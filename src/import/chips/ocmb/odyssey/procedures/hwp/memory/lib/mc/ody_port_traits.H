@@ -69,7 +69,6 @@ class portTraits< mss::mc_type::ODYSSEY >
         static constexpr uint64_t FARB5Q_REG = scomt::ody::ODC_SRQ_MBA_FARB5Q;
         static constexpr uint64_t FARB6Q_REG = scomt::ody::ODC_SRQ_MBA_FARB6Q;
         static constexpr uint64_t FARB9Q_REG = scomt::ody::ODC_SRQ_MBA_FARB9Q;
-        static constexpr uint64_t PMU8Q_REG = scomt::ody::ODC_SRQ_MBA_PMU8Q;
         static constexpr uint64_t REFRESH_REG = scomt::ody::ODC_SRQ_MBAREF0Q;
         static constexpr uint64_t STR0Q_REG = scomt::ody::ODC_SRQ_MBASTR0Q;
         static constexpr uint64_t ECC_REG = scomt::ody::ODC_WDF_REGS_RECR;

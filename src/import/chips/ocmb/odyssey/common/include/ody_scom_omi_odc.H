@@ -82,8 +82,8 @@ static const uint32_t D_REG_CMN_CONFIG_CNTR0_EN = 63;
 static const uint64_t D_REG_DL0_CONFIG0 = 0x8012410ull;
 
 static const uint32_t D_REG_DL0_CONFIG0_ENABLE = 0;
-static const uint32_t D_REG_DL0_CONFIG0_CFG0_SPARE_61_58 = 1;
-static const uint32_t D_REG_DL0_CONFIG0_CFG0_SPARE_61_58_LEN = 5;
+static const uint32_t D_REG_DL0_CONFIG0_CFG0_SPARE_62_58 = 1;
+static const uint32_t D_REG_DL0_CONFIG0_CFG0_SPARE_62_58_LEN = 5;
 static const uint32_t D_REG_DL0_CONFIG0_CFG_TL_CREDITS = 6;
 static const uint32_t D_REG_DL0_CONFIG0_CFG_TL_CREDITS_LEN = 6;
 static const uint32_t D_REG_DL0_CONFIG0_TL_EVENT_ACTIONS = 12;
@@ -167,14 +167,30 @@ static const uint32_t D_REG_DL0_CONFIG1_EDPL_ENA = 63;
 
 static const uint64_t D_REG_DL0_CYA2 = 0x801241Cull;
 
-static const uint32_t D_REG_DL0_CYA2_3_SELECT = 48;
-static const uint32_t D_REG_DL0_CYA2_3_SELECT_LEN = 4;
-static const uint32_t D_REG_DL0_CYA2_2_SELECT = 52;
-static const uint32_t D_REG_DL0_CYA2_2_SELECT_LEN = 4;
-static const uint32_t D_REG_DL0_CYA2_1_SELECT = 56;
-static const uint32_t D_REG_DL0_CYA2_1_SELECT_LEN = 4;
-static const uint32_t D_REG_DL0_CYA2_0_SELECT = 60;
-static const uint32_t D_REG_DL0_CYA2_0_SELECT_LEN = 4;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN7 = 32;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN7_LEN = 2;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN6 = 34;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN6_LEN = 2;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN5 = 36;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN5_LEN = 2;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN4 = 38;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN4_LEN = 2;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN3 = 40;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN3_LEN = 2;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN2 = 42;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN2_LEN = 2;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN1 = 44;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN1_LEN = 2;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN0 = 46;
+static const uint32_t D_REG_DL0_CYA2_EDGE_DELTA_LN0_LEN = 2;
+static const uint32_t D_REG_DL0_CYA2_WAT_3_SELECT = 48;
+static const uint32_t D_REG_DL0_CYA2_WAT_3_SELECT_LEN = 4;
+static const uint32_t D_REG_DL0_CYA2_WAT_2_SELECT = 52;
+static const uint32_t D_REG_DL0_CYA2_WAT_2_SELECT_LEN = 4;
+static const uint32_t D_REG_DL0_CYA2_WAT_1_SELECT = 56;
+static const uint32_t D_REG_DL0_CYA2_WAT_1_SELECT_LEN = 4;
+static const uint32_t D_REG_DL0_CYA2_WAT_0_SELECT = 60;
+static const uint32_t D_REG_DL0_CYA2_WAT_0_SELECT_LEN = 4;
 
 
 static const uint64_t D_REG_DL0_CYA_BITS = 0x801241Full;
@@ -199,16 +215,18 @@ static const uint32_t D_REG_DL0_CYA_BITS_MESO_LO_THR = 16;
 static const uint32_t D_REG_DL0_CYA_BITS_MESO_LO_THR_LEN = 2;
 static const uint32_t D_REG_DL0_CYA_BITS_MESO_HI_THR = 18;
 static const uint32_t D_REG_DL0_CYA_BITS_MESO_HI_THR_LEN = 2;
-static const uint32_t D_REG_DL0_CYA_BITS_MESO_LO_ACTION = 20;
-static const uint32_t D_REG_DL0_CYA_BITS_MESO_HI_ACTION = 21;
-static const uint32_t D_REG_DL0_CYA_BITS_SPARE_41 = 22;
+static const uint32_t D_REG_DL0_CYA_BITS_MESO_ACTION = 20;
+static const uint32_t D_REG_DL0_CYA_BITS_MESO_ACTION_LEN = 2;
+static const uint32_t D_REG_DL0_CYA_BITS_DIS_SYNCTO = 22;
 static const uint32_t D_REG_DL0_CYA_BITS_RX_PN_SWAP_OVERRIDE_SELECT = 23;
 static const uint32_t D_REG_DL0_CYA_BITS_RX_PN_SWAP_OVERRIDE = 24;
 static const uint32_t D_REG_DL0_CYA_BITS_RX_PN_SWAP_OVERRIDE_LEN = 8;
 static const uint32_t D_REG_DL0_CYA_BITS_TRIG_SEL = 32;
 static const uint32_t D_REG_DL0_CYA_BITS_TRIG_SEL_LEN = 4;
-static const uint32_t D_REG_DL0_CYA_BITS_SPARE_27_20 = 36;
-static const uint32_t D_REG_DL0_CYA_BITS_SPARE_27_20_LEN = 8;
+static const uint32_t D_REG_DL0_CYA_BITS_TRN_TIMEOUT = 36;
+static const uint32_t D_REG_DL0_CYA_BITS_TRN_TIMEOUT_LEN = 2;
+static const uint32_t D_REG_DL0_CYA_BITS_SPARE_25_20 = 38;
+static const uint32_t D_REG_DL0_CYA_BITS_SPARE_25_20_LEN = 6;
 static const uint32_t D_REG_DL0_CYA_BITS_TX_PSAVE_DELAY_TIMER = 44;
 static const uint32_t D_REG_DL0_CYA_BITS_TX_PSAVE_DELAY_TIMER_LEN = 3;
 static const uint32_t D_REG_DL0_CYA_BITS_FAST_RETRAIN_DISABLE = 47;
@@ -293,6 +311,10 @@ static const uint32_t D_REG_DL0_ERROR_ACTION_1_ACTION_LEN = 4;
 
 static const uint64_t D_REG_DL0_ERROR_HOLD = 0x8012413ull;
 
+static const uint32_t D_REG_DL0_ERROR_HOLD_51 = 12;
+static const uint32_t D_REG_DL0_ERROR_HOLD_50 = 13;
+static const uint32_t D_REG_DL0_ERROR_HOLD_49 = 14;
+static const uint32_t D_REG_DL0_ERROR_HOLD_48 = 15;
 static const uint32_t D_REG_DL0_ERROR_HOLD_47 = 16;
 static const uint32_t D_REG_DL0_ERROR_HOLD_46 = 17;
 static const uint32_t D_REG_DL0_ERROR_HOLD_45 = 18;
@@ -345,6 +367,10 @@ static const uint32_t D_REG_DL0_ERROR_HOLD_00 = 63;
 
 static const uint64_t D_REG_DL0_ERROR_MASK = 0x8012412ull;
 
+static const uint32_t D_REG_DL0_ERROR_MASK_51 = 12;
+static const uint32_t D_REG_DL0_ERROR_MASK_50 = 13;
+static const uint32_t D_REG_DL0_ERROR_MASK_49 = 14;
+static const uint32_t D_REG_DL0_ERROR_MASK_48 = 15;
 static const uint32_t D_REG_DL0_ERROR_MASK_47 = 16;
 static const uint32_t D_REG_DL0_ERROR_MASK_46 = 17;
 static const uint32_t D_REG_DL0_ERROR_MASK_45 = 18;
@@ -405,6 +431,37 @@ static const uint64_t D_REG_DL0_RMT_INFO = 0x8012419ull;
 
 static const uint32_t D_REG_DL0_RMT_INFO_DL0_RMT_MESSAGE = 0;
 static const uint32_t D_REG_DL0_RMT_INFO_DL0_RMT_MESSAGE_LEN = 64;
+
+
+static const uint64_t D_REG_DL0_SKIT_CTL = 0x801241Aull;
+
+static const uint32_t D_REG_DL0_SKIT_CTL_EDGE = 34;
+static const uint32_t D_REG_DL0_SKIT_CTL_EDGE_LEN = 2;
+static const uint32_t D_REG_DL0_SKIT_CTL_WID3 = 36;
+static const uint32_t D_REG_DL0_SKIT_CTL_STATSEL = 37;
+static const uint32_t D_REG_DL0_SKIT_CTL_STATSEL_LEN = 3;
+static const uint32_t D_REG_DL0_SKIT_CTL_MODE = 40;
+static const uint32_t D_REG_DL0_SKIT_CTL_MODE_LEN = 3;
+static const uint32_t D_REG_DL0_SKIT_CTL_IRQ = 43;
+static const uint32_t D_REG_DL0_SKIT_CTL_CLKALIGN = 44;
+static const uint32_t D_REG_DL0_SKIT_CTL_CLKSEL = 45;
+static const uint32_t D_REG_DL0_SKIT_CTL_CLKSEL_LEN = 3;
+static const uint32_t D_REG_DL0_SKIT_CTL_X = 48;
+static const uint32_t D_REG_DL0_SKIT_CTL_X_LEN = 8;
+static const uint32_t D_REG_DL0_SKIT_CTL_Y = 56;
+static const uint32_t D_REG_DL0_SKIT_CTL_Y_LEN = 8;
+
+
+static const uint64_t D_REG_DL0_SKIT_STATUS = 0x801241Bull;
+
+static const uint32_t D_REG_DL0_SKIT_STATUS_SPARE_63_20 = 0;
+static const uint32_t D_REG_DL0_SKIT_STATUS_SPARE_63_20_LEN = 44;
+static const uint32_t D_REG_DL0_SKIT_STATUS_STATE = 44;
+static const uint32_t D_REG_DL0_SKIT_STATUS_STATE_LEN = 4;
+static const uint32_t D_REG_DL0_SKIT_STATUS_LEFT = 48;
+static const uint32_t D_REG_DL0_SKIT_STATUS_LEFT_LEN = 8;
+static const uint32_t D_REG_DL0_SKIT_STATUS_RIGHT = 56;
+static const uint32_t D_REG_DL0_SKIT_STATUS_RIGHT_LEN = 8;
 
 
 static const uint64_t D_REG_DL0_STATUS = 0x8012416ull;
@@ -484,6 +541,8 @@ static const uint32_t D_REG_MC_OMI_FIR_DL0_ENDPOINT_FIR4 = 17;
 static const uint32_t D_REG_MC_OMI_FIR_DL0_ENDPOINT_FIR5 = 18;
 static const uint32_t D_REG_MC_OMI_FIR_DL0_ENDPOINT_FIR6 = 19;
 static const uint32_t D_REG_MC_OMI_FIR_DL0_ENDPOINT_FIR7 = 20;
+static const uint32_t D_REG_MC_OMI_FIR_DL0_SKITTER_ERROR = 21;
+static const uint32_t D_REG_MC_OMI_FIR_DL0_SKITTER_DRIFT = 22;
 
 
 static const uint64_t D_REG_MC_OMI_FIR_CFGLXSTOP = 0x8012407ull;
@@ -510,7 +569,7 @@ static const uint64_t D_REG_MC_OMI_FIR_MASK_RW_WCLEAR = 0x8012402ull;
 static const uint64_t D_REG_MC_OMI_FIR_WOF = 0x8012408ull;
 
 static const uint32_t D_REG_MC_OMI_FIR_WOF_MC_OMI_FIR_WOF = 0;
-static const uint32_t D_REG_MC_OMI_FIR_WOF_MC_OMI_FIR_WOF_LEN = 43;
+static const uint32_t D_REG_MC_OMI_FIR_WOF_MC_OMI_FIR_WOF_LEN = 45;
 
 
 static const uint64_t D_REG_PMU_CNTR = 0x801240Full;

@@ -115,6 +115,7 @@ static const uint32_t SCOM_CERR1_PBUF_ECC_ERR_CE_DW1 = 34;
 static const uint32_t SCOM_CERR1_PBUF_ECC_ERR_UE_DW1 = 35;
 static const uint32_t SCOM_CERR1_PRE_BUFF_ECC_ERR_SYNDROME = 36;
 static const uint32_t SCOM_CERR1_PRE_BUFF_ECC_ERR_SYNDROME_LEN = 8;
+static const uint32_t SCOM_CERR1_PBUF_CRIT_OW_P_ERR = 44;
 
 
 static const uint64_t SCOM_CGDR = 0x8011832ull;
@@ -192,6 +193,7 @@ static const uint32_t SCOM_EICR_TYPE = 43;
 static const uint32_t SCOM_EICR_TYPE_LEN = 5;
 static const uint32_t SCOM_EICR_MISC = 48;
 static const uint32_t SCOM_EICR_MISC_LEN = 6;
+static const uint32_t SCOM_EICR_EIGHTBECC = 54;
 
 
 static const uint64_t SCOM_FIR_WO_OR = 0x8011801ull;
@@ -467,6 +469,7 @@ static const uint32_t SCOM_MASK1_UNEXPECTED_RDDATA_VALID = 16;
 static const uint32_t SCOM_MASK1_MISSING_RDDATA_VALID = 17;
 static const uint32_t SCOM_MASK1_SUE_01_DETECT = 18;
 static const uint32_t SCOM_MASK1_SUE_10_DETECT = 19;
+static const uint32_t SCOM_MASK1_PBUF_CRIT_OW_P_ERR = 20;
 
 
 static const uint64_t SCOM_MCBCM = 0x8011834ull;
@@ -541,14 +544,6 @@ static const uint32_t SCOM_RSPAR_1_LEFT = 10;
 static const uint32_t SCOM_RSPAR_1_LEFT_LEN = 5;
 static const uint32_t SCOM_RSPAR_1_RIGHT = 15;
 static const uint32_t SCOM_RSPAR_1_RIGHT_LEN = 5;
-static const uint32_t SCOM_RSPAR_2_LEFT = 20;
-static const uint32_t SCOM_RSPAR_2_LEFT_LEN = 5;
-static const uint32_t SCOM_RSPAR_2_RIGHT = 25;
-static const uint32_t SCOM_RSPAR_2_RIGHT_LEN = 5;
-static const uint32_t SCOM_RSPAR_3_LEFT = 30;
-static const uint32_t SCOM_RSPAR_3_LEFT_LEN = 5;
-static const uint32_t SCOM_RSPAR_3_RIGHT = 35;
-static const uint32_t SCOM_RSPAR_3_RIGHT_LEN = 5;
 
 
 

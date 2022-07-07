@@ -300,8 +300,9 @@ class eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
             UE_COUNT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_UE_COUNT_LEN,
             AUE_COUNT = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_AUE_COUNT,
             AUE_COUNT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_AUE_COUNT_LEN,
-            RCE_COUNT = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_RCE_COUNT,
-            RCE_COUNT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_RCE_COUNT_LEN,
+            // TODO:MST-1672 find out if RCE is now IUE
+            RCE_COUNT = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_IUE_COUNT,
+            RCE_COUNT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_IUE_COUNT_LEN,
             SYMBOL0_COUNT = scomt::ody::ODC_MCBIST_SCOM_MBSMSECQ_0_COUNT,
             SYMBOL0_COUNT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSMSECQ_0_COUNT_LEN,
             SYMBOL1_COUNT = scomt::ody::ODC_MCBIST_SCOM_MBSMSECQ_1_COUNT,

@@ -605,6 +605,436 @@ static const uint64_t TCMC_DCM_CC_REALIGN_GO = 0x30024ull;
 static const uint32_t TCMC_DCM_CC_REALIGN_GO_PCB_WRITE_DCM_CC_REALIGN_GO = 0;
 
 
+static const uint64_t TCMC_EPS_ANY_LOCAL_ERR_MASK = 0x40080ull;
+
+static const uint32_t TCMC_EPS_ANY_LOCAL_ERR_MASK_XSTOP_TO_PCB = 0;
+static const uint32_t TCMC_EPS_ANY_LOCAL_ERR_MASK_RECOV_TO_PCB = 1;
+static const uint32_t TCMC_EPS_ANY_LOCAL_ERR_MASK_ATTN_TO_PCB = 2;
+static const uint32_t TCMC_EPS_ANY_LOCAL_ERR_MASK_LOCAL_XSTOP_TO_PCB = 3;
+
+
+static const uint64_t TCMC_EPS_CFG_ATTN = 0x40106ull;
+
+static const uint32_t TCMC_EPS_CFG_ATTN_00 = 0;
+static const uint32_t TCMC_EPS_CFG_ATTN_01 = 1;
+static const uint32_t TCMC_EPS_CFG_ATTN_02 = 2;
+static const uint32_t TCMC_EPS_CFG_ATTN_03 = 3;
+static const uint32_t TCMC_EPS_CFG_ATTN_04 = 4;
+static const uint32_t TCMC_EPS_CFG_ATTN_05 = 5;
+static const uint32_t TCMC_EPS_CFG_ATTN_06 = 6;
+static const uint32_t TCMC_EPS_CFG_ATTN_07 = 7;
+static const uint32_t TCMC_EPS_CFG_ATTN_08 = 8;
+static const uint32_t TCMC_EPS_CFG_ATTN_09 = 9;
+static const uint32_t TCMC_EPS_CFG_ATTN_10 = 10;
+static const uint32_t TCMC_EPS_CFG_ATTN_11 = 11;
+static const uint32_t TCMC_EPS_CFG_ATTN_12 = 12;
+static const uint32_t TCMC_EPS_CFG_ATTN_13 = 13;
+static const uint32_t TCMC_EPS_CFG_ATTN_14 = 14;
+static const uint32_t TCMC_EPS_CFG_ATTN_15 = 15;
+static const uint32_t TCMC_EPS_CFG_ATTN_16 = 16;
+static const uint32_t TCMC_EPS_CFG_ATTN_17 = 17;
+static const uint32_t TCMC_EPS_CFG_ATTN_18 = 18;
+static const uint32_t TCMC_EPS_CFG_ATTN_19 = 19;
+static const uint32_t TCMC_EPS_CFG_ATTN_20 = 20;
+static const uint32_t TCMC_EPS_CFG_ATTN_21 = 21;
+static const uint32_t TCMC_EPS_CFG_ATTN_22 = 22;
+static const uint32_t TCMC_EPS_CFG_ATTN_23 = 23;
+static const uint32_t TCMC_EPS_CFG_ATTN_24 = 24;
+static const uint32_t TCMC_EPS_CFG_ATTN_25 = 25;
+static const uint32_t TCMC_EPS_CFG_ATTN_26 = 26;
+static const uint32_t TCMC_EPS_CFG_ATTN_27 = 27;
+static const uint32_t TCMC_EPS_CFG_ATTN_28 = 28;
+static const uint32_t TCMC_EPS_CFG_ATTN_29 = 29;
+static const uint32_t TCMC_EPS_CFG_ATTN_30 = 30;
+static const uint32_t TCMC_EPS_CFG_ATTN_31 = 31;
+static const uint32_t TCMC_EPS_CFG_ATTN_32 = 32;
+static const uint32_t TCMC_EPS_CFG_ATTN_33 = 33;
+static const uint32_t TCMC_EPS_CFG_ATTN_34 = 34;
+static const uint32_t TCMC_EPS_CFG_ATTN_35 = 35;
+static const uint32_t TCMC_EPS_CFG_ATTN_36 = 36;
+static const uint32_t TCMC_EPS_CFG_ATTN_37 = 37;
+static const uint32_t TCMC_EPS_CFG_ATTN_38 = 38;
+static const uint32_t TCMC_EPS_CFG_ATTN_39 = 39;
+static const uint32_t TCMC_EPS_CFG_ATTN_40 = 40;
+static const uint32_t TCMC_EPS_CFG_ATTN_41 = 41;
+static const uint32_t TCMC_EPS_CFG_ATTN_42 = 42;
+static const uint32_t TCMC_EPS_CFG_ATTN_43 = 43;
+static const uint32_t TCMC_EPS_CFG_ATTN_44 = 44;
+static const uint32_t TCMC_EPS_CFG_ATTN_45 = 45;
+static const uint32_t TCMC_EPS_CFG_ATTN_46 = 46;
+static const uint32_t TCMC_EPS_CFG_ATTN_47 = 47;
+static const uint32_t TCMC_EPS_CFG_ATTN_48 = 48;
+static const uint32_t TCMC_EPS_CFG_ATTN_49 = 49;
+static const uint32_t TCMC_EPS_CFG_ATTN_50 = 50;
+static const uint32_t TCMC_EPS_CFG_ATTN_51 = 51;
+static const uint32_t TCMC_EPS_CFG_ATTN_52 = 52;
+static const uint32_t TCMC_EPS_CFG_ATTN_53 = 53;
+static const uint32_t TCMC_EPS_CFG_ATTN_54 = 54;
+static const uint32_t TCMC_EPS_CFG_ATTN_55 = 55;
+static const uint32_t TCMC_EPS_CFG_ATTN_56 = 56;
+static const uint32_t TCMC_EPS_CFG_ATTN_57 = 57;
+static const uint32_t TCMC_EPS_CFG_ATTN_58 = 58;
+static const uint32_t TCMC_EPS_CFG_ATTN_59 = 59;
+static const uint32_t TCMC_EPS_CFG_ATTN_60 = 60;
+static const uint32_t TCMC_EPS_CFG_ATTN_61 = 61;
+static const uint32_t TCMC_EPS_CFG_ATTN_62 = 62;
+static const uint32_t TCMC_EPS_CFG_ATTN_63 = 63;
+
+
+static const uint64_t TCMC_EPS_CFG_LXSTOP = 0x40107ull;
+
+static const uint32_t TCMC_EPS_CFG_LXSTOP_00 = 0;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_01 = 1;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_02 = 2;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_03 = 3;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_04 = 4;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_05 = 5;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_06 = 6;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_07 = 7;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_08 = 8;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_09 = 9;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_10 = 10;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_11 = 11;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_12 = 12;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_13 = 13;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_14 = 14;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_15 = 15;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_16 = 16;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_17 = 17;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_18 = 18;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_19 = 19;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_20 = 20;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_21 = 21;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_22 = 22;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_23 = 23;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_24 = 24;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_25 = 25;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_26 = 26;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_27 = 27;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_28 = 28;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_29 = 29;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_30 = 30;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_31 = 31;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_32 = 32;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_33 = 33;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_34 = 34;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_35 = 35;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_36 = 36;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_37 = 37;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_38 = 38;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_39 = 39;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_40 = 40;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_41 = 41;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_42 = 42;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_43 = 43;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_44 = 44;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_45 = 45;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_46 = 46;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_47 = 47;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_48 = 48;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_49 = 49;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_50 = 50;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_51 = 51;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_52 = 52;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_53 = 53;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_54 = 54;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_55 = 55;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_56 = 56;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_57 = 57;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_58 = 58;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_59 = 59;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_60 = 60;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_61 = 61;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_62 = 62;
+static const uint32_t TCMC_EPS_CFG_LXSTOP_63 = 63;
+
+
+static const uint64_t TCMC_EPS_CFG_RECOV = 0x40105ull;
+
+static const uint32_t TCMC_EPS_CFG_RECOV_00 = 0;
+static const uint32_t TCMC_EPS_CFG_RECOV_01 = 1;
+static const uint32_t TCMC_EPS_CFG_RECOV_02 = 2;
+static const uint32_t TCMC_EPS_CFG_RECOV_03 = 3;
+static const uint32_t TCMC_EPS_CFG_RECOV_04 = 4;
+static const uint32_t TCMC_EPS_CFG_RECOV_05 = 5;
+static const uint32_t TCMC_EPS_CFG_RECOV_06 = 6;
+static const uint32_t TCMC_EPS_CFG_RECOV_07 = 7;
+static const uint32_t TCMC_EPS_CFG_RECOV_08 = 8;
+static const uint32_t TCMC_EPS_CFG_RECOV_09 = 9;
+static const uint32_t TCMC_EPS_CFG_RECOV_10 = 10;
+static const uint32_t TCMC_EPS_CFG_RECOV_11 = 11;
+static const uint32_t TCMC_EPS_CFG_RECOV_12 = 12;
+static const uint32_t TCMC_EPS_CFG_RECOV_13 = 13;
+static const uint32_t TCMC_EPS_CFG_RECOV_14 = 14;
+static const uint32_t TCMC_EPS_CFG_RECOV_15 = 15;
+static const uint32_t TCMC_EPS_CFG_RECOV_16 = 16;
+static const uint32_t TCMC_EPS_CFG_RECOV_17 = 17;
+static const uint32_t TCMC_EPS_CFG_RECOV_18 = 18;
+static const uint32_t TCMC_EPS_CFG_RECOV_19 = 19;
+static const uint32_t TCMC_EPS_CFG_RECOV_20 = 20;
+static const uint32_t TCMC_EPS_CFG_RECOV_21 = 21;
+static const uint32_t TCMC_EPS_CFG_RECOV_22 = 22;
+static const uint32_t TCMC_EPS_CFG_RECOV_23 = 23;
+static const uint32_t TCMC_EPS_CFG_RECOV_24 = 24;
+static const uint32_t TCMC_EPS_CFG_RECOV_25 = 25;
+static const uint32_t TCMC_EPS_CFG_RECOV_26 = 26;
+static const uint32_t TCMC_EPS_CFG_RECOV_27 = 27;
+static const uint32_t TCMC_EPS_CFG_RECOV_28 = 28;
+static const uint32_t TCMC_EPS_CFG_RECOV_29 = 29;
+static const uint32_t TCMC_EPS_CFG_RECOV_30 = 30;
+static const uint32_t TCMC_EPS_CFG_RECOV_31 = 31;
+static const uint32_t TCMC_EPS_CFG_RECOV_32 = 32;
+static const uint32_t TCMC_EPS_CFG_RECOV_33 = 33;
+static const uint32_t TCMC_EPS_CFG_RECOV_34 = 34;
+static const uint32_t TCMC_EPS_CFG_RECOV_35 = 35;
+static const uint32_t TCMC_EPS_CFG_RECOV_36 = 36;
+static const uint32_t TCMC_EPS_CFG_RECOV_37 = 37;
+static const uint32_t TCMC_EPS_CFG_RECOV_38 = 38;
+static const uint32_t TCMC_EPS_CFG_RECOV_39 = 39;
+static const uint32_t TCMC_EPS_CFG_RECOV_40 = 40;
+static const uint32_t TCMC_EPS_CFG_RECOV_41 = 41;
+static const uint32_t TCMC_EPS_CFG_RECOV_42 = 42;
+static const uint32_t TCMC_EPS_CFG_RECOV_43 = 43;
+static const uint32_t TCMC_EPS_CFG_RECOV_44 = 44;
+static const uint32_t TCMC_EPS_CFG_RECOV_45 = 45;
+static const uint32_t TCMC_EPS_CFG_RECOV_46 = 46;
+static const uint32_t TCMC_EPS_CFG_RECOV_47 = 47;
+static const uint32_t TCMC_EPS_CFG_RECOV_48 = 48;
+static const uint32_t TCMC_EPS_CFG_RECOV_49 = 49;
+static const uint32_t TCMC_EPS_CFG_RECOV_50 = 50;
+static const uint32_t TCMC_EPS_CFG_RECOV_51 = 51;
+static const uint32_t TCMC_EPS_CFG_RECOV_52 = 52;
+static const uint32_t TCMC_EPS_CFG_RECOV_53 = 53;
+static const uint32_t TCMC_EPS_CFG_RECOV_54 = 54;
+static const uint32_t TCMC_EPS_CFG_RECOV_55 = 55;
+static const uint32_t TCMC_EPS_CFG_RECOV_56 = 56;
+static const uint32_t TCMC_EPS_CFG_RECOV_57 = 57;
+static const uint32_t TCMC_EPS_CFG_RECOV_58 = 58;
+static const uint32_t TCMC_EPS_CFG_RECOV_59 = 59;
+static const uint32_t TCMC_EPS_CFG_RECOV_60 = 60;
+static const uint32_t TCMC_EPS_CFG_RECOV_61 = 61;
+static const uint32_t TCMC_EPS_CFG_RECOV_62 = 62;
+static const uint32_t TCMC_EPS_CFG_RECOV_63 = 63;
+
+
+static const uint64_t TCMC_EPS_CFG_XSTOP = 0x40104ull;
+
+static const uint32_t TCMC_EPS_CFG_XSTOP_00 = 0;
+static const uint32_t TCMC_EPS_CFG_XSTOP_01 = 1;
+static const uint32_t TCMC_EPS_CFG_XSTOP_02 = 2;
+static const uint32_t TCMC_EPS_CFG_XSTOP_03 = 3;
+static const uint32_t TCMC_EPS_CFG_XSTOP_04 = 4;
+static const uint32_t TCMC_EPS_CFG_XSTOP_05 = 5;
+static const uint32_t TCMC_EPS_CFG_XSTOP_06 = 6;
+static const uint32_t TCMC_EPS_CFG_XSTOP_07 = 7;
+static const uint32_t TCMC_EPS_CFG_XSTOP_08 = 8;
+static const uint32_t TCMC_EPS_CFG_XSTOP_09 = 9;
+static const uint32_t TCMC_EPS_CFG_XSTOP_10 = 10;
+static const uint32_t TCMC_EPS_CFG_XSTOP_11 = 11;
+static const uint32_t TCMC_EPS_CFG_XSTOP_12 = 12;
+static const uint32_t TCMC_EPS_CFG_XSTOP_13 = 13;
+static const uint32_t TCMC_EPS_CFG_XSTOP_14 = 14;
+static const uint32_t TCMC_EPS_CFG_XSTOP_15 = 15;
+static const uint32_t TCMC_EPS_CFG_XSTOP_16 = 16;
+static const uint32_t TCMC_EPS_CFG_XSTOP_17 = 17;
+static const uint32_t TCMC_EPS_CFG_XSTOP_18 = 18;
+static const uint32_t TCMC_EPS_CFG_XSTOP_19 = 19;
+static const uint32_t TCMC_EPS_CFG_XSTOP_20 = 20;
+static const uint32_t TCMC_EPS_CFG_XSTOP_21 = 21;
+static const uint32_t TCMC_EPS_CFG_XSTOP_22 = 22;
+static const uint32_t TCMC_EPS_CFG_XSTOP_23 = 23;
+static const uint32_t TCMC_EPS_CFG_XSTOP_24 = 24;
+static const uint32_t TCMC_EPS_CFG_XSTOP_25 = 25;
+static const uint32_t TCMC_EPS_CFG_XSTOP_26 = 26;
+static const uint32_t TCMC_EPS_CFG_XSTOP_27 = 27;
+static const uint32_t TCMC_EPS_CFG_XSTOP_28 = 28;
+static const uint32_t TCMC_EPS_CFG_XSTOP_29 = 29;
+static const uint32_t TCMC_EPS_CFG_XSTOP_30 = 30;
+static const uint32_t TCMC_EPS_CFG_XSTOP_31 = 31;
+static const uint32_t TCMC_EPS_CFG_XSTOP_32 = 32;
+static const uint32_t TCMC_EPS_CFG_XSTOP_33 = 33;
+static const uint32_t TCMC_EPS_CFG_XSTOP_34 = 34;
+static const uint32_t TCMC_EPS_CFG_XSTOP_35 = 35;
+static const uint32_t TCMC_EPS_CFG_XSTOP_36 = 36;
+static const uint32_t TCMC_EPS_CFG_XSTOP_37 = 37;
+static const uint32_t TCMC_EPS_CFG_XSTOP_38 = 38;
+static const uint32_t TCMC_EPS_CFG_XSTOP_39 = 39;
+static const uint32_t TCMC_EPS_CFG_XSTOP_40 = 40;
+static const uint32_t TCMC_EPS_CFG_XSTOP_41 = 41;
+static const uint32_t TCMC_EPS_CFG_XSTOP_42 = 42;
+static const uint32_t TCMC_EPS_CFG_XSTOP_43 = 43;
+static const uint32_t TCMC_EPS_CFG_XSTOP_44 = 44;
+static const uint32_t TCMC_EPS_CFG_XSTOP_45 = 45;
+static const uint32_t TCMC_EPS_CFG_XSTOP_46 = 46;
+static const uint32_t TCMC_EPS_CFG_XSTOP_47 = 47;
+static const uint32_t TCMC_EPS_CFG_XSTOP_48 = 48;
+static const uint32_t TCMC_EPS_CFG_XSTOP_49 = 49;
+static const uint32_t TCMC_EPS_CFG_XSTOP_50 = 50;
+static const uint32_t TCMC_EPS_CFG_XSTOP_51 = 51;
+static const uint32_t TCMC_EPS_CFG_XSTOP_52 = 52;
+static const uint32_t TCMC_EPS_CFG_XSTOP_53 = 53;
+static const uint32_t TCMC_EPS_CFG_XSTOP_54 = 54;
+static const uint32_t TCMC_EPS_CFG_XSTOP_55 = 55;
+static const uint32_t TCMC_EPS_CFG_XSTOP_56 = 56;
+static const uint32_t TCMC_EPS_CFG_XSTOP_57 = 57;
+static const uint32_t TCMC_EPS_CFG_XSTOP_58 = 58;
+static const uint32_t TCMC_EPS_CFG_XSTOP_59 = 59;
+static const uint32_t TCMC_EPS_CFG_XSTOP_60 = 60;
+static const uint32_t TCMC_EPS_CFG_XSTOP_61 = 61;
+static const uint32_t TCMC_EPS_CFG_XSTOP_62 = 62;
+static const uint32_t TCMC_EPS_CFG_XSTOP_63 = 63;
+
+
+static const uint64_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1 = 0x40081ull;
+
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_XSTOP_ERR = 0;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_RECOV_ERR = 1;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_ATTN_ERR = 2;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_LXSTOP_ERR = 3;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_ERR = 4;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_STAGED_ERR = 5;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_DBG_TRIG_ERR = 6;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNUSED07 = 7;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNUSED08 = 8;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNUSED09 = 9;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNUSED10 = 10;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP01 = 11;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP02 = 12;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP03 = 13;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP04 = 14;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP05 = 15;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP06 = 16;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP07 = 17;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP08 = 18;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP09 = 19;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP10 = 20;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP11 = 21;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP12 = 22;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP13 = 23;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP14 = 24;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP15 = 25;
+
+
+static const uint64_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2 = 0x40082ull;
+
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_XSTOP_ERR = 0;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_RECOV_ERR = 1;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_ATTN_ERR = 2;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_LXSTOP_ERR = 3;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_ERR = 4;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR = 5;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_DBG_TRIG_ERR = 6;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNUSED07 = 7;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNUSED08 = 8;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNUSED09 = 9;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNUSED10 = 10;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP01 = 11;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP02 = 12;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP03 = 13;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP04 = 14;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP05 = 15;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP06 = 16;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP07 = 17;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP08 = 18;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP09 = 19;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP10 = 20;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP11 = 21;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP12 = 22;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP13 = 23;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP14 = 24;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP15 = 25;
+
+
+static const uint64_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3 = 0x40083ull;
+
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_XSTOP_ERR = 0;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_RECOV_ERR = 1;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_ATTN_ERR = 2;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_LXSTOP_ERR = 3;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_SYS_XSTOP_ERR = 4;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_SYS_XSTOP_STAGED_ERR = 5;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_DBG_TRIG_ERR = 6;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNUSED07 = 7;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNUSED08 = 8;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNUSED09 = 9;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNUSED10 = 10;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP01 = 11;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP02 = 12;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP03 = 13;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP04 = 14;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP05 = 15;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP06 = 16;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP07 = 17;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP08 = 18;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP09 = 19;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP10 = 20;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP11 = 21;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP12 = 22;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP13 = 23;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP14 = 24;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP15 = 25;
+
+
+static const uint64_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4 = 0x40084ull;
+
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_XSTOP_ERR = 0;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_RECOV_ERR = 1;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_ATTN_ERR = 2;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_LXSTOP_ERR = 3;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_SYS_XSTOP_ERR = 4;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_SYS_XSTOP_STAGED_ERR = 5;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_DBG_TRIG_ERR = 6;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNUSED07 = 7;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNUSED08 = 8;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNUSED09 = 9;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNUSED10 = 10;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01 = 11;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02 = 12;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03 = 13;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04 = 14;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05 = 15;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06 = 16;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07 = 17;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08 = 18;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09 = 19;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10 = 20;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11 = 21;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12 = 22;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13 = 23;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14 = 24;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15 = 25;
+
+
+static const uint64_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5 = 0x40085ull;
+
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_XSTOP_ERR = 0;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_RECOV_ERR = 1;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_ATTN_ERR = 2;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_LXSTOP_ERR = 3;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_SYS_XSTOP_ERR = 4;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_SYS_XSTOP_STAGED_ERR = 5;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_DBG_TRIG_ERR = 6;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNUSED07 = 7;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNUSED08 = 8;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNUSED09 = 9;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNUSED10 = 10;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP01 = 11;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP02 = 12;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP03 = 13;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP04 = 14;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP05 = 15;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP06 = 16;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP07 = 17;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP08 = 18;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP09 = 19;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP10 = 20;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP11 = 21;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP12 = 22;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP13 = 23;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP14 = 24;
+static const uint32_t TCMC_EPS_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP15 = 25;
+
+
 static const uint64_t TCMC_EPS_DBG_DEBUG_TRACE_CONTROL = 0x107D0ull;
 
 static const uint32_t TCMC_EPS_DBG_DEBUG_TRACE_CONTROL_START = 0;
@@ -837,40 +1267,52 @@ static const uint32_t TCMC_EPS_DBG_XTRA_TRACE_MODE_XTRA_TRACE_MODE_DATA = 0;
 static const uint32_t TCMC_EPS_DBG_XTRA_TRACE_MODE_XTRA_TRACE_MODE_DATA_LEN = 42;
 
 
-static const uint64_t TCMC_EPS_DTS01_RAW = 0x50010ull;
+static const uint64_t TCMC_EPS_DTS0123_RAW = 0x50010ull;
 
-static const uint32_t TCMC_EPS_DTS01_RAW_0_RAW_VALUE = 0;
-static const uint32_t TCMC_EPS_DTS01_RAW_0_RAW_VALUE_LEN = 12;
-static const uint32_t TCMC_EPS_DTS01_RAW_0_RAW_DTR_ID = 12;
-static const uint32_t TCMC_EPS_DTS01_RAW_0_RAW_DTR_ID_LEN = 2;
-static const uint32_t TCMC_EPS_DTS01_RAW_0_RAW_OVERFLOW_TIEDOWN = 14;
-static const uint32_t TCMC_EPS_DTS01_RAW_0_RAW_VALID = 15;
-static const uint32_t TCMC_EPS_DTS01_RAW_1_RAW_VALUE = 16;
-static const uint32_t TCMC_EPS_DTS01_RAW_1_RAW_VALUE_LEN = 12;
-static const uint32_t TCMC_EPS_DTS01_RAW_1_RAW_DTR_ID = 28;
-static const uint32_t TCMC_EPS_DTS01_RAW_1_RAW_DTR_ID_LEN = 2;
-static const uint32_t TCMC_EPS_DTS01_RAW_1_RAW_OVERFLOW_TIEDOWN = 30;
-static const uint32_t TCMC_EPS_DTS01_RAW_1_RAW_VALID = 31;
+static const uint32_t TCMC_EPS_DTS0123_RAW_0_DTR0_RAW_VALUE = 0;
+static const uint32_t TCMC_EPS_DTS0123_RAW_0_DTR0_RAW_VALUE_LEN = 12;
+static const uint32_t TCMC_EPS_DTS0123_RAW_0_DTR0_RAW_DTR_ID = 12;
+static const uint32_t TCMC_EPS_DTS0123_RAW_0_DTR0_RAW_DTR_ID_LEN = 2;
+static const uint32_t TCMC_EPS_DTS0123_RAW_0_DTR0_RAW_OVERFLOW_TIEDOWN = 14;
+static const uint32_t TCMC_EPS_DTS0123_RAW_0_DTR0_RAW_VALID = 15;
+static const uint32_t TCMC_EPS_DTS0123_RAW_1_DTR0_RAW_VALUE = 16;
+static const uint32_t TCMC_EPS_DTS0123_RAW_1_DTR0_RAW_VALUE_LEN = 12;
+static const uint32_t TCMC_EPS_DTS0123_RAW_1_DTR0_RAW_DTR_ID = 28;
+static const uint32_t TCMC_EPS_DTS0123_RAW_1_DTR0_RAW_DTR_ID_LEN = 2;
+static const uint32_t TCMC_EPS_DTS0123_RAW_1_DTR0_RAW_OVERFLOW_TIEDOWN = 30;
+static const uint32_t TCMC_EPS_DTS0123_RAW_1_DTR0_RAW_VALID = 31;
 
 
-static const uint64_t TCMC_EPS_DTS01_RESULT = 0x50000ull;
+static const uint64_t TCMC_EPS_DTS0123_RESULT = 0x50000ull;
 
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS0_TIEDOWN = 0;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS0_TIEDOWN_LEN = 4;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS0_RESULT = 4;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS0_RESULT_LEN = 8;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS0_DTR_ID = 12;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS0_DTR_ID_LEN = 2;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS0_OVERFLOW = 14;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS0_VALID = 15;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS1_TIEDOWN = 16;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS1_TIEDOWN_LEN = 4;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS1_RESULT = 20;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS1_RESULT_LEN = 8;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS1_DTR_ID = 28;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS1_DTR_ID_LEN = 2;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS1_OVERFLOW = 30;
-static const uint32_t TCMC_EPS_DTS01_RESULT_DTS1_VALID = 31;
+static const uint32_t TCMC_EPS_DTS0123_RESULT_DTS0_DTR0_RESULT = 0;
+static const uint32_t TCMC_EPS_DTS0123_RESULT_DTS0_DTR0_RESULT_LEN = 4;
+static const uint32_t TCMC_EPS_DTS0123_RESULT_DTS0_DTR0_DTR_ID = 12;
+static const uint32_t TCMC_EPS_DTS0123_RESULT_DTS0_DTR0_DTR_ID_LEN = 2;
+static const uint32_t TCMC_EPS_DTS0123_RESULT_DTS0_DTR0_OVERFLOW = 14;
+static const uint32_t TCMC_EPS_DTS0123_RESULT_DTS0_DTR0_VALID = 15;
+static const uint32_t TCMC_EPS_DTS0123_RESULT_DTS1_DTR0_RESULT = 16;
+static const uint32_t TCMC_EPS_DTS0123_RESULT_DTS1_DTR0_RESULT_LEN = 4;
+static const uint32_t TCMC_EPS_DTS0123_RESULT_DTS1_DTR0_DTR_ID = 28;
+static const uint32_t TCMC_EPS_DTS0123_RESULT_DTS1_DTR0_DTR_ID_LEN = 2;
+static const uint32_t TCMC_EPS_DTS0123_RESULT_DTS1_DTR0_OVERFLOW = 30;
+static const uint32_t TCMC_EPS_DTS0123_RESULT_DTS1_DTR0_VALID = 31;
+
+
+static const uint64_t TCMC_EPS_DTS01_COEFF = 0x50030ull;
+
+static const uint32_t TCMC_EPS_DTS01_COEFF_0_SCALAR_MULTI_FOR_SQUARED = 2;
+static const uint32_t TCMC_EPS_DTS01_COEFF_0_SCALAR_MULTI_FOR_SQUARED_LEN = 6;
+static const uint32_t TCMC_EPS_DTS01_COEFF_0_SCALAR_MULTIPLIER = 9;
+static const uint32_t TCMC_EPS_DTS01_COEFF_0_SCALAR_MULTIPLIER_LEN = 7;
+static const uint32_t TCMC_EPS_DTS01_COEFF_0_SIGNED_OFFSET = 23;
+static const uint32_t TCMC_EPS_DTS01_COEFF_0_SIGNED_OFFSET_LEN = 9;
+static const uint32_t TCMC_EPS_DTS01_COEFF_1_SCALAR_MULTI_FOR_SQUARED = 34;
+static const uint32_t TCMC_EPS_DTS01_COEFF_1_SCALAR_MULTI_FOR_SQUARED_LEN = 6;
+static const uint32_t TCMC_EPS_DTS01_COEFF_1_SCALAR_MULTIPLIER = 41;
+static const uint32_t TCMC_EPS_DTS01_COEFF_1_SCALAR_MULTIPLIER_LEN = 7;
+static const uint32_t TCMC_EPS_DTS01_COEFF_1_SIGNED_OFFSET = 55;
+static const uint32_t TCMC_EPS_DTS01_COEFF_1_SIGNED_OFFSET_LEN = 9;
 
 
 static const uint64_t TCMC_EPS_DTS_CLEAR_RESULTS = 0x50021ull;
@@ -878,19 +1320,54 @@ static const uint64_t TCMC_EPS_DTS_CLEAR_RESULTS = 0x50021ull;
 static const uint32_t TCMC_EPS_DTS_CLEAR_RESULTS_PCB_WRITE_CLEAR_RESULTS = 0;
 
 
-static const uint64_t TCMC_EPS_DTS_MEASURE_REQ = 0x50023ull;
+static const uint64_t TCMC_EPS_DTS_ERROR_MASK_REG = 0x5002Eull;
+
+static const uint32_t TCMC_EPS_DTS_ERROR_MASK_REG_DTS_ERROR_MASK = 0;
+static const uint32_t TCMC_EPS_DTS_ERROR_MASK_REG_DTS_ERROR_MASK_LEN = 26;
+
+
+static const uint64_t TCMC_EPS_DTS_ERROR_REG = 0x5002Full;
+
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_DTS0_SERIAL_PAR_ERR = 0;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_DTS1_SERIAL_PAR_ERR = 1;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_DTS2_SERIAL_PAR_ERR = 2;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_DTS3_SERIAL_PAR_ERR = 3;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_DTS4_SERIAL_PAR_ERR = 4;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_DTS5_SERIAL_PAR_ERR = 5;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_DTS6_SERIAL_PAR_ERR = 6;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_DTS7_SERIAL_PAR_ERR = 7;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_DTS8_SERIAL_PAR_ERR = 8;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_DTS9_SERIAL_PAR_ERR = 9;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_DTS10_SERIAL_PAR_ERR = 10;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_DTS11_SERIAL_PAR_ERR = 11;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_MDTS0_SERIAL_PAR_ERR = 12;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_MDTS1_SERIAL_PAR_ERR = 13;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_MDTS2_SERIAL_PAR_ERR = 14;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_MDTS3_SERIAL_PAR_ERR = 15;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_MDTS4_SERIAL_PAR_ERR = 16;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_MDTS5_SERIAL_PAR_ERR = 17;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_MDTS6_SERIAL_PAR_ERR = 18;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_MDTS7_SERIAL_PAR_ERR = 19;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_CALC_STATE_ERR = 20;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_RESULT_REG_PAR_ERR = 21;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_SKITTER_CONFIG_PARITY_ERR = 22;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_UNUSED23_ERR = 23;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_UNUSED24_ERR = 24;
+static const uint32_t TCMC_EPS_DTS_ERROR_REG_UNUSED25_ERR = 25;
+
+
+static const uint64_t TCMC_EPS_DTS_MEASURE_REQ = 0x50024ull;
 
 static const uint32_t TCMC_EPS_DTS_MEASURE_REQ_DTS_MEASURE_REQUEST = 0;
 
 
 static const uint64_t TCMC_EPS_DTS_MODE_REG = 0x50020ull;
 
-static const uint32_t TCMC_EPS_DTS_MODE_REG_MINMAX_MODE_ENA = 0;
-static const uint32_t TCMC_EPS_DTS_MODE_REG_MINMAX_MODE_ENA_LEN = 2;
-static const uint32_t TCMC_EPS_DTS_MODE_REG_CALC_OVERFLOW_MASK = 2;
-static const uint32_t TCMC_EPS_DTS_MODE_REG_MEASURE_HANG_PULSE_ENA = 3;
-static const uint32_t TCMC_EPS_DTS_MODE_REG_MEASURE_HANG_PULSE_CNT = 4;
-static const uint32_t TCMC_EPS_DTS_MODE_REG_MEASURE_HANG_PULSE_CNT_LEN = 6;
+static const uint32_t TCMC_EPS_DTS_MODE_REG_INMAX_MODE_ENA = 0;
+static const uint32_t TCMC_EPS_DTS_MODE_REG_INMAX_MODE_ENA_LEN = 2;
+static const uint32_t TCMC_EPS_DTS_MODE_REG_EASURE_HANG_PULSE_ENA = 3;
+static const uint32_t TCMC_EPS_DTS_MODE_REG_EASURE_HANG_PULSE_CNT = 4;
+static const uint32_t TCMC_EPS_DTS_MODE_REG_EASURE_HANG_PULSE_CNT_LEN = 6;
 
 
 static const uint64_t TCMC_EPS_DTS_SELECT = 0x50022ull;
@@ -915,630 +1392,169 @@ static const uint32_t TCMC_EPS_DTS_SELECT_MDTS4_SELECT = 16;
 static const uint32_t TCMC_EPS_DTS_SELECT_MDTS5_SELECT = 17;
 static const uint32_t TCMC_EPS_DTS_SELECT_MDTS6_SELECT = 18;
 static const uint32_t TCMC_EPS_DTS_SELECT_MDTS7_SELECT = 19;
-static const uint32_t TCMC_EPS_DTS_SELECT_DTS_SELECT_OVR = 20;
 
 
-static const uint64_t TCMC_EPS_ERROR_MASK_REG = 0x5002Eull;
+static const uint64_t TCMC_EPS_DTS_SELECT_REPR = 0x50023ull;
 
-static const uint32_t TCMC_EPS_ERROR_MASK_REG_ERROR_MASK = 0;
-static const uint32_t TCMC_EPS_ERROR_MASK_REG_ERROR_MASK_LEN = 26;
-
-
-static const uint64_t TCMC_EPS_ERROR_REG = 0x5002Full;
-
-static const uint32_t TCMC_EPS_ERROR_REG_DTS0_SERIAL_PAR_ERR = 0;
-static const uint32_t TCMC_EPS_ERROR_REG_DTS1_SERIAL_PAR_ERR = 1;
-static const uint32_t TCMC_EPS_ERROR_REG_DTS2_SERIAL_PAR_ERR = 2;
-static const uint32_t TCMC_EPS_ERROR_REG_DTS3_SERIAL_PAR_ERR = 3;
-static const uint32_t TCMC_EPS_ERROR_REG_DTS4_SERIAL_PAR_ERR = 4;
-static const uint32_t TCMC_EPS_ERROR_REG_DTS5_SERIAL_PAR_ERR = 5;
-static const uint32_t TCMC_EPS_ERROR_REG_DTS6_SERIAL_PAR_ERR = 6;
-static const uint32_t TCMC_EPS_ERROR_REG_DTS7_SERIAL_PAR_ERR = 7;
-static const uint32_t TCMC_EPS_ERROR_REG_DTS8_SERIAL_PAR_ERR = 8;
-static const uint32_t TCMC_EPS_ERROR_REG_DTS9_SERIAL_PAR_ERR = 9;
-static const uint32_t TCMC_EPS_ERROR_REG_DTS10_SERIAL_PAR_ERR = 10;
-static const uint32_t TCMC_EPS_ERROR_REG_DTS11_SERIAL_PAR_ERR = 11;
-static const uint32_t TCMC_EPS_ERROR_REG_MDTS0_SERIAL_PAR_ERR = 12;
-static const uint32_t TCMC_EPS_ERROR_REG_MDTS1_SERIAL_PAR_ERR = 13;
-static const uint32_t TCMC_EPS_ERROR_REG_MDTS2_SERIAL_PAR_ERR = 14;
-static const uint32_t TCMC_EPS_ERROR_REG_MDTS3_SERIAL_PAR_ERR = 15;
-static const uint32_t TCMC_EPS_ERROR_REG_MDTS4_SERIAL_PAR_ERR = 16;
-static const uint32_t TCMC_EPS_ERROR_REG_MDTS5_SERIAL_PAR_ERR = 17;
-static const uint32_t TCMC_EPS_ERROR_REG_MDTS6_SERIAL_PAR_ERR = 18;
-static const uint32_t TCMC_EPS_ERROR_REG_MDTS7_SERIAL_PAR_ERR = 19;
-static const uint32_t TCMC_EPS_ERROR_REG_CALC_STATE_ERR = 20;
-static const uint32_t TCMC_EPS_ERROR_REG_RESULT_REG_PAR_ERR = 21;
-static const uint32_t TCMC_EPS_ERROR_REG_SKITTER_MODEREG_PARITY_ERR = 22;
-static const uint32_t TCMC_EPS_ERROR_REG_SKITTER_FORCEREG_PARITY_ERR = 23;
-static const uint32_t TCMC_EPS_ERROR_REG_SKITTER_SELECT_ERR = 24;
-static const uint32_t TCMC_EPS_ERROR_REG_SKITTER_CLKSRCREG_PARITY_ERR = 25;
+static const uint32_t TCMC_EPS_DTS_SELECT_REPR_0_SELECT_REPR = 0;
+static const uint32_t TCMC_EPS_DTS_SELECT_REPR_1_SELECT_REPR = 1;
 
 
-static const uint64_t TCMC_EPS_FIR_ANY_LOCAL_ERR_MASK = 0x40080ull;
+static const uint64_t TCMC_EPS_LOCAL_FIR_WOF = 0x40108ull;
 
-static const uint32_t TCMC_EPS_FIR_ANY_LOCAL_ERR_MASK_XSTOP_TO_PCB = 0;
-static const uint32_t TCMC_EPS_FIR_ANY_LOCAL_ERR_MASK_RECOV_TO_PCB = 1;
-static const uint32_t TCMC_EPS_FIR_ANY_LOCAL_ERR_MASK_ATTN_TO_PCB = 2;
-static const uint32_t TCMC_EPS_FIR_ANY_LOCAL_ERR_MASK_LOCAL_XSTOP_TO_PCB = 3;
-
-
-static const uint64_t TCMC_EPS_FIR_CFG_ATTN = 0x40106ull;
-
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_00 = 0;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_01 = 1;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_02 = 2;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_03 = 3;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_04 = 4;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_05 = 5;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_06 = 6;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_07 = 7;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_08 = 8;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_09 = 9;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_10 = 10;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_11 = 11;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_12 = 12;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_13 = 13;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_14 = 14;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_15 = 15;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_16 = 16;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_17 = 17;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_18 = 18;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_19 = 19;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_20 = 20;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_21 = 21;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_22 = 22;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_23 = 23;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_24 = 24;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_25 = 25;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_26 = 26;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_27 = 27;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_28 = 28;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_29 = 29;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_30 = 30;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_31 = 31;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_32 = 32;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_33 = 33;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_34 = 34;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_35 = 35;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_36 = 36;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_37 = 37;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_38 = 38;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_39 = 39;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_40 = 40;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_41 = 41;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_42 = 42;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_43 = 43;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_44 = 44;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_45 = 45;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_46 = 46;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_47 = 47;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_48 = 48;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_49 = 49;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_50 = 50;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_51 = 51;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_52 = 52;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_53 = 53;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_54 = 54;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_55 = 55;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_56 = 56;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_57 = 57;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_58 = 58;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_59 = 59;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_60 = 60;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_61 = 61;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_62 = 62;
-static const uint32_t TCMC_EPS_FIR_CFG_ATTN_63 = 63;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_00 = 0;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_01 = 1;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_02 = 2;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_03 = 3;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_04 = 4;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_05 = 5;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_06 = 6;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_07 = 7;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_08 = 8;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_09 = 9;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_10 = 10;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_11 = 11;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_12 = 12;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_13 = 13;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_14 = 14;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_15 = 15;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_16 = 16;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_17 = 17;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_18 = 18;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_19 = 19;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_20 = 20;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_21 = 21;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_22 = 22;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_23 = 23;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_24 = 24;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_25 = 25;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_26 = 26;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_27 = 27;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_28 = 28;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_29 = 29;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_30 = 30;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_31 = 31;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_32 = 32;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_33 = 33;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_34 = 34;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_35 = 35;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_36 = 36;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_37 = 37;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_38 = 38;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_39 = 39;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_40 = 40;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_41 = 41;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_42 = 42;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_43 = 43;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_44 = 44;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_45 = 45;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_46 = 46;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_47 = 47;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_48 = 48;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_49 = 49;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_50 = 50;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_51 = 51;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_52 = 52;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_53 = 53;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_54 = 54;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_55 = 55;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_56 = 56;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_57 = 57;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_58 = 58;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_59 = 59;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_60 = 60;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_61 = 61;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_62 = 62;
+static const uint32_t TCMC_EPS_LOCAL_FIR_WOF_63 = 63;
 
 
-static const uint64_t TCMC_EPS_FIR_CFG_LXSTOP = 0x40107ull;
+static const uint64_t TCMC_EPS_MASK_WO_OR = 0x40103ull;
+static const uint64_t TCMC_EPS_MASK_RW_WCLEAR = 0x40102ull;
 
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_00 = 0;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_01 = 1;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_02 = 2;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_03 = 3;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_04 = 4;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_05 = 5;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_06 = 6;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_07 = 7;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_08 = 8;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_09 = 9;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_10 = 10;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_11 = 11;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_12 = 12;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_13 = 13;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_14 = 14;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_15 = 15;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_16 = 16;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_17 = 17;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_18 = 18;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_19 = 19;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_20 = 20;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_21 = 21;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_22 = 22;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_23 = 23;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_24 = 24;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_25 = 25;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_26 = 26;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_27 = 27;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_28 = 28;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_29 = 29;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_30 = 30;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_31 = 31;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_32 = 32;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_33 = 33;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_34 = 34;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_35 = 35;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_36 = 36;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_37 = 37;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_38 = 38;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_39 = 39;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_40 = 40;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_41 = 41;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_42 = 42;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_43 = 43;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_44 = 44;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_45 = 45;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_46 = 46;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_47 = 47;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_48 = 48;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_49 = 49;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_50 = 50;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_51 = 51;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_52 = 52;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_53 = 53;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_54 = 54;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_55 = 55;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_56 = 56;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_57 = 57;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_58 = 58;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_59 = 59;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_60 = 60;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_61 = 61;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_62 = 62;
-static const uint32_t TCMC_EPS_FIR_CFG_LXSTOP_63 = 63;
-
-
-static const uint64_t TCMC_EPS_FIR_CFG_RECOV = 0x40105ull;
-
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_00 = 0;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_01 = 1;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_02 = 2;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_03 = 3;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_04 = 4;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_05 = 5;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_06 = 6;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_07 = 7;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_08 = 8;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_09 = 9;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_10 = 10;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_11 = 11;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_12 = 12;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_13 = 13;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_14 = 14;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_15 = 15;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_16 = 16;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_17 = 17;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_18 = 18;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_19 = 19;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_20 = 20;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_21 = 21;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_22 = 22;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_23 = 23;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_24 = 24;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_25 = 25;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_26 = 26;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_27 = 27;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_28 = 28;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_29 = 29;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_30 = 30;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_31 = 31;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_32 = 32;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_33 = 33;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_34 = 34;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_35 = 35;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_36 = 36;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_37 = 37;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_38 = 38;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_39 = 39;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_40 = 40;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_41 = 41;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_42 = 42;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_43 = 43;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_44 = 44;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_45 = 45;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_46 = 46;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_47 = 47;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_48 = 48;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_49 = 49;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_50 = 50;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_51 = 51;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_52 = 52;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_53 = 53;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_54 = 54;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_55 = 55;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_56 = 56;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_57 = 57;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_58 = 58;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_59 = 59;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_60 = 60;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_61 = 61;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_62 = 62;
-static const uint32_t TCMC_EPS_FIR_CFG_RECOV_63 = 63;
+static const uint32_t TCMC_EPS_MASK_00 = 0;
+static const uint32_t TCMC_EPS_MASK_01 = 1;
+static const uint32_t TCMC_EPS_MASK_02 = 2;
+static const uint32_t TCMC_EPS_MASK_03 = 3;
+static const uint32_t TCMC_EPS_MASK_04 = 4;
+static const uint32_t TCMC_EPS_MASK_05 = 5;
+static const uint32_t TCMC_EPS_MASK_06 = 6;
+static const uint32_t TCMC_EPS_MASK_07 = 7;
+static const uint32_t TCMC_EPS_MASK_08 = 8;
+static const uint32_t TCMC_EPS_MASK_09 = 9;
+static const uint32_t TCMC_EPS_MASK_10 = 10;
+static const uint32_t TCMC_EPS_MASK_11 = 11;
+static const uint32_t TCMC_EPS_MASK_12 = 12;
+static const uint32_t TCMC_EPS_MASK_13 = 13;
+static const uint32_t TCMC_EPS_MASK_14 = 14;
+static const uint32_t TCMC_EPS_MASK_15 = 15;
+static const uint32_t TCMC_EPS_MASK_16 = 16;
+static const uint32_t TCMC_EPS_MASK_17 = 17;
+static const uint32_t TCMC_EPS_MASK_18 = 18;
+static const uint32_t TCMC_EPS_MASK_19 = 19;
+static const uint32_t TCMC_EPS_MASK_20 = 20;
+static const uint32_t TCMC_EPS_MASK_21 = 21;
+static const uint32_t TCMC_EPS_MASK_22 = 22;
+static const uint32_t TCMC_EPS_MASK_23 = 23;
+static const uint32_t TCMC_EPS_MASK_24 = 24;
+static const uint32_t TCMC_EPS_MASK_25 = 25;
+static const uint32_t TCMC_EPS_MASK_26 = 26;
+static const uint32_t TCMC_EPS_MASK_27 = 27;
+static const uint32_t TCMC_EPS_MASK_28 = 28;
+static const uint32_t TCMC_EPS_MASK_29 = 29;
+static const uint32_t TCMC_EPS_MASK_30 = 30;
+static const uint32_t TCMC_EPS_MASK_31 = 31;
+static const uint32_t TCMC_EPS_MASK_32 = 32;
+static const uint32_t TCMC_EPS_MASK_33 = 33;
+static const uint32_t TCMC_EPS_MASK_34 = 34;
+static const uint32_t TCMC_EPS_MASK_35 = 35;
+static const uint32_t TCMC_EPS_MASK_36 = 36;
+static const uint32_t TCMC_EPS_MASK_37 = 37;
+static const uint32_t TCMC_EPS_MASK_38 = 38;
+static const uint32_t TCMC_EPS_MASK_39 = 39;
+static const uint32_t TCMC_EPS_MASK_40 = 40;
+static const uint32_t TCMC_EPS_MASK_41 = 41;
+static const uint32_t TCMC_EPS_MASK_42 = 42;
+static const uint32_t TCMC_EPS_MASK_43 = 43;
+static const uint32_t TCMC_EPS_MASK_44 = 44;
+static const uint32_t TCMC_EPS_MASK_45 = 45;
+static const uint32_t TCMC_EPS_MASK_46 = 46;
+static const uint32_t TCMC_EPS_MASK_47 = 47;
+static const uint32_t TCMC_EPS_MASK_48 = 48;
+static const uint32_t TCMC_EPS_MASK_49 = 49;
+static const uint32_t TCMC_EPS_MASK_50 = 50;
+static const uint32_t TCMC_EPS_MASK_51 = 51;
+static const uint32_t TCMC_EPS_MASK_52 = 52;
+static const uint32_t TCMC_EPS_MASK_53 = 53;
+static const uint32_t TCMC_EPS_MASK_54 = 54;
+static const uint32_t TCMC_EPS_MASK_55 = 55;
+static const uint32_t TCMC_EPS_MASK_56 = 56;
+static const uint32_t TCMC_EPS_MASK_57 = 57;
+static const uint32_t TCMC_EPS_MASK_58 = 58;
+static const uint32_t TCMC_EPS_MASK_59 = 59;
+static const uint32_t TCMC_EPS_MASK_60 = 60;
+static const uint32_t TCMC_EPS_MASK_61 = 61;
+static const uint32_t TCMC_EPS_MASK_62 = 62;
+static const uint32_t TCMC_EPS_MASK_63 = 63;
 
 
-static const uint64_t TCMC_EPS_FIR_CFG_XSTOP = 0x40104ull;
+static const uint64_t TCMC_EPS_MODE_REG = 0x40088ull;
 
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_00 = 0;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_01 = 1;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_02 = 2;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_03 = 3;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_04 = 4;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_05 = 5;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_06 = 6;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_07 = 7;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_08 = 8;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_09 = 9;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_10 = 10;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_11 = 11;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_12 = 12;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_13 = 13;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_14 = 14;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_15 = 15;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_16 = 16;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_17 = 17;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_18 = 18;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_19 = 19;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_20 = 20;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_21 = 21;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_22 = 22;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_23 = 23;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_24 = 24;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_25 = 25;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_26 = 26;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_27 = 27;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_28 = 28;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_29 = 29;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_30 = 30;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_31 = 31;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_32 = 32;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_33 = 33;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_34 = 34;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_35 = 35;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_36 = 36;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_37 = 37;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_38 = 38;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_39 = 39;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_40 = 40;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_41 = 41;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_42 = 42;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_43 = 43;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_44 = 44;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_45 = 45;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_46 = 46;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_47 = 47;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_48 = 48;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_49 = 49;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_50 = 50;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_51 = 51;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_52 = 52;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_53 = 53;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_54 = 54;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_55 = 55;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_56 = 56;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_57 = 57;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_58 = 58;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_59 = 59;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_60 = 60;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_61 = 61;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_62 = 62;
-static const uint32_t TCMC_EPS_FIR_CFG_XSTOP_63 = 63;
-
-
-static const uint64_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1 = 0x40081ull;
-
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_XSTOP_ERR = 0;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_RECOV_ERR = 1;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_ATTN_ERR = 2;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_LXSTOP_ERR = 3;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_ERR = 4;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_SYS_XSTOP_STAGED_ERR = 5;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_DBG_TRIG_ERR = 6;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNUSED07 = 7;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNUSED08 = 8;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNUSED09 = 9;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNUSED10 = 10;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP01 = 11;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP02 = 12;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP03 = 13;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP04 = 14;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP05 = 15;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP06 = 16;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP07 = 17;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP08 = 18;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP09 = 19;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP10 = 20;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP11 = 21;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP12 = 22;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP13 = 23;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP14 = 24;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK1_UNIT_TC_FIR_LOCAL_XSTOP15 = 25;
-
-
-static const uint64_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2 = 0x40082ull;
-
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_XSTOP_ERR = 0;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_RECOV_ERR = 1;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_ATTN_ERR = 2;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_LXSTOP_ERR = 3;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_ERR = 4;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_SYS_XSTOP_STAGED_ERR = 5;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_DBG_TRIG_ERR = 6;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNUSED07 = 7;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNUSED08 = 8;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNUSED09 = 9;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNUSED10 = 10;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP01 = 11;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP02 = 12;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP03 = 13;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP04 = 14;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP05 = 15;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP06 = 16;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP07 = 17;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP08 = 18;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP09 = 19;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP10 = 20;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP11 = 21;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP12 = 22;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP13 = 23;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP14 = 24;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK2_UNIT_TC_FIR_LOCAL_XSTOP15 = 25;
-
-
-static const uint64_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3 = 0x40083ull;
-
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_XSTOP_ERR = 0;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_RECOV_ERR = 1;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_ATTN_ERR = 2;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_LXSTOP_ERR = 3;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_SYS_XSTOP_ERR = 4;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_SYS_XSTOP_STAGED_ERR = 5;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_DBG_TRIG_ERR = 6;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNUSED07 = 7;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNUSED08 = 8;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNUSED09 = 9;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNUSED10 = 10;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP01 = 11;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP02 = 12;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP03 = 13;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP04 = 14;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP05 = 15;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP06 = 16;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP07 = 17;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP08 = 18;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP09 = 19;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP10 = 20;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP11 = 21;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP12 = 22;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP13 = 23;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP14 = 24;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK3_UNIT_TC_FIR_LOCAL_XSTOP15 = 25;
-
-
-static const uint64_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4 = 0x40084ull;
-
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_XSTOP_ERR = 0;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_RECOV_ERR = 1;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_ATTN_ERR = 2;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_LXSTOP_ERR = 3;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYS_XSTOP_ERR = 4;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_SYS_XSTOP_STAGED_ERR = 5;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_DBG_TRIG_ERR = 6;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNUSED07 = 7;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNUSED08 = 8;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNUSED09 = 9;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNUSED10 = 10;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP01 = 11;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP02 = 12;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP03 = 13;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP04 = 14;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP05 = 15;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP06 = 16;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP07 = 17;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP08 = 18;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP09 = 19;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP10 = 20;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP11 = 21;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP12 = 22;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP13 = 23;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP14 = 24;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK4_UNIT_TC_FIR_LOCAL_XSTOP15 = 25;
-
-
-static const uint64_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5 = 0x40085ull;
-
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_XSTOP_ERR = 0;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_RECOV_ERR = 1;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_ATTN_ERR = 2;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_LXSTOP_ERR = 3;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_SYS_XSTOP_ERR = 4;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_SYS_XSTOP_STAGED_ERR = 5;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_DBG_TRIG_ERR = 6;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNUSED07 = 7;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNUSED08 = 8;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNUSED09 = 9;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNUSED10 = 10;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP01 = 11;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP02 = 12;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP03 = 13;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP04 = 14;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP05 = 15;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP06 = 16;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP07 = 17;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP08 = 18;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP09 = 19;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP10 = 20;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP11 = 21;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP12 = 22;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP13 = 23;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP14 = 24;
-static const uint32_t TCMC_EPS_FIR_CLKSTOP_ON_XSTOP_MASK5_UNIT_TC_FIR_LOCAL_XSTOP15 = 25;
-
-
-static const uint64_t TCMC_EPS_FIR_LOCAL_WOF = 0x40108ull;
-
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_00 = 0;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_01 = 1;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_02 = 2;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_03 = 3;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_04 = 4;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_05 = 5;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_06 = 6;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_07 = 7;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_08 = 8;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_09 = 9;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_10 = 10;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_11 = 11;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_12 = 12;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_13 = 13;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_14 = 14;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_15 = 15;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_16 = 16;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_17 = 17;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_18 = 18;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_19 = 19;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_20 = 20;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_21 = 21;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_22 = 22;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_23 = 23;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_24 = 24;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_25 = 25;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_26 = 26;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_27 = 27;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_28 = 28;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_29 = 29;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_30 = 30;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_31 = 31;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_32 = 32;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_33 = 33;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_34 = 34;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_35 = 35;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_36 = 36;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_37 = 37;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_38 = 38;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_39 = 39;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_40 = 40;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_41 = 41;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_42 = 42;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_43 = 43;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_44 = 44;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_45 = 45;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_46 = 46;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_47 = 47;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_48 = 48;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_49 = 49;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_50 = 50;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_51 = 51;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_52 = 52;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_53 = 53;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_54 = 54;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_55 = 55;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_56 = 56;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_57 = 57;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_58 = 58;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_59 = 59;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_60 = 60;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_61 = 61;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_62 = 62;
-static const uint32_t TCMC_EPS_FIR_LOCAL_WOF_63 = 63;
-
-
-static const uint64_t TCMC_EPS_FIR_MASK_WO_OR = 0x40103ull;
-static const uint64_t TCMC_EPS_FIR_MASK_RW_WCLEAR = 0x40102ull;
-
-static const uint32_t TCMC_EPS_FIR_MASK_00 = 0;
-static const uint32_t TCMC_EPS_FIR_MASK_01 = 1;
-static const uint32_t TCMC_EPS_FIR_MASK_02 = 2;
-static const uint32_t TCMC_EPS_FIR_MASK_03 = 3;
-static const uint32_t TCMC_EPS_FIR_MASK_04 = 4;
-static const uint32_t TCMC_EPS_FIR_MASK_05 = 5;
-static const uint32_t TCMC_EPS_FIR_MASK_06 = 6;
-static const uint32_t TCMC_EPS_FIR_MASK_07 = 7;
-static const uint32_t TCMC_EPS_FIR_MASK_08 = 8;
-static const uint32_t TCMC_EPS_FIR_MASK_09 = 9;
-static const uint32_t TCMC_EPS_FIR_MASK_10 = 10;
-static const uint32_t TCMC_EPS_FIR_MASK_11 = 11;
-static const uint32_t TCMC_EPS_FIR_MASK_12 = 12;
-static const uint32_t TCMC_EPS_FIR_MASK_13 = 13;
-static const uint32_t TCMC_EPS_FIR_MASK_14 = 14;
-static const uint32_t TCMC_EPS_FIR_MASK_15 = 15;
-static const uint32_t TCMC_EPS_FIR_MASK_16 = 16;
-static const uint32_t TCMC_EPS_FIR_MASK_17 = 17;
-static const uint32_t TCMC_EPS_FIR_MASK_18 = 18;
-static const uint32_t TCMC_EPS_FIR_MASK_19 = 19;
-static const uint32_t TCMC_EPS_FIR_MASK_20 = 20;
-static const uint32_t TCMC_EPS_FIR_MASK_21 = 21;
-static const uint32_t TCMC_EPS_FIR_MASK_22 = 22;
-static const uint32_t TCMC_EPS_FIR_MASK_23 = 23;
-static const uint32_t TCMC_EPS_FIR_MASK_24 = 24;
-static const uint32_t TCMC_EPS_FIR_MASK_25 = 25;
-static const uint32_t TCMC_EPS_FIR_MASK_26 = 26;
-static const uint32_t TCMC_EPS_FIR_MASK_27 = 27;
-static const uint32_t TCMC_EPS_FIR_MASK_28 = 28;
-static const uint32_t TCMC_EPS_FIR_MASK_29 = 29;
-static const uint32_t TCMC_EPS_FIR_MASK_30 = 30;
-static const uint32_t TCMC_EPS_FIR_MASK_31 = 31;
-static const uint32_t TCMC_EPS_FIR_MASK_32 = 32;
-static const uint32_t TCMC_EPS_FIR_MASK_33 = 33;
-static const uint32_t TCMC_EPS_FIR_MASK_34 = 34;
-static const uint32_t TCMC_EPS_FIR_MASK_35 = 35;
-static const uint32_t TCMC_EPS_FIR_MASK_36 = 36;
-static const uint32_t TCMC_EPS_FIR_MASK_37 = 37;
-static const uint32_t TCMC_EPS_FIR_MASK_38 = 38;
-static const uint32_t TCMC_EPS_FIR_MASK_39 = 39;
-static const uint32_t TCMC_EPS_FIR_MASK_40 = 40;
-static const uint32_t TCMC_EPS_FIR_MASK_41 = 41;
-static const uint32_t TCMC_EPS_FIR_MASK_42 = 42;
-static const uint32_t TCMC_EPS_FIR_MASK_43 = 43;
-static const uint32_t TCMC_EPS_FIR_MASK_44 = 44;
-static const uint32_t TCMC_EPS_FIR_MASK_45 = 45;
-static const uint32_t TCMC_EPS_FIR_MASK_46 = 46;
-static const uint32_t TCMC_EPS_FIR_MASK_47 = 47;
-static const uint32_t TCMC_EPS_FIR_MASK_48 = 48;
-static const uint32_t TCMC_EPS_FIR_MASK_49 = 49;
-static const uint32_t TCMC_EPS_FIR_MASK_50 = 50;
-static const uint32_t TCMC_EPS_FIR_MASK_51 = 51;
-static const uint32_t TCMC_EPS_FIR_MASK_52 = 52;
-static const uint32_t TCMC_EPS_FIR_MASK_53 = 53;
-static const uint32_t TCMC_EPS_FIR_MASK_54 = 54;
-static const uint32_t TCMC_EPS_FIR_MASK_55 = 55;
-static const uint32_t TCMC_EPS_FIR_MASK_56 = 56;
-static const uint32_t TCMC_EPS_FIR_MASK_57 = 57;
-static const uint32_t TCMC_EPS_FIR_MASK_58 = 58;
-static const uint32_t TCMC_EPS_FIR_MASK_59 = 59;
-static const uint32_t TCMC_EPS_FIR_MASK_60 = 60;
-static const uint32_t TCMC_EPS_FIR_MASK_61 = 61;
-static const uint32_t TCMC_EPS_FIR_MASK_62 = 62;
-static const uint32_t TCMC_EPS_FIR_MASK_63 = 63;
-
-
-static const uint64_t TCMC_EPS_FIR_MODE_REG = 0x40088ull;
-
-static const uint32_t TCMC_EPS_FIR_MODE_REG_XSTOP_LOCK = 0;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_XSTOP_LOCK_RECOV = 1;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_XSTOP_LOCK_ATTN = 2;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_XSTOP_LOCK_LXSTOP = 3;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_MODE_REG04 = 4;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_MODE_REG05 = 5;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_DISABLE_IOPB_ERR = 6;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_MODE_REG07 = 7;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_MODE_REG08 = 8;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_MASK_DIRECT_ERROR = 9;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_MODE_REG10 = 10;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_MODE_REG11 = 11;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_MODE_REG12 = 12;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_MODE_REG13 = 13;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_RECOV_WOF_FREEZE = 14;
-static const uint32_t TCMC_EPS_FIR_MODE_REG_RECOV_WOF_GATE = 15;
+static const uint32_t TCMC_EPS_MODE_REG_XSTOP_LOCK = 0;
+static const uint32_t TCMC_EPS_MODE_REG_XSTOP_LOCK_RECOV = 1;
+static const uint32_t TCMC_EPS_MODE_REG_XSTOP_LOCK_ATTN = 2;
+static const uint32_t TCMC_EPS_MODE_REG_XSTOP_LOCK_LXSTOP = 3;
+static const uint32_t TCMC_EPS_MODE_REG_MODE_REG04 = 4;
+static const uint32_t TCMC_EPS_MODE_REG_MODE_REG05 = 5;
+static const uint32_t TCMC_EPS_MODE_REG_DISABLE_IOPB_ERR = 6;
+static const uint32_t TCMC_EPS_MODE_REG_MODE_REG07 = 7;
+static const uint32_t TCMC_EPS_MODE_REG_MODE_REG08 = 8;
+static const uint32_t TCMC_EPS_MODE_REG_MASK_DIRECT_ERROR = 9;
+static const uint32_t TCMC_EPS_MODE_REG_MODE_REG10 = 10;
+static const uint32_t TCMC_EPS_MODE_REG_MODE_REG11 = 11;
+static const uint32_t TCMC_EPS_MODE_REG_MODE_REG12 = 12;
+static const uint32_t TCMC_EPS_MODE_REG_MODE_REG13 = 13;
+static const uint32_t TCMC_EPS_MODE_REG_RECOV_WOF_FREEZE = 14;
+static const uint32_t TCMC_EPS_MODE_REG_RECOV_WOF_GATE = 15;
 
 
 static const uint64_t TCMC_EPS_PSC_ADDR_TRAP_REG = 0x10003ull;
@@ -1553,8 +1569,8 @@ static const uint32_t TCMC_EPS_PSC_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_RETUR
 static const uint32_t TCMC_EPS_PSC_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_WRITE_PARITY_ERROR = 32;
 static const uint32_t TCMC_EPS_PSC_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_ACCESS_VIOLATION = 33;
 static const uint32_t TCMC_EPS_PSC_ADDR_TRAP_REG_SATELLITE_ACKNOWLEDGE_BIT_INVALID_REGISTER = 34;
-static const uint32_t TCMC_EPS_PSC_ADDR_TRAP_REG_LAST_MASTERID = 35;
-static const uint32_t TCMC_EPS_PSC_ADDR_TRAP_REG_LAST_MASTERID_LEN = 4;
+static const uint32_t TCMC_EPS_PSC_ADDR_TRAP_REG_LAST_CONTROLLERID = 35;
+static const uint32_t TCMC_EPS_PSC_ADDR_TRAP_REG_LAST_CONTROLLERID_LEN = 4;
 
 
 static const uint64_t TCMC_EPS_PSC_ATOMIC_LOCK_MASK_LATCH_REG = 0x10007ull;
@@ -1661,39 +1677,6 @@ static const uint32_t TCMC_EPS_PSC_WRITE_PROTECT_RINGS_REG_WRITE_PROTECT_RINGS =
 static const uint32_t TCMC_EPS_PSC_WRITE_PROTECT_RINGS_REG_WRITE_PROTECT_RINGS_LEN = 32;
 
 
-static const uint64_t TCMC_EPS_SKITTER_CLKSRC_REG = 0x50055ull;
-
-static const uint32_t TCMC_EPS_SKITTER_CLKSRC_REG_CLKSRC = 0;
-static const uint32_t TCMC_EPS_SKITTER_CLKSRC_REG_CLKSRC_LEN = 3;
-static const uint32_t TCMC_EPS_SKITTER_CLKSRC_REG_DELAY_SELECT = 36;
-static const uint32_t TCMC_EPS_SKITTER_CLKSRC_REG_DELAY_SELECT_LEN = 2;
-
-
-static const uint64_t TCMC_EPS_SKITTER_DATA0 = 0x50050ull;
-
-
-
-static const uint64_t TCMC_EPS_SKITTER_FORCE_REG = 0x50054ull;
-
-static const uint32_t TCMC_EPS_SKITTER_FORCE_REG_F_SKITTER_READ = 0;
-
-
-static const uint64_t TCMC_EPS_SKITTER_MODE_REG = 0x50053ull;
-
-static const uint32_t TCMC_EPS_SKITTER_MODE_REG_SKITTER_HOLD_SAMPLE = 0;
-static const uint32_t TCMC_EPS_SKITTER_MODE_REG_DISABLE_SKITTER_STICKINESS = 1;
-static const uint32_t TCMC_EPS_SKITTER_MODE_REG_SKITTER_MODE_UNUSED1 = 2;
-static const uint32_t TCMC_EPS_SKITTER_MODE_REG_SKITTER_MODE_UNUSED1_LEN = 2;
-static const uint32_t TCMC_EPS_SKITTER_MODE_REG_SKITTER_HOLD_DBGTRIG_SEL = 4;
-static const uint32_t TCMC_EPS_SKITTER_MODE_REG_SKITTER_HOLD_DBGTRIG_SEL_LEN = 2;
-static const uint32_t TCMC_EPS_SKITTER_MODE_REG_SKITTER_RESET_TRIG_SEL = 6;
-static const uint32_t TCMC_EPS_SKITTER_MODE_REG_SKITTER_RESET_TRIG_SEL_LEN = 2;
-static const uint32_t TCMC_EPS_SKITTER_MODE_REG_SKITTER_SAMPLE_GUTS = 8;
-static const uint32_t TCMC_EPS_SKITTER_MODE_REG_SKITTER_SAMPLE_GUTS_LEN = 2;
-static const uint32_t TCMC_EPS_SKITTER_MODE_REG_SKITTER_HOLD_SAMPLE_WITH_TRIGGER = 44;
-static const uint32_t TCMC_EPS_SKITTER_MODE_REG_SKITTER_DATA_V_LT = 45;
-
-
 static const uint64_t TCMC_ERROR_STATUS = 0x3000Full;
 
 static const uint32_t TCMC_ERROR_STATUS_PCB_WRITE_NOT_ALLOWED_ERR = 0;
@@ -1703,7 +1686,7 @@ static const uint32_t TCMC_ERROR_STATUS_PCB_ADDRESS_NOT_VALID_ERR = 3;
 static const uint32_t TCMC_ERROR_STATUS_PCB_PARITY_ON_ADDR_ERR = 4;
 static const uint32_t TCMC_ERROR_STATUS_PCB_PARITY_ON_DATA_ERR = 5;
 static const uint32_t TCMC_ERROR_STATUS_PCB_PROTECTED_ACCESS_INVALID_ERR = 6;
-static const uint32_t TCMC_ERROR_STATUS_PCB_PARITY_ON_SPCIF_ERR = 7;
+static const uint32_t TCMC_ERROR_STATUS_UNUSED_ERROR07 = 7;
 static const uint32_t TCMC_ERROR_STATUS_PCB_WRITE_AND_OPCG_IP_ERR = 8;
 static const uint32_t TCMC_ERROR_STATUS_SCAN_READ_AND_OPCG_IP_ERR = 9;
 static const uint32_t TCMC_ERROR_STATUS_UNUSED_ERROR10 = 10;
@@ -1999,7 +1982,7 @@ static const uint32_t TCMC_OPCG_REG1_MISR_INIT_WAIT_LEN = 12;
 static const uint32_t TCMC_OPCG_REG1_UNUSED48 = 48;
 static const uint32_t TCMC_OPCG_REG1_SCAN_CLK_USE_EVEN = 49;
 static const uint32_t TCMC_OPCG_REG1_DISABLE_FCE_DURING_FILL = 50;
-static const uint32_t TCMC_OPCG_REG1_UNUSED51 = 51;
+static const uint32_t TCMC_OPCG_REG1_LBIST_SKITTER_CTL_EN = 51;
 static const uint32_t TCMC_OPCG_REG1_RTIM_THOLD_FORCE = 52;
 static const uint32_t TCMC_OPCG_REG1_DISABLE_ARY_CLK_DURING_FILL = 53;
 static const uint32_t TCMC_OPCG_REG1_SG_HIGH_DURING_FILL = 54;
@@ -2411,7 +2394,7 @@ static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_0_SAMP_TRACE_LO_DATA_RE
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_0_SAMP_TRACE_LO_DATA_REG_HOLD_ADDRESS_LEN = 10;
 
 
-static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_CTRL_CONFIG = 0x1040Cull;
+static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_CTRL_CONFIG = 0x10412ull;
 
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_CTRL_CONFIG_STORE_ON_TRIG_MODE = 0;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_CTRL_CONFIG_WRITE_ON_RUN_MODE = 1;
@@ -2434,19 +2417,19 @@ static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_CTRL_CONFIG_TRACE_CON
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_CTRL_CONFIG_TRACE_CONTROL_UNUSED_LEN = 3;
 
 
-static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG = 0x1040Eull;
+static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG = 0x10414ull;
 
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_CMP_MSK_LT_B_64_TO_87 = 0;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_CMP_MSK_LT_B_64_TO_87_LEN = 24;
 
 
-static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_0 = 0x1040Dull;
+static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_0 = 0x10413ull;
 
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_0_CMP_MSK_LT_B_0_TO_63 = 0;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_0_CMP_MSK_LT_B_0_TO_63_LEN = 64;
 
 
-static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_2 = 0x1040Full;
+static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_2 = 0x10415ull;
 
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_2_A = 0;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_2_A_LEN = 24;
@@ -2454,7 +2437,7 @@ static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_2_B = 24;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_2_B_LEN = 24;
 
 
-static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_3 = 0x10410ull;
+static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_3 = 0x10416ull;
 
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_3_C = 0;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_3_C_LEN = 24;
@@ -2462,7 +2445,7 @@ static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_3_D = 24;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_3_D_LEN = 24;
 
 
-static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_4 = 0x10411ull;
+static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_4 = 0x10417ull;
 
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_4_A = 0;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_4_A_LEN = 24;
@@ -2470,7 +2453,7 @@ static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_4_B = 24;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_4_B_LEN = 24;
 
 
-static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_5 = 0x10412ull;
+static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_5 = 0x10418ull;
 
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_5_C = 0;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_5_C_LEN = 24;
@@ -2478,7 +2461,7 @@ static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_5_D = 24;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_5_D_LEN = 24;
 
 
-static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_9 = 0x10413ull;
+static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_9 = 0x10419ull;
 
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_9_DISABLE_COMPRESSION = 0;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_9_ERROR_BIT_COMPRESSION_CARE_MASK = 1;
@@ -2510,13 +2493,13 @@ static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_9_DD1_STR
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_DATA_CONFIG_9_SPARE_LT = 37;
 
 
-static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_SAMP_TRACE_HI_DATA_REG = 0x1040Aull;
+static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_SAMP_TRACE_HI_DATA_REG = 0x10410ull;
 
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_SAMP_TRACE_HI_DATA_REG_TRACE_HI_DATA = 0;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_SAMP_TRACE_HI_DATA_REG_TRACE_HI_DATA_LEN = 64;
 
 
-static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_SAMP_TRACE_LO_DATA_REG = 0x1040Bull;
+static const uint64_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_SAMP_TRACE_LO_DATA_REG = 0x10411ull;
 
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_SAMP_TRACE_LO_DATA_REG_LO_DATA = 0;
 static const uint32_t TCMC_TRA0_TRA_SCOMSAT_ARRAY_SELECT_1_SAMP_TRACE_LO_DATA_REG_LO_DATA_LEN = 32;

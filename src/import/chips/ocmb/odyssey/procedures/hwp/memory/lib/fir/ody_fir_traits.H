@@ -112,12 +112,12 @@ struct firTraits2<scomt::perv::TPCHIP_TPC_LFIR_RW_WCLEAR>
 {
     static constexpr uint64_t FIR_CLEAR = scomt::perv::TPCHIP_TPC_LFIR_RW_WCLEAR;
     static constexpr uint64_t FIR_SET = scomt::perv::TPCHIP_TPC_LFIR_WO_OR;
-    static constexpr uint64_t ATTN = scomt::perv::TPCHIP_TPC_EPS_FIR_CFG_ATTN;
-    static constexpr uint64_t LXSTOP = scomt::perv::TPCHIP_TPC_EPS_FIR_CFG_LXSTOP;
-    static constexpr uint64_t RECOV = scomt::perv::TPCHIP_TPC_EPS_FIR_CFG_RECOV;
-    static constexpr uint64_t XSTOP = scomt::perv::TPCHIP_TPC_EPS_FIR_CFG_XSTOP;
-    static constexpr uint64_t MASK_CLEAR = scomt::perv::TPCHIP_TPC_EPS_FIR_MASK_RW_WCLEAR;
-    static constexpr uint64_t MASK_SET = scomt::perv::TPCHIP_TPC_EPS_FIR_MASK_WO_OR;
+    static constexpr uint64_t ATTN = scomt::perv::TPCHIP_TPC_EPS_CFG_ATTN;
+    static constexpr uint64_t LXSTOP = scomt::perv::TPCHIP_TPC_EPS_CFG_LXSTOP;
+    static constexpr uint64_t RECOV = scomt::perv::TPCHIP_TPC_EPS_CFG_RECOV;
+    static constexpr uint64_t XSTOP = scomt::perv::TPCHIP_TPC_EPS_CFG_XSTOP;
+    static constexpr uint64_t MASK_CLEAR = scomt::perv::TPCHIP_TPC_EPS_MASK_RW_WCLEAR;
+    static constexpr uint64_t MASK_SET = scomt::perv::TPCHIP_TPC_EPS_MASK_WO_OR;
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
