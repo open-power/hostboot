@@ -44,6 +44,9 @@
 #include <targeting/common/attributeTank.H>
 
 #include <isteps/pm/pm_common_ext.H>
+
+using namespace TARGETING;
+
 namespace HTMGT
 {
 
@@ -1025,32 +1028,40 @@ namespace HTMGT
     {
         bool isRunning = false;
 
-        // If hostboot gets restarted, HTMGT will not have been called
-        // so need to call buildOccs (no-op if objects already exist)
-        errlHndl_t err = OccManager::buildOccs(false, false);
-        if (nullptr == err)
+        // Query the PM_COMPLEX_LOAD_REQ to indicate if OCCs are loaded.
+        // DO_NOT_LOAD indicates OCCs are loaded and the buildOCCs should
+        // succeed, so try the poll.
+        TARGETING::Target* l_sys = nullptr;
+        TARGETING::targetService().getTopLevelTarget(l_sys);
+        if ((l_sys->getAttr<ATTR_PM_COMPLEX_LOAD_REQ>()) == PM_COMPLEX_LOAD_TYPE_DO_NOT_LOAD)
         {
-            // check if the OCCs are actually running
-            if (OccManager::occNeedsReset() == false)
+            // If hostboot gets restarted, HTMGT will not have been called
+            // so need to call buildOccs (no-op if objects already exist)
+            errlHndl_t err = OccManager::buildOccs(false, false);
+            if (nullptr == err)
             {
-                uint8_t occInstance = i_proc->getAttr<TARGETING::ATTR_POSITION>();
-                Occ *occPtr = OccManager::getOcc(occInstance);
-                if (occPtr != nullptr)
+                // check if the OCCs are actually running
+                if (OccManager::occNeedsReset() == false)
                 {
-                    const occStateId occState = occPtr->getState();
-                    if( (occState == OCC_STATE_OBSERVATION) ||
-                        (occState == OCC_STATE_ACTIVE) ||
-                        (occState == OCC_STATE_CHARACTERIZATION) )
+                    uint8_t occInstance = i_proc->getAttr<TARGETING::ATTR_POSITION>();
+                    Occ *occPtr = OccManager::getOcc(occInstance);
+                    if (occPtr != nullptr)
                     {
-                        isRunning = true;
+                        const occStateId occState = occPtr->getState();
+                        if( (occState == OCC_STATE_OBSERVATION) ||
+                            (occState == OCC_STATE_ACTIVE) ||
+                            (occState == OCC_STATE_CHARACTERIZATION) )
+                        {
+                            isRunning = true;
+                        }
                     }
                 }
             }
-        }
-        else
-        {
-            // OCCs not started yet
-            delete err;
+            else
+            {
+                // OCCs not started yet
+                delete err;
+            }
         }
 
         return isRunning;
