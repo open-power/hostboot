@@ -1512,25 +1512,29 @@ errlHndl_t hdatLoadIoData(const hdatMsAddr_t &i_msAddr,
 
                 TARGETING::Target *l_phbTarget = l_phbList[l_idx];
 
+                uint8_t l_chipUnit = 0;
+                assert( l_phbTarget->
+                   tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(l_chipUnit));
+
                 assert( l_phbTarget->
                    tryGetAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN3>(
                        l_laneEq3));
                 memcpy((l_hub->hdatLaneEqPHBGen3 +
-                          l_idx*NUM_OF_LANES_PER_PHB), l_laneEq3,
+                          l_chipUnit*NUM_OF_LANES_PER_PHB), l_laneEq3,
                           NUM_OF_LANES_PER_PHB*2);
 
                 assert( l_phbTarget->
                    tryGetAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN4>(
                       l_laneEq4));
                 memcpy((l_hub->hdatLaneEqPHBGen4 +
-                          l_idx*NUM_OF_LANES_PER_PHB),l_laneEq4,
+                          l_chipUnit*NUM_OF_LANES_PER_PHB),l_laneEq4,
                           NUM_OF_LANES_PER_PHB*2);
 
                 assert( l_phbTarget->
                    tryGetAttr<TARGETING::ATTR_PROC_PCIE_LANE_EQUALIZATION_GEN5>(
                       l_laneEq5));
                 memcpy((l_hub->hdatLaneEqPHBGen5 +
-                          l_idx*NUM_OF_LANES_PER_PHB),l_laneEq5,
+                          l_chipUnit*NUM_OF_LANES_PER_PHB),l_laneEq5,
                           NUM_OF_LANES_PER_PHB*2);
             }
 
