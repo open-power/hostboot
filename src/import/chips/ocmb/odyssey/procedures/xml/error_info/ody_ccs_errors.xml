@@ -112,6 +112,53 @@
 
 
   <hwpError>
+    <rc>RC_MSS_ODY_CCS_READ_MISCOMPARE</rc>
+    <description>
+        CCS reports a read miscompare.
+    </description>
+    <ffdc>FAIL_TYPE</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>PORT_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_ODY_CCS_UE_SUE</rc>
+    <description>
+        CCS reports a UE or SUE in the CCS program array
+        Chould be an indicator of corruption in the CCS program
+    </description>
+    <ffdc>FAIL_TYPE</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_ODY_CCS_HUNG</rc>
     <description>
         Software reported that the machine is not seeing the CCS finish in the alloted time
