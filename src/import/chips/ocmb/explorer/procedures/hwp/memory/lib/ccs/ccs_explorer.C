@@ -301,40 +301,6 @@ void copy_cke_to_spare_cke<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::T
 }
 
 ///
-/// @brief Updates the initial delays based upon the total delays passed in - EXP specialization
-/// @param[in] i_target the target type on which to operate
-/// @param[in] i_delay the calculated delays from CCS
-/// @param[in,out] io_program the program for which to update the delays
-/// @return FAPI2_RC_SUCCSS iff ok
-///
-template<>
-fapi2::ReturnCode update_initial_delays<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
-( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-  const uint64_t i_delay,
-  ccs::program<mss::mc_type::EXPLORER>& io_program)
-{
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-
-    // Check our program for any delays. If there isn't a iv_initial_delay configured, then
-    // we use the delay we just summed from the instructions.
-    if (io_program.iv_poll.iv_initial_delay == 0)
-    {
-        io_program.iv_poll.iv_initial_delay = cycles_to_ns<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target, i_delay, l_rc);
-        FAPI_TRY(l_rc, "%s cycles_to_ns failed", mss::c_str(i_target));
-    }
-
-    if (io_program.iv_poll.iv_initial_sim_delay == 0)
-    {
-        io_program.iv_poll.iv_initial_sim_delay = cycles_to_simcycles(i_delay);
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Select the port(s) to be used by the CCS - EXPLORER specialization
 /// @param[in] i_target the target to effect
 /// @param[in] i_ports the buffer representing the ports
@@ -345,6 +311,37 @@ fapi2::ReturnCode select_ports<mss::mc_type::EXPLORER>( const fapi2::Target<fapi
 {
     // No broadcast mode, only one port, so no port selection
     return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Determines our rank configuration type - Explorer specialization
+/// @param[in] i_target the MCA target on which to operate
+/// @param[out] o_rank_config the rank configuration
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode get_rank_config<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        rank_configuration& o_rank_config)
+{
+    typedef ccsTraits<mss::mc_type::EXPLORER> TT;
+    constexpr uint8_t QUAD_RANK_ENABLE = 4;
+    o_rank_config = rank_configuration::DUAL_DIRECT;
+
+    uint8_t l_num_master_ranks[TT::CCS_MAX_DIMM_PER_PORT] = {};
+    bool l_has_rcd = false;
+    FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_num_master_ranks));
+    FAPI_TRY(TT::get_has_rcd(i_target, l_has_rcd));
+
+    // We only need to check DIMM0
+    // Our number of ranks should be the same between DIMM's 0/1
+    // Check if we have the right number for encoded mode
+    // And that we have an RCD
+    o_rank_config = ((l_num_master_ranks[0] == QUAD_RANK_ENABLE) && (l_has_rcd)) ?
+                    rank_configuration::QUAD_ENCODED :
+                    rank_configuration::DUAL_DIRECT;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 } // namespace ccs

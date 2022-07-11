@@ -80,28 +80,8 @@ instruction_t<MC> des_command(const uint16_t i_idle = 0);
 /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
-inline fapi2::ReturnCode get_rank_config(const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
-        rank_configuration& o_rank_config)
-{
-    constexpr uint8_t QUAD_RANK_ENABLE = 4;
-    o_rank_config = rank_configuration::DUAL_DIRECT;
-
-    uint8_t l_num_master_ranks[TT::CCS_MAX_DIMM_PER_PORT] = {};
-    bool l_has_rcd = false;
-    FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_num_master_ranks));
-    FAPI_TRY(TT::get_has_rcd(i_target, l_has_rcd));
-
-    // We only need to check DIMM0
-    // Our number of ranks should be the same between DIMM's 0/1
-    // Check if we have the right number for encoded mode
-    // And that we have an RCD
-    o_rank_config = ((l_num_master_ranks[0] == QUAD_RANK_ENABLE) && (l_has_rcd)) ?
-                    rank_configuration::QUAD_ENCODED :
-                    rank_configuration::DUAL_DIRECT;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
+fapi2::ReturnCode get_rank_config(const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
+                                  rank_configuration& o_rank_config);
 
 ///
 /// @brief Determines our rank configuration type across all ports
@@ -479,7 +459,28 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T  >
 fapi2::ReturnCode update_initial_delays( const fapi2::Target<T>& i_target,
         const uint64_t i_delay,
-        ccs::program<MC>& io_program);
+        ccs::program<MC>& io_program)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    // Check our program for any delays. If there isn't a iv_initial_delay configured, then
+    // we use the delay we just summed from the instructions.
+    if (io_program.iv_poll.iv_initial_delay == 0)
+    {
+        io_program.iv_poll.iv_initial_delay = cycles_to_ns<T>(i_target, i_delay, l_rc);
+        FAPI_TRY(l_rc, "%s cycles_to_ns failed", mss::c_str(i_target));
+    }
+
+    if (io_program.iv_poll.iv_initial_sim_delay == 0)
+    {
+        io_program.iv_poll.iv_initial_sim_delay = cycles_to_simcycles(i_delay);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Execute first part of preperation for a set of CCS instructions - multiple ports
@@ -776,18 +777,6 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
     std::vector< fapi2::Target<P> > l_ports{ i_port };
     return execute_via_mcbist<MC>(i_target, io_program, l_ports);
 }
-
-///
-/// @brief Query the status of the CCS engine
-/// @tparam MC the memory controller type running CCS
-/// @tparam T the target type of the chiplet which executes the CCS instruction
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] i_target The MCBIST containing the CCS engine
-/// @param[out] io_status The query result first being the result, second the type
-/// @return FAPI2_RC_SUCCESS iff success
-///
-template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
-fapi2::ReturnCode status_query( const fapi2::Target<T>& i_target, std::pair<uint64_t, uint64_t>& io_status );
 
 } // ends namespace ccs
 } // ends namespace mss
