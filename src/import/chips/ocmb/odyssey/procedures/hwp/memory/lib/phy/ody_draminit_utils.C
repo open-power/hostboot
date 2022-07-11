@@ -2567,6 +2567,10 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     load_dmem_8bit_fields(i_struct.AdvTrainOpt, i_struct.MsgMisc, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58000), l_data));
 
+    // Need to write to paired even/odd addresses in order to "complete" the write
+    l_data.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58001), l_data));
+
     load_dmem_8bit_fields(i_struct.Pstate, i_struct.PllBypassEn, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58002), l_data));
 
@@ -2591,6 +2595,10 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     load_dmem_8bit_fields(i_struct.HdtCtrl, i_struct.PhyCfg, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58009), l_data));
 
+    // Need to write to paired even/odd addresses in order to "complete" the write
+    l_data.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5800a), l_data));
+
     load_dmem_8bit_fields(i_struct.DFIMRLMargin, i_struct.X16Present, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5800b), l_data));
 
@@ -2614,6 +2622,14 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 
     load_dmem_8bit_fields(i_struct.EnabledDQsChA, i_struct.CsPresentChA, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58012), l_data));
+
+    // Need to write to paired even/odd addresses in order to "complete" the write
+    l_data.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58013), l_data));
+
+    // Need to write to paired even/odd addresses in order to "complete" the write
+    l_data.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5802e), l_data));
 
     load_dmem_8bit_fields(i_struct.MR0_A0, i_struct.MR2_A0, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5802f), l_data));
@@ -2656,6 +2672,11 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 
     load_dmem_8bit_fields(i_struct.MR12_A0_next, i_struct.MR13_A0_next, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5803c), l_data));
+
+    // Need to write to paired even/odd addresses in order to "complete" the write
+    l_data.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5803d), l_data));
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5803e), l_data));
 
     load_dmem_8bit_fields(i_struct.MR33_ORG_A0_next, i_struct.MR33_A0_next, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x5803f), l_data));
@@ -2759,6 +2780,11 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     load_dmem_8bit_fields(i_struct.MR12_A2_next, i_struct.MR13_A2_next, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58062), l_data));
 
+    // Need to write to paired even/odd addresses in order to "complete" the write
+    l_data.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58063), l_data));
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58064), l_data));
+
     load_dmem_8bit_fields(i_struct.MR33_ORG_A2_next, i_struct.MR33_A2_next, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58065), l_data));
 
@@ -2837,6 +2863,11 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     load_dmem_8bit_fields(i_struct.EnabledDQsChB, i_struct.CsPresentChB, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58088), l_data));
 
+    // Need to write to paired even/odd addresses in order to "complete" the write
+    l_data.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58089), l_data));
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580a4), l_data));
+
     load_dmem_8bit_fields(i_struct.MR0_B0, i_struct.MR2_B0, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580a5), l_data));
 
@@ -2878,6 +2909,11 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 
     load_dmem_8bit_fields(i_struct.MR12_B0_next, i_struct.MR13_B0_next, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b2), l_data));
+
+    // Need to write to paired even/odd addresses in order to "complete" the write
+    l_data.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b3), l_data));
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b4), l_data));
 
     load_dmem_8bit_fields(i_struct.MR33_ORG_B0_next, i_struct.MR33_B0_next, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580b5), l_data));
@@ -2980,6 +3016,11 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 
     load_dmem_8bit_fields(i_struct.MR12_B2_next, i_struct.MR13_B2_next, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580d8), l_data));
+
+    // Need to write to paired even/odd addresses in order to "complete" the write
+    l_data.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580d9), l_data));
+    FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580da), l_data));
 
     load_dmem_8bit_fields(i_struct.MR33_ORG_B2_next, i_struct.MR33_B2_next, l_data);
     FAPI_TRY(fapi2::putScom(i_target, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x580db), l_data));
