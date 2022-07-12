@@ -24,6 +24,7 @@
 # IBM_PROLOG_END_TAG
 import os.path
 import os
+from setuptools.command.build_py import build_py
 """
  Setuptools is an open source package.
  Documentation on setuptools can be found on the web.
@@ -89,10 +90,51 @@ package_data = {
                   "regdata/*.json", "regdata/*.py" ]
 }
 
+# Handy debug environment tips
+# HERE = os.path.abspath(os.path.dirname(__file__))
+# custom_data_files is a list of tuples
+custom_data_files = [( 'hostboot_data', ['img/hbotStringFile', 'img/hbicore.syms'])]
+
+
+def check_environment_files():
+    """
+    Check the environment for the needed files
+
+    Hostboot setup.py is invoked in two contexts:
+    1 - op-build, where the img files exist, post build
+    2 - OpenBMC, where the img files do NOT exist
+        OpenBMC clones a clean Hostboot repo (source only)
+
+    setup.py will fail if data_files do not exist,
+    so if we encounter a missing file, clear the
+    expectation and only populate the wheel with
+    the usual python source files.
+    """
+    for i in custom_data_files:
+        for x in i[1]:
+            if not os.path.isfile(x):
+                custom_data_files.clear()
+                return
+
+class BuildCommand(build_py):
+    """
+    Subclass the build_py command
+
+    This allows the capability to add custom build
+    steps.
+    """
+    def run(self):
+        # First run the regular build_py
+        build_py.run(self)
+        # Now run the custom step we need
+        check_environment_files()
+
 setup(
     name            = "Hostboot",
+    cmdclass        = {'build_py': BuildCommand},
     version         = os.getenv('PELTOOL_VERSION', '0.1'),
     packages        = package_directories.keys(),
+    data_files      = custom_data_files,
     package_dir     = package_directories,
     package_data    = package_data,
     scripts         = ['src/build/debug/hb-memdump.sh','src/build/trace/tracelite/weave.py'],
