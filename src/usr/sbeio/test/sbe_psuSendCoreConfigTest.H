@@ -121,8 +121,6 @@ class PsuSendCoreConfigTest : public CxxTest::TestSuite
             bool command_unsupported =false;
 
             // Make the call to perform the PSU Chip Operation
-            // NOTE: Once the new SBE image is available in simics we can
-            // change to ERRL_SERV_PREDICTIVE
             l_err = SbePsu::getTheInstance().performPsuChipOp(
                             l_procTarget,
                             &l_psuCommand,
@@ -130,11 +128,11 @@ class PsuSendCoreConfigTest : public CxxTest::TestSuite
                             SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
                             SbePsu::SBE_CORE_CONFIG_REQ_USED_REGS,
                             SbePsu::SBE_CORE_CONFIG_RSP_USED_REGS,
-                            SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_INFORMATIONAL },
+                            SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_PREDICTIVE },
                             &command_unsupported);
             if ( command_unsupported )
             {
-                TS_INFO("testCoreConfigInfo: SBE firmware "
+                TS_FAIL("testCoreConfigInfo: ERROR: SBE firmware "
                         "does not support PSU sending Core configuration information" );
                 errlCommit(l_err, CXXTEST_COMP_ID);
                 break;
