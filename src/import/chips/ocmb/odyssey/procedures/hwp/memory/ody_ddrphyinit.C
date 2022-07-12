@@ -43,6 +43,7 @@
 #include <ody_ddrphyinit.H>
 
 #include <lib/phy/ody_ddrphy_phyinit_config.H>
+#include <lib/phy/ody_phy_reset.H>
 
 extern "C"
 {
@@ -56,6 +57,9 @@ extern "C"
 
         for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
         {
+            // Perform PHY reset for Odyssey
+            FAPI_TRY(mss::ody::phy::reset(l_port));
+
             // Runs all steps of PHY init
             FAPI_TRY(run_phy_init(l_port), TARGTIDFORMAT "failed init_phy_config", TARGTID);
         }
