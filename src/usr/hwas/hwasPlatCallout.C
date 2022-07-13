@@ -176,30 +176,6 @@ errlHndl_t platHandleHWCallout(
                 break;
             }
         } // switch i_deconfigState
-
-        // check to see if this target is the master processor
-        //  and if it's being deconfigured.
-        //  NOTE: will be non-functional early in IPL before discovery complete.
-        if ( (i_pTarget == l_masterProc) &&
-             (NO_DECONFIG != i_deconfigState) )
-        {
-            const TARGETING::HwasState hwasState =
-                    l_masterProc->getAttr<TARGETING::ATTR_HWAS_STATE>();
-            // we either deconfigured the proc or we should have but
-            // explicitly decided not too, either way we need to kill
-            // the boot
-            if (!hwasState.functional || l_skipDeconfig)
-            {
-#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
-                HWAS_INF("boot proc deconfigured as part of testcase execution. Skipping shutdown and allowing testcase"
-                         " to handle");
-#else
-                HWAS_ERR("boot proc deconfigured - Shutdown due to plid 0x%X",
-                        io_errl->eid());
-                INITSERVICE::doShutdown(io_errl->eid(), true);
-#endif
-            }
-        }
     } // PLD
 
     return errl;
