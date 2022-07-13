@@ -855,6 +855,14 @@
         <no_export/>
     </attribute>
     <attribute>
+        <id>ATTR_BUS_POS</id>
+        <no_export/>
+    </attribute>
+    <attribute>
+        <id>ATTR_FAPI_POS</id>
+        <no_export/>
+    </attribute>
+    <attribute>
         <id>ATTR_PROC_PCIE_IOP_SWAP</id>
         <writeable/>
     </attribute>
