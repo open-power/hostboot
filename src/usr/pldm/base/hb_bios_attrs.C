@@ -129,7 +129,10 @@ const std::vector<const char*> POSSIBLE_HB_USB_ENABLEMENT_STRINGS = {PLDM_BIOS_E
                                                                      PLDM_BIOS_DISABLED_STRING};
 
 const std::vector<const char*> POSSIBLE_HB_MEM_REGION_SIZE_STRINGS = {PLDM_BIOS_128_MB_STRING,
-                                                                      PLDM_BIOS_256_MB_STRING};
+                                                                      PLDM_BIOS_256_MB_STRING,
+                                                                      PLDM_BIOS_1024_MB_STRING,
+                                                                      PLDM_BIOS_2048_MB_STRING,
+                                                                      PLDM_BIOS_4096_MB_STRING};
 
 const std::vector<const char*> POSSIBLE_HB_POWER_LIMIT_STRINGS = {PLDM_BIOS_ENABLED_STRING,
                                                                   PLDM_BIOS_DISABLED_STRING};
