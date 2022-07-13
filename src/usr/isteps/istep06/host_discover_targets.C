@@ -270,49 +270,6 @@ errlHndl_t updateSecondarySbeScratchRegs()
 
 #ifdef CONFIG_PLDM
 
-/* @brief Perform the first step of the PDR exchange, which will fetch the BMC's
- *        PDRs and add them to Hostboot's PDR repository.  These are necessary
- *        to request the FRU VPD for targets "owned" by the BMC.
- *
- * @return errlHndl_t Error if any, otherwise nullptr.
- */
-static errlHndl_t fetch_remote_pdrs()
-{
-    errlHndl_t l_err = nullptr;
-
-    /* Fetch the BMC's PDRs. */
-
-    do
-    {
-        // Starting the PDR exchange, ergo, set the flag stating that HB is starting
-        // a critical PLDM exchange with the BMC.
-        const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
-        const bool l_criticalExchangeCommencing = true;
-        sys->setAttr<TARGETING::ATTR_HALT_ON_BMC_PLDM_RESET>(l_criticalExchangeCommencing);
-
-        PLDM::thePdrManager().resetPdrs();
-
-        /* Get the BMC's PDRs. */
-
-        l_err = PLDM::thePdrManager().addRemotePdrs();
-
-        if (l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to add remote PDRs to PDR manager");
-            break;
-        }
-
-        sys->setAttr<TARGETING::ATTR_PLDM_BMC_PDR_COUNT>(PLDM::thePdrManager().pdrCount());
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Added %llu remote PDRs to PDR manager",
-                  PLDM::thePdrManager().pdrCount());
-    } while (false);
-
-    return l_err;
-}
-
 /* @brief Add local PDRs and finish the first half of the PDR exchange with the
  *        BMC (until and including Hostboot notifying the BMC that it has added
  *        its own PDRs to its repository). Presence detection should have already
@@ -509,32 +466,6 @@ void* host_discover_targets( void *io_pArgs )
 
     do
     {
-
-#ifdef CONFIG_PLDM
-    /* First step of the PDR exchange is to fetch remote PDRs and then cache
-     * remote FRU VPD. Presence detection depends on this data. */
-
-    l_err = fetch_remote_pdrs();
-
-    if (l_err)
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  ERR_MRK"host_discover_targets: Failed to fetch PDRs from the BMC");
-
-        captureError(l_err, l_stepError, ISTEP_COMP_ID);
-        break;
-    }
-
-    l_err = PLDM::cacheRemoteFruVpd();
-    if (l_err)
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  ERR_MRK"host_discover_targets: Failed to cache remote FRU info from the BMC");
-
-        captureError(l_err, l_stepError, ISTEP_COMP_ID);
-        break;
-    }
-#endif
 
     // Check whether we're in MPIPL mode
     TARGETING::Target* l_pTopLevel = TARGETING::UTIL::assertGetToplevelTarget();

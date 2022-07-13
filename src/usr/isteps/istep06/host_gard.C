@@ -46,6 +46,7 @@
 // SBE
 #include <sbe/sbeif.H>
 #include <sbe/sbe_update.H>
+#include <sbeio/sbe_psudd.H>
 
 // Security
 #include <trustedbootif.H>
@@ -458,6 +459,14 @@ void* host_gard( void *io_pArgs )
         // Commit Error
         errlCommit (l_err, ISTEP_COMP_ID);
     }
+
+    // Process SBE PSU errors that might have occurred before FAPI was
+    // initialized.  Early PSU errors must be handled after
+    // host_discover_targets because SBE dumps are not possible until after the
+    // PDR exchange.  Further, in order to actually deconfig a processor
+    // correctly, all the initial target state processing needs to be completed,
+    // which implies host_gard is also materially complete.
+    SBEIO::SbePsu::getTheInstance().processEarlyError();
 
     (void)SECUREBOOT::logPlatformSecurityConfiguration();
 
