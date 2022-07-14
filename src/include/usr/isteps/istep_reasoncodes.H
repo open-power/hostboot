@@ -202,4 +202,24 @@ namespace ISTEP
 
 };
 
+//*****************************************************
+// SRC Graveyard
+// Contains error log descriptions for SRCs that were
+// removed from the code but we need to still provide
+// backward compatible parser logic for.
+
+/*@
+ * @errortype
+ * @moduleid         ISTEP::MOD_REDISCOVER_I2C_TARGETS
+ * @reasoncode       ISTEP::RC_REDISCOVERED_TARGETS
+ * @userdata1[0:31]  HUID of 1st rediscovered target
+ * @userdata1[31:63] HUID of 2nd rediscovered target, if applicable
+ * @userdata2[0:31]  Target Count Before Rediscover Attempt
+ * @userdata2[31:63] Target Count After Rediscover Attempt
+ * @devdesc          Targets detected via I2C were rediscovered
+ *                   after an I2C reset.  Reboot to add to config
+ * @custdesc         A problem occurred during the IPL of the
+ *                   system and the system will reboot.
+ */
+
 #endif
