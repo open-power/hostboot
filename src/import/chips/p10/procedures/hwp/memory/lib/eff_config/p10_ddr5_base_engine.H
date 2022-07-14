@@ -47,6 +47,8 @@
 #include <mss_generic_attribute_setters.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <generic/memory/lib/spd/spd_checker.H>
 #include <lib/eff_config/ody_attr_engine_traits.H>
 
@@ -96,6 +98,45 @@ class base_0_0 : public mss::spd::base
         }
 
         ///
+        /// @brief Set the dimm type field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_dimm_type(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+            uint8_t l_dimm_type = 0;
+
+            const std::vector<uint8_t> l_reserved_bits{0b0000, 0b0101, 0b0110, 0b0111, 0b1000, 0b1001, 0b1100, 0b1101, 0b1110, 0b1111};
+
+            // =========================================================
+            // Item JC-45-2260.01M
+            // Page 27
+            // DDR5 SPD Document Release 1
+            // Byte 3 (0x003): Key Byte / Module Type
+            // =========================================================
+            const std::vector< std::pair<uint8_t, uint8_t> > BASE_MODULE_TYPE_MAP =
+            {
+                //{key byte, dimm type}
+                {0b1010, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM},
+                // All others reserved or not supported
+            };
+
+            FAPI_TRY( mss::spd::get_field_spd(iv_ocmb, FIELDS::BASE_MODULE, i_spd, SET_DIMM_TYPE, l_field));
+            FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, SET_DIMM_TYPE, l_field) );
+
+            FAPI_TRY( lookup_table_check(iv_dimm, BASE_MODULE_TYPE_MAP, SET_DIMM_TYPE, l_field, l_dimm_type),
+                      "%s failed DIMM_TYPE lookup check", spd::c_str(iv_dimm) );
+
+            FAPI_TRY(mss::attr::set_dimm_type(iv_dimm, l_dimm_type));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+
+        ///
         /// @brief Set the hybrid field
         ///
         /// @param[in] i_spd SPD binary
@@ -106,8 +147,11 @@ class base_0_0 : public mss::spd::base
             uint8_t l_field = 0;
             uint8_t l_hybrid = 0;
 
+
             // =========================================================
-            // DDR5 SPD Document
+            // Item JC-45-2260.01M
+            // Page 27
+            // DDR5 SPD Document Revision 1
             // Byte 3 (0x003): Key Byte / Module Type - Hybrid
             // =========================================================
             const std::vector< std::pair<uint8_t, uint8_t> > HYBRID_MAP =
@@ -144,7 +188,9 @@ class base_0_0 : public mss::spd::base
             static const std::vector<uint8_t> RESERVED_BITS = {0b011, 0b100, 0b101, 0b110, 0b111};
 
             // =========================================================
-            // DDR5 SPD Document
+            // Item JC-45-2260.01M
+            // Page 27
+            // DDR5 SPD Document Revision 1
             // Byte 3 (0x003): Key Byte / Module Type - Hybrid
             // =========================================================
             const std::vector< std::pair<uint8_t, uint8_t> > HYBRID_MEMORY_TYPE_MAP =
@@ -152,8 +198,6 @@ class base_0_0 : public mss::spd::base
 
                 //{key byte, dimm type}
                 {0, fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_NONE},
-                {1, fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_NVDIMM_N},
-                {2, fapi2::ENUM_ATTR_MEM_EFF_HYBRID_MEMORY_TYPE_NVDIMM_P},
                 // All others reserved or not supported
             };
 
@@ -169,81 +213,393 @@ class base_0_0 : public mss::spd::base
         }
 
         ///
-        /// @brief Set the dimm type field
+        /// @brief Set the sdram density field
         ///
         /// @param[in] i_spd SPD binary
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
         ///
-        virtual fapi2::ReturnCode set_dimm_type(const std::vector<uint8_t>& i_spd) const
+        virtual fapi2::ReturnCode set_sdram_density(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            uint8_t l_dimm_type = 0;
-
-            const std::vector<uint8_t> l_reserved_bits{0b0000, 0b0101, 0b0110, 0b0111, 0b1000, 0b1001, 0b1100, 0b1101, 0b1110, 0b1111};
+            uint8_t l_sdram_density = 0;
 
             // =========================================================
-            // DDR5 SPD Document
-            // Byte 3 (0x003): Key Byte / Module Type
+            // Item JC-45-2260.01M
+            // Page 27
+            // DDR5 SPD Document Revision 1
+            // Byte 4 (0x004): Key Byte / First SDRAM Density & Package
             // =========================================================
-            const std::vector< std::pair<uint8_t, uint8_t> > BASE_MODULE_TYPE_MAP =
+            const std::vector< std::pair<uint8_t, uint8_t> > DRAM_DENSITY_MAP =
             {
-                //{key byte, dimm type}
-                {10, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM},
-                // All others reserved or not supported
+                // {key byte, capacity in GBs}
+                {0b00001, fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_4G},
+                {0b00010, fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_8G},
+                {0b00011, fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_12G},
+                {0b00100, fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_16G},
+                {0b00101, fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_24G},
+                {0b00110, fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_32G},
+                {0b00111, fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_48G},
+                {0b01000, fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_64G},
+            };
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::DENSITY_PER_DIE, i_spd, SET_DRAM_DENSITY, l_field));
+
+            FAPI_TRY( lookup_table_check(iv_dimm, DRAM_DENSITY_MAP, SET_DRAM_DENSITY, l_field, l_sdram_density),
+                      "%s failed DRAM_DENSITY lookup check", spd::c_str(iv_dimm) );
+
+            FAPI_TRY(mss::attr::set_dram_density(iv_dimm, l_sdram_density));
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the col addr bits field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_col_addr_bits(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+            uint8_t l_col_addr_bits  = 0;
+            const std::vector<uint8_t> l_reserved_bits{0b010, 0b011, 0b100, 0b0101, 0b110, 0b111};
+            // =========================================================
+            // Item JC-45-2260.01M
+            // Page 28
+            // DDR5 SPD Document Revision 1
+            // Byte 5 (0x005): Key Byte / First SDRAM Addressing
+            // =========================================================
+            const std::vector< std::pair<uint8_t, uint8_t> > DRAM_ADDR_COL_MAP =
+            {
+                {0b000, fapi2::ENUM_ATTR_MEM_EFF_DRAM_COLUMN_BITS_NUM10},
+                {0b001, fapi2::ENUM_ATTR_MEM_EFF_DRAM_COLUMN_BITS_NUM11},
             };
 
-            FAPI_TRY( mss::spd::get_field_spd(iv_ocmb, FIELDS::BASE_MODULE, i_spd, SET_DIMM_TYPE, l_field));
-            FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, SET_DIMM_TYPE, l_field) );
-
-            FAPI_TRY( lookup_table_check(iv_dimm, BASE_MODULE_TYPE_MAP, SET_DIMM_TYPE, l_field, l_dimm_type),
-                      "%s failed DIMM_TYPE lookup check", spd::c_str(iv_dimm) );
-
-            FAPI_TRY(mss::attr::set_dimm_type(iv_dimm, l_dimm_type));
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::COL_ADDR_BITS, i_spd, SET_COL_ADDR_BITS, l_field));
+            FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, SET_COL_ADDR_BITS, l_field) );
+            FAPI_TRY(lookup_table_check(iv_dimm, DRAM_ADDR_COL_MAP, SET_COL_ADDR_BITS, l_field, l_col_addr_bits));
+            FAPI_TRY(mss::attr::set_dram_column_bits(iv_dimm, l_col_addr_bits));
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
-
         ///
-        /// @brief Gets the number of package ranks per channel
+        /// @brief Set the row addr bits field
         ///
         /// @param[in] i_spd SPD binary
-        /// @param[out] o_die_per_package number of DRAM dies included in a package
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
         ///
-        virtual fapi2::ReturnCode get_package_ranks_per_channel(const std::vector<uint8_t>& i_spd,
-                uint8_t& o_die_per_package) const
+        virtual fapi2::ReturnCode set_row_addr_bits(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            o_die_per_package = 0;
+            uint8_t l_row_addr_bits = 0;
+
+            // =========================================================
+            // Item JC-45-2260.01M
+            // Page 28
+            // DDR5 SPD Document Revision 1
+            // Byte 5 (0x005): Key Byte / First SDRAM Addressing
+            // =========================================================
+            const std::vector< std::pair<uint8_t, uint8_t> > DRAM_ADDR_ROW_MAP =
+            {
+                {0b00000, fapi2::ENUM_ATTR_MEM_EFF_DRAM_ROW_BITS_NUM16},
+                {0b00001, fapi2::ENUM_ATTR_MEM_EFF_DRAM_ROW_BITS_NUM17},
+                {0b00010, fapi2::ENUM_ATTR_MEM_EFF_DRAM_ROW_BITS_NUM18},
+            };
+
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::ROW_ADDR_BITS, i_spd, SET_ROW_ADDR_BITS, l_field));
+            FAPI_TRY(lookup_table_check(iv_dimm, DRAM_ADDR_ROW_MAP, SET_ROW_ADDR_BITS, l_field, l_row_addr_bits));
+            FAPI_TRY(mss::attr::set_dram_row_bits(iv_dimm, l_row_addr_bits));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the prim stack type field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_prim_stack_type(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+            uint8_t l_prim_stack_type = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::DIE_PER_PACKAGE, i_spd, SET_PRIM_STACK_TYPE, l_field));
+
+            // =========================================================
+            // Item JC-45-2260.01M
+            // Page 27
+            // DDR5 SPD Document Revision 1
+            // Byte 4 (0x004): Key Byte / First SDRAM Density & Package
+            // =========================================================
+            // Note: This byte's validity gets checked in set_prim_die_count
+            l_prim_stack_type = (l_field == 0) ? fapi2::ENUM_ATTR_MEM_EFF_PRIM_STACK_TYPE_SDP
+                                : fapi2::ENUM_ATTR_MEM_EFF_PRIM_STACK_TYPE_3DS;
+
+            FAPI_TRY(mss::attr::set_prim_stack_type(iv_dimm, l_prim_stack_type));
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the prim die count field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_prim_die_count(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+            uint8_t l_prim_die_count = 0;
 
             const std::vector<uint8_t> l_reserved_bits{0b001, 0b110, 0b111};
 
             // =========================================================
-            // DDR5 SPD Document
-            // Byte 4 (0x004): First SDRAM Density and Package
+            // Byte 4 maps
+            // Item JC-45-2260.01M
+            // Page 27
+            // DDR5 SPD Document Release 3
+            // Byte 4 (0x004): First SDRAM Density and Package Type
             // =========================================================
-            const std::vector< std::pair<uint8_t, uint8_t> > DIE_PER_PACKAGE_MAP =
+            const std::vector<std::pair<uint8_t, uint8_t> > PRIM_DIE_COUNT_MAP =
             {
-                //{key byte, dimm type}
-                {0b000, 1},
-                {0b010, 2},
-                {0b011, 4},
-                {0b100, 8},
-                {0b101, 16},
-                // All others reserved or not supported
+                // {key byte, number of die}
+                {0b000, fapi2::ENUM_ATTR_MEM_EFF_PRIM_DIE_COUNT_D1},
+                {0b010, fapi2::ENUM_ATTR_MEM_EFF_PRIM_DIE_COUNT_D2},
+                {0b011, fapi2::ENUM_ATTR_MEM_EFF_PRIM_DIE_COUNT_D4},
+                {0b100, fapi2::ENUM_ATTR_MEM_EFF_PRIM_DIE_COUNT_D8},
+                {0b101, fapi2::ENUM_ATTR_MEM_EFF_PRIM_DIE_COUNT_D16},
             };
 
-            FAPI_TRY( mss::spd::get_field_spd(iv_ocmb, FIELDS::PACKAGE_RANKS_PER_CHANNEL, i_spd, SET_PRIM_DIE_COUNT, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::DIE_PER_PACKAGE, i_spd, SET_PRIM_DIE_COUNT, l_field));
             FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, SET_PRIM_DIE_COUNT, l_field) );
+            FAPI_TRY(lookup_table_check(iv_dimm, PRIM_DIE_COUNT_MAP, SET_PRIM_DIE_COUNT, l_field, l_prim_die_count));
+            FAPI_TRY(mss::attr::set_prim_die_count(iv_dimm, l_prim_die_count));
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
-            FAPI_TRY( lookup_table_check(iv_dimm, DIE_PER_PACKAGE_MAP, SET_PRIM_DIE_COUNT, l_field, o_die_per_package),
-                      "%s failed DIE_PER_PACKAGE lookup check", spd::c_str(iv_dimm) );
+
+        ///
+        /// @brief Set the sdram width field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_sdram_width(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+            uint8_t l_sdram_width = 0;
+
+            const std::vector<uint8_t> l_reserved_bits{0b100, 0b101, 0b110, 0b111};
+
+            // =========================================================
+            // Item JC-45-2260.01M
+            // Page 28
+            // DDR5 SPD Document Release 1
+            // Byte 6 (0x06) : First SDRAM I/O Width
+            // =========================================================
+            const std::vector< std::pair<uint8_t, uint8_t> > DRAM_WIDTH_MAP =
+            {
+                // {key byte, device width (bits)}
+                {0b000, fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4},
+                {0b001, fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X8},
+                // All others reserved
+            };
+
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::SDRAM_WIDTH, i_spd, SET_DRAM_WIDTH, l_field));
+            FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, SET_DRAM_WIDTH, l_field) );
+            FAPI_TRY(lookup_table_check(iv_dimm, DRAM_WIDTH_MAP, SET_DRAM_WIDTH, l_field, l_sdram_width));
+            FAPI_TRY(mss::attr::set_dram_width(iv_dimm, l_sdram_width));
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        /// @brief Set the burst length field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_burst_length(const std::vector<uint8_t>& i_spd) const
+        {
+            // =========================================================
+            // Item JC-45-2260.01M
+            // Page 32
+            // DDR5 SPD Document Release 1
+            // Byte 12 (0x00C) : SDRAM BL32 & Post Package Repair
+            // =========================================================
+            // We are harcoding burst length to support 16 clks
+            constexpr uint8_t l_burst_length = fapi2::ENUM_ATTR_MEM_BURST_LENGTH_BL16;
+
+            FAPI_TRY(mss::attr::set_burst_length(iv_port, l_burst_length));
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the channels per dimm field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_channels_per_dimm(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+            uint8_t l_channels_per_dimm = 0;
+
+            // =========================================================
+            // Item JC-45-2260.01M
+            // Page 75
+            // DDR5 SPD Document Release 1.0
+            // Byte 235 (0x0EB): Memory Channel Bus Width
+            // =========================================================
+            const std::vector<std::pair<uint8_t, uint8_t> > CHANNELS_PER_DIMM_MAP =
+            {
+                // {key byte, bus width (in bits)
+                {0b00, fapi2::ENUM_ATTR_MEM_EFF_CHANNELS_PER_DIMM_1_CHANNEL},
+                {0b01, fapi2::ENUM_ATTR_MEM_EFF_CHANNELS_PER_DIMM_2_CHANNELS},
+                // All others reserved
+            };
+
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::CHANNELS_PER_DIMM, i_spd, SET_CHANNELS_PER_DIMM, l_field));
+            FAPI_TRY(lookup_table_check(iv_dimm, CHANNELS_PER_DIMM_MAP, SET_CHANNELS_PER_DIMM, l_field, l_channels_per_dimm));
+            FAPI_TRY(mss::attr::set_channels_per_dimm(iv_dimm, l_channels_per_dimm));
 
         fapi_try_exit:
             return fapi2::current_err;
         }
+
+        ///
+        /// @brief Set the bus width field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_bus_width(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+            uint8_t l_bus_width = 0;
+
+            // =========================================================
+            // Item JC-45-2260.01M
+            // Page 75
+            // DDR5 SPD Document Release 1.0
+            // Byte 235 (0x0EB): Memory Channel Bus Width
+            // =========================================================
+            const std::vector<std::pair<uint8_t, uint8_t> > BUS_WIDTH_MAP =
+            {
+                // {key byte, bus width (in bits)
+                {0, fapi2::ENUM_ATTR_MEM_EFF_PRIM_BUS_WIDTH_8_BITS},
+                {1, fapi2::ENUM_ATTR_MEM_EFF_PRIM_BUS_WIDTH_16_BITS},
+                {2, fapi2::ENUM_ATTR_MEM_EFF_PRIM_BUS_WIDTH_32_BITS},
+                {3, fapi2::ENUM_ATTR_MEM_EFF_PRIM_BUS_WIDTH_64_BITS},
+                // All others reserved
+            };
+
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::BUS_WIDTH, i_spd, SET_PRIM_BUS_WIDTH, l_field));
+            FAPI_TRY(lookup_table_check(iv_dimm, BUS_WIDTH_MAP, SET_PRIM_BUS_WIDTH, l_field, l_bus_width));
+            FAPI_TRY(mss::attr::set_prim_bus_width(iv_dimm, l_bus_width));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the module mfg id field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_module_mfg_id(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_cont_codes = 0;
+            uint8_t l_last_nonzero_byte = 0;
+            uint16_t l_field = 0;
+            fapi2::buffer<uint16_t> l_buffer;
+
+            // =========================================================
+            // Item JC-45-2260.01M
+            // Page 95
+            // DDR5 SPD Document Release 1.0
+            // Byte 512 (0x0200): Module Manufacturer ID Code, First Byte
+            // Byte 513 (0x0201): Module Manufacturer ID Code, Second Byte
+            // =========================================================
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::CONTINUATION_CODES, i_spd, SET_MODULE_MFG_ID, l_cont_codes));
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::LAST_NON_ZERO_BYTE, i_spd, SET_MODULE_MFG_ID, l_last_nonzero_byte));
+
+            // Align and endian swap
+            right_aligned_insert(l_buffer, l_last_nonzero_byte, l_cont_codes);
+            l_field = l_buffer;
+            fapi2::endian_swap(l_field);
+
+            FAPI_INF("%s.Module Manufacturer ID Code: %x",
+                     spd::c_str(iv_dimm),
+                     l_field);
+
+            FAPI_TRY(mss::attr::set_module_mfg_id(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the dram mfg id field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_dram_mfg_id(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_mfgid_msb = 0;
+            uint8_t l_mfgid_lsb = 0;
+            uint16_t l_field = 0;
+            fapi2::buffer<uint16_t> l_buffer;
+
+            // =========================================================
+            // Item JC-45-2260.01M
+            // Page 96
+            // DDR5 SPD Document Release 1.0
+            // Byte 552 (0x228): DRAM Manufacturer ID code, First Byte
+            // Byte 553 (0x229): DRAM Manufacturer ID code, Second Byte
+            // =========================================================
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::DRAM_MFR_ID_CODE_LSB, i_spd, SET_DRAM_MFG_ID, l_mfgid_lsb));
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::DRAM_MFR_ID_CODE_MSB, i_spd, SET_DRAM_MFG_ID, l_mfgid_msb));
+
+            // Align and endian swap
+            right_aligned_insert(l_buffer, l_mfgid_msb, l_mfgid_lsb);
+            l_field = l_buffer;
+            fapi2::endian_swap(l_field);
+
+            FAPI_INF("%s.DRAM Manufacturer ID Code: %x",
+                     spd::c_str(iv_dimm),
+                     l_field);
+
+            FAPI_TRY(mss::attr::set_dram_mfg_id(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the supported cas latencies field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_supported_cas_latencies(const std::vector<uint8_t>& i_spd) const
+        {
+            uint64_t l_field = 0;
+
+            FAPI_TRY(mss::gen::ddr5::get_supported_cas_latencies(iv_dimm, i_spd, get_spd_revision(), l_field))
+
+            FAPI_TRY(mss::attr::set_ddr5_spd_cl_supported(iv_port, l_field));
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+
 
         ///
         /// @brief Set the host to ddr speed ratio field
@@ -267,14 +623,14 @@ class base_0_0 : public mss::spd::base
             const std::vector< std::pair<uint8_t, uint8_t> > HOST_TO_DDR_SPEED_RATIO_MAP =
             {
                 // {key byte, speed ratio}
-                {0, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_1_TO_1},
-                {1, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_2_TO_1},
-                {2, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_4_TO_1},
-                {3, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_8_TO_1},
-                {4, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_16_TO_1},
-                {5, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_32_TO_1},
-                {6, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_64_TO_1},
-                {7, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_128_TO_1},
+                {0b0000, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_1_TO_1},
+                {0b0001, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_2_TO_1},
+                {0b0010, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_4_TO_1},
+                {0b0011, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_8_TO_1},
+                {0b0100, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_16_TO_1},
+                {0b0101, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_32_TO_1},
+                {0b0110, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_64_TO_1},
+                {0b0111, fapi2::ENUM_ATTR_MEM_EFF_HOST_TO_DDR_SPEED_RATIO_128_TO_1},
                 // All others reserved or not supported
             };
 
@@ -283,6 +639,7 @@ class base_0_0 : public mss::spd::base
             FAPI_TRY( lookup_table_check(iv_dimm, HOST_TO_DDR_SPEED_RATIO_MAP, SET_HOST_TO_DDR_SPEED_RATIO, l_field,
                                          l_host_to_ddr_speed_ratio),
                       "%s failed HOST_TO_DDR_SPEED_RATIO lookup check", spd::c_str(iv_dimm) );
+
 
             FAPI_TRY(mss::attr::set_host_to_ddr_speed_ratio(iv_dimm, l_host_to_ddr_speed_ratio));
 
@@ -302,7 +659,9 @@ class base_0_0 : public mss::spd::base
             uint8_t l_rpd = 0;
 
             // =========================================================
-            // DDR5 SPD Document Release Preliminary
+            // Item JC-45-2260.01M
+            // Page 72
+            // DDR5 SPD Document Revision 1
             // Byte 234 (0x0EA): Module Organization
             // =========================================================
             const std::vector< std::pair<uint8_t, uint8_t> > NUM_PACKAGE_RANKS_MAP =
@@ -346,6 +705,35 @@ class base_0_0 : public mss::spd::base
             l_field = l_ranks_configed;
 
             FAPI_TRY(mss::attr::set_dimm_ranks_configed(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the dram cwl field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_dram_cwl(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_dram_cl = 0;
+            uint8_t l_field = 0;
+
+            // =========================================================
+            // Taken from DDR5 SDRAM
+            // JESD79-5A
+            // Page 389, Table 258
+            // The DDR5 CWL is given as CL-2 for all speed bins
+            // =========================================================
+            FAPI_TRY(mss::attr::get_dram_cl(iv_port, l_dram_cl));
+            FAPI_DBG("%s DRAM CL %d", spd::c_str(iv_dimm), l_dram_cl);
+
+            l_field = l_dram_cl - 2;
+            FAPI_DBG("%s DRAM CWL %d", spd::c_str(iv_dimm), l_field);
+
+            FAPI_TRY(mss::attr::set_dram_cwl(iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -405,6 +793,112 @@ class base_0_0 : public mss::spd::base
         }
 
         ///
+        /// @brief Set the logical ranks field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_logical_ranks(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+            uint8_t l_prim_stack_type = 0;
+            uint8_t l_master_ranks = 0;
+            uint8_t l_die_count = 0;
+
+            FAPI_TRY( mss::attr::get_num_master_ranks_per_dimm(iv_dimm, l_master_ranks) );
+            FAPI_TRY( mss::attr::get_prim_die_count(iv_dimm, l_die_count) );
+            FAPI_TRY( mss::attr::get_prim_stack_type(iv_dimm, l_prim_stack_type) );
+
+            {
+                // For 3DS parts, the number of die per package is the primary die count
+                // For non-3DS parts, only 1 die is present per package.
+                // The number of logical ranks is the die count multiplied by the number of ranks
+                const auto l_multiplier = (l_prim_stack_type == fapi2::ENUM_ATTR_MEM_EFF_PRIM_STACK_TYPE_3DS) ? l_die_count : 1;
+                l_field = (l_master_ranks * l_multiplier);
+                FAPI_DBG("%s Num Logical Ranks %d", spd::c_str(iv_dimm), l_field);
+            }
+
+            FAPI_TRY(mss::attr::set_logical_ranks_per_dimm(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the height 3ds field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_height_3ds(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+            uint16_t l_3ds_height = 0;
+
+            {
+                const std::vector< std::pair<uint8_t, uint16_t> > HEIGHT_3DS_MAP =
+                {
+                    // {key byte, 3DS HEIGHT}
+                    {0b000, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_PLANAR},
+                    {0b010, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H2},
+                    {0b011, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H4},
+                    {0b100, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H8},
+                    {0b101, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H16},
+                    // All others reserved
+                };
+
+                FAPI_TRY( get_field_spd(iv_ocmb, FIELDS::HEIGHT_3DS, i_spd, SET_3DS_HEIGHT, l_field));
+                FAPI_TRY( lookup_table_check(iv_dimm, HEIGHT_3DS_MAP, SET_3DS_HEIGHT, l_field, l_3ds_height),
+                          "%s failed HEIGHT_3DS lookup check", spd::c_str(iv_dimm) );
+            }
+
+            FAPI_TRY(mss::attr::set_3ds_height(iv_dimm, l_3ds_height));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the mem dimm size field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_mem_dimm_size(const std::vector<uint8_t>& i_spd) const
+        {
+            uint32_t l_field = 0;
+            uint8_t l_channels_per_dimm = 0;
+            uint8_t l_bus_width_per_channel = 0;
+            uint8_t l_dram_width = 0;
+            uint8_t l_prim_die_count = 0;
+            uint8_t l_dram_density = 0;
+            uint8_t l_logical_rank_per_dimm = 0;
+
+            FAPI_TRY( mss::attr::get_channels_per_dimm(iv_dimm, l_channels_per_dimm) );
+            FAPI_TRY( mss::attr::get_prim_bus_width(iv_dimm, l_bus_width_per_channel) );
+            FAPI_TRY( mss::attr::get_dram_width(iv_dimm, l_dram_width) );
+            FAPI_TRY( mss::attr::get_prim_die_count(iv_dimm, l_prim_die_count) );
+            FAPI_TRY( mss::attr::get_dram_density(iv_dimm, l_dram_density) );
+            FAPI_TRY( mss::attr::get_logical_ranks_per_dimm(iv_dimm, l_logical_rank_per_dimm) );
+
+            // Calculate dimm size
+            // Formula from SPD Spec (seriously, they don't have parenthesis in the spec)
+            // Total = l_channels_per_dimm * l_bus_width_per_channel / l_dram_width * l_die_per_package *
+            //         l_dram_density / 8 * l_ranks_per_channel
+            l_field = (l_channels_per_dimm * l_bus_width_per_channel * l_prim_die_count * l_dram_density * l_logical_rank_per_dimm)
+                      / (8 * l_dram_width);
+
+            FAPI_DBG("%s DIMM size = %d => %d * (%d / %d) * %d * (%d / 8) * %d",
+                     spd::c_str(iv_dimm), l_field, l_channels_per_dimm, l_bus_width_per_channel, l_dram_width,
+                     l_prim_die_count, l_dram_density, l_logical_rank_per_dimm );
+
+            FAPI_TRY(mss::attr::set_dimm_size(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Process the data init fields - these fields should be processed first
         ///
         /// @param[in] i_spd SPD binary
@@ -438,8 +932,32 @@ class base_0_0 : public mss::spd::base
         ///
         virtual fapi2::ReturnCode process(const std::vector<uint8_t>& i_spd) const
         {
-            // TK fill this in - just looking to get it so we can compile now
+            // These likely should have been done already, but just in case
+            FAPI_TRY(process_data_init_fields(i_spd));
+
+            // Base cnfg fields
+            FAPI_TRY(set_sdram_density(i_spd));
+            FAPI_TRY(set_col_addr_bits(i_spd));
+            FAPI_TRY(set_row_addr_bits(i_spd));
+            FAPI_TRY(set_prim_stack_type(i_spd));
+            FAPI_TRY(set_channels_per_dimm(i_spd));
+            FAPI_TRY(set_prim_die_count(i_spd));
+            FAPI_TRY(set_sdram_width(i_spd));
+            FAPI_TRY(set_bus_width(i_spd));
+            FAPI_TRY(set_supported_cas_latencies(i_spd));
+
+            // TODO: Zen:MST-1427 Processing for DDR5 EFD module
+            // Timing fields
+
+            FAPI_TRY(set_module_mfg_id(i_spd));
+            FAPI_TRY(set_dram_mfg_id(i_spd));
+            FAPI_TRY(set_dram_cwl(i_spd));
+            FAPI_TRY(set_burst_length(i_spd));
+
             return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -450,8 +968,12 @@ class base_0_0 : public mss::spd::base
         ///
         virtual fapi2::ReturnCode process_derived(const std::vector<uint8_t>& i_spd) const
         {
-            // TK fill this in - just looking to get it so we can compile now
-            return fapi2::FAPI2_RC_SUCCESS;
+            FAPI_TRY(set_logical_ranks(i_spd));
+            FAPI_TRY(set_height_3ds(i_spd));
+            FAPI_TRY(set_mem_dimm_size(i_spd));
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
 };

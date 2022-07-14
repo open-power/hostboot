@@ -63,6 +63,12 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::ENDURANT_VD
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::OPERABLE_VPP_FLD;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::ENDURANT_VPP_FLD;
 
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::HEIGHT_3DS;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::COL_ADDR_BITS;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::ROW_ADDR_BITS;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::SDRAM_WIDTH;
+
+
 //////////////////////////////////////
 //// Bytes 19-93: timings
 //////////////////////////////////////
@@ -86,9 +92,17 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TRCD_MIN_MS
 //////////////////////////////////////
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::RANK_MIX;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::PACKAGE_RANKS_PER_CHANNEL;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BUS_WIDTH;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BUS_EXT_WIDTH;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::CHANNELS_PER_DIMM;
 
 // fields<DDR5, DDIMM_MODULE>
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::HI_DDR_SPEED_RATIO;
+
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::CONTINUATION_CODES;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::LAST_NON_ZERO_BYTE;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::DRAM_MFR_ID_CODE_LSB;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::DRAM_MFR_ID_CODE_MSB;
 
 }// spd
 }// mss

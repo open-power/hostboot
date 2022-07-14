@@ -184,4 +184,16 @@
     <mssAccessorName>ddr5_phy_vref_rd</mssAccessorName>
   </attribute>
 
+  <attribute>
+        <id>ATTR_MEM_DDR5_SPD_CL_SUPPORTED</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Cas Latency Supported by DDR5 DRAM
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint64</valueType>
+        <writeable/>
+        <mssAccessorName>ddr5_spd_cl_supported</mssAccessorName>
+    </attribute>
+
 </attributes>

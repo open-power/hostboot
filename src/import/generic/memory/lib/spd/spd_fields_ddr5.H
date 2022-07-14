@@ -65,6 +65,7 @@ class fields<DDR5, BASE_CNFG>
             //////////////////////////////////////
             //// Bytes 0-18: prior to timings
             //////////////////////////////////////
+
             // Byte 3
             HYBRID_START = 0,
             HYBRID_LEN = 1,
@@ -78,6 +79,19 @@ class fields<DDR5, BASE_CNFG>
             DIE_PER_PACKAGE_LEN = 3,
             DENSITY_PER_DIE_START = 3,
             DENSITY_PER_DIE_LEN = 5,
+            HEIGHT_3DS_START = 0,
+            HEIGHT_3DS_LEN = 3,
+
+            // Byte 5
+            COL_ADDRESS_START = 0,
+            COL_ADDRESS_LEN = 3,
+            ROW_ADDRESS_START = 3,
+            ROW_ADDRESS_LEN = 5,
+
+            // Byte 6
+            SDRAM_WIDTH_START = 0,
+            SDRAM_WIDTH_LEN = 3,
+
 
             //Byte 16, 17, 18
             OPERABLE_START = 4,
@@ -135,6 +149,31 @@ class fields<DDR5, BASE_CNFG>
             RANK_MIX_LEN = 1,
             PACKAGE_RANKS_PER_CHANNEL_START = 2,
             PACKAGE_RANKS_PER_CHANNEL_LEN = 3,
+
+            // Byte 235
+            CHANNELS_PER_DIMM_START = 1,
+            CHANNELS_PER_DIMM_LEN = 2,
+            BUS_EXT_WIDTH_START = 3,
+            BUS_EXT_WIDTH_LEN = 2,
+            BUS_WIDTH_START = 5,
+            BUS_WIDTH_LEN = 3,
+
+            /////////////////////////////////////////////
+            //// Bytes 512-637: manufacturing information
+            /////////////////////////////////////////////
+            // Byte 512
+            CONTINUATION_CODES_START = 0,
+            CONTINUATION_CODES_LEN = 8,
+
+            // Byte 513
+            LAST_NON_ZERO_BYTE_START = 0,
+            LAST_NON_ZERO_BYTE_LEN = 8,
+
+            // Byte 552-553
+            DRAM_MFR_ID_CODE_START = 0,
+            DRAM_MFR_ID_CODE_LEN = 8,
+
+
         };
 
     public:
@@ -151,6 +190,10 @@ class fields<DDR5, BASE_CNFG>
         static constexpr mss::field_t<mss::endian::LITTLE> BASE_MODULE{3, BASE_MODULE_START, BASE_MODULE_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> DIE_PER_PACKAGE{4, DIE_PER_PACKAGE_START, DIE_PER_PACKAGE_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> DENSITY_PER_DIE{4, DENSITY_PER_DIE_START, DENSITY_PER_DIE_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> HEIGHT_3DS{4, HEIGHT_3DS_START, HEIGHT_3DS_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> COL_ADDR_BITS{5, COL_ADDRESS_START, COL_ADDRESS_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> ROW_ADDR_BITS{5, ROW_ADDRESS_START, ROW_ADDRESS_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> SDRAM_WIDTH{6, SDRAM_WIDTH_START, SDRAM_WIDTH_LEN};
 
         static constexpr mss::field_t<mss::endian::LITTLE> OPERABLE_VDD_FLD{16, OPERABLE_START, OPERABLE_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> ENDURANT_VDD_FLD{16, ENDURANT_START, ENDURANT_LEN};
@@ -184,6 +227,17 @@ class fields<DDR5, BASE_CNFG>
         //////////////////////////////////////
         static constexpr mss::field_t<mss::endian::LITTLE> RANK_MIX{234, RANK_MIX_START, RANK_MIX_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> PACKAGE_RANKS_PER_CHANNEL{234, PACKAGE_RANKS_PER_CHANNEL_START, PACKAGE_RANKS_PER_CHANNEL_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> BUS_WIDTH{235, BUS_WIDTH_START, BUS_WIDTH_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> BUS_EXT_WIDTH{235, BUS_EXT_WIDTH_START, BUS_EXT_WIDTH_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> CHANNELS_PER_DIMM{235, CHANNELS_PER_DIMM_START, CHANNELS_PER_DIMM_LEN};
+
+        //////////////////////////////////////
+        //// Bytes 512-513: module information
+        //////////////////////////////////////
+        static constexpr mss::field_t<mss::endian::LITTLE> CONTINUATION_CODES{512, CONTINUATION_CODES_START, CONTINUATION_CODES_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> LAST_NON_ZERO_BYTE{513, LAST_NON_ZERO_BYTE_START, LAST_NON_ZERO_BYTE_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> DRAM_MFR_ID_CODE_LSB{552, DRAM_MFR_ID_CODE_START, DRAM_MFR_ID_CODE_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> DRAM_MFR_ID_CODE_MSB{553, DRAM_MFR_ID_CODE_START, DRAM_MFR_ID_CODE_LEN};
 };
 
 ///

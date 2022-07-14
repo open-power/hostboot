@@ -110,6 +110,8 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             // Blank for now - this commit is to merge in the skeleton for use
             return fapi2::FAPI2_RC_SUCCESS;
         }
+
+        // TODO: Zen:MST-1426: Add DDIMM module decodes in here, including ody_serial_number
 };
 
 } // ddr5

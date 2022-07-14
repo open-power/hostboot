@@ -131,7 +131,7 @@
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
-    <enum> 4G = 4, 8G = 8, 16G = 16 </enum>
+    <enum> 4G = 4, 8G = 8, 12G = 12, 16G = 16, 24G = 24, 32G = 32, 48G = 48, 64G = 64</enum>
     <writeable/>
     <array>2</array>
     <mssUnit>Gb</mssUnit>
@@ -186,7 +186,7 @@
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
-    <enum> NUM10 = 10</enum>
+    <enum> NUM10 = 10, NUM11 = 11</enum>
     <writeable/>
     <array>2</array>
     <mssAccessorName>dram_column_bits</mssAccessorName>
@@ -229,7 +229,8 @@
       D5 = 5,
       D6 = 6,
       D7 = 7,
-      D8 = 8
+      D8 = 8,
+      D16 = 16
     </enum>
     <writeable/>
     <array>2</array>
@@ -270,6 +271,24 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>prim_bus_width</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_CHANNELS_PER_DIMM</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      ARRAY[DIMM]
+      Number of channels per DIMM (bits 6~5).
+      Decodes Byte 235.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>
+      1_CHANNEL = 1, 2_CHANNELS = 2
+    </enum>
+    <writeable/>
+    <array>2</array>
+    <mssAccessorName>channels_per_dimm</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -596,7 +615,7 @@
       </description>
       <initToZero></initToZero>
       <valueType>uint16</valueType>
-      <enum>PLANAR = 0, H2 = 2, H4 = 4, H8 = 8</enum>
+      <enum>PLANAR = 0, H2 = 2, H4 = 4, H8 = 8, H16 = 16</enum>
       <array>2</array>
       <writeable/>
       <mssAccessorName>3ds_height</mssAccessorName>

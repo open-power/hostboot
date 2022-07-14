@@ -217,6 +217,7 @@ enum generic_ffdc_codes : uint16_t
     INIT_RANK_INFO = 0x103B,
     BIAS_PMIC_FROM_SPD = 0x103C,
     PMIC_ENABLE_SPD = 0x103D,
+    SET_CHANNELS_PER_DIMM = 0x103E,
     SET_DRAM_WIDTH = 0x1040,
 
     SET_SI_VREF_DRAM_WR = 0x1041,
