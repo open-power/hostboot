@@ -79,6 +79,11 @@ class instruction_t
         fapi2::buffer<uint64_t> arr1;
         // The port indexed rank on which to operate. If this is invalid, all ranks will be disabled
         uint64_t iv_port_rank;
+        // Different memory controllers handle the 16-bit idle and repeats separately
+        // As such, we store the idle and repeat command values here
+        // They will then be updated immediately prior to the arrays buffers being loaded into the registers
+        uint16_t iv_idles;
+        uint16_t iv_repeats;
         // We want to have a switch to update rank or not. A user might want to setup CS in some weird way
         // In that case, they don't want us "fixing" their CS values
         // We'll default the rank to be updated - we want to send out CS properly
@@ -121,10 +126,14 @@ class instruction_t
         instruction_t( const uint64_t i_port_rank = NO_CHIP_SELECT_ACTIVE,
                        const fapi2::buffer<uint64_t> i_arr0 = 0,
                        const fapi2::buffer<uint64_t> i_arr1 = 0,
+                       const uint16_t i_idles = 0,
+                       const uint16_t i_repeats = 0,
                        const bool i_update_rank = true):
             arr0(i_arr0),
             arr1(i_arr1),
             iv_port_rank(i_port_rank),
+            iv_idles(i_idles),
+            iv_repeats(i_repeats),
             iv_update_rank(i_update_rank)
         {
             // Skip setting up the rank if the user doesn't want us to
@@ -135,6 +144,23 @@ class instruction_t
                 set_chipselects_helper(0b11, 0b11, 0b00, false);
             }
         }
+
+        ///
+        /// @brief Updates the idles and repeats based upon the memory controller
+        /// @param[in] i_target the port target for this instruction - for error logging
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+        ///
+        fapi2::ReturnCode configure_idles_and_repeats( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target );
+
+        ///
+        /// @brief Grabs the idles from the CCS array
+        ///
+        void get_idles();
+
+        ///
+        /// @brief Grabs the repeats from the CCS array
+        ///
+        void get_repeats();
 
         ///
         /// @brief Updates the rank based upon the passed in rank configuration encoding
@@ -238,7 +264,9 @@ class instruction_t
             return arr0 == i_rhs.arr0 &&
                    arr1 == i_rhs.arr1 &&
                    iv_port_rank == i_rhs.iv_port_rank &&
-                   iv_update_rank == i_rhs.iv_update_rank;
+                   iv_update_rank == i_rhs.iv_update_rank &&
+                   iv_idles == i_rhs.iv_idles &&
+                   iv_repeats == i_rhs.iv_repeats;
         }
 };
 

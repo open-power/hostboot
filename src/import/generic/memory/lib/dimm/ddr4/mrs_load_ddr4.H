@@ -266,10 +266,8 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
     // Not sure if we can get tricky here and only delay after the b-side MR. The question is whether the delay
     // is needed/assumed by the register or is purely a DRAM mandated delay. We know we can't go wrong having
     // both delays but if we can ever confirm that we only need one we can fix this. BRS
-    l_inst_a_side.arr1.template insertFromRight<TT::ARR1_IDLES,
-                                TT::ARR1_IDLES_LEN>(i_delay_in_cycles);
-    l_inst_b_side.arr1.template insertFromRight<TT::ARR1_IDLES,
-                                TT::ARR1_IDLES_LEN>(i_delay_in_cycles);
+    l_inst_a_side.iv_idles = i_delay_in_cycles;
+    l_inst_b_side.iv_idles = i_delay_in_cycles;
 
     // Dump out the 'decoded' MRS and trace the CCS instructions.
     FAPI_TRY(decode_helper(i_data, i_port_rank, l_inst_a_side),
@@ -1500,9 +1498,7 @@ inline fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
         FAPI_TRY(MRS::dram_tccd_l(i_target, l_delay), "Failed to invoke accessor for tCCD_L");
     }
 
-    // Input type needs to be greater than IDLES_LEN, hence the cast
-    l_inst.arr1.template insertFromRight<TT::ARR1_IDLES,
-                         TT::ARR1_IDLES_LEN>(static_cast<uint64_t>(l_delay));
+    l_inst.iv_idles = l_delay;
 
     FAPI_INF("MPR Read CCS inst 0x%016llx:0x%016llx %s:rank %d, MPR location:%d, delay (in cycles) %d",
              uint64_t(l_inst.arr0), uint64_t(l_inst.arr1), mss::c_str(i_target), i_port_rank, i_mpr_loc, l_delay);
@@ -1534,9 +1530,7 @@ inline fapi2::ReturnCode precharge_all( const fapi2::Target<fapi2::TARGET_TYPE_D
     uint8_t l_delay = 0;
     FAPI_TRY( MRS::dram_trp(i_target, l_delay) );
 
-    // Input type needs to be greater than IDLES_LEN, hence the cast
-    l_inst.arr1.template insertFromRight<TT::ARR1_IDLES,
-                         TT::ARR1_IDLES_LEN>( static_cast<uint64_t>(l_delay));
+    l_inst.iv_idles = l_delay;
 
     FAPI_INF("precharge_all CCS inst 0x%016llx:0x%016llx %s:rank %d, delay (in cycles) %d",
              uint64_t(l_inst.arr0), uint64_t(l_inst.arr1), mss::c_str(i_target), i_port_rank, l_delay);

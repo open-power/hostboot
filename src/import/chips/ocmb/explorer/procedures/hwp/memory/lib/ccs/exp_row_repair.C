@@ -233,10 +233,8 @@ fapi2::ReturnCode add_sppr_guardkey( const mss::rank::info<mss::mc_type::EXPLORE
 
     // Insert the delay into arr1 (control reg)
     // setting to 10 in order to space each side command by 20 which give plenty of time for tMOD
-    l_inst_a_side.arr1.template insertFromRight<EXPLR_MCBIST_CCS_INST_ARR1_00_IDLES,
-                                EXPLR_MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(i_delay_in_cycles);
-    l_inst_b_side.arr1.template insertFromRight<EXPLR_MCBIST_CCS_INST_ARR1_00_IDLES,
-                                EXPLR_MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(i_delay_in_cycles);
+    l_inst_a_side.iv_idles = i_delay_in_cycles;
+    l_inst_b_side.iv_idles = i_delay_in_cycles;
 
     // Trace printout
     FAPI_INF("Instruction Value: 0x%016llx:0x%016llx rank %d a-side on dimm %s",

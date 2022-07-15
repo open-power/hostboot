@@ -563,6 +563,10 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
         FAPI_TRY(io_inst_iter->configure_rank(i_port, l_rank_configs[l_port_index]),
                  "Error configuring rank in ccs::execute on port %s", mss::c_str(i_port));
 
+        // Now, configure the idles and repeats within this instructino
+        FAPI_TRY(io_inst_iter->configure_idles_and_repeats(i_port),
+                 "Error configuring idles and repeats in ccs::execute on port %s", mss::c_str(i_port));
+
         io_inst_iter->get_cke_helper(l_current_cke);
 
         // Make sure this instruction leads to the next. Notice this limits this mechanism to pretty
@@ -574,8 +578,8 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
         // arr1 contains a specification of the delay and repeat after this instruction, as well
         // as a repeat. Total up the delays as we go so we know how long to wait before polling
         // the CCS engine for completion
-        io_inst_iter->arr1.template extractToRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(l_delay);
-        io_inst_iter->arr1.template extractToRight<TT::ARR1_REPEAT_CMD_CNT, TT::ARR1_REPEAT_CMD_CNT_LEN>(l_repeat);
+        l_delay = io_inst_iter->iv_idles;
+        l_repeat = io_inst_iter->iv_repeats;
 
         l_total_delay += l_delay * (l_repeat + 1);
 

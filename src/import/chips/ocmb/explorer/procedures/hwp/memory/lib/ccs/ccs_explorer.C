@@ -154,6 +154,42 @@ void instruction_t<mss::mc_type::EXPLORER>::set_cke_helper(const uint8_t i_cke)
 }
 
 ///
+/// @brief Updates the idles and repeats based upon the memory controller - Explorer specialization
+/// @param[in] i_target the port target for this instruction - for error logging
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode instruction_t<mss::mc_type::EXPLORER>::configure_idles_and_repeats(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target )
+{
+    using TT = ccsTraits<mss::mc_type::EXPLORER>;
+    arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(iv_idles);
+    arr1.template insertFromRight<TT::ARR1_REPEAT_CMD_CNT, TT::ARR1_REPEAT_CMD_CNT_LEN>(iv_repeats);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Grabs the idles from the CCS array - Explorer specialization
+///
+template<>
+void instruction_t<mss::mc_type::EXPLORER>::get_idles()
+{
+    using TT = ccsTraits<mss::mc_type::EXPLORER>;
+    arr1.template extractToRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(iv_idles);
+}
+
+///
+/// @brief Grabs the repeats from the CCS array - Explorer specialization
+///
+template<>
+void instruction_t<mss::mc_type::EXPLORER>::get_repeats()
+{
+    using TT = ccsTraits<mss::mc_type::EXPLORER>;
+    arr1.template extractToRight<TT::ARR1_REPEAT_CMD_CNT, TT::ARR1_REPEAT_CMD_CNT_LEN>(iv_repeats);
+}
+
+///
 /// @brief Configures the chip to properly execute CCS instructions - EXPLORER specialization
 /// @param[in] i_ports the vector of ports
 /// @return FAPI2_RC_SUCCSS iff ok

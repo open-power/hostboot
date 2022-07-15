@@ -93,6 +93,27 @@ void instruction_t<mss::mc_type::EXPLORER>::get_cke_helper(uint8_t& o_cke) const
 template<>
 void instruction_t<mss::mc_type::EXPLORER>::set_cke_helper(const uint8_t i_cke);
 
+///
+/// @brief Updates the idles and repeats based upon the memory controller - Explorer specialization
+/// @param[in] i_target the port target for this instruction - for error logging
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode instruction_t<mss::mc_type::EXPLORER>::configure_idles_and_repeats(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target );
+
+///
+/// @brief Grabs the idles from the CCS array - Explorer specialization
+///
+template<>
+void instruction_t<mss::mc_type::EXPLORER>::get_idles();
+
+///
+/// @brief Grabs the repeats from the CCS array - Explorer specialization
+///
+template<>
+void instruction_t<mss::mc_type::EXPLORER>::get_repeats();
+
 } // namespace ccs
 } // namespace mss
 

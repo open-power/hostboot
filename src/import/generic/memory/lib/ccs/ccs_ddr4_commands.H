@@ -249,16 +249,14 @@ inline instruction_t<MC> des_command(const uint16_t i_idle = 0)
     // CKE is high Note: P8 set all 4 of these high - not sure if that's correct. BRS
     rcd_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_HIGH);
 
-    // Insert idle
-    rcd_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
-
     // ACT is high no-care
     // RAS, CAS, WE no-care
 
     // Device Deslect wants CS_n always high (select nothing using rank NO_CHIP_SELECT_ACTIVE)
     return instruction_t<MC>( NO_CHIP_SELECT_ACTIVE,
                               rcd_boilerplate_arr0,
-                              rcd_boilerplate_arr1);
+                              rcd_boilerplate_arr1,
+                              i_idle);
 }
 
 ///
@@ -310,7 +308,7 @@ inline instruction_t<MC> odt_command(const uint8_t i_odt_values, const uint64_t 
 {
     auto l_odt_cmd = des_command<MC>();
     l_odt_cmd.arr0.template insertFromRight<TT::ARR0_DDR_ODT, TT::ARR0_DDR_ODT_LEN>(i_odt_values);
-    l_odt_cmd.arr1.template insertFromRight<TT::ARR1_REPEAT_CMD_CNT, TT::ARR1_REPEAT_CMD_CNT_LEN>(i_cycles);
+    l_odt_cmd.iv_repeats = i_cycles;
 
     return l_odt_cmd;
 }
@@ -327,10 +325,9 @@ template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 inline instruction_t<MC> nttm_read_command()
 {
     // get the des_command
-    auto l_command = des_command<MC>();
+    auto l_command = des_command<MC>(TT::NTTM_READ_DELAY);
     // set to CCS_INST_ARR1 register
     l_command.arr1.template setBit<TT::NTTM_MODE_FORCE_READ>();
-    l_command.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>(TT::NTTM_READ_DELAY);
 
     return l_command;
 }
@@ -351,12 +348,10 @@ inline instruction_t<MC> pde_command()
     fapi2::buffer<uint64_t> rcd_boilerplate_arr1;
 
     // Power Down Entry just like a DES, but we set CKE low
-    instruction_t<MC> l_inst = des_command<MC>();
+    instruction_t<MC> l_inst = des_command<MC>(TT::TIMING_TCPDED);
 
     // CKE is low. Note: P8 set all 4 of these low - not sure if that's correct.
     l_inst.arr0.template insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_LOW);
-
-    l_inst.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( TT::TIMING_TCPDED );
 
     return l_inst;
 }
@@ -393,10 +388,7 @@ inline instruction_t<MC> zqcl_command( const uint64_t i_port_rank,
     // ADDR10/AP is high
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_10>();
 
-    // Insert idle
-    l_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
-
-    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
 
 ///
@@ -582,13 +574,10 @@ inline instruction_t<MC> precharge_all_command( const uint64_t i_port_rank,
     // Setup ADDR10/AP high
     l_boilerplate_arr0.setBit<TT::ARR0_DDR_ADDRESS_10>();
 
-    // Insert idle
-    l_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
-
     // From DDR4 Spec table 17:
     // All other bits from the command truth table or 'V', for valid (1 or 0)
 
-    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
 
 ///
@@ -617,13 +606,10 @@ inline instruction_t<MC> self_refresh_entry_command( const uint64_t i_port_rank,
     .template clearBit<TT::ARR0_DDR_ADDRESS_15>()
     .template setBit<TT::ARR0_DDR_ADDRESS_14>();
 
-    // Insert idle
-    l_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
-
     // From DDR4 Spec table 17:
     // All other bits from the command truth table are 'V', for valid (1 or 0)
 
-    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
 
 ///
@@ -653,13 +639,10 @@ inline instruction_t<MC> self_refresh_exit_command( const uint64_t i_port_rank, 
     .template setBit<TT::ARR0_DDR_ADDRESS_15>()
     .template setBit<TT::ARR0_DDR_ADDRESS_14>();
 
-    // Insert idle
-    l_boilerplate_arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( i_idle );
-
     // From DDR4 Spec table 17:
     // All other bits from the command truth table are 'V', for valid (1 or 0)
 
-    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1);
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
 
 ///

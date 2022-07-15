@@ -336,8 +336,7 @@ fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIM
 
         // For changes to the control word setting [...] the controller needs to wait some time
         // the last control word access, before further access to the DRAM can take place.
-        l_inst.arr1.template insertFromRight<CCS::ARR1_IDLES,
-                             CCS::ARR1_IDLES_LEN>(i_data.iv_delay);
+        l_inst.iv_idles = i_data.iv_delay;
 
         FAPI_INF("F%d%s%02x%s value 0x%x (%d cycles) 0x%016llx:0x%016llx %s",
                  uint8_t(i_data.iv_func_space),

@@ -79,8 +79,7 @@ fapi2::ReturnCode process_inst(const mss::rank::info<MC>& i_rank_info,
                                std::vector< mss::ccs::instruction_t<MC> >& io_inst)
 {
     // Insert the delay into arr1 (conroll reg)
-    io_instruction.arr1.template insertFromRight < TT::ARR1_IDLES,
-                                 TT::ARR1_IDLES_LEN>(i_delay_in_cycles);
+    io_instruction.iv_idles = i_delay_in_cycles;
 
     // Add both to the CCS program
     io_inst.push_back(io_instruction);
@@ -332,8 +331,7 @@ void set_wr_repeats( const uint64_t i_rep,
                      mss::ccs::instruction_t<MC>& io_inst )
 {
     // set data
-    io_inst.arr1.template insertFromRight<TT::ARR1_REPEAT_CMD_CNT,
-                          TT::ARR1_REPEAT_CMD_CNT_LEN>(i_rep);
+    io_inst.iv_repeats = i_rep;
 }
 
 }// namespace ccs
