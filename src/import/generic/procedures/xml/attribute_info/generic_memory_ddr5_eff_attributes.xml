@@ -168,4 +168,20 @@
     <mssAccessorName>ddr5_wl_adj_end</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MEM_EFF_DDR5_PHY_VREF_RD</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Vref level to be used by the PHY during reads for DDR5.
+      The units of this field are a percentage of VDDQ according
+      to the following equation: Receiver Vref =
+      VDDQ*PhyVref[6:0]/128. For example to set Vref at 0.25*VDDQ,
+      set this field to 0x20.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_phy_vref_rd</mssAccessorName>
+  </attribute>
+
 </attributes>
