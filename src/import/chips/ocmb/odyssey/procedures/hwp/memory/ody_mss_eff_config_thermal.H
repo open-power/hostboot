@@ -40,7 +40,8 @@
 #include <fapi2.H>
 
 // Required for Cronus
-typedef fapi2::ReturnCode (*ody_mss_eff_config_thermal_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+typedef fapi2::ReturnCode (*ody_mss_eff_config_thermal_FP_t) (const
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >& i_targets);
 
 extern "C"
 {
