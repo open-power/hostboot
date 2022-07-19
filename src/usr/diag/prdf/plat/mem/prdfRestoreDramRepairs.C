@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,25 +116,6 @@ void __calloutDimm<TYPE_OCMB_CHIP>( errlHndl_t & io_errl,
 
     HWAS::DeconfigEnum deconfigPolicy = HWAS::DELAYED_DECONFIG;
     HWAS::GARD_ErrorType gardPolicy   = HWAS::GARD_Predictive;
-
-    #ifdef CONFIG_NVDIMM
-    // For the "RDR: All repairs used" case, If the DIMM is an NVDIMM, change
-    // the gard and deconfig options to no gard/deconfig and call
-    // nvdimmNotifyProtChange to indicate a save/restore may work.
-    if ( i_nvdimmNoGard )
-    {
-        deconfigPolicy = HWAS::NO_DECONFIG;
-        gardPolicy     = HWAS::GARD_NULL;
-
-        uint32_t l_rc = PlatServices::nvdimmNotifyProtChange( i_dimmTrgt,
-            NVDIMM::NVDIMM_RISKY_HW_ERROR );
-        if ( SUCCESS != l_rc )
-        {
-            PRDF_TRAC( PRDF_FUNC "nvdimmNotifyProtChange(0x%08x) "
-                       "failed.", PlatServices::getHuid(i_dimmTrgt) );
-        }
-    }
-    #endif
 
     io_errl->addHwCallout( i_dimmTrgt, HWAS::SRCI_PRIORITY_HIGH,
                            deconfigPolicy, gardPolicy );
@@ -311,10 +292,6 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
         for ( const auto & dimm : calloutList )
         {
             bool nvdimmNoGard = false;
-            #ifdef CONFIG_NVDIMM
-            if ( isNVDIMM(dimm.first) ) nvdimmNoGard = true;
-            #endif
-
             __calloutDimm<T>( errl, i_trgt, dimm.first, nvdimmNoGard );
         }
 

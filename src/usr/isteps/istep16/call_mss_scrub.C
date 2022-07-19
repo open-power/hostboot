@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,27 +84,6 @@ void* call_mss_scrub(void* const io_pArgs)
         {
             bool start = true; // initially true except for MP-IPL conditions.
 
-// QUESTION: Leave this block here?
-#ifdef CONFIG_NVDIMM
-            // During MP-IPLs, We only want to start background scrubbing on
-            // maintenance targets that have connected NVDIMMs.
-            if (sysTrgt->getAttr<ATTR_IS_MPIPL_HB>())
-            {
-                start = false; // Only true if there is an NVDIMM.
-
-                // Find at least one DIMM behind this MCBIST that is an NVDIMM.
-                TargetHandleList dimmList;
-                getChildAffinityTargets(dimmList, maintTrgt, CLASS_NA,TYPE_DIMM);
-                for (const auto& dimmTrgt : dimmList)
-                {
-                    start = isNVDIMM(dimmTrgt);
-                    if (start)
-                    {
-                        break;
-                    }
-                }
-            }
-#endif
             // Continue to the next target if we are unable to start background
             // scrubbing on this target.
             if (!start)

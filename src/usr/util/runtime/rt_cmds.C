@@ -44,9 +44,6 @@
 #include <scom/runtime/rt_scomif.H> // sendScomOpToFsp,
                                     // sendMultiScomReadToFsp,
                                     // switchToSbeScomAccess
-#ifdef CONFIG_NVDIMM
-#include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
-#endif
 #include <util/utillidmgr.H>
 #include <util/runtime/rt_fwreq_helper.H>
 
@@ -1166,7 +1163,6 @@ void cmd_switchToSbeScomAccess( char*& o_output, uint32_t i_huid)
     sprintf( o_output, "switchToSbeScomAccess executed");
 }
 
-
 /**
  * @brief Send a scom operation (read/write) to the FSP
  * @param[out] o_output     Output display buffer, memory allocated here
@@ -1284,50 +1280,6 @@ void cmd_sendMultiScomReadToFSP( char*                 &o_output,
         strcat( o_output, tmp_str);
     }
 }
-
-#ifdef CONFIG_NVDIMM
-void cmd_nvdimm_protection_msg( char* &o_output, uint32_t i_huid,
-                               uint32_t protection )
-{
-    errlHndl_t l_err = nullptr;
-    o_output = new char[500];
-    uint8_t l_notifyType = NVDIMM::NOT_PROTECTED;
-
-    TARGETING::Target* l_targ{};
-    l_targ = getTargetFromHUID(i_huid);
-    if (l_targ != NULL)
-    {
-      if (protection == 1)
-      {
-          l_notifyType = NVDIMM::PROTECTED;
-          l_err = notifyNvdimmProtectionChange(l_targ, NVDIMM::PROTECTED);
-      }
-      else if (protection == 2)
-      {
-          l_notifyType = NVDIMM::UNPROTECTED_BECAUSE_ERROR;
-          l_err = notifyNvdimmProtectionChange(l_targ, NVDIMM::UNPROTECTED_BECAUSE_ERROR);
-      }
-      else
-      {
-          l_err = notifyNvdimmProtectionChange(l_targ, NVDIMM::NOT_PROTECTED);
-      }
-      if (l_err)
-      {
-          sprintf( o_output, "Error on call to notifyNvdimmProtectionChange"
-                  "(0x%.8X, %d), rc=0x%.8X, plid=0x%.8X",
-                  i_huid, l_notifyType, ERRL_GETRC_SAFE(l_err), l_err->plid() );
-          errlCommit(l_err, UTIL_COMP_ID);
-          return;
-      }
-    }
-    else
-    {
-        sprintf( o_output, "cmd_nvdimm_protection_msg: HUID 0x%.8X not found",
-            i_huid );
-        return;
-    }
-}
-#endif
 
 /**
  * @brief  Execute an arbitrary command inside Hostboot Runtime
@@ -1636,22 +1588,6 @@ int hbrtCommand( int argc,
                     "ERROR: multiScomReadToFsp <huid> <scomAddrs>");
         }
     }
-#ifdef CONFIG_NVDIMM
-    else if( !strcmp( argv[0], "nvdimm_protection" ) )
-    {
-        if (argc >= 3)
-        {
-          uint32_t huid = strtou64(argv[1], NULL, 16);
-          uint32_t protection = strtou64( argv[2], NULL, 16);
-          cmd_nvdimm_protection_msg( *l_output, huid, protection );
-        }
-        else
-        {
-            *l_output = new char[100];
-            sprintf(*l_output, "ERROR: nvdimm_protection <huid> <0 or 1>");
-        }
-    }
-#endif
     else if( !strcmp( argv[0], "lidload" ) )
     {
         if (argc == 2)
@@ -1853,10 +1789,6 @@ int hbrtCommand( int argc,
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "multiScomReadToFsp <huid> <scomAddrs>\n");
         strcat( *l_output, l_tmpstr );
-#ifdef CONFIG_NVDIMM
-        sprintf( l_tmpstr, "nvdimm_protection <huid> <0 or 1>\n");
-        strcat( *l_output, l_tmpstr );
-#endif
         sprintf( l_tmpstr, "lidload <lid number>\n");
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "getcaps\n");

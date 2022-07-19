@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,10 +93,6 @@
 #include <runtime/interface.h>
 #include <runtime/hbrt_utilities.H>
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
-
-#ifdef CONFIG_NVDIMM
-#include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
-#endif
 
 #endif //__HOSTBOOT_RUNTIME
 
@@ -999,20 +995,6 @@ namespace HBPM
 
                 break;
             }
-
-#if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_NVDIMM)
-            // Notify PHYP that NVDIMMs are not protected from power off event
-            l_errl = NVDIMM::notifyNvdimmProtectionChange(i_target, NVDIMM::NOT_PROTECTED);
-            if (l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                  ERR_MRK"resetPMComplex: unable to notify PHYP that NVDIMM"
-                  " is not protected for HUID=0x%.8X", get_huid(i_target) );
-
-                l_errl->collectTrace("ISTEPS_TRACE",256);
-                errlCommit(l_errl, ISTEP_COMP_ID);
-            }
-#endif
 
             // Reset path
             FAPI_INVOKE_HWP(l_errl,

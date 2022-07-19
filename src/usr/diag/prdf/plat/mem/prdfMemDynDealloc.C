@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1539,22 +1539,6 @@ int32_t dimmList( TargetHandleList  & i_dimmList )
         sendPredDeallocRequest( ssAddr, seAddr );
         PRDF_TRAC( PRDF_FUNC "Predictive dealloc for start addr: 0x%016llx "
                    "end addr: 0x%016llx", ssAddr, seAddr );
-
-        #ifdef CONFIG_NVDIMM
-        // If the DIMM is an NVDIMM, send a message to PHYP that a save/restore
-        // may work.
-        if ( isNVDIMM(*it) )
-        {
-            uint32_t l_rc = PlatServices::nvdimmNotifyProtChange( *it,
-                    NVDIMM::NVDIMM_RISKY_HW_ERROR );
-            if ( SUCCESS != l_rc )
-            {
-                PRDF_TRAC( PRDF_FUNC "nvdimmNotifyProtChange(0x%08x) "
-                           "failed.", getHuid(*it) );
-                continue;
-            }
-        }
-        #endif
     }
 
     return o_rc;

@@ -709,11 +709,6 @@ public:
     void clearMruListGard();
 
     /**
-     * @brief Iterates the MRU list and clears gard for any NVDIMM targets.
-     */
-    void clearNvdimmMruListGard();
-
-    /**
      * @brief Iterates the MRU list and in the event there is a low priority
      *        OCMB callout with a higher priority level2 callout, adjusts the
      *        OCMB callout to GARD. This is used only in the situation where PRD

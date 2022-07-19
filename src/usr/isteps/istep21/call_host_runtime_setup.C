@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,10 +58,6 @@
 
 #ifdef CONFIG_UCD_FLASH_UPDATES
 #include "call_update_ucd_flash.H"
-#endif
-
-#ifdef CONFIG_NVDIMM
-#include "call_nvdimm_update.H"
 #endif
 
 #include <dump/dumpif.H>
@@ -323,13 +319,6 @@ void* call_host_runtime_setup (void *io_pArgs)
                         "Failed persistent_rwAttrRuntimeCheck()" );
             break;
         }
-
-#ifdef CONFIG_NVDIMM
-        // Update the NVDIMM controller code, if necessary
-        // Need to do this after LIDs are accessible
-        NVDIMM_UPDATE::call_nvdimm_update();
-#endif
-
 
 #ifdef CONFIG_START_OCC_DURING_BOOT
         bool l_activatePM = !TARGETING::is_phyp_load();

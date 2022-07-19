@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -465,19 +465,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                                  // Extended Module
             }
         },
-#ifdef CONFIG_NVDIMM
-        /**
-         * @brief   NVDIMM module
-         */
-        {
-            "libnvdimm.so" ,                                // taskname
-            NULL,                                           // no pointer to fn
-            {
-                INIT_TASK,                                  // task type
-                EXT_IMAGE,                                  // Extended Module
-            }
-        },
-#endif
 
         /**
          * @brief SMF module

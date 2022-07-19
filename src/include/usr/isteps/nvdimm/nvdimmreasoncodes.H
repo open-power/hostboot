@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -156,5 +156,369 @@ enum UserDetailsTypes
 };
 
 };  // end NVDIMM
+
+// SRC Graveyard
+// Contains error log descriptions for SRCs that were
+// removed from the code but we need to still provide
+// backward compatible parser logic for.
+/*@
+ *@errortype
+ *@reasoncode       NVDIMM_NOT_READY
+ *@severity         ERRORLOG_SEV_UNRECOVERABLE
+ *@moduleid         NVDIMM_CHECK_READY
+ *@userdata1[0:31]  Ret value from ready register
+ *@userdata1[32:63] Target Huid
+ *@userdata2        <UNUSED>
+ *@devdesc          Failed to read ready status or NVDIMM not ready
+ *                   for host access. (userdata1 != 0xA5)
+ *@custdesc         NVDIMM not ready
+ */
+
+/*@
+ *@errortype
+ *@reasoncode       NVDIMM_STATUS_TIMEOUT
+ *@severity         ERRORLOG_SEV_PREDICTIVE
+ *@moduleid         NVDIMM_POLL_STATUS
+ *@userdata1[0:31]  Related ops (0xff = NA)
+ *@userdata1[32:63] Target Huid
+ *@userdata2[0:31]  Polled value
+ *@userdata2[32:63] Timeout value
+ *@devdesc          Encountered timeout while performing operation on NVDIMM
+ *                   Refer to userdata1 for which operation it timed out.
+ *@custdesc         NVDIMM timed out
+ */
+
+/*@
+ *@errortype
+ *@reasoncode       NVDIMM_SET_ES_ERROR
+ *@severity         ERRORLOG_SEV_PREDICTIVE
+ *@moduleid         NVDIMM_SET_ES
+ *@userdata1[0:31]  Related ops (0xff = NA)
+ *@userdata1[32:63] Target Huid
+ *@userdata2        <UNUSED>
+ *@devdesc          Encountered error setting the energy source policy
+ *                   Make sure the connection between energy source and
+ *                   NVDIMM is intact
+ *@custdesc         NVDIMM encountered error setting the energy source policy
+ */
+
+/*@
+ *@errortype
+ *@reasoncode      NVDIMM_RESTORE_FAILED
+ *@severity        ERRORLOG_SEV_UNRECOVERABLE
+ *@moduleid        NVDIMM_RESTORE
+ *@userdata1       Target Huid
+ *@userdata2       <UNUSED>
+ *@devdesc         NVDIMM failed to restore data. This is likely
+ *                  due to failure entering self-refresh and/or
+ *                  restore timeout (Controller error)
+ *@custdesc        NVDIMM failed to restore data
+ */
+
+/*@
+ *@errortype
+ *@reasoncode       NVDIMM_ERASE_FAILED
+ *@severity         ERRORLOG_SEV_PREDICTIVE
+ *@moduleid         NVDIMM_CHECK_ERASE
+ *@userdata1[0:31]  Related ops (0xff = NA)
+ *@userdata1[32:63] Target Huid
+ *@userdata2        <UNUSED>
+ *@devdesc          Encountered error erasing previously stored data image
+ *                   on NVDIMM. Likely due to timeout and/or controller error
+ *@custdesc         NVDIMM error erasing data image
+ */
+
+/*@
+ *@errortype
+ *@reasoncode       NVDIMM_OPEN_PAGE_TIMEOUT
+ *@severity         ERRORLOG_SEV_UNRECOVERABLE
+ *@moduleid         NVDIMM_OPEN_PAGE
+ *@userdata1[0:31]  Related ops (0xff = NA)
+ *@userdata1[32:63] Target Huid
+ *@userdata2[0:31]  Polled value
+ *@userdata2[32:63] Timeout value
+ *@devdesc          NVDIMM OpenPage timed out, likely due to controller error
+ *@custdesc         Encountered error performing internal operaiton
+ *                   on NVDIMM
+ */
+
+/*@
+ *@errortype
+ *@moduleid         UPDATE_IMAGE
+ *@reasoncode       NVDIMM_OPERATION_IN_PROGRESS
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2        NVDIMM_CMD_STATUS0
+ *@devdesc          NV controller is busy so no update can run
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@moduleid         UPDATE_IMAGE
+ *@reasoncode       NVDIMM_CHECKSUM_ERROR
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2[0:15]  Host checksum calculated
+ *@userdata2[16:31] NV checksum returned
+ *@userdata2[32:47] size of data for checksum
+ *@devdesc          Checksum failure when transferring region
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@moduleid         UPDATE_IMAGE_DATA
+ *@reasoncode       NVDIMM_ZERO_TOTAL_REGIONS
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2[0:15]  Firmware image size
+ *@userdata2[16:31] region_size
+ *@devdesc          Firmware image size is not large enough
+ *                  (needs to be at least region_size)
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@moduleid         UPDATE_IMAGE_DATA
+ *@reasoncode       NVDIMM_CHECKSUM_ERROR
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2[0:15]  Host checksum calculated
+ *@userdata2[16:31] NV checksum returned
+ *@userdata2[32:47] size of data for checksum
+ *@userdata2[48:63] region
+ *@devdesc          Checksum failure when transferring region
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@moduleid         CHANGE_FW_UPDATE_MODE
+ *@reasoncode       NVDIMM_UPDATE_MODE_UNCHANGED
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2[0:7]   Mode setting
+ *@userdata2[8:15]  FIRMWARE_OPS_STATUS byte
+ *@devdesc          Firmware Update Mode not updated
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@moduleid         WAIT_FW_OPS_BLOCK_RECEIVED
+ *@reasoncode       NVDIMM_BLOCK_NOT_RECEIVED
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2[0:15]  Last FIRMWARE_OPS_STATUS read
+ *@userdata2[16:31] Timeout (msecs)
+ *@devdesc          Firmware Operation timed out waiting for
+ *                  data block transfer confirmation
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@moduleid         WAIT_FW_OPS_COMPLETE
+ *@reasoncode       NVDIMM_FW_OPS_IN_PROGRESS_TIMEOUT
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2[0:15]  Last NVDIMM_CMD_STATUS0 read
+ *@userdata2[16:31] Timeout (seconds)
+ *@devdesc          Firmware Operation timed out
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@moduleid         BYTE_REGION_BLOCK_TRANSFER
+ *@reasoncode       NVDIMM_DATA_SIZE_TOO_LARGE
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2[0:15]  Data size trying to transfer
+ *@userdata2[16:31] Maximum data size allowed
+ *@userdata2[32:47] Calculated blocks_per_region
+ *@userdata2[48-63] Maximum blocks_per_region allowed
+ *@devdesc          Data size too big to transfer in one command
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@moduleid         BYTE_REGION_BLOCK_TRANSFER
+ *@reasoncode       NVDIMM_DATA_SIZE_INVALID
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2[0:15]  Data size trying to transfer
+ *@userdata2[16:31] Calculated maximum data size transfer
+ *@userdata2[32:47] Blocks per region
+ *@userdata2[48-63] Bytes transferred per block
+ *@devdesc          Data size too big to transfer
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@moduleid         COMMIT_FW_REGION
+ *@reasoncode       NVDIMM_FW_OPS_NOT_SUCCESSFUL
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2        Operation command being verified
+ *@devdesc          Firmware Operation not successful
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@moduleid         CLEAR_FW_DATA_BLOCK
+ *@reasoncode       NVDIMM_FW_OPS_NOT_SUCCESSFUL
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2        Operation command being verified
+ *@devdesc          Firmware Operation not successful
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@moduleid         VALIDATE_FW_IMAGE
+ *@reasoncode       NVDIMM_FW_OPS_NOT_SUCCESSFUL
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2        Operation command being verified
+ *@devdesc          Firmware Operation not successful
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@reasoncode       NVDIMM_UNSUPPORTED_NVDIMM_TYPE
+ *@moduleid         NVDIMM_RUN_UPDATE
+ *@userdata1[0:31]  Unsupported Type
+ *@userdata1[32:63] NVDIMM Target Huid
+ *@userdata2[0:31]  Supported nvdimm type
+ *@userdata2[32:63] Other supported nvdimm type
+ *@devdesc          Unable to update an unsupported NVDIMM type
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
+ *@reasoncode       NVDIMM_UPDATE_NOT_SUPPORTED
+ *@moduleid         NVDIMM_IS_UPDATE_NEEDED
+ *@userdata1[0:31]  NVDIMM version level
+ *@userdata1[32:63] NVDIMM Target Huid
+ *@userdata2        NVDIMM type (manufacturer and product)
+ *@devdesc          Unable to update an NVDIMM at this code level
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ * @errortype
+ * @reasoncode       NVDIMM_OVERFLOW_ERROR
+ * @severity         ERRL_SEV_UNRECOVERABLE
+ * @moduleid         NVDIMM_PERFORM_OP
+ * @userdata1[0:31]  Offset
+ * @userdata1[32:63] Buffer Length
+ * @userdata2        Device Max Size (in KB)
+ * @devdesc          I2C Buffer Length + Offset > Max Size
+ * @custdesc         A problem occurred during the IPL of the
+ *                   system: I2C buffer offset is too large.
+ */
+
+/*@
+ * @errortype
+ * @reasoncode     NVDIMM_INVALID_OPERATION
+ * @severity       ERRL_SEV_UNRECOVERABLE
+ * @moduleid       NVDIMM_PERFORM_OP
+ * @userdata1      Operation Type
+ * @userdata2      Chip to Access
+ * @devdesc        Invalid operation type.
+ */
+
+/*@
+ * @errortype
+ * @reasoncode       NVDIMM_INVALID_OFFSET
+ * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+ * @moduleid         NVDIMM_CROSSESNVDIMMPAGEBOUNDARY
+ * @userdata1        Offset attempting to access
+ * @userdata2        Requested buffer length
+ * @devdesc          NVDIMM register offset out of bound
+ */
+
+/*@
+ * @errortype
+ * @reasoncode     NVDIMM_I2C_WRITE_PAGE_SIZE_ZERO
+ * @severity       ERRL_SEV_UNRECOVERABLE
+ * @moduleid       NVDIMM_WRITE
+ * @userdata1      HUID of target
+ * @devdesc        I2C write page size is zero.
+ */
+
+/*@
+ * @errortype
+ * @reasoncode       NVDIMM_INVALID_DEVICE_TYPE
+ * @severity         ERRL_SEV_UNRECOVERABLE
+ * @moduleid         NVDIMM_PREPAREADDRESS
+ * @userdata1        Address Size (aka Device Type)
+ * @devdesc          The Device type not supported (addrSize)
+ * @custdesc         A problem was detected during the IPL of
+ *                   the system: Device type not supported.
+ */
+
+/*@
+ * @errortype
+ * @reasoncode       NVDIMM_ATTR_INFO_NOT_FOUND
+ * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+ * @moduleid         NVDIMM_READATTRIBUTES
+ * @userdata1        HUID of target
+ * @devdesc          NVDIMM attribute was not found
+ */
+
+/*@
+ * @errortype
+ * @reasoncode       NVDIMM_INVALID_ADDR_OFFSET_SIZE
+ * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+ * @moduleid         NVDIMM_READATTRIBUTES
+ * @userdata1        HUID of target
+ * @userdata2        Address Offset Size
+ * @devdesc          Invalid address offset size
+ */
+
+/*@
+ * @errortype
+ * @reasoncode       NVDIMM_I2C_MASTER_PATH_ERROR
+ * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+ * @moduleid         NVDIMM_GETI2CMASTERTARGET
+ * @userdata1        HUID of target
+ * @userdata2        Compressed Entity Path
+ * @devdesc          I2C master entity path doesn't exist.
+ */
+
+/*@
+ * @errortype
+ * @reasoncode       NVDIMM_TARGET_NULL
+ * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+ * @moduleid         NVDIMM_GETI2CMASTERTARGET
+ * @userdata1        HUID of target
+ * @userdata2        Compressed Entity Path
+ * @devdesc          I2C master path target is null.
+ */
+
+/*@
+ * @errortype
+ * @severity          ERRL_SEV_PREDICTIVE
+ * @moduleid          NOTIFY_NVDIMM_PROTECTION_CHG
+ * @reasoncode        NVDIMM_NULL_FIRMWARE_REQUEST_PTR
+ * @userdata1         HUID of processor target
+ * @userdata2[0:31]   Requested protection state
+ * @userdata2[32:63]  Current armed state
+ * @devdesc           Unable to inform PHYP of NVDIMM protection
+ * @custdesc          Internal firmware error
+ */
+
+/*@
+ *@errortype
+ *@reasoncode       NVDIMM_ARM_FAILED
+ *@severity         ERRORLOG_SEV_PREDICTIVE
+ *@moduleid         NVDIMM_SET_ARM
+ *@userdata1[0:31]  Related ops (0xff = NA)
+ *@userdata1[32:63] Target Huid
+ *@userdata2        <UNUSED>
+ *@devdesc          Encountered error arming the catastrophic save
+ *                   trigger on NVDIMM. Make sure an energy source
+ *                   is connected to the NVDIMM and the ES policy
+ *                   is set properly
+ *@custdesc         NVDIMM encountered error arming save trigger
+ */
 
 #endif

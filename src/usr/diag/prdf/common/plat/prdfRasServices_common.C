@@ -976,14 +976,6 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
                 TargetHandle_t calloutTgt = thiscallout.getTarget();
                 TYPE tgtType = getTargetType( calloutTgt );
 
-                #ifdef CONFIG_NVDIMM
-                // If the MRU's gard policy is set to NO_GARD, skip it.
-                if ( NO_GARD == it->gardState && isNVDIMM(calloutTgt) )
-                {
-                    continue;
-                }
-                #endif
-
                 switch ( tgtType )
                 {
                     case TYPE_MC:   case TYPE_MI:  case TYPE_MCC:
@@ -1014,14 +1006,6 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
                 {
                     if ( TYPE_DIMM == getTargetType(*dimm) )
                     {
-                        #ifdef CONFIG_NVDIMM
-                        // If the MRU's gard policy is set to NO_GARD, skip it.
-                        if ( NO_GARD == it->gardState && isNVDIMM(*dimm) )
-                        {
-                            continue;
-                        }
-                        #endif
-
                         dimmList.push_back(*dimm);
                     }
                 }

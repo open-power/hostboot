@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -737,10 +737,6 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
     if ( allRepairsUsed )
     {
         io_sc.service_data->setServiceCall();
-
-        // We want to try to avoid garding NVDIMMs, so clear gard for them now.
-        io_sc.service_data->clearNvdimmMruListGard();
-
     }
 
     return o_rc;

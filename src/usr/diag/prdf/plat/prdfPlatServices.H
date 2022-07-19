@@ -53,10 +53,6 @@
 #include <targeting/common/targetservice.H>
 #include <gen_mss_mcbist_settings.H>
 
-#ifdef CONFIG_NVDIMM
-#include <isteps/nvdimm/nvdimm.H>
-#endif
-
 //------------------------------------------------------------------------------
 
 namespace PRDF
@@ -195,26 +191,6 @@ bool isRowRepairEnabled( ExtensibleChip * i_chip, const MemRank & i_rank );
  */
 template<TARGETING::TYPE T>
 uint32_t deployRowRepair( ExtensibleChip * i_chip, const MemRank & i_rank );
-
-#ifdef CONFIG_NVDIMM
-/**
- * @brief Notify PHYP/Hostboot of NVDIMM protection status
- *
- * @param i_target     Processor with NVDIMM
- * @param i_state      Protection state of NVDIMM
- */
-uint32_t nvdimmNotifyProtChange( TARGETING::TargetHandle_t i_target,
-    const NVDIMM::nvdimm_protection_t i_state );
-
-/**
- * @brief Add SMART-specific, page 4 NVDIMM registers to the FFDC
- *
- * @param i_nvdimm An nvdimm target
- * @param io_errl  Error log to add the FFDC to
- */
-void nvdimmAddFfdc( TARGETING::TargetHandle_t i_nvdimm, errlHndl_t & io_errl  );
-
-#endif
 
 /**
  * @brief  Whenever an OMI link has degraded, the bus must be reconfigured to

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2021
+# Contributors Listed Below - COPYRIGHT 2015,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -24,9 +24,6 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 MODULE = istep21
-
-#TODO RTC:214285
-#PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
@@ -49,8 +46,6 @@ OBJS += call_host_start_payload.o
 OBJS += p10_get_freq_compat_settings.o
 OBJS += p10_check_freq_compat.o
 OBJS += $(if $(CONFIG_UCD_FLASH_UPDATES),call_update_ucd_flash.o,)
-
-OBJS += $(if $(CONFIG_NVDIMM),call_nvdimm_update.o,)
 
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
 

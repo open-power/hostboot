@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2023
+# Contributors Listed Below - COPYRIGHT 2010,2024
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -350,8 +350,6 @@ RUNTIME_MODULES += expaccess_rt  # ~/src/usr/expaccess/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),prdf_rt) # ~/src/usr/diag/prdf/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),attn_rt) # ~/src/usr/diag/attn/runtime/
 RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)   # ~/src/usr/htmgt/runtime/
-#RUNTIME_MODULES += $(if $(CONFIG_NVDIMM),nvdimm_rt)
-#RUNTIME_MODULES += p9_cpuWkup
 RUNTIME_MODULES += hwplibs_rt    # ~src/usr/hwplibs/runtime/
 
 
