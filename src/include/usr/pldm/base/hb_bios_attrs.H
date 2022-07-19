@@ -60,6 +60,25 @@ namespace PLDM
     constexpr uint8_t LMB_SIZE_ENCODE_128MB = 0x3;
     constexpr uint8_t LMB_SIZE_ENCODE_256MB = 0x4;
 
+    /** @brief Retrieve the PROC_FAVOR_AGGRESSIVE_PREFETCH from the BMC BIOS
+    *
+    * @details This method retrieves PROC_FAVOR_AGGRESSIVE_PREFETCH from the BMC BIOS via the PLDM interface.
+    *          * A value of 0 means Disabled
+    *          * A value of 1 means Enabled
+    *
+    * @param[in,out] io_string_table  See brief at the top of this file.
+    * @param[in,out] io_attr_table    See brief at the top of this file.
+    * @param[out] o_proc_favor_aggressive_prefetch
+    *                                 If no error occurred then will contain the value
+    *                                 of PROC_FAVOR_AGGRESSIVE_PREFETCH from the BMC BIOS.
+    *                                 If error, then the parameter is left as is.
+    *
+    * @return Error if failed to retrieve the value, otherwise nullptr on success
+    */
+    errlHndl_t getProcFavorAggressivePrefetch( std::vector<uint8_t>& io_string_table,
+                                      std::vector<uint8_t>& io_attr_table,
+                                      TARGETING::ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH_type &o_proc_favor_aggressive_prefetch);
+
     /** @brief Retrieve the Lateral Cast Out (LCO) mode from the BMC BIOS
     *
     * @details This method retrieves the LCO mode from the BMC BIOS via the PLDM interface.

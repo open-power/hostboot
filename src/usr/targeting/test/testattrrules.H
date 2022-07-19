@@ -123,6 +123,7 @@ public:
           ATTR_FUSED_CORE_MODE_HB, //ok,unique data per instance
           ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE, //ok,explicitly synced between instances
           ATTR_PROC_LCO_MODE_DISABLE, //ok, set by HWSV or BIOS ATTR
+          ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH, //ok, set by HWSV or BIOS ATTR
 
           ATTR_FW_RELEASE_VERSION, //ok,BMC only
           ATTR_RAW_MTM, //ok,BMC only

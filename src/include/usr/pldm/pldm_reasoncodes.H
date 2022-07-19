@@ -113,6 +113,7 @@ namespace PLDM
         MOD_GET_PLDM_VERSION_REQ                     = 0x48, // handleGetPldmVersionRequest
         MOD_MAKE_PLDM_REQUEST_RUNTIME                = 0x49, // sendrecv_pldm_request (runtime)
         MOD_CHECK_FOR_HB_TERMINUS_LOCATOR            = 0x4A, // checkForHbTerminusLocator
+        MOD_GET_PROC_FAVOR_AGGRESSIVE_PREFETCH       = 0x4B, // getProcFavorAggressivePrefetch
     };
 
     enum PLDMReasonCode

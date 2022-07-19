@@ -51,6 +51,40 @@ using namespace TARGETING;
 namespace ISTEP
 {
 
+void parse_hb_proc_favor_aggressive_prefetch(std::vector<uint8_t>& io_string_table,
+                                    std::vector<uint8_t>& io_attr_table,
+                                    ISTEP_ERROR::IStepError & io_stepError)
+{
+    // Create a variable to hold the retrieved value from the BMC BIOS
+    ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH_type l_favor_aggressive_prefetch(0);
+
+    // Cache a handle to the system target
+    const auto l_sys = UTIL::assertGetToplevelTarget();
+
+    // Get attribute from the BMC BIOS
+    errlHndl_t l_errl = PLDM::getProcFavorAggressivePrefetch(io_string_table, io_attr_table, l_favor_aggressive_prefetch);
+
+    if ( unlikely(l_errl != nullptr) )
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                   "parse_hb_proc_favor_aggressive_prefetch(): An error occurred getting the "
+                   "PROC_FAVOR_AGGRESSIVE_PREFETCH from the BMC BIOS. Leaving the value for "
+                   "the system as is, with value %d (0 = disabled, 1 = enabled).",
+                   l_sys->getAttr<ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH>() );
+        l_errl->collectTrace("ISTEPS_TRACE",256);
+        errlCommit( l_errl, ISTEP_COMP_ID );
+    }
+    else
+    {
+        l_sys->setAttr<ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH>(l_favor_aggressive_prefetch);
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                   "parse_hb_proc_favor_agggressive_prefetch(): Set to %d "
+                   "(0 = disabled, 1 = enabled).",
+                   l_sys->getAttr<ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH>() );
+    }
+} // parse_hb_proc_favor_aggressive_prefetch
+
 void parse_hb_lateral_cast_out_mode(std::vector<uint8_t>& io_string_table,
                                     std::vector<uint8_t>& io_attr_table,
                                     ISTEP_ERROR::IStepError & io_stepError)

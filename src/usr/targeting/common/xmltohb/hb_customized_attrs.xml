@@ -865,7 +865,11 @@
         <id>ATTR_PROC_LCO_MODE_DISABLE</id>
         <writeable/>
     </attribute>
-
+    <attribute>
+        <id>ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH</id>
+        <no_export/>
+        <writeable/>
+    </attribute>
     <attribute>
         <id>ATTR_UNSECURE_HOMER_ADDRESS</id>
         <writeable/>
