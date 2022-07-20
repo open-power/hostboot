@@ -414,7 +414,7 @@ errlHndl_t copyArchitectedRegs(void)
         // Map processor dump area destination address to VA addresses
         procTableEntry = reinterpret_cast<procDumpAreaEntry *>(procTableAddr);
 
-        //In case of HYP Pre-Init failure case , HYP does not allocate minimum memory on all nodes so node specific 
+        //In case of HYP Pre-Init failure case , HYP does not allocate minimum memory on all nodes so node specific
         //allocated size will be zero.In that case skip copying of data to HDAT and return to the caller.
         if( !procTableEntry->HypInitSuccess && (procTableEntry->iv_nodeSrcArcRegDataTOC[nodeId].dataSize == 0) )
         {
@@ -479,7 +479,7 @@ errlHndl_t copyArchitectedRegs(void)
 
         uint64_t dstTempAddr = reinterpret_cast<uint64_t>(vMapDstAddrBase);
         procTableEntry->iv_nodeCapturedArcRegDataTOC[nodeId].dataSize = 0;
-        uint64_t allProcDataSize = 0; 
+        uint64_t allProcDataSize = 0;
         for (uint32_t procNum = 0; procNum < procChips.size(); procNum++)
         {
             // Base addresses w.r.t PROC positions. This is static here
@@ -722,8 +722,8 @@ errlHndl_t copyArchitectedRegs(void)
             //Populate the processor specific TOC in the HDAT PDA structure.
             uint32_t procId = procChips[procNum]->getAttr<TARGETING::ATTR_ORDINAL_ID>();
             //Update PROC specific data offset
-            procTableEntry->iv_procArcRegDataToc[procId].dataOffset = 
-               static_cast<uint64_t>(procTableEntry->iv_nodeSrcArcRegDataTOC[nodeId].dataOffset + 
+            procTableEntry->iv_procArcRegDataToc[procId].dataOffset =
+               static_cast<uint64_t>(procTableEntry->iv_nodeSrcArcRegDataTOC[nodeId].dataOffset +
                                      allProcDataSize);
             //Update the size information.
             procTableEntry->iv_procArcRegDataToc[procId].dataSize = (procTableEntry->threadRegSize * threadCount);
@@ -870,9 +870,15 @@ errlHndl_t checkValidDumpDestinationAddresses(const uint64_t i_curDestTableAddr,
 {
     errlHndl_t l_err = nullptr;
 
+    const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+    const auto l_maxNodesPerSys = l_sys->getAttr<TARGETING::ATTR_MAX_COMPUTE_NODES_PER_SYSTEM>();
+
+    TRACFCOMP(g_trac_dump, INFO_MRK"checkValidDumpDestinationAddresses(): "
+              "max nodes per system found = %d", l_maxNodesPerSys);
+
     // Verify that the destination table does not contain
     // both the reserved memory region and our memory footprint
-    for (uint64_t i = 0; i < MAX_NODES_PER_SYS; i++)
+    for (uint64_t i = 0; i < l_maxNodesPerSys; i++)
     {
         uint64_t lowerBound = cpu_spr_value(CPU_SPR_HRMOR) +
             i * MEMMAP::NODE_OFFSET;
