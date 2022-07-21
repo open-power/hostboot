@@ -185,6 +185,40 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MEM_EFF_DDR5_RTT_PARK_RD</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      RTT_PARK setting for read accesses. Bits[4:6] bitmap setting
+      for non-target ranks 3 to 0, respectively (bit 7 is not used). If
+      a bit is set, corresponding ranks use RTT_PARK during Reads to this
+      rank; otherwise, RTT_NOM_RD is used.
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_rtt_park_rd</mssAccessorName>
+    <array>2 4</array>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DDR5_RTT_PARK_WR</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      RTT_PARK setting for write accesses. Bits[4:6] bitmap setting
+      for non-target ranks 3 to 0, respectively (bit 7 is not used). If
+      a bit is set, corresponding ranks use RTT_PARK during Writes to this
+      rank; otherwise, RTT_NOM_RD is used.
+      ARRAY[DIMM][RANK]
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>ddr5_rtt_park_wr</mssAccessorName>
+    <array>2 4</array>
+  </attribute>
+
+  <attribute>
         <id>ATTR_MEM_DDR5_SPD_CL_SUPPORTED</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>

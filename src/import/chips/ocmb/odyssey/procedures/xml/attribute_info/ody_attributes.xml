@@ -53,8 +53,26 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_ODY_MSG_BLOCK_DATA_SOURCE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Switch from using attribute control in PHY message block
+            to using sim environment hard codes.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            USE_ATTRIBUTES = 0x00,
+            USE_HARDCODES  = 0x01
+        </enum>
+<!-- TODO:Zen:MST-1813 Change this to USE_ATTRIBUTES once initial sim testing is complete -->
+        <default>USE_HARDCODES</default>
+        <writeable/>
+        <mssAccessorName>ody_msg_block_data_source</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_ODY_DRAMINIT_VERBOSITY</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
             Controls the number of debug messages
             sent by the Odyssey PHY firmware based on verbosity field
@@ -701,6 +719,32 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_ODY_PHY_CA_DFE_TRAIN_OPTIONS</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            CA DFE training options (bit 0 on the left):
+            [6:7] NbTAPm1: Number of TAP (NbTAP) to train is NbTAPm1 + 1 (TAP are trained from 1 to NbTAP)
+            [4:5] BiasStepMode: delta to use when iterating TAP BiasStep from min to max
+                  0 = delta 1 for all trained TAP
+                  1 = delta 2 for all trained TAP
+                  2 = delta 5 for all trained TAP
+                  3 = delta 16 for TAP1, 10 for TAP2, 7 for TAP3 and 7 for TAP4 (useful for simulation)
+            [2:3] VStepSize: VrefCA step size (2^n)
+                  0 = step size of 1
+                  1 = step size of 2
+                  2 = step size of 4
+                  3 = step size of 8
+            [1] TrainDFEGain: when set, train the DFE Gain Offset
+            [0] DFEVrefEnable: when set, DFE Vref circuitry will be enabled during and after CA DFE training
+            Reserved1E2 in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0x00</default>
+        <writeable/>
+        <mssAccessorName>ca_dfe_train_options</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_ODY_PHY_TX2D_DFE_MISC</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
@@ -753,6 +797,40 @@
         <default>0x01</default>
         <writeable/>
         <mssAccessorName>tx2d_train_opt</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_PHY_DEBUG_TRAIN_OPTIONS</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Bit fields (bit 0 on the left):
+            [7]: SingleBurstPDA: when set, use the single
+            burst PDA ID enumeration method
+            [6]: DumpMR: when set, read and dump MR values
+            after read and write training stages (only when
+            HdtCtrl is less than or equal to 4)
+            [5]: KeepODT: when set, ODT_on / off values in
+            MR37, MR38 and MR39 are programmed as specified
+            in the message block during training
+            [4]: ResetIntWL: when set, MR2[7] is set to 0
+            during devinit
+            [3]: ForceDPAR: when set, DPAR signal is forced
+            to high during RCD initialization, or RCD
+            self-refresh exit
+            [2] RFU, must be 0
+            [1]: ExtendWLrangeUpperLimit: When set, avoid
+            backoff during WL search based on WrPre setting
+            to permit covering a larger maximal WL skew
+            [0]: tDqs2DqOverwrite (debug option only): when
+            set, non-zero VrefDq* field overwrite extracted
+            tDQS2DQ delay associated with the corresponding
+            nibble before when starting wr2D training
+            Reserved1E4 in the message block structure.
+        </description>
+        <valueType>uint8</valueType>
+        <default>0x00</default>
+        <writeable/>
+        <mssAccessorName>debug_train_options</mssAccessorName>
     </attribute>
 
     <attribute>

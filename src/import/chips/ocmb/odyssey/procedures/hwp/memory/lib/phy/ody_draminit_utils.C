@@ -400,12 +400,13 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Configures the DRAM training message block
+/// @brief Configures the DRAM training message block using sim environment hardcoded values
 /// @param[in] i_target the memory port on which to operate
 /// @param[out] o_struct the message block
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+fapi2::ReturnCode configure_dram_train_message_block_hardcodes(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_target,
         PMU_SMB_DDR5U_1D_t& o_struct)
 {
 
@@ -2271,6 +2272,117 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
 }
 
 ///
+/// @brief Configures the DRAM training message block using attributes
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_sim value of ATTR_IS_SIMULATION
+/// @param[out] o_struct the message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_sim,
+        PMU_SMB_DDR5U_1D_t& o_struct)
+{
+    fapi2::ReturnCode l_rc;
+
+    const msg_block_params l_msg_block_config(i_target, l_rc);
+    FAPI_TRY(l_rc, "Unable to instantiate msg_block_params for target " TARGTIDFORMAT, TARGTID);
+
+    FAPI_TRY(l_msg_block_config.setup_AdvTrainOpt(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MsgMisc(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_Pstate(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_PllBypassEn(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_DRAMFreq(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_RCW05_next(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_RCW06_next(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_RXEN_ADJ(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_RX2D_DFE_Misc(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_PhyVref(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_D5Misc(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_WL_ADJ(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_SequenceCtrl(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_HdtCtrl(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_PhyCfg(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_DFIMRLMargin(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_X16Present(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_UseBroadcastMR(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_D5Quickboot(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_DisabledDbyte(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_CATrainOpt(i_sim, o_struct));
+    FAPI_TRY(l_msg_block_config.setup_TX2D_DFE_Misc(i_sim, o_struct));
+    FAPI_TRY(l_msg_block_config.setup_RX2D_TrainOpt(i_sim, o_struct));
+    FAPI_TRY(l_msg_block_config.setup_TX2D_TrainOpt(i_sim, o_struct));
+    FAPI_TRY(l_msg_block_config.setup_Share2DVrefResult(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MRE_MIN_PULSE(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_DWL_MIN_PULSE(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_PhyConfigOverride(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_EnabledDQsChA(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_CsPresentChA(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_EnabledDQsChB(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_CsPresentChB(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR0(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR2(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR3(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR4(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR5(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR6(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR32_next(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR8(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR32_ORG_next(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR10(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR11(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR12(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR13(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR14(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR15(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR111(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR32(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR33(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR34(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR35(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR32_ORG(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR37(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR38(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR39(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR33_ORG(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR11_next(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR12_next(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR13_next(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR33_ORG_next(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR33_next(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR50(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR51(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR52(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_DFE_GainBias(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_ReservedF6(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_ReservedF7(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_ReservedF8(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_ReservedF9(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_BCW04_next(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_BCW05_next(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_WR_RD_RTT_PARK(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_Reserved1E2(i_sim, o_struct));
+    FAPI_TRY(l_msg_block_config.setup_Reserved1E3(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_Reserved1E4(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_Reserved1E5(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_Reserved1E6(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_Reserved1E7(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_WL_ADJ_START(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_WL_ADJ_END(o_struct));
+    // TODO: Zen:MST-1732 Fill in RCW fields in ody_draminit message block from attributes
+    FAPI_TRY(l_msg_block_config.setup_RCW(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_BCW(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_VrefDq(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR3_per_dram(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_VrefCS(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_VrefCA(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_DisabledDB(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_output_fields(o_struct));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Processes a streaming message from the mailbox protocol
 /// @param[in] i_target the target on which to operate
 /// @param[out] o_log_data hwp_data_ostream of streaming log
@@ -2345,8 +2457,21 @@ fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Targe
         i_target,
         PMU_SMB_DDR5U_1D_t& io_msg_block)
 {
+    uint8_t l_sim = 0;
+    uint8_t l_data_source = 0;
+
+    FAPI_TRY(mss::attr::get_is_simulation(l_sim));
+    FAPI_TRY(mss::attr::get_ody_msg_block_data_source(i_target, l_data_source));
+
     // Configure the message block structure
-    FAPI_TRY(configure_dram_train_message_block(i_target, io_msg_block));
+    if (l_data_source == fapi2::ENUM_ATTR_ODY_MSG_BLOCK_DATA_SOURCE_USE_HARDCODES)
+    {
+        FAPI_TRY(configure_dram_train_message_block_hardcodes(i_target, io_msg_block));
+    }
+    else
+    {
+        FAPI_TRY(configure_dram_train_message_block(i_target, l_sim, io_msg_block));
+    }
 
     // Load the message block on to snps phy
     FAPI_TRY(load_msg_block(i_target, io_msg_block));
