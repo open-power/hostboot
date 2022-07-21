@@ -2273,8 +2273,9 @@ fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
         for(const auto& l_port : l_port_targets)
         {
             FAPI_TRY(putScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(l_curr_addr), l_buffer));
-            l_curr_addr += 1;
         }
+
+        l_curr_addr += 1;
 
 #ifndef __PPE__
         {
