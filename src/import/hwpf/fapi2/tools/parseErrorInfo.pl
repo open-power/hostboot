@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -482,6 +482,7 @@ print ECFILE "#include <buffer.H>\n";
 print ECFILE "#include <variable_buffer.H>\n" if ( $arg_use_variable_buffers ne undef );
 print ECFILE "#include <hwp_error_info.H>\n";
 print ECFILE "#if !defined(FAPI2_NO_FFDC) && !defined(MINIMUM_FFDC)\n";
+print ECFILE "#include <utils.H>\n";
 print ECFILE "#include <ffdc_includes.H>\n";
 print ECFILE "#include <collect_reg_ffdc.H>\n";
 print ECFILE "#endif\n";
