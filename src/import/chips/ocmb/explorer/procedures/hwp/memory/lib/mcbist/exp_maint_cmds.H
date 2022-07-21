@@ -84,6 +84,15 @@ class steerTraits< mss::mc_type::EXPLORER, mss::steer::mux_type::READ_MUX >
         static const std::vector<uint32_t> muxregs_left;
         static const std::vector<uint32_t> muxregs_right;
 
+        ///
+        /// @brief Gets the correct target for the read mux registers off of a MEM_PORT target
+        /// @return Returns the MEM_PORT target
+        ///
+        static fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> get_target(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+        {
+            return i_target;
+        }
+
         // Mux Register and Spare value definitions
         enum mux_registers : size_t
         {
@@ -105,6 +114,15 @@ class steerTraits< mss::mc_type::EXPLORER, mss::steer::mux_type::WRITE_MUX >
 
         static const std::vector<uint32_t> muxregs_left;
         static const std::vector<uint32_t> muxregs_right;
+
+        ///
+        /// @brief Gets the correct target for the write mux registers off of a MEM_PORT target
+        /// @return Returns the MEM_PORT target
+        ///
+        static fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> get_target(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+        {
+            return i_target;
+        }
 
         // Mux Register and Spare value definitions
         enum mux_registers : size_t

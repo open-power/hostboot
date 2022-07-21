@@ -56,6 +56,27 @@ template<>
 class portTraits< mss::mc_type::ODYSSEY >
 {
     public:
+
+        ///
+        /// @brief Gets the correct target for the FARB registers off of a MEM_PORT target
+        /// @return Returns the OCMB_CHIP target
+        ///
+        static fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> get_farb_target(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+                i_target)
+        {
+            return mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+        }
+
+        ///
+        /// @brief Gets the correct target for the read reorder queue registers off of a MEM_PORT target
+        /// @return Returns the OCMB_CHIP target
+        ///
+        static fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> get_rrq_target(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+                i_target)
+        {
+            return mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+        }
+
         // MC_TYPE
         static constexpr fapi2::TargetType MC_TARGET_TYPE = fapi2::TARGET_TYPE_OCMB_CHIP;
 

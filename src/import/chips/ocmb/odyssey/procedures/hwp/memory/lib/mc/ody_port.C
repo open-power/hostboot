@@ -107,25 +107,19 @@ fapi2::ReturnCode configure_rrq<mss::mc_type::ODYSSEY>(
     const mss::states i_state)
 {
     using TT = portTraits<mss::mc_type::ODYSSEY>;
+    fapi2::buffer<uint64_t> l_data;
 
-    // Loops through all port targets, hitting all the registers
-    for( const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target) )
-    {
-        fapi2::buffer<uint64_t> l_data;
+    // Gets the reg
+    FAPI_TRY(mss::getScom(i_target, TT::ROQ_REG, l_data), "%s failed to getScom from ROQ0Q",
+             mss::c_str(i_target));
 
-        // Gets the reg
-        FAPI_TRY(mss::getScom(l_port, TT::ROQ_REG, l_data), "%s failed to getScom from ROQ0Q",
-                 mss::c_str(l_port));
+    // Sets the bit
+    l_data.writeBit<TT::ROQ_FIFO_MODE>(i_state == mss::states::ON);
 
-        // Sets the bit
-        l_data.writeBit<TT::ROQ_FIFO_MODE>(i_state == mss::states::ON);
+    // Sets the regs
+    FAPI_TRY(mss::putScom(i_target, TT::ROQ_REG, l_data), "%s failed to putScom to ROQ0Q",
+             mss::c_str(i_target));
 
-        // Sets the regs
-        FAPI_TRY(mss::putScom(l_port, TT::ROQ_REG, l_data), "%s failed to putScom to ROQ0Q",
-                 mss::c_str(l_port));
-    }
-
-    // In case we don't have any port's
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:

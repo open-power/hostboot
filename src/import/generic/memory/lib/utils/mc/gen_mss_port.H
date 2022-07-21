@@ -110,7 +110,11 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode read_farb0q( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::FARB0Q_REG, o_data) );
+    // This register sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY( mss::getScom(TT::get_farb_target(i_target), TT::FARB0Q_REG, o_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -129,7 +133,11 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode write_farb0q( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_TRY( mss::putScom(i_target, TT::FARB0Q_REG, i_data) );
+    // This register sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY( mss::putScom(TT::get_farb_target(i_target), TT::FARB0Q_REG, i_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -148,7 +156,11 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode read_farb6q( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::FARB6Q_REG, o_data) );
+    // This register sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY( mss::getScom(TT::get_farb_target(i_target), TT::FARB6Q_REG, o_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -167,7 +179,11 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode write_farb6q( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_TRY( mss::putScom(i_target, TT::FARB6Q_REG, i_data) );
+    // This register sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY( mss::putScom(TT::get_farb_target(i_target), TT::FARB6Q_REG, i_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -694,13 +710,19 @@ inline fapi2::ReturnCode configure_rrq(const fapi2::Target<T>& i_target, const m
         fapi2::buffer<uint64_t> l_data;
 
         // Gets the reg
-        FAPI_TRY(mss::getScom(l_port, TT::RRQ_REG, l_data), "%s failed to getScom from RRQ0Q", mss::c_str(l_port));
+        // This register sits on different chiplets depending upon the MC type in question
+        // In some MC's, it sits on the port level
+        // In other MC's, it sits on the chip level
+        // As such, a helper function is used to grab the appropriate target type to run this scom
+        FAPI_TRY(mss::getScom(TT::get_rrq_target(l_port), TT::RRQ_REG, l_data), "%s failed to getScom from RRQ0Q",
+                 mss::c_str(l_port));
 
         // Sets the bit
         l_data.writeBit<TT::RRQ_FIFO_MODE>(i_state == mss::states::ON);
 
         // Sets the regs
-        FAPI_TRY(mss::putScom(l_port, TT::RRQ_REG, l_data), "%s failed to putScom to RRQ0Q", mss::c_str(l_port));
+        FAPI_TRY(mss::putScom(TT::get_rrq_target(l_port), TT::RRQ_REG, l_data), "%s failed to putScom to RRQ0Q",
+                 mss::c_str(l_port));
     }
 
     // In case we don't have any port's

@@ -442,6 +442,11 @@ fapi2::ReturnCode get_steer_mux(
     uint8_t& o_dram_spare0_symbol,
     uint8_t& o_dram_spare1_symbol )
 {
+    // Depending upon the mux type, the register accessed in this function sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    const auto& l_scom_target = TT::get_target(i_target);
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::buffer<uint64_t> l_steer_mux;
     fapi2::buffer<uint64_t> l_data;
@@ -460,7 +465,7 @@ fapi2::ReturnCode get_steer_mux(
     FAPI_TRY( check::rank<MC>(i_target, i_port_rank) );
 
     // Read Steer Mux
-    FAPI_TRY(fapi2::getScom(i_target, TT::MUX_REGISTER, l_steer_mux));
+    FAPI_TRY(fapi2::getScom(l_scom_target, TT::MUX_REGISTER, l_steer_mux));
 
     // Get correct ranks spare data for spare0
     FAPI_TRY(l_steer_mux.extractToRight(l_dramSpare0Index,
@@ -513,6 +518,7 @@ fapi2::ReturnCode put_steer_mux(
     const steer_type i_steer_type,
     const uint8_t i_symbol )
 {
+    const auto& l_scom_target = TT::get_target(i_target);
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::buffer<uint64_t> l_steer_mux;
     fapi2::buffer<uint64_t> l_data;
@@ -535,7 +541,7 @@ fapi2::ReturnCode put_steer_mux(
     FAPI_TRY( check::symbol_or_clear<MC>(i_target, i_symbol) );
 
     // Read Write Mux
-    FAPI_TRY(fapi2::getScom(i_target, TT::MUX_REGISTER, l_steer_mux));
+    FAPI_TRY(fapi2::getScom(l_scom_target, TT::MUX_REGISTER, l_steer_mux));
 
     // Convert from i_symbol to Dram Spare Index
     FAPI_TRY( symbol_to_spare<MC>(i_symbol, l_dramSpareIndex) );
@@ -557,7 +563,7 @@ fapi2::ReturnCode put_steer_mux(
     }
 
     // Write to Write Mux
-    FAPI_TRY(fapi2::putScom(i_target, TT::MUX_REGISTER, l_steer_mux));
+    FAPI_TRY(fapi2::putScom(l_scom_target, TT::MUX_REGISTER, l_steer_mux));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -866,7 +872,11 @@ fapi2::ReturnCode unspare(const size_t i_spare,
     FAPI_TRY(mss::steer::check::mux_type(l_port,
                                          static_cast<mss::steer::steer_type>(i_spare)));
 
-    FAPI_TRY(fapi2::getScom(l_port, WM::MUX_REGISTER, l_steer_mux_wr));
+    // Depending upon the mux type, the register accessed in this function sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY(fapi2::getScom(WM::get_target(l_port), WM::MUX_REGISTER, l_steer_mux_wr));
     FAPI_TRY(fapi2::getScom(l_port, RM::MUX_REGISTER, l_steer_mux_rd));
 
     // Insert steer data into correct spare
@@ -893,7 +903,11 @@ fapi2::ReturnCode unspare(const size_t i_spare,
                                                 RM::SPARE_MUX_LEN));
     }
 
-    FAPI_TRY(fapi2::putScom(l_port, WM::MUX_REGISTER, l_steer_mux_wr));
+    // Depending upon the mux type, the register accessed in this function sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY(fapi2::putScom(WM::get_target(l_port), WM::MUX_REGISTER, l_steer_mux_wr));
     FAPI_TRY(fapi2::putScom(l_port, RM::MUX_REGISTER, l_steer_mux_rd));
 
 fapi_try_exit:
