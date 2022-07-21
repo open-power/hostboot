@@ -196,4 +196,40 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_ODY_DRAMINIT_INVALID_DDR5_DRAM_WR_PREAMBLE</rc>
+    <description>
+       An invalid value was detected in ATTR_DDR5_DRAM_WR_PREAMBLE
+    </description>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_DRAMINIT_ZERO_DRAM_WIDTH</rc>
+    <description>Saw a zero value in ATTR_MEM_EFF_DRAM_WIDTH.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>
