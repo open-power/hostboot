@@ -738,6 +738,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                      * @devdesc          IStep failed and HW deconfigured.
                      *                   Looped back to an earlier istep
                      *                   (Reconfigure loop).
+                     * @custdesc         System partially rebooting to recover from previous event.
                      */
                     errhdl = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -1782,6 +1783,7 @@ errlHndl_t IStepDispatcher::sendIstepCompleteMsg()
          * @userdata2        Current SubStep
          * @devdesc          Request to send Istep Complete msg to Fsp, but
          *                   no outstanding message from Fsp found.
+         * @custdesc         An internal firmware error occurred
          */
         const bool hbSwError = true;
         err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1999,6 +2001,7 @@ void IStepDispatcher::shutdownDuringIpl()
          * @userdata1        Current IStep
          * @userdata2        Current SubStep
          * @devdesc          Received shutdown request from FSP
+         * @custdesc         Host shutting down due to Service Processor request.
          */
         errlHndl_t err = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -2020,6 +2023,7 @@ void IStepDispatcher::shutdownDuringIpl()
          * @userdata2        Current SubStep
          * @devdesc          Received shutdown request due to deconfigure
          *                   outside of reconfig loop
+         * @custdesc         System shutting down due to previous error.
          */
         errlHndl_t err = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -2233,6 +2237,7 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
          * @userdata1   Istep Requested
          * @userdata2   Substep Requested
          * @devdesc     Istep messaged received by non-master node.
+         * @custdesc    An internal firmware error occurred
          */
         err = new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,

@@ -1934,6 +1934,7 @@ errlHndl_t PnorRP::fixECC (PNOR::SectionId i_section)
              *  @userdata2      0
              *
              *  @devdesc        Non ECC protected section is passed to fixECC
+             *  @custdesc       An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_INFORMATIONAL,

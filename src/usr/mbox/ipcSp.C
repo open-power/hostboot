@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -957,7 +957,7 @@ void IpcSp::msgHandler()
                  *
                  * @devdesc    IPC service provider received an unexpected
                  *             message.
-                 *
+                 * @custdesc   An internal firmware error occurred
                  */
                 err = new ERRORLOG::ErrlEntry
                     (

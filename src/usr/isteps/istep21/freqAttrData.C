@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -281,6 +281,7 @@ errlHndl_t sendFreqAttrData()
                      *
                      *  @devdesc        messages from other nodes have
                      *                  not returned in time
+                     *  @custdesc       An internal firmware error occurred
                      */
                     l_elog = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
@@ -375,6 +376,7 @@ errlHndl_t sendFreqAttrData()
                      *
                      *  @devdesc        Freq attribute DATA timer thread
                      *                  failed
+                     *  @custdesc       An internal firmware error occurred
                      */
                     l_elog = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,

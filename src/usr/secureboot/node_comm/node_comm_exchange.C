@@ -553,7 +553,7 @@ errlHndl_t nodeCommGenQuoteResponse(const QuoteRequestBlob* const i_request,
          * @moduleid   MOD_NC_GEN_QUOTE_RESPONSE
          * @userdata1  Primary TPM HUID
          * @devdesc    Could not fetch primary TPM's Log
-         * @custdes    Trustedboot failure
+         * @custdesc   Trustedboot failure
          */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          MOD_NC_GEN_QUOTE_RESPONSE,

@@ -337,6 +337,7 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                                  NVDIMM protection ||
                                  resource ID (Initiate gard)
              * @devdesc          The Firmware Request call failed
+             * @custdesc         An internal firmware error occurred
              */
             l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                   MOD_RT_FIRMWARE_REQUEST,
@@ -608,6 +609,7 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                                  SBE state ||
                                  NVDIMM protection state
              * @devdesc          The Firmware Request call failed
+             * @custdesc         An internal firmware error occurred
              */
             l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                   MOD_RT_FIRMWARE_REQUEST,
@@ -678,6 +680,7 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
           * @userdata2[0:31]  MBOX message type
           * @userdata2[32:63] Message Type
           * @devdesc          The Firmware Request call failed
+          * @custdesc         An internal firmware error occurred
           */
          l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                MOD_RT_FIRMWARE_REQUEST,

@@ -147,6 +147,7 @@ namespace RTPM
                     * @userdata1    HBRT PM Mode
                     * @userdata2    HUID
                     * @devdesc      PM load complex unknown mode
+                    * @custdesc     An internal firmware error occurred
                     */
                     l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_INFORMATIONAL,
@@ -359,6 +360,7 @@ namespace RTPM
                 * @userdata2        SCOM address
                 * @devdesc          HCODE scom update runtime
                 *                   interface not linked.
+                * @custdesc         An internal firmware error occurred
                 */
                 l_err= new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                      MOD_PM_RT_HCODE_UPDATE,
@@ -434,6 +436,7 @@ namespace RTPM
                    * @userdata1    Hypervisor return code
                    * @userdata2    SCOM address
                    * @devdesc      HCODE SCOM update error
+                   * @custdesc     An internal firmware error occurred
                    */
                    l_err = new ErrlEntry( ERRL_SEV_INFORMATIONAL,
                                           MOD_PM_RT_HCODE_UPDATE,

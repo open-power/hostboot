@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -333,6 +333,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
               *  @devdesc        Request given to load payload into mirrored
               *                  memory, but no mirrored memory exists at
               *                  that location.
+              *  @custdesc       An internal firmware error occurred
               */
             l_errl = new ERRORLOG::ErrlEntry
                 (
@@ -375,6 +376,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
           *  @userdata2      Top of memory
           *
           *  @devdesc        There is no functional memory
+          *  @custdesc       An internal firmware error occurred
           */
         l_errl = new ERRORLOG::ErrlEntry
           (
@@ -508,8 +510,9 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
           * @userdata1    rc from mm_extend
           * @userdata2    <UNUSED>
           *
-          *   @devdesc  Failure extending memory to after
-          *        exiting cache contained mode.
+          * @devdesc      Failure extending memory to after
+          *               exiting cache contained mode.
+          * @custdesc     An internal firmware error occurred
           */
         l_errl = new ERRORLOG::ErrlEntry
             (ERRORLOG::ERRL_SEV_UNRECOVERABLE,

@@ -224,6 +224,7 @@ errlHndl_t HdatMsVpd::addIMTAddrRange(hdatMsAddr_t &i_start,
          * @userdata4 none
          * @devdesc   Exceeded limit of number of mainstore VPD
          *            In Memory Trace array entries
+         * @custdesc  Firmware encountered an internal error.
          */
         hdatBldErrLog(l_errlHndl,
                   MOD_ADD_IMT_ADDR_RANGE,        // SRC module ID
@@ -267,6 +268,7 @@ errlHndl_t HdatMsVpd::addUEAddrRange(hdatMsAddr_t &i_addr)
          * @userdata4 none
          * @devdesc Exceeded limit of number of mainstore
          *          VPD In Memory Trace array entries
+         * @custdesc Firmware encountered an internal error.
          */
         hdatBldErrLog(l_errlHndl,
                   MOD_ADD_UE_ADDR_RANGE,     // SRC module ID
@@ -341,6 +343,7 @@ errlHndl_t HdatMsVpd::addRHBAddrRange(uint32_t i_dbob_id, hdatMsAddr_t &i_start,
          * @userdata4  none
          * @devdesc    Exceeded limit of number of mainstore VPD Reserved
          *             Hostboot array entries
+         * @custdesc   Firmware encountered an internal error.
          */
         hdatBldErrLog(l_errlHndl,
                   MOD_ADD_RES_HB_ADDR_RANGE,     // SRC module ID
@@ -456,6 +459,7 @@ errlHndl_t HdatMsVpd::addMsAreaFru(uint32_t i_resourceId,
          * @userdata3 ID number of mainstore area that wasn't added
          * @userdata4 none
          * @devdesc Exceeded limit of number of mainstore area array entries
+         * @custdesc Firmware encountered an internal error.
          */
         hdatBldErrLog(l_errlHndl,
                   MOD_ADD_MS_AREA_FRU,   // SRC module ID
@@ -750,6 +754,7 @@ errlHndl_t HdatMsVpd::addRamFru(uint16_t i_msAreaId,
          * @userdata3 none
          * @userdata4 none
          * @devdesc Attempted to add a RAM FRU for an invalid mainstore area
+         * @custdesc Firmware encountered an internal error.
         */
         HDAT_INF("Attempted to add a RAM FRU for an invalid mainstore area %d",
          i_msAreaId);

@@ -1109,6 +1109,7 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget* const i_primaryTpm,
              * @userdata1      Starting address of event that caused error
              * @userdata2      0
              * @devdesc        Unmarshal error while replaying tpm log.
+             * @custdesc       Internal firmware error with trusted boot implications
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         MOD_TPM_REPLAY_LOG,

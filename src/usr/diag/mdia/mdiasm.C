@@ -327,6 +327,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                          * @userData1        Associated memory diag work item
                          * @userData2        Target HUID
                          * @devdesc          A maint command SW timed out
+                         * @custdesc         An internal firmware error occurred
                          */
                         err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                             PROCESS_COMMAND_TIMEOUT,
@@ -368,6 +369,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                  * @userData1        Associated memory diag work item
                  * @userData2        Target HUID
                  * @devdesc          A maint command HW timed out
+                 * @custdesc         An internal firmware error occurred
                  */
                 errlHndl_t timeoutErrl = new ErrlEntry(
                         ERRL_SEV_UNRECOVERABLE,

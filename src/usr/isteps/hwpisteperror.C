@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,8 @@ void ISTEP_ERROR::IStepError::addErrorDetails( const errlHndl_t i_err )
          * @userdata2[32:64] iStep and SubStep that failed
          * @devdesc     IStep failed, Check other log(s) with the same PLID
          *              for reason.
+         * @custdesc    An error occurred during the IPL. Check previous logs
+         *              for details.
          *
          */
         iv_eHandle = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,

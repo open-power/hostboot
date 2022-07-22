@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,6 +82,7 @@ errlHndl_t sendScomOpToFsp(DeviceFW::OperationType i_opType,
           * @userdata1        target's HUID
           * @userdata2        SCOM address
           * @devdesc          Hypervisor firmware request interface not linked
+          * @custdesc         An internal firmware error occurred
           */
          l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          MOD_FSISCOM_RT_SEND_SCOM_TO_FSP,
@@ -119,6 +120,7 @@ errlHndl_t sendScomOpToFsp(DeviceFW::OperationType i_opType,
           * @userdata1        target's HUID
           * @userdata2        SCOM address
           * @devdesc          Unable to allocate firmware request messages
+          * @custdesc         An internal firmware error occurred
           */
          l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          MOD_FSISCOM_RT_SEND_SCOM_TO_FSP,
@@ -220,6 +222,7 @@ errlHndl_t sendMultiScomReadToFsp(TARGETING::TargetHandle_t i_target,
           * @userdata1        target's HUID
           * @userdata2        # of SCOMs to read
           * @devdesc          Hypervisor firmware request interface not linked
+          * @custdesc         An internal firmware error occurred
           */
          l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          MOD_FSISCOM_RT_SEND_MULTI_SCOM_TO_FSP,
@@ -269,6 +272,7 @@ errlHndl_t sendMultiScomReadToFsp(TARGETING::TargetHandle_t i_target,
           * @userdata1        target's HUID
           * @userdata2        # of SCOMs to read
           * @devdesc          Unable to allocate firmware request messages
+          * @custdesc         An internal firmware error occurred
           */
          l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                          MOD_FSISCOM_RT_SEND_MULTI_SCOM_TO_FSP,
@@ -334,6 +338,7 @@ errlHndl_t sendMultiScomReadToFsp(TARGETING::TargetHandle_t i_target,
           * @userdata2[00:31] # of SCOMs requested
           * @userdata2[32:63] # of SCOMs returned
           * @devdesc          Multi-SCOM read did not return correct SCOMs
+          * @custdesc         An internal firmware error occurred
           */
          l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
                                          MOD_FSISCOM_RT_SEND_MULTI_SCOM_TO_FSP,

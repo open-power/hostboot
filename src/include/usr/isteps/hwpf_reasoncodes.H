@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -170,14 +170,15 @@ namespace fapi
  * @reasoncode   RC_INVALID_ATTR_GET
  * @devdesc      InitFile HW Procedure requested an invalid attribute
  * @custdesc     A problem was detected during the IPL of the system:
- *               A hardware initialization procedure requested an invalid
- *               attribute.
+ *               A hardware initialization procedure encountered a firmware error.
  */
 /*@
  * @errortype
  * @moduleid     MOD_FAPI_RC_TO_ERRL
  * @reasoncode   RC_INVALID_CHIP_EC_FEATURE_GET
  * @devdesc      Request for EC features on an attribute without EC features
+ * @custdesc     A problem was detected during the IPL of the system:
+ *               A hardware initialization procedure encountered a firmware error.
  */
 
 #endif

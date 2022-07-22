@@ -373,13 +373,14 @@ void* call_host_activate_boot_core(void* const io_pArgs)
                       l_rc);
             /*@
              * @errortype
-             * @reasoncode  RC_FAIL_BOOT_CORE_WINKLE
              * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @reasoncode  RC_FAIL_BOOT_CORE_WINKLE
              * @moduleid    MOD_HOST_ACTIVATE_BOOT_CORE
              * @userdata1   return code from cpu_master_winkle
              * @userdata2   Fused core indicator
-             *
-             * @devdesc cpu_master_winkle returned an error
+             * @devdesc     cpu_master_winkle returned an error
+             * @custdesc    A problem occurred during the IPL
+             *              of the system.
              */
             l_errl =
                 new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,

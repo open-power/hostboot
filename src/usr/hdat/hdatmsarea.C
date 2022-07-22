@@ -360,6 +360,7 @@ errlHndl_t HdatMsArea::addAddrRange(hdatMsAddr_t &i_start,
          * @userdata4 none
          * @devdesc Failed trying to add another entry to a mainstore area
          *          address range array
+         * @custdesc An internal firmware error occurred
          */
         hdatBldErrLog(l_errlHndl,
                       MOD_ADD_ADDR_RANGE,         // SRC module ID
@@ -414,6 +415,7 @@ errlHndl_t HdatMsArea::addMmioAddrRange(hdatMsAddr_t &i_start,
          * @userdata4  none
          * @devdesc    Failed trying to add another entry to a mainstore area
          *             MMIO address range array
+         * @custdesc An internal firmware error occurred
          */
         hdatBldErrLog(l_errlHndl,
                       MOD_ADD_MMIO_ADDR_RANGE,             // SRC module ID
@@ -498,6 +500,7 @@ errlHndl_t HdatMsArea::addRam(HdatRam &i_ram)
          * @userdata4 none
          * @devdesc Failed trying to add another entry to a mainstore area
          *          RAM array
+         * @custdesc An internal firmware error occurred
          */
 
         HDAT_INF("Failed trying to add another entry to a mainstore area RAM "

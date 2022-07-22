@@ -192,6 +192,7 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
              * @userdata2[48:63]  0
              * @devdesc     invalid section passed to getSectionInfo  or
              *              section prohibited by secureboot
+             * @custdesc    An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_RTPNOR_GETSECTIONINFO,
@@ -223,6 +224,7 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
              * @reasoncode  PNOR::RC_SECTION_SIZE_IS_ZERO
              * @userdata1   PNOR::SectionId
              * @devdesc     section size is zero
+             * @custdesc    An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_RTPNOR_GETSECTIONINFO,
@@ -305,6 +307,7 @@ errlHndl_t RtPnor::flush (const PNOR::SectionId i_section,
              * @reasoncode  PNOR::RC_INVALID_SECTION
              * @userdata1   PNOR::SectionId
              * @devdesc     invalid section passed to flush
+             * @custdesc    An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_RTPNOR_FLUSH,
@@ -324,6 +327,7 @@ errlHndl_t RtPnor::flush (const PNOR::SectionId i_section,
              * @reasoncode  PNOR::RC_SECTION_SIZE_IS_ZERO
              * @userdata1   PNOR::SectionId
              * @devdesc     section size is zero
+             * @custdesc    An internal firmware error occurred
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_RTPNOR_FLUSH,
@@ -565,7 +569,7 @@ errlHndl_t RtPnor::readFromDeviceOpal(uint64_t i_procId,
                      * @userdata2[32:63]    actual amount read
                      * @devdesc             Amount of data read from pnor does
                      *                      not match expected size
-                     * @custdesc          Error accessing system firmware flash
+                     * @custdesc            Error accessing system firmware flash
                      */
                     l_err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -629,7 +633,9 @@ errlHndl_t RtPnor::readFromDeviceOpal(uint64_t i_procId,
                  * @errortype
                  * @moduleid    PNOR::MOD_RTPNOR_READFROMDEVICE
                  * @reasoncode  PNOR::RC_UNCORRECTABLE_ECC
-                 * @devdesc     UNCORRECTABLE ECC
+                 * @devdesc     UNCORRECTABLE ECC found when removing ECC from
+                 *              data retrieved from PNOR
+                 * @custdesc    Error detected in firmware storage area
                  */
                 //@todo Add PNOR callout RTC:116145
                 l_err = new ERRORLOG::ErrlEntry(

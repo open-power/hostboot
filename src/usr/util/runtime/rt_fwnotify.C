@@ -250,7 +250,8 @@ void sbeAttemptRecovery(uint64_t i_data)
              * @reasoncode   RC_SBE_RT_INVALID_HUID
              * @userdata1    HUID of target
              * @userdata2    HWSV error log id (plid)
-             * @devdesc      SBE error recovery attempt failed
+             * @devdesc      Invalid Target HUID in SBE Retry Data
+             * @custdesc     An internal firmware error occurred
              */
             l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
                                    MOD_RT_FIRMWARE_NOTIFY,
@@ -359,8 +360,8 @@ void sbeAttemptRecovery(uint64_t i_data)
              * @reasoncode   RC_FW_REQUEST_RT_NULL_PTR
              * @userdata1    HUID of target
              * @userdata2    HWSV error log id (plid)
-             * @devdesc      SBE error recovery attempt failed
-             * @custdec      Internal firmware error
+             * @devdesc      g_hostInterfaces->firmware_request not supported
+             * @custdesc     Internal firmware error
              */
             l_err = new ErrlEntry( ERRL_SEV_PREDICTIVE,
                                    MOD_RT_FIRMWARE_NOTIFY,
@@ -468,6 +469,7 @@ void attrSyncRequest( void * i_data)
         * @userdata2[0:31]  Data Size
         * @userdata2[32:63] Up to 4 bytes of attribute data
         * @devdesc      Attribute failed to update on HBRT side
+        * @custdesc     An internal firmware error occurred
         */
        errlHndl_t l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                         MOD_RT_ATTR_SYNC_REQUEST,
@@ -1439,6 +1441,7 @@ void firmware_notify( uint64_t i_len, void *i_data )
          * @userdata2[0:31]  MBOX message type (FSP msg)
          * @userdata2[32:63] Message Type (FSP msg)
          * @devdesc      Error with Firmware Notify request
+         * @custdesc     An internal firmware error occurred
          */
         l_err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                               MOD_RT_FIRMWARE_NOTIFY,

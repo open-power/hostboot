@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -254,6 +254,7 @@ errlHndl_t nvdimmPerformOp( DeviceFW::OperationType i_opType,
                  * @userdata1      Operation Type
                  * @userdata2      Chip to Access
                  * @devdesc        Invalid operation type.
+                 * @custdesc       An internal firmware error occurred
                  */
                 err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                NVDIMM_PERFORM_OP,
@@ -341,6 +342,7 @@ errlHndl_t crossesNvdimmPageBoundary( uint64_t i_offset,
              * @userdata1        Offset attempting to access
              * @userdata2        Requested buffer length
              * @devdesc          NVDIMM register offset out of bound
+             * @custdesc         An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -715,6 +717,7 @@ errlHndl_t nvdimmWrite ( TARGETING::Target * i_target,
              * @moduleid       NVDIMM_WRITE
              * @userdata1      HUID of target
              * @devdesc        I2C write page size is zero.
+             * @custdesc       An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            NVDIMM_WRITE,
@@ -1133,6 +1136,7 @@ errlHndl_t nvdimmReadAttributes ( TARGETING::Target * i_target,
              * @moduleid         NVDIMM_READATTRIBUTES
              * @userdata1        HUID of target
              * @devdesc          NVDIMM attribute was not found
+             * @custdesc         An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1196,6 +1200,7 @@ errlHndl_t nvdimmReadAttributes ( TARGETING::Target * i_target,
              * @userdata1        HUID of target
              * @userdata2        Address Offset Size
              * @devdesc          Invalid address offset size
+             * @custdesc         An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1292,6 +1297,7 @@ errlHndl_t nvdimmGetI2CMasterTarget ( TARGETING::Target * i_target,
              * @userdata1        HUID of target
              * @userdata2        Compressed Entity Path
              * @devdesc          I2C master entity path doesn't exist.
+             * @custdesc         An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry(
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -1345,6 +1351,7 @@ errlHndl_t nvdimmGetI2CMasterTarget ( TARGETING::Target * i_target,
              * @userdata1        HUID of target
              * @userdata2        Compressed Entity Path
              * @devdesc          I2C master path target is null.
+             * @custdesc         An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            NVDIMM_GETI2CMASTERTARGET,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -141,6 +141,7 @@ errlHndl_t MailboxSp::_init()
          * @reasoncode      MBOX::RC_KERNEL_REG_FAILED
          * @userdata1       rc from msq_q_register
          * @devdesc         Could not register mailbox message queue
+         * @custdesc        An internal firmware error occurred
          */
         err = new ERRORLOG::ErrlEntry
             (
@@ -526,6 +527,7 @@ void MailboxSp::msgHandler()
                              * @reasoncode      MBOX::RC_IPC_INVALID_DATA
                              * @userdata1       IPC Data Area MSG Queue ID
                              * @devdesc         IPC Message data corrupted
+                             * @custdesc        An internal firmware error occurred
                              */
                             err = new ERRORLOG::ErrlEntry
                                 (
@@ -581,6 +583,7 @@ void MailboxSp::msgHandler()
                  * @reasoncode      MBOX::RC_INVALID_MBOX_MSG_TYPE
                  * @userdata1       Message type
                  * @devdesc         Invalid message type sent to mailbox msgQ
+                 * @custdesc        An internal firmware error occurred
                  */
                 err = new ERRORLOG::ErrlEntry
                     (
@@ -646,6 +649,7 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
              * @userdata1       queue_id
              * @userdata2       message type
              * @devdesc         Mailbox is disabled, message dropped.
+             * @custdesc        An internal firmware error occurred
              */
             errlHndl_t err = new ERRORLOG::ErrlEntry
                 (
@@ -1021,6 +1025,7 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                      * @userdata1       rc from msg_send()
                      * @userdata2       msg queue id
                      * @devdesc         Invalid msg or msg queue
+                     * @custdesc        An internal firmware error occurred
                      *
                      */
                     err = new ERRORLOG::ErrlEntry
@@ -1085,6 +1090,7 @@ void MailboxSp::recv_msg(mbox_msg_t & i_mbox_msg)
                  * @userdata2       msg type
                  * @devdesc         Message from FSP. Message type is not
                  *                  within a valid range. Message dropped.
+                 * @custdesc        An internal firmware error occurred
                  */
                 err = new ERRORLOG::ErrlEntry
                     (
@@ -1179,6 +1185,7 @@ void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
          * @userdata2       msg type
          * @devdesc         Message from FSP. An invalid message queue ID
          *                  or mesage type was sent to the FSP.
+         * @custdesc        An internal firmware error occurred
          */
         errlHndl_t err = new ERRORLOG::ErrlEntry
             (
@@ -1242,6 +1249,7 @@ void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
          * @userdata1       msg type
          * @userdata2       msg queue id
          * @devdesc         Message from FSP to HB MBOX of an unknown type
+         * @custdesc        An internal firmware error occurred
          */
         errlHndl_t err = new ERRORLOG::ErrlEntry
             (
@@ -1335,6 +1343,7 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id,
              * @userdata1       returncode from msg_sendrecv()
              *
              * @devdesc         Invalid message or message queue
+             * @custdesc        An internal firmware error occurred
              *
              */
             err = new ERRORLOG::ErrlEntry
@@ -1361,6 +1370,7 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id,
          *
          * @devdesc         Host boot mailbox service is not available
          *                  at this time.
+         * @custdesc        An internal firmware error occurred
          *
          */
         err = new ERRORLOG::ErrlEntry
@@ -1623,6 +1633,7 @@ errlHndl_t MailboxSp::msgq_register(queue_id_t i_queue_id, msg_q_t i_msgQ)
              *
              * @devdesc         Message queue already registered with mailbox
              *                  using a different queue.
+             * @custdesc        An internal firmware error occurred
              *
              */
             err = new ERRORLOG::ErrlEntry
@@ -1749,6 +1760,7 @@ errlHndl_t MailboxSp::handleInterrupt()
                  * @userdata1       Status from MB device driver
                  * @devdesc         Mailbox Data Write attempted
                  *                  before ACK.
+                 * @custdesc        An internal firmware error occurred
                  *
                  */
                 err = new ERRORLOG::ErrlEntry
@@ -1778,6 +1790,7 @@ errlHndl_t MailboxSp::handleInterrupt()
                  * @userdata1       Status from MB device driver
                  * @devdesc         Mailbox Hardware detected
                  *                  parity error.
+                 * @custdesc        An internal firmware error occurred
                  */
                 err = new ERRORLOG::ErrlEntry
                     (
@@ -1808,6 +1821,7 @@ errlHndl_t MailboxSp::handleInterrupt()
                  * @userdata1       Status from MB device driver
                  * @devdesc         Retry failed. Bad status
                  *                  indicated in PIB status reg.
+                 * @custdesc        An internal firmware error occurred
                  *
                  */
                 err = new ERRORLOG::ErrlEntry
@@ -1935,6 +1949,7 @@ void MailboxSp::handleIPC(queue_id_t i_msg_q_id, msg_t * i_msg)
              * @userdata1       rc from msg_send()
              * @userdata2       msg queue id
              * @devdesc         Invalid msg or msg queue
+             * @custdesc        An internal firmware error occurred
              *
              */
             errlHndl_t err = new ERRORLOG::ErrlEntry
@@ -1975,6 +1990,7 @@ void MailboxSp::handleIPC(queue_id_t i_msg_q_id, msg_t * i_msg)
          * @userdata1       msg queue
          * @userdata2       msg type
          * @devdesc         Invalid message queue ID
+         * @custdesc        An internal firmware error occurred
          */
         errlHndl_t err = new ERRORLOG::ErrlEntry
             (
@@ -2034,6 +2050,7 @@ void MailboxSp::invalidMsgResponder(mbox_msg_t & i_mbox_msg)
      * @userdata2       msg type
      * @devdesc         Message from FSP. Message not claimed
      *                  by any Hostboot service.
+     * @custdesc        An internal firmware error occurred
      */
     errlHndl_t err = new ERRORLOG::ErrlEntry
         (
@@ -2318,6 +2335,7 @@ errlHndl_t MBOX::send(queue_id_t i_q_id, msg_t * i_msg,int i_node)
              * @userdata2       The node
              *
              * @devdesc         An invalid node was specified
+             * @custdesc        An internal firmware error occurred
              *
              */
             err = new ERRORLOG::ErrlEntry
@@ -2385,6 +2403,7 @@ errlHndl_t MBOX::msgq_register(queue_id_t i_queue_id, msg_q_t i_msgQ)
          * @userdata2       0
          *
          * @devdesc         Mailbox service is not available now.
+         * @custdesc        An internal firmware error occurred
          *
          */
         err = new ERRORLOG::ErrlEntry
