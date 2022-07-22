@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2021
+# Contributors Listed Below - COPYRIGHT 2012,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -55,11 +55,11 @@ XMLTOHB_TARGETS += ${XMLTOHB_HEADER_TARGETS}
 XMLTOHB_TARGETS += ${XMLTOHB_SOURCE_TARGETS}
 
 # Temp defaults XML sources used by updatetempsxml.pl script
-TEMP_DEFAULTS_XML       += tempdefaults.xml
-HB_TEMP_DEFAULTS_XML    += hb_temp_defaults.xml
-HB_CUSTOMIZED_ATTRS_XML    += hb_customized_attrs.xml
-HB_CUSTOMIZED_ATTRS_XML_FSP += hb_customized_attrs_fsp.xml
-HB_CUSTOMIZED_ATTRS_XML_OP += hb_customized_attrs_op.xml
+TEMP_DEFAULTS_XML            += tempdefaults.xml
+HB_TEMP_DEFAULTS_XML         += hb_temp_defaults.xml
+EKB_CUSTOMIZED_ATTRS_XML     += ekb_customized_attrs.xml
+EKB_CUSTOMIZED_ATTRS_XML_FSP += ekb_customized_attrs_fsp.xml
+EKB_CUSTOMIZED_ATTRS_XML_OP  += ekb_customized_attrs_op.xml
 
 ATTRIBUTE_SERVICE_H     += plat_attribute_service.H
 HB_PLAT_ATTR_SRVC_H     += hb_plat_attr_srvc.H

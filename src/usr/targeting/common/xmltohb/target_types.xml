@@ -527,7 +527,7 @@
     <!--
     @todo CQ:SW497175 Attribute FABRIC_PRESENT_GROUPS is now PROC_FABRIC_PRESENT_GROUPS
           Remove this attribute after HWSV is updated with new name
-          The new attribute is made writeable in hb_customized_attrs.xml
+          The new attribute is made writeable in ekb_customized_attrs.xml
     -->
     <attribute>
       <id>FABRIC_PRESENT_GROUPS</id>

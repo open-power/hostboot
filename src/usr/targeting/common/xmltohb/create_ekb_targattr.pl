@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -28,14 +28,15 @@
 #
 # Usage:
 #
-#    create_attr_ekb --fapi=fapiattrs.xml --attr=attribute_types_ekb.xml
+#    create_ekb_targattr.pl --fapi=fapiattrs.xml --attr=attribute_types_ekb.xml
 #                    --targ=target_types.xmltohb --default=hb_temp_default.xml
 #
 # Purpose:
 #
-#    This perl script processes the FAPI attributes in fapiattrs.xml, and the
-#    temporary defaults in hb_temp_defaults.xml and creates attribute_types_ekb.xml,
-#    and target_types_ekb.xml with equivalent Hostboot attribute definitions.
+#    This perl script processes the FAPI attributes (from the EKB repo) in
+#    fapiattrs.xml, and the temporary defaults in hb_temp_defaults.xml and
+#    creates attribute_types_ekb.xml, and target_types_ekb.xml with
+#    equivalent Hostboot attribute definitions.
 #
 
 use strict;
@@ -158,7 +159,7 @@ foreach my $FapiAttr ( @{$fapiXml->{attribute}} )
     $numattrs++;
 }
 
-print "...$numattrs attributes generated from EKB\n";
+print "...$numattrs fapi attributes generated from EKB\n";
 print $ATTR_FH "</attributes>";
 close $ATTR_FH;
 

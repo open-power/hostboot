@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/targeting/common/xmltohb/hb_customized_attrs_op.xml $ -->
+<!-- $Source: src/usr/targeting/common/xmltohb/ekb_customized_attrs_fsp.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
@@ -22,44 +22,39 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Includes customizations of FAPI attributes we only want to be done for eBMC configs-->
+
+<!-- =====================================================================
+     Contains the definition of temporary FW defaults for FAPI attributes
+     (from the EKB repo) needing a default for FSP Configs.
+     For more details see src/usr/targeting/common/xmltohb/ekb_customized_attrs.xml
+     ================================================================= -->
 
 <attributes>
-    <!-- On eBMC systems these attributes need to initialize to 0 and reset
-         back to 0 on reboot. This differs from FSP systems where the FSP
-         manages these attributes. -->
+    <!-- These are computed on the FSP so need to be non-volatile
+         for HB to consume them -->
     <attribute>
         <id>ATTR_PROC_FABRIC_PRESENT_GROUPS</id>
         <writeable/>
-        <persistency>volatile-zeroed</persistency>
+        <persistency>non-volatile</persistency>
     </attribute>
     <attribute>
         <id>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</id>
-        <persistency>volatile-zeroed</persistency>
+        <persistency>non-volatile</persistency>
     </attribute>
     <attribute>
         <id>ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ</id>
-        <persistency>volatile-zeroed</persistency>
+        <persistency>non-volatile</persistency>
     </attribute>
     <attribute>
         <id>ATTR_FREQ_CORE_CEILING_MHZ</id>
-        <persistency>volatile-zeroed</persistency>
+        <persistency>non-volatile</persistency>
     </attribute>
     <attribute>
         <id>ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ</id>
-        <persistency>volatile-zeroed</persistency>
+        <persistency>non-volatile</persistency>
     </attribute>
     <attribute>
         <id>ATTR_FREQ_CORE_FLOOR_MHZ</id>
-        <persistency>volatile-zeroed</persistency>
-    </attribute>
-    <attribute>
-        <id>ATTR_CP_REFCLOCK_SELECT</id>
-        <persistency>volatile-zeroed</persistency>
-    </attribute>
-    <!-- force LMB SIZE to be set via bios attributes on each IPL -->
-    <attribute>
-        <id>ATTR_LMB_SIZE</id>
-        <persistency>volatile</persistency>
+        <persistency>non-volatile</persistency>
     </attribute>
 </attributes>

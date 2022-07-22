@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/targeting/common/xmltohb/hb_customized_attrs.xml $    -->
+<!-- $Source: src/usr/targeting/common/xmltohb/ekb_customized_attrs.xml $   -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
@@ -26,8 +26,8 @@
 
 <!-- =====================================================================
      Contains the definition of temporary FW defaults for FAPI attributes
-     needing a default.  Each FAPI attribute should already be defined
-     elsewhere in an attribute XML file.
+     (from the EKB repo) needing a default.  Each FAPI attribute should already
+     be defined elsewhere in an attribute XML file.
      <attribute>
          <id>...</id>
          <default>...</default>
@@ -85,7 +85,7 @@
     <attribute>
         <id>ATTR_DYNAMIC_INIT_MODE_VEC</id>
         <no_export/>
-    <writeable/>
+        <writeable/>
     </attribute>
 
     <!-- Value will come from BIOS/ASM -->
@@ -328,11 +328,6 @@
     <attribute>
           <id>ATTR_STOP5_DISABLE</id>
           <default>0</default>
-     </attribute>
-
-    <attribute>
-          <id>ATTR_FAPI_POS</id>
-          <default>0xFFFFFFFF</default>
      </attribute>
 
     <attribute>
@@ -861,6 +856,7 @@
     <attribute>
         <id>ATTR_FAPI_POS</id>
         <no_export/>
+        <default>0xFFFFFFFF</default>
     </attribute>
     <attribute>
         <id>ATTR_PROC_PCIE_IOP_SWAP</id>

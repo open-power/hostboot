@@ -1,11 +1,11 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/usr/targeting/common/xmltohb/hb_customized_attrs_fsp.xml $ -->
+<!-- $Source: src/usr/targeting/common/xmltohb/ekb_customized_attrs_op.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2021                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2021,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,34 +22,44 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Includes customizations of FAPI attributes we only want to be done for FSP configs-->
+
+<!-- =====================================================================
+     Contains the definition of temporary FW defaults for FAPI attributes
+     (from the EKB repo) needing a default for eBMC Configs.
+     For more details see src/usr/targeting/common/xmltohb/ekb_customized_attrs.xml
+     ================================================================= -->
 
 <attributes>
-    <!-- These are computed on the FSP so need to be non-volatile
-         for HB to consume them -->
+    <!-- On eBMC systems these attributes need to initialize to 0 and reset
+         back to 0 on reboot. This differs from FSP systems where the FSP
+         manages these attributes. -->
     <attribute>
         <id>ATTR_PROC_FABRIC_PRESENT_GROUPS</id>
         <writeable/>
-        <persistency>non-volatile</persistency>
+        <persistency>volatile-zeroed</persistency>
     </attribute>
     <attribute>
         <id>ATTR_PROC_FABRIC_TOPOLOGY_ID_TABLE</id>
-        <persistency>non-volatile</persistency>
+        <persistency>volatile-zeroed</persistency>
     </attribute>
     <attribute>
         <id>ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ</id>
-        <persistency>non-volatile</persistency>
+        <persistency>volatile-zeroed</persistency>
     </attribute>
     <attribute>
         <id>ATTR_FREQ_CORE_CEILING_MHZ</id>
-        <persistency>non-volatile</persistency>
+        <persistency>volatile-zeroed</persistency>
     </attribute>
     <attribute>
         <id>ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ</id>
-        <persistency>non-volatile</persistency>
+        <persistency>volatile-zeroed</persistency>
     </attribute>
     <attribute>
         <id>ATTR_FREQ_CORE_FLOOR_MHZ</id>
-        <persistency>non-volatile</persistency>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+    <attribute>
+        <id>ATTR_CP_REFCLOCK_SELECT</id>
+        <persistency>volatile-zeroed</persistency>
     </attribute>
 </attributes>
