@@ -67,7 +67,7 @@ class throttle_traits<mss::mc_type::ODYSSEY>
         //                    may need updating once real power values are known
         // MIN_UTIL is  in c%
         // This will need to be overriden with an MRW attribute
-        static const uint64_t MIN_UTIL = 1000;
+        static const uint64_t MIN_UTIL = 500;
         // IDLE_UTIL is  in c%
         static const uint64_t IDLE_UTIL = 0;
         // Minimum throttle allowed for the port and or slot. If we set to 0, we brick the port
@@ -102,6 +102,8 @@ class throttle_traits<mss::mc_type::ODYSSEY>
             POWER_SLOPE = 0x152,
             POWER_INT = 0x94,
             POWER_LIMIT = 0x64,
+
+            SAFEMODE_THROTTLE_DEFAULT = 0x9C4,
         };
 
         enum
@@ -163,6 +165,10 @@ class throttle_traits<mss::mc_type::ODYSSEY>
             // Invalid for Odyssey but compile will fail without them
             DIMMS_PER_PORT_START = 0,
             DIMMS_PER_PORT_LEN = 1,
+
+            // Invalid for Odyssey but compile will fail without them
+            DIMM_COUNT_START = 22,
+            DIMM_COUNT_LEN = 4,
         };
 
         // Definition is in chip folder
