@@ -271,6 +271,7 @@ namespace HTMGT
                      * @userdata1[0:15]  OCC elog id
                      * @userdata1[16:31] Bad callout index
                      * @devdesc Bad FRU data received in OCC error log
+                     * @custdesc An internal firmware error occurred
                      */
                     bldErrLog(err2, HTMGT_MODID_PROCESS_ELOG,
                               HTMGT_RC_BAD_FRU_CALLOUTS,
@@ -303,6 +304,7 @@ namespace HTMGT
                          * @userdata1[0:15]  OCC elog id
                          * @userdata1[16:31] OCC severity
                          * @devdesc No FRU callouts found for non-info OCC Error
+                         * @custdesc An internal firmware error occurred
                          */
                         bldErrLog(err2, HTMGT_MODID_PROCESS_ELOG,
                                   HTMGT_RC_MISMATCHING_SEVERITY,
@@ -424,6 +426,7 @@ namespace HTMGT
              * @userdata3 OCC RC
              * @userdata4 OCC severity / actions
              * @devdesc Invalid OCC error log data
+             * @custdesc An internal firmware error occurred
              */
             bldErrLog(l_errlHndl, HTMGT_MODID_PROCESS_ELOG,
                       HTMGT_RC_INVALID_OCC_ELOG,

@@ -498,6 +498,7 @@ namespace HTMGT
                      * @userdata3 OCC state
                      * @userdata4 exception
                      * @devdesc Unable to send cmd to OCC exception
+                     * @custdesc An internal firmware error occurred
                      */
                     bldErrLog(l_errlHndl, HTMGT_MOD_SEND_OCC_CMD,
                               HTMGT_RC_OCC_EXCEPTION,
@@ -522,6 +523,7 @@ namespace HTMGT
                      * @userdata4 1
                      * @devdesc OCC comm not established or command is not
                      *          supported
+                     * @custdesc An internal firmware error occurred
                      */
                     bldErrLog(l_errlHndl, HTMGT_MOD_SEND_OCC_CMD,
                               HTMGT_RC_OCC_UNAVAILABLE,
@@ -541,6 +543,7 @@ namespace HTMGT
              * @moduleid HTMGT_MOD_SEND_OCC_CMD
              * @userdata1 OCC command type
              * @devdesc OCC is not valid
+             * @custdesc An internal firmware error occurred
              */
             bldErrLog(l_errlHndl, HTMGT_MOD_SEND_OCC_CMD,
                       HTMGT_RC_INTERNAL_ERROR,
@@ -855,6 +858,7 @@ namespace HTMGT
                      * @userdata2[0:31] OCC instance
                      * @userdata2[32:63] exception data
                      * @devdesc OCC reported exception
+                     * @custdesc An internal firmware error occurred
                      */
                     errlHndl_t l_excErr = NULL;
                     ERRORLOG::errlSeverity_t severity =
@@ -1030,6 +1034,7 @@ namespace HTMGT
              * @userdata2[0:15] response sequence number
              * @userdata2[16:31] response status
              * @devdesc Timeout waiting for OCC response
+             * @custdesc An internal firmware error occurred
              */
             bldErrLog(l_err, HTMGT_MOD_WRITE_OCC_CMD, HTMGT_RC_TIMEOUT,
                       iv_OccCmd.cmdType, l_read_timeout,
@@ -1183,6 +1188,7 @@ namespace HTMGT
                  * @userdata2[0:15] response buffer[4-7]
                  * @userdata2[16:31]
                  * @devdesc Invalid response length received
+                 * @custdesc An internal firmware error occurred
                  */
                 bldErrLog(l_errlHndl, HTMGT_MOD_PARSE_OCC_RSP,
                           HTMGT_RC_SEND_FAIL,
@@ -1266,6 +1272,7 @@ namespace HTMGT
                          * @userdata1[0:15] OCC command type
                          * @userdata1[16:31] response data length
                          * @devdesc Invalid length in OCC response
+                         * @custdesc An internal firmware error occurred
                          */
                         bldErrLog(l_errlHndl, HTMGT_MOD_CHECK_OCC_RSP,
                                   HTMGT_RC_OCC_CMD_FAIL,
@@ -1347,6 +1354,7 @@ namespace HTMGT
              * @userdata3 checksum
              * @userdata4 calculated checksum
              * @devdesc OCC response had checksum failure
+             * @custdesc An internal firmware error occurred
              */
             bldErrLog(l_errlHndl, HTMGT_MOD_CHECK_OCC_RSP,
                       HTMGT_RC_CHECKSUM_FAIL,

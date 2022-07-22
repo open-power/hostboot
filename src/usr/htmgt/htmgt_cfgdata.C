@@ -292,6 +292,7 @@ namespace HTMGT
              * @moduleid  HTMGT_MOD_SEND_OCC_CONFIG
              * @userdata1 requested config format
              * @devdesc Failed to send all required config data
+             * @custdesc An internal firmware error occurred
              */
             bldErrLog(l_err,
                       HTMGT_MOD_SEND_OCC_CONFIG,
@@ -386,6 +387,7 @@ uint8_t convert_temp_type(const uint8_t i_sensor_type)
                  * @userdata1 USAGE type
                  * @userdata2 0
                  * @devdesc Unsupported MEM_EFF_THERM_SENSOR type
+                 * @custdesc An internal firmware error occurred
                  */
                 errlHndl_t l_err = NULL;
                 bldErrLog(l_err, HTMGT_MOD_CONVERT_TEMP_TYPE,
@@ -509,6 +511,7 @@ uint8_t ocmbInit(Occ *i_occ,
                          * @userdata2 OCMB HUID
                          * @devdesc Unsupported
                          *             ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE type
+                         * @custdesc An internal firmware error occurred
                          */
                         errlHndl_t l_err = NULL;
                         bldErrLog(l_err, HTMGT_MOD_OCMB_INIT,
@@ -803,6 +806,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
                      * @reasoncode HTMGT_RC_ATTRIBUTE_ERROR
                      * @userdata1 ocmb instance
                      * @devdesc Failed to read throttle settings
+                     * @custdesc An internal firmware error occurred
                      */
                     errlHndl_t l_err = NULL;
                     bldErrLog(l_err, HTMGT_MOD_MEMTHROTTLE,
@@ -1536,6 +1540,7 @@ void getApssMessageData(uint8_t* o_data,
          * @reasoncode HTMGT_RC_ATTRIBUTE_ERROR
          * @userdata1 ocmb instance
          * @devdesc Invalid APSS config data was found
+         * @custdesc An internal firmware error occurred
          */
         errlHndl_t l_err = NULL;
         bldErrLog(l_err, HTMGT_MOD_APSS_DATA,

@@ -129,6 +129,7 @@ namespace HTMGT
                                      * @reasoncode HTMGT_RC_OCC_UNEXPECTED_STATE
                                      * @moduleid  HTMGT_MOD_LOAD_START_STATUS
                                      * @devdesc OCC needs reset after initial poll
+                                     * @custdesc An internal firmware error occurred
                                      */
                                     bldErrLog(l_err,
                                               HTMGT_MOD_LOAD_START_STATUS,
@@ -197,6 +198,7 @@ namespace HTMGT
                          * @moduleid        HTMGT_MOD_LOAD_START_STATUS
                          * @userdata1       number of OCCs
                          * @devdesc         No OCC master was found
+                         * @custdesc        An internal firmware error occurred
                          */
                         bldErrLog(l_err, HTMGT_MOD_LOAD_START_STATUS,
                                   HTMGT_RC_OCC_MASTER_NOT_FOUND,
@@ -221,6 +223,7 @@ namespace HTMGT
                  * @moduleid        HTMGT_MOD_LOAD_START_STATUS
                  * @userdata1       Failing OCC HUID
                  * @devdesc         OCCs were not loaded/started successfully
+                 * @custdesc        An internal firmware error occurred
                  */
                 bldErrLog(l_err, HTMGT_MOD_LOAD_START_STATUS,
                           HTMGT_RC_OCC_START_FAIL,
@@ -453,6 +456,7 @@ namespace HTMGT
              * @moduleid        HTMGT_MOD_PROCESS_OCC_RESET
              * @userdata1       Processor HUID
              * @devdesc         No OCC target found for proc Target,
+             * @custdesc        An internal firmware error occurred
              */
             bldErrLog(errl,
                       HTMGT_MOD_PROCESS_OCC_RESET,
@@ -563,6 +567,8 @@ namespace HTMGT
              * @userdata2[0:31]  safeMode flag
              * @userdata2[32:63] OCC instance
              * @devdesc         Operation not allowed, system is in safe mode
+             * @custdesc        A failure has occurred that is leaving the system in Safe Mode.
+             *                  Performance will be impacted until the error has been resolved.
              */
             bldErrLog(l_err,
                       HTMGT_MOD_ENABLE_OCC_ACTUATION,
@@ -730,6 +736,7 @@ namespace HTMGT
                                  * @userdata1    command data[0-7]
                                  * @userdata2    command data length
                                  * @devdesc      Specified OCC not available
+                                 * @custdesc     An internal firmware error occurred
                                  */
                                 failingSrc = HTMGT_RC_OCC_UNAVAILABLE;
                             }
@@ -848,6 +855,7 @@ namespace HTMGT
                                  * @userdata1    command data[0-7]
                                  * @userdata2    command data length
                                  * @devdesc      Invalid pass thru command data
+                                 * @custdesc     An internal firmware error occurred
                                  */
                                 failingSrc = HTMGT_RC_INVALID_PARAMETER;
                             }
@@ -979,6 +987,7 @@ namespace HTMGT
                          * @userdata1    command data[0-7]
                          * @userdata2    command data length
                          * @devdesc      SET_MODE not supported (use BMC)
+                         * @custdesc     An internal firmware error occurred
                          */
                         failingSrc = HTMGT_RC_NO_SUPPORT;
                         break;
@@ -1000,6 +1009,7 @@ namespace HTMGT
                          * @userdata1    command data[0-7]
                          * @userdata2    command data length
                          * @devdesc      Invalid pass thru command
+                         * @custdesc     An internal firmware error occurred
                          */
                         failingSrc = HTMGT_RC_INVALID_DATA;
                         break;

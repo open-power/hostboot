@@ -203,6 +203,7 @@ namespace HTMGT
                          * @moduleid  HTMGT_MOD_OCC_POLL
                          * @userdata1 OCC instance
                          * @devdesc Invalid POLL response length
+                         * @custdesc An internal firmware error occurred
                          */
                         bldErrLog(err,
                                   HTMGT_MOD_OCC_POLL,
@@ -339,6 +340,7 @@ namespace HTMGT
                      * @userdata2[0:15] duplicate OCC instance
                      * @userdata2[16:31] response status byte
                      * @devdesc Invalid OCC present data in POLL response
+                     * @custdesc An internal firmware error occurred
                      */
                     bldErrLog(l_err, HTMGT_MOD_OCC_POLL,
                               HTMGT_RC_DUPLICATE_CHIP_ID,
@@ -379,6 +381,7 @@ namespace HTMGT
                      * @userdata2[0:15] expected role
                      * @userdata2[16:31] response status byte
                      * @devdesc Invalid role is POLL response
+                     * @custdesc An internal firmware error occurred
                      */
                     bldErrLog(l_err, HTMGT_MOD_OCC_POLL,
                               HTMGT_RC_INVALID_ROLE,

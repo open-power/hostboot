@@ -191,6 +191,8 @@ namespace HTMGT
                          * @devdesc Homer pointer is nullptr, unable to
                          *          communicate with the OCCs.
                          *          Leaving system in safe mode.
+                         * @custdesc A failure has occurred that is leaving the system in Safe Mode.
+                         *           Performance will be impacted until the error has been resolved.
                          */
                         bldErrLog(err,
                                   HTMGT_MOD_BUILD_OCCS,
@@ -241,6 +243,7 @@ namespace HTMGT
                  * @moduleid        HTMGT_MOD_BUILD_OCCS
                  * @userdata1       functional processor count
                  * @devdesc         No functional OCCs were found
+                 * @custdesc        An internal firmware error occurred
                  */
                 bldErrLog(err, HTMGT_MOD_BUILD_OCCS,
                           HTMGT_RC_OCC_UNAVAILABLE,
@@ -449,6 +452,7 @@ namespace HTMGT
                      * @moduleid HTMGT_MOD_OCCMGR_SET_STATE
                      * @reasoncode HTMGT_RC_INTERNAL_ERROR
                      * @devdesc Unable to set state of master OCC
+                     * @custdesc An internal firmware error occurred
                      */
                     bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_STATE,
                               HTMGT_RC_INTERNAL_ERROR,
@@ -488,6 +492,7 @@ namespace HTMGT
                              * @userdata1[32-63] OCC state
                              * @userdata2 OCC instance
                              * @devdesc OCC did not change to requested state
+                             * @custdesc An internal firmware error occurred
                              */
                             bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_STATE,
                                       HTMGT_RC_OCC_UNEXPECTED_STATE,
@@ -543,6 +548,7 @@ namespace HTMGT
              * @reasoncode HTMGT_RC_INVALID_DATA
              * @userdata1 requested state
              * @devdesc Invalid OCC state requested
+             * @custdesc An internal firmware error occurred
              */
             bldErrLog(l_err, HTMGT_MOD_OCCMGR_SET_STATE,
                       HTMGT_RC_INVALID_DATA,
@@ -586,6 +592,7 @@ namespace HTMGT
                  * @userdata1  reset reason | safe src
                  * @userdata2  safe instance | huid
                  * @devdesc OCCs will be reset
+                 * @custdesc An internal firmware error occurred
                  */
                 uint32_t l_huid = 0;
                 if (i_failedOccTarget)
@@ -781,6 +788,8 @@ namespace HTMGT
                      * @userdata2  OCC instance
                      * @devdesc OCC reset threshold reached.
                      *          Leaving OCCs in reset state
+                     * @custdesc A failure has occurred that is leaving the system in Safe Mode.
+                     *           Performance will be impacted until the error has been resolved.
                      */
                     bldErrLog(err,
                               HTMGT_MOD_OCC_RESET,
@@ -1069,6 +1078,7 @@ namespace HTMGT
                          * @userdata1 OCC instance
                          * @userdata2 last OCC checkpoint
                          * @devdesc Set of OCC state failed
+                         * @custdesc An internal firmware error occurred
                          */
                         bldErrLog(l_err, HTMGT_MOD_WAIT_FOR_CHECKPOINT,
                                   HTMGT_RC_OCC_NOT_READY,

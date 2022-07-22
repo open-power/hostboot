@@ -140,6 +140,7 @@ namespace HTMGT
                      * @userdata2[0-31] OCC response status
                      * @userdata2[32-63] current OCC state
                      * @devdesc Set of OCC state failed
+                     * @custdesc An internal firmware error occurred
                      */
                     bldErrLog(l_err, HTMGT_MOD_OCC_SET_STATE,
                               HTMGT_RC_OCC_CMD_FAIL,
@@ -159,6 +160,7 @@ namespace HTMGT
              * @userdata1  OCC instance
              * @userdata2  Requested state
              * @devdesc Set state only allowed on master OCC
+             * @custdesc An internal firmware error occurred
              */
             bldErrLog(l_err, HTMGT_MOD_OCC_SET_STATE,
                       HTMGT_RC_INTERNAL_ERROR,

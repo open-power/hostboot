@@ -118,6 +118,7 @@ namespace HTMGT
              * @userdata1[16:31] poll attempts
              * @userdata2[0:15] target ready bit
              * @devdesc OCC not ready for target state
+             * @custdesc An internal firmware error occurred
              */
             bldErrLog(l_err, HTMGT_MOD_WAIT_FOR_OCC_READY,
                       HTMGT_RC_OCC_NOT_READY,

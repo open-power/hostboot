@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,6 +109,7 @@ errlHndl_t call_utils_to_throttle(std::vector <fapi2::Target<fapi2::
                  * @userdata1 ocmb HUID
                  * @userdata2 port HUID
                  * @devdesc Failed to set utilization for throttle procedures
+                 * @custdesc An internal firmware error occurred
                  */
                 err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                               HTMGT_MOD_MEM_UTIL_TO_THROTTLE,
@@ -229,6 +230,7 @@ errlHndl_t memPowerThrottleOT(
                      * @userdata1 ocmb HUID
                      * @userdata2 port HUID
                      * @devdesc Failed to read util to throttle results
+                     * @custdesc An internal firmware error occurred
                      */
                     err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                   HTMGT_MOD_MEM_THROTTLE_OT,
@@ -306,6 +308,7 @@ errlHndl_t memPowerThrottleOT(
                  * @reasoncode HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL
                  * @userdata1 ocmb HUID
                  * @devdesc Failed to save util to throttle results
+                 * @custdesc An internal firmware error occurred
                  */
                 err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                               HTMGT_MOD_MEM_THROTTLE_OT,
@@ -382,6 +385,7 @@ errlHndl_t call_bulk_pwr_throttles(
                  * @userdata1 ocmb HUID
                  * @userdata2 port HUID
                  * @devdesc Failed to set target power for throttle procedure
+                 * @custdesc An internal firmware error occurred
                  */
                 err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                               HTMGT_MOD_MEM_BULK_PWR_THROTTLE,
@@ -528,6 +532,7 @@ errlHndl_t memPowerThrottleRedPower(
                      * @userdata1 ocmb HUID
                      * @userdata2 port HUID
                      * @devdesc Failed to read throttle procedure results
+                     * @custdesc An internal firmware error occurred
                      */
                     err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                   HTMGT_MOD_MEM_THROTTLE_REDUN,
@@ -616,6 +621,7 @@ errlHndl_t memPowerThrottleRedPower(
                  * @reasoncode HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL
                  * @userdata1 ocmb HUID
                  * @devdesc Failed to save throttle procedure results
+                 * @custdesc An internal firmware error occurred
                  */
                 err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                               HTMGT_MOD_MEM_THROTTLE_REDUN,
