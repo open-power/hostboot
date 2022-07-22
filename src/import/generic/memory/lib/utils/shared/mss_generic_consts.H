@@ -256,6 +256,7 @@ enum generic_ffdc_codes : uint16_t
     POWER_LIMIT = 0x1072,
     SLOPE = 0x1073,
     INTERCEPT = 0x1074,
+    SAFEMODE = 0x1078,
 
     SET_SI_RD_VREF_DQ = 0x1075,
     SET_CAC_DELAY_A = 0x1076,

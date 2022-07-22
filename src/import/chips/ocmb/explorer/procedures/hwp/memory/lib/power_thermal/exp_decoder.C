@@ -90,12 +90,14 @@ fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_slope (
     FAPI_TRY( (get_power_thermal_value<TT::THERMAL_START, TT::THERMAL_LENGTH, SLOPE>(
                    *i_slope[0],
                    "ATTR_MSS_MRW_OCMB_PWR_SLOPE",
+                   TT::DONT_DECODE_SAFE_MODE,
                    iv_total_slope)) );
 
     // To get power slope
     FAPI_TRY( (get_power_thermal_value<TT::POWER_SLOPE_START, TT::POWER_SLOPE_LENGTH, SLOPE>(
                    *i_slope[1],
                    "ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT",
+                   TT::DONT_DECODE_SAFE_MODE,
                    iv_vddr_slope)) );
 
 fapi_try_exit:
@@ -130,12 +132,14 @@ fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_intercept (
     FAPI_TRY( (get_power_thermal_value<TT::THERMAL_START, TT::THERMAL_LENGTH, INTERCEPT>(
                    *i_intercept[0],
                    "ATTR_MSS_MRW_OCMB_PWR_INTERCEPT",
+                   TT::DONT_DECODE_SAFE_MODE,
                    iv_total_intercept)) );
 
     // To get power intercept
     FAPI_TRY( (get_power_thermal_value<TT::POWER_INTERCEPT_START, TT::POWER_INTERCEPT_LENGTH, INTERCEPT>(
                    *i_intercept[1],
                    "ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT",
+                   TT::DONT_DECODE_SAFE_MODE,
                    iv_vddr_intercept)) );
 
 fapi_try_exit:
@@ -171,12 +175,14 @@ fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_thermal_power_limit (
     FAPI_TRY( (get_power_thermal_value<TT::THERMAL_START, TT::THERMAL_LENGTH, POWER_LIMIT>(
                    *i_thermal_limits[0],
                    "ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT",
+                   TT::DONT_DECODE_SAFE_MODE,
                    iv_thermal_power_limit)) );
 
     // To get regulator power or current limit
     FAPI_TRY( (get_power_thermal_value<TT::POWER_LIMIT_START, TT::POWER_LIMIT_LENGTH, POWER_LIMIT>(
                    *i_thermal_limits[1],
                    "ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT",
+                   TT::DONT_DECODE_SAFE_MODE,
                    iv_power_limit)) );
 
 fapi_try_exit:
@@ -192,9 +198,11 @@ fapi_try_exit:
 /// @param[in] i_intercept vector of generated hashes for encoding the values for memory power curve intercepts
 /// @param[in] i_thermal_power_limit vector of generated hashes for encoding the values for memory power limits
 /// @param[in] i_current_curve_with_limit vector of generated hashes for encoding the values for regulator power curves and limits
+/// @param[in] i_safemode_throttles vector of generated hashes for safemode throttles array
 /// @param[out] o_slope the power curve slope for each dimm
 /// @param[out] o_intercept the power curve intercept for each dimm
 /// @param[out] o_limit the power limit for the dimm
+/// @param[out] o_safemode the safe mode throttle value for the dimm
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note used to set power curve attributes in calling function
 /// @note decodes the attribute "encoding" to get the power curves and power limits for a dimm
@@ -205,9 +213,11 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
                                    const std::vector< uint64_t >& i_intercept,
                                    const std::vector< uint64_t >& i_thermal_power_limit,
                                    const std::vector< uint64_t >& i_current_curve_with_limit,
+                                   const std::vector< uint64_t >& i_safemode_throttles,
                                    uint16_t o_slope [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT],
                                    uint16_t o_intercept [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT],
-                                   uint32_t o_limit [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT])
+                                   uint32_t o_limit [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT],
+                                   uint32_t& o_safemode)
 {
     using TT = throttle_traits<mss::mc_type::EXPLORER>;
 
@@ -227,7 +237,8 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
                                                mss::count_dimm(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm)) :
                                                1;
 
-        FAPI_TRY( l_decoder.generate_encoding(), "Fail encountered while generating encodings on %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_decoder.generate_encoding(TT::DONT_DECODE_SAFE_MODE), "Fail encountered while generating encodings on %s",
+                  mss::c_str(l_dimm) );
 
         // The first entry into these arrays must be valid
         // If we don't find any values, the attributes aren't found so go with some defaults
@@ -245,7 +256,8 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
         {
             const std::vector< const std::vector<uint64_t>* > l_slope {&i_slope, &i_current_curve_with_limit};
 
-            FAPI_TRY( l_decoder.find_slope(l_slope), "Fail encountered in find_slope on %s", mss::c_str(l_dimm) );
+            FAPI_TRY( l_decoder.find_slope(l_slope), "Fail encountered in find_slope on %s",
+                      mss::c_str(l_dimm) );
 
             o_slope[l_dimm_pos] =
                 ((i_throttle_type == mss::throttle_type::POWER) ? l_decoder.iv_vddr_slope : l_decoder.iv_total_slope) /
@@ -266,7 +278,8 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
         {
             const std::vector< const std::vector<uint64_t>* > l_intercept {&i_intercept, &i_current_curve_with_limit};
 
-            FAPI_TRY( l_decoder.find_intercept(l_intercept), "Fail encountered in find_intercept on %s", mss::c_str(l_dimm) );
+            FAPI_TRY( l_decoder.find_intercept(l_intercept),
+                      "Fail encountered in find_intercept on %s", mss::c_str(l_dimm) );
 
             o_intercept[l_dimm_pos] =
                 ((i_throttle_type == mss::throttle_type::POWER) ? l_decoder.iv_vddr_intercept : l_decoder.iv_total_intercept) /
@@ -298,6 +311,26 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
                  l_decoder.iv_power_limit* DECI_TO_CENTI : l_decoder.iv_thermal_power_limit
                 ) /
                 l_number_dimm_for_attr_value;
+        }
+
+        l_attr_value = i_safemode_throttles[0];
+
+        if (i_safemode_throttles.empty() || !l_attr_value.getBit<TT::DIMM_COUNT_START, TT::DIMM_COUNT_LEN>())
+        {
+            FAPI_INF("%s ATTR_MSS_MRW_OCMB_SAFEMODE_UTIL_ARRAY not found or has zero values", mss::c_str(l_dimm));
+            o_safemode = TT::SAFEMODE_THROTTLE_DEFAULT;
+        }
+        else
+        {
+            mss::power_thermal::decoder<mss::mc_type::EXPLORER> l_decoder_safemode(l_kind);
+
+            FAPI_TRY( l_decoder_safemode.generate_encoding(TT::DECODE_SAFE_MODE),
+                      "Fail encountered while generating encodings on %s", mss::c_str(l_dimm) );
+            FAPI_TRY( (l_decoder_safemode.get_power_thermal_value<TT::SAFEMODE_START, TT::SAFEMODE_LENGTH, SAFEMODE>(
+                           i_safemode_throttles,
+                           "ATTR_MSS_MRW_OCMB_SAFEMODE_UTIL_ARRAY",
+                           TT::DECODE_SAFE_MODE,
+                           o_safemode)) );
         }
     }
 

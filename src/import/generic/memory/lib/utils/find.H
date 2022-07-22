@@ -207,6 +207,7 @@ inline fapi2::Target<fapi2::TARGET_TYPE_OMIC> find_target(const fapi2::Target<fa
 ///
 /// @brief find all the OCMB_CHIPs connected to a PROC_CHIP
 /// @param[in] i_target a fapi2::Target PROC_CHIP
+/// @param[in] i_state fapi2 target state
 /// @return a vector of fapi2::TARGET_TYPE_OCMB_CHIP
 ///
 template<>
@@ -231,6 +232,7 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 ///
 /// @brief find all the DIMMS connected to an MI
 /// @param[in] i_target a fapi2::Target MI
+/// @param[in] i_state fapi2 target state
 /// @return a vector of fapi2::TARGET_TYPE_DIMM
 ///
 template<>
@@ -255,6 +257,7 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target,
 ///
 /// @brief find all the OCMB_CHIPs connected to an MI
 /// @param[in] i_target a fapi2::Target MI
+/// @param[in] i_state fapi2 target state
 /// @return a vector of fapi2::TARGET_TYPE_OCMB_CHIP
 ///
 template<>
@@ -276,6 +279,7 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target,
 ///
 /// @brief find all the MEM_PORTs connected to a PROC_CHIP
 /// @param[in] i_target a fapi2::Target PROC_CHIP
+/// @param[in] i_state fapi2 target state
 /// @return a vector of fapi2::TARGET_TYPE_MEM_PORT
 ///
 template<>

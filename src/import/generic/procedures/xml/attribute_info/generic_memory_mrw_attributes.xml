@@ -62,7 +62,7 @@
         Used to get the VDDR and VDDR+VPP power curve for each DIMM
         Decoded and used to set ATTR_MSS_TOTAL_PWR_INTERCEPT
         Key Value pair
-        KEY (0-19): In order
+        KEY (0-20): In order
         DIMM_SIZE = bits 0-3,
         DIMM_GEN = 4-5,
         DIMM_TYPE = 6-7,
@@ -71,7 +71,7 @@
         DIMM_STACK_TYPE = 14-15,
         DRAM_MFGID = 16-18,
         DIMMS_PER_PORT = 19-20,
-        Bits 21-32: Not used
+        Bits 21-31: Not used
         VALUE (bits 32-63) in cW:
         VMEM power curve = 32-47
         VMEM+VPP power curve = 48-63
@@ -92,7 +92,7 @@
         Used to get the VDDR and VDDR+VPP power curve for each DIMM
         Decoded and used to set ATTR_MSS_TOTAL_PWR_INTERCEPT
         Key Value pair
-        KEY (0-19): In order
+        KEY (0-20): In order
         DIMM_SIZE = bits 0-3,
         DIMM_GEN = 4-5,
         DIMM_TYPE = 6-7,
@@ -101,7 +101,7 @@
         DIMM_STACK_TYPE = 14-15,
         DRAM_MFGID = 16-18,
         DIMMS_PER_PORT = 19-20,
-        Bits 21-32: Not used
+        Bits 21-31: Not used
         VALUE (bits 32-63) in cW:
         VMEM power curve = 32-47
         VMEM+VPP power curve = 48-63
@@ -686,6 +686,7 @@
         Used to thermally protect the system in all supported environmental conditions when OCC is not functional
         Consumer: thermal_init, initfile
         Default to 2500 c%%
+        This attribute is depricated and is now replaced by ATTR_MSS_MRW_SAFEMODE_UTIL_ARRAY and ATTR_MSS_SAFEMODE_DRAM_DATABUS_UTIL
     </description>
     <valueType>uint32</valueType>
     <default>0x000009C4</default>
@@ -793,7 +794,7 @@
         Machine Readable Workbook Thermal Memory Power Limit
         Used to calculate throttles to be at or under the power limit
         Per DIMM basis
-        KEY (0-19): In order
+        KEY (0-20): In order
         DIMM_SIZE = bits 0-3,
         DIMM_GEN = 4-5,
         DIMM_TYPE = 6-7,
@@ -802,7 +803,7 @@
         DIMM_STACK_TYPE = 14-15,
         DRAM_MFGID = 16-18,
         DIMMS_PER_PORT = 19-20,
-        Bits 21-32: Not used
+        Bits 21-31: Not used
         VALUE (bits 32-63) in cW:
         VMEM+VPP thermal power limit per DIMM = 32-63
         Consumers: eff_config_thermal and bulk_pwr_throttles
@@ -831,6 +832,39 @@
     <default>DISABLED</default>
     <platInit/>
     <mssAccessorName>mrw_orverride_therm_sensor_usage</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_OCMB_SAFEMODE_UTIL_ARRAY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Memory safemode throttle settings based on DIMM configurations
+        Key Value pair
+        KEY (0-25): In order
+        DIMM_SIZE = bits 0-3,
+        DIMM_GEN = 4-5,
+        DIMM_TYPE = 6-8,
+        DIMM_WIDTH = 9-11,
+        DIMM_DENSITY = 12-14,
+        DIMM_STACK_TYPE = 15-16,
+        DRAM_MFGID = 17-19,
+        DIMM_HEIGHT = 20-21,
+        DIMM_COUNT = Bits 22-25 (Number of configured DIMMs under processor (supported values are 2,4,6,8,16,32)
+          0b0000 = 2 DIMMs
+          0b0001 = 4 DIMMs
+          0b0010 = 6 DIMMs
+          0b0011 = 8 DIMMs
+          0b0100 = 16 DIMMs
+          0b0101 = 32 DIMMs
+          0b1111 = wildcard
+        Bits 26-31: Not used
+        VALUE (bits 32-47) safemode dram data bus utilization in c%
+    </description>
+    <valueType>uint64</valueType>
+    <platInit/>
+    <array>50</array>
+    <default>0xFFFFFFC009C40000</default>
+    <mssAccessorName>mrw_ocmb_safemode_util_array</mssAccessorName>
   </attribute>
 
 </attributes>

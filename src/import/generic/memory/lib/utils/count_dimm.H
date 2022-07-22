@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,6 +87,76 @@ inline size_t count_dimm(const std::vector<fapi2::Target<T>>& i_targets)
     }
 
     return l_dimm_count;
+}
+
+///
+/// @brief Return the count of the number of MEM port attached to a target.
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target a target
+/// @param[in] i_state [optional] fapi2 target state (defaults to TARGET_STATE_FUNCTIONAL)
+/// @return size_t the count of MEM port attached
+/// @note Use this function to count "present and nonfunctional" DIMMs
+///
+template< fapi2::TargetType T >
+inline size_t count_mem_port(const fapi2::Target<T>& i_target,
+                             fapi2::TargetState i_state = fapi2::TARGET_STATE_FUNCTIONAL)
+{
+    size_t l_mem_port_count = find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target, i_state).size();
+    return l_mem_port_count;
+}
+
+///
+/// @brief Return the count of the number of MEM port attached to a target.
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target a target
+/// @param[in] i_state [optional] fapi2 target state (defaults to TARGET_STATE_FUNCTIONAL)
+/// @return size_t the count of MEM port attached
+/// @note Use this function to count "present and nonfunctional" DIMMs
+///
+template< >
+inline size_t count_mem_port(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                             fapi2::TargetState i_state)
+{
+    // We currently have only one DIMM on a MEM port
+    return 1;
+}
+
+///
+/// @brief Return the count of the number of MEM port attached to a vector of targets.
+/// @tparam T the fapi2::TargetType
+/// @param[in] i_target a vector of targets
+/// @param[in] i_state [optional] fapi2 target state (defaults to TARGET_STATE_FUNCTIONAL)
+/// @return size_t the count of MEM port attached
+/// @note Use this function to count "present and nonfunctional" DIMMs
+///
+template< fapi2::TargetType T >
+inline size_t count_mem_port(const std::vector<fapi2::Target<T>>& i_targets,
+                             fapi2::TargetState i_state = fapi2::TARGET_STATE_FUNCTIONAL )
+{
+    size_t l_mem_port_count = 0;
+
+    for (const auto& l_target : i_targets)
+    {
+        l_mem_port_count += count_mem_port(l_target, i_state);
+    }
+
+    return l_mem_port_count;
+}
+
+///
+/// @brief Return the count of the number of MEM attached to a proc chip - DIMM speicalization
+/// @param[in] i_target a target
+/// @param[in] i_state [optional] fapi2 target state (defaults to TARGET_STATE_FUNCTIONAL)
+/// @return size_t the count of MEM attached
+/// @note Use this function to count "present and nonfunctional" DIMMs
+///
+template< >
+inline size_t count_mem_port(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                             fapi2::TargetState i_state)
+{
+    const auto& l_ocmb = find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target, i_state);
+
+    return count_mem_port(l_ocmb, i_state);
 }
 
 }

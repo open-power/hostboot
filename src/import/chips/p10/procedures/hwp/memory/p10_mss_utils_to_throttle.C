@@ -76,22 +76,23 @@ extern "C"
             uint32_t l_max_databus_util = 0;
             uint32_t l_dram_clocks = 0;
             uint32_t l_safemode_util = 0;
-            uint32_t l_safemode_throttle_per_port = 0;
             uint32_t l_calc_util = 0;
 
             FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_dram_clocks));
             FAPI_TRY(mss::attr::get_mrw_max_dram_databus_util(l_max_databus_util));
-            FAPI_TRY(mss::attr::get_mrw_safemode_dram_databus_util(l_safemode_util));
-
-            l_safemode_throttle_per_port = mss::power_thermal::calc_n_from_dram_util(
-                                               (l_safemode_util / mss::power_thermal::throttle_const::PERCENT_CONVERSION),
-                                               l_dram_clocks);
 
             for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(l_ocmb))
             {
                 fapi2::ReturnCode l_rc;
                 uint32_t l_input_databus_util = 0;
                 bool l_safemode = false;
+                uint32_t l_safemode_throttle_per_port = 0;
+
+                FAPI_TRY(mss::attr::get_safemode_dram_databus_util(l_port, l_safemode_util));
+
+                l_safemode_throttle_per_port = mss::power_thermal::calc_n_from_dram_util(
+                                                   (static_cast<double>(l_safemode_util) / mss::power_thermal::throttle_const::PERCENT_CONVERSION),
+                                                   l_dram_clocks);
 
                 // Util attribute set by OCC
                 FAPI_TRY( mss::attr::get_databus_util(l_port, l_input_databus_util) );

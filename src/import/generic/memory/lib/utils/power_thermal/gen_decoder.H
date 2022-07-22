@@ -25,7 +25,7 @@
 
 ///
 /// @file gen_decoder.H
-/// @brief Decoder for ATTR_MSS_MRW_PWR_CURVE_SLOPE and _INTERCEPT and THERMAL_POWER_LIMIT
+/// @brief Decoder for ATTR_MSS_MRW_PWR_CURVE_SLOPE and _INTERCEPT and THERMAL_POWER_LIMIT and SAFEMODE_THROTTLES
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
@@ -41,6 +41,7 @@
 #include <generic/memory/lib/utils/power_thermal/gen_throttle_traits.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
 
 namespace mss
 {
@@ -57,6 +58,7 @@ constexpr uint8_t  ANY_STACK_TYPE = 0xFF;
 constexpr uint16_t ANY_MFGID = 0xFFFF;
 constexpr uint8_t  ANY_HEIGHT = 0xFF;
 constexpr uint8_t  ANY_PORT = 0xFF;
+constexpr uint8_t  ANY_COUNT = 0xFF;
 
 //Currently needs to be in sorted order for lookup to work
 static const std::vector< std::pair<uint32_t , uint8_t> > DIMM_SIZE_MAP =
@@ -144,13 +146,25 @@ static const std::vector < std::pair< uint8_t, uint8_t> > DIMMS_PORT_MAP =
     {ANY_PORT, 0b11}
 };
 
+static const std::vector < std::pair< uint8_t, uint8_t> > DIMM_COUNT_MAP =
+{
+    //Num dimms per PROC_CHIP
+    {2, 0b0000},
+    {4, 0b0001},
+    {6, 0b0010},
+    {8, 0b0011},
+    {16, 0b0100},
+    {32, 0b0101},
+    {ANY_COUNT, 0b1111}
+};
+
 // Forward declaration
 template<mss::mc_type MC, typename TT = throttle_traits<MC>>
-fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask);
+fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, const uint8_t i_safemode_throttles, uint32_t& o_mask);
 
 
 ///
-///@brief a compare functor for the decoder::find_attr functions below
+/// @brief a compare functor for the decoder::find_attr functions below
 /// @tparam MC mss::mc_type
 ///
 template<mss::mc_type MC>
@@ -159,9 +173,12 @@ struct is_match
     ///
     ///@brief functor constructor
     ///@param[in] i_gen_key the class object's constructed hash for the installed dimm, to be compared with the attr array
+    ///@param[in] i_safemode_throttles check dimm count only in the case of safemode throttles calculation
     ///
-    is_match(const uint32_t i_gen_key) : iv_gen_key(i_gen_key) {}
+    is_match(const uint32_t i_gen_key, const uint8_t i_safemode_throttles) : iv_gen_key(i_gen_key),
+        iv_safemode_throttles(i_safemode_throttles)  {}
     const fapi2::buffer<uint32_t> iv_gen_key;
+    const uint8_t iv_safemode_throttles;
 
     ///
     ///@brief Boolean compare used for find_if function
@@ -173,7 +190,7 @@ struct is_match
         uint32_t l_wildcard_mask = 0;
 
         // Get wildcard mask. If the decoding fails(value to key), we should continue
-        generate_wildcard_mask<MC>(l_this_hash, l_wildcard_mask);
+        generate_wildcard_mask<MC>(l_this_hash, iv_safemode_throttles, l_wildcard_mask);
 
         // Mask the wildcard bits
         return ((l_this_hash | l_wildcard_mask) == (iv_gen_key | l_wildcard_mask));
@@ -251,11 +268,12 @@ fapi_try_exit:
 /// @tparam MC mss::mc_type
 /// @tparam TT throttle_traits throttle traits for the given mc_type
 /// @param[in] i_hash The encoded value
+/// @param[in] i_safemode_throttles check dimm count only in the case of safemode throttles calculation
 /// @param[out] o_mask The wildcard mask
 ///
 
 template<mss::mc_type MC, typename TT = throttle_traits<MC>>
-fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask)
+fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, const uint8_t i_safemode_throttles, uint32_t& o_mask)
 {
 
     fapi2::buffer<uint32_t> l_mask;
@@ -368,6 +386,20 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, uint32_t& o_mask
         {
             l_mask.setBit<TT::DIMM_MODULE_HEIGHT_START, TT::DIMM_MODULE_HEIGHT_LEN>();
         }
+
+        // If reading safemode throttles, check for dimm count
+        if (i_safemode_throttles)
+        {
+            FAPI_TRY(( decode<TT::DIMM_COUNT_START, TT::DIMM_COUNT_LEN>
+                       (DIMM_COUNT_MAP, l_hash, l_uint8_buf)),
+                     "Failed to generate power thermal decoding for %s val %d",
+                     "DIMMS_COUNT", l_hash);
+
+            if(ANY_COUNT == l_uint8_buf)
+            {
+                l_mask.setBit<TT::DIMM_COUNT_START, TT::DIMM_COUNT_LEN>();
+            }
+        }
     }
 
     o_mask = l_mask;
@@ -425,11 +457,11 @@ class decoder
 
         ///
         /// @brief generates the 32 bit encoding for the power curve attributes
+        /// @param[in] i_safemode_throttles check dimm count only in the case of safemode throttles calculation
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
-        /// @note populates iv_gen_key
+        /// @note populates iv_gen_keys
         ///
-        fapi2::ReturnCode generate_encoding ();
-
+        fapi2::ReturnCode generate_encoding (const uint8_t i_safemode_throttles);
 
         ///
         /// @brief encodes dimm type into key, allowing special cases like MDS
@@ -479,6 +511,7 @@ class decoder
         /// @tparam OT output type
         /// @param[in] i_array is a vector of the attribute values
         /// @param[in] i_attr_description the attribute description
+        /// @param[in] i_safemode_throttles skip safemode throttles readings in case of power thermal calculations
         /// @param[out] o_value the output value
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
         /// @note populates iv_thermal_power_limit
@@ -486,16 +519,18 @@ class decoder
         template<size_t FIELD_START, size_t FIELD_LEN, generic_ffdc_codes FUNCTION, typename OT>
         fapi2::ReturnCode get_power_thermal_value(const std::vector<uint64_t>& i_array,
                 const char* const i_attr_description,
+                const uint8_t i_safemode_throttles,
                 OT& o_value);
 };
 
 ///
 /// @brief generates the 32 bit encoding for the power curve attributes
+/// @param[in] i_safemode_throttles check dimm count only in the case of safemode throttles calculation
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
 /// @note populates iv_gen_keys
 ///
 template<mss::mc_type MC, typename TT>
-fapi2::ReturnCode decoder<MC, TT>::generate_encoding()
+fapi2::ReturnCode decoder<MC, TT>::generate_encoding(const uint8_t i_safemode_throttles)
 {
     //DIMM_SIZE
     FAPI_TRY(( encode<TT::DIMM_SIZE_START, TT::DIMM_SIZE_LEN>
@@ -556,6 +591,15 @@ fapi2::ReturnCode decoder<MC, TT>::generate_encoding()
                  "DIMM_MODULE_HEIGHT", iv_kind.iv_module_height, mss::c_str(iv_kind.iv_target) );
     }
 
+    // If reading safemode throttles, check for dimm count
+    if (i_safemode_throttles)
+    {
+        FAPI_TRY(( encode<TT::DIMM_COUNT_START, TT::DIMM_COUNT_LEN>
+                   (iv_kind.iv_target, iv_kind.iv_rounded_off_dimm_count, DIMM_COUNT_MAP, iv_gen_key)),
+                 "Failed to generate power thermal encoding for %s val %d on target: %s",
+                 "DIMM_COUNT", iv_kind.iv_rounded_off_dimm_count, mss::c_str(iv_kind.iv_target) );
+    }
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -564,6 +608,7 @@ fapi_try_exit:
 /// @brief Helper function to find the value from attribute
 /// @param[in] i_array is a vector of the attribute values
 /// @param[in] i_attr_description the attribute description
+/// @param[in] i_safemode_throttles skip safemode throttles readings in case of power thermal calculations
 /// @param[out] o_value the output value
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
 /// @note populates iv_thermal_power_limit
@@ -572,6 +617,7 @@ template<mss::mc_type MC, typename TT>
 template<size_t FIELD_START, size_t FIELD_LEN, generic_ffdc_codes FUNCTION, typename OT>
 fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uint64_t>& i_array,
         const char* const i_attr_description,
+        const uint8_t i_safemode_throttles,
         OT& o_value)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -579,7 +625,7 @@ fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uin
     // Find iterator to matching key (if it exists)
     auto l_value_iterator  =  std::find_if(i_array.begin(),
                                            i_array.end(),
-                                           is_match<MC>(iv_gen_key));
+                                           is_match<MC>(iv_gen_key, i_safemode_throttles));
 
     FAPI_ASSERT(l_value_iterator != i_array.end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
@@ -593,10 +639,11 @@ fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uin
                 .set_DRAM_DENSITY(iv_kind.iv_dram_density)
                 .set_STACK_TYPE(iv_kind.iv_stack_type)
                 .set_MFGID(iv_kind.iv_mfgid)
-                .set_MODULE_HEIGHT(iv_kind.iv_module_height),
+                .set_MODULE_HEIGHT(iv_kind.iv_module_height)
+                .set_ROUNDED_OFF_DIMM_COUNT(iv_kind.iv_rounded_off_dimm_count),
                 "Couldn't find %s value for generated key:0x%08lx, for target %s. "
                 "DIMM values for generated key are "
-                "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d, height %d",
+                "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d, height %d rounded dimm count is %d",
                 i_attr_description,
                 iv_gen_key,
                 mss::c_str(iv_kind.iv_target),
@@ -608,7 +655,8 @@ fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uin
                 iv_kind.iv_stack_type,
                 iv_kind.iv_mfgid,
                 iv_dimms_per_port,
-                iv_kind.iv_module_height
+                iv_kind.iv_module_height,
+                iv_kind.iv_rounded_off_dimm_count
                );
     {
         const fapi2::buffer<uint64_t> l_temp(*l_value_iterator);
@@ -618,6 +666,8 @@ fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uin
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+
 
 } // power_thermal
 } // mss

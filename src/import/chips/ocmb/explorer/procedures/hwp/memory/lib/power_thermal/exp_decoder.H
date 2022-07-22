@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <fapi2.H>
 
 #include <lib/shared/exp_consts.H>
-#include <generic/memory/lib/utils/dimm/kind.H>
+#include <lib/dimm/exp_kind.H>
 #include <lib/power_thermal/exp_throttle.H>
 #include <generic/memory/lib/utils/power_thermal/gen_decoder.H>
 
@@ -50,21 +50,22 @@ namespace mss
 namespace power_thermal
 {
 
-
 ///
-/// @brief find the power curve attributes for each dimm on an MCS target
-/// @param[in] i_targets vector of MCS targets on which dimm attrs will be set
-/// @param[in] i_slope vector of generated hashes for encoding and values for MSS_MRW_POWER_SLOPE
-/// @param[in] i_intercept vector of generated hashes for encoding and values for MSS_MRW_POWER_INTERCEPT
-/// @param[in] i_thermal_power_limit vector of generated hashes for encoding and values for MSS_MRW_THERMAL_MEMORY_POWER_LIMIT
-/// @param[out] o_vddr_slope the VDDR power curve slope for each dimm
-/// @param[out] o_vddr_int the VDDR power curve intercept for each dimm
-/// @param[out] o_total_slope the VDDR+VPP power curve slope for each dimm
-/// @param[out] o_total_int the VDDR+VPP power curve intercept for each dimm
-/// @param[out] o_thermal_power the thermal power limit for the dimm
+/// @brief find the power curve attributes for each dimm on an MEM_PORT target
+/// @param[in] i_throttle_type specifies whether this is for power or thermal throttling
+/// @param[in] i_port vector of MEM_PORT targets on which dimm attrs will be set
+/// @param[in] i_slope vector of generated hashes for encoding the values for memory power curve slopes
+/// @param[in] i_intercept vector of generated hashes for encoding the values for memory power curve intercepts
+/// @param[in] i_thermal_power_limit vector of generated hashes for encoding the values for memory power limits
+/// @param[in] i_current_curve_with_limit vector of generated hashes for encoding the values for regulator power curves and limits
+/// @param[in] i_safemode_throttles vector of generated hashes for safemode throttles array
+/// @param[out] o_slope the power curve slope for each dimm
+/// @param[out] o_intercept the power curve intercept for each dimm
+/// @param[out] o_limit the power limit for the dimm
+/// @param[out] o_safemode the safe mode throttle value for the dimm
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note used to set power curve attributes in calling function
-/// @note decodes the attribute "encoding" to get the vddr and vddr/vpp power curves for a dimm
+/// @note decodes the attribute "encoding" to get the power curves and power limits for a dimm
 ///
 fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
                                    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
@@ -72,9 +73,11 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
                                    const std::vector< uint64_t >& i_intercept,
                                    const std::vector< uint64_t >& i_thermal_power_limit,
                                    const std::vector< uint64_t >& i_current_curve_with_limit,
+                                   const std::vector< uint64_t >& i_safemode_throttles,
                                    uint16_t o_slope [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT],
                                    uint16_t o_intercept [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT],
-                                   uint32_t o_limit [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT]);
+                                   uint32_t o_limit [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT],
+                                   uint32_t& o_safemode);
 
 
 ///
@@ -84,6 +87,7 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
 ///
 template<>
 fapi2::ReturnCode decoder<mss::mc_type::EXPLORER, throttle_traits<mss::mc_type::EXPLORER>>::encode_dimm_type();
+
 } // power_thermal
 } // mss
 #endif

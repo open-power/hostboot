@@ -1443,6 +1443,7 @@
     <ffdc>STACK_TYPE</ffdc>
     <ffdc>MFGID</ffdc>
     <ffdc>MODULE_HEIGHT</ffdc>
+    <ffdc>ROUNDED_OFF_DIMM_COUNT</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

@@ -62,23 +62,14 @@ extern "C"
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
         FAPI_INF("Start exp_mss_eff_config_thermal");
 
-        // For regulaor power/current throttling or thermal throtling
+        // For regulator power/current throttling or thermal throttling
         // Do thermal throttling last so the attributes end up representing a total power value for later usage
         //   Need to have ATTR_EXP_TOTAL_PWR_SLOPE and ATTR_EXP_TOTAL_PWR_INTERCEPT with total DIMM power
         //   (not regulator current values) after exp_mss_eff_config_thermal is run, so when OCC calls
         //   exp_bulk_pwr_throttles at runtime the total DIMM power will be used for any memory bulk supply throttling
         const std::vector<mss::throttle_type> throttle_types{ mss::throttle_type::POWER, mss::throttle_type::THERMAL};
 
-        // Return error if safemode throttle utilization is less than MIN_UTIL
         const uint64_t l_min_util = TT::MIN_UTIL;
-        uint32_t l_safemode_util = 0;
-        FAPI_TRY( mss::attr::get_mrw_safemode_dram_databus_util(l_safemode_util) );
-        FAPI_ASSERT( l_safemode_util >= TT::MIN_UTIL,
-                     fapi2::MSS_MRW_SAFEMODE_UTIL_THROTTLE_NOT_SUPPORTED()
-                     .set_MRW_SAFEMODE_UTIL(l_safemode_util)
-                     .set_MIN_UTIL_VALUE(l_min_util),
-                     "MRW safemode util (%d centi percent) has less util than the min util allowed (%d centi percent)",
-                     l_safemode_util, l_min_util );
 
         for (const auto& l_ocmb : i_targets)
         {
@@ -101,8 +92,10 @@ extern "C"
         {
             for ( const auto& l_ocmb : i_targets)
             {
+                const uint32_t l_dimm_count = mss::count_dimm(l_ocmb);
+
                 //Not doing any work if there are no dimms installed
-                if (mss::count_dimm(l_ocmb) == 0)
+                if ( l_dimm_count == 0)
                 {
                     FAPI_INF("Skipping eff_config thermal because no dimms for %s", mss::c_str(l_ocmb));
                     continue;
@@ -112,6 +105,7 @@ extern "C"
                 uint64_t l_thermal_power_limit[TT::SIZE_OF_THERMAL_LIMIT_ATTR] = {0};
                 uint64_t l_thermal_power_slope[TT::SIZE_OF_THERMAL_SLOPE_ATTR] = {0};
                 uint64_t l_thermal_power_intecept[TT::SIZE_OF_THERMAL_INTERCEPT_ATTR] = {0};
+                uint64_t l_safemode_throttles[TT::SIZE_OF_SAFEMODE_THROTTLE_ATTR] = {0};
                 // Power (PMIC)
                 uint64_t l_current_curve_with_limit[TT::SIZE_OF_CURRENT_CURVE_WITH_LIMIT_ATTR] = {0};
 
@@ -120,6 +114,7 @@ extern "C"
                 FAPI_TRY( mss::attr::get_mrw_ocmb_pwr_slope (l_thermal_power_slope) );
                 FAPI_TRY( mss::attr::get_mrw_ocmb_pwr_intercept (l_thermal_power_intecept) );
                 FAPI_TRY( mss::attr::get_mrw_ocmb_current_curve_with_limit (l_current_curve_with_limit) );
+                FAPI_TRY( mss::attr::get_mrw_ocmb_safemode_util_array (l_safemode_throttles) );
 
                 // Convert array to vector
                 std::vector<uint64_t> l_thermal_power_limit_v     ( std::begin(l_thermal_power_limit),
@@ -130,6 +125,8 @@ extern "C"
                         std::end(l_thermal_power_intecept) );
                 std::vector<uint64_t> l_current_curve_with_limit_v( std::begin(l_current_curve_with_limit),
                         std::end(l_current_curve_with_limit) );
+                std::vector<uint64_t> l_safemode_throttles_v      ( std::begin(l_safemode_throttles),
+                        std::end(l_safemode_throttles) );
 
                 for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(l_ocmb))
                 {
@@ -142,23 +139,36 @@ extern "C"
                     uint16_t l_slope    [TT::DIMMS_PER_PORT] = {0};
                     uint16_t l_intercept[TT::DIMMS_PER_PORT] = {0};
                     uint32_t l_limit    [TT::DIMMS_PER_PORT] = {0};
+                    uint32_t l_safemode = 0;
 
                     // Set the thermal power throttle
-                    //Set the PMIC current slope, intercept and limit
+                    // Set the PMIC current slope, intercept and limit
                     FAPI_TRY( mss::power_thermal::get_power_attrs (l_throttle_type,
                               l_port,
                               l_thermal_power_slope_v,
                               l_thermal_power_intecept_v,
                               l_thermal_power_limit_v,
                               l_current_curve_with_limit_v,
+                              l_safemode_throttles_v,
                               l_slope,
                               l_intercept,
-                              l_limit) );
+                              l_limit,
+                              l_safemode) );
 
                     FAPI_TRY(mss::attr::set_total_pwr_slope(l_port, l_slope));
                     FAPI_TRY(mss::attr::set_total_pwr_intercept(l_port, l_intercept));
                     FAPI_TRY(mss::attr::set_dimm_thermal_limit(l_port, l_limit));
                     FAPI_TRY(mss::attr::set_mem_watt_target(l_port, l_limit));
+
+                    // Return error if safemode throttle utilization is less than MIN_UTIL
+                    FAPI_ASSERT( l_safemode >= TT::MIN_UTIL,
+                                 fapi2::MSS_MRW_SAFEMODE_UTIL_THROTTLE_NOT_SUPPORTED()
+                                 .set_MRW_SAFEMODE_UTIL(l_safemode)
+                                 .set_MIN_UTIL_VALUE(l_min_util),
+                                 "MRW safemode util (%d centi percent) has less util than the min util allowed (%d centi percent) for %s",
+                                 l_safemode, l_min_util, mss::c_str(l_port) );
+
+                    FAPI_TRY( mss::attr::set_safemode_dram_databus_util(l_port, l_safemode) );
 
                     for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port) )
                     {

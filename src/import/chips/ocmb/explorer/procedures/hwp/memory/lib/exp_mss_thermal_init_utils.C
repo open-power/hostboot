@@ -488,9 +488,15 @@ fapi2::ReturnCode setup_emergency_throttles(const fapi2::Target<fapi2::TARGET_TY
     uint16_t l_nslot_safe = 0;
     uint16_t l_nport_safe = 0;
 
-    // Get the required values from the mrw attributes
-    FAPI_TRY(mss::attr::get_mrw_safemode_dram_databus_util(l_n_safemode_throttle_value),
-             "Error in setup_emergency_throttles" );
+    // Get the required values from the attributes
+    for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        FAPI_TRY(mss::attr::get_safemode_dram_databus_util(l_port, l_n_safemode_throttle_value),
+                 "Error in setup_emergency_throttles" );
+
+        break;
+    }
+
     FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_m_throttle_value), "Error in setup_emergency_throttles" );
 
     // Get the register to be programmed using getScom

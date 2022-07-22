@@ -213,15 +213,16 @@ fapi2::ReturnCode set_safemode_throttles<mss::mc_type::EXPLORER>(
     fapi2::buffer<uint64_t> l_data;
     fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS_Type l_throttle_denominator = 0;
     uint32_t l_throttle_per_port = 0;
-    fapi2::ATTR_MSS_MRW_SAFEMODE_DRAM_DATABUS_UTIL_Type l_util_per_port = 0;
+    fapi2::ATTR_MSS_SAFEMODE_DRAM_DATABUS_UTIL_Type l_util_per_port = 0;
 
-    FAPI_TRY(mss::attr::get_mrw_safemode_dram_databus_util(l_util_per_port));
+    FAPI_TRY( mss::attr::get_safemode_dram_databus_util(i_target, l_util_per_port) );
     FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_throttle_denominator));
 
     FAPI_TRY(fapi2::getScom(i_target, TT::FARB4Q_REG, l_data));
 
     // l_util_per_port is in c%, so convert to % when calling calc_n_from_dram_util
-    l_throttle_per_port = calc_n_from_dram_util((l_util_per_port / PERCENT_CONVERSION), l_throttle_denominator);
+    l_throttle_per_port = calc_n_from_dram_util((static_cast<double>(l_util_per_port) / PERCENT_CONVERSION),
+                          l_throttle_denominator);
 
     l_data.insertFromRight<TT::EMERGENCY_M, TT::EMERGENCY_M_LEN>(l_throttle_denominator);
     l_data.insertFromRight<TT::EMERGENCY_N, TT::EMERGENCY_N_LEN>(l_throttle_per_port);

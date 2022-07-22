@@ -42,6 +42,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 
 namespace mss
 {
@@ -71,6 +72,21 @@ enum kind_t
 
 namespace dimm
 {
+
+///
+/// @brief Function to round up dimm count
+/// @param[in] i_dimm_count the dimm count value to be rounded off
+/// @return rounded up value of the dimm count
+///
+inline uint8_t round_up_dimm_count(const uint8_t i_dimm_count)
+{
+    std::vector<uint8_t> l_supported_dimm_count = { 2, 4, 6, 8, 16, 32 };
+
+    std::vector<uint8_t>::iterator l_dimm_count;
+    l_dimm_count = std::lower_bound (l_supported_dimm_count.begin(), l_supported_dimm_count.end(), i_dimm_count);
+
+    return *l_dimm_count;
+}
 
 ///
 /// @class mss::dimm::kind
@@ -128,6 +144,7 @@ class kind
             iv_hybrid_memory_type = i_rhs.iv_hybrid_memory_type;
             iv_rcd_mfgid = i_rhs.iv_rcd_mfgid;
             iv_module_height = i_rhs.iv_module_height;
+            iv_rounded_off_dimm_count = i_rhs.iv_rounded_off_dimm_count;
             return *this;
         }
 
@@ -152,7 +169,8 @@ class kind
                     (iv_hybrid == i_rhs.iv_hybrid) &&
                     (iv_hybrid_memory_type == i_rhs.iv_hybrid_memory_type) &&
                     (iv_rcd_mfgid == i_rhs.iv_rcd_mfgid) &&
-                    (iv_module_height == i_rhs.iv_module_height));
+                    (iv_module_height == i_rhs.iv_module_height) &&
+                    (iv_rounded_off_dimm_count == i_rhs.iv_rounded_off_dimm_count));
         }
 
         ///
@@ -174,6 +192,8 @@ class kind
         kind(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ):
             iv_target(i_target)
         {
+            const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
             FAPI_TRY( mss::attr::get_dram_gen(i_target, iv_dram_generation) );
             FAPI_TRY( mss::attr::get_dimm_type(i_target, iv_dimm_type) );
             FAPI_TRY( mss::attr::get_dram_density(i_target, iv_dram_density) );
@@ -187,8 +207,12 @@ class kind
             FAPI_TRY( mss::attr::get_hybrid( i_target, iv_hybrid ));
             FAPI_TRY( mss::attr::get_hybrid_memory_type( i_target, iv_hybrid_memory_type ));
             FAPI_TRY( mss::attr::get_rcd_mfg_id(i_target, iv_rcd_mfgid) );
-            FAPI_TRY( mss::attr::get_dram_module_height(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target),
-                      iv_module_height) );
+            FAPI_TRY( mss::attr::get_dram_module_height(l_ocmb, iv_module_height) );
+
+            iv_rounded_off_dimm_count = mss::count_mem_port(mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(l_ocmb),
+                                        fapi2::TARGET_STATE_PRESENT);
+            iv_rounded_off_dimm_count = round_up_dimm_count(iv_rounded_off_dimm_count);
+
 
             return;
 
@@ -214,6 +238,7 @@ class kind
         /// @param[in] i_hybrid_memory_type, defult none
         /// @param[in] i_rcd_mfgid dimm register and data buffer manufacturer id, default 0
         /// @param[in] i_module_height dimm height default 0
+        /// @param[in] i_raw_dimm_count rounded off dimm count default 0
         /// @note can't be constexpr as fapi2::Target doesn't have a constexpr ctor.
         ///
         kind( const uint8_t i_master_ranks,
@@ -229,7 +254,8 @@ class kind
               const uint8_t i_hybrid = fapi2::ENUM_ATTR_EFF_HYBRID_NOT_HYBRID,
               const uint8_t i_hybrid_memory_type = fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NONE,
               const uint16_t i_rcd_mfgid = 0,
-              const uint8_t i_module_height = 0
+              const uint8_t i_module_height = 0,
+              const uint8_t i_raw_dimm_count = 0
             ):
             iv_target(0),
             iv_master_ranks(i_master_ranks),
@@ -266,6 +292,8 @@ class kind
                 fapi2::Assert(false);
             }
 
+            iv_rounded_off_dimm_count = round_up_dimm_count(i_raw_dimm_count);
+
         }
 
         fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_target;
@@ -283,6 +311,7 @@ class kind
         uint8_t iv_hybrid_memory_type;
         uint16_t iv_rcd_mfgid;
         uint8_t iv_module_height;
+        uint8_t iv_rounded_off_dimm_count;
 
         ///
         /// @brief equal_config
