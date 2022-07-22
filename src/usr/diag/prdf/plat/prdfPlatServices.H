@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,7 @@ inline bool atRuntime()
     #endif
 }
 
-inline bool isSmpCoherent() { return false; }
+inline bool isSmpCoherent() { return atRuntime(); }
 
 /**
  * @brief Read data using SCOM

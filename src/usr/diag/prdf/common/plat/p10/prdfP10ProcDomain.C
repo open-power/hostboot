@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2002,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2002,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,20 +117,39 @@ void ProcDomain::Order(ATTENTION_TYPE attentionType)
 // originate from a connected processor and moves it to the front of the domain.
 void ProcDomain::SortForXstop()
 {
+    SYSTEM_DEBUG_CLASS sysDebug;
+
+    // During an IPL, before all nodes are stitched together, system checkstop
+    // analysis will be scoped only to the node that reported the attention.
+    // Therefore, we will should only consider chips belonging to that node.
+    TargetHandle_t nodeTrgt = nullptr;
+    if (!isSmpCoherent())
+    {
+        auto procTrgt = sysDebug.getTargetWithAttn(TYPE_PROC, CHECK_STOP);
+        PRDF_ASSERT(nullptr != procTrgt);
+        nodeTrgt = getConnectedParent(procTrgt, TYPE_NODE);
+    }
+
     // Look for the first chip with active checkstop attentions that did not
     // originate from a connected processor. In case of soft reIPL (i.e. the
     // service processor is not reset), start looking at the end of the domain
     // to avoid possible starvation.
     for (int i = (GetSize() - 1); i >= 0; --i)
     {
-        RuleChip * procChip = LookUp(i);
+        RuleChip* procChip = LookUp(i);
+        auto procTrgt = procChip->getTrgt();
 
-        // Analysis could be at the system or node scope depending on the IPL
-        // state of the nodes. To ensure we analyze to the correct chips, only
-        // check chips from the list send from ATTN to PRD.
-        SYSTEM_DEBUG_CLASS sysDebug;
-        if (!sysDebug.isActiveAttentionPending(procChip->getTrgt(),
-                                               MACHINE_CHECK))
+        // If this is a checkstop on an isolated node, limit the scope of
+        // sorting to the target node. See aboved for details.
+        if ((nullptr != nodeTrgt) &&
+            (nodeTrgt != getConnectedParent(procTrgt, TYPE_NODE)))
+        {
+            continue;
+        }
+
+        // To ensure we analyze to the correct chips, only check chips from the
+        // list sent from ATTN to PRD.
+        if (!sysDebug.isActiveAttentionPending(procTrgt, CHECK_STOP))
         {
             continue;
         }

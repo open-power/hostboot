@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -267,6 +267,23 @@ bool SYSTEM_DEBUG_CLASS::isActiveAttentionPending(
 void SYSTEM_DEBUG_CLASS::Clear(void)
 {
     g_AttnDataList.clear();
+}
+
+// --------------------------------------------------------------------
+
+TargetHandle_t SYSTEM_DEBUG_CLASS::getTargetWithAttn(
+    TYPE i_trgtType, ATTENTION_VALUE_TYPE i_attnType) const
+{
+    for (const auto& e : g_AttnDataList)
+    {
+        if (i_trgtType == getTargetType(e.targetHndl) &&
+            i_attnType == e.attnType)
+        {
+            return e.targetHndl;
+        }
+    }
+
+    return nullptr;
 }
 
 // -------------------------------------------------------------------
