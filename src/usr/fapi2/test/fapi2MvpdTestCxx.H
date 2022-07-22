@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -363,50 +363,19 @@ public:
 
           uint32_t l_huid = TARGETING::get_huid(eqChiplet);
 
-         //PROC0EQ1 has an override set in nimbus's standalone xml, this branch checks it
-         //TODO RTC: 181716 Re-enable #V override test path when we have multiple
-         //          EQs avaiable in the simics model
-//        uint32_t l_pos = eqChiplet->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-//           if(l_pos == 1)
-//           {
-//
-//               numTests++;
-//               if(voltageData.bucketId != 2)
-//               {
-//                   numFails++;
-//                   TS_FAIL("Error:p10_pm_get_poundv_bucket with EQ with HUID = 0x%X should have returned bucket ID 2, not %d",l_huid, voltageData.bucketId);
-//               }
-//
-//               numTests++;
-//               if(*l_bucketAttr != 2)
-//               {
-//                   numFails++;
-//                   TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA EQ with HUID = 0x%X should have bucket ID 2, not %d",l_huid, *l_bucketAttr);
-//               }
-//
-//               if(l_rc)
-//               {
-//                   numFails++;
-//                   TS_FAIL("Error: Error occured while trying to read voltage data from mvpd");
-//                   continue;
-//               }
-//               continue;
-//           }
-          /* TODO RTC 244307: Re-enable testcase when the voltage data is correct
           numTests++;
-          if(voltageData.bucketId != 3)
+          if(voltageData.bucketId != 1)
           {
               numFails++;
-              TS_FAIL("Error:p10_pm_get_poundv_bucket with EQ with HUID = 0x%X should have returned bucket ID 3, not %d",l_huid, voltageData.bucketId);
+              TS_FAIL("Error:p10_pm_get_poundv_bucket with EQ with HUID = 0x%X should have returned bucket ID 1, not %d",l_huid, voltageData.bucketId);
               continue;
           }
           numTests++;
-          if(*l_bucketAttr != 3)
+          if(*l_bucketAttr != 1)
           {
               numFails++;
-              TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA EQ with HUID = 0x%X should have bucket ID 3, not %d",l_huid, *l_bucketAttr);
+              TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA EQ with HUID = 0x%X should have bucket ID 1, not %d",l_huid, *l_bucketAttr);
           }
-          */
 
           if(l_rc)
           {
