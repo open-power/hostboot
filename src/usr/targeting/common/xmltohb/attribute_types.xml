@@ -7685,6 +7685,20 @@
   </attribute>
 
   <attribute>
+    <id>SBE_HANDLES_SMP_TPM_EXTEND</id>
+    <description>
+        0 = HB handles TPM extend
+        1 = SBE handles TPM extend
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>SBE_IS_STARTED</id>
     <description>
         If 0, SBE for the processor has not been started.

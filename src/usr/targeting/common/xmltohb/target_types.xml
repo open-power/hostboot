@@ -1527,6 +1527,9 @@
       <id>PCIE_NVME_PHB_CONFIG</id>
     </attribute>
     <attribute>
+      <id>SBE_HANDLES_SMP_TPM_EXTEND</id>
+    </attribute>
+    <attribute>
       <id>SECURE_VERSION_SEEPROM</id>
     </attribute>
     <attribute>
