@@ -77,6 +77,7 @@ package_directories = {
     "udparsers.b1d00":   "src/usr/vpd/plugins/ebmc",
     "udparsers.b1e00":   "src/usr/secureboot/common/plugins/ebmc",
     "udparsers.b2600":   "src/usr/htmgt/plugins/ebmc",
+    "udparsers.b2a00":   "src/usr/htmgt/plugins/ebmc",
     "udparsers.b3100":   "src/usr/errl/plugins/ebmc/b3100",
     "udparsers.b3600":   "src/usr/expaccess/plugins/ebmc",
     "udparsers.b4500":   "src/usr/spi/plugins/ebmc",
