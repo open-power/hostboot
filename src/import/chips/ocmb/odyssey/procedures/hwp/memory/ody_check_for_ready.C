@@ -63,43 +63,30 @@ extern "C"
         T_CFAM_FSI_W_FSI2PIB_STATUS_t FSI2PIB_STATUS;
 
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-        fapi2::ATTR_IS_SIMULATION_Type l_sim_env;
         fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
-        // Skip delay polls if running on sim
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, l_sim_env),
-                 "Error from FAPI_ATTR_GET (ATTR_IS_SIMULATION)");
+        // Polling until CFAM logic is active
+        uint8_t l_poll = 0;
 
-        if (l_sim_env)
+        while (l_poll < MAX_I2C_ACTIVE_POLL)
         {
-            FAPI_INF("Sim environment, skipping ody_check_for_ready %s", mss::c_str(i_target));
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-        else
-        {
-            // Polling until CFAM logic is active
-            uint8_t l_poll = 0;
+            FAPI_DBG("Loop count: %d", l_poll);
+            FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
+            l_rc = FSI2PIB_STATUS.getCfam(i_target);
 
-            while (l_poll < MAX_I2C_ACTIVE_POLL)
+            if (l_rc == fapi2::FAPI2_RC_SUCCESS)
             {
-                FAPI_DBG("Loop count: %d", l_poll);
-                FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
-                l_rc = FSI2PIB_STATUS.getCfam(i_target);
-
-                if (l_rc == fapi2::FAPI2_RC_SUCCESS)
-                {
-                    FAPI_INF("OCMB %s is active.", mss::c_str(i_target));
-                    break;
-                }
-
-                l_poll++;
+                FAPI_INF("OCMB %s is active.", mss::c_str(i_target));
+                break;
             }
 
-            FAPI_ASSERT(!l_rc,
-                        fapi2::ODYSSEY_I2C_ERROR()
-                        .set_OCMB_TARGET(i_target),
-                        "Odyssey I2C is not active for target %s.", mss::c_str(i_target));
+            l_poll++;
         }
+
+        FAPI_ASSERT(!l_rc,
+                    fapi2::ODYSSEY_I2C_ERROR()
+                    .set_OCMB_TARGET(i_target),
+                    "Odyssey I2C is not active for target %s.", mss::c_str(i_target));
 
     fapi_try_exit:
         FAPI_DBG("ody_check_for_ready: Exiting.");
