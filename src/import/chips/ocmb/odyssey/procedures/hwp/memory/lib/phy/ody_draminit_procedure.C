@@ -83,10 +83,11 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     FAPI_TRY(mss::ody::phy::cleanup_training(i_target));
 
     // 7a. Read the data from the message block structure
-    FAPI_TRY(mss::ody::phy::read_msg_block(i_target, l_msg_block_response))
+    FAPI_TRY(mss::ody::phy::read_msg_block(i_target, l_msg_block_response));
+    mss::ody::phy::display_msg_block(i_target, l_msg_block_response);
 
     // 7b. Load attibutes with the message block contents
-    // TODO:ZEN:MST-1647
+    FAPI_TRY(mss::ody::phy::set_attributes(i_target, l_msg_block_response));
 
     // 8. Error handling
     // TODO:ZEN:MST-1568 Add Odyssey draminit error processing

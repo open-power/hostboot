@@ -44,10 +44,17 @@
 #include <ody_scom_mp_mastr_b0.H>
 #include <ody_scom_mp_drtub0.H>
 #include <mss_odyssey_attribute_getters.H>
+#include <mss_odyssey_attribute_setters.H>
 #include <lib/phy/ody_draminit_utils.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <ody_consts.H>
 #include <generic/memory/lib/utils/num.H>
+#include <lib/dimm/ody_rank.H>
+
+#include <generic/memory/lib/dimm/ddr5/ddr5_mr3.H>
+#include <generic/memory/lib/dimm/ddr5/ddr5_mr10.H>
+#include <generic/memory/lib/dimm/ddr5/ddr5_mr11.H>
+#include <generic/memory/lib/dimm/ddr5/ddr5_mr12.H>
 
 #ifndef __PPE__
     // Included for progress / time left reporting (Cronus only)
@@ -6709,6 +6716,573 @@ fapi2::ReturnCode read_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
                              l_temp16));
     io_struct.PmuInternalRev1 = l_temp16; // uint16_t
 
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper to read mode register data into attributes
+/// @tparam MR the mode register class for which to process data
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank_infos the rank information class vector
+/// @param[in] i_data_array the array of data to process
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+template<typename MR>
+fapi2::ReturnCode read_mr_from_block(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_rank_infos,
+                                     const uint8_t (&i_data_array)[mss::ody::MAX_RANK_PER_PHY][mss::ody::MAX_NIBBLES_PER_PORT])
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_dram_width = 0;
+    MR l_mr(i_target, l_rc);
+
+    FAPI_TRY(mss::attr::get_dram_width(i_target, l_dram_width));
+
+    {
+        const uint8_t INDEX = l_dram_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X8 ? NIBBLES_PER_BYTE : 1;
+
+        // Loops over all ranks
+        for(const auto& l_rank_info : i_rank_infos)
+        {
+            // Loops over all of the DRAM
+            uint8_t l_mc_dram = 0;
+
+            for(uint8_t l_phy_dram = 0; l_phy_dram < mss::ody::MAX_NIBBLES_PER_PORT; l_phy_dram += INDEX, ++l_mc_dram)
+            {
+                FAPI_TRY(l_mr.read_from_data(l_rank_info, i_data_array[l_rank_info.get_phy_rank()][l_phy_dram], l_mc_dram));
+            }
+        }
+    }
+
+    FAPI_TRY(l_mr.set_attribute(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Sets the MR3 attributes based upon the outputted data from draminit
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank_infos the rank information class vector
+/// @param[in] i_msg_blk message block structure
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode set_mr3_attributes(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_rank_infos,
+                                     const _PMU_SMB_DDR5_1D_t& i_msg_block)
+{
+    // Assigns the data from the message block so it is easy to access
+    const uint8_t DATA_ARRAY[mss::ody::MAX_RANK_PER_PHY][mss::ody::MAX_NIBBLES_PER_PORT] =
+    {
+        // Rank 0
+        {
+            i_msg_block.MR3R0Nib0,
+            i_msg_block.MR3R0Nib1,
+            i_msg_block.MR3R0Nib2,
+            i_msg_block.MR3R0Nib3,
+            i_msg_block.MR3R0Nib4,
+            i_msg_block.MR3R0Nib5,
+            i_msg_block.MR3R0Nib6,
+            i_msg_block.MR3R0Nib7,
+            i_msg_block.MR3R0Nib8,
+            i_msg_block.MR3R0Nib9,
+            i_msg_block.MR3R0Nib10,
+            i_msg_block.MR3R0Nib11,
+            i_msg_block.MR3R0Nib12,
+            i_msg_block.MR3R0Nib13,
+            i_msg_block.MR3R0Nib14,
+            i_msg_block.MR3R0Nib15,
+            i_msg_block.MR3R0Nib16,
+            i_msg_block.MR3R0Nib17,
+            i_msg_block.MR3R0Nib18,
+            i_msg_block.MR3R0Nib19,
+        },
+
+        // Rank 1
+        {
+            i_msg_block.MR3R1Nib0,
+            i_msg_block.MR3R1Nib1,
+            i_msg_block.MR3R1Nib2,
+            i_msg_block.MR3R1Nib3,
+            i_msg_block.MR3R1Nib4,
+            i_msg_block.MR3R1Nib5,
+            i_msg_block.MR3R1Nib6,
+            i_msg_block.MR3R1Nib7,
+            i_msg_block.MR3R1Nib8,
+            i_msg_block.MR3R1Nib9,
+            i_msg_block.MR3R1Nib10,
+            i_msg_block.MR3R1Nib11,
+            i_msg_block.MR3R1Nib12,
+            i_msg_block.MR3R1Nib13,
+            i_msg_block.MR3R1Nib14,
+            i_msg_block.MR3R1Nib15,
+            i_msg_block.MR3R1Nib16,
+            i_msg_block.MR3R1Nib17,
+            i_msg_block.MR3R1Nib18,
+            i_msg_block.MR3R1Nib19,
+        },
+
+        // Rank 2
+        {
+            i_msg_block.MR3R2Nib0,
+            i_msg_block.MR3R2Nib1,
+            i_msg_block.MR3R2Nib2,
+            i_msg_block.MR3R2Nib3,
+            i_msg_block.MR3R2Nib4,
+            i_msg_block.MR3R2Nib5,
+            i_msg_block.MR3R2Nib6,
+            i_msg_block.MR3R2Nib7,
+            i_msg_block.MR3R2Nib8,
+            i_msg_block.MR3R2Nib9,
+            i_msg_block.MR3R2Nib10,
+            i_msg_block.MR3R2Nib11,
+            i_msg_block.MR3R2Nib12,
+            i_msg_block.MR3R2Nib13,
+            i_msg_block.MR3R2Nib14,
+            i_msg_block.MR3R2Nib15,
+            i_msg_block.MR3R2Nib16,
+            i_msg_block.MR3R2Nib17,
+            i_msg_block.MR3R2Nib18,
+            i_msg_block.MR3R2Nib19,
+        },
+
+        // Rank 3
+        {
+            i_msg_block.MR3R3Nib0,
+            i_msg_block.MR3R3Nib1,
+            i_msg_block.MR3R3Nib2,
+            i_msg_block.MR3R3Nib3,
+            i_msg_block.MR3R3Nib4,
+            i_msg_block.MR3R3Nib5,
+            i_msg_block.MR3R3Nib6,
+            i_msg_block.MR3R3Nib7,
+            i_msg_block.MR3R3Nib8,
+            i_msg_block.MR3R3Nib9,
+            i_msg_block.MR3R3Nib10,
+            i_msg_block.MR3R3Nib11,
+            i_msg_block.MR3R3Nib12,
+            i_msg_block.MR3R3Nib13,
+            i_msg_block.MR3R3Nib14,
+            i_msg_block.MR3R3Nib15,
+            i_msg_block.MR3R3Nib16,
+            i_msg_block.MR3R3Nib17,
+            i_msg_block.MR3R3Nib18,
+            i_msg_block.MR3R3Nib19,
+        },
+    };
+
+    return read_mr_from_block<mss::ddr5::mr3_data<mss::mc_type::ODYSSEY>>(i_target, i_rank_infos, DATA_ARRAY);
+}
+
+///
+/// @brief Sets the MR10 attributes based upon the outputted data from draminit
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank_infos the rank information class vector
+/// @param[in] i_msg_blk message block structure
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode set_mr10_attributes(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_rank_infos,
+                                      const _PMU_SMB_DDR5_1D_t& i_msg_block)
+{
+    // Assigns the data from the message block so it is easy to access
+    const uint8_t DATA_ARRAY[mss::ody::MAX_RANK_PER_PHY][mss::ody::MAX_NIBBLES_PER_PORT] =
+    {
+        // Rank 0
+        {
+            i_msg_block.VrefDqR0Nib0,
+            i_msg_block.VrefDqR0Nib1,
+            i_msg_block.VrefDqR0Nib2,
+            i_msg_block.VrefDqR0Nib3,
+            i_msg_block.VrefDqR0Nib4,
+            i_msg_block.VrefDqR0Nib5,
+            i_msg_block.VrefDqR0Nib6,
+            i_msg_block.VrefDqR0Nib7,
+            i_msg_block.VrefDqR0Nib8,
+            i_msg_block.VrefDqR0Nib9,
+            i_msg_block.VrefDqR0Nib10,
+            i_msg_block.VrefDqR0Nib11,
+            i_msg_block.VrefDqR0Nib12,
+            i_msg_block.VrefDqR0Nib13,
+            i_msg_block.VrefDqR0Nib14,
+            i_msg_block.VrefDqR0Nib15,
+            i_msg_block.VrefDqR0Nib16,
+            i_msg_block.VrefDqR0Nib17,
+            i_msg_block.VrefDqR0Nib18,
+            i_msg_block.VrefDqR0Nib19,
+        },
+
+        // Rank 1
+        {
+            i_msg_block.VrefDqR1Nib0,
+            i_msg_block.VrefDqR1Nib1,
+            i_msg_block.VrefDqR1Nib2,
+            i_msg_block.VrefDqR1Nib3,
+            i_msg_block.VrefDqR1Nib4,
+            i_msg_block.VrefDqR1Nib5,
+            i_msg_block.VrefDqR1Nib6,
+            i_msg_block.VrefDqR1Nib7,
+            i_msg_block.VrefDqR1Nib8,
+            i_msg_block.VrefDqR1Nib9,
+            i_msg_block.VrefDqR1Nib10,
+            i_msg_block.VrefDqR1Nib11,
+            i_msg_block.VrefDqR1Nib12,
+            i_msg_block.VrefDqR1Nib13,
+            i_msg_block.VrefDqR1Nib14,
+            i_msg_block.VrefDqR1Nib15,
+            i_msg_block.VrefDqR1Nib16,
+            i_msg_block.VrefDqR1Nib17,
+            i_msg_block.VrefDqR1Nib18,
+            i_msg_block.VrefDqR1Nib19,
+        },
+
+        // Rank 2
+        {
+            i_msg_block.VrefDqR2Nib0,
+            i_msg_block.VrefDqR2Nib1,
+            i_msg_block.VrefDqR2Nib2,
+            i_msg_block.VrefDqR2Nib3,
+            i_msg_block.VrefDqR2Nib4,
+            i_msg_block.VrefDqR2Nib5,
+            i_msg_block.VrefDqR2Nib6,
+            i_msg_block.VrefDqR2Nib7,
+            i_msg_block.VrefDqR2Nib8,
+            i_msg_block.VrefDqR2Nib9,
+            i_msg_block.VrefDqR2Nib10,
+            i_msg_block.VrefDqR2Nib11,
+            i_msg_block.VrefDqR2Nib12,
+            i_msg_block.VrefDqR2Nib13,
+            i_msg_block.VrefDqR2Nib14,
+            i_msg_block.VrefDqR2Nib15,
+            i_msg_block.VrefDqR2Nib16,
+            i_msg_block.VrefDqR2Nib17,
+            i_msg_block.VrefDqR2Nib18,
+            i_msg_block.VrefDqR2Nib19,
+        },
+
+        // Rank 3
+        {
+            i_msg_block.VrefDqR3Nib0,
+            i_msg_block.VrefDqR3Nib1,
+            i_msg_block.VrefDqR3Nib2,
+            i_msg_block.VrefDqR3Nib3,
+            i_msg_block.VrefDqR3Nib4,
+            i_msg_block.VrefDqR3Nib5,
+            i_msg_block.VrefDqR3Nib6,
+            i_msg_block.VrefDqR3Nib7,
+            i_msg_block.VrefDqR3Nib8,
+            i_msg_block.VrefDqR3Nib9,
+            i_msg_block.VrefDqR3Nib10,
+            i_msg_block.VrefDqR3Nib11,
+            i_msg_block.VrefDqR3Nib12,
+            i_msg_block.VrefDqR3Nib13,
+            i_msg_block.VrefDqR3Nib14,
+            i_msg_block.VrefDqR3Nib15,
+            i_msg_block.VrefDqR3Nib16,
+            i_msg_block.VrefDqR3Nib17,
+            i_msg_block.VrefDqR3Nib18,
+            i_msg_block.VrefDqR3Nib19,
+        },
+    };
+
+    return read_mr_from_block<mss::ddr5::mr10_data<mss::mc_type::ODYSSEY>>(i_target, i_rank_infos, DATA_ARRAY);
+}
+
+///
+/// @brief Sets the MR11 attributes based upon the outputted data from draminit
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank_infos the rank information class vector
+/// @param[in] i_msg_blk message block structure
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode set_mr11_attributes(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_rank_infos,
+                                      const _PMU_SMB_DDR5_1D_t& i_msg_block)
+{
+    // Assigns the data from the message block so it is easy to access
+    uint8_t DATA_ARRAY[mss::ody::MAX_RANK_PER_PHY][mss::ody::MAX_NIBBLES_PER_PORT] =
+    {
+        // Rank 0
+        {
+            i_msg_block.VrefCAR0Nib0,
+            i_msg_block.VrefCAR0Nib1,
+            i_msg_block.VrefCAR0Nib2,
+            i_msg_block.VrefCAR0Nib3,
+            i_msg_block.VrefCAR0Nib4,
+            i_msg_block.VrefCAR0Nib5,
+            i_msg_block.VrefCAR0Nib6,
+            i_msg_block.VrefCAR0Nib7,
+            i_msg_block.VrefCAR0Nib8,
+            i_msg_block.VrefCAR0Nib9,
+            i_msg_block.VrefCAR0Nib10,
+            i_msg_block.VrefCAR0Nib11,
+            i_msg_block.VrefCAR0Nib12,
+            i_msg_block.VrefCAR0Nib13,
+            i_msg_block.VrefCAR0Nib14,
+            i_msg_block.VrefCAR0Nib15,
+            i_msg_block.VrefCAR0Nib16,
+            i_msg_block.VrefCAR0Nib17,
+            i_msg_block.VrefCAR0Nib18,
+            i_msg_block.VrefCAR0Nib19,
+        },
+
+        // Rank 1
+        {
+            i_msg_block.VrefCAR1Nib0,
+            i_msg_block.VrefCAR1Nib1,
+            i_msg_block.VrefCAR1Nib2,
+            i_msg_block.VrefCAR1Nib3,
+            i_msg_block.VrefCAR1Nib4,
+            i_msg_block.VrefCAR1Nib5,
+            i_msg_block.VrefCAR1Nib6,
+            i_msg_block.VrefCAR1Nib7,
+            i_msg_block.VrefCAR1Nib8,
+            i_msg_block.VrefCAR1Nib9,
+            i_msg_block.VrefCAR1Nib10,
+            i_msg_block.VrefCAR1Nib11,
+            i_msg_block.VrefCAR1Nib12,
+            i_msg_block.VrefCAR1Nib13,
+            i_msg_block.VrefCAR1Nib14,
+            i_msg_block.VrefCAR1Nib15,
+            i_msg_block.VrefCAR1Nib16,
+            i_msg_block.VrefCAR1Nib17,
+            i_msg_block.VrefCAR1Nib18,
+            i_msg_block.VrefCAR1Nib19,
+        },
+
+        // Rank 2
+        {
+            i_msg_block.VrefCAR2Nib0,
+            i_msg_block.VrefCAR2Nib1,
+            i_msg_block.VrefCAR2Nib2,
+            i_msg_block.VrefCAR2Nib3,
+            i_msg_block.VrefCAR2Nib4,
+            i_msg_block.VrefCAR2Nib5,
+            i_msg_block.VrefCAR2Nib6,
+            i_msg_block.VrefCAR2Nib7,
+            i_msg_block.VrefCAR2Nib8,
+            i_msg_block.VrefCAR2Nib9,
+            i_msg_block.VrefCAR2Nib10,
+            i_msg_block.VrefCAR2Nib11,
+            i_msg_block.VrefCAR2Nib12,
+            i_msg_block.VrefCAR2Nib13,
+            i_msg_block.VrefCAR2Nib14,
+            i_msg_block.VrefCAR2Nib15,
+            i_msg_block.VrefCAR2Nib16,
+            i_msg_block.VrefCAR2Nib17,
+            i_msg_block.VrefCAR2Nib18,
+            i_msg_block.VrefCAR2Nib19,
+        },
+
+        // Rank 3
+        {
+            i_msg_block.VrefCAR3Nib0,
+            i_msg_block.VrefCAR3Nib1,
+            i_msg_block.VrefCAR3Nib2,
+            i_msg_block.VrefCAR3Nib3,
+            i_msg_block.VrefCAR3Nib4,
+            i_msg_block.VrefCAR3Nib5,
+            i_msg_block.VrefCAR3Nib6,
+            i_msg_block.VrefCAR3Nib7,
+            i_msg_block.VrefCAR3Nib8,
+            i_msg_block.VrefCAR3Nib9,
+            i_msg_block.VrefCAR3Nib10,
+            i_msg_block.VrefCAR3Nib11,
+            i_msg_block.VrefCAR3Nib12,
+            i_msg_block.VrefCAR3Nib13,
+            i_msg_block.VrefCAR3Nib14,
+            i_msg_block.VrefCAR3Nib15,
+            i_msg_block.VrefCAR3Nib16,
+            i_msg_block.VrefCAR3Nib17,
+            i_msg_block.VrefCAR3Nib18,
+            i_msg_block.VrefCAR3Nib19,
+        },
+    };
+
+    return read_mr_from_block<mss::ddr5::mr11_data<mss::mc_type::ODYSSEY>>(i_target, i_rank_infos, DATA_ARRAY);
+}
+
+///
+/// @brief Sets the MR12 attributes based upon the outputted data from draminit
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_rank_infos the rank information class vector
+/// @param[in] i_msg_blk message block structure
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode set_mr12_attributes(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                      const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_rank_infos,
+                                      const _PMU_SMB_DDR5_1D_t& i_msg_block)
+{
+    // Assigns the data from the message block so it is easy to access
+    uint8_t DATA_ARRAY[mss::ody::MAX_RANK_PER_PHY][mss::ody::MAX_NIBBLES_PER_PORT] =
+    {
+        // Rank 0
+        {
+            i_msg_block.VrefCSR0Nib0,
+            i_msg_block.VrefCSR0Nib1,
+            i_msg_block.VrefCSR0Nib2,
+            i_msg_block.VrefCSR0Nib3,
+            i_msg_block.VrefCSR0Nib4,
+            i_msg_block.VrefCSR0Nib5,
+            i_msg_block.VrefCSR0Nib6,
+            i_msg_block.VrefCSR0Nib7,
+            i_msg_block.VrefCSR0Nib8,
+            i_msg_block.VrefCSR0Nib9,
+            i_msg_block.VrefCSR0Nib10,
+            i_msg_block.VrefCSR0Nib11,
+            i_msg_block.VrefCSR0Nib12,
+            i_msg_block.VrefCSR0Nib13,
+            i_msg_block.VrefCSR0Nib14,
+            i_msg_block.VrefCSR0Nib15,
+            i_msg_block.VrefCSR0Nib16,
+            i_msg_block.VrefCSR0Nib17,
+            i_msg_block.VrefCSR0Nib18,
+            i_msg_block.VrefCSR0Nib19,
+        },
+
+        // Rank 1
+        {
+            i_msg_block.VrefCSR1Nib0,
+            i_msg_block.VrefCSR1Nib1,
+            i_msg_block.VrefCSR1Nib2,
+            i_msg_block.VrefCSR1Nib3,
+            i_msg_block.VrefCSR1Nib4,
+            i_msg_block.VrefCSR1Nib5,
+            i_msg_block.VrefCSR1Nib6,
+            i_msg_block.VrefCSR1Nib7,
+            i_msg_block.VrefCSR1Nib8,
+            i_msg_block.VrefCSR1Nib9,
+            i_msg_block.VrefCSR1Nib10,
+            i_msg_block.VrefCSR1Nib11,
+            i_msg_block.VrefCSR1Nib12,
+            i_msg_block.VrefCSR1Nib13,
+            i_msg_block.VrefCSR1Nib14,
+            i_msg_block.VrefCSR1Nib15,
+            i_msg_block.VrefCSR1Nib16,
+            i_msg_block.VrefCSR1Nib17,
+            i_msg_block.VrefCSR1Nib18,
+            i_msg_block.VrefCSR1Nib19,
+        },
+
+        // Rank 2
+        {
+            i_msg_block.VrefCSR2Nib0,
+            i_msg_block.VrefCSR2Nib1,
+            i_msg_block.VrefCSR2Nib2,
+            i_msg_block.VrefCSR2Nib3,
+            i_msg_block.VrefCSR2Nib4,
+            i_msg_block.VrefCSR2Nib5,
+            i_msg_block.VrefCSR2Nib6,
+            i_msg_block.VrefCSR2Nib7,
+            i_msg_block.VrefCSR2Nib8,
+            i_msg_block.VrefCSR2Nib9,
+            i_msg_block.VrefCSR2Nib10,
+            i_msg_block.VrefCSR2Nib11,
+            i_msg_block.VrefCSR2Nib12,
+            i_msg_block.VrefCSR2Nib13,
+            i_msg_block.VrefCSR2Nib14,
+            i_msg_block.VrefCSR2Nib15,
+            i_msg_block.VrefCSR2Nib16,
+            i_msg_block.VrefCSR2Nib17,
+            i_msg_block.VrefCSR2Nib18,
+            i_msg_block.VrefCSR2Nib19,
+        },
+
+        // Rank 3
+        {
+            i_msg_block.VrefCSR3Nib0,
+            i_msg_block.VrefCSR3Nib1,
+            i_msg_block.VrefCSR3Nib2,
+            i_msg_block.VrefCSR3Nib3,
+            i_msg_block.VrefCSR3Nib4,
+            i_msg_block.VrefCSR3Nib5,
+            i_msg_block.VrefCSR3Nib6,
+            i_msg_block.VrefCSR3Nib7,
+            i_msg_block.VrefCSR3Nib8,
+            i_msg_block.VrefCSR3Nib9,
+            i_msg_block.VrefCSR3Nib10,
+            i_msg_block.VrefCSR3Nib11,
+            i_msg_block.VrefCSR3Nib12,
+            i_msg_block.VrefCSR3Nib13,
+            i_msg_block.VrefCSR3Nib14,
+            i_msg_block.VrefCSR3Nib15,
+            i_msg_block.VrefCSR3Nib16,
+            i_msg_block.VrefCSR3Nib17,
+            i_msg_block.VrefCSR3Nib18,
+            i_msg_block.VrefCSR3Nib19,
+        },
+    };
+
+    return read_mr_from_block<mss::ddr5::mr12_data<mss::mc_type::ODYSSEY>>(i_target, i_rank_infos, DATA_ARRAY);
+}
+
+///
+/// @brief Sets the mode register attributes based upon the outputted data from draminit
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_msg_blk message block structure
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode set_mr_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                    const _PMU_SMB_DDR5_1D_t& i_msg_block)
+{
+    // Gets the rank information vector
+    std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
+
+    FAPI_TRY(mss::rank::ranks_on_port(i_target, l_rank_infos));
+
+    // Checks that we have at least one rank (we should)
+    if(l_rank_infos.empty())
+    {
+        FAPI_INF( TARGTIDFORMAT "has no ranks! Skipping setting the MR attributes", TARGTID );
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    {
+        // Gets the DIMM target - any DIMM target should work as Odyssey should only have one DIMM
+        const auto l_dimm = l_rank_infos[0].get_dimm_target();
+
+        // Sets the mode register attributes
+        FAPI_TRY(set_mr3_attributes(l_dimm, l_rank_infos, i_msg_block));
+        FAPI_TRY(set_mr10_attributes(l_dimm, l_rank_infos, i_msg_block));
+        FAPI_TRY(set_mr11_attributes(l_dimm, l_rank_infos, i_msg_block));
+        FAPI_TRY(set_mr12_attributes(l_dimm, l_rank_infos, i_msg_block));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Sets the generic attributes based upon the outputted data from draminit
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_msg_blk message block structure
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode set_generic_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const _PMU_SMB_DDR5_1D_t& i_msg_block)
+{
+    FAPI_TRY(mss::attr::set_ody_draminit_fw_revision(i_target, i_msg_block.PmuRevision));
+    FAPI_TRY(mss::attr::set_ody_draminit_internal_fw_revision0(i_target, i_msg_block.PmuInternalRev0));
+    FAPI_TRY(mss::attr::set_ody_draminit_internal_fw_revision1(i_target, i_msg_block.PmuInternalRev1));
+    FAPI_TRY(mss::attr::set_ody_draminit_fw_data_addr_offset(i_target, i_msg_block.ResultAddrOffset));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Sets the attributes based upon the outputted data from draminit
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_msg_blk message block structure
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode set_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                 const _PMU_SMB_DDR5_1D_t& i_msg_block)
+{
+    FAPI_TRY(set_mr_attributes(i_target, i_msg_block));
+    FAPI_TRY(set_generic_attributes(i_target, i_msg_block));
 
 fapi_try_exit:
     return fapi2::current_err;

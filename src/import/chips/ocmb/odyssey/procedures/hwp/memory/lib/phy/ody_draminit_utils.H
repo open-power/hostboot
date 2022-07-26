@@ -321,6 +321,33 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 fapi2::ReturnCode read_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                  _PMU_SMB_DDR5_1D_t& io_struct);
 
+///
+/// @brief Sets the mode register attributes based upon the outputted data from draminit
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_msg_blk message block structure
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode set_mr_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                    const _PMU_SMB_DDR5_1D_t& i_msg_block);
+
+///
+/// @brief Sets the generic attributes based upon the outputted data from draminit
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_msg_blk message block structure
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode set_generic_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const _PMU_SMB_DDR5_1D_t& i_msg_block);
+
+///
+/// @brief Sets the attributes based upon the outputted data from draminit
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_msg_blk message block structure
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode set_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                 const _PMU_SMB_DDR5_1D_t& i_msg_block);
+
 /// @brief Prints the fields from the message block structure
 /// @param[in] i_target the target on which to operate
 /// @param[in] i_msg_blk message block structure

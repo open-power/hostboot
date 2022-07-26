@@ -40,6 +40,7 @@
 #include <fapi2.H>
 
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_rank.H>
@@ -206,6 +207,16 @@ class mr3_data
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief Sets the attribute for this MR
+        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode set_attribute(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+        {
+            return mss::attr::set_wl_internal_cycle_alignment(i_target, iv_wr_lvl_internal_lower);
+        }
+
         enum
         {
             LOWER = 4,
@@ -220,8 +231,11 @@ class mr3_data
         ///
         /// @brief Displays the information that makes up the MR
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_rank the input rank to print
+        /// @param[in] i_dram_number the input DRAM number
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_rank,
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint64_t i_rank,
                      const uint8_t i_dram_number) const
         {
             // Inputs were checked in the public display method

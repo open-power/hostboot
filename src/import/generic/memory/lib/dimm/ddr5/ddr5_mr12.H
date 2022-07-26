@@ -40,6 +40,7 @@
 #include <fapi2.H>
 
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_rank.H>
@@ -196,6 +197,16 @@ class mr12_data
             iv_vrefcs_value[i_rank_info.get_dimm_rank()][i_dram_number] = i_mr_data;
         fapi_try_exit:
             return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Sets the attribute for this MR
+        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode set_attribute(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+        {
+            return mss::attr::set_ddr5_dram_vrefcs(i_target, iv_vrefcs_value);
         }
 
         // All 8 bits are used, no need for bit enumerators
