@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2205,49 +2205,6 @@ errlHndl_t FsiDD::initMasterControl(TARGETING::Target* i_master,
                 databuf |= 0x00000020;
             }
 
-            //Hardware Bug HW204566 on Murano DD1.x requires legacy
-            //  mode to be enabled
-            if( (i_master->getAttr<TARGETING::ATTR_MODEL>()
-                                      == TARGETING::MODEL_MURANO) )
-            {
-                uint32_t ec_level = 0x00;
-                uint32_t idec = 0;
-                if( i_master != iv_master )
-                {
-                    // get the data via FSI (scom engine)
-                    FSI::FsiAddrInfo_t addr_info( i_master, 0x1028 );
-                    l_err = genFullFsiAddr( addr_info );
-                    if( l_err ) { break; }
-
-                    // perform the read operation
-                    l_err = read( addr_info, &idec );
-                    if( l_err ) { break; }
-                    TRACDCOMP( g_trac_fsi, "FSI=%X", idec );
-                }
-                else
-                {
-                    // have to use the scom version on the master chip
-                    uint32_t tmp_data[2];
-                    size_t scom_size = sizeof(scom_data);
-                    l_err = deviceOp( DeviceFW::READ,
-                                      TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                                      tmp_data,
-                                      scom_size,
-                                      DEVICE_XSCOM_ADDRESS(0x000F000F) );
-                    if( l_err ) { break; }
-
-                    idec = tmp_data[0];
-                }
-                ec_level = (idec & 0xF0000000) >> 24;
-                ec_level |= ((idec & 0x00F00000) >> 20);
-
-                TRACDCOMP( g_trac_fsi, "%.8X: EC=%X", TARGETING::get_huid(i_master), ec_level );
-                if( ec_level < 0x20 )
-                {
-                    // 25=clock/4 (legacy) mode
-                    databuf |= 0x00000040;
-                }
-            }
             l_err = write( ctl_reg|FSI_MMODE_000, &databuf );
             if( l_err ) { break; }
         }
