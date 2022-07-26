@@ -69,6 +69,9 @@ enum sizes
     // Any code that converts DIMM ranks to port ranks should use the rank API
     MAX_RANK_PER_DIMM = 4,
 
+    // The maximum number of ranks in the PHY
+    MAX_RANK_PER_PHY = 4,
+
     // This is the maximum number of main ranks per DIMM supported by the hardware
     HW_MAX_RANK_PER_DIMM = 2,
 
