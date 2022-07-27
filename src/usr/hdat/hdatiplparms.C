@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -659,42 +659,9 @@ void HdatIplParms::hdatGetSystemParamters()
 
     this->iv_hdatIPLParams->iv_sysParms.hdatMemoryScrubbing = 0;
 
-    // TODO: CQ SW533629 - remove use of ATTR_OPEN_POWER_TURBO_MODE_SUPPORTED for p10
-#if 0
-    // Get SPPL information
-    uint32_t l_numCores;
-
-    TARGETING::ATTR_OPEN_POWER_TURBO_MODE_SUPPORTED_type l_turboModeSupported;
-    if(l_pSysTarget->tryGetAttr
-                             <TARGETING::ATTR_OPEN_POWER_TURBO_MODE_SUPPORTED>
-                                                        (l_turboModeSupported))
-    {
-        HDAT::hdatGetNumberOfCores(l_numCores);
-        HDAT_DBG("got number of cores %d",l_numCores);
-
-        if(l_turboModeSupported == true)
-        {
-            this->iv_hdatIPLParams->iv_sysParms.hdatCurrentSPPLValue =
-                                            HDAT_TURBO_CORE_MODE_PART_SIZE_128;
-        }
-        else if( l_numCores == 6 )
-        {
-            this->iv_hdatIPLParams->iv_sysParms.hdatCurrentSPPLValue =
-                                          HDAT_NONTURBO_SIX_CORE_PART_SIZE_256;
-        }
-        else if( l_numCores == 8 )
-        {
-            this->iv_hdatIPLParams->iv_sysParms.hdatCurrentSPPLValue =
-                                        HDAT_NONTURBO_EIGHT_CORE_PART_SIZE_256;
-        }
-    }
-    else
-    {
-        HDAT_ERR("Error in getting OPEN_POWER_TURBO_MODE_SUPPORTED attribute");
-    }
-#else
-        HDAT_ERR("OPEN_POWER_TURBO_MODE_SUPPORTED attribute not supported in p10");
-#endif
+    // This was only having valid data in P9 so removing the value filling
+    // from P10
+    this->iv_hdatIPLParams->iv_sysParms.hdatCurrentSPPLValue = 0;
 
     this->iv_hdatIPLParams->iv_sysParms.usePoreSleep  = 0x01;
 
