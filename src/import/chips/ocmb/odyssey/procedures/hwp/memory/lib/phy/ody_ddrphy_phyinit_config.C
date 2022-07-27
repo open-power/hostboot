@@ -1006,8 +1006,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                       TARGTID, pstate,  i_user_input_basic.Frequency[pstate]);
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Programming PllCtrl1::PllCpIntCtrl to 0x%x based on DfiClk frequency = %d.",
-                      PllCpIntCtrl,
-                      TARGTID, i_user_input_basic.Frequency[pstate] / 2);
+                      TARGTID, PllCpIntCtrl, i_user_input_basic.Frequency[pstate] / 2);
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d,  Memclk=%dMHz",
                       TARGTID, pstate,  i_user_input_basic.Frequency[pstate]);
