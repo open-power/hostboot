@@ -781,4 +781,56 @@
 
     <!-- end draminit structure (message block) inputs section -->
 
+    <!-- begin draminit structure (message block) outputs section -->
+
+    <attribute>
+        <id>ATTR_ODY_DRAMINIT_FW_REVISION</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            DRAMINIT's firmware binary's revision
+        </description>
+        <valueType>uint16</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>ody_draminit_fw_revision</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_DRAMINIT_INTERNAL_FW_REVISION0</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            DRAMINIT's firmware internal binary's revision 0
+        </description>
+        <valueType>uint16</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>ody_draminit_internal_fw_revision0</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_DRAMINIT_INTERNAL_FW_REVISION1</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            DRAMINIT's firmware internal binary's revision 1
+        </description>
+        <valueType>uint16</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>ody_draminit_internal_fw_revision1</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_DRAMINIT_FW_DATA_ADDR_OFFSET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            DRAMINIT's firmware's address offset for additional data
+        </description>
+        <valueType>uint16</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>ody_draminit_fw_data_addr_offset</mssAccessorName>
+    </attribute>
+
+    <!-- end draminit structure (message block) outputs section -->
+
 </attributes>
