@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -30,6 +30,13 @@
     ############################################################################
     # EQ_CORE_FIR FFDC Regs
     ############################################################################
+
+    register HV_PR_STATE
+    {
+        name        "Hypervisor Current State";
+        scomaddr    0x2002840D;
+        capture     group eq_core_fir_ffdc;
+    };
 
     register PC_FIR_HOLD_OUT
     {

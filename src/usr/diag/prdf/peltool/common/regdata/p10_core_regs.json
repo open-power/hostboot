@@ -189,6 +189,11 @@
         "description": "Core ISU Holdout 3",
         "name": "ISU_HOLD_OUT3"
     },
+    "0x99b4": {
+        "address": "0x000000002002840d",
+        "description": "Hypervisor Current State",
+        "name": "HV_PR_STATE"
+    },
     "0xae4d": {
         "address": "0x0000000020028451",
         "description": "Core PC FIR Holdout",
