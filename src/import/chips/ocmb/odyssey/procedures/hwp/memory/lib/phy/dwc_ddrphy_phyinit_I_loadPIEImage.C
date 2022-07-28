@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -52,6 +52,7 @@
 #include <lib/phy/ody_ddrphy_phyinit_structs.H>
 #include <lib/phy/ody_ddrphy_phyinit_config.H>
 #include <lib/phy/ody_ddrphy_csr_defines.H>
+#include <mss_odyssey_attribute_getters.H>
 
 ///
 /// @brief Translates from the Synopsys register information, does the scom, and adds delay
@@ -107,11 +108,31 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
     user_input_basic_t l_user_input_basic;
     user_input_advanced_t l_user_input_advanced;
     user_input_dram_config_t l_dram_config;
+    uint8_t l_data_source = 0;
 
-    FAPI_TRY(init_phy_structs( i_target,
-                               l_user_input_basic,
-                               l_user_input_advanced,
-                               l_dram_config));
+    // TODO: Zen:MST-1895 Make a helper function for this or remove the hardcodes
+    FAPI_TRY(mss::attr::get_ody_msg_block_data_source(i_target, l_data_source));
+
+    if (l_data_source == fapi2::ENUM_ATTR_ODY_MSG_BLOCK_DATA_SOURCE_USE_HARDCODES)
+    {
+        FAPI_TRY(init_phy_structs_hardcodes(i_target,
+                                            l_user_input_basic,
+                                            l_user_input_advanced,
+                                            l_dram_config),
+                 TARGTIDFORMAT "failed init_phy_structs", TARGTID);
+    }
+    else
+    {
+        FAPI_TRY(setup_phy_basic_struct(i_target,
+                                        l_user_input_basic),
+                 TARGTIDFORMAT "failed setup_phy_basic_struct", TARGTID);
+        FAPI_TRY(setup_phy_advanced_struct(i_target,
+                                           l_user_input_advanced),
+                 TARGTIDFORMAT "failed setup_phy_advanced_struct", TARGTID);
+        FAPI_TRY(setup_dram_input_struct(i_target,
+                                         l_dram_config),
+                 TARGTIDFORMAT "failed setup_dram_input_struct", TARGTID);
+    }
 
     FAPI_TRY(dwc_ddrphy_phyinit_I_loadPIEImage( i_target,
              l_runtime_config,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -44,8 +44,8 @@
 
 #include <fapi2.H>
 
+#include <generic/memory/lib/utils/num.H>
 #include <lib/phy/ody_ddrphy_phyinit_structs.H>
-
 ///
 /// @brief Maps from drive strength in Ohms to the register value
 /// @param[in] DrvStren_ohm drive strength in ohms
@@ -129,12 +129,11 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 /// @param[in,out] io_user_input_dram_config - DRAM configuration inputs needed for PHY init (MRS/RCW)
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 /// @note Currently, hardcoding these structures for simulation purposes
-/// TODO:ZEN:MST-1591 Convert PY init structures to be initialized from attributes
 ///
-fapi2::ReturnCode init_phy_structs( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                                    user_input_basic_t& io_user_input_basic,
-                                    user_input_advanced_t& io_user_input_advanced,
-                                    user_input_dram_config_t& io_user_input_dram_config);
+fapi2::ReturnCode init_phy_structs_hardcodes( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        user_input_basic_t& io_user_input_basic,
+        user_input_advanced_t& io_user_input_advanced,
+        user_input_dram_config_t& io_user_input_dram_config);
 
 ///
 /// @brief Runs PHY init on a specific port
@@ -144,5 +143,31 @@ fapi2::ReturnCode init_phy_structs( const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
 /// TRGTID uses i_target in a macro and we want the port target (not i_target)
 ///
 fapi2::ReturnCode run_phy_init( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+/// @brief Initializes the PHY init the PHY basic structure
+/// @param[in] i_target - the memory port on which to operate
+/// @param[in,out] io_user_input_basic - Synopsys basic user input structure
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode setup_phy_basic_struct(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        user_input_basic_t& io_user_input_basic);
+
+/// @brief Initializes the PHY init the PHY advanced structure
+/// @param[in] i_target - the memory port on which to operate
+/// @param[in,out] io_user_input_advanced - Synopsys advanced user input structure
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        user_input_advanced_t& io_user_input_advanced);
+
+///
+/// @brief Initializes the fields in the dram_config struct needed for phy init.
+/// @param[in] i_target - the memory port on which to operate
+/// @param[in,out] io_user_input_dram_config - DRAM configuration inputs needed for PHY init (MRS/RCW)
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode setup_dram_input_struct(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        user_input_dram_config_t& io_user_input_dram_config);
+
 
 #endif

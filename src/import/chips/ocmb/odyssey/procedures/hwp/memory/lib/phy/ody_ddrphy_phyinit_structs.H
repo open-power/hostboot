@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -58,9 +58,8 @@ typedef enum DimmTypes
     RDIMM,
     LRDIMM,
     NODIMM,
-    NVDIMMP
+    NVDIMMP,
 } DimmType_t;
-
 
 typedef struct user_input_basic
 {

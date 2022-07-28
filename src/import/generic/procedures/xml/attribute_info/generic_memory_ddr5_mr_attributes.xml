@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -234,6 +234,7 @@
     <valueType>uint8</valueType>
     <writeable/>
     <enum>TCK2 = 1, TCK3 = 2, TCK4 = 3</enum>
+    <default>TCK2</default>
     <mssAccessorName>ddr5_dram_wr_preamble</mssAccessorName>
   </attribute>
 

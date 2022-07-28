@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2464,6 +2464,7 @@ fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Targe
     FAPI_TRY(mss::attr::get_ody_msg_block_data_source(i_target, l_data_source));
 
     // Configure the message block structure
+    // TODO: Zen:MST-1895 Make a helper function for this or remove the hardcodes
     if (l_data_source == fapi2::ENUM_ATTR_ODY_MSG_BLOCK_DATA_SOURCE_USE_HARDCODES)
     {
         FAPI_TRY(configure_dram_train_message_block_hardcodes(i_target, io_msg_block));
