@@ -184,6 +184,28 @@ $(call BUILD_GENERATED)
 ##
 
 
+# Generate odyssey_memory_accessors header file
+GENERATED = gen_ody_accessors
+COMMAND = gen_accessors.pl
+$(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
+
+$(GENERATED)_PATH = ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/lib/
+$(GENERATED)_FILE_PREFIX = mss_odyssey
+
+SOURCES += $(shell find $(IMPORT_PATH)/chips/ocmb/odyssey/procedures/xml/attribute_info/ -type f)
+
+CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_odyssey_attribute_getters.H
+CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_odyssey_attribute_setters.H
+CLEAN_TARGETS += ${$(GENERATED)_PATH}/.gen_exp_accessors.built
+
+define gen_exp_accessors_RUN
+		$(C1) mkdir $$($(GENERATED)_PATH) -p
+		$(C1) perl -I$(IMPORT_PATH)/generic/memory/tools/ $$< --system=P10 --output-dir=$$($(GENERATED)_PATH) --output-file-prefix=$$($(GENERATED)_FILE_PREFIX) $$(filter-out $$<,$$^)
+endef
+$(call BUILD_GENERATED)
+##
+
+
 ## Generate mss_p10 header file
 GENERATED = gen_p10_accessors
 COMMAND = gen_accessors.pl
