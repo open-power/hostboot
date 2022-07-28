@@ -2607,18 +2607,6 @@ errlHndl_t FsiDD::checkForErrors( FSI::FsiAddrInfo_t& i_addrInfo )
         return NULL;
     }
 
-    //@fixme-RTC:87909 - temporary simics workaround
-    //Skip MAEB check on Brazos for now
-    if( Util::isSimicsRunning() )
-    {
-        if( iv_master->getAttr<TARGETING::ATTR_MODEL>()
-            == TARGETING::MODEL_VENICE )
-        {
-            return NULL;
-        }
-    }
-
-
     uint32_t maeb_reg = getControlReg(i_addrInfo.accessInfo.type)|FSI_MAEB_070;
 
     //check for general errors
