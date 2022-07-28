@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 
 #include <string>
 #include <list>
-#include <netinet/in.h>
+#include <endian.h>
 
 #include <prdrExpr.H>
 #include <prdrCommon.H>
@@ -184,7 +184,7 @@ class Group
             {
                 PRDR_FWRITE(&cv_op, 1, 1, i_file);
 
-                uint16_t l_ruleCount = htons(cv_rules.size());
+                uint16_t l_ruleCount = htobe16(cv_rules.size());
                 PRDR_FWRITE(&l_ruleCount, sizeof(l_ruleCount), 1, i_file);
 
                 // Write flags for GROUP op.

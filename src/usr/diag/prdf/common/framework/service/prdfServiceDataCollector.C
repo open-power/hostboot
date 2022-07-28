@@ -58,14 +58,14 @@ namespace PRDF
 
 inline void buffer_append(uint8_t *&ptr, uint32_t value)
 {
-    uint32_t l_tmp32 = htonl(value);
+    uint32_t l_tmp32 = htobe32(value);
     memcpy(ptr, &l_tmp32, sizeof(uint32_t));
     ptr += sizeof(uint32_t);
 }
 
 inline void buffer_append(uint8_t *&ptr, uint16_t value)
 {
-    uint16_t l_tmp16 = htons(value);
+    uint16_t l_tmp16 = htobe16(value);
     memcpy(ptr, &l_tmp16, sizeof(uint16_t));
     ptr += sizeof(uint16_t);
 }
@@ -81,7 +81,7 @@ inline uint32_t buffer_get32(const uint8_t * &ptr)
     uint32_t l_tmp32 = 0;
     memcpy(&l_tmp32, ptr, sizeof(uint32_t));
     ptr += sizeof(uint32_t);
-    return ntohl(l_tmp32);
+    return be32toh(l_tmp32);
 }
 
 inline uint16_t buffer_get16(const uint8_t * &ptr)
@@ -89,7 +89,7 @@ inline uint16_t buffer_get16(const uint8_t * &ptr)
     uint16_t l_tmp16 = 0;
     memcpy(&l_tmp16, ptr, sizeof(uint16_t));
     ptr += sizeof(uint16_t);
-    return ntohs(l_tmp16);
+    return be16toh(l_tmp16);
 }
 
 inline uint8_t buffer_get8(const uint8_t * &ptr)
@@ -103,7 +103,7 @@ inline uint8_t buffer_get8(const uint8_t * &ptr)
 inline void buffer_append( uint8_t *&ptr, const TARGETING::TargetHandle_t i_pGivenHandle )
 {
     HUID l_targetHuid = PlatServices::getHuid( i_pGivenHandle );
-    l_targetHuid = htonl( l_targetHuid );
+    l_targetHuid = htobe32( l_targetHuid );
     uint32_t l_size = sizeof( l_targetHuid );
     memcpy( ptr, &l_targetHuid, l_size );
     ptr += l_size;
@@ -114,7 +114,7 @@ inline TARGETING::TargetHandle_t buffer_getTarget( const uint8_t *&ptr )
     HUID l_chipHuid = INVALID_HUID;
     uint32_t l_size = sizeof( l_chipHuid );
     memcpy( &l_chipHuid, ptr, l_size );
-    l_chipHuid = ntohl( l_chipHuid );
+    l_chipHuid = be32toh( l_chipHuid );
     TARGETING::TargetHandle_t l_tempChipHandle = PlatServices::getTarget( l_chipHuid );
     ptr += l_size;
 

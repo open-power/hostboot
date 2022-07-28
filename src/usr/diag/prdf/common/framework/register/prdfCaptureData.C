@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -205,13 +205,13 @@ uint32_t CaptureData::Copy( uint8_t * i_buffer, uint32_t i_bufferSize ) const
             curTrgt = entry.chipHandle;
 
             // Add HUID to buffer.
-            __bufferAdd( curIdx, htonl(PlatServices::getHuid(curTrgt)) );
+            __bufferAdd( curIdx, htobe32(PlatServices::getHuid(curTrgt)) );
 
             // Update the current count pointer.
             regCntPtr = (uint32_t *)curIdx;
 
             // Zero out the register count.
-            __bufferAdd( curIdx, htonl(0) );
+            __bufferAdd( curIdx, htobe32(0) );
         }
 
         // Go to next entry if the data byte length is 0.
@@ -226,10 +226,10 @@ uint32_t CaptureData::Copy( uint8_t * i_buffer, uint32_t i_bufferSize ) const
         }
 
         // Write register ID.
-        __bufferAdd( curIdx, htons(entry.address) );
+        __bufferAdd( curIdx, htobe16(entry.address) );
 
         // Write data length.
-        __bufferAdd( curIdx, htons(entry.dataByteLength) );
+        __bufferAdd( curIdx, htobe16(entry.dataByteLength) );
 
         // Write the data.
         // >>> TODO: RTC 199045 The data should already be in network format.
@@ -247,7 +247,7 @@ uint32_t CaptureData::Copy( uint8_t * i_buffer, uint32_t i_bufferSize ) const
         {
             uint32_t l_temp32;
             memcpy(&l_temp32, &entry.dataPtr[l_dataWritten], sizeof(l_temp32));
-            l_temp32 = htonl(l_temp32);
+            l_temp32 = htobe32(l_temp32);
             memcpy(curIdx, &l_temp32, 4);
             l_dataWritten += 4; curIdx += 4;
         }
@@ -264,7 +264,7 @@ uint32_t CaptureData::Copy( uint8_t * i_buffer, uint32_t i_bufferSize ) const
             //       will leave it for now and fix it when we have time.
             uint32_t l_temp32;
             memcpy(&l_temp32, &entry.dataPtr[l_dataWritten], sizeof(l_temp32));
-            l_temp32 = htonl(l_temp32);
+            l_temp32 = htobe32(l_temp32);
             memcpy(curIdx, &l_temp32, entry.dataByteLength - l_dataWritten);
             curIdx += entry.dataByteLength - l_dataWritten;
         }
@@ -273,7 +273,7 @@ uint32_t CaptureData::Copy( uint8_t * i_buffer, uint32_t i_bufferSize ) const
         // Update entry count. It is important to update the buffer just in
         // case we happen to run out of room in the buffer and need to exit
         // early.
-        *regCntPtr = htonl( ntohl(*regCntPtr) + 1 );
+        *regCntPtr = htobe32( be32toh(*regCntPtr) + 1 );
     }
 
     return curIdx - i_buffer;
@@ -290,7 +290,7 @@ CaptureData & CaptureData::operator=(const uint8_t *i_flatdata)
 
     // Read size.
     memcpy(&l_tmp32, i_flatdata, sizeof(uint32_t));
-    uint32_t size = ntohl(l_tmp32);
+    uint32_t size = be32toh(l_tmp32);
     i_flatdata += sizeof(uint32_t);
 
     Clear();
@@ -304,7 +304,7 @@ CaptureData & CaptureData::operator=(const uint8_t *i_flatdata)
         memcpy(&l_chipHuid , i_flatdata,l_huidSize );
         i_flatdata += l_huidSize ;
         TargetHandle_t l_pchipHandle  =nullptr;
-        l_chipHuid =  ntohl(l_chipHuid);
+        l_chipHuid =  be32toh(l_chipHuid);
         l_pchipHandle = PlatServices::getTarget(l_chipHuid );
         if(nullptr ==l_pchipHandle)
         {
@@ -314,7 +314,7 @@ CaptureData & CaptureData::operator=(const uint8_t *i_flatdata)
         // Read # of entries.
         memcpy(&l_tmp32, i_flatdata, sizeof(uint32_t));
         i_flatdata += sizeof(l_tmp32);
-        uint32_t entries = ntohl(l_tmp32);
+        uint32_t entries = be32toh(l_tmp32);
 
         // Input each entry.
         for(uint32_t i = 0; i < entries; ++i)
@@ -322,12 +322,12 @@ CaptureData & CaptureData::operator=(const uint8_t *i_flatdata)
             // Read register id.
             memcpy(&l_tmp16, i_flatdata, sizeof(uint16_t));
             i_flatdata += sizeof(uint16_t);
-            int regid = ntohs(l_tmp16);
+            int regid = be16toh(l_tmp16);
 
             // Read byte count.
             memcpy(&l_tmp16, i_flatdata, sizeof(uint16_t));
             i_flatdata += sizeof(uint16_t);
-            uint32_t bytecount = ntohs(l_tmp16);
+            uint32_t bytecount = be16toh(l_tmp16);
 
             // Read data for register.
             BitStringBuffer bs(bytecount * 8);

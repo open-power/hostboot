@@ -133,7 +133,7 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
     CPU_WORD* bufAddr = bsb.getBufAddr();
     for ( uint32_t i = 0; i < (sz_buf/sz_word); i++ )
     {
-        bufAddr[i] = htonl(bufAddr[i]);
+        bufAddr[i] = htobe32(bufAddr[i]);
     }
 
     // Add the extended MemoryMru to the error log.
@@ -245,7 +245,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
             for ( uint32_t i = 0; i < ( dramStream.size()/sz_word); i++ )
             {
               ((uint32_t*)dramStream.base())[i] =
-                                    htonl(((uint32_t*)dramStream.base())[i]);
+                                    htobe32(((uint32_t*)dramStream.base())[i]);
             }
             #endif
 
@@ -338,7 +338,7 @@ void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
         size_t sz_capData = idx;
         sz_capData = ((sz_capData + sz_word-1) / sz_word) * sz_word;
         for ( uint32_t i = 0; i < (sz_capData/sz_word); i++ )
-            ((CPU_WORD*)capData)[i] = htonl(((CPU_WORD*)capData)[i]);
+            ((CPU_WORD*)capData)[i] = htobe32(((CPU_WORD*)capData)[i]);
 
         // Add data to capture data.
         BitString bs ( sz_capData*8, (CPU_WORD *) &capData );
@@ -420,7 +420,7 @@ void captureRowRepairVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
         size_t sz_capData = idx;
         sz_capData = ((sz_capData + sz_word-1) / sz_word) * sz_word;
         for ( uint32_t i = 0; i < (sz_capData/sz_word); i++ )
-            ((CPU_WORD*)capData)[i] = htonl(((CPU_WORD*)capData)[i]);
+            ((CPU_WORD*)capData)[i] = htobe32(((CPU_WORD*)capData)[i]);
 
         // Add data to capture data.
         BitString bs ( sz_capData*8, (CPU_WORD *) &capData );

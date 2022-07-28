@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,27 +37,12 @@
 
 #include <iostream>
 #include <iomanip>
-#include <netinet/in.h>
+#include <endian.h>
 
 // define needed to enable x86 rule parser code only
 #define __PRD_RULE_COMPILE
 #include <prdrCommon.H>
 #include <UtilHash.H>
-
-#ifdef __HOSTBOOT_MODULE
-  #include <endian.h>
-  # define htonll(x) htobe64(x)
-  #ifndef htobe64
-    #include <byteswap.h>
-    #if __BYTE_ORDER == __LITTLE_ENDIAN
-        #define htobe64(x) __bswap_64(x)
-    #else
-        #define htobe64(x) (x)
-    #endif
-  #endif
-#else
-  #include <utilendian.H>
-#endif
 
 #define PRDR_FWRITE( memPtr, size, count, fileStream) \
     if( count != fwrite(memPtr, size, count, fileStream)) \
@@ -84,10 +69,10 @@ struct ResetOrMaskStruct
 
         uint64_t l_tmp64;
 
-        l_tmp64 = htonll(addr_r);
+        l_tmp64 = htobe64(addr_r);
         PRDR_FWRITE(&l_tmp64, sizeof (l_tmp64), 1, l_file);
 
-        l_tmp64 = htonll(addr_w);
+        l_tmp64 = htobe64(addr_w);
         PRDR_FWRITE(&l_tmp64, sizeof (l_tmp64), 1, l_file);
     }
 };
@@ -133,7 +118,7 @@ struct CaptureReqStruct
 
         for (int i = 0; i < loopMax; i++)
         {
-            l_tmp32 = htonl(data[i]);
+            l_tmp32 = htobe32(data[i]);
             PRDR_FWRITE(&l_tmp32, 4, 1, l_file);
         }
 
@@ -151,7 +136,7 @@ struct CaptureReqStruct
                 // remove double quotes from the string
                 str = str.substr(1, str.size() - 2);
             }
-            l_tmp32 = htonl(PRDF::Util::hashString(str.c_str()));
+            l_tmp32 = htobe32(PRDF::Util::hashString(str.c_str()));
             PRDR_FWRITE(&l_tmp32, sizeof(l_tmp32), 1, l_file);
         }
     };
@@ -296,24 +281,24 @@ class Register
         uint32_t l_temp;
         uint16_t l_temp16;
 
-        l_temp16 = htons(PRDF::Util::hashString( cv_sname->c_str() ));
+        l_temp16 = htobe16(PRDF::Util::hashString( cv_sname->c_str() ));
         PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
-        l_temp = htonl(cv_flags);
+        l_temp = htobe32(cv_flags);
         PRDR_FWRITE(&l_temp, sizeof(l_temp), 1, l_file);
 
-        uint64_t l_temp64 = htonll(cv_scomaddr);
+        uint64_t l_temp64 = htobe64(cv_scomaddr);
         PRDR_FWRITE(&l_temp64, sizeof(l_temp64), 1, l_file);
 
         if (cv_flags & Prdr::PRDR_REGISTER_SCOMLEN)
         {
-            l_temp16 = htons(cv_scomlen);
+            l_temp16 = htobe16(cv_scomlen);
             PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
         }
 
         if (cv_flags & Prdr::PRDR_REGISTER_RESETS)
         {
-            l_temp16 = htons(cv_resets.size());
+            l_temp16 = htobe16(cv_resets.size());
             PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
             std::for_each( cv_resets.begin(), cv_resets.end(),
@@ -324,7 +309,7 @@ class Register
 
         if (cv_flags & Prdr::PRDR_REGISTER_MASKS)
         {
-            l_temp16 = htons(cv_masks.size());
+            l_temp16 = htobe16(cv_masks.size());
             PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
             std::for_each( cv_masks.begin(), cv_masks.end(),
@@ -335,7 +320,7 @@ class Register
 
         if (cv_flags & Prdr::PRDR_REGISTER_CAPTURE)
         {
-            l_temp16 = htons(cv_captures.size());
+            l_temp16 = htobe16(cv_captures.size());
             PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
             std::for_each( cv_captures.begin(), cv_captures.end(),

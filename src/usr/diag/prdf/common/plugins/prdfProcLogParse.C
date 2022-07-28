@@ -33,7 +33,7 @@
 #include <cstring>
 #include <iipconst.h>
 #include <prdfParserEnums.H>
-#include <netinet/in.h>
+#include <endian.h>
 #include <prdfPlatProcConst.H>
 #include <map>
 #include <vector>

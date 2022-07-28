@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -662,7 +662,7 @@ void addFfdcToCaptureData(  ExtensibleChip * i_chip,
     for( uint32_t i = 0; i < sz_t / sz_w; i++ )
     {
         ((CPU_WORD *)errorDataBuff)[i] =
-                        htonl(( (CPU_WORD *) errorDataBuff)[i]);
+                        htobe32(( (CPU_WORD *) errorDataBuff)[i]);
     }
 
     #endif

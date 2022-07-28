@@ -55,7 +55,7 @@
 #include <prdfBitString.H>
 
 #include <hwas/common/hwasCallout.H>
-#include <netinet/in.h>
+#include <endian.h>
 
 // Portable formatting of uint64_t.  The ISO C99 standard requires
 // __STDC_FORMAT_MACROS to be defined in order for PRIx64 etc. to be defined.
@@ -370,7 +370,7 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
     }
 
     // Get the capture data size and adjust buffer length accordingly.
-    size_t sz_capData = ntohl( l_capData->PfaCaptureDataSize );
+    size_t sz_capData = be32toh( l_capData->PfaCaptureDataSize );
     if ( sz_capData < i_buflen ) i_buflen = sz_capData;
 
     i_parser.PrintBlank();
@@ -513,7 +513,7 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
                 }
 
                 snprintf(sigDataString, 100, "(0x%016" PRIx64 ") 0x%08x 0x%08x",
-                         sigAddress, htonl(tmpData1), htonl(tmpData2) );
+                         sigAddress, htobe32(tmpData1), htobe32(tmpData2) );
 
                 i_parser.PrintString( sigHeaderString, sigDataString );
             }
@@ -812,7 +812,7 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
         CPU_WORD* buf = (CPU_WORD*)i_buffer;
         for ( uint32_t i = 0; i < (i_buflen/sz_word); i++ )
         {
-            buf[i] = ntohl(buf[i]);
+            buf[i] = be32toh(buf[i]);
         }
 
         BitString bs( (i_buflen*8), buf );

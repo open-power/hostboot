@@ -829,7 +829,7 @@ void ErrDataService::AddCapData( CaptureData & i_cd, errlHndl_t i_errHdl)
             break;
         }
 
-        l_CapDataBuf->PfaCaptureDataSize = htonl( thisCapDataSize );
+        l_CapDataBuf->PfaCaptureDataSize = htobe32( thisCapDataSize );
 
         thisCapDataSize = thisCapDataSize +
                           sizeof(l_CapDataBuf->PfaCaptureDataSize);

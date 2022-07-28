@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,7 @@
 #include <string>
 #include <stdint.h>
 
-#include <netinet/in.h>
+#include <endian.h>
 
 #include <prdrRegister.H>
 
@@ -138,23 +138,23 @@ class Chip
 
             PRDR_FWRITE("PRDRCHIP", 8, 1, l_file);
 
-            l_temp = htonl(cv_chipid);
+            l_temp = htobe32(cv_chipid);
             PRDR_FWRITE(&l_temp, sizeof(l_temp), 1, l_file);
 
-            l_temp = htonl(cv_targetType);
+            l_temp = htobe32(cv_targetType);
             PRDR_FWRITE(&l_temp, sizeof(l_temp), 1, l_file);
 
-            l_temp = htonl(cv_signatureOffset);
+            l_temp = htobe32(cv_signatureOffset);
             PRDR_FWRITE(&l_temp, sizeof(l_temp), 1, l_file);
 
             // Write dumptype to file.  //@ecdf
-            l_temp = htonl(cv_dumptype);
+            l_temp = htobe32(cv_dumptype);
             PRDR_FWRITE(&l_temp, sizeof(l_temp), 1, l_file);
 
-            l_temp16 = htons(cv_scomlen);
+            l_temp16 = htobe16(cv_scomlen);
             PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
-            l_temp16 = htons(cv_reglist.size());
+            l_temp16 = htobe16(cv_reglist.size());
             PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
             for (RegisterList::iterator i = cv_reglist.begin();

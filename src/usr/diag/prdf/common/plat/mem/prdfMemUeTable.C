@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,7 +115,7 @@ void MemUeTable::addCapData( CaptureData & io_cd )
         // Fix endianness issues with non PPC machines.
         sz_actData = ((sz_actData + sz_word-1) / sz_word) * sz_word;
         for ( uint32_t i = 0; i < (sz_actData/sz_word); i++ )
-            ((CPU_WORD*)data)[i] = htonl(((CPU_WORD*)data)[i]);
+            ((CPU_WORD*)data)[i] = htobe32(((CPU_WORD*)data)[i]);
 
         // Add data to capture data.
         BitString bs ( sz_actData*8, (CPU_WORD *) &data );

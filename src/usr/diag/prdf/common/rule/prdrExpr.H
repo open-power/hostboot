@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 #include <stdint.h>
 #include <typeinfo>                // for typeid
 
-#include <netinet/in.h>
+#include <endian.h>
 
 #include <prdrCommon.H> // for enums.
 
@@ -98,7 +98,7 @@ class ExprRef : public Expr
         int output(FILE * i_file)
             {
                 char l_op = prdrGetRefType(cv_name);
-                uint16_t l_id = htons(prdrGetRefId(cv_name));
+                uint16_t l_id = htobe16(prdrGetRefId(cv_name));
 
                 PRDR_FWRITE(&l_op, 1, 1, i_file);
                 PRDR_FWRITE(&l_id, sizeof(l_id), 1, i_file);
@@ -153,12 +153,12 @@ class ExprInt : public Expr
 
                 if (Prdr::INTEGER != cv_op)
                 {
-                    uint16_t temp = htons((uint16_t) cv_value);
+                    uint16_t temp = htobe16((uint16_t) cv_value);
                     PRDR_FWRITE(&temp, sizeof(temp), 1, i_file);
                 }
                 else
                 {
-                    uint32_t temp = htonl(cv_value);
+                    uint32_t temp = htobe32(cv_value);
                     PRDR_FWRITE(&temp, sizeof(temp), 1, i_file);
                 }
 
@@ -198,7 +198,7 @@ class ExprTime : public Expr
         if ( (seconds / iv_base) > iv_units )
             seconds = iv_units * iv_base;
 
-        seconds = htonl( seconds );
+        seconds = htobe32( seconds );
         PRDR_FWRITE( &seconds, sizeof(seconds), 1, i_file );
 
         return 0;
@@ -508,14 +508,14 @@ class ExprRule : public Expr
 
                 l_op = Prdr::REF_RULE;
                 PRDR_FWRITE(&l_op, 1, 1, i_file);
-                l_ref = htons(prdrGetRefId(cv_rulename));
+                l_ref = htobe16(prdrGetRefId(cv_rulename));
                 PRDR_FWRITE(&l_ref, sizeof(l_ref), 1, i_file);
 
                 cv_bits->output(i_file);
 
                 l_op = prdrGetRefType(cv_actionname);
                 PRDR_FWRITE(&l_op, 1, 1, i_file);
-                l_ref = htons(prdrGetRefId(cv_actionname));
+                l_ref = htobe16(prdrGetRefId(cv_actionname));
                 PRDR_FWRITE(&l_ref, sizeof(l_ref), 1, i_file);
 
                 return 0;
@@ -707,14 +707,14 @@ class ExprAct_Thresh : public Expr
                     else if (nullptr != cv_mfg_file_thr)
                     {
                         uint32_t l_tmp32 = prdrActionArgMap(*cv_mfg_file_thr);
-                        l_tmp32 = htonl(l_tmp32);
+                        l_tmp32 = htobe32(l_tmp32);
                         PRDR_FWRITE(&l_tmp32, sizeof(l_tmp32), 1, i_file);
                     }
                 }
 
                 if (0 != cv_3)
                 {
-                    uint32_t l_tmp32 = htonl(cv_3);
+                    uint32_t l_tmp32 = htobe32(cv_3);
                     PRDR_FWRITE(&l_tmp32, 4, 1, i_file);
                 }
 
@@ -783,7 +783,7 @@ class ExprAct_Dump : public Expr  //@ecdf
                     l_dType = prdrActionArgMap("DUMP_CONTENT_HW");
                 else
                     l_dType = prdrActionArgMap(*cv_1);
-                l_dType = htonl(l_dType);
+                l_dType = htobe32(l_dType);
                 PRDR_FWRITE(&l_dType, sizeof(l_dType), 1, i_file);
 
                 return 0;
@@ -813,10 +813,10 @@ class ExprAct_Analyse : public Expr
             char l_op = Prdr::ACT_ANALY;
             PRDR_FWRITE(&l_op, 1, 1, i_file);
 
-            uint32_t l_chipType = htonl(prdrActionArgMap(*cv_1));
+            uint32_t l_chipType = htobe32(prdrActionArgMap(*cv_1));
             PRDR_FWRITE(&l_chipType, sizeof(l_chipType), 1, i_file);
 
-            uint32_t l_chipIndx = htonl(cv_2);
+            uint32_t l_chipIndx = htobe32(cv_2);
             PRDR_FWRITE(&l_chipIndx, sizeof(l_chipIndx), 1, i_file);
 
             return 0;
@@ -868,15 +868,15 @@ class ExprAct_Callout : public Expr
             l_op = cv_type;
             PRDR_FWRITE(&l_op, 1, 1, i_file);
 
-            uint32_t l_priority = htonl(prdrActionArgMap(*cv_1));
+            uint32_t l_priority = htobe32(prdrActionArgMap(*cv_1));
             PRDR_FWRITE(&l_priority, sizeof(l_priority), 1, i_file);
 
             if ( Prdr::CALLOUT_GARD_SELF != cv_type )
             {
-                uint32_t l_arg = htonl(prdrActionArgMap(*cv_2));
+                uint32_t l_arg = htobe32(prdrActionArgMap(*cv_2));
                 PRDR_FWRITE(&l_arg, sizeof(l_arg), 1, i_file);
 
-                l_arg = htonl(cv_3);
+                l_arg = htobe32(cv_3);
                 PRDR_FWRITE(&l_arg, sizeof(l_arg), 1, i_file);
                 // Write bool for ALT resolution.
                 l_op = (nullptr == cv_alt ? 0 : 1);
@@ -888,9 +888,9 @@ class ExprAct_Callout : public Expr
 
                 // Write peer connection type
                 if(Prdr::CALLOUT_GARD_PEER == cv_type)
-                    l_arg = htonl(prdrActionArgMap(*cv_2));
+                    l_arg = htobe32(prdrActionArgMap(*cv_2));
                 else
-                    l_arg = htonl(prdrActionArgMap("TYPE_NA"));
+                    l_arg = htobe32(prdrActionArgMap("TYPE_NA"));
 
                 PRDR_FWRITE(&l_arg, sizeof(l_arg), 1, i_file);
             }
@@ -978,7 +978,7 @@ class ExprAct_Funccall : public Expr
 
                 uint32_t l_chip;
                 if (nullptr != cv_2)
-                    l_chip = htonl(prdrActionArgMap(*cv_2));
+                    l_chip = htobe32(prdrActionArgMap(*cv_2));
                 else
                     l_chip = 0;
                 PRDR_FWRITE(&l_chip, sizeof(l_chip), 1, i_file);
@@ -1013,7 +1013,7 @@ class ExprAct_Flag : public Expr
                 l_op = Prdr::ACT_FLAG;
                 PRDR_FWRITE(&l_op, 1, 1, i_file);
 
-                uint32_t l_flag = htonl(prdrActionArgMap(*cv_1));
+                uint32_t l_flag = htobe32(prdrActionArgMap(*cv_1));
                 PRDR_FWRITE(&l_flag, sizeof(l_flag), 1, i_file);
 
                 return 0;
@@ -1043,7 +1043,7 @@ class ExprAct_Capture : public Expr
                 l_op = Prdr::ACT_CAPT;
                 PRDR_FWRITE(&l_op, 1, 1, i_file);
 
-                uint32_t l_group = htonl(prdrCaptureGroupMap(*cv_1));
+                uint32_t l_group = htobe32(prdrCaptureGroupMap(*cv_1));
                 PRDR_FWRITE(&l_group, sizeof(l_group), 1, i_file);
 
                 return 0;

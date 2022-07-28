@@ -312,7 +312,7 @@ void MemDqBitmap::getCaptureData( CaptureData & o_cd ) const
 
     // Fix endianness issues with non PPC machines.
     for ( uint32_t i = 0; i < (sz_capData/sz_word); i++ )
-        ((CPU_WORD*)capData)[i] = htonl(((CPU_WORD*)capData)[i]);
+        ((CPU_WORD*)capData)[i] = htobe32(((CPU_WORD*)capData)[i]);
 
     BitString bs ( sz_capData*8, (CPU_WORD *) &capData );
     o_cd.Add( iv_trgt, Util::hashString("BAD_DQ_BITMAP"), bs );

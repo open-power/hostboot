@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,7 +154,7 @@ int main(int argc, char ** argv)
     l_htmlFile << "</HEAD><BODY>" << std::endl;
 
     // output rules.
-    l_size = htons((uint16_t)g_rules.size());
+    l_size = htobe16((uint16_t)g_rules.size());
     PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
     for (std::map<std::string, Expr *>::iterator i = g_rules.begin();
          i != g_rules.end();
@@ -175,17 +175,17 @@ int main(int argc, char ** argv)
 
     // output bit groups
     uint32_t l_pos = 0;
-    l_size = htons((uint16_t)g_groups.size());
+    l_size = htobe16((uint16_t)g_groups.size());
     PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
-    l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["CHECK_STOP"]));
+    l_size = htobe16((uint16_t)prdrGetRefId(&g_attentionStartGroup["CHECK_STOP"]));
     PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
-    l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["RECOVERABLE"]));
+    l_size = htobe16((uint16_t)prdrGetRefId(&g_attentionStartGroup["RECOVERABLE"]));
     PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
-    l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["SPECIAL"]));
+    l_size = htobe16((uint16_t)prdrGetRefId(&g_attentionStartGroup["SPECIAL"]));
     PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
-    l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["UNIT_CS"]));
+    l_size = htobe16((uint16_t)prdrGetRefId(&g_attentionStartGroup["UNIT_CS"]));
     PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
-    l_size = htons((uint16_t)prdrGetRefId(&g_attentionStartGroup["HOST_ATTN"]));
+    l_size = htobe16((uint16_t)prdrGetRefId(&g_attentionStartGroup["HOST_ATTN"]));
     PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
 
     l_htmlFile << "<H2> Register Groups </H2>" << std::endl;
@@ -201,7 +201,7 @@ int main(int argc, char ** argv)
     }
 
     // output action classes.
-    l_size = htons((uint16_t)g_actionclasses.size());
+    l_size = htobe16((uint16_t)g_actionclasses.size());
     PRDR_FWRITE(&l_size, sizeof(l_size), 1, l_prfFile);
 
     l_htmlFile << "<H2> Actions </H2>" << std::endl;
