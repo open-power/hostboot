@@ -36,7 +36,6 @@
 #include <sys/mm.h>                            // mm_virt_to_phys
 #include <errno.h>
 #include <sbeio/sbe_utils.H>                   // SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES
-#include <errl/errlreasoncodes.H>              // ERRL_UDT_NOFORMAT
 #include <targeting/common/mfgFlagAccessors.H> // areAllSrcsTerminating
 
 extern trace_desc_t* g_trac_sbeio;
@@ -242,7 +241,7 @@ errlHndl_t getPmicHlthCheckData()
                                             l_alignedMemHandle.dataPtr,
                                             l_psuResponse.pmic_health_check_data_size,
                                             1,                           // Version
-                                            ERRORLOG::ERRL_UDT_NOFORMAT, // parser ignores data
+                                            SBEIO_UDT_NO_FORMAT,         // parser ignores data
                                             false );                     // merge
                             }
                             errlCommit(l_err, SBEIO_COMP_ID);
@@ -315,7 +314,7 @@ errlHndl_t getPmicHlthCheckData()
                                 l_alignedMemHandle.dataPtr,
                                 l_psuResponse.pmic_health_check_data_size,
                                 1,                           // Version
-                                ERRORLOG::ERRL_UDT_NOFORMAT, // parser ignores data
+                                SBEIO_UDT_NO_FORMAT,         // parser ignores data
                                 false );                     // merge
                 }
 
