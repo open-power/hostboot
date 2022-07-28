@@ -38,8 +38,10 @@ import site
 
 # Global variable to hold search directories for the LIDs and in what order to search
 # Listed in order of priority, i.e. HOSTBOOT_TRACE_DIR takes highest priority if found, etc.
-LID_SEARCH_DIRS = [ os.getenv('HOSTBOOT_TRACE_DIR'),                    # ENV VAR OVERRIDE
+LID_SEARCH_DIRS = [ os.getenv('HOSTBOOT_TRACE_DIR'),                    # ENV VAR OVERRIDE HOSTBOOT
+                    os.getenv('SBE_TRACE_DIR'),                         # ENV VAR OVERRIDE SBE
                     os.path.join(site.USER_BASE, 'hostboot_data'),      # data_files exported from Hostboot
+                    os.path.join(site.USER_BASE, 'sbe_data'),           # data_files exported from SBE
                     "/usr/local/share/hostfw/running",                  # The BMC patch directory
                     "/var/lib/phosphor-software-manager/hostfw/running" # The BMC running directory
                   ]
@@ -49,6 +51,7 @@ LID_SEARCH_DIRS = [ os.getenv('HOSTBOOT_TRACE_DIR'),                    # ENV VA
 lid_dict = {
     "81e00685.lid" : "hbotStringFile",
     "81e00686.lid" : "hbicore.syms",
+    "81e0068a.lid" : "sbeStringFile",
 }
 
 """ Searches the directories in the list 'LID_SEARCH_DIRS' for the given
@@ -70,12 +73,18 @@ def getLid(lidFileName):
 
         if path: # if ENV VAR does not exist we get None, so need to validate first
             primary_lid = os.path.join(path, lidFileName)
-            alternate_file = os.path.join(path, lid_dict[lidFileName])
-            if os.path.exists(primary_lid):
+            try:
+                alternate_file = os.path.join(path, lid_dict[lidFileName])
+            except Exception as e:
+                # this can happen if someone calls this routine with an
+                # unsupported lidFileName (a name not in the lid_dict)
+                # this will eventually fail in isfile below
+                alternate_file = ""
+            if os.path.isfile(primary_lid):
                 lidFileNameWithPath = primary_lid
                 break
             else:
-                if os.path.exists(alternate_file):
+                if os.path.isfile(alternate_file):
                     lidFileNameWithPath = alternate_file
                     break
 
