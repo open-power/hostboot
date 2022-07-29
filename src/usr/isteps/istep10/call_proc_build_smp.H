@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,25 @@ void poisonPrimaryTpm();
  */
 void forceProcDelayDeconfigCallout(TargetHandle_t const i_proc,
                                    errlHndl_t& io_err);
+
+/**
+ * @brief XSCOM TPM measurements for the secondary chips
+ *        1. Validates PCR6 security state values matches between all SBEs
+ *        2. Mismatch will cause primary TPM to be poisoned,
+ *           indicating we are in an invalid security state
+ *        3. Extend all measurements (except PCR6) from secondary/alternate
+ *           procs to TPM only if i_extendToTpm = true, but always append to log
+ *
+ * @param[in] i_primaryProc    - primary sentinal processor target
+ * @param[in] i_secondaryProcs - secondary/alternate processor targets
+ * @param[in] i_extendToTpm    - extend measurements to the TPM
+ * @param[in/out] io_StepError - istep failure errors will be added to this
+ */
+void retrieveAndExtendSecondaryMeasurements(
+                            const TargetHandle_t i_primaryProc,
+                            const TargetHandleList& i_secondaryProcs,
+                            const bool i_extendToTpm,
+                            ISTEP_ERROR::IStepError & io_StepError );
 
 };
 

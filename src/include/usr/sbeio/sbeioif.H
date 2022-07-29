@@ -134,7 +134,7 @@ namespace SBEIO
     errlHndl_t stopDeadmanLoop( );
 
     /**
-    * @brief Semd System Configuration
+    * @brief Send System Configuration
     *
     * @param[in] i_systemConfig Fabric grouping map bitstring
     *                           Examples:
@@ -148,6 +148,24 @@ namespace SBEIO
     */
     errlHndl_t sendSystemConfig(const uint64_t i_systemConfig,
                                 TARGETING::Target * i_procChip);
+
+
+    /**
+    * @brief Send the TPM Extend Mode command to the SBE with Enter ctrl flag
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t psuTPMExtendModeEnter();
+
+
+    /**
+    * @brief Send the TPM Extend Mode command to the SBE with Exit ctrl flag
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t psuTPMExtendModeExit();
 
 
     /**

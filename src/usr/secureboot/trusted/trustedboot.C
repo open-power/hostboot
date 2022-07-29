@@ -3100,6 +3100,21 @@ void synchronizePrimaryTpmLogs()
 
     do {
 
+    // Get the capability attribute from the node
+    TARGETING::TargetHandle_t l_nodeTarget =
+        TARGETING::UTIL::getCurrentNodeTarget();
+    auto l_sbeExtend =
+        l_nodeTarget->getAttr<TARGETING::ATTR_SBE_HANDLES_SMP_TPM_EXTEND>();
+
+    // Do not logMeasurementRegs if MPIPL and ATTR_SBE_HANDLES_SMP_TPM_EXTEND
+    // because SBE will take care of extending the secondary measurements into
+    // the boot chip TPM
+    const auto pSys = TARGETING::UTIL::assertGetToplevelTarget();
+    if(pSys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() && l_sbeExtend)
+    {
+        break;
+    }
+
     // Get Primary TPM (no syncing to secondary TPM)
     getPrimaryTpm(l_primaryTpm);
     if(!l_primaryTpm)

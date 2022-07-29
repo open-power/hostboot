@@ -44,6 +44,7 @@ OBJS += sbe_scomAccessdd.o
 OBJS += sbe_setFFDCAddr.o
 OBJS += sbe_getSBEFFDC.o
 OBJS += sbe_memRegionMgr.o
+OBJS += sbe_psuTPMExtendMode.o
 OBJS += sbe_fifo_buffer.o
 OBJS += sbe_securityListBinDump.o
 OBJS += sbe_exitCacheContained.o

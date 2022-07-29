@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/target.H>
+#include <targeting/targplatutil.H>
 #include <pbusLinkSvc.H>
 
 #include <fapi2/target.H>
@@ -49,6 +50,7 @@
 #include <sbeio/sbeioif.H>
 #include <usr/vmmconst.h>
 #include <p10_build_smp.H>
+#include <p10_gen_fbc_rt_settings.H>
 
 #include <secureboot/trustedbootif.H>
 #include <secureboot/service.H>
@@ -71,6 +73,221 @@ namespace ISTEP_10
 {
 
 const uint64_t MAX_SBE_WAIT_NS = 30000*NS_PER_MSEC; //=30s
+
+/**
+ * @brief XSCOM TPM measurements for the secondary chips
+ *        1. Validates PCR6 security state values matches between all SBEs
+ *        2. Mismatch will cause primary TPM to be poisoned,
+ *           indicating we are in an invalid security state
+ *        3. Extend all measurements (except PCR6) from secondary/alternate
+ *           procs to TPM only if i_extendToTpm = true, but always append to log
+ *
+ * @param[in] i_primaryProc    - primary sentinal processor target
+ * @param[in] i_secondaryProcs - secondary/alternate processor targets
+ * @param[in] i_extendToTpm    - extend measurements to the TPM
+ * @param[in/out] io_StepError - istep failure errors will be added to this
+ */
+
+void retrieveAndExtendSecondaryMeasurements(
+                            const TargetHandle_t i_primaryProc,
+                            const TargetHandleList& i_secondaryProcs,
+                            const bool i_extendToTpm,
+                            IStepError & io_StepError )
+{
+    errlHndl_t  l_errl  =   nullptr;
+    bool l_poison_tpm = false;
+
+    // structure to report what mismatched
+    typedef union {
+      uint8_t full_reason;
+      struct
+      {
+        uint8_t rsvd          : 5;
+        uint8_t PCR6_regs_0   : 1; // SBE Security State - PCR6 version
+        uint8_t PCR6_regs_1   : 1; // HW Key Hash- PCR6 version
+        uint8_t PCR6_regs_4_7 : 1; // Hash of SBE Secureboot Validation Image
+      } PACKED;
+    } mismatch_reason_t;
+
+    // TPM to log/extend measurements (or potentially poison)
+    Target* l_primaryTpm = nullptr;
+
+    // measurement data
+    TRUSTEDBOOT::TPM_sbe_measurements_regs_grouped l_primarySbeMeasuredGroups;
+    TRUSTEDBOOT::TPM_sbe_measurements_regs_grouped l_secondarySbeMeasuredGroups;
+
+    uint32_t poison_eid = 0; // EID of error that caused poisoning of TPM
+
+    do {
+    // TPM to log/extend measurements (or potentially poison)
+    TRUSTEDBOOT::getPrimaryTpm(l_primaryTpm);
+    auto l_tpmHwasState = l_primaryTpm->getAttr<ATTR_HWAS_STATE>();
+
+    // grab primary values first
+    l_errl = TRUSTEDBOOT::groupSbeMeasurementRegs(i_primaryProc, l_primarySbeMeasuredGroups);
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+           ERR_MRK"ERROR : retrieveAndExtendSecondaryMeasurements: "
+           "groupSbeMeasurementRegs returned error for 0x%.8X primary processor "
+           TRACE_ERR_FMT,
+           get_huid(i_primaryProc),
+           TRACE_ERR_ARGS(l_errl) );
+        // this indicates XSCOM failure on primary processor so make this fatal
+        forceProcDelayDeconfigCallout(i_primaryProc, l_errl);
+        captureError(l_errl, io_StepError, ISTEP_COMP_ID, i_primaryProc);
+        break;
+    }
+
+    // secondary chips
+    for ( auto curproc : i_secondaryProcs)
+    {
+        l_errl = TRUSTEDBOOT::groupSbeMeasurementRegs(curproc, l_secondarySbeMeasuredGroups);
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               ERR_MRK"ERROR : retrieveAndExtendSecondaryMeasurements: "
+               "groupSbeMeasurementRegs returned error for 0x%.8X processor "
+               TRACE_ERR_FMT,
+               get_huid(curproc),
+               TRACE_ERR_ARGS(l_errl) );
+            forceProcDelayDeconfigCallout(curproc, l_errl);
+            captureError(l_errl, io_StepError, ISTEP_COMP_ID, curproc);
+            continue;
+        }
+
+        mismatch_reason_t l_mismatch = {0};
+        // compare PCR6 for mismatch - register 0/security state
+        if (memcmp(l_primarySbeMeasuredGroups.sbe_measurement_regs_0,
+                   l_secondarySbeMeasuredGroups.sbe_measurement_regs_0,
+                   TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_0_SIZE))
+        {
+            l_mismatch.PCR6_regs_0 = 1;
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK"Mismatch found: 0x%08X processor PCR6 register 0/security state",
+                get_huid(curproc) );
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 0/security state",
+                l_primarySbeMeasuredGroups.sbe_measurement_regs_0,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_0_SIZE );
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 0/security state",
+                l_secondarySbeMeasuredGroups.sbe_measurement_regs_0,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_0_SIZE );
+        }
+        // compare PCR6 for mismatch - register 1/HW key hash
+        if (memcmp(l_primarySbeMeasuredGroups.sbe_measurement_regs_1,
+                   l_secondarySbeMeasuredGroups.sbe_measurement_regs_1,
+                   TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_1_SIZE))
+        {
+            l_mismatch.PCR6_regs_1 = 1;
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK"Mismatch found: 0x%08X processor PCR6 register 1/HW key hash",
+                get_huid(curproc) );
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 1/HW key hash",
+                l_primarySbeMeasuredGroups.sbe_measurement_regs_1,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_1_SIZE );
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 1/HW key hash",
+                l_secondarySbeMeasuredGroups.sbe_measurement_regs_1,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_1_SIZE );
+        }
+        // compare PCR6 for mismatch - registers 4 to 7/Hash of SBE secureboot validation image
+        if (memcmp(l_primarySbeMeasuredGroups.sbe_measurement_regs_4_7,
+                   l_secondarySbeMeasuredGroups.sbe_measurement_regs_4_7,
+                   TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_4_7_SIZE))
+        {
+            l_mismatch.PCR6_regs_4_7 = 1;
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK"Mismatch found: 0x%08X processor PCR6 registers 4-7/SBE secureboot validation image",
+                get_huid(curproc) );
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 4-7/SBE secureboot validation image",
+                l_primarySbeMeasuredGroups.sbe_measurement_regs_4_7,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_4_7_SIZE);
+            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 4-7/SBE secureboot validation image",
+                l_secondarySbeMeasuredGroups.sbe_measurement_regs_4_7,
+                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_4_7_SIZE);
+        }
+
+        if (l_mismatch.full_reason != 0)
+        {
+            l_poison_tpm = true;
+
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                "creating error for mismatch (0x%.08X) on proc 0x%.8X",
+                l_mismatch.full_reason, get_huid(curproc) );
+
+            /*@
+             * @errortype
+             * @moduleid   MOD_RETRIEVE_EXTEND_SECONDARY_MEASUREMENTS
+             * @reasoncode RC_PCR6_MISMATCH_DETECTED
+             * @userdata1  Huid of secondary processor
+             * @userdata2  Mismatch found (bitwise 0x02 = PCR6 0, 0x01 = PCR6 4-7)
+             * @devdesc    Unable to confirm PCR6 match between primary and secondary SBE
+             * @custdesc   Platform security problem detected
+             */
+            l_errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                             MOD_RETRIEVE_EXTEND_SECONDARY_MEASUREMENTS,
+                                             RC_PCR6_MISMATCH_DETECTED,
+                                             get_huid(curproc),
+                                             l_mismatch.full_reason);
+            l_errl->addHwCallout( curproc,
+                                  HWAS::SRCI_PRIORITY_HIGH,
+                                  HWAS::NO_DECONFIG,
+                                  HWAS::GARD_NULL );
+            if (!SECUREBOOT::enabled())
+            {
+              TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "retrieveAndExtendSecondaryMeasurements: security is off, "
+                  "so just log the PCR6 Mismatch (EID: 0x%08X) as informational",
+                  l_errl->eid() );
+                l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            }
+            poison_eid = l_errl->eid();
+            l_errl->collectTrace(ISTEP_COMP_NAME);
+            SECUREBOOT::addSecurityRegistersToErrlog(l_errl);
+
+            // allow the istep to continue for just a mismatch error
+            errlCommit(l_errl, ISTEP_COMP_ID);
+        }
+
+        // primaryTpm must be functional to log/extend measurements
+        if (l_tpmHwasState.functional)
+        {
+            // log and extend measurements (good or mismatched ones)
+            l_errl = TRUSTEDBOOT::logSbeMeasurementRegs(
+                                            l_primaryTpm,
+                                            curproc,
+                                            l_secondarySbeMeasuredGroups,
+                                            i_extendToTpm);
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    ERR_MRK"retrieveAndExtendSecondaryMeasurements: "
+                    "log/extend measurements for 0x%08X processor SBE",
+                    get_huid(curproc));
+                forceProcDelayDeconfigCallout(curproc, l_errl);
+                captureError(l_errl, io_StepError, ISTEP_COMP_ID, curproc);
+            }
+        }
+
+        if (poison_eid)
+        {
+            // If not already compromised, set to this poison_eid
+            if (!curproc->getAttr<ATTR_SBE_COMPROMISED_EID>())
+            {
+                // update attribute with EID of poisoning reason
+                curproc->setAttr<ATTR_SBE_COMPROMISED_EID>(poison_eid);
+            }
+            // clear it out for next secondary processor
+            poison_eid = 0;
+        }
+    } // secondary chip loop
+    } while (0);
+
+    if(l_poison_tpm)
+    {
+        poisonPrimaryTpm();
+    }
+}
+
 
 /**
  * @brief Force a processor delayed_deconfig callout in the error log
@@ -406,12 +623,27 @@ void* call_proc_build_smp (void *io_pArgs)
     IStepError l_StepError;
 
     // General flow of this istep
-    // a) phase 1 build SMP
-    // b) halt all non-boot chip SBEs
-    // c) check for Secure Access mismatch via FSI to non-boot chips
-    // d) call HWP to specifically enable SMP fabric (pb hotplug)
+    // a) Phase 1 build SMP
+    // b) Halt all non-boot chip SBEs (legacy path)
+    // c) Check for Secure Access mismatch via FSI to non-boot chips
+    // d) Call HWP to specifically enable SMP fabric (pb hotplug) (legacy path)
+    // d) Call TPM Extend Mode chip-op (new path)
+    //    1) Call sendSystemConfig to send system fabric map to SBE
+    //    2) Reclaim all DMA buffers from the FSP
+    //    3) Suspend the mailbox with interrupt disable
+    //    4) Ensure that interrupt presenter is drained
+    //    5) Flush TPM state
+    //    6) Send TPM Extend Mode chip-op with Enter control flag
+    //    7) Send TPM Extend Mode chip-op with Exit crontol flag
+    //    8) Resume the mailbox
+    // Switch form SBESCOM to XSCOM
+    // Call p10_build_smp HWP POST
+    // Switch SPI access from FSI to PIB
+    // New path: Get secondary measurements, don't extend to TPM
 
-    // SBE's will have measurements taken / extended to TPM / restarted in 10.3
+    // Legacy path: measurements taken, extended to TPM, restarted in 10.3
+    // New path: SBEs not stopped, measurements taken and extended to TPM
+    //           here in 10.1 via the SBE TPM Extend Mode chip-op
 
     do
     {
@@ -458,15 +690,29 @@ void* call_proc_build_smp (void *io_pArgs)
             {
                 // include all secondary processors
                 l_secondaryProcsList.push_back(curproc);
-
             }
         }
+
+        // Sort the secondary proc list by the fabric effective topo id.
+        // This will be consistent with the SBEs so the measurements are
+        // sequenced in the right order.
+        std::sort(l_secondaryProcsList.begin(),
+                  l_secondaryProcsList.end(),
+                  [] (TargetHandle_t a, TargetHandle_t b)
+                {
+                    return a->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>() < b->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
+                });
+
+        // Get the capability attribute from the node
+        TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
+        auto l_sbeExtend =
+            l_nodeTarget->getAttr<TARGETING::ATTR_SBE_HANDLES_SMP_TPM_EXTEND>();
 
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                             l_fapi2_boot_proc (l_bootProc);
 
 
-        // a) phase 1 build SMP
+        // a) Phase 1 build SMP
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Call p10_build_smp(SMP_ACTIVATE_PHASE1)" );
         FAPI_INVOKE_HWP( l_errl, p10_build_smp,
@@ -514,6 +760,13 @@ void* call_proc_build_smp (void *io_pArgs)
             }
         }
 
+        // Do not halt SBEs when SBE is extending the TPM measurements,
+        // since it's immune from rogue SBE interference
+        if (l_sbeExtend)
+        {
+            haltSbes = false;
+        }
+
         if(haltSbes)
         {
             // Mask appropriate bits to prevent PRDF handling of SBE halt
@@ -526,7 +779,7 @@ void* call_proc_build_smp (void *io_pArgs)
                 break;
             }
 
-            // b) halt all non-boot chip SBEs
+            // b) Halt all non-boot chip SBEs
             for (auto l_proc : l_secondaryProcsList)
             {
                 // send halt request
@@ -576,7 +829,8 @@ void* call_proc_build_smp (void *io_pArgs)
                 "reporting Hostboot requested halts to service processor.");
         }
 
-        // c) check for Secure Access mismatch via FSI to non-boot chips
+        // c) Check for Secure Access mismatch via FSI to non-boot chips
+        //    Is this still required in the new path
         checkForSecurityAccessMismatch(l_secondaryProcsList, l_StepError);
         if (!l_StepError.isNull())
         {
@@ -584,23 +838,128 @@ void* call_proc_build_smp (void *io_pArgs)
             break;
         }
 
-        // d) Call HWP to specifically enable SMP fabric (pb hotplug)
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Call p10_build_smp(SMP_ACTIVATE_SWITCH)" );
-        FAPI_INVOKE_HWP( l_errl, p10_build_smp,
-                         l_procList,
-                         l_fapi2_boot_proc,
-                         SMP_ACTIVATE_SWITCH );
-        if(l_errl)
+        // d) Call HWP to enable SMP fabric (pb hotplug) (legacy path)
+        if (!l_sbeExtend)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR : call p10_build_smp(SMP_ACTIVATE_SWITCH) "
-                TRACE_ERR_FMT,
-                TRACE_ERR_ARGS(l_errl) );
-            captureError(l_errl, l_StepError, HWPF_COMP_ID);
-            break;
+                    "Call p10_build_smp(SMP_ACTIVATE_SWITCH)" );
+            FAPI_INVOKE_HWP( l_errl, p10_build_smp,
+                            l_procList,
+                            l_fapi2_boot_proc,
+                            SMP_ACTIVATE_SWITCH );
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR : call p10_build_smp(SMP_ACTIVATE_SWITCH) "
+                    TRACE_ERR_FMT,
+                    TRACE_ERR_ARGS(l_errl) );
+                captureError(l_errl, l_StepError, HWPF_COMP_ID);
+                break;
+            }
         }
+        // d) Call TPM Extend Mode chip-op (new path)
+        else
+        {
+            // 1) Call sendSystemConfig to send system fabric map to SBE
+            TARGETING::TargetHandleList l_procChips;
+            getAllChips( l_procChips, TARGETING::TYPE_PROC , true);
+            uint64_t l_systemFabricConfigurationMap = 0x0;
+            for(auto l_proc : l_procChips)
+            {
+                // Get fabric info from proc
+                uint8_t l_fabricTopoId =
+                    l_proc->getAttr<ATTR_PROC_FABRIC_EFF_TOPOLOGY_ID>();
+                // Take topology ID X and set the Xth bit in a 16 bit integer
+                // and shift it over by 48 bits to fit 64 bits
+                // Math turns out to be shifting left by 63 - topology id
+                l_systemFabricConfigurationMap |= (1 << (63 - l_fabricTopoId));
+            }
 
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "System Fabric ID Map 0x%llX",
+                       l_systemFabricConfigurationMap);
+
+            l_errl = SBEIO::sendSystemConfig(l_systemFabricConfigurationMap,
+                                             l_bootProc);
+            if ( l_errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "sendSystemConfig: Error sending sbe chip-op to proc 0x%.8X. Returning errorlog, reason=0x%x",
+                            TARGETING::get_huid(l_bootProc),
+                            l_errl->reasonCode() );
+                break;
+            }
+
+            // 2) Reclaim all DMA buffers from the FSP
+            l_errl = MBOX::reclaimDmaBfrsFromFsp();
+            if (l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                            "ERROR call_proc_build_smp:: "
+                            "MBOX::reclaimDmaBfrsFromFsp");
+
+                // If it not complete then that's okay, but we want to store
+                // the log away somewhere. Since we didn't get all the DMA
+                // buffers back it's not a big deal to commit a log, even if
+                // we lose a DMA buffer because of it, it doesn't matter that
+                // much. This will generate more traffic to the FSP.
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errlCommit( l_errl, HWPF_COMP_ID );
+
+                // (do not break, keep going to suspend)
+            }
+
+            // 3) Suspend the mailbox with interrupt disable
+            l_errl = MBOX::suspend(true, true);
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR call_proc_build_smp:: MBOX::suspend");
+                break;
+            }
+
+            // 4) Ensure that interrupt presenter is drained
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Draining interrupt queue");
+            INTR::drainQueue();
+
+            // 5) Flush TPM state
+            l_errl = TRUSTEDBOOT::flushTpmQueue();
+            if (l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"Unable to flushTpmQueue");
+                break;
+            }
+
+            // 6) Send TPM Extend Mode chip-op with Enter control flag
+            // SBE will stop instructions on the host and prevent XSCOM access
+            // while it gathers TPM measurements from the secondaries and logs
+            // them into the boot chip TPM.  It will then start a deadman timer
+            // and restart instructions and wait for hostboot to send the Exit
+            // chip-op to disarm the timer.
+            l_errl = SBEIO::psuTPMExtendModeEnter();
+            if( l_errl )
+            {
+                break;
+            }
+
+            // 7) Send TPM Extend Mode chip-op with Exit crontol flag
+            l_errl = SBEIO::psuTPMExtendModeExit();
+            if( l_errl )
+            {
+                break;
+            }
+
+            // 8) Resume the mailbox
+            l_errl = MBOX::resume();
+            if (l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "call_proc_build_smp ERROR : MBOX::resume");
+                break;
+            }
+        }
 
         // At the point where we can now change the proc chips to use
         // XSCOM rather than SBESCOM which is the default.
@@ -671,6 +1030,21 @@ void* call_proc_build_smp (void *io_pArgs)
         {
             // break out on istep failure
             break;
+        }
+
+        if (l_sbeExtend)
+        {
+            // get all the measurements (don't extend to TPM) and check
+            //    Note: this uses XSCOM to do the readings
+            retrieveAndExtendSecondaryMeasurements(l_bootProc,
+                                                   l_secondaryProcsList,
+                                                   false, // !extendToTpm
+                                                   l_StepError);
+            if (!l_StepError.isNull())
+            {
+                // break out on istep failure
+                break;
+            }
         }
 
         // Set a flag so that the ATTN code will check ALL processors

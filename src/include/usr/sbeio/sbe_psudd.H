@@ -126,7 +126,7 @@ class SbePsu
           // BYTE 7 options
         enum putRingCommandFromImageCommands
         {
-            SBE_CMD_CONTROL_PUTRING        = 0x01
+            SBE_CMD_CONTROL_PUTRING        = 0x01,
         };
 
         /**
@@ -155,6 +155,7 @@ class SbePsu
         enum psuSecurityContolCommands
         {
             SBE_PSU_SET_UNSECURE_MEMORY_REGION_CMD  = 0x01,
+            SBE_PSU_TPM_EXTEND_MODE_CMD             = 0x02,
         };
 
 
@@ -193,6 +194,20 @@ class SbePsu
             // Re-use SBE_REQUIRE_RESPONSE and SBE_REQUIRE_ACK from above
             SBE_MEM_REGION_RESPONSE_REQUIRED = SBE_REQUIRE_RESPONSE,
             SBE_MEM_REGION_ACK_REQUIRED      = SBE_REQUIRE_ACK,
+        };
+
+        /**
+         * @brief enums for SBE TPM Extend Mode control flags
+         */
+        //BYTE 2  & 3, Control Flags
+        enum psuTPMExtendModeControlFlags
+        {
+            SBE_TPM_EXTEND_MODE_ENTER              = 0x01,
+            SBE_TPM_EXTEND_MODE_EXIT               = 0x02,
+
+            // Re-use SBE_REQUIRE_RESPONSE and SBE_REQUIRE_ACK from above
+            SBE_TPM_EXTEND_MODE_RESPONSE_REQUIRED = SBE_REQUIRE_RESPONSE,
+            SBE_TPM_EXTEND_MODE_ACK_REQUIRED      = SBE_REQUIRE_ACK,
         };
 
         /**
@@ -277,6 +292,27 @@ class SbePsu
             SBE_MEM_CONFIG_REQ_USED_REGS  = 0x05,
             // Use Response Reg 4 (0x1)
             SBE_MEM_CONFIG_RSP_USED_REGS  = 0x01,
+        };
+
+        /**
+         * @brief non reserved word enums
+         *
+         * Shows which of the request and response msg registers are
+         * not reserved. Reserved registers do not need to be written
+         * or read.
+         *
+         * This is a 4 bit field, each bit indicates as follows:
+         * 0x1 - Reg 0 is non-reserved (read or write this reg)
+         * 0x2 - Reg 1 is non-reserved (read or write this reg)
+         * 0x4 - Reg 2 is non-reserved (read or write this reg)
+         * 0x8 - Reg 3 is non-reserved (read or write this reg)
+         */
+        enum psuTPMExtendModeNonReservedMsgs
+        {
+            // Use Request Reg 0,1 0x1 + 0x2)
+            SBE_TPM_EXTEND_MODE_REQ_USED_REGS  = 0x03,
+            // Use Response Reg 4 (0x1)
+            SBE_TPM_EXTEND_MODE_RSP_USED_REGS  = 0x01,
         };
 
         /**
@@ -774,6 +810,18 @@ class SbePsu
                 uint32_t cd6_memRegion_Size;            //Mbx Reg 1
                 uint64_t cd6_memRegion_Start_Addr;      //Mbx Reg 2
                 uint64_t cd6_memRegion_MbxReg3reserved; //Mbx Reg 3
+            } PACKED;
+
+            struct //psuTPMExtendMode
+            {
+                uint16_t cd6_TPMExtendMode_Reserved;
+                uint16_t cd6_TPMExtendMode_ControlFlags;
+                uint16_t cd6_TPMExtendMode_SeqID;
+                uint8_t  cd6_TPMExtendMode_CommandClass;
+                uint8_t  cd6_TPMExtendMode_Command;
+                uint64_t cd6_TPMExtendMode_WaitTimerMS;
+                uint64_t cd6_TPMExtendMode_MbxReg2reserved;
+                uint64_t cd6_TPMExtendMode_MbxReg3reserved;
             } PACKED;
 
             struct //setFFDCAddress

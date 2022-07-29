@@ -33,6 +33,7 @@
 #include <sbeio/sbe_utils.H>  // sbeCapabilities_t
 #include <sbeio/sbeioreasoncodes.H> // SBEIO_PSU, SBEIO_FIFO,
 #include <targeting/common/commontargeting.H>  // get_huid
+#include <targeting/targplatutil.H>  //getCurrentNodeTarget
 #include <util/align.H>            // ALIGN_X
 #include <sys/mm.h>                // mm_virt_to_phys
 #include <sbeio/sbeioif.H>
@@ -99,6 +100,24 @@ void applySbeCapabilities(TargetHandle_t i_target,
     TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
               "SBE supports Hostboot requested halt status reporting: %d",
               sbeSupportsHaltReporting);
+/*
+    // SBE support for TPM Extend Mode as of version 2.1 or later.
+    const uint8_t sbeSupportsTpmExtendMode =
+        (   (   (i_capabilities.majorVersion == 2)
+             && (i_capabilities.minorVersion >= 1))
+         || (   (i_capabilities.majorVersion >  2)));
+
+#ifndef __HOSTBOOT_RUNTIME
+    TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
+#else
+    TargetHandle_t l_nodeTarget = UTIL::assertGetMasterNodeTarget();
+#endif
+    l_nodeTarget->
+        setAttr<ATTR_SBE_HANDLES_SMP_TPM_EXTEND>(sbeSupportsTpmExtendMode);
+    TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
+              "SBE supports TPM Extend Mode: %d",
+              sbeSupportsTpmExtendMode);
+*/
 }
 
 /**

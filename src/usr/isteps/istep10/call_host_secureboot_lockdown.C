@@ -66,6 +66,7 @@
 #include <targeting/common/mfgFlagAccessors.H>
 
 #include <targeting/common/utilFilter.H> // getAllChips
+#include <targeting/targplatutil.H> // getCurrentNodeTarget
 
 #include <i2c/i2c.H>
 #include <i2c/i2c_common.H>
@@ -93,215 +94,6 @@ using   namespace   SBEIO;
 
 namespace ISTEP_10
 {
-
-/**
- * @brief XSCOM TPM measurements for the secondary chips
- *        1. Validates PCR6 security state values matches between all SBEs
- *        2. Mismatch will cause primary TPM to be poisoned,
- *           indicating we are in an invalid security state
- *        3. Extend all measurements (except PCR6) from secondary/alternate
- *           procs to TPM and append to log
- *
- * @param[in] i_primaryProc    - primary sentinal processor target
- * @param[in] i_secondaryProcs - secondary/alternate processor targets
- * @param[in/out] io_StepError - istep failure errors will be added to this
- */
-
-void retrieveAndExtendSecondaryMeasurements(
-                            const TargetHandle_t i_primaryProc,
-                            const TargetHandleList& i_secondaryProcs,
-                            IStepError & io_StepError )
-{
-    errlHndl_t  l_errl  =   nullptr;
-    bool l_poison_tpm = false;
-
-    // structure to report what mismatched
-    typedef union {
-      uint8_t full_reason;
-      struct
-      {
-        uint8_t rsvd          : 5;
-        uint8_t PCR6_regs_0   : 1; // SBE Security State - PCR6 version
-        uint8_t PCR6_regs_1   : 1; // HW Key Hash- PCR6 version
-        uint8_t PCR6_regs_4_7 : 1; // Hash of SBE Secureboot Validation Image
-      } PACKED;
-    } mismatch_reason_t;
-
-    // TPM to log/extend measurements (or potentially poison)
-    Target* l_primaryTpm = nullptr;
-
-    // measurement data
-    TRUSTEDBOOT::TPM_sbe_measurements_regs_grouped l_primarySbeMeasuredGroups;
-    TRUSTEDBOOT::TPM_sbe_measurements_regs_grouped l_secondarySbeMeasuredGroups;
-
-    uint32_t poison_eid = 0; // EID of error that caused poisoning of TPM
-
-    do {
-    // TPM to log/extend measurements (or potentially poison)
-    TRUSTEDBOOT::getPrimaryTpm(l_primaryTpm);
-    auto l_tpmHwasState = l_primaryTpm->getAttr<ATTR_HWAS_STATE>();
-
-    // grab primary values first
-    l_errl = TRUSTEDBOOT::groupSbeMeasurementRegs(i_primaryProc, l_primarySbeMeasuredGroups);
-    if (l_errl)
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-           ERR_MRK"ERROR : retrieveAndExtendSecondaryMeasurements: "
-           "groupSbeMeasurementRegs returned error for 0x%.8X primary processor "
-           TRACE_ERR_FMT,
-           get_huid(i_primaryProc),
-           TRACE_ERR_ARGS(l_errl) );
-        // this indicates XSCOM failure on primary processor so make this fatal
-        forceProcDelayDeconfigCallout(i_primaryProc, l_errl);
-        captureError(l_errl, io_StepError, ISTEP_COMP_ID, i_primaryProc);
-        break;
-    }
-
-    // secondary chips
-    for ( auto curproc : i_secondaryProcs)
-    {
-        l_errl = TRUSTEDBOOT::groupSbeMeasurementRegs(curproc, l_secondarySbeMeasuredGroups);
-        if (l_errl)
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               ERR_MRK"ERROR : retrieveAndExtendSecondaryMeasurements: "
-               "groupSbeMeasurementRegs returned error for 0x%.8X processor "
-               TRACE_ERR_FMT,
-               get_huid(curproc),
-               TRACE_ERR_ARGS(l_errl) );
-            forceProcDelayDeconfigCallout(curproc, l_errl);
-            captureError(l_errl, io_StepError, ISTEP_COMP_ID, curproc);
-            continue;
-        }
-
-        mismatch_reason_t l_mismatch = {0};
-        // compare PCR6 for mismatch - register 0/security state
-        if (memcmp(l_primarySbeMeasuredGroups.sbe_measurement_regs_0,
-                   l_secondarySbeMeasuredGroups.sbe_measurement_regs_0,
-                   TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_0_SIZE))
-        {
-            l_mismatch.PCR6_regs_0 = 1;
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                ERR_MRK"Mismatch found: 0x%08X processor PCR6 register 0/security state",
-                get_huid(curproc) );
-            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 0/security state",
-                l_primarySbeMeasuredGroups.sbe_measurement_regs_0,
-                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_0_SIZE );
-            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 0/security state",
-                l_secondarySbeMeasuredGroups.sbe_measurement_regs_0,
-                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_0_SIZE );
-        }
-        // compare PCR6 for mismatch - register 1/HW key hash
-        if (memcmp(l_primarySbeMeasuredGroups.sbe_measurement_regs_1,
-                   l_secondarySbeMeasuredGroups.sbe_measurement_regs_1,
-                   TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_1_SIZE))
-        {
-            l_mismatch.PCR6_regs_1 = 1;
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                ERR_MRK"Mismatch found: 0x%08X processor PCR6 register 1/HW key hash",
-                get_huid(curproc) );
-            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 1/HW key hash",
-                l_primarySbeMeasuredGroups.sbe_measurement_regs_1,
-                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_1_SIZE );
-            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 1/HW key hash",
-                l_secondarySbeMeasuredGroups.sbe_measurement_regs_1,
-                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_1_SIZE );
-        }
-        // compare PCR6 for mismatch - registers 4 to 7/Hash of SBE secureboot validation image
-        if (memcmp(l_primarySbeMeasuredGroups.sbe_measurement_regs_4_7,
-                   l_secondarySbeMeasuredGroups.sbe_measurement_regs_4_7,
-                   TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_4_7_SIZE))
-        {
-            l_mismatch.PCR6_regs_4_7 = 1;
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                ERR_MRK"Mismatch found: 0x%08X processor PCR6 registers 4-7/SBE secureboot validation image",
-                get_huid(curproc) );
-            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Primary PCR6 Reg 4-7/SBE secureboot validation image",
-                l_primarySbeMeasuredGroups.sbe_measurement_regs_4_7,
-                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_4_7_SIZE);
-            TRACFBIN( ISTEPS_TRACE::g_trac_isteps_trace, "Secondary PCR6 Reg 4-7/SBE secureboot validation image",
-                l_secondarySbeMeasuredGroups.sbe_measurement_regs_4_7,
-                TRUSTEDBOOT::TPM_SBE_MEASUREMENT_REGS_4_7_SIZE);
-        }
-
-        if (l_mismatch.full_reason != 0)
-        {
-            l_poison_tpm = true;
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                "creating error for mismatch (0x%.08X) on proc 0x%.8X",
-                l_mismatch.full_reason, get_huid(curproc) );
-
-            /*@
-             * @errortype
-             * @moduleid   MOD_RETRIEVE_EXTEND_SECONDARY_MEASUREMENTS
-             * @reasoncode RC_PCR6_MISMATCH_DETECTED
-             * @userdata1  Huid of secondary processor
-             * @userdata2  Mismatch found (bitwise 0x02 = PCR6 0, 0x01 = PCR6 4-7)
-             * @devdesc    Unable to confirm PCR6 match between primary and secondary SBE
-             * @custdesc   Platform security problem detected
-             */
-            l_errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
-                                             MOD_RETRIEVE_EXTEND_SECONDARY_MEASUREMENTS,
-                                             RC_PCR6_MISMATCH_DETECTED,
-                                             get_huid(curproc),
-                                             l_mismatch.full_reason);
-            l_errl->addHwCallout( curproc,
-                                  HWAS::SRCI_PRIORITY_HIGH,
-                                  HWAS::NO_DECONFIG,
-                                  HWAS::GARD_NULL );
-            if (!SECUREBOOT::enabled())
-            {
-              TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "retrieveAndExtendSecondaryMeasurements: security is off, "
-                  "so just log the PCR6 Mismatch (EID: 0x%08X) as informational",
-                  l_errl->eid() );
-                l_errl->setSev(ERRL_SEV_INFORMATIONAL);
-            }
-            poison_eid = l_errl->eid();
-            l_errl->collectTrace(ISTEP_COMP_NAME);
-            SECUREBOOT::addSecurityRegistersToErrlog(l_errl);
-
-            // allow the istep to continue for just a mismatch error
-            errlCommit(l_errl, ISTEP_COMP_ID);
-        }
-
-        // primaryTpm must be functional to log/extend measurements
-        if (l_tpmHwasState.functional)
-        {
-            // log and extend measurements (good or mismatched ones)
-            l_errl = TRUSTEDBOOT::logSbeMeasurementRegs(l_primaryTpm, curproc, l_secondarySbeMeasuredGroups, true);
-            if (l_errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    ERR_MRK"retrieveAndExtendSecondaryMeasurements: "
-                    "log/extend measurements for 0x%08X processor SBE",
-                    get_huid(curproc));
-                forceProcDelayDeconfigCallout(curproc, l_errl);
-                captureError(l_errl, io_StepError, ISTEP_COMP_ID, curproc);
-            }
-        }
-
-        if (poison_eid)
-        {
-            // If not already compromised, set to this poison_eid
-            if (!curproc->getAttr<ATTR_SBE_COMPROMISED_EID>())
-            {
-                // update attribute with EID of poisoning reason
-                curproc->setAttr<ATTR_SBE_COMPROMISED_EID>(poison_eid);
-            }
-            // clear it out for next secondary processor
-            poison_eid = 0;
-        }
-    } // secondary chip loop
-    } while (0);
-
-    if(l_poison_tpm)
-    {
-        poisonPrimaryTpm();
-    }
-}
-
 
 /**
  * @brief Clear FIFO and perform HRESET to secondary processor SBE
@@ -967,21 +759,30 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
         }
     }
 
-    // get all the measurements/extend to TPM and check
-    //    Note: this uses XSCOM to do the readings
-    retrieveAndExtendSecondaryMeasurements(l_bootProc,
-                                           l_secondaryProcsList,
-                                           l_istepError);
-    if (!l_istepError.isNull())
+    // Get the capability attribute from the node
+    TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
+    auto l_sbeExtend =
+        l_nodeTarget->getAttr<TARGETING::ATTR_SBE_HANDLES_SMP_TPM_EXTEND>();
+
+    if (!l_sbeExtend)
     {
-        // break out on istep failure
-        break;
+        // get all the measurements/extend to TPM and check
+        //    Note: this uses XSCOM to do the readings
+        retrieveAndExtendSecondaryMeasurements(l_bootProc,
+                                               l_secondaryProcsList,
+                                               true, // extendToTpm
+                                               l_istepError);
+        if (!l_istepError.isNull())
+        {
+            // break out on istep failure
+            break;
+        }
     }
 
     const bool isMpipl = TARGETING::UTIL::assertGetToplevelTarget()->
         getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
 
-    if(!isMpipl)
+    if(!isMpipl && !l_sbeExtend)
     {
         // Unhalt the SBEs if they were halted in istep 10.1.  See that
         // step for detailed explanation on the criteria for performing a halt.
