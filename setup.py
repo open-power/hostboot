@@ -154,7 +154,5 @@ setup(
     data_files      = custom_data_files,
     package_dir     = package_directories,
     package_data    = package_data,
-    data_files      = [( 'hostboot_data', ['img/hbotStringFile']),
-                       ( 'hostboot_data', ['img/hbicore.syms'])],
     scripts         = ['src/build/debug/hb-memdump.sh','src/build/trace/tracelite/weave.py'],
 )
