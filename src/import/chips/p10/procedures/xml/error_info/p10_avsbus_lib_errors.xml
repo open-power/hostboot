@@ -22,6 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- // EKB-Mirror-To: hostboot                                                -->
 <hwpErrors>
     <!-- ******************************************************************** -->
     <hwpError>
@@ -59,13 +60,18 @@
       <ffdc>BRIDGE</ffdc>
       <ffdc>RAIL</ffdc>
       <ffdc>ROOT_CTRL1</ffdc>
-     <callout>
-      <target>SPIVID_SLAVE_PART</target>
-      <priority>HIGH</priority>
-    </callout>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>SPIVID_SLAVE_PART</hwid>
+        <avsbus>BUS</avsbus>
+        <avsrail>RAIL</avsrail>
+        <refTarget>PROC_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>PROC_TARGET</target>
@@ -86,13 +92,18 @@
       <ffdc>BRIDGE</ffdc>
       <ffdc>RAIL</ffdc>
       <ffdc>ROOT_CTRL1</ffdc>
-     <callout>
-      <target>SPIVID_SLAVE_PART</target>
-      <priority>HIGH</priority>
-    </callout>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>SPIVID_SLAVE_PART</hwid>
+        <avsbus>BUS</avsbus>
+        <avsrail>RAIL</avsrail>
+        <refTarget>PROC_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>PROC_TARGET</target>
@@ -112,13 +123,18 @@
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
       <ffdc>RAIL</ffdc>
-     <callout>
-      <target>SPIVID_SLAVE_PART</target>
-      <priority>HIGH</priority>
-    </callout>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>SPIVID_SLAVE_PART</hwid>
+        <avsbus>BUS</avsbus>
+        <avsrail>RAIL</avsrail>
+        <refTarget>PROC_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>PROC_TARGET</target>
@@ -139,12 +155,17 @@
       <ffdc>BRIDGE</ffdc>
       <ffdc>RAIL</ffdc>
       <callout>
-        <target>SPIVID_SLAVE_PART</target>
-        <priority>HIGH</priority>
-      </callout>
-      <callout>
         <procedure>CODE</procedure>
         <priority>MEDIUM</priority>
+      </callout>
+      <callout>
+        <hw>
+          <hwid>SPIVID_SLAVE_PART</hwid>
+          <avsbus>BUS</avsbus>
+          <avsrail>RAIL</avsrail>
+          <refTarget>PROC_TARGET</refTarget>
+        </hw>
+        <priority>HIGH</priority>
       </callout>
       <callout>
         <target>PROC_TARGET</target>
@@ -167,12 +188,17 @@
       <ffdc>COMMAND</ffdc>
       <ffdc>RESP_DATA</ffdc>
       <callout>
-        <target>SPIVID_SLAVE_PART</target>
-        <priority>HIGH</priority>
-      </callout>
-      <callout>
         <procedure>CODE</procedure>
         <priority>MEDIUM</priority>
+      </callout>
+      <callout>
+        <hw>
+          <hwid>SPIVID_SLAVE_PART</hwid>
+          <avsbus>BUS</avsbus>
+          <avsrail>RAIL</avsrail>
+          <refTarget>PROC_TARGET</refTarget>
+        </hw>
+        <priority>HIGH</priority>
       </callout>
       <callout>
         <target>PROC_TARGET</target>
@@ -199,12 +225,17 @@
         <priority>HIGH</priority>
       </callout>
       <callout>
-       <target>SPIVID_SLAVE_PART</target>
-       <priority>MEDIUM</priority>
-      </callout>
-      <callout>
         <target>PROC_TARGET</target>
         <priority>LOW</priority>
+      </callout>
+      <callout>
+        <hw>
+          <hwid>SPIVID_SLAVE_PART</hwid>
+          <avsbus>BUS</avsbus>
+          <avsrail>RAIL</avsrail>
+          <refTarget>PROC_TARGET</refTarget>
+        </hw>
+        <priority>HIGH</priority>
       </callout>
        <deconfigure>
         <target>PROC_TARGET</target>
@@ -249,7 +280,12 @@
         <priority>HIGH</priority>
       </callout>
       <callout>
-        <target>SPIVID_SLAVE_PART</target>
+        <hw>
+          <hwid>SPIVID_SLAVE_PART</hwid>
+          <avsbus>BUS</avsbus>
+          <avsrail>RAIL</avsrail>
+          <refTarget>PROC_TARGET</refTarget>
+        </hw>
         <priority>MEDIUM</priority>
       </callout>
     </hwpError>
@@ -270,7 +306,12 @@
         <priority>HIGH</priority>
       </callout>
       <callout>
-        <target>SPIVID_SLAVE_PART</target>
+        <hw>
+          <hwid>SPIVID_SLAVE_PART</hwid>
+          <avsbus>BUS</avsbus>
+          <avsrail>RAIL</avsrail>
+          <refTarget>PROC_TARGET</refTarget>
+        </hw>
         <priority>MEDIUM</priority>
       </callout>
     </hwpError>

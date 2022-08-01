@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
 /// @file error_info.H
 /// @brief Defines the Error Information structures and classes
 ///
+// EKB-Mirror-To: hostboot
 
 #ifndef FAPI2_ERRORINFO_H_
 #define FAPI2_ERRORINFO_H_
@@ -183,12 +184,16 @@ struct ErrorInfoHwCallout
     /// @param[in] i_calloutPriority Priority of callout
     /// @param[in] i_refTarget       Reference to reference target
     /// @param[in] i_clkPos          Clock position
+    /// @param[in] i_avsbus          AVS Bus number
+    /// @param[in] i_avsrail         AVS Rail number
     ///
     ErrorInfoHwCallout(
         const HwCallouts::HwCallout i_hw,
         const CalloutPriorities::CalloutPriority i_calloutPriority,
         const Target<TARGET_TYPE_ALL>& i_refTarget,
-        const uint8_t i_clkPos = CLOCK_POS_UNDEF);
+        const uint8_t i_clkPos = CLOCK_POS_UNDEF,
+        const uint8_t i_avsbus = AVSBUS_UNDEF,
+        const uint8_t i_avsrail = AVSRAIL_UNDEF);
 
 #ifdef FAPI_CUSTOM_MALLOC
     ///
@@ -220,6 +225,12 @@ struct ErrorInfoHwCallout
 
     // Clock position
     uint8_t iv_clkPos;
+
+    // AVS Bus number
+    uint8_t iv_avsbus;
+
+    // AVS Rail number
+    uint8_t iv_avsrail;
 };
 
 ///
@@ -572,6 +583,8 @@ struct ErrorInfoEntryHwCallout
     uint8_t iv_calloutPriority;
     uint8_t iv_refObjIndex;
     uint8_t iv_clkPos;
+    uint8_t iv_avsbus;
+    uint8_t iv_avsrail;
     void addErrorInfo(std::shared_ptr<ErrorInfo> i_info,
                       const void* const* i_object) const;
 };
