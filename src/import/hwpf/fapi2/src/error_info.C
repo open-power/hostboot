@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
  *  @file error_info.C
  *  @brief Implements the error information classes
  */
+// EKB-Mirror-To: hostboot
 
 #include <stdint.h>
 #include <string.h>
@@ -68,17 +69,23 @@ ErrorInfoFfdc::ErrorInfoFfdc(const uint32_t i_ffdcId,
 /// @param[in] i_hw              Hardware to callout
 /// @param[in] i_calloutPriority Priority of callout
 /// @param[in] i_refTarget       Reference to reference target
-/// @param[in[ i_clkPos          Clock position
+/// @param[in] i_clkPos          Clock position
+/// @param[in] i_avsbus          AVS Bus number
+/// @param[in] i_avsrail         AVS Rail number
 ///
 ErrorInfoHwCallout::ErrorInfoHwCallout(
     const HwCallouts::HwCallout i_hw,
     const CalloutPriorities::CalloutPriority i_calloutPriority,
     const Target<TARGET_TYPE_ALL>& i_refTarget,
-    const uint8_t i_clkPos):
+    const uint8_t i_clkPos,
+    const uint8_t i_avsbus,
+    const uint8_t i_avsrail):
     iv_hw(i_hw),
     iv_calloutPriority(i_calloutPriority),
     iv_refTarget(i_refTarget),
-    iv_clkPos(i_clkPos)
+    iv_clkPos(i_clkPos),
+    iv_avsbus(i_avsbus),
+    iv_avsrail(i_avsrail)
 {}
 
 ///
@@ -270,10 +277,12 @@ void ErrorInfoEntryHwCallout::addErrorInfo(std::shared_ptr<ErrorInfo> i_info,
         static_cast<HwCallouts::HwCallout>(iv_hw),
         static_cast<CalloutPriorities::CalloutPriority>(iv_calloutPriority),
         target,
-        iv_clkPos);
+        iv_clkPos,
+        iv_avsbus,
+        iv_avsrail);
 
-    FAPI_DBG("addErrorInfo: Adding hw callout target: 0x%lx hw: %d, pri: %d, pos: %d",
-             ei->iv_refTarget.get(), ei->iv_hw, ei->iv_calloutPriority, ei->iv_clkPos);
+    FAPI_DBG("addErrorInfo: Adding hw callout target: 0x%lx hw: %d, pri: %d, pos: %d, avsbus: %d, avsrail: %d",
+             ei->iv_refTarget.get(), ei->iv_hw, ei->iv_calloutPriority, ei->iv_clkPos, ei->iv_avsbus, ei->iv_avsrail);
 
     i_info->iv_hwCallouts.push_back(std::shared_ptr<ErrorInfoHwCallout>(ei));
 }

@@ -37,6 +37,8 @@
 # Usage:
 # parseErrorInfo.pl <output dir> <filename1> <filename2> ...
 
+#// EKB-Mirror-To: hostboot
+
 use strict;
 
 #------------------------------------------------------------------------------
@@ -67,6 +69,8 @@ my $mcast_type                = "fapi2::mcast_t";
 my $scom_addr_type            = "uint64_t";
 my $ffdc_count                = 0;
 my $clock_ffdc_type           = "uint8_t";
+my $avsbus_ffdc_type          = "uint8_t";
+my $avsrail_ffdc_type         = "uint8_t";
 
 # There are some names used in the XML files which exist in either
 # c++ keywords (case, for example) or macros (DOMAIN). The one's which
@@ -1087,6 +1091,38 @@ foreach my $argnum ( 0 .. $#ARGV )
                     else
                     {
                         $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_clkPos = 0xff; \\\n";
+                    }
+
+                    # HW Callout - AVS Bus
+                    if ( exists $callout->{hw}->{avsbus} )
+                    {
+                        # Add the Targets to the objectlist if they don't already exist
+                        my $objNum1 = addEntryToArray( \@eiObjects, $callout->{hw}->{avsbus} );
+                        $eiEntryStr .=
+                            "    l_entries[$eiEntryCount].hw_callout.iv_avsbus = $callout->{hw}->{avsbus}; \\\n";
+
+                        # Add a method to the ffdc-gathering class
+                        addFfdcMethod( \%methods, $callout->{hw}->{avsbus}, $err->{rc}, $avsbus_ffdc_type, $objNum1 );
+                    }
+                    else
+                    {
+                        $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_avsbus = 0xff; \\\n";
+                    }
+
+                    # HW Callout - AVS Rail
+                    if ( exists $callout->{hw}->{avsrail} )
+                    {
+                        # Add the Targets to the objectlist if they don't already exist
+                        my $objNum1 = addEntryToArray( \@eiObjects, $callout->{hw}->{avsrail} );
+                        $eiEntryStr .=
+                            "    l_entries[$eiEntryCount].hw_callout.iv_avsrail = $callout->{hw}->{avsrail}; \\\n";
+
+                        # Add a method to the ffdc-gathering class
+                        addFfdcMethod( \%methods, $callout->{hw}->{avsrail}, $err->{rc}, $avsrail_ffdc_type, $objNum1 );
+                    }
+                    else
+                    {
+                        $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_avsrail = 0xff; \\\n";
                     }
 
                     $eiEntryCount++;

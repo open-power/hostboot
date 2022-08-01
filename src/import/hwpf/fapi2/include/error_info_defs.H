@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 /// @file error_info_defs.H
 /// @brief Defines to support the Error Information class
 ///
-
+// EKB-Mirror-To: hostboot
 #ifndef FAPI2_ERRORINFO_DEFS_H_
 #define FAPI2_ERRORINFO_DEFS_H_
 
@@ -42,6 +42,8 @@ namespace fapi2
 {
 // For HW callout - Clock position undefined to 0xFF(default)
 #define CLOCK_POS_UNDEF 0xFF
+#define AVSBUS_UNDEF 0xFF
+#define AVSRAIL_UNDEF 0xFF
 
 ///
 /// @brief Type to hold the ffdc data to be sent to hostboot
