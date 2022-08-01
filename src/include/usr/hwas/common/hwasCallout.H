@@ -202,10 +202,11 @@ enum busTypeEnum
 
 enum voltageTypeEnum
 {
-    VDD = 0,
-    VCS = 1,
-    VDN = 2,
-    VIO = 3,
+    VDD = 0x0,
+    VCS = 0x1,
+    VDN = 0x2,
+    VIO = 0x3,
+    VOLTAGE_INVALID = 0xFF
 };
 
 // Used by Hostboot code where real clock targets do not exist
