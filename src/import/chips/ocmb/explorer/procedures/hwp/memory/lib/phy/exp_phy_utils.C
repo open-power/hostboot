@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 // EKB-Mirror-To: hostboot
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <explorer_scom_addresses_fixes.H>
 #include <explorer_scom_addresses_fld_fixes.H>
@@ -70,10 +71,20 @@ fapi_try_exit:
 /// @brief Disable the ALERT_N bit in MCHP PHY
 ///
 /// @param[in] i_target MEM_PORT target
+/// @param[in] i_is_planar true if this is a planar system
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode disable_alert_n(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+fapi2::ReturnCode disable_alert_n(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint8_t i_is_planar)
 {
+    // Skips this functionality if the system is a planar
+    // The alert_n signal is not wired back for DDIMM's, but is for planar systems
+    // As such, this functioanlity can be skipped for planar systems
+    if(i_is_planar == fapi2::ENUM_ATTR_MEM_MRW_IS_PLANAR_TRUE)
+    {
+        FAPI_INF("%s is in a planar system. Keeping alert_n enabled", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     fapi2::buffer<uint64_t> l_data;
 
     // Need to enable PHY access in order to scom the PHY regs

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/phy/exp_phy_utils.H $ */
+/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/fir/exp_unmask.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2022                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,48 +22,69 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
+// EKB-Mirror-To: hostboot
 
 ///
-/// @file exp_phy_utils.H
-/// @brief Utility functions to control phy access
+/// @file exp_unmask.H
+/// @brief Explorer specific unmask support
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
-// EKB-Mirror-To: hostboot
+
+#ifndef _MSS_EXP_UNMASK_H_
+#define _MSS_EXP_UNMASK_H_
 
 #include <fapi2.H>
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <lib/fir/exp_fir_traits.H>
 
 namespace mss
 {
 namespace exp
 {
-namespace phy
+namespace unmask
 {
 
 ///
-/// @brief Configure the PHY to allow/disallow register accesses via scom
-/// @param[in] i_target the target on which to operate
-/// @param[in] i_state the state to set the PHY to - either mss::states::ON_N or mss::states::OFF_N
-/// @return fapi2::FAPI2_RC_SUCCESS iff successful
-///
-fapi2::ReturnCode configure_phy_access(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                                       const mss::states i_state);
-
-///
-/// @brief Disable the ALERT_N bit in MCHP PHY
-///
-/// @param[in] i_target MEM_PORT target
+/// @brief Helper for setting up the RDF maintenance RCD fir
 /// @param[in] i_is_planar true if this is a planar system
-/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @param[in] i_has_rcd true if this Explorer has an RCD
+/// @param[in,out] io_rdf_fir RDF fir class
 ///
-fapi2::ReturnCode disable_alert_n(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                                  const uint8_t i_is_planar);
+void rdf_maintenance_rcd_helper(const uint8_t i_is_planar, const bool i_has_rcd,
+                                mss::fir::reg<EXPLR_RDF_FIR>& io_rdf_fir);
 
-} // phy
-} // exp
-} // mss
+///
+/// @brief Helper for setting up the RDF mainline RCD fir
+/// @param[in] i_is_planar true if this is a planar system
+/// @param[in] i_has_rcd true if this Explorer has an RCD
+/// @param[in,out] io_rdf_fir RDF fir class
+///
+void rdf_mainline_rcd_helper(const uint8_t i_is_planar, const bool i_has_rcd, mss::fir::reg<EXPLR_RDF_FIR>& io_rdf_fir);
+
+///
+/// @brief Helper for setting up the SRQ RCD parity error
+/// @param[in] i_is_planar true if this is a planar system
+/// @param[in] i_has_rcd true if this Explorer has an RCD
+/// @param[in,out] io_srq_fir SRQ fir class
+///
+void srq_rcd_parity_helper(const uint8_t i_is_planar, const bool i_has_rcd,
+                           mss::fir::reg<EXPLR_SRQ_SRQFIRQ>& io_srq_fir);
+
+///
+/// @brief Helper for setting up the FARB0Q bits related to RCD parity
+/// @param[in] i_target the fapi2::Target
+/// @param[in] i_is_planar true if this is a planar system
+/// @param[in] i_has_rcd true if this Explorer has an RCD
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode setup_farb_rcd_bits_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t i_is_planar, const bool i_has_rcd);
+
+} // end unmask ns
+} // end exp ns
+} // end mss ns
+
+#endif
