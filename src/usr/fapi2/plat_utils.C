@@ -47,6 +47,7 @@
 #include <p10_scan_compression.H>
 #include <scom/wakeup.H>
 #include <util/misc.H>
+#include <hwas/common/hwasCallout.H>
 
 #include <fapi2.H>
 
@@ -239,8 +240,8 @@ HWAS::partTypeEnum xlatePartHwCallout(
             l_part = HWAS::GPIO_EXPANDER_PART_TYPE;
             break;
         case HwCallouts::SPIVID_SLAVE_PART:
-            // TODO: update this for FAPI layer changes
-            //l_part = HWAS::SPIVID_SLAVE_PART_TYPE;
+            assert(0,"SPIVID_SLAVE_PART part callout explicitly not supported "
+                     "from FAPI");
             break;
         case HwCallouts::TOD_CLOCK:
             l_part = HWAS::TOD_CLOCK;
@@ -538,10 +539,8 @@ void processEIHwCallouts(const ErrorInfo & i_errInfo,
                   (l_hw == HwCallouts::SBE_SEEPROM_PART) ||
                   (l_hw == HwCallouts::VPD_PART) ||
                   (l_hw == HwCallouts::LPC_SLAVE_PART) ||
-                  (l_hw == HwCallouts::GPIO_EXPANDER_PART) ||
-                  (l_hw == HwCallouts::SPIVID_SLAVE_PART) )
+                  (l_hw == HwCallouts::GPIO_EXPANDER_PART) )
         {
-            // TODO: update this for FAPI layer changes
             HWAS::partTypeEnum l_part =
                 xlatePartHwCallout((*itr)->iv_hw);
 
@@ -549,6 +548,101 @@ void processEIHwCallouts(const ErrorInfo & i_errInfo,
                      " (part:%d, pri:%d)",
                      l_part, l_priority);
             io_pError->addPartCallout(l_pRefTarget, l_part, l_priority);
+        }
+        else if (l_hw == HwCallouts::SPIVID_SLAVE_PART)
+        {
+            uint8_t l_avsbus = (*itr)->iv_avsbus;
+            uint8_t l_avsrail = (*itr)->iv_avsrail;
+
+            // Translate the bus+rail to a VRM type
+            TARGETING::ATTR_AVSBUS_BUSNUM_type l_avsbus_array = {};
+            TARGETING::ATTR_AVSBUS_RAIL_type l_avsrail_array = {};
+            if (l_pRefTarget->tryGetAttr<TARGETING::ATTR_AVSBUS_BUSNUM>(l_avsbus_array) &&
+                l_pRefTarget->tryGetAttr<TARGETING::ATTR_AVSBUS_RAIL>(l_avsrail_array))
+            {
+                HWAS::voltageTypeEnum vrmType = HWAS::VOLTAGE_INVALID;
+                // busnum type is array of unsigned char
+                for (uint8_t avsbus = 0; avsbus < sizeof(TARGETING::ATTR_AVSBUS_BUSNUM_type); avsbus++)
+                {
+                    if (l_avsbus_array[avsbus] == l_avsbus)
+                    {
+                        // Check to see if the bus index found returns the correct rail value
+                        if (l_avsrail_array[avsbus] == l_avsrail)
+                        {
+                            vrmType = (HWAS::voltageTypeEnum)avsbus;
+                            break;
+                        }
+                    }
+                }
+
+                if (vrmType < HWAS::VOLTAGE_INVALID)
+                {
+                    FAPI_INF("processEIHwCallouts: Adding vrm-callout"
+                             " (VRM type:%d, pri:%d)",
+                             vrmType, l_priority);
+
+                    io_pError->addVrmCallout(l_pRefTarget, vrmType, l_priority);
+                }
+                else
+                {
+                    FAPI_ERR("processEIHwCallouts: SPIVID_SLAVE_PART error finding VRM type "
+                             "l_pRefTarget=0x%08X, vrmType=%d", get_huid(l_pRefTarget),
+                             vrmType);
+
+                    // Couldn't isolate to a VRM, so engage next level of
+                    // support at a high priority, because firmware is trying
+                    // to implicate a voltage domain.
+                    io_pError->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,
+                                                   HWAS::SRCI_PRIORITY_HIGH);
+
+                    // It's also possible firmware deficiencies caused this
+                    io_pError->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                                   HWAS::SRCI_PRIORITY_MED);
+
+                    // Referenced target should be the entity initiating
+                    // regulator communication, which should only be processors
+                    // currently. In that case it's possible that entity is at
+                    // fault.
+                    if(   (l_pRefTarget)
+                       && (   l_pRefTarget->getAttr<TARGETING::ATTR_TYPE>()
+                           == TARGETING::TYPE_PROC))
+                    {
+                        io_pError->addHwCallout(l_pRefTarget,
+                                                HWAS::SRCI_PRIORITY_LOW,
+                                                HWAS::NO_DECONFIG,
+                                                HWAS::GARD_NULL);
+                    }
+                }
+            }
+            else
+            {
+                FAPI_ERR("processEIHwCallouts: SPIVID_SLAVE_PART error getting bus or rail attribute "
+                         "l_pRefTarget=0x%08X", get_huid(l_pRefTarget));
+
+                // Couldn't isolate to a VRM, so engage next level of
+                // support at a high priority, because firmware is trying
+                // to implicate a voltage domain.
+                io_pError->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,
+                                               HWAS::SRCI_PRIORITY_HIGH);
+
+                // It's also likely firmware deficiencies caused this
+                io_pError->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                               HWAS::SRCI_PRIORITY_MED);
+
+                // Referenced target should be the entity initiating
+                // regulator communication, which should only be processors
+                // currently. In that case it's possible that entity is at
+                // fault.
+                if(   (l_pRefTarget)
+                   && (   l_pRefTarget->getAttr<TARGETING::ATTR_TYPE>()
+                       == TARGETING::TYPE_PROC))
+                {
+                    io_pError->addHwCallout(l_pRefTarget,
+                                            HWAS::SRCI_PRIORITY_LOW,
+                                            HWAS::NO_DECONFIG,
+                                            HWAS::GARD_NULL);
+                }
+            }
         }
         else
         {
