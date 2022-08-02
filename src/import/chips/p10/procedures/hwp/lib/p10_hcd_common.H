@@ -77,7 +77,8 @@
 
 #else
 
-#include "iota_panic_codes.h"
+//#include "iota_panic_codes.h"
+#include "qme_service_codes.h"
 
 #ifdef __cplusplus
 extern "C" {
