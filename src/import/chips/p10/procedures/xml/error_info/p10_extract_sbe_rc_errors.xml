@@ -372,7 +372,7 @@
   <hwpError>
     <rc>RC_EXTRACT_SBE_RC_OTP_PIB_ERR</rc>
     <description>
-    Scom error detected
+    Scom error or 10.2 chipop error detected
     Action:Warm ipl where we don't switch off VSB just toggle start_cbs from FSP [RESTART_CBS]
     </description>
     <ffdc>OCCURRENCE</ffdc>

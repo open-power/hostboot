@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include "p10_scom_perv_c.H"
 #include <p10_scom_proc_1.H>
 #include <p10_scom_perv_a.H>
+#include <p10_scom_perv_d.H>
 #include <p10_scom_perv_1.H>
 #include <p10_scom_perv_2.H>
 #include <p10_scom_perv_9.H>
@@ -53,6 +54,7 @@
 #define SCRATCH_3_REG_IPL_MODE_BIT       0
 #define SCRATCH_3_REG_RUNTIME_MODE_BIT   1
 #define SCRATCH_4_REG_VALID_BIT   3
+#define SB_MSG_REG_VIRTUAL_HALT_STATE_BIT 2
 
 // See doxygen in header file
 fapi2::ReturnCode p10_sbe_hreset(
@@ -66,6 +68,8 @@ fapi2::ReturnCode p10_sbe_hreset(
     FAPI_DBG("p10_sbe_hreset: Entering...");
     fapi2::buffer<uint32_t> l_data32(0);
     fapi2::buffer<uint64_t> l_data64(0);
+    fapi2::buffer<uint64_t> l_data64_sb_msg(0);
+    fapi2::buffer<uint32_t> l_data32_sb_msg(0);
     fapi2::buffer<uint64_t> l_data64_cbs(0);
     fapi2::buffer<uint32_t> l_data32_cbs(0);
     fapi2::buffer<uint16_t> l_spi_clock_value(0);
@@ -85,10 +89,6 @@ fapi2::ReturnCode p10_sbe_hreset(
     if (!i_is_fsp && ((l_hostboot_runtime) || (!l_hostboot_runtime && l_masterProc)))
     {
 // Use CSB start bit to decide on reset vector0 or reset vector1
-        // Clear Self Boot message reg
-        FAPI_TRY(PREP_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG(i_target));
-        l_data64.flush<0>();
-        FAPI_TRY(PUT_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG(i_target, l_data64));
 
         // Set MBOX scratch_3 register to indicate IPL/Runtime
         FAPI_TRY(PREP_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW(i_target));
@@ -120,20 +120,33 @@ fapi2::ReturnCode p10_sbe_hreset(
         FAPI_TRY(PREP_FSXCOMP_FSXLOG_CBS_CS(i_target));
         FAPI_TRY(GET_FSXCOMP_FSXLOG_CBS_CS(i_target, l_data64_cbs));
 
+        //Reset usage depends on SB MSG register bit 2 state
+        // If SB_MSG Bit 2 is 1, use SBE Interrupt S1 else use depending on CBS start bit state
+        FAPI_TRY(PREP_FSXCOMP_FSXLOG_SB_MSG(i_target));
+        FAPI_TRY(GET_FSXCOMP_FSXLOG_SB_MSG(i_target, l_data64_sb_msg));
+
         // HRESET
         FAPI_TRY(PREP_FSXCOMP_FSXLOG_SB_CS(i_target));
         FAPI_TRY(GET_FSXCOMP_FSXLOG_SB_CS(i_target, l_data64));
         CLEAR_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0(l_data64);
         CLEAR_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1(l_data64);
+        CLEAR_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1(l_data64);
         FAPI_TRY(PUT_FSXCOMP_FSXLOG_SB_CS(i_target, l_data64));
 
-        if(l_data64_cbs.getBit<scomt::perv::FSXCOMP_FSXLOG_CBS_CS_START_BOOT_SEQUENCER>())
+        if(l_data64_sb_msg.getBit<SB_MSG_REG_VIRTUAL_HALT_STATE_BIT>())
         {
-            SET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1(l_data64);
+            SET_FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1(l_data64);
         }
         else
         {
-            SET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0(l_data64);
+            if(l_data64_cbs.getBit<scomt::perv::FSXCOMP_FSXLOG_CBS_CS_START_BOOT_SEQUENCER>())
+            {
+                SET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1(l_data64);
+            }
+            else
+            {
+                SET_FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0(l_data64);
+            }
         }
 
         FAPI_TRY(PUT_FSXCOMP_FSXLOG_SB_CS(i_target, l_data64));
@@ -142,10 +155,6 @@ fapi2::ReturnCode p10_sbe_hreset(
 
     else
     {
-        // Clear Self Boot message reg
-        l_data32.flush<0>();
-        FAPI_TRY(fapi2::putCfamRegister(i_target, TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG_FSI, l_data32));
-
         // Set MBOX scratch_3 register to indicate IPL/Runtime
         FAPI_TRY(fapi2::getCfamRegister(i_target, FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI,
                                         l_data32));
@@ -178,21 +187,37 @@ fapi2::ReturnCode p10_sbe_hreset(
         // If CBS Start Bit is 1, use reset vector 1 else use reset vector 0
         FAPI_TRY(fapi2::getCfamRegister(i_target, FSXCOMP_FSXLOG_CBS_CS_FSI,
                                         l_data32_cbs));
+
+        //Reset usage depends on SB MSG register bit 2 state
+        // If SB_MSG Bit 2 is 1, use SBE Interrupt S1 else use depending on CBS start bit state
+        FAPI_TRY(fapi2::getCfamRegister(i_target, FSXCOMP_FSXLOG_SB_MSG_FSI,
+                                        l_data32_sb_msg));
+
+
         // HRESET
         FAPI_TRY(fapi2::getCfamRegister(i_target, FSXCOMP_FSXLOG_SB_CS_FSI, l_data32),
                  "Error from getCfamRegister to FSXCOMP_FSXLOG_SB_CS_FSI");
         FAPI_TRY(l_data32.clearBit(FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0));
         FAPI_TRY(l_data32.clearBit(FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1));
+        FAPI_TRY(l_data32.clearBit(FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1));
         FAPI_TRY(fapi2::putCfamRegister(i_target, FSXCOMP_FSXLOG_SB_CS_FSI, l_data32),
                  "Error from putCfamRegister to FSXCOMP_FSXLOG_SB_CS_FSI");
 
-        if(l_data32_cbs.getBit<scomt::perv::FSXCOMP_FSXLOG_CBS_CS_START_BOOT_SEQUENCER>())
+
+        if(l_data32_sb_msg.getBit<SB_MSG_REG_VIRTUAL_HALT_STATE_BIT>())
         {
-            FAPI_TRY(l_data32.setBit(FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1));
+            FAPI_TRY(l_data32.setBit(FSXCOMP_FSXLOG_SB_CS_INTERRUPT_S1));
         }
         else
         {
-            FAPI_TRY(l_data32.setBit(FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0));
+            if(l_data32_cbs.getBit<scomt::perv::FSXCOMP_FSXLOG_CBS_CS_START_BOOT_SEQUENCER>())
+            {
+                FAPI_TRY(l_data32.setBit(FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR1));
+            }
+            else
+            {
+                FAPI_TRY(l_data32.setBit(FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0));
+            }
         }
 
         FAPI_TRY(fapi2::putCfamRegister(i_target, FSXCOMP_FSXLOG_SB_CS_FSI, l_data32),

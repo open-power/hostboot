@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #define btos(x) ((x)?"TRUE":"FALSE")
 
 #include <fapi2.H>
+#include <p10_sbe_ext_defs.H>
 
 namespace P10_EXTRACT_SBE_RC
 {

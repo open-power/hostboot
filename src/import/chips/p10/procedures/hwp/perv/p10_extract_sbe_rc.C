@@ -118,6 +118,14 @@
 #include <p10_scom_perv.H>
 #include <p10_clock_test.H>
 
+// Bit definitions
+#define SB_MSG_REG_SBE_BOOTED_BIT 0
+#define SB_MSG_REG_VIRTUAL_HALT_SUPPORTED_BIT 2
+#define SBE_STATE_START_BIT 8
+#define SBE_STATE_LENGTH 4
+#define SBE_PROGRESS_CODE_START_BIT 28
+#define SBE_PROGRESS_CODE_LENGTH 4
+
 
 fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
                                      P10_EXTRACT_SBE_RC::RETURN_ACTION& o_return_action,
@@ -180,8 +188,10 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     fapi2::buffer<uint32_t> l_data32_lr;
     fapi2::buffer<uint32_t> l_data32_magicbyte;
     fapi2::buffer<uint8_t>  l_is_ndd1 = false;
+    fapi2::buffer<uint8_t> l_sbe_state;
     fapi2::buffer<uint64_t> l_data64_dbg[NUM_OF_LOCATION];
     fapi2::buffer<uint32_t> l_data32_sb_cs;
+    fapi2::buffer<uint32_t> l_data32_cbs_cs;
     fapi2::buffer<uint64_t> l_data64_spi_status;
     fapi2::buffer<uint64_t> l_data64_spi_config;
     fapi2::buffer<uint64_t> l_data64_spi_clock_config;
@@ -198,6 +208,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     fapi2::buffer<uint64_t> l_data64_spi3_config;
     fapi2::buffer<uint64_t> l_data64_spi3_clock_config;
     fapi2::buffer<uint64_t> l_data64_loc_lfr;
+    fapi2::buffer<uint64_t> l_data64_sb_msg;
     bool l_ppe_halt_state = true;
     bool l_data_mchk = false;
     bool l_inst_mchk = false;
@@ -314,12 +325,56 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     FAPI_INF("p10_extract_sbe_rc : PPE_XIDBGPRO : %" PRIx64 "", l_data64_dbgpro);
     FAPI_INF("p10_extract_sbe_rc : SBE IAR : %#08lX", l_data32_iar);
 
+
+    FAPI_INF("p10_extract_sbe_rc : Reading CBS_CS and SB_CS registers");
+    FAPI_TRY(getCfamRegister(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_CBS_CS_FSI, l_data32_cbs_cs));
+    FAPI_TRY(getCfamRegister(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_SB_CS_FSI, l_data32_sb_cs));
+
+    FAPI_INF("p10_extract_sbe_rc : Reading Sbe_Msg register");
+    FAPI_TRY(getScom(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_SB_MSG, l_data64_sb_msg));
+    l_data64_sb_msg.extractToRight(l_sbe_state, SBE_STATE_START_BIT, SBE_STATE_LENGTH);
+
     l_data32_curr_iar = l_data32_iar;
 
-    if (l_data64_dbgpro.getBit<scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGPRO_XSR_HS>())
+    if((l_data64_sb_msg.getBit<SB_MSG_REG_VIRTUAL_HALT_SUPPORTED_BIT>()) && (l_sbe_state == SBE_STATE_WAIT_FOR_S1))
     {
+        if( (!(l_data32_cbs_cs.getBit<scomt::perv::FSXCOMP_FSXLOG_CBS_CS_SECURE_ACCESS_BIT>())) &&
+            (!(l_data32_sb_cs.getBit<scomt::perv::FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE>()))   &&
+            !l_is_HB_module)
+        {
+            FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIXCR, l_data64));
+            l_data64.insertFromRight(0x1, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIXCR_PPE_XIXCR_XCR,
+                                     scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIXCR_PPE_XIXCR_XCR_LEN);
+            FAPI_INF("Halting SBE");
+            FAPI_TRY(putScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIXCR, l_data64));
+        }
+    }
+
+
+    if ((l_data64_dbgpro.getBit<scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIDBGPRO_XSR_HS>()) ||
+        ((l_data64_sb_msg.getBit<SB_MSG_REG_VIRTUAL_HALT_SUPPORTED_BIT>()) && (l_sbe_state == SBE_STATE_WAIT_FOR_S1)))
+    {
+        if((l_data64_sb_msg.getBit<SB_MSG_REG_VIRTUAL_HALT_SUPPORTED_BIT>()) &&
+           (l_sbe_state == SBE_STATE_TPM_EXTEND_MODE_HALT)  &&
+           (l_data64_sb_msg.getBit<SB_MSG_REG_SBE_BOOTED_BIT>()))
+        {
+            o_return_action = P10_EXTRACT_SBE_RC::RESTART_CBS;
+            FAPI_ASSERT((!(sib_rsp_info != 0x0)), fapi2::EXTRACT_SBE_RC_OTP_PIB_ERR()
+                        .set_TARGET_CHIP(i_target_chip)
+                        .set_OCCURRENCE(1),
+                        "Scom error detected");
+        }
+
         FAPI_INF("p10_extract_sbe_rc : PPE is in HALT state and SDB is set %s", btos(i_set_sdb));
         l_ppe_halt_state  = true;
+    }
+    else if((l_data64_sb_msg.getBit<SB_MSG_REG_VIRTUAL_HALT_SUPPORTED_BIT>()) &&
+            (l_sbe_state != SBE_STATE_TPM_EXTEND_MODE_HALT) && (l_sbe_state != SBE_STATE_HALT) &&
+            (l_data64_sb_msg.getBit<SB_MSG_REG_SBE_BOOTED_BIT>()))
+    {
+        o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_BMSEEPROM;
+        FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_UNKNOWN_ERROR()
+                    .set_TARGET_CHIP(i_target_chip), "SBE halted due to unknown error");
     }
     else
     {
@@ -481,10 +536,14 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         switch(HC)
         {
             case 0x0 :
-                o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
-                FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_NEVER_STARTED()
-                            .set_TARGET_CHIP(i_target_chip),
-                            "ERROR:Halt Condition is all Zero, SBE engine was probably never started or SBE got halted by programming XCR to halt");
+                if (! l_data64_sb_msg.getBit<SB_MSG_REG_VIRTUAL_HALT_SUPPORTED_BIT>())
+                {
+                    o_return_action = P10_EXTRACT_SBE_RC::RESTART_SBE;
+                    FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_NEVER_STARTED()
+                                .set_TARGET_CHIP(i_target_chip),
+                                "ERROR:Halt Condition is all Zero, SBE engine was probably never started or SBE got halted by programming XCR to halt");
+                }
+
                 break;
 
             case 0x1 :
@@ -606,21 +665,21 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
                 if(!l_is_ndd1)
                 {
-                    fapi2::buffer<uint8_t> l_sbe_code_state;
-                    FAPI_INF("p10_extract_sbe_rc : Reading SB_MSG register to collect SBE Code state bits");
+                    fapi2::buffer<uint8_t> l_sbe_progress_code;
+                    FAPI_INF("p10_extract_sbe_rc : Reading SB_MSG register to collect SBE Progress Code bits");
 
                     if(l_is_HB_module && !i_set_sdb) //HB calling Master Proc or HB calling Slave after SMP
                     {
                         FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG, l_data64));
-                        l_data64.extractToRight(l_sbe_code_state, 30, 2);
+                        l_data64.extractToRight(l_sbe_progress_code, SBE_PROGRESS_CODE_START_BIT, SBE_PROGRESS_CODE_LENGTH);
                     }
                     else
                     {
                         FAPI_TRY(getCfamRegister(i_target_chip, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG_FSI, l_data32));
-                        l_data32.extractToRight(l_sbe_code_state, 30, 2);
+                        l_data32.extractToRight(l_sbe_progress_code, SBE_PROGRESS_CODE_START_BIT, SBE_PROGRESS_CODE_LENGTH);
                     }
 
-                    if(l_sbe_code_state == 0x1)
+                    if(l_sbe_progress_code == 0x1)
                     {
                         o_return_action = P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
                         FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_MAGIC_NUMBER_MISMATCH()
@@ -629,7 +688,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                     }
                     else
                     {
-                        FAPI_ERR("p10_extract_sbe_rc : SBE code state value = %02X is invalid", l_sbe_code_state);
+                        FAPI_ERR("p10_extract_sbe_rc : SBE code state value = %02X is invalid", l_sbe_progress_code);
                     }
                 }
             }
@@ -641,24 +700,24 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 FAPI_ERR("p10_extract_sbe_rc : Program Interrupt occured in SEEPROM memory program");
 
-                fapi2::buffer<uint8_t> l_sbe_code_state;
                 bool l_sbe_booted = false;
-                FAPI_INF("p10_extract_sbe_rc : Reading SB_MSG register to collect SBE Code state bits");
+                fapi2::buffer<uint8_t> l_sbe_progress_code;
+                FAPI_INF("p10_extract_sbe_rc : Reading SB_MSG register to collect SBE Progress Code bits");
 
                 if(l_is_HB_module && !i_set_sdb) //HB calling Master Proc or HB calling Slave after SMP
                 {
                     FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG, l_data64));
-                    l_data64.extractToRight(l_sbe_code_state, 30, 2);
+                    l_data64.extractToRight(l_sbe_progress_code, SBE_PROGRESS_CODE_START_BIT, SBE_PROGRESS_CODE_LENGTH);
                     l_sbe_booted = l_data64.getBit<0>();
                 }
                 else
                 {
                     FAPI_TRY(getCfamRegister(i_target_chip, scomt::proc::TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG_FSI, l_data32));
-                    l_data32.extractToRight(l_sbe_code_state, 30, 2);
+                    l_data32.extractToRight(l_sbe_progress_code, SBE_PROGRESS_CODE_START_BIT, SBE_PROGRESS_CODE_LENGTH);
                     l_sbe_booted = l_data32.getBit<0>();
                 }
 
-                //if(l_sbe_code_state < 0x9)
+                //if(l_sbe_progress_code < 0x9)
                 if((MSEEPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= MSEEPROM_MAX_RANGE))
                 {
                     o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM;
@@ -673,14 +732,14 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                                 .set_TARGET_CHIP(i_target_chip),
                                 "ERROR:Program Interrupt occured in Boot SEEPROM");
                 }
-                else if(l_sbe_code_state < 0xB)
+                else if((l_sbe_progress_code < 0xB) && (!l_sbe_booted))
                 {
                     o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
                     FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_L2_LOADER_FAIL()
                                 .set_TARGET_CHIP(i_target_chip),
                                 "ERROR:Program Interrupt occured in Boot SEEPROM")
                 }
-                else if((l_sbe_code_state == 0xB) && (!l_sbe_booted))
+                else if((l_sbe_progress_code == 0xB) && (!l_sbe_booted))
                 {
                     o_return_action = P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
                     FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_L2_LOADER_FAIL()
@@ -689,7 +748,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 }
                 else if(!l_sbe_booted)
                 {
-                    FAPI_ERR("p10_extract_sbe_rc : SBE code state value = %02X is invalid", l_sbe_code_state);
+                    FAPI_ERR("p10_extract_sbe_rc : SBE code state value = %02X is invalid", l_sbe_progress_code);
                 }
             }
 
