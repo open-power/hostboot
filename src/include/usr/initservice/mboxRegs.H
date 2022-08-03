@@ -564,6 +564,7 @@ namespace SPLESS
         {
             uint32_t data32;
 
+            // Initial SBE boot
             struct
             {
                                                   //       Maps to:
@@ -580,6 +581,9 @@ namespace SPLESS
                 // Is this needed?
                 uint32_t ndlMeshCtlSetup     :4;  //28:31  ATTR_NDL_MESHCTRL_SETUP
             } pauMcFreq;
+
+            // IPL and Runtime used by PRD
+            uint32_t prdHint1;
         };
     };
 
@@ -621,6 +625,9 @@ namespace SPLESS
                 // Maps to ATTR_CHIP_CONTAINED_BACKING_CACHES_VEC
                 uint32_t backingCachesMask   :32; //0:31
             } chipCaches;
+
+            // IPL and Runtime used by PRD
+            uint32_t prdHint2;
         };
     };
 
@@ -661,7 +668,8 @@ namespace SPLESS
     // CFAM address: 0x2983
     struct MboxScratch12_t : MboxScratch_t<12>
     {
-        // Placeholder
+        // Host will set this register to 0xA5000001 when it can run
+        // without the BMC.
         uint32_t value;
     };
 
@@ -709,7 +717,8 @@ namespace SPLESS
     // CFAM address: 0x2985
     struct MboxScratch14_t : MboxScratch_t<14>
     {
-        // Placeholder
+        // SBE will use this scratch register to pass FFDC on a secureboot
+        // validation error up to hostboot to log an error.
         uint32_t value;
     };
 
@@ -720,7 +729,8 @@ namespace SPLESS
     // CFAM address: 0x2986
     struct MboxScratch15_t : MboxScratch_t<15>
     {
-        // Placeholder
+        // BMC will use this register to keep track of the SBE state
+        // (being hreset or running)
         uint32_t value;
     };
 
@@ -731,8 +741,20 @@ namespace SPLESS
     // CFAM address: 0x2987
     struct MboxScratch16_t : MboxScratch_t<16>
     {
-        // Placeholder
-        uint32_t value;
+        // SBE runtime SPI settings
+        union
+        {
+            uint32_t data32;
+
+            // This is the structure of this register if the chip IS NOT
+            // configured in chip-contained mode
+            struct
+            {
+                uint32_t sbeSPI        :28; //00:27  SBE SPI settings
+                uint32_t pauFreqLimit  :4;  //28:31  PAU frequency limit on
+                                            //       SPI Chip Select workaround
+            } runtimeSPI;
+        };
     };
 
     static_assert(sizeof(MboxScratch16_t) == sizeof(uint32_t),
