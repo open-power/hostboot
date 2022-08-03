@@ -228,8 +228,6 @@ enum SectionId
     SPIRA_H,              //< SPIRA-H
     SPIRA_L,              //< Legacy SPIRA
     NACA,                 //< NACA
-    HBRT,                 //< Hostboot Runtime
-    HBRT_DATA,            //< Hostboot Runtime Data
     PCRD,                 //< Processor Chip Related Data
     IPMI_DATA,            //< IPMI Sensor Mapping Data
     NODE_TPM_RELATED,     //< Node TPM Related Data

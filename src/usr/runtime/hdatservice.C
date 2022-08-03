@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,12 +58,6 @@ const hdatHeaderExp_t MDT_HEADER = {
     0xD1F0,   //id
     "MS VPD", //name
     0x0024    //version
-};
-
-const hdatHeaderExp_t HBRT_DATA_HEADER = {
-    0xD1F0,   //id
-    "HBRT  ", //name
-    0x0010    //version
 };
 
 const hdatHeaderExp_t IPLPARMS_SYSTEM_HEADER = {
@@ -735,54 +729,6 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             //Array Header size
             o_dataSize = reservedMemArrayHeader->entrySize;
         }
-        // HB Runtime Data
-        else if ( (RUNTIME::HBRT        == i_section) ||
-                  (RUNTIME::HBRT_DATA   == i_section) )
-        {
-            // Data section requires drilling to dataBlob
-            bool l_needBlob = (RUNTIME::HBRT_DATA == i_section);
-
-            // Find the right tuple and verify it makes sense
-            errhdl = getAndCheckTuple(i_section, tuple);
-            if( errhdl ) { break; }
-            TRACUCOMP(g_trac_runtime, "HBRT_DATA tuple=%p", tuple);
-
-            uint64_t base_addr;
-            errhdl = getSpiraTupleVA(tuple, base_addr);
-            if( errhdl ) { break; }
-
-            hdatHDIF_t* hbrt_header =
-              reinterpret_cast<hdatHDIF_t*>(base_addr);
-            TRACUCOMP( g_trac_runtime, "hbrt_header=%p", hbrt_header );
-
-            // Check the headers and version info
-            errhdl = check_header( hbrt_header,
-                                   HBRT_DATA_HEADER );
-            if( errhdl ) { break; }
-
-            hdatHDIFDataHdr_t* hbrt_data_header =
-              reinterpret_cast<hdatHDIFDataHdr_t*>
-              (hbrt_header->hdatDataPtrOffset + base_addr);
-
-            TRACUCOMP( g_trac_runtime, "hbrt_data_header=%p", hbrt_data_header );
-            // Make sure the Data Header is pointing somewhere valid
-            errhdl = verify_hdat_address( (hbrt_data_header + i_instance),
-                                          sizeof(hdatHDIFDataHdr_t) );
-            if( errhdl ) { break; }
-
-            o_dataAddr = hbrt_data_header[i_instance].hdatOffset + base_addr;
-            o_dataSize = hbrt_data_header[i_instance].hdatSize;
-
-            if (l_needBlob)
-            {
-                // For accessing pointer to various RT data
-                hdatHBRT_t* l_hbrtPtr =
-                    reinterpret_cast<hdatHBRT_t *>(o_dataAddr);
-                o_dataAddr = l_hbrtPtr->hdatDataBlob.hdatOffset + base_addr;
-                o_dataSize = l_hbrtPtr->hdatDataBlob.hdatSize;
-            } // end if getting dataBlob
-        }
-
         // IPL Parameters : System Parameters
         else if( RUNTIME::IPLPARMS_SYSTEM == i_section )
         {
@@ -1592,11 +1538,6 @@ errlHndl_t hdatService::getAndCheckTuple(const SectionId i_section,
         case RUNTIME::RESERVED_MEM:
             l_spiraS = SPIRAS_MDT;
             l_spiraL = SPIRAL_MDT;
-            break;
-        case RUNTIME::HBRT:
-        case RUNTIME::HBRT_DATA:
-            l_spiraS = SPIRAS_HBRT_DATA;
-            l_spiraL = SPIRAL_HBRT_DATA;
             break;
         case RUNTIME::IPLPARMS_SYSTEM:
             l_spiraS = SPIRAS_IPL_PARMS;
