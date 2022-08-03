@@ -68,7 +68,31 @@ class SignatureData:
 
         signature = "Undefined error code " + hexSig
 
-        if chipType in self._data:
+        # Check for any special error codes that can be associated with any
+        # FIR bit. These only take into account the last 16 bits (4 characters).
+        errCodeMap = {'dd00': 'Assert failed in PRD',
+                      'dd01': 'Invalid attention type passed to PRD',
+                      'dd02': 'No active error bits found',
+                      'dd03': 'Chip connection lookup failure',
+                      'dd05': 'Internal PRD code',
+                      'dd09': 'Fail to access attention data from registry',
+                      'dd11': 'SRC Access failure',
+                      'dd12': 'HWSV Access failure',
+                      'dd20': 'Config error - no domains in system',
+                      'dd21': 'No active attentions found',
+                      'dd23': 'Unknown chip raised attention',
+                      'dd24': 'PRD Model is not built',
+                      'dd28': 'PrdStartScrub failure',
+                      'dd29': 'PrdResoreRbs failure',
+                      'dd81': 'Multiple bits on in Error Register',
+                      'dd90': 'Scan comm access from Error Register failed',
+                      'dd91': 'SCOM access failed due to Power Fault',
+                      'ddff': 'Do not reset or mask FIR bits'}
+        last4 = hexSig[-4:]
+
+        if last4 in errCodeMap:
+            signature = errCodeMap[last4]
+        elif chipType in self._data:
             if hexSig in self._data[chipType]["signatures"]:
                 signature = self._data[chipType]["signatures"][hexSig]
 
