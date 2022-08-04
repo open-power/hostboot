@@ -115,6 +115,30 @@ template<>
 void instruction_t<mss::mc_type::EXPLORER>::get_repeats();
 
 ///
+/// @brief Computes and sets the parity bit - Explorer specialization
+/// @param[in] i_target the port target for this instruction
+/// @param[in] i_rank_config the rank configuration
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode instruction_t<mss::mc_type::EXPLORER>::compute_parity(const
+        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const rank_configuration i_rank_config);
+
+///
+/// @brief Computes and sets the parity bit - Explorer specialization
+/// @param[in] i_target the port target for this instruction
+/// @param[in] i_rank_config the rank configuration
+/// @param[in] i_is_planar the value of the is planar attribute
+/// @param[in,out] io_inst the instruction on which to operate
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode compute_parity_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        const rank_configuration i_rank_config,
+                                        const uint8_t i_is_planar,
+                                        instruction_t<mss::mc_type::EXPLORER>& io_inst);
+
+///
 /// @brief Determines our rank configuration type - Explorer specialization
 /// @param[in] i_target the MCA target on which to operate
 /// @param[out] o_rank_config the rank configuration

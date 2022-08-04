@@ -46,6 +46,7 @@
 #include <explorer_scom_addresses_fld.H>
 #include <generic/memory/lib/ccs/ccs_instruction.H>
 #include <generic/memory/lib/ccs/ccs_ddr4_commands.H>
+#include <generic/memory/lib/utils/bit_count.H>
 
 // Generates linkage
 constexpr std::pair<uint64_t, uint64_t> ccsTraits<mss::mc_type::EXPLORER>::CS_N[];
@@ -187,6 +188,90 @@ void instruction_t<mss::mc_type::EXPLORER>::get_repeats()
 {
     using TT = ccsTraits<mss::mc_type::EXPLORER>;
     arr1.template extractToRight<TT::ARR1_REPEAT_CMD_CNT, TT::ARR1_REPEAT_CMD_CNT_LEN>(iv_repeats);
+}
+
+///
+/// @brief Computes and sets the parity bit - Explorer specialization
+/// @param[in] i_target the port target for this instruction
+/// @param[in] i_rank_config the rank configuration
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode instruction_t<mss::mc_type::EXPLORER>::compute_parity(const
+        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const rank_configuration i_rank_config)
+{
+    uint8_t l_is_planar = 0;
+    FAPI_TRY(mss::attr::get_mem_mrw_is_planar(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target), l_is_planar));
+    FAPI_TRY(compute_parity_helper(i_target, i_rank_config, l_is_planar, *this));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Computes and sets the parity bit - Explorer specialization
+/// @param[in] i_target the port target for this instruction
+/// @param[in] i_rank_config the rank configuration
+/// @param[in] i_is_planar the value of the is planar attribute
+/// @param[in,out] io_inst the instruction on which to operate
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode compute_parity_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        const rank_configuration i_rank_config,
+                                        const uint8_t i_is_planar,
+                                        instruction_t<mss::mc_type::EXPLORER>& io_inst)
+{
+
+    using TT = ccsTraits<mss::mc_type::EXPLORER>;
+
+    // Parity computation is only needed if the ran configuration is in quad encoded CS mode
+    // Automatic parity computation works in dual direct mode and therefore the parity will not be manually computed
+    if(i_rank_config == rank_configuration::DUAL_DIRECT)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // If this is not a planar system, parity is unused, so skip the manual calculations
+    if(i_is_planar == fapi2::ENUM_ATTR_MEM_MRW_IS_PLANAR_FALSE)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Now the fun begins...
+    // Control signals are not used in the parity calculations
+    // The parity calculations use even parity
+    // This means that the total number of valid signals + parity must be even
+    // To compute this, count the number of 1's, then if it's odd, set the parity signal
+    uint8_t l_num_signals = 0;
+    uint8_t l_num_rows[mss::exp::MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY(mss::attr::get_dram_row_bits(i_target, l_num_rows));
+
+    // CA17 may not be used - it depends upon the number of rows
+    // Using DIMM0's number of rows. They should be the same
+    if(l_num_rows[0] == fapi2::ENUM_ATTR_MEM_EFF_DRAM_ROW_BITS_NUM18)
+    {
+        l_num_signals += mss::bit_count<TT::ARR0_DDR_ADDRESS_17>(io_inst.arr0);
+    }
+
+    // Now for the rest of the signals
+    // Just using the values individually so that it's very explicit what is being used
+    l_num_signals += mss::bit_count<TT::ARR0_DDR_ADDRESS_0_13, TT::ARR0_DDR_ADDRESS_0_13_LEN>(io_inst.arr0);
+    l_num_signals += mss::bit_count<TT::ARR0_DDR_BANK_GROUP_1>(io_inst.arr0);
+    l_num_signals += mss::bit_count<TT::ARR0_DDR_BANK_0_1, TT::ARR0_DDR_BANK_0_1_LEN>(io_inst.arr0);
+    l_num_signals += mss::bit_count<TT::ARR0_DDR_BANK_GROUP_0>(io_inst.arr0);
+    l_num_signals += mss::bit_count<TT::ARR0_DDR_ACTN>(io_inst.arr0);
+    l_num_signals += mss::bit_count<TT::ARR0_DDR_ADDRESS_16>(io_inst.arr0);
+    l_num_signals += mss::bit_count<TT::ARR0_DDR_ADDRESS_15>(io_inst.arr0);
+    l_num_signals += mss::bit_count<TT::ARR0_DDR_ADDRESS_14>(io_inst.arr0);
+    l_num_signals += mss::bit_count<TT::ARR0_DDR_CID_2>(io_inst.arr0);
+
+    // Set the parity bit
+    io_inst.arr0. template writeBit<TT::ARR0_DDR_PARITY>(mss::is_odd(l_num_signals));
+
+    FAPI_DBG("%s manually computed CCS parity as %u", mss::c_str(i_target), mss::is_odd(l_num_signals));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///

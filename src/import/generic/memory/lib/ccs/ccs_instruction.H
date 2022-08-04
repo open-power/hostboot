@@ -163,6 +163,15 @@ class instruction_t
         void get_repeats();
 
         ///
+        /// @brief Computes the parity (if necessary) based upon the rank configuration
+        /// @param[in] i_target the port target for this instruction
+        /// @param[in] i_rank_config the rank configuration
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+        ///
+        fapi2::ReturnCode compute_parity(const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
+                                         const rank_configuration i_rank_config);
+
+        ///
         /// @brief Updates the rank based upon the passed in rank configuration encoding
         /// @param[in] i_target the port target for this instruction - for error logging
         /// @param[in] i_rank_config the rank configuration

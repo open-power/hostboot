@@ -120,6 +120,16 @@ template<>
 void instruction_t<mss::mc_type::ODYSSEY>::get_repeats();
 
 ///
+/// @brief Grabs the repeats from the CCS array - Odyssey specialization
+/// @param[in] i_target the port target for this instruction
+/// @param[in] i_rank_config the rank configuration
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode instruction_t<mss::mc_type::ODYSSEY>::compute_parity(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_target, const rank_configuration i_rank_config);
+
+///
 /// @brief Determines our rank configuration type - Odyssey specialization
 /// @param[in] i_target the MCA target on which to operate
 /// @param[out] o_rank_config the rank configuration

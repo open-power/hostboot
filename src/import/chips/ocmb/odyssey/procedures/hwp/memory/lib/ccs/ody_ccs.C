@@ -247,6 +247,20 @@ void instruction_t<mss::mc_type::ODYSSEY>::get_repeats()
 }
 
 ///
+/// @brief Grabs the repeats from the CCS array - Odyssey specialization
+/// @param[in] i_target the port target for this instruction
+/// @param[in] i_rank_config the rank configuration
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode instruction_t<mss::mc_type::ODYSSEY>::compute_parity(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_target, const rank_configuration i_rank_config)
+{
+    // Odyssey does not need to manually compute parity at this time
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
 /// @brief Configures the chip to properly execute CCS instructions - ODYSSEY specialization
 /// @param[in] i_ports the vector of ports
 /// @return FAPI2_RC_SUCCSS iff ok

@@ -564,9 +564,13 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
         FAPI_TRY(io_inst_iter->configure_rank(i_port, l_rank_configs[l_port_index]),
                  "Error configuring rank in ccs::execute on port %s", mss::c_str(i_port));
 
-        // Now, configure the idles and repeats within this instructino
+        // Now, configure the idles and repeats within this instruction
         FAPI_TRY(io_inst_iter->configure_idles_and_repeats(i_port),
                  "Error configuring idles and repeats in ccs::execute on port %s", mss::c_str(i_port));
+
+        // Finally, configure the parity if needed
+        FAPI_TRY(io_inst_iter->compute_parity(i_port, l_rank_configs[l_port_index]),
+                 "Error computing and configuring parity in ccs::execute on port %s", mss::c_str(i_port));
 
         io_inst_iter->get_cke_helper(l_current_cke);
 
