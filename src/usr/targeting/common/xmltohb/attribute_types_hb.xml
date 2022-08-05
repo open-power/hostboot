@@ -235,6 +235,22 @@
 
   <attribute>
     <description>
+       Enables reconfiguration loops due to a deconfiguration.  This behavior
+       is disabled by default, then enabled at the end of host guard when the
+       system configuration has been determined.
+    </description>
+    <id>ENABLE_RECONFIG_DUE_TO_DECONFIG</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
       Whether, when a node attempts to extend a measurement to its primary TPM,
       it must attempt to mirror the same HW and SW log measurement into the
       primary TPM in every other node. This flag is only set when multiple nodes

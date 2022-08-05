@@ -297,12 +297,11 @@ errlHndl_t platHandleClockCallout(
         if( NO_DECONFIG != i_deconfigState )
         {
             HWAS_INF("Triggering reconfig loop for attempted clock deconfig");
-            TARGETING::Target* l_sys = TARGETING::UTIL::assertGetToplevelTarget();
-            TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
-              l_sys->getAttr<ATTR_RECONFIGURE_LOOP>();
-            // 'OR' values in case of multiple reasons for reconfigure
-            l_reconfigAttr |= TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
-            l_sys->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+
+            // Force a reconfig loop so the SP picks up our current
+            //  HWAS_STATE and chooses a better boot core.
+            setOrClearReconfigLoopReason(ReconfigSetOrClear::RECONFIG_SET,
+                                         RECONFIGURE_LOOP_DECONFIGURE);
         }
         // Note: On eBMC systems this is the only way the IPL would be stopped.
         //  On FSP systems HWSV will stop the IPL and do a reconfig loop but

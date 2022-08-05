@@ -59,6 +59,9 @@
 // MMIO constants
 #include <arch/memorymap.H>
 
+// HWAS
+#include <hwas/common/hwas.H>
+
 namespace TARGETING
 {
 
@@ -699,13 +702,13 @@ errlHndl_t check_proc0_memory_config()
 
         }
 
+#ifndef __HOSTBOOT_RUNTIME
         // If we swapped any topologies, we need to do a reconfig loop to
         //  get the memory configuration back in sync with reality since
         //  that was computed before this logic runs.
-        auto l_reconfigAttr =
-              l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
-        l_reconfigAttr |= 0x10; //@fixme-Change to RECONFIGURE_LOOP_TOPOLOGY_SWAP after ekb change
-        l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+        HWAS::setOrClearReconfigLoopReason(HWAS::ReconfigSetOrClear::RECONFIG_SET,
+                                           RECONFIGURE_LOOP_TOPOLOGY_SWAP);
+#endif
     }
 
     return l_err;

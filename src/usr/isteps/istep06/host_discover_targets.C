@@ -752,27 +752,6 @@ void* host_discover_targets( void *io_pArgs )
         captureError(l_err, l_stepError, ISTEP_COMP_ID);
     }
 
-    // If targets are deconfigured as a result of above calls, they
-    // are done so using the PLID as the reason for deconfiguration,
-    // which sets ATTR_RECONFIGURE_LOOP. We need to reset this here
-    // so that we do not trigger a reconfig loop at the end of this
-    // istep for applying logic related to initial presence detction.
-    // If we do not reset this attr, this will lead to infinite
-    // reconfig loops if we fail the checkMinimumHardware() below.
-
-    // Have to push out any pending logs so that deconfigs happen
-    // before we check the flag.
-    ERRORLOG::ErrlManager::callFlushErrorLogs();
-
-    // Read current value
-    TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
-      l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
-    // Turn off deconfigure bit
-    l_reconfigAttr &= ~TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
-    // Write back to attribute
-    l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>
-      (l_reconfigAttr);
-
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "host_discover_targets exit" );
 

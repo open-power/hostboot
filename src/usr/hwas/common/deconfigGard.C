@@ -282,19 +282,16 @@ void DeconfigGard::_deconfigureTarget(
                 *o_targetDeconfigured = true;
             }
 
+#ifndef __HOSTBOOT_RUNTIME
             // if this is a real error, trigger a reconfigure loop
             if (i_errlEid & DECONFIGURED_BY_PLID_MASK)
             {
                 // Set RECONFIGURE_LOOP attribute to indicate it was caused by
                 // a hw deconfigure
-                TARGETING::Target* l_pTopLevel = nullptr;
-                TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
-                TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
-                        l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
-                // 'OR' values in case of multiple reasons for reconfigure
-                l_reconfigAttr |= TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
-                l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+                setOrClearReconfigLoopReason(ReconfigSetOrClear::RECONFIG_SET,
+                                             RECONFIGURE_LOOP_DECONFIGURE);
             }
+#endif
 
             // Do any necessary Deconfigure Actions
             _doDeconfigureActions(i_target);
@@ -2334,6 +2331,7 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         // only create Ephemeral gard records for BMC systems
         if(!INITSERVICE::spBaseServicesEnabled())
         {
+#ifndef __HOSTBOOT_RUNTIME
             HWAS_INF("call platCreateGardRecord to create an Ephemeral record for the garded target %.8X",
                      get_huid(i_pTarget));
             l_pErr = HWAS::theDeconfigGard().platCreateGardRecord(i_pTarget,
@@ -2351,17 +2349,12 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
                 // istep
                 if (l_pErr->reasonCode() == HWAS::RC_GARD_REPOSITORY_FULL)
                 {
-                    Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
-                    ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
-                        l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
-                    // Turn off deconfigure bit
-                    l_reconfigAttr &= ~RECONFIGURE_LOOP_DECONFIGURE;
-                    // Write back to attribute
-                    l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+                    setOrClearReconfigLoopReason(ReconfigSetOrClear::RECONFIG_CLEAR,
+                                                 RECONFIGURE_LOOP_DECONFIGURE);
                 }
-
                 break;
             }
+#endif          
         }
 #endif
 

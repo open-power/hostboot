@@ -90,6 +90,61 @@ TRAC_INIT(&g_trac_dbg_hwas, "HWAS",     1024 );
 TRAC_INIT(&g_trac_imp_hwas, "HWAS_I",   1024 );
 #endif
 
+void setOrClearReconfigLoopReason(
+    const ReconfigSetOrClear          i_action,
+    const TARGETING::RECONFIGURE_LOOP i_reason)
+{
+    bool setReconfig = true;
+    const auto pSysTarget = UTIL::assertGetToplevelTarget();
+    auto reconfig =
+        pSysTarget->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+
+    switch(i_action)
+    {
+        case ReconfigSetOrClear::RECONFIG_SET:
+        {
+#ifdef __HOSTBOOT_MODULE
+            // FSP is not subject to the interval in which reconfigs due to
+            // deconfig are blocked, so FSP never has to block the reconfig
+            if(i_reason == RECONFIGURE_LOOP_DECONFIGURE)
+            {
+                const auto enabled = pSysTarget->getAttr<TARGETING::ATTR_ENABLE_RECONFIG_DUE_TO_DECONFIG>();
+                if(!enabled)
+                {
+                    HWAS_INF(
+                        "Reconfig loop due to deconfiguration requested, "
+                        "however this is blocked due to "
+                        "ATTR_ENABLE_RECONFIG_DUE_TO_DECONFIG not being set.");
+                    setReconfig = false;
+                    break;
+                }
+            }
+#endif
+            reconfig |= i_reason;
+            break;
+        }
+
+        case ReconfigSetOrClear::RECONFIG_CLEAR:
+        {
+            reconfig &= ~i_reason;
+            break;
+        }
+
+        default:
+        {
+            HWAS_ASSERT(0,"Bug! Caller passed unhandled action of 0x%08X",
+                        i_action);
+            setReconfig = false;
+            break;
+        }
+    }
+
+    if(setReconfig)
+    {
+        pSysTarget->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>(reconfig);
+    }
+}
+
 Target* shouldPowerGateNMMU1(const Target& i_proc)
 {
     HWAS_ASSERT(i_proc.getAttr<ATTR_TYPE>() == TYPE_PROC,
