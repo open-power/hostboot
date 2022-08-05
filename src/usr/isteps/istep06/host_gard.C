@@ -243,8 +243,8 @@ errlHndl_t establish_boot_core( void )
 
                     // Force a reconfig loop so the SP picks up our current
                     //  HWAS_STATE and chooses a better boot core.
-                    l_reconfigAttr |= RECONFIGURE_LOOP_DECONFIGURE;
-                    l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+                    HWAS::setOrClearReconfigLoopReason(HWAS::ReconfigSetOrClear::RECONFIG_SET,
+                                                       RECONFIGURE_LOOP_DECONFIGURE);
 
                     l_err->collectTrace(TARG_COMP_NAME);
                     l_err->collectTrace(ISTEP_COMP_NAME);
@@ -417,23 +417,16 @@ void* host_gard( void *io_pArgs )
         CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "---------------------------------");
 #endif
 
-        // If targets are deconfigured as a result of collectGard(), they
-        // are done so using the PLID as the reason for deconfiguration,
-        // which sets ATTR_RECONFIGURE_LOOP. We need to reset this here
-        // so that we do not trigger a reconfig loop at the end of this
-        // istep for applying gard records for error logs that came from
-        // prior ipls. If we do not reset this attr, this will lead to
-        // infinite reconfig loops if we fail the checkMinimumHardware()
-        // below
+        // Hostboot must ensure it does not trigger a reconfig loop at the end
+        // of this istep for applying gard records for error logs that came from
+        // prior IPLs.  It must therefore flush out all the pending error logs
+        // so that the reconfig loop activation gets skipped, then enable
+        // reconfiguration loops due to deconfiguration going forward.
+        // Non-intervention here could lead to infinite reconfig loops if the
+        // checkMinimumHardware check fails below.
+        ERRORLOG::ErrlManager::callFlushErrorLogs();
+        l_pTopLevel->setAttr<TARGETING::ATTR_ENABLE_RECONFIG_DUE_TO_DECONFIG>(true);
 
-        // Read current value
-        ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
-            l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
-        // Turn off deconfigure bit
-        l_reconfigAttr &= ~RECONFIGURE_LOOP_DECONFIGURE;
-        // Write back to attribute
-        l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>
-                (l_reconfigAttr);
 
         // check and see if we still have enough hardware to continue
         // if this checkMinimumHardware() fails then we fail the ipl.

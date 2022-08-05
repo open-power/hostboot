@@ -48,6 +48,7 @@
 #include <sbe/sbe_update.H>
 #include <targeting/targplatutil.H>
 #include <errl/errludattribute.H>
+#include <hwas/common/hwas.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -169,8 +170,8 @@ void deconfigure_redundant_clock(errlHndl_t i_errl,
             // a reconfig loop automatically when a clock is marked for deconfig.
             // To emulate that behavior we will manually set the flag that is
             // checked at the end of each istep.
-            const auto l_reconfigAttr = sys->getAttr<ATTR_RECONFIGURE_LOOP>();
-            sys->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr | TARGETING::RECONFIGURE_LOOP_DECONFIGURE);
+            HWAS::setOrClearReconfigLoopReason(ReconfigSetOrClear::RECONFIG_SET,
+                                               RECONFIGURE_LOOP_DECONFIGURE);
         }
         else
         {

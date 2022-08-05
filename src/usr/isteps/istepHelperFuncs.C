@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,7 +52,7 @@
 
 #include    <pnor/pnorif.H>
 #include    <pnor/pnor_const.H>
-
+#include    <hwas/common/hwas.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -385,10 +385,8 @@ void captureErrorOcmbUpdateCheck(errlHndl_t               &io_err,
                   "captureErrorOcmbUpdateCheck: OMI failure EID: 0x%.8X "
                   "Requesting reboot to do OCMB update ...",
                   io_err?io_err->eid():0);
-            auto l_reconfigAttr =
-                l_systemTarget->getAttr<ATTR_RECONFIGURE_LOOP>();
-            l_reconfigAttr |= RECONFIGURE_LOOP_OCMB_FW_UPDATE;
-            l_systemTarget->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+            HWAS::setOrClearReconfigLoopReason(HWAS::ReconfigSetOrClear::RECONFIG_SET,
+                                               RECONFIGURE_LOOP_OCMB_FW_UPDATE);
 
             // commit error as recovered
             // to prevent any deconfig or gard actions

@@ -568,6 +568,14 @@ static void initializeAttributes(TargetService& i_targetService,
         // Do some special memory-preserving work
         if(i_isMpipl)
         {
+            // At end of host guard step, Hostboot flushes the error logs and
+            // then sets ATTR_ENABLE_RECONFIG_DUE_TO_DECONFIG to true.  It
+            // performs this sequence so that any error logs in flight at the
+            // time of that policy change are locked in under the previous
+            // policy.  That extra error log flush should not be required here
+            // because error logs with deconfigs are not being processed yet at
+            // this point in the boot.
+            l_pTopLevel->setAttr<ATTR_ENABLE_RECONFIG_DUE_TO_DECONFIG>(false);
             l_pTopLevel->setAttr<ATTR_IS_MPIPL_HB>(1);
             l_pTopLevel->setAttr<ATTR_EXTEND_TPM_MEAS_TO_OTHER_NODES>(0);
 

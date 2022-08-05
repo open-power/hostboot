@@ -57,6 +57,7 @@
 #include <lib/inband/exp_flash_utils.H> // exp_flash_read_test
 #include <errl/errlreasoncodes.H>   // ERRL_UDT_NOFORMAT
 #include <errl/errludstring.H>
+#include <hwas/common/hwas.H>
 
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -884,7 +885,6 @@ void performUpdate( IStepError& o_stepError,
     errlHndl_t l_err = nullptr;
     Util::ThreadPool<IStepWorkItem> threadpool;
     constexpr size_t MAX_OCMB_THREADS = 8;
-    Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
     bool l_rebootRequired = i_rebootRequired;
 
     do
@@ -952,10 +952,8 @@ void performUpdate( IStepError& o_stepError,
         TRACFCOMP(g_trac_expupd,
                   "performUpdate: %d OCMB chip(s) %s update.  Requesting reboot...",
                   i_explorerList.size(), o_stepError.isNull()?"completed":"attempted");
-        auto l_reconfigAttr =
-            l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
-        l_reconfigAttr |= RECONFIGURE_LOOP_OCMB_FW_UPDATE;
-        l_pTopLevel->setAttr<ATTR_RECONFIGURE_LOOP>(l_reconfigAttr);
+        HWAS::setOrClearReconfigLoopReason(HWAS::ReconfigSetOrClear::RECONFIG_SET,
+                                           RECONFIGURE_LOOP_OCMB_FW_UPDATE);
     }
 }
 

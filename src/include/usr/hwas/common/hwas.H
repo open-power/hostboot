@@ -314,6 +314,33 @@ void enableHwasState(TARGETING::Target *i_target,
  */
 void applyCoreFunctionalOverride(TARGETING::TargetHandle_t i_target);
 
+/**
+ *  @brief Used to indicate whether to set or clear a reconfig loop reason
+ */
+enum class ReconfigSetOrClear
+{
+    RECONFIG_SET,
+    RECONFIG_CLEAR,
+};
+
+/**
+ *  @brief Sets or clears a reconfig loop reason from the ATTR_RECONFIGURE_LOOP
+ *      attribute.
+ *
+ *  @par Detailed Description:
+ *    Sets or clears a reconfg loop reason from ATTR_RECONFIGURE_LOOP attribute.
+ *    If caller requests a "set" of the RECONFIGURE_LOOP_DECONFIGURE reason,
+ *    it will only be honored if ATTR_ENABLE_RECONFIG_DUE_TO_DECONFIG is not 0
+ *    (otherwise it will be a no-op).
+ *
+ *  @param[in] i_action Whether to set or clear the specified reconfig loop
+ *                      reason
+ *  @param[in] i_reason Reconfig loop reason to set or clear
+ */
+void setOrClearReconfigLoopReason(
+    const ReconfigSetOrClear          i_action,
+    const TARGETING::RECONFIGURE_LOOP i_reason);
+
 };   // end namespace
 
 #endif
