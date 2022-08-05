@@ -95,12 +95,12 @@ namespace OCMB_SPD
  *
  * @param[in] i_eepromSource - The EEPROM source (CACHE/HARDWARE).
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer
  *      to the error log.
  */
 errlHndl_t getMemType(uint8_t&                      o_memType,
                       TARGETING::TargetHandle_t     i_target,
-                      EEPROM::EEPROM_SOURCE         i_eepromSource);
+                      EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
 }
 
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,8 @@
 #include <targeting/common/attributes.H>
 #include <targeting/common/utilFilter.H>
 #include <i2c/i2c.H>
+#include <eeprom/eeprom_const.H>
+#include <arch/magic.H>
 
 extern trace_desc_t* g_trac_i2c;
 
@@ -53,133 +55,521 @@ using namespace TARGETING;
 
 
 // Used to ignore comparing data on reads
-#define I2C_TEST_IGNORE_DATA_COMPARE 0xFFFFFFFFFFFFFFFF
+#define I2C_TEST_COMMON_IGNORE_DATA_COMPARE 0x0ull
 
 using I2C::HOST_ENGINE_D;
 using I2C::HOST_ENGINE_E;
 
+// define operator==() to gather all targets with ATTR_EEPROM_VPD_PRIMARY_INFO
+namespace TARGETING{
+
+    bool operator==(const ATTR_EEPROM_VPD_PRIMARY_INFO_type&, ATTR_EEPROM_VPD_PRIMARY_INFO_type) { return true; }
+
+}
+
 class I2CTestCommon: public CxxTest::TestSuite
 {
+
     public:
 
         /**
-         * @brief I2C Direct Test
+         * @brief I2C Direct Test for ONE_BYTE_ADDR EEPROMS
          *      This test will test a variety of direct reads and writes
-         *      with various lengths across slave devices.
+         *      with various lengths across slave devices with 1 byte addresses.
          *
          *      Currently only Processor targets are supported in simics.
          *
-         *      Add other targets to this testcase when their support is
-         *      added.
          */
-        void testI2CDirect ( void )
+        void testI2CDirect_ONE_BYTE_ADDR ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             int cmds = 0;
             int fails = 0;
+            uint64_t original_data = 0;
+            uint64_t data = 0;
 
-            TRACFCOMP( g_trac_i2c,
-                       "testI2CDirect - Start" );
+            TRACFCOMP( g_trac_i2c, "testI2CDirect_ONE_BYTE_ADDR - Start");
 
-            struct
+            const uint64_t dataMask = 0x00FFFFFFFFFFFFFF;
+            struct testData_t
             {
-                uint64_t port;      // Master engine port
-                uint64_t engine;    // Master engine
-                uint64_t devAddr;   // Slave Device address
+                ATTR_EEPROM_VPD_PRIMARY_INFO_type eeprom_info;
 
-                uint64_t data;      // Data to write or compare to
-                                    // if data = I2C_TEST_IGNORE_DATA_COMPARE
-                                    //  than ignore data compare
+                uint64_t addrAndData;   // Data to write or compare to, which also includes
+                                        // the addr to read/write to in the MSBs
 
-                size_t   size;        // Number of Bytes to read/write
-                bool     rnw;         // Read (true), Write (false)
-                TARGETING::TYPE type; // Target Type
-            } testData[] =
-            {
+                size_t writeSize;       // Number of Bytes to write
 
-                // PROCESSOR TESTS
-                //  -- For DIMM SPD's, ONLY USE ENGINE 3
 
-                // READ All 3 at address 0 for 8 bytes first
-                // Ignore data compare as we're not sure what's
-                //  been writted there
+                uint64_t expectedData;  // Expected Data to see after preforming test read
+                size_t readSize;        // Number of Bytes to read, must be less than 7
+                                        // (can only write 7 bytes of data since we need 1 for
+                                        // addressing)
 
-                { 0x01, HOST_ENGINE_E, 0xA0, I2C_TEST_IGNORE_DATA_COMPARE,
-                     8, true, TARGETING::TYPE_PROC }, // Read
 
-                { 0x0a, HOST_ENGINE_E, 0xA0, I2C_TEST_IGNORE_DATA_COMPARE,
-                     8, true, TARGETING::TYPE_PROC }, // Read
-
-                { 0x0b, HOST_ENGINE_E, 0xA0, I2C_TEST_IGNORE_DATA_COMPARE,
-                     8, true, TARGETING::TYPE_PROC }, // Read data back
-
-                { 0x01, HOST_ENGINE_E, 0xA0, I2C_TEST_IGNORE_DATA_COMPARE,
-                     8, true, TARGETING::TYPE_PROC }, // Read
-
-                { 0x01, HOST_ENGINE_E, 0xA0, I2C_TEST_IGNORE_DATA_COMPARE,
-                     8, true, TARGETING::TYPE_PROC }, // Read
-
-                { 0x01, HOST_ENGINE_E, 0xA0, I2C_TEST_IGNORE_DATA_COMPARE,
-                     8, true, TARGETING::TYPE_PROC }, // Read data back
-
-                // Read/Write SPD
-                // Safe to write addresses past 2048
-
-                { 0x01, HOST_ENGINE_E, 0xA0, 0x0810ababcdcdefef,
-                     8, false, TARGETING::TYPE_PROC }, // Write data to 0x0810
-
-                { 0x01, HOST_ENGINE_E, 0xA0, 0x0810000000000000,
-                     2, false, TARGETING::TYPE_PROC }, // Write addr for read
-
-                { 0x01, HOST_ENGINE_E, 0xA0, 0xababcdcdefef0000,
-                     6, true, TARGETING::TYPE_PROC  }, // Read data back
-
-                { 0x01, HOST_ENGINE_E, 0xA0, 0x0813000000000000,
-                     2, false, TARGETING::TYPE_PROC }, // Write addr for read
-
-                { 0x01, HOST_ENGINE_E, 0xA0, 0xcdefef0000000000,
-                     3, true, TARGETING::TYPE_PROC  }, // Read data back
-
-                { 0x01, HOST_ENGINE_E, 0xA0, 0x0825831200000000,
-                     4, false, TARGETING::TYPE_PROC }, // Write data to 0x0825
-
-                { 0x01, HOST_ENGINE_E, 0xA0, 0x0824000000000000,
-                     2, false, TARGETING::TYPE_PROC }, // Write addr for read
-
-                { 0x01, HOST_ENGINE_E, 0xA0, 0x0083120000000000,
-                     3, true, TARGETING::TYPE_PROC  }, // Read data back
-
-                /* TODO RTC 248506: Test other I2C engines than engine E
-
-                { 0x00, HOST_ENGINE_D, 0xA0, 0x0810ababcdcdefef,
-                     8, false, TARGETING::TYPE_PROC }, // Write data to 0x0810
-
-                { 0x00, HOST_ENGINE_D, 0xA0, 0x0810000000000000,
-                     2, false, TARGETING::TYPE_PROC }, // Write addr for read
-
-                { 0x00, HOST_ENGINE_D, 0xA0, 0xababcdcdefef0000,
-                     6, true, TARGETING::TYPE_PROC  }, // Read data back
-
-                { 0x00, HOST_ENGINE_D, 0xA0, 0x0813000000000000,
-                     2, false, TARGETING::TYPE_PROC }, // Write addr for read
-
-                { 0x00, HOST_ENGINE_D, 0xA0, 0xcdefef0000000000,
-                     3, true, TARGETING::TYPE_PROC  }, // Read data back
-
-                { 0x00, HOST_ENGINE_D, 0xA0, 0x0825831200000000,
-                     4, false, TARGETING::TYPE_PROC }, // Write data to 0x0825
-
-                { 0x00, HOST_ENGINE_D, 0xA0, 0x0824000000000000,
-                     2, false, TARGETING::TYPE_PROC }, // Write addr for read
-
-                { 0x00, HOST_ENGINE_D, 0xA0, 0x0083120000000000,
-                     3, true, TARGETING::TYPE_PROC  }, // Read data back
-
-                */
+                TARGETING::TargetHandle_t i2cMasterTarg; // ptr to i2c Master target
+                TARGETING::TargetHandle_t testTarget; // target ptr getting the Eeprom Info from.
+                                                      // used for debug info for test case fails
             };
 
-            const uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
+            std::vector<testData_t> testData;
 
+            // Get top level system target
+            TARGETING::TargetService& tS = TARGETING::targetService();
+            TARGETING::TargetHandle_t sysTarget = TARGETING::UTIL::assertGetToplevelTarget();
+
+            // get all targs that have EEPROM_VPD_PRIMARY_INFO attribute
+            ATTR_EEPROM_VPD_PRIMARY_INFO_type any = {};
+            PredicateAttrVal<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO> l_hasEepromInfo(any);
+
+            PredicateIsFunctional l_isFunc;
+            PredicatePostfixExpr l_checkExprFuncWithEepromInfo;
+            l_checkExprFuncWithEepromInfo.push(&l_hasEepromInfo)
+                                         .push(&l_isFunc)
+                                         .And();
+
+            TargetHandleList l_targsWithEepromInfo;
+            targetService().getAssociated(l_targsWithEepromInfo,
+                                          sysTarget,
+                                          TargetService::CHILD, TargetService::ALL,
+                                          &l_checkExprFuncWithEepromInfo );
+
+            // create a test for each eeprom i2c master
+            for (auto l_targ : l_targsWithEepromInfo)
+            {
+                ATTR_EEPROM_VPD_PRIMARY_INFO_type eeprom_info =
+                    l_targ->getAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>();
+
+                auto i2cMasterTarg = tS.toTarget(eeprom_info.i2cMasterPath);
+                if (i2cMasterTarg->getAttr<ATTR_TYPE>() != TARGETING::TYPE_PROC)
+                {
+                    TRACFCOMP( g_trac_i2c,
+                               "testI2CDirect_ONE_BYTE_ADDR: HUID 0x%08X has i2c master 0x%08X, "
+                               "which is not of TYPE_PROC, skip running tests on this master",
+                               get_huid(l_targ), get_huid(i2cMasterTarg));
+                    continue;
+                }
+                else if (!i2cMasterTarg->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                {
+                    TRACFCOMP( g_trac_i2c,
+                               "testI2CDirect_ONE_BYTE_ADDR - HUID 0x%08X has i2c master 0x%08X "
+                               "which is not functional, skip running tests on this master",
+                               get_huid(l_targ), get_huid(i2cMasterTarg));
+                    continue;
+                }
+
+                if(eeprom_info.byteAddrOffset == EEPROM::ONE_BYTE_ADDR ||
+                   eeprom_info.byteAddrOffset == EEPROM::ONE_BYTE_ADDR_PAGESELECT)
+                {
+                    testData.push_back({eeprom_info,
+                                0x40DEADBEEF000000, // at addr 0x40 write 0xDEADBEEF
+                                5, // write 5 bytes
+                                0xDEADBEEF00000000, // expect to see 0xDEADBEEF at addr 0x40
+                                4, // read only 4 bytes
+                                i2cMasterTarg,
+                                l_targ });
+                }
+            }
+
+            const uint32_t NUM_CMDS = testData.size();
+
+            // Skipping I2C test altogether in VBU/VPO environment
+            if( TARGETING::is_vpo() )
+            {
+                return;
+            }
+            //TODO: RTC 297301
+            if (MAGIC_IS_BONITO())
+            {
+                TRACFCOMP( g_trac_i2c, "Skipping testI2CDirect_ONE_BYTE_ADDR for Bonito, "
+                           "device reads for ONE_BYTE_ADDR EEPROMs need to perform a page "
+                           "op first before tests begin.");
+                return;
+            }
+
+            do
+            {
+                for( uint32_t i = 0; i < NUM_CMDS; i++ )
+                {
+                    // Make sure size is less than or = to 8 bytes
+                    // to fit into data
+                    if (testData[i].writeSize > 8)
+                    {
+                        TRACFCOMP( g_trac_i2c,
+                                   "testI2CDirect_ONE_BYTE_ADDR Size (%d) is greater than "
+                                   "8 bytes. Skipping test %d",
+                                   testData[i].writeSize, i );
+                        continue;
+                    }
+                    if (testData[i].readSize > 7)
+                    {
+                        TRACFCOMP( g_trac_i2c,
+                                   "testI2CDirect_ONE_BYTE_ADDR Size (%d) is greater than "
+                                   "7 bytes. Skipping test %d",
+                                   testData[i].readSize, i );
+                        continue;
+                    }
+
+                    // For Each Set of Data, 6 operations:
+                    // 0) Write Addr to Read from
+                    // 1) Read Original Data and Save It
+                    // 2) Write Test Data
+                    // 3) Read Test Data and Compare
+                    // 4) Write Back Original Data
+                    // 5) Read Back Original Data and Compare
+
+                    // Before starting, clear original data buffer
+                    original_data = 0x0ull;
+                    size_t dataSize = 0;
+
+                    for (uint8_t j = 0; j <= 5; j++)
+                    {
+                        // Clear data variable
+                        data = 0;
+                        // For Loop 0: Write addr to read from on next loop
+                        if ( j == 0 )
+                        {
+                            // only write the addr
+                            data = testData[i].addrAndData & (~dataMask);
+                            dataSize = 1;
+                            TRACFCOMP( g_trac_i2c,
+                                       "Writting eeprom addr: 0x%016llX",
+                                       data);
+                        }
+                        // For Loop 1, 5: Read orig data in EEPROM
+                        if ( j == 1 || j == 5)
+                        {
+                            data = 0; // data filled in on read
+                            // read back 1 byte less since writes use 1 byte
+                            // for adressing, not actually writing data to the
+                            // EEPROM
+                            dataSize = testData[i].writeSize - 1;
+                            TRACFCOMP( g_trac_i2c,"Reading orig data from eeprom");
+                        }
+
+                        // For Loop 2: Write test data to EEPROM
+                        if ( j == 2 )
+                        {
+                            // write both addr with test data
+                            data = testData[i].addrAndData;
+                            dataSize = testData[i].writeSize;
+                            TRACFCOMP( g_trac_i2c,
+                                       "Writting test data and addr: 0x%016llX",
+                                       data);
+                        }
+
+                        // For Loop 3: Read back test data
+                        if ( j == 3 )
+                        {
+                            data = 0; // data filled in on read
+                            dataSize = testData[i].readSize;
+                            TRACFCOMP( g_trac_i2c,"Reading back test data");
+                        }
+
+                        // For Loop 4: Write back orig data
+                        if ( j == 4 )
+                        {
+                            // get just the addr and add in the orig data in the lower 7 bytes
+                            data = (testData[i].addrAndData & (~dataMask)) + (original_data >> 8);
+                            dataSize = testData[i].writeSize;
+                            TRACFCOMP( g_trac_i2c,
+                                       "Writting back orig data with addr: 0x%016llX",
+                                       data);
+                        }
+
+                        // increment cmd op counter
+                        cmds++;
+
+                        err = deviceOp( (j%2) ? DeviceFW::READ : DeviceFW::WRITE,
+                                    testData[i].i2cMasterTarg,
+                                    &data,
+                                    dataSize,
+                                    DEVICE_I2C_ADDRESS( testData[i].eeprom_info.port,
+                                                        testData[i].eeprom_info.engine,
+                                                        testData[i].eeprom_info.devAddr,
+                                                        testData[i].eeprom_info.i2cMuxBusSelector,
+                                                        &(testData[i].eeprom_info.i2cMuxPath)));
+                        if( err )
+                        {
+                            TS_FAIL( "testI2CDirect_ONE_BYTE_ADDR - OP %d FAILED "
+                                     "- cmd %d out of %d",
+                                     j % 6, i + 1, NUM_CMDS );
+
+                            TRACFCOMP( g_trac_i2c,
+                                       "testI2CDirect_ONE_BYTE_ADDR - failing cmd: %s, "
+                                       "data 0x%016llX, target HUID 0x%08X for i2cMaster 0x%08X, "
+                                       "p/e/devAddr = 0x%X/0x%X/0x%X",
+                                       (j%2) ? "READ" : "WRITE",
+                                       testData[i].addrAndData,
+                                       get_huid(testData[i].testTarget),
+                                       get_huid(testData[i].i2cMasterTarg),
+                                       testData[i].eeprom_info.port,
+                                       testData[i].eeprom_info.engine,
+                                       testData[i].eeprom_info.devAddr);
+
+                            errlCommit( err, I2C_COMP_ID );
+                            fails++;
+                            continue;
+                        }
+
+                        // If a write op, wait 5ms for EEPROM to write data
+                        // to its internal memory
+                        if ( (j%2) == 0 )
+                        {
+                            nanosleep(0,5 * NS_PER_MSEC);   // 5 msec
+                        }
+
+                        // Handle loop-specific results
+
+                        // For Loop 1: save original data
+                        if ( j == 1 )
+                        {
+                            original_data = data;
+
+                            TRACFCOMP(g_trac_i2c,"testI2CDirect_ONE_BYTE_ADDR: "
+                                      "original_data=0x%016llX", original_data);
+                        }
+
+                        // For Loop 3: compare new data
+                        if ( j == 3 )
+                        {
+                            TRACFCOMP( g_trac_i2c,
+                                       "testI2CDirect_ONE_BYTE_ADDR: New Data Compare: "
+                                       "written=0x%016llX, read_back=0x%016llX",
+                                       testData[i].expectedData, data);
+
+
+                            if( data != testData[i].expectedData )
+                            {
+
+                                TRACFCOMP(g_trac_i2c,
+                                          "testI2CDirect_ONE_BYTE_ADDR: New Data Compare Fail: "
+                                          "wrote=0x%016llx, read back=0x%016llX. cmd: %d/%d (%d)",
+                                          testData[i].expectedData, data, i + 1, NUM_CMDS, j);
+                                TS_FAIL( "testI2CDirect_ONE_BYTE_ADDR - Failure comparing new data!" );
+
+                                TRACFCOMP( g_trac_i2c,
+                                           "testI2CDirect_ONE_BYTE_ADDR - failing cmd: %s, data "
+                                           "0x%016llX, target HUID 0x%08X for i2cMaster 0x%08X, "
+                                           "p/e/devAddr = 0x%X/0x%X/0x%X",
+                                           (j%2) ? "READ" : "WRITE",
+                                           testData[i].addrAndData,
+                                           get_huid(testData[i].testTarget),
+                                           get_huid(testData[i].i2cMasterTarg),
+                                           testData[i].eeprom_info.port,
+                                           testData[i].eeprom_info.engine,
+                                           testData[i].eeprom_info.devAddr);
+                                fails++;
+
+                                // Don't break - try to write back original data
+                                continue;
+                            }
+
+                        }
+
+                        // For Loop 5: compare writing-back original data
+                        if ( j == 5 )
+                        {
+                            TRACFCOMP( g_trac_i2c,
+                                       "testI2CDirect_ONE_BYTE_ADDR: Original Data Compare: "
+                                       "original=0x%016llX, read_back=0x%016llX",
+                                       original_data, data);
+
+                            if( data != original_data )
+                            {
+                                TRACFCOMP(g_trac_i2c,
+                                          "testI2CDirect_ONE_BYTE_ADDR: Original Data Compare Fail: "
+                                          "original=0x%016llX, read back=0x%016llX. cmd: %d/%d (%d)",
+                                          original_data, data, i + 1, NUM_CMDS, j);
+                                TS_FAIL( "testI2CDirect_ONE_BYTE_ADDR - Failure comparing original data!");
+
+                                TRACFCOMP( g_trac_i2c,
+                                           "testI2CDirect_ONE_BYTE_ADDR - failing cmd: %s, data "
+                                           "0x%016llX, target HUID 0x%08X for i2cMaster 0x%08X, "
+                                           "p/e/devAddr = 0x%X/0x%X/0x%X",
+                                           (j%2) ? "READ" : "WRITE",
+                                           testData[i].addrAndData,
+                                           get_huid(testData[i].testTarget),
+                                           get_huid(testData[i].i2cMasterTarg),
+                                           testData[i].eeprom_info.port,
+                                           testData[i].eeprom_info.engine,
+                                           testData[i].eeprom_info.devAddr);
+
+                                fails++;
+
+                                // Break: stop testing if we can't write back
+                                // original data successfully
+                                break;
+                            }
+                        }
+
+                    }  // end of 'j' loop: 5 ops per testData[i]
+
+                }
+            } while( 0 );
+
+            TRACFCOMP( g_trac_i2c,
+                       "testI2CDirect_ONE_BYTE_ADDR - End: %d/%d fails",
+                       fails, cmds );
+        }
+
+        /**
+         * @brief I2C Direct Test for TWO_BYTE_ADDR EEPROMS
+         *      This test will test a variety of direct reads and writes
+         *      with various lengths across slave devices with 2 byte addresses.
+         *
+         *      Currently only Processor targets are supported in simics.
+         *
+         */
+        void testI2CDirect_TWO_BYTE_ADDR ( void )
+        {
+            errlHndl_t err = nullptr;
+            int cmds = 0;
+            int fails = 0;
+            uint64_t data = 0;
+
+            TRACFCOMP( g_trac_i2c, "testI2CDirect_TWO_BYTE_ADDR - Start" );
+
+            struct testData_t
+            {
+                ATTR_EEPROM_VPD_PRIMARY_INFO_type eeprom_info;
+
+                uint64_t data;      // Data to write or compare to, which also includes
+                                    // the addr to read/write to in the MSBs
+                                    // if data = I2C_TEST_COMMON_IGNORE_DATA_COMPARE
+                                    // than ignore data compare
+                size_t   size;      // Number of Bytes to read/write
+                DeviceFW::OperationType rnw;         // READ/WRITE
+                TARGETING::TargetHandle_t i2cMasterTarg; // ptr to i2c Master target
+                TARGETING::TargetHandle_t testTarget; // target ptr getting the Eeprom Info from.
+                                                      // used for debug info for test case fails
+            };
+
+            std::vector<testData_t> testData;
+
+            // Get top level system target
+            TARGETING::TargetService& tS = TARGETING::targetService();
+            TARGETING::TargetHandle_t sysTarget = TARGETING::UTIL::assertGetToplevelTarget();
+
+            // get all targs that have EEPROM_VPD_PRIMARY_INFO attribute
+            ATTR_EEPROM_VPD_PRIMARY_INFO_type any = {};
+            PredicateAttrVal<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO> l_hasEepromInfo(any);
+
+            PredicateIsFunctional l_isFunc;
+            PredicatePostfixExpr l_checkExprFuncWithEepromInfo;
+            l_checkExprFuncWithEepromInfo.push(&l_hasEepromInfo)
+                                         .push(&l_isFunc)
+                                         .And();
+
+            TargetHandleList l_targsWithEepromInfo;
+            targetService().getAssociated(l_targsWithEepromInfo,
+                                          sysTarget,
+                                          TargetService::CHILD, TargetService::ALL,
+                                          &l_checkExprFuncWithEepromInfo );
+
+            // create a test for each eeprom i2c master
+            for (auto l_targ : l_targsWithEepromInfo)
+            {
+                ATTR_EEPROM_VPD_PRIMARY_INFO_type eeprom_info =
+                    l_targ->getAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>();
+
+                auto i2cMasterTarg = tS.toTarget(eeprom_info.i2cMasterPath);
+                if (i2cMasterTarg->getAttr<ATTR_TYPE>() != TARGETING::TYPE_PROC)
+                {
+
+                    TRACFCOMP( g_trac_i2c,
+                               "testI2CDirect_TWO_BYTE_ADDR: HUID 0x%08X has i2c master 0x%08X, "
+                               "which is not of TYPE_PROC, skip running tests on this master",
+                               get_huid(l_targ), get_huid(i2cMasterTarg));
+                    continue;
+                }
+                else if (!i2cMasterTarg->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                {
+                    TRACFCOMP( g_trac_i2c,
+                               "testI2CDirect_TWO_BYTE_ADDR - HUID 0x%08X has i2c master 0x%08X "
+                               "which is not functional, skip running tests on this master",
+                               get_huid(l_targ), get_huid(i2cMasterTarg));
+                    continue;
+                }
+
+                if (eeprom_info.byteAddrOffset == EEPROM::TWO_BYTE_ADDR)
+                {
+                    // read only tests
+                    testData.push_back({eeprom_info,
+                                        I2C_TEST_COMMON_IGNORE_DATA_COMPARE,
+                                        8,
+                                        DeviceFW::READ,
+                                        i2cMasterTarg,
+                                        l_targ });
+
+                    //write->read->verify tests
+
+                    // write data to an addr and read it back
+                    // write 0xababcdcdefef to addr 0x0810
+                    testData.push_back({eeprom_info,
+                                        0x0810ababcdcdefef,
+                                        8,
+                                        DeviceFW::WRITE,
+                                        i2cMasterTarg,
+                                        l_targ });
+                    // write which addr to read from (0x0810)
+                    testData.push_back({eeprom_info,
+                                        0x0810000000000000,
+                                        2,
+                                        DeviceFW::WRITE,
+                                        i2cMasterTarg,
+                                        l_targ });
+                    // read from 0x0810
+                    testData.push_back({eeprom_info,
+                                        0xababcdcdefef0000,
+                                        6,
+                                        DeviceFW::READ,
+                                        i2cMasterTarg,
+                                        l_targ });
+
+                    // move addr 3 bytes forward from before and read data again
+                    // write which addr to read from (0x0813)
+                    testData.push_back({eeprom_info,
+                                        0x0813000000000000,
+                                        2,
+                                        DeviceFW::WRITE,
+                                        i2cMasterTarg,
+                                        l_targ });
+                    // read from 0x0813
+                    testData.push_back({eeprom_info,
+                                        0xcdefef0000000000,
+                                        3,
+                                        DeviceFW::READ,
+                                        i2cMasterTarg,
+                                        l_targ });
+
+                    // write data to an addr, and read the data back starting
+                    // 1 byte before the data written.
+                    // write 0x831200000000 to addr 0x0825
+                    testData.push_back({eeprom_info,
+                                        0x0825831200000000,
+                                        8,
+                                        DeviceFW::WRITE,
+                                        i2cMasterTarg,
+                                        l_targ });
+                    // write which addr to read from (0x0x0824)
+                    testData.push_back({eeprom_info,
+                                        0x0824000000000000,
+                                        2,
+                                        DeviceFW::WRITE,
+                                        i2cMasterTarg,
+                                        l_targ });
+                    // read from 0x0810
+                    testData.push_back({eeprom_info,
+                                        0x0083120000000000,
+                                        3,
+                                        DeviceFW::READ,
+                                        i2cMasterTarg,
+                                        l_targ });
+                }
+            } //for each l_targsWithEepromInfo
+
+            const uint32_t NUM_CMDS = testData.size();
 
             // Skipping I2C test altogether in VBU/VPO environment
             if( TARGETING::is_vpo() )
@@ -189,118 +579,83 @@ class I2CTestCommon: public CxxTest::TestSuite
 
             do
             {
-                // Get top level system target
-                TARGETING::TargetService& tS = TARGETING::targetService();
-                TARGETING::Target * sysTarget = NULL;
-                TARGETING::Target * theTarget = NULL;
-                tS.getTopLevelTarget( sysTarget );
-                assert( sysTarget != NULL );
-
-                // Get the Proc Target
-                TARGETING::Target* procTarget = NULL;
-                tS.masterProcChipTargetHandle( procTarget );
-
                 for( uint32_t i = 0; i < NUM_CMDS; i++ )
                 {
-
                     // Make sure size is less than or = to 8 bytes
-                    //  to fit into data
-                    uint64_t data;
+                    // to fit into data
                     if (testData[i].size > 8)
                     {
                         TRACFCOMP( g_trac_i2c,
-                                   "testI2CDirect Size (%d) is greater than"
-                                   " 8 bytes. Skipping test %d",
+                                   "testI2CDirect_TWO_BYTE_ADDR Size (%d) is greater than "
+                                   "8 bytes. Skipping test %d",
                                    testData[i].size, i );
                         continue;
                     }
 
-                    // if a read, initialize data, else, set data to write
-                    if( testData[i].rnw )
-                    {
-                        data = 0x0ull;
-                    }
-                    else
-                    {
-                        data = testData[i].data;
-                    }
-
-                    // Decide which target to use
-                    switch( testData[i].type )
-                    {
-                        case TARGETING::TYPE_PROC:
-                            if( NULL == procTarget )
-                            {
-                                TRACFCOMP( g_trac_i2c,
-                                           ERR_MRK"Processor Target is NULL, go to next "
-                                           "operation!" );
-                                continue;
-                            }
-
-                            theTarget = procTarget;
-                            break;
-
-                        default:
-                            TS_FAIL( "testI2CDirect - Invalid Chip type "
-                                     "specificed in testData!" );
-                            fails++;
-                            continue;
-                            break;
-                    };
-
-                    // Check to see if the target is functional before we
-                    // continue..
-                    if
-                        (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
-                    {
-
-                        TRACFCOMP( g_trac_i2c,
-                            "testI2CDirect - target not functional");
-
-                        continue;
-                    }
-
                     // do the operation
+                    data = testData[i].data;
                     cmds++;
-                    err = deviceOp( (testData[i].rnw ? DeviceFW::READ : DeviceFW::WRITE),
-                                    theTarget,
+                    err = deviceOp( testData[i].rnw,
+                                    testData[i].i2cMasterTarg,
                                     &data,
                                     testData[i].size,
-                                    DEVICE_I2C_ADDRESS( testData[i].port,
-                                                        testData[i].engine,
-                                                        testData[i].devAddr,
-                                                        0xFF,
-                                                        nullptr) );
+                                    DEVICE_I2C_ADDRESS( testData[i].eeprom_info.port,
+                                                        testData[i].eeprom_info.engine,
+                                                        testData[i].eeprom_info.devAddr,
+                                                        testData[i].eeprom_info.i2cMuxBusSelector,
+                                                        &(testData[i].eeprom_info.i2cMuxPath)));
 
                     if( err )
                     {
-                        TS_FAIL( "testI2CDirect - fail on cmd %d out of %d",
-                                  i + 1, NUM_CMDS );
-                        errlCommit( err,
-                                    I2C_COMP_ID );
+                        TS_FAIL( "testI2CDirect_TWO_BYTE_ADDR - fail on cmd %d out of %d",
+                                 i + 1, NUM_CMDS );
+                        TRACFCOMP( g_trac_i2c,
+                                   "testI2CDirect_TWO_BYTE_ADDR - failing cmd: %s, data "
+                                   "0x%016llX, target HUID 0x%08X for i2cMaster 0x%08X, "
+                                   "p/e/devAddr = 0x%X/0x%X/0x%X",
+                                   testData[i].rnw == DeviceFW::READ ? "READ" : "WRITE",
+                                   testData[i].data,
+                                   get_huid(testData[i].testTarget),
+                                   get_huid(testData[i].i2cMasterTarg),
+                                   testData[i].eeprom_info.port,
+                                   testData[i].eeprom_info.engine,
+                                   testData[i].eeprom_info.devAddr );
+                        errlCommit( err, I2C_COMP_ID );
                         fails++;
                         continue;
                     }
 
                     // If a write op, wait 5ms for EEPROM to write data
                     // to its internal memory
-                    if (testData[i].rnw == false)
+                    if (testData[i].rnw == DeviceFW::WRITE)
                     {
                         nanosleep(0,5 * NS_PER_MSEC);   // 5 msec
                     }
 
                     // compare data for the read, but ignore case where
-                    //  data = I2C_TEST_IGNORE_DATA_COMPARE
-                    if( ( testData[i].rnw ) &&
-                        ( testData[i].data != I2C_TEST_IGNORE_DATA_COMPARE ))
+                    // data = I2C_TEST_COMMON_IGNORE_DATA_COMPARE
+                    if( ( testData[i].rnw == DeviceFW::READ) &&
+                        ( testData[i].data != I2C_TEST_COMMON_IGNORE_DATA_COMPARE ))
                     {
                         if( data != testData[i].data )
                         {
+
                             TRACFCOMP( g_trac_i2c,
-                                       "testI2CDirect - cmd: %d/%d, Data read:"
-                                       " %016llx, expected: %016llx",
+                                       "testI2CDirect_TWO_BYTE_ADDR - cmd: %d/%d, Data read: "
+                                       "0x%016llX, expected: 0x%016llX",
                                        i + 1, NUM_CMDS, data, testData[i].data );
-                            TS_FAIL( "testI2CDirect - Failure comparing read data!" );
+                            TRACFCOMP( g_trac_i2c,
+                                       "testI2CDirect_TWO_BYTE_ADDR - failing cmd: %s, data "
+                                       "0x%016llX, target HUID 0x%08X for i2cMaster 0x%08X, "
+                                       "p/e/devAddr = 0x%X/0x%X/0x%X",
+                                       testData[i].rnw == DeviceFW::READ ? "READ" : "WRITE",
+                                       testData[i].data,
+                                       get_huid(testData[i].testTarget),
+                                       get_huid(testData[i].i2cMasterTarg),
+                                       testData[i].eeprom_info.port,
+                                       testData[i].eeprom_info.engine,
+                                       testData[i].eeprom_info.devAddr );
+                            TS_FAIL("testI2CDirect_TWO_BYTE_ADDR - Failure comparing read data!");
                             fails++;
                             continue;
                         }
@@ -309,7 +664,7 @@ class I2CTestCommon: public CxxTest::TestSuite
             } while( 0 );
 
             TRACFCOMP( g_trac_i2c,
-                       "testI2CDirect - End: %d/%d fails",
+                       "testI2CDirect_TWO_BYTE_ADDR - End: %d/%d fails",
                        fails, cmds );
         }
 
@@ -325,39 +680,118 @@ class I2CTestCommon: public CxxTest::TestSuite
          */
         void testI2COffset ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             int cmds = 0;
             int fails = 0;
             uint64_t original_data = 0;
             uint64_t data = 0;
 
-            TRACFCOMP( g_trac_i2c,
-                       "testI2COffset - Start" );
+            TRACFCOMP( g_trac_i2c, "testI2COffset - Start" );
 
-            struct
+            struct testData_t
             {
-                uint64_t port;         // Master engine port
-                uint64_t engine;       // Master engine
-                uint64_t devAddr;      // Slave Device address
-                uint16_t offset;       // Slave Device offset - 2 bytes
-                uint64_t data;         // Data to write
-                size_t   size;         // Number of Bytes to read/write
-                TARGETING::TYPE type;  // Target Type
-            } testData[] =
-            {
+                ATTR_EEPROM_VPD_PRIMARY_INFO_type eeprom_info;
 
-                // PROCESSOR TESTS
+                uint64_t data;      // Data to write or compare to
+                                    // if data = I2C_TEST_COMMON_IGNORE_DATA_COMPARE
+                                    // than ignore data compare
 
-                // Read/Write DIMM SPD
-                { 0x01, HOST_ENGINE_E, 0xA0, 0x0820,
-                  0xFEFEDADA57579191, 8, TARGETING::TYPE_PROC },
-
-                // Read/Write DIMM SPD
-                { 0x0a, HOST_ENGINE_E, 0xA0, 0x0820,
-                  0x5ABC310000000000, 3, TARGETING::TYPE_PROC },
+                size_t   size;      // Number of Bytes to read/write
+                uint16_t offset;    // Slave Device offset. Set MSB for 1 byte addressing targets
+                size_t offsetSize;  // size in bytes for the offset above.
+                                    // Used for 1 vs 2 byte addressing
+                TARGETING::TargetHandle_t i2cMasterTarg; // ptr to i2c Master target
+                TARGETING::TargetHandle_t testTarget; // target ptr getting the Eeprom Info from.
+                                                      // used for debug info for test case fails
             };
 
-            const uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
+            std::vector<testData_t> testData;
+
+            // Get top level system target
+            TARGETING::TargetService& tS = TARGETING::targetService();
+            TARGETING::TargetHandle_t sysTarget = TARGETING::UTIL::assertGetToplevelTarget();
+
+            ATTR_EEPROM_VPD_PRIMARY_INFO_type any = {};
+            PredicateAttrVal<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO> l_hasEepromInfo(any);
+
+            PredicateIsFunctional l_isFunc;
+            PredicatePostfixExpr l_checkExprFuncWithEepromInfo;
+            l_checkExprFuncWithEepromInfo.push(&l_hasEepromInfo)
+                                         .push(&l_isFunc)
+                                         .And();
+
+            TargetHandleList l_targsWithEepromInfo;
+            targetService().getAssociated(l_targsWithEepromInfo,
+                                          sysTarget,
+                                          TargetService::CHILD, TargetService::ALL,
+                                          &l_checkExprFuncWithEepromInfo );
+
+            // create a test for reading each i2c master and port of the targets
+            for (auto l_targ : l_targsWithEepromInfo)
+            {
+                ATTR_EEPROM_VPD_PRIMARY_INFO_type eeprom_info =
+                    l_targ->getAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>();
+
+                auto i2cMasterTarg = tS.toTarget(eeprom_info.i2cMasterPath);
+                if (i2cMasterTarg->getAttr<ATTR_TYPE>() != TARGETING::TYPE_PROC)
+                {
+
+                    TRACFCOMP( g_trac_i2c,
+                               "testI2COffset: HUID 0x%08X has i2c master 0x%08X "
+                               "which is not of TYPE_PROC, skip running tests on this master",
+                               get_huid(l_targ), get_huid(i2cMasterTarg));
+                    continue;
+                }
+                else if (!i2cMasterTarg->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+                {
+                    TRACFCOMP( g_trac_i2c,
+                               "testI2COffset - HUID 0x%08X has i2c master 0x%08X "
+                               "which is not functional, skip running tests on this master",
+                               get_huid(l_targ), get_huid(i2cMasterTarg));
+                    continue;
+                }
+
+
+                if(eeprom_info.byteAddrOffset == EEPROM::TWO_BYTE_ADDR )
+                {
+                    testData.push_back({eeprom_info,
+                                        0xFEFEDADA57579191,
+                                        8,
+                                        0x0820,
+                                        2,
+                                        i2cMasterTarg,
+                                        l_targ });
+
+                    testData.push_back({eeprom_info,
+                                        0x5ABC310000000000,
+                                        3,
+                                        0x0820,
+                                        2,
+                                        i2cMasterTarg,
+                                        l_targ });
+                }
+                else if(eeprom_info.byteAddrOffset == EEPROM::ONE_BYTE_ADDR ||
+                        eeprom_info.byteAddrOffset == EEPROM::ONE_BYTE_ADDR_PAGESELECT)
+                {
+                    testData.push_back({eeprom_info,
+                                        0xFEFEDADA57579191,
+                                        8,
+                                        0x8200,
+                                        1,
+                                        i2cMasterTarg,
+                                        l_targ });
+
+                    testData.push_back({eeprom_info,
+                                        0x5ABC310000000000,
+                                        3,
+                                        0x8200,
+                                        1,
+                                        i2cMasterTarg,
+                                        l_targ });
+                }
+            }
+
+            const uint32_t NUM_CMDS = testData.size();
 
 
             // Skipping I2C test altogether in VBU/VPO environment
@@ -368,18 +802,6 @@ class I2CTestCommon: public CxxTest::TestSuite
 
             do
             {
-
-                // Get top level system target
-                TARGETING::TargetService& tS = TARGETING::targetService();
-                TARGETING::Target * sysTarget = NULL;
-                TARGETING::Target * theTarget = NULL;
-                tS.getTopLevelTarget( sysTarget );
-                assert( sysTarget != NULL );
-
-                // Get the Proc Target
-                TARGETING::Target* procTarget = NULL;
-                tS.masterProcChipTargetHandle( procTarget );
-
                 for ( uint32_t i = 0; i < NUM_CMDS; i++ )
                 {
                     TRACUCOMP( g_trac_i2c,"testI2COffset: Outer Loop i= "
@@ -390,48 +812,11 @@ class I2CTestCommon: public CxxTest::TestSuite
                     if (testData[i].size > 8)
                     {
                         TRACFCOMP( g_trac_i2c,
-                                   "testI2COffset: Size (%d) is greater than"
-                                   " 8 bytes. Skipping test %d",
+                                   "testI2COffset: Size (%d) is greater than "
+                                   "8 bytes. Skipping test %d",
                                    testData[i].size, i + 1 );
                         continue;
                     }
-
-                    // Decide which target to use
-                    switch( testData[i].type )
-                    {
-                        case TARGETING::TYPE_PROC:
-                            if( NULL == procTarget )
-                            {
-                                TRACFCOMP( g_trac_i2c,
-                                           ERR_MRK"Processor Target is NULL, "
-                                           "go to next operation!" );
-                                continue;
-                            }
-
-                            theTarget = procTarget;
-                            break;
-
-                        default:
-                            TS_FAIL( "testI2COffset - Invalid Chip type "
-                                     "specificed in testData!" );
-                            fails++;
-                            continue;
-                            break;
-                    };
-
-
-                    // Check to see if the target is functional before we
-                    // continue..
-                    if
-                        (!theTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
-                    {
-
-                        TRACFCOMP( g_trac_i2c,
-                            "testI2COffset - target not functional");
-
-                        continue;
-                    }
-
 
                     // For Each Set of Data, 5 operations:
                     // 1) Read Original Data and Save It
@@ -462,30 +847,42 @@ class I2CTestCommon: public CxxTest::TestSuite
 
                         err = deviceOp(
                                 (j%2) ? DeviceFW::READ : DeviceFW::WRITE,
-                                theTarget,
+                                testData[i].i2cMasterTarg,
                                 &data,
                                 testData[i].size,
                                 DEVICE_I2C_ADDRESS_OFFSET(
-                                                    testData[i].port,
-                                                    testData[i].engine,
-                                                    testData[i].devAddr,
-                                                    sizeof(testData[i].offset),
+                                                    testData[i].eeprom_info.port,
+                                                    testData[i].eeprom_info.engine,
+                                                    testData[i].eeprom_info.devAddr,
+                                                    testData[i].offsetSize,
                                                     reinterpret_cast<uint8_t*>(
-                                                    &(testData[i].offset)),
-                                                    0xFF,
-                                                    nullptr));
+                                                        &(testData[i].offset)),
+                                                    testData[i].eeprom_info.i2cMuxBusSelector,
+                                                    &(testData[i].eeprom_info.i2cMuxPath)));
 
                         if( err )
                         {
                             TS_FAIL( "testI2COffset - OP %d FAILED "
                                      "- cmd %d out of %d",
                                      j, i + 1, NUM_CMDS );
-                            errlCommit( err,
-                                        I2C_COMP_ID );
+
+                            TRACFCOMP( g_trac_i2c,
+                                       "testI2COffset - failing cmd: %s, data 0x%016llX, "
+                                       "target HUID 0x%08X for i2cMaster 0x%08X, p/e/devAddr "
+                                       "= 0x%X/0x%X/0x%X, offset 0x%016llX",
+                                       (j%2) ? "READ" : "WRITE",
+                                       testData[i].data,
+                                       get_huid(testData[i].testTarget),
+                                       get_huid(testData[i].i2cMasterTarg),
+                                       testData[i].eeprom_info.port,
+                                       testData[i].eeprom_info.engine,
+                                       testData[i].eeprom_info.devAddr,
+                                       testData[i].offset );
+
+                            errlCommit( err, I2C_COMP_ID );
                             fails++;
                             continue;
                         }
-
 
                         // If a write op, wait 5ms for EEPROM to write data
                         // to its internal memory
@@ -501,29 +898,40 @@ class I2CTestCommon: public CxxTest::TestSuite
                         {
                             original_data = data;
 
-                            // Always trace original data - just in case
                             TRACFCOMP(g_trac_i2c,"testI2COffset: "
-                                      "original_data=0x%x", original_data);
+                                      "original_data=0x%016llX", original_data);
                         }
-
 
                         // For Loop 3: compare new data
                         if ( j == 3 )
                         {
-
-                            TRACUCOMP( g_trac_i2c,"testI2COffset: "
-                               "New Data Compare: "
-                               "written=0x%016llx, read_back=0x%016llx",
-                               testData[i].data, data);
+//                             TRACUCOMP( g_trac_i2c,"testI2COffset: "
+                            TRACFCOMP( g_trac_i2c,
+                                       "testI2COffset: New Data Compare: "
+                                       "written=0x%016llx, read_back=0x%016llX",
+                                       testData[i].data, data);
 
                             if( data != testData[i].data )
                             {
-                                TRACFCOMP(g_trac_i2c,"testI2COffset: New "
-                                    "Data Compare Fail: wrote=%016llx, "
-                                    "read back=%016llx. cmd: %d/%d (%d)",
-                                    testData[i].data, data, i + 1, NUM_CMDS, j);
+                                TRACFCOMP(g_trac_i2c,
+                                          "testI2COffset: New Data Compare Fail: wrote=%016llX, "
+                                          "read back=%016llX. cmd: %d/%d (%d)",
+                                          testData[i].data, data, i + 1, NUM_CMDS, j);
                                 TS_FAIL( "testI2COffset - Failure comparing "
                                          "new data!" );
+
+                                TRACFCOMP( g_trac_i2c,
+                                           "testI2COffset - failing cmd: %s, data 0x%016llX, "
+                                           "target HUID 0x%08X for i2cMaster 0x%08X, p/e/devAddr "
+                                           "= 0x%X/0x%X/0x%X, offset 0x%016llX",
+                                           (j%2) ? "READ" : "WRITE",
+                                           testData[i].data,
+                                           get_huid(testData[i].testTarget),
+                                           get_huid(testData[i].i2cMasterTarg),
+                                           testData[i].eeprom_info.port,
+                                           testData[i].eeprom_info.engine,
+                                           testData[i].eeprom_info.devAddr,
+                                           testData[i].offset );
                                 fails++;
 
                                 // Don't break - try to write back original data
@@ -535,19 +943,34 @@ class I2CTestCommon: public CxxTest::TestSuite
                         // For Loop 5: compare writing-back original data
                         if ( j == 5 )
                         {
-                            TRACUCOMP( g_trac_i2c,"testI2COffset: "
-                               "Original Data Compare: "
-                               "original=0x%016llx, read_back=0x%016llx",
-                               original_data, data);
+                            TRACFCOMP( g_trac_i2c,
+                                       "testI2COffset: Original Data Compare: "
+                                       "original=0x%016llx, read_back=0x%016llx",
+                                       original_data, data);
 
                             if( data != original_data )
                             {
-                                TRACFCOMP(g_trac_i2c,"testI2COffset: New "
-                                    "Data Compare Fail: original=%016llx, "
-                                    "read back=%016llx. cmd: %d/%d (%d)",
-                                    original_data, data, i + 1, NUM_CMDS, j);
+                                TRACFCOMP(g_trac_i2c,
+                                          "testI2COffset: New " "Data Compare Fail: "
+                                          "original=0x%016llX, read back=0x%016llX. "
+                                          "cmd: %d/%d (%d)",
+                                          original_data, data, i + 1, NUM_CMDS, j);
                                 TS_FAIL( "testI2COffset - Failure comparing "
                                          "original data!" );
+
+                                TRACFCOMP( g_trac_i2c,
+                                           "testI2COffset - failing cmd: %s, data 0x%016llX, "
+                                           "target HUID 0x%08X for i2cMaster 0x%08X, p/e/devAddr "
+                                           "= 0x%X/0x%X/0x%X, offset 0x%016llX",
+                                           (j%2) ? "READ" : "WRITE",
+                                           testData[i].data,
+                                           get_huid(testData[i].testTarget),
+                                           get_huid(testData[i].i2cMasterTarg),
+                                           testData[i].eeprom_info.port,
+                                           testData[i].eeprom_info.engine,
+                                           testData[i].eeprom_info.devAddr,
+                                           testData[i].offset );
+
                                 fails++;
 
                                 // Break: stop testing if we can't write back
@@ -575,7 +998,7 @@ class I2CTestCommon: public CxxTest::TestSuite
          */
         void testI2CInvalidTarget ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             int fails = 0;
             const int NUM_CMDS = 1;
 
@@ -606,7 +1029,7 @@ class I2CTestCommon: public CxxTest::TestSuite
             else
             {
                 delete err;
-                err = NULL;
+                err = nullptr;
             }
 
             TRACFCOMP( g_trac_i2c,
@@ -621,7 +1044,7 @@ class I2CTestCommon: public CxxTest::TestSuite
          */
         void testI2CInvalidOperation ( void )
         {
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
             int64_t fails = 0, num_ops = 0;
             uint64_t data = 0x0ull;
             size_t dataSize = 8;
@@ -633,9 +1056,9 @@ class I2CTestCommon: public CxxTest::TestSuite
             {
                 // Get a processor Target
                 TARGETING::TargetService& tS = TARGETING::targetService();
-                TARGETING::Target* testTarget = NULL;
+                TARGETING::Target* testTarget = nullptr;
                 tS.masterProcChipTargetHandle( testTarget );
-                assert(testTarget != NULL);
+                assert(testTarget != nullptr);
 
 
                 // check to see if the target is functional before we
@@ -661,7 +1084,7 @@ class I2CTestCommon: public CxxTest::TestSuite
                                                     0xFF,
                                                     nullptr) );
 
-                if( NULL == err )
+                if( nullptr == err )
                 {
                     fails++;
                     TS_FAIL( "testI2CInvalidOperation - Error should've "
@@ -670,7 +1093,7 @@ class I2CTestCommon: public CxxTest::TestSuite
                 else
                 {
                     delete err;
-                    err = NULL;
+                    err = nullptr;
                 }
             } while( 0 );
             TRACFCOMP( g_trac_i2c,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,6 +118,7 @@ enum
     MAGIC_SAVE_ATTR_VALUE     =  7057, // record attribute value
     MAGIC_CHECK_FEATURE       =  7058, // check for feature enablement
 
+    MAGIC_CHECK_BONITO_CONFIG =  7777, // check if MACHINE=bonito is set in the ENV
 
     // 8000-8999 are defined by the Simics CEC team
     MAGIC_SIMICS_FSP_WAIT      =  8001, // Notify we are/aren't waiting for FSP
@@ -264,6 +265,18 @@ constexpr uint8_t MAGIC_FEATURE__IGNORETODFAIL = 3;
 constexpr uint8_t MAGIC_FEATURE__USEOLDSPI_DEPRECATED = 4;
 constexpr uint8_t MAGIC_FEATURE__SKIPOCC       = 5;
 
-
+/**
+ * @brief Check if a running Bonito machine
+ */
+#define MAGIC_IS_BONITO() magic_check_bonito()
+inline bool magic_check_bonito()
+{
+    long register r3 asm("r3") = 0;
+    asm volatile("mr 4, %0" ::
+                 "r" (1):
+                 "4");
+    MAGIC_INSTRUCTION(MAGIC_CHECK_BONITO_CONFIG);
+    return r3;
+}
 
 #endif //__KERNEL_MAGIC_H

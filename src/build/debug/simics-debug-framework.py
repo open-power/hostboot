@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -861,6 +861,9 @@ def magic_instruction_callback(user_arg, cpu, arg):
         else:
             print("MAGIC_CHECK_FEATURE> Unknown feature %d requested for" % (feature))
         cpu.r3 = value
+
+    if arg == 7777:   # MAGIC_CHECK_BONITO_CONFIG
+        cpu.r3 = os.getenv('MACHINE').upper() == 'BONITO'
 
 
 # Continuous trace: Clear these files.

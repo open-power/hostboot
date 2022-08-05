@@ -32,6 +32,7 @@
 #include <functional>
 #include <plat_utils.H>
 #include <error_scope.H>
+#include <targeting/common/utilFilter.H>
 
 namespace fapi2
 {
@@ -700,7 +701,6 @@ void test_fapi2getChildTargetsForCDG()
     int numTests = 0;
     int numFails = 0;
     TARGETING::Target * l_proc = nullptr;
-    size_t l_expectedDimms = 0;
     TARGETING::TargetHandleList l_chipList;
 
     do
@@ -722,7 +722,9 @@ void test_fapi2getChildTargetsForCDG()
             break;
         }
 
-        l_expectedDimms = 8;
+        TARGETING::TargetHandleList l_funcDimmList;
+        getAllLogicalCards( l_funcDimmList,
+                            TARGETING::TYPE_DIMM );
 
         Target<fapi2::TARGET_TYPE_PROC_CHIP> fapi2_procTarget(l_proc);
         // Now get all dimms under this processor
@@ -733,13 +735,13 @@ void test_fapi2getChildTargetsForCDG()
                 0xff,  // All sockets
                 l_dimmList);
 
-        FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%.08X is %d",
-                TARGETING::get_huid(l_proc),l_dimmList.size());
+        FAPI_INF("test_fapi2getChildTargetsForCDG: Dimms under proc 0x%08X is %d",
+                TARGETING::get_huid(l_proc), l_dimmList.size());
         numTests++;
-        if(l_dimmList.size() != l_expectedDimms)
+        if(l_dimmList.size() != l_funcDimmList.size())
         {
-            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count %d not equal expected %d",
-                    l_dimmList.size(),l_expectedDimms);
+            TS_FAIL("test_fapi2getChildTargetsForCDG: Dimm count not equal, expected %d found %d",
+                    l_funcDimmList.size(), l_dimmList.size());
             numFails++;
         }
 

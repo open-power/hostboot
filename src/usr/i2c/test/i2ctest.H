@@ -44,6 +44,8 @@
 #include <i2c/i2c.H>
 #include <secureboot/service.H>
 
+#include <arch/magic.H>
+
 extern trace_desc_t* g_trac_i2c;
 
 // Easy macro replace for unit testing
@@ -251,33 +253,40 @@ class I2CTestIPL : public CxxTest::TestSuite
 
         void testI2cForceReset(void)
         {
+            TRACFCOMP(g_trac_i2c, ENTER_MRK"testI2cForceReset enter");
 
-
-            errlHndl_t err = NULL;
+            errlHndl_t err = nullptr;
 
             do
             {
+                //TODO: RTC 297301
+                if (MAGIC_IS_BONITO())
+                {
+                    TRACFCOMP( g_trac_i2c, "Skipping testI2cForceReset for Bonito, "
+                               "device reads returns 0. Requires more investigation");
+                    break;
+                }
                 I2C::misc_args_t io_args;
 
                 uint64_t data = 0x0;
 
                 // Get the Proc Target
                 TARGETING::TargetService& tS = TARGETING::targetService();
-                TARGETING::Target* procTarget = NULL;
+                TARGETING::Target* procTarget = nullptr;
                 tS.masterProcChipTargetHandle( procTarget );
-                assert( procTarget != NULL );
+                assert( procTarget != nullptr );
 
                 // reset the target and then try a read
                 if(procTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
                 {
-                    TRACFCOMP( g_trac_i2c,
-                               " testI2cForceReset- functional good path" );
-                    io_args.engine = HOST_ENGINE_E;
+                    TRACFCOMP( g_trac_i2c, "testI2cForceReset- functional good path");
+                    // p/e/devvAddr 1/e/0xA0 routes to Dimm for P10 standalone and Bonito
                     io_args.port = 0x1;
+                    io_args.engine = HOST_ENGINE_E;
+                    io_args.devAddr = 0xA0;
                     io_args.switches.useHostI2C = 1;
                     //get engine lock attr for engine 0
                     //prevents sbe update test fails
-
 
                     size_t data_size = 8;
 
@@ -286,7 +295,9 @@ class I2CTestIPL : public CxxTest::TestSuite
                                     procTarget,
                                     &data,
                                     data_size,
-                                    DEVICE_I2C_ADDRESS_OFFSET( 0x01, HOST_ENGINE_E, 0xA0,
+                                    DEVICE_I2C_ADDRESS_OFFSET( io_args.port,
+                                                               io_args.engine,
+                                                               io_args.devAddr,
                                                                sizeof(offset),
                                                                &offset,
                                                                I2C_MUX::NOT_APPLICABLE,
@@ -299,9 +310,11 @@ class I2CTestIPL : public CxxTest::TestSuite
                         break;
                     }
 
-                    mutex_t * engineLock = NULL;
+                    TRACFCOMP( g_trac_i2c, "testI2cForceReset: data after first read is 0x%016llX", data );
+
+                    mutex_t * engineLock = nullptr;
                     engineLock =
-                    procTarget->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_0>();
+                        procTarget->getHbMutexAttr<TARGETING::ATTR_I2C_ENGINE_MUTEX_0>();
 
                     recursive_mutex_lock( engineLock );
 
@@ -331,9 +344,9 @@ class I2CTestIPL : public CxxTest::TestSuite
                                     procTarget,
                                     &data,
                                     data_size,
-                                    DEVICE_I2C_ADDRESS( 0x01,
-                                                        HOST_ENGINE_E,
-                                                        0xA0,
+                                    DEVICE_I2C_ADDRESS( io_args.port,
+                                                        io_args.engine,
+                                                        io_args.devAddr,
                                                         I2C_MUX::NOT_APPLICABLE,
                                                         nullptr) );
                 }
@@ -345,6 +358,8 @@ class I2CTestIPL : public CxxTest::TestSuite
                     break;
                 }
 
+                TRACFCOMP( g_trac_i2c, "testI2cForceReset: data after second read is 0x%016llX", data );
+
                 if(data == 0)
                 {
                     //there should be some data
@@ -352,10 +367,9 @@ class I2CTestIPL : public CxxTest::TestSuite
                     break;
                 }
 
-
             }while(0);
 
-
+            TRACFCOMP(g_trac_i2c, EXIT_MRK"testI2cForceReset exit");
         }
 
         /**

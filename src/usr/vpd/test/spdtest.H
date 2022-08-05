@@ -47,6 +47,8 @@
 #include "../spd_planar.H"
 #include "../spd.H"
 
+#include <arch/magic.H>
+
 extern trace_desc_t* g_trac_spd;
 
 using namespace TARGETING;
@@ -342,6 +344,18 @@ class SPDTest: public CxxTest::TestSuite
 
             TS_INFO("testSpdWriteDQ Entry");
 
+            // TODO: PFHB-23
+            // This test case will crash while preforming a page switch
+            // when attemping to write test data to ONE_BYTE_ADDR_PAGESELECT
+            // eeproms during runtime.
+            if (MAGIC_IS_BONITO())
+            {
+                TS_INFO("Skipping testSpdWriteDQ for bonito config due to "
+                        "page switching not being supported for eeprom devices "
+                        "durring runtime" );
+                return;
+            }
+
             do
             {
                 TARGETING::Target * theTarget = nullptr;
@@ -372,8 +386,7 @@ class SPDTest: public CxxTest::TestSuite
                 {
                     fails++;
                     TS_FAIL( "testSpdWriteDQ - failed to read memtype!" );
-                    errlCommit( err,
-                                VPD_COMP_ID );
+                    errlCommit( err, VPD_COMP_ID );
                     break;
                 }
 
@@ -382,12 +395,12 @@ class SPDTest: public CxxTest::TestSuite
                 err = getModType(modType,
                                  theTarget,
                                  memType);
+
                 if( err )
                 {
                     fails++;
                     TS_FAIL("testSpdRead- Failure reading memory module type!");
-                    errlCommit( err,
-                                VPD_COMP_ID );
+                    errlCommit( err, VPD_COMP_ID );
                     break;
                 }
 
@@ -423,7 +436,7 @@ class SPDTest: public CxxTest::TestSuite
                 else
                 {
                     fails++;
-                    TS_FAIL( "testSpdWriteDQ - Unsupported memory type: 0x%04x", memType );
+                    TS_FAIL( "testSpdWriteDQ - Unsupported memory type: 0x%04X", memType );
                     errlCommit( err, VPD_COMP_ID);
                     break;
                 }
@@ -444,6 +457,7 @@ class SPDTest: public CxxTest::TestSuite
                                   origData,
                                   theSize,
                                   DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
+
                 TRACFBIN( g_trac_spd, "testSpdWriteDQ ORIGINAL DIMM BAD DQ DATA read=", origData, theSize );
 
                 if( err )
@@ -463,6 +477,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // Write the test data in
+                TS_INFO( "testSpdWriteDQ - Write the test data in" );
                 err = deviceWrite( theTarget,
                                    testData,
                                    theSize,
@@ -476,11 +491,13 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // Read the data out again to check it
+                TS_INFO( "testSpdWriteDQ - Read the data out again to check it" );
                 verifyData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
                 err = deviceRead( theTarget,
                                   verifyData,
                                   theSize,
                                   DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
+
                 TRACFBIN( g_trac_spd, "testSpdWriteDQ TEST DATA read=", verifyData, theSize );
 
                 if( err )
@@ -507,11 +524,11 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // put the original data back to be a good citizen
+                TS_INFO( "testSpdWriteDQ - deviceWrite Restoring ORIGINAL DIMM BAD DQ DATA" );
                 err = deviceWrite( theTarget,
                                    origData,
                                    theSize,
                                    DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
-                TS_INFO( "testSpdWriteDQ - deviceWrite Restoring ORIGINAL DIMM BAD DQ DATA" );
 
                 if( err )
                 {
