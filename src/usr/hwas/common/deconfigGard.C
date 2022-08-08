@@ -2751,7 +2751,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
         std::vector<uint32_t> errlLogEidList;
         //First apply all Unrecoverable or Fatal gard records and
         //check whether system is bootable, if not bootable
-        //exit from this funtion or try to apply remaining records
+        //exit from this function or try to apply remaining records
         for (GardRecordsCItr_t l_itr = l_gardRecords.begin();
              l_itr != l_gardRecords.end();
              ++l_itr)
@@ -2828,7 +2828,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
             const char* l_tmpstring =
               l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
-            CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Deconfig HUID 0x%08X, %s due to 0x%.8X",
+            CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Deconfig HUID 0x%08X, %s due to 0x%08X",
                     get_huid(l_pTarget),
                     l_tmpstring,
                     l_errlogEid);
@@ -2839,7 +2839,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 
         if (l_pErr)
         {
-            HWAS_ERR("Error occured when applying Unrecoverable Guard records");
+            HWAS_ERR("Error occurred when applying Unrecoverable Guard records");
             break;
         }
 
@@ -2936,13 +2936,13 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 const char* l_tmpstring =
                     l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
-                CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Skip applying %sGARD record for HUID=0x%08X (%s) due to 0x%.8X",
+                CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Skip applying %sGARD record for HUID=0x%08X (%s) due to 0x%08X",
                                   isDeconfigGard(l_gardRecord.iv_errorType) ? "Deconfig " : "",
                                   get_huid(l_pTarget),
                                   l_tmpstring,
                                   l_errlogEid);
 #endif
-                HWAS_INF("Skip applying %sGARD record for HUID=0x%08X (%s) due to 0x%.8X",
+                HWAS_INF("Skip applying %sGARD record for HUID=0x%08X (%s) due to 0x%08X",
                           isDeconfigGard(l_gardRecord.iv_errorType) ? "Deconfig " : "",
                           get_huid(l_pTarget),
                           l_tmpstring,
@@ -3007,7 +3007,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 
         if(l_pErr)
         {
-            HWAS_ERR("Error occured when applying Recoverable Guard records");
+            HWAS_ERR("Error occurred when speculatively applying Recoverable Guard records");
             break;
         }
 
@@ -3172,7 +3172,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
                 const char* l_tmpstring =
                   l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString();
-                CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Deconfig HUID 0x%08X, %s due to 0x%.08X",
+                CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "Deconfig HUID 0x%08X, %s due to 0x%08X",
                     get_huid(l_pTarget),
                     l_tmpstring,
                     l_errlogEid);
@@ -3182,6 +3182,12 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
 
                 l_specDeconfigVector.erase(l_specDeconfigVector.begin());
             } // while
+
+            if (l_pErr)
+            {
+                HWAS_ERR("Error occurred when applying Recoverable Guard records");
+                break;
+            }
         }
 
         if (iv_XAOBusEndpointDeconfigured)
