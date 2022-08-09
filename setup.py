@@ -91,6 +91,7 @@ package_directories = {
 
     "srcparsers.bsrc":  "src/usr/errl/parser/ebmc",
     "srcparsers.be500": "src/usr/diag/prdf/peltool/src",
+    "srcparsers.b2a00": "src/usr/htmgt/plugins/ebmc/src",
 
     # Additional parser packages.
     # These are useful when functions may be needed for both SRC and user data
