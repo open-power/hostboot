@@ -101,7 +101,12 @@ class errludP_occ:
         lines.append("Current Power Mode: "+dataToString(occModeList,str(hex(data[i])[2:]).zfill(2)))
         i += 1
         value,i = memConcat(data, i, i+4)
-        lines.append("Total Time (seconds): "+str(int(value,16)))
+        if i < 120:
+            lines.append("Total Time (seconds): "+str(int(value,16)))
+        elif i < 5400:
+            lines.append("Total Time (minutes): "+'{:.1f}'.format(int(value,16)/60))
+        else:
+            lines.append("Total Time (hours): "+'{:.1f}'.format(int(value,16)/3600))
         nummodes = data[i]
         i += 1
         lines.append("Modes in Log: "+str(nummodes))
