@@ -118,7 +118,7 @@ fapi2::ReturnCode poll_for_message_available(const fapi2::Target<fapi2::TARGET_T
     mss::poll_parameters l_poll_params(DELAY_10NS,
                                        200,
                                        mss::DELAY_1MS,
-                                       200,
+                                       2000,
                                        i_mailbox_poll_count);
 
     // Poll for getting 0 at UctWriteProtShadow.
@@ -126,7 +126,7 @@ fapi2::ReturnCode poll_for_message_available(const fapi2::Target<fapi2::TARGET_T
     {
         fapi2::buffer<uint64_t> l_data = 0xFF;
         FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_UCTSHADOWREGS, l_data));
-        return MESSAGE_AVAILABLE == l_data;
+        return (l_data.getBit<scomt::mp::DWC_DDRPHYA_APBONLY0_UCTSHADOWREGS_UCTWRITEPROTSHADOW>() == MESSAGE_AVAILABLE);
 
     fapi_try_exit:
         FAPI_ERR("mss::poll() hit an error in mss::getScom");
@@ -138,6 +138,7 @@ fapi2::ReturnCode poll_for_message_available(const fapi2::Target<fapi2::TARGET_T
                 fapi2::ODY_GET_MAIL_FAILURE().
                 set_PORT_TARGET(i_target),
                 TARGTIDFORMAT " poll for getting mail timed out during DRAM training", TARGTID);
+    FAPI_INF(TARGTIDFORMAT " received mail message", TARGTID);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -166,6 +167,8 @@ fapi2::ReturnCode read_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
     // Writing 0 to DctWriteProt.
     FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_DCTWRITEPROT, RECEPTION_ACK));
 
+    FAPI_INF(TARGTIDFORMAT " o_mail message: 0x%16x", TARGTID, o_mail);
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -182,7 +185,7 @@ fapi2::ReturnCode acknowledge_mail(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     mss::poll_parameters l_poll_params(DELAY_10NS,
                                        200,
                                        mss::DELAY_1MS,
-                                       200,
+                                       400,
                                        i_mailbox_poll_count);
 
     // Poll for getting 0 at UctWriteProtShadow.
@@ -205,6 +208,8 @@ fapi2::ReturnCode acknowledge_mail(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 
     // Writing 1 here completes the mail reading process.
     FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_DCTWRITEPROT, ACK_MESSAGE));
+
+    FAPI_INF(TARGTIDFORMAT " mail acknowledged", TARGTID);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -245,6 +250,7 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
             FAPI_TRY(process_smbus_message(i_target));
         }
         FAPI_TRY(fapi2::delay(mss::DELAY_1MS, 200));
+        FAPI_INF(TARGTIDFORMAT " got a msg that is neither Stream or SMbus: 0x%16x", TARGTID, l_mail);
         // return true if mail content is either successful completion or failed completion.
         return check_for_completion(l_mail);
     fapi_try_exit:
