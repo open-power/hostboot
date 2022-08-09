@@ -1197,5 +1197,64 @@ typedef struct user_input_dram_config
     uint8_t  DisabledDbyte;    // Byte offset 0x1a, CSR Addr 0x5800d, Direction=In
     // Bitmap to indicate which Dbytes are not connected (for DByte 0 to 7):
     // Set DisabledDbyte[i] to 1 to specify that DByte i does not need to be trained (DByte 8 and 9 can be disabled via EnabledDQs setting, however both must either enabled or disabled)
+    uint8_t  CsPresentChA;     // Byte offset 0x25, CSR Addr 0x58012, Direction=In
+    // Indicates presence of DRAM at each chip select for PHY channel A.
+    uint8_t  CsPresentChB;     // Byte offset 0x25, CSR Addr 0x58012, Direction=In
+    // Indicates presence of DRAM at each chip select for PHY channel B.
+
+    uint8_t  WR_RD_RTT_PARK_A0; // Byte offset 0xfc, CSR Addr 0x5807e, Direction=In
+    // RTT_PARK setting for Write/Read acesses targeting Ch A Rank 0.
+    //   WR_RD_RTT_PARK_A0[3:0]: Write RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 0 is not used); if bit set, corresponding rank is using RTT_PARK during Write to Ch A rank 0; otherwise RTT_NOM_WR is used
+    //   WR_RD_RTT_PARK_A0[7:4]: Read RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 4 is not used): if set, corresponding ranks is using RTT_PARK during Read to Ch A rank 0; otherwise, RTT_NOM_RD is used
+    uint8_t  WR_RD_RTT_PARK_A1; // Byte offset 0xfd, CSR Addr 0x5807e, Direction=In
+    // RTT_PARK setting for Write/Read acesses targeting Ch A Rank 1.
+    //   WR_RD_RTT_PARK_A1[3:0]: Write RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 1 is not used); if bit set, corresponding rank is using RTT_PARK during Write to Ch A rank 1; otherwise RTT_NOM_WR is used
+    //   WR_RD_RTT_PARK_A1[7:4]: Read RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 5 is not used): if set, corresponding ranks is using RTT_PARK during Read to Ch A rank 1; otherwise, RTT_NOM_RD is used
+    uint8_t  WR_RD_RTT_PARK_A2; // Byte offset 0xfe, CSR Addr 0x5807f, Direction=In
+    // RTT_PARK setting for Write/Read acesses targeting Ch A Rank 2.
+    //   WR_RD_RTT_PARK_A2[3:0]: Write RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 2 is not used); if bit set, corresponding rank is using RTT_PARK during Write to Ch A rank 2; otherwise RTT_NOM_WR is used
+    //   WR_RD_RTT_PARK_A2[7:4]: Read RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 6 is not used): if set, corresponding ranks is using RTT_PARK during Read to Ch A rank 2; otherwise, RTT_NOM_RD is used
+    uint8_t  WR_RD_RTT_PARK_A3; // Byte offset 0xff, CSR Addr 0x5807f, Direction=In
+    // RTT_PARK setting for Write/Read acesses targeting Ch A Rank 3.
+    //   WR_RD_RTT_PARK_A3[3:0]: Write RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 3 is not used); if bit set, corresponding rank is using RTT_PARK during Write to Ch A rank 3; otherwise RTT_NOM_WR is used
+    //   WR_RD_RTT_PARK_A3[7:4]: Read RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 7 is not used): if set, corresponding ranks is using RTT_PARK during Read to Ch A rank 3; otherwise, RTT_NOM_RD is used
+    uint8_t  WR_RD_RTT_PARK_B0; // Byte offset 0x1e8, CSR Addr 0x580f4, Direction=In
+    // RTT_PARK setting for Write/Read acesses targeting Ch B Rank 0.
+    //   WR_RD_RTT_PARK_B0[3:0]: Write RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 0 is not used); if bit set, corresponding rank is using RTT_PARK during Write to Ch B rank 0; otherwise RTT_NOM_WR is used
+    //   WR_RD_RTT_PARK_B0[7:4]: Read RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 4 is not used): if set, corresponding ranks is using RTT_PARK during Read to Ch B rank 0; otherwise, RTT_NOM_RD is used
+    uint8_t  WR_RD_RTT_PARK_B1; // Byte offset 0x1e9, CSR Addr 0x580f4, Direction=In
+    // RTT_PARK setting for Write/Read acesses targeting Ch B Rank 1.
+    //   WR_RD_RTT_PARK_B0[3:0]: Write RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 1 is not used); if bit set, corresponding rank is using RTT_PARK during Write to Ch B rank 1; otherwise RTT_NOM_WR is used
+    //   WR_RD_RTT_PARK_B0[7:4]: Read RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 5 is not used): if set, corresponding ranks is using RTT_PARK during Read to Ch B rank 1; otherwise, RTT_NOM_RD is used
+    uint8_t  WR_RD_RTT_PARK_B2; // Byte offset 0x1ea, CSR Addr 0x580f5, Direction=In
+    // RTT_PARK setting for Write/Read acesses targeting Ch B Rank 2.
+    //   WR_RD_RTT_PARK_B0[3:0]: Write RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 2 is not used); if bit set, corresponding rank is using RTT_PARK during Write to Ch B rank 2; otherwise RTT_NOM_WR is used
+    //   WR_RD_RTT_PARK_B0[7:4]: Read RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 6 is not used): if set, corresponding ranks is using RTT_PARK during Read to Ch B rank 2; otherwise, RTT_NOM_RD is used
+    uint8_t  WR_RD_RTT_PARK_B3; // Byte offset 0x1eb, CSR Addr 0x580f5, Direction=In
+    // RTT_PARK setting for Write/Read acesses targeting Ch B Rank 3.
+    //   WR_RD_RTT_PARK_B0[3:0]: Write RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 3 is not used); if bit set, corresponding rank is using RTT_PARK during Write to Ch B rank 3; otherwise RTT_NOM_WR is used
+    //   WR_RD_RTT_PARK_B0[7:4]: Read RTT_PARK bit-map setting for non-target ranks 3 to 0, respectively (bit 7 is not used): if set, corresponding ranks is using RTT_PARK during Read to Ch B rank 3; otherwise, RTT_NOM_RD is used
 } user_input_dram_config_t;
+
+/// A structure to store the sequence function runtime input variables.
+typedef struct runtime_config
+{
+    int Train2D;      ///< train2d input parameter
+    uint8_t initCtrl; ///< Enable skipping certain initializations steps of for debug and simulation speedup.
+    ///< Bit   | Name          | Control Setting
+    ///< ----- | ----          | ---
+    ///<     0 | skip_fw       | When bit is set skip execution of training firmware entirely  including skipping imem and dmem loads.
+    ///<     1 | skip_imem     | When bit is set only skip imem load
+    ///<     2 | skip_dmem     | When bit is set only skip dmem load
+
+
+
+    int skip_train;   ///< skip_train input parameter
+    int debug;        ///< print debug messages
+    int RetEn;        ///< Retention Enable input parameter, instructs phyinit to \n
+    ///< issue register reads during initialization to retention registers.
+    uint32_t pubRev;  ///< Digital hardware PUB revision number.
+    uint32_t enableBits[3]; ///< PIE and ACSM configuration bits.
+} runtime_config_t;
+
 #endif

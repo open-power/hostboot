@@ -58,6 +58,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <lib/shared/ody_consts.H>
 #include <lib/phy/ody_ddrphy_csr_defines.H>
 #include <lib/phy/ody_phy_reset.H>
 #include <lib/phy/ody_ddrphy_phyinit_structs.H>
@@ -369,6 +370,7 @@ int calculate_clk_tick_per_1us(const int i_mem_clock_freq)
 /// @param[in] i_target - the memory port on which to operate
 /// @param[in] i_addr - the Synopsys address on which to operate on
 /// @param[in] i_data - the data to write out to the register
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode dwc_ddrphy_phyinit_userCustom_io_write16(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const uint64_t i_addr,
@@ -402,7 +404,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                                    const user_input_advanced_t& i_user_input_advanced,
                                    const user_input_dram_config_t& i_user_input_dram_config)
 {
-    constexpr uint32_t pubRev = 0x350;
+    constexpr uint32_t pubRev = mss::ody::PUB_REV;
 
     FAPI_DBG ("////##############################################################");
     FAPI_DBG ("////");
@@ -3508,6 +3510,18 @@ fapi2::ReturnCode init_phy_structs( const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
         // TODO:ZEN:MST-1585 Add in UDIMM vs RDIMM switches into the PHY init code
         // Note: default value is 0x00 anyways
         io_user_input_dram_config.RCW00_ChA_D0 = 0x00;
+
+        io_user_input_dram_config.CsPresentChA        = 0x01; // There's a chip select on channel A
+        io_user_input_dram_config.CsPresentChB        = 0x01; // There's a chip select on channel B
+
+        io_user_input_dram_config.WR_RD_RTT_PARK_A0        = 0x00; // RTT_PARK disabled
+        io_user_input_dram_config.WR_RD_RTT_PARK_A1        = 0x00; // RTT_PARK disabled
+        io_user_input_dram_config.WR_RD_RTT_PARK_A2        = 0x00; // RTT_PARK disabled
+        io_user_input_dram_config.WR_RD_RTT_PARK_A3        = 0x00; // RTT_PARK disabled
+        io_user_input_dram_config.WR_RD_RTT_PARK_B0        = 0x00; // RTT_PARK disabled
+        io_user_input_dram_config.WR_RD_RTT_PARK_B1        = 0x00; // RTT_PARK disabled
+        io_user_input_dram_config.WR_RD_RTT_PARK_B2        = 0x00; // RTT_PARK disabled
+        io_user_input_dram_config.WR_RD_RTT_PARK_B3        = 0x00; // RTT_PARK disabled
     }
 
     return fapi2::FAPI2_RC_SUCCESS;

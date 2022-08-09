@@ -7,6 +7,7 @@
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -31,7 +32,7 @@
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -42,6 +43,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 
 #include <generic/memory/mss_git_data_helper.H>
+#include <lib/phy/dwc_ddrphy_phyinit_I_loadPIEImage.H>
 
 extern "C"
 {
@@ -54,6 +56,14 @@ extern "C"
     {
         mss::display_git_commit_info("ody_load_pie");
 
+        for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+        {
+            FAPI_TRY(dwc_ddrphy_phyinit_I_loadPIEImage(l_port));
+        }
+
         return fapi2::FAPI2_RC_SUCCESS;
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 }
