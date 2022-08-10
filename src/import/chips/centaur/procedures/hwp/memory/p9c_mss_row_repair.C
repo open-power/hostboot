@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,7 @@ extern "C"
         constexpr uint32_t WAIT_TIMER = 1500;
         constexpr uint32_t PPR_ENABLE = 5;
         constexpr uint8_t TMOD = 24;
+        constexpr uint8_t ODT_REPEAT = 4;
 
         const std::vector<uint64_t> MR0_SHADOW_REGS =
         {
@@ -199,13 +200,16 @@ extern "C"
         // Issue ACT command with bank and row fail address
         FAPI_TRY(add_activate_to_ccs(i_target_mba, l_addr, l_trcd, l_instruction_number));
 
-        // Issue WR command with (tWR + WL + 10) cycles delay, values are the result of lab experimentation
-        FAPI_TRY(add_write_to_ccs(i_target_mba, l_addr, (l_twr + l_cwl + l_al + l_pl + 10), l_instruction_number));
+        // Issue WR command with no delay (it's handled in the ODT command below)
+        FAPI_TRY(add_write_to_ccs(i_target_mba, l_addr, 0, l_instruction_number));
 
         // Write pattern (back up the instruction count so we hit the write instruction)
         --l_instruction_number;
         FAPI_TRY(mss_ccs_load_data_pattern(i_target_mba, l_instruction_number, l_write_pattern));
         ++l_instruction_number;
+
+        // Issue ODT command (DES with ODTs set) with the write delay (tWR + WL + 10) cycles, values are the result of lab experimentation
+        FAPI_TRY(add_odt_to_ccs(i_target_mba, l_addr, ODT_REPEAT, (l_twr + l_cwl + l_al + l_pl + 10), l_instruction_number));
 
         // Issue precharge all command
         FAPI_TRY(add_precharge_all_to_ccs(i_target_mba, l_addr, l_trcd, l_odt, l_stack_type_u8array, l_instruction_number));

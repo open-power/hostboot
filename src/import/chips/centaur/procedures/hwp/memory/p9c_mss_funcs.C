@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2571,11 +2571,7 @@ fapi2::ReturnCode add_activate_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                                       const uint32_t i_delay,
                                       uint32_t& io_instruction_number)
 {
-    uint8_t l_is_sim = 0;
-    uint8_t l_address_mirror_map[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0}; //address_mirror_map[port][dimm]
     uint8_t l_stack_type_u8array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
-    const uint8_t l_dimm = i_addr.mrank / MAX_RANKS_PER_DIMM;
-    const uint8_t l_dimm_rank = i_addr.mrank - MAX_RANKS_PER_DIMM * l_dimm;
 
     // CCS Array 0 buffers
     fapi2::variable_buffer addr_16(16);
@@ -2603,8 +2599,6 @@ fapi2::ReturnCode add_activate_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA
     fapi2::buffer<uint8_t> l_data_8;
     fapi2::buffer<uint16_t> l_data_16;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_sim));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_ADDRESS_MIRRORING, i_target_mba, l_address_mirror_map));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target_mba, l_dram_type));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target_mba,  l_stack_type_u8array));
 
@@ -2653,10 +2647,6 @@ fapi2::ReturnCode add_activate_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA
     odt_4.flush<0>();
     cal_type_4.flush<0>();
 
-    if ((l_address_mirror_map[l_port][l_dimm] & (0x08 >> l_dimm_rank) ) && (l_is_sim == 0))
-    {
-        FAPI_TRY(mss_address_mirror_swizzle(i_target_mba, addr_16, bank_3));
-    }
 
     FAPI_TRY(mss_ccs_inst_arry_0(i_target_mba,
                                  io_instruction_number,
@@ -2707,8 +2697,6 @@ fapi2::ReturnCode add_write_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                    const uint32_t i_delay,
                                    uint32_t& io_instruction_number)
 {
-    uint8_t l_is_sim = 0;
-    uint8_t l_address_mirror_map[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0}; //address_mirror_map[port][dimm]
     uint8_t l_stack_type_u8array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
     const uint8_t l_dimm = i_addr.mrank / MAX_RANKS_PER_DIMM;
     const uint8_t l_dimm_rank = i_addr.mrank - MAX_RANKS_PER_DIMM * l_dimm;
@@ -2740,8 +2728,6 @@ fapi2::ReturnCode add_write_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
     fapi2::buffer<uint8_t> l_data_8;
     fapi2::buffer<uint16_t> l_data_16;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_sim));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_ADDRESS_MIRRORING, i_target_mba, l_address_mirror_map));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, i_target_mba, l_dram_type));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_ODT_WR, i_target_mba,  l_odt));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target_mba,  l_stack_type_u8array));
@@ -2783,11 +2769,6 @@ fapi2::ReturnCode add_write_to_ccs(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         l_data_16.reverse();
         FAPI_TRY(addr_16.insert((uint16_t)l_data_16));
         FAPI_TRY(addr_16.setBit(12)); // burst length 8
-    }
-
-    if ((l_address_mirror_map[l_port][l_dimm] & (0x08 >> l_dimm_rank) ) && (l_is_sim == 0))
-    {
-        FAPI_TRY(mss_address_mirror_swizzle(i_target_mba, addr_16, bank_3));
     }
 
     FAPI_TRY(mss_ccs_inst_arry_0(i_target_mba,
