@@ -41,6 +41,7 @@
 #include <fapi2.H>
 #include <mss_explorer_attribute_getters.H>
 #include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/shared/exp_consts.H>
@@ -274,33 +275,6 @@ inline fapi2::ReturnCode get_booted_fw_version(const fapi2::Target<fapi2::TARGET
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-///
-/// @brief Check if any dimms exist that have RCD enabled - DIMM specialization
-/// @param[in] i_target - the fapi2::Target we are starting from
-/// @param[out] o_has_rcd - true iff any DIMM with RCD detected
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode has_rcd( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                           bool& o_has_rcd );
-
-///
-/// @brief Check if any dimms exist that have RCD enabled - MEM PORT specialization
-/// @param[in] i_target - the fapi2::Target we are starting from
-/// @param[out] o_has_rcd - true iff any DIMM with RCD detected
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode has_rcd( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                           bool& o_has_rcd );
-
-///
-/// @brief Check if any dimms exist that have RCD enabled - OCMB CHIP specialization
-/// @param[in] i_target - the fapi2::Target we are starting from
-/// @param[out] o_has_rcd - true iff any DIMM with RCD detected
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-///
-fapi2::ReturnCode has_rcd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                           bool& o_has_rcd );
 
 ///
 /// @brief Gets if the given target has a quad encoded CS

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -489,24 +489,6 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_0_location</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_SUPPORTED_RCD</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-          ARRAY[DIMM]
-          Byte 264: Registered Clock Drivers (RCD).
-          DDIMM SPD spec.
-          Module's supported RCD options
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>NO_RCD = 0, RCD_PER_CHANNEL_1 = 1</enum>
-        <writeable/>
-        <array>2</array>
-        <mssUnits>bool</mssUnits>
-        <mssAccessorName>supported_rcd</mssAccessorName>
     </attribute>
 
 </attributes>
