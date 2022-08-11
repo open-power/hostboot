@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -215,7 +215,7 @@ void gpi_print(FILE* stream, void* vgpi, uint32_t dump_flag)
         fprintf(stream, "         'TRUC' indicates PGPE truncated the generated Pstate Table\n\n");
         fprintf(stream, "\t%3s %3s       %9s         %7s          %7s\n", "Psd", "Psh", "Freq(Mhz)", "Ext(mV)", "Eff(mV)");
 
-        for (e = 0; e < highest_pstate; e++)
+        for (e = 0; e <= highest_pstate; e++)
         {
             if (e >= max_table_entries)
             {
@@ -268,7 +268,7 @@ void gpi_print(FILE* stream, void* vgpi, uint32_t dump_flag)
     fprintf(stream, "         'TRUC' indicates PGPE truncated the generated Pstate Table\n\n");
     fprintf(stream, "\t%3s %3s       %9s         %7s          %7s\n", "Psd", "Psh", "Freq(Mhz)", "Ext(mV)", "Eff(mV)");
 
-    for (e = 0; e < highest_pstate; e++)
+    for (e = 0; e <= highest_pstate; e++)
     {
         if (e >= max_table_entries)
         {
