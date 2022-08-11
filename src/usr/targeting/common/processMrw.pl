@@ -563,7 +563,7 @@ sub processTargets
                      ($targetObj->getTargetType($target) eq "lcard-dimm-ddimm4u")) )
             {
                 # The P10 children that get processed are PMIC, OCMB, MEM_PORT,
-                # GENERIC_I2C_DEVICE and MDS_CTLR
+                # and GENERIC_I2C_DEVICE
                 processDdimmAndChildren($targetObj, $target);
             }
             elsif ($type eq "BMC")
@@ -1163,7 +1163,7 @@ sub processProcessorAndChildren
 
 #--------------------------------------------------
 # @brief Process targets of type DIMM and it's children,
-#        like PMIC, GENERIC_I2C_DEVICE, OCMB and MDS_CTLR
+#        like PMIC, GENERIC_I2C_DEVICE, and OCMB
 #
 # @pre SYS, NODE and PROC targets need to be processed beforehand
 #
@@ -1350,7 +1350,6 @@ sub processDdimmAndChildren
     markTargetAsProcessed($targetObj, $target);
 
     ## Process children PMIC, OCMB, Generic I2C Devices (aka ADCs and GPIO Expanders)
-    ## and MDS_CTLR (MDS controllers).
     # Children may differ for different systems.
     # Sanity check flag, to make sure that this code is still valid.
     my $foundPmic = false;
@@ -1381,12 +1380,6 @@ sub processDdimmAndChildren
             # Update TYPE to GENERIC_I2C_DEVICE for all targets
             $targetObj->setAttribute($child, "TYPE", "GENERIC_I2C_DEVICE");
             processGenericI2cDevice($targetObj, $child, $dimmId);
-        }
-        elsif ($childTargetType eq "mds_ctlr")
-        {
-            # Update TYPE to MDS_CTLR for all targets
-            $targetObj->setAttribute($child, "TYPE", "MDS_CTLR");
-            processMdsCtlr($targetObj, $child, $dimmId);
         }
     }
 
