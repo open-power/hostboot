@@ -349,6 +349,60 @@ fapi_try_exit:
 
 } // ddr4
 
+namespace ddr5
+{
+
+///
+/// @brief Generates the DDR5 DDIMM module SPD engine based upon the SPD rev
+/// @param[in] i_target DIMM target
+/// @param[in] i_rev SPD revision
+/// @param[out] o_module_specific_engine shared pointer to the module specific cnfg engine in question
+/// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
+///
+fapi2::ReturnCode ddimm_module_specific_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_rev,
+        std::shared_ptr<mss::spd::module_specific_base>& o_module_specific_engine)
+{
+    // Poor man's fallback technique: if we receive a revision that's later than (or numerically
+    // greater than) the latest supported, we'll decode as if it's the latest supported rev
+    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_MAX) ? mss::spd::rev::DDIMM_MAX : i_rev;
+
+    // Then switch over the SPD revision
+    switch (l_fallback_rev)
+    {
+
+        case mss::spd::rev::V0_0:
+            {
+                o_module_specific_engine = std::make_shared<mss::spd::ddr5::ddimm_0_0>(i_target);
+                return fapi2::FAPI2_RC_SUCCESS;
+                break;
+            }
+
+        default:
+            {
+                // Declarations to avoid FAPI_ASSERT compile fails
+                const uint8_t DRAM_GEN = fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5;
+                const uint8_t DIMM_TYPE = fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM;
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_SPD_REVISION_FOR_MODULE_SPECIFC()
+                            .set_SPD_REVISION(i_rev)
+                            .set_DRAM_GENERATION(DRAM_GEN)
+                            .set_DIMM_TYPE(DIMM_TYPE)
+                            .set_FUNCTION_CODE(SPD_FACTORY)
+                            .set_DIMM_TARGET(i_target),
+                            "Unsupported SPD revision(0x%02x) received in SPD decoder factory for DDR%u %sDIMM for %s",
+                            i_rev, 4, "D", spd::c_str(i_target));
+                break;
+            }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // ddr5
+
 ///
 /// @brief Generates the module specific SPD engines based upon the rev/DRAM generation/DIMM type
 /// @param[in] i_target DIMM target
@@ -396,8 +450,7 @@ fapi2::ReturnCode module_specific_factory(const fapi2::Target<fapi2::TARGET_TYPE
             break;
 
         case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5:
-            o_module_specific_engine = std::make_shared<mss::spd::ddr5::ddimm_0_0>(i_target);
-            return fapi2::FAPI2_RC_SUCCESS;
+            return ddr5::ddimm_module_specific_factory(i_target, i_rev,  o_module_specific_engine);
             break;
 
         default:
