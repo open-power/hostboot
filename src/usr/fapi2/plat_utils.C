@@ -986,6 +986,44 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
             }
         } // else if no elog yet
 
+        // Error log *MUST* be valid at this point, otherwise there is a logic
+        // bug somewhere
+        if(l_pError == nullptr)
+        {
+            FAPI_ERR("rcToErrl: Logic bug! No error log created when "
+                     "translating a FAPI return code into a platform error "
+                     "log with FAPI RC of 0x%08X and creator of 0x%08X.",
+                     l_rcValue,io_rc.getCreator());
+            /*@
+             * @errortype
+             * @moduleid   MOD_FAPI2_RC_TO_ERRL
+             * @reasoncode RC_INVALID_ERROR_LOG
+             * @userdata1  FAPI return code value
+             * @userdata2  Creator of the FAPI return code
+             * @devdesc    Failed to translate a FAPI return code back into a
+             *             platform error log due to a logic bug in the
+             *             firmware.  Creating substitute error log to prevent
+             *             a crash and allow FFDC to be gathered
+             * @custdesc   Firmware logic error detected during boot
+             */
+            l_pError = new ERRORLOG::ErrlEntry(
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                           MOD_FAPI2_RC_TO_ERRL,
+                           RC_INVALID_ERROR_LOG,
+                           l_rcValue,
+                           io_rc.getCreator(),
+                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            // Per defect SW554464, Hostboot can hit this path due to an unknown
+            // SPI EEPROM related error, so add SPI/EEPROM traces in addition
+            // to the general traces below.
+            l_pError->collectTrace(SPI_COMP_NAME, KILOBYTE);
+            l_pError->collectTrace(EEPROM_COMP_NAME, KILOBYTE);
+
+            // Force the severity, otherwise caller severity will take hold
+            i_sev = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+        }
+
         // add the fapi traces to the elog
         l_pError->collectTrace(FAPI_TRACE_NAME, 256 );
         l_pError->collectTrace(FAPI_IMP_TRACE_NAME, 384 );
