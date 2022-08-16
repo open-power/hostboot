@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,6 +145,7 @@ namespace fapi2
         RC_WOF_OVERRIDE_MAGIC_MISMATCH = FAPI2_COMP_ID | 0x47,
         RC_WOF_OVERRIDE_VERSION_MISMATCH = FAPI2_COMP_ID | 0x48,
         RC_WOF_OVERRIDE_TABLE_NOT_FOUND  = FAPI2_COMP_ID | 0x49,
+        RC_INVALID_ERROR_LOG             = FAPI2_COMP_ID | 0x4A,
 
         RC_UNSUPPORTED_OPERATION       = FAPI2_COMP_ID | 0xF0,
 
