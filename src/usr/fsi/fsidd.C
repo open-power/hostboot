@@ -712,36 +712,6 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
     }
     else if( FSI::FFDC_PIB_FAIL == i_ffdc_type )
     {
-        errlHndl_t tmp_err = NULL;
-        FSI::FsiChipInfo_t fsi_info = getFsiInfo( i_target );
-
-        // Grab the FSI GP regs since they have fencing information
-        ERRORLOG::ErrlUserDetailsLogRegister regdata2(i_target);
-        uint64_t dump_regs[] = {
-            0x2848,//2812=GP3
-            0x284C,//2813=GP4
-            0x2850,//2814=GP5
-            0x2854,//2815=GP6
-            0x2858,//2816=GP7
-            0x285C,//2817=GP8
-        };
-        uint32_t databuf = 32;
-        for( size_t x=0; x<(sizeof(dump_regs)/sizeof(dump_regs[0])); x++ )
-        {
-            tmp_err = read( fsi_info.master, dump_regs[x], &databuf );
-            if( tmp_err )
-            {
-                delete tmp_err;
-            }
-            else
-            {
-                TRACDCOMP( g_trac_fsi, "%.8X = %.8X", dump_regs[x], databuf );
-                regdata2.addDataBuffer(&databuf, sizeof(databuf),
-                                       DEVICE_FSI_ADDRESS(dump_regs[x]));
-            }
-        }
-        regdata2.addToLog(io_log);
-
         // Grab the security reg (per Cedric)
         if( i_target != iv_master )
         {
@@ -788,7 +758,6 @@ void FsiDD::getFsiFFDC(FSI::fsiFFDCType_t i_ffdc_type,
             l_scom_data.addData(DEVICE_XSCOM_ADDRESS(opb_base|OPB_REG_RSIS));
         }
         // Other suggestions from Markus Cebulla
-        l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x0005001Cull));//SBE_VITAL
         l_scom_data.addData(DEVICE_XSCOM_ADDRESS(0x00010005ull));//Secure reg
         l_scom_data.addToLog(io_log);
     }
