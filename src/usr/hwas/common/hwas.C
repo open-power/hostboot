@@ -3081,7 +3081,6 @@ void invokePresentByAssoc()
                  omiPred(CLASS_NA, TYPE_OMI),
                  omicPred(CLASS_NA, TYPE_OMIC),
                  ocmbPred(CLASS_CHIP, TYPE_OCMB_CHIP),
-                 pmicPred(CLASS_NA, TYPE_PMIC),
                  memportPred(CLASS_NA, TYPE_MEM_PORT);
     PredicateHwas functionalPred;
     functionalPred.functional(true);
@@ -3215,8 +3214,9 @@ void presentByAssoc(TargetHandleList& i_targets)
                   getParent(relativeParent),
                   getChildren(relativeChildren)
                 {}
-    }
-    static const l_rules[] =
+    };
+
+    std::vector<presentRule> l_rules =
     {
         { TYPE_MC, TYPE_MI,
           DeconfigGard::DECONFIGURED_BY_NO_CHILD_MI,
@@ -3259,22 +3259,13 @@ void presentByAssoc(TargetHandleList& i_targets)
           DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEM_PORT,
           DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP },
 
-        // TODO RTC 261354: remove compile flag and use the symetric rule for PMICs once
-        // HWSV implements the logic to set PMICs as present
-#ifdef __HOSTBOOT_MODULE
-        { TYPE_OCMB_CHIP, TYPE_PMIC,
-          DeconfigGard::DECONFIGURED_BY_NO_CHILD_PMIC,
-          DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP },
-#else
         // Asymmetrical rule; every PMIC has to have an OCMB_CHIP parent,
         // but not every OCMB_CHIP has a PMIC child
         { TYPE_OCMB_CHIP, TYPE_PMIC,
-          DeconfigGard::INVALID_DECONFIGURED_BY_REASON, // Asymmetrical rules can't
-                                                        // deconfigure the parent
-          DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP,
-          NO_CHECK_PARENT }, // asymmetrical
-#endif
-
+           DeconfigGard::INVALID_DECONFIGURED_BY_REASON, // Asymmetrical rules can't
+                                                         // deconfigure the parent
+           DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP,
+           NO_CHECK_PARENT }, // asymmetrical
 
         // Asymmetrical rule; every GENERIC_I2C_DEVICE has to have an OCMB_CHIP parent,
         // but not every OCMB_CHIP has a GENERIC_I2C_DEVICE child, ie on 2U DDIMMs
@@ -3288,6 +3279,20 @@ void presentByAssoc(TargetHandleList& i_targets)
           DeconfigGard::DECONFIGURED_BY_NO_CHILD_DIMM,
           DeconfigGard::DECONFIGURED_BY_NO_PARENT_MEM_PORT },
     };
+
+    // Planar systems will not have PMICs under OCMBs, other systems need to check this
+    if (TARGETING::arePmicsInBlueprint())
+    {
+        // TODO RTC 261354: remove compile flag and use the symetric rule for PMICs once
+        // HWSV implements the logic to set PMICs as present
+#ifdef __HOSTBOOT_MODULE
+        HWAS_DBG("PMIC required child of OCMB_CHIP");
+        // PMIC is a required child of OCMB_CHIP if running on non-planar system
+        l_rules.push_back( {TYPE_OCMB_CHIP, TYPE_PMIC,
+                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_PMIC,
+                        DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP} );
+#endif
+    }
 
     // Keeps a record of targets we have already examined
     std::map<Target*, bool> deconfigured;

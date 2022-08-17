@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __SBE_PSU_SEND_PMIC_CONFIG_TEST_H
-#define __SBE_PSU_SEND_PMIC_CONFIG_TEST_H
+#ifndef __SBE_PSU_SEND_MEM_CONFIG_TEST_H
+#define __SBE_PSU_SEND_MEM_CONFIG_TEST_H
 
 /**
  *  @file sbe_psuSendMemConfigTest.H

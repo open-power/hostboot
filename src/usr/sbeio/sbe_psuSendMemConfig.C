@@ -387,7 +387,9 @@ errlHndl_t psuSendSbeMemConfig(const TargetHandle_t i_pProc)
         l_targets_processed = getMemConfigInfo(i_pProc, CLASS_NA, TYPE_PMIC,
                                         SbePsu::SBE_PMIC_CONFIG_MAX_NUMBER,
                                         reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc));
+
         l_total_targets_processed = l_targets_processed;
+
         TRACFCOMP(g_trac_sbeio, "psuSendSbeMemConfig: POST PMICs: current l_targets_processed=%d",
                       l_targets_processed);
 

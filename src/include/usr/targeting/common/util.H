@@ -152,6 +152,13 @@ uint8_t  is_fused_mode( );
 
 
 /**
+ * @brief Checks if PMIC targets exist in system blueprint
+ *        Note: A machine with planar OCMBs will not have PMICs in the blueprint
+ * @return true if PMICs exist, else false
+ */
+bool arePmicsInBlueprint();
+
+/**
  * @brief Determine if the given dimm target is an NVDIMM
  *
  * @param[in] i_target : dimm target to check

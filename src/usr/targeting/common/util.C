@@ -226,6 +226,37 @@ uint8_t  is_fused_mode( )
 } // end is_fused_mode
 
 
+bool arePmicsInBlueprint()
+{
+    static uint8_t l_pmics_flag = 0x00;
+    constexpr uint8_t BLUEPRINT_CHECKED_BIT = 0x80;
+
+    if ((l_pmics_flag & BLUEPRINT_CHECKED_BIT) != BLUEPRINT_CHECKED_BIT)
+    {
+        // check if system has PMICs
+        TARGETING::TargetHandleList l_pmicList;
+        TARGETING::Target* l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+
+        // Only get PMIC targets
+        const PredicateCTM l_pmicPred(CLASS_NA, TYPE_PMIC);
+
+        TARGETING::targetService().getAssociated( l_pmicList, l_sys,
+            TargetService::CHILD, TargetService::ALL, &l_pmicPred);
+
+        if (l_pmicList.empty())
+        {
+            // No PMICs found
+            l_pmics_flag |= BLUEPRINT_CHECKED_BIT;
+        }
+        else
+        {
+            // Found PMICs (return true)
+            l_pmics_flag |= (BLUEPRINT_CHECKED_BIT | 0x01);
+        }
+    }
+    return (l_pmics_flag & (~BLUEPRINT_CHECKED_BIT));
+}
+
 bool isNVDIMM( const TARGETING::Target * i_target )
 {
     // no nvdimm support in p10

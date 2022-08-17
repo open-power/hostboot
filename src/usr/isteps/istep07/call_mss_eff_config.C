@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -256,32 +256,38 @@ void* call_mss_eff_config (void *io_pArgs)
         //----- mss_check_ddimm_config
         // Verify any DDIMM device (e.g. PMIC, GPIOs, etc) functionality
 
-        for(const auto & l_ocmb_target: l_fapi2_ocmb_targets)
+        // If there are no PMIC, ADC or GPIO Expander Units targets then
+        // skip mss_check_ddimm_config
+        if (TARGETING::arePmicsInBlueprint())
         {
-            TARGETING::Target* l_targOCMB = l_ocmb_target.get();
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "call mss_check_ddimm_config HWP on OCMB %.8X",
-                       TARGETING::get_huid(l_targOCMB));
-
-            FAPI_INVOKE_HWP(l_err, mss_check_ddimm_config, l_ocmb_target);
-            if (l_err)
+            for(const auto & l_ocmb_target: l_fapi2_ocmb_targets)
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR in mss_check_ddimm_config HWP on target 0x%.08X. "
-                          TRACE_ERR_FMT,
-                          get_huid(l_targOCMB),
-                          TRACE_ERR_ARGS(l_err));
+                Target* l_targOCMB = l_ocmb_target.get();
 
-                // Ensure istep error created and has same plid as this error
-                l_err->collectTrace(FAPI2_COMP_NAME);
-                l_StepError.addErrorDetails(l_err);
-                errlCommit(l_err, ISTEP_COMP_ID);
-            }
-            else
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "SUCCESS :  mss_check_ddimm_config HWP on target 0x%.08X",
-                          get_huid(l_targOCMB));
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "call mss_check_ddimm_config HWP on OCMB 0x%08X",
+                           get_huid(l_targOCMB));
+
+                FAPI_INVOKE_HWP(l_err, mss_check_ddimm_config, l_ocmb_target);
+                if (l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "ERROR in mss_check_ddimm_config HWP on target 0x%08X. "
+                              TRACE_ERR_FMT,
+                              get_huid(l_targOCMB),
+                              TRACE_ERR_ARGS(l_err));
+
+                    // Ensure istep error created and has same plid as this error
+                    l_err->collectTrace(FAPI2_COMP_NAME);
+                    l_StepError.addErrorDetails(l_err);
+                    errlCommit(l_err, ISTEP_COMP_ID);
+                }
+                else
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "SUCCESS :  mss_check_ddimm_config HWP on target 0x%08X",
+                              get_huid(l_targOCMB));
+                }
             }
         }
 

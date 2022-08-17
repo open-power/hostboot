@@ -54,6 +54,7 @@
 
 #include <util/random.H>
 
+
 // The defines below are here to modify mostly during
 // code development and debug to easily turn off and on
 // the various tests to isolate any problems that may
@@ -7544,7 +7545,7 @@ public:
 
         // This is done to ensure that the algorithm works on each edge case
 
-        const std::vector<presentByAssocTestPath> l_testCases[] =
+        std::vector<std::vector<presentByAssocTestPath>> l_testCases =
         {
             // Each one of these is a separate test. Each test has only a single
             // functional target, which is expected to be deconfigured by
@@ -7570,26 +7571,34 @@ public:
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
             },
             {
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-            },
-            {
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-            },
-            {
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
             },
             {
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             },
         };
 
+        // Only check for PMIC on NON-Planar configurations
+        if (TARGETING::arePmicsInBlueprint())
+        {
+            l_testCases.push_back( {{ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } }} );
+            l_testCases.push_back( {{ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } }} );
+        }
+
         // Run each testcase
+        uint8_t l_caseCount = 0;
         for (const auto& l_testCase : l_testCases)
         {
+            TS_INFO("testdeconfigPresentByAssoc1: Starting Test case %d", l_caseCount );
             if (!runDeconfigPresentByAssocTest(l_testCase))
             {
-                TS_INFO("testdeconfigPresentByAssoc1: incorrect configuration returned");
+                TS_INFO("testdeconfigPresentByAssoc1: Incorrect configuration returned for Test case %d", l_caseCount );
             }
+            else
+            {
+                TS_INFO("testdeconfigPresentByAssoc1: Correct configuration returned for Test case %d", l_caseCount );
+            }
+            l_caseCount++;
         }
 
         TS_INFO("testdeconfigPresentByAssoc1: Exit");
@@ -7605,7 +7614,7 @@ public:
         // This test the scenario where MC Group 1 does not have any children
         // MC Group 0 is fully populated
 
-        const std::vector<presentByAssocTestPath> l_testCase = {
+        std::vector<presentByAssocTestPath> l_testCase = {
             // MC 1 (has nothing)
             { false, { {TYPE_MC, 1} } },
 
@@ -7616,11 +7625,16 @@ public:
             { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
             { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
             { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-            { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
             { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-            { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
             { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
         };
+
+        if (TARGETING::arePmicsInBlueprint())
+        {
+            // Only check for PMIC on NON-Planar configurations
+            l_testCase.push_back( { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } } );
+            l_testCase.push_back( { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } } );
+        }
 
         if (!runDeconfigPresentByAssocTest(l_testCase))
         {
@@ -7641,7 +7655,7 @@ public:
         // it deconfigures the whole chain up to (but not including) the parent
         // MCC
 
-        const std::vector<presentByAssocTestPath> l_testCase = {
+        std::vector<presentByAssocTestPath> l_testCase = {
             { true, { TYPE_MC } },
             { true, { TYPE_MC, TYPE_MI } },
             { true, { TYPE_MC, TYPE_OMIC } },
@@ -7651,19 +7665,27 @@ public:
             // OMI group 0
             { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
             { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-            { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
             { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-            { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
             { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
 
             // OMI group 1
             { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
             // No OCMB chip here
-            { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
             { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-            { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
             { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
         };
+
+        if (TARGETING::arePmicsInBlueprint())
+        {
+            // Only check for PMIC on NON-Planar configurations
+            // OMI group 0
+            l_testCase.push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCase.push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // No OCMB chip under OMI group 1
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+        }
 
         if (!runDeconfigPresentByAssocTest(l_testCase))
         {
@@ -7683,7 +7705,7 @@ public:
         // This test the scenario where OCMB_CHIP Group 0 has no MEM_PORTs causing
         // MC Group 0 to also be deconfigured.
 
-        const std::vector<presentByAssocTestPath> l_testCases[] =
+        std::vector<std::vector<presentByAssocTestPath>> l_testCases =
         {
             { // baseline functional
                 { true, { TYPE_MC } },
@@ -7692,9 +7714,8 @@ public:
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
+
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             },
             { // missing MEM_PORT causes deconfiguration
@@ -7704,18 +7725,36 @@ public:
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC } },
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
                 // No MEM_PORT here
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
             }
         };
 
+        if (TARGETING::arePmicsInBlueprint())
+        {
+            // Only check for PMIC on NON-Planar configurations
+            // baseline functional
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // Missing MEM_PORT causes deconfiguration
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+        }
+
+        uint8_t l_caseCount = 0;
+
         for (const auto& l_testCase : l_testCases)
         {
+            TS_INFO("testdeconfigPresentByAssoc4: Starting Test case %d", l_caseCount );
             if (!runDeconfigPresentByAssocTest(l_testCase))
             {
-                TS_INFO("testdeconfigPresentByAssoc4: incorrect configuration returned");
+                TS_INFO("testdeconfigPresentByAssoc4: Incorrect configuration returned for Test case %d", l_caseCount );
             }
+            else
+            {
+                TS_INFO("testdeconfigPresentByAssoc4: Correct configuration returned for Test case %d", l_caseCount );
+            }
+            l_caseCount++;
         }
 
         TS_INFO("testdeconfigPresentByAssoc4: Exit");
@@ -7733,8 +7772,7 @@ public:
         // If there is no OCMB_CHIP parent, we make sure everything, including the PMIC,
         // is deconfigured.
         // If there are no PMIC children, we make sure the OCMB_CHIP is deconfigured.
-
-        const std::vector<presentByAssocTestPath> l_testCases[] =
+        std::vector<std::vector<presentByAssocTestPath>> l_testCases =
         {
             { // baseline should be functional
                 { true, { TYPE_MC } },
@@ -7743,41 +7781,52 @@ public:
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             },
-            { // removing the pmic should knockout the ocmb chip, which should knockout everything else
-                { false, { TYPE_MC } },
-                { false, { TYPE_MC, TYPE_MI } },
-                { false, { TYPE_MC, TYPE_OMIC } },
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC } },
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                // { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
-            },
-            { // remove the OCMB_CHIP and everything should go bad, including the PMIC
+
+            { // remove the OCMB_CHIP and everything should go bad, including the PMIC (if it exists)
                 { false, { TYPE_MC } },
                 { false, { TYPE_MC, TYPE_MI } },
                 { false, { TYPE_MC, TYPE_OMIC } },
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC } },
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                 // { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             },
         };
 
+
+        if (TARGETING::arePmicsInBlueprint())
+        {
+            // baseline
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // remove the OCMB_CHIP and everything should go bad, including the PMIC
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // Only valid on system configuration with PMIC
+            l_testCases.push_back(
+                { // removing the pmic should knockout the ocmb chip, which should knockout everything else
+                    { false, { TYPE_MC } },
+                    { false, { TYPE_MC, TYPE_MI } },
+                    { false, { TYPE_MC, TYPE_OMIC } },
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC } },
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
+                    // { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
+                    { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
+                } );
+        }
+
         uint8_t l_caseCount = 0;
         for (const auto& l_testCase : l_testCases)
         {
-
             TS_INFO("testdeconfigPresentByAssoc5: Starting Test case %d", l_caseCount );
             if (!runDeconfigPresentByAssocTest(l_testCase))
             {
@@ -7803,7 +7852,7 @@ public:
         // This tests the scenario where an OCMB_CHIP parent has no TYPE_GENERIC_I2C_DEVICE children,
         // the OCMB_CHIP should not be deconfigured since the presence of TYPE_GENERIC_I2C_DEVICE's
         // depends on if the system is 2U or 4U DDIMM
-        const std::vector<presentByAssocTestPath> l_testCases[] =
+        std::vector<std::vector<presentByAssocTestPath>> l_testCases =
         {
             { // baseline should be functional
                 { true, { TYPE_MC } },
@@ -7812,25 +7861,32 @@ public:
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             },
             { // removing the generic i2c devices shouldn't make anything bad since there is an async rule
-              // for differneces between 2U and 4U DDIMMs
+              // for differences between 2U and 4U DDIMMs
                 { true, { TYPE_MC } },
                 { true, { TYPE_MC, TYPE_MI } },
                 { true, { TYPE_MC, TYPE_OMIC } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
                 // { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             },
         };
+
+        if (TARGETING::arePmicsInBlueprint())
+        {
+            // baseline
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // generic i2c device removed
+            l_testCases[1].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+        }
 
         uint8_t l_caseCount = 0;
         for (const auto& l_testCase : l_testCases)
@@ -7858,8 +7914,7 @@ public:
         TS_INFO("testdeconfigPresentByAssoc7: Started");
 
         // This test the scenario where OMI Group 0 has no DIMMS
-
-        const std::vector<presentByAssocTestPath> l_testCases[] =
+        std::vector<std::vector<presentByAssocTestPath>> l_testCases =
         {
             { // baseline should be all good except for childless OMIC1
                 { true, { TYPE_MC } },
@@ -7871,17 +7926,13 @@ public:
                 // OMI group 0
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
 
                 // OMI group 1
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } }
             },
             { // When we remove the DIMM for OMI 0 then it should be deconfigured
@@ -7894,27 +7945,51 @@ public:
                 // OMI group 0
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
                 { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
-                  // no DIMM here
+                // no DIMM here
 
                 // OMI group 1
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                 { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } }
             }
         };
 
+
+        if (TARGETING::arePmicsInBlueprint())
+        {
+            // baseline
+            // OMI group 0
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+            // OMI group 1
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // When we remove the DIMM for OMI 0 then it should be deconfigured
+            // OMI group 0
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // OMI group 1
+            l_testCases[1].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[1].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+        }
+
+        uint8_t l_caseCount = 0;
         for (const auto& l_testCase : l_testCases)
         {
+            TS_INFO("testdeconfigPresentByAssoc7: Starting Test case %d", l_caseCount );
             if (!runDeconfigPresentByAssocTest(l_testCase))
             {
-                TS_INFO("testdeconfigPresentByAssoc7: incorrect configuration returned");
+                TS_INFO("testdeconfigPresentByAssoc7: incorrect configuration returned for Test case %d", l_caseCount );
             }
+            else
+            {
+                TS_INFO("testdeconfigPresentByAssoc7: Correct configuration returned for Test case %d", l_caseCount );
+            }
+            l_caseCount++;
         }
 
         TS_INFO("testdeconfigPresentByAssoc7: Exit");
@@ -7930,7 +8005,7 @@ public:
         // This test the scenario where each type is missing it's child
         //  and the cascade
 
-        const std::vector<presentByAssocTestPath> l_testCases[] =
+        std::vector<std::vector<presentByAssocTestPath>> l_testCases =
         {
             { // baseline should be all good
                 { true, { TYPE_MC } },
@@ -7943,36 +8018,24 @@ public:
                     // MCC0/OMI0
                     { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                       { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC0/OMI1
                     { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
                       { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                   // MCC1
                   { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
                     // MCC1/OMI0
                     { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
                       { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC1/OMI1
                     { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
                       { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             },
             { // Missing children should bubble up
@@ -7993,26 +8056,62 @@ public:
                     // MCC1/OMI0
                     { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
                       { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC1/OMI1
                     { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
                       { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
             }
         };
 
+        if (TARGETING::arePmicsInBlueprint())
+        {
+            // baseline
+            // MCC0/OMI0
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+
+            // MCC0/OMI1
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+
+            // MCC1/OMI0
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+
+            // MCC1/OMI1
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+
+            // Missing children should bubble up
+            // MCC1/OMI0
+            l_testCases[1].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[1].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } }),
+
+            // MCC1/OMI1
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+        }
+
+        uint8_t l_caseCount = 0;
         for (const auto& l_testCase : l_testCases)
         {
+            TS_INFO("testdeconfigPresentByAssoc8: Starting Test case %d", l_caseCount );
             if (!runDeconfigPresentByAssocTest(l_testCase))
             {
-                TS_INFO("testdeconfigPresentByAssoc8: incorrect configuration returned");
+                TS_INFO("testdeconfigPresentByAssoc8: incorrect configuration returned for Test case %d", l_caseCount );
             }
+            else
+            {
+                TS_INFO("testdeconfigPresentByAssoc8: Correct configuration returned for Test case %d", l_caseCount );
+            }
+            l_caseCount++;
         }
 
         TS_INFO("testdeconfigPresentByAssoc8: Exit");
@@ -8027,8 +8126,7 @@ public:
 
         // This test the scenario where each type is missing it's parent
         //  and the cascade
-
-        const std::vector<presentByAssocTestPath> l_testCases[] =
+        std::vector<std::vector<presentByAssocTestPath>> l_testCases =
         {
             { // baseline should be all good
                 { true, { TYPE_MC } },
@@ -8041,36 +8139,24 @@ public:
                     // MCC0/OMI0
                     { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                       { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC0/OMI1
                     { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
                       { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                   // MCC1
                   { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
                     // MCC1/OMI0
                     { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
                       { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC1/OMI1
                     { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
                       { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             },
             { // Bad parent MC should make all children bad
@@ -8083,36 +8169,24 @@ public:
                     // MCC0/OMI0
                     { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                       { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC0/OMI1
                     { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
                       { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                   // MCC1
                   { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
                     // MCC1/OMI0
                     { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
                       { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC1/OMI1
                     { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
                       { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             },
             { // Bad MI should make all children bad
@@ -8125,36 +8199,24 @@ public:
                     // MCC0/OMI0
                     { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                       { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC0/OMI1
                     { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
                       { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                   // MCC1
                   { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
                     // MCC1/OMI0
                     { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
                       { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC1/OMI1
                     { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
                       { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             },
             { // Bad MCC, OMI makes children bad
@@ -8167,35 +8229,23 @@ public:
                     // MCC0/OMI0
                     { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                       { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC0/OMI1
                     { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
                       { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                   // MCC1
                   { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
                     // MCC1/OMI0
                       { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC1/OMI1
                     { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
                       { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             },
             { // Bad OCMB chip makes children bad
@@ -8209,36 +8259,24 @@ public:
                     // MCC0/OMI0
                     { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                       { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC0/OMI1
                     { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
                       // missing OCMB chip here
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                   // MCC1
                   { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
                     // MCC1/OMI0
                     { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
                       // missing OCMB chip here
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC1/OMI1
                     { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
                       { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             },
             { // Missing OMIC should make child OMIs bad
@@ -8252,46 +8290,171 @@ public:
                     // MCC0/OMI0
                     { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                       { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC0/OMI1
                     { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
                       { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                   // MCC1
                   { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
                     // MCC1/OMI0
                     { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
                       { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC1/OMI1
                     { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
                       { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
             }
         };
 
+
+        if (TARGETING::arePmicsInBlueprint())
+        {
+            // baseline
+            // MCC0/OMI0
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC0/OMI1
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI0
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI1
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[0].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // Bad parent MC should make all children bad
+            // MCC0/OMI0
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC0/OMI1
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI0
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI1
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[1].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // Bad MI should make all children bad
+            // MCC0/OMI0
+            l_testCases[2].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[2].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[2].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC0/OMI1
+            l_testCases[2].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[2].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[2].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI0
+            l_testCases[2].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[2].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[2].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI1
+            l_testCases[2].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[2].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[2].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // Bad MCC, OMI makes children bad
+            // MCC0/OMI0
+            l_testCases[3].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[3].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[3].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC0/OMI1
+            l_testCases[3].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[3].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[3].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI0
+            l_testCases[3].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[3].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[3].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI1
+            l_testCases[3].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[3].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[3].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // Bad OCMB chip makes children bad
+            // MCC0/OMI0
+            l_testCases[4].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[4].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[4].push_back({ true, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC0/OMI1
+            l_testCases[4].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[4].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[4].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI0
+            l_testCases[4].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[4].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[4].push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI1
+            l_testCases[4].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[4].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[4].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // Missing OMIC should make child OMIs bad
+            // MCC0/OMI0
+            l_testCases[5].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[5].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[5].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC0/OMI1
+            l_testCases[5].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[5].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[5].push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI0
+            l_testCases[5].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[5].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[5].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI1
+            l_testCases[5].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCases[5].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCases[5].push_back({ true, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+        }
+
+        uint8_t l_caseCount = 0;
         for (const auto& l_testCase : l_testCases)
         {
+            TS_INFO("testdeconfigPresentByAssoc9: Starting Test case %d", l_caseCount );
             if (!runDeconfigPresentByAssocTest(l_testCase))
             {
-                TS_INFO("testdeconfigPresentByAssoc9: incorrect configuration returned");
+                TS_INFO("testdeconfigPresentByAssoc9: incorrect configuration returned for Test case %d", l_caseCount );
             }
+            else
+            {
+                TS_INFO("testdeconfigPresentByAssoc9: Correct configuration returned for Test case %d", l_caseCount );
+            }
+            l_caseCount++;
         }
 
         TS_INFO("testdeconfigPresentByAssoc9: Exit");
@@ -8306,7 +8469,7 @@ public:
 
         // This test creates the scenario where an OMIC has no PAUC parent.
         // It makes sure the OMIC is deconfigured.
-        const std::vector<presentByAssocTestPath> l_testCase =
+        std::vector<presentByAssocTestPath> l_testCase =
         {
             // A functional MC0 tree. Verify the whole tree will be
             // deconfigured because of the missing PAUC
@@ -8320,38 +8483,49 @@ public:
                     // MCC0/OMI0
                     { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI } },
                       { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC0/OMI1
                     { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1} } },
                       { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, TYPE_MCC ,{TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                   // MCC1
                   { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1} } },
                     // MCC1/OMI0
                     { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI } },
                       { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
                     // MCC1/OMI1
                     { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1} } },
                       { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT } },
-                        { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } },
                         { false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_MEM_PORT, TYPE_DIMM } },
         };
+
+        if (TARGETING::arePmicsInBlueprint())
+        {
+            // MCC0/OMI0
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC0/OMI1
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, TYPE_MCC ,{TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI0
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, TYPE_OMI, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+
+            // MCC1/OMI1
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_PMIC } });
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, {TYPE_PMIC, 1} } });
+            l_testCase.push_back({ false, { TYPE_MC, TYPE_MI, {TYPE_MCC, 1}, {TYPE_OMI, 1}, TYPE_OCMB_CHIP, TYPE_GENERIC_I2C_DEVICE } });
+        }
 
         // Run presentByAssoc test. deconfigPauc=true.
         if (!runDeconfigPresentByAssocTest(l_testCase, true))

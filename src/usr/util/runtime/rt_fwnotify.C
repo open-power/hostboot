@@ -1077,6 +1077,12 @@ void handlePmicHealthCheckCallback(void)
 
     do
     {
+        if (!TARGETING::arePmicsInBlueprint())
+        {
+            // skip responding on non-PMIC system configuration
+            break;
+        }
+
         // Call function to create a PEL with PMIC telemetry data from the SBE.
         // This info PEL will be committed inside the health check function.
         // The error returned indicates a problem with the health check, commit it.

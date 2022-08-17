@@ -771,8 +771,12 @@ namespace RT_SBEIO
                                            sbeApplyAttrOverrides);
             SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_OVERRIDE_VPD,
                                            sbeApplyVpdOverrides);
-            SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_PMIC_HLTH_CHK,
-                                           pmic_health_check_wrapper);
+            // Check if PMIC health check is even available
+            if (TARGETING::arePmicsInBlueprint())
+            {
+                SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_PMIC_HLTH_CHK,
+                                               pmic_health_check_wrapper);
+            }
        }
     };
 
