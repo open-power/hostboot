@@ -538,7 +538,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
-fapi2::ReturnCode change_refresh_enable( const fapi2::Target<T>& i_target, states i_state )
+fapi2::ReturnCode change_refresh_enable( const fapi2::Target<T>& i_target, const states i_state )
 {
     fapi2::buffer<uint64_t> l_data;
 

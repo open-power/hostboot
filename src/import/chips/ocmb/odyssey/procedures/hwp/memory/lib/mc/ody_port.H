@@ -1,13 +1,12 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/ody_load_pie.C $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mc/ody_port.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2022                             */
 /* [+] International Business Machines Corp.                              */
-/* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -26,51 +25,41 @@
 // EKB-Mirror-To: hostboot
 
 ///
-/// @file ody_load_pie.C
-/// @brief Loads the binaries for the PHY Initialization Engine (PIE) to initialize the PHY to mainline mode
+/// @file ody_port.C
+/// @brief Odyssey functions for ports
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
-// *HWP Consumed by: FSP:HB
+// *HWP Consumed by: HB:FSP
+
+#ifndef _MSS_ODY_PORT_H_
+#define _MSS_ODY_PORT_H_
 
 #include <fapi2.H>
-#include <ody_load_pie.H>
 
-#include <generic/memory/lib/utils/c_str.H>
-#include <generic/memory/lib/utils/find.H>
-#include <generic/memory/lib/utils/count_dimm.H>
 
-#include <generic/memory/mss_git_data_helper.H>
-#include <lib/phy/dwc_ddrphy_phyinit_I_loadPIEImage.H>
-
-#include <lib/mc/ody_port.H>
-#include <lib/mc/ody_port_traits.H>
-#include <generic/memory/lib/utils/mc/gen_mss_port.H>
-
-extern "C"
+namespace mss
 {
+namespace ody
+{
+
 ///
-/// @brief Load the PHY Initialization Engine (PIE) to initialize the PHY to mainline mode
-/// @param[in] i_target, the MC of the ports
-/// @return FAPI2_RC_SUCCESS iff ok
+/// @brief Initializes the DFI interface
+/// @param[in] i_target the target to check for DFI interface completion
+/// @return FAPI2_RC_SUCCSS iff ok
 ///
-    fapi2::ReturnCode ody_load_pie( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
-    {
-        mss::display_git_commit_info("ody_load_pie");
+fapi2::ReturnCode poll_for_dfi_init_complete( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target );
 
-        for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
-        {
-            FAPI_TRY(dwc_ddrphy_phyinit_I_loadPIEImage(l_port));
+///
+/// @brief Initializes the DFI interface
+/// @param[in] i_target the target to check for DFI interface completion
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode poll_for_dfi_init_complete( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target );
 
-            // Throws the DRAM into self-time refresh mode
-            FAPI_TRY(mss::change_force_str<mss::mc_type::ODYSSEY>( i_target, mss::states::ON ));
-        }
+} // ns ody
+} // ns mss
 
-        return fapi2::FAPI2_RC_SUCCESS;
-
-    fapi_try_exit:
-        return fapi2::current_err;
-    }
-}
+#endif

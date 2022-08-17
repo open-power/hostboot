@@ -41,6 +41,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 
 #include <lib/mc/ody_port_traits.H>
+#include <lib/mc/ody_port.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
@@ -77,10 +78,15 @@ extern "C"
         // FAPI_TRY( mss::change_iml_complete<mss::mc_type::ODYSSEY>(i_target, mss::HIGH), "%s Failed to set_ipm_complete",
         //           mss::c_str(i_target));
 
-        // Set DFI init start requested from Stephen Powell
+        // Set DFI init start
         FAPI_TRY( mss::change_dfi_init_start<mss::mc_type::ODYSSEY>(i_target, mss::ON ),
                   TARGTIDFORMAT " Failed to change_dfi_init_start",
                   TARGTID );
+
+        // Checks that the DFI init completed successfully
+        FAPI_TRY(mss::ody::poll_for_dfi_init_complete(i_target),
+                 TARGTIDFORMAT " Failed to poll_for_dfi_init_complete",
+                 TARGTID );
 
         // Start the refresh engines by setting MBAREF0Q(0) = 1. Note that the remaining bits in
         // MBAREF0Q should retain their initialization values.

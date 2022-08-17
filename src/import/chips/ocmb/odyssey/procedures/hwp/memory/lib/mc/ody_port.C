@@ -42,11 +42,16 @@
 #include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
+#include <generic/memory/lib/utils/poll.H>
+#include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/pos.H>
 #include <lib/mc/ody_port_traits.H>
+#include <lib/mc/ody_port.H>
 #include <lib/ecc/ecc_traits_odyssey.H>
 #include <lib/mcbist/ody_mcbist_traits.H>
 #include <lib/mcbist/ody_maint_cmds.H>
 #include <mss_generic_attribute_getters.H>
+#include <ody_scom_ody_odc.H>
 
 
 namespace mss
@@ -80,6 +85,7 @@ const std::vector<uint8_t> portTraits< mss::mc_type::ODYSSEY >::SPARE_NIBBLES =
     10,
     11
 };
+
 ///
 /// @brief Configures the write reorder queue bit - Odyssey specialization
 /// @param[in] i_target the target to effect
@@ -125,5 +131,78 @@ fapi2::ReturnCode configure_rrq<mss::mc_type::ODYSSEY>(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+namespace ody
+{
+
+///
+/// @brief Initializes the DFI interface
+/// @param[in] i_target the target to check for DFI interface completion
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode poll_for_dfi_init_complete( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+
+    // For each port...
+    for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        // ... Polls for the DFI init complete
+        FAPI_TRY(poll_for_dfi_init_complete(l_port));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Initializes the DFI interface
+/// @param[in] i_target the target to check for DFI interface completion
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode poll_for_dfi_init_complete( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target )
+{
+    using TT = mss::portTraits< mss::mc_type::ODYSSEY >;
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
+    // Each PHY (aka port target) has its own DFI complete bit
+    // As such, depending upon the port in question, the DFI complete bit is different
+    const uint64_t DFI_COMPLETE_BIT = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
+                                      (i_target) == 0 ?
+                                      TT::DFI_INIT_COMPLETE0 : TT::DFI_INIT_COMPLETE1;
+
+
+    fapi2::buffer<uint64_t> l_data;
+    mss::poll_parameters l_poll_params(DELAY_10NS,
+                                       200,
+                                       mss::DELAY_1MS,
+                                       200,
+                                       200);
+
+    // Poll for getting 1 at the DFI complete bit
+    bool l_poll_return = mss::poll(l_ocmb, l_poll_params, [&l_ocmb, &DFI_COMPLETE_BIT]()->bool
+    {
+        fapi2::buffer<uint64_t> l_data;
+        FAPI_TRY(fapi2::getScom(l_ocmb, TT::FARB6Q_REG, l_data));
+        return l_data.getBit(DFI_COMPLETE_BIT);
+
+    fapi_try_exit:
+        FAPI_ERR("mss::poll() hit an error in mss::getScom");
+        return false;
+    });
+
+    // following FAPI_TRY to preserve the scom failure in lambda.
+    FAPI_TRY(fapi2::current_err);
+    FAPI_ASSERT(l_poll_return,
+                fapi2::ODY_DRAMINIT_DFI_INIT_TIMEOUT().
+                set_PORT_TARGET(i_target),
+                TARGTIDFORMAT " poll for DFI init complete timed out", TARGTID);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // ody
 
 } // mss

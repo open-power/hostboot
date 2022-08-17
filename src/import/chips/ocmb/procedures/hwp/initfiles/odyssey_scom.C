@@ -61,6 +61,7 @@ constexpr uint64_t literal_0x05 = 0x05;
 constexpr uint64_t literal_0x0C = 0x0C;
 constexpr uint64_t literal_0x0D = 0x0D;
 constexpr uint64_t literal_0x0E = 0x0E;
+constexpr uint64_t literal_0x01 = 0x01;
 constexpr uint64_t literal_0x162 = 0x162;
 constexpr uint64_t literal_0x249 = 0x249;
 constexpr uint64_t literal_0x1F = 0x1F;
@@ -210,6 +211,9 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             FAPI_TRY(fapi2::getScom( TGT0, 0x8011015ull, l_scom_buffer ));
 
             l_scom_buffer.insert<43, 5, 59, uint64_t>(literal_0x0A );
+            l_scom_buffer.insert<7, 5, 59, uint64_t>(literal_0x00 );
+            l_scom_buffer.insert<14, 2, 62, uint64_t>(literal_0x01 );
+            l_scom_buffer.insert<12, 2, 62, uint64_t>(literal_0x00 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011015ull, l_scom_buffer));
         }
         {
