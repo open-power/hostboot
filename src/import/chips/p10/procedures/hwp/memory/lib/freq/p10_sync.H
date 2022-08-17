@@ -58,7 +58,6 @@ static const std::vector<uint64_t> P10_OMI_FREQS =
     23460, // fapi2::ENUM_ATTR_FREQ_OMI_MHZ_23460,
     25600, // fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600,
     32000, // fapi2::ENUM_ATTR_FREQ_OMI_MHZ_32000,
-    38400, // fapi2::ENUM_ATTR_FREQ_OMI_MHZ_38400,
 };
 
 ///
