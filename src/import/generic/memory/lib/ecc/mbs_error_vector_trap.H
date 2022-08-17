@@ -105,7 +105,13 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 void set_nce_galois( const fapi2::Target<T>& i_target,
                      fapi2::buffer<uint64_t>& io_data,
-                     const uint64_t i_value);
+                     const uint64_t i_value)
+{
+    io_data.insertFromRight<TT::P0_NCE_GALOIS, TT::P0_NCE_GALOIS_LEN>(i_value);
+
+    FAPI_INF("%s set_nce_galois: 0x%016lx", mss::c_str(i_target), i_value);
+}
+
 ///
 /// @brief get_nce_galois
 /// @tparam MC the memory controller type
@@ -113,12 +119,17 @@ void set_nce_galois( const fapi2::Target<T>& i_target,
 /// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the register value
-/// @param[out] i_value the value of the field
+/// @param[out] o_value the value of the field
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 void get_nce_galois( const fapi2::Target<T>& i_target,
                      const fapi2::buffer<uint64_t>& i_data,
-                     uint64_t& o_value);
+                     uint64_t& o_value)
+{
+    i_data.extractToRight<TT::P0_NCE_GALOIS, TT::P0_NCE_GALOIS_LEN>(o_value);
+
+    FAPI_INF("%s get_nce_galois: 0x%016lx", mss::c_str(i_target), o_value);
+}
 
 ///
 /// @brief set_nce_magnitude
@@ -132,7 +143,12 @@ void get_nce_galois( const fapi2::Target<T>& i_target,
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 void set_nce_magnitude( const fapi2::Target<T>& i_target,
                         fapi2::buffer<uint64_t>& io_data,
-                        const uint64_t i_value);
+                        const uint64_t i_value)
+{
+    io_data.insertFromRight<TT::P0_NCE_MAGNITUDE, TT::P0_NCE_MAGNITUDE_LEN>(i_value);
+
+    FAPI_INF("%s set_nce_magnitude: 0x%016lx", mss::c_str(i_target), i_value);
+}
 
 ///
 /// @brief get_nce_magnitude
@@ -141,12 +157,17 @@ void set_nce_magnitude( const fapi2::Target<T>& i_target,
 /// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the register value
-/// @param[out] i_value the value of the field
+/// @param[out] o_value the value of the field
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 void get_nce_magnitude( const fapi2::Target<T>& i_target,
                         const fapi2::buffer<uint64_t>& i_data,
-                        uint64_t& o_value);
+                        uint64_t& o_value)
+{
+    i_data.extractToRight<TT::P0_NCE_MAGNITUDE, TT::P0_NCE_MAGNITUDE_LEN>(o_value);
+
+    FAPI_INF("%s get_nce_magnitude: 0x%016lx", mss::c_str(i_target), o_value);
+}
 
 ///
 /// @brief set_tce_galois
@@ -160,7 +181,12 @@ void get_nce_magnitude( const fapi2::Target<T>& i_target,
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 void set_tce_galois( const fapi2::Target<T>& i_target,
                      fapi2::buffer<uint64_t>& io_data,
-                     const uint64_t i_value);
+                     const uint64_t i_value)
+{
+    io_data.insertFromRight<TT::P0_TCE_GALOIS, TT::P0_TCE_GALOIS_LEN>(i_value);
+
+    FAPI_INF("%s set_tce_galois: 0x%016lx", mss::c_str(i_target), i_value);
+}
 
 ///
 /// @brief get_tce_galois
@@ -169,12 +195,17 @@ void set_tce_galois( const fapi2::Target<T>& i_target,
 /// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the register value
-/// @param[out] i_value the value of the field
+/// @param[out] o_value the value of the field
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 void get_tce_galois( const fapi2::Target<T>& i_target,
                      const fapi2::buffer<uint64_t>& i_data,
-                     uint64_t& o_value);
+                     uint64_t& o_value)
+{
+    i_data.extractToRight<TT::P0_TCE_GALOIS, TT::P0_TCE_GALOIS_LEN>(o_value);
+
+    FAPI_INF("%s get_tce_galois: 0x%016lx", mss::c_str(i_target), o_value);
+}
 
 ///
 /// @brief set_tce_magnitude
@@ -188,7 +219,12 @@ void get_tce_galois( const fapi2::Target<T>& i_target,
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 void set_tce_magnitude( const fapi2::Target<T>& i_target,
                         fapi2::buffer<uint64_t>& io_data,
-                        const uint64_t i_value);
+                        const uint64_t i_value)
+{
+    io_data.insertFromRight<TT::P0_TCE_MAGNITUDE, TT::P0_TCE_MAGNITUDE_LEN>(i_value);
+
+    FAPI_INF("%s set_tce_magnitude: 0x%016lx", mss::c_str(i_target), i_value);
+}
 
 ///
 /// @brief get_tce_magnitude
@@ -197,12 +233,17 @@ void set_tce_magnitude( const fapi2::Target<T>& i_target,
 /// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_target the fapi2 target of the mc
 /// @param[in] i_data the register value
-/// @param[out] i_value the value of the field
+/// @param[out] o_value the value of the field
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 void get_tce_magnitude( const fapi2::Target<T>& i_target,
                         const fapi2::buffer<uint64_t>& i_data,
-                        uint64_t& o_value);
+                        uint64_t& o_value)
+{
+    i_data.extractToRight<TT::P0_TCE_MAGNITUDE, TT::P0_TCE_MAGNITUDE_LEN>(o_value);
+
+    FAPI_INF("%s get_tce_magnitude: 0x%016lx", mss::c_str(i_target), o_value);
+}
 
 } // close namespace mbs_error_vector_trap
 
