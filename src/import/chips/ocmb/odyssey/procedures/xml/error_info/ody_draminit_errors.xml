@@ -133,4 +133,21 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_ODY_DRAMINIT_DFI_INIT_TIMEOUT</rc>
+    <description>Ody DFI initialization timed out.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>
