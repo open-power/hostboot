@@ -762,7 +762,7 @@ errlHndl_t reloadMvpdEecacheFromNextSource( TARGETING::Target* const i_target,
         io_triggerErrorLog->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
         TRACFCOMP( g_trac_eeprom, ERR_MRK"reloadMvpdEecacheFromNextSource: "
                    "The error log (%08X) that precipitated the reloading of the MVPD EECACHE "
-                   "for target 0x%08X has module Id 0x%.2X and reason code 0x%.4X.",
+                   "for target 0x%08X has module Id 0x%02X and reason code 0x%04X.",
                    io_triggerErrorLog->eid(),
                    TARGETING::get_huid(i_target),
                    io_triggerErrorLog->moduleId(),

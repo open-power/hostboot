@@ -905,7 +905,7 @@ errlHndl_t spdSetSize ( TARGETING::Target &io_target,
         if ( SPD_DDR3_TYPE == i_dimmType )
         {
             io_target.setAttr<TARGETING::ATTR_DIMM_SPD_BYTE_SIZE>(SPD_DDR3_SIZE);
-            TRACSSCOMP( g_trac_spd, "found DIMM w/ HUID 0x%.08X to be type "
+            TRACSSCOMP( g_trac_spd, "found DIMM w/ HUID 0x%08X to be type "
                         "DDR3, set ATTR_DIMM_SPD_BYTE_SIZE to be %d",
                         TARGETING::get_huid(&io_target),
                         io_target.getAttr<TARGETING::ATTR_DIMM_SPD_BYTE_SIZE>() );
@@ -914,7 +914,7 @@ errlHndl_t spdSetSize ( TARGETING::Target &io_target,
         else if ( SPD_DDR4_TYPE == i_dimmType )
         {
             io_target.setAttr<TARGETING::ATTR_DIMM_SPD_BYTE_SIZE>(SPD_DDR4_SIZE);
-            TRACSSCOMP( g_trac_spd, "found DIMM w/ HUID 0x%.08X to be type "
+            TRACSSCOMP( g_trac_spd, "found DIMM w/ HUID 0x%08X to be type "
                         "DDR4, set ATTR_DIMM_SPD_BYTE_SIZE to be %d",
                         TARGETING::get_huid(&io_target),
                         io_target.getAttr<TARGETING::ATTR_DIMM_SPD_BYTE_SIZE>() );
@@ -981,7 +981,7 @@ errlHndl_t spdUpdateEepromRedundancy(TARGETING::Target * i_target, const uint8_t
 
             if (modType == DDIMM)
             {
-                uint8_t ddimmModHeight = 0xFF;
+                uint8_t ddimmModHeight = DDIMM_MOD_HEIGHT_INVALID;
                 err = getDdimmModHeight(ddimmModHeight, i_target);
                 if ( err )
                 {
@@ -992,7 +992,7 @@ errlHndl_t spdUpdateEepromRedundancy(TARGETING::Target * i_target, const uint8_t
                 if (ddimmModHeight == DDIMM_MOD_HEIGHT_4U)
                 {
                     TRACFCOMP( g_trac_spd,
-                        "spdUpdateEepromRedundancy> Found 0x%.08X is an eeprom-redundant DDR4 4U DDIMM",
+                        "spdUpdateEepromRedundancy> Found 0x%08X is an eeprom-redundant DDR4 4U DDIMM",
                         TARGETING::get_huid(i_target) );
                     newEepromRedundancy = TARGETING::EEPROM_VPD_REDUNDANCY_PRESENT;
                 }
@@ -1048,6 +1048,8 @@ errlHndl_t spdUpdateEepromRedundancy(TARGETING::Target * i_target, const uint8_t
             }
             else
             {
+                // This is not expected but OCMB presence is later checked and that should
+                // make the OCMBs match the DDIMMs (it might mean another error log though)
                 TRACFCOMP(g_trac_spd,
                     "spdUpdateEepromRedundancy> Found %d ocmb parent(s) of DIMM target (0x%08X)",
                     l_ocmbs.size(), TARGETING::get_huid(i_target));
@@ -1062,7 +1064,7 @@ errlHndl_t spdUpdateEepromRedundancy(TARGETING::Target * i_target, const uint8_t
 // ------------------------------------------------------------------
 bool spdPresent ( TARGETING::Target * i_target )
 {
-    TRACSSCOMP( g_trac_spd, ENTER_MRK"spdPresent(0x%.08X)", TARGETING::get_huid(i_target) );
+    TRACSSCOMP( g_trac_spd, ENTER_MRK"spdPresent(0x%08X)", TARGETING::get_huid(i_target) );
 
     errlHndl_t err{nullptr};
     uint8_t    memType(MEM_TYPE_INVALID);
@@ -1089,23 +1091,24 @@ bool spdPresent ( TARGETING::Target * i_target )
 
             if ( !isValidDimmType(memType) )
             {
-                TRACFCOMP( g_trac_spd, "spdPresent> Unexpected data 0x%04x found on 0x%08X, checking CRC",
+                TRACFCOMP( g_trac_spd, "spdPresent> Unexpected data 0x%04X found on 0x%08X, checking CRC",
                            memType, TARGETING::get_huid(i_target) );
                 std::vector<crc_section_t> l_sections;
                 errlHndl_t err2 = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_AUTO, EEPROM::HARDWARE, l_sections);
                 if( err2 )
                 {
                     TRACFCOMP( g_trac_spd, "spdPresent> CRC error found, deleting error as it will be checked again later" );
+                    // CRC later checked in platPresenceDetect() when it finds the functional OCMBs
+                    // and then runs the CRC check on those so this error can be deleted
                     delete err2;
                     err2 = nullptr;
-                    // Note that we will check CRC again later so no
-                    // need to commit the log here
 
                     // we saw something so default it to DDR4
                     memType = SPD_DDR4_TYPE;
                 }
 
                 // Try the other EEPROM if possible
+                // If not possible, continue to spdSetSize() which will decide if memType is usable or it will throw an error
                 bool l_switched_to_backup = EEPROM::eepromSwitchToBackup(i_target);
                 if (l_switched_to_backup)
                 {

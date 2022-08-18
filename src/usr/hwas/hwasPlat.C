@@ -583,7 +583,7 @@ errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target)
         if (l_errl != nullptr)
         {
             HWAS_ERR("ocmbIdecPhase1> Error while trying to read "
-                     "ENTIRE SPD from 0x%.08X ",
+                     "ENTIRE SPD from 0x%08X ",
                      TARGETING::get_huid(i_target));
             break;
         }
@@ -605,12 +605,12 @@ errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target)
         if (l_errl != nullptr)
         {
             HWAS_ERR("ocmbIdecPhase1> Error while trying to parse  "
-                     "chip id and ec values from SPD read from OCMB 0x%.08X ",
+                     "chip id and ec values from SPD read from OCMB 0x%08X ",
                      TARGETING::get_huid(i_target));
             break;
         }
 
-        HWAS_INF("ocmbIdecPhase1> Read Chip ID = 0x%x  Chip EC = 0x%x from target 0x%.08X",
+        HWAS_INF("ocmbIdecPhase1> Read Chip ID = 0x%x  Chip EC = 0x%x from target 0x%08X",
                  l_chipId, l_chipEc, TARGETING::get_huid(i_target) );
 
         // set the explorer chip EC attributes.
@@ -682,7 +682,7 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
         }
 
         HWAS_INF("ocmbIdecPhase2> OCMB 0x%08X - read ID/EC successful. "
-                 "ID = 0x%.4X, EC = 0x%.2X, Full IDEC 0x%x",
+                 "ID = 0x%04X, EC = 0x%02X, Full IDEC 0x%x",
                  TARGETING::get_huid(i_target),
                  l_id,
                  l_ec,
@@ -691,13 +691,13 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
         if (l_id != l_chipIdFromSpd)
         {
             HWAS_ERR("ocmbIdecPhase2> OCMB Chip Id and associated SPD Chip Id "
-                     "don't match: OCMB ID=0x%.4X; SPD ID=0x%.4X;",
+                     "don't match: OCMB ID=0x%04X; SPD ID=0x%04X;",
                      l_id,
                      l_chipIdFromSpd);
 
-            HWAS_ERR("ocmbIdecPhase2> Previous CHIP_ID 0x%.4X translated from "
+            HWAS_ERR("ocmbIdecPhase2> Previous CHIP_ID 0x%04X translated from "
                      "SPD read will be overwritten with OCMB IDEC register "
-                     "ID=0x%.4X",
+                     "ID=0x%04X",
                      l_chipIdFromSpd,
                      l_id);
             /*@
@@ -733,13 +733,13 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
         if (l_ec != l_ecFromSpd)
         {
             HWAS_ERR("ocmbIdecPhase2> OCMB Revision and associated SPD "
-                     "Revision don't match: OCMB EC=0x%.2X; "
-                     "SPD EC=0x%.2X; ",
+                     "Revision don't match: OCMB EC=0x%02X; "
+                     "SPD EC=0x%02X; ",
                      l_ec, l_ecFromSpd);
 
-            HWAS_ERR("ocmbIdecPhase2> Previous EC and HDAT_EC attributes 0x%.2X,"
+            HWAS_ERR("ocmbIdecPhase2> Previous EC and HDAT_EC attributes 0x%02X,"
                      " which were set with values found in SPD will be overwritten"
-                     "  with value from OCMB IDEC register ID=0x%.2X",
+                     "  with value from OCMB IDEC register ID=0x%02X",
                      l_ecFromSpd,
                      l_ec);
 

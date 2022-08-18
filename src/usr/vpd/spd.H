@@ -97,6 +97,7 @@ enum
     DDIMM_MOD_HEIGHT_4U        = 0x80,
     DDIMM_MOD_HEIGHT_2U        = 0x20,
     DDIMM_MOD_HEIGHT_1U        = 0x00,
+    DDIMM_MOD_HEIGHT_INVALID   = 0xFF,
 
     DIMM_SPD_SECTION_SIZE = 0x200,  // Size each DIMM SPD section
     DIMM_SPD_MAX_SECTIONS = 512,    // Maximum number of sections

@@ -825,7 +825,7 @@ errlHndl_t eepromGetMasterTarget ( TARGETING::Target * i_target,
                 // Always trace all of the info even if we cannot fit it in error log
                 TRACFCOMP( g_trac_eeprom,
                        ERR_MRK"eepromGetMasterTarget() - "
-                       "i_eepromInfo.%sMasterPath[%d].type = %.02X i_eepromInfo.%sMasterPath[%d].instance =  %.02X",
+                       "i_eepromInfo.%sMasterPath[%d].type = %02X i_eepromInfo.%sMasterPath[%d].instance =  %02X",
                         masterTypeStr, i, masterPath[i].type,
                         masterTypeStr, i, masterPath[i].instance );
 
@@ -886,8 +886,8 @@ errlHndl_t eepromGetMasterTarget ( TARGETING::Target * i_target,
                 // Always trace all of the info even if we cannot fit it in error log
                 TRACFCOMP( g_trac_eeprom,
                        ERR_MRK"eepromGetMasterTarget() - "
-                       "masterPath[%d].type = 0x%.02X, "
-                       "masterPath[%d].instance = 0x%.02X",
+                       "masterPath[%d].type = 0x%02X, "
+                       "masterPath[%d].instance = 0x%02X",
                         i, masterPath[i].type, i, masterPath[i].instance );
 
             }

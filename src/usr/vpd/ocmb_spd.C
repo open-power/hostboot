@@ -392,7 +392,7 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
                      bool* const o_missing_vpd )
 {
     errlHndl_t l_errl = nullptr;
-    TRACDCOMP( g_trac_spd, "Start checkCRC on %.8X", T::get_huid(i_target) );
+    TRACDCOMP( g_trac_spd, "Start checkCRC on %08X", T::get_huid(i_target) );
 
     o_crc_sections.clear();
 
@@ -433,23 +433,23 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
         }
 
         // Pull the CRC from the last 2 bytes, it is stored little-endian
-        TRACDCOMP( g_trac_spd, "crcSPD=%.4X",
+        TRACDCOMP( g_trac_spd, "crcSPD=%04X",
                    ((reinterpret_cast<uint16_t*>(l_spddata))
                    [(l_section.numbytes-2)/2]) );
         l_section.crcSPD = htole16((reinterpret_cast<uint16_t*>(l_spddata))
                                    [(l_section.numbytes-2)/2]);
-        TRACDCOMP( g_trac_spd, "crcSPD=%.4X (swap)", l_section.crcSPD );
+        TRACDCOMP( g_trac_spd, "crcSPD=%04X (swap)", l_section.crcSPD );
         TRACDBIN( g_trac_spd, "SPD Data", l_spddata, l_section.numbytes );
 
         // Compute the CRC from the current data
         l_section.crcActual = jedec_Crc16( l_spddata, l_section.numbytes-2 );
-        TRACDCOMP( g_trac_spd, "crcActual=%.4X", l_section.crcActual );
+        TRACDCOMP( g_trac_spd, "crcActual=%04X", l_section.crcActual );
 
         // Take some actions if there is a miscompare
         if( l_section.crcSPD != l_section.crcActual )
         {
             TRACFCOMP( g_trac_spd,
-                   "CRC Miscompare found on %.8X for range %d, SPD=0x%.4X, Computed=0x%.4X (loc=%d)",
+                   "CRC Miscompare found on %08X for range %d, SPD=0x%04X, Computed=0x%04X (loc=%d)",
                    T::get_huid(i_target), l_section.start,
                    l_section.crcSPD, l_section.crcActual,
                    i_location );
@@ -459,7 +459,7 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
             // Write the new CRC out to the SPD if asked
             if( (FIX == i_mode) || (CHECK_AND_FIX == i_mode) )
             {
-                TRACFCOMP( g_trac_spd, "Fixing CRC on %.8X", T::get_huid(i_target) );
+                TRACFCOMP( g_trac_spd, "Fixing CRC on %08X", T::get_huid(i_target) );
                 l_repairedMiscompare = true;
 
                 // byteswap the data before writing it back
@@ -594,7 +594,7 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
     }
 
 
-    TRACDCOMP( g_trac_spd, "Finish checkCRC on %.8X", T::get_huid(i_target) );
+    TRACDCOMP( g_trac_spd, "Finish checkCRC on %08X", T::get_huid(i_target) );
     return l_errl;
 }
 
@@ -630,7 +630,7 @@ errlHndl_t fixEEPROM( TARGETING::TargetHandle_t i_target )
                                                           EEPROM::CACHE) );
         if( l_errl )
         {
-            TRACFCOMP( g_trac_spd, "Error reading SPD from cache on %.8X", T::get_huid(i_target) );
+            TRACFCOMP( g_trac_spd, "Error reading SPD from cache on %08X", T::get_huid(i_target) );
             break;
         }
 
@@ -655,7 +655,7 @@ errlHndl_t fixEEPROM( TARGETING::TargetHandle_t i_target )
         }
 
         TRACFCOMP( g_trac_spd,
-                   "fixEEPROM> Pushing cached SPD out to EEPROM on %.8X",
+                   "fixEEPROM> Pushing cached SPD out to EEPROM on %08X",
                    T::get_huid(i_target) );
         l_errl = DeviceFW::deviceOp( DeviceFW::WRITE,
                                      i_target,
@@ -666,7 +666,7 @@ errlHndl_t fixEEPROM( TARGETING::TargetHandle_t i_target )
                                      EEPROM::HARDWARE) );
         if( l_errl )
         {
-            TRACFCOMP( g_trac_spd, "Error writing SPD on %.8X", T::get_huid(i_target) );
+            TRACFCOMP( g_trac_spd, "Error writing SPD on %08X", T::get_huid(i_target) );
             break;
         }
 
@@ -721,7 +721,7 @@ errlHndl_t ddimmParkEeprom(TARGETING::TargetHandle_t i_target)
         if( l_errhdl )
         {
             TRACFCOMP(g_trac_spd,
-                      ERR_MRK"ddimmParkEeprom> Failed on %.8X",
+                      ERR_MRK"ddimmParkEeprom> Failed on %08X",
                       TARGETING::get_huid(i_target));
             l_errhdl->collectTrace( "SPD", 1*KILOBYTE );
         }
