@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,6 +108,32 @@ extern "C"
         const size_t i_xscomPairSize,
         const void* i_pxscomInit,
         const p10_sbe_exit_cache_contained_step_t i_steps);
+
+///
+/// @brief Process input target and associated attributes to generate set of
+///        core targets needed for HWP calls
+///
+/// @param[in]  i_target                Reference to processor chip target
+/// @param[out] o_active_core_targets   Set of targets to process which are
+///                                     associated with active cores
+///                                     (running HB code)
+/// @param[out] o_backing_cache_targets Set of targets to process which are
+///                                     associated with backing caches
+/// @param[out] o_master_core_target    Designated HB master core target,
+///                                     should lie in set of active core targets
+/// @param[out] o_master_core_pair_target    Designated HB master core pair
+///                                     target, should lie in set of active core
+///                                     targets
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode
+    p10_sbe_exit_cache_contained_validate_core_inputs(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>>& o_active_core_targets,
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_CORE>>& o_backing_cache_targets,
+        fapi2::Target<fapi2::TARGET_TYPE_CORE>& o_master_core_target,
+        fapi2::Target<fapi2::TARGET_TYPE_CORE>& o_master_core_pair_target);
 
 } // extern "C"
 
