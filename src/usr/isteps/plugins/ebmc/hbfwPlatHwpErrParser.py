@@ -985,6 +985,8 @@ def hbfwErrLookupHwpRc(ver, data):
                         "The system attribute ATTR_FREQ_PAU_MHZ has a zero value. This is fatal to Pstate functionality." ],
             0xb745b5: [ "RC_PSTATE_PB_UT_FREQ_MISMATCH",
                         "The UltraTurbo frequency for this part does not match the others in the system. This indicates the parts from different sorts may be plugged into the machine." ],
+            0xbe57e2: [ "RC_SET_SYS_FREQ_ORIGINAL_CORRUPTION",
+                        "The retaining attributes that hold the original values of the core floor and the core ceiling frequencies are bad. They should have non-zero values." ],
             0x03b31e: [ "RC_MULTINODE_FREQ_MISMATCH",
                         "There is a mismatch in the UltraTurbo frequency values between different nodes" ],
             0xba8ce1: [ "RC_PM_STATIC_POUNDV_EC_MISMATCH",

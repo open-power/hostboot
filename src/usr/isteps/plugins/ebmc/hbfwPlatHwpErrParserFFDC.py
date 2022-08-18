@@ -11218,6 +11218,16 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="COMPAT_FREQ"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xb41edece:
+        d["HwpReturnCode"]="RC_SET_SYS_FREQ_ORIGINAL_CORRUPTION"
+        d["FFDC"]="ORIG_CEILING_FREQ"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe06dbda6:
+        d["HwpReturnCode"]="RC_SET_SYS_FREQ_ORIGINAL_CORRUPTION"
+        d["FFDC"]="ORIG_FLOOR_FREQ"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4ceb5f93:
         d["HwpReturnCode"]="RC_MULTINODE_FREQ_MISMATCH"
         d["FFDC"]="LOCAL_UT_FREQ"

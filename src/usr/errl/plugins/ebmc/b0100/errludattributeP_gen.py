@@ -2404,6 +2404,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0x2d5e154:
+            #simpleType:uint
+            label = "IO_IOHS_XTALK"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xbf1b8d3:
             #simpleType:uint
             label = "IO_IOHS_CHANNEL_LOSS"
@@ -3104,6 +3110,18 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0xcc3d988:
             #simpleType:uint
             label = "FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0x3e38294:
+            #simpleType:uint
+            label = "FREQ_SYSTEM_CORE_FLOOR_MHZ_ORIGINAL"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+4)[0])
+                i += 4
+        elif attrEnum == 0xacca48f:
+            #simpleType:uint
+            label = "FREQ_SYSTEM_CORE_CEILING_MHZ_ORIGINAL"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
