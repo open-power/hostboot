@@ -304,6 +304,10 @@
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0</default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>NODE0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -393,6 +397,10 @@
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_PROC0</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DCM0</default>
     </attribute>
 </targetInstance>
 
@@ -496,6 +504,10 @@
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_PROC1</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DCM0</default>
     </attribute>
 </targetInstance>
 
@@ -13922,6 +13934,10 @@
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB0</default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14004,6 +14020,10 @@
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB1</default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14083,6 +14103,10 @@
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB2</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM2</default>
     </attribute>
 </targetInstance>
 
@@ -14164,6 +14188,10 @@
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB3</default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM3</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14243,6 +14271,10 @@
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB4</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM4</default>
     </attribute>
 </targetInstance>
 
@@ -14324,6 +14356,10 @@
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB5</default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14404,6 +14440,10 @@
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB6</default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM6</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14483,6 +14523,10 @@
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB7</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM7</default>
     </attribute>
 </targetInstance>
 
@@ -14568,6 +14612,10 @@
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB8</default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM8</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14647,6 +14695,10 @@
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB9</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM9</default>
     </attribute>
 </targetInstance>
 
@@ -14728,6 +14780,10 @@
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB10</default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM10</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14807,6 +14863,10 @@
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB11</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM11</default>
     </attribute>
 </targetInstance>
 
@@ -14888,6 +14948,10 @@
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB12</default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM12</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14967,6 +15031,10 @@
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB13</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM13</default>
     </attribute>
 </targetInstance>
 
@@ -15048,6 +15116,10 @@
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB14</default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM14</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -15127,6 +15199,10 @@
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_OCMB15</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM15</default>
     </attribute>
 </targetInstance>
 
@@ -20004,6 +20080,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20075,6 +20155,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20143,6 +20227,10 @@
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM2</default>
     </attribute>
 </targetInstance>
 
@@ -20213,6 +20301,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM3</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20281,6 +20373,10 @@
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM4</default>
     </attribute>
 </targetInstance>
 
@@ -20351,6 +20447,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM5</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20419,6 +20519,10 @@
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM6</default>
     </attribute>
 </targetInstance>
 
@@ -20489,6 +20593,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM7</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20557,6 +20665,10 @@
             <field><id>writeCycleTime</id><value>20</value></field>
             <field><id>writePageSize</id><value>32</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM8</default>
     </attribute>
 </targetInstance>
 
@@ -20627,6 +20739,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM9</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20695,6 +20811,10 @@
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM10</default>
     </attribute>
 </targetInstance>
 
@@ -20765,6 +20885,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM11</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20833,6 +20957,10 @@
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM12</default>
     </attribute>
 </targetInstance>
 
@@ -20903,6 +21031,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM13</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -20972,6 +21104,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM14</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -21040,6 +21176,10 @@
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM15</default>
     </attribute>
 </targetInstance>
 
@@ -23823,7 +23963,7 @@
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
-        <attribute>
+    <attribute>
         <id>EEPROM_VPD_BACKUP_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
@@ -23837,6 +23977,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM16</default>
     </attribute>
 </targetInstance>
 
@@ -24288,6 +24432,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM16</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -24345,7 +24493,7 @@
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
-        <attribute>
+    <attribute>
         <id>EEPROM_VPD_BACKUP_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
@@ -24359,6 +24507,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM17</default>
     </attribute>
 </targetInstance>
 
@@ -24810,6 +24962,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM17</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -24867,7 +25023,7 @@
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
-        <attribute>
+    <attribute>
         <id>EEPROM_VPD_BACKUP_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
@@ -24881,6 +25037,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM18</default>
     </attribute>
 </targetInstance>
 
@@ -25332,6 +25492,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM18</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -25403,6 +25567,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM19</default>
     </attribute>
 </targetInstance>
 
@@ -25854,6 +26022,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM19</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -25925,6 +26097,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM20</default>
     </attribute>
 </targetInstance>
 
@@ -26376,6 +26552,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM20</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -26447,6 +26627,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM21</default>
     </attribute>
 </targetInstance>
 
@@ -26898,6 +27082,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM21</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -26969,6 +27157,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM22</default>
     </attribute>
 </targetInstance>
 
@@ -27420,6 +27612,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM22</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -27491,6 +27687,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM23</default>
     </attribute>
 </targetInstance>
 
@@ -27942,6 +28142,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM23</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -28013,6 +28217,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM24</default>
     </attribute>
 </targetInstance>
 
@@ -28464,6 +28672,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM24</default>
+    </attribute>
 </targetInstance>
 <!-- DDIMM off of proc1 port1  (not connected) -->
 
@@ -28536,6 +28748,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM25</default>
     </attribute>
 </targetInstance>
 
@@ -28719,6 +28935,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM25</default>
+    </attribute>
 </targetInstance>
 
 <!-- DDIMM off of proc1 port4  (not connected) -->
@@ -28792,6 +29012,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM26</default>
     </attribute>
 </targetInstance>
 
@@ -28961,7 +29185,7 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
-        <attribute>
+    <attribute>
         <id>EEPROM_VPD_BACKUP_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
@@ -28974,6 +29198,10 @@
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM26</default>
     </attribute>
 </targetInstance>
 
@@ -29048,6 +29276,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM27</default>
     </attribute>
 </targetInstance>
 
@@ -29231,6 +29463,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM27</default>
+    </attribute>
 </targetInstance>
 
 <!-- DDIMM off of proc1 port6  (not connected) -->
@@ -29290,7 +29526,7 @@
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
     </attribute>
-        <attribute>
+    <attribute>
         <id>EEPROM_VPD_BACKUP_INFO</id>
         <default>
             <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
@@ -29304,6 +29540,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM28</default>
     </attribute>
 </targetInstance>
 
@@ -29487,6 +29727,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM28</default>
+    </attribute>
 </targetInstance>
 
 <!-- DDIMM off of proc1 port7  (not connected) -->
@@ -29560,6 +29804,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM29</default>
     </attribute>
 </targetInstance>
 
@@ -29743,6 +29991,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM29</default>
+    </attribute>
 </targetInstance>
 
 <!-- DDIMM off of proc1 port10  (not connected) -->
@@ -29816,6 +30068,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM30</default>
     </attribute>
 </targetInstance>
 
@@ -29999,6 +30255,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM30</default>
+    </attribute>
 </targetInstance>
 
 <!-- DDIMM off of proc1 port11  (not connected) -->
@@ -30072,6 +30332,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
             <field><id>eepromContentType</id><value>0x4</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM31</default>
     </attribute>
 </targetInstance>
 
@@ -30259,6 +30523,10 @@
         <id>LOCATION_CODE</id>
         <default>S0_N0_DIMM31</default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM31</default>
+    </attribute>
 </targetInstance>
 <!-- ==== DDIMMs off second processor ==================================== -->
 
@@ -30330,6 +30598,10 @@
     <attribute>
       <id>TPM_ENABLED</id>
       <default>1</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>NODE0</default><!-- Soldered on the backplane -->
     </attribute>
 </targetInstance>
 

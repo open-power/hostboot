@@ -329,6 +329,10 @@
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0</default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>NODE0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -418,6 +422,10 @@
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_PROC0</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DCM0</default>
     </attribute>
 </targetInstance>
 
@@ -531,6 +539,10 @@
     <attribute>
         <id>LOCATION_CODE</id>
         <default>S0_N0_PROC1</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DCM0</default>
     </attribute>
 </targetInstance>
 
@@ -13945,8 +13957,11 @@
     <attribute>
         <id>MEM_MRW_IS_PLANAR</id>
         <default>0x1</default>
-   </attribute>
-
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>NODE0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14017,7 +14032,11 @@
     <attribute>
         <id>MEM_MRW_IS_PLANAR</id>
         <default>0x1</default>
-   </attribute>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>NODE0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14086,7 +14105,11 @@
     <attribute>
         <id>MEM_MRW_IS_PLANAR</id>
         <default>0x1</default>
-   </attribute>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>NODE0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14155,7 +14178,11 @@
     <attribute>
         <id>MEM_MRW_IS_PLANAR</id>
         <default>0x1</default>
-   </attribute>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>NODE0</default>
+    </attribute>
 </targetInstance>
 
 <!-- ===================================================================== -->
@@ -14363,6 +14390,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DIMM0</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14420,6 +14451,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DIMM1</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14475,6 +14510,10 @@
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
     </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DIMM2</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14529,6 +14568,10 @@
             <field><id>writeCycleTime</id><value>05</value></field>
             <field><id>writePageSize</id><value>0x20</value></field>
         </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DIMM3</default>
     </attribute>
 </targetInstance>
 
@@ -17321,6 +17364,10 @@
     <attribute>
       <id>TPM_ENABLED</id>
       <default>1</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>TPM0</default><!-- Unique FRU -->
     </attribute>
 </targetInstance>
 
