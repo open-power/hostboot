@@ -117,5 +117,63 @@
     </deconfigure>
   </hwpError>
 
+<!-- PHY Init step I/J errors -->
+
+  <hwpError>
+    <rc>RC_ODY_PHYINIT_PIE_INVALID_DQS_OSC_TIME</rc>
+    <description>Invalid value for i_user_input_advanced.DqsOscRunTimeSel</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>DQS_OSC_TIME</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_PHYINIT_PIE_INVALID_NUM_RANKS</rc>
+    <description>Invalid number of ranks on a given DFI (channel)</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>NUM_RANKS</ffdc>
+    <ffdc>DFI</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_PHYINIT_PIE_SPACE_OVERFILL</rc>
+    <description>PIE instruction space overspilled, Address is not part of PIE instruction space</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>END_ADDRESS</ffdc>
+    <ffdc>PUB_REV</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
 
 </hwpErrors>
