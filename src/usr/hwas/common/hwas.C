@@ -190,13 +190,17 @@ void applyCoreFunctionalOverride(TARGETING::TargetHandle_t i_target)
     // if functionalOverride is set, then the target was deconfigured
     // due to Field Core Override (FCO). Set target 'functional' to
     // re-enable for use or for FCO selection again
+    // Also, clear 'deconfiguredByEid' field, as well, to not confuse
+    // anything looking at that field
     if (hwasState.functionalOverride && hwasState.present)
     {
         hwasState.functional = true;
+        hwasState.deconfiguredByEid = HWAS::DeconfigGard::INVALID_DECONFIGURED_BY_REASON;
     }
     // set to false so that the override is only applied
     // once per time being set
     hwasState.functionalOverride = false;
+
     i_target->setAttr<ATTR_HWAS_STATE>(hwasState);
 
     // always have to update ATTR_PG if the state changes
