@@ -58,7 +58,7 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
 {
 
     // Create the stucture to configure
-    PMU_SMB_DDR5U_1D_t l_msg_block_response;
+    PMU_SMB_DDR5U_1D_t l_msg_block;
 
     fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT_Type l_poll_count;
     FAPI_TRY(mss::attr::get_draminit_training_timeout(i_target , l_poll_count));
@@ -70,7 +70,7 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     // It is being done in ody_load_dmem.C
 
     // 3. Configures and loads the message block onto Synopsys PHY
-    FAPI_TRY(mss::ody::phy::configure_and_load_dram_train_message_block(i_target));
+    FAPI_TRY(mss::ody::phy::configure_and_load_dram_train_message_block(i_target, l_msg_block));
 
     // 4. Initialize mailbox protocol and start training
     FAPI_TRY(mss::ody::phy::init_mailbox_protocol(i_target));
@@ -83,11 +83,11 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     FAPI_TRY(mss::ody::phy::cleanup_training(i_target));
 
     // 7a. Read the data from the message block structure
-    FAPI_TRY(mss::ody::phy::read_msg_block(i_target, l_msg_block_response));
-    mss::ody::phy::display_msg_block(i_target, l_msg_block_response);
+    FAPI_TRY(mss::ody::phy::read_msg_block(i_target, l_msg_block));
+    mss::ody::phy::display_msg_block(i_target, l_msg_block);
 
     // 7b. Load attibutes with the message block contents
-    FAPI_TRY(mss::ody::phy::set_attributes(i_target, l_msg_block_response));
+    FAPI_TRY(mss::ody::phy::set_attributes(i_target, l_msg_block));
 
     // 8. Error handling
     // TODO:ZEN:MST-1568 Add Odyssey draminit error processing

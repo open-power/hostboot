@@ -166,7 +166,6 @@ fapi2::ReturnCode read_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
 
     // Writing 0 to DctWriteProt.
     FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_DCTWRITEPROT, RECEPTION_ACK));
-
     FAPI_INF(TARGTIDFORMAT " o_mail message: 0x%16x", TARGTID, o_mail);
 
 fapi_try_exit:
@@ -208,7 +207,6 @@ fapi2::ReturnCode acknowledge_mail(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 
     // Writing 1 here completes the mail reading process.
     FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_DCTWRITEPROT, ACK_MESSAGE));
-
     FAPI_INF(TARGTIDFORMAT " mail acknowledged", TARGTID);
 
 fapi_try_exit:
@@ -2212,20 +2210,18 @@ fapi_try_exit:
 ///
 /// @brief Configure and load the msg block on to snps phy
 /// @param[in] i_target the target on which to operate
+/// @param[in,out] io_msg_block the message block to configure and load
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
-        i_target)
+        i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
 {
-
-    // Create the stucture to configure
-    PMU_SMB_DDR5U_1D_t l_msg_block_to_cnfg_and_load;
-
     // Configure the message block structure
-    FAPI_TRY(configure_dram_train_message_block(i_target, l_msg_block_to_cnfg_and_load));
+    FAPI_TRY(configure_dram_train_message_block(i_target, io_msg_block));
 
     // Load the message block on to snps phy
-    FAPI_TRY(load_msg_block(i_target, l_msg_block_to_cnfg_and_load))
+    FAPI_TRY(load_msg_block(i_target, io_msg_block))
 
 fapi_try_exit:
     return fapi2::current_err;
