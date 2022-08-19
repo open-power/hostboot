@@ -45,6 +45,9 @@
 #define TARGTIDFORMAT "0x%08X"
 #define TARGTID i_target.get()
 
+#define GENTARGTIDFORMAT "0x%08X"
+#define GENTARGTID(_tgt_) _tgt_.get()
+
 // Macro for printing 64-bit values on PPE - use this instead of %016LX
 // Note that the PPE version of the formatter requires two VARGS in the trace
 #define UINT64FORMAT "0x%08X%08X"
@@ -60,6 +63,9 @@
 // so we'll define it here directly
 #define TARGTIDFORMAT "%s"
 #define TARGTID mss::spd::c_str(i_target)
+
+#define GENTARGTIDFORMAT "%s"
+#define GENTARGTID(_tgt_) mss::spd::c_str(_tgt_)
 
 // Macro for printing 64-bit values on PPE (Cronus mode) - use this instead of %016LX
 #define UINT64FORMAT "0x%016LX"

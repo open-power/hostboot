@@ -105,6 +105,7 @@ namespace POWER_OCID
 
 // Device IDs
 constexpr uint16_t EXPLORER     = 0x0636;
+constexpr uint16_t ODYSSEY      = 0x06C3;
 
 
 // Vendor IDs

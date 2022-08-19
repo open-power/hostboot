@@ -47,6 +47,10 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/fir/gen_mss_fir.H>
+#include <lib/omi/exp_omi_traits.H>
+#include <generic/memory/lib/utils/omi/gen_omi_utils.H>
+
+
 
 ///
 /// @brief Verify we know how to talk to the connected device
@@ -626,7 +630,7 @@ fapi2::ReturnCode omiSetACTagPASIDMetaData(const fapi2::Target<fapi2::TARGET_TYP
     FAPI_TRY(mss::exp::ib::putOCCfg(i_target, EXPLR_OC_O1ACTAG_O1FNID_MSB, l_value));
 
     // Check that acTAG and PASID config is valid
-    FAPI_TRY(mss::check::check_mfir_actag_pasid_cfg(i_target));
+    FAPI_TRY(mss::check::check_mfir_actag_pasid_cfg<mss::mc_type::EXPLORER>(i_target));
 
 fapi_try_exit:
 
@@ -672,8 +676,8 @@ fapi2::ReturnCode exp_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     FAPI_TRY(omiValidateDownstream(i_target));
     FAPI_TRY(omiTLVersionShortBackOff(i_target));
     FAPI_TRY(omiSetMMIOEnableBAR(i_target));
-    FAPI_TRY(mss::exp::omi::setup_obj_handles(i_target));
-    FAPI_TRY(mss::exp::omi::setup_int_cmd_flags(i_target));
+    FAPI_TRY(mss::omi::setup_obj_handles<mss::mc_type::EXPLORER>(i_target));
+    FAPI_TRY(mss::omi::setup_int_cmd_flags<mss::mc_type::EXPLORER>(i_target));
     FAPI_TRY(omiSetACTagPASIDMetaData(i_target));
     FAPI_TRY(omiEnableAFU(i_target));
     FAPI_TRY(mss::unmask::after_mc_omi_init<mss::mc_type::EXPLORER>(i_target));

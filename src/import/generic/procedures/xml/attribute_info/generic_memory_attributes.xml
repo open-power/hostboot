@@ -612,4 +612,57 @@
     <default>0x000009C4</default>
     <mssAccessorName>safemode_dram_databus_util</mssAccessorName>
   </attribute>
+
+   <attribute>
+        <id>ATTR_MSS_OCMB_CHECKSTOP_OBJ_HANDLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            The obj_handle value to send on ocmb checkstop
+        </description>
+        <valueType>uint64</valueType>
+        <default>0x0</default>
+        <platInit/>
+        <mrwHide/>
+        <mssAccessorName>ocmb_checkstop_obj_handle</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_RECOV_OBJ_HANDLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            The obj_handle value to send on ocmb recoverable errors
+        </description>
+        <valueType>uint64</valueType>
+        <default>0x1</default>
+        <platInit/>
+        <mrwHide/>
+        <mssAccessorName>ocmb_recov_obj_handle</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_SPECATTN_OBJ_HANDLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            The obj_handle value to send on ocmb special attention
+        </description>
+        <valueType>uint64</valueType>
+        <default>0x2</default>
+        <platInit/>
+        <mrwHide/>
+        <mssAccessorName>ocmb_specattn_obj_handle</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OCMB_APPINTR_OBJ_HANDLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            The obj_handle value to send on ocmb application interrupt
+        </description>
+        <valueType>uint64</valueType>
+        <default>0x3</default>
+        <platInit/>
+        <mrwHide/>
+        <mssAccessorName>ocmb_appintr_obj_handle</mssAccessorName>
+    </attribute>
+
 </attributes>

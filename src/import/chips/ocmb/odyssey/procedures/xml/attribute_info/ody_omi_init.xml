@@ -1,0 +1,277 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/ocmb/odyssey/procedures/xml/attribute_info/ody_omi_init.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- @file ody_omi_init.xml -->
+<!-- @brief Attribute xml for ody_omi_init -->
+<!-- -->
+<!-- *HWP HWP Owner: Geetha Pisapati <geetha.pisapati@us.ibm.com> -->
+<!-- *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com> -->
+<!-- *HWP FW Owner: Daniel Crowell <dcrowell@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 2 -->
+<!-- *HWP Consumed by: FSP:HB -->
+<!-- EKB-Mirror-To: hostboot -->
+<!-- -->
+<attributes>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_ENABLE_US_TMPL_1</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+         Enable Odyssey upstream transmit template 1.
+         Should be disabled by default.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED = 0x00,
+    ENABLED = 0x01
+  </enum>
+  <default>DISABLED</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_enable_us_tmpl_1</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_ENABLE_US_TMPL_5</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+         Enable Odyssey upstream transmit template 5.
+         Should be enabled by default.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED = 0x00,
+    ENABLED = 0x01
+  </enum>
+  <default>ENABLED</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_enable_us_tmpl_5</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_ENABLE_US_TMPL_9</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+         Enable Odyssey upstream transmit template 9.
+         Should be enabled by default.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED = 0x00,
+    ENABLED = 0x01
+  </enum>
+  <default>ENABLED</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_enable_us_tmpl_9</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_ENABLE_US_TMPL_A</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+         Enable Odyssey upstream transmit template A.
+         Not supported by Axone
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED = 0x00,
+    ENABLED = 0x01
+  </enum>
+  <default>DISABLED</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_enable_us_tmpl_a</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_ENABLE_US_TMPL_B</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+         Enable Odyssey upstream transmit template 11.
+         Should be disabled by default.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED = 0x00,
+    ENABLED = 0x01
+  </enum>
+  <default>DISABLED</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_enable_us_tmpl_b</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_TMPL_0_PACING</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+      Template 0 pacing
+  </description>
+  <valueType>uint8</valueType>
+  <default>0xF</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_tmpl_0_pacing</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_TMPL_1_PACING</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+      Template 1 pacing
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_tmpl_1_pacing</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_TMPL_5_PACING</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+      Template 5 pacing
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_tmpl_5_pacing</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_TMPL_9_PACING</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+      Template 9 pacing
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_tmpl_9_pacing</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_TMPL_B_PACING</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+      Template B pacing
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_tmpl_b_pacing</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_SHRT_BACKOFF_TIMER</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+      Short back-off timer value.
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_shrt_backoff_timer</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_METADATA_ENABLE</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+     Enable OpenCAPI metadata
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x1</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_metadata_enable</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_PASID_BASE</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+     The PASID base
+  </description>
+  <valueType>uint32</valueType>
+  <default>0x0</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_pasid_base</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_ACTAG_BASE</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+     The desired actag base
+  </description>
+  <valueType>uint32</valueType>
+  <default>0x0</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_actag_base</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_AFU_ACTAG_LEN</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+      The expected number of actags to be supported by the ocmb.
+      Must be 1 for Odyssey
+      Validate via OCTRLTAG
+      10518  OCTRLTAG_AFU_ACTAG_LENGTH_SUPPORTED
+  </description>
+  <valueType>uint32</valueType>
+  <default>0x1</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_afu_actag_len</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ODY_PASID_LEN</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+      The expected number of PASIDs to be supported by the ocmb.
+      Number of consecutive PASIDs this AFU supports is 2^pasid_length_supported
+      Validate via OPASID
+      10100  OPASID_MAX_PASID_WIDTH
+  </description>
+  <valueType>uint8</valueType>
+  <default>0x0</default>
+  <platInit/>
+  <mrwHide/>
+  <mssAccessorName>ody_pasid_len</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+</attributes>
