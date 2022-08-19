@@ -29,4 +29,5 @@
 
 PROCEDURE=ody_omi_init
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(MSS_ODY_INCLUDES))
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/memory/lib)
 $(call BUILD_PROCEDURE)
