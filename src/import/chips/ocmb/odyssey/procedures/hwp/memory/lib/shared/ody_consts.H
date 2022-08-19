@@ -97,6 +97,9 @@ enum sizes
     SERIAL_RAW_CARD_LEN = 2,
     SERIAL_SERIAL_NUMBER = 14,
     SERIAL_SERIAL_NUMBER_LEN = 12,
+
+    // Synopsys PUB revision version
+    PUB_REV = 0x350,
 };
 
 #endif
