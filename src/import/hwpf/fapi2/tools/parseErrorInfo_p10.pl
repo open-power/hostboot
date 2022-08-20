@@ -68,6 +68,8 @@ my $mcast_type                = "fapi2::mcast_t";
 my $scom_addr_type            = "uint64_t";
 my $ffdc_count                = 0;
 my $clock_ffdc_type           = "uint8_t";
+my $avsbus_ffdc_type          = "uint8_t";
+my $avsrail_ffdc_type         = "uint8_t";
 
 # There are some names used in the XML files which exist in either
 # c++ keywords (case, for example) or macros (DOMAIN). The one's which
@@ -1096,6 +1098,28 @@ foreach my $argnum ( 0 .. $#ARGV )
                     else
                     {
                         $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_clkPos = 0xff; \\\n";
+                    }
+
+                    # HW Callout - AVS Bus
+                    if ( exists $callout->{hw}->{avsbus} )
+                    {
+                        $eiEntryStr .=
+                            "    l_entries[$eiEntryCount].hw_callout.iv_avsbus = $callout->{hw}->{avsbus}; \\\n";
+                    }
+                    else
+                    {
+                        $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_avsbus = 0xff; \\\n";
+                    }
+
+                    # HW Callout - AVS Rail
+                    if ( exists $callout->{hw}->{avsrail} )
+                    {
+                        $eiEntryStr .=
+                            "    l_entries[$eiEntryCount].hw_callout.iv_avsrail = $callout->{hw}->{avsrail}; \\\n";
+                    }
+                    else
+                    {
+                        $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_avsrail = 0xff; \\\n";
                     }
 
                     $eiEntryCount++;
