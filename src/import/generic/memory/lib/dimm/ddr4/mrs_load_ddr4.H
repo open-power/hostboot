@@ -254,6 +254,11 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
               "Failed to make CCS instruction for MR%d on %s",
               i_data.iv_mrs, mss::c_str(i_target) );
 
+    // Dump out the 'decoded' MRS and trace the CCS instructions.
+    FAPI_TRY(decode_helper(i_data, i_port_rank, l_inst_a_side),
+             "Failed to decode information for MR%d on %s",
+             i_data.iv_mrs, mss::c_str(i_target) );
+
     // Call traits mirroring to determine if necessary
     FAPI_TRY( mss::address_mirror<MC>(i_target, i_port_rank, l_inst_a_side),
               "Failed mirroring MR%d rank %d on %s",
@@ -269,10 +274,6 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
     l_inst_a_side.iv_idles = i_delay_in_cycles;
     l_inst_b_side.iv_idles = i_delay_in_cycles;
 
-    // Dump out the 'decoded' MRS and trace the CCS instructions.
-    FAPI_TRY(decode_helper(i_data, i_port_rank, l_inst_a_side),
-             "Failed to decode information for MR%d on %s",
-             i_data.iv_mrs, mss::c_str(i_target) );
 
     FAPI_INF("MRS%02d (%d) 0x%016llx:0x%016llx %s:rank %d a-side", uint8_t(i_data.iv_mrs), i_delay_in_cycles,
              l_inst_a_side.arr0, l_inst_a_side.arr1, mss::c_str(i_target), i_port_rank);
