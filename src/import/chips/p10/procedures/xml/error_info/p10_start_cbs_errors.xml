@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -59,11 +59,15 @@
       <rc>RC_VDN_PGOOD_NOT_SET</rc>
       <description>Nest power (VDN) Power Good indication not set</description>
       <ffdc>CBS_ENVSTAT_READ</ffdc>
+      <ffdc>AVS_BUS</ffdc>
+      <ffdc>AVS_RAIL</ffdc>
       <callout>
         <!-- Call out the processor VRM -->
         <hw>
           <hwid>SPIVID_SLAVE_PART</hwid>
           <refTarget>MASTER_CHIP</refTarget>
+          <avsbus>AVS_BUS</avsbus>
+          <avsrail>AVS_RAIL</avsrail>
         </hw>
         <priority>HIGH</priority>
       </callout>

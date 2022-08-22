@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -196,12 +196,14 @@ avsInitExtVoltageControl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_ta
 ///@brief Polls OCB status register O2SST for o2s_ongoing=0
 ///@param[i] i_target       Chip target
 ///@param[i] i_avsBusNum    AVSBus Number (0 or 1)
+///@param[i] i_avsRailNum   AVS rail number
 ///@param[i] i_o2sBridgeNum O2S Bridge Number (0 or 1)
 ///@return   FAPI2::SUCCESS
 ///@return FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode
 avsPollVoltageTransDone(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                         const uint8_t i_avsBusNum,
+                        const uint8_t i_avsRailNum,
                         const uint8_t i_o2sBridgeNum);
 
 ///@brief Drives a downstream command to a select bus via a selected bridge
@@ -270,11 +272,13 @@ avsStatusRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 ///@brief Drive an Idle Frame on an AVSBus
 ///@param[i] i_target       Chip target
 ///@param[i] i_avsBusNum    AVSBus Number (0 or 1)
+///@param[i] i_avsRailNum   AVS rail number
 ///@param[i] i_o2sBridgeNum O2S Bridge Number (0 or 1)
 ///@return FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode
 avsIdleFrame(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
              const uint8_t i_avsBusNum,
+             const uint8_t i_avsRailNum,
              const uint8_t i_o2sBridgeNum);
 
 ///@brief Validate the AVSBUS slave response

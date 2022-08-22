@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -378,7 +378,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
         // initialize the AVS slave
         FAPI_DBG("   Sending AVSBus idle frame");
-        FAPI_TRY(avsIdleFrame(i_target, i_bus_num[i_evid_value], BRIDGE_NUMBER));
+        FAPI_TRY(avsIdleFrame(i_target, i_bus_num[i_evid_value], i_rail_select[i_evid_value], BRIDGE_NUMBER));
 
         // Read the present voltage
 
@@ -401,7 +401,7 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
             if (!l_goodResponse)
             {
-                FAPI_TRY(avsIdleFrame(i_target, i_bus_num[i_evid_value], BRIDGE_NUMBER));
+                FAPI_TRY(avsIdleFrame(i_target, i_bus_num[i_evid_value], i_rail_select[i_evid_value], BRIDGE_NUMBER));
             }
 
             l_count++;
@@ -553,7 +553,7 @@ p10_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
 
     // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
     // initialize the AVS slave
-    FAPI_TRY(avsIdleFrame(i_target, i_bus_num, BRIDGE_NUMBER));
+    FAPI_TRY(avsIdleFrame(i_target, i_bus_num, i_rail_select, BRIDGE_NUMBER));
 
     // Compute the delta
     l_delta_mv = (int32_t)l_present_voltage_mv - (int32_t)i_voltage_mv;
@@ -625,7 +625,7 @@ p10_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
 
             if (!l_goodResponse)
             {
-                FAPI_TRY(avsIdleFrame(i_target, i_bus_num, BRIDGE_NUMBER));
+                FAPI_TRY(avsIdleFrame(i_target, i_bus_num, i_rail_select, BRIDGE_NUMBER));
             }
 
             l_count++;

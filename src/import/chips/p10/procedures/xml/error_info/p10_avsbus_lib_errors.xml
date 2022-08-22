@@ -32,16 +32,22 @@
       </description>
       <ffdc>PROC_TARGET</ffdc>
       <ffdc>AVSBUS_NUM</ffdc>
+      <ffdc>AVSRAIL_NUM</ffdc>
       <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
       <ffdc>AVSBUS_MAX_POLL_CNT</ffdc>
       <ffdc>SCOMREG_ADDR</ffdc>
       <ffdc>SCOMREG_DATA</ffdc>
     <callout>
-      <target>SPIVID_SLAVE_PART</target>
+      <hw>
+        <hwid>SPIVID_SLAVE_PART</hwid>
+        <avsbus>AVSBUS_NUM</avsbus>
+        <avsrail>AVSRAIL_NUM</avsrail>
+        <refTarget>PROC_TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>CHIP_TARGET</target>
+      <target>PROC_TARGET</target>
       <priority>MEDIUM</priority>
     </callout>
     <callout>
@@ -150,7 +156,7 @@
       <description>
         AVS command failed failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.
       </description>
-      <ffdc>TARGET</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
       <ffdc>BUS</ffdc>
       <ffdc>BRIDGE</ffdc>
       <ffdc>RAIL</ffdc>

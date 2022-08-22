@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -53,6 +53,8 @@
     <ffdc>VREF_CALIBRATION_ADDRESS</ffdc>
     <ffdc>IS_VDM_ENABLED</ffdc>
     <ffdc>IS_IVRM_ENABLED</ffdc>
+    <ffdc>AVSBUS</ffdc>
+    <ffdc>AVSRAIL</ffdc>
     <callout>
       <target>CHIP</target>
       <priority>HIGH</priority>
@@ -61,7 +63,9 @@
        <!-- Call out the processor VRM -->
        <hw>
          <hwid>SPIVID_SLAVE_PART</hwid>
-          <refTarget>CHIP</refTarget>
+         <refTarget>CHIP</refTarget>
+         <avsbus>AVSBUS</avsbus>
+         <avsrail>AVSRAIL</avsrail>
         </hw>
         <priority>MEDIUM</priority>
    </callout>

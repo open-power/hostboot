@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include "p10_scom_perv_c.H"
 #include "p10_scom_perv_d.H"
 #include "p10_scom_proc_f.H"
+#include "p10_avsbus_lib.H"
 
 enum P10_START_CBS_Private_Constants
 {
@@ -62,6 +63,11 @@ fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     fapi2::ATTR_CP_REFCLOCK_SELECT_Type l_cp_refclck_select;
     uint8_t l_callout_clock = fapi2::ENUM_ATTR_CP_REFCLOCK_SELECT_OSC1;
     int l_timeout = 0;
+    const auto railType = p10avslib::AVS_VDN;
+    uint8_t avsBus = AVSBUS_UNDEF;
+    uint8_t avsRail = AVSRAIL_UNDEF;
+    fapi2::ATTR_AVSBUS_BUSNUM_Type avsBusArr  = {AVSBUS_UNDEF, AVSBUS_UNDEF, AVSBUS_UNDEF, AVSBUS_UNDEF};
+    fapi2::ATTR_AVSBUS_RAIL_Type   avsRailArr = {AVSRAIL_UNDEF, AVSRAIL_UNDEF, AVSRAIL_UNDEF, AVSRAIL_UNDEF};
 
     FAPI_INF("p10_start_cbs: Entering ...");
 
@@ -78,9 +84,16 @@ fapi2::ReturnCode p10_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
                                     l_data32));
     l_read_vdn_pgood_status = l_data32.getBit<perv::FSXCOMP_FSXLOG_CBS_ENVSTAT_CBS_ENVSTAT_C4_VDN_PGOOD>();
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_AVSBUS_BUSNUM, i_target_chip, avsBusArr));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_AVSBUS_RAIL,  i_target_chip, avsRailArr));
+    avsBus = avsBusArr[railType];
+    avsRail = avsRailArr[railType];
+
     FAPI_ASSERT(l_read_vdn_pgood_status,
                 fapi2::VDN_PGOOD_NOT_SET()
                 .set_CBS_ENVSTAT_READ(l_data32)
+                .set_AVS_BUS(avsBus)
+                .set_AVS_RAIL(avsRail)
                 .set_MASTER_CHIP(i_target_chip),
                 "ERROR:VDN_PGOOD OFF, CBS_ENVSTAT BIT 2 NOT SET");
 
