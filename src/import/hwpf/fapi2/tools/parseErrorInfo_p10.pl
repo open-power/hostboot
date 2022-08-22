@@ -1060,7 +1060,8 @@ foreach my $argnum ( 0 .. $#ARGV )
                     if (   ( $callout->{hw}->{hwid} eq "TOD_CLOCK" )
                         || ( $callout->{hw}->{hwid} eq "MEM_REF_CLOCK" )
                         || ( $callout->{hw}->{hwid} eq "PROC_REF_CLOCK" )
-                        || ( $callout->{hw}->{hwid} eq "PCI_REF_CLOCK" ) )
+                        || ( $callout->{hw}->{hwid} eq "PCI_REF_CLOCK" )
+                        || ( $callout->{hw}->{hwid} eq "SPIVID_SLAVE_PART" ) )
                     {
                         if ( !exists $callout->{hw}->{refTarget} )
                         {

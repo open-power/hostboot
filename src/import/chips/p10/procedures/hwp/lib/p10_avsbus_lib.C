@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -230,6 +230,7 @@ fapi2::ReturnCode
 avsPollVoltageTransDone(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint8_t i_avsBusNum,
+    const uint8_t i_avsBusRail,
     const uint8_t i_o2sBridgeNum)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -259,6 +260,7 @@ avsPollVoltageTransDone(
                 fapi2::PROCPM_AVSBUS_POLL_TIMEOUT()
                 .set_PROC_TARGET(i_target)
                 .set_AVSBUS_NUM(i_avsBusNum)
+                .set_AVSRAIL_NUM(i_avsBusRail)
                 .set_AVSBUS_BRIDGE_NUM(i_o2sBridgeNum)
                 .set_AVSBUS_MAX_POLL_CNT(p10avslib::MAX_POLL_COUNT_AVS)
                 .set_SCOMREG_ADDR(p10avslib::OCB_O2SST[i_avsBusNum][i_o2sBridgeNum])
@@ -324,7 +326,7 @@ avsDriveCommand(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                      p10avslib::OCB_O2SWD[i_avsBusNum][i_o2sBridgeNum], l_data64));
 
     // Wait on o2s_ongoing = 0
-    FAPI_TRY(avsPollVoltageTransDone(i_target, i_avsBusNum, i_o2sBridgeNum));
+    FAPI_TRY(avsPollVoltageTransDone(i_target, i_avsBusNum, i_RailSelect, i_o2sBridgeNum));
     // Note:  caller will check for the specific timeout return code.
 
 fapi_try_exit:
@@ -411,6 +413,7 @@ avsVoltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                     .set_PROC_TARGET(i_target)
                     .set_BUS(i_avsBusNum)
                     .set_RAIL(i_RailSelect)
+                    .set_BRIDGE(i_o2sBridgeNum)
                     .set_VOLTAGE(i_Voltage),
                     "A voltage greater than the AVSBUS VRM allowable maximum was to be attempted");
     }
@@ -480,6 +483,7 @@ fapi_try_exit:
 fapi2::ReturnCode
 avsIdleFrame(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
              const uint8_t i_avsBusNum,
+             const uint8_t i_avsRailNum,
              const uint8_t i_o2sBridgeNum)
 {
     fapi2::buffer<uint64_t> l_idleframe = 0xFFFFFFFFFFFFFFFFull;
@@ -500,7 +504,7 @@ avsIdleFrame(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                      l_scomdata));
 
     // Wait on o2s_ongoing = 0
-    FAPI_TRY(avsPollVoltageTransDone(i_target, i_avsBusNum, i_o2sBridgeNum));
+    FAPI_TRY(avsPollVoltageTransDone(i_target, i_avsBusNum, i_avsRailNum, i_o2sBridgeNum));
 
 fapi_try_exit:
 
@@ -611,6 +615,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             .set_PROC_TARGET(i_target)
             .set_BUS(i_avsBusNum)
             .set_BRIDGE(i_o2sBridgeNum)
+            .set_RAIL(i_RailSelect)
             .set_ROOT_CTRL1(l_data64),
             "ERROR: AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
         }
@@ -623,6 +628,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             .set_PROC_TARGET(i_target)
             .set_BUS(i_avsBusNum)
             .set_BRIDGE(i_o2sBridgeNum)
+            .set_RAIL(i_RailSelect)
             .set_ROOT_CTRL1(l_data64),
             "ERROR: AVS command failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.");
         }
@@ -634,7 +640,8 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             fapi2::PM_AVSBUS_MASTER_BAD_CRC_ERROR()
             .set_PROC_TARGET(i_target)
             .set_BUS(i_avsBusNum)
-            .set_BRIDGE(i_o2sBridgeNum),
+            .set_BRIDGE(i_o2sBridgeNum)
+            .set_RAIL(i_RailSelect),
             "ERROR: AVS command failed. Bad CRC detected by P10 on AVSBus Slave Segement.");
         }
         else if(l_rsp_ack_code == 0x02)
@@ -645,7 +652,8 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             fapi2::PM_AVSBUS_SLAVE_BAD_CRC_ERROR()
             .set_PROC_TARGET(i_target)
             .set_BUS(i_avsBusNum)
-            .set_BRIDGE(i_o2sBridgeNum),
+            .set_BRIDGE(i_o2sBridgeNum)
+            .set_RAIL(i_RailSelect),
             "ERROR: AVS command failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
         }
         else if(l_rsp_ack_code == 0x01)
@@ -686,7 +694,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                         .set_COMMAND(l_command)
                         .set_RESP_DATA(l_status_data),
                         "ERROR: AVS Read Status command validation failed.");
-                        FAPI_TRY(avsIdleFrame(i_target, i_avsBusNum, i_o2sBridgeNum));
+                        FAPI_TRY(avsIdleFrame(i_target, i_avsBusNum, i_RailSelect, i_o2sBridgeNum));
                     }
 
                     // Parse the status for the reason.  The actual status is bits 8:12
