@@ -46,6 +46,7 @@
 #include <lib/dimm/exp_rank.H>
 #include <lib/dimm/exp_kind.H>
 #include <lib/ccs/exp_bad_dq_bitmap_funcs.H>
+#include <lib/workarounds/exp_ccs_row_repair_workarounds.H>
 
 #include <generic/memory/lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
@@ -891,6 +892,7 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::EXPLOR
     fapi2::buffer<uint64_t> l_modeq_reg;
     fapi2::buffer<uint64_t> l_mcbist_status;
     fapi2::buffer<uint64_t> l_ccs_status;
+    fapi2::buffer<uint64_t> l_reg_data;
     bool l_poll_result = false;
 
     // Get port rank and target
@@ -957,8 +959,14 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::EXPLOR
     // Configure CCS regs for execution
     FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg ) );
 
+    // Disable zq cal before Concurrent CCS
+    FAPI_TRY( mss::exp::workarounds::disable_zq_cal(l_ocmb_target, l_reg_data));
+
     // Run CCS via MCBIST for Concurrent CCS
     FAPI_TRY( mss::ccs::execute_via_mcbist<mss::mc_type::EXPLORER>(l_ocmb_target, l_program, l_port_target) );
+
+    // Reload reg data for zq cal after Concurrent CCS
+    mss::putScom(l_ocmb_target, EXPLR_SRQ_MBA_FARB9Q, l_reg_data);
 
     // Revert CCS regs after execution
     // NOTE: May require MCBIST restoration for exp_background_scrub
