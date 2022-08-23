@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,8 @@ typedef union sbeMsgReg
 #ifdef _BIG_ENDIAN
         uint32_t sbeBooted : 1; ///< SBE control loop initialized
         uint32_t asyncFFDC : 1; // < async ffdc present on sbe
-        uint32_t reserved1 : 2; ///< Reserved
+        uint64_t iv_s1Supported : 1; // If set implies PPE supports S1 interrupt
+        uint32_t reserved1 : 1; ///< Reserved
         uint32_t prevState : 4; ///< Previous SBE state
         uint32_t currState : 4; ///< Current SBE state
         uint32_t majorStep : 8; ///< Last major istep executed by the SBE
@@ -51,7 +52,8 @@ typedef union sbeMsgReg
         uint32_t majorStep : 8; ///< Last major istep executed by the SBE
         uint32_t currState : 4; ///< Current SBE state
         uint32_t prevState : 4; ///< Previous SBE state
-        uint32_t reserved1 : 2; ///< Reserved
+        uint32_t reserved1 : 1; ///< Reserved
+        uint64_t iv_s1Supported : 1; // If set implies PPE supports S1 interrupt
         uint32_t asyncFFDC : 1; // < async ffdc present on sbe
         uint32_t sbeBooted : 1; ///< SBE control loop initialized
 #endif
@@ -74,9 +76,11 @@ typedef enum sbeState
     SBE_STATE_FAILURE = 0x7, // Internal SBE failure
     SBE_STATE_QUIESCE = 0x8, // This state quiesces any seeprom access
     SBE_STATE_HALT    = 0x9, // SBE halted via chip-op driven from Hostboot.Needs SBE reset to get out
+    SBE_STATE_TPM_EXTEND_MODE_HALT = 0xA, // SBE halted due to an error during TPM Extend mode chip-op
+    SBE_STATE_WAIT_FOR_S1 = 0xB, // SBE is waiting for s1 interrupt to be reset
 
     // Max States, Always keep it at the last of the enum and sequential
-    SBE_MAX_STATE     = 0xA,
+    SBE_MAX_STATE     = 0xC,
     // Don't count this in the state, just to intialize the state variables
     SBE_INVALID_STATE = 0xF,
 } sbeState_t;
