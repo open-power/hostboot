@@ -2352,9 +2352,9 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
                     setOrClearReconfigLoopReason(ReconfigSetOrClear::RECONFIG_CLEAR,
                                                  RECONFIGURE_LOOP_DECONFIGURE);
                 }
-#endif
                 break;
             }
+#endif
         }
 #endif
 
