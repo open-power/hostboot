@@ -265,6 +265,9 @@ uint32_t getSensorNumber(const TARGETING::Target* i_pTarget,
     }
 
 #ifdef CONFIG_PLDM
+    occ_sensor_id_t sensor_id { };
+    sensor_id.target_type = occ_sensor_id_t::target_type_t::TARGET_TYPE_RSVD;
+
     uint8_t sensor_type = occ_sensor_id_t::SENSOR_TYPE_UNKNOWN;
     const TARGETING::TYPE target_type = i_pTarget->getAttr<ATTR_TYPE>();
 
@@ -302,11 +305,16 @@ uint32_t getSensorNumber(const TARGETING::Target* i_pTarget,
         {
             i_pTarget = dimm.front();
         }
+        sensor_id.target_type = occ_sensor_id_t::target_type_t::TARGET_TYPE_OCMB;
     }
     // fall through
 
     case TYPE_DIMM:
         sensor_type = occ_sensor_id_t::SENSOR_TYPE_DIMM;
+        if (sensor_id.target_type == occ_sensor_id_t::target_type_t::TARGET_TYPE_RSVD)
+        {
+            sensor_id.target_type = occ_sensor_id_t::target_type_t::TARGET_TYPE_DIMM;
+        }
         break;
     case TYPE_PROC:
         sensor_type = occ_sensor_id_t::SENSOR_TYPE_PROC;
@@ -335,9 +343,8 @@ uint32_t getSensorNumber(const TARGETING::Target* i_pTarget,
         break;
     }
 
-    occ_sensor_id_t sensor_id { };
+
     sensor_id.sensor_type = sensor_type;
-    sensor_id.reserved = 0;
     sensor_id.entity_id = PLDM::getEntityInstanceNumber(i_pTarget);
 
     sensor_number = sensor_id.encoded;
@@ -389,6 +396,10 @@ TARGETING::Target * getSensorTarget(const uint32_t i_sensorNumber,
     }
     case occ_sensor_id_t::SENSOR_TYPE_DIMM:
         get_parent_type = TARGETING::TYPE_OCMB_CHIP;
+        if (sensor.target_type == occ_sensor_id_t::target_type_t::TARGET_TYPE_DIMM)
+        {
+            get_parent_type = TARGETING::TYPE_INVALID;
+        }
         getClassResources(candidates, CLASS_NA, TARGETING::TYPE_DIMM, UTIL_FILTER_PRESENT);
         break;
     case occ_sensor_id_t::SENSOR_TYPE_NODE:

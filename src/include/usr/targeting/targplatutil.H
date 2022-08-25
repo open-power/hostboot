@@ -65,7 +65,7 @@ union occ_sensor_id_t
     struct
     {
         uint8_t sensor_type;
-        uint8_t reserved;
+        uint8_t target_type;
         uint16_t entity_id;
     } PACKED;
 
@@ -78,6 +78,15 @@ union occ_sensor_id_t
         SENSOR_TYPE_NODE = 0xF0,
         SENSOR_TYPE_UNKNOWN = 0xFF
     };
+
+    enum target_type_t : uint8_t
+    {
+        TARGET_TYPE_RSVD = 0x00,
+        TARGET_TYPE_OCMB = 0x01,
+        TARGET_TYPE_DIMM = 0x02,
+        TARGET_TYPE_UNKNOWN = 0xFF
+    };
+
 } PACKED;
 
 /**
