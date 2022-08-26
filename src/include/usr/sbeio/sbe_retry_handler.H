@@ -348,6 +348,13 @@ class SbeRetryHandler
         static constexpr bool ACCESS_WRITE = true;
         static constexpr bool ACCESS_READ = false;
 
+        /**
+         * @brief  Collect register data for FFDC to add to a log.
+         *
+         * @return void
+         */
+        void addRegisterFFDC( errlHndl_t i_errhdl );
+
         /************************** Class Elements **************************/
 
         /**

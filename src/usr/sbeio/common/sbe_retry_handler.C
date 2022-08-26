@@ -47,6 +47,7 @@
 #include <initservice/istepdispatcherif.H>
 #include <initservice/initsvcreasoncodes.H>
 #include <errl/errludtarget.H>
+#include <errl/errludlogregister.H>
 #include <util/misc.H>
 #include <arch/magic.H>
 #include <sbe/sbe_update.H>
@@ -68,6 +69,7 @@
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <targeting/targplatutil.H>
+#include <initservice/mboxRegs.H>
 
 // FAPI2 Infrastructure
 #include <fapi2.H>
@@ -436,6 +438,7 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
 
                 l_errl->collectTrace("ISTEPS_TRACE", 256);
                 l_errl->collectTrace(SBEIO_COMP_NAME, 256);
+                addRegisterFFDC(l_errl);
 
                 // Set the PLID of the error log to master PLID
                 // if the master PLID is set
@@ -760,6 +763,8 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
 
                     l_errl->collectTrace( "ISTEPS_TRACE", 256);
                     l_errl->collectTrace( SBEIO_COMP_NAME, 256);
+                    addRegisterFFDC(l_errl);
+
                     // Set the PLID of the error log to master PLID
                     // if the master PLID is set
                     updatePlids(l_errl);
@@ -819,6 +824,8 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                                          HWAS::SRCI_PRIORITY_LOW,
                                          HWAS::DELAYED_DECONFIG,
                                          HWAS::GARD_NULL);
+
+                    addRegisterFFDC(l_errl);
 
                     // Set the PLID of the error log to master PLID
                     // if the master PLID is set
@@ -885,6 +892,8 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                                          HWAS::SRCI_PRIORITY_LOW,
                                          HWAS::DELAYED_DECONFIG,
                                          HWAS::GARD_NULL);
+
+                    addRegisterFFDC(l_errl);
 
                     // Set the PLID of the error log to master PLID
                     // if the master PLID is set
@@ -1416,6 +1425,8 @@ void SbeRetryHandler::sbe_get_ffdc_handler()
                             iv_clock_error_handler(l_sbeHwpfErr, iv_proc, l_clock_failure_type);
                         }
 
+                        addRegisterFFDC(l_sbeHwpfErr);
+
                         // Set the PLID of the error log to master PLID
                         // if the master PLID is set
                         updatePlids(l_sbeHwpfErr);
@@ -1437,6 +1448,8 @@ void SbeRetryHandler::sbe_get_ffdc_handler()
 
             l_errl->collectTrace( SBEIO_COMP_NAME, KILOBYTE/4);
             l_errl->collectTrace( "ISTEPS_TRACE", KILOBYTE/4);
+
+            addRegisterFFDC(l_errl);
 
             // Set the PLID of the error log to master PLID
             // if the master PLID is set
@@ -1517,6 +1530,8 @@ void SbeRetryHandler::sbe_run_extract_rc()
 
         // Capture the target data in the elog
         ERRORLOG::ErrlUserDetailsTarget(iv_proc).addToLog( l_errl );
+
+        addRegisterFFDC(l_errl);
 
         // Set the PLID of the error log to master PLID
         // if the master PLID is set
@@ -1968,6 +1983,64 @@ errlHndl_t SbeRetryHandler::accessControlReg( bool i_writeNotRead,
     } while(0);
 
     return l_errl;
+}
+
+/**
+ * @brief  Collect register data for FFDC to add to a log.
+ */
+void SbeRetryHandler::addRegisterFFDC( errlHndl_t i_errhdl )
+{
+    SBE_TRACF("addRegisterFFDC=%.8X",i_errhdl->eid());
+    ErrlUserDetailsLogRegister l_regdata(iv_proc);
+
+#ifdef __HOSTBOOT_RUNTIME
+    const bool l_isRuntime = true;
+#else
+    const bool l_isRuntime = false;
+#endif
+
+    // Add all of the scratch registers
+    // Use CFAM for secondary procs during IPL
+    if(!l_isRuntime && !iv_proc->getAttr<TARGETING::ATTR_PROC_SBE_MASTER_CHIP>())
+    {
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<1>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<2>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<3>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<4>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<5>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<6>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<7>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<8>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<9>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<10>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<11>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<12>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<13>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<14>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<15>::CFAM_ADDR));
+        l_regdata.addData(DEVICE_CFAM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<16>::CFAM_ADDR));
+    }
+    else // otherwise use scoms
+    {
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<1>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<2>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<3>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<4>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<5>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<6>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<7>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<8>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<9>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<10>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<11>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<12>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<13>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<14>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<15>::REG_ADDR));
+        l_regdata.addData(DEVICE_SCOM_ADDRESS(INITSERVICE::SPLESS::MboxScratch_t<16>::REG_ADDR));
+    }
+
+    l_regdata.addToLog(i_errhdl);
 }
 
 } // End of namespace SBEIO
