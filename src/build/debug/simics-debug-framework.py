@@ -865,6 +865,97 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7777:   # MAGIC_CHECK_BONITO_CONFIG
         cpu.r3 = os.getenv('MACHINE').upper() == 'BONITO'
 
+    if arg == 7060:   # MAGIC_SAVE_PEL
+        pel_phys_addr = cpu.r4
+        pel_size = cpu.r5
+        pel_id = cpu.r6
+        # see NODE_OFFSET in memorymap.H
+        per_node = 0x400000000000   #64TB
+        per_chip = 0x40000000000    #4TB
+        hb_hrmor = cpu.hrmor
+        node_num = hb_hrmor//per_node
+        chip_num = hb_hrmor//per_chip
+        pel_max_offset = pel_phys_addr + pel_size
+        mem_object = None
+        #print( ">> hrmor=%X" % hb_hrmor)
+        #print( ">> pel_phys_addr=%X" % pel_phys_addr)
+        #print( ">> pel_size=%X" % pel_size)
+        #print( ">> pel_id=%X" % pel_id)
+        #print( ">> node_num=%d" % node_num)
+        #print( ">> chip_num=%d" % chip_num)
+
+        # Find the entry in the memory map that includes our
+        #  base memory region. Can't assume object is "ram"
+        low_priority = 10
+        mem_map_entries = (conf.system_cmp0.phys_mem).map
+        for entry in mem_map_entries:
+            # 0=base, 1=name, 4=size 5=mirrored target, 6=priority
+            #print ">> %d:%s" % (entry[0], entry[1])
+            #check if base == hrmor, or if memory space encompasses the
+            #entire base memory which is:  hrmor + 0x4000000 (64 MB)
+            if ((entry[0] == hb_hrmor) or
+                ((entry[0] < hb_hrmor) and
+                 (entry[0] + entry[4] >= hb_hrmor + 0x4000000))):
+                obj = entry[1]
+                size = entry[4]
+                target = entry[5]
+                priority = entry[6]
+                # Check if there is a target that needs to be investigated that
+                # points to another object or map
+                if (target != None) and (priority < low_priority):
+                    #print "Continuous trace target = %s" % (target)
+                    smm_map_entries = target.map
+                    for smm_entry in smm_map_entries:
+                        if ((smm_entry[0] == (node_num*per_node)) or
+                            (entry[0] == hb_hrmor)):
+                            mem_object = simics.SIM_object_name(smm_entry[1])
+                            #print "SMM: Found entry %s for hrmor %x" % (mem_object, hb_hrmor)
+                            low_priority = priority
+                            #break
+                    break
+                # If we find an object later in the list that covers the
+                # correct area then use it.
+                else:
+                    if pel_max_offset < size:
+                        mem_object = simics.SIM_object_name(obj)
+                        #print "Found entry %s size=0x%x" % (mem_object, size)
+                        low_priority = priority
+                        #break
+
+        if mem_object == None:
+            print("Could not find entry for hrmor %d" % (hb_hrmor))
+            SIM_break_simulation( "No memory for trace" )
+            return
+
+        # Figure out if we are running out of the cache or mainstore
+        # Add the HRMOR if we're running from memory
+        if 'cache' not in mem_object and 'l3' not in mem_object:
+            #print "Did not find cache"
+            pel_phys_addr = (pel_phys_addr +
+                                   hb_hrmor -
+                                    (per_node*node_num))
+
+        # Save the PEL buffer to a file named pel.<pelid>.bin in current dir
+        pel_filename = "pel.%X.bin"%(pel_id)
+        cmd1 = "(%s)->image.save %s 0x%x %d -overwrite"%(
+                    mem_object,\
+                    pel_filename,\
+                    pel_phys_addr,\
+                    pel_size)
+        print( "cmd1=%s\n"%(cmd1))
+
+        try:
+            if (simenv.fileSystemOk == 1):
+                SIM_run_alone(run_command, cmd1 )
+            else:
+                print("WARNING: Unable to write Hostboot PEL, maybe check your credentials, but continuing")
+        except Exception as e:
+            print("WARNING: Problem running saveCommand for Hostboot PEL, maybe check your credentials, but continuing... {}".format(e))
+
+        #file = open("hb_trace_debug.dat", "a")
+        #file.write("%s\n" % (saveCommand))
+        #file.close()
+
 
 # Continuous trace: Clear these files.
 rc = os.system( "rm -f hbTracMERG" )
@@ -882,6 +973,9 @@ rc = os.system( "rm -f tracBINARY" )
 
 # SBE traces: Clear these files.
 rc = os.system( "rm -f sbetrace.hb.txt" )
+
+# PELs: Clear these files.
+rc = os.system( "rm -f pel.*.bin" )
 
 # Register the magic instruction hap handler (a callback).
 SIM_hap_add_callback_range( "Core_Magic_Instruction", magic_instruction_callback, None, 7000, 7999 )

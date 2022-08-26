@@ -117,6 +117,7 @@ enum
     MAGIC_GCOV_MODULE_UNLOAD  =  7056, // extract gcov info
     MAGIC_SAVE_ATTR_VALUE     =  7057, // record attribute value
     MAGIC_CHECK_FEATURE       =  7058, // check for feature enablement
+    MAGIC_SAVE_PEL            =  7060, // save a single PEL
 
     MAGIC_CHECK_BONITO_CONFIG =  7777, // check if MACHINE=bonito is set in the ENV
 
@@ -204,6 +205,18 @@ enum
                  "r" (_componentId), "r" (_logLevel) : \
                  "4", "5"); \
     MAGIC_INSTRUCTION(MAGIC_SET_LOG_LEVEL); \
+
+/**
+ * @brief Save a PEL to a file
+ * @param[in]  Physical memory address of a PEL (uint64_t)
+ * @param[in]  Size of PEL in bytes (uint64_t)
+ * @param[in]  ID of PEL (uint64_t)
+ */
+#define MAGIC_INST_SAVE_PEL(_addr, _size, _id) \
+    asm volatile("mr 4, %0; mr 5, %1; mr 6, %2;" :: \
+                 "r" (_addr), "r" (_size), "r" (_id) : "4", "5", "6"); \
+    MAGIC_INSTRUCTION(MAGIC_SAVE_PEL); \
+
 
 // Simics components that we can raise log levels for
 // It is important to keep these lined up with

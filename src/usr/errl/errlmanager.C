@@ -56,6 +56,9 @@
 #include <sys/sync.h>
 #include <sys/time.h>
 #include <time.h>
+#include <util/misc.H>
+#include <arch/magic.H>
+#include <kernel/pagemgr.H>
 
 namespace ERRORLOG
 {
@@ -929,6 +932,18 @@ void ErrlManager::saveErrLogEntry( errlHndl_t& io_err )
         // Count of error logs called to commit, regardless if there was
         // room to commit them or not.
         iv_pStorage->cInserted++;
+
+        // In Simics we can save every log out to a file as well
+        if( Util::isSimicsRunning() )
+        {
+            // Allocate space to unflatten into on a page boundary
+            void* l_flatbuf = PageManager::allocatePage(ALIGN_PAGE(l_cbflat)/PAGESIZE,true);
+            io_err->flatten( l_flatbuf, l_cbflat );
+            uint64_t l_pelid = io_err->eid();
+            MAGIC_INST_SAVE_PEL( l_flatbuf, l_cbflat, l_pelid );
+            PageManager::freePage(l_flatbuf);
+        }
+
 
     } while( 0 );
     TRACDCOMP( g_trac_errl, EXIT_MRK"ErrlManager::saveErrLogEntry" );
