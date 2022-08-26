@@ -214,6 +214,11 @@ class mr32_data
             const auto l_dimm_rank = i_rank_info.get_dimm_rank();
 
             FAPI_TRY(check_strap(l_dimm, i_strap));
+            // Check DRAM checks the boundaries for the array bounds below
+            // Linux on power compiles do not acknowledge that the assert is doing this check
+            // As such, using pragmas to avoid the warning causing the error
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
             FAPI_TRY(check_and_convert_odt_to_field(l_dimm,
                                                     l_dimm_rank,
                                                     i_strap,
@@ -226,6 +231,7 @@ class mr32_data
                                                     true,
                                                     iv_cs_odt[l_dimm_rank][i_strap],
                                                     l_cs_field));
+#pragma GCC diagnostic pop
 
             l_data. template insertFromRight<CK_ODT, CK_ODT_LEN>(l_ck_field)
             . template insertFromRight<CS_ODT, CS_ODT_LEN>(l_cs_field)
@@ -280,6 +286,11 @@ class mr32_data
             const auto& l_dimm = i_rank_info.get_dimm_target();
             const auto l_dimm_rank = i_rank_info.get_dimm_rank();
 
+            // Check DRAM checks the boundaries for the array bounds below
+            // Linux on power compiles do not acknowledge that the assert is doing this check
+            // As such, using pragmas to avoid the warning causing the error
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
             FAPI_TRY(check_and_convert_odt_from_field(l_dimm,
                      l_dimm_rank,
                      i_strap,
@@ -292,6 +303,7 @@ class mr32_data
                      true,
                      l_cs_field,
                      iv_cs_odt[l_dimm_rank][l_strap]));
+#pragma GCC diagnostic pop
 
 
             return fapi2::FAPI2_RC_SUCCESS;
@@ -322,12 +334,18 @@ class mr32_data
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_dimm_rank,
                      const uint8_t i_strap) const
         {
+            // Check DRAM checks the boundaries for the array bounds below
+            // Linux on power compiles do not acknowledge that the assert is doing this check
+            // As such, using pragmas to avoid the warning causing the error
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
             FAPI_INF(TARGTIDFORMAT
                      " DDR5 MR32 rank%u. strap%u. CK ODT:%u.", TARGTID, i_dimm_rank,
                      i_strap, iv_ck_odt[i_dimm_rank][i_strap]);
             FAPI_INF(TARGTIDFORMAT
                      " DDR5 MR32 rank%u. strap%u. CS ODT:%u.", TARGTID, i_dimm_rank,
                      i_strap, iv_cs_odt[i_dimm_rank][i_strap]);
+#pragma GCC diagnostic pop
         }
 
 };

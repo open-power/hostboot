@@ -149,8 +149,15 @@ class mr3_data
             FAPI_TRY(check_dram(i_rank_info.get_dimm_target(), i_dram_number));
 
             {
+                // Check DRAM checks the boundaries for the array bounds below
+                // Linux on power compiles do not acknowledge that the assert is doing this check
+                // As such, using pragmas to avoid the warning causing the error
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+
                 fapi2::buffer<uint8_t> l_data;
                 const auto l_alignment_value = iv_wr_lvl_internal_lower[i_rank_info.get_dimm_rank()][i_dram_number];
+#pragma GCC diagnostic pop
 
                 // Checks the cycle alignment
                 FAPI_TRY(check_cycle_alignment(i_rank_info.get_dimm_target(), l_alignment_value));
@@ -200,7 +207,13 @@ class mr3_data
 
             l_data.extractToRight<LOWER, FIELD_LEN>(l_field);
             FAPI_TRY(check_dram(i_rank_info.get_dimm_target(), i_dram_number));
+            // Check DRAM checks the boundaries for the array bounds below
+            // Linux on power compiles do not acknowledge that the assert is doing this check
+            // As such, using pragmas to avoid the warning causing the error
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
             iv_wr_lvl_internal_lower[i_rank_info.get_dimm_rank()][i_dram_number] = l_field;
+#pragma GCC diagnostic pop
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
@@ -238,10 +251,16 @@ class mr3_data
                      const uint64_t i_rank,
                      const uint8_t i_dram_number) const
         {
+            // Check DRAM checks the boundaries for the array bounds below
+            // Linux on power compiles do not acknowledge that the assert is doing this check
+            // As such, using pragmas to avoid the warning causing the error
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
             // Inputs were checked in the public display method
             FAPI_INF(TARGTIDFORMAT
                      " DDR5 MR3. WR LVL internal cycle rank%u, DRAM%u - lower byte: %u. Note: WR LVL internal cycle - upper byte is unused and will be 0",
                      TARGTID, i_rank, i_dram_number, iv_wr_lvl_internal_lower[i_rank][i_dram_number]);
+#pragma GCC diagnostic pop
         }
 
 };

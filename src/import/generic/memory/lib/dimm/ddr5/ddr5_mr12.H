@@ -155,7 +155,13 @@ class mr12_data
             FAPI_TRY(check_vref_value(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number,
                                       iv_vrefcs_value[i_rank_info.get_dimm_rank()][i_dram_number]));
 
+            // Check DRAM checks the boundaries for the array bounds below
+            // Linux on power compiles do not acknowledge that the assert is doing this check
+            // As such, using pragmas to avoid the warning causing the error
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
             o_mr_data = iv_vrefcs_value[i_rank_info.get_dimm_rank()][i_dram_number];
+#pragma GCC diagnostic pop
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -194,7 +200,13 @@ class mr12_data
             // Note: not checking the rank input as it is already checked by the rank info class
             FAPI_TRY(check_vref_value(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number, i_mr_data));
 
+            // Check DRAM checks the boundaries for the array bounds below
+            // Linux on power compiles do not acknowledge that the assert is doing this check
+            // As such, using pragmas to avoid the warning causing the error
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
             iv_vrefcs_value[i_rank_info.get_dimm_rank()][i_dram_number] = i_mr_data;
+#pragma GCC diagnostic pop
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -224,9 +236,15 @@ class mr12_data
                      const uint64_t i_rank,
                      const uint8_t i_dram_number) const
         {
+            // Check DRAM checks the boundaries for the array bounds below
+            // Linux on power compiles do not acknowledge that the assert is doing this check
+            // As such, using pragmas to avoid the warning causing the error
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
             FAPI_INF(TARGTIDFORMAT
                      " DDR5 MR10. rank%u, DRAM%u VREFCS: 0x%02",
                      TARGTID, i_rank, i_dram_number, iv_vrefcs_value[i_rank][i_dram_number]);
+#pragma GCC diagnostic pop
         }
 
 };
