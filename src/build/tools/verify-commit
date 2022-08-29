@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -41,13 +41,15 @@ my $importPrefix = $ENV{'IMPORT_REL_PATH'}."/";
 
 my $rtcNumber = rtc_workitem_num();
 my $cqNumber = cq_workitem_num();
+my $jiraNumber = jira_workitem_num();
+my $ewmNumber = ewm_workitem_num();
 
 GetOptions("show-all" => \$showAll);
 
 verifyPatchSet();       # Verify the patch contents.
 verifyCommitMsg();      # Verify the commit message.
 verifyTodoFixme();      # Make sure there are no TODO/FIXME
-                        # associated with current RTC/CQ
+                        # associated with current RTC/CQ/JIRA/EWM
 
 # Finish out the divider.
 if ($issueFound)
@@ -139,7 +141,7 @@ sub verifyPatchSet
 #     * Warning: Lines longer than MAX_CODE_LINE_LENGTH characters, except in trace statement.
 #     * Warning: Trailing whitespace.
 #     * Warning: Tab characters outside of makefiles.
-#     * Warning: TODO or FIXME type tag without a corresponding RTC number.
+#     * Warning: TODO or FIXME type tag without a corresponding work item number.
 #     * Warning: NOMERGE tag found.
 #
 sub verifyFileLine
@@ -196,10 +198,12 @@ sub verifyFileLine
     if (($line =~ m/TODO/i) || ($line =~ m/FIXME/i))
     {
         if ( (not ($line =~ m/RTC[\s:]\s*[0-9]+/)) &&
-             (not ($line =~ m/CQ[\s:]\s*[A-Z][A-Z][0-9]+/)))
+             (not ($line =~ m/CQ[\s:]\s*[A-Z][A-Z][0-9]+/)) &&
+             (not ($line =~ m/JIRA[\s:]\s*[A-Z]+[-][0-9]+/)) &&
+             (not ($line =~ m/EWM[\s:]\s*[0-9]+/)))
         {
             warning($file,$line,$count,
-                    "TODO/FIXME tag without corresponding RTC or CQ number.");
+                    "TODO/FIXME tag without corresponding RTC/CQ/JIRA/EWM number.");
         }
     }
 
@@ -239,6 +243,8 @@ sub verifyCommitMsg
     my $lineCount = 0;
     my $rtcTag = "";
     my $cqTag = "";
+    my $jiraTag = "";
+    my $ewmTag = "";
     my $githubTag = "";
     my $changeId = "";
     my $taggedLine = "";
@@ -278,6 +284,7 @@ sub verifyCommitMsg
 
             $rtcTag = "";
             $cqTag = "";
+            $jiraTag = "";
             $githubTag = "";
             $untaggedLine = "";
             $taggedLine = "";
@@ -311,6 +318,28 @@ sub verifyCommitMsg
             {
                 error("Commit Message",$line,$lineCount,
                         (sprintf "CQ tag format incorrect (%s).", $1));
+            }
+        }
+
+        # Verify format of JIRA message. "JIRA: PHB-123456"
+        if ($line =~ m/^\s*JIRA:\s*[A-Z]+[-][0-9]+(.*)/)
+        {
+            $jiraTag = $line;
+            if ("" ne $1)
+            {
+                error("Commit Message",$line,$lineCount,
+                        (sprintf "JIRA tag format incorrect (%s).", $1));
+            }
+        }
+
+        # Verify format of EWM message. "EWM: 123456"
+        if ($line =~ m/^\s*EWM:\s*[0-9]+(.*)/)
+        {
+            $ewmTag = $line;
+            if ("" ne $1)
+            {
+                error("Commit Message",$line,$lineCount,
+                        (sprintf "EWM tag format incorrect (%s).", $1));
             }
         }
 
@@ -363,11 +392,15 @@ sub verifyCommitMsg
         }
     }
 
-    # Warn for missing RTC tag.
-    if (("" eq $rtcTag) && ("" eq $cqTag) && ("" eq $githubTag))
+    # Warn for missing work item tag.
+    if (("" eq $rtcTag) &&
+        ("" eq $cqTag) &&
+        ("" eq $githubTag) &&
+        ("" eq $jiraTag) &&
+        ("" eq $ewmTag))
     {
         warning("Commit Message","<end-of-file>",$lineCount,
-                "Neither RTC nor CQ nor Github tag found.");
+                "No RTC/CQ/Github/JIRA/EWM tag found.");
     }
 
     # Error for missing Change-Id.
@@ -390,7 +423,7 @@ sub verifyCommitMsg
 #
 # Verifies that there are no Todo or Fixme
 # tags in the code with the current commit's
-# RTC or CQ number.
+# RTC/CQ/JIRA/EWM number.
 #
 sub verifyTodoFixme
 {
@@ -398,7 +431,7 @@ sub verifyTodoFixme
     my $commentText;
     my $lineNumber;
     # Get the list of TODO/FIXME lines in src/
-    open TODO_LIST, "egrep -rn '(TODO.*(CQ|RTC).*)|(FIXME.*(CQ|RTC).*)' --exclude-dir={extern,import} src/* |"
+    open TODO_LIST, "egrep -rn '(TODO.*(CQ|RTC|JIRA|EWM).*)|(FIXME.*(CQ|RTC|JIRA|EWM).*)' --exclude-dir={extern,import} src/* |"
         or die "Cannot get the list of TODO/FIXME lines.\n";
 
     while(my $line = <TODO_LIST>)
@@ -408,13 +441,25 @@ sub verifyTodoFixme
         {
             ($file, $commentText, $lineNumber) = parse_todo_fixme_line($line);
             strong_warning($file, $commentText, $lineNumber,
-             "TODO/FIXME tag with the same RTC number as in the current commit message.");
+             "TODO/FIXME tag with the same RTC number [$rtcNumber] as in the current commit message.");
         }
-        elsif(check_cq_todo_fixme($line))
+        if(check_cq_todo_fixme($line))
         {
             ($file, $commentText, $lineNumber) = parse_todo_fixme_line($line);
             strong_warning($file, $commentText, $lineNumber,
-              "TODO/FIXME tag with the same CQ number as in the current commit message.");
+              "TODO/FIXME tag with the same CQ number [$cqNumber] as in the current commit message.");
+        }
+        if(check_jira_todo_fixme($line))
+        {
+            ($file, $commentText, $lineNumber) = parse_todo_fixme_line($line);
+            strong_warning($file, $commentText, $lineNumber,
+              "TODO/FIXME tag with the same Jira number [$jiraNumber] as in the current commit message.");
+        }
+        if(check_ewm_todo_fixme($line))
+        {
+            ($file, $commentText, $lineNumber) = parse_todo_fixme_line($line);
+            strong_warning($file, $commentText, $lineNumber,
+              "TODO/FIXME tag with the same EWM number [$ewmNumber] as in the current commit message.");
         }
     }
 }
@@ -443,6 +488,30 @@ sub check_cq_todo_fixme
     my $line = shift;
     if($line =~ m/CQ\s*:*\s*([A-Z][A-Z][0-9]+)/ &&
           $1 eq $cqNumber && $cqNumber ne "")
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+sub check_jira_todo_fixme
+{
+    my $line = shift;
+    if($line =~ m/JIRA\s*:*\s*([A-Z]+[-][0-9]+)/ &&
+           $1 eq $jiraNumber && $jiraNumber ne "")
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+sub check_ewm_todo_fixme
+{
+    my $line = shift;
+    if($line =~ m/EWM\s*:*\s*([0-9]+)/ &&
+           $1 eq $ewmNumber && $ewmNumber ne "")
     {
         return 1;
     }
@@ -556,6 +625,71 @@ sub cq_workitem_num
         return "";
     }
 }
+
+# sub jira_workitem_num
+#
+# Determines the JIRA WorkItem associated with a git commit.
+#
+# @param[in] commit - The git commit, or no parameter for last commit
+#
+# @return string - JIRA WorkItem number (or "").
+#
+sub jira_workitem_num
+{
+    my $commit = shift;
+    my $message;
+
+    if(defined($commit))
+    {
+        $message = git_commit_msg($commit);
+    }
+    else
+    {
+        $message = git_commit_msg("");
+    }
+
+    if ($message =~ m/JIRA:\s*([A-Z]+[-][0-9]+)/)
+    {
+        return $1;
+    }
+    else
+    {
+        return "";
+    }
+}
+
+# sub ewm_workitem_num
+#
+#  Determines the EWM WorkItem associated with a git commit.
+#
+#  @param[in] commit - The git commit, or no parameter for last commit
+#
+#  @return string - EWM WorkItem number (or "").
+#
+sub ewm_workitem_num
+{
+    my $commit = shift;
+    my $message;
+
+    if(defined($commit))
+    {
+        $message = git_commit_msg($commit);
+    }
+    else
+    {
+        $message = git_commit_msg("");
+    }
+
+    if ($message =~ m/EWM:\s*([0-9]+)/)
+    {
+        return $1;
+    }
+    else
+    {
+        return "";
+    }
+}
+
 
 # sub git_commit_msg
 #
