@@ -47,6 +47,7 @@
 #include <lib/dimm/exp_rank.H>
 #include <lib/dimm/exp_kind.H>
 #include <lib/workarounds/exp_ccs_row_repair_workarounds.H>
+#include <lib/workarounds/exp_byte_swizzle_workarounds.H>
 
 #include <generic/memory/lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
@@ -1087,9 +1088,7 @@ fapi2::ReturnCode get_num_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
     uint8_t l_dram_width = 0;
     FAPI_TRY( mss::attr::get_dram_width(i_target, l_dram_width) );
 
-    // The DRAM index in ATTR_ROW_REPAIR_DATA is relative to the logical perspective.
-    // The bad_bits attribute is also logical perspective according to PRD
-    // using the DRAM index
+    // Grabs the numeric DRAM instance and ensures that the DRAM is inbounds
     // TODO: Move to helper function Zen#646
     l_byte = (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ?
              l_dram :
@@ -1108,6 +1107,12 @@ fapi2::ReturnCode get_num_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
                 set_INDEX(l_dram),
                 "DRAM index %d supplied to get_num_bad_bits is out of bounds on %s",
                 l_dram, mss::spd::c_str(i_target));
+
+    // The DRAM index in ATTR_ROW_REPAIR_DATA is relative to the logical perspective.
+    // The bad_bits attribute is in the DFI perspective (unfortunately)
+    // Grab the byte, then swizzle it from the DFI perspective to the logical perspective
+    // The indexing was checked above. The conversion function should keep us in bounds
+    l_byte = mss::exp::workarounds::mcbist_to_dfi_byte_swizzle(l_byte);
 
     {
         const uint8_t l_bad_bits_on_dram = i_bad_bits[l_byte] & l_mask;
