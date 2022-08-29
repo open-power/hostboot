@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -255,7 +255,7 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::DRAMINIT>(
     fapi2::ReturnCode& io_rc,
     bool& o_fir_error)
 {
-    // For draminit case, we want to check SRQFIR[4] and LOCAL_FIR[20,36] only, so unmask checkbits
+    // For draminit case, we want to check SRQFIR[4] and LOCAL_FIR[20,32,36] only, so unmask checkbits
     // NOTE: if you change DRAMINIT_FIR_REGS, you need to update these indices
     const auto l_srqfir = EXPLORER_DRAMINIT_FIR_REGS.at(0);
     const auto l_localfir = EXPLORER_DRAMINIT_FIR_REGS.at(1);
@@ -268,10 +268,11 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::EXPLORER, firChecklist::DRAMINIT>(
     l_check_mask.clearBit<EXPLR_SRQ_SRQFIRQ_RCD_PARITY_ERROR>();
     FAPI_TRY(bad_fir_bits_helper_with_mask(i_target, l_srqfir, l_check_mask, io_rc, o_fir_error));
 
-    // Mask all, then unmask bits 20,36
+    // Mask all, then unmask bits 20,32,36
     if (o_fir_error != true)
     {
         l_check_mask.flush<1>().clearBit<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_PCS_GPBC_IRQ_106>()
+        .clearBit<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_OCMB_DOORBELL_INT_2>()
         .clearBit<EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR_DDR4_PHY__FATAL>();
 
         FAPI_TRY(bad_fir_bits_helper_with_mask(i_target, l_localfir, l_check_mask, io_rc, o_fir_error));
