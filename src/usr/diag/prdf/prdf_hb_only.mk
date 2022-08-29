@@ -221,6 +221,7 @@ prd_obj_no_sim += exp_maint_cmds.o
 prd_obj_no_sim += exp_deploy_row_repairs.o
 prd_obj_no_sim += exp_row_repair.o
 prd_obj_no_sim += exp_ccs_row_repair_workarounds.o
+prd_obj_no_sim += exp_byte_swizzle_workarounds.o
 prd_obj_no_sim += ccs_explorer.o
 prd_obj_no_sim += exp_mrs04.o
 prd_obj_no_sim += exp_fir.o
