@@ -59,37 +59,6 @@ namespace unmask
 {
 
 ///
-/// @brief Helper for setting up RDF maintenance RCD fir
-/// @param[in] i_is_planar true if this is a planar system
-/// @param[in] i_has_rcd true if this Explorer has an RCD
-/// @param[in,out] io_rdf_fir true if there is an RDF fir
-///
-void rdf_maintenance_rcd_helper(const uint8_t i_is_planar, const bool i_has_rcd,
-                                mss::fir::reg<EXPLR_RDF_FIR>& io_rdf_fir)
-{
-    // RCD parity errors are only valid in planar systems on Explorer
-    if (i_has_rcd && i_is_planar == fapi2::ENUM_ATTR_MEM_MRW_IS_PLANAR_TRUE)
-    {
-        io_rdf_fir.recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_RCD>();
-    }
-}
-
-///
-/// @brief Helper for setting up the RDF mainline RCD fir
-/// @param[in] i_is_planar true if this is a planar system
-/// @param[in] i_has_rcd true if this Explorer has an RCD
-/// @param[in,out] io_rdf_fir RDF fir class
-///
-void rdf_mainline_rcd_helper(const uint8_t i_is_planar, const bool i_has_rcd, mss::fir::reg<EXPLR_RDF_FIR>& io_rdf_fir)
-{
-    // RCD parity errors are only valid in planar systems on Explorer
-    if (i_has_rcd && i_is_planar == fapi2::ENUM_ATTR_MEM_MRW_IS_PLANAR_TRUE)
-    {
-        io_rdf_fir.recoverable_error<EXPLR_RDF_FIR_MAINLINE_RCD>();
-    }
-}
-
-///
 /// @brief Helper for setting up the SRQ RCD parity error
 /// @param[in] i_is_planar true if this is a planar system
 /// @param[in] i_has_rcd true if this Explorer has an RCD
@@ -207,8 +176,6 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target
     // Write MCBISTFIR register per Explorer unmask spec
     FAPI_TRY(l_exp_mcbist_reg.attention<EXPLR_MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>()
              .write());
-
-    mss::exp::unmask::rdf_maintenance_rcd_helper(l_is_planar, l_has_rcd, l_exp_rdf_reg);
 
     // Write RDF FIR register per Explorer unmask spec
     FAPI_TRY(l_exp_rdf_reg.recoverable_error<EXPLR_RDF_FIR_MAINTENANCE_AUE>()
@@ -680,9 +647,6 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
     // If so set RCD fir to recoverable
     FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
     FAPI_TRY(mss::attr::get_mem_mrw_is_planar(i_target, l_is_planar));
-
-    // Update the FIR's if the Explorer has an RCD
-    mss::exp::unmask::rdf_mainline_rcd_helper(l_is_planar, l_has_rcd, l_exp_rdf_fir_reg);
 
     // Write remainder of RDF FIR mask per Explorer unmask spec
     FAPI_TRY(l_exp_rdf_fir_reg.checkstop<EXPLR_RDF_FIR_MAINLINE_AUE>()

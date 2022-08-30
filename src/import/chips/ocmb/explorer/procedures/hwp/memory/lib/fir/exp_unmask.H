@@ -48,23 +48,6 @@ namespace unmask
 {
 
 ///
-/// @brief Helper for setting up the RDF maintenance RCD fir
-/// @param[in] i_is_planar true if this is a planar system
-/// @param[in] i_has_rcd true if this Explorer has an RCD
-/// @param[in,out] io_rdf_fir RDF fir class
-///
-void rdf_maintenance_rcd_helper(const uint8_t i_is_planar, const bool i_has_rcd,
-                                mss::fir::reg<EXPLR_RDF_FIR>& io_rdf_fir);
-
-///
-/// @brief Helper for setting up the RDF mainline RCD fir
-/// @param[in] i_is_planar true if this is a planar system
-/// @param[in] i_has_rcd true if this Explorer has an RCD
-/// @param[in,out] io_rdf_fir RDF fir class
-///
-void rdf_mainline_rcd_helper(const uint8_t i_is_planar, const bool i_has_rcd, mss::fir::reg<EXPLR_RDF_FIR>& io_rdf_fir);
-
-///
 /// @brief Helper for setting up the SRQ RCD parity error
 /// @param[in] i_is_planar true if this is a planar system
 /// @param[in] i_has_rcd true if this Explorer has an RCD
