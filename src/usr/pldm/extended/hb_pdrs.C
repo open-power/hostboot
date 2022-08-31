@@ -827,6 +827,11 @@ errlHndl_t addHostbootPdrs(PdrManager& io_pdrman)
         .entity_type = ENTITY_TYPE_BACKPLANE
     };
 
+    // Terminus locator PDR must be added first as it is beneficial for the BMC
+    // to know this ahead of receiving and normalizing the entity association
+    // PDRs.
+    io_pdrman.addTerminusLocatorPDR();
+
     addEntityAssociationAndFruRecordSetPdrs(io_pdrman, backplane_entity);
     addBootProgressPdrs(io_pdrman, backplane_entity);
     errl = addSystemStateControlPdrs(io_pdrman);
@@ -839,8 +844,6 @@ errlHndl_t addHostbootPdrs(PdrManager& io_pdrman)
     { // Dynamic Code Execution should not be enabled in secure mode
         addDcePdrs(io_pdrman);
     }
-
-    io_pdrman.addTerminusLocatorPDR();
 
     // checks for PLDM error and adds flight recorder data to log
     addPldmFrData(errl);
