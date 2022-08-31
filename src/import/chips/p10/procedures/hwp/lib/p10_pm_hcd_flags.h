@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,6 +77,8 @@ enum PM_GPE_OCCFLG2_DEFS
     PGPE_OP_TRACE_MEM_MODE                  = 9,
     PGPE_OP_TRACE_MEM_MODE_LEN          = 2,
     PGPE_HW_ERROR_INJECT                    = 11,
+    PGPE_AVS_PROFILE_ENABLE                 = 12,
+    PGPE_PROBE_ENABLE                       = 13,
     PGPE_ACTIVE                             = 16,
     PGPE_PSTATE_PROTOCOL_ACTIVE             = 17,
     PGPE_SAFE_MODE_ACTIVE                   = 18,
