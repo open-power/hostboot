@@ -74,6 +74,17 @@ void srq_rcd_parity_helper(const uint8_t i_is_planar, const bool i_has_rcd,
                            mss::fir::reg<EXPLR_SRQ_SRQFIRQ>& io_srq_fir);
 
 ///
+/// @brief Helper for setting the  SRQFIRQ_PORT_FAIL bit
+/// @param[in] i_target the fapi2::Target
+/// @param[in] i_is_planar true if this is a planar system
+/// @param[in] i_has_rcd true if this Explorer has an RCD
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode  setup_srq_port_fail_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t i_is_planar,
+        const bool i_has_rcd);
+
+///
 /// @brief Helper for setting up the FARB0Q bits related to RCD parity
 /// @param[in] i_target the fapi2::Target
 /// @param[in] i_is_planar true if this is a planar system
