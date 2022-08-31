@@ -66,21 +66,26 @@ class mr0_data
         ///
         /// @brief mr0_data ctor
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-        /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+        /// @param[in,out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
         ///
-        mr0_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ) :
+        mr0_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc ) :
             iv_cas_latency(0),
             iv_burst_length(0)
         {
+            if (io_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                return;
+            }
+
             const auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
             FAPI_TRY( mss::attr::get_dram_cl(l_port_target, iv_cas_latency), "Error in ddr5::mr0_data()" );
             FAPI_TRY( mss::attr::get_burst_length(l_port_target, iv_burst_length), "Error in ddr5::mr0_data()" );
 
-            o_rc = fapi2::FAPI2_RC_SUCCESS;
+            io_rc = fapi2::FAPI2_RC_SUCCESS;
             return;
         fapi_try_exit:
-            o_rc = fapi2::current_err;
+            io_rc = fapi2::current_err;
             FAPI_ERR(TARGTIDFORMAT " unable to get attributes for ddr5::mr0", TARGTID);
             return;
         }

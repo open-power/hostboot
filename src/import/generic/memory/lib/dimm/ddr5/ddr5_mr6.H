@@ -69,19 +69,24 @@ class mr6_data
         ///
         /// @brief mr6_data ctor
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-        /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+        /// @param[in,out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
         ///
-        mr6_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc )
+        mr6_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc )
         {
+            if (io_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                return;
+            }
+
             const auto& l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
             FAPI_TRY( mss::attr::get_dram_twr(l_port_target, iv_wr_recovery), "Error in ddr5::mr6_data()" );
             FAPI_TRY( mss::attr::get_dram_trtp(l_port_target, iv_trtp), "Error in ddr5::mr6_data()" );
 
-            o_rc = fapi2::FAPI2_RC_SUCCESS;
+            io_rc = fapi2::FAPI2_RC_SUCCESS;
             return;
         fapi_try_exit:
-            o_rc = fapi2::current_err;
+            io_rc = fapi2::current_err;
             FAPI_ERR(TARGTIDFORMAT " unable to get attributes for ddr5::mr4", TARGTID);
             return;
         }

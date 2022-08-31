@@ -67,19 +67,24 @@ class mr112_data
         ///
         /// @brief mr112_data ctor
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-        /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+        /// @param[in,out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
         ///
-        mr112_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc )
+        mr112_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc )
         {
+            if (io_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                return;
+            }
+
             FAPI_TRY( mss::attr::get_ddr5_dfe_gain_bias(i_target, iv_dfe_gain_bias),
                       "Error in ddr5::mr112_data()" );
             FAPI_TRY( mss::attr::get_ddr5_dfe_sign_bit(i_target, iv_dfe_sign_bit),
                       "Error in ddr5::mr112_data()" );
 
-            o_rc = fapi2::FAPI2_RC_SUCCESS;
+            io_rc = fapi2::FAPI2_RC_SUCCESS;
             return;
         fapi_try_exit:
-            o_rc = fapi2::current_err;
+            io_rc = fapi2::current_err;
             FAPI_ERR(TARGTIDFORMAT " unable to get attributes for ddr5::mr112", TARGTID);
             return;
         }

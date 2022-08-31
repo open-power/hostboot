@@ -67,10 +67,15 @@ class mr50_data
         ///
         /// @brief mr50_data ctor
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-        /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+        /// @param[in,out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
         ///
-        mr50_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc )
+        mr50_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc )
         {
+            if (io_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                return;
+            }
+
             const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
             FAPI_TRY(mss::attr::get_mrw_ddr5_dram_read_crc(iv_rd_crc_enable), "Error in ddr5::mr50_data()");
@@ -82,10 +87,10 @@ class mr50_data
             FAPI_TRY(mss::attr::get_ddr5_wr_crc_autodisable_status(l_port, iv_wr_crc_autodisable_status),
                      "Error in ddr5::mr50_data()");
 
-            o_rc = fapi2::FAPI2_RC_SUCCESS;
+            io_rc = fapi2::FAPI2_RC_SUCCESS;
             return;
         fapi_try_exit:
-            o_rc = fapi2::current_err;
+            io_rc = fapi2::current_err;
             FAPI_ERR(TARGTIDFORMAT " unable to get attributes for ddr5::mr50", TARGTID);
             return;
         }

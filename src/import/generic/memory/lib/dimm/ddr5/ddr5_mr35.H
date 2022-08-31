@@ -66,19 +66,24 @@ class mr35_data
         ///
         /// @brief mr35_data ctor
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
-        /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+        /// @param[in,out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
         ///
-        mr35_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc )
+        mr35_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc )
         {
+            if (io_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                return;
+            }
+
             FAPI_TRY( mss::attr::get_ddr5_dram_rtt_nom_wr(i_target, iv_rtt_nom_wr),
                       "Error in ddr5::mr35_data()" );
             FAPI_TRY( mss::attr::get_ddr5_dram_rtt_nom_rd(i_target, iv_rtt_nom_rd),
                       "Error in ddr5::mr35_data()" );
 
-            o_rc = fapi2::FAPI2_RC_SUCCESS;
+            io_rc = fapi2::FAPI2_RC_SUCCESS;
             return;
         fapi_try_exit:
-            o_rc = fapi2::current_err;
+            io_rc = fapi2::current_err;
             FAPI_ERR(TARGTIDFORMAT " unable to get attributes for ddr5::mr35", TARGTID);
             return;
         }
