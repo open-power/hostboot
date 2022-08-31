@@ -1972,7 +1972,7 @@ void PlatPmPPB::attr_init( void )
     }
 
 #define SET_DEFAULT_2(_attr_name, _attr_default_0,_attr_default_1) \
-    if (!(iv_attrs._attr_name[0] && iv_attrs._attr_name[1])) \
+    if (!(iv_attrs._attr_name[0] || iv_attrs._attr_name[1])) \
     { \
        iv_attrs._attr_name[0] = _attr_default_0; \
        iv_attrs._attr_name[1] = _attr_default_1; \
@@ -1983,7 +1983,7 @@ void PlatPmPPB::attr_init( void )
     }
 
 #define SET_DEFAULT_4(_attr_name, _attr_default_0,_attr_default_1, _attr_default_2,_attr_default_3) \
-    if (!(iv_attrs._attr_name[0] && iv_attrs._attr_name[1] && iv_attrs._attr_name[2] && iv_attrs._attr_name[3])) \
+    if (!(iv_attrs._attr_name[0] || iv_attrs._attr_name[1] || iv_attrs._attr_name[2] || iv_attrs._attr_name[3])) \
     { \
        iv_attrs._attr_name[0] = _attr_default_0; \
        iv_attrs._attr_name[1] = _attr_default_1; \
