@@ -48,6 +48,7 @@
 #include <lib/phy/exp_phy_utils.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
 #include <lib/exp_attribute_accessors_manual.H>
+#include <lib/mc/exp_port.H>
 
 namespace mss
 {
@@ -118,6 +119,9 @@ fapi2::ReturnCode setup_farb_rcd_bits_helper(const fapi2::Target<fapi2::TARGET_T
     if (i_has_rcd && i_is_planar == fapi2::ENUM_ATTR_MEM_MRW_IS_PLANAR_TRUE)
     {
         fapi2::buffer<uint64_t> l_reg_data;
+
+        // Configure FARB0Q_RCD_PROTECTION_TIME
+        FAPI_TRY(mss::config_exp_rcd_protect_time(i_target));
 
         // Clear FARB0 54/57 bits for RCD recovery and port fail
         FAPI_TRY(fapi2::getScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_reg_data));
