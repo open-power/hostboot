@@ -29,7 +29,6 @@
 
 #include <prdfMemLogParse.H>
 
-#include <errlusrparser.H>
 #include <cstring>
 #include <UtilHash.H>
 #include <utilmem.H>
@@ -218,7 +217,7 @@ void initMemMruStrings( MemoryMruData::MemMruMeld i_mm, bool & o_addDramSite,
 
 // Helper function for parseMemMruData()
 void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
-                        char * io_data )
+                        char * io_data, errlver_t i_ver )
 {
     MemoryMruData::MemMruMeld mm = i_extMemMru.mmMeld;
 
@@ -233,17 +232,19 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
 
     uint8_t dimmDq = dqIdx;
 
-    // If the DQ is not spared, translate to DIMM DQ format
-
-    if ( !mm.s.dramSpared )
+    // Version 2 or above: if the DQ is not spared, translate to DIMM DQ format
+    if ( 2 <= i_ver )
     {
-        // Note: The dqMapping maps from dimm dq format to c4 format
-        for ( uint8_t dq = 0; dq < DQS_PER_DIMM; dq++ )
+        if ( !mm.s.dramSpared )
         {
-            if ( i_extMemMru.dqMapping[dq] == dqIdx )
+            // Note: The dqMapping maps from dimm dq format to c4 format
+            for ( uint8_t dq = 0; dq < DQS_PER_DIMM; dq++ )
             {
-                dimmDq = dq;
-                break;
+                if ( i_extMemMru.dqMapping[dq] == dqIdx )
+                {
+                    dimmDq = dq;
+                    break;
+                }
             }
         }
     }
@@ -272,7 +273,8 @@ void parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru )
 //------------------------------------------------------------------------------
 
 void parseMemMruData( ErrlUsrParser & i_parser,
-                      const MemoryMruData::ExtendedData & i_extMemMru )
+                      const MemoryMruData::ExtendedData & i_extMemMru,
+                      errlver_t i_ver )
 {
     bool addDramSite;
     char header[HEADER_SIZE]; char data[DATA_SIZE];
@@ -281,7 +283,7 @@ void parseMemMruData( ErrlUsrParser & i_parser,
     if ( addDramSite )
     {
         // Get the DRAM site location information from the extended data.
-        addDramSiteString( i_extMemMru, data );
+        addDramSiteString( i_extMemMru, data, i_ver );
     }
 
     i_parser.PrintString( header, data );

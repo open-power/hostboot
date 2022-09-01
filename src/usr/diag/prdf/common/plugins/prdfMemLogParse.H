@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,8 @@
 
 #include <stdint.h>
 #include <prdfMemoryMruData.H>
-#include <attributeenums.H>     // For TARGETING::TYPE enum
+#include <attributeenums.H> // For TARGETING::TYPE enum
+#include <errlusrparser.H>  // For errlver_t
 
 class ErrlUsrParser;
 
@@ -65,9 +66,11 @@ void parseMemMruData( ErrlUsrParser & i_parser, uint32_t i_memMru );
  *        up to the caller to add that data.
  * @param i_parser    The error log parser.
  * @param i_extMemMru A MemoryMru with extended data for extra FFDC.
+ * @param i_ver This error log section's version
  */
 void parseMemMruData( ErrlUsrParser & i_parser,
-                      const MemoryMruData::ExtendedData & i_extMemMru );
+                      const MemoryMruData::ExtendedData & i_extMemMru,
+                      errlver_t i_ver );
 
 /**
  * @brief Parses Memory UE table.

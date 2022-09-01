@@ -792,7 +792,7 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
 //------------------------------------------------------------------------------
 
 bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
-                     ErrlUsrParser & i_parser )
+                     ErrlUsrParser & i_parser, errlver_t i_ver )
 {
     bool o_rc = true; // Don't dump the hex buffer at the end.
 
@@ -825,7 +825,12 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
         extMemMru.isBufDimm = bs.getFieldJustify( curPos,  1 ); curPos+= 1;
         extMemMru.isX4Dram  = bs.getFieldJustify( curPos,  1 ); curPos+= 1;
         extMemMru.isValid   = bs.getFieldJustify( curPos,  1 ); curPos+= 1;
-        curPos += 5; // 5 bits reserved
+
+        // Version 2 or above: 5 reserved bits were added
+        if ( 2 <= i_ver )
+        {
+            curPos += 5; // 5 bits reserved
+        }
 
         for ( uint32_t i = 0; i < sizeof(extMemMru.dqMapping); i++ )
         {
@@ -838,28 +843,32 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
         i_parser.PrintHeading( heading );
         i_parser.PrintBlank();
 
-        parseMemMruData( i_parser, extMemMru );
+        parseMemMruData( i_parser, extMemMru, i_ver );
 
         i_parser.PrintBlank();
 
-        // Print the DQ mapping stored in the extended mem mru
-        i_parser.PrintString("Mem VPD DQ Mapping:", "");
-        for ( uint32_t n = 0; n < DQS_PER_DIMM; n+=20 )
+        // Version 2 and above: print the DQ mapping stored in the
+        // extended mem mru.
+        if ( 2 <= i_ver )
         {
-            char mapping[72];
-            snprintf( mapping, 72, "%d %d %d %d %d %d %d %d %d %d "
-                                   "%d %d %d %d %d %d %d %d %d %d",
-                      extMemMru.dqMapping[n+0] , extMemMru.dqMapping[n+1],
-                      extMemMru.dqMapping[n+2] , extMemMru.dqMapping[n+3],
-                      extMemMru.dqMapping[n+4] , extMemMru.dqMapping[n+5],
-                      extMemMru.dqMapping[n+6] , extMemMru.dqMapping[n+7],
-                      extMemMru.dqMapping[n+8] , extMemMru.dqMapping[n+9],
-                      extMemMru.dqMapping[n+10], extMemMru.dqMapping[n+11],
-                      extMemMru.dqMapping[n+12], extMemMru.dqMapping[n+13],
-                      extMemMru.dqMapping[n+14], extMemMru.dqMapping[n+15],
-                      extMemMru.dqMapping[n+16], extMemMru.dqMapping[n+17],
-                      extMemMru.dqMapping[n+18], extMemMru.dqMapping[n+19] );
-            i_parser.PrintString(mapping, "");
+            i_parser.PrintString("Mem VPD DQ Mapping:", "");
+            for ( uint32_t n = 0; n < DQS_PER_DIMM; n+=20 )
+            {
+                char mapping[72];
+                snprintf(mapping, 72, "%d %d %d %d %d %d %d %d %d %d "
+                                      "%d %d %d %d %d %d %d %d %d %d",
+                         extMemMru.dqMapping[n+0] , extMemMru.dqMapping[n+1],
+                         extMemMru.dqMapping[n+2] , extMemMru.dqMapping[n+3],
+                         extMemMru.dqMapping[n+4] , extMemMru.dqMapping[n+5],
+                         extMemMru.dqMapping[n+6] , extMemMru.dqMapping[n+7],
+                         extMemMru.dqMapping[n+8] , extMemMru.dqMapping[n+9],
+                         extMemMru.dqMapping[n+10], extMemMru.dqMapping[n+11],
+                         extMemMru.dqMapping[n+12], extMemMru.dqMapping[n+13],
+                         extMemMru.dqMapping[n+14], extMemMru.dqMapping[n+15],
+                         extMemMru.dqMapping[n+16], extMemMru.dqMapping[n+17],
+                         extMemMru.dqMapping[n+18], extMemMru.dqMapping[n+19]);
+                i_parser.PrintString(mapping, "");
+            }
         }
 
         o_rc = false; // Dump the hex buffer at the end. This is temporary. Just
@@ -882,16 +891,16 @@ bool logDataParse( ErrlUsrParser & i_parser, void * i_buffer,
     bool rc = false;
     switch ( i_sst )
     {
-        case ErrlSectPFA5_1:  // Assume version 1 now
+        case ErrlSectPFA5_1:
             rc = parsePfaData(i_buffer, i_buflen, i_parser);
             break;
 
-        case ErrlCapData_1:  // Assume version 1 for now
+        case ErrlCapData_1:
             rc = parseCaptureData(i_buffer, i_buflen, i_parser, i_ver);
             break;
 
         case ErrlMruData:
-            rc = parseExtMemMru( i_buffer, i_buflen, i_parser );
+            rc = parseExtMemMru( i_buffer, i_buflen, i_parser, i_ver );
             break;
 
         case ErrlL2LineDeleteFfdc:

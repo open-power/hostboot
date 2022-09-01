@@ -238,7 +238,8 @@ def symbol2Dq(symbol, dramSpared):
 # Used to parse an input memory mru callout into the input dictionary
 # ###################################################
 
-def parseMemMruCallout(mruCallout, prefix, d, dqMap=None):
+
+def parseMemMruCallout(mruCallout, prefix, d, ver, dqMap=None):
 
     # We have a MemMRU, parse the 32 bits of the callout
     # autopep8: off
@@ -275,11 +276,13 @@ def parseMemMruCallout(mruCallout, prefix, d, dqMap=None):
         d[prefix]['Pins'] = pins
         d[prefix]['Dram Spared'] = "Yes" if (dramSpared == 1) else "No"
 
-        # Translate the DQ to DIMM format if a dqMap was provided.
-        if dqMap is not None and dramSpared == 0:
-            for dimmDq, c4Dq in dqMap.items():
-                if c4Dq == dq:
-                    dq = dimmDq
+        # Version 2 and above: translate the DQ to DIMM format if a dqMap was
+        # provided.
+        if (2 <= ver):
+            if dqMap is not None and dramSpared == 0:
+                for dimmDq, c4Dq in dqMap.items():
+                    if c4Dq == dq:
+                        dq = dimmDq
 
         d[prefix]['DQ'] = dq
 
@@ -1200,7 +1203,7 @@ class errludP_prdf:
             d[mruWithNum]['Gard State'] = gardStateStr
 
             if "MemoryMru" == mruTypeStr:
-                parseMemMruCallout(mruCallout, mruWithNum, d)
+                parseMemMruCallout(mruCallout, mruWithNum, d, ver)
             else:
                 # Add the information in the MRU to the dictionary
                 # Pad the bitmap with 0s to 8 hex characters (32 bits)
@@ -1240,30 +1243,32 @@ class errludP_prdf:
         # 5-bits:   Reserved
         # 640-bits: Mem VPD DQ Mapping
 
-        mruCallout, i=intConcat(data, i, i+4)
+        mruCallout, i = intConcat(data, i, i+4)
 
         # Parse all the additional data, 3 flags and the DQ mapping
-        otherData, i=intConcat(data, i, i+1)
+        otherData, i = intConcat(data, i, i+1)
 
         isBufDimm = (otherData >> 7) & 0x1
-        isX4Dram  = (otherData >> 6) & 0x1
-        isValid   = (otherData >> 5) & 0x1
-        reserved  = otherData & 0x1F
+        isX4Dram = (otherData >> 6) & 0x1
+        isValid = (otherData >> 5) & 0x1
+        reserved = otherData & 0x1F
 
         d["Extended Mem Mru"] = OrderedDict()
         d["Extended Mem Mru"]["isX4Dram"] = "Yes" if (isX4Dram == 1) else "No"
 
-        # Parse the DQ Mapping
-        dqMapString = ''
-        dqMap = OrderedDict()
-        for mapKey in range(80):
-            dqMapping, i=intConcat(data, i, i+1)
-            dqMapString += str(dqMapping) + ' '
-            dqMap[mapKey] = dqMapping
+        # Version 2 and above: parse the DQ Mapping
+        dqMap = None
+        if (2 <= ver):
+            dqMapString = ''
+            dqMap = OrderedDict()
+            for mapKey in range(80):
+                dqMapping, i = intConcat(data, i, i+1)
+                dqMapString += str(dqMapping) + ' '
+                dqMap[mapKey] = dqMapping
 
-        d["Extended Mem Mru"]["Mem VPD Dq Mapping"] = dqMapString
+            d["Extended Mem Mru"]["Mem VPD Dq Mapping"] = dqMapString
 
-        parseMemMruCallout(mruCallout, "Extended Mem Mru", d, dqMap)
+        parseMemMruCallout(mruCallout, "Extended Mem Mru", d, ver, dqMap)
 
         return json.dumps(d)
 

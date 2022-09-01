@@ -137,7 +137,7 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
     }
 
     // Add the extended MemoryMru to the error log.
-    PRDF_ADD_FFDC( io_errl, bsb.getBufAddr(), sz_buf, ErrlVer1, ErrlMruData );
+    PRDF_ADD_FFDC( io_errl, bsb.getBufAddr(), sz_buf, ErrlVer2, ErrlMruData );
 
     #undef PRDF_FUNC
 }
