@@ -52,6 +52,7 @@
 #include <lib/mcbist/ody_maint_cmds.H>
 #include <mss_generic_attribute_getters.H>
 #include <ody_scom_ody_odc.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 
 
 namespace mss
@@ -149,6 +150,8 @@ fapi2::ReturnCode poll_for_dfi_init_complete( const fapi2::Target<fapi2::TARGET_
         // ... Polls for the DFI init complete
         FAPI_TRY(poll_for_dfi_init_complete(l_port));
     }
+
+    FAPI_INF(TARGTIDFORMAT " DFI polling completed successfully", TARGTID);
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
