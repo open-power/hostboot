@@ -3098,7 +3098,9 @@ void synchronizePrimaryTpmLogs()
 
     TRACUCOMP(g_trac_trustedboot, ENTER_MRK "synchronizePrimaryTpmLogs()");
 
-    do {
+    // Get the mpipl attribute from the system
+    const auto pSys = TARGETING::UTIL::assertGetToplevelTarget();
+    auto l_isMpipl = pSys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
 
     // Get the capability attribute from the node
     TARGETING::TargetHandle_t l_nodeTarget =
@@ -3106,11 +3108,12 @@ void synchronizePrimaryTpmLogs()
     auto l_sbeExtend =
         l_nodeTarget->getAttr<TARGETING::ATTR_SBE_HANDLES_SMP_TPM_EXTEND>();
 
+    do {
+
     // Do not logMeasurementRegs if MPIPL and ATTR_SBE_HANDLES_SMP_TPM_EXTEND
     // because SBE will take care of extending the secondary measurements into
     // the boot chip TPM
-    const auto pSys = TARGETING::UTIL::assertGetToplevelTarget();
-    if(pSys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() && l_sbeExtend)
+    if(l_isMpipl && l_sbeExtend)
     {
         break;
     }
@@ -3160,18 +3163,20 @@ void synchronizePrimaryTpmLogs()
 
     } while(0);
 
-    if (nullptr != err)
+    if(!l_isMpipl || !l_sbeExtend)
     {
-        // We failed to extend to this TPM we can no longer use it
-        // Mark TPM as not functional, commit err and set it to nullptr
-        tpmMarkFailed(l_primaryTpm, err);
+        if (nullptr != err)
+        {
+            // We failed to extend to this TPM we can no longer use it
+            // Mark TPM as not functional, commit err and set it to nullptr
+            tpmMarkFailed(l_primaryTpm, err);
+        }
+
+        // Do Separators For All PCRs on i_tpm_target.
+        pcrExtendSeparator(l_primaryTpm,
+                        false, // false: do NOT extend to TPM
+                        true); // true: do extend to SW Log
     }
-
-    // Do Separators For All PCRs on i_tpm_target.
-    pcrExtendSeparator(l_primaryTpm,
-                       false, // false: do NOT extend to TPM
-                       true); // true: do extend to SW Log
-
 
     TRACUCOMP(g_trac_trustedboot, EXIT_MRK "synchronizePrimaryTpmLogs()");
 
