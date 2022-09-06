@@ -100,7 +100,7 @@ void applySbeCapabilities(TargetHandle_t i_target,
     TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
               "SBE supports Hostboot requested halt status reporting: %d",
               sbeSupportsHaltReporting);
-/*
+
     // SBE support for TPM Extend Mode as of version 2.1 or later.
     const uint8_t sbeSupportsTpmExtendMode =
         (   (   (i_capabilities.majorVersion == 2)
@@ -117,7 +117,7 @@ void applySbeCapabilities(TargetHandle_t i_target,
     TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
               "SBE supports TPM Extend Mode: %d",
               sbeSupportsTpmExtendMode);
-*/
+
 }
 
 /**
