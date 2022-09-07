@@ -3491,6 +3491,18 @@ fapi2::ReturnCode init_phy_structs( const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
 
         io_user_input_advanced.D5DisableRetraining      = 0x0000;
 
+        io_user_input_advanced.DFIPHYUPDCNT             = 0b0111;
+        io_user_input_advanced.DFIPHYUPDRESP            = 0b000;
+        io_user_input_advanced.Nibble_ECC               = 0x0; // Setup to be a DDIMM
+        io_user_input_advanced.NoX4onUpperNibble_Override = 0; // Do not use
+        io_user_input_advanced.NoX4onUpperNibbleTg[0] = 0; // Currently disabled -> see override setting
+        io_user_input_advanced.NoX4onUpperNibbleTg[1] = 0; // Currently disabled -> see override setting
+        io_user_input_advanced.NoX4onUpperNibbleTg[2] = 0; // Currently disabled -> see override setting
+        io_user_input_advanced.NoX4onUpperNibbleTg[3] = 0; // Currently disabled -> see override setting
+
+        io_user_input_advanced.EnableMAlertAsync = 1; // Per the design team, we should be in Async mode
+        io_user_input_advanced.Dfi1Active = 1; // DFI1 is active
+        io_user_input_advanced.Num_Logical_Ranks = 0; // Appeares to be unused in the PHY init code and only needed for 3DS
     }
 
     // DRAM input structure
