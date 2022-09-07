@@ -49,5 +49,16 @@ namespace PLDM
 errlHndl_t handleGetPldmAttrDumpRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
                                         const pldm_mctp_message& i_msg);
 
+/* @brief handleHtmgtRequest
+ *
+ *        Handler for intercepting the HTMGT requests from BMC.
+ *
+ * @param[in] i_msgQ          Handle to the MCTP outbound message queue
+ * @param[in] i_msg           Request message object
+ * @return    errlHndl_t      Error if any, otherwise nullptr.
+ */
+errlHndl_t handleHtmgtRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
+                              const pldm_mctp_message& i_msg);
+
 } // namespace PLDM
 #endif
