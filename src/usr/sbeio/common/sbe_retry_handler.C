@@ -156,7 +156,8 @@ SbeRetryHandler::SbeRetryHandler(TARGETING::Target * const i_proc,
 , iv_sbeTestMode(SBE_FORCED_TEST_PATH::TEST_ERROR_RECOVERED)
 #endif
 {
-    SBE_TRACF(ENTER_MRK "SbeRetryHandler::SbeRetryHandler()");
+    SBE_TRACF(ENTER_MRK "SbeRetryHandler::SbeRetryHandler() proc %08X, sbe_mode %X, restart %X",
+        get_huid(i_proc), i_sbeMode, i_restartMethod);
 
     // Initialize members that have no default initialization
     iv_sbeRegister.reg = 0;
@@ -170,8 +171,21 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
 {
     SBE_TRACF(ENTER_MRK "main_sbe_handler()");
 
-#if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
-    const auto old_hreset_states = PLDM::notifyBeginSbeHreset(iv_proc);
+    TARGETING::Target* l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+    bool isMpIpl = l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
+
+    bool isRuntimeOrMpIpl = isMpIpl;
+#if defined(__HOSTBOOT_RUNTIME)
+    isRuntimeOrMpIpl = true;
+#endif
+    SBE_TRACF("main_sbe_handler(): isRuntimeOrMpIpl = %d", isRuntimeOrMpIpl);
+
+#if defined(CONFIG_PLDM)
+    PLDM::sbe_hreset_states old_hreset_states;
+    if (isRuntimeOrMpIpl)
+    {
+        old_hreset_states = PLDM::notifyBeginSbeHreset(iv_proc);
+    }
 #endif
 
     do
@@ -244,16 +258,25 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             this->sbe_run_extract_rc();
 
 #if !defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
-            errlHndl_t dump_errl = PLDM::dumpSbe(iv_proc, iv_masterErrorLogPLID);
-
-            if (dump_errl)
+            // only dumpSbe if not runtime or last resort for MPIPL (ie NO_RECOVERY_ACTION is set)
+            if (!isMpIpl || (this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION) )
             {
-                SBE_TRACF("main_sbe_handler(1): SBE dump failed for processor 0x%08x, PLID 0x%08x",
-                          get_huid(iv_proc), iv_masterErrorLogPLID);
-                dump_errl->collectTrace("ISTEPS_TRACE");
-                dump_errl->collectTrace(SBEIO_COMP_NAME);
-                dump_errl->plid(iv_masterErrorLogPLID);
-                errlCommit(dump_errl, SBEIO_COMP_ID);
+                errlHndl_t dump_errl = PLDM::dumpSbe(iv_proc, iv_masterErrorLogPLID);
+
+                if (dump_errl)
+                {
+                    SBE_TRACF("main_sbe_handler(1): SBE dump failed for processor 0x%08x, PLID 0x%08x",
+                              get_huid(iv_proc), iv_masterErrorLogPLID);
+                    dump_errl->collectTrace("ISTEPS_TRACE");
+                    dump_errl->collectTrace(SBEIO_COMP_NAME);
+                    dump_errl->plid(iv_masterErrorLogPLID);
+                    errlCommit(dump_errl, SBEIO_COMP_ID);
+                }
+            }
+            else
+            {
+                SBE_TRACF("main_sbe_handler(1): Skipping PLDM::dumpSbe(0x%08X, 0x%08x) currentAction = %d",
+                    get_huid(iv_proc), iv_masterErrorLogPLID, this->iv_currentAction);
             }
 #endif
         }
@@ -277,7 +300,7 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
         // access mode into PIB_ACCESS.  Do this after we read the hw
         // regs in extract_rc and the sbe dump, but before we take
         // any actions ourselves.
-        if( this->iv_initialPowerOn )
+        if( this->iv_initialPowerOn && !isMpIpl )
         {
             l_errl = SPI::spiSetAccessMode(iv_proc, SPI::FSI_ACCESS);
             if (l_errl)
@@ -319,7 +342,7 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             //
             //        ERROR_RECOVERED    = 0,
             //           - We should never hit this, if we have recovered then
-            //             curreState should be RUNTIME
+            //             currState should be RUNTIME
             //        RESTART_SBE        = 1,
             //        RESTART_CBS        = 2,
             //           - We will not listen to p10_extract_rc on HOW to restart the
@@ -746,7 +769,7 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
 #ifndef __HOSTBOOT_RUNTIME
                 // If something is wrong w/ the SBE during IPL time on a FSP based system then
                 // we will always TI and let hwsv deal with the problem.
-                if(INITSERVICE::spBaseServicesEnabled())
+                if(!isMpIpl && INITSERVICE::spBaseServicesEnabled())
                 {
                     // If this is the initial power on there will be no logs that point out this fail
                     // so we need to create one now
@@ -952,16 +975,25 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                     this->sbe_run_extract_rc();
 
 #if !defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
-                    errlHndl_t dump_errl = PLDM::dumpSbe(iv_proc, iv_masterErrorLogPLID);
-
-                    if (dump_errl)
+                    // only call dumpSbe if not runtime or last resort for MPIPL (ie NO_RECOVERY_ACTION is set)
+                    if ( !isMpIpl || (this->iv_currentAction == P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION) )
                     {
-                        SBE_TRACF("main_sbe_handler(2): SBE dump failed for processor 0x%08x, PLID 0x%08x",
-                                  get_huid(iv_proc), iv_masterErrorLogPLID);
-                        dump_errl->collectTrace("ISTEPS_TRACE");
-                        dump_errl->collectTrace(SBEIO_COMP_NAME);
-                        dump_errl->plid(iv_masterErrorLogPLID);
-                        errlCommit(dump_errl, SBEIO_COMP_ID);
+                        errlHndl_t dump_errl = PLDM::dumpSbe(iv_proc, iv_masterErrorLogPLID);
+
+                        if (dump_errl)
+                        {
+                            SBE_TRACF("main_sbe_handler(2): SBE dump failed for processor 0x%08x, PLID 0x%08x",
+                                      get_huid(iv_proc), iv_masterErrorLogPLID);
+                            dump_errl->collectTrace("ISTEPS_TRACE");
+                            dump_errl->collectTrace(SBEIO_COMP_NAME);
+                            dump_errl->plid(iv_masterErrorLogPLID);
+                            errlCommit(dump_errl, SBEIO_COMP_ID);
+                        }
+                    }
+                    else
+                    {
+                        SBE_TRACF("main_sbe_handler(2): Skipping PLDM::dumpSbe(0x%08X, 0x%08x) while in MPIPL mode and currentAction = %d",
+                            get_huid(iv_proc), iv_masterErrorLogPLID, this->iv_currentAction);
                     }
 #endif
                 }
@@ -1021,23 +1053,26 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
 
     }while(0);
 
-#if defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
-    TARGETING::ATTR_CURRENT_SBE_HRESET_STATUS_type op_result = 0;
-
-    if (isSbeAtRuntime())
+#if defined(CONFIG_PLDM)
+    if (isRuntimeOrMpIpl)
     {
-        SBE_TRACF("main_sbe_handler: HRESET on processor 0x%08x succeeded", get_huid(iv_proc));
+        TARGETING::ATTR_CURRENT_SBE_HRESET_STATUS_type op_result = 0;
 
-        op_result = TARGETING::SBE_HRESET_STATUS_READY;
+        if (isSbeAtRuntime())
+        {
+            SBE_TRACF("main_sbe_handler: HRESET on processor 0x%08x succeeded", get_huid(iv_proc));
+
+            op_result = TARGETING::SBE_HRESET_STATUS_READY;
+        }
+        else
+        {
+            SBE_TRACF("main_sbe_handler: HRESET on processor 0x%08x failed", get_huid(iv_proc));
+
+            op_result = TARGETING::SBE_HRESET_STATUS_FAILED;
+        }
+
+        PLDM::notifyEndSbeHreset(iv_proc, op_result, old_hreset_states);
     }
-    else
-    {
-        SBE_TRACF("main_sbe_handler: HRESET on processor 0x%08x failed", get_huid(iv_proc));
-
-        op_result = TARGETING::SBE_HRESET_STATUS_FAILED;
-    }
-
-    PLDM::notifyEndSbeHreset(iv_proc, op_result, old_hreset_states);
 #endif
 
     SBE_TRACF(EXIT_MRK"main_sbe_handler: iv_switchSidesCount=%llx iv_switchSidesCount_mseeprom=%llx "
