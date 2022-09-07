@@ -881,6 +881,10 @@ bool logDataParse( ErrlUsrParser & i_parser, void * i_buffer,
             rc = parseL3LineDeleteFfdc(i_buffer, i_buflen, i_parser, i_ver);
             break;
 
+        case ErrlScratchSig:
+            rc = parseScratchSig(i_buffer, i_buflen, i_parser, i_ver);
+            break;
+
         default:
             printUnknown( i_parser, i_ver, i_sst );
             i_parser.PrintHexDump(i_buffer, i_buflen);

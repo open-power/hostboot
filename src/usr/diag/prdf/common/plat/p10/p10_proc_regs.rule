@@ -813,3 +813,25 @@
         scomaddr    0x00040033;
         capture     group TODReg;
     };
+
+    ############################################################################
+    # Hostboot Scratch Regs (for error signature storing)
+    ############################################################################
+
+    # Note: These registers will be captured manually in the ErrlScratchSig
+    #       section of the error log so they will not be added to a capture
+    #       group here.
+    register HB_SCRATCH_9
+    {
+        name        "Hostboot Scratch 9";
+        scomaddr    0x00050180;
+        capture     group never;
+    };
+
+    register HB_SCRATCH_10
+    {
+        name        "Hostboot Scratch 10";
+        scomaddr    0x00050181;
+        capture     group never;
+    };
+

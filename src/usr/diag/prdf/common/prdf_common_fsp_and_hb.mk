@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2016
+# Contributors Listed Below - COPYRIGHT 2014,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -81,6 +81,7 @@ prd_obj += prdfAssert.o
 prd_obj += prdfBitKey.o
 prd_obj += prdfBitString.o
 prd_obj += prdfErrlSmartPtr.o
+prd_obj += prdfErrorSignature.o
 prd_obj += prdfFilters.o
 prd_obj += prdfRegisterData.o
 prd_obj += prdfThresholdUtils.o
