@@ -51,6 +51,7 @@
 #include <util/misc.H>
 #include <sbe/sbeif.H>
 #include <isteps/istep_reasoncodes.H>
+#include <console/consoleif.H>
 
 #ifndef __HOSTBOOT_RUNTIME
 #include <vfs/vfs.H> // module_is_loaded
@@ -98,13 +99,23 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
                                     bool* const            o_unsupportedOp)
 
 {
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
+    errlHndl_t initialErrl = nullptr;
+
     static mutex_t l_psuOpMux = MUTEX_INITIALIZER;
     bool l_needUnlock = false;
+    bool l_retryCmd = false;
 
     SBE_TRACD(ENTER_MRK "performPsuChipOp");
 
     o_unsupportedOp && (*o_unsupportedOp = false);
+
+    // Retry MPIPL SBE response failure
+    TARGETING::Target* l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+    if (l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+    {
+        l_retryCmd = true;
+    }
 
     do
     {
@@ -191,16 +202,52 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
             break;
         }
 
+        // If retrying the command is an option, then just
+        // return an error log without any actions
+        bool l_justErrl = l_retryCmd;
+
         // read PSU response and check results
         errl = checkResponse(i_target,
                              i_pPsuRequest,
                              iv_psuResponse,
                              i_timeout,
-                             i_rspMsgs);
+                             i_rspMsgs,
+                             l_justErrl);
         if (errl)
         {
-            SBE_TRACF(ERR_MRK"performPsuChipOp::"
-                      " checkResponse returned an error");
+            SBE_TRACF(ERR_MRK"performPsuChipOp::checkResponse returned an error");
+            if (l_retryCmd && (initialErrl == nullptr))
+            {
+#ifndef __HOSTBOOT_RUNTIME
+                if (VFS::module_is_loaded("libfapi2.so"))
+                {
+                    SBE_TRACF("performPsuChipOp:: Attempting an HRESET to recover from error");
+
+                    SbeRetryHandler l_SBEobj = SbeRetryHandler(
+                        i_target,
+                        SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                        SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                        errl->plid(),
+                        NOT_INITIAL_POWERON);
+
+                    l_SBEobj.main_sbe_handler();
+
+                    initialErrl = errl;
+                    errl = nullptr; // allows the continue to work
+                    initialErrl->collectTrace(SBEIO_COMP_NAME);
+
+                    l_retryCmd = false;
+                    if( l_needUnlock )
+                    {
+                        mutex_unlock(&l_psuOpMux);
+                        l_needUnlock = false;
+                    }
+                    SBE_TRACF("performPsuChipOp:: now retry the failed command (0x%X)",
+                        i_pPsuRequest->command);
+                    continue;
+                }
+#endif
+            }
             break;  // return with error
         }
 
@@ -298,13 +345,33 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
                 errl = nullptr;
             }
         }
+        // made it to the end without an error
+        break; // exit do-while loop
     }
-    while (0);
+    while (errl == nullptr); // necessary for continue to work
 
     if( errl )
     {
         errl->collectTrace(SBEIO_COMP_NAME);
     }
+
+    if( initialErrl && errl)
+    {
+        // commit last error and return initial one
+        errl->plid(initialErrl->plid());
+        errlCommit(errl, SBEIO_COMP_ID);
+        errl = initialErrl;
+        initialErrl = nullptr;
+    }
+    else if( initialErrl)
+    {
+        SBE_TRACF("performPsuChipOp: successfully recovered from RC %X",
+            ERRL_GETRC_SAFE(initialErrl));
+        // set recovered error
+        initialErrl->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+        errlCommit(initialErrl, SBEIO_COMP_ID);
+    }
+
 
     MAGIC_INST_SET_LOG_LEVEL(PIB_PSU, LOG_LEVEL_OFF);
     MAGIC_INST_SET_LOG_LEVEL(SBE_INT_BO, LOG_LEVEL_OFF);
@@ -370,12 +437,12 @@ errlHndl_t SbePsu::processEarlyError()
 
     if (earlyError())
     {
-        SBE_TRACF(ERR_MRK"processEarlyError: early error occurred"
-                  ", plid=0x%X, target huid=0x%X",
+        SBE_TRACF(ERR_MRK"processEarlyError: early error occurred, "
+                  "plid=0x%08X, target huid=0x%08X",
                   iv_earlyErrorEid, TARGETING::get_huid(iv_earlyErrorTarget));
         SbeRetryHandler l_SBEobj = SbeRetryHandler(
             iv_earlyErrorTarget,
-            SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
+            SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
             SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
             iv_earlyErrorEid,
             NOT_INITIAL_POWERON);
@@ -641,7 +708,8 @@ errlHndl_t SbePsu::checkResponse(TARGETING::Target  * i_target,
                                  psuCommand         * i_pPsuRequest,
                                  psuResponse        * o_pPsuResponse,
                                  const uint64_t       i_timeout,
-                                 uint8_t              i_rspMsgs)
+                                 uint8_t              i_rspMsgs,
+                                 bool                 i_justReturnError)
 {
     errlHndl_t errl = NULL;
 
@@ -650,7 +718,7 @@ errlHndl_t SbePsu::checkResponse(TARGETING::Target  * i_target,
     do
     {
         //wait for request to be completed
-        errl = pollForPsuComplete(i_target,i_timeout,i_pPsuRequest);
+        errl = pollForPsuComplete(i_target,i_timeout,i_pPsuRequest, i_justReturnError);
         if (errl)
         { break; }  // return with error
 
@@ -791,9 +859,10 @@ errlHndl_t SbePsu::checkResponse(TARGETING::Target  * i_target,
  */
 errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                                       const uint64_t i_timeout,
-                                      psuCommand* i_pPsuRequest)
+                                      psuCommand* i_pPsuRequest,
+                                      bool i_justErrl)
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     SBE_TRACD(ENTER_MRK "pollForPsuComplete");
     uint64_t l_elapsed_time_ns = 0;
 
@@ -912,13 +981,26 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                                           HWAS::GARD_NULL );
                     ERRORLOG::errlCommit( l_errl, SBEIO_COMP_ID );
                 }
-                //On open power systems we want to deconfigure the processor
+                //On open power systems we want to deconfigure the processor (if not MPIPL state)
                 else
                 {
-                    l_errl->addHwCallout( i_target,
-                                          HWAS::SRCI_PRIORITY_HIGH,
-                                          HWAS::DELAYED_DECONFIG,
-                                          HWAS::GARD_NULL );
+                    TARGETING::Target* l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+                    if (l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+                    {
+                        SBE_TRACF("MPIPL mode, so no deconfig of processor");
+                        l_errl->addHwCallout( i_target,
+                                              HWAS::SRCI_PRIORITY_HIGH,
+                                              HWAS::NO_DECONFIG,
+                                              HWAS::GARD_NULL );
+
+                    }
+                    else
+                    {
+                        l_errl->addHwCallout( i_target,
+                                              HWAS::SRCI_PRIORITY_HIGH,
+                                              HWAS::DELAYED_DECONFIG,
+                                              HWAS::GARD_NULL );
+                    }
                 }
 
 #ifndef __HOSTBOOT_RUNTIME
@@ -929,6 +1011,12 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                     // be logged.
                     SBE_TRACF("Timeout error saved until fapi is loaded.");
                     saveEarlyError(l_errPlid, i_target);
+                }
+                else if (i_justErrl)
+                {
+                    // don't do any recovery here, just return the error
+                    SBE_TRACF("pollForPsuComplete - just returning error PLID %X, RC %X",
+                        ERRL_GETPLID_SAFE(l_errl), ERRL_GETRC_SAFE(l_errl));
                 }
                 else
 #endif //__HOSTBOOT_RUNTIME

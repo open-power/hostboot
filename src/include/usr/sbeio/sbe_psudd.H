@@ -1325,6 +1325,7 @@ class SbePsu
          * @param[out] o_pPsuResponse Pointer to PSU response
          * @param[in]  i_timeout      Time out for response
          * @param[in]  i_rspMsgs      4 bit mask telling which regs to read
+         * @param[in]  i_justErrl     Just return failure log without actions taken
          *
          * @return errlHndl_t Error log handle on failure.
          */
@@ -1332,19 +1333,22 @@ class SbePsu
                                 psuCommand         * i_pPsuRequest,
                                 psuResponse        * o_pPsuResponse,
                                 const uint64_t       i_timeout,
-                                uint8_t              i_rspMsgs);
+                                uint8_t              i_rspMsgs,
+                                bool                 i_justErrl);
         /**
          * @brief Poll for response ready to be read
          *
          * @param[in]  i_target       Master proc to use for scoms
          * @param[in]  i_timeout      Time out for response
          * @param[in]  i_pPsuRequest  PSU request (for FFDC)
+         * @param[in]  i_justErrl     Just return failure log without actions taken
          *
          * @return errlHndl_t Error log handle on failure.
          */
         errlHndl_t pollForPsuComplete(TARGETING::Target * i_target,
                                       const uint64_t i_timeout,
-                                      psuCommand* i_pPsuRequest);
+                                      psuCommand* i_pPsuRequest,
+                                      bool i_justErrl);
         /**
          * @brief Read Scom wrapper
          *
