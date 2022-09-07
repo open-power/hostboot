@@ -89,6 +89,11 @@
         "description": "TOD FSM Register",
         "name": "TOD_FSM_REGISTER"
     },
+    "0x13f4": {
+        "address": "0x0000000000050180",
+        "description": "Hostboot Scratch 9",
+        "name": "HB_SCRATCH_9"
+    },
     "0x15fa": {
         "address": "0x0000000002040003",
         "description": "N0 Chiplet Unit Checkstop FIR",
@@ -348,6 +353,11 @@
         "address": "0x0000000003040107",
         "description": "P10 chip N1_LOCAL_FIR ACT1",
         "name": "N1_LOCAL_FIR_ACT1"
+    },
+    "0x43e4": {
+        "address": "0x0000000000050181",
+        "description": "Hostboot Scratch 10",
+        "name": "HB_SCRATCH_10"
     },
     "0x44be": {
         "address": "0x0000000002040109",

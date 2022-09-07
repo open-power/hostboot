@@ -461,6 +461,26 @@ bool parseL3LineDeleteFfdc(void* i_buffer, uint32_t i_buflen,
     return false; // TODO: eventually will remove, but keeping for debug.
 }
 
+bool parseScratchSig(void* i_buffer, uint32_t i_buflen, ErrlUsrParser& i_parser,
+                     errlver_t)
+{
+    bool rc = true;
+
+    uint32_t chipId = 0;
+    uint32_t sigId  = 0;
+
+    BufferReadStream ffdc{i_buffer, i_buflen};
+
+    ffdc >> chipId
+         >> sigId;
+
+    char sig[72];
+    snprintf( sig, 72, "0x%08x 0x%08x", chipId, sigId );
+    i_parser.PrintString("HB Scratch Reg Signature:", sig);
+
+    return rc;
+}
+
 #if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
 } // end namespace FSP/HOSTBOOT
 #endif

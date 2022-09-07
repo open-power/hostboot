@@ -73,6 +73,7 @@ enum ErrlSubsect
     // data sections for FFDC at 70.
     ErrlL2LineDeleteFfdc = 70,
     ErrlL3LineDeleteFfdc = 71,
+    ErrlScratchSig       = 72,
 };
 
 struct MsDumpStruct

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -183,7 +183,25 @@ class ErrorSignature
     void TraceSignature() const
     {
         PRDF_INF( "PRD Signature %08X %08X", getChipId(), getSigId() );
+
+        #ifdef __HOSTBOOT_MODULE
+        // Any time the signature is updated, write the HB scratch regs
+        writeScratch();
+        #endif
     }
+
+    #ifdef __HOSTBOOT_MODULE
+    /**
+     * @brief Write the current signature to the specified Hostboot scratch
+     *        registers: 0x00050180 (scratch 9) and 0x00050181 (scratch 10).
+     * @note This is intended to workaround an issue in analysis if a system
+     *       would checkstop during FIR analysis at the time when PRD had
+     *       cleared and masked the attention, but had not yet committed the
+     *       log. This way, the signature of the otherwise lost analysis is
+     *       saved.
+     */
+    void writeScratch() const;
+    #endif
 
     uint32_t iv_chipId;  ///< 32-bit representation of a chip
     uint16_t iv_regId;   ///< 16-bit register ID

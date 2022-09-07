@@ -278,6 +278,57 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     updateSrc( esig->getChipId(), SrcWord7, esig->getSigId(),
                SrcWord9, PRD_Reason_Code);
 
+    #ifndef __HOSTBOOT_MODULE
+    // Check the HB scratch registers for data. If there exists non-zero values
+    // store those in the FFDC.
+    TargetHandle_t procTrgt = getMasterProc();
+    ExtensibleChip * proc = (ExtensibleChip *)systemPtr->GetChip(procTrgt);
+
+    uint32_t chipId = 0;
+    uint32_t sigId = 0;
+
+    //  Read scratch 9
+    SCAN_COMM_REGISTER_CLASS * scratch9 = proc->getRegister("HB_SCRATCH_9");
+    uint32_t scom_rc = scratch9->Read();
+    if ( SUCCESS != scom_rc )
+    {
+        PRDF_ERR("Read() failed on HB_SCRATCH_9 proc=0x%08x", proc->getHuid());
+    }
+    else
+    {
+        chipId = scratch9->GetBitFieldJustified(0, 32);
+    }
+
+    // Read scratch 10
+    SCAN_COMM_REGISTER_CLASS * scratch10 = proc->getRegister("HB_SCRATCH_10");
+    scom_rc = scratch10->Read();
+    if ( SUCCESS != scom_rc )
+    {
+        PRDF_ERR("Read() failed on HB_SCRATCH_10 proc=0x%08x", proc->getHuid());
+    }
+    else
+    {
+        sigId = scratch10->GetBitFieldJustified(0, 32);
+    }
+
+    // If the data is non-zero, add it to the FFDC
+    if ( chipId || sigId )
+    {
+        auto buf = std::make_shared<FfdcBuffer>(ErrlScratchSig, ErrlVer1, 8);
+        (*buf) << chipId // 4 bytes
+               << sigId; // 4 bytes
+
+        if (!buf->good())
+        {
+            PRDF_ERR("ErrlScratchSig: Buffer state bad. Data may be "
+                     "incomplete.");
+        }
+
+        io_sdc.getFfdc().push_back(buf);
+    }
+
+    #endif
+
     //**************************************************************
     //  Add SDC Capture data to Error Log User Data here only if
     //    there are 4 or more callouts,
@@ -684,6 +735,34 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         // Commit the error log.
         commitErrLog( iv_errl, pfaData );
     }
+
+    // Now that the error log has been committed, clear the HB scratch regs that
+    // contain the error signature
+    #ifdef __HOSTBOOT_MODULE
+    TargetHandle_t procTrgt = getMasterProc();
+    ExtensibleChip * proc = (ExtensibleChip *)systemPtr->GetChip(procTrgt);
+
+    //  Clear scratch 9
+    SCAN_COMM_REGISTER_CLASS * scratch9 = proc->getRegister("HB_SCRATCH_9");
+    scratch9->clearAllBits();
+    uint32_t rc = scratch9->Write();
+    if ( SUCCESS != rc )
+    {
+        PRDF_ERR( "Write() to clear failed on HB_SCRATCH_9 proc=0x%08x",
+                  proc->getHuid() );
+    }
+
+    // Clear scratch 10
+    SCAN_COMM_REGISTER_CLASS * scratch10 = proc->getRegister("HB_SCRATCH_10");
+    scratch10->clearAllBits();
+    rc = scratch10->Write();
+    if ( SUCCESS != rc )
+    {
+        PRDF_ERR( "Write() to clear failed on HB_SCRATCH_10 proc=0x%08x",
+                  proc->getHuid() );
+    }
+    #endif
+
 
 #ifndef __HOSTBOOT_MODULE
     errlHndl_t reg_errl = UtilReg::read ("prdf/RasServices", &sdcSaveFlags, sz_uint8);
