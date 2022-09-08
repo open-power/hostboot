@@ -195,6 +195,9 @@ class ccsTraits<mss::mc_type::EXPLORER>
             STAT_READ_MISCOMPARE = 0x1000000000000000,
             STAT_UE_SUE          = 0x0800000000000000,
 
+            // Bit positions 7
+            STAT_RCD_FAIL_RCD    = 0x8000000000000000,
+
             // If the fail type isn't one of these, we're hung
             STAT_HUNG = 0x0ull,
         };

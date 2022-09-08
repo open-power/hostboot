@@ -360,10 +360,18 @@ fapi2::ReturnCode fail_type<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::
                 .set_MC_TARGET(i_target),
                 "%s CCS FAIL UE or SUE Error", mss::c_str(i_target));
 
+    // Problem with RCD parity
+    FAPI_ASSERT(TT::STAT_RCD_FAIL_RCD != i_type,
+                fapi2::MSS_EXP_CCS_RCD_FAIL()
+                .set_FAIL_TYPE(i_type)
+                .set_MC_TARGET(i_target),
+                "%s CCS FAIL RCD PARITY Error", mss::c_str(i_target));
+
     // Problem with the CCS engine
     FAPI_ASSERT(TT::STAT_HUNG != i_type,
                 fapi2::MSS_EXP_CCS_HUNG().set_MC_TARGET(i_target),
                 "%s CCS appears hung", mss::c_str(i_target));
+
 fapi_try_exit:
     // Due to the PRD update, we need to check for FIR's
     // If any FIR's have lit up, this CCS fail could have been caused by the FIR

@@ -1185,6 +1185,29 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_EXP_CCS_RCD_FAIL</rc>
+    <description>
+        Indicates that an RCD fail occurred during CCS
+    </description>
+    <ffdc>FAIL_TYPE</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_EXP_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_EXP_CCS_HUNG_TRYING_TO_STOP</rc>
     <description>
         CCS failed to return from in-progress status while trying to stop a previous program
