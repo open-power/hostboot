@@ -43,6 +43,16 @@
 #include <p10_read_xram.H>
 #include <p10_pm_ocb_indir_setup_linear.H>
 #include <p10_pm_ocb_indir_setup_circular.H>
+#include <p10_hcd_memmap_occ_sram.H>
+#include <p10_hcd_memmap_qme_sram.H>
+
+/// @brief Misc constants useful for HWP
+enum
+{
+    PGPE_SRAM_END_ADDR  = ( PGPE_SRAM_BASE_ADDR + OCC_SRAM_PGPE_REGION_SIZE ),
+    XGPE_SRAM_END_ADDR  = ( XGPE_SRAM_BASE_ADDR + OCC_SRAM_XGPE_REGION_SIZE ),
+    QME_SRAM_END_ADDR   = ( QME_SRAM_BASE_ADDR  + QME_SRAM_SIZE ),
+};
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -60,6 +70,9 @@ fapi2::ReturnCode p10_getsram(
 
     FAPI_DBG("p10_getsram: PervChipletId 0x%.8X, i_mode 0x%.2X, i_offset %p, i_bytes %u.",
              i_pervChipletId, i_mode, i_offset, i_bytes);
+
+    //Let us determine it is not Chip0 of IOSCM
+    auto l_funCoreList = i_target.getChildren< fapi2::TARGET_TYPE_CORE >();
 
     if ( (i_pervChipletId >= PAU0_PERV_CHIPLET_ID) && (i_pervChipletId <= PAU3_PERV_CHIPLET_ID) )
     {
@@ -79,6 +92,13 @@ fapi2::ReturnCode p10_getsram(
     }
     else if ( (i_pervChipletId >= EQ0_PERV_CHIPLET_ID) && (i_pervChipletId <= EQ7_PERV_CHIPLET_ID) )
     {
+        if((( i_offset >= QME_SRAM_BASE_ADDR ) && ( i_offset <= QME_SRAM_END_ADDR ) ) &&
+           ( 0 == l_funCoreList.size() ))
+        {
+            FAPI_INF( "Ignoring SRAM dump for QME on IOSCM system" );
+            goto fapi_try_exit;
+        }
+
         // Call QME PPE SRAM read HWP here
         for (auto& l_eq : i_target.getChildren<fapi2::TARGET_TYPE_EQ>())
         {
@@ -135,6 +155,20 @@ fapi2::ReturnCode p10_getsram(
     }
     else
     {
+        if((( i_offset >= PGPE_SRAM_BASE_ADDR ) && ( i_offset <= PGPE_SRAM_END_ADDR ) ) &&
+           ( 0 == l_funCoreList.size() ))
+        {
+            FAPI_INF( "Ignoring SRAM dump for PGPE on IOSCM system" );
+            goto fapi_try_exit;
+        }
+
+        if((( i_offset >= XGPE_SRAM_BASE_ADDR ) && ( i_offset <= XGPE_SRAM_END_ADDR ) ) &&
+           ( 0 == l_funCoreList.size() ))
+        {
+            FAPI_INF( "Ignoring SRAM dump for XGPE on IOSCM system" );
+            goto fapi_try_exit;
+        }
+
         // Validate OCC mode (bits 0:1 of i_mode)
         uint8_t l_occMode = (i_mode >> MODE_OCC_ACCESS_MODE_BIT_SHIFT) & 0x3;
         FAPI_ASSERT( (l_occMode >= OCB_MODE_LOWER_LIMIT) &&
