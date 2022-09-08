@@ -470,6 +470,11 @@ hb_simsetup()
         EECACHE_PREBUILT=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt_dd2)`
         echo "cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt_dd2.bin.ecc"
         cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt_dd2.bin.ecc
+
+        # EECACHE to be used for MACHINE set as "bonito"
+        EECACHE_PREBUILT=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt_bonito)`
+        echo "cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt_bonito.bin.ecc"
+        cp ${EECACHE_PREBUILT} ${STANDALONE_SIMICS}/eecache_prebuilt_bonito.bin.ecc
         exit 0
 
     fi

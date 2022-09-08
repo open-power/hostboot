@@ -1004,7 +1004,7 @@ errlHndl_t eepromI2cRead ( TARGETING::Target * i_target,
             }
 
             // set to false so we don't attempt to lock the page mutex
-            // if there bytes remaining to be read
+            // if there are bytes remaining to be read
             l_lockMutex = false;
 
         } // while( l_readLenRemaining > 0 )

@@ -561,7 +561,8 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target *            i_target,
                                             o_match);
     }
     else if (  (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
-            || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM))
+            || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM)
+            || (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD))
     {
         l_err = SPD::cmpEecacheToEeprom(i_target,
                                         i_eepromType,
@@ -570,7 +571,7 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target *            i_target,
     }
     else
     {
-        assert(false, "Error, invalid EEPROM type 0x%x for target HUID 0x%X passed to cmpEecacheToEeprom",
+        assert(false, "Error, invalid EEPROM type 0x%X for target HUID 0x%X passed to cmpEecacheToEeprom",
                i_eepromType, get_huid(i_target));
     }
 
@@ -738,7 +739,6 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target       * i_target,
                               "VPD::ensureEepromCacheIsInSync: "
                               "Error checking for CACHE/ATTRIBUTE match for rec=%d,kw=%d",
                               rk.record, rk.keyword);
-                    break;
                 }
             }
             // Compare cache vs eeprom
@@ -756,11 +756,13 @@ errlHndl_t ensureEepromCacheIsInSync(TARGETING::Target       * i_target,
                               "VPD::ensureEepromCacheIsInSync: "
                               "Error checking for CACHE/HARDWARE match for rec=%d,kw=%d",
                               rk.record, rk.keyword);
-                    break;
                 }
             }
 
+            // update o_isInSync before breaking out on error
             o_isInSync = o_isInSync && l_match;
+            if( l_err ) { break; }
+
         }
         if( l_err ) { break; }
 

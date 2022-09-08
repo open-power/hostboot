@@ -231,7 +231,8 @@ bool isValidDimmType(uint8_t i_memType,
     {
         isValid = isValidDimmType(i_memType);
     }
-    else if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM)
+    else if ((i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM) ||
+             (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD))
     {
         isValid = isValidOcmbDimmType(i_memType);
     }
@@ -1615,13 +1616,9 @@ errlHndl_t getMemType(uint8_t &                  o_memType,
 // @TODO RTC 204341 Implement for runtime
 #ifndef __HOSTBOOT_RUNTIME
 
-    if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
-    {
-        err = getMemType(o_memType,
-                         i_target,
-                         i_eepromSource);
-    }
-    else if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM)
+    if ((i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM)  ||
+        (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM) ||
+        (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD))
     {
         err = getMemType(o_memType,
                          i_target,
@@ -2143,7 +2140,8 @@ errlHndl_t readFromEepromSource(TARGETING::Target*          i_target,
                           i_memType,
                           i_eepromSource);
     }
-    else if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM)
+    else if ((i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM) ||
+             (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD))
     {
         err = ocmbGetSPD(i_target,
                          io_buffer,

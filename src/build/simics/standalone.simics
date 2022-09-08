@@ -55,6 +55,8 @@ if ($hostboot_profile == FALSE) {
         } else {
             if ($standalone_test_dd1 == TRUE) {
                 $eccPreloadName = "eecache_prebuilt.bin.ecc"
+            } else if ($machine_name == "bonito") {
+                $eccPreloadName = "eecache_prebuilt_bonito.bin.ecc"
             } else {
                 $eccPreloadName = "eecache_prebuilt_dd2.bin.ecc"
             }
@@ -66,22 +68,12 @@ if ($hostboot_profile == FALSE) {
             }
         }
 
-        # TODO 297301
-        # once we have a good base PNOR image for bonito, need to save a copy off to use as EECACHE
-        # and remove this if condition
-        if ( $machine_name == "bonito") {
-            # force all the targs to read their spd/vpd from the HW files instead of
-            # using EECAHCE so that we start from the same sync point for Bonito
-            echo "    - Bonito EECACHE not set up yet - Skip Loading EECACHE - booting with blank EECACHE"
-        } else {
-            # NOTE must change offset if PNOR layout changes EECACHE offsets
-            echo "    - Loading EECACHE "+$eccPreload+" at 0x2C000 in PNOR"
-            try {
-                ($hb_pnor).load-file $eccPreload 0x2C000
-            } except {
-                echo "**** Unable to load "+$eccPreload+" - booting with blank EECACHE ****"
-            }
-
+        # NOTE must change offset if PNOR layout changes EECACHE offsets
+        echo "    - Loading EECACHE "+$eccPreload+" at 0x2C000 in PNOR"
+        try {
+            ($hb_pnor).load-file $eccPreload 0x2C000
+        } except {
+            echo "**** Unable to load "+$eccPreload+" - booting with blank EECACHE ****"
         }
 
     }
