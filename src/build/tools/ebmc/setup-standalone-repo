@@ -171,13 +171,32 @@ function cherrypick_standalone_patch ()
 
 function verify_config_file ()
 {
-    config=$(env | grep CONFIG_FILE | grep p10ebmc)
+    config=$(env | grep CONFIG_FILE | cut -d"=" -f2)
+
+    # See if the environment variable exists
     if [ -z "$config" ]; then
         echo ""
-        echo "User environment variable for CONFIG_FILE not setup for standalone patching... fixing."
+        echo "User environment variable for CONFIG_FILE not found... fixing."
         cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/openpower/configs/hostboot/p10ebmc.config $PROJECT_ROOT/
         export CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config
+        echo "Environment variable for config now set to:"
         echo $(env | grep CONFIG_FILE)
+    else
+        # Get the md5sums of each config file to see if they are the same. If not, we want to take the one from the build.
+        config_md5sum=$(md5sum $config | cut -d" " -f1)
+        build_config_md5sum=$(md5sum /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/openpower/configs/hostboot/p10ebmc.config | cut -d" " -f1)
+
+        if [ $config_md5sum = $build_config_md5sum ]; then
+            echo ""
+            echo "User CONFIG_FILE ( $config ) matches the build config file. Not copying the config from the build over."
+        else
+            echo ""
+            echo "User config file $config DOES NOT match the build config file. Replacing with the one from the build."
+            cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/openpower/configs/hostboot/p10ebmc.config $PROJECT_ROOT/
+            export CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config
+            echo "Environment variable for config now set to:"
+            echo $(env | grep CONFIG_FILE)
+        fi
     fi
 }
 
@@ -338,7 +357,13 @@ function main ()
 
     if [ "$xml_only" == false ]; then
         verify_config_file
+        # Remind the user of their responsibilities. Put this notice here so it's not seen when doing copy-only actions.
+        echo ""
+        echo "Repo has been setup for creating standalone patches for full system simulation and hardware."
+        echo "IMPORTANT: You must 'make clobber' your repo now and perform 'hb simsetup' and 'hb prime' actions."
+        echo "           Otherwise, your patches will be built incorrectly!"
     fi
+
 }
 
 # The user must source this script
