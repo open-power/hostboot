@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,7 +96,11 @@ class VPDInfo<TARGET_TYPE_OCMB_CHIP>
               iv_efd_type(VPD_INFO_INVALID_8),
               iv_dmb_mfg_id(VPD_INFO_INVALID_16),
               iv_dmb_revision(VPD_INFO_INVALID_8),
-              iv_ddr_mode(VPD_INFO_INVALID_8)
+              iv_ddr_mode(VPD_INFO_INVALID_8),
+              iv_dimm_count(VPD_INFO_INVALID_64),
+              iv_total_ranks_dimm0(VPD_INFO_INVALID_64),
+              iv_total_ranks_dimm1(VPD_INFO_INVALID_64),
+              iv_dimm_type(VPD_INFO_INVALID_64)
         {};
 
         // *** INPUT DATA ***
@@ -124,6 +128,25 @@ class VPDInfo<TARGET_TYPE_OCMB_CHIP>
         uint16_t iv_dmb_mfg_id;  // buffer manufacturer
         uint8_t iv_dmb_revision; // buffer revision
         uint8_t iv_ddr_mode;     // DDR4 or DDR5
+
+
+        // total number of DIMMs attached
+        uint64_t iv_dimm_count;
+
+        // total number of ranks on each of the DIMMs attached
+        uint64_t iv_total_ranks_dimm0;
+        uint64_t iv_total_ranks_dimm1;
+
+        // DIMM type encoding, matches 'DIMMs Supported' byte 7 in EFD:
+        // (bits numbered right to left)
+        // bit7: reserved, code as 0
+        // bit6: '1' if the DIMM is 3DS
+        // bit5: '1' if the DIMM supports DDP
+        // bit4: '1' if the DIMM supports quad rank mode
+        // bits3,2: b00 for UDIMM, b01 for RDIMM
+        // bit1: '1' for DIMM in slot 1
+        // bit0: '1' for DIMM in slot 0
+        uint64_t iv_dimm_type;
 };
 
 
