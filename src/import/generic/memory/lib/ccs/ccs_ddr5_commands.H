@@ -688,21 +688,35 @@ inline instruction_t<MC> des_command(const uint16_t i_idle = 0)
                               i_idle);
 }
 
+///
+/// @brief Create, initialize a NTTM read CCS command
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
+/// @return the Device Deselect CCS instruction
+/// @note need to setup 8 cycles delay
+///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> nttm_read_command()
+{
+    // This was a 4 on DDR4, so using an 8 for DDR5 (burst length is 2x as long on DDR5)
+    constexpr uint64_t IDLES = 8;
+
+    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr1;
+
+    l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::NOP);
+    l_boilerplate_arr1.template setBit<TT::NTTM_MODE_FORCE_READ>();
+
+    // Device Deslect wants CS_n always high (select nothing using rank NO_CHIP_SELECT_ACTIVE)
+    return instruction_t<MC>( NO_CHIP_SELECT_ACTIVE,
+                              l_boilerplate_arr0,
+                              l_boilerplate_arr1,
+                              IDLES);
+}
+
 // TK commands to add
-// NTTM
 // termination update for writes/reads
 // write data select/timing update/adds (it's weird for ODY + DDR5 CCS)
-#if 0
-    ///
-    /// @brief Create, initialize a NTTM read CCS command
-    /// @tparam MC The memory controller type of the traits
-    /// @tparam TT the CCS traits related to MC
-    /// @return the Device Deselect CCS instruction
-    /// @note need to setup 4 cycles delay
-    ///
-    template< mss::mc_type MC, typename TT = ccsTraits<MC> >
-    inline instruction_t<MC> nttm_read_command();
-#endif
 
 } // ends namespace ddr5
 } // ends namespace ccs
