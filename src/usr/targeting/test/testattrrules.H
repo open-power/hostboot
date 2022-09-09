@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,7 +84,6 @@ public:
           ATTR_MSS_VOLT_DDR4_VDDR_INTERCEPT_POST_DRAM_INIT, //deprecated
           ATTR_MRW_DDR4_VDDR_MAX_LIMIT_POST_DRAM_INIT, //deprecated
           ATTR_MSS_VOLT_DDR4_VDDR_SLOPE_POST_DRAM_INIT, //deprecated
-          ATTR_MNFG_FLAGS, //deprecated
 
           ATTR_PROC_FABRIC_TOPOLOGY_MODE, //make this readonly except on SBE
           ATTR_NO_XSCOM_ENFORCEMENT, //why is this writable?

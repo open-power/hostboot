@@ -189,12 +189,6 @@
     </attribute>
 
     <attribute>
-          <id>ATTR_MNFG_FLAGS</id>
-          <default>0x0000000000000000</default>
-          <writeable/>
-     </attribute>
-
-    <attribute>
           <id>ATTR_BOOT_FREQ_MHZ</id>
           <default>2400</default>
      </attribute>
