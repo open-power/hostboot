@@ -59,9 +59,10 @@ namespace mss
 
 const std::vector< uint64_t > frequency_traits<mss::proc_type::PROC_P10>::SUPPORTED_FREQS =
 {
-    mss::DIMM_SPEED_2666,
-    mss::DIMM_SPEED_2933,
-    mss::DIMM_SPEED_3200,
+    mss::DIMM_SPEED_2666, // DDR4 ONLY
+    mss::DIMM_SPEED_2933, // DDR4 ONLY
+    mss::DIMM_SPEED_3200, // DDR4 max + DDR5 min
+    mss::DIMM_SPEED_4000, // DDR5 ONLY -> p10's OMI limit is 32.0, so 4000 for DDR
 };
 
 ///
@@ -202,6 +203,7 @@ fapi2::ReturnCode callout_bad_freq_calculated<mss::proc_type::PROC_P10>(
     const auto FREQ0 = TT::SUPPORTED_FREQ0;
     const auto FREQ1 = TT::SUPPORTED_FREQ1;
     const auto FREQ2 = TT::SUPPORTED_FREQ2;
+    const auto FREQ3 = TT::SUPPORTED_FREQ3;
 
     // If we don't find a valid frequency OR don't get a 0 (nothing configured on this clock domain), then error out
     FAPI_ASSERT( std::binary_search(TT::SUPPORTED_FREQS.begin(), TT::SUPPORTED_FREQS.end(), i_final_freq) ||
@@ -212,7 +214,8 @@ fapi2::ReturnCode callout_bad_freq_calculated<mss::proc_type::PROC_P10>(
                  .set_PROC_TYPE(mss::proc_type::PROC_P10)
                  .set_SUPPORTED_FREQ_0(FREQ0)
                  .set_SUPPORTED_FREQ_1(FREQ1)
-                 .set_SUPPORTED_FREQ_2(FREQ2),
+                 .set_SUPPORTED_FREQ_2(FREQ2)
+                 .set_SUPPORTED_FREQ_3(FREQ3),
                  "%s: Calculated FREQ (%d) isn't supported",
                  mss::c_str(i_target),
                  i_final_freq);
@@ -397,6 +400,10 @@ fapi2::ReturnCode freq_support_bitmap_helper<mss::proc_type::PROC_P10>(
                     l_freq_bit = 2;
                     break;
 
+                case TT::SUPPORTED_FREQ3:
+                    l_freq_bit = 3;
+                    break;
+
                 default:
                     break;
             }
@@ -456,17 +463,43 @@ fapi2::ReturnCode callout_no_common_freq<mss::proc_type::PROC_P10>(
                 .set_PORT12_FREQ_SUPPORT(l_supported_freq_bitmap[12])
                 .set_PORT13_FREQ_SUPPORT(l_supported_freq_bitmap[13])
                 .set_PORT14_FREQ_SUPPORT(l_supported_freq_bitmap[14])
-                .set_PORT15_FREQ_SUPPORT(l_supported_freq_bitmap[15]),
+                .set_PORT15_FREQ_SUPPORT(l_supported_freq_bitmap[15])
+                .set_PORT16_FREQ_SUPPORT(l_supported_freq_bitmap[16])
+                .set_PORT17_FREQ_SUPPORT(l_supported_freq_bitmap[17])
+                .set_PORT18_FREQ_SUPPORT(l_supported_freq_bitmap[18])
+                .set_PORT19_FREQ_SUPPORT(l_supported_freq_bitmap[19])
+                .set_PORT20_FREQ_SUPPORT(l_supported_freq_bitmap[20])
+                .set_PORT21_FREQ_SUPPORT(l_supported_freq_bitmap[21])
+                .set_PORT22_FREQ_SUPPORT(l_supported_freq_bitmap[22])
+                .set_PORT23_FREQ_SUPPORT(l_supported_freq_bitmap[23])
+                .set_PORT24_FREQ_SUPPORT(l_supported_freq_bitmap[24])
+                .set_PORT25_FREQ_SUPPORT(l_supported_freq_bitmap[25])
+                .set_PORT26_FREQ_SUPPORT(l_supported_freq_bitmap[26])
+                .set_PORT27_FREQ_SUPPORT(l_supported_freq_bitmap[27])
+                .set_PORT28_FREQ_SUPPORT(l_supported_freq_bitmap[28])
+                .set_PORT29_FREQ_SUPPORT(l_supported_freq_bitmap[29])
+                .set_PORT30_FREQ_SUPPORT(l_supported_freq_bitmap[30])
+                .set_PORT31_FREQ_SUPPORT(l_supported_freq_bitmap[31]),
                 "%s didn't find a frequency that was supported on any ports. Freq support bitmap: "
-                "port0:0x%02X port1:0x%02X port2:0x%02X port3:0x%02X port4:0x%02X "
-                "port5:0x%02X port6:0x%02X port7:0x%02X port8:0x%02X port9:0x%02X "
-                "port10:0x%02X port11:0x%02X port12:0x%02X port13:0x%02X port14:0x%02X port15:0x%02X",
+                "port 0- 3:0x%02X 0x%02X 0x%02X 0x%02X "
+                "port 4- 7:0x%02X 0x%02X 0x%02X 0x%02X "
+                "port 8-11:0x%02X 0x%02X 0x%02X 0x%02X "
+                "port12-15:0x%02X 0x%02X 0x%02X 0x%02X "
+                "port16-19:0x%02X 0x%02X 0x%02X 0x%02X "
+                "port20-23:0x%02X 0x%02X 0x%02X 0x%02X "
+                "port24-27:0x%02X 0x%02X 0x%02X 0x%02X "
+                "port28-31:0x%02X 0x%02X 0x%02X 0x%02X",
                 mss::c_str(i_target), l_supported_freq_bitmap[0], l_supported_freq_bitmap[1],
                 l_supported_freq_bitmap[2], l_supported_freq_bitmap[3], l_supported_freq_bitmap[4],
                 l_supported_freq_bitmap[5], l_supported_freq_bitmap[6], l_supported_freq_bitmap[7],
                 l_supported_freq_bitmap[8], l_supported_freq_bitmap[9], l_supported_freq_bitmap[10],
                 l_supported_freq_bitmap[11], l_supported_freq_bitmap[12], l_supported_freq_bitmap[13],
-                l_supported_freq_bitmap[14], l_supported_freq_bitmap[15]);
+                l_supported_freq_bitmap[14], l_supported_freq_bitmap[15], l_supported_freq_bitmap[16],
+                l_supported_freq_bitmap[17], l_supported_freq_bitmap[18], l_supported_freq_bitmap[19],
+                l_supported_freq_bitmap[20], l_supported_freq_bitmap[21], l_supported_freq_bitmap[22],
+                l_supported_freq_bitmap[23], l_supported_freq_bitmap[24], l_supported_freq_bitmap[25],
+                l_supported_freq_bitmap[26], l_supported_freq_bitmap[27], l_supported_freq_bitmap[28],
+                l_supported_freq_bitmap[29], l_supported_freq_bitmap[30], l_supported_freq_bitmap[31]);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -510,6 +543,7 @@ fapi2::ReturnCode callout_max_freq_empty_set<mss::proc_type::PROC_P10>(
                            .set_OMI_FREQ_0(fapi2::ENUM_ATTR_FREQ_OMI_MHZ_21330)
                            .set_OMI_FREQ_1(fapi2::ENUM_ATTR_FREQ_OMI_MHZ_23460)
                            .set_OMI_FREQ_2(fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600)
+                           .set_OMI_FREQ_3(fapi2::ENUM_ATTR_FREQ_OMI_MHZ_32000)
                            .set_PORT_TARGET(l_port),
                            "%s didn't find a supported frequency for any ports in this domain", mss::c_str(l_port));
     }

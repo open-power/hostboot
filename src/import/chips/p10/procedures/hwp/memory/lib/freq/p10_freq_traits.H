@@ -88,6 +88,7 @@ class frequency_traits<mss::proc_type::PROC_P10>
         static constexpr uint64_t SUPPORTED_FREQ0 = DIMM_SPEED_2666;
         static constexpr uint64_t SUPPORTED_FREQ1 = DIMM_SPEED_2933;
         static constexpr uint64_t SUPPORTED_FREQ2 = DIMM_SPEED_3200;
+        static constexpr uint64_t SUPPORTED_FREQ3 = DIMM_SPEED_4000;
 };
 
 
