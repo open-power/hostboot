@@ -50,7 +50,6 @@
 #include <sbeio/sbeioif.H>
 #include <usr/vmmconst.h>
 #include <p10_build_smp.H>
-#include <p10_gen_fbc_rt_settings.H>
 
 #include <secureboot/trustedbootif.H>
 #include <secureboot/service.H>
@@ -626,8 +625,8 @@ void* call_proc_build_smp (void *io_pArgs)
     // a) Phase 1 build SMP
     // b) Halt all non-boot chip SBEs (legacy path)
     // c) Check for Secure Access mismatch via FSI to non-boot chips
-    // d) Call HWP to specifically enable SMP fabric (pb hotplug) (legacy path)
-    // d) Call TPM Extend Mode chip-op (new path)
+    // d) Legacy path: Call HWP to specifically enable SMP fabric (pb hotplug)
+    // d) New path: Call TPM Extend Mode chip-op
     //    1) Call sendSystemConfig to send system fabric map to SBE
     //    2) Reclaim all DMA buffers from the FSP
     //    3) Suspend the mailbox with interrupt disable
@@ -636,7 +635,7 @@ void* call_proc_build_smp (void *io_pArgs)
     //    6) Send TPM Extend Mode chip-op with Enter control flag
     //    7) Send TPM Extend Mode chip-op with Exit crontol flag
     //    8) Resume the mailbox
-    // Switch form SBESCOM to XSCOM
+    // Switch from SBESCOM to XSCOM
     // Call p10_build_smp HWP POST
     // Switch SPI access from FSI to PIB
     // New path: Get secondary measurements, don't extend to TPM
@@ -741,6 +740,7 @@ void* call_proc_build_smp (void *io_pArgs)
             }
         }
 
+        // b) Perform halt on all non-boot chip SBEs
         // On production signed firmware, always halt all secondary chip SBEs to
         // prevent security holes.  To avoid firmware update co-reqs,
         // on imprint signed firmware, halt all secondary chip SBEs unless one
@@ -779,7 +779,6 @@ void* call_proc_build_smp (void *io_pArgs)
                 break;
             }
 
-            // b) Halt all non-boot chip SBEs
             for (auto l_proc : l_secondaryProcsList)
             {
                 // send halt request
@@ -824,13 +823,13 @@ void* call_proc_build_smp (void *io_pArgs)
         else
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                "call_proc_build_smp: Skipped halting SBEs because firmware "
+                "call_proc_build_smp: Skipped halting SBEs because 1) Firmware "
                 "was imprint signed and one or more SBEs did not support "
-                "reporting Hostboot requested halts to service processor.");
+                "reporting Hostboot requested halts to service processor "
+                "2) The SBE firmware supports extending the TPM measurements.");
         }
 
         // c) Check for Secure Access mismatch via FSI to non-boot chips
-        //    Is this still required in the new path
         checkForSecurityAccessMismatch(l_secondaryProcsList, l_StepError);
         if (!l_StepError.isNull())
         {

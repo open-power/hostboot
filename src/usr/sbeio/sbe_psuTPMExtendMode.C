@@ -74,8 +74,8 @@ namespace SBEIO
         const uint32_t l_waitTimerMS = 10500;
         // Due to SBE protocol limitation, the wait timer cannot exceed 10500
         // or it will wrap around in the SBE
-        assert(l_waitTimerMS <= 10500,
-               "psuTPMExtendModeEnter waitTimerMS > 10500");
+        static_assert(l_waitTimerMS <= 10500,
+                      "psuTPMExtendModeEnter waitTimerMS > 10500");
 
         SBE_TRACF(ENTER_MRK
             "psuTPMExtendModeEnter: sending TPM Extend Mode from HB -> SBE ctrlFlags=0x%x waitTimerMS=%d on Proc 0x%x",

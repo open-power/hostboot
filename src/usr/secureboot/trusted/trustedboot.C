@@ -3110,11 +3110,15 @@ void synchronizePrimaryTpmLogs()
 
     do {
 
-    // Do not logMeasurementRegs if MPIPL and ATTR_SBE_HANDLES_SMP_TPM_EXTEND
-    // because SBE will take care of extending the secondary measurements into
-    // the boot chip TPM
+    // In MPIPL, ATTR_SBE_HANDLES_SMP_TPM_EXTEND=1 means the SBE will not reset
+    // through the normal SBE boot flow, thus SBE will skip resetting the TPM
+    // and skip measuring into that TPM. Since Hostboot has to match the
+    // hardware measurements with the software log, we have to skip whatever
+    // the SBE skips, so do not log measurement regs.
     if(l_isMpipl && l_sbeExtend)
     {
+        TRACFCOMP(g_trac_trustedboot,ERR_MRK"synchronizePrimaryTpmLogs(): "
+            "ATTR_IS_MPIPL_HB=1 and ATTR_SBE_HANDLES_SMP_TPM_EXTEND=1, do not log measurement regs");
         break;
     }
 
@@ -3174,8 +3178,13 @@ void synchronizePrimaryTpmLogs()
 
         // Do Separators For All PCRs on i_tpm_target.
         pcrExtendSeparator(l_primaryTpm,
-                        false, // false: do NOT extend to TPM
-                        true); // true: do extend to SW Log
+                           false, // false: do NOT extend to TPM
+                           true); // true: do extend to SW Log
+    }
+    else
+    {
+        TRACFCOMP(g_trac_trustedboot,ERR_MRK"synchronizePrimaryTpmLogs(): "
+            "ATTR_IS_MPIPL_HB=1 and ATTR_SBE_HANDLES_SMP_TPM_EXTEND=1, do not call pcrExtendSeparator");
     }
 
     TRACUCOMP(g_trac_trustedboot, EXIT_MRK "synchronizePrimaryTpmLogs()");
