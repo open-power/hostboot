@@ -81,9 +81,6 @@ errlHndl_t establish_boot_core( void )
 
     do {
         Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
-        ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
-          l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>();
-
         const Target* l_bootCore = getBootCore( );
 
         if (l_bootCore == nullptr)
@@ -196,7 +193,7 @@ errlHndl_t establish_boot_core( void )
                         l_replacementHuid = TARGETING::get_huid(l_core);
                         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                    "Found a viable bootcore at %.8X (functional)",
-                                   TARGETING::get_huid(l_bootCore) );
+                                   l_replacementHuid );
                         break;
                     }
                     else if( l_hwas.deconfiguredByEid ==
@@ -205,7 +202,7 @@ errlHndl_t establish_boot_core( void )
                         l_replacementHuid = TARGETING::get_huid(l_core);
                         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                                    "Found a viable bootcore at %.8X (FCO)",
-                                   TARGETING::get_huid(l_bootCore) );
+                                   l_replacementHuid );
                         break;
                     }
                 }
@@ -260,7 +257,7 @@ errlHndl_t establish_boot_core( void )
             }
 
             // If there isn't a reconfig loop triggered, we need to just fail
-            if( !(l_reconfigAttr & RECONFIGURE_LOOP_DECONFIGURE) )
+            if( !(l_pTopLevel->getAttr<ATTR_RECONFIGURE_LOOP>() & RECONFIGURE_LOOP_DECONFIGURE) )
             {
                 /*@
                  * @errortype
