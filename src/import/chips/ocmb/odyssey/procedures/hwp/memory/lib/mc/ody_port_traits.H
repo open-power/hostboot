@@ -39,6 +39,7 @@
 
 #include <fapi2.H>
 #include <ody_scom_ody.H>
+#include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/shared/ody_consts.H>
