@@ -30,16 +30,18 @@
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
+
 
 #include <fapi2.H>
 #include <ody_enable_ecc.H>
-
+#include <lib/mc/ody_port_traits.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port.H>
 
 extern "C"
 {
-
     ///
     /// @brief Enable ECC checking
     /// @param[in] i_target OCMB chip
@@ -47,7 +49,15 @@ extern "C"
     ///
     fapi2::ReturnCode ody_enable_ecc(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
-        return fapi2::FAPI2_RC_SUCCESS;
+        FAPI_INF(TARGTIDFORMAT " ody_enable_ecc: Entering...", TARGTID);
+
+        // Enable ecc checking
+        FAPI_TRY( mss::enable_read_ecc<mss::mc_type::ODYSSEY>(i_target), TARGTIDFORMAT "Failed enable_read_ecc", TARGTID );
+
+        FAPI_INF(TARGTIDFORMAT " ody_enable_ecc: Exiting...", TARGTID);
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 
 }
