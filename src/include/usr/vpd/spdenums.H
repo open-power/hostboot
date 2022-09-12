@@ -43,7 +43,6 @@ enum
 
 enum
 {
-    OCMB_SPD_BUFFER_SIZE_BYTES = 0x1C0, // 448 Bytes
     OCMB_SPD_EFD_COMBINED_SIZE = 0x800, // 2 KB
 };
 

@@ -44,8 +44,6 @@
 #include <i2c/i2c.H>
 #include <secureboot/service.H>
 
-#include <arch/magic.H>
-
 extern trace_desc_t* g_trac_i2c;
 
 // Easy macro replace for unit testing
@@ -259,13 +257,6 @@ class I2CTestIPL : public CxxTest::TestSuite
 
             do
             {
-                //TODO: RTC 297301
-                if (MAGIC_IS_BONITO())
-                {
-                    TRACFCOMP( g_trac_i2c, "Skipping testI2cForceReset for Bonito, "
-                               "device reads returns 0. Requires more investigation");
-                    break;
-                }
                 I2C::misc_args_t io_args;
 
                 uint64_t data = 0x0;
@@ -280,28 +271,40 @@ class I2CTestIPL : public CxxTest::TestSuite
                 if(procTarget->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
                 {
                     TRACFCOMP( g_trac_i2c, "testI2cForceReset- functional good path");
-                    // p/e/devvAddr 1/e/0xA0 routes to Dimm for P10 standalone and Bonito
-                    io_args.port = 0x1;
-                    io_args.engine = HOST_ENGINE_E;
-                    io_args.devAddr = 0xA0;
-                    io_args.switches.useHostI2C = 1;
-                    //get engine lock attr for engine 0
-                    //prevents sbe update test fails
+
+                    // get a child dimm of the proc to read/test on
+                    PredicateIsFunctional l_isFunc;
+                    PredicateCTM l_isDimm(CLASS_NA, TYPE_DIMM);
+                    PredicatePostfixExpr l_checkExprFuncDimm;
+                    l_checkExprFuncDimm.push(&l_isDimm)
+                                       .push(&l_isFunc)
+                                       .And();
+                    TargetHandleList l_funcDimms;
+                    tS.getAssociated(l_funcDimms,
+                                     procTarget,
+                                     TargetService::CHILD_BY_AFFINITY,
+                                     TargetService::ALL,
+                                     &l_checkExprFuncDimm);
+
+                    if (l_funcDimms.empty())
+                    {
+                        TS_FAIL("testI2cForceReset: no functional dimms under proc 0x%08X",
+                                get_huid(procTarget));
+                        break;
+                    }
 
                     size_t data_size = 8;
 
                     uint8_t offset = 0;
-                    err = deviceOp( DeviceFW::READ,
-                                    procTarget,
-                                    &data,
-                                    data_size,
-                                    DEVICE_I2C_ADDRESS_OFFSET( io_args.port,
-                                                               io_args.engine,
-                                                               io_args.devAddr,
-                                                               sizeof(offset),
-                                                               &offset,
-                                                               I2C_MUX::NOT_APPLICABLE,
-                                                               nullptr) );
+
+                    // deviceOp EEPROM READ to perform page ops if nessesary
+                    err = deviceOp(DeviceFW::READ,
+                                   l_funcDimms[0],
+                                   &data,
+                                   data_size,
+                                   DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
+                                                         offset,
+                                                         EEPROM::HARDWARE));
 
                     if(err)
                     {
@@ -319,6 +322,14 @@ class I2CTestIPL : public CxxTest::TestSuite
                     recursive_mutex_lock( engineLock );
 
                     //force reset
+                    ATTR_EEPROM_VPD_PRIMARY_INFO_type dimm_eeprom_info =
+                        l_funcDimms[0]->getAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>();
+
+                    io_args.port = dimm_eeprom_info.port;
+                    io_args.engine = dimm_eeprom_info.engine;
+                    io_args.devAddr = dimm_eeprom_info.devAddr;
+                    io_args.switches.useHostI2C = 1;
+
                     err = I2C::i2cReset(procTarget,
                                         io_args,
                                         I2C::FORCE_UNLOCK_RESET);
@@ -328,32 +339,31 @@ class I2CTestIPL : public CxxTest::TestSuite
                     //if there was an error for a reason commit it
                     if(err)
                     {
-                        TS_FAIL("I2C reset failed");
+                        TS_FAIL("testI2cForceReset: I2C reset failed");
                         errlCommit( err,I2C_COMP_ID );
                         break;
                     }
                     else
                     {
-                        TS_INFO("i2cReset succeeded");
+                        TS_INFO("testI2cForceReset: i2cReset succeeded");
                     }
 
                     nanosleep( 0, 100);
 
                     data = 0;
-                    err = deviceOp( DeviceFW::READ,
-                                    procTarget,
-                                    &data,
-                                    data_size,
-                                    DEVICE_I2C_ADDRESS( io_args.port,
-                                                        io_args.engine,
-                                                        io_args.devAddr,
-                                                        I2C_MUX::NOT_APPLICABLE,
-                                                        nullptr) );
+
+                    err = deviceOp(DeviceFW::READ,
+                                   l_funcDimms[0],
+                                   &data,
+                                   data_size,
+                                   DEVICE_EEPROM_ADDRESS(EEPROM::VPD_PRIMARY,
+                                                         offset,
+                                                         EEPROM::HARDWARE));
                 }
 
                 if(err)
                 {
-                    TS_FAIL("testI2cForceReset failed err detected");
+                    TS_FAIL("testI2cForceReset: I2C read after reset failed");
                     errlCommit( err,I2C_COMP_ID );
                     break;
                 }
@@ -363,7 +373,7 @@ class I2CTestIPL : public CxxTest::TestSuite
                 if(data == 0)
                 {
                     //there should be some data
-                    TS_FAIL("testI2cForceReset failed data read is 0");
+                    TS_FAIL("testI2cForceReset: data read is 0, expected non-zero data");
                     break;
                 }
 

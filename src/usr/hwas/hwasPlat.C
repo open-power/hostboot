@@ -57,7 +57,6 @@
 #include <targeting/common/targetservice.H>
 #include <chipids.H>
 #include <vpd/spdenums.H>
-// #include <vpd/spd.H>
 #include <spd.H>
 
 #include <map>

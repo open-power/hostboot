@@ -957,9 +957,9 @@ bool spdPresent ( TARGETING::Target * i_target )
                 break;
             }
 
-                TRACDCOMP( g_trac_spd,
-                           INFO_MRK"Mem Type: 0x%04X",
-                           memType );
+            TRACDCOMP( g_trac_spd,
+                       INFO_MRK"Mem Type: 0x%04X",
+                       memType );
 
             if ( !isValidDimmType(memType) )
             {
