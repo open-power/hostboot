@@ -1332,12 +1332,15 @@ errlHndl_t cacheRemoteFruVpd()
     static const bool CACHE_VPD = true;
     static const bool NO_CACHE_VPD = false;
 
-    enum extra_fru_data_t
+    enum extra_fru_data_t : uint8_t
     {
         NO_EXTRA_FRU_INFO   = 0,
         HAS_FW_VERSION_INFO = 1 << 0,
         HAS_SERIAL_NUMBER   = 1 << 1,
         HAS_MODEL_NUMBER    = 1 << 2,
+
+        // Add combination enums here to avoid casting issues below
+        HAS_FW_VERSION_INFO_OR_SERIAL_NUMBER = HAS_FW_VERSION_INFO | HAS_SERIAL_NUMBER ,
     };
 
     struct pldm_entity_to_targeting_mapping
@@ -1373,7 +1376,7 @@ errlHndl_t cacheRemoteFruVpd()
           TYPE_SYS,
           EEPROM::VPD_PRIMARY,
           1,
-          HAS_SERIAL_NUMBER,
+          HAS_FW_VERSION_INFO_OR_SERIAL_NUMBER,
           NO_CACHE_VPD,
           setAttribute<ATTR_SYS_LOCATION_CODE> },
         { ENTITY_TYPE_TPM,
