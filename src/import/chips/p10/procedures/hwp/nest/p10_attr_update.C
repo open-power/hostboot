@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,8 @@
 // expected field size
 constexpr uint32_t MER0_VD_KEYWORD_SIZE_EXP  = 2;
 constexpr uint32_t MER0_PDI_KEYWORD_SIZE_EXP = 270;
+
+constexpr uint32_t BAD_LANE_VEC_SMP9 = 0x08040000;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -97,7 +99,7 @@ p10_attr_update_mer0_pdI_mvpd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         (l_vd_keyword_data[1] == 0x31))
     {
         FAPI_DBG("MER0 VD keyword: 0x3031, will not process #I");
-        goto fapi_try_exit;
+        goto check_smp9;
     }
     else if ((l_vd_keyword_data[0] == 0x30) &&
              (l_vd_keyword_data[1]  > 0x31))
@@ -185,6 +187,40 @@ p10_attr_update_mer0_pdI_mvpd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                     .set_UNIT_POS(l_unit_pos),
                     "Invalid CRP0 PDI entry (%s)",
                     l_targetStr);
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID, l_iohs_target, l_bad_lane_vec_valid));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC, l_iohs_target, l_bad_lane_vec));
+    }
+
+check_smp9:
+
+    // SMP9 cables are missing one lane relative to planar/cabled links for default P10 capabilities
+    // in SMP9 mode:
+    // - warn if bad lane mask is valid (from VPD) and marks any lanes outside of these missing lanes (this
+    //   may result in downstream training failures)
+    // - ensure that missing lanes are marked out to prevent sparing/callouts during training
+    for (auto& l_iohs_target : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
+    {
+        fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_Type l_bad_lane_vec_valid = fapi2::ENUM_ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_FALSE;
+        fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_Type l_bad_lane_vec = 0;
+        fapi2::ATTR_IOHS_SMP9_INTERCONNECT_Type l_smp9_interconnect = fapi2::ENUM_ATTR_IOHS_SMP9_INTERCONNECT_FALSE;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID, l_iohs_target, l_bad_lane_vec_valid));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC, l_iohs_target, l_bad_lane_vec));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IOHS_SMP9_INTERCONNECT, l_iohs_target, l_smp9_interconnect));
+
+        if (l_smp9_interconnect)
+        {
+            FAPI_ASSERT_NOEXIT((BAD_LANE_VEC_SMP9 == (l_bad_lane_vec | BAD_LANE_VEC_SMP9)),
+                               fapi2::P10_ATTR_UPDATE_INVALID_SMP9_CONFIG_ERR()
+                               .set_TARGET(i_target)
+                               .set_BAD_LANE_VEC(l_bad_lane_vec)
+                               .set_BAD_LANE_VEC_VALID(l_bad_lane_vec_valid),
+                               "Bad lane vector content may result in failed link training given SMP9 usage!");
+
+            l_bad_lane_vec |= BAD_LANE_VEC_SMP9;
+            l_bad_lane_vec_valid = fapi2::ENUM_ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_TRUE;
+        }
 
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID, l_iohs_target, l_bad_lane_vec_valid));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC, l_iohs_target, l_bad_lane_vec));

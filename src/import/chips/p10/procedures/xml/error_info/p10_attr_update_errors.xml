@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2021                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2021,2022                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -95,6 +95,24 @@
   <ffdc>ENTRY_B2</ffdc>
   <ffdc>CHIPLET_ID</ffdc>
   <ffdc>UNIT_POS</ffdc>
+  <callout>
+    <hw>
+      <hwid>VPD_PART</hwid>
+      <refTarget>TARGET</refTarget>
+    </hw>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+<!-- ******************************************************************** -->
+<hwpError>
+  <rc>RC_P10_ATTR_UPDATE_INVALID_SMP9_CONFIG_ERR</rc>
+  <description>
+    Procedure: p10_attr_update
+    Badlane vector content may result in failed link training given SMP9 usage
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>BAD_LANE_VEC</ffdc>
+  <ffdc>BAD_LANE_VEC_VALID</ffdc>
   <callout>
     <hw>
       <hwid>VPD_PART</hwid>

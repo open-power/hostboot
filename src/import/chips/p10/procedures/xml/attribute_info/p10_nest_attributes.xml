@@ -254,6 +254,24 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_IOHS_SMP9_INTERCONNECT</id>
+  <targetType>TARGET_TYPE_IOHS</targetType>
+  <description>
+    Indicates if the link is reliant on SMP9 cabling to to connect between drawers.
+    Should be considered valid only if ATTR_IOHS_CONFIG_MODE for the given
+    link is configured as an SMPX or SMPA.
+    Provided by the MRW.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <default>FALSE</default>
+  <platInit>mrw</platInit>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_IOHS_FABRIC_TOD_CROSS_CONFIG</id>
   <targetType>TARGET_TYPE_IOHS</targetType>
   <description>
