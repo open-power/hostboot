@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,6 +96,9 @@ enum ReturnCodes : uint32_t
     FAPI2_RC_FALSE                       = FAPI2_RC_FAPI2_MASK | 0x06,
     ///< The logical opposite of SUCCESS. Needed where procedures want
     ///< a multi-bool type of operation (e.g., true, false, scom error)
+
+    FAPI2_RC_FILE_NOT_FOUND              = FAPI2_RC_FAPI2_MASK | 0x07,
+    ///< A requested file was not found
 
     //
     // PLAT generated return codes. Additional details may be contained in

@@ -177,10 +177,10 @@ inline ReturnCode modifyCfamRegister(const Target<K, M, V>& i_target,
                                      const buffer<uint32_t> i_data,
                                      const ChipOpModifyMode i_modifyMode);
 
-/// @brief Writes a ring to a chip.
+/// @brief Writes a composite ring image to a chip.
 /// @tparam K template parameter, passed in target.
 /// @param[in] i_target   Target to operate on.
-/// @param[in] i_ringID   Ring ID that will identify the Ring in the image.
+/// @param[in] i_ringID   Ring ID that will identify the composite image
 /// @param[in] i_ringMode Ring operation mode.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 template< TargetType K, MulticastType M, typename V >
@@ -188,16 +188,33 @@ ReturnCode putRing(const Target<K, M, V>& i_target,
                    const RingId_t i_ringID,
                    const RingMode i_ringMode = RING_MODE_HEADER_CHECK);
 
-/// @brief Writes a ring to a chip.
+/// @brief Writes a composite ring image to a chip.
 /// @tparam K template parameter, passed in target.
 /// @param[in] i_target   Target to operate on.
-/// @param[in] i_ringID   Ring ID name that will identify the Ring in the image.
+/// @param[in] i_ringID   Ring ID name that will identify the composite image
 /// @param[in] i_ringMode Ring operation mode.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 template< TargetType K, MulticastType M, typename V >
 ReturnCode putRing(const Target<K, M, V>& i_target,
                    const char* i_ringID,
                    const RingMode i_ringMode = RING_MODE_HEADER_CHECK);
+
+/// @brief Backend platform implementation of putRing
+/// This applies a single scan image to a given target.
+/// Hardware procedures will not usually call this function; it is
+/// supposed to be called by putRingBackend() only.
+/// @param[in] i_target    Target to scan into. May be multicast!
+/// @param[in] i_scanImage Scan image to apply
+/// @param[in] i_modifiedRingAddress
+///                        Ring address modified to indicate the actual
+///                        scan regions targeted by this call
+/// @param[in] i_ringMode  Ring operation mode.
+/// @return FAPI2_RC_SUCCESS on success, else error code.
+template< TargetType K, MulticastType M, typename V >
+ReturnCode plat_putRingImpl(const Target<K, M, V>& i_target,
+                            const void* i_scanImage,
+                            const uint32_t i_modifiedRingAddress,
+                            const RingMode i_ringMode = RING_MODE_HEADER_CHECK);
 
 // variable_buffer isn't supported on PPE
 #if !defined(__PPE__) && !defined(FAPI_VARIABLE_BUFFER_NOT_SUPPORTED)
