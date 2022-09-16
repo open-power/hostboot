@@ -607,7 +607,6 @@ public:
      */
     errlHndl_t clearGardRecords(const TARGETING::Target * const i_pTarget,
                                 const bool i_clearOnlyDeconfig = false);
-#ifdef __HOSTBOOT_MODULE
     /**
      * @brief Platform specific function that clears Gard Records for the
      *        specified Target, or ALL GARD records.
@@ -629,18 +628,6 @@ public:
      */
     errlHndl_t platClearGardRecords(const TARGETING::Target * const i_pTarget,
                                     const bool i_clearOnlyDeconfig = false);
-#else
-    /**
-     * @brief Platform specific function that clears Gard Records for the
-     *        specified Target, or ALL GARD records.
-     *
-     * @param[in] i_pTarget Pointer to Target to clear GARD record for.
-     *            If nullptr, then ALL GARD Records will be cleared.
-     *
-     * @return errlHndl_t. Error log handle.
-     */
-    errlHndl_t platClearGardRecords(const TARGETING::Target * const i_pTarget);
-#endif
     /**
      * @brief Dumps all GARD Records for the specified Target.
      *
