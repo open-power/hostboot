@@ -202,7 +202,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
                                    l_args );
             if( l_err )
             {
-                TRACFCOMP(g_trac_vpd, "Error reading VPD size for 0x%X on %.8X",
+                TRACFCOMP(g_trac_vpd, ERR_MRK"Error reading VPD size for 0x%X on 0x%08X",
                           rk.name,
                           TARGETING::get_huid(i_target));
                 errlCommit(l_err, VPD_COMP_ID);
@@ -218,8 +218,9 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
                                    l_args );
             if( l_err )
             {
-                TRACFCOMP(g_trac_vpd, "Error reading VPD data for 0x%X",
-                          rk.name);
+                TRACFCOMP(g_trac_vpd, ERR_MRK"Error reading VPD data for 0x%X on 0x%08X",
+                          rk.name,
+                          TARGETING::get_huid(i_target));
                 errlCommit(l_err, VPD_COMP_ID);
                 // Don't break, continue to next value
                 continue;
@@ -308,7 +309,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
 
                 default:
                     // Unexpected  property returned, this should never happen
-                    TRACFCOMP(g_trac_vpd,
+                    TRACFCOMP(g_trac_vpd,ERR_MRK
                               "Attribute 0x%X not expected",
                               rk.name);
                     assert(false,"Unexpected attribute from fru vpd lookup");
@@ -365,11 +366,17 @@ errlHndl_t getFruRecordsAndKeywords( TARGETING::Target * i_target,
             }
         }
         // SPD-derived FRUs
-        else if((  i_type == TARGETING::TYPE_DIMM )
-               || (i_type == TARGETING::TYPE_OCMB_CHIP))
+        else if(  i_type == TARGETING::TYPE_DIMM )
         {
-            auto l_use11S = TARGETING::UTIL::assertGetToplevelTarget()
-              ->getAttr<TARGETING::ATTR_USE_11S_SPD>();
+            auto l_attr_use11S = TARGETING::UTIL::assertGetToplevelTarget()
+                ->getAttr<TARGETING::ATTR_USE_11S_SPD>();
+
+             auto l_dimm_eeprom_type =
+                 i_target->getAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>().eepromContentType;
+
+            // if not an isdimm, use the IBM11S keywords if attr is set
+            // if an isdimm, only use JEDEC standard keywords
+            bool l_use11S = (l_dimm_eeprom_type != TARGETING::EEPROM_CONTENT_TYPE_ISDIMM) && (l_attr_use11S == 1);
 
             for( auto& rk : io_locs )
             {
@@ -400,6 +407,31 @@ errlHndl_t getFruRecordsAndKeywords( TARGETING::Target * i_target,
                             rk.keyword = SPD::INVALID_SPD_KEYWORD;
                             l_badProperties.push_back(rk.name);
                         }
+                        break;
+                    default:
+                        rk.keyword = SPD::INVALID_SPD_KEYWORD;
+                        l_badProperties.push_back(rk.name);
+                }
+            }
+        }
+        else if (i_type == TARGETING::TYPE_OCMB_CHIP)
+        {
+            for( auto& rk : io_locs )
+            {
+                // SPD does not use record
+                rk.record = IPVPD::INVALID_RECORD;
+
+                switch(rk.name)
+                {
+                    case(TARGETING::ATTR_PART_NUMBER):
+                    case(TARGETING::ATTR_FRU_NUMBER): //same as part number
+                        rk.keyword = SPD::IBM_11S_PN;
+                        break;
+                    case(TARGETING::ATTR_SERIAL_NUMBER):
+                        rk.keyword = SPD::IBM_11S_SN;
+                        break;
+                    case(TARGETING::ATTR_FRU_CCIN):
+                        rk.keyword = SPD::IBM_11S_CC;
                         break;
                     default:
                         rk.keyword = SPD::INVALID_SPD_KEYWORD;

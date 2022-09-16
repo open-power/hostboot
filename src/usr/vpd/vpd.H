@@ -159,7 +159,7 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
  */
 struct FruPropertyLocation_t
 {
-    TARGETING::ATTRIBUTE_ID name;
+    const TARGETING::ATTRIBUTE_ID name;
     vpdRecord record;
     vpdKeyword keyword;
     FruPropertyLocation_t( TARGETING::ATTRIBUTE_ID i_name ) :

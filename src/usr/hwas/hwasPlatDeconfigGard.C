@@ -757,7 +757,7 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
 
             l_pErr = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 MOD_PLAT_DECONFIG_GARD,
-                HWAS::RC_NOT_CURRENT_GARD_VERSION,userdata1,0);
+                HWAS::RC_NOT_CURRENT_GARD_VERSION,userdata1, 0);
             errlCommit(l_pErr, HWAS_COMP_ID);
         }
         else
@@ -766,7 +766,6 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
             l_pRecord->iv_targetId = l_targetId;
             l_pRecord->iv_errlogEid = i_errlEid;
             l_pRecord->iv_errorType = i_errorType;
-
 
             if (!INITSERVICE::spBaseServicesEnabled())
             {
@@ -777,20 +776,48 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
                     l_type = TYPE_NA;
                 }
 
+                ATTR_EEPROM_VPD_PRIMARY_INFO_type l_eepromVpd = {};
+                TARGETING::EEPROM_CONTENT_TYPE l_eepromContentType = TARGETING::EEPROM_CONTENT_TYPE_INVALID;
+
                 switch (l_type)
                 {
-                    // RTC 254396 - Support pluggable ISDIMMs
                     case TARGETING::TYPE_DIMM:
-                        memcpy(l_pRecord->uniqueId.isddimmDDR4.serialNum, l_SN,
-                            sizeof(l_pRecord->uniqueId.isddimmDDR4.serialNum));
-                        memcpy(l_pRecord->uniqueId.isddimmDDR4.partNum, l_PN,
-                            sizeof(l_pRecord->uniqueId.isddimmDDR4.partNum));
-                        HWAS_INF("platCreateGardRecord: SN/PN isddimmDDR4 "
-                                 "sizeof(l_pRecord->uniqueId.isddimmDDR4.serialNum)=0x%X "
-                                 "sizeof(l_pRecord->uniqueId.isddimmDDR4.partNum)=0x%X",
-                                 sizeof(l_pRecord->uniqueId.isddimmDDR4.serialNum),
-                                 sizeof(l_pRecord->uniqueId.isddimmDDR4.partNum));
+
+                        l_eepromVpd = i_pTarget->getAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>();
+
+                        l_eepromContentType =
+                            static_cast<TARGETING::EEPROM_CONTENT_TYPE>(l_eepromVpd.eepromContentType);
+
+                        if (l_eepromContentType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
+                        {
+                            // in ddr4Data the JEDEC PN/SN are listed as size 0x14/0x04 (20/4 bytes respectively)
+                            // in uniqueId, isdimmDDR4 has these sizes
+                            memcpy(l_pRecord->uniqueId.isdimmDDR4.serialNum, l_SN,
+                                sizeof(l_pRecord->uniqueId.isdimmDDR4.serialNum));
+                            memcpy(l_pRecord->uniqueId.isdimmDDR4.partNum, l_PN,
+                                sizeof(l_pRecord->uniqueId.isdimmDDR4.partNum));
+                            HWAS_INF("platCreateGardRecord: SN/PN isdimmDDR4 "
+                                     "sizeof(l_pRecord->uniqueId.isdimmDDR4.serialNum)=0x%X "
+                                     "sizeof(l_pRecord->uniqueId.isdimmDDR4.partNum)=0x%X",
+                                     sizeof(l_pRecord->uniqueId.isdimmDDR4.serialNum),
+                                     sizeof(l_pRecord->uniqueId.isdimmDDR4.partNum));
+                        }
+                        else
+                        {
+                            // in ddr4DDIMMData the JEDEC PN/SN are listed as size 0x1E/0x04 (30/4 bytes respectively)
+                            // in uniqueId, isddimmDDR4 has these sizes (note isddimmDDR4 used here vs isdimmDDR4 above)
+                            memcpy(l_pRecord->uniqueId.isddimmDDR4.serialNum, l_SN,
+                                sizeof(l_pRecord->uniqueId.isddimmDDR4.serialNum));
+                            memcpy(l_pRecord->uniqueId.isddimmDDR4.partNum, l_PN,
+                                sizeof(l_pRecord->uniqueId.isddimmDDR4.partNum));
+                            HWAS_INF("platCreateGardRecord: SN/PN isddimmDDR4 "
+                                     "sizeof(l_pRecord->uniqueId.isddimmDDR4.serialNum)=0x%X "
+                                     "sizeof(l_pRecord->uniqueId.isddimmDDR4.partNum)=0x%X",
+                                     sizeof(l_pRecord->uniqueId.isddimmDDR4.serialNum),
+                                     sizeof(l_pRecord->uniqueId.isddimmDDR4.partNum));
+                        }
                         break;
+
                     default:
                         memcpy(l_pRecord->uniqueId.ibm11S.serialNum, l_SN,
                             sizeof(l_pRecord->uniqueId.ibm11S.serialNum));

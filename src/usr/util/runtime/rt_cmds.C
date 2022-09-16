@@ -254,8 +254,8 @@ void cmd_readwritevpd(char*& o_output, DeviceFW::OperationType i_rtCmd,
                       uint32_t i_huid, uint64_t i_keyword,
                       uint64_t i_record = 0, uint64_t i_data = 0)
 {
-    UTIL_FT( "cmd_readwritevpd> rtcmd=%s, huid=%.8X, "
-             "keyword=%lx, record=%lx, data=%lx",
+    UTIL_FT( "cmd_readwritevpd> rtcmd=%s, HUID=0x%08X, "
+             "keyword=0x%lX, record=0x%lX, data=0x%lX",
              (i_rtCmd == DeviceFW::OperationType::READ ? "read" : "write"),
               i_huid, i_keyword, i_record, i_data);
 
@@ -271,7 +271,7 @@ void cmd_readwritevpd(char*& o_output, DeviceFW::OperationType i_rtCmd,
         TARGETING::Target* l_target = getTargetFromHUID(i_huid);
         if (nullptr == l_target)
         {
-           sprintf( o_output, "HUID %.8X not found", i_huid );
+           sprintf( o_output, "HUID 0x%08X not found", i_huid );
            break;
         }
 
@@ -280,7 +280,7 @@ void cmd_readwritevpd(char*& o_output, DeviceFW::OperationType i_rtCmd,
        if (!l_target->tryGetAttr<TARGETING::ATTR_TYPE>(l_targetType))
        {
            sprintf( o_output, "No TARGETING::ATTR_TYPE associated "
-                              "with HUID %.8X", i_huid );
+                              "with HUID 0x%08X", i_huid );
            break;
        }
 
@@ -289,7 +289,8 @@ void cmd_readwritevpd(char*& o_output, DeviceFW::OperationType i_rtCmd,
 
        if (DeviceFW::OperationType::READ == i_rtCmd)   // reading data from vpd
        {
-          if (TARGETING::TYPE_DIMM == l_targetType)  // SPD
+          if ((TARGETING::TYPE_DIMM == l_targetType) ||
+              (TARGETING::TYPE_OCMB_CHIP == l_targetType))  // SPD
           {
               sprintf( o_readWriteCmd, "read SPD");
               l_isSpd = true;
@@ -361,14 +362,15 @@ void cmd_readwritevpd(char*& o_output, DeviceFW::OperationType i_rtCmd,
           }
           else
           {
-              sprintf( o_output, "cmd_readvpd> VPD %.8X is currently not"
-                        " supported for HUID %.8x", l_targetType, i_huid);
+              sprintf( o_output, "cmd_readvpd> VPD read is currently not"
+                        " supported for HUID 0x%08X", i_huid);
               break;
           }
        }
        else   // writing data to vpd
        {
-          if (TARGETING::TYPE_DIMM == l_targetType)  // SPD
+          if ((TARGETING::TYPE_DIMM == l_targetType) ||
+              (TARGETING::TYPE_OCMB_CHIP == l_targetType))  // SPD
           {
               sprintf( o_readWriteCmd, "write SPD");
               l_isSpd = true;
@@ -459,8 +461,8 @@ void cmd_readwritevpd(char*& o_output, DeviceFW::OperationType i_rtCmd,
           }
           else
           {
-              sprintf( o_output, "cmd_writevpd> VPD %.8X is currently not"
-                        " supported for HUID %.8x", l_targetType, i_huid);
+              sprintf( o_output, "cmd_writevpd> VPD write is currently not"
+                        " supported for HUID 0x%08x", i_huid);
               break;
           }
        }
@@ -474,20 +476,20 @@ void cmd_readwritevpd(char*& o_output, DeviceFW::OperationType i_rtCmd,
        if (l_isSpd)
        {
            // write out results for SPD
-           sprintf( o_output, "%s - HUID=%.8X Keyword=%.8X %.8X, Data=",
+           sprintf( o_output, "%s - HUID=0x%08X Keyword=0x%016llX, Data=",
                     &o_readWriteCmd,
                     i_huid,
-                    (uint32_t)(i_keyword>>32), (uint32_t)i_keyword);
+                    i_keyword);
        }
        else
        {
            // write out results for MVPD or PVPD
-           sprintf( o_output, "%s - HUID=%.8X Record=%.8X %.8X, "
-                              "Keyword=%.8X %.8X, Data=",
+           sprintf( o_output, "%s - HUID=0x%08X Record=0x%016llX, "
+                              "Keyword=0x%016llX, Data=",
                     &o_readWriteCmd,
                     i_huid,
-                    (uint32_t)(i_record>>32), (uint32_t)i_record,
-                    (uint32_t)(i_keyword>>32), (uint32_t)i_keyword);
+                    i_record,
+                    i_keyword);
        }
 
        // write out the data from the device read/write
@@ -537,7 +539,7 @@ void cmd_readwritevpd(char*& o_output, DeviceFW::OperationType i_rtCmd,
 
    if (l_errhdl)
    {
-      sprintf( o_output, "cmd_readwritevpd> FAIL - %s: RC=%.4X",
+      sprintf( o_output, "cmd_readwritevpd> FAIL - %s: RC=0x%04X",
                &o_readWriteCmd,
                ERRL_GETRC_SAFE(l_errhdl) );
    }
