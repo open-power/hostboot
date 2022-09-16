@@ -395,11 +395,21 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
 
         // Increment our persistent counter so we don't reuse EIDs
         //  after reboots or mpipl
+        // ATTR_HOSTSVC_PLID = largest committed log id (usually last committed log)
+        // Note: next log will add 1 to this value
         TARGETING::Target * sys = NULL;
         if( TARGETING::targetService().isInitialized() )
         {
             TARGETING::targetService().getTopLevelTarget( sys );
-            sys->setAttr<TARGETING::ATTR_HOSTSVC_PLID>(io_err->eid()+1);
+
+            uint64_t prevID = sys->getAttr<TARGETING::ATTR_HOSTSVC_PLID>();
+            // incase errors are committed out of order, keep largest EID
+            if (prevID < io_err->eid())
+            {
+                sys->setAttr<TARGETING::ATTR_HOSTSVC_PLID>(io_err->eid());
+                TRACFCOMP(g_trac_errl, "Updated ATTR_HOSTSVC_PLID to 0x%08X", io_err->eid());
+            }
+
             // update instance variable in case target service was not
             // avaible when errlmanager's constructor was called.
             iv_pldWaitEnable &= !sys->getAttr<TARGETING::ATTR_DISABLE_PLD_WAIT>();

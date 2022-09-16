@@ -356,13 +356,15 @@ void ErrlManager::errlogMsgHndlr ()
                     TARGETING::Target * sys = nullptr;
                     TARGETING::targetService().getTopLevelTarget( sys );
 
+                    // FSP side: HWSV handles IPL-time HOSTSVC_PLID setting
+#ifndef CONFIG_FSP_BUILD
                     // Set the value of the first HBRT EID so that the HBRT logs start with
                     // the right EID
                     TRACFCOMP(g_trac_errl, INFO_MRK"Setting the first HBRT EID to 0x%x",
                               ERRORLOG::ErrlManager::getFirstHbrtEid());
                     sys->setAttr<TARGETING::ATTR_HOSTSVC_PLID>(
                                     ERRORLOG::ErrlManager::getFirstHbrtEid());
-
+#endif
                     // Cache current 'hidden error log enable' value for tracing
                     auto l_hiddenErrLogsEnableOldValue = iv_hiddenErrLogsEnable;
 

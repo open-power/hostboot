@@ -2706,7 +2706,8 @@
 
   <attribute>
     <description>
-        Value of the next EID that host service should send.
+        Value of the largest EID that host service sent.
+        This is usually the last EID committed.
         (Note - EID is more accurate, PLID being kept to handle legacy code.)
     </description>
     <id>HOSTSVC_PLID</id>
