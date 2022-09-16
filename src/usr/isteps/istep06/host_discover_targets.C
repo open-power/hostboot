@@ -43,6 +43,7 @@
 #include <initservice/taskargs.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
+#include <initservice/istepdispatcherif.H>
 #include <isteps/hwpisteperror.H>
 #include <istepHelperFuncs.H>
 #include <initservice/isteps_trace.H>
@@ -405,7 +406,7 @@ static errlHndl_t finish_pdr_exchange()
              * @devdesc    BMC returned less PDRs than previous BMC + HB PDRs
              * @custdesc   A software error occurred during system boot
              */
-            l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+            l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                   ISTEP::MOD_FINISH_PDR_EXCHANGE,
                                   ISTEP::RC_TOO_SMALL_BMC_PDR_COUNT,
                                   PLDM::thePdrManager().pdrCount(),
@@ -414,7 +415,13 @@ static errlHndl_t finish_pdr_exchange()
                                   sys->getAttr<TARGETING::ATTR_PLDM_HB_PDR_COUNT>()),
                                   ErrlEntry::NO_SW_CALLOUT);
             PLDM::addBmcErrorCallouts(l_err);
-            break;
+            l_err->collectTrace(ISTEP_COMP_NAME);
+            errlCommit(l_err, ISTEP_COMP_ID);
+
+            // The reboot message is for the benefit of the customer's understanding of what's going on. However,
+            // there may be situations where this reboot is triggered that isn't caused by a hotplug issue, e.g. a code
+            // bug.
+            INITSERVICE::requestReboot("Rebooting due to a FRU hot-remove");
         }
         // now update BMC PDR count to latest count which includes HB PDRs
         sys->setAttr<TARGETING::ATTR_PLDM_BMC_PDR_COUNT>(PLDM::thePdrManager().pdrCount());
