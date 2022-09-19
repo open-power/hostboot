@@ -291,6 +291,13 @@ namespace Bootloader{
 
         uint64_t l_rc = 0;
 
+        // Used in multiple places below: Set startAddr to SHA512_HASH_FUNCTION_OFFSET
+        // call_rom_SHA512() function at an offset of Secure ROM
+        const uint64_t l_rom_SHA512_startAddr =
+            reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
+                + g_blData->blToHbData.branchtableOffset
+                + SHA512_HASH_FUNCTION_OFFSET;
+
         // Check if Secure Access Bit is set
         if (!g_blData->blToHbData.secureAccessBit)
         {
@@ -304,12 +311,6 @@ namespace Bootloader{
             //      EXACTLY what is being loaded on the system
             // 3) Put the hash value from that measurement into the secureboot header
             //    - The call_rom_SHA512() function below accomplishes tasks 2 and 3 at the same time
-
-            // Set startAddr to SHA512_HASH_FUNCTION_OFFSET ROM_verify() function at an offset of Secure ROM
-            uint64_t l_rom_SHA512_startAddr =
-                reinterpret_cast<const uint64_t>(g_blData->blToHbData.secureRom)
-                + g_blData->blToHbData.branchtableOffset
-                + SHA512_HASH_FUNCTION_OFFSET;
 
             // In non-secure mode must skip past the secure header at the start of the container
             uint8_t* l_pContainer = reinterpret_cast<uint8_t*>(const_cast<void*>(i_pContainer));
@@ -369,11 +370,11 @@ namespace Bootloader{
             uint8_t *p_hw_parms = reinterpret_cast<uint8_t *>(&l_hw_parms);
             for(uint8_t i = 0; i < sizeof(ROM_hw_params); p_hw_parms[i++] = 0){}
 
-            // Use current hw hash key
+            // Use current system hw hash key
             memcpy (&l_hw_parms.hw_key_hash, g_blData->blToHbData.hwKeysHashPtr,
                     sizeof(SHA512_t));
 
-            // Use current minimum FW secure version
+            // Use current system minimum FW secure version
             l_hw_parms.log = g_blData->blToHbData.min_secure_version;
 
             const auto l_container = reinterpret_cast<const ROM_container_raw*>
@@ -383,8 +384,102 @@ namespace Bootloader{
                                    (l_rom_verify_startAddr),
                                    l_container,
                                    &l_hw_parms);
+
             if (l_rc != 0)
             {
+                // Look for two most common fails
+                const uint64_t l_hw_key_hash_test_fail_rc    = ERROR_EVENT
+                                                               | ROM_VERIFY
+                                                               | HW_KEY_HASH_TEST;
+                const uint64_t l_secure_version_test_fail_rc = ERROR_EVENT
+                                                               | ROM_VERIFY
+                                                               | SECURE_VERSION_TEST;
+
+                if ((l_hw_parms.log == l_hw_key_hash_test_fail_rc) ||
+                    (l_hw_parms.log == l_secure_version_test_fail_rc))
+                {
+
+                    // Gather info to add console messages for common fails
+                    const uint32_t l_imprint_hash = 0x40d487ff; // Hard-coded, publicly-known value
+
+                    uint32_t l_system_hash = 0;
+                    memcpy(&l_system_hash,
+                           g_blData->blToHbData.hwKeysHashPtr,
+                           sizeof(l_system_hash));
+                    uint8_t  l_system_min_version = g_blData->blToHbData.min_secure_version;
+                    uint32_t l_container_hash = 0;
+                    uint8_t  l_container_min_version = 0;
+
+                    // Get Secure Version from the container
+                    // - get sw_key_count and ecid_count
+                    const auto* const pHwPrefix =
+                        reinterpret_cast<const ROM_prefix_header_raw* const>(
+                            reinterpret_cast<const uint8_t* const>(i_pContainer)
+                            + offsetof(ROM_container_raw,prefix));
+                    const auto swKeyCount = pHwPrefix->sw_key_count;
+                    const auto ecidCount = pHwPrefix->ecid_count;
+
+                    // - get pointer to Secure Version in the container
+                    const char* const pFwSecureVersionInContainer =
+                          reinterpret_cast<const char* const>(i_pContainer)
+                            + offsetof(ROM_container_raw,prefix)
+                            + offsetof(ROM_prefix_header_raw,ecid)
+                            + ecidCount*ECID_SIZE
+                            + offsetof(ROM_prefix_data_raw,sw_pkey_p)
+                            + swKeyCount*sizeof(ecc_key_t)
+                            + offsetof(ROM_sw_header_raw,fw_secure_version);
+                    // - copy secure version from the container to a local variable
+                    memcpy(&l_container_min_version,
+                           pFwSecureVersionInContainer,
+                           sizeof(l_container_min_version));
+
+                    // Setup and call hash function on public HW Keys in the container
+                    // - Get pointer to public HW Keys in the container
+                    const char* const l_pHwPKeyA =
+                        reinterpret_cast<const char* const>(i_pContainer)
+                        + offsetof(ROM_container_raw,hw_pkey_a);
+
+                    // - get total HW Keys Size and create a variable to hold the hash
+                    size_t l_totalHwKeysSize = HW_KEY_COUNT*sizeof(ecc_key_t);
+                    SHA512_t l_pContainerHash;
+                    // - hash HW Keys
+                    call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
+                                    reinterpret_cast<const sha2_byte*>(l_pHwPKeyA),
+                                    l_totalHwKeysSize,
+                                    reinterpret_cast<SHA512_t*>(&l_pContainerHash));
+                    // - copy just the first 4 bytes to a local variable
+                    memcpy(&l_container_hash, &l_pContainerHash, sizeof(l_container_hash));
+
+                    if (l_rc == l_hw_key_hash_test_fail_rc)
+                    {
+                        bl_console::putString("\rFAILED HW Keys' Hash Check\r\n");
+                    }
+                    else
+                    {
+                        bl_console::putString("\rFAILED Minimum Secure Version Check\r\n");
+                    }
+                    bl_console::putString("\rHashes: Sys=0x");
+                    bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_system_hash),
+                                           sizeof(l_system_hash));
+                    bl_console::putString("\tContainer=0x");
+                    bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_container_hash),
+                                           sizeof(l_container_hash));
+                    bl_console::putString("\t(imprint hash=0x");
+                    bl_console::displayHex(reinterpret_cast<const unsigned char*>(&l_imprint_hash),
+                                           sizeof(l_imprint_hash));
+                    bl_console::putString(")\r\n");
+
+                    bl_console::putString("\rSecure Versions: Sys=0x");
+                    bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_system_min_version),
+                                           sizeof(l_system_min_version));
+                    bl_console::putString("\tContainer=0x");
+                    bl_console::displayHex(reinterpret_cast<unsigned char*>
+                                               (&l_container_min_version),
+                                           sizeof(l_container_min_version));
+                    bl_console::putString("\r\n");
+                }
+
+                // Prepare To Terminate The System:
                 // Get first 4 bytes of Container that failed verification
                 uint32_t l_beginContainer = 0;
                 memcpy(&l_beginContainer, i_pContainer,
