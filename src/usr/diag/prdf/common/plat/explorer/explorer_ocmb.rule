@@ -1154,7 +1154,7 @@ group gRDFFIR
     /** RDFFIR[15]
      *  Mainline read RCD
      */
-    (rRDFFIR, bit(15)) ? mem_port_th_1_UERE;
+    (rRDFFIR, bit(15)) ? all_dimm_H_memport_L_th_1_UERE;
 
     /** RDFFIR[16]
      *  Mainline read IAUE
@@ -1169,7 +1169,7 @@ group gRDFFIR
     /** RDFFIR[18]
      *  Mainline read IRCD
      */
-    (rRDFFIR, bit(18)) ? mem_port_th_32perDay;
+    (rRDFFIR, bit(18)) ? all_dimm_H_memport_L_th_32perDay;
 
     /** RDFFIR[19]
      *  Mainline read IMPE
@@ -1219,7 +1219,7 @@ group gRDFFIR
     /** RDFFIR[35]
      *  Maintenance RCD
      */
-    (rRDFFIR, bit(35)) ? mem_port_th_1;
+    (rRDFFIR, bit(35)) ? all_dimm_H_memport_L_th_1;
 
     /** RDFFIR[36]
      *  Maintenance IAUE
@@ -1234,7 +1234,7 @@ group gRDFFIR
     /** RDFFIR[38]
      *  Maintenance IRCD
      */
-    (rRDFFIR, bit(38)) ? mem_port_th_32perDay;
+    (rRDFFIR, bit(38)) ? all_dimm_H_memport_L_th_32perDay;
 
     /** RDFFIR[39]
      *  Maintenance IMPE

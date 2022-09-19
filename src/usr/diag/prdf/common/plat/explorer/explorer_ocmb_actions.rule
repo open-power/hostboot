@@ -117,7 +117,7 @@ actionclass mem_port
 
 actionclass mem_port_L
 {
-    callout(connected(TYPE_MEM_PORT,0), MRU_LOW);
+    callout(connected(TYPE_MEM_PORT,0), MRU_LOW, NO_GARD);
 };
 
 actionclass all_dimm_H
@@ -211,6 +211,18 @@ actionclass self_H_omi_L_th_1
     calloutSelfHigh;
     omi_L;
     threshold1;
+};
+
+actionclass all_dimm_H_memport_L_th_1
+{
+    all_dimm_H_memport_L;
+    threshold1;
+};
+
+actionclass all_dimm_H_memport_L_th_32perDay
+{
+    all_dimm_H_memport_L;
+    threshold32pday;
 };
 
 ################################################################################
@@ -348,6 +360,12 @@ actionclass omi_bus_th_1_noClearFirBits_UERE
 {
     SueSource;
     omi_bus_th_1_noClearFirBits; # must be called last
+};
+
+actionclass all_dimm_H_memport_L_th_1_UERE
+{
+    all_dimm_H_memport_L_th_1;
+    SueSource;
 };
 
 ################################################################################
