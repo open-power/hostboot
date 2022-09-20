@@ -36,14 +36,8 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/find.H>
-
-#ifndef __PPE__
-    #include <generic/memory/lib/utils/c_str.H>
-    #include <generic/memory/lib/utils/mss_generic_check.H>
-#endif
-
+#include <generic/memory/lib/utils/mss_generic_check.H>
 #include <ody_ddrphyinit.H>
-
 #include <lib/phy/ody_ddrphy_phyinit_config.H>
 #include <lib/phy/ody_phy_reset.H>
 
