@@ -34,6 +34,9 @@
 
 #include <fapi2.H>
 #include <ody_getecid.H>
+#include <ody_scom_perv.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
+
 
 
 extern "C"
@@ -46,6 +49,39 @@ extern "C"
     ///
     fapi2::ReturnCode ody_getecid(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
+
+        using namespace scomt;
+        using namespace scomt::perv;
+
+        uint64_t l_attr_data[2] = {};
+        fapi2::buffer<uint64_t> l_ecid_part0_data64;
+        fapi2::buffer<uint64_t> l_ecid_part1_data64;
+        fapi2::buffer<uint64_t> l_ecid_part2_data64;
+
+        FAPI_INF(TARGTIDFORMAT " ody_getecid : Entering ...", TARGTID);
+
+        FAPI_INF(TARGTIDFORMAT " ody_getecid : extract and manipulate ECID data", TARGTID);
+        FAPI_TRY(fapi2::getScom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG0, l_ecid_part0_data64));
+        FAPI_TRY(fapi2::getScom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG1, l_ecid_part1_data64));
+        FAPI_TRY(fapi2::getScom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG2, l_ecid_part2_data64));
+
+        l_ecid_part0_data64.reverse();
+        l_ecid_part1_data64.reverse();
+        l_ecid_part2_data64.reverse();
+
+        l_attr_data[0] = l_ecid_part0_data64();
+        l_attr_data[1] = l_ecid_part1_data64();
+
+        FAPI_INF(TARGTIDFORMAT " ody_getecid : extracted ecid: 0x%016llX 0x%016llX", TARGTID, l_attr_data[0], l_attr_data[1]);
+        FAPI_INF(TARGTIDFORMAT " ody_getecid : push fuse string into attribute ...", TARGTID);
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ECID, i_target, l_attr_data));
+
+
+
+        FAPI_INF(TARGTIDFORMAT " ody_getecid : Exiting ...", TARGTID);
+
+    fapi_try_exit:
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
