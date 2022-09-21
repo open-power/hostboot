@@ -49,6 +49,7 @@
 #include <targeting/targplatutil.H>
 #include <errl/errludattribute.H>
 #include <hwas/common/hwas.H>
+#include <errl/errludtarget.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -348,11 +349,18 @@ void* call_host_cbs_start(void *io_pArgs)
             // determining whether it's possible to boot.
 #ifdef CONFIG_FSP_BUILD
             l_errl->addHwCallout(l_cpu_target, SRCI_PRIORITY_LOW, DELAYED_DECONFIG, GARD_NULL);
+            captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
 #else
+            // Don't add the log to the istep log in this path, so that (1) the
+            // severity won't be upgraded to UNRECOVERABLE, and (2) the istep
+            // will succeed but perform a reconfig loop because of
+            // deconfigure_redundant_clock's processing.
             deconfigure_redundant_clock(l_errl, l_cpu_target, OSCREFCLK_TYPE);
+            ERRORLOG::ErrlUserDetailsTarget(l_cpu_target).addToLog(l_errl);
+            l_errl->collectTrace("ISTEPS_TRACE");
+            errlCommit(l_errl, HWPF_COMP_ID);
 #endif
 
-            captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
             continue; //Don't continue on this chip if p10_clock_test failed
         }
 
