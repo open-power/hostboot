@@ -7517,6 +7517,43 @@
   </attribute>
 
   <attribute>
+    <description>
+      The number of reconfig loops allowed due to RCD parity errors when
+      recovery is disabled. PRD will make a predictive callout and stop issuing
+      reconfigs due to RCD parity errors when RCD_PARITY_RECONFIG_LOOP_COUNT is
+      greater than this value. A value of 0 indicates that no reconfig loops are
+      allowed due to RCD parity errors.
+    </description>
+    <id>RCD_PARITY_RECONFIG_LOOPS_ALLOWED</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>1</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      PRD will increment this count and issue a reconfig loop each time an RCD
+      parity error (recovery disabled) is detected during Memory Diagnostics.
+      This value will be cleared at the end of Memory Diagnostics if it is able
+      to complete without the need to issue a reconfig loop.
+    </description>
+    <id>RCD_PARITY_RECONFIG_LOOP_COUNT</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description> System attribute array that defines the reconfig loop test cases
       consumer: istep dispatcher reconfigLoopTestRunner function
       This array is loaded with data via attribute override. The attribute is

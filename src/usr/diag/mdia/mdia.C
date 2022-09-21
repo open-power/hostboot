@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <util/singleton.H>
 #include <util/misc.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H> // for getAllChips
 
 using namespace TARGETING;
 using namespace Util;
@@ -57,14 +58,13 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
 
     Globals globals {}; // Constructor initializes from targeting attributes.
 
-    // get the workflow for each target mba passed in.
+    // get the workflow for each target passed in.
     // associate each workflow with the target handle.
 
     WorkFlowAssocMap list;
 
     TargetHandleList::const_iterator tit;
     DiagMode mode;
-
 
     for(tit = i_targetList.begin(); tit != i_targetList.end(); ++tit)
     {
@@ -96,6 +96,22 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
     if(nullptr == err)
     {
         err = doStepCleanup(globals);
+    }
+
+    // If this step completes without the need for a reconfig due to an RCD
+    // parity error, clear all RCD parity error counters.
+    TargetHandle_t top = nullptr;
+    targetService().getTopLevelTarget(top);
+
+    ATTR_RECONFIGURE_LOOP_type attr = top->getAttr<ATTR_RECONFIGURE_LOOP>();
+    if ( 0 == (attr & RECONFIGURE_LOOP_RCD_PARITY_ERROR) )
+    {
+        TargetHandleList trgtList; getAllChips( trgtList, TYPE_OCMB_CHIP );
+        for ( auto & trgt : trgtList )
+        {
+            if ( 0 != trgt->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>() )
+                trgt->setAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>(0);
+        }
     }
 
     if (nullptr != err)

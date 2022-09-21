@@ -3012,6 +3012,24 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
       l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
     bool l_mfgMode = TARGETING::areAllSrcsTerminating();
 
+    // Get RCD Parity reconfig loop information
+    TARGETING::TargetHandleList l_allFuncOcmb;
+    TARGETING::getAllChips(l_allFuncOcmb, TARGETING::TYPE_OCMB_CHIP, true );
+    uint8_t l_rcdLoops = 0;
+    for( auto ocmb : l_allFuncOcmb )
+    {
+        auto l_loops =
+          ocmb->getAttr<TARGETING::ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>();
+        if( l_loops > l_rcdLoops )
+        {
+            l_rcdLoops = l_loops;
+        }
+    }
+    auto l_rcdThreshold =
+        l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_TH_MEMORY_RCD_PARITY_ERRORS>();
+    auto l_rcdLoopsAllowed =
+        l_pTopLevel->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOPS_ALLOWED>();
+
     /*@
      * @errortype
      * @reasoncode       ISTEP_FAILED_DUE_TO_DECONFIG
@@ -3023,10 +3041,17 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
      * @userdata2[00:07] Value of ATTR_RECONFIGURE_LOOP
      *                   - 0x01 = DECONFIGURE;
      *                   - 0x02 = BAD_DQ_BIT_SET;
+     *                   - 0x04 = RCD_PARITY_ERROR
      *                   - 0x08 = OCMB_FW_UPDATE;
      *                   - 0x10 = TOPOLOGY_SWAP;
      * @userdata2[08:15] Manufacturing Mode (MNFG_FLAG_SRC_TERM)
-     * @userdata2[16:63] Unused
+     * @userdata2[16:23] Largest number of RCD reboots
+     *                   (ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT)
+     * @userdata2[24:31] Number of RCD reboots allowed
+     *                   (ATTR_RCD_PARITY_RECONFIG_LOOPS_ALLOWED)
+     * @userdata2[32:39] RCD parity error threshold
+     *                   (ATTR_MNFG_TH_RCD_PARITY_ERRORS)
+     * @userdata2[40:63] Unused
      * @devdesc          Hostboot has requested a reconfig loop due to a
      *                   hardware error. Causes could be:
      *                   - deconfiguration during an istep outside of the
@@ -3048,8 +3073,10 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
             FOUR_UINT16_TO_UINT64(
                 TWO_UINT8_TO_UINT16(l_reconfigAttr,
                                     l_mfgMode),
-                                  0,
-                                  0,
+                TWO_UINT8_TO_UINT16(l_rcdLoops,
+                                    l_rcdLoopsAllowed),
+                TWO_UINT8_TO_UINT16(l_rcdThreshold,
+                                    0),
                                   0
                                   ) );
     err->collectTrace("HWAS_I", 1024);
