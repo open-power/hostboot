@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -37,6 +37,29 @@ prd_incpath += ${PRD_SRC_PATH}/plat/explorer
 # Hostboot only object files common to both IPL and runtime
 ################################################################################
 
-# plat/mem/ (rule plugin related)
+# plat/explorer/ (rule plugin related)
 prd_rule_plugin += prdfExplorerPlugins.o
+
+
+################################################################################
+# Hostboot only object files (IPL only)
+################################################################################
+
+ifneq (${HOSTBOOT_RUNTIME},1)
+
+# plat/explorer/ (rule plugin related)
+prd_rule_plugin += prdfExplorerPlugins_ipl.o
+
+endif
+
+################################################################################
+# Hostboot only object files (runtime only)
+################################################################################
+
+ifeq (${HOSTBOOT_RUNTIME},1)
+
+# plat/explorer/ (rule plugin related)
+prd_rule_plugin += prdfExplorerPlugins_rt.o
+
+endif
 

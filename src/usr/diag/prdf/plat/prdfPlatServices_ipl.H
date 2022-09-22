@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,14 @@ template<TARGETING::TYPE T>
 uint32_t mssRestoreDramRepairs( TARGETING::TargetHandle_t i_target,
                                 uint8_t & o_repairedRankMask,
                                 uint8_t & o_badDimmMask );
+
+/**
+ * @brief  Initiates a reconfig loop due to an RCD parity error.
+ * @param  i_trgt An OCMB target.
+ * @return True if the number of allowed reconfig loops has been exceeded.
+ *         False otherwise.
+ */
+bool rcdParityErrorReconfigLoop( TARGETING::TargetHandle_t i_trgt );
 
 //##############################################################################
 //##                  Maintenance Command wrappers

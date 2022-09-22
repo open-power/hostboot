@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,11 @@ ThresholdResolution::ThresholdPolicy getIueTh();
  * @brief Returns IMPE threshold policy.
  */
 ThresholdResolution::ThresholdPolicy getImpeTh();
+
+/**
+ * @brief Returns RCD Parity Error threshold policy.
+ */
+ThresholdResolution::ThresholdPolicy getRcdParityTh();
 
 #endif
 

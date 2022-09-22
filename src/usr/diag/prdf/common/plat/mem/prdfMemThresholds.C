@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,6 +104,26 @@ ThresholdResolution::ThresholdPolicy getImpeTh()
     {
         th = MfgThresholdMgr::getInstance()->
                            getThreshold( ATTR_MNFG_TH_MEMORY_IMPES );
+    }
+
+    return ThresholdResolution::ThresholdPolicy( th,
+                                                 ThresholdResolution::ONE_DAY );
+}
+
+#endif
+
+//------------------------------------------------------------------------------
+
+#ifdef __HOSTBOOT_MODULE
+
+ThresholdResolution::ThresholdPolicy getRcdParityTh()
+{
+    uint32_t th = RCD_PARITY_NON_MNFG_TH;
+
+    if ( mfgMode() )
+    {
+        th = MfgThresholdMgr::getInstance()->
+            getThreshold(ATTR_MNFG_TH_MEMORY_RCD_PARITY_ERRORS);
     }
 
     return ThresholdResolution::ThresholdPolicy( th,

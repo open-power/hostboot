@@ -773,8 +773,9 @@ rule rSRQFIR
     SRQFIR & ~SRQFIR_MASK &  SRQFIR_ACT0 & ~SRQFIR_ACT1;
 };
 
+# Bit 13 must be analyzed before bit 4, so just start with 13 here.
 group gSRQFIR
-    filter singlebit,
+    filter priority(13),
            cs_root_cause(1,7,10,11,12,13,16,17,18,19,20,22,24,25,26,27)
 {
     /** SRQFIR[0]

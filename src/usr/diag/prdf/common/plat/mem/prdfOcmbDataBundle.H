@@ -203,6 +203,9 @@ class OcmbDataBundle : public DataBundle
     /** Bool to indicate if we've triggered a channel fail because of IUEs. */
     bool iv_iueChnlFail = false;
 
+    /** Threshold table for RCD parity errors. */
+    TimeBasedThreshold iv_rcdParityTh = TimeBasedThreshold( getRcdParityTh() );
+
     #ifdef __HOSTBOOT_RUNTIME
 
     /** VCM false alarm counter. */
