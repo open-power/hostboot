@@ -192,6 +192,9 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     fapi2::buffer<uint64_t> l_data64_dbg[NUM_OF_LOCATION];
     fapi2::buffer<uint32_t> l_data32_sb_cs;
     fapi2::buffer<uint32_t> l_data32_cbs_cs;
+    fapi2::buffer<uint32_t> l_data32_sb_msg;
+    fapi2::buffer<uint64_t> l_data64_sb_cs;
+    fapi2::buffer<uint64_t> l_data64_cbs_cs;
     fapi2::buffer<uint64_t> l_data64_spi_status;
     fapi2::buffer<uint64_t> l_data64_spi_config;
     fapi2::buffer<uint64_t> l_data64_spi_clock_config;
@@ -325,21 +328,36 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     FAPI_INF("p10_extract_sbe_rc : PPE_XIDBGPRO : %" PRIx64 "", l_data64_dbgpro);
     FAPI_INF("p10_extract_sbe_rc : SBE IAR : %#08lX", l_data32_iar);
 
+    FAPI_INF("p10_extract_sbe_rc : Reading Sbe_Msg,CBS_CS and SB_CS registers");
 
-    FAPI_INF("p10_extract_sbe_rc : Reading CBS_CS and SB_CS registers");
-    FAPI_TRY(getCfamRegister(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_CBS_CS_FSI, l_data32_cbs_cs));
-    FAPI_TRY(getCfamRegister(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_SB_CS_FSI, l_data32_sb_cs));
+    if(l_is_HB_module && !i_set_sdb) //HB calling Master Proc or HB calling Slave after SMP
+    {
+        FAPI_TRY(getScom(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_SB_MSG, l_data64_sb_msg));
+        l_data64_sb_msg.extractToRight(l_sbe_state, SBE_STATE_START_BIT, SBE_STATE_LENGTH);
 
-    FAPI_INF("p10_extract_sbe_rc : Reading Sbe_Msg register");
-    FAPI_TRY(getScom(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_SB_MSG, l_data64_sb_msg));
-    l_data64_sb_msg.extractToRight(l_sbe_state, SBE_STATE_START_BIT, SBE_STATE_LENGTH);
+        FAPI_TRY(getScom(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_CBS_CS, l_data64_cbs_cs));
+        FAPI_TRY(getScom(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_SB_CS, l_data64_sb_cs));
+    }
+    else
+    {
+        FAPI_TRY(getCfamRegister(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_SB_MSG_FSI, l_data32_sb_msg));
+        l_data32_sb_msg.extractToRight(l_sbe_state, SBE_STATE_START_BIT, SBE_STATE_LENGTH);
+
+        FAPI_TRY(getCfamRegister(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_CBS_CS_FSI, l_data32_cbs_cs));
+        FAPI_TRY(getCfamRegister(i_target_chip, scomt::perv::FSXCOMP_FSXLOG_SB_CS_FSI, l_data32_sb_cs));
+
+        l_data64_sb_msg.insertFromRight(l_data32_sb_msg, 0, 32);
+        l_data64_cbs_cs.insertFromRight(l_data32_cbs_cs, 0, 32);
+        l_data64_sb_cs.insertFromRight(l_data32_sb_cs, 0, 32);
+    }
+
 
     l_data32_curr_iar = l_data32_iar;
 
     if((l_data64_sb_msg.getBit<SB_MSG_REG_VIRTUAL_HALT_SUPPORTED_BIT>()) && (l_sbe_state == SBE_STATE_WAIT_FOR_S1))
     {
-        if( (!(l_data32_cbs_cs.getBit<scomt::perv::FSXCOMP_FSXLOG_CBS_CS_SECURE_ACCESS_BIT>())) &&
-            (!(l_data32_sb_cs.getBit<scomt::perv::FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE>()))   &&
+        if( (!(l_data64_cbs_cs.getBit<scomt::perv::FSXCOMP_FSXLOG_CBS_CS_SECURE_ACCESS_BIT>())) &&
+            (!(l_data64_sb_cs.getBit<scomt::perv::FSXCOMP_FSXLOG_SB_CS_SECURE_DEBUG_MODE>()))   &&
             !l_is_HB_module)
         {
             FAPI_TRY(getScom(i_target_chip, scomt::proc::TP_TPCHIP_PIB_SBE_SBEPM_SBEPPE_PPE_XIXCR, l_data64));
