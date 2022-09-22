@@ -316,7 +316,7 @@ void IpcSp::msgHandler()
                     // Take topology ID X and set the Xth bit in a 16 bit integer
                     // and shift it over by 48 bits to fit 64 bits
                     // Math turns out to be shifting left by 63 - topology id
-                    l_systemFabricConfigurationMap |= (1 << (63 - l_fabricTopoId));
+                    l_systemFabricConfigurationMap |= (1ULL << (63 - l_fabricTopoId));
                 }
 
                 TRACFCOMP( g_trac_ipc,

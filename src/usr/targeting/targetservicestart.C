@@ -597,6 +597,11 @@ static void initializeAttributes(TargetService& i_targetService,
             //Set this back to its default of zero (PM_COMPLEX_LOAD_TYPE_LOAD)
             l_pTopLevel->setAttr<ATTR_PM_COMPLEX_LOAD_REQ>(0);
 
+            // Get the TPM extend capability attribute for the node
+            TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
+            auto l_sbeExtend =
+                l_nodeTarget->getAttr<TARGETING::ATTR_SBE_HANDLES_SMP_TPM_EXTEND>();
+
             //Assemble list of functional procs and zero out virtual address values
             //to ensure they get set again this IPL
             TARGETING::PredicateCTM l_chipFilter(CLASS_CHIP, TYPE_PROC);
@@ -666,7 +671,17 @@ static void initializeAttributes(TargetService& i_targetService,
             {
                 tpm->setAttr<ATTR_HB_TPM_INIT_ATTEMPTED>(0);
                 tpm->setAttr<ATTR_HB_TPM_LOG_MGR_PTR>(0);
-                tpm->setAttr<ATTR_TPM_POISONED>(0);
+
+                // If the SBE is extending the secondary TPM measurements
+                // do not reset the TPM poison flag
+                if (l_sbeExtend)
+                {
+                    continue;
+                }
+                else
+                {
+                    tpm->setAttr<ATTR_TPM_POISONED>(0);
+                }
             }
 
             //Assemble list of membuf and zero out some virtual address attributes

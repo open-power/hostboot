@@ -54,6 +54,7 @@
 #include <secureboot/trustedbootif.H>
 #include <secureboot/service.H>
 #include <p10_scom_proc.H>
+#include <p10_sbe_spi_cmd.H>
 #include <sys/time.h>
 #include <istepHelperFuncs.H>
 #include <sbeio/sbe_retry_handler.H>
@@ -72,6 +73,9 @@ namespace ISTEP_10
 {
 
 const uint64_t MAX_SBE_WAIT_NS = 30000*NS_PER_MSEC; //=30s
+const uint64_t TPM_SPI_ENGINE = 4;
+const uint64_t TPM_SPI_USE_CHIP_SELECT_0 = 1;
+const uint64_t HOSTBOOT_PIB_MASTER_ID = 9;
 
 /**
  * @brief XSCOM TPM measurements for the secondary chips
@@ -871,7 +875,7 @@ void* call_proc_build_smp (void *io_pArgs)
                 // Take topology ID X and set the Xth bit in a 16 bit integer
                 // and shift it over by 48 bits to fit 64 bits
                 // Math turns out to be shifting left by 63 - topology id
-                l_systemFabricConfigurationMap |= (1 << (63 - l_fabricTopoId));
+                l_systemFabricConfigurationMap |= (1ULL << (63 - l_fabricTopoId));
             }
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -928,6 +932,24 @@ void* call_proc_build_smp (void *io_pArgs)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           ERR_MRK"Unable to flushTpmQueue");
+                break;
+            }
+
+            // Unlock the TPM SPI engine
+            SpiControlHandle l_spi_handle(l_fapi2_boot_proc,
+                                          TPM_SPI_ENGINE,
+                                          TPM_SPI_USE_CHIP_SELECT_0,
+                                          true); // i_pib_access
+            FAPI_INVOKE_HWP( l_errl,
+                             spi_master_unlock,
+                             l_spi_handle,
+                             HOSTBOOT_PIB_MASTER_ID );
+            if (l_errl != nullptr)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_proc_build_smp: Failure trying to release TPM SPI atomic lock, proc 0x%.8X. Returning errorlog, reason=0x%x",
+                    TARGETING::get_huid(l_bootProc),
+                    l_errl->reasonCode() );
                 break;
             }
 

@@ -2990,17 +2990,34 @@ errlHndl_t logMeasurementRegs(TpmTarget* i_tpm_target,
     /*********************/
     /* PCR_1 Settings    */
     /*********************/
-    // PCR1 : HW Keys' Hash
-    appendPosToStr(l_log_msg_str, l_hash_str, l_pos_str);
-    pcrExtendSingleTpm(i_tpm_target,
-                       PCR_1,
-                       EV_PLATFORM_CONFIG_FLAGS,
-                       TPM_ALG_SHA256,
-                       hw_keys_hash,
-                       SHA512_DIGEST_LENGTH,
-                       reinterpret_cast<uint8_t*>(l_log_msg_str),
-                       strlen(l_log_msg_str) + 1,
-                       i_extendToTpm);
+    // PCR1 : boot proc, HW Keys' Hash
+    if (l_isBootProc)
+    {
+        appendPosToStr(l_log_msg_str, l_hash_str, l_pos_str);
+        pcrExtendSingleTpm(i_tpm_target,
+                        PCR_1,
+                        EV_PLATFORM_CONFIG_FLAGS,
+                        TPM_ALG_SHA256,
+                        hw_keys_hash,
+                        SHA512_DIGEST_LENGTH,
+                        reinterpret_cast<uint8_t*>(l_log_msg_str),
+                        strlen(l_log_msg_str) + 1,
+                        i_extendToTpm);
+    }
+    // PCR1 : secondary proc, register 1's 8 byte abbreviated HW key hash
+    else
+    {
+        appendPosToStr(l_log_msg_str, l_hash_str, l_pos_str);
+        pcrExtendSingleTpm(i_tpm_target,
+                        PCR_1,
+                        EV_PLATFORM_CONFIG_FLAGS,
+                        TPM_ALG_SHA256,
+                        &i_regs.sbe_measurement_regs_1[0],
+                        TPM_SBE_MEASUREMENT_REGS_1_SIZE,
+                        reinterpret_cast<uint8_t*>(l_log_msg_str),
+                        strlen(l_log_msg_str) + 1,
+                        i_extendToTpm);
+    }
 
     // PCR1 : SBE Security State
     appendPosToStr(l_log_msg_str, l_sbeSecurityState_str, l_pos_str);
