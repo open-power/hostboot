@@ -221,6 +221,9 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
 {
     using TT = throttle_traits<mss::mc_type::EXPLORER>;
 
+    // get number of ports on ocmb - used later to split the safemode utilization across all ports
+    const uint8_t l_port_count = mss::count_mem_port(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port));
+
     for (const auto& l_dimm : find_targets <fapi2::TARGET_TYPE_DIMM> (i_port))
     {
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -331,6 +334,9 @@ fapi2::ReturnCode get_power_attrs (const mss::throttle_type i_throttle_type,
                            "ATTR_MSS_MRW_OCMB_SAFEMODE_UTIL_ARRAY",
                            TT::DECODE_SAFE_MODE,
                            o_safemode)) );
+
+            // safemode utilization is for OCMB, so split it across ports
+            o_safemode = o_safemode / l_port_count;
         }
     }
 

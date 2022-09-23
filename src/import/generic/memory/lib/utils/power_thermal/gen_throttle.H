@@ -110,63 +110,6 @@ inline uint32_t throttled_cmds(const uint32_t i_databus_util, const uint32_t i_n
 }
 
 ///
-/// @brief Calculate the port databus utilization based off of N throttles and M dram clocks
-/// @tparam MC mss::mc_type
-/// @tparam TT throttle_traits throttle traits for the given mc_type
-/// @tparam T output type
-/// @param[in] i_n_throttles N (address operations) allowed within a window of M DRAM clocks
-/// @param[in] i_num_dram_clocks window of M DRAM clocks
-/// @param[out] o_calc_util
-/// @return FAPI2_RC_SUCCESS iff method was a success
-/// @note Uses N/M Throttling.
-/// @note DRAM databus utilization = N * 4 * 10000 / M
-///
-template<mss::mc_type MC, typename TT = throttle_traits<MC>, typename T>
-fapi2::ReturnCode calc_util_from_throttles(const uint16_t i_n_throttles,
-        const uint32_t i_num_dram_clocks,
-        T& o_calc_util)
-{
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    constexpr uint32_t l_multiplier = DRAM_BUS_UTILS * UTIL_CONVERSION;
-    const uint64_t l_calc_util_uint64 = static_cast<uint64_t>((static_cast<double>(i_n_throttles) * l_multiplier) /
-                                        i_num_dram_clocks);
-    FAPI_ASSERT( (i_num_dram_clocks != 0),
-                 fapi2::MSS_M_DRAM_CLOCKS_EQUALS_ZERO(),
-                 "ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS was not set and equals zero");
-
-    o_calc_util = (static_cast<double>(i_n_throttles) * l_multiplier) / i_num_dram_clocks;
-
-    // Best way to check for overflow if o_calc_util can be a double?
-    // If o_calc_util overflows, the value inside will be below the expected outcome
-    // So compare o_calc_util with the calculated value, but store calculated value in largest storage
-    // Compare ">=" because o_calc_util can be a double, and so we can't compare just equality due to truncation
-    FAPI_ASSERT( o_calc_util >= l_calc_util_uint64,
-                 fapi2::MSS_OUTPUT_OVERFLOW_CALC_UTIL()
-                 .set_RESULT(o_calc_util)
-                 .set_THROTTLES(i_n_throttles)
-                 .set_DRAM_CLOCKS(i_num_dram_clocks)
-                 .set_MULTIPLIER(l_multiplier),
-                 "Overflow of output variable in calc_util_from_throttles throttles: %d, multiplier %d, dram_clocks %d",
-                 i_n_throttles,
-                 l_multiplier,
-                 i_num_dram_clocks);
-
-    // Check for the minimum
-    if(o_calc_util < TT::MIN_UTIL)
-    {
-        FAPI_INF("Calculated utilization (%u) is less than the minimum utilization: %u. Setting to minimum value",
-                 static_cast<uint32_t>(o_calc_util), static_cast<uint32_t>(TT::MIN_UTIL));
-        o_calc_util = TT::MIN_UTIL;
-    }
-
-    FAPI_INF("In calc_util_from_throttles, calculated %u for output utilization from throttles:%d, dram_clocks %d",
-             static_cast<uint32_t>(o_calc_util), i_n_throttles, i_num_dram_clocks);
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Perform thermal calculations as part of the effective configuration
 /// @tparam MC mss::mc_type
 /// @tparam T the fapi2 target type of the target
@@ -329,6 +272,7 @@ class throttle
         const fapi2::Target<TT::PORT_TARGET_TYPE>& iv_target;
 
         uint32_t iv_databus_port_max;
+        uint32_t iv_min_util_port;
 
         uint8_t iv_power_uplift_idle;
         uint8_t iv_power_uplift;
@@ -454,7 +398,6 @@ class throttle
             const double i_util_port,
             double o_util_dimm_max [TT::DIMMS_PER_PORT]) const;
 
-
         ///
         /// @brief Calculate ATTR_MSS_CHANNEL_PAIR_MAXPOWER and  ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
         /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
@@ -473,6 +416,20 @@ class throttle
         /// @note both DIMM's on a port are set to the same throttle level
         ///
         fapi2::ReturnCode thermal_throttles ();
+
+        ///
+        /// @brief Calculate the port databus utilization based off of N throttles and M dram clocks
+        /// @param[in] i_n_throttles N (address operations) allowed within a window of M DRAM clocks
+        /// @param[in] i_num_dram_clocks window of M DRAM clocks
+        /// @param[out] o_calc_util
+        /// @return FAPI2_RC_SUCCESS iff method was a success
+        /// @note Uses N/M Throttling.
+        /// @note DRAM databus utilization = N * 4 * 10000 / M
+        ///
+        fapi2::ReturnCode calc_util_from_throttles(const uint16_t i_n_throttles,
+                const uint32_t i_num_dram_clocks,
+                double& o_calc_util) const;
+
 };
 
 
@@ -487,6 +444,7 @@ template<mss::mc_type MC, typename TT>
 throttle<MC, TT>::throttle( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_port, fapi2::ReturnCode& o_rc) :
     iv_target(i_port),
     iv_databus_port_max(0),
+    iv_min_util_port(0),
     iv_runtime_n_slot(0),
     iv_runtime_n_port(0),
     iv_n_slot(0),
@@ -495,6 +453,8 @@ throttle<MC, TT>::throttle( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_port, f
     iv_calc_port_maxpower(0)
 {
     FAPI_TRY( mss::attr::get_mrw_max_dram_databus_util(iv_databus_port_max), "%s Error in throttle ctor",
+              mss::c_str(i_port) );
+    FAPI_TRY( mss::attr::get_safemode_dram_databus_util(iv_target, iv_min_util_port), "%s Error in throttle ctor",
               mss::c_str(i_port) );
     FAPI_TRY( mss::attr::get_mrw_dimm_power_curve_percent_uplift(iv_power_uplift), "%s Error in throttle ctor",
               mss::c_str(i_port) );
@@ -528,6 +488,8 @@ throttle<MC, TT>::throttle( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_port, f
              iv_runtime_n_slot,
              iv_runtime_n_port);
 
+    FAPI_INF("Safemode util (min util allowed) is %d c%%", iv_min_util_port);
+
     FAPI_INF("The dimm power limit is %d, dram clocks are %d, dimm power curve slopes are %d %d for %s",
              iv_port_power_limit,
              iv_m_clocks,
@@ -548,6 +510,13 @@ throttle<MC, TT>::throttle( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_port, f
                  .set_PORT_DATABUS_UTIL(iv_databus_port_max)
                  .set_DIMM_COUNT(mss::count_dimm(iv_target)),
                  "Failed to get max databus utilization for target %s",
+                 mss::c_str(iv_target));
+
+    FAPI_ASSERT( (iv_min_util_port != 0),
+                 fapi2::MSS_NO_SAFEMODE_UTILIZATION()
+                 .set_PORT_TARGET(iv_target)
+                 .set_PORT_DATABUS_UTIL(iv_min_util_port),
+                 "Failed to get safemode utilization for target %s",
                  mss::c_str(iv_target));
 
     FAPI_ASSERT( (iv_port_power_limit != 0),
@@ -898,14 +867,13 @@ fapi2::ReturnCode throttle<MC, TT>::calc_power_curve(const double i_power_idle,
         uint32_t& o_slope,
         uint32_t& o_int) const
 {
-    auto l_min_util = TT::MIN_UTIL;
     const double l_divisor = ((static_cast<double>(iv_databus_port_max) / UTIL_CONVERSION) - TT::IDLE_UTIL);
     FAPI_ASSERT ((l_divisor > 0),
                  fapi2::MSS_CALC_POWER_CURVE_DIVIDE_BY_ZERO()
                  .set_PORT_TARGET(iv_target)
                  .set_PORT_DATABUS_UTIL(iv_databus_port_max)
                  .set_UTIL_CONVERSION(UTIL_CONVERSION)
-                 .set_IDLE_UTIL(l_min_util)
+                 .set_IDLE_UTIL(iv_min_util_port)
                  .set_RESULT(l_divisor),
                  "Calculated zero for the divisor in calc_power_curve on target %s",
                  mss::c_str(iv_target) );
@@ -975,12 +943,72 @@ fapi2::ReturnCode throttle<MC, TT>::calc_util_usage(const uint32_t i_slope,
              "failed update_databus_port_max_util_by_dimm_type %s", mss::c_str(iv_target));
 
     // Check for the minimum threshnold and update if need be
-    if(o_util < TT::MIN_UTIL)
+    if(o_util < iv_min_util_port)
     {
         FAPI_INF("Calculated utilization (%u) is less than the minimum utilization: %u. Setting to minimum value for %s",
                  static_cast<uint32_t>(o_util),
-                 static_cast<uint32_t>(TT::MIN_UTIL), mss::c_str(iv_target));
-        o_util = TT::MIN_UTIL;
+                 static_cast<uint32_t>(iv_min_util_port), mss::c_str(iv_target));
+        o_util = iv_min_util_port;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Calculate the port databus utilization based off of N throttles and M dram clocks
+/// @tparam MC mss::mc_type
+/// @tparam TT throttle_traits throttle traits for the given mc_type
+/// @param[in] i_n_throttles N (address operations) allowed within a window of M DRAM clocks
+/// @param[in] i_num_dram_clocks window of M DRAM clocks
+/// @param[out] o_calc_util
+/// @return FAPI2_RC_SUCCESS iff method was a success
+/// @note Uses N/M Throttling.
+/// @note DRAM databus utilization = N * 4 * 10000 / M
+///
+template<mss::mc_type MC, typename TT>
+fapi2::ReturnCode throttle<MC, TT>::calc_util_from_throttles(const uint16_t i_n_throttles,
+        const uint32_t i_num_dram_clocks,
+        double& o_calc_util) const
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    constexpr uint32_t l_multiplier = DRAM_BUS_UTILS * UTIL_CONVERSION;
+
+    FAPI_ASSERT( (i_num_dram_clocks != 0),
+                 fapi2::MSS_M_DRAM_CLOCKS_EQUALS_ZERO(),
+                 "ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS was not set and equals zero");
+
+    // brackets to avoid cross initialization compile errors (for above FAPI_ASSERT)
+    {
+        const uint64_t l_calc_util_uint64 = static_cast<uint64_t>((static_cast<double>(i_n_throttles) * l_multiplier) /
+                                            i_num_dram_clocks);
+        o_calc_util = (static_cast<double>(i_n_throttles) * l_multiplier) / i_num_dram_clocks;
+
+        // Best way to check for overflow if o_calc_util can be a double?
+        // If o_calc_util overflows, the value inside will be below the expected outcome
+        // So compare o_calc_util with the calculated value, but store calculated value in largest storage
+        // Compare ">=" because o_calc_util can be a double, and so we can't compare just equality due to truncation
+        FAPI_ASSERT( o_calc_util >= l_calc_util_uint64,
+                     fapi2::MSS_OUTPUT_OVERFLOW_CALC_UTIL()
+                     .set_RESULT(o_calc_util)
+                     .set_THROTTLES(i_n_throttles)
+                     .set_DRAM_CLOCKS(i_num_dram_clocks)
+                     .set_MULTIPLIER(l_multiplier),
+                     "Overflow of output variable in calc_util_from_throttles throttles: %d, multiplier %d, dram_clocks %d",
+                     i_n_throttles,
+                     l_multiplier,
+                     i_num_dram_clocks);
+
+        // Check for the minimum
+        if(o_calc_util < iv_min_util_port)
+        {
+            FAPI_INF("Calculated utilization (%u) is less than the minimum utilization: %u. Setting to minimum value",
+                     static_cast<uint32_t>(o_calc_util), static_cast<uint32_t>(iv_min_util_port));
+            o_calc_util = iv_min_util_port;
+        }
+
+        FAPI_INF("In calc_util_from_throttles, calculated %u for output utilization from throttles:%d, dram_clocks %d",
+                 static_cast<uint32_t>(o_calc_util), i_n_throttles, i_num_dram_clocks);
     }
 
 fapi_try_exit:
@@ -1006,12 +1034,12 @@ fapi2::ReturnCode throttle<MC, TT>::calc_power_from_n (const uint16_t i_n_slot,
     double l_port_power_max = 0;
     double l_port_power_idle = 0;
 
-    FAPI_TRY( calc_util_from_throttles<MC>(i_n_slot, iv_m_clocks, l_calc_util_slot),
+    FAPI_TRY( calc_util_from_throttles(i_n_slot, iv_m_clocks, l_calc_util_slot),
               "%s Error calculating utilization from slot throttle %d and mem clocks %d",
               mss::c_str(iv_target),
               i_n_slot,
               iv_m_clocks);
-    FAPI_TRY( calc_util_from_throttles<MC>(i_n_port, iv_m_clocks, l_calc_util_port),
+    FAPI_TRY( calc_util_from_throttles(i_n_port, iv_m_clocks, l_calc_util_port),
               "%s Error calculating utilization from port throttle %d and mem clocks %d",
               mss::c_str(iv_target),
               i_n_port,
@@ -1189,68 +1217,47 @@ fapi_try_exit:
 
 
 ///
-/// @brief Calculate utilization from input or safemode throttles
-/// @tparam MC mss::mc_type
-/// @tparam T the fapi2 target type of the target
-/// @tparam TT throttle_traits throttle traits for the given MC target type
+/// @brief Calculate utilization from input or safemode utilization
 /// @param[in] i_target the port target
 /// @param[in] i_input_databus_util input utilization
-/// @param[in] i_dram_clocks window of M DRAM clocks
-/// @param[in] i_safemode_throttle_per_port safemode throttle value
-/// @param[in] i_max_databus_util databus utilization limit
+/// @param[in] i_min_databus_util minimum databus utilization limit
+/// @param[in] i_max_databus_util maximum databus utilization limit
 /// @param[out] o_util calculated utilization
 /// @param[out] o_util_error true if input utilization is lower than minimum allowed
 /// @param[out] o_safemode true if safemode throttle values were used for calculation
-/// @return fapi2::FAPI2_RC_SUCCESS if ok
 ///
-template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
-fapi2::ReturnCode calc_utilization(const fapi2::Target<T>& i_target,
-                                   const uint32_t i_input_databus_util,
-                                   const uint32_t i_dram_clocks,
-                                   const uint16_t i_safemode_throttle_per_port,
-                                   const uint32_t i_max_databus_util,
-                                   uint32_t& o_util,
-                                   bool& o_util_error,
-                                   bool& o_safemode)
+template<fapi2::TargetType T>
+void calc_utilization(const fapi2::Target<T>& i_target,
+                      const uint32_t i_input_databus_util,
+                      const uint32_t i_min_databus_util,
+                      const uint32_t i_max_databus_util,
+                      uint32_t& o_util,
+                      bool& o_util_error,
+                      bool& o_safemode)
 {
-    constexpr uint64_t l_min_util = TT::MIN_UTIL;
-
-    o_util = i_input_databus_util;
     o_safemode = false;
 
     // Use MRW safemode throttle values if input utilization is zero
     if (i_input_databus_util == 0)
     {
-        FAPI_TRY(calc_util_from_throttles<MC>(i_safemode_throttle_per_port,
-                                              i_dram_clocks,
-                                              o_util),
-                 "%s Error calculating utilization from safemode throttle %d and mem clocks %d",
+        FAPI_INF("%s Safemode throttles being used since input util is zero:  Using Utilization %d c%%",
                  mss::c_str(i_target),
-                 i_safemode_throttle_per_port,
-                 i_dram_clocks);
-        FAPI_INF("%s Safemode throttles being used since input util is zero:  Using N=%d, Utilization %d %%",
-                 mss::c_str(i_target),
-                 i_safemode_throttle_per_port,
-                 o_util);
+                 i_min_databus_util);
         o_safemode = true;
     }
-    else if (i_input_databus_util < l_min_util)
+    else if (i_input_databus_util < i_min_databus_util)
     {
         o_util_error = true;
     }
 
-    // Make sure MIN_UTIL <= input_utilization <= max_utilization
-    o_util = (o_util >= l_min_util) ? std::min(o_util, i_max_databus_util) : l_min_util;
+    // Make sure min_utilization <= input_utilization <= max_utilization
+    o_util = std::max(i_input_databus_util, i_min_databus_util);
+    o_util = std::min(o_util, i_max_databus_util);
 
-    FAPI_INF("%s MRW dram clock window: %d, databus utilization: %d",
+    FAPI_INF("%s calc_utilization final databus utilization: %d",
              mss::c_str(i_target),
-             i_dram_clocks,
              o_util);
 
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
 }
 
 ///

@@ -1170,6 +1170,19 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_NO_SAFEMODE_UTILIZATION</rc>
+    <description>
+      Safemode utilization is zero
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>PORT_DATABUS_UTIL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_CALC_POWER_CURVE_DIVIDE_BY_ZERO</rc>
     <description>
       Denominator equals 0
