@@ -3006,8 +3006,12 @@ bool ErrlEntry::hasMaintenanceCallout(bool i_includeInfo)
 
 
 void ErrlEntry::setDeconfigState(TARGETING::Target* const i_target,
-                                 DeconfigEnum i_deconfigState)
+                                 DeconfigEnum i_deconfigState,
+                                 HWAS::CalloutStyle_t i_callout_style,
+                                 HWAS::CalloutType_t i_callout_type)
 {
+    TRACFCOMP(g_trac_errl, ENTER_MRK"setDeconfigState i_callout_style=0x%X i_callout_type=0x%X HWAS::ALL_STYLE=0x%X HWAS::SINGLE_STYLE=0x%X",
+                  i_callout_style, i_callout_type, HWAS::ALL_STYLE, HWAS::SINGLE_STYLE);
     //Loop through each section of the errorlog
     for(auto & section : iv_SectionVector)
     {
@@ -3016,9 +3020,13 @@ void ErrlEntry::setDeconfigState(TARGETING::Target* const i_target,
             const auto callout_ud = reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData);
             // Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts will have a target
             // entry that follows the UDT callout entry
-            if (callout_ud->type == HWAS::HW_CALLOUT ||
-                callout_ud->type == HWAS::CLOCK_CALLOUT ||
-                callout_ud->type == HWAS::PART_CALLOUT)
+            //
+            // Rule for letting it pass
+            if ( ((i_callout_style == HWAS::SINGLE_STYLE) && (callout_ud->type == i_callout_type)) ||
+                 ( (i_callout_style == HWAS::ALL_STYLE) &&
+                   ((callout_ud->type == HWAS::HW_CALLOUT) ||
+                    (callout_ud->type == HWAS::CLOCK_CALLOUT) ||
+                    (callout_ud->type == HWAS::PART_CALLOUT) ) ) )
             {
                 TARGETING::Target * target_found = nullptr;
                 uint8_t * target_ptr = section->iv_pData + sizeof(HWAS::callout_ud_t);
@@ -3050,9 +3058,13 @@ void ErrlEntry::setDeconfigState(TARGETING::Target* const i_target,
 }
 
 void ErrlEntry::setGardType(TARGETING::Target* const i_target,
-                            GARD_ErrorType i_gardType)
+                            GARD_ErrorType i_gardType,
+                            HWAS::CalloutStyle_t i_callout_style,
+                            HWAS::CalloutType_t i_callout_type)
 {
     //Loop through each section of the errorlog
+    TRACFCOMP(g_trac_errl, ENTER_MRK"setGardType i_callout_style=0x%X i_callout_type=0x%X HWAS::ALL_STYLE=0x%X HWAS::SINGLE_STYLE=0x%X",
+                  i_callout_style, i_callout_type, HWAS::ALL_STYLE, HWAS::SINGLE_STYLE);
     for(auto & section : iv_SectionVector)
     {
         if (section->compId() == ERRL_COMP_ID && section->subSect() == ERRORLOG::ERRL_UDT_CALLOUT)
@@ -3060,9 +3072,13 @@ void ErrlEntry::setGardType(TARGETING::Target* const i_target,
             const auto callout_ud = reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData);
             // Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts will have a target
             // entry that follows the UDT callout entry
-            if (callout_ud->type == HWAS::HW_CALLOUT ||
-                callout_ud->type == HWAS::CLOCK_CALLOUT ||
-                callout_ud->type == HWAS::PART_CALLOUT)
+            //
+            // Rule for letting it pass
+            if ( ((i_callout_style == HWAS::SINGLE_STYLE) && (callout_ud->type == i_callout_type)) ||
+                 ( (i_callout_style == HWAS::ALL_STYLE) &&
+                   ((callout_ud->type == HWAS::HW_CALLOUT) ||
+                    (callout_ud->type == HWAS::CLOCK_CALLOUT) ||
+                    (callout_ud->type == HWAS::PART_CALLOUT) ) ) )
             {
                 TARGETING::Target * target_found = nullptr;
                 uint8_t * target_ptr = section->iv_pData + sizeof(HWAS::callout_ud_t);

@@ -136,8 +136,8 @@ void* call_host_sbe_update (void *io_pArgs)
                     // only need the deconfig/gard actions for the PNOR Part
                     // and do not want to deconfigure the entire proc because
                     // of a PNOR part problem
-                    l_errl->setGardType(l_procTarg,HWAS::GARD_NULL);
-                    l_errl->setDeconfigState(l_procTarg,HWAS::NO_DECONFIG);
+                    l_errl->setGardType(l_procTarg, HWAS::GARD_NULL, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+                    l_errl->setDeconfigState(l_procTarg, HWAS::NO_DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
                     // Commit error
                     errlCommit( l_errl, HWPF_COMP_ID );
                     l_testAltMaster = false;
@@ -166,12 +166,17 @@ void* call_host_sbe_update (void *io_pArgs)
 
                     if ( type_enum == TARGETING::PROC_MASTER_TYPE_MASTER_CANDIDATE )
                     {
-                        //Remove any processor deconfigure/gard information, we
-                        // only need the deconfig/gard actions for the PNOR Part
-                        // and do not want to deconfigure the entire proc because
-                        // of a PNOR part problem
-                        l_errl->setGardType(l_procTarg,HWAS::GARD_NULL);
-                        l_errl->setDeconfigState(l_procTarg,HWAS::NO_DECONFIG);
+                        // For a PNOR part problem, the PART_CALLOUT will indicate
+                        // the Gard_Fatal action if needed.
+                        //
+                        // These calls to setGardType and setDeconfigState will
+                        // assure that the l_procTarg (in this case, the MASTER_CANDIDATE)
+                        // is NOT misappropriately deconfigured/garded since the PNOR part problem
+                        // surfaced here is NOT an immediate problem, but will only
+                        // become an issue IF and WHEN the Alternate Proc is called
+                        // upon to become the PRIMARY Proc.
+                        l_errl->setGardType(l_procTarg, HWAS::GARD_NULL, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+                        l_errl->setDeconfigState(l_procTarg, HWAS::NO_DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
                     }
                 }
                 // Commit error

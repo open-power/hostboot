@@ -266,8 +266,8 @@ void processCallout(errlHndl_t &io_errl,
                                         pCalloutUD->partType,
                                         pCalloutUD->priority,
                                         io_errl,
-                                        pCalloutUD->deconfigState,
-                                        pCalloutUD->gardErrorType);
+                                        pCalloutUD->partDeconfigState,
+                                        pCalloutUD->partGardErrorType);
                 if (errl)
                 {
                     HWAS_ERR("processCallout: error platHandlePartCallout");
