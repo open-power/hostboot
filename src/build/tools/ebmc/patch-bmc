@@ -124,12 +124,12 @@ function REMOTE_SUDO () {
 
 function PATCH_HBI_HBB () {
     # Copy files and create symlinks
+    REMOTE_SUDO "mkdir -p $BMC_PATCH_DIRECTORY/hbdebug/"
     SSHPASS $COPY "$PATCHES_DIR/HBI.bin" "$PATCHES_DIR/HBB.bin" "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
     REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin HBB && ln -sf HBI.bin HBI"
     REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin $HBB.lid && ln -sf HBI.bin $HBI.lid"
 
     # Copy the symbol files over for debug
-    REMOTE_SUDO "mkdir -p $BMC_PATCH_DIRECTORY/hbdebug/"
     SSHPASS $COPY `find $IMG_DIR/hbotStringFile $IMG_DIR/*.list.bz2 $IMG_DIR/*.syms $IMG_DIR/*.bin.modinfo | grep -v _test` "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
 }
 
@@ -324,7 +324,7 @@ else   # Apply the data to the BMC
 
    # Copy patch files over too so we know what is being patched
    COPYDIR=/tmp/hb_patches_`date +%Y%m%H%M%S`/
-   mkdir $COPYDIR
+   mkdir -p $COPYDIR
    MAKE_GIT_PATCHFILES $COPYDIR
 
    if [[ $PATCH_HBI = 1 ]] ; then
