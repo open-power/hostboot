@@ -118,7 +118,7 @@ fapi2::ReturnCode poll_for_message_available(const fapi2::Target<fapi2::TARGET_T
     mss::poll_parameters l_poll_params(DELAY_10NS,
                                        200,
                                        mss::DELAY_1MS,
-                                       2000,
+                                       20000,
                                        i_mailbox_poll_count);
 
     // Poll for getting 0 at UctWriteProtShadow.
@@ -161,12 +161,13 @@ fapi2::ReturnCode read_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
     {
         fapi2::buffer<uint64_t> l_data;
         FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_UCTDATWRITEONLYSHADOW, l_data));
-        o_mail     = (o_mail << 16 ) | l_data;
+        o_mail     = (l_data << 16 ) | o_mail;
     }
 
     // Writing 0 to DctWriteProt.
     FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_DCTWRITEPROT, RECEPTION_ACK));
-    FAPI_INF(TARGTIDFORMAT " o_mail message: 0x%16x", TARGTID, o_mail);
+
+    FAPI_INF(TARGTIDFORMAT " o_mail message: 0x%016x", TARGTID, o_mail);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -184,7 +185,7 @@ fapi2::ReturnCode acknowledge_mail(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     mss::poll_parameters l_poll_params(DELAY_10NS,
                                        200,
                                        mss::DELAY_1MS,
-                                       400,
+                                       20000,
                                        i_mailbox_poll_count);
 
     // Poll for getting 0 at UctWriteProtShadow.
@@ -192,7 +193,7 @@ fapi2::ReturnCode acknowledge_mail(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     {
         fapi2::buffer<uint64_t> l_data;
         FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_UCTSHADOWREGS, l_data));
-        return ACK_MESSAGE == l_data;
+        return (l_data.getBit<scomt::mp::DWC_DDRPHYA_APBONLY0_UCTSHADOWREGS_UCTWRITEPROTSHADOW>() == ACK_MESSAGE);
 
     fapi_try_exit:
         FAPI_ERR("mss::poll() hit an error in mss::getScom");
@@ -207,6 +208,7 @@ fapi2::ReturnCode acknowledge_mail(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 
     // Writing 1 here completes the mail reading process.
     FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_DCTWRITEPROT, ACK_MESSAGE));
+
     FAPI_INF(TARGTIDFORMAT " mail acknowledged", TARGTID);
 
 fapi_try_exit:
@@ -248,7 +250,7 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
             FAPI_TRY(process_smbus_message(i_target));
         }
         FAPI_TRY(fapi2::delay(mss::DELAY_1MS, 200));
-        FAPI_INF(TARGTIDFORMAT " got a msg that is neither Stream or SMbus: 0x%16x", TARGTID, l_mail);
+        FAPI_INF(TARGTIDFORMAT " got a msg that is neither Stream or SMbus: 0x%016x", TARGTID, l_mail);
         // return true if mail content is either successful completion or failed completion.
         return check_for_completion(l_mail);
     fapi_try_exit:
@@ -2165,8 +2167,9 @@ fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TY
     constexpr uint64_t NUM_DATA_LEN     = 16;
 
     // Grabbing a streaming message should be almost instantaneous
-    // Only using a loop count of 1 (1 ms) to hopefully allow draminit to run quickly
-    constexpr uint64_t LOOP_COUNT = 1;
+    // Only using a loop count of 10 (10 ms) to hopefully allow draminit to run quickly
+    // Need to run at least 2 loops here to get streaming message in sim
+    constexpr uint64_t LOOP_COUNT = 10;
     fapi2::buffer<uint64_t> l_mail;
     uint32_t l_string_index = 0;
     uint16_t l_num_data = 0;
@@ -2210,7 +2213,6 @@ fapi_try_exit:
 ///
 /// @brief Configure and load the msg block on to snps phy
 /// @param[in] i_target the target on which to operate
-/// @param[in,out] io_msg_block the message block to configure and load
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
@@ -2221,7 +2223,7 @@ fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Targe
     FAPI_TRY(configure_dram_train_message_block(i_target, io_msg_block));
 
     // Load the message block on to snps phy
-    FAPI_TRY(load_msg_block(i_target, io_msg_block))
+    FAPI_TRY(load_msg_block(i_target, io_msg_block));
 
 fapi_try_exit:
     return fapi2::current_err;
