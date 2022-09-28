@@ -1202,6 +1202,7 @@ sub processDdimmAndChildren
     my $procPosRelativeToNode = "ERR";
     my $omiIdPerProc = 0;
 
+
     # Find connections for target (DIMM) of bus type ("OMI"), ignore
     # connections FROM this target ("") but find connections TO this target(1).
     my $conn = $targetObj->findConnectionsByDirection($target, "OMI", "", 1);
@@ -1371,6 +1372,8 @@ sub processDdimmAndChildren
         }
         elsif ($childType eq "OCMB_CHIP")
         {
+            # Set the Bus Position of the OCMB, it is associated with the OMI id so set it here.
+            $targetObj->setAttribute($child, "BUS_POS", $omiIdPerProc);
             processOcmbChipAndChildren($targetObj, $child, $dimmId);
             $foundOcmb = true;
         }
