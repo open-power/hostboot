@@ -2015,17 +2015,19 @@ public:
             }
 
             // Set callouts associated with this processor to have GARD_NULL
-            errl->setGardType(proc, GARD_NULL);
+            errl->setGardType(proc, GARD_NULL, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
             expectations[PROC_EXPECT].expect_gard = false;
             expectations[PROC_EXPECT].expected_gard = GARD_NULL;
 
+            TS_INFO("testSetGardType calling CHECK 1");
             checkExpectations(expectations[PROC_EXPECT], errl, CHECK_GARD);
 
             // Set callouts associated with this processor to have GARD_Fatal
-            errl->setGardType(proc, GARD_Fatal);
+            errl->setGardType(proc, GARD_Fatal, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
             expectations[PROC_EXPECT].expect_gard = true;
             expectations[PROC_EXPECT].expected_gard = GARD_Fatal;
 
+            TS_INFO("testSetGardType calling CHECK 2");
             checkExpectations(expectations[PROC_EXPECT], errl, CHECK_GARD);
 
             // Reset the error log's callouts and our expectations
@@ -2042,19 +2044,23 @@ public:
                                       callout.gard_type);
             }
 
-            // Set callouts associated with this ocmb to have GARD_NULL
-            errl->setGardType(ocmb, GARD_NULL);
-            expectations[OCMB_EXPECT].expect_gard = false;
-            expectations[OCMB_EXPECT].expected_gard = GARD_NULL;
-
-            checkExpectations(expectations[OCMB_EXPECT], errl, CHECK_GARD);
-
-            // Set callouts associated with this ocmb to have GARD_Predictive
-            errl->setGardType(ocmb, GARD_Predictive);
+            // Check that the ORIGINAL GARD_Fatal is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setGardType(ocmb, GARD_NULL, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
             expectations[OCMB_EXPECT].expect_gard = true;
-            expectations[OCMB_EXPECT].expected_gard = GARD_Predictive;
+            expectations[OCMB_EXPECT].expected_gard = GARD_Fatal;
 
-            checkExpectations(expectations[OCMB_EXPECT], errl, CHECK_GARD);
+            TS_INFO("testSetGardType calling CHECK 3");
+            checkExpectations(expectations[OCMB_EXPECT], errl, CHECK_NONE);
+
+            // Check that the ORIGINAL GARD_Fatal is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setGardType(ocmb, GARD_Predictive, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[OCMB_EXPECT].expect_gard = true;
+            expectations[OCMB_EXPECT].expected_gard = GARD_Fatal;
+
+            TS_INFO("testSetGardType calling CHECK 4");
+            checkExpectations(expectations[OCMB_EXPECT], errl, CHECK_NONE);
 
             // Reset the error log's callouts and our expectations
             resetError(errl);
@@ -2070,19 +2076,23 @@ public:
                                     callout.gard_type);
             }
 
-            // Set callouts associated with this dimm to have GARD_Fatal
-            errl->setGardType(dimm, GARD_Fatal);
-            expectations[DIMM_EXPECT].expect_gard = true;
-            expectations[DIMM_EXPECT].expected_gard = GARD_Fatal;
-
-            checkExpectations(expectations[DIMM_EXPECT], errl, CHECK_GARD);
-
-            // Set callouts associated with this dimm to have GARD_NULL
-            errl->setGardType(dimm, GARD_NULL);
+            // Check that the ORIGINAL GARD_NULL is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setGardType(dimm, GARD_Fatal, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
             expectations[DIMM_EXPECT].expect_gard = false;
             expectations[DIMM_EXPECT].expected_gard = GARD_NULL;
 
-            checkExpectations(expectations[DIMM_EXPECT], errl, CHECK_GARD);
+            TS_INFO("testSetGardType calling CHECK 5");
+            checkExpectations(expectations[DIMM_EXPECT], errl, CHECK_NONE);
+
+            // Check that the ORIGINAL GARD_NULL is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setGardType(dimm, GARD_NULL, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[DIMM_EXPECT].expect_gard = false;
+            expectations[DIMM_EXPECT].expected_gard = GARD_NULL;
+
+            TS_INFO("testSetGardType calling CHECK 6");
+            checkExpectations(expectations[DIMM_EXPECT], errl, CHECK_NONE);
 
             // Now we will test a combination of callouts. Without resetting
             // the error log, add part callouts for all callouts in the list
@@ -2097,22 +2107,48 @@ public:
             // We've added new callouts, the callout match criteria bit flags should still match but the callout's
             // gards will not match since another call to setGardType wasn't done. Don't check if all gards match
             // because they won't.
+            //
+
+            TS_INFO("testSetGardType calling CHECK 7");
             checkExpectations(expectations, errl, CHECK_NONE);
 
             // Set all gards to null ( dimm is already null)
             // and check our expectations
-            errl->setGardType(proc, GARD_NULL);
-            expectations[PROC_EXPECT].expect_gard = false;
+            errl->setGardType(proc, GARD_NULL, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[PROC_EXPECT].expect_gard = true;
             expectations[PROC_EXPECT].expected_gard = GARD_NULL;
 
-            errl->setGardType(ocmb, GARD_NULL);
-            expectations[OCMB_EXPECT].expect_gard = false;
-            expectations[OCMB_EXPECT].expected_gard = GARD_NULL;
+            // Check that the ORIGINAL GARD_Fatal is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setGardType(ocmb, GARD_NULL, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[OCMB_EXPECT].expect_gard = true;
+            expectations[OCMB_EXPECT].expected_gard = GARD_Fatal;
 
-            checkExpectations(expectations, errl, CHECK_GARD);
+            TS_INFO("testSetGardType calling CHECK 8");
+            checkExpectations(expectations, errl, CHECK_NONE);
 
-            // Set all gards to fatal
+            // Set HW_CALLOUT to fatal
             // and check our expectations
+            errl->setGardType(proc, GARD_Fatal, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[PROC_EXPECT].expect_gard = true;
+            expectations[PROC_EXPECT].expected_gard = GARD_Fatal;
+
+            // Check that the ORIGINAL GARD_Fatal is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setGardType(ocmb, GARD_Fatal, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[OCMB_EXPECT].expect_gard = true;
+            expectations[OCMB_EXPECT].expected_gard = GARD_Fatal;
+
+            // Check that the ORIGINAL GARD_NULL is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setGardType(dimm, GARD_Fatal, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[DIMM_EXPECT].expect_gard = false;
+            expectations[DIMM_EXPECT].expected_gard = GARD_NULL;
+
+            TS_INFO("testSetGardType calling CHECK 9");
+            checkExpectations(expectations, errl, CHECK_NONE);
+
+            // Use the LEGACY method to set ALL and cross verify
             errl->setGardType(proc, GARD_Fatal);
             expectations[PROC_EXPECT].expect_gard = true;
             expectations[PROC_EXPECT].expected_gard = GARD_Fatal;
@@ -2125,6 +2161,7 @@ public:
             expectations[DIMM_EXPECT].expect_gard = true;
             expectations[DIMM_EXPECT].expected_gard = GARD_Fatal;
 
+            TS_INFO("testSetGardType calling CHECK 10");
             checkExpectations(expectations, errl, CHECK_GARD);
 
             delete errl;
@@ -2238,17 +2275,19 @@ public:
             }
 
             // Set callouts associated with this processor to have NO_DECONFIG
-            errl->setDeconfigState(proc, NO_DECONFIG);
+            errl->setDeconfigState(proc, NO_DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
             expectations[PROC_EXPECT].expect_deconfig = false;
             expectations[PROC_EXPECT].expected_deconfig = NO_DECONFIG;
 
+            TS_INFO("testSetDeconfigState calling CHECK 1");
             checkExpectations(expectations[PROC_EXPECT], errl, CHECK_DECONFIG);
 
             // Set callouts associated with this processor to have DELAYED_DECONFIG
-            errl->setDeconfigState(proc, DELAYED_DECONFIG);
+            errl->setDeconfigState(proc, DELAYED_DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
             expectations[PROC_EXPECT].expect_deconfig = true;
             expectations[PROC_EXPECT].expected_deconfig = DELAYED_DECONFIG;
 
+            TS_INFO("testSetDeconfigState calling CHECK 2");
             checkExpectations(expectations[PROC_EXPECT], errl, CHECK_DECONFIG);
 
             // Reset the error log's callouts and our expectations
@@ -2265,19 +2304,23 @@ public:
                                       callout.gard_type);
             }
 
-            // Set callouts associated with this ocmb to have DELAYED_DECONFIG
-            errl->setDeconfigState(ocmb, DELAYED_DECONFIG);
-            expectations[OCMB_EXPECT].expect_deconfig = true;
-            expectations[OCMB_EXPECT].expected_deconfig = DELAYED_DECONFIG;
-
-            checkExpectations(expectations[OCMB_EXPECT], errl, CHECK_DECONFIG);
-
-            // Set callouts associated with this ocmb to have NO_DECONFIG
-            errl->setDeconfigState(ocmb, NO_DECONFIG);
+            // Check that the ORIGINAL NO_DECONFIG is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setDeconfigState(ocmb, DELAYED_DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
             expectations[OCMB_EXPECT].expect_deconfig = false;
             expectations[OCMB_EXPECT].expected_deconfig = NO_DECONFIG;
 
-            checkExpectations(expectations[OCMB_EXPECT], errl, CHECK_DECONFIG);
+            TS_INFO("testSetDeconfigState calling CHECK 3");
+            checkExpectations(expectations[OCMB_EXPECT], errl, CHECK_NONE);
+
+            // Check that the ORIGINAL NO_DECONFIG is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setDeconfigState(ocmb, NO_DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[OCMB_EXPECT].expect_deconfig = false;
+            expectations[OCMB_EXPECT].expected_deconfig = NO_DECONFIG;
+
+            TS_INFO("testSetDeconfigState calling CHECK 4");
+            checkExpectations(expectations[OCMB_EXPECT], errl, CHECK_NONE);
 
             // Reset the error log's callouts and our expectations
             resetError(errl);
@@ -2293,19 +2336,23 @@ public:
                                     callout.gard_type);
             }
 
-            // Set callouts associated with this dimm to have NO_DECONFIG
-            errl->setDeconfigState(dimm, NO_DECONFIG);
-            expectations[DIMM_EXPECT].expect_deconfig = false;
-            expectations[DIMM_EXPECT].expected_deconfig = NO_DECONFIG;
-
-            checkExpectations(expectations[DIMM_EXPECT], errl, CHECK_DECONFIG);
-
-            // Set callouts associated with this dimm to have DELAYED_DECONFIG
-            errl->setDeconfigState(dimm, DELAYED_DECONFIG);
+            // Check that the ORIGINAL DECONFIG is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setDeconfigState(dimm, NO_DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
             expectations[DIMM_EXPECT].expect_deconfig = true;
-            expectations[DIMM_EXPECT].expected_deconfig = DELAYED_DECONFIG;
+            expectations[DIMM_EXPECT].expected_deconfig = DECONFIG;
 
-            checkExpectations(expectations[DIMM_EXPECT], errl, CHECK_DECONFIG);
+            TS_INFO("testSetDeconfigState calling CHECK 5");
+            checkExpectations(expectations[DIMM_EXPECT], errl, CHECK_NONE);
+
+            // Check that the ORIGINAL DECONFIG is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setDeconfigState(dimm, DELAYED_DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[DIMM_EXPECT].expect_deconfig = true;
+            expectations[DIMM_EXPECT].expected_deconfig = DECONFIG;
+
+            TS_INFO("testSetDeconfigState calling CHECK 6");
+            checkExpectations(expectations[DIMM_EXPECT], errl, CHECK_NONE);
 
             // Now we will test a combination of callouts. Without resetting
             // the error log, add part callouts for all callouts in the list
@@ -2320,26 +2367,54 @@ public:
             // We've added new callouts, the callout match criteria bit flags should still match but the callout's
             // deconfigs will not match since another call to setDeconfigState wasn't done.
             // Don't check if all deconfigs match because they won't.
+            TS_INFO("testSetDeconfigState calling CHECK 7");
             checkExpectations(expectations, errl, CHECK_NONE);
 
             // Set all deconfigs to NO_DECONFIG
             // and check our expectations
-            errl->setDeconfigState(proc, NO_DECONFIG);
-            expectations[PROC_EXPECT].expect_deconfig = false;
-            expectations[PROC_EXPECT].expected_deconfig = NO_DECONFIG;
 
-            errl->setDeconfigState(ocmb, NO_DECONFIG);
+            // We added a NEW set of PROC targets (addClockCallout) so there WILL be a DECONFIG
+            errl->setDeconfigState(proc, NO_DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[PROC_EXPECT].expect_deconfig = true;
+            expectations[PROC_EXPECT].expected_deconfig = DECONFIG;
+
+            // Check that the ORIGINAL NO_DECONFIG is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setDeconfigState(ocmb, NO_DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
             expectations[OCMB_EXPECT].expect_deconfig = false;
             expectations[OCMB_EXPECT].expected_deconfig = NO_DECONFIG;
 
-            errl->setDeconfigState(dimm, NO_DECONFIG);
-            expectations[DIMM_EXPECT].expect_deconfig = false;
-            expectations[DIMM_EXPECT].expected_deconfig = NO_DECONFIG;
+            // Check that the ORIGINAL DECONFIG is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setDeconfigState(dimm, NO_DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[DIMM_EXPECT].expect_deconfig = true;
+            expectations[DIMM_EXPECT].expected_deconfig = DECONFIG;
 
-            checkExpectations(expectations, errl, CHECK_DECONFIG);
+            TS_INFO("testSetDeconfigState calling CHECK 8");
+            checkExpectations(expectations, errl, CHECK_NONE);
 
-            // Set all deconfigs to DECONFIG
+            // Set all HW_CALLOUTs to DECONFIG
             // and check our expectations
+            errl->setDeconfigState(proc, DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[PROC_EXPECT].expect_deconfig = true;
+            expectations[PROC_EXPECT].expected_deconfig = DECONFIG;
+
+            // Check that the ORIGINAL NO_DECONFIG is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setDeconfigState(ocmb, DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[OCMB_EXPECT].expect_deconfig = false;
+            expectations[OCMB_EXPECT].expected_deconfig = NO_DECONFIG;
+
+            // Check that the ORIGINAL DECONFIG is still there
+            // Since now ONLY the HW_CALLOUT will be updated per target
+            errl->setDeconfigState(dimm, DECONFIG, HWAS::SINGLE_STYLE, HWAS::HW_CALLOUT);
+            expectations[DIMM_EXPECT].expect_deconfig = true;
+            expectations[DIMM_EXPECT].expected_deconfig = DECONFIG;
+
+            TS_INFO("testSetDeconfigState calling CHECK 9");
+            checkExpectations(expectations, errl, CHECK_NONE);
+
+            // Use the LEGACY method to set ALL and cross verify
             errl->setDeconfigState(proc, DECONFIG);
             expectations[PROC_EXPECT].expect_deconfig = true;
             expectations[PROC_EXPECT].expected_deconfig = DECONFIG;
@@ -2352,6 +2427,7 @@ public:
             expectations[DIMM_EXPECT].expect_deconfig = true;
             expectations[DIMM_EXPECT].expected_deconfig = DECONFIG;
 
+            TS_INFO("testSetDeconfigState calling CHECK 10");
             checkExpectations(expectations, errl, CHECK_DECONFIG);
 
             delete errl;

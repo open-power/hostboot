@@ -283,6 +283,23 @@ enum calloutType : uint8_t
 };
 typedef calloutType CalloutType_t;
 
+// Legacy setting is ALL_STYLE which will
+// setGardType and setDeconfigState for ALL
+// User Details callouts (HW_CALLOUT, CLOCK_CALLOUT
+// and PART_CALLOUT
+//
+// If desired SINGLE_STYLE can be used to ONLY
+// setGardType and setDeconfigState for a SINGLE
+// type of callout, HW_CALLOUT, CLOCK_CALLOUT
+// or PART_CALLOUT
+enum calloutStyle : uint8_t
+{
+    ALL_STYLE          = 0x01,
+    SINGLE_STYLE       = 0x02,
+    LAST_STYLE = SINGLE_STYLE,
+};
+typedef calloutStyle CalloutStyle_t;
+
 const uint8_t TARGET_IS_SENTINEL = 0xF0;
 
 /**

@@ -645,12 +645,16 @@ public:
     *  @param[in]  i_target        The hardware target we want to look for.
     *  @param[in]  i_gardType      The gard type we want to force matching
     *                              callouts to.
+    *  @param[in]  i_callout_type  The callout type to work on
+    *  @param[in]  i_callout_style The type of SET to perform, legacy ALL,
+    *              HW_CALLOUT, CLOCK_CALLOUT and PART_CALLOUT
     *
     *  @return void
     */
     void setGardType(TARGETING::Target* i_target,
-                     HWAS::GARD_ErrorType i_gardType);
-
+                     HWAS::GARD_ErrorType i_gardType,
+                     HWAS::CalloutStyle_t i_callout_style = HWAS::ALL_STYLE,
+                     HWAS::CalloutType_t i_callout_type = HWAS::HW_CALLOUT);
     /**
     *  @brief Search through UD details sections for HW, clock, and part
     *  callouts associated with a given target and set the deconfig setting
@@ -659,11 +663,16 @@ public:
     *  @param[in]  i_target        The hardware target we want to look for.
     *  @param[in]  i_deconfigState The deconfig state we want to force matching
     *                              callouts to.
+    *  @param[in]  i_callout_type  The callout type to work on
+    *  @param[in]  i_callout_style The type of SET to perform, legacy ALL,
+    *              HW_CALLOUT, CLOCK_CALLOUT and PART_CALLOUT
     *
     *  @return void
     */
     void setDeconfigState(TARGETING::Target* i_target,
-                          HWAS::DeconfigEnum i_deconfigState);
+                          HWAS::DeconfigEnum i_deconfigState,
+                          HWAS::CalloutStyle_t i_callout_style = HWAS::ALL_STYLE,
+                          HWAS::CalloutType_t i_callout_type = HWAS::HW_CALLOUT);
 
     /**
      *  @brief remove all gard and deconfigure elements from an errorlog
