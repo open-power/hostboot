@@ -259,8 +259,14 @@ namespace HTMGT
                              " failed with 0x%04X",
                              reset_err->reasonCode());
 
-                    // Set original error log  as unrecoverable/degraded and commit
-                    l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE1);
+                    // Only make original error unrecoverable if it was cause of safe mode
+                    uint32_t safeInstance = 0;
+                    if (l_err->reasonCode() ==
+                        OccManager::getSafeModeReason(safeInstance))
+                    {
+                        // Set original error log as unrecoverable/degraded and commit
+                        l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE1);
+                    }
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
 
                     // Commit occReset error
