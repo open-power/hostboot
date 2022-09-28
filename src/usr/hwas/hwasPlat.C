@@ -1084,6 +1084,7 @@ void platCheckOcmbCRC(TARGETING::Target * i_target, bool & io_present)
         // there will already be an error for the disabled eeprom and the valid one would have been checked in eecache
         if (vpd_accessibility == TARGETING::EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED)
         {
+            bool checkedBothEeproms = false;
             std::vector<SPD::crc_section_t> l_sections_primary;
             std::vector<SPD::crc_section_t> l_sections_backup;
 
@@ -1129,10 +1130,11 @@ void platCheckOcmbCRC(TARGETING::Target * i_target, bool & io_present)
                         i_target->setAttr<TARGETING::ATTR_EEPROM_VPD_REDUNDANCY>(TARGETING::EEPROM_VPD_REDUNDANCY_PRESENT);
                     }
                 }
+                checkedBothEeproms = true;
             }
 
             // check if SPD data matches between the two EEPROMs
-            if (!logged_hw_error)
+            if (!logged_hw_error && checkedBothEeproms)
             {
                 bool mismatchFound = false;
 
@@ -1201,8 +1203,8 @@ void platCheckOcmbCRC(TARGETING::Target * i_target, bool & io_present)
                     */
                     errl = new ERRORLOG::ErrlEntry(
                                         ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                        HWAS::MOD_CHECK_HB_NVDIMM,
-                                        HWAS::RC_HB_PROC_ONLY_NVDIMM,
+                                        HWAS::MOD_PLAT_CHECK_OCMB_CRC,
+                                        HWAS::RC_CRC_MISMATCH_FOUND,
                                         get_huid(i_target),
                                         first_mismatch.value,
                                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
