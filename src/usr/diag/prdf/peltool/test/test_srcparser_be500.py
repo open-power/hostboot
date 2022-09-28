@@ -53,11 +53,9 @@ class TestPrdSrcParsing(unittest.TestCase):
         # Print the output for manual testing
         print(json.dumps(jsonOut, indent=4))
 
-        self.assertEqual(jsonOut["Attention Type"], "RECOVERABLE")
-        self.assertEqual(jsonOut["Node"], 0)
-        self.assertEqual(jsonOut["Target Type"], "TYPE_OCMB_CHIP")
-        self.assertEqual(jsonOut["Target Instance"], 33)
+        self.assertEqual(jsonOut["Target Desc"], "node 0 ocmb 33")
         self.assertEqual(jsonOut["Signature"], "RDFFIR[8]: Mainline read NCE")
+        self.assertEqual(jsonOut["Attn Type"], "RECOVERABLE")
 
     def testCorefir(self):
 
@@ -78,12 +76,10 @@ class TestPrdSrcParsing(unittest.TestCase):
         # Print the output for manual testing
         print(json.dumps(jsonOut, indent=4))
 
-        self.assertEqual(jsonOut["Attention Type"], "RECOVERABLE")
-        self.assertEqual(jsonOut["Node"], 0)
-        self.assertEqual(jsonOut["Target Type"], "TYPE_CORE")
-        self.assertEqual(jsonOut["Target Instance"], 46)
+        self.assertEqual(jsonOut["Target Desc"], "node 0 proc 1 core 14")
         sigCheck = "EQ_L2_FIR[8]: L2 directory CE due to stuck bit"
         self.assertEqual(jsonOut["Signature"], sigCheck)
+        self.assertEqual(jsonOut["Attn Type"], "RECOVERABLE")
 
 
 if __name__ == '__main__':
