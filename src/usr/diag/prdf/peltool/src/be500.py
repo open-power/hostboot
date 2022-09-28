@@ -55,101 +55,51 @@ def attnTypeToStr(i_type: str) -> str:
 # ###################################################
 
 
-def targetTypeToStr(i_type: str) -> str:
+def huidToStr(huid: str) -> str:
 
-    targetTypes = {"00": "TYPE_NA",
-                   "01": "TYPE_SYS",
-                   "02": "TYPE_NODE",
-                   "03": "TYPE_DIMM",
-                   "04": "TYPE_MEMBUF",
-                   "05": "TYPE_PROC",
-                   "06": "TYPE_EX",
-                   "07": "TYPE_CORE",
-                   "08": "TYPE_L2",
-                   "09": "TYPE_L3",
-                   "0a": "TYPE_L4",
-                   "0b": "TYPE_MCS",
-                   "0d": "TYPE_MBA",
-                   "0e": "TYPE_XBUS",
-                   "0f": "TYPE_ABUS",
-                   "10": "TYPE_PCI",
-                   "11": "TYPE_DPSS",
-                   "12": "TYPE_APSS",
-                   "13": "TYPE_OCC",
-                   "14": "TYPE_PSI",
-                   "15": "TYPE_FSP",
-                   "16": "TYPE_PNOR",
-                   "17": "TYPE_OSC",
-                   "18": "TYPE_TODCLK",
-                   "19": "TYPE_CONTROL_NODE",
-                   "1a": "TYPE_OSCREFCLK",
-                   "1b": "TYPE_OSCPCICLK",
-                   "1c": "TYPE_REFCLKENDPT",
-                   "1d": "TYPE_PCICLKENDPT",
-                   "1e": "TYPE_NX",
-                   "1f": "TYPE_PORE",
-                   "20": "TYPE_PCIESWITCH",
-                   "21": "TYPE_CAPP",
-                   "22": "TYPE_FSI",
-                   "23": "TYPE_EQ",
-                   "24": "TYPE_MCA",
-                   "25": "TYPE_MCBIST",
-                   "26": "TYPE_MI",
-                   "27": "TYPE_DMI",
-                   "28": "TYPE_OBUS",
-                   "2a": "TYPE_SBE",
-                   "2b": "TYPE_PPE",
-                   "2c": "TYPE_PERV",
-                   "2d": "TYPE_PEC",
-                   "2e": "TYPE_PHB",
-                   "2f": "TYPE_SYSREFCLKENDPT",
-                   "30": "TYPE_MFREFCLKENDPT",
-                   "31": "TYPE_TPM",
-                   "32": "TYPE_SP",
-                   "33": "TYPE_UART",
-                   "34": "TYPE_PS",
-                   "35": "TYPE_FAN",
-                   "36": "TYPE_VRM",
-                   "37": "TYPE_USB",
-                   "38": "TYPE_ETH",
-                   "39": "TYPE_PANEL",
-                   "3a": "TYPE_BMC",
-                   "3b": "TYPE_FLASH",
-                   "3c": "TYPE_SEEPROM",
-                   "3d": "TYPE_TMP",
-                   "3e": "TYPE_GPIO_EXPANDER",
-                   "3f": "TYPE_POWER_SEQUENCER",
-                   "40": "TYPE_RTC",
-                   "41": "TYPE_FANCTLR",
-                   "42": "TYPE_OBUS_BRICK",
-                   "43": "TYPE_NPU",
-                   "44": "TYPE_MC",
-                   "45": "TYPE_TEST_FAIL",
-                   "46": "TYPE_MFREFCLK",
-                   "47": "TYPE_SMPGROUP",
-                   "48": "TYPE_OMI",
-                   "49": "TYPE_MCC",
-                   "4a": "TYPE_OMIC",
-                   "4b": "TYPE_OCMB_CHIP",
-                   "4c": "TYPE_MEM_PORT",
-                   "4d": "TYPE_I2C_MUX",
-                   "4e": "TYPE_PMIC",
-                   "4f": "TYPE_NMMU",
-                   "50": "TYPE_PAU",
-                   "51": "TYPE_IOHS",
-                   "52": "TYPE_PAUC",
-                   "53": "TYPE_FC",
-                   "54": "TYPE_LPCREFCLKENDPT",
-                   "55": "TYPE_GENERIC_I2C_DEVICE",
-                   "56": "TYPE_MDS_CTLR",
-                   "57": "TYPE_LAST_IN_RANGE"}
+    # HUID format (32 bits):
+    # 4    4    8        16
+    # SSSS NNNN TTTTTTTT iiiiiiiiiiiiiiii
+    # S=System
+    # N=Node Number
+    # T=Target Type (matches TYPE attribute)
+    # i=Instance/Sequence number of target, relative to node
+    node_inst = int(huid[1:2], 16)
+    target_type = int(huid[2:4], 16)
+    target_inst = int(huid[4:8], 16)
 
-    targetTypeStr = "Unknown Type " + i_type
+    chips = {
+        0x05: 'proc'  # TYPE_PROC
+        0x4b: 'ocmb'  # TYPE_OCMB_CHIP
+    }
 
-    if i_type.lower() in targetTypes:
-        targetTypeStr = targetTypes[i_type.lower()]
+    if target_type in chips:
+        return f'node {node_inst} {chips[target_type]} {target_inst}'
 
-    return targetTypeStr
+    proc_units = {
+        # autopep8: off
+        0x07: ('core', 32)  # TYPE_CORE
+        0x23: ('eq'  ,  8)  # TYPE_EQ
+        0x2d: ('pec' ,  2)  # TYPE_PEC
+        0x2e: ('phb' ,  6)  # TYPE_PHB
+        0x44: ('mc'  ,  4)  # TYPE_MC
+        0x49: ('mcc' ,  8)  # TYPE_MCC
+        0x4a: ('omic',  8)  # TYPE_OMIC
+        0x4f: ('nmmu',  2)  # TYPE_NMMU
+        0x50: ('pau' ,  8)  # TYPE_PAU
+        0x51: ('iohs',  8)  # TYPE_IOHS
+        0x52: ('pauc',  4)  # TYPE_PAUC
+        # autopep8: on
+    }
+
+    if target_type in proc_units:
+        unit_type, units_per_proc = proc_units[target_type]
+        proc_inst = target_inst // units_per_proc
+        unit_inst = target_inst % units_per_proc
+        return f'node {node_inst} proc {proc_inst} {unit_type} {unit_inst}'
+
+    # Just in case we fail to parse the HUID.
+    return f'node {node_inst} type 0x{target_type:02x} inst {target_inst}'
 
 
 def parseSRCToJson(refcode: str,
@@ -161,29 +111,14 @@ def parseSRCToJson(refcode: str,
 
     out = OrderedDict()
 
-    # word6 contains the huid.
-    # HUID format (32 bits):
-    # 4    4    8        16
-    # SSSS NNNN TTTTTTTT iiiiiiiiiiiiiiii
-    # S=System
-    # N=Node Number
-    # T=Target Type (matches TYPE attribute)
-    # i=Instance/Sequence number of target, relative to node
-    nodeNum = word6[1:2]
-    targetType = word6[2:4].lower()
-    targetInst = word6[4:8]
+    # The HUID is word6.
+    out["Target Desc"] = huidToStr(word6)
 
-    # The signature is word8
-    signatureData = SignatureData()
-    description = signatureData.parseSignature(targetType, word8.lower())
+    # The target type is the second byte of the HUID.
+    # The signature is word8.
+    out["Signature"] = SignatureData().parseSignature(word6[2:4], word8)
 
-    # Attention type is the last nibble of word7
-    attnType = word7[6:8]
-
-    out["Attention Type"] = attnTypeToStr(attnType)
-    out["Node"] = int(nodeNum, 16)
-    out["Target Type"] = targetTypeToStr(targetType)
-    out["Target Instance"] = int(targetInst, 16)
-    out["Signature"] = description
+    # The attention type is the last byte of word7.
+    out["Attn Type"] = attnTypeToStr(word7[6:8])
 
     return json.dumps(out)
