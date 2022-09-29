@@ -70,6 +70,7 @@ TRAC_INIT( & g_trac_spd, "SPD", KILOBYTE );
 // #define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
 
+using namespace TARGETING;
 
 // ----------------------------------------------
 // Defines
@@ -108,7 +109,7 @@ bool isValidDimmType ( uint8_t i_dimmType );
   *                   false otherwise
   */
 bool isValidDimmType(uint8_t i_dimmType,
-                     TARGETING::EEPROM_CONTENT_TYPE i_eepromType);
+                     EEPROM_CONTENT_TYPE i_eepromType);
 
 
 /**
@@ -142,7 +143,7 @@ bool compareEntries ( const KeywordData e1,
  *      to the error log.
  */
 errlHndl_t getMemType(uint8_t & o_memType,
-                     TARGETING::Target * i_target,
+                     Target * i_target,
                      EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
 
 /**
@@ -161,8 +162,8 @@ errlHndl_t getMemType(uint8_t & o_memType,
  *      to the error log.
  */
 errlHndl_t getMemType(uint8_t &                     o_memType,
-                     TARGETING::Target *            i_target,
-                     TARGETING::EEPROM_CONTENT_TYPE i_eepromType,
+                     Target *            i_target,
+                     EEPROM_CONTENT_TYPE i_eepromType,
                      EEPROM::EEPROM_SOURCE          i_eepromSource);
 
 /**
@@ -178,7 +179,7 @@ errlHndl_t getMemType(uint8_t &                     o_memType,
  *      to the error log.
  */
 errlHndl_t getModType ( modSpecTypes_t & o_modType,
-                        TARGETING::Target * i_target,
+                        Target * i_target,
                         uint64_t i_memType );
 
 
@@ -198,7 +199,7 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
  *      to the error log.
  */
 errlHndl_t getDdimmModHeight(uint8_t & o_ddimmModHeight,
-                           TARGETING::Target * i_target,
+                           Target * i_target,
                            EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
 
 
@@ -213,24 +214,24 @@ errlHndl_t getDdimmModHeight(uint8_t & o_ddimmModHeight,
  * @return errlHndl_t - NULL if successful, otherwise a pointer to the
  *      error log.
  */
-errlHndl_t spdSetSize ( TARGETING::Target &io_target,
+errlHndl_t spdSetSize ( Target &io_target,
                         uint8_t            i_dimmType);
 
 
 // Register the perform Op with the routing code for DIMMs.
 DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        DeviceFW::SPD,
-                       TARGETING::TYPE_DIMM,
+                       TYPE_DIMM,
                        spdGetKeywordValue );
 DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
                        DeviceFW::SPD,
-                       TARGETING::TYPE_DIMM,
+                       TYPE_DIMM,
                        spdWriteKeywordValue );
 
 // Register the perform Op with the routing code for OCMBs.
 DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
                        DeviceFW::SPD,
-                       TARGETING::TYPE_OCMB_CHIP,
+                       TYPE_OCMB_CHIP,
                        spdWriteKeywordValue );
 
 // ------------------------------------------------------------------
@@ -244,18 +245,18 @@ bool isValidDimmType ( const uint8_t i_dimmType )
 
 
 bool isValidDimmType(uint8_t i_memType,
-                     TARGETING::EEPROM_CONTENT_TYPE i_eepromType)
+                     EEPROM_CONTENT_TYPE i_eepromType)
 {
     bool isValid = false;
 
 // TODO RTC:204341 Add support for reading/write EECACHE during runtime
 #ifndef __HOSTBOOT_RUNTIME
-    if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
+    if (i_eepromType == EEPROM_CONTENT_TYPE_ISDIMM)
     {
         isValid = isValidDimmType(i_memType);
     }
-    else if ((i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM) ||
-             (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD))
+    else if ((i_eepromType == EEPROM_CONTENT_TYPE_DDIMM) ||
+             (i_eepromType == EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD))
     {
         isValid = isValidOcmbDimmType(i_memType);
     }
@@ -270,7 +271,7 @@ bool isValidDimmType(uint8_t i_memType,
 // spdGetKeywordValue
 // ------------------------------------------------------------------
 errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
-                                TARGETING::Target * i_target,
+                                Target * i_target,
                                 void * io_buffer,
                                 size_t & io_buflen,
                                 int64_t i_accessType,
@@ -281,7 +282,7 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
 
     TRACSSCOMP( g_trac_spd,
                 ENTER_MRK"spdGetKeywordValue(%08X), io_buflen: %d, keyword: 0x%04x",
-                TARGETING::get_huid(i_target), io_buflen, keyword );
+                get_huid(i_target), io_buflen, keyword );
 
     do
     {
@@ -331,7 +332,7 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
                        ERR_MRK"Invalid Basic Memory Type (0x%04x), "
                        "target huid = 0x%x",
                        memType,
-                       TARGETING::get_huid(i_target));
+                       get_huid(i_target));
 
             /*@
              * @errortype
@@ -389,7 +390,7 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
 // spdWriteKeywordValue
 // ------------------------------------------------------------------
 errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
-                                  TARGETING::Target * i_target,
+                                  Target * i_target,
                                   void * io_buffer,
                                   size_t & io_buflen,
                                   int64_t i_accessType,
@@ -492,7 +493,7 @@ errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
 errlHndl_t spdFetchData ( uint64_t              i_byteAddr,
                           size_t                i_numBytes,
                           void                * o_data,
-                          TARGETING::Target   * i_target,
+                          Target   * i_target,
                           EEPROM::EEPROM_SOURCE i_eepromSource)
 {
     errlHndl_t err{nullptr};
@@ -534,7 +535,7 @@ errlHndl_t spdFetchData ( uint64_t              i_byteAddr,
 errlHndl_t spdWriteData ( uint64_t i_offset,
                           size_t i_numBytes,
                           void * i_data,
-                          TARGETING::Target * i_target )
+                          Target * i_target )
 {
     errlHndl_t err{nullptr};
 
@@ -573,7 +574,7 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
 errlHndl_t spdGetValue(VPD::vpdKeyword       i_keyword,
                        void                * io_buffer,
                        size_t              & io_buflen,
-                       TARGETING::Target   * i_target,
+                       Target   * i_target,
                        uint64_t              i_DDRRev,
                        EEPROM::EEPROM_SOURCE i_eepromSource)
 {
@@ -717,7 +718,7 @@ errlHndl_t spdGetValue(VPD::vpdKeyword       i_keyword,
 errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
                            void * io_buffer,
                            size_t & io_buflen,
-                           TARGETING::Target * i_target,
+                           Target * i_target,
                            uint64_t i_DDRRev )
 {
     errlHndl_t err{nullptr};
@@ -892,11 +893,11 @@ errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
 // ------------------------------------------------------------------
 // spdSetSize
 // ------------------------------------------------------------------
-errlHndl_t spdSetSize ( TARGETING::Target &io_target,
+errlHndl_t spdSetSize ( Target &io_target,
                         const uint8_t      i_dimmType)
 {
     TRACSSCOMP( g_trac_spd, ENTER_MRK"spdSetSize(): setting DIMM SPD(0x%X) size for"
-                " target(0x%X)", i_dimmType, TARGETING::get_huid(&io_target) );
+                " target(0x%X)", i_dimmType, get_huid(&io_target) );
 
     errlHndl_t l_err{nullptr};
 
@@ -904,20 +905,20 @@ errlHndl_t spdSetSize ( TARGETING::Target &io_target,
     {
         if ( SPD_DDR3_TYPE == i_dimmType )
         {
-            io_target.setAttr<TARGETING::ATTR_DIMM_SPD_BYTE_SIZE>(SPD_DDR3_SIZE);
+            io_target.setAttr<ATTR_DIMM_SPD_BYTE_SIZE>(SPD_DDR3_SIZE);
             TRACSSCOMP( g_trac_spd, "found DIMM w/ HUID 0x%08X to be type "
                         "DDR3, set ATTR_DIMM_SPD_BYTE_SIZE to be %d",
-                        TARGETING::get_huid(&io_target),
-                        io_target.getAttr<TARGETING::ATTR_DIMM_SPD_BYTE_SIZE>() );
+                        get_huid(&io_target),
+                        io_target.getAttr<ATTR_DIMM_SPD_BYTE_SIZE>() );
 
         }
         else if ( SPD_DDR4_TYPE == i_dimmType )
         {
-            io_target.setAttr<TARGETING::ATTR_DIMM_SPD_BYTE_SIZE>(SPD_DDR4_SIZE);
+            io_target.setAttr<ATTR_DIMM_SPD_BYTE_SIZE>(SPD_DDR4_SIZE);
             TRACSSCOMP( g_trac_spd, "found DIMM w/ HUID 0x%08X to be type "
                         "DDR4, set ATTR_DIMM_SPD_BYTE_SIZE to be %d",
-                        TARGETING::get_huid(&io_target),
-                        io_target.getAttr<TARGETING::ATTR_DIMM_SPD_BYTE_SIZE>() );
+                        get_huid(&io_target),
+                        io_target.getAttr<ATTR_DIMM_SPD_BYTE_SIZE>() );
         }
         else
         {
@@ -939,7 +940,7 @@ errlHndl_t spdSetSize ( TARGETING::Target &io_target,
             l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                              VPD::VPD_SPD_SET_DIMM_SIZE,
                                              VPD::VPD_INVALID_BASIC_MEMORY_TYPE,
-                                             TARGETING::get_huid(&io_target),
+                                             get_huid(&io_target),
                                              i_dimmType,
                                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
@@ -961,11 +962,11 @@ errlHndl_t spdSetSize ( TARGETING::Target &io_target,
  * @param i_memtype Memory type returned from getMemType()
  * @return nullptr if redundancy set correctly, else error
  */
-errlHndl_t spdUpdateEepromRedundancy(TARGETING::Target * i_target, const uint8_t i_memType)
+errlHndl_t spdUpdateEepromRedundancy(Target * i_target, const uint8_t i_memType)
 {
     errlHndl_t err{nullptr};
-    TARGETING::ATTR_EEPROM_VPD_REDUNDANCY_type newEepromRedundancy =
-                    TARGETING::EEPROM_VPD_REDUNDANCY_POSSIBLE;
+    ATTR_EEPROM_VPD_REDUNDANCY_type newEepromRedundancy =
+                    EEPROM_VPD_REDUNDANCY_POSSIBLE;
 
     do {
         // Check for redundant DDR4 4U DDIMM
@@ -993,8 +994,8 @@ errlHndl_t spdUpdateEepromRedundancy(TARGETING::Target * i_target, const uint8_t
                 {
                     TRACFCOMP( g_trac_spd,
                         "spdUpdateEepromRedundancy> Found 0x%08X is an eeprom-redundant DDR4 4U DDIMM",
-                        TARGETING::get_huid(i_target) );
-                    newEepromRedundancy = TARGETING::EEPROM_VPD_REDUNDANCY_PRESENT;
+                        get_huid(i_target) );
+                    newEepromRedundancy = EEPROM_VPD_REDUNDANCY_PRESENT;
                 }
                 else
                 {
@@ -1003,47 +1004,47 @@ errlHndl_t spdUpdateEepromRedundancy(TARGETING::Target * i_target, const uint8_t
                     {
                         TRACFCOMP( g_trac_spd,
                             "spdUpdateEepromRedundancy> 0x%08X is a NON-REDUNDANT DDR4 %dU DDIMM",
-                            TARGETING::get_huid(i_target), (ddimmModHeight == DDIMM_MOD_HEIGHT_2U)?2:1 );
-                        newEepromRedundancy = TARGETING::EEPROM_VPD_REDUNDANCY_NOT_PRESENT;
+                            get_huid(i_target), (ddimmModHeight == DDIMM_MOD_HEIGHT_2U)?2:1 );
+                        newEepromRedundancy = EEPROM_VPD_REDUNDANCY_NOT_PRESENT;
                     }
                     else
                     {
                         TRACFCOMP( g_trac_spd,
                             "spdUpdateEepromRedundancy> 0x%08X is a non-redundant eeprom DDR4 DDIMM (mod height %x)",
-                            TARGETING::get_huid(i_target), ddimmModHeight );
+                            get_huid(i_target), ddimmModHeight );
                     }
                 }
             }
         }
 
         // Only update to redundancy present
-        if (newEepromRedundancy != TARGETING::EEPROM_VPD_REDUNDANCY_POSSIBLE)
+        if (newEepromRedundancy != EEPROM_VPD_REDUNDANCY_POSSIBLE)
         {
             // we read SPD to determine redundancy
-            i_target->setAttr<TARGETING::ATTR_EEPROM_VPD_REDUNDANCY>(newEepromRedundancy);
+            i_target->setAttr<ATTR_EEPROM_VPD_REDUNDANCY>(newEepromRedundancy);
 
             // also update parent OCMB redundancy
-            TARGETING::TargetHandleList l_ocmbs;
+            TargetHandleList l_ocmbs;
             getParentAffinityTargets(l_ocmbs,
                                      i_target,
-                                     TARGETING::CLASS_CHIP,
-                                     TARGETING::TYPE_OCMB_CHIP,
+                                     CLASS_CHIP,
+                                     TYPE_OCMB_CHIP,
                                      false);
             if (l_ocmbs.size() == 1)
             {
                 TRACFCOMP(g_trac_spd,
                     "spdUpdateEepromRedundancy> setting DDIMM (0x%08X) and its OCMB (0x%08X) to EEPROM_VPD_REDUNDANCY (%d)",
-                    TARGETING::get_huid(i_target), TARGETING::get_huid(l_ocmbs[0]), newEepromRedundancy);
-                l_ocmbs[0]->setAttr<TARGETING::ATTR_EEPROM_VPD_REDUNDANCY>(newEepromRedundancy);
+                    get_huid(i_target), get_huid(l_ocmbs[0]), newEepromRedundancy);
+                l_ocmbs[0]->setAttr<ATTR_EEPROM_VPD_REDUNDANCY>(newEepromRedundancy);
 
-                TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY_type dimm_eeprom_accessibility =
-                    TARGETING::EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED;
-                if( i_target->tryGetAttr<TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY>(dimm_eeprom_accessibility) )
+                ATTR_EEPROM_VPD_ACCESSIBILITY_type dimm_eeprom_accessibility =
+                    EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED;
+                if( i_target->tryGetAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(dimm_eeprom_accessibility) )
                 {
                     TRACFCOMP(g_trac_spd,
                         "spdUpdateEepromRedundancy> setting OCMB(0x%08X) to DIMM accessibility setting (%x)",
-                        TARGETING::get_huid(l_ocmbs[0]), dimm_eeprom_accessibility);
-                    l_ocmbs[0]->setAttr<TARGETING::ATTR_EEPROM_VPD_ACCESSIBILITY>(dimm_eeprom_accessibility);
+                        get_huid(l_ocmbs[0]), dimm_eeprom_accessibility);
+                    l_ocmbs[0]->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(dimm_eeprom_accessibility);
                 }
             }
             else
@@ -1052,7 +1053,7 @@ errlHndl_t spdUpdateEepromRedundancy(TARGETING::Target * i_target, const uint8_t
                 // make the OCMBs match the DDIMMs (it might mean another error log though)
                 TRACFCOMP(g_trac_spd,
                     "spdUpdateEepromRedundancy> Found %d ocmb parent(s) of DIMM target (0x%08X)",
-                    l_ocmbs.size(), TARGETING::get_huid(i_target));
+                    l_ocmbs.size(), get_huid(i_target));
             }
         }
     } while (0);
@@ -1062,9 +1063,9 @@ errlHndl_t spdUpdateEepromRedundancy(TARGETING::Target * i_target, const uint8_t
 // ------------------------------------------------------------------
 // spdPresent
 // ------------------------------------------------------------------
-bool spdPresent ( TARGETING::Target * i_target )
+bool spdPresent ( Target * i_target )
 {
-    TRACSSCOMP( g_trac_spd, ENTER_MRK"spdPresent(0x%08X)", TARGETING::get_huid(i_target) );
+    TRACSSCOMP( g_trac_spd, ENTER_MRK"spdPresent(0x%08X)", get_huid(i_target) );
 
     errlHndl_t err{nullptr};
     uint8_t    memType(MEM_TYPE_INVALID);
@@ -1092,7 +1093,7 @@ bool spdPresent ( TARGETING::Target * i_target )
             if ( !isValidDimmType(memType) )
             {
                 TRACFCOMP( g_trac_spd, "spdPresent> Unexpected data 0x%04X found on 0x%08X, checking CRC",
-                           memType, TARGETING::get_huid(i_target) );
+                           memType, get_huid(i_target) );
                 std::vector<crc_section_t> l_sections;
                 errlHndl_t err2 = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_AUTO, EEPROM::HARDWARE, l_sections);
                 if( err2 )
@@ -1112,7 +1113,7 @@ bool spdPresent ( TARGETING::Target * i_target )
                 bool l_switched_to_backup = EEPROM::eepromSwitchToBackup(i_target);
                 if (l_switched_to_backup)
                 {
-                    TRACFCOMP(g_trac_spd, "spdPresent> disabled primary access for 0x%08X", TARGETING::get_huid(i_target));
+                    TRACFCOMP(g_trac_spd, "spdPresent> disabled primary access for 0x%08X", get_huid(i_target));
 
                     // create error for bad vpd data
                     /*@
@@ -1128,7 +1129,7 @@ bool spdPresent ( TARGETING::Target * i_target )
                     err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE_REDUNDANCY_LOST,
                                                    VPD::VPD_SPD_PRESENCE_DETECT,
                                                    VPD::VPD_SPD_INVALID_PRIMARY_VPD,
-                                                   TARGETING::get_huid(i_target),
+                                                   get_huid(i_target),
                                                    memType,
                                                    ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
                     // VPD is wrong
@@ -1141,7 +1142,7 @@ bool spdPresent ( TARGETING::Target * i_target )
                                        HWAS::NO_DECONFIG,
                                        HWAS::GARD_NULL );
 
-                    bool mfgMode = TARGETING::areMfgThresholdsActive();
+                    bool mfgMode = areMfgThresholdsActive();
                     if (!mfgMode)
                     {
                         // field mode, don't make user visible log
@@ -1214,7 +1215,7 @@ bool spdPresent ( TARGETING::Target * i_target )
     } while( !pres ); // only check in continue case (redundant eeprom)
 
     TRACSSCOMP( g_trac_spd, EXIT_MRK"spdPresent(0x%08X): returning %s",
-        TARGETING::get_huid(i_target), (pres ? "true" : "false") );
+        get_huid(i_target), (pres ? "true" : "false") );
 
     return pres;
 }
@@ -1226,7 +1227,7 @@ bool spdPresent ( TARGETING::Target * i_target )
 // ------------------------------------------------------------------
 errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
                             void * io_buffer,
-                            TARGETING::Target * i_target)
+                            Target * i_target)
 {
     errlHndl_t err{nullptr};
     uint8_t * tmpBuffer = static_cast<uint8_t *>(io_buffer);
@@ -1331,20 +1332,20 @@ errlHndl_t ddr3SpecialCases(const KeywordData & i_kwdData,
 errlHndl_t fetchDataFromEepromType(uint64_t i_byteAddr,
                                    size_t i_numBytes,
                                    void * o_data,
-                                   TARGETING::Target * i_target,
-                                   TARGETING::EEPROM_CONTENT_TYPE i_eepromType)
+                                   Target * i_target,
+                                   EEPROM_CONTENT_TYPE i_eepromType)
 {
     errlHndl_t errl = nullptr;
 
-    if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
+    if (i_eepromType == EEPROM_CONTENT_TYPE_ISDIMM)
     {
         errl = spdFetchData(i_byteAddr,
                             i_numBytes,
                             o_data,
                             i_target);
     }
-    else if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM ||
-             i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD)
+    else if (i_eepromType == EEPROM_CONTENT_TYPE_DDIMM ||
+             i_eepromType == EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD)
     {
         errl = ocmbFetchData(i_target,
                              i_byteAddr,
@@ -1380,7 +1381,7 @@ errlHndl_t fetchDataFromEepromType(uint64_t i_byteAddr,
 // ------------------------------------------------------------------
 errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
                             void * io_buffer,
-                            TARGETING::Target * i_target)
+                            Target * i_target)
 {
     errlHndl_t err{nullptr};
     uint8_t * tmpBuffer = static_cast<uint8_t *>(io_buffer);
@@ -1388,10 +1389,10 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
     TRACSSCOMP( g_trac_spd, ENTER_MRK"ddr4SpecialCases()" );
 
     auto eepromVpd =
-        i_target->getAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>();
+        i_target->getAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>();
 
-    TARGETING::EEPROM_CONTENT_TYPE eepromType =
-       static_cast<TARGETING::EEPROM_CONTENT_TYPE>(eepromVpd.eepromContentType);
+    EEPROM_CONTENT_TYPE eepromType =
+       static_cast<EEPROM_CONTENT_TYPE>(eepromVpd.eepromContentType);
 
     switch( i_kwdData.keyword )
     {
@@ -1539,7 +1540,7 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
 // ------------------------------------------------------------------
 errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
                              void * io_buffer,
-                             TARGETING::Target * i_target,
+                             Target * i_target,
                              uint64_t i_DDRRev )
 {
     errlHndl_t err{nullptr};
@@ -1691,7 +1692,7 @@ bool compareEntries ( const KeywordData e1,
 // ------------------------------------------------------------------
 errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                                      uint64_t i_memType,
-                                     TARGETING::Target * i_target )
+                                     Target * i_target )
 {
     errlHndl_t err{nullptr};
 
@@ -1743,7 +1744,7 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
                                     VPD::VPD_SPD_CHECK_MODULE_SPECIFIC_KEYWORD,
                                     VPD::VPD_MOD_SPECIFIC_UNSUPPORTED,
                                     userdata1,
-                                    TARGETING::get_huid(i_target));
+                                    get_huid(i_target));
 
                 // HB code asked for an unsupprted keyword for this Module
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -1774,7 +1775,7 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
 // getMemType
 // ------------------------------------------------------------------
 errlHndl_t getMemType(uint8_t             & o_memType,
-                      TARGETING::Target   * i_target,
+                      Target   * i_target,
                       EEPROM::EEPROM_SOURCE i_eepromSource)
 {
     errlHndl_t err{nullptr};
@@ -1794,8 +1795,8 @@ errlHndl_t getMemType(uint8_t             & o_memType,
 
 
 errlHndl_t getMemType(uint8_t &                  o_memType,
-                     TARGETING::Target *         i_target,
-                     TARGETING::EEPROM_CONTENT_TYPE i_eepromType,
+                     Target *         i_target,
+                     EEPROM_CONTENT_TYPE i_eepromType,
                      EEPROM::EEPROM_SOURCE       i_eepromSource)
 {
     errlHndl_t err = nullptr;
@@ -1803,9 +1804,9 @@ errlHndl_t getMemType(uint8_t &                  o_memType,
 // @TODO RTC 204341 Implement for runtime
 #ifndef __HOSTBOOT_RUNTIME
 
-    if ((i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM)  ||
-        (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM) ||
-        (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD))
+    if ((i_eepromType == EEPROM_CONTENT_TYPE_DDIMM)  ||
+        (i_eepromType == EEPROM_CONTENT_TYPE_ISDIMM) ||
+        (i_eepromType == EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD))
     {
         err = getMemType(o_memType,
                          i_target,
@@ -1828,7 +1829,7 @@ errlHndl_t getMemType(uint8_t &                  o_memType,
                                       VPD::VPD_GET_MEMTYPE,
                                       VPD::VPD_INVALID_EEPROM_CONTENT_TYPE,
                                       i_eepromType,
-                                      TARGETING::get_huid(i_target),
+                                      get_huid(i_target),
                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
     }
 
@@ -1842,17 +1843,17 @@ errlHndl_t getMemType(uint8_t &                  o_memType,
 // getModType
 // ------------------------------------------------------------------
 errlHndl_t getModType ( modSpecTypes_t & o_modType,
-                        TARGETING::Target * i_target,
+                        Target * i_target,
                         uint64_t i_memType )
 {
     errlHndl_t err{nullptr};
     o_modType = NA;
 
     auto eepromVpd =
-        i_target->getAttr<TARGETING::ATTR_EEPROM_VPD_PRIMARY_INFO>();
+        i_target->getAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>();
 
-    TARGETING::EEPROM_CONTENT_TYPE eepromType =
-       static_cast<TARGETING::EEPROM_CONTENT_TYPE>(eepromVpd.eepromContentType);
+    EEPROM_CONTENT_TYPE eepromType =
+       static_cast<EEPROM_CONTENT_TYPE>(eepromVpd.eepromContentType);
 
     uint8_t modTypeVal = 0;
     err = fetchDataFromEepromType(MOD_TYPE_ADDR,
@@ -1961,7 +1962,7 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
 
 
 errlHndl_t getDdimmModHeight(uint8_t & o_dimmModHeight,
-                           TARGETING::Target * i_target,
+                           Target * i_target,
                            EEPROM::EEPROM_SOURCE i_eepromSource)
 {
     errlHndl_t err{nullptr};
@@ -1984,7 +1985,7 @@ errlHndl_t getDdimmModHeight(uint8_t & o_dimmModHeight,
 // ------------------------------------------------------------------
 errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
                              uint64_t i_memType,
-                             TARGETING::Target * i_target,
+                             Target * i_target,
                              const KeywordData *& o_entry )
 {
     errlHndl_t err{nullptr};
@@ -2109,7 +2110,7 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
 // ------------------------------------------------------------------
 // setPartAndSerialNumberAttributes
 // ------------------------------------------------------------------
-void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
+void setPartAndSerialNumberAttributes( Target * i_target )
 {
     errlHndl_t l_err = nullptr;
 
@@ -2118,7 +2119,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
     VPD::vpdKeyword l_serialKeyword = SPD::MODULE_SERIAL_NUMBER;
     VPD::vpdKeyword l_ccinKeyword = 0;
 
-    if(TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_USE_11S_SPD>())
+    if(UTIL::assertGetToplevelTarget()->getAttr<ATTR_USE_11S_SPD>())
     {
         //Use IBM 11S Location for DDIMM SN/PN/CCIN
         l_partKeyword = SPD::IBM_11S_PN;
@@ -2232,7 +2233,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
         TRACFCOMP(g_trac_spd, "setPartAndSerialNumberAttributes: HUID=0x%08X", get_huid(i_target));
 
         // Set the attributes
-        TARGETING::ATTR_PART_NUMBER_type l_PN = {0};
+        ATTR_PART_NUMBER_type l_PN = {0};
         size_t expectedPNSize = sizeof(l_PN);
         if(expectedPNSize < l_partDataSize)
         {
@@ -2242,13 +2243,13 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             l_partDataSize = expectedPNSize; //truncate it
         }
         memcpy(l_PN, l_partNumberData, l_partDataSize);
-        i_target->trySetAttr<TARGETING::ATTR_PART_NUMBER>(l_PN);
+        i_target->trySetAttr<ATTR_PART_NUMBER>(l_PN);
         TRACFBIN(g_trac_spd,
                  "                                : PART NUMBER =",
                  l_PN, l_partDataSize);
 
         // FRU Part Number is the same as Part Number for DIMMs
-        TARGETING::ATTR_FRU_NUMBER_type l_FN = {0};
+        ATTR_FRU_NUMBER_type l_FN = {0};
         size_t expectedFNSize = sizeof(l_FN);
         if(expectedFNSize < l_partDataSize)
         {
@@ -2258,12 +2259,12 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             l_partDataSize = expectedFNSize; //truncate it
         }
         memcpy(l_FN, l_partNumberData, l_partDataSize);
-        i_target->trySetAttr<TARGETING::ATTR_FRU_NUMBER>(l_FN);
+        i_target->trySetAttr<ATTR_FRU_NUMBER>(l_FN);
         TRACFBIN(g_trac_spd,
                  "                                : FRU NUMBER =",
                  l_FN, l_partDataSize);
 
-        TARGETING::ATTR_SERIAL_NUMBER_type l_SN = {0};
+        ATTR_SERIAL_NUMBER_type l_SN = {0};
         size_t expectedSNSize = sizeof(l_SN);
         if(expectedSNSize < l_serialDataSize)
         {
@@ -2272,14 +2273,14 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
             l_serialDataSize = expectedSNSize; //truncate it
         }
         memcpy(l_SN, l_serialNumberData, l_serialDataSize);
-        i_target->trySetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_SN);
+        i_target->trySetAttr<ATTR_SERIAL_NUMBER>(l_SN);
         TRACFBIN(g_trac_spd,
                  "                                : SERIAL NUMBER =",
                  l_SN, l_serialDataSize);
 
         if (l_ccinKeyword != 0)
         {
-            TARGETING::ATTR_FRU_CCIN_type l_CC = 0;
+            ATTR_FRU_CCIN_type l_CC = 0;
             size_t expectedCCSize = sizeof(l_CC);
             if(expectedCCSize < l_ccinDataSize)
             {
@@ -2289,7 +2290,7 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
                 l_ccinDataSize = expectedCCSize; //truncate it
             }
             memcpy(&l_CC, l_ccinData, l_ccinDataSize);
-            i_target->trySetAttr<TARGETING::ATTR_FRU_CCIN>(l_CC);
+            i_target->trySetAttr<ATTR_FRU_CCIN>(l_CC);
             TRACFCOMP(g_trac_spd,
                       "                                : CCIN = %lX",
                       l_CC);
@@ -2322,8 +2323,8 @@ void setPartAndSerialNumberAttributes( TARGETING::Target * i_target )
  *
  * @return        errlHndl_t       nullptr on success. Otherwise, error log.
  */
-errlHndl_t readFromEepromSource(TARGETING::Target*          i_target,
-                                TARGETING::EEPROM_CONTENT_TYPE i_eepromType,
+errlHndl_t readFromEepromSource(Target*          i_target,
+                                EEPROM_CONTENT_TYPE i_eepromType,
                           const VPD::vpdKeyword             i_keyword,
                           const uint8_t                     i_memType,
                                 void*                       io_buffer,
@@ -2338,7 +2339,7 @@ errlHndl_t readFromEepromSource(TARGETING::Target*          i_target,
 
 // @TODO RTC 204341 Implement for runtime
 #ifndef __HOSTBOOT_RUNTIME
-    if (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_ISDIMM)
+    if (i_eepromType == EEPROM_CONTENT_TYPE_ISDIMM)
     {
         err = spdGetValue(i_keyword,
                           io_buffer,
@@ -2347,8 +2348,8 @@ errlHndl_t readFromEepromSource(TARGETING::Target*          i_target,
                           i_memType,
                           i_eepromSource);
     }
-    else if ((i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_DDIMM) ||
-             (i_eepromType == TARGETING::EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD))
+    else if ((i_eepromType == EEPROM_CONTENT_TYPE_DDIMM) ||
+             (i_eepromType == EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD))
     {
         err = ocmbGetSPD(i_target,
                          io_buffer,
@@ -2374,7 +2375,7 @@ errlHndl_t readFromEepromSource(TARGETING::Target*          i_target,
                                       VPD::VPD_READ_FROM_EEPROM_SOURCE,
                                       VPD::VPD_INVALID_EEPROM_CONTENT_TYPE,
                                       i_eepromType,
-                                      TARGETING::get_huid(i_target),
+                                      get_huid(i_target),
                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
     }
 #endif
@@ -2386,14 +2387,14 @@ errlHndl_t readFromEepromSource(TARGETING::Target*          i_target,
 // ------------------------------------------------------------------
 // cmpEecacheToEeprom
 // ------------------------------------------------------------------
-errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
-                              TARGETING::EEPROM_CONTENT_TYPE i_eepromType,
+errlHndl_t cmpEecacheToEeprom(Target * i_target,
+                              EEPROM_CONTENT_TYPE i_eepromType,
                               VPD::vpdKeyword i_keyword,
                               bool &o_match)
 {
     errlHndl_t err = nullptr;
 
-    TRACSSCOMP(g_trac_spd, ENTER_MRK"cmpEecacheToEeprom(%08X)",TARGETING::get_huid(i_target));
+    TRACSSCOMP(g_trac_spd, ENTER_MRK"cmpEecacheToEeprom(%08X)",get_huid(i_target));
 
     // default to a mismatch to force a refresh from the eeprom
     o_match = false;
@@ -2515,7 +2516,7 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
             TRACFCOMP( g_trac_spd,
                        "cmpEecacheToEeprom(): CACHE size (0x%X) and HARDWARE "
                        "size (0x%X) are differnt for 0x%08X",
-                       sizeCache, sizeHardware, TARGETING::get_huid(i_target) );
+                       sizeCache, sizeHardware, get_huid(i_target) );
             break;
         }
         if (memcmp(dataHardware, dataCache, sizeHardware))
@@ -2525,7 +2526,7 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
             TRACFCOMP( g_trac_spd,
                        "cmpEecacheToEeprom(): CACHE and HARDWARE "
                        "data don't match for 0x%08X",
-                       TARGETING::get_huid(i_target) );
+                       get_huid(i_target) );
             unexpected_data = true;
             break;
         }
@@ -2546,7 +2547,7 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
     if( !err && unexpected_data )
     {
         TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Unexpected data found on %08X, checking CRC",
-           TARGETING::get_huid(i_target) );
+           get_huid(i_target) );
         //TODO - check for p10 dd1 here
         std::vector<crc_section_t> l_sections;
         errlHndl_t errHW = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_PRIMARY, EEPROM::HARDWARE, l_sections );
@@ -2606,7 +2607,7 @@ errlHndl_t cmpEecacheToEeprom(TARGETING::Target * i_target,
 //  the Generic VPD driver.  We need a wrapper to handle the extra "record"
 //  argument though.
 errlHndl_t spdGetKeywordValue_generic ( DeviceFW::OperationType i_opType,
-                                        TARGETING::Target * i_target,
+                                        Target * i_target,
                                         void * io_buffer,
                                         size_t & io_buflen,
                                         int64_t i_accessType,
@@ -2626,11 +2627,11 @@ errlHndl_t spdGetKeywordValue_generic ( DeviceFW::OperationType i_opType,
 }
 DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        DeviceFW::VPD,
-                       TARGETING::TYPE_DIMM,
+                       TYPE_DIMM,
                        spdGetKeywordValue_generic );
 
 errlHndl_t spdWriteKeywordValue_generic ( DeviceFW::OperationType i_opType,
-                                          TARGETING::Target * i_target,
+                                          Target * i_target,
                                           void * io_buffer,
                                           size_t & io_buflen,
                                           int64_t i_accessType,
@@ -2650,12 +2651,12 @@ errlHndl_t spdWriteKeywordValue_generic ( DeviceFW::OperationType i_opType,
 }
 DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
                        DeviceFW::VPD,
-                       TARGETING::TYPE_DIMM,
+                       TYPE_DIMM,
                        spdWriteKeywordValue_generic );
 
 DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
                        DeviceFW::VPD,
-                       TARGETING::TYPE_OCMB_CHIP,
+                       TYPE_OCMB_CHIP,
                        spdWriteKeywordValue_generic );
 
 
