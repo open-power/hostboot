@@ -79,7 +79,10 @@ const HdatKeywordInfo l_pvpdKeywords[] =
     { PVPD::LX,  "LX" },
 };
 
+const char HDAT_RAINIER2U_SYSTEM_TYPE[] = "ibm,rainier-2s2u";
+const char HDAT_RAINIER4U_SYSTEM_TYPE[] = "ibm,rainier-2s4u";
 const char HDAT_EVEREST_SYSTEM_TYPE[] = "ibm,everest";
+const char HDAT_BONNELL_SYSTEM_TYPE[] = "ibm,bonnell";
 
 extern trace_desc_t *g_trac_hdat;
 
@@ -106,6 +109,17 @@ const uint32_t PROC6_NUM_SLOTS = 2;
 const uint32_t PROC7_NUM_SLOTS = 2;
 const uint32_t TOTAL_NUM_SLOTS = 25;
 
+//Bonnell slot table areas/entry info for each proc
+const uint32_t PROC0_NUM_SLOT_BONNELL_TABLE_AREAS = 4;
+const uint32_t PROC1_NUM_SLOT_BONNELL_TABLE_AREAS = 9;
+const uint32_t PROC0_NUM_SLOT_BONNELL_ENTRY_INFO  = 4;
+const uint32_t PROC1_NUM_SLOT_BONNELL_ENTRY_INFO  = 9;
+
+//Bonnell slot numbers for each proc
+const uint32_t PROC0_BONNELL_NUM_SLOTS = 4;
+const uint32_t PROC1_BONNELL_NUM_SLOTS = 9;
+const uint32_t TOTAL_BONNELL_NUM_SLOTS = 13;
+
 //const uint32_t MAX_NUM_OF_PROCS           = 2;
 //const uint32_t MAX_NUM_OF_SLOT_TABLE_AREAS =
   //             (PROC0_NUM_SLOT_TABLE_AREAS > PROC1_NUM_SLOT_TABLE_AREAS) ?
@@ -126,7 +140,8 @@ static_assert( NUM_OF_LANES_PER_PHB ==
 // TODO:SW398487 : Need to replace this with PNOR : HDAT partition consumption.
 // The below hardcoding is for temporary purpose but still valid values from mrw
 // hdatSlotMapAreas got changed to reflect P10 Rainier model values
-hdatSlotMapArea_t hdatSlotMapAreas[PROC0_NUM_SLOT_TABLE_AREAS + PROC1_NUM_SLOT_TABLE_AREAS + PROC2_NUM_SLOT_TABLE_AREAS + PROC3_NUM_SLOT_TABLE_AREAS]=
+// Rainier related slot map area entries
+hdatSlotMapArea_t hdatSlotMapAreasRainier[PROC0_NUM_SLOT_TABLE_AREAS + PROC1_NUM_SLOT_TABLE_AREAS + PROC2_NUM_SLOT_TABLE_AREAS + PROC3_NUM_SLOT_TABLE_AREAS]=
 {
 { 1,0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C11" },
 { 2,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"002" },
@@ -145,7 +160,8 @@ hdatSlotMapArea_t hdatSlotMapAreas[PROC0_NUM_SLOT_TABLE_AREAS + PROC1_NUM_SLOT_T
 };
 
 
-hdatSlotEntryInfo_t hdatSlotMapEntries[PROC0_NUM_SLOT_ENTRY_INFO + PROC1_NUM_SLOT_ENTRY_INFO + PROC2_NUM_SLOT_ENTRY_INFO + PROC3_NUM_SLOT_ENTRY_INFO] = {
+// Rainier related slot map info entries
+hdatSlotEntryInfo_t hdatSlotMapEntriesRainier[PROC0_NUM_SLOT_ENTRY_INFO + PROC1_NUM_SLOT_ENTRY_INFO + PROC2_NUM_SLOT_ENTRY_INFO + PROC3_NUM_SLOT_ENTRY_INFO] = {
 { 1,0,5,2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0,0 },
 { 2,0,0,128, 0,  2,0,0,0,0,0,25,0, 32,  0,0,0,0,0,0 },
 { 3,0,0,64,  0,  2,0,0,0,0,0,25,0, 32,  0,0,0,0,0,0 },
@@ -237,6 +253,44 @@ hdatSlotEntryInfo_t hdatSlotMapEntriesEverest[TOTAL_NUM_SLOTS]=
 
 { 24,0,0,2040,256,2,0,0,0,0,0,75,46,4072,0,0,0,0,0,0 },
 { 25,0,0,2040,256,2,0,0,0,0,0,75,46,4072,0,0,0,0,0,0 },
+};
+
+//Bonnell related slot map area entries
+hdatSlotMapArea_t hdatSlotMapAreasBonnell[TOTAL_BONNELL_NUM_SLOTS]=
+{
+{ 1, 0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C3" },
+{ 2, 0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"002" },
+{ 3, 0,2,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"001" },
+{ 4, 0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C2" },
+
+{ 5, 0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C1" },
+{ 6, 0,1,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"003" },
+{ 7, 0,1,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"004" },
+{ 8, 0,1,0,0,0,0x000F,0,0,0,1,0,0,0,0,0,0,0,"005" },
+{ 9, 0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"P1-C0" },
+{ 10,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"P1-C1" },
+{ 11,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"P1-C2" },
+{ 12,0,1,0,0,0,0x00FF,0,0,0,1,0,0,0,0,0,0,0,"P1-C3" },
+{ 13,0,3,0,0,0,0xFFFF,0,0,0,1,0,0,0,0,0,0,0,"C0" },
+};
+
+//Bonnell related slot map info entries
+hdatSlotEntryInfo_t hdatSlotMapEntriesBonnell[TOTAL_BONNELL_NUM_SLOTS]=
+{
+{ 1, 0,4,2040,256,2,0,0,0,0,0,75,29,4072,0,0,0,0,0,0 },
+{ 2, 0,0, 128,  0,2,0,0,0,0,0,75,29,  32,0,0,0,0,0,0 },
+{ 3, 0,0,  64,  0,2,0,0,0,0,0,75,29,  32,0,0,0,0,0,0 },
+{ 4, 0,2,2040,256,2,0,0,0,0,0,75,29,4072,0,0,0,0,0,0 },
+
+{ 5, 0,3,2040,256,2,0,0,0,0,0,75,29,4072,0,0,0,0,0,0 },
+{ 6, 0,0,   8,  0,2,0,0,0,0,0,75,29,   0,0,0,0,0,0,0 },
+{ 7, 0,0,   8,  0,2,0,0,0,0,0,75,29,   0,0,0,0,0,0,0 },
+{ 8, 0,0, 128,  0,2,0,0,0,0,0,75,29,  32,0,0,0,0,0,0 },
+{ 9, 0,5, 128, 32,2,0,0,0,0,0,75,29, 256,0,0,0,0,0,0 },
+{ 10,0,6, 128, 32,2,0,0,0,0,0,75,29, 256,0,0,0,0,0,0 },
+{ 11,0,7, 128, 32,2,0,0,0,0,0,75,29, 256,0,0,0,0,0,0 },
+{ 12,0,8, 128, 32,2,0,0,0,0,0,75,29, 256,0,0,0,0,0,0 },
+{ 13,0,1,2040,256,2,0,0,0,0,0,75,29,4072,0,0,0,0,0,0 },
 };
 
 /*******************************************************************************
@@ -932,156 +986,240 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
     const char* i_systemType, int i_iohubNum,bool i_dcm)
 {
     HDAT_ENTER();
-    errlHndl_t l_errlHndl = NULL;
-    if (!i_dcm)
+    errlHndl_t l_errlHndl = nullptr;
+    bool l_invalidSystemType = false;
+    do {
+        if (!i_dcm)
+        {
+            uint32_t arrayCount = 0;
+            auto startIndex = 0;
+            if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
+               ) //Rainier
+            {
+                if(i_iohubNum == 1)
+                {
+                    arrayCount = PROC0_NUM_SLOT_TABLE_AREAS +
+                                 PROC1_NUM_SLOT_TABLE_AREAS;
+                }
+                else if(i_iohubNum == 2)
+                {
+                    arrayCount = PROC0_NUM_SLOT_TABLE_AREAS +
+                                 PROC1_NUM_SLOT_TABLE_AREAS +
+                                 PROC2_NUM_SLOT_TABLE_AREAS +
+                                 PROC3_NUM_SLOT_TABLE_AREAS;
+                }
+            }
+            else if(!strcmp(i_systemType, HDAT_BONNELL_SYSTEM_TYPE)) //Bonnell
+            {
+                arrayCount = PROC0_NUM_SLOT_BONNELL_TABLE_AREAS +
+                             PROC1_NUM_SLOT_BONNELL_TABLE_AREAS;
+            }
+            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            {
+                if(i_iohubNum == 1)
+                {
+                    arrayCount = PROC0_NUM_SLOTS +
+                                 PROC1_NUM_SLOTS;
+                }
+                else if(i_iohubNum == 2)
+                {
+                    arrayCount = PROC0_NUM_SLOTS +
+                                 PROC1_NUM_SLOTS +
+                                 PROC2_NUM_SLOTS +
+                                 PROC3_NUM_SLOTS;
+                }
+                else if(i_iohubNum == 3)
+                {
+                    arrayCount = PROC0_NUM_SLOTS +
+                                 PROC1_NUM_SLOTS +
+                                 PROC2_NUM_SLOTS +
+                                 PROC3_NUM_SLOTS +
+                                 PROC4_NUM_SLOTS +
+                                 PROC5_NUM_SLOTS;
+                }
+                else if(i_iohubNum == 4)
+                {
+                    arrayCount = PROC0_NUM_SLOTS +
+                                 PROC1_NUM_SLOTS +
+                                 PROC2_NUM_SLOTS +
+                                 PROC3_NUM_SLOTS +
+                                 PROC4_NUM_SLOTS +
+                                 PROC5_NUM_SLOTS +
+                                 PROC6_NUM_SLOTS +
+                                 PROC7_NUM_SLOTS;
+                }
+            }
+            else // Invalid system type
+            {
+                l_invalidSystemType = true;
+                break;
+            }
+
+            iv_hdatSlotMapAreaArrayHdr = { sizeof(hdatHDIFDataArray_t),
+                              arrayCount,
+                              sizeof(hdatSlotMapArea_t),
+                              sizeof(hdatSlotMapArea_t) };
+            if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
+               ) //Rainier
+            {
+                memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreasRainier+startIndex) ,
+                sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+            }
+            else if(!strcmp(i_systemType, HDAT_BONNELL_SYSTEM_TYPE)) //Bonnell
+            {
+                memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreasBonnell+startIndex),
+                sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+            }
+            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            {
+                memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreasEverest+startIndex),
+                sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+            }
+            else // Invalid system type
+            {
+                l_invalidSystemType = true;
+                break;
+            }
+        }
+        else
+        {
+            uint32_t arrayCount = 0;
+            auto startIndex = 0;
+            if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
+               ) //Rainier
+            {
+                switch(i_iohubNum)
+                {
+                    case 1: arrayCount = PROC0_NUM_SLOT_TABLE_AREAS +
+                                         PROC1_NUM_SLOT_TABLE_AREAS;
+                            break;
+                    case 2: arrayCount = PROC2_NUM_SLOT_TABLE_AREAS +
+                                         PROC3_NUM_SLOT_TABLE_AREAS;
+
+                            startIndex = PROC0_NUM_SLOT_TABLE_AREAS +
+                                         PROC1_NUM_SLOT_TABLE_AREAS;
+                            break;
+                }
+            }
+            else if(!strcmp(i_systemType, HDAT_BONNELL_SYSTEM_TYPE)) //Bonnell
+            {
+                arrayCount = PROC0_NUM_SLOT_BONNELL_TABLE_AREAS +
+                             PROC1_NUM_SLOT_BONNELL_TABLE_AREAS;
+            }
+            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            {
+                switch(i_iohubNum)
+                {
+                    case 1: arrayCount = PROC0_NUM_SLOTS +
+                                         PROC1_NUM_SLOTS;
+                            break;
+                    case 2: arrayCount = PROC2_NUM_SLOTS +
+                                         PROC3_NUM_SLOTS;
+
+                            startIndex = PROC0_NUM_SLOTS +
+                                         PROC1_NUM_SLOTS;
+                            break;
+                    case 3: arrayCount = PROC4_NUM_SLOTS +
+                                         PROC5_NUM_SLOTS;
+
+                            startIndex = PROC0_NUM_SLOTS +
+                                         PROC1_NUM_SLOTS +
+                                         PROC2_NUM_SLOTS +
+                                         PROC3_NUM_SLOTS;
+                            break;
+                    case 4: arrayCount = PROC6_NUM_SLOTS +
+                                         PROC7_NUM_SLOTS;
+
+                            startIndex = PROC0_NUM_SLOTS +
+                                         PROC1_NUM_SLOTS +
+                                         PROC2_NUM_SLOTS +
+                                         PROC3_NUM_SLOTS +
+                                         PROC4_NUM_SLOTS +
+                                         PROC5_NUM_SLOTS;
+                            break;
+                }
+            }
+            else // Invalid system type
+            {
+                l_invalidSystemType = true;
+                break;
+            }
+
+            iv_hdatSlotMapAreaArrayHdr = { sizeof(hdatHDIFDataArray_t),
+               arrayCount,
+               sizeof(hdatSlotMapArea_t), sizeof(hdatSlotMapArea_t) };
+
+            if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
+               ) //Rainier
+            {
+                memcpy(iv_hdatSlotMapAreaPtr,(hdatSlotMapAreasRainier + startIndex),
+                sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+            }
+            else if(!strcmp(i_systemType, HDAT_BONNELL_SYSTEM_TYPE)) //Bonnell
+            {
+                memcpy(iv_hdatSlotMapAreaPtr,
+                    (hdatSlotMapAreasBonnell + startIndex),
+                sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+            }
+            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            {
+                memcpy(iv_hdatSlotMapAreaPtr,
+                    (hdatSlotMapAreasEverest + startIndex),
+                sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
+            }
+            else // Invalid system type
+            {
+                l_invalidSystemType = true;
+                break;
+            }
+            auto toPrintSlotMap=
+                reinterpret_cast<hdatSlotMapArea_t *>(iv_hdatSlotMapAreaPtr);
+            for(size_t i=0; i<iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt;i++)
+            {
+                HDAT_DBG("printing slot map object %i",i);
+                HDAT_DBG("hdatEntryId=0x%x",toPrintSlotMap->hdatEntryId);
+                HDAT_DBG("hdatLaneMask=0x%x",toPrintSlotMap->hdatLaneMask);
+                HDAT_DBG("hdatSlotName=%s",toPrintSlotMap->hdatSlotName);
+                toPrintSlotMap++;
+            }
+        }
+    }while(0);
+
+    if (l_invalidSystemType == true)
     {
-        uint32_t arrayCount = 0;
-        auto startIndex = 0;
-        if(strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Rainier
+        if (i_systemType != NULL)
         {
-            if(i_iohubNum == 1)
-            {
-                arrayCount = PROC0_NUM_SLOT_TABLE_AREAS +
-                             PROC1_NUM_SLOT_TABLE_AREAS;
-            }
-            else if(i_iohubNum == 2)
-            {
-                arrayCount = PROC0_NUM_SLOT_TABLE_AREAS +
-                             PROC1_NUM_SLOT_TABLE_AREAS +
-                             PROC2_NUM_SLOT_TABLE_AREAS +
-                             PROC3_NUM_SLOT_TABLE_AREAS;
-            }
+            HDAT_ERR("SMAREA systemType=%s",i_systemType);
         }
-        else //Everest
-        {
-            if(i_iohubNum == 1)
-            {
-                arrayCount = PROC0_NUM_SLOTS +
-                             PROC1_NUM_SLOTS;
-            }
-            else if(i_iohubNum == 2)
-            {
-                arrayCount = PROC0_NUM_SLOTS +
-                             PROC1_NUM_SLOTS +
-                             PROC2_NUM_SLOTS +
-                             PROC3_NUM_SLOTS;
-            }
-            else if(i_iohubNum == 3)
-            {
-                arrayCount = PROC0_NUM_SLOTS +
-                             PROC1_NUM_SLOTS +
-                             PROC2_NUM_SLOTS +
-                             PROC3_NUM_SLOTS +
-                             PROC4_NUM_SLOTS +
-                             PROC5_NUM_SLOTS;
-            }
-            else if(i_iohubNum == 4)
-            {
-                arrayCount = PROC0_NUM_SLOTS +
-                             PROC1_NUM_SLOTS +
-                             PROC2_NUM_SLOTS +
-                             PROC3_NUM_SLOTS +
-                             PROC4_NUM_SLOTS +
-                             PROC5_NUM_SLOTS +
-                             PROC6_NUM_SLOTS +
-                             PROC7_NUM_SLOTS;
-            }
-        }
-
-        iv_hdatSlotMapAreaArrayHdr = { sizeof(hdatHDIFDataArray_t),
-                          arrayCount,
-                          sizeof(hdatSlotMapArea_t),
-                          sizeof(hdatSlotMapArea_t) };
-        if(strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Rainier
-        {
-            memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreas+startIndex) ,
-            sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
-        }
-        else //Everest
-        {
-            memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreasEverest+startIndex),
-            sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
-        }
+        /*@
+         * @errortype
+         * @refcode    LIC_REFCODE
+         * @subsys     EPUB_FIRMWARE_SP
+         * @reasoncode RC_INVALID_SYSTEM_TYPE_SMAREA
+         * @moduleid   MOD_IOHUB_SYSTEM_TYPE
+         * @userdata1  io hub number
+         * @userdata2  dcm number
+         * @userdata3  none
+         * @userdata4  none
+         * @devdesc    Unable to determine the system type in slot map
+         *             table area data
+         * @custdesc   Firmware error detected for a non supported system
+         *             type while creating slot map table area data
+         */
+        hdatBldErrLog(l_errlHndl,
+              MOD_IOHUB_SYSTEM_TYPE,             // SRC module ID
+              RC_INVALID_SYSTEM_TYPE_SMAREA,     // SRC ext ref code
+              i_iohubNum,                        // SRC hex word 1
+              i_dcm,                             // SRC hex word 2
+              0,                                 // SRC hex word 3
+              0,                                 // SRC hex word 4
+              ERRORLOG::ERRL_SEV_UNRECOVERABLE);
     }
-    else
-    {
-        uint32_t arrayCount = 0;
-        auto startIndex = 0;
-        if(strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Rainier
-        {
-            switch(i_iohubNum)
-            {
-                case 1: arrayCount = PROC0_NUM_SLOT_TABLE_AREAS +
-                                     PROC1_NUM_SLOT_TABLE_AREAS;
-                        break;
-                case 2: arrayCount = PROC2_NUM_SLOT_TABLE_AREAS +
-                                     PROC3_NUM_SLOT_TABLE_AREAS;
 
-                        startIndex = PROC0_NUM_SLOT_TABLE_AREAS +
-                                     PROC1_NUM_SLOT_TABLE_AREAS;
-                        break;
-            }
-        }
-        else //Everest
-        {
-            switch(i_iohubNum)
-            {
-                case 1: arrayCount = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS;
-                        break;
-                case 2: arrayCount = PROC2_NUM_SLOTS +
-                                     PROC3_NUM_SLOTS;
-
-                        startIndex = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS;
-                        break;
-                case 3: arrayCount = PROC4_NUM_SLOTS +
-                                     PROC5_NUM_SLOTS;
-
-                        startIndex = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS +
-                                     PROC2_NUM_SLOTS +
-                                     PROC3_NUM_SLOTS;
-                        break;
-                case 4: arrayCount = PROC6_NUM_SLOTS +
-                                     PROC7_NUM_SLOTS;
-
-                        startIndex = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS +
-                                     PROC2_NUM_SLOTS +
-                                     PROC3_NUM_SLOTS +
-                                     PROC4_NUM_SLOTS +
-                                     PROC5_NUM_SLOTS;
-                        break;
-            }
-        }
-
-        iv_hdatSlotMapAreaArrayHdr = { sizeof(hdatHDIFDataArray_t),
-           arrayCount,
-           sizeof(hdatSlotMapArea_t), sizeof(hdatSlotMapArea_t) };
-
-        if(strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Rainier
-        {
-            memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreas + startIndex),
-            sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
-        }
-        else // Everest
-        {
-            memcpy(iv_hdatSlotMapAreaPtr,
-                (hdatSlotMapAreasEverest + startIndex),
-            sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
-        }
-        auto toPrintSlotMap=
-                 reinterpret_cast<hdatSlotMapArea_t *>(iv_hdatSlotMapAreaPtr);
-        for(size_t i=0; i<iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt;i++)
-        {
-            HDAT_DBG("printing slot map object %i",i);
-            HDAT_DBG("hdatEntryId=0x%x",toPrintSlotMap->hdatEntryId);
-            HDAT_DBG("hdatLaneMask=0x%x",toPrintSlotMap->hdatLaneMask);
-            HDAT_DBG("hdatSlotName=%s",toPrintSlotMap->hdatSlotName);
-            toPrintSlotMap++;
-        }
-    }
     HDAT_EXIT();
     return l_errlHndl;
 }
@@ -1090,150 +1228,237 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
     const char* i_systemType, int i_iohubNum, bool i_dcm)
 {
     HDAT_ENTER();
-    errlHndl_t l_errlHndl = NULL;
-    if (!i_dcm)
-    {
-        uint32_t arrayCount = 0;
-        auto startIndex = 0;
-        if(strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Rainier
+    errlHndl_t l_errlHndl = nullptr;
+    bool l_invalidSystemType = false;
+    do {
+        if (!i_dcm)
         {
-            if(i_iohubNum == 1)
+            uint32_t arrayCount = 0;
+            auto startIndex = 0;
+            if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
+               ) //Rainier
             {
-                arrayCount = PROC0_NUM_SLOT_ENTRY_INFO +
-                             PROC1_NUM_SLOT_ENTRY_INFO;
+                if(i_iohubNum == 1)
+                {
+                    arrayCount = PROC0_NUM_SLOT_ENTRY_INFO +
+                                 PROC1_NUM_SLOT_ENTRY_INFO;
+                }
+                else if(i_iohubNum == 2)
+                {
+                    arrayCount = PROC0_NUM_SLOT_ENTRY_INFO +
+                                 PROC1_NUM_SLOT_ENTRY_INFO +
+                                 PROC2_NUM_SLOT_ENTRY_INFO +
+                                 PROC3_NUM_SLOT_ENTRY_INFO;
+                }
             }
-            else if(i_iohubNum == 2)
+            else if(!strcmp(i_systemType, HDAT_BONNELL_SYSTEM_TYPE)) //Bonnell
             {
-                arrayCount = PROC0_NUM_SLOT_ENTRY_INFO +
-                             PROC1_NUM_SLOT_ENTRY_INFO +
-                             PROC2_NUM_SLOT_ENTRY_INFO +
-                             PROC3_NUM_SLOT_ENTRY_INFO;
+                arrayCount = PROC0_NUM_SLOT_BONNELL_ENTRY_INFO +
+                             PROC1_NUM_SLOT_BONNELL_ENTRY_INFO;
             }
-        }
-        else //Evesret
-        {
-            if(i_iohubNum == 1)
+            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
             {
-                arrayCount = PROC0_NUM_SLOTS +
-                             PROC1_NUM_SLOTS;
+                if(i_iohubNum == 1)
+                {
+                    arrayCount = PROC0_NUM_SLOTS +
+                                 PROC1_NUM_SLOTS;
+                }
+                else if(i_iohubNum == 2)
+                {
+                    arrayCount = PROC0_NUM_SLOTS +
+                                 PROC1_NUM_SLOTS +
+                                 PROC2_NUM_SLOTS +
+                                 PROC3_NUM_SLOTS;
+                }
+                else if(i_iohubNum == 3)
+                {
+                    arrayCount = PROC0_NUM_SLOTS +
+                                 PROC1_NUM_SLOTS +
+                                 PROC2_NUM_SLOTS +
+                                 PROC3_NUM_SLOTS +
+                                 PROC4_NUM_SLOTS +
+                                 PROC5_NUM_SLOTS;
+                }
+                else if(i_iohubNum == 4)
+                {
+                    arrayCount = PROC0_NUM_SLOTS +
+                                 PROC1_NUM_SLOTS +
+                                 PROC2_NUM_SLOTS +
+                                 PROC3_NUM_SLOTS +
+                                 PROC4_NUM_SLOTS +
+                                 PROC5_NUM_SLOTS +
+                                 PROC6_NUM_SLOTS +
+                                 PROC7_NUM_SLOTS;
+                }
             }
-            else if(i_iohubNum == 2)
+            else // Invalid system type
             {
-                arrayCount = PROC0_NUM_SLOTS +
-                             PROC1_NUM_SLOTS +
-                             PROC2_NUM_SLOTS +
-                             PROC3_NUM_SLOTS;
+                l_invalidSystemType = true;
+                break;
             }
-            else if(i_iohubNum == 3)
-            {
-                arrayCount = PROC0_NUM_SLOTS +
-                             PROC1_NUM_SLOTS +
-                             PROC2_NUM_SLOTS +
-                             PROC3_NUM_SLOTS +
-                             PROC4_NUM_SLOTS +
-                             PROC5_NUM_SLOTS;
-            }
-            else if(i_iohubNum == 4)
-            {
-                arrayCount = PROC0_NUM_SLOTS +
-                             PROC1_NUM_SLOTS +
-                             PROC2_NUM_SLOTS +
-                             PROC3_NUM_SLOTS +
-                             PROC4_NUM_SLOTS +
-                             PROC5_NUM_SLOTS +
-                             PROC6_NUM_SLOTS +
-                             PROC7_NUM_SLOTS;
-            }
-        }
 
-        iv_hdatSlotMapEntryArrayHdr = { sizeof(hdatHDIFDataArray_t),
+            iv_hdatSlotMapEntryArrayHdr = { sizeof(hdatHDIFDataArray_t),
                             arrayCount,
                             sizeof(hdatSlotEntryInfo_t),
                             sizeof(hdatSlotEntryInfo_t) };
-        if(strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Rainier
-        {
-            memcpy(iv_hdatSlotMapEntryInfoPtr, (hdatSlotMapEntries+startIndex),
-                   sizeof(hdatSlotEntryInfo_t) *
-                   iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
-        }
-        else //Everest
-        {
-            memcpy(iv_hdatSlotMapEntryInfoPtr,
-                   (hdatSlotMapEntriesEverest+startIndex),
-                   sizeof(hdatSlotEntryInfo_t) *
-                   iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
-        }
-    }
-    else
-    {
-        uint32_t arrayCount = 0;
-        auto startIndex = 0;
-        if(strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Rainier
-        {
-            switch(i_iohubNum)
+            if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
+               ) //Rainier
             {
-                case 1: arrayCount = PROC0_NUM_SLOT_ENTRY_INFO +
-                                     PROC1_NUM_SLOT_ENTRY_INFO;
-                        break;
-                case 2: arrayCount = PROC2_NUM_SLOT_ENTRY_INFO +
-                                     PROC3_NUM_SLOT_ENTRY_INFO;
-
-                        startIndex = PROC0_NUM_SLOT_ENTRY_INFO +
-                                     PROC1_NUM_SLOT_ENTRY_INFO;
-                        break;
+                memcpy(iv_hdatSlotMapEntryInfoPtr,
+                       (hdatSlotMapEntriesRainier+startIndex),
+                       sizeof(hdatSlotEntryInfo_t) *
+                       iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
+            }
+            else if(!strcmp(i_systemType, HDAT_BONNELL_SYSTEM_TYPE)) //Bonnell
+            {
+                memcpy(iv_hdatSlotMapEntryInfoPtr,
+                       (hdatSlotMapEntriesBonnell+startIndex),
+                       sizeof(hdatSlotEntryInfo_t) *
+                       iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
+            }
+            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            {
+                memcpy(iv_hdatSlotMapEntryInfoPtr,
+                       (hdatSlotMapEntriesEverest+startIndex),
+                       sizeof(hdatSlotEntryInfo_t) *
+                       iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
+            }
+            else // Invalid system type
+            {
+                l_invalidSystemType = true;
+                break;
             }
         }
-        else //Everest
+        else
         {
-            switch(i_iohubNum)
+            uint32_t arrayCount = 0;
+            auto startIndex = 0;
+            if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
+               ) //Rainier
             {
-                case 1: arrayCount = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS;
-                        break;
-                case 2: arrayCount = PROC2_NUM_SLOTS +
-                                     PROC3_NUM_SLOTS;
+                switch(i_iohubNum)
+                {
+                    case 1: arrayCount = PROC0_NUM_SLOT_ENTRY_INFO +
+                                         PROC1_NUM_SLOT_ENTRY_INFO;
+                            break;
+                    case 2: arrayCount = PROC2_NUM_SLOT_ENTRY_INFO +
+                                         PROC3_NUM_SLOT_ENTRY_INFO;
 
-                        startIndex = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS;
-                        break;
-                case 3: arrayCount = PROC4_NUM_SLOTS +
-                                     PROC5_NUM_SLOTS;
-
-                        startIndex = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS +
-                                     PROC2_NUM_SLOTS +
-                                     PROC3_NUM_SLOTS;
-                        break;
-                case 4: arrayCount = PROC6_NUM_SLOTS +
-                                     PROC7_NUM_SLOTS;
-
-                        startIndex = PROC0_NUM_SLOTS +
-                                     PROC1_NUM_SLOTS +
-                                     PROC2_NUM_SLOTS +
-                                     PROC3_NUM_SLOTS +
-                                     PROC4_NUM_SLOTS +
-                                     PROC5_NUM_SLOTS;
-                        break;
+                            startIndex = PROC0_NUM_SLOT_ENTRY_INFO +
+                                         PROC1_NUM_SLOT_ENTRY_INFO;
+                            break;
+                }
             }
-        }
-        iv_hdatSlotMapEntryArrayHdr = { sizeof(hdatHDIFDataArray_t),
+            else if(!strcmp(i_systemType, HDAT_BONNELL_SYSTEM_TYPE)) //Bonnell
+            {
+                arrayCount = PROC0_NUM_SLOT_BONNELL_ENTRY_INFO +
+                             PROC1_NUM_SLOT_BONNELL_ENTRY_INFO;
+            }
+            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            {
+                switch(i_iohubNum)
+                {
+                    case 1: arrayCount = PROC0_NUM_SLOTS +
+                                         PROC1_NUM_SLOTS;
+                            break;
+                    case 2: arrayCount = PROC2_NUM_SLOTS +
+                                         PROC3_NUM_SLOTS;
+
+                            startIndex = PROC0_NUM_SLOTS +
+                                         PROC1_NUM_SLOTS;
+                            break;
+                    case 3: arrayCount = PROC4_NUM_SLOTS +
+                                         PROC5_NUM_SLOTS;
+
+                            startIndex = PROC0_NUM_SLOTS +
+                                         PROC1_NUM_SLOTS +
+                                         PROC2_NUM_SLOTS +
+                                         PROC3_NUM_SLOTS;
+                            break;
+                    case 4: arrayCount = PROC6_NUM_SLOTS +
+                                         PROC7_NUM_SLOTS;
+
+                            startIndex = PROC0_NUM_SLOTS +
+                                         PROC1_NUM_SLOTS +
+                                         PROC2_NUM_SLOTS +
+                                         PROC3_NUM_SLOTS +
+                                         PROC4_NUM_SLOTS +
+                                         PROC5_NUM_SLOTS;
+                            break;
+                }
+            }
+            else // Invalid system type
+            {
+                l_invalidSystemType = true;
+                break;
+            }
+            iv_hdatSlotMapEntryArrayHdr = { sizeof(hdatHDIFDataArray_t),
                           arrayCount,
                           sizeof(hdatSlotEntryInfo_t),
                           sizeof(hdatSlotEntryInfo_t) };
-        if(strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Rainier
-        {
-            memcpy(iv_hdatSlotMapEntryInfoPtr,
-                   (hdatSlotMapEntries + startIndex),
+            if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
+               ) //Rainier
+            {
+                memcpy(iv_hdatSlotMapEntryInfoPtr,
+                   (hdatSlotMapEntriesRainier + startIndex),
                    sizeof(hdatSlotEntryInfo_t) *
                    iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
-        }
-        else //Everest
-        {
-            memcpy(iv_hdatSlotMapEntryInfoPtr,
+            }
+            else if(!strcmp(i_systemType, HDAT_BONNELL_SYSTEM_TYPE)) //Bonnell
+            {
+                memcpy(iv_hdatSlotMapEntryInfoPtr,
+                   (hdatSlotMapEntriesBonnell + startIndex),
+                   sizeof(hdatSlotEntryInfo_t) *
+                   iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
+            }
+            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            {
+                memcpy(iv_hdatSlotMapEntryInfoPtr,
                    (hdatSlotMapEntriesEverest + startIndex),
                    sizeof(hdatSlotEntryInfo_t) *
                    iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
+            }
+            else // Invalid system type
+            {
+                l_invalidSystemType = true;
+                break;
+            }
         }
+    }while(0);
+
+    if (l_invalidSystemType == true)
+    {
+        if (i_systemType != NULL)
+        {
+            HDAT_ERR("SMINFO systemType=%s",i_systemType);
+        }
+        /*@
+         * @errortype
+         * @refcode    LIC_REFCODE
+         * @subsys     EPUB_FIRMWARE_SP
+         * @reasoncode RC_INVALID_SYSTEM_TYPE_SMINFO
+         * @moduleid   MOD_IOHUB_SYSTEM_TYPE
+         * @userdata1  io hub number
+         * @userdata2  dcm number
+         * @userdata3  none
+         * @userdata4  none
+         * @devdesc    Unable to determine the system type in slot map
+         *             entry info data
+         * @custdesc   Firmware error detected for a non supported system
+         *             type while creating slot map entry info data
+         */
+        hdatBldErrLog(l_errlHndl,
+              MOD_IOHUB_SYSTEM_TYPE,             // SRC module ID
+              RC_INVALID_SYSTEM_TYPE_SMINFO,     // SRC ext ref code
+              i_iohubNum,                        // SRC hex word 1
+              i_dcm,                             // SRC hex word 2
+              0,                                 // SRC hex word 3
+              0,                                 // SRC hex word 4
+              ERRORLOG::ERRL_SEV_UNRECOVERABLE);
     }
     HDAT_EXIT();
     return l_errlHndl;
