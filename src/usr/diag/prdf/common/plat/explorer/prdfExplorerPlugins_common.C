@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -818,6 +818,55 @@ int32_t clearAndMaskTlxtRe( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, clearAndMaskTlxtRe );
+
+//##############################################################################
+//
+//                               SRQFIR
+//
+//##############################################################################
+
+/**
+ * @brief  In the case where SRQFIR[25] (Firmware initiated channel fail due to
+ *         IUE threshold) causes a system checkstop, the IUE bits which are
+ *         left on at threshold should be blamed as the root cause. A separate
+ *         log for the IUE threshold should already be committed.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t checkIueTh( ExtensibleChip * i_chip,
+                    STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[explorer_ocmb::checkIueTh] "
+
+    // By default, let the rule code make the callout
+    uint32_t o_rc = PRD_SCAN_COMM_REGISTER_ZERO;
+
+    // If a system check occurred
+    if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() )
+    {
+        // Check for the IUE bits (RDFFIR[17,37])
+        SCAN_COMM_REGISTER_CLASS * rdffir = i_chip->getRegister("RDFFIR");
+        if ( SUCCESS != rdffir->Read() )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed for RDFFIR on 0x%08x",
+                      i_chip->getHuid() );
+        }
+        else
+        {
+            if ( rdffir->IsBitSet(17) || rdffir->IsBitSet(37) )
+            {
+                o_rc = i_chip->Analyze(io_sc, RECOVERABLE);
+            }
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, checkIueTh );
+
 
 } // end namespace explorer_ocmb
 
