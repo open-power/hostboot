@@ -49,6 +49,7 @@
 #include <targeting/common/util.H>
 #include <pldm/extended/pdr_manager.H>
 
+
 using namespace TARGETING;
 
 namespace HDAT
@@ -626,6 +627,7 @@ void HdatIplParms::hdatGetSystemParamters()
     // NO ECO Support
     this->iv_hdatIPLParams->iv_sysParms.hdatSystemECOMode = 0;
 
+    // Default all System Attributes to zero
     this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes = 0;
 
     //Populate SMM Enabled/Disabled attribute
@@ -656,6 +658,11 @@ void HdatIplParms::hdatGetSystemParamters()
 
     this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
                                                            HDAT_MPIPL_SUPPORTED;
+
+    // Set Lateral Cast Out Mode (LCO)
+    this->iv_hdatIPLParams->iv_sysParms.hdatSystemAttributes |=
+          l_pSysTarget->getAttr<ATTR_PROC_LCO_MODE_DISABLE>() ? HDAT_LATERAL_CAST_OUT_DISABLED :
+                                                                HDAT_LATERAL_CAST_OUT_ENABLED ;
 
     this->iv_hdatIPLParams->iv_sysParms.hdatMemoryScrubbing = 0;
 
