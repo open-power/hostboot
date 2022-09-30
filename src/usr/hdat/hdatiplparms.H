@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -341,12 +341,20 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray[NUM_RISK_LEV
 #define HDAT_KEYLOCK_MANUAL                        0x02
 #define HDAT_KEYLOCK_NORMAL                        0x04
 
+// Bit Masks for System Attributes (uint32_t)
 #define HDAT_MULT_TPMDS                            0x80000000
 #define HDAT_SMM_ENABLED                           0x40000000
 #define HDAT_CRYPTO_DISABLED_BIT                   0x20000000
 #define HDAT_RISK_LEVEL_ELEVATED                   0x10000000
 #define HDAT_MPIPL_SUPPORTED                       0x04000000
 #define HDAT_ENABLE_SYSTEM_USB_PORT                0x08000000
+// LCO State: bits 6 and 7:
+// - 0b00: undefined
+// - 0b01: undefined
+// - 0b10: disabled
+// - 0b11: enabled
+#define HDAT_LATERAL_CAST_OUT_DISABLED             0x02000000
+#define HDAT_LATERAL_CAST_OUT_ENABLED              0x03000000
 
 #define HDAT_ECO_ENABLED                           0x80000000
 #define HDAT_ECO_CAPABLE                           0x40000000
