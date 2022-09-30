@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2021
+# Contributors Listed Below - COPYRIGHT 2018,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -552,7 +552,7 @@ actionclass mem_port_failure_UERE
 # unless it resulted in a system checkstop.
 actionclass fwInitChnlFail_UERE
 {
-    calloutSelfMed;
+    try( funccall("checkIueTh"), calloutSelfMed );
     threshold_and_mask_mnfgInfo_th1;
     SueSource;
 };
