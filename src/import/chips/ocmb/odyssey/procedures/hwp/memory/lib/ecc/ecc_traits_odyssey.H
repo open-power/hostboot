@@ -86,6 +86,7 @@ class eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
         // Mark shadow register (port specific - scom using MEM_PORT target)
         static constexpr uint64_t MARK_SHADOW_REG = scomt::ody::ODC_RDF0_SCOM_MSR;
 
+        // TODO:ZEN-MST:1781  Verify the number of ranks for the ECC traits
         static constexpr uint64_t ECC_MAX_MRANK_PER_PORT = ody::MAX_MRANK_PER_PORT;
         static constexpr uint64_t ECC_MAX_DQ_BITS = ody::MAX_DQ_BITS_PER_PORT;
         static constexpr uint64_t ECC_MAX_SYMBOLS = ody::MAX_SYMBOLS_PER_PORT;
@@ -95,30 +96,36 @@ class eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
         constexpr static const uint64_t MAINLINE_NCE_REGS[] =
         {
             scomt::ody::ODC_MCBIST_SCOM_MBNCER0Q,
+            scomt::ody::ODC_MCBIST_SCOM_MBNCER0Q,
         };
 
         constexpr static const uint64_t MAINLINE_RCE_REGS[] =
         {
+            scomt::ody::ODC_MCBIST_SCOM_MBRCER0Q,
             scomt::ody::ODC_MCBIST_SCOM_MBRCER0Q,
         };
 
         constexpr static const uint64_t MAINLINE_MPE_REGS[] =
         {
             scomt::ody::ODC_MCBIST_SCOM_MBMPER0Q,
+            scomt::ody::ODC_MCBIST_SCOM_MBMPER0Q,
         };
 
         constexpr static const uint64_t MAINLINE_UE_REGS[] =
         {
-            scomt::ody::ODC_MCBIST_SCOM_MBAUER0Q,
+            scomt::ody::ODC_MCBIST_SCOM_MBUER0Q,
+            scomt::ody::ODC_MCBIST_SCOM_MBUER0Q,
         };
 
         constexpr static const uint64_t MAINLINE_AUE_REGS[] =
         {
             scomt::ody::ODC_MCBIST_SCOM_MBAUER0Q,
+            scomt::ody::ODC_MCBIST_SCOM_MBAUER0Q,
         };
 
         constexpr static const uint64_t ERROR_VECTOR_REGS[] =
         {
+            scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q,
             scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q,
         };
 
