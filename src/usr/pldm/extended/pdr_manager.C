@@ -269,6 +269,66 @@ errlHndl_t PdrManager::checkForHbTerminusLocator()
 
     return l_errl;
 }
+
+void PdrManager::clearHbEntityAssociationPDRs()
+{
+    std::vector<uint32_t>l_pdr_handles_to_delete;
+
+    foreachPdrOfType(PLDM_PDR_ENTITY_ASSOCIATION,
+                    [&l_pdr_handles_to_delete]
+                    (const uint8_t* const pdr_data, const uint32_t pdr_data_size)
+                    {
+                        const auto pdr_hdr
+                              = reinterpret_cast<const pldm_pdr_hdr*>(pdr_data);
+                        uint32_t record_hndl = le32toh(pdr_hdr->record_handle);
+
+                        if (record_hndl >= HB_PLDM_ENTITY_ASSOC_PDR_RANGE_START &&
+                            record_hndl <= HB_PLDM_ENTITY_ASSOC_PDR_RANGE_END)
+                        {
+                            const auto entity_assoc_pdr
+                              = reinterpret_cast<const pldm_pdr_entity_association*>(pdr_hdr + 1);
+
+                            // delete this HB associative PDR
+                            PLDM_DBG("clearHbEntityAssociationPDRs() - remove record %X -> "
+                                "ENTITY_ASSOC: containerId 0x%04X, "
+                                "Container => entity_type 0x%04X, "
+                                "entity_instance_num 0x%04X, container_id 0x%04X "
+                                "with %d children",
+                            record_hndl,
+                            le16toh(entity_assoc_pdr->container_id),
+                            le16toh(entity_assoc_pdr->container.entity_type),
+                            le16toh(entity_assoc_pdr->container.entity_instance_num),
+                            le16toh(entity_assoc_pdr->container.entity_container_id),
+                            entity_assoc_pdr->num_children);
+                            for (uint8_t i = 0; i < entity_assoc_pdr->num_children; i++)
+                            {
+                                auto containerChild = entity_assoc_pdr->children[i];
+                                PLDM_DBG("Child[%d] -> %04X/%04X/%04X", i,
+                                    le16toh(containerChild.entity_type),
+                                    le16toh(containerChild.entity_instance_num),
+                                    le16toh(containerChild.entity_container_id));
+                            }
+                            l_pdr_handles_to_delete.push_back(pdr_hdr->record_handle);
+                        }
+                        else
+                        {
+                            PLDM_DBG("clearHbEntityAssociationPDRs() - skip record %X", record_hndl);
+                        }
+
+                        return false; // continue iteration
+                    });
+
+    // A small window exists here where iv_pdr_repo could be updated and
+    // the pdr handles list might be invalid
+    mutex_lock(&iv_access_mutex);
+    bool is_remote = false;
+    for (auto record_handle : l_pdr_handles_to_delete)
+    {
+        PLDM_INF("clearHbEntityAssociationPDRs() - removing record %lld", le32toh(record_handle));
+        pldm_delete_by_record_handle(iv_pdr_repo.get(), record_handle, is_remote);
+    }
+    mutex_unlock(&iv_access_mutex);
+}
 #endif
 
 bool PdrManager::entity_id_component_equal(const uint16_t i_haystack, const uint16_t i_needle)

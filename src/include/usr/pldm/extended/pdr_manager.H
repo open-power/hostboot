@@ -179,6 +179,11 @@ public:
      */
     errlHndl_t checkForHbTerminusLocator();
 
+    /*
+     * @brief Remove HB created entity association PDRs from the repo
+     */
+    void clearHbEntityAssociationPDRs();
+
 #endif
 
     /* @brief  Iterate the PDR repository and invoke a callback for each PDR of
@@ -592,6 +597,7 @@ private:
     const uint16_t HB_PLDM_SENSOR_EFFECTER_ID_RANGE_START = 0x5556;
     const uint16_t HB_PLDM_SENSOR_EFFECTER_ID_RANGE_END = 0xAAAA;
 
+
     /* This monotonically increasing value is used to assign sensor/effecter IDs, and the IDs are stored in
      * attributes, along with a state_query_handler_id_t value, to record how to handle PLDM sensor/effecter
      * queries. */
@@ -602,8 +608,10 @@ private:
     //   See libpldm/pdr.c for implementation details
     // BMC: 0x00000001 to 0x00FFFFFF (recall: 0x00000000 is reserved per PLDM spec)
     // Hostboot: 0x01000000 to 0x01FFFFFF
-    // PHYP: 0x02000000 to 0x02FFFFFF
+    // PHYP:     0x02000000 to 0x02FFFFFF
     // Reserved: 0x03000000 to 0xFFFFFFFF
+    static const uint32_t HB_PLDM_ENTITY_ASSOC_PDR_RANGE_START = 0x01000000;
+    static const uint32_t HB_PLDM_ENTITY_ASSOC_PDR_RANGE_END   = 0x01FFFFFF;
 
     /* @brief  Handle a PLDM state sensor or effecter command.
      *
