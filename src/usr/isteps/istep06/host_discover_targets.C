@@ -384,8 +384,16 @@ static errlHndl_t finish_pdr_exchange()
             break;
         }
 
+        // Remove the HB Associative PDRs to use the BMC normalized ones instead
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      INFO_MRK"Remove the HB entity association PDRs to use the BMC normalized ones instead");
+        PLDM::thePdrManager().clearHbEntityAssociationPDRs();
+
         const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
 
+        // Note: Expecting that the BMC will translate each of our entity
+        //       association PDRs into exactly one new PDR, so this check
+        //       will work after removing the HB entity association PDRs
         // Verify BMC returned at least previous BMC count + HB count
         if ( (sys->getAttr<TARGETING::ATTR_PLDM_HB_PDR_COUNT>() +
              sys->getAttr<TARGETING::ATTR_PLDM_BMC_PDR_COUNT>()) >

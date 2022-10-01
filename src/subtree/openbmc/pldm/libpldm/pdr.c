@@ -933,3 +933,37 @@ void pldm_entity_association_pdr_extract(const uint8_t *pdr, uint16_t pdr_len,
 		++i;
 	}
 }
+
+void pldm_delete_by_record_handle(pldm_pdr *repo, uint32_t record_handle,
+				  bool is_remote)
+{
+	assert(repo != NULL);
+
+	pldm_pdr_record *record = repo->first;
+	pldm_pdr_record *prev = NULL;
+	while (record != NULL) {
+		pldm_pdr_record *next = record->next;
+		struct pldm_pdr_hdr *hdr = (struct pldm_pdr_hdr *)record->data;
+		if ((record->is_remote == is_remote) &&
+		    (hdr->record_handle == record_handle)) {
+			if (repo->first == record) {
+				repo->first = next;
+			} else {
+				prev->next = next;
+			}
+			if (repo->last == record) {
+				repo->last = prev;
+			}
+			if (record->data) {
+				free(record->data);
+			}
+			--repo->record_count;
+			repo->size -= record->size;
+			free(record);
+			break;
+		} else {
+			prev = record;
+		}
+		record = next;
+	}
+}
