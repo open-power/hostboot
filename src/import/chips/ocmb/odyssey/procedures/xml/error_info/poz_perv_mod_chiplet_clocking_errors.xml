@@ -39,7 +39,7 @@
    <hwpError>
       <rc>RC_POZ_SRAM_ABIST_DONE_BIT_ERR</rc>
       <description>SRAM abist done bit is not set</description>
-      <ffdc>PERV_CPLT_STAT</ffdc>
+      <ffdc>PERV_CPLT_STAT0</ffdc>
       <ffdc>SELECT_SRAM</ffdc>
       <ffdc>PROC_TARGET</ffdc>
    </hwpError>
