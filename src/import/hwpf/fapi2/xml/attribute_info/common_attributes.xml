@@ -182,6 +182,7 @@
     <valueType>uint8</valueType>
     <default>0xFF</default><!-- Ensures platform explicitly puts a valid number in here -->
     <platInit/>
+    <writeable/>
   </attribute>
   <!-- ******************************************************************************** -->
 </attributes>
