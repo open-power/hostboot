@@ -62,4 +62,28 @@
   <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SIM_CHIPLET_MASK</id>
+  <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+    Simulation attribute to enable the chiplets actually exist in model.
+    To mark chiplet as present set corresponding chiplet ID bit position to 1 in 64 bit mask value.
+  </description>
+  <valueType>uint64</valueType>
+  <default>0xFFFFFFFFFFFFFFFF</default>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SCAN0_SCAN_RATIO</id>
+  <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+    To choose scan ratio value for SCAN0 operation
+  </description>
+  <valueType>uint8</valueType>
+  <platInit>mrw</platInit>
+  <default>0x0</default>
+</attribute>
+<!-- ********************************************************************** -->
+
 </attributes>

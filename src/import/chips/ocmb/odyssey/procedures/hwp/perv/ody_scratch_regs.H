@@ -49,21 +49,18 @@ enum ody_scratch_regs
     // Scratch_reg_4 (RESERVED)
     SCRATCH4_REG_VALID_BIT                          = 3,
 
-    // Scratch_reg_5 (RESERVED)
+    // Scratch_reg_5 (SPI bus clock divider)
     SCRATCH5_REG_VALID_BIT                          = 4,
-
-    // Scratch_reg_6 (SPI bus clock divider)
-    SCRATCH6_REG_VALID_BIT                          = 5,
     ATTR_SPI_BUS_DIV_REF_STARTBIT                   = 0,
     ATTR_SPI_BUS_DIV_REF_LENGTH                     = 16,
 
-    // Scratch_reg_7 (PLL bucket/frequency configuration)
-    SCRATCH7_REG_VALID_BIT                          = 6,
+    // Scratch_reg_6 (PLL bucket/frequency configuration)
+    SCRATCH6_REG_VALID_BIT                          = 5,
     ATTR_OCMB_PLL_BUCKET_STARTBIT                   = 0,
     ATTR_OCMB_PLL_BUCKET_LENGTH                     = 4,
 
-    // Scratch_reg_8 (clockstop-on-checkstop setup)
-    SCRATCH8_REG_VALID_BIT                          = 7,
+    // Scratch_reg_7 (clockstop-on-checkstop setup)
+    SCRATCH7_REG_VALID_BIT                          = 6,
     ATTR_CLOCKSTOP_ON_XSTOP_STARTBIT                = 10,
     ATTR_CLOCKSTOP_ON_XSTOP_LENGTH                  = 2,
     ATTR_CLOCKSTOP_ON_XSTOP_DISABLED                = 0x0,
@@ -71,11 +68,14 @@ enum ody_scratch_regs
     ATTR_CLOCKSTOP_ON_XSTOP_XSTOP_SPATTN            = 0x2,
     ATTR_CLOCKSTOP_ON_XSTOP_STAGED_XSTOP            = 0x3,
 
-    // Scratch_reg_9 (PLL bypass, relative position)
-    SCRATCH9_REG_VALID_BIT                          = 8,
+    // Scratch_reg_8 (PLL bypass, relative position)
+    SCRATCH8_REG_VALID_BIT                          = 7,
     ATTR_IO_TANK_PLL_BYPASS_BIT                     = 0,
-    ATTR_OCMB_REL_POS_STARTBIT                      = 16,
-    ATTR_OCMB_REL_POS_LENGTH                        = 8,
+    ATTR_BUS_POS_STARTBIT                           = 16,
+    ATTR_BUS_POS_LENGTH                             = 8,
+
+    // Scratch_reg_9
+    SCRATCH9_REG_VALID_BIT                          = 8,
 
     // Scratch_reg_10 (RESERVED)
     SCRATCH10_REG_VALID_BIT                         = 9,

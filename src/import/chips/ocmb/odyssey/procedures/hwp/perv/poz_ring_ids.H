@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/perv/ody_scratch_regs_utils.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/perv/poz_ring_ids.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,37 +22,17 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//------------------------------------------------------------------------------
-/// @file  ody_scratch_regs_utils.H
-/// @brief Project specific utility functions to support Odyssey scratch
-///        register setup
-//------------------------------------------------------------------------------
-// *HWP HW Maintainer   : Anusha Reddy (anusrang@in.ibm.com)
-// *HWP FW Maintainer   : Raja Das (rajadas2@in.ibm.com)
-//------------------------------------------------------------------------------
-
 #pragma once
 
-#include <fapi2.H>
+namespace ring_id
+{
 
-///
-/// @brief Read attribute/platform state to determine desired OCMB PLL bucket
-///
-/// @param[in]   i_target                  Reference to TARGET_TYPE_OCMB_CHIP
-/// @param[out]  o_pll_bucket              Target PLL bucket setting
-///
-/// @return fapi::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
-///
-fapi2::ReturnCode ody_scratch_regs_get_pll_bucket(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    fapi2::ATTR_OCMB_PLL_BUCKET_Type& o_pll_bucket);
+#define RING_ID_MAXLEN 32
+#define RING_ID(id) const char id[] = #id; static_assert(sizeof(id) <= RING_ID_MAXLEN, "Ring ID " #id " exceeds maximum length")
 
+// Regenerate using:
+// cat composite_ring_sorting.txt | sed 's/#.*$//;/^[ \t]*$/ d;' | cut -d' ' -f1 | grep -v FAIL | sed 's/.*/    RING_ID(\0);/'
 
-/// @brief Set platform specific multicast setup attributes
-///
-/// @param[in]   i_target                  Reference to TARGET_TYPE_OCMB_CHIP
-///
-/// @return fapi::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
-///
-fapi2::ReturnCode ody_scratch_regs_setup_plat_multicast_attrs(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+RING_ID(chiplet_rtg);
+
+}

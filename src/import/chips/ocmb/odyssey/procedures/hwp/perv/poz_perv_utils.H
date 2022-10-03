@@ -49,3 +49,27 @@ fapi2::Target<fapi2::TARGET_TYPE_PERV> get_tp_chiplet_target(const fapi2::Target
 fapi2::ReturnCode get_hotplug_mc_group(
     const fapi2::Target<fapi2::TARGET_TYPE_ANY_POZ_CHIP>& i_target,
     fapi2::MulticastGroup& o_mcgroup);
+
+/**
+ * @brief Print the hex equivalent of an integer into a string
+ *
+ * The destination buffer will be overwritten; no trailing zero byte
+ * will be appended. It is recommended to reserve enough space in the
+ * destination string to hold the requested number of characters.
+ *
+ * @param o_str   Location to start writing
+ * @param i_value Value to print
+ * @param i_width With in hex nibbles
+ */
+void strhex(char* o_str, uint64_t i_value, int i_width);
+
+/**
+ * @brief Apply a bucketed ring
+ *
+ * @param i_target   Target chiplet to apply ring on
+ * @param i_ring_id  Bucketed ring ID, must be one ending in _XX
+ * @param i_bucket   Bucket number to apply
+ */
+fapi2::ReturnCode putRingBucket(const fapi2::Target<fapi2::TARGET_TYPE_ALL_MC>& i_target,
+                                const char* i_ring_id,
+                                int i_bucket);

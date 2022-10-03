@@ -51,5 +51,12 @@
       <ffdc>GROUP_ID_VALUE</ffdc>
       <ffdc>PROC_TARGET</ffdc>
    </hwpError>
-   <!-- ******************************************************************** -->
+  <!-- ******************************************************************** -->
+   <hwpError>
+      <rc>RC_POZ_CHIPLET_NOT_FOUND</rc>
+      <description>Provided chiplet number does not match anything in provided target</description>
+      <ffdc>CHIPLET_NUMBER</ffdc>
+      <ffdc>PROC_TARGET</ffdc>
+   </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

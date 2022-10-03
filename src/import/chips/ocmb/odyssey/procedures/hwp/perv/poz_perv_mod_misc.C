@@ -55,19 +55,19 @@ enum POZ_PERV_MOD_MISC_Private_Constants
     PGOOD_REGIONS_OFFSET = 12,
 };
 
-ReturnCode mod_cbs_start(
+ReturnCode mod_cbs_start_prep(
     const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_target,
-    bool start_sbe)
+    bool i_start_sbe,
+    bool i_scan0_clockstart)
 {
     ROOT_CTRL0_t ROOT_CTRL0;
+    ROOT_CTRL1_t ROOT_CTRL1;
+    CBS_ENVSTAT_t CBS_ENVSTAT;
     ROOT_CTRL0_COPY_t ROOT_CTRL0_COPY;
     CBS_CS_t CBS_CS;
     SBE_FIFO_FSB_DOWNFIFO_RESET_t FSB_DOWNFIFO_RESET;
     FSI2PIB_STATUS_t FSI2PIB_STATUS;
     SB_MSG_t SB_MSG;
-    int l_timeout = 0;
-
-    FAPI_INF("Entering ...");
 
     FAPI_INF("Drop CFAM protection 0 to ungate VDN_PRESENT");
     FAPI_TRY(ROOT_CTRL0.getCfam(i_target));
@@ -90,17 +90,64 @@ ReturnCode mod_cbs_start(
     FAPI_INF("Clear Selfboot Message Register, Reset SBE FIFO.");
     SB_MSG = 0;
     FAPI_TRY(SB_MSG.putCfam(i_target));
+
     FSB_DOWNFIFO_RESET = 0x80000000;
     FAPI_TRY(FSB_DOWNFIFO_RESET.putCfam(i_target));
+
+    FAPI_TRY(CBS_ENVSTAT.getCfam(i_target));
+
+    if (CBS_ENVSTAT.get_CBS_ENVSTAT_C4_TEST_ENABLE())
+    {
+        FAPI_INF("Test mode, enable TP drivers/receivers for GSD scan out");
+        ROOT_CTRL1.set_TP_RI_DC_N(1);
+        ROOT_CTRL1.set_TP_DI2_DC_N(1);
+        FAPI_TRY(ROOT_CTRL1.putCfam(i_target));
+    }
 
     FAPI_INF("Prepare for CBS start.");
     FAPI_TRY(CBS_CS.getCfam(i_target));
     CBS_CS.set_START_BOOT_SEQUENCER(0);
-    CBS_CS.set_OPTION_SKIP_SCAN0_CLOCKSTART(0);
-    CBS_CS.set_OPTION_PREVENT_SBE_START(not start_sbe);
+    CBS_CS.set_OPTION_SKIP_SCAN0_CLOCKSTART(not i_scan0_clockstart);
+    CBS_CS.set_OPTION_PREVENT_SBE_START(not i_start_sbe);
     FAPI_TRY(CBS_CS.putCfam(i_target));
 
+fapi_try_exit:
+    return current_err;
+}
+
+ReturnCode mod_cbs_cleanup(const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_target)
+{
+    ROOT_CTRL0_t ROOT_CTRL0;
+    SB_CS_t SB_CS;
+
+    FAPI_INF("Clear CBS command to enable clock gating inside clock controller");
+    FAPI_TRY(ROOT_CTRL0.getScom(i_target));
+    ROOT_CTRL0.set_FSI_CC_CBS_CMD(0);
+    FAPI_TRY(ROOT_CTRL0.putScom(i_target));
+
+    FAPI_INF("Clear SBE start bit to facilitate restarts later");
+    FAPI_TRY(SB_CS.getScom(i_target));
+    SB_CS.set_START_RESTART_VECTOR0(0);
+    FAPI_TRY(SB_CS.putScom(i_target));
+
+fapi_try_exit:
+    return current_err;
+}
+
+ReturnCode mod_cbs_start(
+    const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_target,
+    bool i_start_sbe,
+    bool i_scan0_clockstart)
+{
+    CBS_CS_t CBS_CS;
+    int l_timeout = 0;
+
+    FAPI_INF("Entering ...");
+
+    FAPI_TRY(mod_cbs_start_prep(i_target, i_start_sbe, i_scan0_clockstart));
+
     FAPI_INF("Start CBS.");
+    FAPI_TRY(CBS_CS.getCfam(i_target));
     CBS_CS.set_START_BOOT_SEQUENCER(1);
     FAPI_TRY(CBS_CS.putCfam(i_target));
     // Leave START_BOOT_SEQUENCER at 1 to prevent accidental restarts
@@ -136,6 +183,8 @@ ReturnCode mod_cbs_start(
                 //.set_CLOCK_POS(l_callout_clock),
                 "ERROR: CBS HAS NOT REACHED IDLE STATE VALUE 0x002 ");
 
+    FAPI_TRY(mod_cbs_cleanup(i_target));
+
 fapi_try_exit:
     FAPI_INF("Exiting ...");
     return current_err;
@@ -146,14 +195,17 @@ ReturnCode mod_switch_pcbmux(
     mux_type i_path)
 {
     ROOT_CTRL0_t ROOT_CTRL0;
+    uint8_t l_oob_mux_save;
 
     FAPI_INF("Entering ...");
+    FAPI_TRY(ROOT_CTRL0.getScom(i_target));
+    l_oob_mux_save = ROOT_CTRL0.get_OOB_MUX();
+
     FAPI_DBG("Raise OOB Mux.");
-    ROOT_CTRL0 = 0;
     ROOT_CTRL0.set_OOB_MUX(1);
     FAPI_TRY(ROOT_CTRL0.putScom_SET(i_target));
 
-    FAPI_DBG("Set PCB_RESET_DC bit in ROOT_CTRL0 register.");
+    FAPI_DBG("Set PCB_RESET bit in ROOT_CTRL0 register.");
     ROOT_CTRL0 = 0;
     ROOT_CTRL0.set_PCB_RESET(1);
     FAPI_TRY(ROOT_CTRL0.putScom_SET(i_target));
@@ -171,15 +223,15 @@ ReturnCode mod_switch_pcbmux(
     FAPI_TRY(ROOT_CTRL0.clearBit(i_path));
     FAPI_TRY(ROOT_CTRL0.putScom_CLEAR(i_target));
 
-    FAPI_DBG("Clear PCB_RESET_DC.");
+    FAPI_DBG("Clear PCB_RESET.");
     ROOT_CTRL0 = 0;
     ROOT_CTRL0.set_PCB_RESET(1);
     FAPI_TRY(ROOT_CTRL0.putScom_CLEAR(i_target));
 
     FAPI_DBG("Drop OOB Mux.");
-    ROOT_CTRL0 = 0;
-    ROOT_CTRL0.set_OOB_MUX(1);
-    FAPI_TRY(ROOT_CTRL0.putScom_CLEAR(i_target));
+    FAPI_TRY(ROOT_CTRL0.getScom(i_target));
+    ROOT_CTRL0.set_OOB_MUX(l_oob_mux_save);
+    FAPI_TRY(ROOT_CTRL0.putScom(i_target));
 
 fapi_try_exit:
     FAPI_INF("Exiting ...");
@@ -195,7 +247,7 @@ ReturnCode mod_multicast_setup(
     fapi2::buffer<uint64_t> l_eligible_chiplets = 0;
     fapi2::buffer<uint64_t> l_required_group_members;
     fapi2::buffer<uint64_t> l_current_group_members;
-    auto l_func = i_target.getChildren<fapi2::TARGET_TYPE_PERV>( i_pgood_policy);
+    auto l_all_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_PERV>(i_pgood_policy);
 
     FAPI_INF("Entering ...");
     FAPI_ASSERT(!(i_group_id > 6),
@@ -206,7 +258,7 @@ ReturnCode mod_multicast_setup(
 
     FAPI_INF("Determine required group members.");
 
-    for (auto& targ : l_func)
+    for (auto& targ : l_all_chiplets)
     {
         l_eligible_chiplets.setBit(targ.getChipletNumber());
     }
@@ -240,6 +292,35 @@ ReturnCode mod_multicast_setup(
         FAPI_TRY(fapi2::putScom(i_target, (PCB_RESPONDER_MCAST_GROUP_1 + i_group_id) | (i << 24),
                                 (new_group << 58) | (prev_group << 42)));
     }
+
+fapi_try_exit:
+    FAPI_INF("Exiting ...");
+    return current_err;
+}
+
+ReturnCode mod_get_chiplet_by_number(
+    const Target < TARGET_TYPE_PERV | TARGET_TYPE_ANY_POZ_CHIP > & i_target,
+    uint8_t i_chiplet_number,
+    Target < TARGET_TYPE_PERV >& o_target)
+{
+    auto l_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_PERV>();
+
+    FAPI_INF("Entering ...");
+
+    for (auto& chiplet : l_chiplets)
+    {
+        if (chiplet.getChipletNumber() == i_chiplet_number)
+        {
+            o_target = chiplet;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+    }
+
+    FAPI_ASSERT(false,
+                fapi2::POZ_CHIPLET_NOT_FOUND()
+                .set_CHIPLET_NUMBER(i_chiplet_number)
+                .set_PROC_TARGET(i_target),
+                "ERROR: Provided chiplet number does not match anything in provided target.");
 
 fapi_try_exit:
     FAPI_INF("Exiting ...");
@@ -325,7 +406,7 @@ ReturnCode mod_poz_tp_init_common(const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_targ
     l_data64.flush<0>();
     l_data64.insert< PGOOD_REGIONS_STARTBIT, PGOOD_REGIONS_LENGTH, PGOOD_REGIONS_OFFSET >(l_attr_pg);
     CPLT_CTRL2 = l_data64();
-    FAPI_TRY(CPLT_CTRL2.putScom(get_tp_chiplet_target(i_target)));
+    FAPI_TRY(CPLT_CTRL2.putScom(l_tpchiplet));
 
     FAPI_DBG("Enable PERV vital clock gating");
     PERV_CTRL0 = 0;
@@ -335,18 +416,14 @@ ReturnCode mod_poz_tp_init_common(const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_targ
     FAPI_DBG("Disable alignment pulse");
     CPLT_CTRL0.flush<0>();
     CPLT_CTRL0.set_CTRL_CC_FORCE_ALIGN(1);
-    //TODO: fixme
-    //FAPI_TRY(CPLT_CTRL0.putScom_CLEAR(i_target));
-    FAPI_TRY(fapi2::putScom(i_target, 0x01000020, CPLT_CTRL0()));
+    FAPI_TRY(CPLT_CTRL0.putScom_CLEAR(l_tpchiplet));
 
     FAPI_TRY(delay(DELAY_10us, SIM_CYCLE_DELAY));
 
     FAPI_DBG("Allow chiplet PLATs to enter flush");
     CPLT_CTRL0.flush<0>();
     CPLT_CTRL0.set_CTRL_CC_FLUSHMODE_INH(1);
-    //TODO: fixme
-    //FAPI_TRY(CPLT_CTRL0.putScom_CLEAR(i_target));
-    FAPI_TRY(fapi2::putScom(i_target, 0x01000020, CPLT_CTRL0()));
+    FAPI_TRY(CPLT_CTRL0.putScom_CLEAR(l_tpchiplet));
 
 fapi_try_exit:
     FAPI_INF("Exiting ...");

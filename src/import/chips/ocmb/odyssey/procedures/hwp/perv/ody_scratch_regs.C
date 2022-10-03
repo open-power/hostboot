@@ -148,27 +148,27 @@ fapi2::ReturnCode ody_scratch_regs_update(
     FAPI_DBG("Reading value of Scratch 16 mailbox register (valid)");
     FAPI_TRY(ody_scratch_regs_get_scratch(i_target, i_use_scom, SCRATCH_REGISTER16, l_scratch16_reg));
 
-    // scratch 6 -- SPI bus clock divider
-    if (i_update_all || !l_scratch16_reg.getBit<SCRATCH6_REG_VALID_BIT>())
+    // scratch 5 -- SPI bus clock divider
+    if (i_update_all || !l_scratch16_reg.getBit<SCRATCH5_REG_VALID_BIT>())
     {
-        fapi2::buffer<uint32_t> l_scratch6_reg = 0;
+        fapi2::buffer<uint32_t> l_scratch5_reg = 0;
         fapi2::ATTR_SPI_BUS_DIV_REF_Type l_attr_spi_bus_div_ref;
 
         FAPI_DBG("Reading ATTR_SPI_BUS_DIV_REF");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SPI_BUS_DIV_REF, i_target, l_attr_spi_bus_div_ref));
 
-        l_scratch6_reg.insertFromRight<ATTR_SPI_BUS_DIV_REF_STARTBIT, ATTR_SPI_BUS_DIV_REF_LENGTH>(l_attr_spi_bus_div_ref);
+        l_scratch5_reg.insertFromRight<ATTR_SPI_BUS_DIV_REF_STARTBIT, ATTR_SPI_BUS_DIV_REF_LENGTH>(l_attr_spi_bus_div_ref);
 
-        FAPI_DBG("Setting up value of Scratch 6 mailbox register");
-        FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER6, l_scratch6_reg));
+        FAPI_DBG("Setting up value of Scratch 5 mailbox register");
+        FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER5, l_scratch5_reg));
 
-        l_scratch16_reg.setBit<SCRATCH6_REG_VALID_BIT>();
+        l_scratch16_reg.setBit<SCRATCH5_REG_VALID_BIT>();
     }
 
-    // scratch 7 -- PLL bucket/frequency selection
-    if (i_update_all || !l_scratch16_reg.getBit<SCRATCH7_REG_VALID_BIT>())
+    // scratch 6 -- PLL bucket/frequency selection
+    if (i_update_all || !l_scratch16_reg.getBit<SCRATCH6_REG_VALID_BIT>())
     {
-        fapi2::buffer<uint32_t> l_scratch7_reg = 0;
+        fapi2::buffer<uint32_t> l_scratch6_reg = 0;
         fapi2::ATTR_OCMB_PLL_BUCKET_Type l_ocmb_pll_bucket = 0;
 
 #ifndef __PPE__
@@ -180,18 +180,18 @@ fapi2::ReturnCode ody_scratch_regs_update(
         FAPI_DBG("Reading ATTR_OCMB_PLL_BUCKET");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_PLL_BUCKET, i_target, l_ocmb_pll_bucket));
 
-        l_scratch7_reg.insertFromRight<ATTR_OCMB_PLL_BUCKET_STARTBIT, ATTR_OCMB_PLL_BUCKET_LENGTH>(l_ocmb_pll_bucket);
+        l_scratch6_reg.insertFromRight<ATTR_OCMB_PLL_BUCKET_STARTBIT, ATTR_OCMB_PLL_BUCKET_LENGTH>(l_ocmb_pll_bucket);
 
-        FAPI_DBG("Setting up value of Scratch 7 mailbox register");
-        FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER7, l_scratch7_reg));
+        FAPI_DBG("Setting up value of Scratch 6 mailbox register");
+        FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER6, l_scratch6_reg));
 
-        l_scratch16_reg.setBit<SCRATCH7_REG_VALID_BIT>();
+        l_scratch16_reg.setBit<SCRATCH6_REG_VALID_BIT>();
     }
 
-    // scratch 8 -- clockstop-on-checkstop setup
-    if (i_update_all || !l_scratch16_reg.getBit<SCRATCH8_REG_VALID_BIT>())
+    // scratch 7 -- clockstop-on-checkstop setup
+    if (i_update_all || !l_scratch16_reg.getBit<SCRATCH7_REG_VALID_BIT>())
     {
-        fapi2::buffer<uint32_t> l_scratch8_reg = 0;
+        fapi2::buffer<uint32_t> l_scratch7_reg = 0;
         fapi2::ATTR_CLOCKSTOP_ON_XSTOP_Type l_attr_clockstop_on_xstop;
         uint8_t l_clockstop_on_xstop = ATTR_CLOCKSTOP_ON_XSTOP_DISABLED;
 
@@ -216,44 +216,36 @@ fapi2::ReturnCode ody_scratch_regs_update(
                      l_attr_clockstop_on_xstop);
         }
 
-        l_scratch8_reg.insertFromRight<ATTR_CLOCKSTOP_ON_XSTOP_STARTBIT, ATTR_CLOCKSTOP_ON_XSTOP_LENGTH>
+        l_scratch7_reg.insertFromRight<ATTR_CLOCKSTOP_ON_XSTOP_STARTBIT, ATTR_CLOCKSTOP_ON_XSTOP_LENGTH>
         (l_clockstop_on_xstop);
+
+        FAPI_DBG("Setting up value of Scratch 7 mailbox register");
+        FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER7, l_scratch7_reg));
+
+        l_scratch16_reg.setBit<SCRATCH7_REG_VALID_BIT>();
+    }
+
+    // scratch 8 -- PLL bypass/OCMB position
+    if (i_update_all || !l_scratch16_reg.getBit<SCRATCH8_REG_VALID_BIT>())
+    {
+        fapi2::buffer<uint32_t> l_scratch8_reg = 0;
+        fapi2::ATTR_IO_TANK_PLL_BYPASS_Type l_attr_io_tank_pll_bypass;
+        fapi2::ATTR_BUS_POS_Type l_bus_pos;
+
+        FAPI_DBG("Reading IO tank PLL bypass attribute");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_TANK_PLL_BYPASS, i_target, l_attr_io_tank_pll_bypass));
+        l_scratch8_reg.writeBit<ATTR_IO_TANK_PLL_BYPASS_BIT>(l_attr_io_tank_pll_bypass ==
+                fapi2::ENUM_ATTR_IO_TANK_PLL_BYPASS_BYPASS);
+
+        FAPI_DBG("Determining relative position");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BUS_POS, i_target, l_bus_pos));
+        l_scratch8_reg.insertFromRight<ATTR_BUS_POS_STARTBIT, ATTR_BUS_POS_LENGTH>
+        (l_bus_pos);
 
         FAPI_DBG("Setting up value of Scratch 8 mailbox register");
         FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER8, l_scratch8_reg));
 
         l_scratch16_reg.setBit<SCRATCH8_REG_VALID_BIT>();
-    }
-
-    // scratch 9 -- PLL bypass/OCMB position
-    if (i_update_all || !l_scratch16_reg.getBit<SCRATCH9_REG_VALID_BIT>())
-    {
-        fapi2::buffer<uint32_t> l_scratch9_reg = 0;
-        fapi2::ATTR_IO_TANK_PLL_BYPASS_Type l_attr_io_tank_pll_bypass;
-        fapi2::ATTR_OCMB_REL_POS_Type l_ocmb_rel_pos;
-
-        FAPI_DBG("Reading IO tank PLL bypass attribute");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_TANK_PLL_BYPASS, i_target, l_attr_io_tank_pll_bypass));
-        l_scratch9_reg.writeBit<ATTR_IO_TANK_PLL_BYPASS_BIT>(l_attr_io_tank_pll_bypass ==
-                fapi2::ENUM_ATTR_IO_TANK_PLL_BYPASS_BYPASS);
-
-        FAPI_DBG("Determining relative position");
-#ifndef __PPE__
-        {
-            fapi2::Target<fapi2::TARGET_TYPE_OMI> l_omi_target;
-            FAPI_TRY(i_target.getOtherEnd(l_omi_target));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_omi_target, l_ocmb_rel_pos));
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_OCMB_REL_POS, i_target, l_ocmb_rel_pos));
-        }
-#endif
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_REL_POS, i_target, l_ocmb_rel_pos));
-        l_scratch9_reg.insertFromRight<ATTR_OCMB_REL_POS_STARTBIT, ATTR_OCMB_REL_POS_LENGTH>
-        (l_ocmb_rel_pos);
-
-        FAPI_DBG("Setting up value of Scratch 9 mailbox register");
-        FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER9, l_scratch9_reg));
-
-        l_scratch16_reg.setBit<SCRATCH9_REG_VALID_BIT>();
     }
 
     FAPI_DBG("Setting up value of Scratch 16 mailbox register (valid)");
