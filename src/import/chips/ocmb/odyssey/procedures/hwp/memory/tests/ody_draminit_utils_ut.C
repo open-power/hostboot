@@ -84,7 +84,9 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                 REQUIRE_RC_PASS(fapi2::getScom(l_port, scomt::mp::DWC_DDRPHYA_APBONLY0_MICRORESET, l_data));
                 REQUIRE(l_data == 1); // ARC processor stalled
                 REQUIRE_RC_PASS(fapi2::getScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_CALZAP, l_data));
-                REQUIRE(l_data == 1); // Calibration engines Zap'ed!
+                REQUIRE(l_data == 0); // Calibration engines un-Zap'ed!
+                REQUIRE_RC_PASS(fapi2::getScom(l_port, scomt::mp::DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL, l_data));
+                REQUIRE(l_data == 0); // scom access set to on
             }
 
             return 0;
