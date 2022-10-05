@@ -31,9 +31,10 @@
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
-// *HWP Consumed by: HB:FSP
+// *HWP Consumed by: HB, FSP, SBE
 
 #include <generic/memory/lib/utils/pos.H>
+#include <lib/shared/ody_consts.H>
 
 namespace mss
 {
@@ -74,6 +75,25 @@ relative_pos<mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Target
         i_target)
 {
     return pos(i_target) % mcTypeTraits<mss::mc_type::ODYSSEY>::PORTS_PER_OCMB;
+}
+
+///
+/// @brief Return a TEMP_SENSOR's relative position from an OCMB
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to chiplet R
+///
+template<>
+posTraits<fapi2::TARGET_TYPE_TEMP_SENSOR>::pos_type
+relative_pos<mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>&
+        i_target)
+{
+    // TODO:ZEN:MST-1814 Add support for relative_pos for TEMP_SENSOR to OCMB_CHIP
+    // Update to official code when platform support is added for TEMP_SENSOR pos attributes
+    // return pos(i_target) % ody::NUM_DTS;
+
+    // As the platform code is not working yet for pos of a TEMP_SENSOR, just returning 0 for now
+    // When the platform support is available, delete the return 0 and uncomment the above code
+    return 0;
 }
 
 
