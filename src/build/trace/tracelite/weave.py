@@ -39,6 +39,19 @@ import sys
 import shlex
 
 """
+Python colors for console
+usage: "{bcolors.FAIL}ERROR text{bcolors.ENDC}"
+"""
+class bcolors:
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+"""
 Global debug file for debug traces
 default = no debug file
 """
@@ -67,6 +80,12 @@ def DBG_TRACE(dbgStr):
     if (G_debugFile):
         x = dbgStr.strip()
         G_debugFd.write(x+"\n")
+
+""" Used to designate a new error
+    Adds "ERROR: " to text and makes it RED
+"""
+def ERROR_HDR(errStr):
+    sys.stderr.write(bcolors.FAIL + "ERROR: " + errStr + bcolors.ENDC + "\n")
 
 
 """ Counts the number of %arguments in format string
@@ -285,7 +304,7 @@ def fillInParms(fstring, paramList):
                 i += 1
                 break
 
-            sys.stderr.write("ERROR: Unhandled format character: " + fstring[i]+"\n")
+            ERROR_HDR("Unhandled format character: " + fstring[i])
             return fstring, -1
 
         parmStr = ""
@@ -306,7 +325,11 @@ def fillInParms(fstring, paramList):
             DBG_TRACE(str(parmListIndex)+") "+fstring[parmIndexStart:i]+"-> "+ pythonFormat)
             DBG_TRACE(fstring)
             DBG_TRACE(", ".join([str(elem) for elem in paramList]))
-            parmStr = str.format(pythonFormat, int(paramList[parmListIndex],16))
+            try:
+                parmStr = str.format(pythonFormat, int(paramList[parmListIndex],16))
+            except ValueError:
+                ERROR_HDR("Unable to convert parameter "+str(parmListIndex)+" to number");
+                return fstring, -2
         else:
             if paramList[parmListIndex][0] == '"' and paramList[parmListIndex][-1] == '"':
                 if numFormat:
@@ -315,7 +338,15 @@ def fillInParms(fstring, paramList):
                     parmStr = paramList[parmListIndex][1:-1]
             else:
                 # assuming it is a character
-                parmStr = str.format(pythonFormat, int(paramList[parmListIndex],16))
+                DBG_TRACE("Assuming character...");
+                DBG_TRACE(str(parmListIndex)+") "+fstring[parmIndexStart:i]+"-> "+ pythonFormat)
+                DBG_TRACE(fstring)
+                DBG_TRACE(", ".join([str(elem) for elem in paramList]))
+                try:
+                    parmStr = str.format(pythonFormat, int(paramList[parmListIndex],16))
+                except ValueError:
+                    ERROR_HDR("Unable to convert parameter "+str(parmListIndex)+" to string")
+                    return fstring, -3
         parmListIndex += 1
 
         # remove current parameter's formatting from fstring and replace with parsed parameter
@@ -373,12 +404,14 @@ def parse_tracelite_line(line):
                 trace_lite_entry = line[trace_lite_entry_index+len("|trace_lite "):]
             except ValueError:
                 print(line)
-                sys.stderr.write("ERROR: no trace_lite found in tracelite line\n")
-                sys.stderr.write(line+"\n")
+                ERROR_HDR("NO trace_lite found in tracelite line")
+                sys.stderr.write("Full line: "+line+"\n")
+                return 2
         else:
             print(line)
-            sys.stderr.write("ERROR: Invalid trace_lite line. Found "+str(len(fields))+" trace_lite sections, expected 3\n")
-            sys.stderr.write(line+"\n")
+            ERROR_HDR("Invalid trace_lite line. Found "+str(len(fields))+" trace_lite sections, expected 3")
+            sys.stderr.write("Full line: "+line+"\n")
+            return 3
     else:
         timestamp, process, trace_lite_entry = line.split('|')
 
@@ -392,42 +425,54 @@ def parse_tracelite_line(line):
             parameterList.append(token)
     except ValueError:
         error = tokenizer.token.splitlines()[0]
-        sys.stderr.write("ERROR: " + tokenizer.error_leader() + error)
+        ERROR_HDR(tokenizer.error_leader() + error)
         sys.stderr.write("Unable to split into parameters:\n")
         sys.stderr.write(trace_lite_entry)
-        return 2
+        sys.stderr.write("Full line: "+line+"\n")
+        print(line)
+        return 4
 
     # check this or pop on empty list will fail
     if len(parameterList) == 0:
-        sys.stderr.write("ERROR: no hbotHash was found on line\n")
-        sys.stderr.write(line)
-        sys.stderr.write(trace_lite_entry)
-        return 3
+        ERROR_HDR("NO hbotHash was found on line")
+        sys.stderr.write("Full line: "+line+"\n")
+        sys.stderr.write(trace_lite_entry+"\n")
+        print(line)
+        return 5
 
     hbotHash = parameterList.pop(0)
     if ishex(hbotHash):
         formatStr = lookupFormatString(hbotHash)
     else:
-        sys.stderr.write("ERROR: Non-hash found: "+hbotHash+"\n")
-        sys.stderr.write("Full line: "+line)
-        sys.stderr.write(", ".join([str(elem) for elem in parameterList]))
-        return 4
+        ERROR_HDR("Non-hash found: "+hbotHash)
+        sys.stderr.write("Full line: "+line+"\n")
+        print(line)
+        return 6
+
+    if formatStr == "":
+        ERROR_HDR("Unfound hash "+hbotHash +" ("+str(int(hbotHash,16))+")")
+        sys.stderr.write("Full line: "+line+"\n")
+        print(line)
+        return 7
 
     if countargs(formatStr) != len(parameterList) :
-        sys.stderr.write("ERROR: Found "+str(len(parameterList))+", expected "+str(countargs(formatStr)))
-        sys.stderr.write(formatStr)
-        sys.stderr.write(trace_lite_entry)
-        sys.stderr.write(", ".join([str(elem) for elem in parameterList]))
-        sys.stderr.write(line)
-        return 5
+        ERROR_HDR("Found "+str(len(parameterList))+" parameters, but expected "+str(countargs(formatStr))+" at timestamp "+timestamp)
+        sys.stderr.write(formatStr+"\n")
+        sys.stderr.write("["+", ".join([str(elem) for elem in parameterList])+"]\n")
+        sys.stderr.write("Full line: "+line+"\n")
+        print(line)
+        return 8
     else:
         # normal path
         formatStr, retCode = fillInParms(formatStr, parameterList)
+        # Note: if retCode not 0, then ERROR_HDR() had been called pointing out the error for bad return code
         if (retCode != 0):
-            print(timestamp+"|"+process+"|"+formatStr+(", ".join([str(elem) for elem in parameterList])))
-            sys.stderr.write("ERROR: Unable to fill in parameters for "+formatStr+"\n")
-            sys.stderr.write(", ".join([str(elem) for elem in parameterList])+"\n")
-            return 6
+            print(timestamp+"|"+process+"|"+formatStr+ " ["+(", ".join([str(elem) for elem in parameterList]))+"]")
+            sys.stderr.write("Invalid parameters at timestamp"+timestamp+"\n")
+            sys.stderr.write("Unable to fill in parameters for hash "+str(hbotHash)+"->"+formatStr+"\n")
+            sys.stderr.write("Parameters: "+", ".join([str(elem) for elem in parameterList])+"\n")
+            sys.stderr.write("Full line: "+line+"\n")
+            return 9
 
     print(timestamp+"|"+process+"|"+formatStr)
     return 0
@@ -506,12 +551,12 @@ if __name__ == "__main__":
           # Get the LID file for the HB string file
           stringFile = getLid(HBOT_STRING_LID_FILE)
           if stringFile == "":
-              sys.stderr.write("ERROR: unable to locate "+HBOT_STRING_LID_FILE+"\n");
+              ERROR_HDR("Unable to locate "+HBOT_STRING_LID_FILE)
               sys.exit(1)
           else:
               read_stringfile(stringFile)
         except ImportError:
-            sys.stderr.write("ERROR: no getLid module, unable to locate hbotStringFile\n")
+            ERROR_HDR("no getLid module, unable to locate hbotStringFile")
             print_full_usage()
             sys.exit(2)
 

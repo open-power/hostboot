@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -158,7 +158,15 @@ namespace TRACE
             // argument.
             while(NULL != (i_fmt = strchr(i_fmt, '%')))
             {
-                i_fmt++;
+                i_fmt++; // skip %
+
+                // skip width in front of format type
+                while ((i_fmt != nullptr) && (isdigit(*i_fmt) || (*i_fmt == '-')))
+                {
+                    i_fmt++;
+                }
+                if (i_fmt == nullptr)
+                    break;
 
                 switch (*i_fmt)
                 {
