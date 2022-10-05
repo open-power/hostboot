@@ -23,7 +23,18 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-
+  <hwpError>
+    <sbeError/>
+    <rc>RC_ODY_GETTRACEARRAY_INVALID_MUX</rc>
+    <description>The trace control select for this trace array does not match the position of the requested trace bus.</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TRACE_ARRAY</ffdc>
+    <ffdc>MUX_SELECT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
   <hwpError>
     <sbeError/>
     <rc>RC_ODY_GETTRACEARRAY_INVALID_ARRAY</rc>
