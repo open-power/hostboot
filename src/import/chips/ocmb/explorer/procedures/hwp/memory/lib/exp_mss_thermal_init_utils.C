@@ -42,6 +42,8 @@
 #include <explorer_scom_addresses_fld.H>
 #include <exp_data_structs.H>
 #include <mss_explorer_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/exp_attribute_accessors_manual.H>
 
@@ -60,10 +62,11 @@ fapi2::ReturnCode sensor_interval_read(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const thermal::sensor_selection_override i_override_sensor)
 {
+    uint8_t l_configured_thermal_sensors = 0;
+    FAPI_TRY(mss::attr::get_module_thermal_sensors(i_target, l_configured_thermal_sensors));
+
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        uint8_t l_configured_thermal_sensors = 0;
-        FAPI_TRY(mss::attr::get_module_thermal_sensors(l_port, l_configured_thermal_sensors));
 
         if (l_configured_thermal_sensors == 0)
         {
@@ -171,6 +174,7 @@ fapi2::ReturnCode setup_cmd_flags(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> i_port,
     uint8_t& o_cmd_flags)
 {
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port);
     o_cmd_flags = 0;
 
     fapi2::buffer<uint8_t> l_cmd_flags;
@@ -189,15 +193,15 @@ fapi2::ReturnCode setup_cmd_flags(
     uint8_t l_sensor_1_usage = 0;
     uint8_t l_diff_sensor_usage = 0;
 
-    FAPI_TRY(mss::get_booted_fw_version(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port), l_fw_version));
+    FAPI_TRY(mss::get_booted_fw_version(l_ocmb, l_fw_version));
 
-    FAPI_TRY(mss::attr::get_therm_sensor_0_availability(i_port, l_sensor_0_avail));
-    FAPI_TRY(mss::attr::get_therm_sensor_1_availability(i_port, l_sensor_1_avail));
-    FAPI_TRY(mss::attr::get_therm_sensor_differential_availability(i_port, l_diff_sensor_avail));
+    FAPI_TRY(mss::attr::get_therm_sensor_0_availability(l_ocmb, l_sensor_0_avail));
+    FAPI_TRY(mss::attr::get_therm_sensor_1_availability(l_ocmb, l_sensor_1_avail));
+    FAPI_TRY(mss::attr::get_therm_sensor_differential_availability(l_ocmb, l_diff_sensor_avail));
 
-    FAPI_TRY(mss::attr::get_therm_sensor_0_usage(i_port, l_sensor_0_usage));
-    FAPI_TRY(mss::attr::get_therm_sensor_1_usage(i_port, l_sensor_1_usage));
-    FAPI_TRY(mss::attr::get_therm_sensor_differential_usage(i_port, l_diff_sensor_usage));
+    FAPI_TRY(mss::attr::get_therm_sensor_0_usage(l_ocmb, l_sensor_0_usage));
+    FAPI_TRY(mss::attr::get_therm_sensor_1_usage(l_ocmb, l_sensor_1_usage));
+    FAPI_TRY(mss::attr::get_therm_sensor_differential_usage(l_ocmb, l_diff_sensor_usage));
 
     // Make sure usage is > DISABLED (0) and also marked as available
     l_cmd_flags.writeBit<DIMM0_SENSOR_PRESENT_BIT>(
@@ -232,6 +236,8 @@ fapi2::ReturnCode setup_cmd_args(
     const sensor_selection_override i_override_sensor,
     host_fw_command_struct& o_cmd)
 {
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port);
+
     // Sanity memset
     memset(&o_cmd.command_argument[0], 0, sizeof(o_cmd.command_argument));
 
@@ -243,9 +249,9 @@ fapi2::ReturnCode setup_cmd_args(
     uint32_t l_fw_version = 0;
     uint8_t l_airflow_direction = 0;
 
-    FAPI_TRY(mss::attr::get_therm_sensor_0_type(i_port, l_sensor_0_type));
-    FAPI_TRY(mss::attr::get_therm_sensor_1_type(i_port, l_sensor_1_type));
-    FAPI_TRY(mss::attr::get_therm_sensor_differential_type(i_port, l_differential_sensor_type));
+    FAPI_TRY(mss::attr::get_therm_sensor_0_type(l_ocmb, l_sensor_0_type));
+    FAPI_TRY(mss::attr::get_therm_sensor_1_type(l_ocmb, l_sensor_1_type));
+    FAPI_TRY(mss::attr::get_therm_sensor_differential_type(l_ocmb, l_differential_sensor_type));
     FAPI_TRY(mss::get_booted_fw_version(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port), l_fw_version));
     FAPI_TRY(mss::attr::get_mrw_dimm_slot_airflow(l_airflow_direction));
 
@@ -259,11 +265,11 @@ fapi2::ReturnCode setup_cmd_args(
         uint8_t l_selected_i2c_addr = 0;
         thermal::thermal_sensor_settings l_settings;
 
-        FAPI_TRY(mss::attr::get_therm_sensor_0_secondary_availability(i_port, l_secondary_sensor_avail));
-        FAPI_TRY(mss::attr::get_therm_sensor_0_location(i_port, l_primary_sensor_location));
-        FAPI_TRY(mss::attr::get_therm_sensor_0_secondary_location(i_port, l_secondary_sensor_location));
-        FAPI_TRY(mss::attr::get_therm_sensor_0_i2c_addr(i_port, l_primary_sensor_i2c_addr));
-        FAPI_TRY(mss::attr::get_therm_sensor_0_secondary_i2c_addr(i_port, l_secondary_sensor_i2c_addr));
+        FAPI_TRY(mss::attr::get_therm_sensor_0_secondary_availability(l_ocmb, l_secondary_sensor_avail));
+        FAPI_TRY(mss::attr::get_therm_sensor_0_location(l_ocmb, l_primary_sensor_location));
+        FAPI_TRY(mss::attr::get_therm_sensor_0_secondary_location(l_ocmb, l_secondary_sensor_location));
+        FAPI_TRY(mss::attr::get_therm_sensor_0_i2c_addr(l_ocmb, l_primary_sensor_i2c_addr));
+        FAPI_TRY(mss::attr::get_therm_sensor_0_secondary_i2c_addr(l_ocmb, l_secondary_sensor_i2c_addr));
 
         // Select primary or secondary sensor and get i2c address
         l_selected_i2c_addr = select_ext_sensor(i_port,
@@ -300,11 +306,11 @@ fapi2::ReturnCode setup_cmd_args(
         uint8_t l_selected_i2c_addr = 0;
         thermal::thermal_sensor_settings l_settings;
 
-        FAPI_TRY(mss::attr::get_therm_sensor_1_secondary_availability(i_port, l_secondary_sensor_avail));
-        FAPI_TRY(mss::attr::get_therm_sensor_1_location(i_port, l_primary_sensor_location));
-        FAPI_TRY(mss::attr::get_therm_sensor_1_secondary_location(i_port, l_secondary_sensor_location));
-        FAPI_TRY(mss::attr::get_therm_sensor_1_i2c_addr(i_port, l_primary_sensor_i2c_addr));
-        FAPI_TRY(mss::attr::get_therm_sensor_1_secondary_i2c_addr(i_port, l_secondary_sensor_i2c_addr));
+        FAPI_TRY(mss::attr::get_therm_sensor_1_secondary_availability(l_ocmb, l_secondary_sensor_avail));
+        FAPI_TRY(mss::attr::get_therm_sensor_1_location(l_ocmb, l_primary_sensor_location));
+        FAPI_TRY(mss::attr::get_therm_sensor_1_secondary_location(l_ocmb, l_secondary_sensor_location));
+        FAPI_TRY(mss::attr::get_therm_sensor_1_i2c_addr(l_ocmb, l_primary_sensor_i2c_addr));
+        FAPI_TRY(mss::attr::get_therm_sensor_1_secondary_i2c_addr(l_ocmb, l_secondary_sensor_i2c_addr));
 
         // Select primary or secondary sensor and get i2c address
         l_selected_i2c_addr = select_ext_sensor(i_port,
@@ -362,7 +368,7 @@ fapi2::ReturnCode setup_cmd_args(
 
         fapi2::buffer<uint8_t> l_arg_6;
         uint8_t l_differential_usage = 0;
-        FAPI_TRY(mss::attr::get_therm_sensor_differential_usage(i_port, l_differential_usage));
+        FAPI_TRY(mss::attr::get_therm_sensor_differential_usage(l_ocmb, l_differential_usage));
 
         // Skip on-chip sensor arguments if Explorer FW doesn't support sensor type
         if (is_dtm_supported(l_fw_version, l_differential_usage))
@@ -386,7 +392,7 @@ fapi2::ReturnCode setup_cmd_args(
             o_cmd.command_argument[6] = l_arg_6;
 
             // Direct mapping
-            FAPI_TRY(mss::attr::get_therm_sensor_differential_i2c_addr(i_port, o_cmd.command_argument[7]));
+            FAPI_TRY(mss::attr::get_therm_sensor_differential_i2c_addr(l_ocmb, o_cmd.command_argument[7]));
 
             // cmd_argument[8-9 & 10-11]: register offset
             o_cmd.command_argument[8] = l_settings.iv_cmd_arg_8_onchip_reg_offset_0;

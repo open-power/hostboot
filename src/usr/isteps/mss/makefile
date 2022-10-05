@@ -148,6 +148,7 @@ SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_e
 SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_si_attributes.xml
 SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_ddr5_eff_attributes.xml
 SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_ddr5_mr_attributes.xml
+SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_thermal_sensor_attributes.xml
 
 CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_generic_attribute_getters.H
 CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_generic_attribute_setters.H
