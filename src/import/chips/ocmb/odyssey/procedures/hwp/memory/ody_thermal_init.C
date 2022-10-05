@@ -30,11 +30,12 @@
 // *HWP HWP Owner: Geetha Pisapati <geetha.pisapati@ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
-// *HWP Consumed by: FSP:HB
+// *HWP Level: 2
+// *HWP Consumed by: FSP,HB, SBE
 
 #include <fapi2.H>
 #include <ody_thermal_init.H>
+#include <lib/power_thermal/ody_thermal_init_utils.H>
 
 extern "C"
 {
@@ -46,6 +47,16 @@ extern "C"
     ///
     fapi2::ReturnCode ody_thermal_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
     {
-        return fapi2::FAPI2_RC_SUCCESS;
+        // Polls the DTS for initial values
+        FAPI_TRY(mss::ody::thermal::read_dts_sensors(i_target));
+
+        // Sets up throttling
+        FAPI_TRY (mss::ody::thermal::mc::setup_emergency_throttles(i_target));
+
+        // Clear the emergency mode throttle bit
+        FAPI_TRY (mss::ody::thermal::mc::disable_safe_mode_throttles(i_target));
+
+    fapi_try_exit:
+        return fapi2::current_err;
     }
 } //extern C

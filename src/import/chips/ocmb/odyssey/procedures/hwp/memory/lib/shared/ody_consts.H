@@ -31,7 +31,7 @@
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
-// *HWP Consumed by: CI
+// *HWP Consumed by: CI, SBE, HB, FSP
 
 #ifndef _MSS_ODY_CONSTS_H_
 #define _MSS_ODY_CONSTS_H_
@@ -100,6 +100,9 @@ enum sizes
 
     // Synopsys PUB revision version
     PUB_REV = 0x350,
+
+    // Maximum number of external DTS sensors
+    NUM_DTS = 4,
 };
 
 #endif
