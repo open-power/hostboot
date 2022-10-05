@@ -2426,15 +2426,19 @@ fapi2::ReturnCode cleanup_training(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 
     // Per the Synopsys documentation, to cleanup after the training:
     // 1. Stop the processor (stall it)
-    // 2. Reset the calibration engines to their initial state (cal Zap!)
+    // 2. Disable the CalZap register
+    // 3. Configure CSR access
     fapi2::buffer<uint64_t> l_data;
 
     // 1. Stop the processor (stall it)
     FAPI_TRY(stall_arc_processor(i_target));
 
-    // 2. Reset the calibration engines to their initial state (cal Zap!)
-    l_data.flush<0>().setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_CALZAP_CALZAP>();
+    // 2. Disable the CalZap register before reading out the training results
     FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_CALZAP, l_data));
+
+    // 3. Configure CSR access as well
+    // Note: ON_N refers to scom access -> so this enables scom access
+    FAPI_TRY(configure_phy_scom_access(i_target, mss::states::ON_N));
 
 fapi_try_exit:
     return fapi2::current_err;
