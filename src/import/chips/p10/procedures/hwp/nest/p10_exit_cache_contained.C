@@ -1220,11 +1220,13 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     }
 
     l_scom_data |= (uint64_t) 0x0     << (64 - (61 +  1)); //MCMODE1_DISABLE_FP_COMMAND_BYPASS=OFF
+
     //mask
     l_scom_mask |= (uint64_t) 0x1     << (64 - ( 8 +  1)); //MCMODE1_EN_BLOCK_PF_RD_IN_FLIGHT
     l_scom_mask |= (uint64_t) 0x1     << (64 - ( 9 +  1)); //MCMODE1_EN_EPF_CL_LIMIT=ON
     l_scom_mask |= (uint64_t) 0x1     << (64 - (32 +  1)); //MCMODE1_DISABLE_ALL_SPEC_OPS=OFF
     l_scom_mask |= (uint64_t) 0x7FFFF << (64 - (33 + 19)); //MCMODE1_DISABLE_SPEC_OP
+    l_scom_mask |= (uint64_t) 0x3F    << (64 - (54 +  6)); //MCMODE1_DISABLE_COMMAND_BYPASS=0x00
     l_scom_mask |= (uint64_t) 0x1     << (64 - (61 +  1)); //MCMODE1_DISABLE_FP_COMMAND_BYPASS=OFF
 
     FAPI_TRY(p10_gen_xscom_init(
@@ -1301,6 +1303,10 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     //MCFIRMASK
     l_scom_data = 0;
     l_scom_mask = 0;
+
+    //data
+    l_scom_data |= (uint64_t) 0x1 << (64 - (22 + 1)); //MCFIR_INVALID_SMF_ACCESS
+
     //mask
     l_scom_mask |= (uint64_t) 0x1 << (64 - ( 0 + 1)); //MCFIR_MC_INTERNAL_RECOVERABLE_ERROR
     l_scom_mask |= (uint64_t) 0x1 << (64 - ( 1 + 1)); //MCFIR_MC_INTERNAL_NONRECOVERABLE_ERROR
@@ -1311,6 +1317,7 @@ p10_exit_cache_contained_run_mi_initfile_xscom(
     l_scom_mask |= (uint64_t) 0x1 << (64 - (15 + 1)); //MCFIR_POP_RCMD_NOHIT
     l_scom_mask |= (uint64_t) 0x1 << (64 - (16 + 1)); //MCFIR_POP_RCMD_BADHIT
     l_scom_mask |= (uint64_t) 0x1 << (64 - (20 + 1)); //MCFIR_MULTIPLE_TID_ERROR
+    l_scom_mask |= (uint64_t) 0x1 << (64 - (22 + 1)); //MCFIR_INVALID_SMF_ACCESS
 
     if(!l_hw550549) //Unmask only if not affected by HW550549
     {
