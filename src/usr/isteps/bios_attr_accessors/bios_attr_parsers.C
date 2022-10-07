@@ -721,4 +721,42 @@ void parse_hb_cap_freq_mhz(std::vector<uint8_t>& io_string_table,
     // else, do nothing if cap_freq_mhz = IGNORE_CAP_VALUE
 }
 
+
+void parse_hb_secure_ver_lockin_enabled(std::vector<uint8_t>& io_string_table,
+                                        std::vector<uint8_t>& io_attr_table,
+                                        ISTEP_ERROR::IStepError & io_stepError)
+{
+    TARGETING::ATTR_SECURE_VERSION_LOCKIN_POLICY_type lockinEnabled = false;
+
+    errlHndl_t l_errl = PLDM::getSecVerLockinEnabled(io_string_table,
+                                                     io_attr_table,
+                                                     lockinEnabled);
+
+    if (l_errl)
+    {
+        lockinEnabled = false;
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  ERR_MRK"parse_hb_secure_ver_lockin_enabled(): An error occurred getting "
+                  "the PLDM Secure Version Lockin Enabled BIOS attribute from the BMC. "
+                  "Setting the Secure Version Lockin Policy attribute to false (%d)",
+                  lockinEnabled);
+
+        l_errl->collectTrace("ISTEPS_TRACE", 256);
+        l_errl->collectTrace("PLDM", 256);
+        errlCommit(l_errl, ISTEP_COMP_ID); // don't cause a TI by attaching to io_stepError
+    }
+    else
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  INFO_MRK"parse_hb_secure_ver_lockin_enabled(): Succeeded in getting "
+                  "the PLDM Secure Version Lockin Enabled BIOS attribute from the BMC. "
+                  "Setting the Secure Version Lockin Policy attribute to %d",
+                  lockinEnabled);
+    }
+
+    const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+    sys->setAttr<TARGETING::ATTR_SECURE_VERSION_LOCKIN_POLICY>(lockinEnabled);
 }
+
+} // end of namespace ISTEP
