@@ -43,7 +43,8 @@ enum
 
 enum
 {
-    OCMB_SPD_EFD_COMBINED_SIZE = 0x800, // 2 KB
+    OCMB_SPD_EFD_COMBINED_SIZE        = 0x0800, // 2 KB
+    PLANAR_OCMB_SPD_EFD_COMBINED_SIZE = 0x1000, // 4 KB
 };
 
 /**

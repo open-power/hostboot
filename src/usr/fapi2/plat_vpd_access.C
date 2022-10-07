@@ -37,6 +37,10 @@
 #include <errl/errlmanager.H>
 #include <fapi2_spd_access.H>
 
+ #include <spd.H>
+ #include <ocmb_spd.H>
+
+
 //The following can be uncommented for unit testing
 // #undef FAPI_DBG
 // #define FAPI_DBG(args...) FAPI_INF(args)
@@ -56,9 +60,6 @@ fapi2::ReturnCode platGetVPD(
 
     errlHndl_t l_errl = nullptr;
 
-    // Set up buffer we will read first 2KB of OCMB's eeprom to
-    // 1st KB is SPD info, 2nd KB is EFD info. Both are needed.
-    size_t   l_spdBufferSize = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
     uint8_t* l_spdBuffer = nullptr;
 
     do
@@ -72,17 +73,67 @@ fapi2::ReturnCode platGetVPD(
             FAPI_ERR("platGetVPD<OCMB>: Error from getTargetingTarget");
             break; //return with error
         }
-        FAPI_DBG("platGetVPD<OCMB> : target=0x%08X",TARGETING::get_huid(l_ocmbTarget));
+
+        FAPI_DBG("platGetVPD<OCMB> : HUID = 0x%08X", TARGETING::get_huid(l_ocmbTarget));
 
         // Retrieve the EFD data or the EFD data size if o_blob is NULL
         if (fapi2::EFD == io_vpdInfo.iv_vpd_type)
         {
+
+            // Read the Basic Memory Type
+            uint8_t l_memType(SPD::MEM_TYPE_INVALID);
+            l_errl = OCMB_SPD::getMemType(l_memType, l_ocmbTarget, EEPROM::AUTOSELECT);
+
+            if (l_errl || !SPD::isValidOcmbDimmType(l_memType))
+            {
+                FAPI_ERR("platGetVPD<OCMB>: Error from getMemType() for HUID = 0x%08X, l_memType = 0x%2X",
+                         TARGETING::get_huid(l_ocmbTarget), l_memType);
+
+                if (!l_errl)
+                {
+                    /*@
+                    * @errortype
+                    * @moduleid          fapi2::MOD_FAPI2_PLAT_GET_VPD_OCMB
+                    * @reasoncode        fapi2::RC_UNKNOWN_OCMB_CHIP_TYPE
+                    * @userdata1         Mem type of OCMB
+                    * @userdata2         HUID of OCMB target
+                    * @devdesc           Invalid or unsupported MemVpdData requested.
+                    * @custdesc          Firmware Error
+                    */
+                    l_errl = new ERRORLOG::ErrlEntry(
+                                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         fapi2::MOD_FAPI2_PLAT_GET_VPD_OCMB,
+                                         fapi2::RC_UNKNOWN_OCMB_CHIP_TYPE,
+                                         l_memType,
+                                         TARGETING::get_huid(l_ocmbTarget),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                }
+                break;
+            }
+
+            SPD::modSpecTypes_t l_modType = SPD::NA;
+            l_errl = SPD::getModType(l_modType, l_ocmbTarget, l_memType);
+
+            if (l_errl)
+            {
+                FAPI_ERR("platGetVPD<OCMB>: Error from getModType() for HUID = 0x%08X, l_modType = 0x%02X",
+                         TARGETING::get_huid(l_ocmbTarget), l_modType);
+                break;
+            }
+
+            // For standard OCMBs, need a 2KB buffer
+            // 1st KB is SPD info, 2nd KB is EFD info.
+            // For Planar OCMBs, need a 4KB buffer
+            // 1st 512B is SPD info, and remaining 3.5KB is EFD info
+            size_t l_spdBufferSize = (l_modType == SPD::PLANAR) ?
+                                     SPD::PLANAR_OCMB_SPD_EFD_COMBINED_SIZE :
+                                     SPD::OCMB_SPD_EFD_COMBINED_SIZE;
+
             // Allocate buffer to hold SPD and init to 0
             l_spdBuffer = new uint8_t[l_spdBufferSize];
             memset(l_spdBuffer, 0, l_spdBufferSize);
 
-            // Get the SPD buffer, where the EFD data is to be extracted from
-            // "ENTIRE_SPD" for OCMB target is first 2 KB of EEPROM
+            // Get the SPD buffer
             l_errl = deviceRead(l_ocmbTarget,
                                 l_spdBuffer,
                                 l_spdBufferSize,

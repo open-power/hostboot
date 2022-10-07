@@ -45,10 +45,7 @@
 namespace SPD
 {
 
-/**
-* @brief Miscellaneous enumerations for SPD
-*/
-enum
+enum spdMemType_t
 {
     // Memory Type address/size/constants for DDRx (DDR3, DDR4, etc)
     // Some values are assigned to equivalent values found in file
@@ -62,12 +59,15 @@ enum
     SPD_DDR3_SIZE = SPD::DDR3_SPD_SIZE,  // SPD size for DDR3, 256 bytes
     SPD_DDR4_SIZE = SPD::DDR4_SPD_SIZE,  // SPD size for DDR4, 512 bytes
     SPD_DDR5_SIZE = 1024,
+};
 
-
+enum spdModType_t
+{
     // Module Type address/size/mask/constants for DDRx (DDR3, DDR4, etc)
     MOD_TYPE_ADDR            = 0x03,
     MOD_TYPE_SZ              = 0x01,
-    MOD_TYPE_MASK            = 0x0f,
+    MOD_TYPE_MASK            = 0x0F,
+
     MOD_TYPE_DDR3_RDIMM      = 0x01,
     MOD_TYPE_DDR3_UDIMM      = 0x02,
     MOD_TYPE_DDR3_SO_DIMM    = 0x03,
@@ -77,8 +77,9 @@ enum
     MOD_TYPE_DDR3_MINI_CDIMM = 0x07,
     MOD_TYPE_DDR3_SO_UDIMM   = 0x08,
     MOD_TYPE_DDR3_SO_RDIMM   = 0x09,
-    MOD_TYPE_DDR3_SO_CDIMM   = 0x0a,
-    MOD_TYPE_DDR3_LRDIMM     = 0x0b,
+    MOD_TYPE_DDR3_SO_CDIMM   = 0x0A,
+    MOD_TYPE_DDR3_LRDIMM     = 0x0B,
+
     MOD_TYPE_DDR4_RDIMM      = 0x01,
     MOD_TYPE_DDR4_UDIMM      = 0x02,
     MOD_TYPE_DDR4_SO_DIMM    = 0x03,
@@ -88,26 +89,16 @@ enum
     MOD_TYPE_DDR4_SO_RDIMM   = 0x08,
     MOD_TYPE_DDR4_SO_UDIMM   = 0x09,
     MOD_TYPE_DDIMM           = 0x0A,
-    MOD_TYPE_PLANAR          = 0x0B,
+    MOD_TYPE_PLANAR          = 0x0C,
+
     MOD_TYPE_MDS_DDIMM       = 0xBA,
-
-    // DDIMM Mod height (1U/2U/4U)
-    DDIMM_MOD_HEIGHT_ADDR      = 0xC1,
-    DDIMM_MOD_HEIGHT_SZ        = 0x01,
-    DDIMM_MOD_HEIGHT_4U        = 0x80,
-    DDIMM_MOD_HEIGHT_2U        = 0x20,
-    DDIMM_MOD_HEIGHT_1U        = 0x00,
-    DDIMM_MOD_HEIGHT_INVALID   = 0xFF,
-
-    DIMM_SPD_SECTION_SIZE = 0x200,  // Size each DIMM SPD section
-    DIMM_SPD_MAX_SECTIONS = 512,    // Maximum number of sections
-
+    MOD_TYPE_MDS_PLANAR      = 0xBC,
 };
 
 /**
  * @brief Enumerations for Module Specific Keywords
  */
-typedef enum
+enum modSpecTypes_t
 {
     NA        = 0x00, // Invalid Type
     UMM       = 0x01, // Unbuffered Memory Modules
@@ -117,8 +108,18 @@ typedef enum
     DDIMM     = 0x10, // Differential DIMM
     PLANAR    = 0x20, // Planar EEPROM
     ALL       = 0xFFFF,
-} modSpecTypes_t;
+};
 
+enum dimmModHeight_t
+{
+    // DDIMM Mod height (1U/2U/4U)
+    DDIMM_MOD_HEIGHT_ADDR      = 0xC1,
+    DDIMM_MOD_HEIGHT_SZ        = 0x01,
+    DDIMM_MOD_HEIGHT_4U        = 0x80,
+    DDIMM_MOD_HEIGHT_2U        = 0x20,
+    DDIMM_MOD_HEIGHT_1U        = 0x00,
+    DDIMM_MOD_HEIGHT_INVALID   = 0xFF,
+};
 
 /**
 * @brief Structure to define the lookup table for SPD keywords
@@ -136,7 +137,6 @@ struct KeywordData
     bool writable;      // Whether this keyword can be written to.
     modSpecTypes_t modSpec; // Module Specific type keyword is valid for.
 };
-
 
 /**
  * @brief This function is used to read SPD keywords from collected
@@ -161,7 +161,7 @@ struct KeywordData
  * @param [in] i_args - This is an argument list for the device driver
  *       framework.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
@@ -193,7 +193,7 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
  * @param [in] i_args - This is an argument list for the device driver
  *       framework.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
@@ -219,7 +219,7 @@ errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
  * @param[in] i_eepromSource Eeprom source (CACHE/HARDWARE).
  *                           Default AUTOSELECT
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t spdFetchData(uint64_t i_byteAddr,
@@ -242,7 +242,7 @@ errlHndl_t spdFetchData(uint64_t i_byteAddr,
  *
  * @param[in] i_target - The target DIMM to access.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t spdWriteData ( uint64_t i_offset,
@@ -270,7 +270,7 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
  * @param[in] i_eepromSource The eeprom source (CACHE/HARDWARE).
  *                           Default AUTOSELECT
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t spdGetValue(VPD::vpdKeyword i_keyword,
@@ -298,7 +298,7 @@ errlHndl_t spdGetValue(VPD::vpdKeyword i_keyword,
  *
  * @param[in] i_DDRRev - The DIMM DDR Revision.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
@@ -320,7 +320,9 @@ errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
  *
  * @param[in] i_target - The target DIMM to access the data for.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @param[in] i_DDRRev - The DIMM DDR Revision.
+ *
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
@@ -339,7 +341,7 @@ errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
  *
  * @param[in] i_keyword - The SPD Keyword requested.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t spdCheckSize ( size_t i_bufferSz,
@@ -376,7 +378,7 @@ bool spdPresent ( TARGETING::Target * i_target );
  * @param[in] i_args - An argument for the Device Driver framework.  There
  *      are no args for this function.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
@@ -396,7 +398,7 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
  *
  * @param[in] i_memType - The memory type
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer
  *      to the error log.
  */
 errlHndl_t getModType ( modSpecTypes_t & o_modType,
@@ -415,7 +417,7 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
  *
  * @param[out] o_entry - The table entry corresponding to the keyword.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to
  *      the error log.
  */
 errlHndl_t getKeywordEntry(VPD::vpdKeyword    i_keyword,
@@ -433,7 +435,7 @@ errlHndl_t getKeywordEntry(VPD::vpdKeyword    i_keyword,
  *
  * @param[in] i_target - The chip target.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the error
  *      log.
  */
 errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
@@ -452,7 +454,7 @@ errlHndl_t checkModSpecificKeyword ( KeywordData i_kwdData,
  *
  * @param [in] o_match - Result of keyword compare
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the
  *         error log.  A mismatch will not return an error.
  */
 errlHndl_t cmpEecacheToEeprom(TARGETING::Target *            i_target,

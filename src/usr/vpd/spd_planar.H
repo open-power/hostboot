@@ -92,8 +92,8 @@ const KeywordData planarEepromData[] =
     { SAFE_PARK_ZONE,                   0x800,  0x01,   0x00,   0x00, false, false, ALL },
 
     // Module Specific fields supported on DDR4 only
-    { ENTIRE_SPD_WITHOUT_EFD,           0x00,   0x280,  0x00,   0x00, false, false, ALL },
-    { ENTIRE_SPD,                       0x00,   0x800,  0x00,   0x00, false, false, ALL },
+    { ENTIRE_SPD_WITHOUT_EFD,           0x00,  0x0280,  0x00,   0x00, false, false, ALL },
+    { ENTIRE_SPD,                       0x00,  0x1000,  0x00,   0x00, false, false, ALL },
     //---------------------------------------------------------------------------------------
 };
 
