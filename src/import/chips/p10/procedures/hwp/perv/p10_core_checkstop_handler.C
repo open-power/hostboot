@@ -37,9 +37,12 @@
 #include "p10_scom_c_b.H"
 #include "p10_scom_c_d.H"
 #include <p10_scom_c.H>
+#include <p10_scom_proc_7.H>
+#include <p10_scom_proc_4.H>
 
 using namespace scomt;
 using namespace scomt::c;
+using namespace scomt::proc;
 
 fapi2::ReturnCode p10_core_checkstop_handler(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target_core,
@@ -101,6 +104,9 @@ fapi2::ReturnCode p10_core_checkstop_handler(
     }
     else
     {
+        auto l_target_chip = i_target_core.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+        fapi2::buffer<uint64_t> l_es_hp_mode1_curr = 0;
+
         // We want to pull out the original actions, and restore them
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ORIG_FIR_SETTINGS_ACTION0, i_target_core, l_action0),
                  "Error from FAPI_ATTR_GET (ATTR_ORIG_FIR_SETTINGS_ACTION0)");
@@ -118,6 +124,16 @@ fapi2::ReturnCode p10_core_checkstop_handler(
         l_data.flush<1>();
         CLEAR_EC_PC_FIR_CORE_FIRMASK_MASK_PC_TFAC_XSTOP_ERROR(l_data);
         FAPI_TRY(PUT_EC_PC_FIR_CORE_FIRMASK_WO_AND(i_target_core, l_data));
+
+        FAPI_TRY(GET_PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR(l_target_chip, l_es_hp_mode1_curr));
+
+        if (!GET_PB_COM_SCOM_ES3_STATION_HP_MODE1_CURR_PB_CFG_MASTER_CHIP_CURR_ES3(l_es_hp_mode1_curr))
+        {
+            fapi2::buffer<uint64_t> l_es_fir_mask = 0;
+            FAPI_TRY(PREP_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR(l_target_chip));
+            SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK(l_es_fir_mask);
+            FAPI_TRY(PUT_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR(l_target_chip, l_es_fir_mask));
+        }
     }
 
     // Save off the current values of actions into the register

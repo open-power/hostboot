@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -610,6 +610,38 @@ static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_6 = 6;
 static const uint32_t TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA_7 = 7;
 //<< [TP_TPCHIP_OCC_OCI_OCB_OPIT2PRA]
 // proc/reg00023.H
+
+//>> [PB_COM_SCOM_ES3_STATION_FIR_MASK_REG]
+static const uint64_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW = 0x03011383ull;
+static const uint64_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND = 0x03011384ull;
+static const uint64_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR = 0x03011385ull;
+
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK = 0;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK = 1;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK = 2;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK = 3;
+static const uint32_t P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK = 3; // p10:20,
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK = 4;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK = 5;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK = 6;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK = 7;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK = 8;
+static const uint32_t P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK = 8; // p10:20,
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK = 9;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK = 10;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK = 11;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK = 12;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK = 13;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK = 14;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK = 15;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK = 16;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK = 17;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK = 18;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK = 19;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK = 20;
+static const uint32_t PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK = 21;
+//<< [PB_COM_SCOM_ES3_STATION_FIR_MASK_REG]
+// proc/reg00021.H
 
 //>>THE END<<
 
