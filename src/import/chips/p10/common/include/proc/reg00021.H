@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -9120,6 +9120,2896 @@ fapi_try_exit:
 #endif
 }
 //<< GET_[PB_COM_SCOM_ES3_STATION_HP_MODE4_CURR_31_AX_NUM_CURR_ES3]
+
+//>> PREP_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW;
+#endif
+    return fapi2::getScom(i_target, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW]
+
+//>> PUT_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return fapi2::putScom(i_target, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW]
+
+//>> PREP_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND;
+#endif
+    return fapi2::getScom(i_target, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND]
+
+//>> PUT_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return fapi2::putScom(i_target, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND]
+
+//>> PREP_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PREP_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR;
+#endif
+    return fapi2::current_err;
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PREP_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    scomt::last_scom = PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR;
+#endif
+    return fapi2::getScom(i_target, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR, o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR]
+
+//>> PUT_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR]
+template< fapi2::TargetType K, fapi2::MulticastType M, typename V >
+static inline fapi2::ReturnCode PUT_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR(const fapi2::Target<K, M, V>& i_target,
+        const uint64_t i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::init(i_target));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return fapi2::putScom(i_target, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR, i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    return fapi2::current_err;
+#endif
+}
+//<< PUT_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR]
+
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PROTOCOL_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_OVERFLOW_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HW_PARITY_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_3_MASK]
+
+//>> SET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK]
+
+//>> SET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK]
+
+//>> SET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK]
+
+//>> CLEAR_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK]
+
+//>> GET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK]
+
+//>> GET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK]
+static inline bool GET_P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_INACTIVE_LINK_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_COHERENCY_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ADDR_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_CRESP_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_LIMIT_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x20));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_SPARE_8_MASK]
+
+//>> SET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK]
+
+//>> SET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK]
+
+//>> SET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK]
+
+//>> CLEAR_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK]
+
+//>> GET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK]
+
+//>> GET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK]
+static inline bool GET_P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::failOn(0xa, 0x10));
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[P10_20_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_ACTIVE_LINK_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK(
+    fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_HANG_RECOVERY_GTE_LEVEL1_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK(const uint64_t i_data,
+        fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FORCE_MP_IPL_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_PB_CMD_SNOOPER_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_OVERFLOW_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_PROTOCOL_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_DATA_ROUTE_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_FIR_COMPAB_TRIGGER_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_PROTOCOL_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_OVERFLOW_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK0_HW_PARITY_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_PROTOCOL_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_OVERFLOW_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("0:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK(
+    const uint64_t i_data,
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.insertFromRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK,
+           1>(i_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("1:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
+
+//>> SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& SET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.setBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("2:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< SET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
+
+//>> CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& CLEAR_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return o_data.clearBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("3:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return o_data;
+#endif
+}
+//<< CLEAR_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
+static inline fapi2::buffer<uint64_t>& GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK(
+    fapi2::buffer<uint64_t>& i_data,
+    uint64_t& o_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.extractToRight<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK,
+           1>(o_data);
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("4:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
+
+//>> GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
+static inline bool GET_PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK(fapi2::buffer<uint64_t>& i_data)
+{
+#ifdef SCOM_CHECKING
+    FAPI_TRY(scomt::chkReg(PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_RW, PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_AND,
+                           PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_WO_OR));
+#endif
+    return i_data.getBit<PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK>();
+#ifdef SCOM_CHECKING
+fapi_try_exit:
+    FAPI_ERR("5:scom_proc Invalid dial access PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK chip: %x, ec: %x",
+             scomt::chip, scomt::ec);
+    return i_data;
+#endif
+}
+//<< GET_[PB_COM_SCOM_ES3_STATION_FIR_MASK_REG_LINK1_HW_PARITY_ERROR_MASK]
 
 //>>THE END<<
 
