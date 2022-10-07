@@ -320,6 +320,13 @@ namespace HTMGT
              */
             static void setOccsStarted(const bool i_started);
 
+            /**
+             * @brief Add OCC traces to an error log
+             *
+             * @param[in,out] i_err  Error log to be updated
+             */
+            static void addTraceToLog(errlHndl_t & i_err);
+
         private:
 
             typedef std::vector<Occ*> occList_t;
@@ -463,6 +470,9 @@ namespace HTMGT
             /** See setOccsStarted() above */
             void _setOccsStarted(const bool i_started)
             { iv_occsStarted = i_started; };
+
+            /** See addTraceToLog() above */
+            void _addTraceToLog(errlHndl_t & i_err);
     };
 
     typedef Singleton<OccManager> occMgr;
