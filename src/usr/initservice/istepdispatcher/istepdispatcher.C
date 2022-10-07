@@ -244,6 +244,7 @@ void IStepDispatcher::parsePLDMBiosAttrs(ISTEP_ERROR::IStepError & io_stepError)
         ISTEP::parse_hb_lateral_cast_out_mode,
         ISTEP::parse_hb_cap_freq_mhz,
         ISTEP::parse_hb_proc_favor_aggressive_prefetch,
+        ISTEP::parse_hb_secure_ver_lockin_enabled,
     };
 
     std::vector<uint8_t> bios_string_table, bios_attr_table;

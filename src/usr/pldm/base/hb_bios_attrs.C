@@ -94,7 +94,6 @@ const char PLDM_BIOS_HB_CAP_FREQ_MHZ_MAX_STRING[]     = "hb_cap_freq_mhz_max";
 const char PLDM_BIOS_HB_CAP_FREQ_MHZ_MIN_STRING[]     = "hb_cap_freq_mhz_min";
 const char PLDM_BIOS_HB_CAP_FREQ_MHZ_REQUEST_STRING[] = "hb_cap_freq_mhz_request_current";
 
-
 // Possible Values
 const char PLDM_BIOS_HB_OPAL_STRING[]          = "OPAL";
 const char PLDM_BIOS_HB_POWERVM_STRING[]       = "PowerVM";
@@ -2332,6 +2331,8 @@ errlHndl_t getSecVerLockinEnabled(std::vector<uint8_t>& io_string_table,
     errlHndl_t l_errl = nullptr;
     o_lockinEnabled = false;
 
+    PLDM_ENTER("getSecVerLockinEnabled");
+
     do {
 
     std::vector<char>l_decodedValue = {};
@@ -2377,6 +2378,8 @@ errlHndl_t getSecVerLockinEnabled(std::vector<uint8_t>& io_string_table,
     }
 
     } while(0);
+
+    PLDM_EXIT("getSecVerLockinEnabled, o_lockinEnabled=%d", o_lockinEnabled);
 
     return l_errl;
 }
