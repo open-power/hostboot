@@ -1426,6 +1426,15 @@ namespace HTMGT
         return l_err;
     }
 
+    void OccManager::_addTraceToLog(errlHndl_t & i_err)
+    {
+        TMGT_INF("_addTraceToLog: Adding OCC traces to log");
+        for( const auto & occ : iv_occArray )
+        {
+            occ->addOccTrace(i_err);
+        }
+    }
+
     // ---------- public interfaces ---------- //
 
 
@@ -1570,6 +1579,11 @@ namespace HTMGT
     void OccManager::setOccsStarted(const bool i_started)
     {
         return Singleton<OccManager>::instance()._setOccsStarted(i_started);
+    }
+
+    void OccManager::addTraceToLog(errlHndl_t & i_err)
+    {
+        return Singleton<OccManager>::instance()._addTraceToLog(i_err);
     }
 
 } // end namespace

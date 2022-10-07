@@ -229,6 +229,18 @@ namespace HTMGT
                           HTMGT_RC_OCC_START_FAIL,
                           0, l_huid, 0, 0,
                           ERRORLOG::ERRL_SEV_INFORMATIONAL);
+
+                errlHndl_t bldErr = OccManager::buildOccs(true);
+                if (nullptr == bldErr)
+                {
+                    OccManager::addTraceToLog(l_err);
+                }
+                else
+                {
+                    TMGT_ERR("Unable to add OCC traces to log");
+                    delete bldErr;
+                    bldErr = nullptr;
+                }
             }
 
             if (nullptr != l_err)
