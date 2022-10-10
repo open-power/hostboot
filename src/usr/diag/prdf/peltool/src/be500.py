@@ -69,8 +69,8 @@ def huidToStr(huid: str) -> str:
     target_inst = int(huid[4:8], 16)
 
     chips = {
-        0x05: 'proc'  # TYPE_PROC
-        0x4b: 'ocmb'  # TYPE_OCMB_CHIP
+        0x05: 'proc',  # TYPE_PROC
+        0x4b: 'ocmb',  # TYPE_OCMB_CHIP
     }
 
     if target_type in chips:
@@ -78,17 +78,17 @@ def huidToStr(huid: str) -> str:
 
     proc_units = {
         # autopep8: off
-        0x07: ('core', 32)  # TYPE_CORE
-        0x23: ('eq'  ,  8)  # TYPE_EQ
-        0x2d: ('pec' ,  2)  # TYPE_PEC
-        0x2e: ('phb' ,  6)  # TYPE_PHB
-        0x44: ('mc'  ,  4)  # TYPE_MC
-        0x49: ('mcc' ,  8)  # TYPE_MCC
-        0x4a: ('omic',  8)  # TYPE_OMIC
-        0x4f: ('nmmu',  2)  # TYPE_NMMU
-        0x50: ('pau' ,  8)  # TYPE_PAU
-        0x51: ('iohs',  8)  # TYPE_IOHS
-        0x52: ('pauc',  4)  # TYPE_PAUC
+        0x07: ('core', 32),  # TYPE_CORE
+        0x23: ('eq'  ,  8),  # TYPE_EQ
+        0x2d: ('pec' ,  2),  # TYPE_PEC
+        0x2e: ('phb' ,  6),  # TYPE_PHB
+        0x44: ('mc'  ,  4),  # TYPE_MC
+        0x49: ('mcc' ,  8),  # TYPE_MCC
+        0x4a: ('omic',  8),  # TYPE_OMIC
+        0x4f: ('nmmu',  2),  # TYPE_NMMU
+        0x50: ('pau' ,  8),  # TYPE_PAU
+        0x51: ('iohs',  8),  # TYPE_IOHS
+        0x52: ('pauc',  4),  # TYPE_PAUC
         # autopep8: on
     }
 
