@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -34,7 +34,6 @@
 #    updatetempsxml --generic=temp_generic.xml
 #                   --fapi=fapiattrs.xml
 #                   --fapi_inc=fapi2PlatAttrService.H
-#                   --fw_dflts=hb_temp_defaults.xml
 #                   --defaults=tempdefaults.xml
 #
 # Purpose:
@@ -57,19 +56,17 @@ $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 my $generic = "";
 my $fapi = "";
 my $fapi_inc = "";
-my $fw_dflts = "";
 my $defaults = "";
 my $usage = 0;
 use Getopt::Long;
 GetOptions( "generic:s"  => \$generic,
             "fapi:s"     => \$fapi,
             "fapi_inc:s" => \$fapi_inc,
-            "fw_dflts:s" => \$fw_dflts,
             "defaults:s" => \$defaults,
             "help"       => \$usage, );
 
 if (($generic eq "") || ($fapi eq "") || ($fapi_inc eq "") ||
-    ($fw_dflts eq "") || ($defaults eq ""))
+    ($defaults eq ""))
 {
     display_help();
     exit 1;
@@ -100,13 +97,6 @@ my $fapiXml = XMLin("$fapi", ForceArray=>1);
 open (FH, "<$fapi_inc") ||
     die "ERROR: unable to open $fapi_inc\n";
 close (FH);
-
-open (FH, "<$fw_dflts") ||
-    die "ERROR: unable to open $fw_dflts\n";
-close (FH);
-
-#print STDERR "XMLin($fw_dflts, ForceArray=>1)\n";
-my $fwDfltsXml = XMLin("$fw_dflts", ForceArray=>1);
 
 open (FH, "<$defaults") ||
     die "ERROR: unable to open $defaults\n";
@@ -159,190 +149,6 @@ foreach my $TgtType ( @{$genericXmlArray->{targetType}} )
 # Walk through hb_temp_defaults.xml file looking for new FAPI attributes
 my @NewAttr;
 my @UpdtTgt;
-
-foreach my $TempAttr ( @{$fwDfltsXml->{attribute}} )
-{
-    my $fapi_attr = "";
-    my $fapi_id = $TempAttr->{id}->[0];
-    $fapi_id =~ s/\s//g;
-#    print STDERR "Processing FAPI Id $fapi_id\n";
-    my $generic_id = $fapi_id;
-    $generic_id =~ s/ATTR_//;
-    my $found = 0;
-
-    my $persistency = "volatile";
-
-    # First, check if attribute definition exists in fapiattrs.xml
-    foreach my $FapiAttr ( @{$fapiXml->{attribute}} )
-    {
-        my $fapi_attr_id = $FapiAttr->{id}->[0];
-        $fapi_attr_id =~ s/\s//g;
-        if ($fapi_attr_id eq $fapi_id)
-        {
-            $found = 1;
-            $fapi_attr = $FapiAttr;
-
-            # Check if FAPI attribute is associated with specific target types
-            if (exists $FapiAttr->{targetType})
-            {
-                my @types = split(',',$FapiAttr->{targetType}->[0]);
-                foreach my $type(@types)
-                {
-                    $type =~ s/\s//g;
-                    $type =~ s/TARGET_TYPE_//;
-                    $type =~ s/_ENDPOINT//;
-                    $type =~ s/_CHIPLET//;
-                    $type =~ s/_CHIP//;
-                    $type =~ s/^SYSTEM$/SYS/;
-
-                    my $msgNeeded = 1;
-
-                    # Loop through target type info from temp_generic.xml file
-                    for my $i ( 0 .. $#TgtTypeInfo)
-                    {
-                        # Check for entry of specified target type without a
-                        # definition of the given attribute
-                        if(($TgtTypeInfo[$i][1] eq $type) &&
-                           !($TgtTypeInfo[$i][2] =~ /\s$generic_id\s/))
-                        {
-                            # Determine if default exists for the update
-                            if (exists $TempAttr->{default})
-                            {
-                                push @UpdtTgt, [ $TgtTypeInfo[$i][0], $type,
-                                                 $generic_id,
-                                                 $TempAttr->{default}->[0]];
-                            }
-                            else
-                            {
-                                push @UpdtTgt, [ $TgtTypeInfo[$i][0], $type,
-                                                 $generic_id, ""];
-                            }
-                            $msgNeeded = 0;
-                        }
-                        elsif($TgtTypeInfo[$i][2] =~ /\s$generic_id\s/)
-                        {
-                            print STDERR "Target $TgtTypeInfo[$i][0] of type ".
-                                  "$type already has attribute $generic_id\n";
-                            $msgNeeded = 0;
-                        }
-                    }
-
-                    print STDERR "Type $type not found in $fapi for attribute ".
-                          "$generic_id\n" if($msgNeeded);
-                }
-            }
-            else
-            {
-                 die "FATAL: FAPI attribute $fapi_id is not associated with ".
-                     "any specific target type\n";
-            }
-
-            # Non-platInit attributes need to be volatile-zeroed
-            #  or xmltohb.pl will throw an error
-            if( !(exists $FapiAttr->{platInit}) )
-            {
-                $persistency = "volatile-zeroed";
-            }
-
-            last;
-        }
-    }
-    die "FATAL: FAPI attribute definition not found in $fapi for "
-        . "$fapi_id\n" if($found == 0);
-
-    # Second, check if handling already exists in fapi2PlatAttrService.H
-    $found = 0;
-    open (FH, "<$fapi_inc");
-    while (my $line = <FH>)
-    {
-        # Check if line starts a GETMACRO or SETMACRO #define statement
-        if (($line =~ /^\s*\#define\s*(ATTR_.*)_(.ETMACRO).*/) &&
-            ($1 eq $fapi_id))
-        {
-            print STDERR "Existing handling found in $fapi_inc for "
-                . "$fapi_id\n";
-            $found = 1;
-            last;
-        }
-    }
-    close (FH);
-    next if($found);
-
-    # Third, check if mapping already exists in generic.xml
-    $found = 0;
-    foreach my $GenericAttr ( @{$genericXmlArray->{attribute}} )
-    {
-        # Check for attribute mapping
-        if (exists $GenericAttr->{hwpfToHbAttrMap})
-        {
-            my $GenericMap = $GenericAttr->{hwpfToHbAttrMap}->[0];
-
-            # Check if FAPI and generic attributes are mapped to each other
-            if ($GenericMap->{id}->[0] eq $fapi_id)
-            {
-                print STDERR "Existing mapping found in $generic for "
-                    . "$fapi_id\n";
-                $found = 1;
-                last;
-            }
-        }
-    }
-    next if($found);
-
-    # Collect information for creating attribute definitions
-    my $description = $fapi_attr->{description}->[0];
-
-    my $valueType = $fapi_attr->{valueType}->[0];
-    $valueType =~ s/(uint\d*)/$1_t/ if($valueType =~ /^uint\d*/);
-    $valueType =~ s/(int\d+)/$1_t/ if ($valueType =~ /^int\d+$/);
-
-    my $fwDefault = "";
-    if (exists $TempAttr->{default})
-    {
-        $fwDefault = $TempAttr->{default}->[0];
-    }
-
-    my $array = "";
-    if(exists $fapi_attr->{array})
-    {
-        my @dimensions = split(' ',$fapi_attr->{array}->[0]);
-        $array = @dimensions[0];
-        for my $i ( 1 .. $#dimensions )
-        {
-            $array .= ",$dimensions[$i]";
-        }
-    }
-
-    # Create generic attribute with mapping
-    push @NewAttr, [ "<attribute>\n" ];
-    push @NewAttr, [ "    <id>$generic_id</id>\n" ];
-    push @NewAttr, [ "    <description>\n" ];
-    push @NewAttr, [ "        $description\n" ];
-    push @NewAttr, [ "    </description>\n" ];
-    push @NewAttr, [ "    <simpleType>\n" ];
-    if($fwDefault ne "")
-    {
-        push @NewAttr, [ "        <$valueType>\n" ];
-        push @NewAttr, [ "            <default>$fwDefault</default>\n" ];
-        push @NewAttr, [ "        </$valueType>\n" ];
-    }
-    else
-    {
-        push @NewAttr, [ "        <$valueType></$valueType>\n" ];
-    }
-    push @NewAttr, [ "        <array>$array</array>\n" ] if($array ne "");
-    push @NewAttr, [ "    </simpleType>\n" ];
-    push @NewAttr, [ "    <persistency>$persistency</persistency>\n" ];
-    push @NewAttr, [ "    <readable/>\n" ];
-    push @NewAttr, [ "    <writeable/>\n" ] if(exists $fapi_attr->{writeable});
-    push @NewAttr, [ "    <hwpfToHbAttrMap>\n" ];
-    push @NewAttr, [ "        <id>$fapi_id</id>\n" ];
-    push @NewAttr, [ "        <macro>DIRECT</macro>\n" ];
-    push @NewAttr, [ "    </hwpfToHbAttrMap>\n" ];
-    push @NewAttr, [ "    <tempAttribute/>\n" ];
-    push @NewAttr, [ "</attribute>\n" ];
-    push @NewAttr, [ "\n" ];
-}
 
 
 # Check tempdefaults.xml for <tempDefault> entries which are setting temporary
@@ -706,7 +512,6 @@ Usage:
     $scriptname --generic=genericfname
                 --fapi=fapifname
                 --fapi_inc=fapiincfname
-                --fw_dflts=fwdfltsfname
                 --defaults=defaultsfname
         --generic=genericfname
               genericfname is complete pathname of the generic.xml file
@@ -715,9 +520,6 @@ Usage:
         --fapi_inc=fapiincfname
               fapiincfname is complete pathname of the
               fapi2PlatAttrService.H file
-        --fw_dflts=fwdfltsfname
-              fwdfltsfname is complete pathname of the
-              hb_temp_defaults.xml file
         --defaults=defaultsfname
               defaultsfname is complete pathname of the tempdefaults.xml file
 \n";
