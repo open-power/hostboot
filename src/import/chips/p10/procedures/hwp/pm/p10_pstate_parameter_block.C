@@ -875,7 +875,7 @@ void gppb_print(
             i_gppb->pgpe_flags[PGPE_FLAG_WOF_DISABLE_VRATIO]);
 
     FAPI_INF("  %-26s : 0x%2X (eco_count_en | eco_count) -> count = %d", "eco_count",
-            i_gppb->pgpe_flags[PGPE_FLAG_ECO_COUNT],  
+            i_gppb->pgpe_flags[PGPE_FLAG_ECO_COUNT],
             (i_gppb->pgpe_flags[PGPE_FLAG_ECO_COUNT] & 0x7F));
 
     FAPI_INF("Other Info:");
@@ -3976,6 +3976,12 @@ fapi2::ReturnCode PlatPmPPB::apply_biased_values ()
         BIAS_POINTER_FREQ(ultraturbo_freq_mhz);
         BIAS_POINTER_FREQ(fmax_freq_mhz);
 
+        uint32_t orig_vdn_mv = iv_attr_mvpd_poundV_static_rails.vdn_mv;
+        iv_attr_mvpd_poundV_static_rails.vdn_mv  =
+            bias_adjust_mv(iv_attr_mvpd_poundV_static_rails.vdn_mv, iv_attrs.attr_voltage_ext_vdn_bias);
+        FAPI_IMP("Apply Biasing to #V VDN value:  original %u, biased %u, bias %d",
+            orig_vdn_mv, iv_attr_mvpd_poundV_static_rails.vdn_mv, iv_attrs.attr_voltage_ext_vdn_bias);
+
     } while(0);
 
 fapi_try_exit:
@@ -5267,6 +5273,12 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
                 bias_adjust_mv(iv_attrs.attr_pm_safe_voltage_mv[VCS], iv_attrs.attr_boot_voltage_biase_0p5pct);
     }
 
+    if (!iv_attrs.attr_boot_voltage_mv[VDN])
+    {
+        iv_attrs.attr_boot_voltage_mv[VDN] =
+                bias_adjust_mv(iv_attr_mvpd_poundV_static_rails.vdn_mv, iv_attrs.attr_boot_voltage_biase_0p5pct);
+    }
+
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
                 FAPI_SYSTEM, l_sys_pstate0_freq_mhz));
@@ -5283,6 +5295,10 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     FAPI_INF("VCS boot_mode_mv 0x%x (%d)",
         iv_attrs.attr_boot_voltage_mv[VCS],
         iv_attrs.attr_boot_voltage_mv[VCS]);
+
+    FAPI_INF("VDN boot_mode_mv 0x%x (%d)",
+        iv_attrs.attr_boot_voltage_mv[VDN],
+        iv_attrs.attr_boot_voltage_mv[VDN]);
 
 
 fapi_try_exit:
