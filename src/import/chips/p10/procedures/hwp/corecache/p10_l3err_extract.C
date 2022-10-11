@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -194,8 +194,8 @@ fapi2::ReturnCode p10_l3err_extract(
         }
 
         // Only look at data entries (ie ignore compression entries for now)
-        l_trace_array[l_trace_index].extract(l_ce_dw, 56, 8);
-        l_trace_array[l_trace_index].extract(l_ue_dw, 64, 8);
+        l_trace_array[l_trace_index].extractToRight(l_ce_dw, 56, 8);
+        l_trace_array[l_trace_index].extractToRight(l_ue_dw, 64, 8);
 
         if( !l_trace_array[l_trace_index].isBitClear( 88, 7 ) )
         {
