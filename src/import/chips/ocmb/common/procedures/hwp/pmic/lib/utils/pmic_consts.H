@@ -366,6 +366,7 @@ namespace adc
 ///
 enum regs
 {
+    SYSTEM_STATUS       = 0x00,
     GENERAL_CFG         = 0x01,
     OSR_CFG             = 0x03,
     OPMODE_CFG          = 0x04,
