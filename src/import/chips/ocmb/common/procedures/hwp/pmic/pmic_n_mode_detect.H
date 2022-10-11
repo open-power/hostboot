@@ -122,8 +122,10 @@ struct __attribute__((__packed__)) adc_telemetry
     uint16_t iv_min_ch6_mV = 0;
     uint16_t iv_min_ch7_mV = 0;
 
-    uint16_t reserved1 = 0;
-    uint32_t reserved2 = 0;
+    uint8_t iv_system_status = 0;
+    uint8_t iv_auto_seq_ch_sel = 0;
+
+    uint32_t reserved1 = 0;
 };
 
 ///
@@ -154,9 +156,13 @@ struct __attribute__((__packed__)) pmic_telemetry
     // Direct read from 8 bit register
     uint8_t iv_r33 = 0;
 
-    uint8_t reserved = 0;
-    uint16_t reserved1 = 0;
-    uint32_t reserved2 = 0;
+    uint8_t iv_r1b = 0;
+    uint8_t iv_r2e = 0;
+    uint8_t iv_r2f = 0;
+    uint8_t iv_r32 = 0;
+    uint8_t iv_r9c = 0;
+
+    uint16_t reserved = 0;
 };
 
 ///
@@ -165,10 +171,14 @@ struct __attribute__((__packed__)) pmic_telemetry
 struct __attribute__((__packed__)) telemetry_data
 {
     uint8_t iv_gpio1_port_state = 0;
-    uint8_t iv_gpio2_port_state = 0;
+    uint8_t iv_gpio1_r01_efuse_output = 0;
+    uint8_t iv_gpio1_r02_efuse_polarity = 0;
+    uint8_t iv_gpio1_r03_configuration = 0;
 
-    uint16_t reserved = 0;
-    uint32_t reserved1 = 0;
+    uint8_t iv_gpio2_port_state = 0;
+    uint8_t iv_gpio2_r01_efuse_output = 0;
+    uint8_t iv_gpio2_r02_efuse_polarity = 0;
+    uint8_t iv_gpio2_r03_configuration = 0;
 
     pmic_telemetry iv_pmic1;
     pmic_telemetry iv_pmic2;
@@ -186,7 +196,7 @@ struct __attribute__((__packed__)) runtime_n_mode_telem_info
 {
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision = 0x02;
+    uint8_t iv_revision = 0x03;
 
     aggregate_state iv_aggregate_error = aggregate_state::N_PLUS_1;
     uint8_t iv_pmic1_errors = 0;
@@ -246,13 +256,13 @@ typedef struct
 
 
 ///
-/// @brief Get the gpio port states
+/// @brief Get the gpio data
 ///
 /// @param[in] i_gpio1 GPIO1
 /// @param[in] i_gpio2 GPIO2
 /// @param[out] o_data data struct
 ///
-void populate_gpio_port_states(
+void populate_gpio_data(
     const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio1,
     const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio2,
     telemetry_data& o_data);

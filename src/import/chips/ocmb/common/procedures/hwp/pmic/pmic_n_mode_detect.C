@@ -369,13 +369,13 @@ std::vector<pmic_info> get_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
 }
 
 ///
-/// @brief Get the gpio port states
+/// @brief Get the gpio data
 ///
 /// @param[in] i_gpio1 GPIO1
 /// @param[in] i_gpio2 GPIO2
 /// @param[out] o_data telemetry data struct
 ///
-void populate_gpio_port_states(
+void populate_gpio_data(
     const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio1,
     const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio2,
     telemetry_data& o_data)
@@ -389,6 +389,36 @@ void populate_gpio_port_states(
 
     FAPI_INF(TARGTIDFORMAT " Reading GPIO Input Port State", MSSTARGID(i_gpio2));
     mss::pmic::i2c::reg_read(i_gpio2, mss::gpio::regs::INPUT_PORT_REG, l_reg_contents_2);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    FAPI_INF(TARGTIDFORMAT " Reading GPIO EFUSE output", MSSTARGID(i_gpio1));
+    mss::pmic::i2c::reg_read(i_gpio1, mss::gpio::regs::EFUSE_OUTPUT, l_reg_contents_1);
+    o_data.iv_gpio1_r01_efuse_output = l_reg_contents_1;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    FAPI_INF(TARGTIDFORMAT " Reading GPIO EFUSE output", MSSTARGID(i_gpio2));
+    mss::pmic::i2c::reg_read(i_gpio2, mss::gpio::regs::EFUSE_OUTPUT, l_reg_contents_2);
+    o_data.iv_gpio2_r01_efuse_output = l_reg_contents_2;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    FAPI_INF(TARGTIDFORMAT " Reading GPIO EFUSE Polarity", MSSTARGID(i_gpio1));
+    mss::pmic::i2c::reg_read(i_gpio1, mss::gpio::regs::EFUSE_POLARITY, l_reg_contents_1);
+    o_data.iv_gpio1_r02_efuse_polarity = l_reg_contents_1;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    FAPI_INF(TARGTIDFORMAT " Reading GPIO EFUSE Polarity", MSSTARGID(i_gpio2));
+    mss::pmic::i2c::reg_read(i_gpio2, mss::gpio::regs::EFUSE_POLARITY, l_reg_contents_2);
+    o_data.iv_gpio2_r02_efuse_polarity = l_reg_contents_2;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    FAPI_INF(TARGTIDFORMAT " Reading GPIO Configuration", MSSTARGID(i_gpio1));
+    mss::pmic::i2c::reg_read(i_gpio1, mss::gpio::regs::CONFIGURATION, l_reg_contents_1);
+    o_data.iv_gpio1_r03_configuration = l_reg_contents_1;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    FAPI_INF(TARGTIDFORMAT " Reading GPIO Configuration", MSSTARGID(i_gpio2));
+    mss::pmic::i2c::reg_read(i_gpio2, mss::gpio::regs::CONFIGURATION, l_reg_contents_2);
+    o_data.iv_gpio2_r03_configuration = l_reg_contents_2;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     // In the case of an I2C read failure, we don't want to abort the procedure. The
@@ -427,6 +457,12 @@ void populate_pmic_data(
         static constexpr uint8_t R0F = 0x0F;
         static constexpr uint8_t R30 = 0x30;
         static constexpr uint8_t R31 = 0x31;
+        static constexpr uint8_t R1B = 0x1B;
+        static constexpr uint8_t R2E = 0x2E;
+        static constexpr uint8_t R2F = 0x2F;
+        static constexpr uint8_t R32 = 0x32;
+        static constexpr uint8_t R9C = 0x9C;
+
 
         // 125mA * bitmap = Current value
         static constexpr uint16_t CURRENT_BITMAP_MULTIPLIER = 125;
@@ -507,6 +543,24 @@ void populate_pmic_data(
             reg_read(io_pmic, R31, l_reg_contents);
             o_pmic_data.iv_temp_c = static_cast<uint16_t>(l_reg_contents()) * ADC_TEMP_STEP;
         }
+
+        //
+        {
+            reg_read(io_pmic, R1B, l_reg_contents);
+            o_pmic_data.iv_r1b = l_reg_contents;
+
+            reg_read(io_pmic, R2E, l_reg_contents);
+            o_pmic_data.iv_r2e = l_reg_contents;
+
+            reg_read(io_pmic, R2F, l_reg_contents);
+            o_pmic_data.iv_r2f = l_reg_contents;
+
+            reg_read(io_pmic, R32, l_reg_contents);
+            o_pmic_data.iv_r32 = l_reg_contents;
+
+            reg_read(io_pmic, R9C, l_reg_contents);
+            o_pmic_data.iv_r9c = l_reg_contents;
+        }
     }
 }
 
@@ -568,6 +622,14 @@ void populate_adc_data(
     static constexpr uint8_t ADC_U16_MAP_LEN = 24;
     static constexpr uint8_t REG_SIZE_BITS = 8;
     fapi2::buffer<uint8_t> l_reg_contents;
+
+    mss::pmic::i2c::reg_read_reverse_buffer(i_adc, mss::adc::regs::SYSTEM_STATUS, l_reg_contents);
+    o_adc_data.iv_system_status = l_reg_contents;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    mss::pmic::i2c::reg_read_reverse_buffer(i_adc, mss::adc::regs::AUTO_SEQ_CH_SEL, l_reg_contents);
+    o_adc_data.iv_auto_seq_ch_sel = l_reg_contents;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     // Fields that map a LSB register to the uint16_t destination in o_adc_data
     const adu_map_t ADC_U16_MAP[ADC_U16_MAP_LEN] =
@@ -750,8 +812,8 @@ fapi2::ReturnCode pmic_n_mode_detect(
         l_info.iv_pmic4_errors = PMICS[mss::pmic::id::PMIC3].iv_state;
         l_info.iv_aggregate_error = l_state;
 
-        // Get GPIO port states
-        populate_gpio_port_states(GPIO1, GPIO2, l_info.iv_telemetry_data);
+        // Get GPIO data
+        populate_gpio_data(GPIO1, GPIO2, l_info.iv_telemetry_data);
 
         // Similar to above, this numbering translation is using the numbering
         // as defined in the "Redundant Power on DIMM – Functional Specification"
