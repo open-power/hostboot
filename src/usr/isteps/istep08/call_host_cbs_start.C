@@ -50,6 +50,7 @@
 #include <errl/errludattribute.H>
 #include <hwas/common/hwas.H>
 #include <errl/errludtarget.H>
+#include <errl/errlreasoncodes.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -351,13 +352,28 @@ void* call_host_cbs_start(void *io_pArgs)
             l_errl->addHwCallout(l_cpu_target, SRCI_PRIORITY_LOW, DELAYED_DECONFIG, GARD_NULL);
             captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
 #else
+            // Search the error log for callouts to determine which clock is at
+            // fault.
+
+            HWAS::clockTypeEnum clock_callout_type = OSCREFCLK_TYPE;
+
+            for(const auto callout : l_errl->getUDSections(ERRL_COMP_ID, ERRORLOG::ERRL_UDT_CALLOUT))
+            {
+                const auto ud = reinterpret_cast<HWAS::callout_ud_t*>(callout);
+                if (ud->type == HWAS::CLOCK_CALLOUT && ud->clockType != OSCREFCLK_TYPE)
+                {
+                    clock_callout_type = ud->clockType;
+                    break;
+                }
+            }
+                deconfigure_redundant_clock(l_errl, l_cpu_target, clock_callout_type);
+            ERRORLOG::ErrlUserDetailsTarget(l_cpu_target).addToLog(l_errl);
+            l_errl->collectTrace("ISTEPS_TRACE");
+
             // Don't add the log to the istep log in this path, so that (1) the
             // severity won't be upgraded to UNRECOVERABLE, and (2) the istep
             // will succeed but perform a reconfig loop because of
             // deconfigure_redundant_clock's processing.
-            deconfigure_redundant_clock(l_errl, l_cpu_target, OSCREFCLK_TYPE);
-            ERRORLOG::ErrlUserDetailsTarget(l_cpu_target).addToLog(l_errl);
-            l_errl->collectTrace("ISTEPS_TRACE");
             errlCommit(l_errl, HWPF_COMP_ID);
 #endif
 
