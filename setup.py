@@ -84,6 +84,7 @@ package_directories = {
     "udparsers.b4700":   "src/usr/pldm/plugins/ebmc",
     "udparsers.be500":   "src/usr/diag/prdf/peltool/ud",
     "udparsers.helpers": "src/build/tools/ebmc",
+    "udparsers.b2800":   "src/usr/sbeio/plugins/ebmc",
 
     # SRC parsers packages.
     # The only required package is 'srcparsers.bsrc', but other modules can be
