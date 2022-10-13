@@ -2386,10 +2386,16 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         // check for functional Master Proc on this node
         Target* l_pMasterProc = nullptr;
 
-        //Get master proc at system level or node level based on target type
+        // Get master proc at system level or node level based on target type
         if(pTop->getAttr<ATTR_TYPE>() == TYPE_SYS)
         {
-            targetService().queryMasterProcChipTargetHandle(l_pMasterProc);
+            // For the system level perspective, we want to find the functional boot proc because if there is a problem
+            // with node 0 where the "preferred" boot proc is then we want to be handed back the boot proc on the next
+            // functional node in the system instead of failing the minimum hardware check.
+            //
+            // We deliberately do not supply the top level target so that the FSP case will search for the correct boot
+            // proc system-wide.
+            targetService().queryMasterProcChipTargetHandle(l_pMasterProc, NULL, true);
         }
         else
         {
