@@ -320,14 +320,14 @@ void PdrManager::clearHbEntityAssociationPDRs()
 
     // A small window exists here where iv_pdr_repo could be updated and
     // the pdr handles list might be invalid
-    mutex_lock(&iv_access_mutex);
+    const auto lock = scoped_mutex_lock(iv_access_mutex);
     bool is_remote = false;
     for (auto record_handle : l_pdr_handles_to_delete)
     {
-        PLDM_INF("clearHbEntityAssociationPDRs() - removing record %lld", le32toh(record_handle));
+        PLDM_INF("clearHbEntityAssociationPDRs() - removing record %lld (0x%X)",
+            le32toh(record_handle), le32toh(record_handle));
         pldm_delete_by_record_handle(iv_pdr_repo.get(), record_handle, is_remote);
     }
-    mutex_unlock(&iv_access_mutex);
 }
 #endif
 

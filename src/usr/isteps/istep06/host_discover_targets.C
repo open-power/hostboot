@@ -384,7 +384,6 @@ static errlHndl_t finish_pdr_exchange()
             break;
         }
 
-        // Remove the HB Associative PDRs to use the BMC normalized ones instead
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       INFO_MRK"Remove the HB entity association PDRs to use the BMC normalized ones instead");
         PLDM::thePdrManager().clearHbEntityAssociationPDRs();
