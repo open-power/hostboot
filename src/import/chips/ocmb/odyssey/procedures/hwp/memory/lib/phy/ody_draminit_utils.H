@@ -175,12 +175,17 @@ fapi2::ReturnCode acknowledge_mail (const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
 ///
 fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                       const uint64_t i_training_poll_count);
+
 ///
-/// @brief Checks the completion condition for training
+/// @brief Checks the completion condition for training and decodes respective message
+/// @param[in] i_target the memory port on which to operate
 /// @param[in] i_mail mail content to check for completion
-/// @return True if mail content is same as one of the completion values , false otherwise
+/// @param[out] o_loop_end flags that completion was detected, ending polling loop and skipping delay.
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-bool check_for_completion(const fapi2::buffer<uint64_t>& i_mail);
+fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const fapi2::buffer<uint64_t>& i_mail,
+        bool& o_loop_end);
 
 ///
 /// @brief Configures the DRAM training message block
@@ -254,6 +259,27 @@ enum mailbox_consts
     STREAMING_MSG = 0x08,
     SMBUS_MSG = 0x50,
     SMBUS_SYNC = 0x51,
+
+    // Stage completion Major messaging
+    END_OF_INITILIAZATION = 0x00,
+    END_OF_FINE_WRITE_LEVELING = 0x01,
+    END_OF_READ_ENABLE_TRAINING = 0x02,
+    END_OF_RD_DLY_CNTR_OPT = 0x03,
+    END_OF_WR_DLY_CNTR_OPT = 0x04,
+    END_OF_2D_RD_DLY_V_CNTR_OPT = 0x05,
+    END_OF_2D_WR_DLY_V_CNTR_OPT = 0x06,
+    END_OF_MAX_RD_LAT_TRAINING = 0x09,
+    END_OF_RD_DQ_DSKEW_TRAINING = 0x0A,
+    TRAINING_STAGE_RESERVED = 0x0B,
+    END_OF_CS_CA_TRAINING = 0x0D,
+    END_OF_RCD_QCS_QCA_TRAINING = 0x1D,
+    END_OF_LRDIMM_MREP_TRAINING = 0x20,
+    END_OF_LRDIMM_DWL_TRAINING = 0x21,
+    END_OF_LRDIMM_MRD_TRAINING = 0x22,
+    END_OF_LRDIMM_MWD_TRAINING = 0x23,
+    GEN_WRT_NOISE_SYN = 0xA0,
+    END_OF_MPR_RD_DLY_CNTR_OPT = 0xFD,
+    END_OF_WR_LVL_COARSE_DLY = 0xFE,
 
     // Mode for reading major message vs streaming msg/SMBus msg
     MAJOR_MSG_MODE = 16,

@@ -231,28 +231,25 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
                                        i_training_poll_count);
     fapi2::buffer<uint64_t> l_mail;
     bool l_poll_return ;
+
     fapi2::ATTR_PHY_GET_MAIL_TIMEOUT_Type l_mailbox_poll_count;
     FAPI_TRY(mss::attr::get_phy_get_mail_timeout(i_target , l_mailbox_poll_count));
     l_poll_return = mss::poll(i_target, l_poll_params, [&i_target, &l_mailbox_poll_count, &l_mail]()->bool
     {
         uint8_t l_mode = MAJOR_MSG_MODE; // 16 bit mode to read major message.
+        bool l_loop_end = false;
         // check the message content.
         FAPI_TRY(mss::ody::phy::get_mail(i_target, l_mode, l_mailbox_poll_count, l_mail));
 
-        if (STREAMING_MSG == l_mail)
+        // Process and decode 'major' messages, and handle SMBus and streaming message protocol if necessary
+        FAPI_TRY(check_for_completion_and_decode(i_target, l_mail, l_loop_end));
+
+        if (l_loop_end)
         {
-            // Decodes and prints streaming messages
-            FAPI_TRY(process_streaming_message(i_target));
-        }
-        else if (SMBUS_MSG == l_mail)
-        {
-            // Processes and handles the SMBus messages including sending out the RCW over i2c
-            FAPI_TRY(process_smbus_message(i_target));
+            return(l_loop_end);
         }
         FAPI_TRY(fapi2::delay(mss::DELAY_1MS, 200));
-        FAPI_INF(TARGTIDFORMAT " got a msg that is neither Stream or SMbus: 0x%016x", TARGTID, l_mail);
-        // return true if mail content is either successful completion or failed completion.
-        return check_for_completion(l_mail);
+
     fapi_try_exit:
         FAPI_ERR("mss::poll() hit an error in mss::getScom");
         return false;
@@ -272,13 +269,124 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Checks the completion condition for training
+/// @brief Checks the completion condition for training and decodes respective message
+/// @param[in] i_target the memory port on which to operate
 /// @param[in] i_mail mail content to check for completion
-/// @return True if mail content is same as one of the completion values , false otherwise
+/// @param[out] o_loop_end flags that completion was detected, ending polling loop and skipping delay.
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-bool check_for_completion(const fapi2::buffer<uint64_t>& i_mail)
+fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const fapi2::buffer<uint64_t>& i_mail, bool& o_loop_end)
 {
-    return ((SUCCESSFUL_COMPLETION == i_mail) || (FAILED_COMPLETION == i_mail));
+    o_loop_end = false;
+
+    switch(i_mail)
+    {
+        case SUCCESSFUL_COMPLETION:
+            o_loop_end = true;
+            FAPI_INF(TARGTIDFORMAT" Successful completion, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case FAILED_COMPLETION:
+            o_loop_end = true;
+            FAPI_INF(TARGTIDFORMAT" Failed completion, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_INITILIAZATION:
+            FAPI_INF(TARGTIDFORMAT" End of initiliazation, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_FINE_WRITE_LEVELING:
+            FAPI_INF(TARGTIDFORMAT" End of fine write training, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_READ_ENABLE_TRAINING:
+            FAPI_INF(TARGTIDFORMAT" End of read enable training, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_RD_DLY_CNTR_OPT:
+            FAPI_INF(TARGTIDFORMAT" End of read delay center optimization, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_WR_DLY_CNTR_OPT:
+            FAPI_INF(TARGTIDFORMAT" End of write delay center optimization, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_2D_RD_DLY_V_CNTR_OPT:
+            FAPI_INF(TARGTIDFORMAT" End of 2D read delay /voltage center optimization, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_2D_WR_DLY_V_CNTR_OPT:
+            FAPI_INF(TARGTIDFORMAT" End of 2D write delay /voltage center optimization, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_MAX_RD_LAT_TRAINING:
+            FAPI_INF(TARGTIDFORMAT" End of max read latency training, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_RD_DQ_DSKEW_TRAINING:
+            FAPI_INF(TARGTIDFORMAT" End of read DQ deskew training, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case TRAINING_STAGE_RESERVED:
+            FAPI_INF(TARGTIDFORMAT" Reserved, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_CS_CA_TRAINING:
+            FAPI_INF(TARGTIDFORMAT" End of CS/CA training, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_RCD_QCS_QCA_TRAINING:
+            FAPI_INF(TARGTIDFORMAT" End of RCD QCS/QCA training, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_LRDIMM_MREP_TRAINING:
+            FAPI_INF(TARGTIDFORMAT" End of LRDIMM MREP training, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_LRDIMM_DWL_TRAINING:
+            FAPI_INF(TARGTIDFORMAT" End of LRDIMM DWL training, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_LRDIMM_MRD_TRAINING:
+            FAPI_INF(TARGTIDFORMAT" End of LRDIMM MRD training, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_LRDIMM_MWD_TRAINING:
+            FAPI_INF(TARGTIDFORMAT" End of LRDIMM MWD training, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case GEN_WRT_NOISE_SYN:
+            FAPI_INF(TARGTIDFORMAT" Generate write noise synchronization Stage, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_MPR_RD_DLY_CNTR_OPT:
+            FAPI_INF(TARGTIDFORMAT" End of MPR read delay center optimization Stage, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case END_OF_WR_LVL_COARSE_DLY:
+            FAPI_INF(TARGTIDFORMAT" End of write level coarse delay Stage, code: 0x%016x", TARGTID, i_mail);
+            break;
+
+        case STREAMING_MSG:
+            // Decodes and prints streaming messages
+            FAPI_TRY(process_streaming_message(i_target));
+            break;
+
+        case SMBUS_MSG:
+            // Processes and handles the SMBus messages including sending out the RCW over i2c
+            FAPI_TRY(process_smbus_message(i_target));
+            break;
+
+        default:
+            FAPI_INF(TARGTIDFORMAT" Unknown major message: 0x%016x", TARGTID, i_mail);
+            break;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
