@@ -211,6 +211,18 @@ for ( each chip in the domain )
 }
 ```
 
+### Important note regarding integrated spare clock configurations
+
+Unlike Denali, which has redundant clock cards, Everest has two clocks soldered
+on the backplane. Our service strategy is to only replace the backplane when
+both clocks are bad or if a clock is the root cause of a system checkstop
+attention.
+
+Note that even though you would expect the system to checkstop when both clocks
+go bad, there is a window early in the IPL, before the SMP buses are trained,
+where the PLLs can generate a psuedo clock from its VCO. In which case, Hostboot
+PRD will have to explicitly check if both clocks are bad.
+
 ## RCS Transient Error Recovery
 
 Some failover events could be caused by transient soft errors. When PRD detects

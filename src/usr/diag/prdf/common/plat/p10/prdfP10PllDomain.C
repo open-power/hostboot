@@ -132,14 +132,20 @@ bool PllDomain::Query(ATTENTION_TYPE i_attnType)
 // ServiceDataCollector::setPredictive() still needs to be called before calling
 // this helper function. This ensures that the AT_THRESHOLD flag is set, which
 // mask the attenions at the end of analysis to prevent flooding of attentions.
-void __clearServiceCallForIntegratedSpare(STEP_CODE_DATA_STRUCT& io_sc)
+void __clearServiceCallForIntegratedSpare(STEP_CODE_DATA_STRUCT& io_sc,
+                                          bool i_bothClocksAtFault)
 {
     #ifndef CONFIG_FSP_BUILD // eBMC systems only
 
-    // Clear the service call flag if manufacturing thresholds are NOT enabled
-    // and if the system is configured with integrated spares.
+    // Clear the service call flag if all of the following apply:
+    //  - Manufacturing thresholds are NOT enabled.
+    //  - The system is configured with integrated spare clocks.
+    //  - None of the clocks have previously been deconfigured.
+    //  - Only one of the two clocks are currently reporting attentions.
     if (!mfgMode() &&
-        (1 == getSystemTarget()->getAttr<ATTR_SYS_CLOCK_INTEGRATED_SPARES>()))
+        (1 == getSystemTarget()->getAttr<ATTR_SYS_CLOCK_INTEGRATED_SPARES>()) &&
+        (0 == getSystemTarget()->getAttr<ATTR_SYS_CLOCK_DECONFIG_STATE>()) &&
+        !i_bothClocksAtFault)
     {
         PRDF_INF("Service actions disabled in integrated spare mode");
         io_sc.service_data->clearServiceCall();
@@ -180,6 +186,12 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // Will need to set the dump content if there are any active attentions.
     // This only needs to be done once.
     bool dumpContentSet = false;
+    #endif
+
+    #ifdef __HOSTBOOT_MODULE
+    // Keep track of which clocks are reporting errors.
+    bool errorOnClock0 = false;
+    bool errorOnClock1 = false;
     #endif
 
     // Keep track of the chips with errors so that we can add more FFDC later.
@@ -278,7 +290,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             {
                 // Make a predictive callout.
                 io_sc.service_data->setPredictive();
-                __clearServiceCallForIntegratedSpare(io_sc);
+                errorOnClock0 = true;
 
                 // Ensure these attentions are masked later.
                 maskErrTypes[chip].set(PllErrTypes::RCS_OSC_ERROR_0);
@@ -332,7 +344,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             {
                 // Make a predictive callout.
                 io_sc.service_data->setPredictive();
-                __clearServiceCallForIntegratedSpare(io_sc);
+                errorOnClock1 = true;
 
                 // Ensure these attentions are masked later.
                 maskErrTypes[chip].set(PllErrTypes::RCS_OSC_ERROR_1);
@@ -458,7 +470,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             {
                 // Make a predictive callout.
                 io_sc.service_data->setPredictive();
-                __clearServiceCallForIntegratedSpare(io_sc);
+                errorOnClock0 = true;
 
                 // Ensure these attentions are masked later.
                 maskErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_0);
@@ -495,7 +507,7 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             {
                 // Make a predictive callout.
                 io_sc.service_data->setPredictive();
-                __clearServiceCallForIntegratedSpare(io_sc);
+                errorOnClock1 = true;
 
                 // Ensure these attentions are masked later.
                 maskErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_1);
@@ -505,6 +517,11 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     }
 
     #ifdef __HOSTBOOT_MODULE // only allowed to modify hardware from the host
+
+    // If there was a predictive callout on a system configured with integrated
+    // spare clock, we may need to clear the service call flag if only one
+    // clock is bad.
+    __clearServiceCallForIntegratedSpare(io_sc, errorOnClock0 && errorOnClock1);
 
     // The following plugins to mask/clear attentions follow all the rules for
     // masking/clearing attentions on a single chip. However, if there were ANY
