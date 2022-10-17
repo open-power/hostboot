@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,7 +69,7 @@ public:
             {masterProc, 0, 0x584950205345504d, 8, 0},
 
             // Read from offset 16
-            {masterProc, 0, 0x44FC00000000ffff, 8, 16},
+            {masterProc, 0, 0xb87f000000000000, 8, 16},
 
             // Read from offset 4
             {masterProc, 0, 0x5345504de7000000, 8, 4},

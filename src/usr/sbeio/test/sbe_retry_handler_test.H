@@ -648,9 +648,10 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             l_sbeTestBootRestartCount = l_SBEobj.iv_boot_restart_count;
 
             // Most important values here are the SwitchSidesCount, CurrentSideCount and RestartCount
-            // The flow would have switched sides on both the seeprom and mseeprom and finally given up
-            if ((l_sbeTestSwitchSidesCount != 1) || (l_sbeTestSwitchSidesCountMseeprom != 1) ||
-                (l_sbeTestCurrentSideCount != 2) || (l_sbeTestCurrentSideCountMseeprom != 2) ||
+            // The flow would have switched sides on just the boot seeprom and
+            // not the mseeprom and finally given up
+            if ((l_sbeTestSwitchSidesCount != 1) || (l_sbeTestSwitchSidesCountMseeprom != 0) ||
+                (l_sbeTestCurrentSideCount != 1) || (l_sbeTestCurrentSideCountMseeprom != 3) ||
                 (l_sbeTestBootRestartCount != 2))
             {
                 TS_FAIL("testSBEFlowRESTART_SBE_FAILURE failed to properly handle SBE Failures");
