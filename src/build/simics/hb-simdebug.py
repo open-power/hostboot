@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -231,12 +231,10 @@ def hb_get_objects_by_class(classname):
 
     # Sort the dictionary by key (object name)
     obj_names=obj_dict.keys()
-    obj_names.sort()
-    for obj_name in obj_names:
+    for obj_name in sorted(obj_dict.keys()):
         obj_list.append(obj_dict[obj_name])
-        #print "object name=%s" % obj_name
+        #print ("object name=%s" % obj_name)
     return obj_list
-
 def hb_getallregs(regname):
     proc_list=[]
     proc_list=hb_get_objects_by_class("ppc_power10_mambo_core")
