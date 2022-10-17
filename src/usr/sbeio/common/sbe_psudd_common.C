@@ -27,6 +27,7 @@
  * @brief Shared code between IPL and Runtime SBE PSU Drivers
  */
 
+#include <limits.h>
 #include <trace/interface.H>
 #include <devicefw/driverif.H>
 #include <errl/errlentry.H>
@@ -966,6 +967,12 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                 ErrlUserDetailsTarget(i_target).addToLog(l_errl);
                 l_regsFFDC.addToLog(l_errl);
                 l_errl->collectTrace(SBEIO_COMP_NAME);
+
+#ifndef __HOSTBOOT_RUNTIME
+                // In case timeout was due to losing an interrupt during IPL
+                // only, save off the interrupt component trace
+                l_errl->collectTrace(INTR_COMP_NAME,2*KILOBYTE);
+#endif
 
                 // Keep a copy of the plid so we can pass it to the retry_handler
                 // so the error logs it creates will be linked
