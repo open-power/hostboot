@@ -53,10 +53,11 @@ fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targ
 {
     // 1. Drive PwrOkIn to 0. Note: Reset, DfiClk, and APBCLK can be X
     // 2. Start DfiClk and APBCLK
-    // Coming into this procedure the PHY is assumed to be in this state:
-    // DfiClk running
-    // APBCLK running
-    // PwrOKIn is 0, Reset is 0 and PRESETn APB is 0
+    // 3. Drive Reset to 1 and PRESETn_APB to 0.
+    // Note: The combination of PwrOkIn=0 and Reset=1 signals a cold reset to the PHY.
+    // 4. Wait a minimum of 16 clock cycles.
+    // 5. Drive PwrOkIn to 1. Once the PwrOkIn is asserted (and Reset is still asserted),
+    // Steps 1-5 are taken care of in pervasive ody_chiplet_startclocks() procedure.
 
     // Local buffer
     fapi2::buffer<uint64_t> l_buffer;
@@ -70,7 +71,7 @@ fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targ
 
     // Bits in the register for both port0 and port1
     constexpr uint32_t CPLT_CONF1_DDR_RESET[NUM_OF_PORTS] = {2, 3};
-    constexpr uint32_t CPLT_CONF1_DDR_PWROKIN[NUM_OF_PORTS] = {6, 7};
+    constexpr uint32_t CPLT_CONF1_DFICLK_RESET[NUM_OF_PORTS] = {10, 11};
     constexpr uint32_t CPLT_CONF1_DDR_APBRESETn[NUM_OF_PORTS] = {14, 15};
 
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
@@ -80,29 +81,16 @@ fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targ
     // to decide whether to use port0 or port1
     const uint8_t l_rel_pos =  mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
-    // 3. Drive Reset to 1 and PRESETn_APB to 0.
-    // Note: The combination of PwrOkIn=0 and Reset=1 signals a cold reset to the PHY.
-
-    // To set Reset=1:
-    // Write a '1' to CPLT_CONF1_REG_SET to set the bit
-    FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DDR_RESET[l_rel_pos]));
-    FAPI_TRY(fapi2::putScom(l_ocmb, CPLT_CONF1_REG_SET, l_buffer));
-    l_buffer.flush<0>();
-
-    // 4. Wait a minimum of 16 clock cycles.
-    FAPI_TRY(fapi2::delay(192, 192));
-
-    // 5. Drive PwrOkIn to 1. Once the PwrOkIn is asserted (and Reset is still asserted),
-    //    DfiClk synchronously switches to any legal input frequency.
-    FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DDR_PWROKIN[l_rel_pos]));
-    FAPI_TRY(fapi2::putScom(l_ocmb, CPLT_CONF1_REG_SET, l_buffer));
-    l_buffer.flush<0>();
 
     // 6. Wait a minimum of 128 clock cycles which is the reset period for phy
-    FAPI_TRY(fapi2::delay(1536, 1536));
+    // 1000 cyles are being added in pervasive procedure
+    FAPI_TRY(fapi2::delay(600, 600));
 
-    // 7. Drive Reset to 0. Note: All DFI and APB inputs must be driven at valid reset states before the deassertion of Reset.
+    // 7. Drive Reset to 0 and DfiClkReset to 0 because the PUB databook says
+    // Reset and DfiClkReset need to be asserted/deasserted together
+    // Note: All DFI and APB inputs must be driven at valid reset states before the deassertion of Reset.
     FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DDR_RESET[l_rel_pos]));
+    FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DFICLK_RESET[l_rel_pos]));
     FAPI_TRY(fapi2::putScom(l_ocmb, CPLT_CONF1_REG_CLEAR, l_buffer));
     l_buffer.flush<0>();
 
