@@ -487,6 +487,33 @@
         <mssAccessorName>therm_sensor_0_secondary_location</mssAccessorName>
     </attribute>
 
+     <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_3_LOCATION</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Thermal Sensor 3 Location
+        </description>
+        <valueType>uint8</valueType>
+        <enum>LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3</enum>
+        <writeable/>
+        <initToZero/>
+        <mssAccessorName>therm_sensor_3_location</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_2_LOCATION</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Thermal Sensor 2 Location
+        </description>
+        <valueType>uint8</valueType>
+        <enum>LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3</enum>
+        <writeable/>
+        <initToZero/>
+        <mssAccessorName>therm_sensor_2_location</mssAccessorName>
+    </attribute>
+
+
     <attribute>
         <id>ATTR_MEM_EFF_THERM_SENSOR_3_LOCATION</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -537,6 +564,148 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_0_location</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_2_AVAIL</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The availability of thermal sensor 2
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero/>
+        <enum>
+          NOT_AVAILABLE = 0,
+          AVAILABLE = 1
+        </enum>
+        <writeable/>
+        <default>NOT_AVAILABLE</default>
+        <mssAccessorName>therm_sensor_2_availability</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_2_TYPE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sensor type of thermal sensor 2
+          JC42 = JEDEC_DDR4_JC42_4_COMPLIANT
+          EMC1412 = MCHP_EMC1412_OR_COMPATIBLE
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero/>
+        <enum>
+          NO_SENSOR = 0,
+          JC42 = 1,
+          EMC1412 = 2
+        </enum>
+        <writeable/>
+        <default>NO_SENSOR</default>
+        <mssAccessorName>therm_sensor_2_type</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_2_USAGE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The chosen usage monitor of thermal sensor 2.
+          Note that the SPD encoding of DRAM_AND_PMIC usage (0x03) is not supported
+          and will be changed to PMIC in this attribute.
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero/>
+        <enum>
+          DISABLED = 0,
+          DRAM = 1,
+          PMIC = 2,
+          MEM_BUF_EXT = 4,
+          DRAM_AND_MEM_BUF_EXT = 5
+        </enum>
+        <writeable/>
+        <default>DISABLED</default>
+        <mssAccessorName>therm_sensor_2_usage</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_2_I2C_ADDR</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Thermal Sensor 2 I2C Address
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <initToZero/>
+        <mssAccessorName>therm_sensor_2_i2c_addr</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_3_AVAIL</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The availability of thermal sensor 3
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero/>
+        <enum>
+          NOT_AVAILABLE = 0,
+          AVAILABLE = 1
+        </enum>
+        <writeable/>
+        <default>NOT_AVAILABLE</default>
+        <mssAccessorName>therm_sensor_3_availability</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_3_TYPE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sensor type of thermal sensor 3
+          JC42 = JEDEC_DDR4_JC42_4_COMPLIANT
+          EMC1412 = MCHP_EMC1412_OR_COMPATIBLE
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero/>
+        <enum>
+          NO_SENSOR = 0,
+          JC42 = 1,
+          EMC1412 = 2
+        </enum>
+        <writeable/>
+        <default>NO_SENSOR</default>
+        <mssAccessorName>therm_sensor_3_type</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_3_USAGE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The chosen usage monitor of thermal sensor 3.
+          Note that the SPD encoding of DRAM_AND_PMIC usage (0x03) is not supported
+          and will be changed to PMIC in this attribute.
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero/>
+        <enum>
+          DISABLED = 0,
+          DRAM = 1,
+          PMIC = 2,
+          MEM_BUF_EXT = 4,
+          DRAM_AND_MEM_BUF_EXT = 5
+        </enum>
+        <writeable/>
+        <default>DISABLED</default>
+        <mssAccessorName>therm_sensor_3_usage</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_THERM_SENSOR_3_I2C_ADDR</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Thermal Sensor 3 I2C Address
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <initToZero/>
+        <mssAccessorName>therm_sensor_3_i2c_addr</mssAccessorName>
     </attribute>
 
 </attributes>
