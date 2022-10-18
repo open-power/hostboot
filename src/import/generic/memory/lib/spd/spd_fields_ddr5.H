@@ -281,12 +281,14 @@ class fields<DDR5, DDIMM_MODULE>
             // Byte 195: Reference Raw Card used
             REF_RAW_CARD_BYTE = 195,
             DESIGN_REV_START = 0,
-            DESIGN_REV_LEN = 8,
+            DESIGN_REV_LEN = 3,
+            DESIGN_REF_CARD_START = 3,
+            DESIGN_REF_CARD_LEN = 5,
 
             // Byte 196: DIMM attributes
             DIMM_ATTR_BYTE = 196,
-            NUM_ROWS_START = 4,
-            NUM_ROWS_LEN = 2,
+            DIMM_ATTR_REGISTER_TYPE_START = 0,
+            DIMM_ATTR_REGISTER_TYPE_LEN = 4,
             NUM_BUFFERS_START = 6,
             NUM_BUFFERS_LEN = 2,
 
@@ -324,12 +326,12 @@ class fields<DDR5, DDIMM_MODULE>
 
             // Byte 202: Memory Channel Bus Width
             BUS_WIDTH_BYTE = 202,
-            NUM_DIMM_CHANNELS_START = 0,
-            NUM_DIMM_CHANNELS_LEN = 2,
-            BUS_WIDTH_EXT_START = 2,
-            BUS_WIDTH_EXT_LEN = 3,
-            CHANNEL_DATA_WIDTH_START = 5,
-            CHANNEL_DATA_WIDTH_LEN = 3,
+            ENABLED_PHY_CHANNELS_START = 0,
+            ENABLED_PHY_CHANNELS_LEN = 2,
+            BUS_WIDTH_CHANNEL_A_START = 2,
+            BUS_WIDTH_CHANNEL_A_LEN = 3,
+            BUS_WIDTH_CHANNEL_B_START = 5,
+            BUS_WIDTH_CHANNEL_B_LEN = 3,
 
             // Byte 203: Module Thermal Sensors
             THERMAL_SENSORS_BYTE = 203,
@@ -346,10 +348,12 @@ class fields<DDR5, DDIMM_MODULE>
             SPEED_SUPPORTED_LSB_START = 1,
             SPEED_SUPPORTED_LSB_LEN = 7,
 
+            // TODO: Zen: MST-1843: New bytes need to be addedd to eff cnfg SPD
+
             // Byte 207: Address Mirroring
             ADDRESS_MIRROR_BYTE = 207,
-            ADDRESS_MIRROR_START = 4,
-            ADDRESS_MIRROR_LEN = 4,
+            ADDRESS_MIRROR_START = 0,
+            ADDRESS_MIRROR_LEN = 8,
 
             // Byte 208: Byte enables LSB
             BYTE_ENABLES_LSB_BYTE = 208,
@@ -376,15 +380,17 @@ class fields<DDR5, DDIMM_MODULE>
             NIBBLE_ENABLES_LSB1_START = 4,
             NIBBLE_ENABLES_LSB1_LEN = 4,
 
-            // Byte 214: Four Rank Mode - DDP Compatibility - TSV 8 High Support - MRAM Support
+            // Byte 213: Nibble enables MSB1
+            // Reserved
+
+            // Byte 214: REDUNDANT CHIP SELECT MODE
+            // TODO: More updates on this byte by another commit
             DDIMM_COMPAT_BYTE = 214,
-            DDIMM_COMPAT_START = 3,
-            DDIMM_COMPAT_LEN = 5,
+            DDIMM_REDUNDANT_CS_EN_START = 7,
+            DDIMM_REDUNDANT_CS_EN_LEN = 1,
 
             // Byte 215: Number of P-States
-            NUM_P_STATES_BYTE = 215,
-            NUM_P_STATES_START = 4,
-            NUM_P_STATES_LEN = 4,
+            // Reserved
 
             // Byte 216: Spare Device Mapping LSB0
             SPARE_DEVICE_LSB0_BYTE = 216,
@@ -401,6 +407,9 @@ class fields<DDR5, DDIMM_MODULE>
             SPARE_DEVICE_LSB1_START = 4,
             SPARE_DEVICE_LSB1_LEN = 4,
 
+            // Byte 219: Spare Device Mapping MSB1
+            // Reserved
+
             // Byte 220: Host Interface Speed to DDR Interface Speed Ratio
             HI_DDR_SPEED_RATIO_BYTE = 220,
             HI_DDR_SPEED_RATIO_START = 4,
@@ -411,7 +420,9 @@ class fields<DDR5, DDIMM_MODULE>
             SPD_CONTENT_REVISION_START = 0,
             SPD_CONTENT_REVISION_LEN = 8,
 
-            // Byte 224: Voltage VIN_MTG Edge connector
+            // TODO: Zen: MST-1843: New bytes need to be addedd to eff cnfg SPD
+
+            // Byte 224: Voltage VIN_MTG Edge Connector
             VIN_MGMT_BYTE = 224,
             VIN_MGMT_NOMINAL_START = 0,
             VIN_MGMT_NOMINAL_LEN = 4,
@@ -420,7 +431,7 @@ class fields<DDR5, DDIMM_MODULE>
             VIN_MGMT_ENDURANT_START = 6,
             VIN_MGMT_ENDURANT_LEN = 2,
 
-            // Byte 225: Voltage VIN_BULK Edge Connecto
+            // Byte 225: Voltage VIN_BULK Edge Connector
             VIN_BULK_BYTE = 225,
             VIN_BULK_NOMINAL_START = 0,
             VIN_BULK_NOMINAL_LEN = 4,
@@ -431,271 +442,565 @@ class fields<DDR5, DDIMM_MODULE>
 
             // Byte 226: PMIC0 Sequence
             PMIC0_SEQUENCE_BYTE = 226,
+            PMIC0_SUPPLY_VOLTAGE_START = 0,
+            PMIC0_SUPPLY_VOLTAGE_LEN = 5,
             PMIC0_SEQUENCE_START = 5,
             PMIC0_SEQUENCE_LEN = 3,
 
-            // Byte 227: PMIC0 Manfacture ID code 1st byte
-            PMIC0_MFG_CODE1_BYTE = 227,
-            PMIC0_CONT_CODE_START = 0,
-            PMIC0_CONT_CODE_LEN = 8,
-
-            // Byte 228: PMIC0 Manfacture ID code 2nd byte
-            PMIC0_MFG_CODE2_BYTE = 228,
-            PMIC0_LAST_NON_ZERO_START = 0,
-            PMIC0_LAST_NON_ZERO_LEN = 8,
-
-            // Byte 229: PMIC0 Revision Number
-            PMIC0_REV_BYTE = 229,
-            PMIC0_REV_START = 0,
-            PMIC0_REV_LEN = 8,
-
-            // Byte 230: PMIC1 Sequence
-            PMIC1_SEQUENCE_BYTE = 230,
+            // Byte 227: PMIC1 Sequence
+            PMIC1_SEQUENCE_BYTE = 227,
+            PMIC1_SUPPLY_VOLTAGE_START = 0,
+            PMIC1_SUPPLY_VOLTAGE_LEN = 5,
             PMIC1_SEQUENCE_START = 5,
             PMIC1_SEQUENCE_LEN = 3,
 
-            // Byte 231: PMIC1 Manfacture ID code 1st byte
-            PMIC1_MFG_CODE1_BYTE = 231,
+            // Byte 228: PMIC2 Sequence
+            PMIC2_SEQUENCE_BYTE = 228,
+            PMIC2_SUPPLY_VOLTAGE_START = 0,
+            PMIC2_SUPPLY_VOLTAGE_LEN = 5,
+            PMIC2_SEQUENCE_START = 5,
+            PMIC2_SEQUENCE_LEN = 3,
+
+            // Byte 229: PMIC3 Sequence
+            PMIC3_SEQUENCE_BYTE = 229,
+            PMIC3_SUPPLY_VOLTAGE_START = 0,
+            PMIC3_SUPPLY_VOLTAGE_LEN = 5,
+            PMIC3_SEQUENCE_START = 5,
+            PMIC3_SEQUENCE_LEN = 3,
+
+            // Byte 230: PMIC0 Manfacture ID code 1st byte
+            PMIC0_MFG_CODE1_BYTE = 230,
+            PMIC0_CONT_CODE_START = 0,
+            PMIC0_CONT_CODE_LEN = 8,
+
+            // Byte 231: PMIC0 Manfacture ID code 2nd byte
+            PMIC0_MFG_CODE2_BYTE = 231,
+            PMIC0_LAST_NON_ZERO_START = 0,
+            PMIC0_LAST_NON_ZERO_LEN = 8,
+
+            // Byte 232: PMIC0 Revision Number
+            PMIC0_REV_BYTE = 232,
+            PMIC0_REV_START = 0,
+            PMIC0_REV_LEN = 8,
+
+            // Byte 233: PMIC1 Manfacture ID code 1st byte
+            PMIC1_MFG_CODE1_BYTE = 233,
             PMIC1_CONT_CODE_START = 0,
             PMIC1_CONT_CODE_LEN = 8,
 
-            // Byte 232: PMIC1 Manfacture ID code 2nd byte
-            PMIC1_MFG_CODE2_BYTE = 232,
+            // Byte 234: PMIC1 Manfacture ID code 2nd byte
+            PMIC1_MFG_CODE2_BYTE = 234,
             PMIC1_LAST_NON_ZERO_START = 0,
             PMIC1_LAST_NON_ZERO_LEN = 8,
 
-            // Byte 233: PMIC1 Revision Number
-            PMIC1_REV_BYTE = 233,
+            // Byte 235: PMIC1 Revision Number
+            PMIC1_REV_BYTE = 235,
             PMIC1_REV_START = 0,
             PMIC1_REV_LEN = 8,
 
-            // Byte 234: PMIC0 SWA Voltage Setting
-            PMIC0_SWA_VOLT_SET_BYTE = 234,
+            // Byte 236: PMIC2 Manfacture ID code 1st byte
+            PMIC2_MFG_CODE1_BYTE = 236,
+            PMIC2_CONT_CODE_START = 0,
+            PMIC2_CONT_CODE_LEN = 8,
+
+            // Byte 237: PMIC2 Manfacture ID code 2nd byte
+            PMIC2_MFG_CODE2_BYTE = 237,
+            PMIC2_LAST_NON_ZERO_START = 0,
+            PMIC2_LAST_NON_ZERO_LEN = 8,
+
+            // Byte 238: PMIC2 Revision Number
+            PMIC2_REV_BYTE = 238,
+            PMIC2_REV_START = 0,
+            PMIC2_REV_LEN = 8,
+
+            // Byte 239: PMIC3 Manfacture ID code 1st byte
+            PMIC3_MFG_CODE1_BYTE = 239,
+            PMIC3_CONT_CODE_START = 0,
+            PMIC3_CONT_CODE_LEN = 8,
+
+            // Byte 240: PMIC3 Manfacture ID code 2nd byte
+            PMIC3_MFG_CODE2_BYTE = 240,
+            PMIC3_LAST_NON_ZERO_START = 0,
+            PMIC3_LAST_NON_ZERO_LEN = 8,
+
+            // Byte 241: PMIC3 Revision Number
+            PMIC3_REV_BYTE = 241,
+            PMIC3_REV_START = 0,
+            PMIC3_REV_LEN = 8,
+
+            // Byte 242: PMIC0 SWA Voltage Setting
+            PMIC0_SWA_VOLT_SET_BYTE = 242,
             PMIC0_SWA_VOLT_SET_START = 0,
             PMIC0_SWA_VOLT_SET_LEN = 7,
             PMIC0_SWA_RANGE_SELECT_START = 7,
             PMIC0_SWA_RANGE_SELECT_LEN = 1,
 
-            // Byte 235: PMIC0 SWA Voltage Offset
-            PMIC0_SWA_VOLT_OFF_BYTE = 235,
+            // Byte 243: PMIC0 SWA Voltage Offset
+            PMIC0_SWA_VOLT_OFF_BYTE = 243,
             PMIC0_SWA_VOLT_OFF_START = 0,
             PMIC0_SWA_VOLT_OFF_LEN = 7,
             PMIC0_SWA_OFF_DIRECTION_START = 7,
             PMIC0_SWA_OFF_DIRECTION_LEN = 1,
 
-            // Byte 236: PMIC0 SWA Delay Sequence Order
-            PMIC0_SWA_DELAY_BYTE = 236,
+            // Byte 244: PMIC0 SWA Delay Sequence Order
+            PMIC0_SWA_DELAY_BYTE = 244,
             PMIC0_SWA_DELAY_START = 0,
             PMIC0_SWA_DELAY_LEN = 4,
             PMIC0_SWA_ORDER_START = 4,
             PMIC0_SWA_ORDER_LEN = 4,
 
-            // Byte 237: PMIC0 SWB Voltage Setting
-            PMIC0_SWB_VOLT_SET_BYTE = 237,
+            // Byte 245: PMIC0 SWB Voltage Setting
+            PMIC0_SWB_VOLT_SET_BYTE = 245,
             PMIC0_SWB_VOLT_SET_START = 0,
             PMIC0_SWB_VOLT_SET_LEN = 7,
             PMIC0_SWB_RANGE_SELECT_START = 7,
             PMIC0_SWB_RANGE_SELECT_LEN = 1,
 
-            // Byte 238: PMIC0 SWB Voltage Offset
-            PMIC0_SWB_VOLT_OFF_BYTE = 238,
+            // Byte 246: PMIC0 SWB Voltage Offset
+            PMIC0_SWB_VOLT_OFF_BYTE = 246,
             PMIC0_SWB_VOLT_OFF_START = 0,
             PMIC0_SWB_VOLT_OFF_LEN = 7,
             PMIC0_SWB_OFF_DIRECTION_START = 7,
             PMIC0_SWB_OFF_DIRECTION_LEN = 1,
 
-            // Byte 239: PMIC0 SWB Delay Sequence Order
-            PMIC0_SWB_DELAY_BYTE = 239,
+            // Byte 247: PMIC0 SWB Delay Sequence Order
+            PMIC0_SWB_DELAY_BYTE = 247,
             PMIC0_SWB_DELAY_START = 0,
             PMIC0_SWB_DELAY_LEN = 4,
             PMIC0_SWB_ORDER_START = 4,
             PMIC0_SWB_ORDER_LEN = 4,
 
-            // Byte 240: PMIC0 SWC Voltage Setting
-            PMIC0_SWC_VOLT_SET_BYTE = 240,
+            // Byte 248: PMIC0 SWC Voltage Setting
+            PMIC0_SWC_VOLT_SET_BYTE = 248,
             PMIC0_SWC_VOLT_SET_START = 0,
             PMIC0_SWC_VOLT_SET_LEN = 7,
             PMIC0_SWC_RANGE_SELECT_START = 7,
             PMIC0_SWC_RANGE_SELECT_LEN = 1,
 
-            // Byte 241: PMIC0 SWC Voltage Offset
-            PMIC0_SWC_VOLT_OFF_BYTE = 241,
+            // Byte 249: PMIC0 SWC Voltage Offset
+            PMIC0_SWC_VOLT_OFF_BYTE = 249,
             PMIC0_SWC_VOLT_OFF_START = 0,
             PMIC0_SWC_VOLT_OFF_LEN = 7,
             PMIC0_SWC_OFF_DIRECTION_START = 7,
             PMIC0_SWC_OFF_DIRECTION_LEN = 1,
 
-            // Byte 242: PMIC0 SWC Delay Sequence Order
-            PMIC0_SWC_DELAY_BYTE = 242,
+            // Byte 250: PMIC0 SWC Delay Sequence Order
+            PMIC0_SWC_DELAY_BYTE = 250,
             PMIC0_SWC_DELAY_START = 0,
             PMIC0_SWC_DELAY_LEN = 4,
             PMIC0_SWC_ORDER_START = 4,
             PMIC0_SWC_ORDER_LEN = 4,
 
-            // Byte 243: PMIC0 SWD Voltage Setting
-            PMIC0_SWD_VOLT_SET_BYTE = 243,
+            // Byte 251: PMIC0 SWD Voltage Setting
+            PMIC0_SWD_VOLT_SET_BYTE = 251,
             PMIC0_SWD_VOLT_SET_START = 0,
             PMIC0_SWD_VOLT_SET_LEN = 7,
             PMIC0_SWD_RANGE_SELECT_START = 7,
             PMIC0_SWD_RANGE_SELECT_LEN = 1,
 
-            // Byte 244: PMIC0 SWD Voltage Offset
-            PMIC0_SWD_VOLT_OFF_BYTE = 244,
+            // Byte 252: PMIC0 SWD Voltage Offset
+            PMIC0_SWD_VOLT_OFF_BYTE = 252,
             PMIC0_SWD_VOLT_OFF_START = 0,
             PMIC0_SWD_VOLT_OFF_LEN = 7,
             PMIC0_SWD_OFF_DIRECTION_START = 7,
             PMIC0_SWD_OFF_DIRECTION_LEN = 1,
 
-            // Byte 245: PMIC0 SWD Delay Sequence Order
-            PMIC0_SWD_DELAY_BYTE = 245,
+            // Byte 253: PMIC0 SWD Delay Sequence Order
+            PMIC0_SWD_DELAY_BYTE = 253,
             PMIC0_SWD_DELAY_START = 0,
             PMIC0_SWD_DELAY_LEN = 4,
             PMIC0_SWD_ORDER_START = 4,
             PMIC0_SWD_ORDER_LEN = 4,
 
-            // Byte 246: PMIC0 Phase Combination and redundancy
-            PMIC0_PHASE_COMBIN_BYTE = 246,
+            // Byte 254: PMIC0 Phase Combination and redundancy
+            PMIC0_PHASE_COMBIN_BYTE = 254,
             PMIC0_REDUNDANCY_START = 0,
             PMIC0_REDUNDANCY_LEN = 1,
             PMIC0_PHASE_COMBIN_START = 4,
             PMIC0_PHASE_COMBIN_LEN = 4,
 
-            // Byte 247: PMIC1 SWA Voltage Setting
-            PMIC1_SWA_VOLT_SET_BYTE = 247,
+            // Byte 255: PMIC1 SWA Voltage Setting
+            PMIC1_SWA_VOLT_SET_BYTE = 255,
             PMIC1_SWA_VOLT_SET_START = 0,
             PMIC1_SWA_VOLT_SET_LEN = 7,
             PMIC1_SWA_RANGE_SELECT_START = 7,
             PMIC1_SWA_RANGE_SELECT_LEN = 1,
 
-            // Byte 248: PMIC1 SWA Voltage Offset
-            PMIC1_SWA_VOLT_OFF_BYTE = 248,
+            // Byte 256: PMIC1 SWA Voltage Offset
+            PMIC1_SWA_VOLT_OFF_BYTE = 256,
             PMIC1_SWA_VOLT_OFF_START = 0,
             PMIC1_SWA_VOLT_OFF_LEN = 7,
             PMIC1_SWA_OFF_DIRECTION_START = 7,
             PMIC1_SWA_OFF_DIRECTION_LEN = 1,
 
-            // Byte 249: PMIC1 SWA Delay Sequence Order
-            PMIC1_SWA_DELAY_BYTE = 249,
+            // Byte 257: PMIC1 SWA Delay Sequence Order
+            PMIC1_SWA_DELAY_BYTE = 257,
             PMIC1_SWA_DELAY_START = 0,
             PMIC1_SWA_DELAY_LEN = 4,
             PMIC1_SWA_ORDER_START = 4,
             PMIC1_SWA_ORDER_LEN = 4,
 
-            // Byte 250: PMIC1 SWB Voltage Setting
-            PMIC1_SWB_VOLT_SET_BYTE = 250,
+            // Byte 258: PMIC1 SWB Voltage Setting
+            PMIC1_SWB_VOLT_SET_BYTE = 258,
             PMIC1_SWB_VOLT_SET_START = 0,
             PMIC1_SWB_VOLT_SET_LEN = 7,
             PMIC1_SWB_RANGE_SELECT_START = 7,
             PMIC1_SWB_RANGE_SELECT_LEN = 1,
 
-            // Byte 251: PMIC1 SWB Voltage Offset
-            PMIC1_SWB_VOLT_OFF_BYTE = 251,
+            // Byte 259: PMIC1 SWB Voltage Offset
+            PMIC1_SWB_VOLT_OFF_BYTE = 259,
             PMIC1_SWB_VOLT_OFF_START = 0,
             PMIC1_SWB_VOLT_OFF_LEN = 7,
             PMIC1_SWB_OFF_DIRECTION_START = 7,
             PMIC1_SWB_OFF_DIRECTION_LEN = 1,
 
-            // Byte 252: PMIC1 SWB Delay Sequence Order
-            PMIC1_SWB_DELAY_BYTE = 252,
+            // Byte 260: PMIC1 SWB Delay Sequence Order
+            PMIC1_SWB_DELAY_BYTE = 260,
             PMIC1_SWB_DELAY_START = 0,
             PMIC1_SWB_DELAY_LEN = 4,
             PMIC1_SWB_ORDER_START = 4,
             PMIC1_SWB_ORDER_LEN = 4,
 
-            // Byte 253: PMIC1 SWC Voltage Setting
-            PMIC1_SWC_VOLT_SET_BYTE = 253,
+            // Byte 261: PMIC1 SWC Voltage Setting
+            PMIC1_SWC_VOLT_SET_BYTE = 261,
             PMIC1_SWC_VOLT_SET_START = 0,
             PMIC1_SWC_VOLT_SET_LEN = 7,
             PMIC1_SWC_RANGE_SELECT_START = 7,
             PMIC1_SWC_RANGE_SELECT_LEN = 1,
 
-            // Byte 254: PMIC1 SWC Voltage Offset
-            PMIC1_SWC_VOLT_OFF_BYTE = 254,
+            // Byte 262: PMIC1 SWC Voltage Offset
+            PMIC1_SWC_VOLT_OFF_BYTE = 262,
             PMIC1_SWC_VOLT_OFF_START = 0,
             PMIC1_SWC_VOLT_OFF_LEN = 7,
             PMIC1_SWC_OFF_DIRECTION_START = 7,
             PMIC1_SWC_OFF_DIRECTION_LEN = 1,
 
-            // Byte 255: PMIC1 SWC Delay Sequence Order
-            PMIC1_SWC_DELAY_BYTE = 255,
+            // Byte 263: PMIC1 SWC Delay Sequence Order
+            PMIC1_SWC_DELAY_BYTE = 263,
             PMIC1_SWC_DELAY_START = 0,
             PMIC1_SWC_DELAY_LEN = 4,
             PMIC1_SWC_ORDER_START = 4,
             PMIC1_SWC_ORDER_LEN = 4,
 
-            // Byte 256: PMIC1 SWD Voltage Setting
-            PMIC1_SWD_VOLT_SET_BYTE = 256,
+            // Byte 264: PMIC1 SWD Voltage Setting
+            PMIC1_SWD_VOLT_SET_BYTE = 264,
             PMIC1_SWD_VOLT_SET_START = 0,
             PMIC1_SWD_VOLT_SET_LEN = 7,
             PMIC1_SWD_RANGE_SELECT_START = 7,
             PMIC1_SWD_RANGE_SELECT_LEN = 1,
 
-            // Byte 257: PMIC1 SWD Voltage Offset
-            PMIC1_SWD_VOLT_OFF_BYTE = 257,
+            // Byte 265: PMIC1 SWD Voltage Offset
+            PMIC1_SWD_VOLT_OFF_BYTE = 265,
             PMIC1_SWD_VOLT_OFF_START = 0,
             PMIC1_SWD_VOLT_OFF_LEN = 7,
             PMIC1_SWD_OFF_DIRECTION_START = 7,
             PMIC1_SWD_OFF_DIRECTION_LEN = 1,
 
-            // Byte 258: PMIC1 SWD Delay Sequence Order
-            PMIC1_SWD_DELAY_BYTE = 258,
+            // Byte 266: PMIC1 SWD Delay Sequence Order
+            PMIC1_SWD_DELAY_BYTE = 266,
             PMIC1_SWD_DELAY_START = 0,
             PMIC1_SWD_DELAY_LEN = 4,
             PMIC1_SWD_ORDER_START = 4,
             PMIC1_SWD_ORDER_LEN = 4,
 
-            // Byte 259: PMIC1 Phase Combination and Redundancy
-            PMIC1_PHASE_COMBIN_BYTE = 259,
+            // Byte 267: PMIC1 Phase Combination and Redundancy
+            PMIC1_PHASE_COMBIN_BYTE = 267,
             PMIC1_REDUNDANCY_START = 0,
             PMIC1_REDUNDANCY_LEN = 1,
             PMIC1_PHASE_COMBIN_START = 4,
             PMIC1_PHASE_COMBIN_LEN = 4,
 
-            // Byte 264
-            MODULE_RCD_BYTE = 264,
+            // Byte 268: PMIC2 SWA Voltage Setting
+            PMIC2_SWA_VOLT_SET_BYTE = 268,
+            PMIC2_SWA_VOLT_SET_START = 0,
+            PMIC2_SWA_VOLT_SET_LEN = 7,
+            PMIC2_SWA_RANGE_SELECT_START = 7,
+            PMIC2_SWA_RANGE_SELECT_LEN = 1,
+
+            // Byte 269: PMIC2 SWA Voltage Offset
+            PMIC2_SWA_VOLT_OFF_BYTE = 269,
+            PMIC2_SWA_VOLT_OFF_START = 0,
+            PMIC2_SWA_VOLT_OFF_LEN = 7,
+            PMIC2_SWA_OFF_DIRECTION_START = 7,
+            PMIC2_SWA_OFF_DIRECTION_LEN = 1,
+
+            // Byte 270: PMIC2 SWA Delay Sequence Order
+            PMIC2_SWA_DELAY_BYTE = 270,
+            PMIC2_SWA_DELAY_START = 0,
+            PMIC2_SWA_DELAY_LEN = 4,
+            PMIC2_SWA_ORDER_START = 4,
+            PMIC2_SWA_ORDER_LEN = 4,
+
+            // Byte 271: PMIC2 SWB Voltage Setting
+            PMIC2_SWB_VOLT_SET_BYTE = 271,
+            PMIC2_SWB_VOLT_SET_START = 0,
+            PMIC2_SWB_VOLT_SET_LEN = 7,
+            PMIC2_SWB_RANGE_SELECT_START = 7,
+            PMIC2_SWB_RANGE_SELECT_LEN = 1,
+
+            // Byte 272: PMIC2 SWB Voltage Offset
+            PMIC2_SWB_VOLT_OFF_BYTE = 272,
+            PMIC2_SWB_VOLT_OFF_START = 0,
+            PMIC2_SWB_VOLT_OFF_LEN = 7,
+            PMIC2_SWB_OFF_DIRECTION_START = 7,
+            PMIC2_SWB_OFF_DIRECTION_LEN = 1,
+
+            // Byte 273: PMIC2 SWB Delay Sequence Order
+            PMIC2_SWB_DELAY_BYTE = 273,
+            PMIC2_SWB_DELAY_START = 0,
+            PMIC2_SWB_DELAY_LEN = 4,
+            PMIC2_SWB_ORDER_START = 4,
+            PMIC2_SWB_ORDER_LEN = 4,
+
+            // Byte 274: PMIC2 SWC Voltage Setting
+            PMIC2_SWC_VOLT_SET_BYTE = 274,
+            PMIC2_SWC_VOLT_SET_START = 0,
+            PMIC2_SWC_VOLT_SET_LEN = 7,
+            PMIC2_SWC_RANGE_SELECT_START = 7,
+            PMIC2_SWC_RANGE_SELECT_LEN = 1,
+
+            // Byte 275: PMIC2 SWC Voltage Offset
+            PMIC2_SWC_VOLT_OFF_BYTE = 275,
+            PMIC2_SWC_VOLT_OFF_START = 0,
+            PMIC2_SWC_VOLT_OFF_LEN = 7,
+            PMIC2_SWC_OFF_DIRECTION_START = 7,
+            PMIC2_SWC_OFF_DIRECTION_LEN = 1,
+
+            // Byte 276: PMIC2 SWC Delay Sequence Order
+            PMIC2_SWC_DELAY_BYTE = 276,
+            PMIC2_SWC_DELAY_START = 0,
+            PMIC2_SWC_DELAY_LEN = 4,
+            PMIC2_SWC_ORDER_START = 4,
+            PMIC2_SWC_ORDER_LEN = 4,
+
+            // Byte 277: PMIC2 SWD Voltage Setting
+            PMIC2_SWD_VOLT_SET_BYTE = 277,
+            PMIC2_SWD_VOLT_SET_START = 0,
+            PMIC2_SWD_VOLT_SET_LEN = 7,
+            PMIC2_SWD_RANGE_SELECT_START = 7,
+            PMIC2_SWD_RANGE_SELECT_LEN = 1,
+
+            // Byte 278: PMIC2 SWD Voltage Offset
+            PMIC2_SWD_VOLT_OFF_BYTE = 278,
+            PMIC2_SWD_VOLT_OFF_START = 0,
+            PMIC2_SWD_VOLT_OFF_LEN = 7,
+            PMIC2_SWD_OFF_DIRECTION_START = 7,
+            PMIC2_SWD_OFF_DIRECTION_LEN = 1,
+
+            // Byte 279: PMIC2 SWD Delay Sequence Order
+            PMIC2_SWD_DELAY_BYTE = 279,
+            PMIC2_SWD_DELAY_START = 0,
+            PMIC2_SWD_DELAY_LEN = 4,
+            PMIC2_SWD_ORDER_START = 4,
+            PMIC2_SWD_ORDER_LEN = 4,
+
+            // Byte 280: PMIC2 Phase Combination and Redundancy
+            PMIC2_PHASE_COMBIN_BYTE = 280,
+            PMIC2_REDUNDANCY_START = 0,
+            PMIC2_REDUNDANCY_LEN = 1,
+            PMIC2_PHASE_COMBIN_START = 4,
+            PMIC2_PHASE_COMBIN_LEN = 4,
+
+            // Byte 281: PMIC3 SWA Voltage Setting
+            PMIC3_SWA_VOLT_SET_BYTE = 281,
+            PMIC3_SWA_VOLT_SET_START = 0,
+            PMIC3_SWA_VOLT_SET_LEN = 7,
+            PMIC3_SWA_RANGE_SELECT_START = 7,
+            PMIC3_SWA_RANGE_SELECT_LEN = 1,
+
+            // Byte 282: PMIC3 SWA Voltage Offset
+            PMIC3_SWA_VOLT_OFF_BYTE = 282,
+            PMIC3_SWA_VOLT_OFF_START = 0,
+            PMIC3_SWA_VOLT_OFF_LEN = 7,
+            PMIC3_SWA_OFF_DIRECTION_START = 7,
+            PMIC3_SWA_OFF_DIRECTION_LEN = 1,
+
+            // Byte 283: PMIC3 SWA Delay Sequence Order
+            PMIC3_SWA_DELAY_BYTE = 283,
+            PMIC3_SWA_DELAY_START = 0,
+            PMIC3_SWA_DELAY_LEN = 4,
+            PMIC3_SWA_ORDER_START = 4,
+            PMIC3_SWA_ORDER_LEN = 4,
+
+            // Byte 284: PMIC2 SWB Voltage Setting
+            PMIC3_SWB_VOLT_SET_BYTE = 284,
+            PMIC3_SWB_VOLT_SET_START = 0,
+            PMIC3_SWB_VOLT_SET_LEN = 7,
+            PMIC3_SWB_RANGE_SELECT_START = 7,
+            PMIC3_SWB_RANGE_SELECT_LEN = 1,
+
+            // Byte 285: PMIC2 SWB Voltage Offset
+            PMIC3_SWB_VOLT_OFF_BYTE = 285,
+            PMIC3_SWB_VOLT_OFF_START = 0,
+            PMIC3_SWB_VOLT_OFF_LEN = 7,
+            PMIC3_SWB_OFF_DIRECTION_START = 7,
+            PMIC3_SWB_OFF_DIRECTION_LEN = 1,
+
+            // Byte 286: PMIC3 SWB Delay Sequence Order
+            PMIC3_SWB_DELAY_BYTE = 286,
+            PMIC3_SWB_DELAY_START = 0,
+            PMIC3_SWB_DELAY_LEN = 4,
+            PMIC3_SWB_ORDER_START = 4,
+            PMIC3_SWB_ORDER_LEN = 4,
+
+            // Byte 287: PMIC3 SWC Voltage Setting
+            PMIC3_SWC_VOLT_SET_BYTE = 287,
+            PMIC3_SWC_VOLT_SET_START = 0,
+            PMIC3_SWC_VOLT_SET_LEN = 7,
+            PMIC3_SWC_RANGE_SELECT_START = 7,
+            PMIC3_SWC_RANGE_SELECT_LEN = 1,
+
+            // Byte 288: PMIC3 SWC Voltage Offset
+            PMIC3_SWC_VOLT_OFF_BYTE = 288,
+            PMIC3_SWC_VOLT_OFF_START = 0,
+            PMIC3_SWC_VOLT_OFF_LEN = 7,
+            PMIC3_SWC_OFF_DIRECTION_START = 7,
+            PMIC3_SWC_OFF_DIRECTION_LEN = 1,
+
+            // Byte 289: PMIC3 SWC Delay Sequence Order
+            PMIC3_SWC_DELAY_BYTE = 289,
+            PMIC3_SWC_DELAY_START = 0,
+            PMIC3_SWC_DELAY_LEN = 4,
+            PMIC3_SWC_ORDER_START = 4,
+            PMIC3_SWC_ORDER_LEN = 4,
+
+            // Byte 290: PMIC3 SWD Voltage Setting
+            PMIC3_SWD_VOLT_SET_BYTE = 290,
+            PMIC3_SWD_VOLT_SET_START = 0,
+            PMIC3_SWD_VOLT_SET_LEN = 7,
+            PMIC3_SWD_RANGE_SELECT_START = 7,
+            PMIC3_SWD_RANGE_SELECT_LEN = 1,
+
+            // Byte 291: PMIC3 SWD Voltage Offset
+            PMIC3_SWD_VOLT_OFF_BYTE = 291,
+            PMIC3_SWD_VOLT_OFF_START = 0,
+            PMIC3_SWD_VOLT_OFF_LEN = 7,
+            PMIC3_SWD_OFF_DIRECTION_START = 7,
+            PMIC3_SWD_OFF_DIRECTION_LEN = 1,
+
+            // Byte 292: PMIC3 SWD Delay Sequence Order
+            PMIC3_SWD_DELAY_BYTE = 292,
+            PMIC3_SWD_DELAY_START = 0,
+            PMIC3_SWD_DELAY_LEN = 4,
+            PMIC3_SWD_ORDER_START = 4,
+            PMIC3_SWD_ORDER_LEN = 4,
+
+            // Byte 293: PMIC3 Phase Combination and Redundancy
+            PMIC3_PHASE_COMBIN_BYTE = 293,
+            PMIC3_REDUNDANCY_START = 0,
+            PMIC3_REDUNDANCY_LEN = 1,
+            PMIC3_PHASE_COMBIN_START = 4,
+            PMIC3_PHASE_COMBIN_LEN = 4,
+
+            // Byte 294: PMIC0 IIC Address
+            PMIC0_IIC_ADDRESS_BYTE = 294,
+            PMIC0_IIC_ADDRESS_START = 0,
+            PMIC0_IIC_ADDRESS_LEN = 8,
+
+            // Byte 295: PMIC1 IIC Address
+            PMIC1_IIC_ADDRESS_BYTE = 295,
+            PMIC1_IIC_ADDRESS_START = 0,
+            PMIC1_IIC_ADDRESS_LEN = 8,
+
+            // Byte 296: PMIC2 IIC Address
+            PMIC2_IIC_ADDRESS_BYTE = 296,
+            PMIC2_IIC_ADDRESS_START = 0,
+            PMIC2_IIC_ADDRESS_LEN = 8,
+
+            // Byte 297: PMIC3 IIC Address
+            PMIC3_IIC_ADDRESS_BYTE = 297,
+            PMIC3_IIC_ADDRESS_START = 0,
+            PMIC3_IIC_ADDRESS_LEN = 8,
+
+            // Byte 298
+            MODULE_RCD_BYTE = 298,
+            MODULE_RCD_MEDIA_CONTROLLER_TYPE_START = 0,
+            MODULE_RCD_MEDIA_CONTROLLER_TYPE_LEN = 4,
+            MODULE_RCD_JEDEC_COMPLIANT_START = 5,
+            MODULE_RCD_JEDEC_COMPLIANT_LEN = 1,
             MODULE_RCD_START = 6,
             MODULE_RCD_LEN = 2,
 
-            // Byte 265-266: RCD MFG ID Code
-            RCD_MFG_ID_LSB_BYTE = 265,
-            RCD_MFG_ID_MSB_BYTE = 266,
+            // Byte 299-300: RCD MFG ID Code
+            RCD_MFG_ID_LSB_BYTE = 299,
+            RCD_MFG_ID_MSB_BYTE = 300,
             RCD_MFG_ID_START = 0,
             RCD_MFG_ID_LEN = 8,
 
-            // Byte 268: Thermal Sensor 0 Profile
-            THERM_SENSOR_0_PROFILE_BYTE = 268,
+            // Byte 301: RCD Revision Nunber
+            RCD_REV_NUM_BYTE = 301,
+            RCD_REV_NUM_START = 0,
+            RCD_REV_NUM_LEN = 8,
+
+            // Byte 302: Thermal Sensor 0 Profile
+            THERM_SENSOR_0_PROFILE_BYTE = 302,
             THERM_SENSOR_0_AVAIL_START = 0,
             THERM_SENSOR_0_AVAIL_LEN = 1,
-            THERM_SENSOR_0_SECOND_AVAIL_START = 1,
-            THERM_SENSOR_0_SECOND_AVAIL_LEN = 1,
             THERM_SENSOR_0_TYPE_START = 2,
             THERM_SENSOR_0_TYPE_LEN = 3,
             THERM_SENSOR_0_USAGE_START = 5,
             THERM_SENSOR_0_USAGE_LEN = 3,
 
-            // Byte 269: Thermal Sensor 0 I2C Address
-            THERM_SENSOR_0_I2C_ADDRESS_BYTE = 269,
-            THERM_SENSOR_0_I2C_ADDRESS_START = 0,
-            THERM_SENSOR_0_I2C_ADDRESS_LEN = 8,
-
-            // Byte 270: Thermal Sensor 1 Profile
-            THERM_SENSOR_1_PROFILE_BYTE = 270,
+            // Byte 303: Thermal Sensor 1 Profile
+            THERM_SENSOR_1_PROFILE_BYTE = 303,
             THERM_SENSOR_1_AVAIL_START = 0,
             THERM_SENSOR_1_AVAIL_LEN = 1,
-            THERM_SENSOR_1_SECOND_AVAIL_START = 1,
-            THERM_SENSOR_1_SECOND_AVAIL_LEN = 1,
             THERM_SENSOR_1_TYPE_START = 2,
             THERM_SENSOR_1_TYPE_LEN = 3,
             THERM_SENSOR_1_USAGE_START = 5,
             THERM_SENSOR_1_USAGE_LEN = 3,
 
-            // Byte 271: Thermal Sensor 1 I2C Address
-            THERM_SENSOR_1_I2C_ADDRESS_BYTE = 271,
+            // Byte 304: Thermal Sensor 2 Profile
+            THERM_SENSOR_2_PROFILE_BYTE = 304,
+            THERM_SENSOR_2_AVAIL_START = 0,
+            THERM_SENSOR_2_AVAIL_LEN = 1,
+            THERM_SENSOR_2_TYPE_START = 2,
+            THERM_SENSOR_2_TYPE_LEN = 3,
+            THERM_SENSOR_2_USAGE_START = 5,
+            THERM_SENSOR_2_USAGE_LEN = 3,
+
+            // Byte 305: Thermal Sensor 3 Profile
+            THERM_SENSOR_3_PROFILE_BYTE = 305,
+            THERM_SENSOR_3_AVAIL_START = 0,
+            THERM_SENSOR_3_AVAIL_LEN = 1,
+            THERM_SENSOR_3_TYPE_START = 2,
+            THERM_SENSOR_3_TYPE_LEN = 3,
+            THERM_SENSOR_3_USAGE_START = 5,
+            THERM_SENSOR_3_USAGE_LEN = 3,
+
+            // Byte 306: Thermal Sensor 0 I2C Address
+            THERM_SENSOR_0_I2C_ADDRESS_BYTE = 306,
+            THERM_SENSOR_0_I2C_ADDRESS_START = 0,
+            THERM_SENSOR_0_I2C_ADDRESS_LEN = 8,
+
+            // Byte 307: Thermal Sensor 1 I2C Address
+            THERM_SENSOR_1_I2C_ADDRESS_BYTE = 307,
             THERM_SENSOR_1_I2C_ADDRESS_START = 0,
             THERM_SENSOR_1_I2C_ADDRESS_LEN = 8,
 
-            // Byte 272: Differential Buffer Thermal Sensor Profile
-            THERM_SENSOR_DIFF_PROFILE_BYTE = 272,
+            // Byte 308: Thermal Sensor 2 I2C Address
+            THERM_SENSOR_2_I2C_ADDRESS_BYTE = 308,
+            THERM_SENSOR_2_I2C_ADDRESS_START = 0,
+            THERM_SENSOR_2_I2C_ADDRESS_LEN = 8,
+
+            // Byte 309: Thermal Sensor 3 I2C Address
+            THERM_SENSOR_3_I2C_ADDRESS_BYTE = 309,
+            THERM_SENSOR_3_I2C_ADDRESS_START = 0,
+            THERM_SENSOR_3_I2C_ADDRESS_LEN = 8,
+
+            // Byte 310: Thermal Sensor Locations
+            THERM_SENSOR_LOCATIONS_BYTE = 310,
+            THERM_SENSOR_3_LOCATION_START = 0,
+            THERM_SENSOR_3_LOCATION_LEN = 2,
+            THERM_SENSOR_2_LOCATION_START = 2,
+            THERM_SENSOR_2_LOCATION_LEN = 2,
+            THERM_SENSOR_1_LOCATION_START = 4,
+            THERM_SENSOR_1_LOCATION_LEN = 2,
+            THERM_SENSOR_0_LOCATION_START = 6,
+            THERM_SENSOR_0_LOCATION_LEN = 2,
+
+            // Byte 311: Differential Buffer Thermal Sensor Profile
+            THERM_SENSOR_DIFF_PROFILE_BYTE = 311,
             THERM_SENSOR_DIFF_AVAIL_START = 0,
             THERM_SENSOR_DIFF_AVAIL_LEN = 1,
             THERM_SENSOR_DIFF_TYPE_START = 1,
@@ -703,31 +1008,10 @@ class fields<DDR5, DDIMM_MODULE>
             THERM_SENSOR_DIFF_USAGE_START = 5,
             THERM_SENSOR_DIFF_USAGE_LEN = 3,
 
-            // Byte 273: Differential Buffer Thermal Sensor I2C Address
-            THERM_SENSOR_DIFF_I2C_ADDRESS_BYTE = 273,
+            // Byte 312: Differential Buffer Thermal Sensor I2C Address
+            THERM_SENSOR_DIFF_I2C_ADDRESS_BYTE = 312,
             THERM_SENSOR_DIFF_I2C_ADDRESS_START = 0,
             THERM_SENSOR_DIFF_I2C_ADDRESS_LEN = 8,
-
-            // Byte 274: Secondary Thermal Sensor 0 I2C Address
-            THERM_SENSOR_0_SECOND_I2C_ADDRESS_BYTE = 274,
-            THERM_SENSOR_0_SECOND_I2C_ADDRESS_START = 0,
-            THERM_SENSOR_0_SECOND_I2C_ADDRESS_LEN = 8,
-
-            // Byte 275: Secondary Thermal Sensor 1 I2C Address
-            THERM_SENSOR_1_SECOND_I2C_ADDRESS_BYTE = 275,
-            THERM_SENSOR_1_SECOND_I2C_ADDRESS_START = 0,
-            THERM_SENSOR_1_SECOND_I2C_ADDRESS_LEN = 8,
-
-            // Byte 276: Thermal Sensor Locations
-            THERM_SENSOR_LOCATIONS_BYTE = 276,
-            THERM_SENSOR_1_SECOND_LOCATION_START = 0,
-            THERM_SENSOR_1_SECOND_LOCATION_LEN = 2,
-            THERM_SENSOR_0_SECOND_LOCATION_START = 2,
-            THERM_SENSOR_0_SECOND_LOCATION_LEN = 2,
-            THERM_SENSOR_1_LOCATION_START = 4,
-            THERM_SENSOR_1_LOCATION_LEN = 2,
-            THERM_SENSOR_0_LOCATION_START = 6,
-            THERM_SENSOR_0_LOCATION_LEN = 2,
 
             // Byte 416-441
             SERIAL_NUMBER_FIELD_START = 0,
@@ -766,9 +1050,10 @@ class fields<DDR5, DDIMM_MODULE>
 
         // Byte 195: Reference Raw Card used
         static constexpr field_t DESIGN_REV{REF_RAW_CARD_BYTE, DESIGN_REV_START, DESIGN_REV_LEN};
+        static constexpr field_t DESIGN_REF_CARD{REF_RAW_CARD_BYTE, DESIGN_REF_CARD_START, DESIGN_REF_CARD_LEN};
 
         // Byte 196: DIMM attributes
-        static constexpr field_t NUM_ROWS{DIMM_ATTR_BYTE, NUM_ROWS_START, NUM_ROWS_LEN};
+        static constexpr field_t REGISTER_TYPE{DIMM_ATTR_BYTE, DIMM_ATTR_REGISTER_TYPE_START, DIMM_ATTR_REGISTER_TYPE_LEN};
         static constexpr field_t NUM_BUFFERS{DIMM_ATTR_BYTE, NUM_BUFFERS_START, NUM_BUFFERS_LEN};
 
         // Byte 197: Thermal Heat Spreader Solution
@@ -784,15 +1069,15 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 200: DMB Revision Number
         static constexpr field_t DMB_REV{DMB_REV_BYTE, DMB_REV_START, DMB_REV_LEN};
 
-        // Byte 201: DIMM Module Oranization
+        // Byte 201: DIMM Module Organization
         static constexpr field_t NUM_PACKAGE_RANKS_CHAN1{DIMM_ORG_BYTE_BYTE, NUM_PACKAGE_RANKS_CHAN1_START, NUM_PACKAGE_RANKS_CHAN1_LEN};
         static constexpr field_t NUM_PACKAGE_RANKS_CHAN0{DIMM_ORG_BYTE_BYTE, NUM_PACKAGE_RANKS_CHAN0_START, NUM_PACKAGE_RANKS_CHAN0_LEN};
         static constexpr field_t DATA_WIDTH{DIMM_ORG_BYTE_BYTE, SDRAM_DATA_WID_CHAN_START, SDRAM_DATA_WID_CHAN_LEN};
 
         // Byte 202: Memory Channel Bus Width
-        static constexpr field_t NUM_DIMM_CHANNELS{BUS_WIDTH_BYTE, NUM_DIMM_CHANNELS_START, NUM_DIMM_CHANNELS_LEN};
-        static constexpr field_t BUS_WIDTH_EXT{BUS_WIDTH_BYTE, BUS_WIDTH_EXT_START, BUS_WIDTH_EXT_LEN};
-        static constexpr field_t CHANNEL_DATA_WIDTH{BUS_WIDTH_BYTE, CHANNEL_DATA_WIDTH_START, CHANNEL_DATA_WIDTH_LEN};
+        static constexpr field_t ENABLED_PHY_CH{BUS_WIDTH_BYTE, ENABLED_PHY_CHANNELS_START, ENABLED_PHY_CHANNELS_LEN};
+        static constexpr field_t BUS_WIDTH_CH_A{BUS_WIDTH_BYTE, BUS_WIDTH_CHANNEL_A_START, BUS_WIDTH_CHANNEL_A_LEN};
+        static constexpr field_t BUS_WIDTH_CH_B{BUS_WIDTH_BYTE, BUS_WIDTH_CHANNEL_B_START, BUS_WIDTH_CHANNEL_B_LEN};
 
         // Byte 203: Module Thermal Sensors
         static constexpr field_t MOD_THERMAL_SENSOR{THERMAL_SENSORS_BYTE, MOD_THERMAL_SENSOR_START, MOD_THERMAL_SENSOR_LEN};
@@ -821,11 +1106,11 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 212: Nibble enables LSB1
         static constexpr field_t NIBBLE_ENABLES_LSB1{NIBBLE_ENABLES_LSB1_BYTE, NIBBLE_ENABLES_LSB1_START, NIBBLE_ENABLES_LSB1_LEN};
 
-        // Byte 214: Four Rank Mode - DDP Compatibility - TSV 8 High Support - MRAM Support
-        static constexpr field_t DDIMM_COMPAT{DDIMM_COMPAT_BYTE, DDIMM_COMPAT_START, DDIMM_COMPAT_LEN};
+        // Byte 213: Nibble enables MSB1
+        // Reserved
 
-        // Byte 215: Number of P-States
-        static constexpr field_t NUM_P_STATES{NUM_P_STATES_BYTE, NUM_P_STATES_START, NUM_P_STATES_LEN};
+        // Byte 214: REDUNDANT CHIP SELECT MODE
+        static constexpr field_t DDIMM_COMPAT{DDIMM_COMPAT_BYTE, DDIMM_REDUNDANT_CS_EN_START, DDIMM_REDUNDANT_CS_EN_LEN};
 
         // Byte 216: Spare Device Mapping LSB0
         static constexpr field_t SPARE_DEVICE_LSB0{SPARE_DEVICE_LSB0_BYTE, SPARE_DEVICE_LSB0_START, SPARE_DEVICE_LSB0_LEN};
@@ -852,178 +1137,332 @@ class fields<DDR5, DDIMM_MODULE>
         static constexpr field_t VIN_BULK_OPERABLE{VIN_BULK_BYTE, VIN_BULK_OPERABLE_START, VIN_BULK_OPERABLE_LEN};
         static constexpr field_t VIN_BULK_ENDURANT{VIN_BULK_BYTE, VIN_BULK_ENDURANT_START, VIN_BULK_ENDURANT_LEN};
 
-        // Byte 226: PMIC0 Sequence
+        // Byte 226: PMIC0 Voltage and Sequence
+        static constexpr field_t PMIC0_SUPPLY_VOLTAGE{PMIC0_SEQUENCE_BYTE, PMIC0_SUPPLY_VOLTAGE_START, PMIC0_SUPPLY_VOLTAGE_LEN};
         static constexpr field_t PMIC0_SEQUENCE{PMIC0_SEQUENCE_BYTE, PMIC0_SEQUENCE_START, PMIC0_SEQUENCE_LEN};
 
-        // Byte 227: PMIC0 Manfacture ID code 1st byte
-        static constexpr field_t PMIC0_CONT_CODE{PMIC0_MFG_CODE1_BYTE, PMIC0_CONT_CODE_START, PMIC0_CONT_CODE_LEN};
-
-        // Byte 228: PMIC0 Manfacture ID code 2nd byte
-        static constexpr field_t PMIC0_LAST_NON_ZERO{PMIC0_MFG_CODE2_BYTE, PMIC0_LAST_NON_ZERO_START, PMIC0_LAST_NON_ZERO_LEN};
-
-        // Byte 229: PMIC0 Revision Number
-        static constexpr field_t PMIC0_REV{PMIC0_REV_BYTE, PMIC0_REV_START, PMIC0_REV_LEN};
-
-        // Byte 230: PMIC1 Sequence
+        // Byte 227: PMIC1 Voltage and Sequence
+        static constexpr field_t PMIC1_SUPPLY_VOLTAGE{PMIC1_SEQUENCE_BYTE, PMIC1_SUPPLY_VOLTAGE_START, PMIC1_SUPPLY_VOLTAGE_LEN};
         static constexpr field_t PMIC1_SEQUENCE{PMIC1_SEQUENCE_BYTE, PMIC1_SEQUENCE_START, PMIC1_SEQUENCE_LEN};
 
-        // Byte 231: PMIC1 Manfacture ID code 1st byte
+        // Byte 228: PMIC2 Voltage and Sequence
+        static constexpr field_t PMIC2_SUPPLY_VOLTAGE{PMIC2_SEQUENCE_BYTE, PMIC2_SUPPLY_VOLTAGE_START, PMIC2_SUPPLY_VOLTAGE_LEN};
+        static constexpr field_t PMIC2_SEQUENCE{PMIC2_SEQUENCE_BYTE, PMIC2_SEQUENCE_START, PMIC2_SEQUENCE_LEN};
+
+        // Byte 229: PMIC3 Voltage and Sequence
+        static constexpr field_t PMIC3_SUPPLY_VOLTAGE{PMIC3_SEQUENCE_BYTE, PMIC3_SUPPLY_VOLTAGE_START, PMIC3_SUPPLY_VOLTAGE_LEN};
+        static constexpr field_t PMIC3_SEQUENCE{PMIC3_SEQUENCE_BYTE, PMIC3_SEQUENCE_START, PMIC3_SEQUENCE_LEN};
+
+        // Byte 230: PMIC0 Manfacture ID code 1st byte
+        static constexpr field_t PMIC0_CONT_CODE{PMIC0_MFG_CODE1_BYTE, PMIC0_CONT_CODE_START, PMIC0_CONT_CODE_LEN};
+
+        // Byte 231: PMIC0 Manfacture ID code 2nd byte
+        static constexpr field_t PMIC0_LAST_NON_ZERO{PMIC0_MFG_CODE2_BYTE, PMIC0_LAST_NON_ZERO_START, PMIC0_LAST_NON_ZERO_LEN};
+
+        // Byte 232: PMIC0 Revision Number
+        static constexpr field_t PMIC0_REV{PMIC0_REV_BYTE, PMIC0_REV_START, PMIC0_REV_LEN};
+
+        // Byte 233: PMIC1 Manfacture ID code 1st byte
         static constexpr field_t PMIC1_CONT_CODE{PMIC1_MFG_CODE1_BYTE, PMIC1_CONT_CODE_START, PMIC1_CONT_CODE_LEN};
 
-        // Byte 232: PMIC1 Manfacture ID code 2nd byte
+        // Byte 234 PMIC1 Manfacture ID code 2nd byte
         static constexpr field_t PMIC1_LAST_NON_ZERO{PMIC1_MFG_CODE2_BYTE, PMIC1_LAST_NON_ZERO_START, PMIC1_LAST_NON_ZERO_LEN};
 
-        // Byte 233: PMIC1 Revision Number
+        // Byte 235: PMIC1 Revision Number
         static constexpr field_t PMIC1_REV{PMIC1_REV_BYTE, PMIC1_REV_START, PMIC1_REV_LEN};
 
-        // Byte 234: PMIC0 SWA Voltage Setting
+        // Byte 236: PMIC2 Manfacture ID code 1st byte
+        static constexpr field_t PMIC2_CONT_CODE{PMIC2_MFG_CODE1_BYTE, PMIC2_CONT_CODE_START, PMIC2_CONT_CODE_LEN};
+
+        // Byte 237 PMIC2 Manfacture ID code 2nd byte
+        static constexpr field_t PMIC2_LAST_NON_ZERO{PMIC2_MFG_CODE2_BYTE, PMIC2_LAST_NON_ZERO_START, PMIC2_LAST_NON_ZERO_LEN};
+
+        // Byte 238: PMIC2 Revision Number
+        static constexpr field_t PMIC2_REV{PMIC2_REV_BYTE, PMIC2_REV_START, PMIC2_REV_LEN};
+
+        // Byte 239: PMIC3 Manfacture ID code 1st byte
+        static constexpr field_t PMIC3_CONT_CODE{PMIC3_MFG_CODE1_BYTE, PMIC3_CONT_CODE_START, PMIC3_CONT_CODE_LEN};
+
+        // Byte 240: PMIC3 Manfacture ID code 2nd byte
+        static constexpr field_t PMIC3_LAST_NON_ZERO{PMIC3_MFG_CODE2_BYTE, PMIC3_LAST_NON_ZERO_START, PMIC3_LAST_NON_ZERO_LEN};
+
+        // Byte 241: PMIC3 Revision Number
+        static constexpr field_t PMIC3_REV{PMIC3_REV_BYTE, PMIC3_REV_START, PMIC3_REV_LEN};
+
+        // Byte 242: PMIC0 SWA Voltage Setting
         static constexpr field_t PMIC0_SWA_VOLT_SET{PMIC0_SWA_VOLT_SET_BYTE, PMIC0_SWA_VOLT_SET_START, PMIC0_SWA_VOLT_SET_LEN};
         static constexpr field_t PMIC0_SWA_RANGE_SELECT{PMIC0_SWA_VOLT_SET_BYTE, PMIC0_SWA_RANGE_SELECT_START, PMIC0_SWA_RANGE_SELECT_LEN};
 
-        // Byte 235: PMIC0 SWA Voltage Offset
+        // Byte 243: PMIC0 SWA Voltage Offset
         static constexpr field_t PMIC0_SWA_VOLT_OFF{PMIC0_SWA_VOLT_OFF_BYTE, PMIC0_SWA_VOLT_OFF_START, PMIC0_SWA_VOLT_OFF_LEN};
         static constexpr field_t PMIC0_SWA_OFF_DIRECTION{PMIC0_SWA_VOLT_OFF_BYTE, PMIC0_SWA_OFF_DIRECTION_START, PMIC0_SWA_OFF_DIRECTION_LEN};
 
-        // Byte 236: PMIC0 SWA Delay Sequence Order
+        // Byte 244: PMIC0 SWA Delay Sequence Order
         static constexpr field_t PMIC0_SWA_DELAY{PMIC0_SWA_DELAY_BYTE, PMIC0_SWA_DELAY_START, PMIC0_SWA_DELAY_LEN};
         static constexpr field_t PMIC0_SWA_ORDER{PMIC0_SWA_DELAY_BYTE, PMIC0_SWA_ORDER_START, PMIC0_SWA_ORDER_LEN};
 
-        // Byte 237: PMIC0 SWB Voltage Setting
+        // Byte 245: PMIC0 SWB Voltage Setting
         static constexpr field_t PMIC0_SWB_VOLT_SET{PMIC0_SWB_VOLT_SET_BYTE, PMIC0_SWB_VOLT_SET_START, PMIC0_SWB_VOLT_SET_LEN};
         static constexpr field_t PMIC0_SWB_RANGE_SELECT{PMIC0_SWB_VOLT_SET_BYTE, PMIC0_SWB_RANGE_SELECT_START, PMIC0_SWB_RANGE_SELECT_LEN};
 
-        // Byte 238: PMIC0 SWB Voltage Offset
+        // Byte 246: PMIC0 SWB Voltage Offset
         static constexpr field_t PMIC0_SWB_VOLT_OFF{PMIC0_SWB_VOLT_OFF_BYTE, PMIC0_SWB_VOLT_OFF_START, PMIC0_SWB_VOLT_OFF_LEN};
         static constexpr field_t PMIC0_SWB_OFF_DIRECTION{PMIC0_SWB_VOLT_OFF_BYTE, PMIC0_SWB_OFF_DIRECTION_START, PMIC0_SWB_OFF_DIRECTION_LEN};
 
-        // Byte 239: PMIC0 SWB Delay Sequence Order
+        // Byte 247: PMIC0 SWB Delay Sequence Order
         static constexpr field_t PMIC0_SWB_DELAY{PMIC0_SWB_DELAY_BYTE, PMIC0_SWB_DELAY_START, PMIC0_SWB_DELAY_LEN};
         static constexpr field_t PMIC0_SWB_ORDER{PMIC0_SWB_DELAY_BYTE, PMIC0_SWB_ORDER_START, PMIC0_SWB_ORDER_LEN};
 
-        // Byte 240: PMIC0 SWC Voltage Setting
+        // Byte 248: PMIC0 SWC Voltage Setting
         static constexpr field_t PMIC0_SWC_VOLT_SET{PMIC0_SWC_VOLT_SET_BYTE, PMIC0_SWC_VOLT_SET_START, PMIC0_SWC_VOLT_SET_LEN};
         static constexpr field_t PMIC0_SWC_RANGE_SELECT{PMIC0_SWC_VOLT_SET_BYTE, PMIC0_SWC_RANGE_SELECT_START, PMIC0_SWC_RANGE_SELECT_LEN};
 
-        // Byte 241: PMIC0 SWC Voltage Offset
+        // Byte 249: PMIC0 SWC Voltage Offset
         static constexpr field_t PMIC0_SWC_VOLT_OFF{PMIC0_SWC_VOLT_OFF_BYTE, PMIC0_SWC_VOLT_OFF_START, PMIC0_SWC_VOLT_OFF_LEN};
         static constexpr field_t PMIC0_SWC_OFF_DIRECTION{PMIC0_SWC_VOLT_OFF_BYTE, PMIC0_SWC_OFF_DIRECTION_START, PMIC0_SWC_OFF_DIRECTION_LEN};
 
-        // Byte 242: PMIC0 SWC Delay Sequence Order
+        // Byte 250: PMIC0 SWC Delay Sequence Order
         static constexpr field_t PMIC0_SWC_DELAY{PMIC0_SWC_DELAY_BYTE, PMIC0_SWC_DELAY_START, PMIC0_SWC_DELAY_LEN};
         static constexpr field_t PMIC0_SWC_ORDER{PMIC0_SWC_DELAY_BYTE, PMIC0_SWC_ORDER_START, PMIC0_SWC_ORDER_LEN};
 
-        // Byte 243: PMIC0 SWD Voltage Setting
+        // Byte 251: PMIC0 SWD Voltage Setting
         static constexpr field_t PMIC0_SWD_VOLT_SET{PMIC0_SWD_VOLT_SET_BYTE, PMIC0_SWD_VOLT_SET_START, PMIC0_SWD_VOLT_SET_LEN};
         static constexpr field_t PMIC0_SWD_RANGE_SELECT{PMIC0_SWD_VOLT_SET_BYTE, PMIC0_SWD_RANGE_SELECT_START, PMIC0_SWD_RANGE_SELECT_LEN};
 
-        // Byte 244: PMIC0 SWD Voltage Offset
+        // Byte 252: PMIC0 SWD Voltage Offset
         static constexpr field_t PMIC0_SWD_VOLT_OFF{PMIC0_SWD_VOLT_OFF_BYTE, PMIC0_SWD_VOLT_OFF_START, PMIC0_SWD_VOLT_OFF_LEN};
         static constexpr field_t PMIC0_SWD_OFF_DIRECTION{PMIC0_SWD_VOLT_OFF_BYTE, PMIC0_SWD_OFF_DIRECTION_START, PMIC0_SWD_OFF_DIRECTION_LEN};
 
-        // Byte 245: PMIC0 SWD Delay Sequence Order
+        // Byte 253: PMIC0 SWD Delay Sequence Order
         static constexpr field_t PMIC0_SWD_DELAY{PMIC0_SWD_DELAY_BYTE, PMIC0_SWD_DELAY_START, PMIC0_SWD_DELAY_LEN};
         static constexpr field_t PMIC0_SWD_ORDER{PMIC0_SWD_DELAY_BYTE, PMIC0_SWD_ORDER_START, PMIC0_SWD_ORDER_LEN};
 
-        // Byte 246: PMIC0 Phase Combination / Redundancy
+        // Byte 254: PMIC0 Phase Combination / Redundancy
         static constexpr field_t PMIC0_PHASE_COMBIN{PMIC0_PHASE_COMBIN_BYTE, PMIC0_PHASE_COMBIN_START, PMIC0_PHASE_COMBIN_LEN};
         static constexpr field_t PMIC0_REDUNDANCY{PMIC0_PHASE_COMBIN_BYTE, PMIC0_REDUNDANCY_START, PMIC0_REDUNDANCY_LEN};
 
-        // Byte 247: PMIC1 SWA Voltage Setting
+        // Byte 255: PMIC1 SWA Voltage Setting
         static constexpr field_t PMIC1_SWA_VOLT_SET{PMIC1_SWA_VOLT_SET_BYTE, PMIC1_SWA_VOLT_SET_START, PMIC1_SWA_VOLT_SET_LEN};
         static constexpr field_t PMIC1_SWA_RANGE_SELECT{PMIC1_SWA_VOLT_SET_BYTE, PMIC1_SWA_RANGE_SELECT_START, PMIC1_SWA_RANGE_SELECT_LEN};
 
-        // Byte 248: PMIC1 SWA Voltage Offset
+        // Byte 256: PMIC1 SWA Voltage Offset
         static constexpr field_t PMIC1_SWA_VOLT_OFF{PMIC1_SWA_VOLT_OFF_BYTE, PMIC1_SWA_VOLT_OFF_START, PMIC1_SWA_VOLT_OFF_LEN};
         static constexpr field_t PMIC1_SWA_OFF_DIRECTION{PMIC1_SWA_VOLT_OFF_BYTE, PMIC1_SWA_OFF_DIRECTION_START, PMIC1_SWA_OFF_DIRECTION_LEN};
 
-        // Byte 249: PMIC1 SWA Delay Sequence Order
+        // Byte 257: PMIC1 SWA Delay Sequence Order
         static constexpr field_t PMIC1_SWA_DELAY{PMIC1_SWA_DELAY_BYTE, PMIC1_SWA_DELAY_START, PMIC1_SWA_DELAY_LEN};
         static constexpr field_t PMIC1_SWA_ORDER{PMIC1_SWA_DELAY_BYTE, PMIC1_SWA_ORDER_START, PMIC1_SWA_ORDER_LEN};
 
-        // Byte 250: PMIC1 SWB Voltage Setting
+        // Byte 258: PMIC1 SWB Voltage Setting
         static constexpr field_t PMIC1_SWB_VOLT_SET{PMIC1_SWB_VOLT_SET_BYTE, PMIC1_SWB_VOLT_SET_START, PMIC1_SWB_VOLT_SET_LEN};
         static constexpr field_t PMIC1_SWB_RANGE_SELECT{PMIC1_SWB_VOLT_SET_BYTE, PMIC1_SWB_RANGE_SELECT_START, PMIC1_SWB_RANGE_SELECT_LEN};
 
-        // Byte 251: PMIC1 SWB Voltage Offset
+        // Byte 259: PMIC1 SWB Voltage Offset
         static constexpr field_t PMIC1_SWB_VOLT_OFF{PMIC1_SWB_VOLT_OFF_BYTE, PMIC1_SWB_VOLT_OFF_START, PMIC1_SWB_VOLT_OFF_LEN};
         static constexpr field_t PMIC1_SWB_OFF_DIRECTION{PMIC1_SWB_VOLT_OFF_BYTE, PMIC1_SWB_OFF_DIRECTION_START, PMIC1_SWB_OFF_DIRECTION_LEN};
 
-        // Byte 252: PMIC1 SWB Delay Sequence Order
+        // Byte 260: PMIC1 SWB Delay Sequence Order
         static constexpr field_t PMIC1_SWB_DELAY{PMIC1_SWB_DELAY_BYTE, PMIC1_SWB_DELAY_START, PMIC1_SWB_DELAY_LEN};
         static constexpr field_t PMIC1_SWB_ORDER{PMIC1_SWB_DELAY_BYTE, PMIC1_SWB_ORDER_START, PMIC1_SWB_ORDER_LEN};
 
-        // Byte 253: PMIC1 SWC Voltage Setting
+        // Byte 261: PMIC1 SWC Voltage Setting
         static constexpr field_t PMIC1_SWC_VOLT_SET{PMIC1_SWC_VOLT_SET_BYTE, PMIC1_SWC_VOLT_SET_START, PMIC1_SWC_VOLT_SET_LEN};
         static constexpr field_t PMIC1_SWC_RANGE_SELECT{PMIC1_SWC_VOLT_SET_BYTE, PMIC1_SWC_RANGE_SELECT_START, PMIC1_SWC_RANGE_SELECT_LEN};
 
-        // Byte 254: PMIC1 SWC Voltage Offset
+        // Byte 262: PMIC1 SWC Voltage Offset
         static constexpr field_t PMIC1_SWC_VOLT_OFF{PMIC1_SWC_VOLT_OFF_BYTE, PMIC1_SWC_VOLT_OFF_START, PMIC1_SWC_VOLT_OFF_LEN};
         static constexpr field_t PMIC1_SWC_OFF_DIRECTION{PMIC1_SWC_VOLT_OFF_BYTE, PMIC1_SWC_OFF_DIRECTION_START, PMIC1_SWC_OFF_DIRECTION_LEN};
 
-        // Byte 255: PMIC1 SWC Delay Sequence Order
+        // Byte 263: PMIC1 SWC Delay Sequence Order
         static constexpr field_t PMIC1_SWC_DELAY{PMIC1_SWC_DELAY_BYTE, PMIC1_SWC_DELAY_START, PMIC1_SWC_DELAY_LEN};
         static constexpr field_t PMIC1_SWC_ORDER{PMIC1_SWC_DELAY_BYTE, PMIC1_SWC_ORDER_START, PMIC1_SWC_ORDER_LEN};
 
-        // Byte 256: PMIC1 SWD Voltage Setting
+        // Byte 264: PMIC1 SWD Voltage Setting
         static constexpr field_t PMIC1_SWD_VOLT_SET{PMIC1_SWD_VOLT_SET_BYTE, PMIC1_SWD_VOLT_SET_START, PMIC1_SWD_VOLT_SET_LEN};
         static constexpr field_t PMIC1_SWD_RANGE_SELECT{PMIC1_SWD_VOLT_SET_BYTE, PMIC1_SWD_RANGE_SELECT_START, PMIC1_SWD_RANGE_SELECT_LEN};
 
-        // Byte 257: PMIC1 SWD Voltage Offset
+        // Byte 265: PMIC1 SWD Voltage Offset
         static constexpr field_t PMIC1_SWD_VOLT_OFF{PMIC1_SWD_VOLT_OFF_BYTE, PMIC1_SWD_VOLT_OFF_START, PMIC1_SWD_VOLT_OFF_LEN};
         static constexpr field_t PMIC1_SWD_OFF_DIRECTION{PMIC1_SWD_VOLT_OFF_BYTE, PMIC1_SWD_OFF_DIRECTION_START, PMIC1_SWD_OFF_DIRECTION_LEN};
 
-        // Byte 258: PMIC1 SWD Delay Sequence Order
+        // Byte 266: PMIC1 SWD Delay Sequence Order
         static constexpr field_t PMIC1_SWD_DELAY{PMIC1_SWD_DELAY_BYTE, PMIC1_SWD_DELAY_START, PMIC1_SWD_DELAY_LEN};
         static constexpr field_t PMIC1_SWD_ORDER{PMIC1_SWD_DELAY_BYTE, PMIC1_SWD_ORDER_START, PMIC1_SWD_ORDER_LEN};
 
-        // Byte 259: PMIC1 Phase Combination
+        // Byte 267: PMIC1 Phase Combination / Redundancy
         static constexpr field_t PMIC1_PHASE_COMBIN{PMIC1_PHASE_COMBIN_BYTE, PMIC1_PHASE_COMBIN_START, PMIC1_PHASE_COMBIN_LEN};
         static constexpr field_t PMIC1_REDUNDANCY{PMIC1_PHASE_COMBIN_BYTE, PMIC1_REDUNDANCY_START, PMIC1_REDUNDANCY_LEN};
 
-        // Byte 264: Registered Clock Drivers (RCD)
+        // Byte 268: PMIC2 SWA Voltage Setting
+        static constexpr field_t PMIC2_SWA_VOLT_SET{PMIC2_SWA_VOLT_SET_BYTE, PMIC2_SWA_VOLT_SET_START, PMIC2_SWA_VOLT_SET_LEN};
+        static constexpr field_t PMIC2_SWA_RANGE_SELECT{PMIC2_SWA_VOLT_SET_BYTE, PMIC2_SWA_RANGE_SELECT_START, PMIC2_SWA_RANGE_SELECT_LEN};
+
+        // Byte 269: PMIC2 SWA Voltage Offset
+        static constexpr field_t PMIC2_SWA_VOLT_OFF{PMIC2_SWA_VOLT_OFF_BYTE, PMIC2_SWA_VOLT_OFF_START, PMIC2_SWA_VOLT_OFF_LEN};
+        static constexpr field_t PMIC2_SWA_OFF_DIRECTION{PMIC2_SWA_VOLT_OFF_BYTE, PMIC2_SWA_OFF_DIRECTION_START, PMIC2_SWA_OFF_DIRECTION_LEN};
+
+        // Byte 270: PMIC2 SWA Delay Sequence Order
+        static constexpr field_t PMIC2_SWA_DELAY{PMIC2_SWA_DELAY_BYTE, PMIC2_SWA_DELAY_START, PMIC2_SWA_DELAY_LEN};
+        static constexpr field_t PMIC2_SWA_ORDER{PMIC2_SWA_DELAY_BYTE, PMIC2_SWA_ORDER_START, PMIC2_SWA_ORDER_LEN};
+
+        // Byte 271: PMIC2 SWB Voltage Setting
+        static constexpr field_t PMIC2_SWB_VOLT_SET{PMIC2_SWB_VOLT_SET_BYTE, PMIC2_SWB_VOLT_SET_START, PMIC2_SWB_VOLT_SET_LEN};
+        static constexpr field_t PMIC2_SWB_RANGE_SELECT{PMIC2_SWB_VOLT_SET_BYTE, PMIC2_SWB_RANGE_SELECT_START, PMIC2_SWB_RANGE_SELECT_LEN};
+
+        // Byte 272: PMIC2 SWB Voltage Offset
+        static constexpr field_t PMIC2_SWB_VOLT_OFF{PMIC2_SWB_VOLT_OFF_BYTE, PMIC2_SWB_VOLT_OFF_START, PMIC2_SWB_VOLT_OFF_LEN};
+        static constexpr field_t PMIC2_SWB_OFF_DIRECTION{PMIC2_SWB_VOLT_OFF_BYTE, PMIC2_SWB_OFF_DIRECTION_START, PMIC2_SWB_OFF_DIRECTION_LEN};
+
+        // Byte 273: PMIC2 SWB Delay Sequence Order
+        static constexpr field_t PMIC2_SWB_DELAY{PMIC2_SWB_DELAY_BYTE, PMIC2_SWB_DELAY_START, PMIC2_SWB_DELAY_LEN};
+        static constexpr field_t PMIC2_SWB_ORDER{PMIC2_SWB_DELAY_BYTE, PMIC2_SWB_ORDER_START, PMIC2_SWB_ORDER_LEN};
+
+        // Byte 274: PMIC2 SWC Voltage Setting
+        static constexpr field_t PMIC2_SWC_VOLT_SET{PMIC2_SWC_VOLT_SET_BYTE, PMIC2_SWC_VOLT_SET_START, PMIC2_SWC_VOLT_SET_LEN};
+        static constexpr field_t PMIC2_SWC_RANGE_SELECT{PMIC2_SWC_VOLT_SET_BYTE, PMIC2_SWC_RANGE_SELECT_START, PMIC2_SWC_RANGE_SELECT_LEN};
+
+        // Byte 275: PMIC2 SWC Voltage Offset
+        static constexpr field_t PMIC2_SWC_VOLT_OFF{PMIC2_SWC_VOLT_OFF_BYTE, PMIC2_SWC_VOLT_OFF_START, PMIC2_SWC_VOLT_OFF_LEN};
+        static constexpr field_t PMIC2_SWC_OFF_DIRECTION{PMIC2_SWC_VOLT_OFF_BYTE, PMIC2_SWC_OFF_DIRECTION_START, PMIC2_SWC_OFF_DIRECTION_LEN};
+
+        // Byte 276: PMIC2 SWC Delay Sequence Order
+        static constexpr field_t PMIC2_SWC_DELAY{PMIC2_SWC_DELAY_BYTE, PMIC2_SWC_DELAY_START, PMIC2_SWC_DELAY_LEN};
+        static constexpr field_t PMIC2_SWC_ORDER{PMIC2_SWC_DELAY_BYTE, PMIC2_SWC_ORDER_START, PMIC2_SWC_ORDER_LEN};
+
+        // Byte 277: PMIC2 SWD Voltage Setting
+        static constexpr field_t PMIC2_SWD_VOLT_SET{PMIC2_SWD_VOLT_SET_BYTE, PMIC2_SWD_VOLT_SET_START, PMIC2_SWD_VOLT_SET_LEN};
+        static constexpr field_t PMIC2_SWD_RANGE_SELECT{PMIC2_SWD_VOLT_SET_BYTE, PMIC2_SWD_RANGE_SELECT_START, PMIC2_SWD_RANGE_SELECT_LEN};
+
+        // Byte 278: PMIC2 SWD Voltage Offset
+        static constexpr field_t PMIC2_SWD_VOLT_OFF{PMIC2_SWD_VOLT_OFF_BYTE, PMIC2_SWD_VOLT_OFF_START, PMIC2_SWD_VOLT_OFF_LEN};
+        static constexpr field_t PMIC2_SWD_OFF_DIRECTION{PMIC2_SWD_VOLT_OFF_BYTE, PMIC2_SWD_OFF_DIRECTION_START, PMIC2_SWD_OFF_DIRECTION_LEN};
+
+        // Byte 279: PMIC2 SWD Delay Sequence Order
+        static constexpr field_t PMIC2_SWD_DELAY{PMIC2_SWD_DELAY_BYTE, PMIC2_SWD_DELAY_START, PMIC2_SWD_DELAY_LEN};
+        static constexpr field_t PMIC2_SWD_ORDER{PMIC2_SWD_DELAY_BYTE, PMIC2_SWD_ORDER_START, PMIC2_SWD_ORDER_LEN};
+
+        // Byte 280: PMIC2 Phase Combination / Redundancy
+        static constexpr field_t PMIC2_PHASE_COMBIN{PMIC2_PHASE_COMBIN_BYTE, PMIC2_PHASE_COMBIN_START, PMIC2_PHASE_COMBIN_LEN};
+        static constexpr field_t PMIC2_REDUNDANCY{PMIC2_PHASE_COMBIN_BYTE, PMIC2_REDUNDANCY_START, PMIC2_REDUNDANCY_LEN};
+
+        // Byte 281: PMIC3 SWA Voltage Setting
+        static constexpr field_t PMIC3_SWA_VOLT_SET{PMIC3_SWA_VOLT_SET_BYTE, PMIC3_SWA_VOLT_SET_START, PMIC3_SWA_VOLT_SET_LEN};
+        static constexpr field_t PMIC3_SWA_RANGE_SELECT{PMIC3_SWA_VOLT_SET_BYTE, PMIC3_SWA_RANGE_SELECT_START, PMIC3_SWA_RANGE_SELECT_LEN};
+
+        // Byte 282: PMIC3 SWA Voltage Offset
+        static constexpr field_t PMIC3_SWA_VOLT_OFF{PMIC3_SWA_VOLT_OFF_BYTE, PMIC3_SWA_VOLT_OFF_START, PMIC3_SWA_VOLT_OFF_LEN};
+        static constexpr field_t PMIC3_SWA_OFF_DIRECTION{PMIC3_SWA_VOLT_OFF_BYTE, PMIC3_SWA_OFF_DIRECTION_START, PMIC3_SWA_OFF_DIRECTION_LEN};
+
+        // Byte 283: PMIC3 SWA Delay Sequence Order
+        static constexpr field_t PMIC3_SWA_DELAY{PMIC3_SWA_DELAY_BYTE, PMIC3_SWA_DELAY_START, PMIC3_SWA_DELAY_LEN};
+        static constexpr field_t PMIC3_SWA_ORDER{PMIC3_SWA_DELAY_BYTE, PMIC3_SWA_ORDER_START, PMIC3_SWA_ORDER_LEN};
+
+        // Byte 284: PMIC3 SWB Voltage Setting
+        static constexpr field_t PMIC3_SWB_VOLT_SET{PMIC3_SWB_VOLT_SET_BYTE, PMIC3_SWB_VOLT_SET_START, PMIC3_SWB_VOLT_SET_LEN};
+        static constexpr field_t PMIC3_SWB_RANGE_SELECT{PMIC3_SWB_VOLT_SET_BYTE, PMIC3_SWB_RANGE_SELECT_START, PMIC3_SWB_RANGE_SELECT_LEN};
+
+        // Byte 285: PMIC3 SWB Voltage Offset
+        static constexpr field_t PMIC3_SWB_VOLT_OFF{PMIC3_SWB_VOLT_OFF_BYTE, PMIC3_SWB_VOLT_OFF_START, PMIC3_SWB_VOLT_OFF_LEN};
+        static constexpr field_t PMIC3_SWB_OFF_DIRECTION{PMIC3_SWB_VOLT_OFF_BYTE, PMIC3_SWB_OFF_DIRECTION_START, PMIC3_SWB_OFF_DIRECTION_LEN};
+
+        // Byte 286: PMIC3 SWB Delay Sequence Order
+        static constexpr field_t PMIC3_SWB_DELAY{PMIC3_SWB_DELAY_BYTE, PMIC3_SWB_DELAY_START, PMIC3_SWB_DELAY_LEN};
+        static constexpr field_t PMIC3_SWB_ORDER{PMIC3_SWB_DELAY_BYTE, PMIC3_SWB_ORDER_START, PMIC3_SWB_ORDER_LEN};
+
+        // Byte 287: PMIC3 SWC Voltage Setting
+        static constexpr field_t PMIC3_SWC_VOLT_SET{PMIC3_SWC_VOLT_SET_BYTE, PMIC3_SWC_VOLT_SET_START, PMIC3_SWC_VOLT_SET_LEN};
+        static constexpr field_t PMIC3_SWC_RANGE_SELECT{PMIC3_SWC_VOLT_SET_BYTE, PMIC3_SWC_RANGE_SELECT_START, PMIC3_SWC_RANGE_SELECT_LEN};
+
+        // Byte 288: PMIC3 SWC Voltage Offset
+        static constexpr field_t PMIC3_SWC_VOLT_OFF{PMIC3_SWC_VOLT_OFF_BYTE, PMIC3_SWC_VOLT_OFF_START, PMIC3_SWC_VOLT_OFF_LEN};
+        static constexpr field_t PMIC3_SWC_OFF_DIRECTION{PMIC3_SWC_VOLT_OFF_BYTE, PMIC3_SWC_OFF_DIRECTION_START, PMIC3_SWC_OFF_DIRECTION_LEN};
+
+        // Byte 289: PMIC3 SWC Delay Sequence Order
+        static constexpr field_t PMIC3_SWC_DELAY{PMIC3_SWC_DELAY_BYTE, PMIC3_SWC_DELAY_START, PMIC3_SWC_DELAY_LEN};
+        static constexpr field_t PMIC3_SWC_ORDER{PMIC3_SWC_DELAY_BYTE, PMIC3_SWC_ORDER_START, PMIC3_SWC_ORDER_LEN};
+
+        // Byte 290: PMIC3 SWD Voltage Setting
+        static constexpr field_t PMIC3_SWD_VOLT_SET{PMIC3_SWD_VOLT_SET_BYTE, PMIC3_SWD_VOLT_SET_START, PMIC3_SWD_VOLT_SET_LEN};
+        static constexpr field_t PMIC3_SWD_RANGE_SELECT{PMIC3_SWD_VOLT_SET_BYTE, PMIC3_SWD_RANGE_SELECT_START, PMIC3_SWD_RANGE_SELECT_LEN};
+
+        // Byte 291: PMIC3 SWD Voltage Offset
+        static constexpr field_t PMIC3_SWD_VOLT_OFF{PMIC3_SWD_VOLT_OFF_BYTE, PMIC3_SWD_VOLT_OFF_START, PMIC3_SWD_VOLT_OFF_LEN};
+        static constexpr field_t PMIC3_SWD_OFF_DIRECTION{PMIC3_SWD_VOLT_OFF_BYTE, PMIC3_SWD_OFF_DIRECTION_START, PMIC3_SWD_OFF_DIRECTION_LEN};
+
+        // Byte 292: PMIC3 SWD Delay Sequence Order
+        static constexpr field_t PMIC3_SWD_DELAY{PMIC3_SWD_DELAY_BYTE, PMIC3_SWD_DELAY_START, PMIC3_SWD_DELAY_LEN};
+        static constexpr field_t PMIC3_SWD_ORDER{PMIC3_SWD_DELAY_BYTE, PMIC3_SWD_ORDER_START, PMIC3_SWD_ORDER_LEN};
+
+        // Byte 293: PMIC3 Phase Combination / Redundancy
+        static constexpr field_t PMIC3_PHASE_COMBIN{PMIC3_PHASE_COMBIN_BYTE, PMIC3_PHASE_COMBIN_START, PMIC3_PHASE_COMBIN_LEN};
+        static constexpr field_t PMIC3_REDUNDANCY{PMIC3_PHASE_COMBIN_BYTE, PMIC3_REDUNDANCY_START, PMIC3_REDUNDANCY_LEN};
+
+        // Byte 294: PMIC0 IIC Address
+        static constexpr field_t PMIC0_IIC_ADDRESS{PMIC0_IIC_ADDRESS_BYTE, PMIC0_IIC_ADDRESS_START, PMIC0_IIC_ADDRESS_LEN};
+
+        // Byte 295: PMIC1 IIC Address
+        static constexpr field_t PMIC1_IIC_ADDRESS{PMIC1_IIC_ADDRESS_BYTE, PMIC1_IIC_ADDRESS_START, PMIC1_IIC_ADDRESS_LEN};
+
+        // Byte 296: PMIC2 IIC Address
+        static constexpr field_t PMIC2_IIC_ADDRESS{PMIC2_IIC_ADDRESS_BYTE, PMIC2_IIC_ADDRESS_START, PMIC2_IIC_ADDRESS_LEN};
+
+        // Byte 297: PMIC3 IIC Address
+        static constexpr field_t PMIC3_IIC_ADDRESS{PMIC3_IIC_ADDRESS_BYTE, PMIC3_IIC_ADDRESS_START, PMIC3_IIC_ADDRESS_LEN};
+
+        // Byte 298: Registered Clock Drivers (RCD)
+        static constexpr field_t MODULE_RCD_MEDIA_CONTROLLER_TYPE{MODULE_RCD_BYTE, MODULE_RCD_MEDIA_CONTROLLER_TYPE_START, MODULE_RCD_MEDIA_CONTROLLER_TYPE_LEN};
+        static constexpr field_t MODULE_RCD_MEDIA_JEDEC_COMPLIANT{MODULE_RCD_BYTE, MODULE_RCD_JEDEC_COMPLIANT_START, MODULE_RCD_JEDEC_COMPLIANT_LEN};
         static constexpr field_t MODULE_RCD{MODULE_RCD_BYTE, MODULE_RCD_START, MODULE_RCD_LEN};
 
-        // Byte 265 and 266: RCD MFG ID
+        // Byte 299 and 300: RCD MFG ID
         static constexpr field_t RCD_MFG_ID_LSB{RCD_MFG_ID_LSB_BYTE, RCD_MFG_ID_START, RCD_MFG_ID_LEN};
         static constexpr field_t RCD_MFG_ID_MSB{RCD_MFG_ID_MSB_BYTE, RCD_MFG_ID_START, RCD_MFG_ID_LEN};
 
-        // Byte 268: Thermal Sensor 0 Profile
+        // Byte 302: Thermal Sensor 0 Profile
         static constexpr field_t THERM_SENSOR_0_AVAIL{THERM_SENSOR_0_PROFILE_BYTE, THERM_SENSOR_0_AVAIL_START, THERM_SENSOR_0_AVAIL_LEN};
-        static constexpr field_t THERM_SENSOR_0_SECOND_AVAIL{THERM_SENSOR_0_PROFILE_BYTE, THERM_SENSOR_0_SECOND_AVAIL_START, THERM_SENSOR_0_SECOND_AVAIL_LEN};
         static constexpr field_t THERM_SENSOR_0_USAGE{THERM_SENSOR_0_PROFILE_BYTE, THERM_SENSOR_0_USAGE_START, THERM_SENSOR_0_USAGE_LEN};
         static constexpr field_t THERM_SENSOR_0_TYPE{THERM_SENSOR_0_PROFILE_BYTE, THERM_SENSOR_0_TYPE_START, THERM_SENSOR_0_TYPE_LEN};
 
-        // Byte 269: Thermal Sensor 0 I2C Address
-        static constexpr field_t THERM_SENSOR_0_I2C_ADDRESS{THERM_SENSOR_0_I2C_ADDRESS_BYTE, THERM_SENSOR_0_I2C_ADDRESS_START, THERM_SENSOR_0_I2C_ADDRESS_LEN};
-
-        // Byte 271: Thermal Sensor 1 Profile
+        // Byte 303: Thermal Sensor 1 Profile
         static constexpr field_t THERM_SENSOR_1_AVAIL{THERM_SENSOR_1_PROFILE_BYTE, THERM_SENSOR_1_AVAIL_START, THERM_SENSOR_1_AVAIL_LEN};
-        static constexpr field_t THERM_SENSOR_1_SECOND_AVAIL{THERM_SENSOR_1_PROFILE_BYTE, THERM_SENSOR_1_SECOND_AVAIL_START, THERM_SENSOR_1_SECOND_AVAIL_LEN};
         static constexpr field_t THERM_SENSOR_1_USAGE{THERM_SENSOR_1_PROFILE_BYTE, THERM_SENSOR_1_USAGE_START, THERM_SENSOR_1_USAGE_LEN};
         static constexpr field_t THERM_SENSOR_1_TYPE{THERM_SENSOR_1_PROFILE_BYTE, THERM_SENSOR_1_TYPE_START, THERM_SENSOR_1_TYPE_LEN};
 
-        // Byte 271: Thermal Sensor 1 I2C Address
+        // Byte 304: Thermal Sensor 2 Profile
+        static constexpr field_t THERM_SENSOR_2_AVAIL{THERM_SENSOR_2_PROFILE_BYTE, THERM_SENSOR_2_AVAIL_START, THERM_SENSOR_2_AVAIL_LEN};
+        static constexpr field_t THERM_SENSOR_2_USAGE{THERM_SENSOR_2_PROFILE_BYTE, THERM_SENSOR_2_USAGE_START, THERM_SENSOR_2_USAGE_LEN};
+        static constexpr field_t THERM_SENSOR_2_TYPE{THERM_SENSOR_2_PROFILE_BYTE, THERM_SENSOR_2_TYPE_START, THERM_SENSOR_2_TYPE_LEN};
+
+        // Byte 305: Thermal Sensor 3 Profile
+        static constexpr field_t THERM_SENSOR_3_AVAIL{THERM_SENSOR_3_PROFILE_BYTE, THERM_SENSOR_3_AVAIL_START, THERM_SENSOR_3_AVAIL_LEN};
+        static constexpr field_t THERM_SENSOR_3_USAGE{THERM_SENSOR_3_PROFILE_BYTE, THERM_SENSOR_3_USAGE_START, THERM_SENSOR_3_USAGE_LEN};
+        static constexpr field_t THERM_SENSOR_3_TYPE{THERM_SENSOR_3_PROFILE_BYTE, THERM_SENSOR_3_TYPE_START, THERM_SENSOR_3_TYPE_LEN};
+
+        // Byte 306: Thermal Sensor 0 I2C Address
+        static constexpr field_t THERM_SENSOR_0_I2C_ADDRESS{THERM_SENSOR_0_I2C_ADDRESS_BYTE, THERM_SENSOR_0_I2C_ADDRESS_START, THERM_SENSOR_0_I2C_ADDRESS_LEN};
+
+        // Byte 307: Thermal Sensor 1 I2C Address
         static constexpr field_t THERM_SENSOR_1_I2C_ADDRESS{THERM_SENSOR_1_I2C_ADDRESS_BYTE, THERM_SENSOR_1_I2C_ADDRESS_START, THERM_SENSOR_1_I2C_ADDRESS_LEN};
 
-        // Byte 272: Differential Sensor Profile
+        // Byte 308: Thermal Sensor 2 I2C Address
+        static constexpr field_t THERM_SENSOR_2_I2C_ADDRESS{THERM_SENSOR_2_I2C_ADDRESS_BYTE, THERM_SENSOR_2_I2C_ADDRESS_START, THERM_SENSOR_2_I2C_ADDRESS_LEN};
+
+        // Byte 309: Thermal Sensor 3 I2C Address
+        static constexpr field_t THERM_SENSOR_3_I2C_ADDRESS{THERM_SENSOR_3_I2C_ADDRESS_BYTE, THERM_SENSOR_3_I2C_ADDRESS_START, THERM_SENSOR_3_I2C_ADDRESS_LEN};
+
+        // Byte 310: Thermal Sensor Locations
+        static constexpr field_t THERM_SENSOR_3_LOCATION{THERM_SENSOR_LOCATIONS_BYTE, THERM_SENSOR_3_LOCATION_START, THERM_SENSOR_3_LOCATION_LEN};
+        static constexpr field_t THERM_SENSOR_2_LOCATION{THERM_SENSOR_LOCATIONS_BYTE, THERM_SENSOR_2_LOCATION_START, THERM_SENSOR_2_LOCATION_LEN};
+        static constexpr field_t THERM_SENSOR_1_LOCATION{THERM_SENSOR_LOCATIONS_BYTE, THERM_SENSOR_1_LOCATION_START, THERM_SENSOR_1_LOCATION_LEN};
+        static constexpr field_t THERM_SENSOR_0_LOCATION{THERM_SENSOR_LOCATIONS_BYTE, THERM_SENSOR_0_LOCATION_START, THERM_SENSOR_0_LOCATION_LEN};
+
+        // Byte 311: Differential Sensor Profile
         static constexpr field_t THERM_SENSOR_DIFF_AVAIL{THERM_SENSOR_DIFF_PROFILE_BYTE, THERM_SENSOR_DIFF_AVAIL_START, THERM_SENSOR_DIFF_AVAIL_LEN};
         static constexpr field_t THERM_SENSOR_DIFF_USAGE{THERM_SENSOR_DIFF_PROFILE_BYTE, THERM_SENSOR_DIFF_USAGE_START, THERM_SENSOR_DIFF_USAGE_LEN};
         static constexpr field_t THERM_SENSOR_DIFF_TYPE{THERM_SENSOR_DIFF_PROFILE_BYTE, THERM_SENSOR_DIFF_TYPE_START, THERM_SENSOR_DIFF_TYPE_LEN};
 
-        // Byte 273: Differential Sensor I2C Address
+        // Byte 312: Differential Sensor I2C Address
         static constexpr field_t THERM_SENSOR_DIFF_I2C_ADDRESS{THERM_SENSOR_DIFF_I2C_ADDRESS_BYTE, THERM_SENSOR_DIFF_I2C_ADDRESS_START, THERM_SENSOR_DIFF_I2C_ADDRESS_LEN};
-
-        // Byte 274: Secondary Thermal Sensor 0 I2C Address
-        static constexpr field_t THERM_SENSOR_0_SECOND_I2C_ADDRESS{THERM_SENSOR_0_SECOND_I2C_ADDRESS_BYTE, THERM_SENSOR_0_SECOND_I2C_ADDRESS_START, THERM_SENSOR_0_SECOND_I2C_ADDRESS_LEN};
-
-        // Byte 275: Secondary Thermal Sensor 1 I2C Address
-        static constexpr field_t THERM_SENSOR_1_SECOND_I2C_ADDRESS{THERM_SENSOR_1_SECOND_I2C_ADDRESS_BYTE, THERM_SENSOR_1_SECOND_I2C_ADDRESS_START, THERM_SENSOR_1_SECOND_I2C_ADDRESS_LEN};
-
-        // Byte 276: Thermal Sensor Locations
-        static constexpr field_t THERM_SENSOR_1_SECOND_LOCATION{THERM_SENSOR_LOCATIONS_BYTE, THERM_SENSOR_1_SECOND_LOCATION_START, THERM_SENSOR_1_SECOND_LOCATION_LEN};
-        static constexpr field_t THERM_SENSOR_0_SECOND_LOCATION{THERM_SENSOR_LOCATIONS_BYTE, THERM_SENSOR_0_SECOND_LOCATION_START, THERM_SENSOR_0_SECOND_LOCATION_LEN};
-        static constexpr field_t THERM_SENSOR_1_LOCATION{THERM_SENSOR_LOCATIONS_BYTE, THERM_SENSOR_1_LOCATION_START, THERM_SENSOR_1_LOCATION_LEN};
-        static constexpr field_t THERM_SENSOR_0_LOCATION{THERM_SENSOR_LOCATIONS_BYTE, THERM_SENSOR_0_LOCATION_START, THERM_SENSOR_0_LOCATION_LEN};
 
         // MANF Section:
         // Section is not standardized across dimm types, so these fields will live in the
@@ -1037,6 +1476,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 552 and 553: DRAM manufacturing ID for DDIMMs
         static constexpr field_t DRAM_MFR_ID_CODE_LSB{DRAM_MFR_ID_CODE_LSB_BYTE, DRAM_MFR_ID_CODE_START, DRAM_MFR_ID_CODE_LEN};
         static constexpr field_t DRAM_MFR_ID_CODE_MSB{DRAM_MFR_ID_CODE_MSB_BYTE, DRAM_MFR_ID_CODE_START, DRAM_MFR_ID_CODE_LEN};
+
 };
 
 }// spd

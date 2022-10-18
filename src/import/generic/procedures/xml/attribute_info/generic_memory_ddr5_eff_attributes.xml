@@ -116,14 +116,18 @@
   </attribute>
 
   <attribute>
-    <id>ATTR_MEM_EFF_DDR5_REDUNDANT_CS_EN</id>
+    <id>ATTR_MEM_EFF_REDUNDANT_CS_EN</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
-      Enable redundant CS for UDIMM.
+        Rank0 DRAM will be half driven by CS0 and CS2.
+        Rank1 DRAM will be half driven by CS1 and CS3.
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
+    <enum>DISABLE = 0, ENABLE = 1</enum>
     <writeable/>
+    <array>2</array>
+    <mssUnits>bool</mssUnits>
     <mssAccessorName>ddr5_redundant_cs_en</mssAccessorName>
   </attribute>
 

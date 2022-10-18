@@ -924,7 +924,6 @@
         <writeable/>
         <mssAccessorName>ody_draminit_fw_data_addr_offset</mssAccessorName>
     </attribute>
-
     <!-- end draminit structure (message block) outputs section -->
 
     <attribute>
