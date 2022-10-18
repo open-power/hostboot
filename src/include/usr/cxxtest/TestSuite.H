@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,36 @@
  *
  *  Imported from FSP tree - /src/test/cxxtest/cxxtest/
  */
+
+// Set by code that wants to manually execute a testcase outside of the
+// normal CxxTest framework
+#ifdef MANUAL_CXXTEST
+
+trace_desc_t *g_trac_test = NULL;
+TRAC_INIT(&g_trac_test, "UNIT_TEST", 4*KILOBYTE);
+
+namespace CxxTest {
+
+// Empty class to satisfy the compiler
+class TestSuite
+{
+public:
+  virtual ~TestSuite() {}
+};
+
+#define  TS_TRACE(...) { TRACFCOMP( g_trac_test, "TS_TRACE> " __VA_ARGS__ ); }
+#define  TS_INFO(...)  { TRACFCOMP( g_trac_test, "TS_INFO> " __VA_ARGS__ ); }
+#define  TS_WARN(...)  { TRACFCOMP( g_trac_test, "!TS_WARN> " __VA_ARGS__ ); }
+#define  TS_FAIL(...)  { TRACFCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__); }
+
+
+}; //namespace CxxTest 
+
+using namespace CxxTest;
+
+#define __cxxtest__TestSuite_h__ //short-circuit the rest
+
+#endif // MANUAL_CXXTEST
 
 
 #ifndef __cxxtest__TestSuite_h__
