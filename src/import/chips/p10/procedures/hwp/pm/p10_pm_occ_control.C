@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -285,7 +285,7 @@ fapi2::ReturnCode pollOCCState(
 
     fapi2::buffer<uint64_t>  l_occflg0;
     uint32_t                 l_timeout_counter = TIMEOUT_COUNT;
-    uint32_t retry_cnt = 10;
+    uint32_t retry_cnt = 30;
 
     FAPI_DBG("OCC state polling...");
 
