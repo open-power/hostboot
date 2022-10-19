@@ -37,7 +37,6 @@
 #include <fapi2.H>
 #include <lib/ecc/ecc_traits_odyssey.H>
 #include <lib/mcbist/ody_mcbist_traits.H>
-#include <lib/mcbist/ody_mcbist.H>
 #include <lib/dimm/ody_rank.H>
 #include <generic/memory/lib/utils/dimm/kind.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
@@ -46,7 +45,6 @@
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/find.H>
-#include <mss_odyssey_attribute_getters.H>
 #include <lib/mc/ody_port_traits.H>
 #include <lib/shared/ody_consts.H>
 #include <lib/dimm/ody_rank.H>
@@ -236,7 +234,7 @@ const mss::states ody_is_broadcast_capable(const std::vector<mss::dimm::kind<mss
 /// @brief Undeploy the specified spare on the provided rank for Odyssey
 /// @param[in] i_target MEM PORT target
 /// @param[in] i_port_rank Port rank we want to undo the steer mux for.
-/// @param[in] i_spare spare number (0 or 1 for odyssey)
+/// @param[in] i_spare spare number (0 or 1 for Odyssey)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode ody_unspare(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
