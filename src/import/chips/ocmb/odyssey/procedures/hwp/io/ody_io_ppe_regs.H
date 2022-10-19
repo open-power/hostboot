@@ -81,6 +81,81 @@
                   DATA)
 
 
+#define IMG_REG_PPE_DEBUG_LOG_NUM_PUT(REGS, TARGET, DATA) \
+    REGS->putData(\
+                  TARGET, \
+                  0xffff30c0, \
+                  0b000000100, \
+                  0x1fc, \
+                  2, \
+                  0, \
+                  0, \
+                  0, \
+                  DATA)
+
+#define IMG_REG_PPE_DEBUG_LOG_NUM_GET(REGS, TARGET, DATA) \
+    REGS->getData(\
+                  TARGET, \
+                  0xffff30c0, \
+                  0b000000100, \
+                  0x1fc, \
+                  2, \
+                  0, \
+                  0, \
+                  0, \
+                  DATA)
+
+
+#define IMG_REG_UCONTROLLER_TEST_STAT_PUT(REGS, TARGET, DATA) \
+    REGS->putData(\
+                  TARGET, \
+                  0xffff30c0, \
+                  0b000000100, \
+                  0x800, \
+                  11, \
+                  0, \
+                  0, \
+                  0, \
+                  DATA)
+
+#define IMG_REG_UCONTROLLER_TEST_STAT_GET(REGS, TARGET, DATA) \
+    REGS->getData(\
+                  TARGET, \
+                  0xffff30c0, \
+                  0b000000100, \
+                  0x800, \
+                  11, \
+                  0, \
+                  0, \
+                  0, \
+                  DATA)
+
+
+#define IMG_REG_PPE_DISABLE_THREAD_ACTIVE_TIME_CHECK_PUT(REGS, TARGET, DATA) \
+    REGS->putData(\
+                  TARGET, \
+                  0xffff30c0, \
+                  0b000000001, \
+                  0x4000, \
+                  14, \
+                  0, \
+                  0, \
+                  0, \
+                  DATA)
+
+#define IMG_REG_PPE_DISABLE_THREAD_ACTIVE_TIME_CHECK_GET(REGS, TARGET, DATA) \
+    REGS->getData(\
+                  TARGET, \
+                  0xffff30c0, \
+                  0b000000001, \
+                  0x4000, \
+                  14, \
+                  0, \
+                  0, \
+                  0, \
+                  DATA)
+
+
 #define IMG_REG_UCONTROLLER_TEST_EN_PUT(REGS, TARGET, DATA) \
     REGS->putData(\
                   TARGET, \
@@ -131,31 +206,6 @@
                   DATA)
 
 
-#define IMG_REG_PPE_DEBUG_LOG_NUM_PUT(REGS, TARGET, DATA) \
-    REGS->putData(\
-                  TARGET, \
-                  0xffff30c0, \
-                  0b000000100, \
-                  0x1fc, \
-                  2, \
-                  0, \
-                  0, \
-                  0, \
-                  DATA)
-
-#define IMG_REG_PPE_DEBUG_LOG_NUM_GET(REGS, TARGET, DATA) \
-    REGS->getData(\
-                  TARGET, \
-                  0xffff30c0, \
-                  0b000000100, \
-                  0x1fc, \
-                  2, \
-                  0, \
-                  0, \
-                  0, \
-                  DATA)
-
-
 #define IMG_REG_PPE_NUM_THREADS_PUT(REGS, TARGET, DATA) \
     REGS->putData(\
                   TARGET, \
@@ -175,31 +225,6 @@
                   0b000000000, \
                   0xf000, \
                   12, \
-                  0, \
-                  0, \
-                  0, \
-                  DATA)
-
-
-#define IMG_REG_UCONTROLLER_TEST_STAT_PUT(REGS, TARGET, DATA) \
-    REGS->putData(\
-                  TARGET, \
-                  0xffff30c0, \
-                  0b000000100, \
-                  0x800, \
-                  11, \
-                  0, \
-                  0, \
-                  0, \
-                  DATA)
-
-#define IMG_REG_UCONTROLLER_TEST_STAT_GET(REGS, TARGET, DATA) \
-    REGS->getData(\
-                  TARGET, \
-                  0xffff30c0, \
-                  0b000000100, \
-                  0x800, \
-                  11, \
                   0, \
                   0, \
                   0, \
@@ -4407,56 +4432,6 @@
                   DATA)
 
 
-#define MEM_REG_RX_B_SIGDET_DONE_PL_PUT(REGS, TARGET, THREAD, LANE, DATA) \
-    REGS->putData(\
-                  TARGET, \
-                  0xffff5800, \
-                  0b000000011, \
-                  0x80, \
-                  7, \
-                  THREAD, \
-                  0x400, \
-                  LANE, \
-                  DATA)
-
-#define MEM_REG_RX_B_SIGDET_DONE_PL_GET(REGS, TARGET, THREAD, LANE, DATA) \
-    REGS->getData(\
-                  TARGET, \
-                  0xffff5800, \
-                  0b000000011, \
-                  0x80, \
-                  7, \
-                  THREAD, \
-                  0x400, \
-                  LANE, \
-                  DATA)
-
-
-#define MEM_REG_RX_B_SIGDET_DONE_PUT(REGS, TARGET, THREAD, DATA) \
-    REGS->putData(\
-                  TARGET, \
-                  0xffff5800, \
-                  0b000000011, \
-                  0x80, \
-                  7, \
-                  THREAD, \
-                  0x400, \
-                  0, \
-                  DATA)
-
-#define MEM_REG_RX_B_SIGDET_DONE_GET(REGS, TARGET, THREAD, DATA) \
-    REGS->getData(\
-                  TARGET, \
-                  0xffff5800, \
-                  0b000000011, \
-                  0x80, \
-                  7, \
-                  THREAD, \
-                  0x400, \
-                  0, \
-                  DATA)
-
-
 #define MEM_REG_PCIE_PPE_SAVED_TX_DCC_LANE_0_PL_PUT(REGS, TARGET, THREAD, LANE, DATA) \
     REGS->putData(\
                   TARGET, \
@@ -5107,6 +5082,56 @@
                   DATA)
 
 
+#define MEM_REG_RX_DFE_FULL_MAX_ERROR_DISABLE_PL_PUT(REGS, TARGET, THREAD, LANE, DATA) \
+    REGS->putData(\
+                  TARGET, \
+                  0xffff5800, \
+                  0b110000110, \
+                  0x100, \
+                  8, \
+                  THREAD, \
+                  0x400, \
+                  LANE, \
+                  DATA)
+
+#define MEM_REG_RX_DFE_FULL_MAX_ERROR_DISABLE_PL_GET(REGS, TARGET, THREAD, LANE, DATA) \
+    REGS->getData(\
+                  TARGET, \
+                  0xffff5800, \
+                  0b110000110, \
+                  0x100, \
+                  8, \
+                  THREAD, \
+                  0x400, \
+                  LANE, \
+                  DATA)
+
+
+#define MEM_REG_RX_DFE_FULL_MAX_ERROR_DISABLE_PUT(REGS, TARGET, THREAD, DATA) \
+    REGS->putData(\
+                  TARGET, \
+                  0xffff5800, \
+                  0b110000110, \
+                  0x100, \
+                  8, \
+                  THREAD, \
+                  0x400, \
+                  0, \
+                  DATA)
+
+#define MEM_REG_RX_DFE_FULL_MAX_ERROR_DISABLE_GET(REGS, TARGET, THREAD, DATA) \
+    REGS->getData(\
+                  TARGET, \
+                  0xffff5800, \
+                  0b110000110, \
+                  0x100, \
+                  8, \
+                  THREAD, \
+                  0x400, \
+                  0, \
+                  DATA)
+
+
 #define MEM_REG_TX_FFE_PRE2_COEF_PL_PUT(REGS, TARGET, THREAD, LANE, DATA) \
     REGS->putData(\
                   TARGET, \
@@ -5551,6 +5576,56 @@
                   0b110001001, \
                   0x8000, \
                   15, \
+                  THREAD, \
+                  0x400, \
+                  0, \
+                  DATA)
+
+
+#define MEM_REG_PPE_THREAD_TIME_STRESS_MODE_PL_PUT(REGS, TARGET, THREAD, LANE, DATA) \
+    REGS->putData(\
+                  TARGET, \
+                  0xffff5800, \
+                  0b110000100, \
+                  0x80, \
+                  7, \
+                  THREAD, \
+                  0x400, \
+                  LANE, \
+                  DATA)
+
+#define MEM_REG_PPE_THREAD_TIME_STRESS_MODE_PL_GET(REGS, TARGET, THREAD, LANE, DATA) \
+    REGS->getData(\
+                  TARGET, \
+                  0xffff5800, \
+                  0b110000100, \
+                  0x80, \
+                  7, \
+                  THREAD, \
+                  0x400, \
+                  LANE, \
+                  DATA)
+
+
+#define MEM_REG_PPE_THREAD_TIME_STRESS_MODE_PUT(REGS, TARGET, THREAD, DATA) \
+    REGS->putData(\
+                  TARGET, \
+                  0xffff5800, \
+                  0b110000100, \
+                  0x80, \
+                  7, \
+                  THREAD, \
+                  0x400, \
+                  0, \
+                  DATA)
+
+#define MEM_REG_PPE_THREAD_TIME_STRESS_MODE_GET(REGS, TARGET, THREAD, DATA) \
+    REGS->getData(\
+                  TARGET, \
+                  0xffff5800, \
+                  0b110000100, \
+                  0x80, \
+                  7, \
                   THREAD, \
                   0x400, \
                   0, \
@@ -6811,9 +6886,9 @@
     REGS->putData(\
                   TARGET, \
                   0xffff5800, \
-                  0b110000100, \
-                  0x80, \
-                  7, \
+                  0b110000110, \
+                  0x200, \
+                  9, \
                   THREAD, \
                   0x400, \
                   LANE, \
@@ -6823,9 +6898,9 @@
     REGS->getData(\
                   TARGET, \
                   0xffff5800, \
-                  0b110000100, \
-                  0x80, \
-                  7, \
+                  0b110000110, \
+                  0x200, \
+                  9, \
                   THREAD, \
                   0x400, \
                   LANE, \
@@ -6836,9 +6911,9 @@
     REGS->putData(\
                   TARGET, \
                   0xffff5800, \
-                  0b110000100, \
-                  0x80, \
-                  7, \
+                  0b110000110, \
+                  0x200, \
+                  9, \
                   THREAD, \
                   0x400, \
                   0, \
@@ -6848,9 +6923,9 @@
     REGS->getData(\
                   TARGET, \
                   0xffff5800, \
-                  0b110000100, \
-                  0x80, \
-                  7, \
+                  0b110000110, \
+                  0x200, \
+                  9, \
                   THREAD, \
                   0x400, \
                   0, \
@@ -10301,56 +10376,6 @@
                   0b000000110, \
                   0xff, \
                   0, \
-                  THREAD, \
-                  0x400, \
-                  0, \
-                  DATA)
-
-
-#define MEM_REG_PPE_DISABLE_THREAD_ACTIVE_TIME_CHECK_PL_PUT(REGS, TARGET, THREAD, LANE, DATA) \
-    REGS->putData(\
-                  TARGET, \
-                  0xffff5800, \
-                  0b110000011, \
-                  0x4, \
-                  2, \
-                  THREAD, \
-                  0x400, \
-                  LANE, \
-                  DATA)
-
-#define MEM_REG_PPE_DISABLE_THREAD_ACTIVE_TIME_CHECK_PL_GET(REGS, TARGET, THREAD, LANE, DATA) \
-    REGS->getData(\
-                  TARGET, \
-                  0xffff5800, \
-                  0b110000011, \
-                  0x4, \
-                  2, \
-                  THREAD, \
-                  0x400, \
-                  LANE, \
-                  DATA)
-
-
-#define MEM_REG_PPE_DISABLE_THREAD_ACTIVE_TIME_CHECK_PUT(REGS, TARGET, THREAD, DATA) \
-    REGS->putData(\
-                  TARGET, \
-                  0xffff5800, \
-                  0b110000011, \
-                  0x4, \
-                  2, \
-                  THREAD, \
-                  0x400, \
-                  0, \
-                  DATA)
-
-#define MEM_REG_PPE_DISABLE_THREAD_ACTIVE_TIME_CHECK_GET(REGS, TARGET, THREAD, DATA) \
-    REGS->getData(\
-                  TARGET, \
-                  0xffff5800, \
-                  0b110000011, \
-                  0x4, \
-                  2, \
                   THREAD, \
                   0x400, \
                   0, \
@@ -14951,6 +14976,56 @@
                   0b110100110, \
                   0xfc, \
                   2, \
+                  THREAD, \
+                  0x400, \
+                  0, \
+                  DATA)
+
+
+#define MEM_REG_RX_B_RESERVED_PL_PUT(REGS, TARGET, THREAD, LANE, DATA) \
+    REGS->putData(\
+                  TARGET, \
+                  0xffff5800, \
+                  0b000000011, \
+                  0x80, \
+                  7, \
+                  THREAD, \
+                  0x400, \
+                  LANE, \
+                  DATA)
+
+#define MEM_REG_RX_B_RESERVED_PL_GET(REGS, TARGET, THREAD, LANE, DATA) \
+    REGS->getData(\
+                  TARGET, \
+                  0xffff5800, \
+                  0b000000011, \
+                  0x80, \
+                  7, \
+                  THREAD, \
+                  0x400, \
+                  LANE, \
+                  DATA)
+
+
+#define MEM_REG_RX_B_RESERVED_PUT(REGS, TARGET, THREAD, DATA) \
+    REGS->putData(\
+                  TARGET, \
+                  0xffff5800, \
+                  0b000000011, \
+                  0x80, \
+                  7, \
+                  THREAD, \
+                  0x400, \
+                  0, \
+                  DATA)
+
+#define MEM_REG_RX_B_RESERVED_GET(REGS, TARGET, THREAD, DATA) \
+    REGS->getData(\
+                  TARGET, \
+                  0xffff5800, \
+                  0b000000011, \
+                  0x80, \
+                  7, \
                   THREAD, \
                   0x400, \
                   0, \
