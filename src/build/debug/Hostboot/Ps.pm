@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2011,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -54,6 +54,18 @@ use constant PS_TASK_STATE_OFFSET => 8*44;
 use constant PS_TASK_STATEEXTRA_OFFSET => 8 + PS_TASK_STATE_OFFSET;
 
 use bigint;
+
+# Map state to a verbose description.
+my %TASK_STATES = ( "R" => "Running",
+                    "r" => "Ready",
+                    "E" => "Ended",
+                    "f" => "Block on Futex",
+                    "M" => "Block on Message",
+                    "u" => "Block on Userspace Request",
+                    "s" => "Block on Sleeping",
+                    "j" => "Block on Join",
+                    "Z" => "Zombie",
+                  );
 
 sub main
 {
@@ -106,7 +118,7 @@ sub displayStackTrace
     # d prefix means "display", i.e. "dstack_ptr" is the display version of
     # "stack_ptr".  d-prefixed values are not part of task_t
     my %task = ();
-    $task{cpu} = ::read64($i_taskAddr + $off); $off+=8;
+    $task{cpu_ptr} = ::read64($i_taskAddr + $off); $off+=8;
     $task{context_t}{stack_ptr} = ::read64($i_taskAddr + $off); $off+=8;
     $task{context_t}{dstack_ptr} = sprintf "0x%X", $task{context_t}{stack_ptr};
     $task{context_t}{nip} = ::read64($i_taskAddr + $off); $off+=8;
@@ -138,27 +150,37 @@ sub displayStackTrace
     $task{context_t}{ctr}             = ::read64($i_taskAddr + $off); $off+=8;
     $task{context_t}{xer}             = ::read64($i_taskAddr + $off); $off+=8;
     $task{context_t}{msr_mask}        = ::read64($i_taskAddr + $off); $off+=8;
-    $task{context_t}{fp_context}      = ::read64($i_taskAddr + $off); $off+=8;
-    $task{context_t}{tid}             = ::read64($i_taskAddr + $off); $off+=8;
-    $task{context_t}{affinity_pinned} = ::read64($i_taskAddr + $off); $off+=8;
-    $task{context_t}{state}           = ::read8( $i_taskAddr + $off); $off+=1;
+    $task{fp_context_ptr}             = ::read64($i_taskAddr + $off); $off+=8;
+    $task{tls_context_ptr}            = ::read64($i_taskAddr + $off); $off+=8;
+    $task{tid}                        = ::read64($i_taskAddr + $off); $off+=8;
+    $task{affinity_pinned}            = ::read64($i_taskAddr + $off); $off+=8;
+    $task{state}                      = ::read8( $i_taskAddr + $off); $off+=1;
 
     # At this point we cached the whole task struct, for any later application.
 
     my $prefix = makeTabs($i_level);
 
+    # Display PIR:
+    # cpu_t has 2 pointers before cpuid_t which is PIR value
+    my $pir = ::read32($task{cpu_ptr}+16);
+    ::userDisplay sprintf("%s     PIR  : %u\n", $prefix, $pir);
+
     # Display PC:
     my $instAddr = $task{context_t}{nip};
     my ($entryPointName, $symOff) =
         ::findSymbolWithinAddrRange($instAddr);
+
+    # convert decimal state to character for lookup in TASK_STATES hash
+    my $stateChar = pack("C", $task{state});
+
     ::userDisplay sprintf("%s     NIP  : %s+0x%x : 0x%08x %s\n",
         $prefix, $entryPointName, $symOff, $instAddr,
         # None of the state is valid if the task is in 'running' state
-        # ('R' = 0x52).
-        ($task{context_t}{state} == 0x52 ? " -- inaccurate" : ""));
+        ($TASK_STATES{$stateChar} eq "Running" ?
+            " -- inaccurate 'running' state" :
+            (exists($TASK_STATES{$stateChar}) ? "" : sprintf("0x%02X", $task{state})."-> unknown state")));
 
     # Now dump the stack trace
-
     my $curFrame = $task{context_t}{"pgprs1"} ;
     my $curLinkReg = $task{context_t}{lr};
     $instAddr = $curLinkReg;
@@ -279,18 +301,8 @@ sub displayTracker
         if ($status) { $stateExtra = "(Crashed)"; }
         elsif ($retval) { $stateExtra = (sprintf "(0x%x)", $retval); }
     }
-    # Map state to an verbose description.
-    my %states = ( "R" => "Running",
-                   "r" => "Ready",
-                   "E" => "Ended",
-                   "f" => "Block on Futex",
-                   "M" => "Block on Message",
-                   "u" => "Block on Userspace Request",
-                   "s" => "Block on Sleeping",
-                   "j" => "Block on Join",
-                   "Z" => "Zombie",
-                 );
-    $state = $states{$state};
+
+    $state = $TASK_STATES{$state};
 
     # Display task info obtained.
     ::userDisplay makeTabs($level)."-+ TID $tid   State: $state$stateExtra\n";

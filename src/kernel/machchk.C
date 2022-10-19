@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -206,6 +206,12 @@ void forceCheckstop()
         // (RS) is stored into the doubleword in storage addressed by EA
         asm volatile("stdcix %0,0,%1"
                      :: "r" (g_xstopRegValue) , "r" (reinterpret_cast <uint64_t>(g_xstopRegPtr)));
+
+        // There will be significant core execution time past the issuance of the CI store
+        // to write the FIR before the core stops execution (the XSCOM has to arbitrate to
+        // broadcast onto the fabric, and then be routed via the ADU through the PIB to the SCOM register).
+        // Adding this infinite loop to "park" the core at this spot for easier debug
+        while (1) {}
     }
     else
     {
