@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,7 +92,7 @@ task_t* TaskManager::_createIdleTask()
 }
 
 task_t* TaskManager::_createTask(TaskManager::task_fn_t t,
-				 void* p, bool withStack, bool kernelParent)
+                                 void* p, bool withStack, bool kernelParent)
 {
     task_t* task = new task_t();
 
@@ -181,12 +181,17 @@ void TaskManager::_endTask(task_t* t, void* retval, int status)
     t->tracker->retval = retval;
     t->tracker->task = NULL; // NULL signifies task is complete for now.
 
+    if (status == TASK_STATUS_CRASHED)
+    {
+        printk( "PIR %u (TID %d) crashed\n",
+            ((t->cpu != nullptr)?t->cpu->cpu:0xFFFF), t->tid );
+    }
+
     if (t->detached)
     {
         if(status == TASK_STATUS_CRASHED)
         {
-            printk("Critical: Detached task %d crashed.\n",
-                t->tid);
+            printk("Critical: Detached task %d crashed.\n", t->tid);
             kassert(false); // Hostboot shuts down
         }
         else
@@ -225,8 +230,7 @@ void TaskManager::_endTask(task_t* t, void* retval, int status)
         {
             if (status == TASK_STATUS_CRASHED)
             {
-                printk("Critical: Parentless task %d crashed.\n",
-                       t->tid);
+                printk("Critical: Parentless task %d crashed.\n", t->tid);
                 kassert(status != TASK_STATUS_CRASHED);
             }
             else
