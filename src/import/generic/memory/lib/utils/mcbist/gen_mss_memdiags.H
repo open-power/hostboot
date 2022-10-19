@@ -214,6 +214,14 @@ fapi_try_exit:
 namespace memdiags
 {
 
+///
+/// @brief Helper function to get the subtest to run scrub for this memory controller type
+/// @tparam MC the mc type of the target under test
+/// @return The subtest used to run scrub
+///
+template< mss::mc_type MC>
+mss::mcbist::subtest_t<MC> get_scrub_subtest();
+
 // Map some of the mcbist namespace here to make it easier for users of memdiags
 // This is an intentional using statement in a header which is typically
 // disallowed - I am intentionally pulling these into this namespace for all callers.
@@ -786,7 +794,7 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
     const fapi2::Target<T>& i_target,
     const constraints<MC> i_const,
     fapi2::ReturnCode& o_rc ):
-    operation<MC>(i_target, mss::mcbist::scrub_subtest<MC>(), i_const)
+    operation<MC>(i_target, get_scrub_subtest<MC>(), i_const)
 {
     mss::mcbist::address l_generic_start_address;
     mss::mcbist::address l_generic_end_address;
@@ -937,7 +945,7 @@ struct targeted_scrub_operation : public operation<MC>
     targeted_scrub_operation( const fapi2::Target<T>& i_target,
                               const constraints<MC> i_const,
                               fapi2::ReturnCode& o_rc ):
-        operation<MC>(i_target, mss::mcbist::scrub_subtest<MC>(), i_const)
+        operation<MC>(i_target, get_scrub_subtest<MC>(), i_const)
     {
         // Scrub operations run 128B
         this->iv_program.change_len64(mss::OFF);

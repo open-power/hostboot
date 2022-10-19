@@ -50,6 +50,16 @@ namespace memdiags
 {
 
 ///
+/// @brief Helper function to get the subtest to run continuous scrub for this memory controller type - Odyssey specialization
+/// @return The subtest used to run continuous scrub
+///
+template<>
+mss::mcbist::subtest_t<mss::mc_type::ODYSSEY> get_scrub_subtest<mss::mc_type::ODYSSEY>()
+{
+    return mss::mcbist::steer_subtest<mss::mc_type::ODYSSEY>();
+}
+
+///
 /// @brief Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and return the original mask value - specialization for Odyssey
 /// @param[in] i_target the target
 /// @param[out] o_fir_mask_save the original mask value to be restored later
