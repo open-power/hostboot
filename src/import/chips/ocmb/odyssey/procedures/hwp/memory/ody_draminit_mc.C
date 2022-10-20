@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <lib/workarounds/ody_dfi_complete_workarounds.H>
 
 extern "C"
 {
@@ -83,10 +84,9 @@ extern "C"
                   TARGTIDFORMAT " Failed to change_dfi_init_start",
                   TARGTID );
 
-        // Checks that the DFI init completed successfully
-        FAPI_TRY(mss::ody::poll_for_dfi_init_complete(i_target),
-                 TARGTIDFORMAT " Failed to poll_for_dfi_init_complete",
-                 TARGTID );
+        // Poll the DFI interface for completion
+        FAPI_TRY( mss::ody::workarounds::check_dfi_init( i_target ), TARGTIDFORMAT " Failed to check if DFI init completed",
+                  TARGTID );
 
         // Start the refresh engines by setting MBAREF0Q(0) = 1. Note that the remaining bits in
         // MBAREF0Q should retain their initialization values.
