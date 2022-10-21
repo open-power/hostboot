@@ -745,6 +745,7 @@ void addBootProgressPdrs(PdrManager& io_pdrman, const pldm_entity& i_backplane_e
              | enum_bit(PLDM_STATE_SET_BOOT_PROG_STATE_BASE_BOARD_INITIALIZATION)
              | enum_bit(PLDM_STATE_SET_BOOT_PROG_STATE_MEM_INITIALIZATION)
              | enum_bit(PLDM_STATE_SET_BOOT_PROG_STATE_SEC_PROC_INITIALIZATION)
+             | enum_bit(PLDM_STATE_SET_BOOT_PROG_STATE_OSSTART)
             ),
             PdrManager::STATE_QUERY_HANDLER_ATTRIBUTE_GETTER,
             ATTR_BOOT_PROGRESS_STATE);
