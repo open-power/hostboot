@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,7 +97,9 @@ fapi2::ReturnCode pwr_throttles( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 /// @note equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
 ///
-fapi2::ReturnCode equalize_throttles( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >& i_targets,
+
+fapi2::ReturnCode equalize_throttles( const
+                                      std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >& i_targets,
                                       const mss::throttle_type i_throttle_type);
 
 }//power_thermal

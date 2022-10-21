@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,6 +145,7 @@ class kind
             iv_rcd_mfgid = i_rhs.iv_rcd_mfgid;
             iv_module_height = i_rhs.iv_module_height;
             iv_rounded_off_dimm_count = i_rhs.iv_rounded_off_dimm_count;
+            iv_attached_dimm_count = i_rhs.iv_attached_dimm_count;
             return *this;
         }
 
@@ -170,7 +171,8 @@ class kind
                     (iv_hybrid_memory_type == i_rhs.iv_hybrid_memory_type) &&
                     (iv_rcd_mfgid == i_rhs.iv_rcd_mfgid) &&
                     (iv_module_height == i_rhs.iv_module_height) &&
-                    (iv_rounded_off_dimm_count == i_rhs.iv_rounded_off_dimm_count));
+                    (iv_rounded_off_dimm_count == i_rhs.iv_rounded_off_dimm_count) &&
+                    (iv_attached_dimm_count == i_rhs.iv_attached_dimm_count));
         }
 
         ///
@@ -212,7 +214,7 @@ class kind
             iv_rounded_off_dimm_count = mss::count_mem_port(mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(l_ocmb),
                                         fapi2::TARGET_STATE_PRESENT);
             iv_rounded_off_dimm_count = round_up_dimm_count(iv_rounded_off_dimm_count);
-
+            iv_attached_dimm_count = mss::count_dimm (mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target));
 
             return;
 
@@ -255,7 +257,8 @@ class kind
               const uint8_t i_hybrid_memory_type = fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NONE,
               const uint16_t i_rcd_mfgid = 0,
               const uint8_t i_module_height = 0,
-              const uint8_t i_raw_dimm_count = 0
+              const uint8_t i_raw_dimm_count = 0,
+              const uint8_t i_attached_dimm_count = 1
             ):
             iv_target(0),
             iv_master_ranks(i_master_ranks),
@@ -272,7 +275,8 @@ class kind
             iv_hybrid(i_hybrid),
             iv_hybrid_memory_type(i_hybrid_memory_type),
             iv_rcd_mfgid(i_rcd_mfgid),
-            iv_module_height(i_module_height)
+            iv_module_height(i_module_height),
+            iv_attached_dimm_count(i_attached_dimm_count)
         {
             // Bit of an idiot-check to be sure a hand-crafted dimm::kind make sense wrt slaves, masters, packages, etc.
             // Both of these are checked in eff_config. If they are messed up, they should be caught there
@@ -312,6 +316,7 @@ class kind
         uint16_t iv_rcd_mfgid;
         uint8_t iv_module_height;
         uint8_t iv_rounded_off_dimm_count;
+        uint8_t iv_attached_dimm_count;
 
         ///
         /// @brief equal_config
@@ -328,7 +333,8 @@ class kind
                     (iv_dram_generation == i_input_compare.iv_dram_generation) &&
                     (iv_dimm_type == i_input_compare.iv_dimm_type) &&
                     (iv_rows == i_input_compare.iv_rows) &&
-                    (iv_size == i_input_compare.iv_size));
+                    (iv_size == i_input_compare.iv_size) &&
+                    (iv_attached_dimm_count == i_input_compare.iv_attached_dimm_count));
         }
 };
 

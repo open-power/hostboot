@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 // EKB-Mirror-To: hostboot
 
 #include <fapi2.H>
+#include <vector>
 #include <ody_mss_eff_config_thermal.H>
 
 extern "C"
@@ -48,7 +49,5 @@ extern "C"
             i_targets)
     {
         return fapi2::FAPI2_RC_SUCCESS;
-
     }
-
 }// extern C

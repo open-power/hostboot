@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,7 @@ constexpr uint16_t ANY_MFGID = 0xFFFF;
 constexpr uint8_t  ANY_HEIGHT = 0xFF;
 constexpr uint8_t  ANY_PORT = 0xFF;
 constexpr uint8_t  ANY_COUNT = 0xFF;
+constexpr uint8_t  ANY_ATTACHED = 0xFF;
 
 //Currently needs to be in sorted order for lookup to work
 static const std::vector< std::pair<uint32_t , uint8_t> > DIMM_SIZE_MAP =
@@ -78,9 +79,10 @@ static const std::vector< std::pair<uint32_t , uint8_t> > DIMM_SIZE_MAP =
 
 static const std::vector< std::pair<uint8_t , uint8_t> > DRAM_GEN_MAP =
 {
+    // Key value pairing needs to be in numerical order based off enum values of attribute for mapping to function properly
     {fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_EMPTY, 0b00},
-    {fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR3, 0b01},
     {fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4, 0b10},
+    {fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5, 0b01},
     {ANY_GEN, 0b11}
 };
 
@@ -307,7 +309,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, const uint8_t i_
     //DIMM_TYPE wildcard
     FAPI_TRY(( decode<TT::DIMM_TYPE_START, TT::DIMM_TYPE_LEN>
                (TT::DIMM_TYPE_MAP, l_hash, l_uint8_buf)),
-             "Failed to generate power thermal decoding for %s val %d",
+             "Failed to generate power thermal decoding for %s val %d ",
              "DIMM_TYPE", l_hash);
 
     if(ANY_TYPE == l_uint8_buf)
@@ -376,7 +378,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, const uint8_t i_
 
     if (TT::MC_TARGET_TYPE == fapi2::TARGET_TYPE_OCMB_CHIP)
     {
-        //MODUEL HEIGHT wildcard
+        //MODULE HEIGHT wildcard
         FAPI_TRY(( decode<TT::DIMM_MODULE_HEIGHT_START, TT::DIMM_MODULE_HEIGHT_LEN>
                    (DIMM_MODULE_HEIGHT_MAP, l_hash, l_uint8_buf)),
                  "Failed to generate power thermal decoding for %s val %d",
@@ -386,6 +388,18 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, const uint8_t i_
         {
             l_mask.setBit<TT::DIMM_MODULE_HEIGHT_START, TT::DIMM_MODULE_HEIGHT_LEN>();
         }
+
+        // NUMBER OF DIMMS ATTACHED wildcard
+        FAPI_TRY(( decode<TT::DIMM_ATTACHED_START, TT::DIMM_ATTACHED_LEN>
+                   (TT::DIMM_ATTACHED_MAP, l_hash, l_uint8_buf)),
+                 "Failed to generate power thermal decoding for %s val %d",
+                 "DIMMS_ATTACHED", l_hash);
+
+        if(ANY_ATTACHED == l_uint8_buf)
+        {
+            l_mask.setBit<TT::DIMM_ATTACHED_START, TT::DIMM_ATTACHED_LEN>();
+        }
+
 
         // If reading safemode throttles, check for dimm count
         if (i_safemode_throttles)
@@ -462,6 +476,21 @@ class decoder
         /// @note populates iv_gen_keys
         ///
         fapi2::ReturnCode generate_encoding (const uint8_t i_safemode_throttles);
+
+        ///
+        /// @brief encodes dimm attached into key, allowing special cases power for ocmb + 1 dimm or ocmb + 2 dimms
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
+        /// @note populates iv_gen_key
+        ///
+        fapi2::ReturnCode encode_dimm_attached()
+        {
+            FAPI_TRY(( encode<TT::DIMM_ATTACHED_START, TT::DIMM_ATTACHED_LEN>
+                       (iv_kind.iv_target, iv_kind.iv_attached_dimm_count, TT::DIMM_ATTACHED_MAP, iv_gen_key)),
+                     "Failed to generate power thermal encoding for %s val %d on target: %s",
+                     "DIMM_ATTACHED", iv_kind.iv_attached_dimm_count, mss::c_str(iv_kind.iv_target) );
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
         ///
         /// @brief encodes dimm type into key, allowing special cases like MDS
@@ -573,6 +602,12 @@ fapi2::ReturnCode decoder<MC, TT>::generate_encoding(const uint8_t i_safemode_th
              "Failed to generate power thermal encoding for %s val %d on target: %s",
              "DRAM_MFG_ID", iv_kind.iv_mfgid, mss::c_str(iv_kind.iv_target) );
 
+    // DIMM_ATTACHED
+    FAPI_TRY(( encode<TT::DIMM_ATTACHED_START, TT::DIMM_ATTACHED_LEN>
+               (iv_kind.iv_target, iv_kind.iv_attached_dimm_count, TT::DIMM_ATTACHED_MAP, iv_gen_key)),
+             "Failed to generate power thermal encoding for %s val %d on target: %s",
+             "DIMM_ATTACHED", iv_kind.iv_attached_dimm_count, mss::c_str(iv_kind.iv_target) );
+
     if (TT::MC_TARGET_TYPE == fapi2::TARGET_TYPE_MCS)
     {
         //NUM DROPS PER PORT
@@ -643,7 +678,7 @@ fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uin
                 .set_ROUNDED_OFF_DIMM_COUNT(iv_kind.iv_rounded_off_dimm_count),
                 "Couldn't find %s value for generated key:0x%08lx, for target %s. "
                 "DIMM values for generated key are "
-                "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d, height %d rounded dimm count is %d",
+                "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d, height %d rounded dimm count is %d, attached dimm is %d",
                 i_attr_description,
                 iv_gen_key,
                 mss::c_str(iv_kind.iv_target),
@@ -656,7 +691,8 @@ fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uin
                 iv_kind.iv_mfgid,
                 iv_dimms_per_port,
                 iv_kind.iv_module_height,
-                iv_kind.iv_rounded_off_dimm_count
+                iv_kind.iv_rounded_off_dimm_count,
+                iv_kind.iv_attached_dimm_count
                );
     {
         const fapi2::buffer<uint64_t> l_temp(*l_value_iterator);
@@ -666,6 +702,36 @@ fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uin
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief find the power curve attributes for each dimm on an MEM_PORT target
+/// @param[in] i_throttle_type specifies whether this is for power or thermal throttling
+/// @param[in] i_port vector of target type on which dimm attrs will be set
+/// @param[in] i_slope vector of generated hashes for encoding the values for memory power curve slopes
+/// @param[in] i_intercept vector of generated hashes for encoding the values for memory power curve intercepts
+/// @param[in] i_thermal_power_limit vector of generated hashes for encoding the values for memory power limits
+/// @param[in] i_current_curve_with_limit vector of generated hashes for encoding the values for regulator power curves and limits
+/// @param[in] i_safemode_throttles vector of generated hashes for safemode throttles array
+/// @param[out] o_slope the power curve slope for each dimm
+/// @param[out] o_intercept the power curve intercept for each dimm
+/// @param[out] o_limit the power limit for the dimm
+/// @param[out] o_safemode the safe mode throttle value for the dimm
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note used to set power curve attributes in calling function
+/// @note decodes the attribute "encoding" to get the power curves and power limits for a dimm
+///
+template<mss::mc_type MC, typename TT = throttle_traits<MC>>
+fapi2::ReturnCode get_power_attrs(const mss::throttle_type i_throttle_type,
+                                  const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                                  const std::vector< uint64_t >& i_slope,
+                                  const std::vector< uint64_t >& i_intercept,
+                                  const std::vector< uint64_t >& i_thermal_power_limit,
+                                  const std::vector< uint64_t >& i_current_curve_with_limit,
+                                  const std::vector< uint64_t >& i_safemode_throttles,
+                                  uint16_t o_slope [TT::DIMMS_PER_PORT ],
+                                  uint16_t o_intercept [TT::DIMMS_PER_PORT ],
+                                  uint32_t o_limit [TT::DIMMS_PER_PORT ],
+                                  uint32_t& o_safemode);
 
 
 

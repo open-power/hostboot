@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,10 +173,15 @@ class throttle_traits<mss::mc_type::EXPLORER>
 
             DIMM_COUNT_START = 22,
             DIMM_COUNT_LEN = 4,
+
+            // Invalid for Explorer but compile will fail without them
+            DIMM_ATTACHED_START = 26,
+            DIMM_ATTACHED_LEN = 2,
         };
 
         // Definition is in chip folder
         static const std::vector< std::pair<uint8_t , uint8_t> > DIMM_TYPE_MAP;
+        static const std::vector< std::pair<uint8_t , uint8_t> > DIMM_ATTACHED_MAP;
 
         // Throttle values
         static constexpr uint64_t NM_RAS_WEIGHT = 0b000;

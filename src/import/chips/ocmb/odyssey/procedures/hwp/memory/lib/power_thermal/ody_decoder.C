@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/power_thermal/exp_decoder.C $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/power_thermal/ody_decoder.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,14 +23,15 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+// EKB-Mirror-To: hostboot
 ///
-/// @file exp_decoder.C
+/// @file ody_decoder.C
 /// @brief Decode MRW attributes for DIMM power curves and power limits
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 3
+// *HWP Level: 2
 // *HWP Consumed by: FSP:HB
 
 // fapi2
@@ -38,34 +39,33 @@
 #include <vector>
 #include <utility>
 
-#include <lib/shared/exp_consts.H>
-#include <lib/power_thermal/exp_decoder.H>
+#include <lib/shared/ody_consts.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/dimm/kind.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/power_thermal/gen_decoder.H>
+#include <lib/power_thermal/ody_throttle_traits.H>
 
 namespace mss
 {
 namespace power_thermal
 {
 
-const std::vector< std::pair<uint8_t , uint8_t> > throttle_traits<mss::mc_type::EXPLORER>::DIMM_TYPE_MAP =
+const std::vector< std::pair<uint8_t , uint8_t> > throttle_traits<mss::mc_type::ODYSSEY>::DIMM_TYPE_MAP =
 {
     {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_RDIMM, 0b000},
     {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM, 0b001},
-    {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM, 0b010},
     {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM, 0b011},
-    // MDS is not an attr enum. It is in exp_consts.H. have set this manually according to is_mds()
-    {mss::exp::DIMM_TYPE_MDS, 0b100},
     {ANY_TYPE, 0b111}
 };
 
-const std::vector< std::pair<uint8_t , uint8_t> > throttle_traits<mss::mc_type::EXPLORER>::DIMM_ATTACHED_MAP =
+const std::vector< std::pair<uint8_t , uint8_t> > throttle_traits<mss::mc_type::ODYSSEY>::DIMM_ATTACHED_MAP =
 {
-    {1, 0b00},
-    {ANY_ATTACHED, 0b11}
+    {0, 0b00},
+    {1, 0b01},
+    {2, 0b10},
+    {ANY_ATTACHED, 0b11},
 };
 
 ///
@@ -75,12 +75,12 @@ const std::vector< std::pair<uint8_t , uint8_t> > throttle_traits<mss::mc_type::
 /// @note populates iv_vddr_slope, iv_total_slope
 ///
 template<>
-fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_slope (
+fapi2::ReturnCode decoder<mss::mc_type::ODYSSEY>::find_slope (
     const std::vector< const std::vector<uint64_t>* >& i_slope)
 {
-    using TT = throttle_traits<mss::mc_type::EXPLORER>;
+    using TT = throttle_traits<mss::mc_type::ODYSSEY>;
 
-    // For explorer, two attribute are used to get slope (i_slope[0], i_slope[1])
+    // For odyssey, two attribute are used to get slope (i_slope[0], i_slope[1])
     //   ATTR_MSS_MRW_OCMB_PWR_SLOPE is for thermal power slope
     //   ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT is for power slope
     FAPI_ASSERT(i_slope.size() == 2,
@@ -117,12 +117,12 @@ fapi_try_exit:
 /// @note populates iv_vddr_intercept, iv_total_intercept
 ///
 template<>
-fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_intercept (
+fapi2::ReturnCode decoder<mss::mc_type::ODYSSEY>::find_intercept (
     const std::vector< const std::vector<uint64_t>* >& i_intercept)
 {
-    using TT = throttle_traits<mss::mc_type::EXPLORER>;
+    using TT = throttle_traits<mss::mc_type::ODYSSEY>;
 
-    // For explorer, two attribute are used to get slope (i_slope[0], i_slope[1])
+    // For odyssey, two attribute are used to get slope (i_slope[0], i_slope[1])
     //   ATTR_MSS_MRW_OCMB_PWR_INTERCEPT is for thermal power intercept
     //   ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT is for power intercept
     FAPI_ASSERT(i_intercept.size() == 2,
@@ -160,12 +160,12 @@ fapi_try_exit:
 /// @note populates iv_thermal_power_limit, iv_power_limit
 ///
 template<>
-fapi2::ReturnCode decoder<mss::mc_type::EXPLORER>::find_thermal_power_limit (
+fapi2::ReturnCode decoder<mss::mc_type::ODYSSEY>::find_thermal_power_limit (
     const std::vector< const std::vector<uint64_t>* >& i_thermal_limits)
 {
-    using TT = throttle_traits<mss::mc_type::EXPLORER>;
+    using TT = throttle_traits<mss::mc_type::ODYSSEY>;
 
-    // For explorer, two attribute are used to get slope (i_slope[0], i_slope[1])
+    // For odyssey, two attribute are used to get slope (i_slope[0], i_slope[1])
     //   ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT is for thermal power limit
     //   ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT is for power limit
     FAPI_ASSERT(i_thermal_limits.size() == 2,
@@ -214,19 +214,19 @@ fapi_try_exit:
 /// @note decodes the attribute "encoding" to get the power curves and power limits for a dimm
 ///
 template<>
-fapi2::ReturnCode get_power_attrs<mss::mc_type::EXPLORER> (const mss::throttle_type i_throttle_type,
+fapi2::ReturnCode get_power_attrs<mss::mc_type::ODYSSEY> (const mss::throttle_type i_throttle_type,
         const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
         const std::vector< uint64_t >& i_slope,
         const std::vector< uint64_t >& i_intercept,
         const std::vector< uint64_t >& i_thermal_power_limit,
         const std::vector< uint64_t >& i_current_curve_with_limit,
         const std::vector< uint64_t >& i_safemode_throttles,
-        uint16_t o_slope [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT],
-        uint16_t o_intercept [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT],
-        uint32_t o_limit [throttle_traits<mss::mc_type::EXPLORER>::DIMMS_PER_PORT],
+        uint16_t o_slope [throttle_traits<mss::mc_type::ODYSSEY>::DIMMS_PER_PORT],
+        uint16_t o_intercept [throttle_traits<mss::mc_type::ODYSSEY>::DIMMS_PER_PORT],
+        uint32_t o_limit [throttle_traits<mss::mc_type::ODYSSEY>::DIMMS_PER_PORT],
         uint32_t& o_safemode)
 {
-    using TT = throttle_traits<mss::mc_type::EXPLORER>;
+    using TT = throttle_traits<mss::mc_type::ODYSSEY>;
 
     // get number of ports on ocmb - used later to split the safemode utilization across all ports
     const uint8_t l_port_count = mss::count_mem_port(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port));
@@ -234,18 +234,18 @@ fapi2::ReturnCode get_power_attrs<mss::mc_type::EXPLORER> (const mss::throttle_t
     for (const auto& l_dimm : find_targets <fapi2::TARGET_TYPE_DIMM> (i_port))
     {
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-        const auto l_dimm_pos = mss::index (l_dimm);
-        mss::dimm::kind<mss::mc_type::EXPLORER> l_kind(l_dimm, l_rc);
+        const auto l_dimm_pos = mss::index(l_dimm);
+        mss::dimm::kind<mss::mc_type::ODYSSEY> l_kind(l_dimm, l_rc);
         FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(l_dimm));
-        mss::power_thermal::decoder<mss::mc_type::EXPLORER> l_decoder(l_kind);
+        mss::power_thermal::decoder<mss::mc_type::ODYSSEY> l_decoder(l_kind);
         fapi2::buffer<uint64_t> l_attr_value;
 
         // DDIMMs mrw slope/intercept/limit attribute values are for whole DDIMM, so divide these by total number of virtual DIMMs
         //   to get it to a DIMM level.  This will get the DIMM count to use in later calculations.
         // ISDIMMs use a value of 1 since mrw attribute values are at the DIMM level
-        uint8_t l_number_dimm_for_attr_value = (l_kind.iv_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM) ?
-                                               mss::count_dimm(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm)) :
-                                               1;
+        const uint8_t l_number_dimm_for_attr_value = (l_kind.iv_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM) ?
+                mss::count_dimm(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm)) :
+                1;
 
         FAPI_TRY( l_decoder.generate_encoding(TT::DONT_DECODE_SAFE_MODE), "Fail encountered while generating encodings on %s",
                   mss::c_str(l_dimm) );
@@ -268,7 +268,6 @@ fapi2::ReturnCode get_power_attrs<mss::mc_type::EXPLORER> (const mss::throttle_t
 
             FAPI_TRY( l_decoder.find_slope(l_slope), "Fail encountered in find_slope on %s",
                       mss::c_str(l_dimm) );
-
             o_slope[l_dimm_pos] =
                 ((i_throttle_type == mss::throttle_type::POWER) ? l_decoder.iv_vddr_slope : l_decoder.iv_total_slope) /
                 l_number_dimm_for_attr_value;
@@ -332,7 +331,7 @@ fapi2::ReturnCode get_power_attrs<mss::mc_type::EXPLORER> (const mss::throttle_t
         }
         else
         {
-            mss::power_thermal::decoder<mss::mc_type::EXPLORER> l_decoder_safemode(l_kind);
+            mss::power_thermal::decoder<mss::mc_type::ODYSSEY> l_decoder_safemode(l_kind);
 
             FAPI_TRY( l_decoder_safemode.generate_encoding(TT::DECODE_SAFE_MODE),
                       "Fail encountered while generating encodings on %s", mss::c_str(l_dimm) );
@@ -343,42 +342,15 @@ fapi2::ReturnCode get_power_attrs<mss::mc_type::EXPLORER> (const mss::throttle_t
                            o_safemode)) );
 
             // safemode utilization is for OCMB, so split it across ports
-            o_safemode = o_safemode / l_port_count;
+            if (l_port_count >= 1)
+            {
+                o_safemode = o_safemode / l_port_count;
+            }
         }
     }
 
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-///
-/// @brief checks if it is a mds DIMM
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
-/// @note set the l_dimm_type with correct type either mds or non-mds dimm type
-///
-template<>
-fapi2::ReturnCode decoder<mss::mc_type::EXPLORER, throttle_traits<mss::mc_type::EXPLORER>>::encode_dimm_type()
-{
-    using TT = throttle_traits<mss::mc_type::EXPLORER>;
-    bool l_mds = false;
-    uint8_t l_dimm_type = iv_kind.iv_dimm_type;
-
-    FAPI_TRY(mss::dimm::is_mds<mss::mc_type::EXPLORER>(iv_kind.iv_target, l_mds));
-
-    if(l_mds)
-    {
-        l_dimm_type = mss::exp::DIMM_TYPE_MDS;
-    }
-
-    FAPI_TRY(( encode<TT::DIMM_TYPE_START, TT::DIMM_TYPE_LEN>
-               (iv_kind.iv_target, l_dimm_type, TT::DIMM_TYPE_MAP, iv_gen_key)),
-             "Failed to generate power thermal encoding for %s val %d on target: %s",
-             "DIMM_TYPE", l_dimm_type, mss::c_str(iv_kind.iv_target) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-
-}
-
 } //ns power_thermal
 } // ns mss

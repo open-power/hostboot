@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,7 +143,7 @@ extern "C"
 
                     // Set the thermal power throttle
                     // Set the PMIC current slope, intercept and limit
-                    FAPI_TRY( mss::power_thermal::get_power_attrs (l_throttle_type,
+                    FAPI_TRY( mss::power_thermal::get_power_attrs<mss::mc_type::EXPLORER> (l_throttle_type,
                               l_port,
                               l_thermal_power_slope_v,
                               l_thermal_power_intecept_v,
@@ -153,7 +153,7 @@ extern "C"
                               l_slope,
                               l_intercept,
                               l_limit,
-                              l_safemode) );
+                              l_safemode));
 
                     FAPI_TRY(mss::attr::set_total_pwr_slope(l_port, l_slope));
                     FAPI_TRY(mss::attr::set_total_pwr_intercept(l_port, l_intercept));

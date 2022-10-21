@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1615,7 +1615,6 @@ fapi_try_exit:
     FAPI_ERR("%s Error setting scominits for power_thermal values", mss::c_str(i_target));
     return fapi2::current_err;
 }
-
 } //ns power_thermal
 }// mss
 
