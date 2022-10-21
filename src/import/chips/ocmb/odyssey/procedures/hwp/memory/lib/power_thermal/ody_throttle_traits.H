@@ -39,7 +39,7 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle_traits.H>
-#include <ody_scom_ody.H>
+#include <ody_scom_ody_odc.H>
 
 namespace mss
 {
@@ -79,6 +79,7 @@ class throttle_traits<mss::mc_type::ODYSSEY>
             SIZE_OF_THERMAL_LIMIT_ATTR = 25,
             SIZE_OF_THERMAL_SLOPE_ATTR = 50,
             SIZE_OF_THERMAL_INTERCEPT_ATTR = 50,
+            SIZE_OF_SAFEMODE_THROTTLE_ATTR = 50,
 
             // Power (PMIC)
             SIZE_OF_CURRENT_CURVE_WITH_LIMIT_ATTR = 25,
@@ -112,6 +113,12 @@ class throttle_traits<mss::mc_type::ODYSSEY>
             DIMMS_PER_PORT = 2,
         };
 
+        enum
+        {
+            DONT_DECODE_SAFE_MODE = 0,
+            DECODE_SAFE_MODE = 1,
+        };
+
         //Bit positions for different section of the attribute
         //first 32 bits are the encoding, second are for values
         enum DECODE_BUFFER_POS
@@ -133,6 +140,10 @@ class throttle_traits<mss::mc_type::ODYSSEY>
             POWER_INTERCEPT_START = 52,
             POWER_INTERCEPT_LENGTH = 12,
             POWER_LENGTH = 32,
+
+            // Safemode throttles
+            SAFEMODE_START = 32,
+            SAFEMODE_LENGTH = 16,
         };
 
         //Positions and lengths of the encodings
@@ -169,10 +180,15 @@ class throttle_traits<mss::mc_type::ODYSSEY>
             // Invalid for Odyssey but compile will fail without them
             DIMM_COUNT_START = 22,
             DIMM_COUNT_LEN = 4,
+
+            // Specifies number of DIMMs attached (1 or 2)
+            DIMM_ATTACHED_START = 26,
+            DIMM_ATTACHED_LEN = 2,
         };
 
         // Definition is in chip folder
         static const std::vector< std::pair<uint8_t , uint8_t> > DIMM_TYPE_MAP;
+        static const std::vector< std::pair<uint8_t , uint8_t> > DIMM_ATTACHED_MAP;
 
         // Throttle values
         // TODO Zenhub #1509: These values have been transferred from Explorer and
