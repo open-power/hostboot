@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -66,6 +66,10 @@
 #include "hdatstructs.H"
 
 #include <pldm/extended/pldm_watchdog.H>
+
+#ifdef CONFIG_PLDM
+#include <pldm/requests/pldm_pdr_requests.H>
+#endif
 
 using namespace ERRORLOG;
 using namespace ISTEP;
@@ -297,6 +301,7 @@ void* call_host_start_payload (void *io_pArgs)
         INITSERVICE::sendProgressCode();
 
 #ifdef CONFIG_PLDM
+        PLDM::sendProgressStateChangeEvent(PLDM_STATE_SET_BOOT_PROG_STATE_OSSTART);
 
         // Invalidate HB Terminus Locator PDR so that BMC can start watching PHYP
         // for watchdogs.
