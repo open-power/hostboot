@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,7 @@ namespace PVPD
         { VINI, "VINI" },
         { VSYS, "VSYS" },
         { LXR0, "LXR0" },
+        { PSPD, "PSPD" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { PVPD_TEST_RECORD, "TEST" },
@@ -119,6 +120,7 @@ namespace PVPD
         { TM,  "TM" },
         { TN,  "TN" },
         { WN,  "WN" },
+        { pdD, "#D" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!

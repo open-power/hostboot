@@ -76,7 +76,7 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
-    <id>chip-ocmb</id>
+    <id>chip-ocmb-generic</id>
     <attribute>
       <id>N_PLUS_ONE_MEM_POWER</id>
     </attribute>

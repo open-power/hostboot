@@ -163,7 +163,7 @@ void setPartAndSerialNumberAttributes( Target * i_target )
 
     TYPE l_type = i_target->getAttr<ATTR_TYPE>();
 
-    TRACSSCOMP(g_trac_vpd, ENTER_MRK"vpd.C::setPartAndSerialNumberAttributes(%.8X)",
+    TRACFCOMP(g_trac_vpd, ENTER_MRK"vpd.C::setPartAndSerialNumberAttributes(%.8X)",
               get_huid(i_target));
     do
     {
@@ -249,6 +249,9 @@ void setPartAndSerialNumberAttributes( Target * i_target )
                     memcpy(l_partNumber, l_kwData, l_dataSize);
                     i_target->trySetAttr
                       <ATTR_PART_NUMBER>(l_partNumber);
+                    TRACFBIN(g_trac_vpd,
+                             ": PART NUMBER =",
+                             l_partNumber, l_dataSize);
                     break;
                 }
 
@@ -268,6 +271,9 @@ void setPartAndSerialNumberAttributes( Target * i_target )
                     memcpy(l_fruNumber, l_kwData, l_dataSize);
                     i_target->trySetAttr
                       <ATTR_FRU_NUMBER>(l_fruNumber);
+                    TRACFBIN(g_trac_vpd,
+                             ": FRU NUMBER =",
+                             l_fruNumber, l_dataSize);
                     break;
                 }
 
@@ -287,6 +293,9 @@ void setPartAndSerialNumberAttributes( Target * i_target )
                     memcpy(l_serialNumber, l_kwData, l_dataSize);
                     i_target->trySetAttr
                       <ATTR_SERIAL_NUMBER>(l_serialNumber);
+                    TRACFBIN(g_trac_vpd,
+                             ": SERIAL NUMBER =",
+                             l_serialNumber, l_dataSize);
                     break;
                 }
 
@@ -306,6 +315,9 @@ void setPartAndSerialNumberAttributes( Target * i_target )
                     memcpy(&l_fruCcin, l_kwData, l_dataSize);
                     i_target->trySetAttr
                       <ATTR_FRU_CCIN>(l_fruCcin);
+                    TRACFBIN(g_trac_vpd,
+                             ": CCIN =",
+                             &l_fruCcin, l_dataSize);
                     break;
                 }
 

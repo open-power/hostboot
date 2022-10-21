@@ -30,15 +30,17 @@
 #include <endian.h>
 #include <errl/errlmanager.H>
 #include <util/misc.H>
+#include <targeting/common/utilFilter.H>
 
 #include "ocmb_spd.H"
 #include "spd.H"
 #include "errlud_vpd.H"
 #include <vpd/vpd_if.H>
+#include <vpd/pvpdenums.H>
 
 extern trace_desc_t * g_trac_spd;
 
-// #define TRACSSCOMP(args...)  TRACFCOMP(args)
+//#define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
 
 // Namespace alias for targeting
@@ -206,20 +208,64 @@ errlHndl_t ocmbFetchData(T::TargetHandle_t    i_target,
 
     do
     {
-        // Get the data
-        err = DeviceFW::deviceOp(DeviceFW::READ,
-                                 i_target,
-                                 o_data,
-                                 i_numBytes,
-                                 DEVICE_EEPROM_ADDRESS(EEPROM::VPD_AUTO,
-                                                       i_byteAddr,
-                                                       i_eepromSource));
-        if( err )
+        // Pull from the EEPROM if it exists
+        T::ATTR_EEPROM_VPD_PRIMARY_INFO_type l_eepromVpd;
+        if( i_target->tryGetAttr<T::ATTR_EEPROM_VPD_PRIMARY_INFO>(l_eepromVpd) )
         {
-            TRACFCOMP(g_trac_spd, ERR_MRK"ocmbFetchData(): failing out of deviceOp");
-            break;
+            // Get the data
+            err = DeviceFW::deviceOp(DeviceFW::READ,
+                                     i_target,
+                                     o_data,
+                                     i_numBytes,
+                                     DEVICE_EEPROM_ADDRESS(EEPROM::VPD_AUTO,
+                                                           i_byteAddr,
+                                                           i_eepromSource));
+            if( err )
+            {
+                TRACFCOMP(g_trac_spd, ERR_MRK"ocmbFetchData(): error reading EEPROM");
+                break;
+            }
         }
+        // Otherwise pull the data from the node VPD
+        else
+        {
+            // parent node
+            TARGETING::TargetHandleList targetListNode;
+            TARGETING::getParentAffinityTargets(targetListNode,i_target,
+                                                TARGETING::CLASS_ENC,
+                                                TARGETING::TYPE_NODE);
+            TARGETING::Target* l_pNodeTarget = targetListNode[0];
 
+            // read PSPD:#D (contains the planar SPD)
+            size_t l_size = 0;
+            err = DeviceFW::deviceOp(DeviceFW::READ,
+                                     l_pNodeTarget,
+                                     nullptr,//returns size only
+                                     l_size,
+                                     DEVICE_VPD_ADDRESS(PVPD::PSPD,
+                                                        PVPD::pdD));
+            if( err )
+            {
+                TRACFCOMP(g_trac_spd, ERR_MRK"ocmbFetchData(): error getting size of PSPD:#D");
+                break;
+            }
+
+            uint8_t l_nodeData[l_size] = {};
+            err = DeviceFW::deviceOp(DeviceFW::READ,
+                                     l_pNodeTarget,
+                                     l_nodeData,
+                                     l_size,
+                                     DEVICE_VPD_ADDRESS(PVPD::PSPD,
+                                                        PVPD::pdD));
+            if( err )
+            {
+                TRACFCOMP(g_trac_spd, ERR_MRK"ocmbFetchData(): error reading PSPD:#D");
+                break;
+            }
+
+            // pull out the chunk of data we want
+            memcpy( o_data, l_nodeData+i_byteAddr, i_numBytes );
+        }
     } while(0);
 
     TRACSSCOMP(g_trac_spd,
@@ -392,6 +438,14 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
                      bool* const o_missing_vpd )
 {
     errlHndl_t l_errl = nullptr;
+
+    // Skip the CRC check if the data isn't coming from a regular EEPROM
+    T::ATTR_EEPROM_VPD_PRIMARY_INFO_type l_eepromVpd;
+    if( !i_target->tryGetAttr<T::ATTR_EEPROM_VPD_PRIMARY_INFO>(l_eepromVpd) )
+    {
+        TRACFCOMP( g_trac_spd, "Skipping CRC check on %.08X", T::get_huid(i_target) );
+        return nullptr;
+    }
     TRACDCOMP( g_trac_spd, "Start checkCRC on %08X", T::get_huid(i_target) );
 
     o_crc_sections.clear();

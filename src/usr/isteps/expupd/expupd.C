@@ -229,6 +229,14 @@ bool checkAndSetForceFlag(TargetHandle_t i_ocmb,
             break;
         }
 
+        // Skip all version checking if the keyword isn't writable
+        if( !l_fWVerKeyword->writable )
+        {
+            TRACFCOMP(g_trac_expupd,"Skipping checkAndSetForceFlag on %.8X because SPD is not writable",
+                      get_huid(i_ocmb));
+            break;
+        }
+
         const size_t l_spdKeywordSize = l_fWVerKeyword->length;
 
         uint8_t* l_versionData = io_spdBuffer;
@@ -302,15 +310,23 @@ void writeExplorerFwVersion(TargetHandle_t i_ocmb, const uint8_t* i_versionStr, 
 
     do
     {
-         l_err = getKeywordEntry(SPD::EXPLORER_FW_VERSION, SPD::SPD_DDR4_TYPE, i_ocmb, l_fWVerKeyword);
+        l_err = getKeywordEntry(SPD::EXPLORER_FW_VERSION, SPD::SPD_DDR4_TYPE, i_ocmb, l_fWVerKeyword);
 
-         if (l_err)
-         {
-              TRACFCOMP(g_trac_expupd,
-                  "writeExplorerFwVersion: Error getting EXPLORER_FW_VERSION entry for OCMB 0x%08X",
-                  get_huid(i_ocmb));
-              break;
-         }
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_expupd,
+                      "writeExplorerFwVersion: Error getting EXPLORER_FW_VERSION entry for OCMB 0x%08X",
+                      get_huid(i_ocmb));
+            break;
+        }
+
+        // Skip all version checking if the keyword isn't writable
+        if( !l_fWVerKeyword->writable )
+        {
+            TRACFCOMP(g_trac_expupd,"Skipping writeExplorerFwVersion on %.8X because SPD is not writable",
+                      get_huid(i_ocmb));
+            break;
+        }
 
         const size_t l_spdKeywordSize = l_fWVerKeyword->length;
 

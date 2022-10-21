@@ -530,7 +530,10 @@ class I2CTestCommon: public CxxTest::TestSuite
 
                 if (eeprom_info.byteAddrOffset == EEPROM::TWO_BYTE_ADDR)
                 {
-                    // read only tests
+                    //-- read only tests
+
+                    // basic read, no data is checked, verifies no errors
+                    //  are flagged
                     testData.push_back({eeprom_info,
                                         I2C_TEST_COMMON_IGNORE_DATA_COMPARE,
                                         8,
@@ -538,9 +541,12 @@ class I2CTestCommon: public CxxTest::TestSuite
                                         i2cMasterTarg,
                                         l_targ });
 
-                    //write->read->verify tests
+                    //-- write->read->verify tests
 
-                    // write data to an addr and read it back
+                    // write data to an addr and read it back to verify
+                    //  we can read what we wrote
+                    // 810 = [ab ab cd cd ef ef] xx xx
+
                     // write 0xababcdcdefef to addr 0x0810
                     testData.push_back({eeprom_info,
                                         0x0810ababcdcdefef,
@@ -564,6 +570,10 @@ class I2CTestCommon: public CxxTest::TestSuite
                                         l_targ });
 
                     // move addr 3 bytes forward from before and read data again
+                    //  to confirm we didn't just have some data floating around
+                    //  in a buffer/cache after the write
+                    // 810 = ab ab cd [cd ef ef] xx xx
+
                     // write which addr to read from (0x0813)
                     testData.push_back({eeprom_info,
                                         0x0813000000000000,
@@ -571,7 +581,7 @@ class I2CTestCommon: public CxxTest::TestSuite
                                         DeviceFW::WRITE,
                                         i2cMasterTarg,
                                         l_targ });
-                    // read from 0x0813
+                    // read 3 bytes from 0x0813
                     testData.push_back({eeprom_info,
                                         0xcdefef0000000000,
                                         3,
@@ -579,26 +589,30 @@ class I2CTestCommon: public CxxTest::TestSuite
                                         i2cMasterTarg,
                                         l_targ });
 
-                    // write data to an addr, and read the data back starting
-                    // 1 byte before the data written.
-                    // write 0x831200000000 to addr 0x0825
+                    // write data to an addr and read the data back starting
+                    //  1 byte after the data written to verify there is no
+                    //  overrun in our write, and 1 byte before to verify
+                    //  there is not underrun.
+                    // 810 = ab [ab 77 88 ef] ef xx xx
+
+                    // write 0x7788 to addr 0x0812 (middle of earlier data)
                     testData.push_back({eeprom_info,
-                                        0x0825831200000000,
-                                        8,
+                                        0x0812778800000000,
+                                        4,
                                         DeviceFW::WRITE,
                                         i2cMasterTarg,
                                         l_targ });
-                    // write which addr to read from (0x0x0824)
+                    // write which addr to read from (0x0811)
                     testData.push_back({eeprom_info,
-                                        0x0824000000000000,
+                                        0x0811000000000000,
                                         2,
                                         DeviceFW::WRITE,
                                         i2cMasterTarg,
                                         l_targ });
-                    // read from 0x0810
+                    // read 4 bytes from 0x0811
                     testData.push_back({eeprom_info,
-                                        0x0083120000000000,
-                                        3,
+                                        0xab7788ef00000000,
+                                        4,
                                         DeviceFW::READ,
                                         i2cMasterTarg,
                                         l_targ });

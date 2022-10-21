@@ -266,7 +266,7 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_OMI           => "unit-omi",
     TARGET_TYPE_OMIC          => "unit-omic",
     TARGET_TYPE_MCC           => "unit-mcc",
-    TARGET_TYPE_OCMB_CHIP     => "chip-ocmb",
+    TARGET_TYPE_OCMB_CHIP     => "chip-ocmb-generic",
     TARGET_TYPE_MEM_PORT      => "unit-mem_port",
     TARGET_TYPE_PMIC          => "pmic",
     TARGET_TYPE_NMMU          => "unit-nmmu",

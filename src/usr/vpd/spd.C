@@ -56,6 +56,7 @@
 #include "spd_planar.H"
 #include "errlud_vpd.H"
 #include <targeting/targplatutil.H>     // assertGetToplevelTarget
+#include <arch/magic.H>
 
 // ----------------------------------------------
 // Trace definitions
@@ -218,6 +219,17 @@ errlHndl_t spdSetSize ( Target &io_target,
                         uint8_t            i_dimmType);
 
 
+/**
+ * @brief This function will return the EEPROM data format that should be used
+ *        to decode the SPD.
+ *
+ * @param [in/out] i_target - DIMM/OCMB target
+ *
+ * @return  EEPROM_CONTENT_TYPE
+ */
+EEPROM_CONTENT_TYPE getEepromType( Target* i_target );
+
+
 // Register the perform Op with the routing code for DIMMs.
 DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        DeviceFW::SPD,
@@ -233,6 +245,26 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WRITE,
                        DeviceFW::SPD,
                        TYPE_OCMB_CHIP,
                        spdWriteKeywordValue );
+
+// ------------------------------------------------------------------
+// getEepromType
+// ------------------------------------------------------------------
+EEPROM_CONTENT_TYPE getEepromType( Target* i_target )
+{
+    EEPROM_CONTENT_TYPE eepromType = EEPROM_CONTENT_TYPE_RAW;
+    ATTR_EEPROM_VPD_PRIMARY_INFO_type eepromVpd;
+    if( i_target->tryGetAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>(eepromVpd) )
+    {
+        eepromType =
+          static_cast<EEPROM_CONTENT_TYPE>(eepromVpd.eepromContentType);
+    }
+    else
+    {
+        //default to planar if no VPD info
+        eepromType = EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD;
+    }
+    return eepromType;
+}
 
 // ------------------------------------------------------------------
 // isValidDimmType
@@ -1388,11 +1420,7 @@ errlHndl_t ddr4SpecialCases(const KeywordData & i_kwdData,
 
     TRACSSCOMP( g_trac_spd, ENTER_MRK"ddr4SpecialCases()" );
 
-    auto eepromVpd =
-        i_target->getAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>();
-
-    EEPROM_CONTENT_TYPE eepromType =
-       static_cast<EEPROM_CONTENT_TYPE>(eepromVpd.eepromContentType);
+    EEPROM_CONTENT_TYPE eepromType = getEepromType(i_target);
 
     switch( i_kwdData.keyword )
     {
@@ -1849,11 +1877,7 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
     errlHndl_t err{nullptr};
     o_modType = NA;
 
-    auto eepromVpd =
-        i_target->getAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>();
-
-    EEPROM_CONTENT_TYPE eepromType =
-       static_cast<EEPROM_CONTENT_TYPE>(eepromVpd.eepromContentType);
+    EEPROM_CONTENT_TYPE eepromType = getEepromType(i_target);
 
     uint8_t modTypeVal = 0;
     err = fetchDataFromEepromType(MOD_TYPE_ADDR,
@@ -2129,6 +2153,17 @@ void setPartAndSerialNumberAttributes( Target * i_target )
 
     do
     {
+        // If the part isn't the FRU then don't set these values
+        TARGETING::ATTR_MEM_MRW_IS_PLANAR_type l_planar = 0;
+        if( i_target->tryGetAttr<ATTR_MEM_MRW_IS_PLANAR>(l_planar) )
+        {
+            if( l_planar )
+            {
+                TRACFCOMP(g_trac_spd, "setPartAndSerialNumberAttributes(): Skipping due to planar memory on %.8X", TARGETING::get_huid(i_target));
+                break;
+            }
+        }
+
         // Read the Basic Memory Type
         uint8_t l_memType(MEM_TYPE_INVALID);
         l_err = getMemType( l_memType,

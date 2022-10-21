@@ -279,7 +279,16 @@ errlHndl_t ocmbI2CPresencePerformOp(DeviceFW::OperationType i_opType,
         errlCommit(l_errl, I2C_COMP_ID);
     }
 #else
-    l_ocmbPresent = EEPROM::eepromPresence(i_target);
+    // Planar OCMBs don't have their own EEPROMs, since they are soldered on the
+    //  board we can assume they are present
+    if( i_target->getAttr<TARGETING::ATTR_MEM_MRW_IS_PLANAR>() )
+    {
+        l_ocmbPresent = true;
+    }
+    else
+    {
+        l_ocmbPresent = EEPROM::eepromPresence(i_target);
+    }
 #endif
 
     memcpy(io_buffer, &l_ocmbPresent, sizeof(l_ocmbPresent));

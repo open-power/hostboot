@@ -313,20 +313,9 @@
   </targetType>
 
   <targetType>
-    <!-- OMI-attached Memory Buffer -->
+    <!-- Default OCMB is on the DDIMM, acts as FRU -->
     <id>chip-ocmb</id>
-    <parent>chip</parent>
-    <attribute>
-      <default>MEM</default>
-      <id>CDM_DOMAIN</id>
-    </attribute>
-    <attribute>
-      <id>DEBUG_OCMB_LOGS</id>
-    </attribute>
-    <attribute>
-      <default>1</default>
-      <id>DECONFIG_GARDABLE</id>
-    </attribute>
+    <parent>chip-ocmb-generic</parent>
     <attribute>
       <id>EECACHE_VPD_STATE</id>
     </attribute>
@@ -445,6 +434,26 @@
       <id>EEPROM_VPD_REDUNDANCY</id>
     </attribute>
     <attribute>
+      <id>LOCATION_CODE</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <!-- OMI-attached Memory Buffer -->
+    <id>chip-ocmb-generic</id>
+    <parent>chip</parent>
+    <attribute>
+      <default>MEM</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
+      <id>DEBUG_OCMB_LOGS</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
       <id>FAPI_I2C_CONTROL_INFO</id>
     </attribute>
     <attribute>
@@ -457,9 +466,6 @@
       <!-- GARD_APPLIED, RESRC_RECOV, MEMDIAG, GARD, DEVTREE_SYNC -->
       <default>0x00000073</default>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-    </attribute>
-    <attribute>
-      <id>LOCATION_CODE</id>
     </attribute>
     <attribute>
       <default>0</default>
@@ -546,6 +552,12 @@
     <attribute>
       <id>VPD_REC_NUM</id>
     </attribute>
+  </targetType>
+
+  <targetType>
+    <!-- Special version for non-DDIMM OCMB that lives on Planar -->
+    <id>chip-ocmb-planar</id>
+    <parent>chip-ocmb-generic</parent>
   </targetType>
 
   <targetType>

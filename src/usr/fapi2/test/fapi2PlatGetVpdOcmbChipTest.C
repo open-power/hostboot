@@ -98,6 +98,8 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
                  (*l_targetList)->getAttr<TARGETING::ATTR_TYPE>() )
             {
                 // Found first non OCMB_CHIP target, break out and use it
+                TS_INFO("testGetVPD_EFD: Using %.8X for test case 2",
+                        TARGETING::get_huid(*l_targetList));
                 break;
             }
         }

@@ -200,6 +200,14 @@ class ExpUpdateTest: public CxxTest::TestSuite
                 break;
             }
 
+            // skip the test if the keyword isn't writable in this config
+            if( !l_fWVerKeyword->writable )
+            {
+                TS_INFO("EXPLORER_FW_VERSION is readonly on %.8X, skipping test",
+                        TARGETING::get_huid(l_ocmb));
+                break;
+            }
+
             const size_t l_spdKeywordSize = l_fWVerKeyword->length;
 
             uint8_t l_originalData [l_spdKeywordSize] = {};

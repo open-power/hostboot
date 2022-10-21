@@ -306,6 +306,21 @@
         <default>affinity:sys-0/node-0</default>
     </attribute>
     <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xB0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x10</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x9</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>NA</default>
     </attribute>
@@ -13891,7 +13906,7 @@
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0ocmb0</id><!-- Simics=backplane0.ocmb[0],port4 -->
-    <type>chip-ocmb</type>
+    <type>chip-ocmb-planar</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0</default>
@@ -13933,40 +13948,15 @@
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
-    <attribute>
-        <id>EEPROM_VPD_PRIMARY_INFO</id>
-        <default>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <field><id>byteAddrOffset</id><value>0x02</value></field>
-            <field><id>devAddr</id><value>0xA0</value></field>
-            <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>4</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
-            <field><id>writeCycleTime</id><value>05</value></field>
-            <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>eepromContentType</id><value>0x9</value></field>
-        </default>
-    </attribute>
-    <attribute>
-        <id>LOCATION_CODE</id>
-        <default>S0_N0_OCMB0</default>
-    </attribute>
     <attribute>
         <id>MEM_MRW_IS_PLANAR</id>
         <default>0x1</default>
-    </attribute>
-    <attribute>
-        <id>STATIC_ABS_LOCATION_CODE</id>
-        <default>NODE0</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0ocmb1</id><!-- Simics=backplane0.ocmb[1],port5 -->
-    <type>chip-ocmb</type>
+    <type>chip-ocmb-planar</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0</default>
@@ -14008,40 +13998,15 @@
             <field><id>devAddr</id><value>0x40</value></field>
         </default>
     </attribute>
-    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
-         that we preload in standalone simics. No cache updates should be needed -->
-    <attribute>
-        <id>EEPROM_VPD_PRIMARY_INFO</id>
-        <default>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <field><id>byteAddrOffset</id><value>0x02</value></field>
-            <field><id>devAddr</id><value>0xA0</value></field>
-            <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>5</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
-            <field><id>writeCycleTime</id><value>05</value></field>
-            <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>eepromContentType</id><value>0x9</value></field>
-        </default>
-    </attribute>
-    <attribute>
-        <id>LOCATION_CODE</id>
-        <default>S0_N0_OCMB1</default>
-    </attribute>
     <attribute>
         <id>MEM_MRW_IS_PLANAR</id>
         <default>0x1</default>
-    </attribute>
-    <attribute>
-        <id>STATIC_ABS_LOCATION_CODE</id>
-        <default>NODE0</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0ocmb2</id><!-- Simics=backplane0.ocmb[2],port6 -->
-    <type>chip-ocmb</type>
+    <type>chip-ocmb-planar</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0</default>
@@ -14084,37 +14049,14 @@
         </default>
     </attribute>
     <attribute>
-        <id>EEPROM_VPD_PRIMARY_INFO</id>
-        <default>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <field><id>byteAddrOffset</id><value>0x02</value></field>
-            <field><id>devAddr</id><value>0xA0</value></field>
-            <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>6</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
-            <field><id>writeCycleTime</id><value>05</value></field>
-            <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>eepromContentType</id><value>0x9</value></field>
-        </default>
-    </attribute>
-    <attribute>
-        <id>LOCATION_CODE</id>
-        <default>S0_N0_OCMB2</default>
-    </attribute>
-    <attribute>
         <id>MEM_MRW_IS_PLANAR</id>
         <default>0x1</default>
-    </attribute>
-    <attribute>
-        <id>STATIC_ABS_LOCATION_CODE</id>
-        <default>NODE0</default>
     </attribute>
 </targetInstance>
 
 <targetInstance>
     <id>sys0node0ocmb3</id><!-- Simics=backplane0.ocmb[3],port7 -->
-    <type>chip-ocmb</type>
+    <type>chip-ocmb-planar</type>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0</default>
@@ -14157,31 +14099,8 @@
         </default>
     </attribute>
     <attribute>
-        <id>EEPROM_VPD_PRIMARY_INFO</id>
-        <default>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
-            <field><id>engine</id><value>3</value></field>
-            <field><id>byteAddrOffset</id><value>0x02</value></field>
-            <field><id>devAddr</id><value>0xA0</value></field>
-            <field><id>chipCount</id><value>0x01</value></field>
-            <field><id>port</id><value>7</value></field>
-            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
-            <field><id>writeCycleTime</id><value>05</value></field>
-            <field><id>writePageSize</id><value>0x20</value></field>
-            <field><id>eepromContentType</id><value>0x9</value></field>
-        </default>
-    </attribute>
-    <attribute>
-        <id>LOCATION_CODE</id>
-        <default>S0_N0_OCMB3</default>
-    </attribute>
-    <attribute>
         <id>MEM_MRW_IS_PLANAR</id>
         <default>0x1</default>
-    </attribute>
-    <attribute>
-        <id>STATIC_ABS_LOCATION_CODE</id>
-        <default>NODE0</default>
     </attribute>
 </targetInstance>
 

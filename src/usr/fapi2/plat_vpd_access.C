@@ -67,7 +67,8 @@ fapi2::ReturnCode platGetVPD(
         // Get targeting OCMB target
         TARGETING::Target * l_ocmbTarget = nullptr;
         l_errl = fapi2::platAttrSvc::getTargetingTarget(i_ocmbFapi2Target,
-                                                        l_ocmbTarget);
+                                                        l_ocmbTarget,
+                                                        TARGETING::TYPE_OCMB_CHIP);
         if (l_errl)
         {
             FAPI_ERR("platGetVPD<OCMB>: Error from getTargetingTarget");

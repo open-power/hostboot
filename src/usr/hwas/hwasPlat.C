@@ -1309,14 +1309,26 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         {
             HWAS_INF("pTarget %08X - detected present - ENC",
                     get_huid(pTarget));
+
             // If the planar VPD was collected remotely, such as on eBMC systems via PLDM, then
             // don't skip presence detect as it will load relevant attributes for FRU callouts.
             if (!EEPROM::hasRemoteVpdSource(pTarget))
             {
-                // The planar VPD wasn't collected remotely, move onto the next target. We can't access
-                // the VPD.
-                pTarget_it++;
-                continue;
+                // The planar VPD wasn't collected remotely, check if HB has
+                //  access to the eeprom to collect it ourselves.
+                auto l_eeprom_info =
+                  pTarget->getAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>();
+                auto l_i2cMasterTarg = targetService().toTarget(l_eeprom_info.i2cMasterPath);
+
+                // If not, move onto the next target. We can't access the VPD
+                //  and we don't need the data (this is FSP case).
+                if( (l_i2cMasterTarg == nullptr)
+                    || (l_i2cMasterTarg->getAttr<ATTR_CLASS>() == CLASS_SYS)
+                    || (l_i2cMasterTarg->getAttr<ATTR_CLASS>() == CLASS_SP) )
+                {
+                    pTarget_it++;
+                    continue;
+                }
             }
         }
 
@@ -1397,35 +1409,45 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
                 eccValidationError = true;
             }
         }
-        // Validate the CRC data of the VPD cache if target is a OCMB and is present
+        // Validate the CRC data of the VPD cache if target is a OCMB and is present,
+        //  and the data is sourced from its own EEPROM
         else if ( (TYPE_OCMB_CHIP == l_attrType) && present )
         {
-            //P10 DD1 Workaround
-            // There is a bug on P10 DD1 that can cause SPD corruption
-            // due to some floating i2c lines.  To help the lab we will
-            // write our previously cached data out to the hardware.
-            PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
-            if( l_pvr.isP10DD10() )
+            // Skip the CRC check if the data isn't coming from a regular EEPROM
+            ATTR_EEPROM_VPD_PRIMARY_INFO_type l_eepromVpd;
+            if( !pTarget->tryGetAttr<ATTR_EEPROM_VPD_PRIMARY_INFO>(l_eepromVpd) )
             {
-                HWAS_DBG( "Call SPD::fixEEPROM on %08X", TARGETING::get_huid(pTarget) );
-                errl = SPD::fixEEPROM( pTarget );
-                if (errl)
-                {
-                    // commit the error but remove all deconfig/gard
-                    errl->removeGardAndDeconfigure();
-                    errlCommit(errl, HWAS_COMP_ID);
-                }
-            }
-            //End P10 DD1 Workaround
-
-            // Simics currently has bad CRC for the serial number portion
-            if(!Util::isSimicsRunning())
-            {
-                platCheckOcmbCRC(pTarget, present);
+                HWAS_DBG( "Skipping CRC check on %.08X", get_huid(pTarget) );
             }
             else
             {
-                HWAS_DBG( "Ignoring CRC in Simics" );
+                //P10 DD1 Workaround
+                // There is a bug on P10 DD1 that can cause SPD corruption
+                // due to some floating i2c lines.  To help the lab we will
+                // write our previously cached data out to the hardware.
+                PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
+                if( l_pvr.isP10DD10() )
+                {
+                    HWAS_DBG( "Call SPD::fixEEPROM on %08X", TARGETING::get_huid(pTarget) );
+                    errl = SPD::fixEEPROM( pTarget );
+                    if (errl)
+                    {
+                        // commit the error but remove all deconfig/gard
+                        errl->removeGardAndDeconfigure();
+                        errlCommit(errl, HWAS_COMP_ID);
+                    }
+                }
+                //End P10 DD1 Workaround
+
+                // Simics currently has bad CRC for the serial number portion
+                if(!Util::isSimicsRunning())
+                {
+                    platCheckOcmbCRC(pTarget, present);
+                }
+                else
+                {
+                    HWAS_DBG( "Ignoring CRC in Simics" );
+                }
             }
         }
 

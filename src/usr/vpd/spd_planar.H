@@ -88,7 +88,7 @@ const KeywordData planarEepromData[] =
     { IBM_11S_PN,                       0x1a3,  0x07,   0x00,   0x00, false, false, ALL },
     { IBM_11S_SN,                       0x1aa,  0x0c,   0x00,   0x00, false, false, ALL },
     { IBM_11S_CC,                       0x1b6,  0x04,   0x00,   0x00, false, false, ALL },
-    { EXPLORER_FW_VERSION,              0x3c0,  0x40,   0x00,   0x00, false, true,  ALL },
+    { EXPLORER_FW_VERSION,              0x3c0,  0x40,   0x00,   0x00, false, false, ALL },
     { SAFE_PARK_ZONE,                   0x800,  0x01,   0x00,   0x00, false, false, ALL },
 
     // Module Specific fields supported on DDR4 only
