@@ -37,6 +37,7 @@
 
 #include <generic/memory/lib/utils/find.H>
 
+#include <lib/phy/ody_phy_utils.H>
 #include <lib/phy/ody_draminit_utils.H>
 #include <ody_scom_mp_apbonly0.H>
 #include <ody_scom_mp_mastr_b0.H>
@@ -129,9 +130,11 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
         // Loops over OCMB chip targets that were defined in the associated config
         for_each_target([](const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
         {
-            REQUIRE_SPECIFIC_RC_FAIL(mss::ody::phy::load_mem_bin_data(i_target, 0x58000, NULL, 0x400, 0x8000),
+            REQUIRE_SPECIFIC_RC_FAIL(mss::ody::phy::load_mem_bin_data(i_target, fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_YES, 0x58000,
+                                     NULL, 0x400, 0x8000),
                                      fapi2::RC_ODY_DRAMINIT_START_DATA_PTR_NULL);
-            REQUIRE_SPECIFIC_RC_FAIL(mss::ody::phy::load_mem_bin_data(i_target, 0x50000, NULL, 0x400, 0x8000),
+            REQUIRE_SPECIFIC_RC_FAIL(mss::ody::phy::load_mem_bin_data(i_target, fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_YES, 0x50000,
+                                     NULL, 0x400, 0x8000),
                                      fapi2::RC_ODY_DRAMINIT_START_DATA_PTR_NULL);
 
             return 0;
@@ -147,7 +150,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
         {
             uint8_t l_dmem_image_data[] = {0x12, 0x34, 0x56, 0x78, 0x9a};
 
-            REQUIRE_SPECIFIC_RC_FAIL(mss::ody::phy::ody_load_dmem_helper(i_target, l_dmem_image_data, 0x5, 0xFFFE),
+            REQUIRE_SPECIFIC_RC_FAIL(mss::ody::phy::ody_load_dmem_helper(i_target, l_dmem_image_data, 0x5, 0xFFFc),
                                      fapi2::RC_ODY_DRAMINIT_MEM_ADDR_RANGE_OUT_OF_BOUNDS);
             REQUIRE_SPECIFIC_RC_FAIL(mss::ody::phy::ody_load_dmem_helper(i_target, l_dmem_image_data, 0x10001, 0),
                                      fapi2::RC_ODY_DRAMINIT_MEM_ADDR_RANGE_OUT_OF_BOUNDS);
@@ -163,6 +166,14 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
         // Loops over OCMB chip targets that were defined in the associated config
         for_each_target([](const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
         {
+
+            // Skips zero data writes
+            // This is safe to do for this UT as the code checking the in bounds cases for the mem data size is at the start of the function
+            for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+            {
+                REQUIRE_RC_PASS(mss::attr::set_ody_dmem_first_load(l_port, fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_YES));
+            }
+
             uint8_t l_dmem_image_data[0x10000] = {};
 
             REQUIRE_RC_PASS(mss::ody::phy::ody_load_dmem_helper(i_target, l_dmem_image_data, 0x10000, 0));
@@ -172,6 +183,72 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
         });
     }
 
+    GIVEN("Tests register values for load_dmem_helper()")
+    {
+        FAPI_INF("Testing passing scenario for DMEM image data");
+        // Loops over OCMB chip targets that were defined in the associated config
+        for_each_target([](const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+        {
+            uint8_t l_dmem_image_data[8] =
+            {
+                0x00, 0x00, 0x00, 0x00, // zero load will be skipped the first time
+                0x01, 0x02, 0x03, 0x04, // non-zero load will always go through
+            };
+
+            // Does register injects
+            for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+            {
+                REQUIRE_RC_PASS(fapi2::putScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58000), 0xffff));
+                REQUIRE_RC_PASS(fapi2::putScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58001), 0xffff));
+                REQUIRE_RC_PASS(fapi2::putScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58002), 0xffff));
+                REQUIRE_RC_PASS(fapi2::putScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58003), 0xffff));
+            }
+
+            // Skips zero data writes for the first load
+            for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+            {
+                REQUIRE_RC_PASS(mss::attr::set_ody_dmem_first_load(l_port, fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_YES));
+            }
+
+            REQUIRE_RC_PASS(mss::ody::phy::ody_load_dmem_helper(i_target, l_dmem_image_data, 8, 0));
+
+            for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+            {
+                fapi2::buffer<uint64_t> l_data;
+                REQUIRE_RC_PASS(fapi2::getScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58000), l_data));
+                REQUIRE(l_data == 0xffff); // no change as the address was not written
+                REQUIRE_RC_PASS(fapi2::getScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58001), l_data));
+                REQUIRE(l_data == 0xffff); // no change as the address was not written
+                REQUIRE_RC_PASS(fapi2::getScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58002), l_data));
+                REQUIRE(l_data == 0x0201);
+                REQUIRE_RC_PASS(fapi2::getScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58003), l_data));
+                REQUIRE(l_data == 0x0403);
+            }
+
+            // Runs zero writes for subsequent loads
+            for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+            {
+                REQUIRE_RC_PASS(mss::attr::set_ody_dmem_first_load(l_port, fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_NO));
+            }
+
+            REQUIRE_RC_PASS(mss::ody::phy::ody_load_dmem_helper(i_target, l_dmem_image_data, 8, 0));
+
+            for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+            {
+                fapi2::buffer<uint64_t> l_data;
+                REQUIRE_RC_PASS(fapi2::getScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58000), l_data));
+                REQUIRE(l_data == 0x0000); // no change as the address was not written
+                REQUIRE_RC_PASS(fapi2::getScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58001), l_data));
+                REQUIRE(l_data == 0x0000); // no change as the address was not written
+                REQUIRE_RC_PASS(fapi2::getScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58002), l_data));
+                REQUIRE(l_data == 0x0201);
+                REQUIRE_RC_PASS(fapi2::getScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(0x58003), l_data));
+                REQUIRE(l_data == 0x0403);
+            }
+
+            return 0;
+        });
+    }
 
     GIVEN("Testing odd offset check in load_dmem_helper()")
     {
