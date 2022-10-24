@@ -960,7 +960,7 @@ fapi2::ReturnCode p10_io_init::sim_speedup(const fapi2::Target<fapi2::TARGET_TYP
             FAPI_TRY(p10_io_ppe_tx_rc_enable_dcc[i].putData(l_pauc_target, 0x0));
             //FAPI_TRY(p10_io_ppe_rx_dc_enable_zcal[i].putData(l_pauc_target, 0x0));
 
-            FAPI_TRY(p10_io_ppe_rx_eo_enable_edge_offset_cal[i].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_edge_offset_cal[i].putData(l_pauc_target, 0x1));
             FAPI_TRY(p10_io_ppe_rx_eo_enable_ctle_peak_cal[i].putData(l_pauc_target, 0x0));
             FAPI_TRY(p10_io_ppe_rx_rc_enable_ctle_peak_cal[i].putData(l_pauc_target, 0x0));
             FAPI_TRY(p10_io_ppe_rx_rc_enable_edge_offset_cal[i].putData(l_pauc_target, 0x0));
