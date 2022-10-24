@@ -104,6 +104,7 @@ struct rcw_id
 ///
 /// @brief Loads binary into registers
 /// @param[in] i_target the target on which to operate
+/// @param[in] i_is_first_load value noting if this is the first load of the given memory array
 /// @param[in] i_start_addr start address of  imem/dmem binary to be read through istream
 /// @param[in] i_data_start data pointer  of imem/dmem
 /// @param[in] i_mem_size size of the dmem/imem istream to be trasferred per loop
@@ -111,6 +112,7 @@ struct rcw_id
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    const uint8_t i_is_first_load,
                                     const uint32_t i_start_addr,
                                     uint8_t* i_data_start,
                                     const uint32_t i_mem_size,
@@ -298,6 +300,19 @@ enum mailbox_consts
 /// @return uint32_t calculated end address
 ///
 uint32_t calculate_image_end_addr(const uint32_t i_start_addr, const uint32_t i_size);
+
+///
+/// @brief Assembles a single registers worth of data from the buffer
+/// @param[in] i_mem_size size of the dmem/imem istream to be transferred per loop
+/// @param[in,out] io_bytes_copied the number of bytes copied
+/// @param[in] i_current_byte the pointer to the current byte
+/// @param[in,out] io_data the data for this register address
+/// @return The updated pointer to the current byte
+///
+const uint8_t* assemble_mem_bin_data_reg(const uint32_t i_mem_size,
+        uint32_t& io_bytes_copied,
+        const uint8_t* i_current_byte,
+        fapi2::buffer<uint64_t>& io_data);
 
 ///
 /// @brief Helper function to ody_load_dmem()

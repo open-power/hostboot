@@ -2338,15 +2338,49 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Assembles a single registers worth of data from the buffer
+/// @param[in] i_mem_size size of the dmem/imem istream to be transferred per loop
+/// @param[in,out] io_bytes_copied the number of bytes copied
+/// @param[in] i_current_byte the pointer to the current byte
+/// @param[in,out] io_data the data for this register address
+/// @return The updated pointer to the current byte
+///
+const uint8_t* assemble_mem_bin_data_reg(const uint32_t i_mem_size,
+        uint32_t& io_bytes_copied,
+        const uint8_t* i_current_byte,
+        fapi2::buffer<uint64_t>& io_data)
+{
+    // Copy the last 8(56-63) bits of data
+    if (io_bytes_copied < i_mem_size)
+    {
+        io_data.insertFromRight < 64 - BITS_PER_BYTE, BITS_PER_BYTE > (*i_current_byte);
+        io_bytes_copied++;
+        i_current_byte++;
+    }
+
+    if (io_bytes_copied < i_mem_size)
+    {
+        // Copy the next 8(48-55) bits of data
+        io_data.insertFromRight < 64 - 2 * BITS_PER_BYTE, BITS_PER_BYTE > (*i_current_byte);
+        io_bytes_copied++;
+        i_current_byte++;
+    }
+
+    return i_current_byte;
+}
+
+///
 /// @brief Loads binary into registers
 /// @param[in] i_target the target on which to operate
+/// @param[in] i_is_first_load value noting if this is the first load of the given memory array
 /// @param[in] i_start_addr start address of  imem/dmem binary
 /// @param[in] i_data_start data pointer  of imem/dmem
-/// @param[in] i_mem_size size of the dmem/imem istream to be trasferred per loop
+/// @param[in] i_mem_size size of the dmem/imem istream to be transferred per loop
 /// @param[in] i_mem_total_size total size of the dmem/imem
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    const uint8_t i_is_first_load,
                                     const uint32_t i_start_addr,
                                     uint8_t* const i_data_start,
                                     const uint32_t i_mem_size,
@@ -2357,7 +2391,7 @@ fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
 
     uint64_t l_curr_addr = i_start_addr;
     uint32_t l_bytes_copied = 0;
-    uint8_t* l_curr_byte = i_data_start;
+    const uint8_t* l_curr_byte = i_data_start;
 
 #ifndef __PPE__
     constexpr uint64_t SECONDS_PER_MINUTE = 60;
@@ -2373,28 +2407,26 @@ fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
     while(l_bytes_copied < i_mem_size)
     {
         // Local buffer for getting data from registers
-        fapi2::buffer<uint64_t> l_buffer;
+        fapi2::buffer<uint64_t> l_buffer_even;
+        fapi2::buffer<uint64_t> l_buffer_odd;
 
-        // Copy the last 8(56-63) bits of data
-        l_buffer.insertFromRight < 64 - BITS_PER_BYTE, BITS_PER_BYTE > (*l_curr_byte);
-        l_bytes_copied++;
-        l_curr_byte++;
+        l_curr_byte = assemble_mem_bin_data_reg(i_mem_size, l_bytes_copied, l_curr_byte, l_buffer_even);
+        l_curr_byte = assemble_mem_bin_data_reg(i_mem_size, l_bytes_copied, l_curr_byte, l_buffer_odd);
 
-        if (l_bytes_copied < i_mem_size)
-        {
-            // Copy the next 8(48-55) bits of data
-            l_buffer.insertFromRight < 64 - 2 * BITS_PER_BYTE, BITS_PER_BYTE > (*l_curr_byte);
-            l_bytes_copied++;
-            l_curr_byte++;
-        }
-
-        // Write l_buffer to the register
+        // Write l_buffer to the registers
         for(const auto& l_port : l_port_targets)
         {
-            FAPI_TRY(putScom(l_port, mss::ody::phy::convert_synopsys_to_ibm_reg_addr(l_curr_addr), l_buffer));
+            FAPI_TRY(phy_mem_load_helper( l_port,
+                                          i_is_first_load,
+                                          l_curr_addr,
+                                          l_buffer_even,
+                                          l_buffer_odd));
         }
 
-        l_curr_addr += 1;
+        // The registers are written in pairs so we increment by 2
+        // Additionally, we need to write the same data to the same register in each port
+        // Therefore, the address is incremented outside of the port loop
+        l_curr_addr += 2;
 
 #ifndef __PPE__
         {
@@ -2582,6 +2614,10 @@ fapi2::ReturnCode ody_load_dmem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OC
     constexpr uint64_t DMEM_END_ADDR = 0x60000;
     constexpr size_t MAX_IMAGE_SIZE = 65536;
 
+    // Get all the mem port targets
+    const auto& l_port_targets = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+    uint8_t l_is_first_load = 0;
+
     // Get the end address
     const auto l_end_addr = mss::ody::phy::calculate_image_end_addr(l_start_addr, i_dmem_size);
 
@@ -2608,11 +2644,27 @@ fapi2::ReturnCode ody_load_dmem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OC
                 TARGTIDFORMAT " DMEM start address(0x%08x) or size(0x%04x) puts image out of range in phy.", TARGTID,
                 l_start_addr, i_dmem_size);
 
+    // If there is at least one port configured, use that port to grab the first load attribute
+    // Going to make the assumption that the ports are always loaded together and that errors did not occur setting the attributes on both ports
+    // This seems like a safe assumption as attribute set/get errors are extremely rare
+    if(!l_port_targets.empty())
+    {
+        FAPI_TRY(mss::attr::get_ody_dmem_first_load(l_port_targets[0], l_is_first_load));
+    }
+
     return mss::ody::phy::load_mem_bin_data(i_target,
+                                            l_is_first_load,
                                             l_start_addr,
                                             i_dmem_data,
                                             i_dmem_size,
                                             MAX_IMAGE_SIZE);
+
+    // Note: we specifically do NOT set the first load attributes here
+    // Due to memory size constraints on the SBE, this procedure can be called multiple times
+    // Setting the attributes here could cause speed ups within the helper functions to not be run
+    // for the second or third executions of the memory load
+    // For normal boots, these attributes will be set in the draminit procedure
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -2664,11 +2716,15 @@ fapi2::ReturnCode ody_load_imem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OC
                 TARGTIDFORMAT " IMEM start address(0x%08x) or size(0x%04x) puts image out of range in phy.", TARGTID, l_start_addr,
                 i_imem_size);
 
+    // Note: the IMEM is not guaranteed to be initialized to zeroes, so this load is considered to NOT be the first load
+    // This will skip some efficiency boosts we can use for the DMEM load
     return mss::ody::phy::load_mem_bin_data(i_target,
+                                            fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_NO,
                                             l_start_addr,
                                             i_imem_data,
                                             i_imem_size,
                                             MAX_IMAGE_SIZE);
+
 fapi_try_exit:
     return fapi2::current_err;
 

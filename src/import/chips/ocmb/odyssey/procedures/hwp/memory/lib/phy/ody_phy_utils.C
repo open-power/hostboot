@@ -37,7 +37,12 @@
 
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <lib/phy/ody_phy_utils.H>
+#include <lib/phy/ody_ddrphy_phyinit_config.H>
 #include <ody_scom_mp_apbonly0.H>
+#include <ody_scom_mp_drtub0.H>
+#include <generic/memory/lib/utils/poll.H>
+#include <lib/phy/ody_draminit_utils.H>
+#include <mss_odyssey_attribute_setters.H>
 
 namespace mss
 {
@@ -195,6 +200,129 @@ fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 
     FAPI_TRY(fapi2::getScom(i_target, i_addr + 3 * SYNOPSYS_ADDR_INCREMENT, l_data));
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief A helper to check if loads to two DMEM fields are needed
+/// @param[in] i_attr the attribute value dictating if this is the first load or not
+/// @param[in] i_data_even even address data
+/// @param[in] i_data_odd odd address data
+/// @return true if the data should be loaded, otherwise false
+/// @note the DMEM should be guaranteed to be initialized to zeroes via a reset function
+/// As such, we can gain performance benefits by only loading non-zero data on the first load
+/// the data for these addresses will be loaded if:
+/// 1. this is not the first time the DMEM have been loaded this boot
+/// 2. this is the first DMEM load and the data for one of the addresses is non-zero
+///
+bool phy_mem_load_helper( const uint8_t i_attr,
+                          const uint64_t i_data_even,
+                          const uint64_t i_data_odd)
+{
+    // If this is not first load, then always load the data
+    if(i_attr == fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_NO)
+    {
+        return true;
+    }
+
+    // If at least one register has non-zero data, then load the data
+    if(i_data_even != 0 || i_data_odd != 0)
+    {
+        return true;
+    }
+
+    // Otherwise, this is the first load and both pieces of data are 0, no load needed
+    return false;
+}
+
+///
+/// @brief A helper to load two DMEM fields only if needed
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_attr the attribute value dictating if this is the first load or not
+/// @param[in] i_addr the starting address to write to - must be the even address
+/// @param[in] i_data_even even address data
+/// @param[in] i_data_odd odd address data
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note the DMEM should be guaranteed to be initialized to zeroes
+/// As such, we can gain performance benefits by only loading non-zero data on the first load
+/// the data for these addresses will be loaded if:
+/// 1. this is not the first time the DMEM have been loaded this boot
+/// 2. this is the first DMEM load and the data for one of the addresses is non-zero
+///
+fapi2::ReturnCode phy_mem_load_helper( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                       const uint8_t i_attr,
+                                       const uint64_t i_addr,
+                                       const uint64_t i_data_even,
+                                       const uint64_t i_data_odd)
+{
+    // If no load is needed, then just exit out, no need for the data load
+    if(phy_mem_load_helper( i_attr, i_data_even, i_data_odd) == false)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // DMEM addresses are always loaded in pairs
+    FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, i_addr, i_data_even));
+    FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, i_addr + 1, i_data_odd));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Resets the DMEM values to all 0's
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+
+fapi2::ReturnCode reset_dmem( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    // Stalls the ARC processor to ensure it's not running
+    FAPI_TRY(stall_arc_processor(i_target));
+
+    // Toggles the start DCCM clear bit. The bit requires a 0->1 transition, so we'll do X->0->1 to be safe
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_DRTUB0_STARTDCCMCLEAR, l_data));
+    l_data.setBit<scomt::mp::DWC_DDRPHYA_DRTUB0_STARTDCCMCLEAR_STARTDCCMCLEAR>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_DRTUB0_STARTDCCMCLEAR, l_data));
+
+    // Polls for completion, where the in progress bit is a 0
+    {
+        mss::poll_parameters l_poll_params(50 * DELAY_1US, // Should take ~100k DFI clocks ~50k memclocks -> 50 US
+                                           20000,          // Initial sim delay
+                                           mss::DELAY_1US, // 1US per poll. Seems fine
+                                           20000,          // Sim delay taken from draminit message block polling
+                                           100);           // 100 polls. Shouldn't take this long
+
+        // Poll for getting 0 at for the DCCM clear running in progress bit.
+        const bool l_poll_return = mss::poll(i_target, l_poll_params, [&i_target]()->bool
+        {
+            fapi2::buffer<uint64_t> l_data;
+            FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_DRTUB0_DCCMCLEARRUNNING, l_data));
+            return (!l_data.getBit<scomt::mp::DWC_DDRPHYA_DRTUB0_DCCMCLEARRUNNING_DCCMCLEARRUNNING>());
+
+        fapi_try_exit:
+            FAPI_ERR("mss::poll() hit an error in mss::getScom");
+            return false;
+        });
+
+        // following FAPI_TRY to preserve the scom failure in lambda.
+        FAPI_TRY(fapi2::current_err);
+        FAPI_ASSERT(l_poll_return,
+                    fapi2::ODY_DMEM_RESET_TIMEOUT().
+                    set_PORT_TARGET(i_target),
+                    TARGTIDFORMAT " poll for getting mail timed out during DCCM clear", TARGTID);
+    }
+
+    // After polling, toggle back to a 0. this is required per simulation
+    l_data.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_DRTUB0_STARTDCCMCLEAR, l_data));
+
+    // After the reset has completed, then toggle the DMEM attribute to note that this is a first run (should be clean now)
+    FAPI_TRY(mss::attr::set_ody_dmem_first_load(i_target, fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_YES));
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -41,6 +41,7 @@
 #include <lib/phy/ody_draminit_utils.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <mss_odyssey_attribute_getters.H>
+#include <mss_odyssey_attribute_setters.H>
 #include <lib/phy/ody_draminit_procedure.H>
 
 namespace mss
@@ -68,6 +69,11 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
 
     // 2. Loads the DMEM Memory (data) onto Synopsys PHY
     // It is being done in ody_load_dmem.C
+
+    // 2.1 Sets the attribute to note that the DMEM has been loaded
+    // Due to memory size constraints on the SBE, the dmem load procedures can be called multiple times
+    // As the speed ups for this attribute depend upon the YES enum, the NO is set here after all loads have completed
+    FAPI_TRY(mss::attr::set_ody_dmem_first_load(i_target, fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_NO));
 
     // 3. Configures and loads the message block onto Synopsys PHY
     FAPI_TRY(mss::ody::phy::configure_and_load_dram_train_message_block(i_target, l_msg_block));

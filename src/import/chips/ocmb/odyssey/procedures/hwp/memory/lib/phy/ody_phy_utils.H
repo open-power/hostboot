@@ -113,6 +113,49 @@ fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint64_t i_addr,
                                    uint64_t& o_field);
 
+///
+/// @brief A helper to check if loads to two IMEM/DMEM fields are needed
+/// @param[in] i_attr the attribute value dictating if this is the first load or not
+/// @param[in] i_data_even even address data
+/// @param[in] i_data_odd odd address data
+/// @return true if the data should be loaded, otherwise false
+/// @note the IMEM/DMEM should be guaranteed to be initialized to zeroes
+/// As such, we can gain performance benefits by only loading non-zero data on the first load
+/// the data for these addresses will be loaded if:
+/// 1. this is not the first time the IMEM/DMEM have been loaded this boot
+/// 2. this is the first IMEM/DMEM load and the data for one of the addresses is non-zero
+///
+bool phy_mem_load_helper( const uint8_t i_attr,
+                          const uint64_t i_data_even,
+                          const uint64_t i_data_odd);
+
+///
+/// @brief A helper to load two IMEM/DMEM fields only if needed
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_attr the attribute value dictating if this is the first load or not
+/// @param[in] i_addr the starting address to write to - must be the even address
+/// @param[in] i_data_even even address data
+/// @param[in] i_data_odd odd address data
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note the IMEM/DMEM should be guaranteed to be initialized to zeroes
+/// As such, we can gain performance benefits by only loading non-zero data on the first load
+/// the data for these addresses will be loaded if:
+/// 1. this is not the first time the IMEM/DMEM have been loaded this boot
+/// 2. this is the first IMEM/DMEM load and the data for one of the addresses is non-zero
+///
+fapi2::ReturnCode phy_mem_load_helper( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                       const uint8_t i_attr,
+                                       const uint64_t i_addr,
+                                       const uint64_t i_data_even,
+                                       const uint64_t i_data_odd);
+
+///
+/// @brief Resets the DMEM values to all 0's
+/// @param[in] i_target the target on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode reset_dmem( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
 } // namespace phy
 } // namespace ody
 } // namespace mss

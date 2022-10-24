@@ -75,6 +75,12 @@ class input_helper
                                                          "--help",
                                                          "help screen flag",
                                                          "false");
+        static constexpr mss::lab::input::traits CLEAR_DMEM =
+            mss::lab::input::create_traits< mss::lab::input::process_type::FLAG,
+            mss::lab::input::required::OPTIONAL>(
+                "--clear_dmem",
+                "Clears the DMEM",
+                "false");
 
         static const std::vector<std::pair<mss::lab::input::traits, std::vector<std::string>>> FIELDS;
 };
@@ -85,6 +91,8 @@ class input_helper
 ///
 struct user_inputs
 {
+    bool iv_clear_dmem = false;
+
     ///
     /// @brief Default constructor
     ///
@@ -102,7 +110,7 @@ struct user_inputs
     ///
     bool operator==(const user_inputs& i_rhs) const
     {
-        return true;
+        return iv_clear_dmem == i_rhs.iv_clear_dmem;
     }
 };
 

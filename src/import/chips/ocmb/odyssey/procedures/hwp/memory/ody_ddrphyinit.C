@@ -40,6 +40,7 @@
 #include <ody_ddrphyinit.H>
 #include <lib/phy/ody_ddrphy_phyinit_config.H>
 #include <lib/phy/ody_phy_reset.H>
+#include <lib/phy/ody_phy_utils.H>
 
 extern "C"
 {
@@ -58,6 +59,9 @@ extern "C"
 
             // Runs all steps of PHY init
             FAPI_TRY(run_phy_init(l_port), TARGTIDFORMAT "failed init_phy_config", TARGTID);
+
+            // Clears the DMEM
+            FAPI_TRY(mss::ody::phy::reset_dmem(l_port), TARGTIDFORMAT "failed to clear the DMEM", TARGTID);
         }
 
         return fapi2::FAPI2_RC_SUCCESS;

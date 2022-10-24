@@ -849,4 +849,22 @@
 
     <!-- end draminit structure (message block) outputs section -->
 
+    <attribute>
+        <id>ATTR_ODY_DMEM_FIRST_LOAD</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Keeps track if the Odyssey's DMEM has been loaded before
+            As the DMEM can be reset to all zeroes, this attribute can be used to speed up the DMEM loads
+            by skipping the any DMEM addresses that are zeroes
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            NO = 0,
+            YES = 1
+        </enum>
+        <default>NO</default>
+        <writeable/>
+        <mssAccessorName>ody_dmem_first_load</mssAccessorName>
+    </attribute>
+
 </attributes>
