@@ -41,6 +41,7 @@
 #include <htmgt/htmgt_reasoncodes.H>
 #include <fapi2_attribute_service.H>
 #include <isteps/pm/scopedHomerMapper.H>
+#include <chips/common/utils/chipids.H>
 
 using namespace TARGETING;
 
@@ -51,19 +52,11 @@ using namespace TARGETING;
 namespace HTMGT
 {
 
+#define OCC_MEM_TYPE_EXPLORER 0xA0
+#define OCC_MEM_TYPE_ODYSSEY  0xB0
+#define OCC_MEM_TYPE_ISDIMM   0xC0
     bool G_wofSupported = true;
     uint8_t G_system_type = 0;
-
-    struct occ_memory_table_t
-    {
-        TARGETING::Target* targetPtr;
-        uint8_t  occInstance;
-        uint8_t  ocmbNum;
-        uint8_t  dts;
-        uint8_t  ocmbTempType;
-        uint8_t  reserved;
-    } __attribute__((packed));
-    std::vector<occ_memory_table_t> G_memTable;
 
 
     // Send config format data to all OCCs
@@ -76,8 +69,6 @@ namespace HTMGT
         {
             TMGT_INF("sendOccConfigData called");
         }
-
-        G_memTable.clear();
 
         const occCfgDataTable_t* start = &occCfgDataTable[0];
         const occCfgDataTable_t* end =
@@ -333,16 +324,16 @@ void writeMemConfigData( uint8_t *& o_data,
            l_dataSize);
     io_index += l_dataSize;
 
-    //Byte 8 Memory type (0xAn, where n is Memory Buffer 0-F)
-    o_data[io_index++] = 0xA0 | i_memType;
+    //Byte 8 Memory type
+    o_data[io_index++] = i_memType;
 
-    //Byte 9 DIMM Info Byte 1 (Memory DTS 0/1)
+    //Byte 9 DIMM Info Byte 1 (Memory DTS 0-3/DIMM I2C Engine)
     o_data[io_index++] = i_dimmInfo1;
 
-    //Byte 10 DIMM Info Byte 2 (Temperature Type)
+    //Byte 10 DIMM Info Byte 2 (Temperature Type/DIMM I2C Port)
     o_data[io_index++] = i_dimmInfo2;
 
-    //Byte 11 DIMM Info Byte 3 (Reserved)
+    //Byte 11 DIMM Info Byte 3 (Reserved/DIMM I2C Address)
     o_data[io_index++] = i_dimmInfo3;
 }
 
@@ -403,6 +394,277 @@ uint8_t convert_temp_type(const uint8_t i_sensor_type)
 }
 
 
+// Read I2C parameters for target ISDIMM and add to OCC config
+uint8_t addIsDimm(uint8_t* o_data,
+                  Target* i_portTarget,
+                  Target* i_dimmTarget,
+                  uint32_t &io_index,
+                  const uint8_t i_ocmbNum)
+
+{
+    uint8_t numSets = 0;
+
+    // TODO JIRA: PFES-6 - Hardcoded I2C Parms until available in MRW
+    uint8_t i2cEngine = 3; // PIB I2C master engine for DIMM (E = 3)
+    uint8_t i2cPort = 3 + i_ocmbNum;        // I2C port (0/1)
+    uint8_t i2cAddr = 0x30 + (i_ocmbNum*2); // sensor I2C Address
+    TMGT_INF("ocmbInit:       I2C Engine[%d] Port[%d] Address[0x%02X] (hardcoded)",
+             i2cEngine, i2cPort, i2cAddr);
+
+#if 0
+    writeMemConfigData(o_data,
+                       i_portTarget,
+                       SENSOR_NAME_DIMM_STATE,
+                       SENSOR_NAME_DIMM_TEMP,
+                       OCC_MEM_TYPE_ISDIMM,
+                       i2cEngine,
+                       i2cPort,
+                       i2cAddr,
+                       io_index );
+    ++numSets;
+#endif
+
+    return numSets;
+}
+
+
+// Read internal DTS type for target OCMB and add to OCC config
+uint8_t addOcmbInternalDts(uint8_t*  o_data,
+                           Target*   i_ocmbTarget,
+                           uint8_t   i_ocmbNum,
+                           uint8_t&  o_memType,
+                           uint32_t& io_index)
+{
+    uint8_t numSets = 0;
+    uint8_t dtsType = 0xFF; // disabled
+    const uint32_t chipId = i_ocmbTarget->getAttr<ATTR_CHIP_ID>();
+    const ATTR_HUID_type l_ocmb_huid = get_huid(i_ocmbTarget);
+    static bool L_logged_invalid = false;
+
+    // Determine internal DTS type for OCMB
+    if(i_ocmbTarget->tryGetAttr
+       <TARGETING::ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE >(dtsType))
+    {
+        if ((dtsType == MEM_EFF_THERM_SENSOR_DIFF_USAGE_MB_INT_DTM) ||
+            (dtsType == MEM_EFF_THERM_SENSOR_DIFF_USAGE_MB_INT_DTM_REM))
+        {
+            dtsType = 0x01; // Internal Memory Controller
+        }
+        else if (dtsType == MEM_EFF_THERM_SENSOR_DIFF_USAGE_DISABLED)
+        {
+            dtsType = 0xFF; // Disabled
+        }
+        else
+        {
+            TMGT_ERR("addOcmbInternalDts: Unsupported ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE 0x%02X",
+                     dtsType);
+            if (!L_logged_invalid)
+            {
+                L_logged_invalid = true;
+                /*@
+                 * @errortype
+                 * @subsys EPUB_FIRMWARE_SP
+                 * @reasoncode HTMGT_RC_INVALID_MEM_SENSOR
+                 * @moduleid HTMGT_MOD_ADD_OBMC_INTERNAL_DTS
+                 * @userdata1 USAGE type
+                 * @userdata2 OCMB HUID
+                 * @devdesc Unsupported
+                 *             ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE type
+                 * @custdesc An internal firmware error occurred
+                 */
+                errlHndl_t l_err = NULL;
+                bldErrLog(l_err, HTMGT_MOD_ADD_OBMC_INTERNAL_DTS,
+                          HTMGT_RC_INVALID_MEM_SENSOR,
+                          dtsType, l_ocmb_huid,
+                          ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+            }
+            dtsType = 0xFF; // Disabled
+        }
+        numSets++;
+    }
+    else
+    {
+        TMGT_ERR("addOcmbInternalDts: Failed to read ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE");
+        dtsType = 0xFF; // Disabled
+        if (!L_logged_invalid)
+        {
+            L_logged_invalid = true;
+            /*@
+             * @errortype
+             * @subsys EPUB_FIRMWARE_SP
+             * @reasoncode HTMGT_RC_ATTRIBUTE_ERROR
+             * @moduleid HTMGT_MOD_ADD_OBMC_INTERNAL_DTS
+             * @userdata1 OCMB number
+             * @userdata2 chip ID
+             * @devdesc Failed to read MEM_EFF_THERM_SENSOR_DIFF_USAGE
+             * @custdesc Failed to determine memory temperature sensor type.
+             *           Some memory temperatures may not be available.
+             */
+            errlHndl_t l_err = NULL;
+            bldErrLog(l_err, HTMGT_MOD_ADD_OBMC_INTERNAL_DTS,
+                      HTMGT_RC_ATTRIBUTE_ERROR,
+                      i_ocmbNum, chipId,
+                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+        }
+    }
+
+    if (chipId == POWER_CHIPID::EXPLORER_16)
+    {
+        // EXPLORER/DDR4 OCMB Memory type (0xAn, where n is Memory Buffer 0-F)
+        o_memType = OCC_MEM_TYPE_EXPLORER | i_ocmbNum;
+
+        TMGT_INF("ocmbInit: OCMB-EXPL[%d] HUID=0x%08lX DTS[int] TYPE[%d] "
+                 "(pos=0x%02X, ordinal=0x%02X)",
+                 i_ocmbNum, l_ocmb_huid, dtsType,
+                 i_ocmbTarget->getAttr<ATTR_POSITION>(),
+                 i_ocmbTarget->getAttr<ATTR_ORDINAL_ID>());
+    }
+    else
+    {
+        // ODYSSEY/DDR5 OCMB Memory type (0xBn, where n is Memory Buffer 0-F)
+        o_memType = OCC_MEM_TYPE_ODYSSEY | i_ocmbNum;
+
+        TMGT_INF("ocmbInit: OCMB-ODYS[%d] HUID=0x%08lX DTS[int] TYPE[%d] "
+                 "(pos=0x%02X, ordinal=0x%02X)",
+                 i_ocmbNum, l_ocmb_huid, dtsType,
+                 i_ocmbTarget->getAttr<ATTR_POSITION>(),
+                 i_ocmbTarget->getAttr<ATTR_ORDINAL_ID>());
+    }
+
+    if (numSets > 0)
+    {
+        // add entry for the OCMB itself
+        writeMemConfigData(o_data,
+                           i_ocmbTarget,
+                           SENSOR_NAME_MEMBUF_STATE,
+                           SENSOR_NAME_MEMBUF_TEMP,
+                           o_memType,
+                           0xFF,        // on-chip thermal sensor
+                           dtsType,      // temperature type (internal, disabled)
+                           0,           // reserved
+                           io_index);
+    }
+
+    return numSets;
+}
+
+// Read available DTSs for target OCMB DIMMS and add to OCC config
+uint8_t addOcmbExternalDts(uint8_t* o_data,
+                           Target* i_ocmbTarget,
+                           const uint8_t i_memType,
+                           uint32_t &io_index)
+{
+    uint8_t numSets = 0;
+    uint8_t dtsType = 0xFF; // disabled
+    static bool attrReadFailure = false;
+
+    uint8_t maxNumDts = HTMGT_NUM_DTS_PER_OCMB;
+    if ((i_memType & 0xF0) == OCC_MEM_TYPE_ODYSSEY)
+    {
+        maxNumDts = HTMGT_NUM_DTS_PER_OCMB_ODYSSEY;
+    }
+
+    // Update entry with DIMM DTSs for this OCMB
+    for (unsigned int l_dts = 0; l_dts < maxNumDts; ++l_dts)
+    {
+        if (l_dts == 0)
+        {
+            if (i_ocmbTarget->tryGetAttr
+                <TARGETING::ATTR_MEM_EFF_THERM_SENSOR_0_USAGE>(dtsType))
+            {
+                dtsType = convert_temp_type(dtsType);
+            }
+            else
+            {
+                TMGT_ERR("ocmbInit: Failed to read ATTR_MEM_EFF_THERM_SENSOR_0_USAGE");
+                dtsType = 0xFF; // disabled
+                attrReadFailure = true;
+            }
+        }
+        else if (l_dts == 1)
+        {
+            if (i_ocmbTarget->tryGetAttr
+                <TARGETING::ATTR_MEM_EFF_THERM_SENSOR_1_USAGE>(dtsType))
+            {
+                dtsType = convert_temp_type(dtsType);
+            }
+            else
+            {
+                TMGT_ERR("ocmbInit: Failed to read ATTR_MEM_EFF_THERM_SENSOR_1_USAGE");
+                dtsType = 0xFF; // disabled
+                attrReadFailure = true;
+            }
+        }
+        else if (l_dts == 2)
+        {
+            if (i_ocmbTarget->tryGetAttr
+                <TARGETING::ATTR_MEM_EFF_THERM_SENSOR_2_USAGE>(dtsType))
+            {
+                dtsType = convert_temp_type(dtsType);
+            }
+            else
+            {
+                TMGT_ERR("ocmbInit: Failed to read ATTR_MEM_EFF_THERM_SENSOR_2_USAGE");
+                dtsType = 0xFF; // disabled
+                attrReadFailure = true;
+            }
+        }
+        else
+        {
+            if (i_ocmbTarget->tryGetAttr
+                <TARGETING::ATTR_MEM_EFF_THERM_SENSOR_3_USAGE>(dtsType))
+            {
+                dtsType = convert_temp_type(dtsType);
+            }
+            else
+            {
+                TMGT_ERR("ocmbInit: Failed to read ATTR_MEM_EFF_THERM_SENSOR_3_USAGE");
+                dtsType = 0xFF; // disabled
+                attrReadFailure = true;
+            }
+        }
+
+        TMGT_INF("ocmbInit:   DTS[%d] TYPE[%d]", l_dts, dtsType);
+        writeMemConfigData(o_data,
+                           i_ocmbTarget,
+                           SENSOR_NAME_DIMM_STATE,
+                           SENSOR_NAME_DIMM_TEMP,
+                           i_memType,  // Memory Buffer #
+                           l_dts,      // DTS #
+                           dtsType,     // Temperature Type
+                           0,          // reserved
+                           io_index );
+        numSets++;
+    } // for each DTS
+
+    if (attrReadFailure)
+    {
+        TMGT_ERR("addOcmbExternalDts: Failed to read at least one memory thermal sensor attribute");
+        /*@
+         * @errortype
+         * @subsys EPUB_FIRMWARE_SP
+         * @reasoncode HTMGT_RC_ATTRIBUTE_ERROR
+         * @moduleid HTMGT_MOD_ADD_OBMC_DTS
+         * @userdata1 DTS count
+         * @userdata2 Memory type
+         * @devdesc Failed to read memory thermal sensor usage type
+         * @custdesc Failed to determine memory temperature sensor type.
+         *           Some memory temperatures may not be available.
+         */
+        errlHndl_t l_err = NULL;
+        bldErrLog(l_err, HTMGT_MOD_ADD_OBMC_DTS,
+                  HTMGT_RC_ATTRIBUTE_ERROR,
+                  numSets, i_memType,
+                  ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+    }
+
+    return numSets;
+}
+
+
 /* Function Specification *******************************************************/
 /*                                                                              */
 /*  Name:      ocmbInit                                                         */
@@ -419,15 +681,24 @@ uint8_t convert_temp_type(const uint8_t i_sensor_type)
 /*             1 EXPLORER OCMB chip / DDIMM                                     */
 /*             1 port / EXPLORER OCMB chip                                      */
 /*             2 DDR4 DIMMs / port                                              */
+/*            or                                                                */
+/*             1 ODYSSEY OCMB chip / DDIMM                                      */
+/*             1 port / ODYSSEY OCMB chip                                       */
+/*             4 channels (data ports) / port                                   */
+/*             2 sides / data port (A/B)                                        */
+/*             2 DDR5 DIMMs / port                                              */
+/*            or                                                                */
+/*             1 EXPLORER OCMB chip supports 1 DDR4 ISDIMM                      */
+/*                                                                              */
+/*  There is no mixing of DIMM types within a node/drawer                       */
 /*                                                                              */
 /*  Logical Layout per proc:                                                    */
 /*                     OCMB0 -- DDIMM0 -- CHIP0 -- (port 0) -- DIMM0            */
 /*                                                          -- DIMM1            */
 /*                           -- DDIMM1 -- CHIP0 -- (port 0) -- DIMM0            */
 /*                                                          -- DIMM1            */
-/*                           -- DDIMM2 -- CHIP0 -- (port 0) -- DIMM0            */
-/*                                                          -- DIMM1            */
-/*                   ...                                                        */
+/*              or                                                              */
+/*                     OCMB0 -- ISDIMM0                                         */
 /*                                                                              */
 /* End Function Specification ***************************************************/
 uint8_t ocmbInit(Occ *i_occ,
@@ -435,6 +706,7 @@ uint8_t ocmbInit(Occ *i_occ,
                  uint32_t & io_index)
 {
     TargetHandleList ocmb_list;
+    static bool L_logged_error = false;
     uint8_t numSets = 0;
 
     const TargetHandle_t occ_target = i_occ->getTarget();
@@ -459,10 +731,15 @@ uint8_t ocmbInit(Occ *i_occ,
         {
             uint8_t l_ocmb_num = 0;
             TargetHandleList port_list;
-            TargetHandleList dimm_list;
-            uint8_t l_type = 0xFF; // Disabled
-            static bool L_logged_invalid = false;
             const ATTR_HUID_type l_ocmb_huid = get_huid(ocmb);
+            uint8_t l_memType;
+
+            ATTR_MEM_MRW_IS_PLANAR_type isDIMMs = false;
+            if (!ocmb->tryGetAttr<ATTR_MEM_MRW_IS_PLANAR>(isDIMMs))
+            {
+                TMGT_ERR("ocmbInit: failed to read ATTR_MEM_MRW_IS_PLANAR");
+                isDIMMs = false;
+            }
 
             // OCMB instance comes from the parent (OMI target)
             Target *omi_target = getImmediateParentByAffinity(ocmb);
@@ -473,164 +750,89 @@ uint8_t ocmbInit(Occ *i_occ,
             }
             else
             {
-                TMGT_ERR("ocmbInit: Unable to determine OCMB parent"
-                         " for HUID 0x%04X", l_ocmb_huid);
+                TMGT_ERR("ocmbInit: Unable to determine OCMB parent for HUID 0x%04X",
+                         l_ocmb_huid);
+                if (!L_logged_error)
+                {
+                    /*@
+                     * @errortype
+                     * @subsys EPUB_FIRMWARE_SP
+                     * @reasoncode HTMGT_RC_TARGET_NOT_FOUND
+                     * @moduleid HTMGT_MOD_OCMB_INIT
+                     * @userdata1 OCC Instance
+                     * @userdata2 OCMB HUID
+                     * @devdesc Failed to find OMI target for OCMB
+                     * @custdesc Failed to determine part of the memory config.
+                     *           Some memory temperatures may not be available.
+                     */
+                    errlHndl_t l_err = NULL;
+                    bldErrLog(l_err, HTMGT_MOD_OCMB_INIT,
+                              HTMGT_RC_TARGET_NOT_FOUND,
+                              i_occ->getInstance(), l_ocmb_huid,
+                              ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                    L_logged_error = true;
+                }
+                continue;
             }
+
             // Get list of functional memory ports associated with this OCMB_CHIP
-            getChildAffinityTargets(port_list, ocmb,
-                                    CLASS_UNIT, TYPE_MEM_PORT);
-            // Currently only support a single port per OCMB (use first port)
-            Target* port_target = port_list[0];
-
-            // Determine DTS type for OCMB
-            if(port_target->tryGetAttr
-               <TARGETING::ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE >(l_type))
+            getChildAffinityTargets(port_list, ocmb, CLASS_UNIT, TYPE_MEM_PORT);
+            if (port_list.size() > 0)
             {
-                if ((l_type == MEM_EFF_THERM_SENSOR_DIFF_USAGE_MB_INT_DTM) ||
-                    (l_type == MEM_EFF_THERM_SENSOR_DIFF_USAGE_MB_INT_DTM_REM))
+                TargetHandleList dimm_list;
+
+                // Currently only support a single port per OCMB (use first port)
+                Target* port_target = port_list[0];
+                if (port_list.size() > 1)
                 {
-                    l_type = 0x01; // Internal Memory Controller
+                    TMGT_ERR("ocmbInit: Found %d functional ports (expected 1)",
+                             port_list.size());
                 }
-                else if (l_type == MEM_EFF_THERM_SENSOR_DIFF_USAGE_DISABLED)
+
+                numSets += addOcmbInternalDts(o_data, ocmb, l_ocmb_num, l_memType, io_index);
+                if (!isDIMMs)
                 {
-                    l_type = 0xFF; // Disabled
+                    numSets += addOcmbExternalDts(o_data, ocmb, l_memType, io_index);
                 }
-                else
+
+                // Get list of functional DIMMs assocated for this port (single port)
+                getChildAffinityTargets(dimm_list, port_target,
+                                        CLASS_LOGICAL_CARD, TYPE_DIMM);
+                const unsigned long l_port_huid = get_huid(port_target);
+                TMGT_INF("ocmbInit:   PORT[%d] HUID=0x%08lX (%d functional DIMMs)",
+                         port_target->getAttr<TARGETING::ATTR_CHIP_UNIT>(),
+                         l_port_huid, dimm_list.size());
+
+                if (dimm_list.size() > 0)
                 {
-                    TMGT_ERR("ocmbInit: Unsupported ATTR_MEM_EFF_THERM_SENSOR"
-                             "_DIFF_USAGE 0x%02X", l_type);
-                    if (!L_logged_invalid)
+                    for (uint8_t index=0; index < dimm_list.size(); index++)
                     {
-                        L_logged_invalid = true;
-                        /*@
-                         * @errortype
-                         * @subsys EPUB_FIRMWARE_SP
-                         * @reasoncode HTMGT_RC_INVALID_MEM_SENSOR
-                         * @moduleid HTMGT_MOD_OCMB_INIT
-                         * @userdata1 USAGE type
-                         * @userdata2 OCMB HUID
-                         * @devdesc Unsupported
-                         *             ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE type
-                         * @custdesc An internal firmware error occurred
-                         */
-                        errlHndl_t l_err = NULL;
-                        bldErrLog(l_err, HTMGT_MOD_OCMB_INIT,
-                                  HTMGT_RC_INVALID_MEM_SENSOR,
-                                  l_type, l_ocmb_huid,
-                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-                        ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                        if (!isDIMMs)
+                        {
+                            // Dump DIMM info for completeness (DTSs will be added after this)
+                            TMGT_INF("ocmbInit:     DIMM[%d] HUID=0x%08lX (position=0x%02X)",
+                                     index, get_huid(dimm_list[index]),
+                                     dimm_list[index]->getAttr<TARGETING::ATTR_POSITION>());
+                        }
+                        else
+                        {
+                            // ISDIMM (I2C) Memory type (0xC0)
+                            TMGT_INF("ocmbInit:     ISDIMM[%d] HUID=0x%08lX (position=0x%02X)",
+                                     index, get_huid(dimm_list[index]),
+                                     dimm_list[index]->getAttr<TARGETING::ATTR_POSITION>());
+
+                            numSets += addIsDimm(o_data, port_target, dimm_list[index], io_index,
+                                                 l_ocmb_num);
+                        }
                     }
-                    l_type = 0xFF; // Disabled
                 }
             }
-            else
-            {
-                TMGT_ERR("ocmbInit: Failed to read "
-                         "ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE");
-                l_type = 0xFF; // Disabled
-            }
-
-            TMGT_INF("ocmbInit: OCMB[%d] HUID=0x%08lX TYPE[%d] "
-                     "(position=0x%02X, ordinal=0x%02X, %d functional PORTs)",
-                     l_ocmb_num, l_ocmb_huid, l_type,
-                     ocmb->getAttr<ATTR_POSITION>(),
-                     ocmb->getAttr<ATTR_ORDINAL_ID>(),
-                     port_list.size());
-
-            // add entry for the OCMB itself
-            writeMemConfigData(o_data,
-                               ocmb,
-                               SENSOR_NAME_MEMBUF_STATE,
-                               SENSOR_NAME_MEMBUF_TEMP,
-                               l_ocmb_num, // Memory Buffer #
-                               0xFF,       // (memory buffer)
-                               l_type,     // Temperature Type
-                               0,          // reserved
-                               io_index);
-            numSets++;
-
-            occ_memory_table_t entry =
-            {
-                ocmb,
-                i_occ->getInstance(),
-                l_ocmb_num, 0xFF,
-                l_type, 0,
-            };
-            G_memTable.push_back(entry);
-
-            // Currently only support a single port per OCMB (use first port)
-            const uint8_t l_port_unit =
-                port_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-            const unsigned long l_port_huid = get_huid(port_target);
-
-            // Get list of functional DIMMs assocated for this port (single port)
-            getChildAffinityTargets(dimm_list, port_target,
-                                    CLASS_LOGICAL_CARD, TYPE_DIMM);
-            TMGT_INF("ocmbInit:   PORT[%d] HUID=0x%08lX (%d functional DIMMs)",
-                     l_port_unit, l_port_huid, dimm_list.size());
-
-            if (dimm_list.size() > 0)
-            {
-                // Dump DIMM info for completeness
-                for (uint8_t index=0; index < dimm_list.size(); index++)
-                {
-                    TMGT_INF("ocmbInit:     DIMM[%d] HUID=0x%08lX (position=0x%02X)",
-                             index,
-                             get_huid(dimm_list[index]),
-                             dimm_list[index]->getAttr<TARGETING::ATTR_POSITION>());
-                }
-            }
-
-            // Update entry with DTSs
-            for (unsigned int l_dts = 0; l_dts < HTMGT_NUM_DTS_PER_OCMB; ++l_dts)
-            {
-                if (l_dts == 0)
-                {
-                    if (port_target->tryGetAttr
-                        <TARGETING::ATTR_MEM_EFF_THERM_SENSOR_0_USAGE>(l_type))
-                    {
-                        l_type = convert_temp_type(l_type);
-                    }
-                    else
-                    {
-                        TMGT_ERR("ocmbInit: Failed to read ATTR_MEM_EFF_"
-                                 "THERM_SENSOR_0_USAGE");
-                        l_type = 0xFF; // disabled
-                    }
-                }
-                else
-                {
-                    if (port_target->tryGetAttr
-                        <TARGETING::ATTR_MEM_EFF_THERM_SENSOR_1_USAGE>(l_type))
-                    {
-                        l_type = convert_temp_type(l_type);
-                    }
-                    else
-                    {
-                        TMGT_ERR("ocmbInit: Failed to read ATTR_MEM_EFF_"
-                                 "THERM_SENSOR_1_USAGE");
-                        l_type = 0xFF; // disabled
-                    }
-                }
-                TMGT_INF("ocmbInit:     PORT[%d] DTS[%d] TYPE[%d]",
-                         l_port_unit, l_dts, l_type);
-                writeMemConfigData(o_data,
-                                   port_target,
-                                   SENSOR_NAME_DIMM_STATE,
-                                   SENSOR_NAME_DIMM_TEMP,
-                                   l_ocmb_num, // Memory Buffer #
-                                   l_dts,      // DTS #
-                                   l_type,     // Temperature Type
-                                   0,          // reserved
-                                   io_index );
-                numSets++;
-            } // for each DTS
         }
     }
     else
     {
-        TMGT_ERR("ocmbInit: SKIPPING UNKNOWN PROCESSOR[%d] "
-                 "(model 0x%02X, HUID=0x%08lX)",
+        TMGT_ERR("ocmbInit: SKIPPING UNKNOWN PROCESSOR[%d] (model 0x%02X, HUID=0x%08lX)",
                  l_procPosition, l_procModel, get_huid(proc));
     }
 
@@ -719,11 +921,11 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
     assert(proc != nullptr);
     assert(o_data != nullptr);
 
-    //Get all functional OCMBs
+    // Get functional OCMBs associated with this processor
     TargetHandleList ocmb_list;
-    getAllChips(ocmb_list, TYPE_OCMB_CHIP, true);
-    TMGT_INF("getMemThrottleMessageData: Total of %d functional OCMBs",
-             ocmb_list.size());
+    getChildAffinityTargets(ocmb_list, proc, CLASS_CHIP, TYPE_OCMB_CHIP);
+    TMGT_INF("getMemThrottleMessageData: p%d has %d functional OCMBs",
+             i_occ_instance, ocmb_list.size());
 
     o_data[index++] = OCC_CFGDATA_MEM_THROTTLE;
     o_data[index++] = 0x40; // version;
@@ -762,114 +964,99 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
                      " for HUID 0x%04X", ocmb_huid);
             continue;
         }
-        // Get functional parent processor
-        TARGETING::TargetHandleList proc_targets;
-        getParentAffinityTargets (proc_targets, ocmb_target, CLASS_CHIP, TYPE_PROC);
-        if (proc_targets.size() > 0)
+
+        // Read the throttle and power values for this OCMB
+        bool attr_failure = false;
+        ATTR_OT_MIN_N_PER_SLOT_type nps_min;
+        if (!ocmb_target->tryGetAttr<ATTR_OT_MIN_N_PER_SLOT>(nps_min))
         {
-            ConstTargetHandle_t proc_target = proc_targets[0];
-            assert(proc_target != nullptr);
+            TMGT_ERR("getMemThrottleMessageData: failed to read OT_MIN_N_PER_SLOT");
+            attr_failure = true;
+        }
+        ATTR_N_PLUS_ONE_N_PER_SLOT_type nps_redun;
+        ATTR_N_PLUS_ONE_N_PER_PORT_type npp_redun;
+        if (!ocmb_target->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_SLOT>(nps_redun))
+        {
+            TMGT_ERR("getMemThrottleMessageData: failed to read N_PLUS_ONE_N_PER_SLOT");
+            attr_failure = true;
+        }
+        if (!ocmb_target->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_PORT>(npp_redun))
+        {
+            TMGT_ERR("getMemThrottleMessageData: failed to read N_PLUS_ONE_N_PER_PORT");
+            attr_failure = true;
+        }
 
-            // Make sure this OCMB is for the current OCC/Proc
-            if (i_occ_instance == proc_target->getAttr<TARGETING::ATTR_POSITION>())
+        if (attr_failure)
+        {
+            /*@
+             * @errortype
+             * @subsys EPUB_FIRMWARE_SP
+             * @moduleid HTMGT_MOD_MEMTHROTTLE
+             * @reasoncode HTMGT_RC_ATTRIBUTE_ERROR
+             * @userdata1 ocmb instance
+             * @devdesc Failed to read throttle settings
+             * @custdesc An internal firmware error occurred
+             */
+            errlHndl_t l_err = NULL;
+            bldErrLog(l_err, HTMGT_MOD_MEMTHROTTLE,
+                      HTMGT_RC_ATTRIBUTE_ERROR,
+                      l_ocmb_pos, 0,
+                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+            // Skip to next ocmb
+            continue;
+        }
+
+        // Query the functional Ports for this OCMB
+        TARGETING::TargetHandleList port_list;
+        getChildAffinityTargetsByState(port_list, ocmb_target, CLASS_UNIT,
+                                       TYPE_MEM_PORT, UTIL_FILTER_FUNCTIONAL);
+        for(const auto & port_target : port_list)
+        {
+            // unit identifies unique Port under a processor
+            uint8_t port_unit = port_target->getAttr
+                <TARGETING::ATTR_CHIP_UNIT>();
+            const uint8_t port_rel_pos = port_unit % 2;
+            if ((nps_min[port_rel_pos] == 0) ||
+                (nps_redun[port_rel_pos] == 0))
             {
-                bool attr_failure = false;
-                // Read the throttle and power values for this OCMB
-                ATTR_OT_MIN_N_PER_SLOT_type nps_min;
-                if (!ocmb_target->tryGetAttr<ATTR_OT_MIN_N_PER_SLOT>(nps_min))
-                {
-                    TMGT_ERR("getMemThrottleMessageData: failed to read "
-                             "OT_MIN_N_PER_SLOT");
-                    attr_failure = true;
-                }
-                ATTR_N_PLUS_ONE_N_PER_SLOT_type nps_redun;
-                ATTR_N_PLUS_ONE_N_PER_PORT_type npp_redun;
-                if (!ocmb_target->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_SLOT>(nps_redun))
-                {
-                    TMGT_ERR("getMemThrottleMessageData: failed to read "
-                             "N_PLUS_ONE_N_PER_SLOT");
-                    attr_failure = true;
-                }
-                if (!ocmb_target->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_PORT>(npp_redun))
-                {
-                    TMGT_ERR("getMemThrottleMessageData: failed to read "
-                             "N_PLUS_ONE_N_PER_PORT");
-                    attr_failure = true;
-                }
-
-                if (attr_failure)
-                {
-                    /*@
-                     * @errortype
-                     * @subsys EPUB_FIRMWARE_SP
-                     * @moduleid HTMGT_MOD_MEMTHROTTLE
-                     * @reasoncode HTMGT_RC_ATTRIBUTE_ERROR
-                     * @userdata1 ocmb instance
-                     * @devdesc Failed to read throttle settings
-                     * @custdesc An internal firmware error occurred
-                     */
-                    errlHndl_t l_err = NULL;
-                    bldErrLog(l_err, HTMGT_MOD_MEMTHROTTLE,
-                              HTMGT_RC_ATTRIBUTE_ERROR,
-                              l_ocmb_pos, 0,
-                              ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-                    ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                    // Skip to next ocmb
-                    continue;
-                }
-
-                // Query the functional Ports for this OCMB
-                TARGETING::TargetHandleList port_list;
-                getChildAffinityTargetsByState(port_list, ocmb_target, CLASS_UNIT,
-                                               TYPE_MEM_PORT, UTIL_FILTER_FUNCTIONAL);
-                for(const auto & port_target : port_list)
-                {
-                    // unit identifies unique Port under a processor
-                    uint8_t port_unit = port_target->getAttr
-                        <TARGETING::ATTR_CHIP_UNIT>();
-                    const uint8_t port_rel_pos = port_unit % 2;
-                    if ((nps_min[port_rel_pos] == 0) ||
-                        (nps_redun[port_rel_pos] == 0))
-                    {
-                        TMGT_ERR("getMemThrottleMessageData: OCMB%d/Port%d [%d]"
-                                 " - Ignored due to null throttle",
-                                 l_ocmb_pos, port_unit, port_rel_pos);
-                        TMGT_ERR("N/slot: Min=%d, Redun=%d",
-                                 nps_min[port_rel_pos], nps_redun[port_rel_pos]);
-                        continue;
-                    }
-                    if (port_rel_pos >= HTMGT_MAX_PORT_PER_OCMB_CHIP)
-                    {
-                        TMGT_ERR("getMemThrottleMessageData: OCMB%d / Port%d"
-                                 " - Ignored due invalid Port position: %d",
-                                 l_ocmb_pos, port_unit, port_rel_pos);
-                        continue;
-                    }
-                    TMGT_INF("getMemThrottleMessageData: OCC%d / OCMB%d / port%d",
-                             i_occ_instance, l_ocmb_pos, port_unit);
-
-                    o_data[index] = l_ocmb_pos; // Mem Buf
-                    o_data[index+1] = 0x00; // reserved
-                    // Minimum
-                    UINT16_PUT(&o_data[index+ 2], nps_min[port_rel_pos]);
-                    // Disabled
-                    UINT16_PUT(&o_data[index+ 4], nps_redun[port_rel_pos]);
-                    UINT16_PUT(&o_data[index+ 6], npp_redun[port_rel_pos]);
-                    // Ultra Turbo
-                    UINT16_PUT(&o_data[index+ 8], nps_redun[port_rel_pos]);
-                    UINT16_PUT(&o_data[index+10], npp_redun[port_rel_pos]);
-                    // Fmax
-                    UINT16_PUT(&o_data[index+12], nps_redun[port_rel_pos]);
-                    UINT16_PUT(&o_data[index+14], npp_redun[port_rel_pos]);
-                    // Oversubscription
-                    UINT16_PUT(&o_data[index+16], nps_redun[port_rel_pos]);
-                    UINT16_PUT(&o_data[index+18], npp_redun[port_rel_pos]);
-                    // reserved
-                    memset(&o_data[index+20], 0, 2); // reserved
-                    index += 22;
-                    ++numSets ;
-                }
+                TMGT_ERR("getMemThrottleMessageData: OCMB%d/Port%d [%d]"
+                         " - Ignored due to null throttle",
+                         l_ocmb_pos, port_unit, port_rel_pos);
+                TMGT_ERR("N/slot: Min=%d, Redun=%d",
+                         nps_min[port_rel_pos], nps_redun[port_rel_pos]);
+                continue;
             }
+            if (port_rel_pos >= HTMGT_MAX_PORT_PER_OCMB_CHIP)
+            {
+                TMGT_ERR("getMemThrottleMessageData: OCMB%d / Port%d"
+                         " - Ignored due invalid Port position: %d",
+                         l_ocmb_pos, port_unit, port_rel_pos);
+                continue;
+            }
+            TMGT_INF("getMemThrottleMessageData: OCC%d / OCMB%d / port%d",
+                     i_occ_instance, l_ocmb_pos, port_unit);
+
+            o_data[index] = l_ocmb_pos; // Mem Buf
+            o_data[index+1] = 0x00; // reserved
+            // Minimum
+            UINT16_PUT(&o_data[index+ 2], nps_min[port_rel_pos]);
+            // Disabled
+            UINT16_PUT(&o_data[index+ 4], nps_redun[port_rel_pos]);
+            UINT16_PUT(&o_data[index+ 6], npp_redun[port_rel_pos]);
+            // Ultra Turbo
+            UINT16_PUT(&o_data[index+ 8], nps_redun[port_rel_pos]);
+            UINT16_PUT(&o_data[index+10], npp_redun[port_rel_pos]);
+            // Fmax
+            UINT16_PUT(&o_data[index+12], nps_redun[port_rel_pos]);
+            UINT16_PUT(&o_data[index+14], npp_redun[port_rel_pos]);
+            // Oversubscription
+            UINT16_PUT(&o_data[index+16], nps_redun[port_rel_pos]);
+            UINT16_PUT(&o_data[index+18], npp_redun[port_rel_pos]);
+            // reserved
+            memset(&o_data[index+20], 0, 2); // reserved
+            index += 22;
+            ++numSets ;
         }
     }
 
