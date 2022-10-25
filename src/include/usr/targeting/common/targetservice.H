@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -332,6 +332,26 @@ class TargetService
         bool isInitialized() const
         {
             return iv_initialized;
+        }
+
+        /**
+         *  @brief Get the flag that indicates if persistent attrs can be updated
+         *
+         *  @return flag value
+         */
+        bool getAllowPersistAttrUpdateFlag(void) const
+        {
+            return iv_allowPersistAttrUpdate;
+        }
+
+        /**
+         *  @brief Set the flag that indicates that persistent attrs can be updated
+         *
+         *  @param bool value (true for update to attrs is allowed and false otherwise)
+         */
+        void setAllowPersistAttrUpdateFlag(const bool i_value)
+        {
+            iv_allowPersistAttrUpdate = i_value;
         }
 
         /**
@@ -1280,6 +1300,7 @@ class TargetService
 
         // Instance variables
         bool        iv_initialized; ///< Is service initialized or not
+        bool        iv_allowPersistAttrUpdate = true;  ///< Flag to indicate if attr can be set
         Target      * iv_pSys;      // Top Level Target
         ATTR_MODEL_type iv_processorModel; // Model of the master processor
 

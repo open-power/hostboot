@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -248,6 +248,9 @@ void* call_host_ipl_complete(void* const io_pArgs)
         // Commit Error
         errlCommit(l_err, HWPF_COMP_ID);
     }
+
+    // Set the flag to indicate persistent attributes cannot be updated
+    TARGETING::targetService().setAllowPersistAttrUpdateFlag(false);
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_host_ipl_complete exit");

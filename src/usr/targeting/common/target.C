@@ -42,6 +42,11 @@
 // This component
 #include <targeting/common/attributes.H>
 #include <targeting/attrrp.H>
+#ifdef __HOSTBOOT_MODULE
+#include <targeting/targplatutil.H>
+#include <errl/errlmanager.H>
+#include <targeting/common/targreasoncodes.H>
+#endif
 #include <targeting/common/util.H>
 #include <targeting/common/trace.H>
 #include <targeting/common/predicates/predicateattrval.H>
@@ -208,7 +213,7 @@ bool Target::_trySetAttr(
     if (unlikely(l_clearAnyNonConstOverride || l_syncAttribute))
     {
         // Check if attribute exists for the target
-        void * l_pAttr = NULL;
+        void * l_pAttr = nullptr;
         _getAttrPtr(i_attr, l_pAttr);
         if (l_pAttr)
         {
@@ -236,56 +241,140 @@ bool Target::_trySetAttr(
     }
 
     // Set the real attribute
-    void* l_pAttrData = NULL;
-    (void) _getAttrPtr(i_attr, l_pAttrData);
-    if (l_pAttrData)
+    void* l_pAttrData = nullptr;
+    do
     {
-        memcpy(l_pAttrData, i_pAttrData, i_size);
-#ifdef __HOSTBOOT_RUNTIME
-        if(isSysTarget)
+        (void) _getAttrPtr(i_attr, l_pAttrData);
+        if (l_pAttrData)
         {
-            uint8_t l_nodeCount = l_attrRP->getNodeCount();
+#ifdef __HOSTBOOT_MODULE
+            bool  l_canUpdate = targetService().getAllowPersistAttrUpdateFlag();
+            bool  l_persist = false;
 
-            for(NODE_ID l_nodeX = NODE0;
-                l_nodeX < l_nodeCount;
-                ++l_nodeX)
+            if (!l_canUpdate)
             {
-                if(l_nodeX == l_nodeId)
+                const auto& l_attrMetaData =
+                    TARGETING::UTIL::getMapMetadataForAllAttributes();
+
+                auto l_attrIt = l_attrMetaData.find(i_attr);
+                if (l_attrIt == l_attrMetaData.end())
                 {
-                    // Already set attribute for this node, so continue to next
-                    continue;
+                    errlHndl_t l_errl = nullptr;
+
+                    // We should always find metadata corresponding to the
+                    // attribute we are trying to set. If we can't, add an
+                    // errorlog entry and a trace so we can detect the issue.
+                    TRACFCOMP(g_trac_targeting,
+                              ERR_MRK"_trySetAttr: No attr metadata for attr ID:0x%x\n", i_attr);
+
+                    /*@
+                     * @errortype
+                     * @moduleid  TARG_SET_PERSISTENT_ATTR
+                     * @reasoncode TARG_RC_NO_METADATA_FOUND
+                     * @userdata1 Return code (0)
+                     * @userdata2 attr ID
+                     * @devdesc   Metadata not found for an attribute
+                     * @custdesc  An internal firmware error occurred
+                     */
+                    l_errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                                      TARG_SET_PERSISTENT_ATTR,
+                                                      TARG_RC_NO_METADATA_FOUND,
+                                                      0,
+                                                      i_attr,
+                                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    l_errl->collectTrace(TARG_COMP_NAME);
+                    errlCommit( l_errl, TARG_COMP_ID );
+                }
+                else
+                {
+                    l_persist = ((l_attrIt->second.readWriteable)  //writeable
+                                 && l_attrIt->second.persistency
+                                 && !strcmp(l_attrIt->second.persistency,"P3_PERSISTENCY"));
+                                                                           //nonvolatile
                 }
 
-                // Walk through targets
-                for(TargetIterator pIt = targetService().begin(l_nodeX);
-                    pIt != TARGETING::targetService().end();
-                    ++pIt)
+                // Log a predictive error if persistent attributes are not allowed
+                // to be updated and if trying to update an attr that is persistent
+                // (read-writable and nonvolatile)!
+                // The logic will go ahead and update the attr anyway as we have a trace
+                // an error log to detect the issue.
+                if (l_persist)
                 {
-                    // Check for system target
-                    if(((*pIt)->getAttr<ATTR_CLASS>() == CLASS_SYS) &&
-                       ((*pIt)->getAttr<ATTR_TYPE>() == TYPE_SYS))
-                    {
-                        // Get pointer to the attribute being set
-                        void* l_pAttrDataNodeX = NULL;
-                        (*pIt)->_getAttrPtr(i_attr, l_pAttrDataNodeX);
-                        if (l_pAttrData)
-                        {
-                            // Set the attribute for this node
-                            memcpy(l_pAttrDataNodeX, i_pAttrData, i_size);
-                        }
+                    errlHndl_t l_errl = nullptr;
 
-                        break;
+                    TRACFCOMP(g_trac_targeting,
+                              ERR_MRK"_trySetAttr: Trying to set persistent attr ID:0x%x", i_attr);
+
+                    /*@
+                     * @errortype
+                     * @moduleid  TARG_SET_PERSISTENT_ATTR
+                     * @reasoncode TARG_RC_SET_PERSIST_ATTR_DISABLED
+                     * @userdata1 Return code (0)
+                     * @userdata2 attr ID
+                     * @devdesc   Persistent attribute is being updated when
+                     *            it is not allowed.
+                     * @custdesc  An internal firmware error occurred
+                     */
+                    l_errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                                      TARG_SET_PERSISTENT_ATTR,
+                                                      TARG_RC_SET_PERSIST_ATTR_DISABLED,
+                                                      0,
+                                                      i_attr,
+                                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    l_errl->collectTrace(TARG_COMP_NAME);
+                    errlCommit( l_errl, TARG_COMP_ID );
+                }
+            }
+#endif
+            memcpy(l_pAttrData, i_pAttrData, i_size);
+
+#ifdef __HOSTBOOT_RUNTIME
+            // At runtime, sync setting SYS level attrs across the nodes on the system
+            if(isSysTarget)
+            {
+                uint8_t l_nodeCount = l_attrRP->getNodeCount();
+
+                for(NODE_ID l_nodeX = NODE0;
+                    l_nodeX < l_nodeCount;
+                    ++l_nodeX)
+                {
+                    if(l_nodeX == l_nodeId)
+                    {
+                        // Already set attribute for this node, so continue to next
+                        continue;
+                    }
+
+                    // Walk through targets
+                    for(TargetIterator pIt = targetService().begin(l_nodeX);
+                        pIt != TARGETING::targetService().end();
+                        ++pIt)
+                    {
+                        // Check for system target
+                        if(((*pIt)->getAttr<ATTR_CLASS>() == CLASS_SYS) &&
+                           ((*pIt)->getAttr<ATTR_TYPE>() == TYPE_SYS))
+                        {
+                            // Get pointer to the attribute being set
+                            void* l_pAttrDataNodeX = nullptr;
+                            (*pIt)->_getAttrPtr(i_attr, l_pAttrDataNodeX);
+                            if (l_pAttrData)
+                            {
+                                // Set the attribute for this node
+                                memcpy(l_pAttrDataNodeX, i_pAttrData, i_size);
+                            }
+
+                            break;
+                        }
                     }
                 }
             }
-        }
 #endif
-        if( unlikely(cv_pCallbackFuncPtr != NULL) )
-        {
-            cv_pCallbackFuncPtr(this, i_attr, i_size, i_pAttrData);
+            if( unlikely(cv_pCallbackFuncPtr != nullptr) )
+            {
+                cv_pCallbackFuncPtr(this, i_attr, i_size, i_pAttrData);
+            }
         }
-    }
-    return (l_pAttrData != NULL);
+    } while (0);
+    return (l_pAttrData != nullptr);
 
     #undef TARG_FN
 }

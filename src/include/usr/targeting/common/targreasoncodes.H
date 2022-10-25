@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,7 @@ enum TargetingModuleId
     TARG_PARSE_RW_ATTR_DATA         = 0x13,
     TARG_PARSE_ATTR_METADATA        = 0x14,
     TARG_PARSE_RW_DATA              = 0x15,
+    TARG_SET_PERSISTENT_ATTR        = 0x16,
 };
 
 enum TargetingReasonCode
@@ -99,6 +100,8 @@ enum TargetingReasonCode
     TARG_RC_BAD_METADATA_PTR                = TARG_COMP_ID | 0x22,
     TARG_RC_BAD_HASH                        = TARG_COMP_ID | 0x23,
     TARG_RC_BAD_VERSION                     = TARG_COMP_ID | 0x24,
+    TARG_RC_NO_METADATA_FOUND               = TARG_COMP_ID | 0x25,
+    TARG_RC_SET_PERSIST_ATTR_DISABLED       = TARG_COMP_ID | 0x26,
 };
 
 }; // End TARGETING namespace
