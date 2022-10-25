@@ -62,6 +62,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/eeprom/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/pnor/
 EXTRAINCDIR += ${ROOTPATH}/src/import/tools/wof/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 define __CLEAN_TARGET
@@ -123,6 +124,8 @@ FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/generic/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/ocmb/explorer/procedures/xml/error_info/*.xml)
+FAPI2_ERROR_XML += $(wildcard \
+  $(ROOTPATH)/src/import/chips/ocmb/odyssey/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/ocmb/common/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \

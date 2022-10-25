@@ -97,6 +97,8 @@ prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/fir/
 prd_incpath += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
+prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
