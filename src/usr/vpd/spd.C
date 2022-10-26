@@ -574,7 +574,7 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
 errlHndl_t spdGetValue(VPD::vpdKeyword       i_keyword,
                        void                * io_buffer,
                        size_t              & io_buflen,
-                       Target   * i_target,
+                       Target              * i_target,
                        uint64_t              i_DDRRev,
                        EEPROM::EEPROM_SOURCE i_eepromSource)
 {
@@ -677,7 +677,8 @@ errlHndl_t spdGetValue(VPD::vpdKeyword       i_keyword,
             err = spdFetchData( (*entry).offset,
                                 (*entry).length,
                                 tmpBuffer,
-                                i_target );
+                                i_target,
+                                i_eepromSource );
 
             if( err )
             {
@@ -1115,7 +1116,6 @@ bool spdPresent ( Target * i_target )
                 {
                     TRACFCOMP(g_trac_spd, "spdPresent> disabled primary access for 0x%08X", get_huid(i_target));
 
-                    // create error for bad vpd data
                     /*@
                      * @errortype
                      * @reasoncode       VPD::VPD_SPD_INVALID_PRIMARY_VPD
@@ -2394,7 +2394,7 @@ errlHndl_t cmpEecacheToEeprom(Target * i_target,
 {
     errlHndl_t err = nullptr;
 
-    TRACSSCOMP(g_trac_spd, ENTER_MRK"cmpEecacheToEeprom(%08X)",get_huid(i_target));
+    TRACSSCOMP(g_trac_spd, ENTER_MRK"cmpEecacheToEeprom(%08X)", get_huid(i_target));
 
     // default to a mismatch to force a refresh from the eeprom
     o_match = false;
@@ -2501,7 +2501,7 @@ errlHndl_t cmpEecacheToEeprom(Target * i_target,
         {
             // CACHE may not be loaded, ignore the error
             delete err;
-            err = NULL;
+            err = nullptr;
             break;
         }
 
@@ -2546,59 +2546,71 @@ errlHndl_t cmpEecacheToEeprom(Target * i_target,
     // copy out to the hardware.
     if( !err && unexpected_data )
     {
-        TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Unexpected data found on %08X, checking CRC",
-           get_huid(i_target) );
-        //TODO - check for p10 dd1 here
-        std::vector<crc_section_t> l_sections;
-        errlHndl_t errHW = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_PRIMARY, EEPROM::HARDWARE, l_sections );
-        if( errHW )
+        if ((i_eepromType == EEPROM_CONTENT_TYPE_DDIMM) ||
+            (i_eepromType == EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD))
         {
-            TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> CRC errors found in hardware" );
-        }
-        errlHndl_t errCACHE = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_PRIMARY, EEPROM::CACHE, l_sections );
-        if( errCACHE )
-        {
-            TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> CRC errors found in cache" );
-        }
-        // If the cache is bad, force a resync
-        // Otherwise if the cache is okay and the HW is bad, assume a match so that
-        //  the cache gets pushed out to the HW
-        if( !errCACHE && !errHW )
-        {
-            TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> No CRC errors found, must be new HW" );
-        }
-        else
-        {
-            TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Found some CRC errors, forcing cache refresh" );
-            // errCACHE error
-            // cache is either missing or bad, we want to refresh from the hardware
-
-            // errHW error
-            // this could mean a bitflip in the SN/PN itself, or it can mean
-            //  we have a new part installed that had bad SPD to begin with
-            // To be safe and avoid whacking SPD with old cache, we will just
-            //  let this fail out and require repair
-
-            o_match = false;
-
-            // commit any logs we hit as informational, just in case
-            if( errCACHE )
-            {
-                errCACHE->collectTrace( "SPD", 256);
-                errCACHE->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                ERRORLOG::errlCommit(errCACHE, VPD_COMP_ID );
-            }
+            // do CRC check
+            TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Unexpected data found on 0x%08X, checking CRC",
+               get_huid(i_target) );
+            //TODO - check for p10 dd1 here
+            std::vector<crc_section_t> l_sections;
+            errlHndl_t errHW = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_PRIMARY, EEPROM::HARDWARE, l_sections );
             if( errHW )
             {
-                errHW->collectTrace( "SPD", 256);
-                errHW->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                ERRORLOG::errlCommit(errHW, VPD_COMP_ID );
+                TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> CRC errors found in hardware" );
+            }
+            errlHndl_t errCACHE = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_PRIMARY, EEPROM::CACHE, l_sections );
+            if( errCACHE )
+            {
+                TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> CRC errors found in cache" );
+            }
+            // If the cache is bad, force a resync
+            // Otherwise if the cache is okay and the HW is bad, assume a match so that
+            //  the cache gets pushed out to the HW
+            if( !errCACHE && !errHW )
+            {
+                TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> No CRC errors found, must be new HW" );
+            }
+            else
+            {
+                TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Found some CRC errors, forcing cache refresh" );
+                // errCACHE error
+                // cache is either missing or bad, we want to refresh from the hardware
+
+                // errHW error
+                // this could mean a bitflip in the SN/PN itself, or it can mean
+                //  we have a new part installed that had bad SPD to begin with
+                // To be safe and avoid whacking SPD with old cache, we will just
+                //  let this fail out and require repair
+
+                o_match = false;
+
+                // commit any logs we hit as informational, just in case
+                if( errCACHE )
+                {
+                    errCACHE->collectTrace( "SPD", 256);
+                    errCACHE->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    ERRORLOG::errlCommit(errCACHE, VPD_COMP_ID );
+                }
+                if( errHW )
+                {
+                    errHW->collectTrace( "SPD", 256);
+                    errHW->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    ERRORLOG::errlCommit(errHW, VPD_COMP_ID );
+                }
             }
         }
+        else // other EEPROM_CONTENT_TYPEs
+        {
+            // don't do the CRC check, only valid for DDIMM and PLANAR_OCMB_SPD
+            TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Unexpected data found on 0x%08X, must be new HW",
+                       get_huid(i_target));
+        }
+
     }
 
-    TRACSSCOMP( g_trac_spd, EXIT_MRK"cmpEecacheToEeprom(): returning %s errors. o_match = 0x%X ",
-                (err ? "with" : "with no"), o_match );
+    TRACSSCOMP( g_trac_spd, EXIT_MRK"cmpEecacheToEeprom(): returning %s errors. o_match = %s",
+                (err ? "with" : "with no"), o_match ? "True" : "False");
 
     return err;
 }

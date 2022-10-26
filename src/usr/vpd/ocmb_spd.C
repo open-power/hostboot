@@ -449,7 +449,8 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
         if( l_section.crcSPD != l_section.crcActual )
         {
             TRACFCOMP( g_trac_spd,
-                   "CRC Miscompare found on %08X for range %d, SPD=0x%04X, Computed=0x%04X (loc=%d)",
+                   "%s CRC Miscompare found on 0x%08X for range %d, SPD=0x%04X, Computed=0x%04X (loc=%d)",
+                   i_location == EEPROM::CACHE ? "CACHE" : "HW",
                    T::get_huid(i_target), l_section.start,
                    l_section.crcSPD, l_section.crcActual,
                    i_location );

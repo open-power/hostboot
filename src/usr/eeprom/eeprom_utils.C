@@ -147,8 +147,6 @@ bool eepromSwitchToBackup(TARGETING::Target * i_target )
 //-------------------------------------------------------------------
 bool eepromPresence ( TARGETING::Target * i_target )
 {
-    TRACUCOMP(g_trac_eeprom, ENTER_MRK"eepromPresence() 0x%08X",
-      TARGETING::get_huid(i_target));
 
     errlHndl_t err = nullptr;
     TARGETING::Target * l_eepromMasterTarget = nullptr;
@@ -207,7 +205,7 @@ bool eepromPresence ( TARGETING::Target * i_target )
             // Use the FSI slave presence detection to see if master can be found
             if( ! FSI::isSlavePresent(l_eepromMasterTarget) )
             {
-                TRACDCOMP( g_trac_eeprom,
+                TRACFCOMP( g_trac_eeprom,
                            "eepromPresence> FSI::isSlavePresent returned false for eeprom Master Target 0x%08X",
                            TARGETING::get_huid(l_eepromMasterTarget) );
                 l_present = false;
@@ -316,7 +314,8 @@ bool eepromPresence ( TARGETING::Target * i_target )
         }
     }
 
-    TRACDCOMP(g_trac_eeprom, EXIT_MRK"eepromPresence() - present %d", l_present);
+    TRACDCOMP(g_trac_eeprom, EXIT_MRK"eepromPresence() - HUID 0x%08X present %d",
+              TARGETING::get_huid(i_target), l_present);
     return l_present;
 }
 #endif // #ifndef __HOSTBOOT_RUNTIME
