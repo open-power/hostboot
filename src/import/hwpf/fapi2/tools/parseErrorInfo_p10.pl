@@ -525,6 +525,7 @@ print CRFILE "#include <p10_scom_nmmu.H>\n";
 
 print CRFILE "#include <explorer_scom_addresses.H>\n";
 print CRFILE "#include <ody_scom_ody_odc.H>\n";
+print CRFILE "#include <ody_scom_perv_tcmc.H>\n";
 
 print CRFILE "namespace fapi2\n";
 print CRFILE "{\n";

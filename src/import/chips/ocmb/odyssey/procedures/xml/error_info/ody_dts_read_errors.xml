@@ -1,0 +1,55 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/ocmb/odyssey/procedures/xml/error_info/ody_dts_read_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- EKB-Mirror-To: hostboot -->
+
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_DTS_ERROR</id>
+    <scomRegister>scomt::perv::TCMC_EPS_DTS_ERROR_REG</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_ODY_DTS_READ_DATA_TIMEOUT</rc>
+    <description>
+      DTS did not return data within allotted timeout.
+    </description>
+    <ffdc>TARGET_CHIP</ffdc>
+    <ffdc>TARGET_MC</ffdc>
+    <ffdc>TIMEOUT</ffdc>
+    <ffdc>DATA_REG</ffdc>
+    <ffdc>ERROR_REG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_DTS_ERROR</id>
+      <targetType>TARGET_TYPE_PERV</targetType>
+      <target>TARGET_MC</target>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
