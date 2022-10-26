@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021
+# Contributors Listed Below - COPYRIGHT 2021,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -80,6 +80,32 @@ while [ "$1" != "" ]; do
     shift
 done
 
+# Expecting input format to be in a format like '2.10.0'.
+# Will return success (i.e. 0) if the current git version is greater than or
+# equal to the given version (meaning the feature is supported). Otherwise,
+# this will return a non-zero value.
+function check_git_version()
+{
+    local given=(${1//./ })
+
+    local current=`git version | awk '{print $3}'`
+    current=(${current//./ })
+
+    if [ ${current[0]} -gt ${given[0]} ]; then
+        return 0
+    elif [ ${current[0]} -eq ${given[0]} ]; then
+        if [ ${current[1]} -gt ${given[1]} ]; then
+            return 0
+        elif [ ${current[1]} -eq ${given[1]} ]; then
+            if [ ${current[2]} -ge ${given[2]} ]; then
+                return 0
+            fi
+        fi
+    fi
+
+    return 1
+}
+
 if !(echo "$SUPPORTED_SUBTREES" | grep -w -q "$SUBTREE") ; then
   echo "  Error! Must specify a valid subtree to use!"
   echo "  Subtrees that are currently supported: $SUPPORTED_SUBTREES"
@@ -93,8 +119,10 @@ if [ `ls ./example_customrc 2>/dev/null | wc -c` -eq 0 ] > /dev/null 2>&1; then
   exit 1
 fi
 
-# Poor-man's './hb workon'
-. ./env.bash
+# Just in case the tool is not run in a hb workon.
+if [ -z "${HOSTBOOT_INSIDE_WORKON}" ]; then
+    . ./env.bash
+fi
 
 # Check if there are any outstanding changes in the current branch
 if ! git diff-index --quiet HEAD --; then
@@ -147,8 +175,14 @@ git remote add bmc-$SUBTREE  https://github.com/openbmc/$SUBTREE.git > /dev/null
 git fetch bmc-$SUBTREE > /dev/null 2>&1
 # we will put the top level commit from the BMC repo in the commit message of the subtree update commit
 BMC_SUBTREE_TOP_COMMIT=`git rev-parse --short bmc-$SUBTREE/master`
+
 # Forcefully subtree update to the latest openbmc/subtree master branch, discard all local changes
-git merge --squash -s recursive -Xsubtree=src/subtree/openbmc/$SUBTREE -Xtheirs bmc-$SUBTREE/master > /dev/null 2>&1
+CMD="git merge --squash -s recursive -Xsubtree=src/subtree/openbmc/$SUBTREE -Xtheirs bmc-$SUBTREE/master"
+if check_git_version '2.10.0'; then
+    CMD="${CMD} --allow-unrelated-histories"
+fi
+$CMD
+
 # If there are still merge conflicts because git thinks 'both' parties have added the
 # file, explicitly checkout 'our' version of the file(s) and then add the files.
 git status | grep both | awk '{print $4}' | xargs git checkout --ours
