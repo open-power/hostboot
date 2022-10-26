@@ -74,6 +74,82 @@ const std::vector<uint8_t> portTraits< mss::mc_type::EXPLORER >::SPARE_NIBBLES =
 };
 
 ///
+/// @brief Configures the write reorder queue bit - Explorer specialization
+/// @param[in] i_target the target to effect
+/// @param[in] i_state to set the bit too
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< >
+fapi2::ReturnCode configure_wrq<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const mss::states i_state)
+{
+    using TT = portTraits<mss::mc_type::EXPLORER>;
+
+    // Loops through all port targets, hitting all the registers
+    for( const auto& l_port : mss::find_targets<TT::PORT_TYPE>(i_target) )
+    {
+        fapi2::buffer<uint64_t> l_data;
+
+        // Gets the reg
+        FAPI_TRY(mss::getScom(l_port, TT::WRQ_REG, l_data), "%s failed to getScom from WRQ0Q for Explorer", mss::c_str(l_port));
+
+        // Sets the bit
+        l_data.writeBit<TT::WRQ_FIFO_MODE>(i_state == mss::states::ON);
+
+        // Sets the regs
+        FAPI_TRY(mss::putScom(l_port, TT::WRQ_REG, l_data), "%s failed to putScom to WRQ0Q for Explorer", mss::c_str(l_port));
+    }
+
+    // In case we don't have any port's
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configures the read reorder queue bit - Explorer specialization
+/// @param[in] i_target the target to effect
+/// @param[in] i_state to set the bit too
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< >
+fapi2::ReturnCode configure_rrq<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const mss::states i_state)
+{
+    using TT = portTraits<mss::mc_type::EXPLORER>;
+
+    // Loops through all port targets, hitting all the registers
+    for( const auto& l_port : mss::find_targets<TT::PORT_TYPE>(i_target) )
+    {
+        fapi2::buffer<uint64_t> l_data;
+
+        // Gets the reg
+        // This register sits on different chiplets depending upon the MC type in question
+        // In some MC's, it sits on the port level
+        // In other MC's, it sits on the chip level
+        // As such, a helper function is used to grab the appropriate target type to run this scom
+        FAPI_TRY(mss::getScom(TT::get_rrq_target(l_port), TT::RRQ_REG, l_data), "%s failed to getScom from RRQ0Q for Explorer",
+                 mss::c_str(l_port));
+
+        // Sets the bit
+        l_data.writeBit<TT::RRQ_FIFO_MODE>(i_state == mss::states::ON);
+
+        // Sets the regs
+        FAPI_TRY(mss::putScom(TT::get_rrq_target(l_port), TT::RRQ_REG, l_data), "%s failed to putScom to RRQ0Q for Explorer",
+                 mss::c_str(l_port));
+    }
+
+    // In case we don't have any port's
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Helper for setting rcd protection time to minimum of DSM0Q_WRDONE_DLY & DSM0Q_RDTAG_DLY
 /// @param [in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok

@@ -39,9 +39,35 @@
 
 #include <fapi2.H>
 
+#include <lib/mc/ody_port_traits.H>
+#include <generic/memory/lib/utils/mc/gen_mss_port.H>
 
 namespace mss
 {
+
+///
+/// @brief Configures the write reorder queue bit - Odyssey specialization
+/// @param[in] i_target the target to effect
+/// @param[in] i_state to set the bit too
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @NOTE: Due to RRQ and WRQ being combined into ROQ this function is now NOOP
+///
+template< >
+fapi2::ReturnCode configure_wrq<mss::mc_type::ODYSSEY>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const mss::states i_state);
+
+///
+/// @brief Configures the read reorder queue bit - Odyssey specialization
+/// @param[in] i_target the target to effect
+/// @param[in] i_state to set the bit too
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< >
+fapi2::ReturnCode configure_rrq<mss::mc_type::ODYSSEY>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const mss::states i_state);
+
 namespace ody
 {
 

@@ -667,30 +667,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
-inline fapi2::ReturnCode configure_wrq(const fapi2::Target<T>& i_target,
-                                       const mss::states i_state)
-{
-    // Loops through all port targets, hitting all the registers
-    for( const auto& l_port : mss::find_targets<TT::PORT_TYPE>(i_target) )
-    {
-        fapi2::buffer<uint64_t> l_data;
-
-        // Gets the reg
-        FAPI_TRY(mss::getScom(l_port, TT::WRQ_REG, l_data), "%s failed to getScom from WRQ0Q", mss::c_str(l_port));
-
-        // Sets the bit
-        l_data.writeBit<TT::WRQ_FIFO_MODE>(i_state == mss::states::ON);
-
-        // Sets the regs
-        FAPI_TRY(mss::putScom(l_port, TT::WRQ_REG, l_data), "%s failed to putScom to WRQ0Q", mss::c_str(l_port));
-    }
-
-    // In case we don't have any port's
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
+fapi2::ReturnCode configure_wrq(const fapi2::Target<T>& i_target, const mss::states i_state);
 
 ///
 /// @brief Configures the read reorder queue bit
@@ -702,35 +679,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
-inline fapi2::ReturnCode configure_rrq(const fapi2::Target<T>& i_target, const mss::states i_state)
-{
-    // Loops through all port targets, hitting all the registers
-    for( const auto& l_port : mss::find_targets<TT::PORT_TYPE>(i_target) )
-    {
-        fapi2::buffer<uint64_t> l_data;
-
-        // Gets the reg
-        // This register sits on different chiplets depending upon the MC type in question
-        // In some MC's, it sits on the port level
-        // In other MC's, it sits on the chip level
-        // As such, a helper function is used to grab the appropriate target type to run this scom
-        FAPI_TRY(mss::getScom(TT::get_rrq_target(l_port), TT::RRQ_REG, l_data), "%s failed to getScom from RRQ0Q",
-                 mss::c_str(l_port));
-
-        // Sets the bit
-        l_data.writeBit<TT::RRQ_FIFO_MODE>(i_state == mss::states::ON);
-
-        // Sets the regs
-        FAPI_TRY(mss::putScom(TT::get_rrq_target(l_port), TT::RRQ_REG, l_data), "%s failed to putScom to RRQ0Q",
-                 mss::c_str(l_port));
-    }
-
-    // In case we don't have any port's
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
+fapi2::ReturnCode configure_rrq(const fapi2::Target<T>& i_target, const mss::states i_state);
 
 ///
 /// @brief Resets the write/read reorder queue values - needs to be called after MCBIST execution
