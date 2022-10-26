@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,10 +69,12 @@ fapi2::ReturnCode p10_load_iop_xram(
     uint8_t* l_xramFwDataPtr = NULL;
     uint32_t l_xramFwSize = 0;
 
-
     // Get PEC multicast target
     auto l_target_mcast = i_target.getMulticast<fapi2::TARGET_TYPE_PEC>(fapi2::MCGROUP_GOOD_PCI);
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PEC>> l_pecChiplets = l_target_mcast.getChildren<fapi2::TARGET_TYPE_PEC>();
+
+    fapi2::ATTR_IS_SIMULATION_Type l_attr_is_simulation = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_attr_is_simulation));
 
     // Skip load if there are no functional PEC targets on this chip
     if (l_pecChiplets.size() == 0)
@@ -187,7 +189,10 @@ fapi2::ReturnCode p10_load_iop_xram(
                  "p10_load_iop_xram: enableXramScrubber returns an error.");
     }
 
-    FAPI_TRY(p10_load_rtrim_override(i_target));
+    if (!l_attr_is_simulation)
+    {
+        FAPI_TRY(p10_load_rtrim_override(i_target));
+    }
 
     FAPI_TRY(p10_verify_iop_fw(i_target));
 
