@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,6 +188,14 @@ extern "C" {
 /// always be extracted to a variable of type Pstate.  If the size of Pstate
 /// variables ever changes we will have to revisit this convention.
 typedef uint8_t Pstate_t;
+
+
+/// As Pstates are really a setting to the DPLL and that has a step size of
+/// 16.667MHz, a reference value of 0xFF is 16.667 x 255 = 4250MHz.  This is
+/// needed to ensure that any underflows in the Pstate computation doesn't
+/// result in negative values which the DPPL will interpret as a very high
+/// frequency.
+#define MAX_PSTATE0_FREQ_MHZ 4250
 
 /// A DPLL frequency code
 ///
