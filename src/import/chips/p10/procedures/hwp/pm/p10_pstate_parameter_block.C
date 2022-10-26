@@ -149,7 +149,6 @@ using namespace pm_pstate_parameter_block;
     if ( ((!a) || (!b) || (!c) || (!d) || (!e) || (!f) || (!g) || (!h) || (!i)))  \
     { state = 0; }
 
-
 char const* vpdSetStr[] = VPD_PT_SET_STR;
 char const* ddsFieldStr[] = POUNDW_DDS_FIELDS_STR;
 char const* region_names[] = VPD_OP_SLOPES_REGION_ORDER_STR;
@@ -4808,6 +4807,13 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
         iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz =
             bias_adjust_mhz(l_frequency_mhz, iv_bias.frequency_0p5pct);
 
+        if (iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz > MAX_PSTATE0_FREQ_MHZ)
+        {
+            FAPI_INF("Clamping Biased operating point %d from %dMHz to %dMHz as the limit of legal Pstates",
+                        p, iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz, MAX_PSTATE0_FREQ_MHZ);
+            iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz = MAX_PSTATE0_FREQ_MHZ;
+        }
+
         iv_operating_points[VPD_PT_SET_BIASED][p].idd_tdp_ac_10ma=
             iv_attr_mvpd_poundV_biased[p].idd_tdp_ac_10ma;
         iv_operating_points[VPD_PT_SET_BIASED][p].idd_tdp_dc_10ma=
@@ -6702,7 +6708,18 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
              sys_target, l_sys_pstate0_freq_mhz));
 
     iv_attrs.attr_pstate0_freq_mhz = l_sys_pstate0_freq_mhz;
-    iv_reference_frequency_mhz = l_sys_pstate0_freq_mhz;
+
+    if (iv_attrs.attr_pstate0_freq_mhz > MAX_PSTATE0_FREQ_MHZ)
+    {
+        FAPI_INF("Clamping the Pstate0 frequency from %dMHz to %dMHz as the limit of legal Pstates",
+                    l_sys_pstate0_freq_mhz, MAX_PSTATE0_FREQ_MHZ);
+        iv_attrs.attr_pstate0_freq_mhz = MAX_PSTATE0_FREQ_MHZ;
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+             sys_target, iv_attrs.attr_pstate0_freq_mhz));
+    }
+
+    iv_reference_frequency_mhz = iv_attrs.attr_pstate0_freq_mhz;
     iv_reference_frequency_khz = iv_reference_frequency_mhz * 1000;
 
     if ((iv_reference_frequency_mhz == 0) || (iv_reference_frequency_khz == 0))
