@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,11 @@ enum PlatTargetingModuleId
     TARG_MOD_CLR_ASSOCS_FROM_SYS_OR_NODE_TARGET   = 0x8A,
     TARG_MOD_ADD_ASSOC_TO_SYS_OR_NODE_TARGET      = 0x8B,
     TARG_MOD_RECONNECT_SYS_AND_NODE_TARGETS       = 0x8C,
+    TARG_MOD_ATTR_ENUM_DATA_FROM_MAP              = 0x8D,
+    TARG_MOD_ATTR_LINE_TO_FIELDS                  = 0x8E,
+    TARG_MOD_ATTR_TARGET_LINE_TO_DATA             = 0x8F,
+    TARG_MOD_ATTR_GET_DATA_FROM_MAP               = 0x90,
+    TARG_MOD_ATTR_TEXT_OVERRIDE                   = 0x91,
 };
 
 /**
@@ -90,6 +95,16 @@ enum PlatTargetingReasonCode
     TARG_RC_FAILED_TO_XLATE_ADDR   = TARG_COMP_ID | 0x8B,
     TARG_RC_EXCEEDED_ENTRY_LIMIT   = TARG_COMP_ID | 0x8C,
     TARG_RT_BAD_LID_MAPPING        = TARG_COMP_ID | 0x8D,
+    TARG_RC_ATTR_NOT_FOUND         = TARG_COMP_ID | 0x8E,
+    TARG_RC_ATTR_VALUE_MISSING     = TARG_COMP_ID | 0x8F,
+    TARG_RC_ATTR_MAX_DIMENSIONS    = TARG_COMP_ID | 0x90,
+    TARG_RC_ATTR_TARGET_NOT_FOUND  = TARG_COMP_ID | 0x91,
+    TARG_RC_ATTR_DATA_NOT_FOUND    = TARG_COMP_ID | 0x92,
+    TARG_RC_ATTR_TARGET_VALIDATION = TARG_COMP_ID | 0x93,
+    TARG_RC_MAX_OVD_LINE_LENGTH    = TARG_COMP_ID | 0x94,
+    TARG_RC_MAX_ATTR_NAME_LENGTH   = TARG_COMP_ID | 0x95,
+    TARG_RC_MAX_ATTR_VAL_LENGTH    = TARG_COMP_ID | 0x96,
+    TARG_RC_NO_OUTPUT_GENERATED    = TARG_COMP_ID | 0x97,
 };
 
 } // End TARGETING namespace

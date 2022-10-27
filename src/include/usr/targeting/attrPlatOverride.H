@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,13 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+/**
+ *  @file attrPlatOverride.H
+ *
+ *  @brief Defines platform level functions used to read and parse
+ *         attribute override data.
+ */
+
 #ifndef __ATTR_PLAT_OVERRIDE_H
 #define __ATTR_PLAT_OVERRIDE_H
 
@@ -31,6 +38,19 @@
 
 namespace TARGETING
 {
+
+/**
+ * @brief This function checks the format of Attribute Overrides in ATTR_TMP
+ *
+ * This function checks the ATTR_TMP section for the possible attribute tank
+ * layer types and returns true if one is found. If one is not found, then
+ * any ATTR_TMP data must be ascii attribute override data.
+ *
+ * @param[in] i_sectionInfo   PNOR::SectionInfo_t to look for overrides
+ *
+ * @return bool   true if attribute tank layer found, else false
+ */
+bool attrTankLayerFound(const PNOR::SectionInfo_t &i_sectionInfo);
 
 /**
  * @struct AttrOverrideSection

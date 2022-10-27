@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,9 +29,30 @@
 #include <errl/errlmanager.H>
 #include <secureboot/service.H>
 #include <console/consoleif.H>
+#include <targeting/attrTextOverride.H>
 
 namespace TARGETING
 {
+
+// Return true if ATTR_TMP PNOR section starts with a TANK_LAYER type
+// Otherwise the PNOR section contains ascii text override data
+bool attrTankLayerFound(const PNOR::SectionInfo_t &i_sectionInfo)
+{
+    bool l_foundTank = false;
+    uint32_t const * l_pAttrData =
+        reinterpret_cast<uint32_t const*>(i_sectionInfo.vaddr);
+
+    if ((*l_pAttrData == AttributeTank::TANK_LAYER_NONE) ||
+        (*l_pAttrData == AttributeTank::TANK_LAYER_FAPI) ||
+        (*l_pAttrData == AttributeTank::TANK_LAYER_TARG) ||
+        (*l_pAttrData == AttributeTank::TANK_LAYER_PERM) ||
+        (*l_pAttrData == AttributeTank::TANK_LAYER_TERM))
+    {
+        l_foundTank = true;
+    }
+
+    return l_foundTank;
+}
 
 const std::pair<AttributeTank::TankLayer, PNOR::SectionId>
     tankLayerToPnor[AttributeTank::TANK_LAYER_LAST] =
@@ -83,199 +104,215 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
 
         TRACFCOMP( g_trac_targeting, "Section id=%d, size=%d", i_sectionInfo.id, i_sectionInfo.size );
 
-        uint32_t l_index = 0;
-        // Deserialize each section
-        while (l_index < i_sectionInfo.size)
+        // If the section does not start with a tank layer type then
+        // handle as ascii text
+        if (attrTankLayerFound(i_sectionInfo) == false)
         {
-            AttrOverrideSection * l_pAttrOverSec =
-                reinterpret_cast<AttrOverrideSection *>
-                    (i_sectionInfo.vaddr + l_index);
-
-            // Reached termination chunk
-            if (l_pAttrOverSec->iv_layer == AttributeTank::TANK_LAYER_TERM)
+            l_err = attrTextOverride(i_sectionInfo);
+            if (l_err)
             {
-                TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides Reached termination section at chunk (0x%x)",
-                            (i_sectionInfo.size - l_index));
-                break;
-            }
-
-            // Remaining chunk smaller than AttrOverrideSection, quit
-            if (sizeof(AttrOverrideSection) > (i_sectionInfo.size - l_index))
-            {
-                TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides AttrOverrideSection too big for chunk (0x%x)",
-                            (i_sectionInfo.size - l_index));
-                /*@
-                 * @errortype
-                 * @moduleid     TARG_GET_ATTR_OVER
-                 * @reasoncode   TARG_RC_ATTR_OVER_PNOR_SEC_SPACE_FAIL
-                 * @userdata1    PNOR Section specified
-                 * @userdata2    Size of AttrOverrideSection
-                 * @devdesc      AttrOverrideSection too big to fit in remaining
-                 *               chunk of pnor section
-                 * @custdesc     Invalid configuration data in firmware Processor
-                 *               NOR flash
-                 */
-                l_err =
-                    new ERRORLOG::ErrlEntry
-                    (ERRORLOG::ERRL_SEV_PREDICTIVE,
-                     TARG_GET_ATTR_OVER,
-                     TARG_RC_ATTR_OVER_PNOR_SEC_SPACE_FAIL,
-                     i_sectionInfo.id,
-                     sizeof(AttrOverrideSection));
-                l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                           HWAS::SRCI_PRIORITY_HIGH);
-                break;
-            }
-
-            l_index += sizeof(AttrOverrideSection);
-
-            // Remaining chunk smaller than serialized chunk size, quit
-            if (l_pAttrOverSec->iv_size > (i_sectionInfo.size - l_index))
-            {
-                TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides serialized chunk too big for chunk (0x%x)",
-                            (i_sectionInfo.size - l_index));
-                /*@
-                 * @errortype
-                 * @moduleid     TARG_GET_ATTR_OVER
-                 * @reasoncode   TARG_RC_ATTR_OVER_ATTR_DATA_SIZE_FAIL
-                 * @userdata1    PNOR Section specified
-                 * @userdata2    Size of Serialized attribute override
-                 * @devdesc      Serialized attribute override chunk too big to
-                 *               fit in remaining chunck of pnor section
-                 * @custdesc     Invalid configuration data in firmware Processor
-                 *               NOR flash
-                 */
-                l_err =
-                    new ERRORLOG::ErrlEntry
-                    (ERRORLOG::ERRL_SEV_PREDICTIVE,
-                     TARG_GET_ATTR_OVER,
-                     TARG_RC_ATTR_OVER_ATTR_DATA_SIZE_FAIL,
-                     i_sectionInfo.id,
-                     l_pAttrOverSec->iv_size);
-                l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                           HWAS::SRCI_PRIORITY_HIGH);
-                break;
-            }
-
-            // Check if a tank layer is specified, if not we can't apply the
-            // attribute override.
-            if (l_pAttrOverSec->iv_layer == AttributeTank::TANK_LAYER_NONE)
-            {
-                TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides no tank layer specified at chunk (0x%x)",
-                            (i_sectionInfo.size - l_index));
-                /*@
-                 * @errortype
-                 * @moduleid     TARG_GET_ATTR_OVER
-                 * @reasoncode   TARG_RC_WRITE_ATTR_OVER_NO_TANK_LAYER
-                 * @userdata1    PNOR Section specified
-                 * @userdata2    Chunk location with no tank layer
-                 * @devdesc      No tank layer was specified for attribute
-                 *               override.
-                 * @custdesc     Invalid configuration data in firmware Processor
-                 *               NOR flash
-                 */
-                l_err =
-                    new ERRORLOG::ErrlEntry
-                    (ERRORLOG::ERRL_SEV_PREDICTIVE,
-                     TARG_GET_ATTR_OVER,
-                     TARG_RC_WRITE_ATTR_OVER_NO_TANK_LAYER,
-                     i_sectionInfo.id,
-                     (i_sectionInfo.size - l_index));
-                l_err->collectTrace("TARG",256);
-                l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                           HWAS::SRCI_PRIORITY_HIGH);
+                // Errors are informational, commit and continue
                 ERRORLOG::errlCommit(l_err, TARG_COMP_ID);
             }
-            // Check if the AttrOverSec is in the correct PNOR section
-            // It was decided that this should not cause a failed IPL, so the
-            // override will not be applied, the errl will be committed, then
-            // we move on.
-            else if (tankLayerToPnor[l_pAttrOverSec->iv_layer - 1].second !=
-                                                            i_sectionInfo.id)
+        }
+
+        // else handle as a binary chunk of attribute data
+        else
+        {
+            uint32_t l_index = 0;
+            // Deserialize each section
+            while (l_index < i_sectionInfo.size)
             {
-                TRACFCOMP(g_trac_targeting,"getAttrOverrides: Failed to apply override - override with TankLayer 0x%X should not be in PNOR::%s",
-                            l_pAttrOverSec->iv_layer, i_sectionInfo.name);
-                /*@
-                 * @errortype
-                 * @moduleid     TARG_GET_ATTR_OVER
-                 * @reasoncode   TARG_RC_WRITE_ATTR_OVER_WRONG_PNOR_SEC
-                 * @userdata1    Tank Layer of attribute
-                 * @userdata2    PNOR Section specified
-                 * @devdesc      Attribute override is in the wrong pnor section
-                 *               needs to be moved to the section associated
-                 *               with its attribute tank layer
-                 * @custdesc     Invalid configuration data in firmware Processor
-                 *               NOR flash
-                 */
-                l_err =
-                    new ERRORLOG::ErrlEntry
-                    (ERRORLOG::ERRL_SEV_PREDICTIVE,
-                     TARG_GET_ATTR_OVER,
-                     TARG_RC_WRITE_ATTR_OVER_WRONG_PNOR_SEC,
-                     l_pAttrOverSec->iv_layer,
-                     i_sectionInfo.id);
-                l_err->collectTrace("TARG",256);
-                l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                           HWAS::SRCI_PRIORITY_HIGH);
-                ERRORLOG::errlCommit(l_err, TARG_COMP_ID);
-            }
-            // Only apply attribute override if in the correct PNOR section
-            else
-            {
-                TRACFCOMP(g_trac_targeting,"getAttrOverrides:"
-                            " override into TankLayer 0x%X",
-                            l_pAttrOverSec->iv_layer);
+                AttrOverrideSection * l_pAttrOverSec =
+                    reinterpret_cast<AttrOverrideSection *>
+                        (i_sectionInfo.vaddr + l_index);
 
-                // Get the AttributeTank that corresponds to the TankLayer in
-                // the AttrOverrideSection. Enum starts with TANK_LAYER_NONE
-                // so need to subtract 1
-                AttributeTank* l_ptank =
-                                     l_pOverTanks[l_pAttrOverSec->iv_layer - 1];
-
-                // Create serialized chunck with AttrOverrideSection data
-                AttributeTank::AttributeSerializedChunk l_chunk;
-                l_chunk.iv_size = l_pAttrOverSec->iv_size;
-                l_chunk.iv_pAttributes = &l_pAttrOverSec->iv_chunk[0];
-
-                // Deserialize the data with the approriate AttributeTank
-                l_ptank->deserializeAttributes(l_chunk, true);
-
-                // The extraction of FAPI Tank Override Attributes is
-                //   not supported. Note it here at ingestion so no
-                //   silent fail later
-                if ( l_pAttrOverSec->iv_layer ==
-                        AttributeTank::TANK_LAYER_FAPI )
+                // Reached termination chunk
+                if (l_pAttrOverSec->iv_layer == AttributeTank::TANK_LAYER_TERM)
                 {
-                    TRACFCOMP(g_trac_targeting,
-                              "getAttrOverrides: "
-                              "FAPI Tank Layer Not Supported");
-                    /*@
-                     * @errortype
-                     * @moduleid     TARG_GET_ATTR_OVER
-                     * @reasoncode   TARG_RC_ATTR_OVER_FAPI_TANK_NOT_SUPPORTED
-                     * @userdata1    Tank Layer of attribute
-                     * @userdata2    PNOR Section specified
-                     * @devdesc      Attribute override is in the FAPI Tank
-                     *               which is not supported
-                     * @custdesc     Unsupported override configuration data
-                     */
-                    l_err =
-                        new ERRORLOG::ErrlEntry
-                        (ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                         TARG_GET_ATTR_OVER,
-                         TARG_RC_ATTR_OVER_FAPI_TANK_NOT_SUPPORTED,
-                         l_pAttrOverSec->iv_layer,
-                         i_sectionInfo.id);
-                    l_err->collectTrace("TARG",256);
-                    l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
-                                               HWAS::SRCI_PRIORITY_HIGH);
-                    ERRORLOG::errlCommit(l_err, TARG_COMP_ID);
+                    TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides Reached termination section at chunk (0x%x)",
+                                (i_sectionInfo.size - l_index));
+                    break;
                 }
 
+                // Remaining chunk smaller than AttrOverrideSection, quit
+                if (sizeof(AttrOverrideSection) > (i_sectionInfo.size - l_index))
+                {
+                    TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides AttrOverrideSection too big for chunk (0x%x)",
+                                (i_sectionInfo.size - l_index));
+                    /*@
+                    * @errortype
+                    * @moduleid     TARG_GET_ATTR_OVER
+                    * @reasoncode   TARG_RC_ATTR_OVER_PNOR_SEC_SPACE_FAIL
+                    * @userdata1    PNOR Section specified
+                    * @userdata2    Size of AttrOverrideSection
+                    * @devdesc      AttrOverrideSection too big to fit in remaining
+                    *               chunk of pnor section
+                    * @custdesc     Invalid configuration data in firmware Processor
+                    *               NOR flash
+                    */
+                    l_err =
+                        new ERRORLOG::ErrlEntry
+                        (ERRORLOG::ERRL_SEV_PREDICTIVE,
+                        TARG_GET_ATTR_OVER,
+                        TARG_RC_ATTR_OVER_PNOR_SEC_SPACE_FAIL,
+                        i_sectionInfo.id,
+                        sizeof(AttrOverrideSection));
+                    l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                            HWAS::SRCI_PRIORITY_HIGH);
+                    break;
+                }
+
+                l_index += sizeof(AttrOverrideSection);
+
+                // Remaining chunk smaller than serialized chunk size, quit
+                if (l_pAttrOverSec->iv_size > (i_sectionInfo.size - l_index))
+                {
+                    TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides serialized chunk too big for chunk (0x%x)",
+                                (i_sectionInfo.size - l_index));
+                    /*@
+                    * @errortype
+                    * @moduleid     TARG_GET_ATTR_OVER
+                    * @reasoncode   TARG_RC_ATTR_OVER_ATTR_DATA_SIZE_FAIL
+                    * @userdata1    PNOR Section specified
+                    * @userdata2    Size of Serialized attribute override
+                    * @devdesc      Serialized attribute override chunk too big to
+                    *               fit in remaining chunck of pnor section
+                    * @custdesc     Invalid configuration data in firmware Processor
+                    *               NOR flash
+                    */
+                    l_err =
+                        new ERRORLOG::ErrlEntry
+                        (ERRORLOG::ERRL_SEV_PREDICTIVE,
+                        TARG_GET_ATTR_OVER,
+                        TARG_RC_ATTR_OVER_ATTR_DATA_SIZE_FAIL,
+                        i_sectionInfo.id,
+                        l_pAttrOverSec->iv_size);
+                    l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                            HWAS::SRCI_PRIORITY_HIGH);
+                    break;
+                }
+
+                // Check if a tank layer is specified, if not we can't apply the
+                // attribute override.
+                if (l_pAttrOverSec->iv_layer == AttributeTank::TANK_LAYER_NONE)
+                {
+                    TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides no tank layer specified at chunk (0x%x)",
+                                (i_sectionInfo.size - l_index));
+                    /*@
+                    * @errortype
+                    * @moduleid     TARG_GET_ATTR_OVER
+                    * @reasoncode   TARG_RC_WRITE_ATTR_OVER_NO_TANK_LAYER
+                    * @userdata1    PNOR Section specified
+                    * @userdata2    Chunk location with no tank layer
+                    * @devdesc      No tank layer was specified for attribute
+                    *               override.
+                    * @custdesc     Invalid configuration data in firmware Processor
+                    *               NOR flash
+                    */
+                    l_err =
+                        new ERRORLOG::ErrlEntry
+                        (ERRORLOG::ERRL_SEV_PREDICTIVE,
+                        TARG_GET_ATTR_OVER,
+                        TARG_RC_WRITE_ATTR_OVER_NO_TANK_LAYER,
+                        i_sectionInfo.id,
+                        (i_sectionInfo.size - l_index));
+                    l_err->collectTrace("TARG",256);
+                    l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                            HWAS::SRCI_PRIORITY_HIGH);
+                    ERRORLOG::errlCommit(l_err, TARG_COMP_ID);
+                }
+                // Check if the AttrOverSec is in the correct PNOR section
+                // It was decided that this should not cause a failed IPL, so the
+                // override will not be applied, the errl will be committed, then
+                // we move on.
+                else if (tankLayerToPnor[l_pAttrOverSec->iv_layer - 1].second !=
+                                                                i_sectionInfo.id)
+                {
+                    TRACFCOMP(g_trac_targeting,"getAttrOverrides: Failed to apply override - override with TankLayer 0x%X should not be in PNOR::%s",
+                                l_pAttrOverSec->iv_layer, i_sectionInfo.name);
+                    /*@
+                    * @errortype
+                    * @moduleid     TARG_GET_ATTR_OVER
+                    * @reasoncode   TARG_RC_WRITE_ATTR_OVER_WRONG_PNOR_SEC
+                    * @userdata1    Tank Layer of attribute
+                    * @userdata2    PNOR Section specified
+                    * @devdesc      Attribute override is in the wrong pnor section
+                    *               needs to be moved to the section associated
+                    *               with its attribute tank layer
+                    * @custdesc     Invalid configuration data in firmware Processor
+                    *               NOR flash
+                    */
+                    l_err =
+                        new ERRORLOG::ErrlEntry
+                        (ERRORLOG::ERRL_SEV_PREDICTIVE,
+                        TARG_GET_ATTR_OVER,
+                        TARG_RC_WRITE_ATTR_OVER_WRONG_PNOR_SEC,
+                        l_pAttrOverSec->iv_layer,
+                        i_sectionInfo.id);
+                    l_err->collectTrace("TARG",256);
+                    l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                            HWAS::SRCI_PRIORITY_HIGH);
+                    ERRORLOG::errlCommit(l_err, TARG_COMP_ID);
+                }
+                // Only apply attribute override if in the correct PNOR section
+                else
+                {
+                    TRACFCOMP(g_trac_targeting,"getAttrOverrides:"
+                                " override into TankLayer 0x%X",
+                                l_pAttrOverSec->iv_layer);
+
+                    // Get the AttributeTank that corresponds to the TankLayer in
+                    // the AttrOverrideSection. Enum starts with TANK_LAYER_NONE
+                    // so need to subtract 1
+                    AttributeTank* l_ptank =
+                                        l_pOverTanks[l_pAttrOverSec->iv_layer - 1];
+
+                    // Create serialized chunck with AttrOverrideSection data
+                    AttributeTank::AttributeSerializedChunk l_chunk;
+                    l_chunk.iv_size = l_pAttrOverSec->iv_size;
+                    l_chunk.iv_pAttributes = &l_pAttrOverSec->iv_chunk[0];
+
+                    // Deserialize the data with the approriate AttributeTank
+                    l_ptank->deserializeAttributes(l_chunk, true);
+
+                    // The extraction of FAPI Tank Override Attributes is
+                    //   not supported. Note it here at ingestion so no
+                    //   silent fail later
+                    if ( l_pAttrOverSec->iv_layer ==
+                            AttributeTank::TANK_LAYER_FAPI )
+                    {
+                        TRACFCOMP(g_trac_targeting,
+                                "getAttrOverrides: "
+                                "FAPI Tank Layer Not Supported");
+                        /*@
+                        * @errortype
+                        * @moduleid     TARG_GET_ATTR_OVER
+                        * @reasoncode   TARG_RC_ATTR_OVER_FAPI_TANK_NOT_SUPPORTED
+                        * @userdata1    Tank Layer of attribute
+                        * @userdata2    PNOR Section specified
+                        * @devdesc      Attribute override is in the FAPI Tank
+                        *               which is not supported
+                        * @custdesc     Unsupported override configuration data
+                        */
+                        l_err =
+                            new ERRORLOG::ErrlEntry
+                            (ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            TARG_GET_ATTR_OVER,
+                            TARG_RC_ATTR_OVER_FAPI_TANK_NOT_SUPPORTED,
+                            l_pAttrOverSec->iv_layer,
+                            i_sectionInfo.id);
+                        l_err->collectTrace("TARG",256);
+                        l_err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                                HWAS::SRCI_PRIORITY_HIGH);
+                        ERRORLOG::errlCommit(l_err, TARG_COMP_ID);
+                    }
 
 
+
+                }
+                l_index += l_pAttrOverSec->iv_size;
             }
-            l_index += l_pAttrOverSec->iv_size;
         }
 
         if (l_err)
@@ -308,11 +345,13 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                    ATTR 02395414 = 07
                  */
 
+                // l_pOverTanks index starts at FAPI but tank layer starts at
+                // TANK_LAYER_NONE so need to add 1 to index
                 CONSOLE::displayf(CONSOLE::DEFAULT, "TARG","**Found %d attribute overrides in Tank %s(%d)",
                                   l_pOverTanks[i]->size(),
                                   AttributeTank::layerToString(
-                                     static_cast<AttributeTank::TankLayer>(i)),
-                                  i);
+                                     static_cast<AttributeTank::TankLayer>(i+1)),
+                                  i+1);
 
                 AttributeTank::AttributeHeader last_hdr;
                 std::list<AttributeTank::Attribute*> l_attrList;

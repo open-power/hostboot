@@ -44,4 +44,5 @@ HOSTBOOT_RT_IPL_COMMON_OBJS += attrPlatOverride.o
 HOSTBOOT_RT_IPL_COMMON_OBJS += translateTarget.o
 HOSTBOOT_RT_IPL_COMMON_OBJS += attrsizesdata.o
 HOSTBOOT_RT_IPL_COMMON_OBJS += targAttrIdToName.o
+HOSTBOOT_RT_IPL_COMMON_OBJS += attrTextOverride.o
 
