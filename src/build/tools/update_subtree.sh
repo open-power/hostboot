@@ -196,8 +196,11 @@ $CMD
 
 # If there are still merge conflicts because git thinks 'both' parties have added the
 # file, explicitly checkout 'our' version of the file(s) and then add the files.
-git status | grep both | awk '{print $4}' | xargs git checkout --ours
-git status | grep both | awk '{print $4}' | xargs git add
+BOTH=$(git status --porcelain | grep 'AA' | awk '{print $2}')
+if [ -n "$BOTH" ]; then
+    echo "$BOTH" | xargs git checkout --ours
+    echo "$BOTH" | xargs git add
+fi
 
 # Create a commit with the changes generated from the merge
 git commit -m "Update to latest openbmc/$SUBTREE commit $BMC_SUBTREE_TOP_COMMIT" > /dev/null 2>&1
