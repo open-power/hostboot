@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,11 +59,7 @@ void VmmManager::init()
 
     v.initPTEs();
 
-#ifdef CONFIG_P9_PAGE_TABLE
     v.initPartitionTable();
-#else
-    v.initSDR1();
-#endif
 };
 
 void VmmManager::init_slb()
@@ -71,11 +67,7 @@ void VmmManager::init_slb()
     VmmManager& v = Singleton<VmmManager>::instance();
     SegmentManager::initSLB();
 
-#ifdef CONFIG_P9_PAGE_TABLE
     v.initPartitionTable();
-#else
-    v.initSDR1();
-#endif
 }
 
 bool VmmManager::pteMiss(task_t* t, uint64_t effAddr, bool store)
