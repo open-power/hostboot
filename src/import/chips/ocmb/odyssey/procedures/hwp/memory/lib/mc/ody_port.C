@@ -133,8 +133,90 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Gets the bandwidth snapshot - Odyssey specialization
+/// @param[in] i_data data read from the FARB6 register
+/// @param[out] o_bw_snapshot_side0 bandwidth for side 0
+/// @param[out] o_bw_snapshot_side1 bandwidth for side 1
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template<>
+void get_bw_snapshot<mss::mc_type::ODYSSEY>( const fapi2::buffer<uint64_t>& i_data,
+        uint64_t& o_bw_snapshot_side0,
+        uint64_t& o_bw_snapshot_side1 )
+{
+    using TT = portTraits<mss::mc_type::ODYSSEY>;
+
+    o_bw_snapshot_side0 = 0;
+    o_bw_snapshot_side1 = 0;
+    i_data.extractToRight<TT::BW_SNAPSHOT_SIDE0, TT::BW_SNAPSHOT_SIDE0_LEN>(o_bw_snapshot_side0);
+    i_data.extractToRight<TT::BW_SNAPSHOT_SIDE1, TT::BW_SNAPSHOT_SIDE1_LEN>(o_bw_snapshot_side1);
+}
+
 namespace ody
 {
+
+///
+/// @brief Enable power management - Odyssey helper for unit testing
+/// @param[in] i_target the target
+/// @param[in] i_pwr_cntrl value of ATTR_MSS_MRW_POWER_CONTROL_REQUESTED
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode enable_power_management_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t i_pwr_cntrl)
+{
+    using TT = portTraits<mss::mc_type::ODYSSEY>;
+
+    fapi2::buffer<uint64_t> l_rpc0;
+    fapi2::buffer<uint64_t> l_str0;
+
+    // Get the value from attribute and write the corresponding settings to scom registers
+    FAPI_TRY(fapi2::getScom(i_target, TT::MBARPC0Q_REG, l_rpc0));
+    FAPI_TRY(fapi2::getScom(i_target, TT::STR0Q_REG, l_str0));
+
+    switch (i_pwr_cntrl)
+    {
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_OFF:
+            {
+                l_rpc0.clearBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
+                l_str0.clearBit<TT::CFG_STR_ENABLE>();
+                l_str0.clearBit<TT::CFG_DIS_CLK_IN_STR>();
+                break;
+            }
+
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN:
+            {
+                l_rpc0.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
+                l_str0.clearBit<TT::CFG_STR_ENABLE>();
+                l_str0.clearBit<TT::CFG_DIS_CLK_IN_STR>();
+                break;
+            }
+
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR:
+            {
+                l_rpc0.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
+                l_str0.setBit<TT::CFG_STR_ENABLE>();
+                l_str0.clearBit<TT::CFG_DIS_CLK_IN_STR>();
+                break;
+            }
+
+        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP:
+        default:
+            {
+                l_rpc0.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
+                l_str0.setBit<TT::CFG_STR_ENABLE>();
+                l_str0.setBit<TT::CFG_DIS_CLK_IN_STR>();
+                break;
+            }
+    }
+
+    FAPI_TRY(fapi2::putScom(i_target, TT::MBARPC0Q_REG, l_rpc0));
+    FAPI_TRY(fapi2::putScom(i_target, TT::STR0Q_REG, l_str0));
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Initializes the DFI interface
@@ -207,5 +289,28 @@ fapi_try_exit:
 }
 
 } // ody
+
+///
+/// @brief Enable power management - Odyssey specialization
+/// @param[in] i_target the target
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< >
+fapi2::ReturnCode enable_power_management<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target )
+{
+    //Enable Power management based off of mrw_power_control_requested
+    FAPI_INF("%s Enable Power min max domains", mss::c_str(i_target));
+
+    uint8_t l_pwr_cntrl = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_pwr_cntrl));
+
+    FAPI_TRY(mss::ody::enable_power_management_helper(i_target, l_pwr_cntrl));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 } // mss

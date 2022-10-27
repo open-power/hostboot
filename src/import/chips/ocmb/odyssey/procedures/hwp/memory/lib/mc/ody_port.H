@@ -85,6 +85,15 @@ fapi2::ReturnCode poll_for_dfi_init_complete( const fapi2::Target<fapi2::TARGET_
 ///
 fapi2::ReturnCode poll_for_dfi_init_complete( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target );
 
+///
+/// @brief Enable power management - Odyssey helper for unit testing
+/// @param[in] i_target the target
+/// @param[in] i_pwr_cntrl value of ATTR_MSS_MRW_POWER_CONTROL_REQUESTED
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode enable_power_management_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t i_pwr_cntrl);
+
 } // ns ody
 } // ns mss
 

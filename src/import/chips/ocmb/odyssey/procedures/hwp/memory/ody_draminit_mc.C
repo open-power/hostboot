@@ -67,11 +67,10 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        // TODO Zen:MST-1405 Power management settings have changed in Odyssey. Need to update generic function
-        // and traits to accommodate changes
         // Enable Power management based off of mrw_power_control_requested
-        // FAPI_TRY( mss::enable_power_management<mss::mc_type::ODYSSEY>(i_target), "%s Failed to enable power management",
-        //           mss::c_str(i_target) );
+        FAPI_TRY( mss::enable_power_management<mss::mc_type::ODYSSEY>(i_target),
+                  TARGTIDFORMAT " Failed to enable power management",
+                  TARGTID );
 
         // TODO Zen:MST-1406 Check with design team if we have an "init complete" indicator in Odyssey.
         // This was assigned to an unused (and unnamed) bit on Explorer PMU8Q.
