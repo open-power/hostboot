@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1112,7 +1112,7 @@ bool AttrTextToBinaryBlob::convertTargLine( const std::string & i_line,
         size_t l_kPosn = l_line.find( "k", 0);
         size_t l_kColonPosn = l_line.find( ":k", 0);
         size_t l_sPosn = l_line.find( ":s", 0);
-        size_t l_nPosn = l_line.find( ":n", 0);
+        // size_t l_nPosn = l_line.find( ":n", 0);  //node parm is ignored
 
         if (l_line.find_first_not_of(" \t", 6) == std::string::npos)
         {
