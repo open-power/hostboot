@@ -71,6 +71,8 @@ namespace TARGETING
          */
         Target* assertGetToplevelTarget();
 
+
+#ifdef __HOSTBOOT_MODULE
         /**
          *  @brief Returns a bit string of the targets that match the given predicate
          *
@@ -116,6 +118,7 @@ namespace TARGETING
          *                           set for a target in the bit string.
          */
         void displayProcChildrenBitmasks(const PredicateBase* const i_pPredicate);
+#endif // __HOSTBOOT_MODULE
 
     }; // namespace Util
 };

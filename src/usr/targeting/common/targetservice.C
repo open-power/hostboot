@@ -116,6 +116,7 @@ namespace TARGETING
             return toplevelTarget;
         };
 
+#ifdef __HOSTBOOT_MODULE
         /**
          *  @brief Returns the max number of targets of TYPE i_targType that could be found
          *         under a proc on the current system configuration
@@ -275,6 +276,7 @@ namespace TARGETING
             }
 
         }
+#endif // __HOSTBOOT_MODULE
 
     }; // namespace Util
 };
