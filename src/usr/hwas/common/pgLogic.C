@@ -5,7 +5,8 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* [+] DD                                                                 */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,8 +95,8 @@ namespace PARTIAL_GOOD
     // Checks the nmmu bit of the N1_S entry.
     const pg_mask_t NMMU1_PG_MASK = 0x004000; //bit9 of 24
 
-    // Only applicable to NMMU1 in chiplet N1_S(3)
-    const cu_mask_t NMMU1_CU_MASK = ( cu_mask(3) );
+    // Only applicable to NMMU1(chip unit 1)
+    const cu_mask_t NMMU1_CU_MASK = ( cu_mask(1) );
 
     // Checks the pau bit of a PAUC entry. This mask is applicable for PAU with
     // CU = 0, 3, 4, or 6.
