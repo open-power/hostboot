@@ -233,9 +233,15 @@ fi
 
 # if we generated a patch above, try to apply it
 if [ $diff_found -eq 1 ]; then
-  echo "Attempting to apply changes found earlier"
-  # do a 3 way merge
-  git am -3 0001-Reapply-$SUBTREE-subtree-changes-made-from-*
+    echo "Attempting to apply changes found earlier"
+    # do a 3 way merge
+    git am -3 0001-Reapply-$SUBTREE-subtree-changes-made-from-*
+
+    # Keep track of patch change ID.
+    PATCH_CHANGE_ID=`git log -1 | grep "Change-Id" | awk '{print $2}'`
+
+    # Clean up patch files.
+    rm -f 0001-Reapply-$SUBTREE-subtree-changes-made-from-*
 fi
 
 if [ "$PUSH_COMMITS" == "1" ]; then
@@ -249,11 +255,14 @@ if [ "$PUSH_COMMITS" == "1" ]; then
 
     git push gerrit HEAD:refs/for/$PUSH_BRANCH
 
-  if [ "$REVIEWER" != "" ]; then
-      echo "Adding $REVIEWER as a reviewer to ${NEW_SYNC_CHANGE_ID}"
-      ssh gerrit gerrit set-reviewers -p hostboot -a ${REVIEWER} ${NEW_SYNC_CHANGE_ID}
-  fi
+    if [ "$REVIEWER" != "" ]; then
+        echo "Adding $REVIEWER as a reviewer to ${NEW_SYNC_CHANGE_ID}"
+        ssh gerrit gerrit set-reviewers -p hostboot -a ${REVIEWER} ${NEW_SYNC_CHANGE_ID}
+
+        if [ -n "$PATCH_CHANGE_ID" ]; then
+            echo "Adding $REVIEWER as a reviewer to ${PATCH_CHANGE_ID}"
+            ssh gerrit gerrit set-reviewers -p hostboot -a ${REVIEWER} ${PATCH_CHANGE_ID}
+        fi
+    fi
 fi
 
-# Clean up patch files, if they exist.
-rm -f 0001-Reapply-$SUBTREE-subtree-changes-made-from-*
