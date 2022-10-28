@@ -219,23 +219,22 @@ fi
 # Create a commit with the changes generated from the merge
 git commit -m "Update to latest openbmc/$SUBTREE commit $BMC_SUBTREE_TOP_COMMIT" > /dev/null 2>&1
 
-# store the new sync commit which will be used to update src/subtree/latest_commit_sync
+# Get the new sync Change-Id and stored it.
 NEW_SYNC_CHANGE_ID=`git log -1 | grep "Change-Id" | awk '{print $2}'`
+
+echo "Updating src/subtree/latest_commit_sync .."
+sed -i "s/$SUBTREE $LAST_SYNC_CHANGE_ID/$SUBTREE $NEW_SYNC_CHANGE_ID/g" src/subtree/latest_commit_sync
+git add src/subtree/latest_commit_sync
+
+if ! git diff-index --quiet HEAD --; then
+  git commit --amend --no-edit
+fi
 
 # if we generated a patch above, try to apply it
 if [ $diff_found -eq 1 ]; then
   echo "Attempting to apply changes found earlier"
   # do a 3 way merge
   git am -3 0001-Reapply-$SUBTREE-subtree-changes-made-from-*
-fi
-
-echo "Updating src/subtree/latest/commit_sync .."
-sed -i "s/$SUBTREE $LAST_SYNC_CHANGE_ID/$SUBTREE $NEW_SYNC_CHANGE_ID/g" src/subtree/latest_commit_sync
-git add src/subtree/latest_commit_sync
-
-# If the git am ran clean then we need to amend the latest_commit_sync changes
-if ! git diff-index --quiet HEAD --; then
-  git commit --amend --no-edit
 fi
 
 if [ "$PUSH_COMMITS" == "1" ]; then
