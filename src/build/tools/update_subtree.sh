@@ -194,6 +194,20 @@ if check_git_version '2.10.0'; then
 fi
 $CMD
 
+# Check for any new changes.
+if [ -z "$(git status --porcelain)" ]; then
+    echo "No changes since last sync commit: $LAST_SYNC_COMMIT"
+
+    # Reset the history back to the were we began.
+    git reset --hard $CURRENT_TOP_COMMIT
+
+    # Clean up patch files, if they exist.
+    rm -f 0001-Reapply-$SUBTREE-subtree-changes-made-from-*
+
+    # Nothing more to do.
+    exit 0
+fi
+
 # If there are still merge conflicts because git thinks 'both' parties have added the
 # file, explicitly checkout 'our' version of the file(s) and then add the files.
 BOTH=$(git status --porcelain | grep 'AA' | awk '{print $2}')
@@ -232,5 +246,5 @@ if [ "$PUSH_COMMITS" == "1" ]; then
   fi
 fi
 
-#cleanup patch
-rm 0001-Reapply-$SUBTREE-subtree-changes-made-from-*
+# Clean up patch files, if they exist.
+rm -f 0001-Reapply-$SUBTREE-subtree-changes-made-from-*
