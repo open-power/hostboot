@@ -45,6 +45,7 @@ function usage()
     echo "    -p --push"
     echo "    -r --reviewer=<reviewer email>"
     echo "    -s --subtree=<subtree>"
+    echo "    -u --upstream-rev=<commit>"
     echo ""
     echo "Subtrees that are currently supported: $SUPPORTED_SUBTREES"
 }
@@ -54,6 +55,7 @@ PUSH_BRANCH="master-p10"
 SUPPORTED_SUBTREES="pldm,libmctp"
 REVIEWER=""
 SUBTREE="wrong"
+UPSTREAM_REV=""
 
 while [ "$1" != "" ]; do
     PARAM=`echo $1 | awk -F= '{print $1}'`
@@ -72,6 +74,9 @@ while [ "$1" != "" ]; do
         -s | --subtree)
             SUBTREE=$VALUE;
             ;;
+        -u | --upstream-rev)
+            UPSTREAM_REV=$VALUE;
+            ;;
         *)
             echo "ERROR: unknown parameter \"$PARAM\""
             usage
@@ -80,6 +85,11 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+
+UPSTREAM_REMOTE="bmc-$SUBTREE"
+if [ -z $UPSTREAM_REV ]; then
+    UPSTREAM_REV="$UPSTREAM_REMOTE/master"
+fi
 
 # Expecting input format to be in a format like '2.10.0'.
 # Will return success (i.e. 0) if the current git version is greater than or
@@ -182,14 +192,14 @@ fi
 
 echo "Updating subtree with changes from remote.."
 # add the bmc-subtree remote repository
-git remote add bmc-$SUBTREE  https://github.com/openbmc/$SUBTREE.git > /dev/null 2>&1
+git remote add $UPSTREAM_REMOTE  https://github.com/openbmc/$SUBTREE.git > /dev/null 2>&1
 # update the bmc-subtree remote repository
-git fetch bmc-$SUBTREE > /dev/null 2>&1
-# we will put the top level commit from the BMC repo in the commit message of the subtree update commit
-BMC_SUBTREE_TOP_COMMIT=`git rev-parse --short bmc-$SUBTREE/master`
+git fetch $UPSTREAM_REMOTE > /dev/null 2>&1
+# we will put the target revision from the BMC repo in the commit message of the subtree update commit
+BMC_SUBTREE_TOP_COMMIT=`git rev-parse --short $UPSTREAM_REV`
 
-# Forcefully subtree update to the latest openbmc/subtree master branch, discard all local changes
-CMD="git merge --squash -s recursive -Xsubtree=src/subtree/openbmc/$SUBTREE -Xtheirs bmc-$SUBTREE/master"
+# Forcefully subtree update to the target upstream revision, discard all local changes
+CMD="git merge --squash -s recursive -Xsubtree=src/subtree/openbmc/$SUBTREE -Xtheirs $UPSTREAM_REV"
 if check_git_version '2.10.0'; then
     CMD="${CMD} --allow-unrelated-histories"
 fi
