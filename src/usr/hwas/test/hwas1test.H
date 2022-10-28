@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -837,7 +837,7 @@ public:
         TargetHandleList pCheckPres;
         getAllChips( pCheckPres, TYPE_PROC, true );
 
-        TS_INFO( "testHWAScheckMarkChildrenNonFunctional() entry");
+        TS_INFO("testHWASMarkChildrenNonFunctional() entry");
 
         for (const TargetHandle_t pTarget : pCheckPres)
         {
@@ -874,10 +874,10 @@ public:
                         if (!l_parentTarget)
                         {
                             TS_FAIL(
-                                "testHWAScheckMarkChildrenNonFunctional>"
+                                "testHWASMarkChildrenNonFunctional>"
                                 "Failed to find parent of type %s "
                                 "for target %s "
-                                "HUID = 0x %08x",
+                                "HUID = 0x%08x",
                                 attrToString<ATTR_TYPE>(l_targetInfo->parent_type),
                                 l_type_str, get_huid(pDesc)
                                 );
@@ -894,7 +894,7 @@ public:
                     l_parentChipletID = l_parentTarget->getAttr<ATTR_CHIPLET_ID>();
                 }
 
-                TS_INFO("testHWAScheckMarkChildrenNonFunctional: "
+                TS_INFO("testHWASMarkChildrenNonFunctional: "
                         "descendant functional - "
                         "type %s, chip unit %d",
                         l_type_str, l_chipUnit);
@@ -921,10 +921,10 @@ public:
                         sprintf(l_pgDataStr, ", pgData = 0x%08x", pgDataAllGood[l_pgIdx]);
                     }
 
-                    TS_FAIL("testHWAScheckMarkChildrenNonFunctional>"
+                    TS_FAIL("testHWASMarkChildrenNonFunctional>"
                             "functional = false, should be true, "
                             "type = %s, chip unit = %d%s, chiplet ID = 0x%02x. "
-                            "pDesc HUID 0x %08x",
+                            "pDesc HUID 0x%08x",
                             l_type_str,
                             l_chipUnit,
                             l_pgDataStr,
@@ -936,10 +936,10 @@ public:
                 // and make sure that the bad state propagates to this child
                 if (l_targetInfo)
                 {
-                    TS_INFO( "testHWAScheckMarkChildrenNonFunctional: "
-                             "%s (chiplet ID = 0x%02x) is not functional",
-                             l_type_str,
-                             l_chipletID);
+                    TS_INFO("testHWASMarkChildrenNonFunctional: "
+                            "%s (chiplet ID = 0x%02x) is not functional",
+                            l_type_str,
+                            l_chipletID);
 
                     // Make a copy we can modify to be bad
                     auto bad_pgData = pgDataAllGood;
@@ -953,10 +953,10 @@ public:
                                                    pDesc,
                                                    bad_pgData))
                     {
-                        TS_FAIL("testHWAScheckMarkChildrenNonFunctional>"
+                        TS_FAIL("testHWASMarkChildrenNonFunctional>"
                                 "functional = true, should be false, "
                                 " = 0x%08x. "
-                                "pDesc HUID 0x %08x, parent HUID 0x %08x, "
+                                "pDesc HUID 0x%08x, parent HUID 0x%08x, "
                                 "pg idx = %d",
                                 bad_pgData[l_pgIdx],
                                 get_huid(pDesc),
@@ -967,7 +967,7 @@ public:
             } // for pDesc_it
         } // for pTarget_it
 
-        TS_INFO( "testHWASMarkChildrenNonFunctional exit" );
+        TS_INFO("testHWASMarkChildrenNonFunctional exit");
     }
 
     /**

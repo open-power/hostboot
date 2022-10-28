@@ -273,7 +273,7 @@ errlHndl_t ocmbI2CPresencePerformOp(DeviceFW::OperationType i_opType,
     if(l_errl)
     {
         TRACFCOMP(g_trac_i2c, "ocmbI2CPresencePerformOp: could not presence-"
-                  "detect target HUID 0x%.08x against the existing EECACHE",
+                  "detect target HUID 0x%08X against the existing EECACHE",
                   TARGETING::get_huid(i_target));
         l_ocmbPresent = false;
         errlCommit(l_errl, I2C_COMP_ID);

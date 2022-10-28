@@ -1627,9 +1627,11 @@
     <description>
       Describes the possible EEPROM VPD redundancy available for target.
       Some of these are:
-      Unknown dimm has possible redundancy
-      4U ddimm have full redundancy present
-      2U ddimm have no redundancy present
+      isdimms have no redundancy present
+      Unknown ddimms has possible redundancy
+      4U ddimms have full redundancy present
+      2U ddimms have no redundancy present
+      Planar OCMBs have no redundancy present
       processors have full redundancy present
     </description>
     <simpleType>

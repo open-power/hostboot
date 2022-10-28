@@ -79,11 +79,14 @@ bool hasRemoteVpdSource(TARGETING::Target * i_target);
  * @brief This function tests to see if the VPD_PRIMARY eeprom is present
  *        for the specific target.
  *
- * @param[in] i_target - Target device.
+ * @param[in] i_target      - Target device.
+ * @param[in] i_checkBackup - bool to detect the BACKUP eeprom instead of the PRIMARY
+ *                            True,  detect the BACKUP eeprom
+ *                            False, detect the PRIMARY eeprom
  *
  * @return bool - True if the eeprom is present, false otherwise.
  */
-bool eepromPresence ( TARGETING::Target * i_target );
+bool eepromPresence ( TARGETING::Target * i_target, bool i_checkBackup = false);
 
 
 /**

@@ -558,6 +558,10 @@
     <!-- Special version for non-DDIMM OCMB that lives on Planar -->
     <id>chip-ocmb-planar</id>
     <parent>chip-ocmb-generic</parent>
+    <attribute>
+      <id>EEPROM_VPD_REDUNDANCY</id>
+      <default>NOT_PRESENT</default>
+    </attribute>
   </targetType>
 
   <targetType>
@@ -1782,7 +1786,7 @@
   </targetType>
 
   <targetType>
-    <!-- Represents the logical DRAM on any kind of DIMM.  Note that this
+    <!-- Represents the logical DRAM on any kind of DIMM. Note that this
          does not represent the physical DIMM, but it does model access to
          the SPD. -->
     <id>lcard-dimm</id>
@@ -1861,6 +1865,10 @@
         </field>
       </default>
       <id>EEPROM_VPD_PRIMARY_INFO</id>
+    </attribute>
+    <attribute>
+      <default>NOT_PRESENT</default>
+      <id>EEPROM_VPD_REDUNDANCY</id>
     </attribute>
     <attribute>
       <id>FRU_ID</id>
@@ -2047,6 +2055,7 @@
       <id>EEPROM_VPD_PRIMARY_INFO</id>
     </attribute>
     <attribute>
+      <default>POSSIBLE</default>
       <id>EEPROM_VPD_REDUNDANCY</id>
     </attribute>
   </targetType>

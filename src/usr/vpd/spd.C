@@ -929,8 +929,8 @@ errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
 errlHndl_t spdSetSize ( Target &io_target,
                         const uint8_t      i_dimmType)
 {
-    TRACSSCOMP( g_trac_spd, ENTER_MRK"spdSetSize(): setting DIMM SPD(0x%X) size for"
-                " target(0x%X)", i_dimmType, get_huid(&io_target) );
+    TRACSSCOMP( g_trac_spd, ENTER_MRK"spdSetSize(): setting DIMM SPD(0x%X) size for "
+                "target(0x%X)", i_dimmType, get_huid(&io_target) );
 
     errlHndl_t l_err{nullptr};
 
@@ -938,20 +938,19 @@ errlHndl_t spdSetSize ( Target &io_target,
     {
         if ( SPD_DDR3_TYPE == i_dimmType )
         {
-            io_target.setAttr<ATTR_DIMM_SPD_BYTE_SIZE>(SPD_DDR3_SIZE);
             TRACSSCOMP( g_trac_spd, "found DIMM w/ HUID 0x%08X to be type "
                         "DDR3, set ATTR_DIMM_SPD_BYTE_SIZE to be %d",
                         get_huid(&io_target),
-                        io_target.getAttr<ATTR_DIMM_SPD_BYTE_SIZE>() );
-
+                        SPD_DDR3_SIZE);
+            io_target.setAttr<ATTR_DIMM_SPD_BYTE_SIZE>(SPD_DDR3_SIZE);
         }
         else if ( SPD_DDR4_TYPE == i_dimmType )
         {
-            io_target.setAttr<ATTR_DIMM_SPD_BYTE_SIZE>(SPD_DDR4_SIZE);
             TRACSSCOMP( g_trac_spd, "found DIMM w/ HUID 0x%08X to be type "
                         "DDR4, set ATTR_DIMM_SPD_BYTE_SIZE to be %d",
                         get_huid(&io_target),
-                        io_target.getAttr<ATTR_DIMM_SPD_BYTE_SIZE>() );
+                        SPD_DDR4_SIZE);
+            io_target.setAttr<ATTR_DIMM_SPD_BYTE_SIZE>(SPD_DDR4_SIZE);
         }
         else
         {
@@ -987,6 +986,8 @@ errlHndl_t spdSetSize ( Target &io_target,
     return l_err;
 }
 
+#ifndef __HOSTBOOT_RUNTIME
+
 /**
  * @brief Checks for redundant memory type by reading SPD data, then
  *        sets the target to its appropriate redundancy setting.
@@ -999,41 +1000,41 @@ errlHndl_t spdUpdateEepromRedundancy(Target * i_target, const uint8_t i_memType)
 {
     errlHndl_t err{nullptr};
     ATTR_EEPROM_VPD_REDUNDANCY_type newEepromRedundancy =
-                    EEPROM_VPD_REDUNDANCY_POSSIBLE;
+                    i_target->getAttr<ATTR_EEPROM_VPD_REDUNDANCY>();
 
     do {
-        // Check for redundant DDR4 4U DDIMM
-        if (i_memType == SPD_DDR4_TYPE)
+        if (newEepromRedundancy == EEPROM_VPD_REDUNDANCY_POSSIBLE)
         {
-            modSpecTypes_t modType = NA;
-            err = getModType(modType, i_target, i_memType);
-            if ( err )
+            // Check for redundant DDR4 4U DDIMM
+            if (i_memType == SPD_DDR4_TYPE)
             {
-                errlCommit(err, VPD_COMP_ID);
-                break;
-            }
-
-            if (modType == DDIMM)
-            {
-                uint8_t ddimmModHeight = DDIMM_MOD_HEIGHT_INVALID;
-                err = getDdimmModHeight(ddimmModHeight, i_target);
+                modSpecTypes_t modType = NA;
+                err = getModType(modType, i_target, i_memType);
                 if ( err )
                 {
                     errlCommit(err, VPD_COMP_ID);
                     break;
                 }
 
-                if (ddimmModHeight == DDIMM_MOD_HEIGHT_4U)
+                if (modType == DDIMM)
                 {
-                    TRACFCOMP( g_trac_spd,
-                        "spdUpdateEepromRedundancy> Found 0x%08X is an eeprom-redundant DDR4 4U DDIMM",
-                        get_huid(i_target) );
-                    newEepromRedundancy = EEPROM_VPD_REDUNDANCY_PRESENT;
-                }
-                else
-                {
-                    if ((ddimmModHeight == DDIMM_MOD_HEIGHT_2U) ||
-                        (ddimmModHeight == DDIMM_MOD_HEIGHT_1U))
+                    uint8_t ddimmModHeight = DDIMM_MOD_HEIGHT_INVALID;
+                    err = getDdimmModHeight(ddimmModHeight, i_target);
+                    if ( err )
+                    {
+                        errlCommit(err, VPD_COMP_ID);
+                        break;
+                    }
+
+                    if (ddimmModHeight == DDIMM_MOD_HEIGHT_4U)
+                    {
+                        TRACFCOMP( g_trac_spd,
+                            "spdUpdateEepromRedundancy> Found 0x%08X is an eeprom-redundant DDR4 4U DDIMM",
+                            get_huid(i_target) );
+                        newEepromRedundancy = EEPROM_VPD_REDUNDANCY_PRESENT;
+                    }
+                    else if ((ddimmModHeight == DDIMM_MOD_HEIGHT_2U) ||
+                             (ddimmModHeight == DDIMM_MOD_HEIGHT_1U))
                     {
                         TRACFCOMP( g_trac_spd,
                             "spdUpdateEepromRedundancy> 0x%08X is a NON-REDUNDANT DDR4 %dU DDIMM",
@@ -1043,55 +1044,119 @@ errlHndl_t spdUpdateEepromRedundancy(Target * i_target, const uint8_t i_memType)
                     else
                     {
                         TRACFCOMP( g_trac_spd,
-                            "spdUpdateEepromRedundancy> 0x%08X is a non-redundant eeprom DDR4 DDIMM (mod height %x)",
+                            "spdUpdateEepromRedundancy> DDIMM 0x%08X has a mod height of 0x%X, which is unknown to have redundant eeprom. "
+                            "Creating info error log and leaving as EEPROM_VPD_REDUNDANCY_POSSIBLE",
                             get_huid(i_target), ddimmModHeight );
+
+                        /*@
+                         * @moduleid         VPD::VPD_SPD_EEPROM_REDUNDANCY
+                         * @reasoncode       VPD::VPD_SPD_UNEXPECTED_DDIMM_HEIGHT
+                         * @userdata1        HUID of DIMM target
+                         * @userdata2        Unexpected DDIMM Module Height
+                         * @devdesc          An unexpected value for a DDIMM's height likely
+                         *                   means that his func needs to account for a new
+                         *                   valid value, and should be updated. However there
+                         *                   is a small chance that the SPD byte holding the
+                         *                   height value is corrupted. In the case that this
+                         *                   target does have a redundant eeprom, we will leave
+                         *                   the attr value as POSSIBLE so that writes will still
+                         *                   be attempted to the backup
+                         * @custdesc         A problem occurred during the IPL
+                         *                   of the system.
+                         */
+                        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                                       VPD::VPD_SPD_EEPROM_REDUNDANCY,
+                                                       VPD::VPD_SPD_UNEXPECTED_DDIMM_HEIGHT,
+                                                       get_huid(i_target),
+                                                       ddimmModHeight,
+                                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                        err->collectTrace(VPD_COMP_NAME);
+                        errlCommit(err, VPD_COMP_ID);
+                    }
+
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_spd,
+                        "spdUpdateEepromRedundancy> modType (0x%X) indicates target 0x%08X is an isdimm that has no redundant eeprom, "
+                        "or courupted modType value for DDIMM",
+                        modType, get_huid(i_target));
+
+                    TRACDCOMP( g_trac_spd,
+                        "spdUpdateEepromRedundancy> calling eepromPresence() to determine if 0x%08X has EEPROM_VPD_BACKUP_INFO",
+                        get_huid(i_target));
+
+                    if (EEPROM::eepromPresence(i_target, true))
+                    {
+                        TRACFCOMP( g_trac_spd,
+                            "spdUpdateEepromRedundancy> 0x%08X has valid EEPROM_VPD_BACKUP_INFO, setting EEPROM_VPD_REDUNDANCY_PRESENT",
+                            get_huid(i_target) );
+                        newEepromRedundancy = EEPROM_VPD_REDUNDANCY_PRESENT;
+                    }
+                    else
+                    {
+                        TRACFCOMP( g_trac_spd,
+                            "spdUpdateEepromRedundancy> 0x%08X does not have valid EEPROM_VPD_BACKUP_INFO, setting EEPROM_VPD_REDUNDANCY_NOT_PRESENT",
+                            get_huid(i_target));
+                        newEepromRedundancy = EEPROM_VPD_REDUNDANCY_NOT_PRESENT;
                     }
                 }
             }
-        }
 
-        // Only update to redundancy present
-        if (newEepromRedundancy != EEPROM_VPD_REDUNDANCY_POSSIBLE)
-        {
-            // we read SPD to determine redundancy
-            i_target->setAttr<ATTR_EEPROM_VPD_REDUNDANCY>(newEepromRedundancy);
-
-            // also update parent OCMB redundancy
-            TargetHandleList l_ocmbs;
-            getParentAffinityTargets(l_ocmbs,
-                                     i_target,
-                                     CLASS_CHIP,
-                                     TYPE_OCMB_CHIP,
-                                     false);
-            if (l_ocmbs.size() == 1)
+            if (newEepromRedundancy != EEPROM_VPD_REDUNDANCY_POSSIBLE)
             {
-                TRACFCOMP(g_trac_spd,
-                    "spdUpdateEepromRedundancy> setting DDIMM (0x%08X) and its OCMB (0x%08X) to EEPROM_VPD_REDUNDANCY (%d)",
-                    get_huid(i_target), get_huid(l_ocmbs[0]), newEepromRedundancy);
-                l_ocmbs[0]->setAttr<ATTR_EEPROM_VPD_REDUNDANCY>(newEepromRedundancy);
+                i_target->setAttr<ATTR_EEPROM_VPD_REDUNDANCY>(newEepromRedundancy);
 
-                ATTR_EEPROM_VPD_ACCESSIBILITY_type dimm_eeprom_accessibility =
-                    EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED;
-                if( i_target->tryGetAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(dimm_eeprom_accessibility) )
+                // also update parent OCMB redundancy
+                TargetHandleList l_ocmbs;
+                getParentAffinityTargets(l_ocmbs,
+                                         i_target,
+                                         CLASS_CHIP,
+                                         TYPE_OCMB_CHIP,
+                                         false);
+
+                if (l_ocmbs.size() == 1)
                 {
-                    TRACFCOMP(g_trac_spd,
-                        "spdUpdateEepromRedundancy> setting OCMB(0x%08X) to DIMM accessibility setting (%x)",
-                        get_huid(l_ocmbs[0]), dimm_eeprom_accessibility);
-                    l_ocmbs[0]->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(dimm_eeprom_accessibility);
+                    if (l_ocmbs[0]->getAttr<ATTR_MEM_MRW_IS_PLANAR>() == 0)
+                    {
+                        TRACFCOMP(g_trac_spd,
+                            "spdUpdateEepromRedundancy> setting DDIMM (0x%08X) and its OCMB (0x%08X) to EEPROM_VPD_REDUNDANCY (%d)",
+                            get_huid(i_target), get_huid(l_ocmbs[0]), newEepromRedundancy);
+                        l_ocmbs[0]->setAttr<ATTR_EEPROM_VPD_REDUNDANCY>(newEepromRedundancy);
+
+                        ATTR_EEPROM_VPD_ACCESSIBILITY_type dimm_eeprom_accessibility =
+                            EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED;
+                        if( i_target->tryGetAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(dimm_eeprom_accessibility) )
+                        {
+                            TRACFCOMP(g_trac_spd,
+                                "spdUpdateEepromRedundancy> setting OCMB(0x%08X) to DIMM accessibility setting (%x)",
+                                get_huid(l_ocmbs[0]), dimm_eeprom_accessibility);
+                            l_ocmbs[0]->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(dimm_eeprom_accessibility);
+                        }
+                    }
+                    else // don't update Planar OCMBs since they don't share EEPROM devices with their child isdimms
+                    {
+                         TRACFCOMP(g_trac_spd,
+                            "spdUpdateEepromRedundancy> OCMB (0x%08X), parent of DIMM (0x%08X), is a planar OCMB. "
+                            "Skip setting ATTR_EEPROM_VPD_REDUNDANCY since planar OCMBs don't share EEPROM devices with their child DIMMs",
+                            get_huid(i_target), get_huid(l_ocmbs[0]), newEepromRedundancy);
+                    }
                 }
-            }
-            else
-            {
-                // This is not expected but OCMB presence is later checked and that should
-                // make the OCMBs match the DDIMMs (it might mean another error log though)
-                TRACFCOMP(g_trac_spd,
-                    "spdUpdateEepromRedundancy> Found %d ocmb parent(s) of DIMM target (0x%08X)",
-                    l_ocmbs.size(), get_huid(i_target));
+                else
+                {
+                    // This is not expected but OCMB presence is later checked and that should
+                    // make the OCMBs match the DDIMMs (it might mean another error log though)
+                    TRACFCOMP(g_trac_spd,
+                        "spdUpdateEepromRedundancy> Found %d OCMB parent(s) of DIMM target (0x%08X)",
+                        l_ocmbs.size(), get_huid(i_target));
+                }
+
             }
         }
     } while (0);
     return err;
 }
+#endif // __HOSTBOOT_RUNTIME
 
 // ------------------------------------------------------------------
 // spdPresent
@@ -1236,6 +1301,7 @@ bool spdPresent ( Target * i_target )
             if ( err )
             {
                 errlCommit(err, VPD_COMP_ID );
+                break;
             }
             else
             {

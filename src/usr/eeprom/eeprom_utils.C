@@ -145,7 +145,7 @@ bool eepromSwitchToBackup(TARGETING::Target * i_target )
 //-------------------------------------------------------------------
 //eepromPresence
 //-------------------------------------------------------------------
-bool eepromPresence ( TARGETING::Target * i_target )
+bool eepromPresence ( TARGETING::Target * i_target, bool i_checkBackup)
 {
 
     errlHndl_t err = nullptr;
@@ -156,7 +156,7 @@ bool eepromPresence ( TARGETING::Target * i_target )
     eeprom_addr_t eepInfo;
 
     eepInfo.eepromRole = EEPROM::VPD_PRIMARY;
-    if (isPrimaryEepromAccessDisabled(i_target))
+    if (i_checkBackup || isPrimaryEepromAccessDisabled(i_target))
     {
         eepInfo.eepromRole = EEPROM::VPD_BACKUP;
     }
@@ -316,6 +316,7 @@ bool eepromPresence ( TARGETING::Target * i_target )
 
     TRACDCOMP(g_trac_eeprom, EXIT_MRK"eepromPresence() - HUID 0x%08X present %d",
               TARGETING::get_huid(i_target), l_present);
+
     return l_present;
 }
 #endif // #ifndef __HOSTBOOT_RUNTIME

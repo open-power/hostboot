@@ -100,6 +100,7 @@ enum vpdModuleId
     VPD_SPD_GET_MOD_TYPE                    = 0x6E,
     VPD_SPD_FETCH_DATA                      = 0x6F,
     VPD_SPD_SET_DIMM_SIZE                   = 0x70,
+    VPD_SPD_EEPROM_REDUNDANCY               = 0x71,
 
     // Runtime VPD
     VPD_RT_GET_ADDR                         = 0x80,
@@ -198,6 +199,7 @@ enum vpdReasonCode
     VPD_UNSUPPORTED_FRU_PROPERTY        = VPD_COMP_ID | 0x4F,
     VPD_UNSUPPORTED_EEPROM_TYPE         = VPD_COMP_ID | 0x50,
     VPD_SPD_INVALID_PRIMARY_VPD         = VPD_COMP_ID | 0x51,
+    VPD_SPD_UNEXPECTED_DDIMM_HEIGHT     = VPD_COMP_ID | 0x52,
 };
 
 
