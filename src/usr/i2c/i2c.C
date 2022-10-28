@@ -74,7 +74,6 @@ TRAC_INIT( & g_trac_i2c, I2C_COMP_NAME, KILOBYTE );
 trace_desc_t* g_trac_i2cr = nullptr;
 TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 
-
 // Easy macro replace for unit testing
 // #define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
@@ -87,9 +86,7 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 #define I2C_RESET_POLL_DELAY_TOTAL_NS (500 * NS_PER_MSEC) // Total time to poll
 
 #define MAX_NACK_RETRIES 3
-#define PAGE_OPERATION 0xffffffff  // Special value use to determine type of op
 constexpr uint64_t FSI_BUS_SPEED_MHZ = 133; //FSI runs at 133MHz
-
 
 // ----------------------------------------------
 
@@ -404,8 +401,8 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     args.switches.useHostI2C = 0;
     args.switches.useFsiI2C  = 0;
 
-    // Decide if page select was requested (denoted with special device address)
-    if( args.devAddr == PAGE_OPERATION )
+    // Check if page select was requested
+    if(subop == DeviceFW::I2C_PAGE_OP)
     {
         TRACUCOMP(g_trac_i2c, "i2cPerformOp():: Page op");
 
@@ -414,9 +411,9 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         bool l_lockOp = static_cast<bool>(va_arg(i_args, int));
         if(l_lockOp)
         {
-
-            //If page select requested, desired page would be passed in va_list
-            uint8_t l_desiredPage = static_cast<uint8_t>(va_arg(i_args, int ));
+            // If I2C_PAGE_OP with a page lock is requested,
+            // the desired page is next in va_list
+            uint8_t l_desiredPage = static_cast<uint8_t>(va_arg(i_args, int));
 
             // if the page mutex needs to be locked
             //  - True Page mutex needs to be locked
@@ -424,11 +421,11 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
             bool l_lockMutex = static_cast<bool>(va_arg(i_args, int));
 
             err = i2cPageSwitchOp( i_opType,
-                                    i_target,
-                                    i_accessType,
-                                    l_desiredPage,
-                                    l_lockMutex,
-                                    args );
+                                   i_target,
+                                   i_accessType,
+                                   l_desiredPage,
+                                   l_lockMutex,
+                                   args );
 
             if( err )
             {
@@ -689,63 +686,6 @@ void i2cHandleError( TARGETING::Target * i_target,
     TRACUCOMP(g_trac_i2c, EXIT_MRK"i2cHandlError()");
 }
 
-
-errlHndl_t i2cChooseEepromPage(TARGETING::Target * i_target,
-                               uint8_t & i_currentPage,
-                               uint8_t & i_newPage,
-                               uint8_t i_desiredPage,
-                               misc_args_t & i_args,
-                               bool & i_pageSwitchNeeded )
-{
-    errlHndl_t l_err = nullptr;
-    // Get EEPROM page attribute
-    TRACUCOMP(g_trac_i2c,
-            "i2cChooseEepromPage: current EEPROM page is %d for target(0x%x)",
-            i_currentPage,
-            TARGETING::get_huid(i_target) );
-    if( i_currentPage != i_desiredPage )
-    {
-        if( i_desiredPage == PAGE_ONE )
-        {
-            TRACUCOMP(g_trac_i2c, "i2cChooseEepromPage: Switching to page ONE");
-            i_args.devAddr = PAGE_ONE_ADDR;
-            i_newPage = PAGE_ONE;
-            i_pageSwitchNeeded = true;
-        }
-        else if( i_desiredPage == PAGE_ZERO )
-        {
-            TRACUCOMP(g_trac_i2c, "i2cChooseEepromPage: Switching to page ZERO");
-            i_args.devAddr = PAGE_ZERO_ADDR;
-            i_newPage = PAGE_ZERO;
-            i_pageSwitchNeeded = true;
-        }
-        else
-        {
-            TRACFCOMP(g_trac_i2c, ERR_MRK"i2cChooseEepromPage: Invalid page requested");
-            /*@
-             * @errortype
-             * @reasoncode      I2C_INVALID_EEPROM_PAGE_REQUEST
-             * @severity        ERRORLOG_SEV_UNRECOVERABLE
-             * @moduleid        I2C_CHOOSE_EEPROM_PAGE
-             * @userdata1       Target Huid
-             * @userdata2       Requested Page
-             * @devdesc         There was a request for an invalid
-             *                  EEPROM page
-             * @custdesc        An internal firmware error occurred
-             */
-            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                             I2C_CHOOSE_EEPROM_PAGE,
-                                             I2C_INVALID_EEPROM_PAGE_REQUEST,
-                                             TARGETING::get_huid(i_target),
-                                             i_desiredPage,
-                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-            l_err->collectTrace( I2C_COMP_NAME, 256 );
-        }
-    }
-
-    return l_err;
-}
-
 // ------------------------------------------------------------------
 // i2cPageSwitchOp
 // ------------------------------------------------------------------
@@ -767,8 +707,8 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
     bool l_error = false;
     mutex_t * l_pageLock = nullptr;
 
-    uint8_t l_currentPage;
-    uint8_t l_newPage;
+    uint8_t l_currentPage = PAGE_UNKNOWN;
+    uint8_t l_newPage = PAGE_UNKNOWN;
     TARGETING::ATTR_EEPROM_PAGE_ARRAY_type page_array;
 
     do
@@ -957,7 +897,7 @@ errlHndl_t i2cPageSwitchOp( DeviceFW::OperationType i_opType,
                 {
                     // Operation completed successfully
                     // set attribute and break from retry loop
-                    TRACUCOMP(g_trac_i2c,"Set EEPROM_PAGE to %d", i_desiredPage);
+                    TRACUCOMP(g_trac_i2c,"Set EEPROM_PAGE to %d", l_newPage);
                     page_array[i_args.engine][i_args.port] = l_newPage;
                     i_target->setAttr<TARGETING::ATTR_EEPROM_PAGE_ARRAY>(page_array);
                     break;

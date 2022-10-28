@@ -25,6 +25,7 @@
 #ifndef __I2CIF_H
 #define __I2CIF_H
 #include <list>
+#include <i2c/i2c_common.H>
 
 // Handy macros to check i2c ranges
 //  Pass in an instance of a TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type
@@ -115,6 +116,40 @@ inline i2cEngineSelect i2cEngineToEngineSelect(const uint8_t i_engine)
 {
     return static_cast<i2cEngineSelect>(0x80 >> i_engine);
 }
+
+/**
+*
+* @brief For ONE_BYTE_ADDR_PAGESELECT EEPROM devices, determine if a page switch is
+*        needed, and set the special device address needed to perform the page switch
+*
+* @param[in]  i_target - pointer to I2C Master Target
+*
+* @param[in]  i_currentPage - Current page the EEPROM device for i_target is on.
+*                             Tracked in ATTR_EEPROM_PAGE_ARRAY
+*
+* @param[out] o_newPage - if o_pageSwitchNeeded is true, EEPROM page to switch to, else
+*                         unchanged
+*
+* @param[in]  i_desiredPage - EEPROM page requested to perform the desired read/write
+*
+* @param[out] o_args - if o_pageSwitchNeeded is true, set member devAddr to special
+*                      address needed to perform the page switch, see eepromPageAddr_t
+*                      in i2c_common.H
+*
+* @param[out] o_pageSwitchNeeded - bool if a page switch is needed.
+*                                  True:  i_currentPage != i_desiredPage
+*                                  False: i_currentPage == i_desiredPage, or
+*                                         i_desiredPage is not valid
+*
+* @return errlHndl_t - nullptr if successful, otherwise a pointer to error log.
+*
+*/
+errlHndl_t i2cChooseEepromPage(TARGETING::Target * i_target,
+                               uint8_t i_currentPage,
+                               uint8_t & o_newPage,
+                               uint8_t i_desiredPage,
+                               misc_args_t & o_args,
+                               bool & o_pageSwitchNeeded);
 
 #ifndef __HOSTBOOT_RUNTIME
 /**

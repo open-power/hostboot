@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,18 +50,6 @@ enum i2c_reset_level
 {
     BASIC_RESET,
     FORCE_UNLOCK_RESET,
-};
-
-/**
- * @brief Miscellaneous enums for I2C
- */
-enum
-{
-    PAGE_ZERO = 0x0,
-    PAGE_ONE = 0x1,
-    PAGE_UNKNOWN = 0x2,
-    PAGE_ZERO_ADDR = 0x6C,
-    PAGE_ONE_ADDR  = 0x6E,
 };
 
 /**

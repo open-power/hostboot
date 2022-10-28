@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,6 +108,7 @@ enum i2cReasonCode
     I2C_INVALID_READ_BYTE_OR_WORD_LENGTH  = I2C_COMP_ID | 0x1B,   // Invalid read byte/word length
     I2C_INVALID_BLOCK_READ_LENGTH         = I2C_COMP_ID | 0x1C,   // Invalid block read length
     I2C_BAD_PEC_BYTE                      = I2C_COMP_ID | 0x1D,   // Bad PEC byte
+    I2C_RUNTIME_INVALID_PAGE_OP_BUFFER    = I2C_COMP_ID | 0x1E,   // non-empty buffer when performing a page op at runtime
 };
 
 
@@ -118,5 +119,31 @@ enum UserDetailsTypes
 };
 
 };  // end I2C
+
+//*****************************************************
+// SRC Graveyard
+// Contains error log descriptions for SRCs that were
+// removed from the code but we need to still provide
+// backward compatible parser logic for.
+
+/*@
+* @errortype
+* @moduleid     I2C_PERFORM_OP
+* @reasoncode   I2C_RUNTIME_INTERFACE_ERR
+* @userdata1    0
+* @userdata2    Op type
+* @devdesc      I2C read/write interface not linked.
+* @custdesc     An internal firmware error occurred
+*/
+
+/*@
+* @errortype
+* @moduleid     I2C_PERFORM_OP
+* @reasoncode   I2C_RUNTIME_ERR
+* @userdata1    Hypervisor return code
+* @userdata2    Op type
+* @devdesc      I2C access error
+* @custdesc     Hardware access error
+*/
 
 #endif

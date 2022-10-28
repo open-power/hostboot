@@ -344,18 +344,6 @@ class SPDTest: public CxxTest::TestSuite
 
             TS_INFO("testSpdWriteDQ Entry");
 
-            // TODO: PFHB-23
-            // This test case will crash while preforming a page switch
-            // when attemping to write test data to ONE_BYTE_ADDR_PAGESELECT
-            // eeproms during runtime.
-            if (MAGIC_IS_BONITO())
-            {
-                TS_INFO("Skipping testSpdWriteDQ for bonito config due to "
-                        "page switching not being supported for eeprom devices "
-                        "durring runtime" );
-                return;
-            }
-
             do
             {
                 TARGETING::Target * theTarget = nullptr;

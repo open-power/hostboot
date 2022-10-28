@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,11 +56,82 @@
 extern trace_desc_t* g_trac_i2c;
 extern trace_desc_t* g_trac_i2cr;
 
+// #define TRACUCOMP(args...) TRACFCOMP(args)
+#define TRACUCOMP(args...)
 
 // ----------------------------------------------
 
 namespace I2C
 {
+
+errlHndl_t i2cChooseEepromPage(TARGETING::Target * i_target,
+                               uint8_t i_currentPage,
+                               uint8_t & o_newPage,
+                               uint8_t i_desiredPage,
+                               misc_args_t & o_args,
+                               bool & o_pageSwitchNeeded )
+{
+    errlHndl_t l_err = nullptr;
+    o_pageSwitchNeeded = false;
+
+    TRACUCOMP(g_trac_i2c,
+              "i2cChooseEepromPage: current EEPROM page is %d, desired page is %d for target(0x%08X)",
+              i_currentPage,
+              i_desiredPage,
+              TARGETING::get_huid(i_target));
+
+    if( i_currentPage != i_desiredPage )
+    {
+        switch (i_desiredPage)
+        {
+            case PAGE_ONE:
+
+                TRACUCOMP(g_trac_i2c, "i2cChooseEepromPage: Switching to page ONE");
+                o_args.devAddr = PAGE_ONE_ADDR;
+                o_newPage = PAGE_ONE;
+                o_pageSwitchNeeded = true;
+                break;
+
+            case PAGE_ZERO:
+
+                TRACUCOMP(g_trac_i2c, "i2cChooseEepromPage: Switching to page ZERO");
+                o_args.devAddr = PAGE_ZERO_ADDR;
+                o_newPage = PAGE_ZERO;
+                o_pageSwitchNeeded = true;
+                break;
+
+            case PAGE_UNKNOWN:
+            default:
+
+                o_newPage = PAGE_UNKNOWN;
+                TRACFCOMP(g_trac_i2c, ERR_MRK"i2cChooseEepromPage: Invalid page requested %d",
+                          i_desiredPage);
+                /*@
+                 * @errortype
+                 * @reasoncode       I2C_INVALID_EEPROM_PAGE_REQUEST
+                 * @severity         ERRORLOG_SEV_UNRECOVERABLE
+                 * @moduleid         I2C_CHOOSE_EEPROM_PAGE
+                 * @userdata1        Target Huid
+                 * @userdata2[00:31] Requested Page
+                 * @userdata2[32:63] Current Page
+                 * @devdesc          There was a request for an invalid
+                 *                   EEPROM page
+                 * @custdesc         An internal firmware error occurred
+                 */
+                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                I2C_CHOOSE_EEPROM_PAGE,
+                                                I2C_INVALID_EEPROM_PAGE_REQUEST,
+                                                TARGETING::get_huid(i_target),
+                                                TWO_UINT32_TO_UINT64(i_desiredPage,
+                                                                     i_currentPage),
+                                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_err->collectTrace( I2C_COMP_NAME, 256 );
+        }
+    }
+
+    return l_err;
+}
+
 /**
  * @brief This function forcefully releases the I2C Atomic Lock
  *        from its current owner.

@@ -1285,7 +1285,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             uint16_t l_devAddr = i_devAddr << 1;
 
             TRACFCOMP(g_trac_hbrt,
-                      "rt_i2c_read: l_chip=%d(%.8X), l_engine=%d, l_port=%d, l_offset=%d, l_devAddr=%.2X",
+                      "rt_i2c_read: l_chip=%d(0x%08X), l_engine=%d, l_port=%d, l_offset=%d, l_devAddr=0x%02X",
                       l_chip, TARGETING::get_huid(l_chipTarg),
                       l_engine, l_port, l_offset, l_devAddr);
 
@@ -1340,7 +1340,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             uint16_t l_devAddr = i_devAddr << 1;
 
             TRACFCOMP(g_trac_hbrt,
-                      "rt_i2c_write: l_chip=%d(%.8X), l_engine=%d, l_port=%d, l_offset=%d, l_devAddr=%.2X",
+                      "rt_i2c_write: l_chip=%d(0x%08X), l_engine=%d, l_port=%d, l_offset=%d, l_devAddr=0x%02X",
                       l_chip, TARGETING::get_huid(l_chipTarg),
                       l_engine, l_port, l_offset, l_devAddr);
 

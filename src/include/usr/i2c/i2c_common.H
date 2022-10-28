@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,22 @@
 
 namespace I2C
 {
+
+/**
+ * @brief enums for ONE_BYTE_ADDR_PAGESELECT EEPROMs
+ */
+enum eepromPage_t : uint8_t
+{
+    PAGE_ZERO = 0x0,
+    PAGE_ONE = 0x1,
+    PAGE_UNKNOWN = 0x2,
+};
+
+enum eepromPageAddr_t
+{
+    PAGE_ZERO_ADDR = 0x6C,
+    PAGE_ONE_ADDR  = 0x6E,
+};
 
 struct Smbus_t
 {

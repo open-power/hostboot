@@ -76,10 +76,10 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                          int64_t i_accessType,
                          va_list i_args )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
+    bool l_freePageOpBuffer = false;
 
-    TRACDCOMP( g_trac_i2c,
-               ENTER_MRK"i2cPerformOp()" );
+    TRACDCOMP( g_trac_i2c, ENTER_MRK"i2cPerformOp()");
 
     // Get the args out of the va_list
     //  Address, Port, Engine, Device Addr.
@@ -94,15 +94,115 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     args.engine = va_arg( i_args, uint64_t );
     args.devAddr = va_arg( i_args, uint64_t );
 
-    // These are additional parms in the case an offset is passed in
-    // via va_list, as well
-    args.offset_length = va_arg( i_args, uint64_t);
-
     TRACFCOMP(g_trac_i2c,
-              "rt_i2c: i2cPerformOp for %.8X"
+              "rt_i2c: i2cPerformOp for 0x%08X"
               TRACE_I2C_ADDR_FMT,
               TARGETING::get_huid(i_target),
               TRACE_I2C_ADDR_ARGS(args));
+
+    do {
+
+    // Check if page select was requested
+    if (subop == DeviceFW::I2C_PAGE_OP)
+    {
+        TRACUCOMP(g_trac_i2c, "rt_i2c i2cPerformOp():: Page op");
+
+        // since this was a page operation, next arg will be whether we want to
+        // lock the page, or unlock. However, since HBRT is single threaded, we
+        // skip the mutex lock step, and immediately perform the write for a page
+        // switch
+        bool l_lockOp = static_cast<bool>(va_arg(i_args, int));
+        if(l_lockOp)
+        {
+            // If I2C_PAGE_OP with a page lock is requested,
+            // the desired page is next in va_list
+            uint8_t l_desiredPage = static_cast<uint8_t>(va_arg(i_args, int));
+
+            {
+                // The page that the PAGESELECT EEPROM is on is not tracked during HBRT.
+                // Because of this, we assume the current page is PAGE_UNKNOWN, which will
+                // always result in l_pageSwitchNeeded returning as true (if no error, in
+                // which case we will break out). Since l_pageSwitchNeeded will always
+                // return true in the good path during runtime there is no need to key off
+                // of it later in this function. For similar reasons, the return value of
+                // l_newPage isn't used either since the current page isn't tracked during
+                // HBRT. Therefore, i2cChooseEepromPage() will always use l_desiredPage to
+                // set the args.devAddr for the page switch operation below.
+                bool l_pageSwitchNeeded = false;
+                uint8_t l_newPage = PAGE_UNKNOWN;
+                err = i2cChooseEepromPage(i_target,
+                                          PAGE_UNKNOWN,
+                                          l_newPage,
+                                          l_desiredPage,
+                                          args,
+                                          l_pageSwitchNeeded);
+            }
+
+            if(err)
+            {
+                break;
+            }
+
+            if (unlikely(io_buffer != nullptr || io_buflen != 0))
+            {
+                TRACFCOMP(g_trac_i2c, ERR_MRK
+                          "rt_i2c i2cPageSwitchOp(): passed in non-nullptr buffer (%p) "
+                          "and/or non-zero buffer length (%d) for a page switch op",
+                           io_buffer, io_buflen);
+
+                 uint64_t ud2 = 0;
+                 memcpy(&ud2, io_buffer, (io_buflen > sizeof(uint64_t) ?
+                                          sizeof(uint64_t) : io_buflen));
+
+                /*@
+                 * @errortype
+                 * @moduleid     RT_I2C_PERFORM_OP
+                 * @reasoncode   I2C_RUNTIME_INVALID_PAGE_OP_BUFFER
+                 * @userdata1    io_buflen
+                 * @userdata2    Up to first 8 bytes of io_buffer
+                 * @devdesc      a valid pointer for io_buffer was passed
+                 *               for a runtime Page Switch op. Runtime Page
+                 *               Switch ops must be called with io_buflen set
+                 *               to nullptr so it can be used for the special
+                 *               device write to switch eeprom pages
+                 * @custdesc     An internal firmware error occurred
+                 */
+                err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                              RT_I2C_PERFORM_OP,
+                                              I2C_RUNTIME_INVALID_PAGE_OP_BUFFER,
+                                              io_buflen,
+                                              ud2,
+                                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                break;
+            }
+
+            // now that i2cChooseEepromPage() has set the special page switch
+            // devAddr for the page we want, we also need to write 2 bytes of
+            // zeros to that special address to perform the switch, so we set
+            // io_buflen/io_buffer here and fall through the rest of the code to
+            // do the write
+            io_buflen = 2;
+            io_buffer = static_cast<uint8_t*>(malloc(io_buflen));
+            memset(io_buffer, 0, io_buflen);
+            l_freePageOpBuffer = true;
+
+            args.offset_length = 0;
+        }
+        else
+        {
+            // nothing to do on the unlock case since we don't
+            // perform lock to begin with during runtime
+            break;
+        }
+    }
+    else
+    {
+        // These are additional parms in the case an offset is passed in
+        // via va_list, as well
+        args.offset_length = va_arg( i_args, uint64_t);
+    }
+
 
     uint32_t offset = 0;
     if ( args.offset_length != 0 )
@@ -143,11 +243,10 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                                           I2C_RUNTIME_INVALID_OFFSET_LENGTH,
                                           args.offset_length,
                                           TWO_UINT32_TO_UINT64(i_opType,
-                                                TARGETING::get_huid(i_target)));
+                                                TARGETING::get_huid(i_target)),
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
-            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_HIGH);
-            return err;
+            break;
         }
     }
 
@@ -182,15 +281,15 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
 
         err->collectTrace( I2C_COMP_NAME, 256);
 
-        return err;
+        break;
     }
 
     // Convert target to proc id
-    err = TARGETING::getRtTarget( i_target,
-                                  proc_id);
+    err = TARGETING::getRtTarget( i_target, proc_id);
+
     if(err)
     {
-        return err;
+        break;
     }
 
     // Combine proc/engine/port
@@ -274,7 +373,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
              * @custdesc         An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           I2C_PERFORM_OP,
+                                           RT_I2C_PERFORM_OP,
                                            I2C_INVALID_OP_TYPE,
                                            i_opType,
                                            userdata2,
@@ -291,7 +390,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         {
             /*@
              * @errortype
-             * @moduleid     I2C_PERFORM_OP
+             * @moduleid     RT_I2C_PERFORM_OP
              * @reasoncode   I2C_RUNTIME_INTERFACE_ERR
              * @userdata1    0
              * @userdata2    Op type
@@ -299,13 +398,12 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
              * @custdesc     An internal firmware error occurred
              */
             err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                          I2C_PERFORM_OP,
+                                          RT_I2C_PERFORM_OP,
                                           I2C_RUNTIME_INTERFACE_ERR,
                                           0,
-                                          i_opType);
+                                          i_opType,
+                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
-            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_HIGH);
             break;
         }
 
@@ -318,7 +416,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         else if( HBRT_RC_I2C_LOCKED == host_rc )
         {
             TRACFCOMP(g_trac_i2c,
-                      "I2C Engine is locked for %.8X (retry %d)"
+                      "I2C Engine is locked for HUID 0x%08X (retry %d)"
                       TRACE_I2C_ADDR_FMT,
                       TARGETING::get_huid(i_target),
                       l_retries,
@@ -399,7 +497,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
             // convert rc to error log
             /*@
              * @errortype
-             * @moduleid     I2C_PERFORM_OP
+             * @moduleid     RT_I2C_PERFORM_OP
              * @reasoncode   I2C_RUNTIME_ERR
              * @userdata1    Hypervisor return code
              * @userdata2    Op type
@@ -407,7 +505,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
              * @custdesc     Hardware access error
              */
             err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                          I2C_PERFORM_OP,
+                                          RT_I2C_PERFORM_OP,
                                           I2C_RUNTIME_ERR,
                                           host_rc,
                                           i_opType);
@@ -421,8 +519,10 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
 
     } //i2c retry loop
 
+    } while(0);
+
     // If there is an error, add parameter info to log
-    if ( err != NULL )
+    if ( err != nullptr )
     {
         I2C::UdI2CParms( i_opType,
                          i_target,
@@ -433,9 +533,15 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
         err->collectTrace(I2C_COMP_NAME);
     }
 
+    if (l_freePageOpBuffer)
+    {
+        free(io_buffer);
+        io_buffer = nullptr;
+    }
+
     TRACDCOMP( g_trac_i2c,
                EXIT_MRK"i2cPerformOp() - %s",
-               ((NULL == err) ? "No Error" : "With Error") );
+               (err ? "With Error" : "No Error"));
 
     return err;
 } // end i2cPerformOp
