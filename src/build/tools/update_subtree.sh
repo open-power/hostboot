@@ -50,6 +50,7 @@ function usage()
 }
 
 PUSH_COMMITS="0"
+PUSH_BRANCH="master-p10"
 SUPPORTED_SUBTREES="pldm,libmctp"
 REVIEWER=""
 SUBTREE="wrong"
@@ -238,7 +239,16 @@ if [ $diff_found -eq 1 ]; then
 fi
 
 if [ "$PUSH_COMMITS" == "1" ]; then
-  git push origin HEAD:refs/for/master-p10
+    # Most Hostboot users have a remote called 'gerrit'. However, this tool is
+    # used in scripts that simply do a clone using the default 'origin' remote.
+    # In which case, we want to make sure the gerrit remote exists before
+    # pushing.
+    if ! git remote | grep gerrit > /dev/null; then
+        git remote add gerrit $(git remote get-url origin)
+    fi
+
+    git push gerrit HEAD:refs/for/$PUSH_BRANCH
+
   if [ "$REVIEWER" != "" ]; then
       echo "Adding $REVIEWER as a reviewer to ${NEW_SYNC_CHANGE_ID}"
       ssh gerrit gerrit set-reviewers -p hostboot -a ${REVIEWER} ${NEW_SYNC_CHANGE_ID}
