@@ -37,6 +37,7 @@
 
 namespace fapi2
 {
+static const MulticastGroup MCGROUP_1 = MCGROUP_GOOD;
 static const MulticastGroup MCGROUP_2 = MCGROUP_GOOD_NO_TP;
 static const MulticastGroup MCGROUP_4 = MCGROUP_GOOD_IOHS;
 static const MulticastGroup MCGROUP_5 = MCGROUP_GOOD_PAU;

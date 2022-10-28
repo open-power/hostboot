@@ -83,6 +83,10 @@ fapi2::ReturnCode ody_scratch_regs_setup_plat_multicast_attrs(
     std::vector<fapi2::MulticastGroupMapping> l_group_map;
     l_group_map.push_back((fapi2::MulticastGroupMapping)
     {
+        fapi2::MCGROUP_1,   1
+    } );
+    l_group_map.push_back((fapi2::MulticastGroupMapping)
+    {
         fapi2::MCGROUP_2,   2
     } );
     l_group_map.push_back((fapi2::MulticastGroupMapping)
@@ -91,11 +95,11 @@ fapi2::ReturnCode ody_scratch_regs_setup_plat_multicast_attrs(
     } );
     l_group_map.push_back((fapi2::MulticastGroupMapping)
     {
-        fapi2::MCGROUP_5,   6
+        fapi2::MCGROUP_5,   5
     } );
     l_group_map.push_back((fapi2::MulticastGroupMapping)
     {
-        fapi2::MCGROUP_5,   6
+        fapi2::MCGROUP_6,   6
     } );
     l_group_map.push_back((fapi2::MulticastGroupMapping)
     {
