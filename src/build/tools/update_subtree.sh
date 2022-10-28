@@ -136,11 +136,22 @@ if [ `git status --porcelain 2>/dev/null| grep "^??" | wc -l` -gt 0 ]; then
   exit 1
 fi
 
-# Find the last commit's gerrit Change-Id that we use to sync with the upstream repo
-LAST_SYNC_CHANGE_ID=`grep $SUBTREE src/subtree/latest_commit_sync | awk '{print $2}'`
-LAST_SYNC_COMMIT=`ssh gerrit gerrit query --current-patch-set $LAST_SYNC_CHANGE_ID | grep revision | awk '{print $2}'| cut -b1-6`
-# Find the current commit's GUID
-CURRENT_TOP_COMMIT=`git rev-parse --short HEAD`
+# Keep track of the current top commit's ID.
+CURRENT_TOP_COMMIT=$(git rev-parse --short HEAD)
+
+# Find the Change-Id of the subtree's last sync with the upstream repo.
+LAST_SYNC_CHANGE_ID=$(grep $SUBTREE src/subtree/latest_commit_sync | awk '{print $2}')
+if [ -z $LAST_SYNC_CHANGE_ID ]; then
+    echo "Unable to find Change-Id subtree: $SUBTREE"
+    exit 1
+fi
+
+# Get the commit ID of the last synched commit from the current working tree.
+LAST_SYNC_COMMIT=$(git log --grep $LAST_SYNC_CHANGE_ID --format="%h")
+if [ -z $LAST_SYNC_COMMIT ]; then
+    echo "Unable to find commit ID for Change-Id: $LAST_SYNC_CHANGE_ID"
+    exit 1
+fi
 
 # Figure out all of the changes we have made to the subtree between now and
 # the last sync commit. Note this command will create outstanding changes
