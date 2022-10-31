@@ -3500,41 +3500,35 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
     // This loop will be run twice to write the pattern twice.  Once per 64B write.
     // When MCBIST maint mode is in 64B mode it will only use the first 64B when in 128B mode
     // MCBIST maint will use all 128B (it will perform two consecutive writes)
-    const auto l_ports =  mss::find_targets<TT::PORT_TYPE>(i_target);
-    // Init the port map
+    l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_START);
 
-    for (const auto& p : l_ports)
+    for (auto l_num_writes = 0; l_num_writes < 2; ++l_num_writes)
     {
-        l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_START);
+        FAPI_INF("Setting the array access control register for %s.", mss::c_str(i_target));
+        FAPI_TRY( fapi2::putScom(i_target, PT::RMW_WRT_BUF_CTL_REG, l_aacr) );
 
-        for (auto l_num_writes = 0; l_num_writes < 2; ++l_num_writes)
+        for (const auto& l_cache_line : i_pattern)
         {
-            FAPI_INF("Setting the array access control register for %s.", mss::c_str(p));
-            FAPI_TRY( fapi2::putScom(p, PT::RMW_WRT_BUF_CTL_REG, l_aacr) );
+            fapi2::buffer<uint64_t> l_value_first  = i_invert ? ~l_cache_line.first : l_cache_line.first;
+            fapi2::buffer<uint64_t> l_value_second = i_invert ? ~l_cache_line.second : l_cache_line.second;
+            FAPI_INF("Loading cache line pattern 0x%016lx 0x%016lx for %s", l_value_first, l_value_second, mss::c_str(i_target));
+            FAPI_TRY( fapi2::putScom(i_target, PT::RMW_WRT_BUF_DATA_REG, l_value_first));
 
-            for (const auto& l_cache_line : i_pattern)
-            {
-                fapi2::buffer<uint64_t> l_value_first  = i_invert ? ~l_cache_line.first : l_cache_line.first;
-                fapi2::buffer<uint64_t> l_value_second = i_invert ? ~l_cache_line.second : l_cache_line.second;
-                FAPI_INF("Loading cache line pattern 0x%016lx 0x%016lx for %s", l_value_first, l_value_second, mss::c_str(i_target));
-                FAPI_TRY( fapi2::putScom(p, PT::RMW_WRT_BUF_DATA_REG, l_value_first));
+            // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the MCA_AAER register
+            // This register is used for the ECC, we will just write all zero to this register.  The ECC will be auto generated
+            // when the aacr MCA_WREITE_AACR_ECCGEN bit is set
+            FAPI_TRY( fapi2::putScom(i_target, PT::RMW_WRT_BUF_ECC_REG, 0) );
 
-                // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the MCA_AAER register
-                // This register is used for the ECC, we will just write all zero to this register.  The ECC will be auto generated
-                // when the aacr MCA_WREITE_AACR_ECCGEN bit is set
-                FAPI_TRY( fapi2::putScom(p, PT::RMW_WRT_BUF_ECC_REG, 0) );
+            // No need to increment the address because the logic does it automatically when MCA_WREITE_AACR_AUTOINC is set
+            FAPI_TRY( fapi2::putScom(i_target, PT::RMW_WRT_BUF_DATA_REG, l_value_second) );
 
-                // No need to increment the address because the logic does it automatically when MCA_WREITE_AACR_AUTOINC is set
-                FAPI_TRY( fapi2::putScom(p, PT::RMW_WRT_BUF_DATA_REG, l_value_second) );
-
-                // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the MCA_AAER register
-                // This register is used for the ECC, we will just write all zero to this register.  The ECC will be auto generated
-                // when the aacr MCA_WREITE_AACR_ECCGEN bit is set
-                FAPI_TRY( fapi2::putScom(p, PT::RMW_WRT_BUF_ECC_REG, 0) );
-            }
-
-            l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_END);
+            // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the MCA_AAER register
+            // This register is used for the ECC, we will just write all zero to this register.  The ECC will be auto generated
+            // when the aacr MCA_WREITE_AACR_ECCGEN bit is set
+            FAPI_TRY( fapi2::putScom(i_target, PT::RMW_WRT_BUF_ECC_REG, 0) );
         }
+
+        l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_END);
     }
 
 fapi_try_exit:

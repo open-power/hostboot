@@ -615,10 +615,10 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
     public:
         // MCBIST error log related registers
         // TODO:ZEN-MST1390 Add MCBIST data/address trap processing
-        static constexpr uint64_t ERROR_LOG_PTR_REG = 0;
-        static constexpr uint64_t RMW_WRT_BUF_CTL_REG = 0;
-        static constexpr uint64_t RMW_WRT_BUF_DATA_REG = 0;
-        static constexpr uint64_t RMW_WRT_BUF_ECC_REG = 0;
+        static constexpr uint64_t ERROR_LOG_PTR_REG = 0; // Has one reg per RDF, so needs API updates
+        static constexpr uint64_t RMW_WRT_BUF_CTL_REG = scomt::ody::ODC_WDF_REGS_AACR;
+        static constexpr uint64_t RMW_WRT_BUF_DATA_REG = scomt::ody::ODC_WDF_REGS_AADR;
+        static constexpr uint64_t RMW_WRT_BUF_ECC_REG = scomt::ody::ODC_WDF_REGS_AAER;
 
         static constexpr uint64_t XLTATE0 = scomt::ody::ODC_SRQ_MBXLT0;
         static constexpr uint64_t XLTATE1 = scomt::ody::ODC_SRQ_MBXLT1;
