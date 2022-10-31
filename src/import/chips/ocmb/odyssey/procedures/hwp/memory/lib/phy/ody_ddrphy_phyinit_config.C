@@ -3491,7 +3491,7 @@ fapi2::ReturnCode init_phy_structs( const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
 
         io_user_input_advanced.D5DisableRetraining      = 0x0000;
 
-        io_user_input_advanced.DFIPHYUPDCNT             = 0b0111;
+        io_user_input_advanced.DFIPHYUPDCNT             = 0b0000;
         io_user_input_advanced.DFIPHYUPDRESP            = 0b000;
         io_user_input_advanced.Nibble_ECC               = 0x0; // Setup to be a DDIMM
         io_user_input_advanced.NoX4onUpperNibble_Override = 0; // Do not use
