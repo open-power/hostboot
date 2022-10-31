@@ -294,6 +294,7 @@ print EDISFILE "#include <p10_scom_proc.H>\n";
 print EDISFILE "#include <p10_scom_pauc.H>\n";
 print EDISFILE "#include <p10_scom_pau.H>\n";
 print EDISFILE "#include <p10_scom_nmmu.H>\n";
+print EDISFILE "#include <ody_scom_ody_odc.H>\n";
 print EDISFILE "namespace fapi2\n";
 print EDISFILE "{\n\n";
 
