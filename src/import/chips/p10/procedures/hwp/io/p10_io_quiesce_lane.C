@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,18 +237,26 @@ fapi2::ReturnCode p10_io_quiesce_lane(
                  !l_dl_rx_lane_control_data.getBit(l_dl_bit + DLP_LINK0_RX_LANE_CONTROL_LOCKED) ||
                  l_dl_rx_lane_control_data.getBit(l_dl_bit + DLP_LINK0_RX_LANE_CONTROL_FAILED))
             {
-                // take no action if a second lane is unexpectedly identified, to avoid action
-                // which may bring down the link
-                FAPI_ASSERT(!l_phy_lane_found,
-                            fapi2::P10_IO_QUIESCE_LANE_MULTIPLE_RX_IDENTIFIED_ERR()
-                            .set_IOLINK_TARGET(i_iolink_target)
-                            .set_IOHS_TARGET(l_iohs_target)
-                            .set_PAUC_TARGET(l_pauc_target)
-                            .set_IOLINK_UNIT_POS(l_iolink_unit_pos)
-                            .set_DL_RX_LANE_CONTROL_ADDR(l_dl_rx_lane_control_addr)
-                            .set_DL_RX_LANE_CONTROL_DATA(l_dl_rx_lane_control_data)
-                            .set_IOHS_FABRIC_LANE_REVERSAL(l_iohs_fabric_lane_reversal),
-                            "Multiple lanes identified in DL RX Lane Control Register, aborting!");
+                // take no action if a second lane is identified, to avoid action which may bring down the link
+                // this will also help handle the case where the link degrades to a fail state between the time
+                // that a spare lane is noted by PRD and this procedure is invoked
+                FAPI_ASSERT_NOEXIT(!l_phy_lane_found,
+                                   fapi2::P10_IO_QUIESCE_LANE_MULTIPLE_RX_IDENTIFIED_ERR()
+                                   .set_IOLINK_TARGET(i_iolink_target)
+                                   .set_IOHS_TARGET(l_iohs_target)
+                                   .set_PAUC_TARGET(l_pauc_target)
+                                   .set_IOLINK_UNIT_POS(l_iolink_unit_pos)
+                                   .set_DL_RX_LANE_CONTROL_ADDR(l_dl_rx_lane_control_addr)
+                                   .set_DL_RX_LANE_CONTROL_DATA(l_dl_rx_lane_control_data)
+                                   .set_IOHS_FABRIC_LANE_REVERSAL(l_iohs_fabric_lane_reversal),
+                                   "Multiple lanes identified in DL RX Lane Control Register, aborting!");
+
+                if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_PREDICTIVE);
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                    goto fapi_try_exit;
+                }
 
                 // use lookup table to translate DL bit position to PHY lane within iolink
                 l_phy_lane_found = true;
@@ -300,36 +308,10 @@ fapi2::ReturnCode p10_io_quiesce_lane(
 
         FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
 
-        //FAPI_TRY(l_io_quiesce_lane.p10_io_ppe_rx_cmd_init_done[l_thread].putData(l_pauc_target,
-        //                                                                         1,
-        //                                                                         (int) l_phy_lane,
-        //                                                                         true));
-        //
-        //FAPI_TRY(p10_io_iohs_put_pl_regs_single(l_iohs_target,
-        //                                        IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_MODE1_PL,
-        //                                        IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_MODE1_PL_RUN_LANE_DL_MASK,
-        //                                        1,
-        //                                        l_phy_lane,
-        //                                        1));
-        //
-        //FAPI_TRY(p10_io_iohs_put_pl_regs_single(l_iohs_target,
-        //                                        IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_CNTL1_PL,
-        //                                        IOO_RX0_RXCTL_DATASM_0_PLREGS_RX_CNTL1_PL_INIT_DONE,
-        //                                        1,
-        //                                        l_phy_lane,
-        //                                        1));
-
         FAPI_TRY(l_io_quiesce_lane.p10_io_ppe_rx_recal_abort[l_thread].putData(l_pauc_target,
                  1,
                  (int) l_phy_lane,
                  true));
-
-        //FAPI_TRY(p10_io_iohs_put_pl_regs_single(l_iohs_target,
-        //                                        IOO_RX0_RXCTL_DATASM_4_PLREGS_RX_MODE1_PL,
-        //                                        IOO_RX0_RXCTL_DATASM_4_PLREGS_RX_MODE1_PL_RECAL_REQ_DL_MASK,
-        //                                        1,
-        //                                        l_phy_lane,
-        //                                        1));
 
         for (uint32_t l_try = 0; l_try < POLLING_LOOPS && l_rx_lane_busy; l_try++)
         {
