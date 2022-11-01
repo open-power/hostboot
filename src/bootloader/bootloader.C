@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -450,7 +450,7 @@ namespace Bootloader{
                     // - copy just the first 4 bytes to a local variable
                     memcpy(&l_container_hash, &l_pContainerHash, sizeof(l_container_hash));
 
-                    if (l_rc == l_hw_key_hash_test_fail_rc)
+                    if (l_hw_parms.log == l_hw_key_hash_test_fail_rc)
                     {
                         bl_console::putString("\rFAILED HW Keys' Hash Check\r\n");
                     }
