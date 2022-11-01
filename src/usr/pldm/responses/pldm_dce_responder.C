@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <sys/mm.h>
 #include <arch/ppc.H>
 #include <sys/task.h>
+#include <string.h>
 
 extern char hbi_ImageId[];
 
@@ -179,36 +180,13 @@ void* dce_execute_task(void* vargs)
     return nullptr;
 }
 
-/* @brief Search for a string in another string.
- *
- * @param[in] needle     The string to search for
- * @param[in] haystack   The string to search in
- * @return               Pointer to occurrence of needle in haystack, or nullptr.
- */
-static const char* strstr(const char* const needle, const char* haystack)
-{
-    auto needle_len = strlen(needle);
-
-    while (*haystack)
-    {
-        if (strncmp(needle, haystack, needle_len) == 0)
-        {
-            return haystack;
-        }
-
-        ++haystack;
-    }
-
-    return nullptr;
-}
-
 /* @brief Print the most recent task crash data from the kernel's printk buffer.
  */
 void print_last_printk_crash()
 {
     const char* last_exception = nullptr, * exception = kernel_printk_buffer;
 
-    while ((exception = strstr("exception", exception + 1)))
+    while ((exception = strstr(exception + 1, "exception")))
     {
         last_exception = exception;
     }

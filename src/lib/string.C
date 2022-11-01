@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,6 +121,39 @@ extern "C" size_t strnlen(const char* s, size_t n)
         length++;
     }
     return length;
+}
+
+extern "C" size_t strcspn( const char* a, const char* b )
+{
+    size_t length = 0;
+
+    while(*a != '\0')
+    {
+        if (strchr(b,*a) != nullptr)
+        {
+            break;
+        }
+        length++;
+        a++;
+    }
+    return length;
+}
+
+extern "C" const char* strstr(const char* haystack, const char* needle)
+{
+    size_t needle_len = strlen(needle);
+
+    while (*haystack)
+    {
+        if (strncmp(needle, haystack, needle_len) == 0)
+        {
+            return haystack;
+        }
+
+        ++haystack;
+    }
+
+    return nullptr;
 }
 
 extern "C" char* strcat(char* d, const char* s)

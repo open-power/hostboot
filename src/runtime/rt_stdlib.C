@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#include <ctype.h>
 #include <stdlib.h>
 #include <runtime/interface.h>
 #include <string.h>
@@ -58,7 +59,6 @@ void* calloc(size_t num, size_t size)
 }
 
 /**
- * Note: endptr is not currently supported
  * Note: strtoul is also defined for ipl in lib/stdlib.C,
  *       any changes to this function should be mirrored there
  */
@@ -67,39 +67,90 @@ uint64_t strtoul(const char *nptr, char **endptr, int base)
     uint64_t l_data = 0;
     size_t i = 0;
 
-    crit_assert(base == 16);
+    crit_assert((base == 10) || (base == 16));
 
-    while( nptr[i] != '\0' )
+    do
     {
-        uint64_t l_nib = 0;
-        switch(nptr[i])
+        // Decimal
+        if (base == 10)
         {
-            // handle leading '0x' or 'x'
-            case('x'): case('X'):
-                l_data = 0;
-                break;
-            case('0'): l_nib = 0; break;
-            case('1'): l_nib = 1; break;
-            case('2'): l_nib = 2; break;
-            case('3'): l_nib = 3; break;
-            case('4'): l_nib = 4; break;
-            case('5'): l_nib = 5; break;
-            case('6'): l_nib = 6; break;
-            case('7'): l_nib = 7; break;
-            case('8'): l_nib = 8; break;
-            case('9'): l_nib = 9; break;
-            case('A'): case('a'): l_nib = 0xA; break;
-            case('B'): case('b'): l_nib = 0xB; break;
-            case('C'): case('c'): l_nib = 0xC; break;
-            case('D'): case('d'): l_nib = 0xD; break;
-            case('E'): case('e'): l_nib = 0xE; break;
-            case('F'): case('f'): l_nib = 0xF; break;
-            default:
-                return 0ULL;
-        }
-        l_data <<= 4;
-        l_data |= l_nib;
-        i++;
+            while (nptr[i] != '\0')
+            {
+                // not dec then stop
+                if (!isdigit(nptr[i]))
+                {
+                    break;
+                }
+
+                if (i > 0)
+                {
+                    l_data *= base;
+                }
+
+                l_data += nptr[i] - '0';
+
+                i++;
+            }
+        } // base == 10
+
+        // Hexadecimal
+        else if (base == 16)
+        {
+            // handle the 'x' or '0x' first
+            if ( (nptr[i] == 'x') ||
+                 (nptr[i] == 'X') )
+            {
+                i++;
+            }
+            else if ( (nptr[i] == '0') &&
+                    ( (nptr[i+1] == 'x') ||
+                      (nptr[i+1] == 'X') ) )
+            {
+                i+=2;
+            }
+
+            while( nptr[i] != '\0' )
+            {
+                // not hex then stop
+                if (!isxdigit(nptr[i]))
+                {
+                    break;
+                }
+
+                uint64_t l_nib = 0;
+                switch(nptr[i])
+                {
+                    case('0'): l_nib = 0; break;
+                    case('1'): l_nib = 1; break;
+                    case('2'): l_nib = 2; break;
+                    case('3'): l_nib = 3; break;
+                    case('4'): l_nib = 4; break;
+                    case('5'): l_nib = 5; break;
+                    case('6'): l_nib = 6; break;
+                    case('7'): l_nib = 7; break;
+                    case('8'): l_nib = 8; break;
+                    case('9'): l_nib = 9; break;
+                    case('A'): case('a'): l_nib = 0xA; break;
+                    case('B'): case('b'): l_nib = 0xB; break;
+                    case('C'): case('c'): l_nib = 0xC; break;
+                    case('D'): case('d'): l_nib = 0xD; break;
+                    case('E'): case('e'): l_nib = 0xE; break;
+                    case('F'): case('f'): l_nib = 0xF; break;
+                    default: break; // should never get here
+                }
+
+                l_data <<= 4;
+                l_data |= l_nib;
+
+                i++;
+            }
+        } // base == 16
+    } while(0);
+
+    if (endptr != nullptr)
+    {
+        *endptr = const_cast<char*>(nptr) + i;
     }
+
     return l_data;
 }

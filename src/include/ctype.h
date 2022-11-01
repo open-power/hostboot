@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -45,6 +47,14 @@ int toupper(int) __attribute__((const));
  * @return int - 0 if not a digit, non-zero if is a digit.
  */
 int isdigit(int) __attribute__((const));
+
+/**
+ * @brief Determine if character is a hex digit (0-9,a-f,A-F).
+ *
+ * @param[in]   Input character.
+ * @return int - 0 if not a hex digit, non-zero if is a hex digit.
+ */
+int isxdigit(int) __attribute__((const));
 
 /**
  * @brief Determine if character is a lower-case character.

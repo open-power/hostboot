@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -34,6 +36,13 @@ int toupper(int ch)
 int isdigit(int c)
 {
     return ((c >= '0') && (c <= '9'));
+}
+
+int isxdigit(int c)
+{
+    return (((c >= '0') && (c <= '9')) ||
+            ((c >= 'a') && (c <= 'f')) ||
+            ((c >= 'A') && (c <= 'F')));
 }
 
 int islower(int c)
