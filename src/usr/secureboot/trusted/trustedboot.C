@@ -1822,6 +1822,7 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                 err->collectTrace(SPI_COMP_NAME );
                 err->collectTrace(SECURE_COMP_NAME );
                 const auto reasonCode = err->reasonCode();
+                const auto l_eid = err->eid();
 
                 // Add Security Registers to the error log
                 SECUREBOOT::addSecurityRegistersToErrlog(err);
@@ -1870,7 +1871,16 @@ void tpmVerifyFunctionalPrimaryTpmExists(
 
                 // terminating the IPL with this fail
                 // Terminate IPL immediately
-                INITSERVICE::doShutdown(reasonCode,isBackgroundShutdown);
+                // For eBMC, we want to TI with EID so proper PELs can be created
+                if (!INITSERVICE::spBaseServicesEnabled())
+                {
+                    TRACFCOMP(g_trac_trustedboot, "eBMC tpmVerifyFunctionalPrimaryTpmExists doShutdown");
+                    INITSERVICE::doShutdown(l_eid,isBackgroundShutdown);
+                }
+                else
+                {
+                    INITSERVICE::doShutdown(reasonCode,isBackgroundShutdown);
+                }
             }
             else
             {
