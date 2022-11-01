@@ -230,6 +230,15 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             FAPI_TRY(fapi2::putScom(TGT0, 0x801101aull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8011029ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<1, 2, 62, uint64_t>(literal_0x03 );
+            l_scom_buffer.insert<3, 2, 62, uint64_t>(literal_0x03 );
+            l_scom_buffer.insert<39, 1, 63, uint64_t>(literal_0x00 );
+            l_scom_buffer.insert<40, 1, 63, uint64_t>(literal_0x01 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8011029ull, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8011034ull, l_scom_buffer ));
 
             l_scom_buffer.insert<30, 10, 54, uint64_t>(literal_0x162 );
