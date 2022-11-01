@@ -81,6 +81,7 @@ function USAGE () {
     errlog ""
     errlog "    OPTIONS may be one or more of the following:"
     errlog "      HBI         Patch Hostboot Base (HBB) and extended (HBI) images"
+    errlog "      HBBL        Patch Hostboot Bootloader"
     errlog "      HBRT        Patch Hostboot runtime"
     errlog "      HBD         Patch Hostboot targeting data (only use with appropriate targeting XML changes)"
     errlog "      --nopldmd   Do not restart PLDMD on the BMC after patching"
@@ -154,6 +155,12 @@ function PATCH_HBRT () {
     /afs/rch/usr5/dcrowell/public/bin/makelids $HBRT_PATCH_DIR
     checkstatus "makelids"
     SSHPASS $COPY $HBRT_PATCH_DIR/lids_to_patch/*.lid "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
+}
+
+function PATCH_HBBL () {
+    # Copy files and create symlink
+    SSHPASS $COPY "$PATCHES_DIR/HBBL.bin" "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
+    REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBBL.bin HBBL && ln -sf HBBL.bin $HBBL.lid"
 }
 
 function RESTART_PLDMD () {
@@ -246,6 +253,7 @@ if [[ "$PASSWORD" == --cponly ]] ; then
 fi
 
 PATCH_HBI=0
+PATCH_HBBL=0
 PATCH_HBRT=0
 PATCH_HBD=0
 RESTART_PLDMD=1
@@ -256,6 +264,10 @@ for type in $* ; do
     case $type in
         HBI)
             PATCH_HBI=1
+            ;;
+
+        HBBL)
+            PATCH_HBBL=1
             ;;
 
         HBRT)
@@ -295,6 +307,10 @@ if [[ $COPY_ONLY = 1 ]] ; then
     if [[ $PATCH_HBI = 1 ]] ; then
         cp "$PATCHES_DIR/HBI.bin" "$PATCHES_DIR/HBB.bin" "$COPYDIR"
         SECTIONS="$SECTIONS HBI"
+    fi
+    if [[ $PATCH_HBBL = 1 ]] ; then
+        cp "$PATCHES_DIR/HBBL.bin" "$COPYDIR"
+        SECTIONS="$SECTIONS HBBL"
     fi
     if [[ $PATCH_HBRT = 1 ]] ; then
         cp "$IMG_DIR/hbirt.bin" "$COPYDIR"
@@ -337,6 +353,10 @@ else   # Apply the data to the BMC
 
    if [[ $PATCH_HBRT = 1 ]] ; then
        PATCH_HBRT
+   fi
+
+   if [[ $PATCH_HBBL = 1 ]] ; then
+       PATCH_HBBL
    fi
 
    SSHPASS $COPY "$COPYDIR"/* "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
