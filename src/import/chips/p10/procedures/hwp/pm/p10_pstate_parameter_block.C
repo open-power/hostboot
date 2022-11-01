@@ -2209,13 +2209,7 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
 
             FAPI_TRY(safe_mode_init());
 
-            if (iv_attrs.attr_boot_voltage_mv[VDN])
-            {
-                FAPI_INF("VDN boot voltage override set: %d mV (0x%X)",
-                        revle16(iv_attrs.attr_boot_voltage_mv[VDN]),
-                        revle16(iv_attrs.attr_boot_voltage_mv[VDN]));
-            }
-            else if(iv_attrs.attr_avs_bus_num[VDN] == INVALID_BUS_NUM)
+            if(iv_attrs.attr_avs_bus_num[VDN] == INVALID_BUS_NUM)
             {
                 FAPI_INF("Skipping VDN access as this rail is not configured for AVSBus");
             }
