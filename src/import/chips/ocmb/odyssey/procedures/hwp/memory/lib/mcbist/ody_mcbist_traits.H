@@ -206,8 +206,7 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr uint64_t LARGEST_ADDRESS = ~0 >> (mss::mcbist::address::MAGIC_PAD + 2);
 
         // Length of expected patterns
-        // TODO:ZEN-MST1396 Update Odyssey MCBIST fixed data and patten size
-        static constexpr uint64_t EXPECTED_PATTERN_SIZE = 4;
+        static constexpr uint64_t EXPECTED_PATTERN_SIZE = 8;
 
         // Size
         static constexpr size_t PORTS_PER_MCBIST = mss::ody::MAX_PORT_PER_OCMB;
@@ -601,6 +600,18 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
 
             // Other constants
             NUM_COMPARE_LOG_ENTRIES = 64,
+        };
+
+        static constexpr std::pair<uint64_t, uint64_t> PATTERN_REGS[EXPECTED_PATTERN_SIZE] =
+        {
+            {scomt::ody::ODC_MCBIST_SCOM_MCBFD0Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD1Q},
+            {scomt::ody::ODC_MCBIST_SCOM_MCBFD2Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD3Q},
+            {scomt::ody::ODC_MCBIST_SCOM_MCBFD4Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD5Q},
+            {scomt::ody::ODC_MCBIST_SCOM_MCBFD6Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD7Q},
+            {scomt::ody::ODC_MCBIST_SCOM_MCBFD8Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD9Q},
+            {scomt::ody::ODC_MCBIST_SCOM_MCBFDAQ, scomt::ody::ODC_MCBIST_SCOM_MCBFDBQ},
+            {scomt::ody::ODC_MCBIST_SCOM_MCBFDCQ, scomt::ody::ODC_MCBIST_SCOM_MCBFDDQ},
+            {scomt::ody::ODC_MCBIST_SCOM_MCBFDEQ, scomt::ody::ODC_MCBIST_SCOM_MCBFDFQ},
         };
 };
 

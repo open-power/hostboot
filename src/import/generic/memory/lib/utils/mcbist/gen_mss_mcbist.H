@@ -3348,13 +3348,15 @@ fapi2::ReturnCode load_eccspare_pattern( const fapi2::Target<T>& i_target, const
 template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const pattern& i_pattern, const bool i_invert )
 {
-    uint64_t l_address = TT::PATTERN0_REG;
+    // Creates iterators to use in the loops below
+    auto l_it = std::begin(TT::PATTERN_REGS);
+    const auto l_it_end = std::end(TT::PATTERN_REGS);
 
     // Checks that the pattern is of the expected length, if not, error out
     // Creates helpers for FAPI_ASSERT
     const auto EXPECTED_SIZE = TT::EXPECTED_PATTERN_SIZE;
     const auto ACTUAL_SIZE = i_pattern.size();
-    FAPI_ASSERT(EXPECTED_SIZE == ACTUAL_SIZE,
+    FAPI_ASSERT(EXPECTED_SIZE <= ACTUAL_SIZE,
                 fapi2::MSS_MCBIST_INCORRECT_PATTERN_LENGTH()
                 .set_TARGET(i_target)
                 .set_EXPECTED(EXPECTED_SIZE)
@@ -3367,12 +3369,21 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const p
     // to the even register and half to the odd.
     for (const auto& l_cache_line : i_pattern)
     {
+        // If the iterator is out of range, then exit
+        // Note: this is not an aerror as the patterns can be of different lengths between chips
+        if(!(l_it < l_it_end))
+        {
+            break;
+        }
+
+        const auto l_first_addr = l_it->first;
+        const auto l_second_addr = l_it->second;
         const fapi2::buffer<uint64_t> l_value_first  = i_invert ? ~l_cache_line.first : l_cache_line.first;
         const fapi2::buffer<uint64_t> l_value_second = i_invert ? ~l_cache_line.second : l_cache_line.second;
         FAPI_INF("Loading cache line pattern 0x%016lx 0x%016lx for %s", l_value_first, l_value_second, mss::c_str(i_target));
-        FAPI_TRY( fapi2::putScom(i_target, l_address, l_value_first) );
-        FAPI_TRY( fapi2::putScom(i_target, ++l_address, l_value_second) );
-        ++l_address;
+        FAPI_TRY( fapi2::putScom(i_target, l_first_addr, l_value_first) );
+        FAPI_TRY( fapi2::putScom(i_target, l_second_addr, l_value_second) );
+        ++l_it;
     }
 
     FAPI_TRY(load_eccspare_pattern<MC>( i_target, i_pattern, i_invert ));

@@ -41,6 +41,10 @@
 namespace mss
 {
 
+// Generates linkage
+constexpr std::pair<uint64_t, uint64_t>
+mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>::PATTERN_REGS[];
+
 ///
 /// @brief Gets the attribute for freq
 /// @param[in] const ref to the target
@@ -173,6 +177,8 @@ fapi2::ReturnCode load_eccspare_pattern<mss::mc_type::ODYSSEY>(
 
     FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBFDQ, l_pattern));
     FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBFDSPQ, l_pattern));
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBFD_HQ, l_pattern));
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBFDSP_HQ, l_pattern));
 
 fapi_try_exit:
     return fapi2::current_err;
