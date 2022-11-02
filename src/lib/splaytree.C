@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -184,12 +186,18 @@ namespace Util
 
             bool found = __find(hint, n);
 
-            // Splay hint up the tree to make future searches quicker.
-            if (likely(NULL != hint))
-            {
-                splay(hint);
-            }
-
+/*          DO NOT SPLAY HERE
+ *          It increases the probability of hitting an
+ *          issue when multi-threaded.
+ *          @TODO JIRA PFHB-297 Temporary fix, while a more permanent
+ *          fix is being developed.
+ *
+ *          Splay hint up the tree to make future searches quicker.
+ *          if (likely(NULL != hint))
+ *          {
+ *             splay(hint);
+ *          }
+ */
             return found;
         }
 
