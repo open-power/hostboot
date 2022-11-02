@@ -88,6 +88,10 @@ extern "C"
         FAPI_TRY( mss::ody::workarounds::check_dfi_init( i_target ), TARGTIDFORMAT " Failed to check if DFI init completed",
                   TARGTID );
 
+        // Deasserts reset_n in certain simulation environments
+        FAPI_TRY( mss::ody::workarounds::deassert_resetn( i_target ), TARGTIDFORMAT " Failed to deassert reset_n",
+                  TARGTID );
+
         // Start the refresh engines by setting MBAREF0Q(0) = 1. Note that the remaining bits in
         // MBAREF0Q should retain their initialization values.
         FAPI_TRY( mss::change_refresh_enable<mss::mc_type::ODYSSEY>(i_target, mss::HIGH),

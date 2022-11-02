@@ -80,6 +80,24 @@ fapi2::ReturnCode complete_dfi_init_for_sim( const fapi2::Target<fapi2::TARGET_T
 ///
 bool is_simulation_dfi_init_workaround_needed( const uint8_t i_is_simulation, const uint8_t i_is_simics );
 
+///
+/// @brief Deasserts the reset_n pin if needed
+/// @param[in] i_target the target on which to operate
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode deassert_resetn( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target );
+
+///
+/// @brief Deasserts the reset_n pin if needed
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_is_simulation true if this is a simulation environment
+/// @param[in] i_is_simics holds the simulation/simics environment type
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode deassert_resetn_helper( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t i_is_simulation,
+        const uint8_t i_is_simics );
+
 } // ns workarounds
 } // ns ody
 } // ns mss

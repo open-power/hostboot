@@ -140,6 +140,50 @@ bool is_simulation_dfi_init_workaround_needed( const uint8_t i_is_simulation, co
     return i_is_simics == fapi2::ENUM_ATTR_IS_SIMICS_REALHW;
 }
 
+///
+/// @brief Deasserts the reset_n pin if needed
+/// @param[in] i_target the target on which to operate
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode deassert_resetn( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+    uint8_t l_is_sim = 0;
+    uint8_t l_is_simics = 0;
+    FAPI_TRY( mss::attr::get_is_simulation(l_is_sim) );
+    FAPI_TRY( mss::attr::get_is_simics(l_is_simics) );
+
+    FAPI_TRY(deassert_resetn_helper( i_target, l_is_sim, l_is_simics ));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Deasserts the reset_n pin if needed
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_is_simulation true if this is a simulation environment
+/// @param[in] i_is_simics holds the simulation/simics environment type
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode deassert_resetn_helper( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t i_is_simulation,
+        const uint8_t i_is_simics )
+{
+    // Checks if the workaround is needed
+    if(is_simulation_dfi_init_workaround_needed(i_is_simulation, i_is_simics))
+    {
+        fapi2::buffer<uint64_t> l_farb5q;
+        FAPI_TRY( fapi2::getScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB5Q, l_farb5q) );
+        l_farb5q.setBit<scomt::ody::ODC_SRQ_MBA_FARB5Q_CFG_DDR_RESETN>();
+        FAPI_TRY( fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB5Q, l_farb5q) );
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
 } // ns workarounds
 } // ns ody
 } // ns mss
