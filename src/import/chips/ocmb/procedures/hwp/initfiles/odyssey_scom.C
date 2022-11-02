@@ -29,10 +29,14 @@
 
 using namespace fapi2;
 
+constexpr uint64_t literal_0 = 0;
+constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0x29 = 0x29;
+constexpr uint64_t literal_0x19 = 0x19;
 constexpr uint64_t literal_0x1C = 0x1C;
 constexpr uint64_t literal_0x2A = 0x2A;
 constexpr uint64_t literal_0x16 = 0x16;
+constexpr uint64_t literal_0x14 = 0x14;
 constexpr uint64_t literal_0x1A = 0x1A;
 constexpr uint64_t literal_0x7 = 0x7;
 constexpr uint64_t literal_0x4 = 0x4;
@@ -41,7 +45,6 @@ constexpr uint64_t literal_0x8 = 0x8;
 constexpr uint64_t literal_0x6 = 0x6;
 constexpr uint64_t literal_0x23 = 0x23;
 constexpr uint64_t literal_0x10 = 0x10;
-constexpr uint64_t literal_0x14 = 0x14;
 constexpr uint64_t literal_0x27 = 0x27;
 constexpr uint64_t literal_0x09 = 0x09;
 constexpr uint64_t literal_0x3B = 0x3B;
@@ -68,18 +71,41 @@ constexpr uint64_t literal_0x1F = 0x1F;
 constexpr uint64_t literal_0x600 = 0x600;
 constexpr uint64_t literal_0xD = 0xD;
 
-fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& TGT0)
+fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& TGT0,
+                               const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
 {
     {
+        fapi2::ATTR_IS_SIMICS_Type l_TGT1_ATTR_IS_SIMICS;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMICS, TGT1, l_TGT1_ATTR_IS_SIMICS));
+        fapi2::ATTR_IS_SIMULATION_Type l_TGT1_ATTR_IS_SIMULATION;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT1, l_TGT1_ATTR_IS_SIMULATION));
+        uint64_t l_def_IS_VBU_AWAN = ((l_TGT1_ATTR_IS_SIMULATION == literal_1) && (l_TGT1_ATTR_IS_SIMICS == literal_0));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x801100cull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 8, 56, uint64_t>(literal_0x29 );
+            if ((l_def_IS_VBU_AWAN == literal_0))
+            {
+                l_scom_buffer.insert<0, 8, 56, uint64_t>(literal_0x29 );
+            }
+            else if ((l_def_IS_VBU_AWAN == literal_1))
+            {
+                l_scom_buffer.insert<0, 8, 56, uint64_t>(literal_0x19 );
+            }
+
             l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_0x1C );
             l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0x1C );
             l_scom_buffer.insert<39, 7, 57, uint64_t>(literal_0x2A );
-            l_scom_buffer.insert<46, 6, 58, uint64_t>(literal_0x16 );
+
+            if ((l_def_IS_VBU_AWAN == literal_0))
+            {
+                l_scom_buffer.insert<46, 6, 58, uint64_t>(literal_0x16 );
+            }
+            else if ((l_def_IS_VBU_AWAN == literal_1))
+            {
+                l_scom_buffer.insert<46, 6, 58, uint64_t>(literal_0x14 );
+            }
+
             l_scom_buffer.insert<52, 6, 58, uint64_t>(literal_0x1A );
             l_scom_buffer.insert<58, 6, 58, uint64_t>(literal_0x1A );
             FAPI_TRY(fapi2::putScom(TGT0, 0x801100cull, l_scom_buffer));

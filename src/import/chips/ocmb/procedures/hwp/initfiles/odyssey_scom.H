@@ -31,12 +31,14 @@
 #include <fapi2.H>
 
 
-typedef fapi2::ReturnCode (*odyssey_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+typedef fapi2::ReturnCode (*odyssey_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
 
 extern "C"
 {
 
-    fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& TGT0);
+    fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& TGT0,
+                                   const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1);
 
 }
 

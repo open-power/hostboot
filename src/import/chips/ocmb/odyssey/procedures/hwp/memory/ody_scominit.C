@@ -59,8 +59,9 @@ extern "C"
 #endif
 
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         FAPI_INF( TARGTIDFORMAT " running odyssey.scom.initfile", TARGTID);
-        FAPI_EXEC_HWP(l_rc, odyssey_scom, i_target);
+        FAPI_EXEC_HWP(l_rc, odyssey_scom, i_target, FAPI_SYSTEM);
         FAPI_TRY(l_rc, TARGTIDFORMAT " error from odyssey.scom.initfile", TARGTID);
 
     fapi_try_exit:
