@@ -3277,6 +3277,49 @@ inline uint8_t generate_eccspare_pattern_helper(const uint64_t& i_data, const bo
 }
 
 ///
+/// @brief Generates the pattern for the ECC and/or spare data for beats 8 to 15
+/// @param[in] i_pattern the pattern on which to operate
+/// @param[in] i_invert true if the pattern should be inverted
+/// @return ECC/spare pattern as needing to be put into the ECC/spare registers
+///
+inline fapi2::buffer<uint64_t> generate_eccspare_pattern_beats8to15(const pattern& i_pattern, const bool i_invert )
+{
+    constexpr uint64_t BYTE0 = BITS_PER_BYTE * 0;
+    constexpr uint64_t BYTE1 = BITS_PER_BYTE * 1;
+    constexpr uint64_t BYTE2 = BITS_PER_BYTE * 2;
+    constexpr uint64_t BYTE3 = BITS_PER_BYTE * 3;
+    constexpr uint64_t BYTE4 = BITS_PER_BYTE * 4;
+    constexpr uint64_t BYTE5 = BITS_PER_BYTE * 5;
+    constexpr uint64_t BYTE6 = BITS_PER_BYTE * 6;
+    constexpr uint64_t BYTE7 = BITS_PER_BYTE * 7;
+
+    fapi2::buffer<uint64_t> l_pattern;
+
+    // Pattern assembly is a tad weird for ECC/spare
+    // The pattern is stored in the same register by byte
+    // So we want to keep the same data as the rest of the data
+    // As such, we want to grab each piece of data on a byte by byte basis, flip as needed, and append it to the pattern
+
+    // Beat 0/1
+    l_pattern.insertFromRight<BYTE0, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[4].first, i_invert));
+    l_pattern.insertFromRight<BYTE1, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[4].second, i_invert));
+
+    // Beat 2/3
+    l_pattern.insertFromRight<BYTE2, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[5].first, i_invert));
+    l_pattern.insertFromRight<BYTE3, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[5].second, i_invert));
+
+    // Beat 4/5
+    l_pattern.insertFromRight<BYTE4, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[6].first, i_invert));
+    l_pattern.insertFromRight<BYTE5, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[6].second, i_invert));
+
+    // Beat 6/7
+    l_pattern.insertFromRight<BYTE6, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[7].first, i_invert));
+    l_pattern.insertFromRight<BYTE7, BITS_PER_BYTE>(generate_eccspare_pattern_helper(i_pattern[7].second, i_invert));
+
+    return l_pattern;
+}
+
+///
 /// @brief Generates the pattern for the ECC and/or spare data
 /// @param[in] i_pattern the pattern on which to operate
 /// @param[in] i_invert true if the pattern should be inverted

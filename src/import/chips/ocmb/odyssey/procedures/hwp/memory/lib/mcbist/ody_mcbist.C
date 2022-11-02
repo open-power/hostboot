@@ -173,12 +173,13 @@ fapi2::ReturnCode load_eccspare_pattern<mss::mc_type::ODYSSEY>(
     const bool i_invert )
 {
     // First up assemble the pattern
-    const auto l_pattern = generate_eccspare_pattern(i_pattern, i_invert);
+    const auto l_pattern_0to7  = generate_eccspare_pattern(i_pattern, i_invert);
+    const auto l_pattern_8to15 = generate_eccspare_pattern_beats8to15(i_pattern, i_invert);
 
-    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBFDQ, l_pattern));
-    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBFDSPQ, l_pattern));
-    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBFD_HQ, l_pattern));
-    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBFDSP_HQ, l_pattern));
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBFDQ, l_pattern_0to7));
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBFDSPQ, l_pattern_0to7));
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBFD_HQ, l_pattern_8to15));
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBFDSP_HQ, l_pattern_8to15));
 
 fapi_try_exit:
     return fapi2::current_err;
