@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/mss_rank.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/num.H>
+#include <generic/memory/lib/dimm/ddr5/ddr5_mr_base.H>
 
 namespace mss
 {
@@ -57,7 +58,7 @@ namespace ddr5
 /// @tparam MC the memory controller type
 ///
 template<mss::mc_type MC>
-class mr2_data
+class mr2_data : public mr_base_data<MC>
 {
     public:
         // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -69,6 +70,7 @@ class mr2_data
         /// @param[in,out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
         ///
         mr2_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc ) :
+            mr_base_data<MC>(iv_mr),
             iv_rd_preamble_train(0),
             iv_wr_leveling(0),
             iv_2n_mode_read_only(0),
@@ -77,6 +79,7 @@ class mr2_data
             iv_device15_mpsm(0),
             iv_internal_wr_timing(0)
         {
+
             if (io_rc != fapi2::FAPI2_RC_SUCCESS)
             {
                 return;
@@ -103,7 +106,7 @@ class mr2_data
         /// @brief Default constructor
         /// @note Default constructor is defined to allow for the use of STL data structures
         ///
-        mr2_data() = default;
+        mr2_data(): mr_base_data<MC>(iv_mr) {};
 
         ///
         /// @brief Assembles the MR based upon the passed in rank info and DRAM number
@@ -114,7 +117,7 @@ class mr2_data
         /// @note DRAM number is not used for MR2 but is kept to keep the interface common across all MR
         ///
         fapi2::ReturnCode assemble_data(const mss::rank::info<MC>& i_rank_info, uint8_t& o_mr_data,
-                                        const uint8_t i_dram_number = 0) const
+                                        const uint8_t i_dram_number = 0) const override
         {
             fapi2::buffer<uint8_t> l_data;
 
@@ -137,7 +140,7 @@ class mr2_data
         /// @param[in] i_dram_number the DRAM on which to operate - not used for MR2 but included to keep the API common
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const
+        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
             this->display(i_rank_info.get_dimm_target());
             return fapi2::FAPI2_RC_SUCCESS;
@@ -152,7 +155,7 @@ class mr2_data
         /// @note This can be used for decoding mode register reads
         ///
         fapi2::ReturnCode read_from_data(const mss::rank::info<MC>& i_rank_info, const uint8_t i_mr_data,
-                                         const uint8_t i_dram_number = 0)
+                                         const uint8_t i_dram_number = 0) override
         {
 
             fapi2::buffer<uint8_t> l_data(i_mr_data);
