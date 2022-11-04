@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,59 +75,6 @@ fapi2::ReturnCode enterprise_mode(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const bool i_enterprise_fuse,
     bool& o_is_enterprise_mode );
-
-///
-/// @brief Plug rule helper for no mixing DIMM size
-/// @param[in] i_target omic target
-/// @param[in] i_kinds a vector of DIMMs plugged into target
-/// @param[in] i_ignore_dimm_size_mix_plug_rule a uint8_t plug rule var
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-/// @note This function will commit error logs representing the mixing failure and make UT'ing the attr easy
-///
-fapi2::ReturnCode dimm_size_mixing_helper(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
-        const std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>>& i_kinds,
-        const uint8_t i_ignore_dimm_size_mix_plug_rule);
-
-///
-/// @brief Plug rule for no mixing DIMM size
-/// @param[in] i_target omic target
-/// @param[in] i_kinds a vector of DIMM (sorted while procesing)
-/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
-/// @note This function will commit error logs representing the mixing failure
-///
-fapi2::ReturnCode dimm_size_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
-                                   const std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>>& i_kinds);
-
-///
-/// @brief Plug rule helper for no mixing DIMM height
-/// @param[in] i_target omic target
-/// @param[in] i_kinds a vector of DIMMs plugged into target
-/// @param[in] i_ignore_dimm_height_mix_plug_rule a uint8_t plug rule var
-/// @param[in] i_mrw_height_plug_rule a uint8_t mrw plug rule var
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-/// @note This function will commit error logs representing the mixing failure and make UT'ing the attrs easy
-///
-fapi2::ReturnCode dimm_height_mixing_helper(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
-        const std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>>& i_kinds,
-        const uint8_t i_ignore_dimm_height_mix_plug_rule,
-        const uint8_t i_mrw_height_plug_rule);
-
-///
-/// @brief Plug rule for no mixing DIMM height
-/// @param[in] i_target omic target
-/// @param[in] i_kinds a vector of DIMMs plugged into target
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-/// @note This function will commit error logs representing the mixing failure
-///
-fapi2::ReturnCode dimm_height_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
-                                     const std::vector<mss::dimm::kind<mss::mc_type::EXPLORER>>& i_kinds);
-
-///
-/// @brief Enforce the plug-rules we can do at the beginning of eff_config_thermal
-/// @param[in] i_target FAPI2 target (OCMB Chip)
-/// @return fapi2::FAPI2_RC_SUCCESS if okay, otherwise a MSS_PLUG_RULE error code
-///
-fapi2::ReturnCode enforce_pre_eff_config_thermal(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 } // plug_rule
 } // exp

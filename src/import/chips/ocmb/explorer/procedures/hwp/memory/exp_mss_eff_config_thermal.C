@@ -47,7 +47,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <mss_generic_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
-#include <lib/plug_rules/exp_plug_rules.H>
+#include <generic/memory/lib/plug_rules/plug_rules.H>
 
 extern "C"
 {
@@ -75,7 +75,7 @@ extern "C"
         {
             // Run eff_config_thermal so that we can run plug rules.
             FAPI_INF("Running enforce_pre_eff_config_thermal on %s", mss::c_str(l_ocmb));
-            FAPI_TRY( mss::exp::plug_rule::enforce_pre_eff_config_thermal(l_ocmb),
+            FAPI_TRY( mss::plug_rule::enforce_pre_eff_config_thermal<mss::mc_type::EXPLORER>(l_ocmb),
                       "Fail encountered in enforce_pre_eff_config_thermal for %s", mss::c_str(l_ocmb));
         }
 
