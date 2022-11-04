@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1143,6 +1143,12 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             reconfigLoopTestRunner(i_istep, i_substep, err);
         }
 #endif // CONFIG_RECONFIG_LOOP_TESTS_ENABLE
+
+        // Trigger deconfig/gard injections when requested
+        if (l_pTopLevel->getAttr<TARGETING::ATTR_ISTEP_CALLOUT_INJECT_ENABLE>())
+        {
+            istepCalloutInject(i_istep, i_substep);
+        }
 
         // now that HWP and PRD have run, check for deferred deconfig work.
 
@@ -3328,6 +3334,67 @@ void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
             // Send one last hearbeat before returning
             sendProgressCode();
         }
+    }
+}
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::istepCalloutInject()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::istepCalloutInject(uint8_t i_step, uint8_t i_substep)
+{
+    // Loop through all targets and callout those that match the current istep
+    for (TARGETING::TargetIterator target = TARGETING::targetService().begin();
+         target != TARGETING::targetService().end();
+         ++target)
+    {
+        TARGETING::ATTR_ISTEP_CALLOUT_INJECT_ACTION_type inja;
+        istepCalloutInjectConfig_t *injacfg;
+
+        if (!target->tryGetAttr<TARGETING::ATTR_ISTEP_CALLOUT_INJECT_ACTION>(inja))
+        {
+            continue;
+        }
+
+        injacfg = reinterpret_cast<istepCalloutInjectConfig_t *>(&inja);
+        if (injacfg->majorStep != i_step || injacfg->minorStep != i_substep)
+        {
+            continue;
+        }
+
+        TRACFCOMP(g_trac_initsvc,
+                  "Error Injection for target, HUID: %.8X Action: %016lX",
+                  TARGETING::get_huid(*target), inja);
+
+        /*@
+         * @errortype
+         * @reasoncode       ISTEP_ERROR_INJECTED
+         * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+         * @moduleid         ISTEP_INJECT_MOD_ID
+         * @userdata1[00:07] Istep of first injection target
+         * @userdata1[08:15] Substep of first injection target
+         * @userdata1[16:23] DeconfigEnum of first injection target
+         * @userdata1[24:31] GARD ErrorType of first injection target
+         * @userdata1[32:63] Reserved
+         * @userdata2        Injection target HUID
+         * @devdesc          IStep failed and HW deconfigured in response
+         *                   to targeted error injection.
+         * @custdesc         System partially rebooting to recover from injected
+         *                   error.
+         */
+        errlHndl_t errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                                  ISTEP_INJECT_MOD_ID,
+                                                  ISTEP_ERROR_INJECTED);
+        errl->addUserData1(inja);
+        errl->addUserData2(TARGETING::get_huid(*target));
+        errl->addHwCallout(*target,
+                           HWAS::SRCI_PRIORITY_HIGH,
+                           static_cast<HWAS::DeconfigEnum>(injacfg->deconfig),
+                           static_cast<HWAS::GARD_ErrorType>(injacfg->guard));
+        errl->collectTrace("INITSVC", 1024);
+        errl->collectTrace("ERRL", 1024);
+
+        errlCommit(errl, ISTEP_COMP_ID);
+        errl = nullptr;
     }
 }
 

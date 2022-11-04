@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -583,6 +583,28 @@ private:
      *            Pass ISTEP_PAUSE_SET_INFINITE to wait forever.
      */
     void doWait(uint16_t i_waitSec);
+
+    // istep callout injection configuration data structure for accessing the
+    // settings in ATTR_ISTEP_CALLOUT_INJECT (64-bit attribute)
+    typedef struct
+    {
+        uint8_t majorStep; // Target istep where pause will be applied
+        uint8_t minorStep;
+        uint8_t deconfig;  // XYZ deconfig data
+        uint8_t guard;     // XYZ guard data
+
+        uint32_t reserved; // Reserved for future expansion
+    } istepCalloutInjectConfig_t;
+
+    /**
+     * @brief Decodes the ATTR_ISTEP_CALLOUT_INJECT attribute and performs
+     * a callout procedure. Intended to be invoked _after_ the istep has
+     * executed but _before_ any deconfig/guards are processed.
+     *
+     * @param[i] i_step - Current istep
+     * @param[i] i_substep - Current substep
+     */
+    void istepCalloutInject(uint8_t i_step, uint8_t i_substep);
 };
 } // namespace
 

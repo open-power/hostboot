@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -3370,6 +3370,51 @@
     <simpleType>
       <uint64_t/>
     </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+        Target-specific attribute that defines the injection criteria and
+        action within an unsigned 64-bit bitfield.
+
+        [00:07] Istep of injection target
+        [08:15] Substep of injection target
+        [16:23] DeconfigEnum of injection target
+        [24:31] GARD ErrorType of injection target
+        [32:63] Reserved
+
+        Attribute Override Example:
+
+            # Manual guard (0xd2) at istep 6.7 for ocmb chip 1
+            target = k0:s0:n0:ocmb:p1
+            ATTR_ISTEP_CALLOUT_INJECT_ACTION 0x060700D200000000 CONST
+
+            # Enable iStep callout injections
+            target = k0:s0
+            ATTR_ISTEP_CALLOUT_INJECT_ENABLE 0x1 CONST
+    </description>
+    <id>ISTEP_CALLOUT_INJECT_ACTION</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint64_t/>
+    </simpleType>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <description>
+        Global boolean attribute that informs the iStepDispatcher to look
+        for and perform [specified] injection actions. Default value of
+        false (0), override to true (1) to enable injections.
+    </description>
+    <id>ISTEP_CALLOUT_INJECT_ENABLE</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <writeable/>
   </attribute>
 
   <attribute>
