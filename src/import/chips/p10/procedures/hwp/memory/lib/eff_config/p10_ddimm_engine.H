@@ -47,6 +47,7 @@
 #include <lib/shared/exp_consts.H>
 
 #include <mss_pmic_attribute_setters.H>
+#include <mss_explorer_attribute_setters.H>
 #include <mss_generic_attribute_setters.H>
 #include <exp_attribute_accessors_manual.H>
 #include <lib/workarounds/exp_quad_encoded_cs_workarounds.H>

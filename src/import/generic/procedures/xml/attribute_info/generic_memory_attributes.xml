@@ -665,18 +665,4 @@
         <mssAccessorName>ocmb_appintr_obj_handle</mssAccessorName>
     </attribute>
 
-    <attribute>
-        <id>ATTR_MEM_DRAM_ADDRESS_MIRRORING</id>
-        <targetType>TARGET_TYPE_MEM_PORT</targetType>
-        <description>
-            Ranks that have address mirroring.
-            This data is derived from SPD or VPD.
-            Note: This is a bit-wise map and muliple ranks can be mirrored.
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <array>2</array>
-        <writeable/>
-        <mssAccessorName>dram_address_mirroring</mssAccessorName>
-    </attribute>
 </attributes>

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -28,7 +28,7 @@
         <id>ATTR_MEM_EFF_PMIC0_MFG_ID</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          Manufacturer ID Code for PMIC0
+          Manufacturer ID Code
         </description>
         <initToZero></initToZero>
         <valueType>uint16</valueType>
@@ -40,7 +40,7 @@
         <id>ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_SETTING</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          PMIC0 SWA Voltage Setting for PMIC0
+          PMIC0 SWA Voltage Setting
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -52,7 +52,7 @@
         <id>ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_RANGE_SELECT</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          PMIC0 SWA Voltage Range for PMIC0
+          PMIC0 SWA Voltage Range
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -64,7 +64,7 @@
         <id>ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_OFFSET</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          PMIC0 SWA Voltage Offset (signed, 1 bit increments) for PMIC0
+          PMIC0 SWA Voltage Offset (signed, 1 bit increments)
         </description>
         <initToZero></initToZero>
         <valueType>int8</valueType>
@@ -76,7 +76,7 @@
         <id>ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          Delay after the sequence which enables SWA for PMIC0
+          Delay after the sequence which enables SWA
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -88,7 +88,7 @@
         <id>ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_ORDER</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          The sequence at which SWA will be enabled for PMIC0
+          The sequence at which SWA will be enabled
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -136,7 +136,7 @@
         <id>ATTR_MEM_EFF_PMIC0_SWB_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          Delay after the sequence which enables SWB for PMIC0
+          Delay after the sequence which enables SWB
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -148,7 +148,7 @@
         <id>ATTR_MEM_EFF_PMIC0_SWB_SEQUENCE_ORDER</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          The sequence at which SWB will be enabled for PMIC0
+          The sequence at which SWB will be enabled
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -196,7 +196,7 @@
         <id>ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          Delay after the sequence which enables SWC for PMIC0
+          Delay after the sequence which enables SWC
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -208,7 +208,7 @@
         <id>ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_ORDER</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          The sequence at which SWC will be enabled for PMIC0
+          The sequence at which SWC will be enabled
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -256,7 +256,7 @@
         <id>ATTR_MEM_EFF_PMIC0_SWD_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          Delay after the sequence which enables SWD for PMIC0
+          Delay after the sequence which enables SWD
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -268,7 +268,7 @@
         <id>ATTR_MEM_EFF_PMIC0_SWD_SEQUENCE_ORDER</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          The sequence at which SWD will be enabled for PMIC0
+          The sequence at which SWD will be enabled
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -280,7 +280,7 @@
         <id>ATTR_MEM_EFF_PMIC1_MFG_ID</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          Manufacturer ID Code for PMIC1
+          Manufacturer ID Code
         </description>
         <initToZero></initToZero>
         <valueType>uint16</valueType>
@@ -328,7 +328,7 @@
         <id>ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          Delay after the sequence which enables SWA for PMIC1
+          Delay after the sequence which enables SWA
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -340,7 +340,7 @@
         <id>ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_ORDER</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          The sequence at which SWA will be enabled for PMIC1
+          The sequence at which SWA will be enabled
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -388,7 +388,7 @@
         <id>ATTR_MEM_EFF_PMIC1_SWB_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          Delay after the sequence which enables SWB for PMIC1
+          Delay after the sequence which enables SWB
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -400,7 +400,7 @@
         <id>ATTR_MEM_EFF_PMIC1_SWB_SEQUENCE_ORDER</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          The sequence at which SWB will be enabled for PMIC1
+          The sequence at which SWB will be enabled
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -460,7 +460,7 @@
         <id>ATTR_MEM_EFF_PMIC1_SWC_SEQUENCE_ORDER</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          The sequence at which SWC will be enabled for PMIC1
+          The sequence at which SWC will be enabled
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -508,7 +508,7 @@
         <id>ATTR_MEM_EFF_PMIC1_SWD_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          Delay after the sequence which enables SWD for PMIC1
+          Delay after the sequence which enables SWD
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -520,516 +520,12 @@
         <id>ATTR_MEM_EFF_PMIC1_SWD_SEQUENCE_ORDER</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          The sequence at which SWD will be enabled for PMIC1
+          The sequence at which SWD will be enabled
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>pmic1_swd_sequence_order</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_MFG_ID</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Manufacturer ID Code for PMIC2
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint16</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_mfg_id</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWA_VOLTAGE_SETTING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWA Voltage Setting
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swa_voltage_setting</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWA_VOLTAGE_RANGE_SELECT</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWA Voltage Range
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swa_voltage_range_select</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWA_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWA Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swa_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWA_SEQUENCE_DELAY</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Delay after the sequence which enables SWA for PMIC2
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swa_sequence_delay</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWA_SEQUENCE_ORDER</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          The sequence at which SWA will be enabled for PMIC2
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swa_sequence_order</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWB_VOLTAGE_SETTING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWB Voltage Setting
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swb_voltage_setting</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWB_VOLTAGE_RANGE_SELECT</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWB Voltage Range
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swb_voltage_range_select</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWB_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWB Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swb_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWB_SEQUENCE_DELAY</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Delay after the sequence which enables SWB for PMIC2
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swb_sequence_delay</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWB_SEQUENCE_ORDER</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          The sequence at which SWB will be enabled for PMIC2
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swb_sequence_order</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWC_VOLTAGE_SETTING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWC Voltage Setting
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swc_voltage_setting</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWC_VOLTAGE_RANGE_SELECT</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWC Voltage Range
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swc_voltage_range_select</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWC_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWC Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swc_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWC_SEQUENCE_DELAY</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Delay after the sequence which enables SWC for PMIC2
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swc_sequence_delay</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWC_SEQUENCE_ORDER</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          The sequence at which SWC will be enabled for PMIC2
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swc_sequence_order</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWD_VOLTAGE_SETTING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWD Voltage Setting
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swd_voltage_setting</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWD_VOLTAGE_RANGE_SELECT</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWD Voltage Range
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swd_voltage_range_select</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWD_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWD Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swd_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWD_SEQUENCE_DELAY</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Delay after the sequence which enables SWD for PMIC2
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swd_sequence_delay</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWD_SEQUENCE_ORDER</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          The sequence at which SWD will be enabled for PMIC2
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swd_sequence_order</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_MFG_ID</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Manufacturer ID Code for PMIC3
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint16</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_mfg_id</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWA_VOLTAGE_SETTING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWA Voltage Setting
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swa_voltage_setting</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWA_VOLTAGE_RANGE_SELECT</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWA Voltage Range
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swa_voltage_range_select</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWA_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWA Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swa_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWA_SEQUENCE_DELAY</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Delay after the sequence which enables SWA for PMIC3
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swa_sequence_delay</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWA_SEQUENCE_ORDER</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          The sequence at which SWA will be enabled for PMIC3
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swa_sequence_order</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWB_VOLTAGE_SETTING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWB Voltage Setting
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swb_voltage_setting</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWB_VOLTAGE_RANGE_SELECT</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWB Voltage Range
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swb_voltage_range_select</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWB_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWB Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swb_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWB_SEQUENCE_DELAY</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Delay after the sequence which enables SWB for PMIC3
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swb_sequence_delay</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWB_SEQUENCE_ORDER</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          The sequence at which SWB will be enabled for PMIC3
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swb_sequence_order</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWC_VOLTAGE_SETTING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWC Voltage Setting
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swc_voltage_setting</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWC_VOLTAGE_RANGE_SELECT</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWC Voltage Range
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swc_voltage_range_select</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWC_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWC Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swc_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWC_SEQUENCE_DELAY</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Delay after the sequence which enables SWC for PMIC3
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swc_sequence_delay</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWC_SEQUENCE_ORDER</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          The sequence at which SWC will be enabled for PMIC3
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swc_sequence_order</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWD_VOLTAGE_SETTING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWD Voltage Setting
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swd_voltage_setting</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWD_VOLTAGE_RANGE_SELECT</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWD Voltage Range
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swd_voltage_range_select</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWD_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWD Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swd_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWD_SEQUENCE_DELAY</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Delay after the sequence which enables SWD for PMIC3
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swd_sequence_delay</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWD_SEQUENCE_ORDER</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          The sequence at which SWD will be enabled for PMIC3
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swd_sequence_order</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1049,6 +545,34 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_PHASE_COMB</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Phase configuration for PMIC0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic0_phase_comb</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_REDUNDANCY</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Redundant PMIC exists for PMIC1
+        </description>
+        <enum>
+          DISABLED = 0,
+          ENABLED = 1
+        </enum>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <initToZero></initToZero>
+        <mssAccessorName>pmic1_redundancy</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC0_REVISION</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -1061,18 +585,30 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MEM_EFF_PMIC0_PHASE_COMB</id>
+        <id>ATTR_MEM_EFF_PMIC1_REVISION</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-          Phase configuration for PMIC0
+          Revision ID of PMIC1
+        </description>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <initToZero></initToZero>
+        <mssAccessorName>pmic1_revision</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_PHASE_COMB</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Phase configuration for PMIC1
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssAccessorName>pmic0_phase_comb</mssAccessorName>
+        <mssAccessorName>pmic1_phase_comb</mssAccessorName>
     </attribute>
 
-     <attribute>
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC0_SEQUENCE</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -1084,7 +620,19 @@
         <mssAccessorName>pmic0_sequence</mssAccessorName>
     </attribute>
 
-     <attribute>
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SEQUENCE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Sequence order to enable PMIC1
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic1_sequence</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_EFD_PMIC0_SWA_VOLTAGE_OFFSET</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -1130,6 +678,54 @@
         <valueType>int8</valueType>
         <writeable/>
         <mssAccessorName>efd_pmic0_swd_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC1_SWA_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC1 SWA Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <mssAccessorName>efd_pmic1_swa_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC1_SWB_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC1 SWB Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <mssAccessorName>efd_pmic1_swb_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC1_SWC_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC1 SWC Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <mssAccessorName>efd_pmic1_swc_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_EFD_PMIC1_SWD_VOLTAGE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC1 SWD Voltage Offset (signed, 1 bit increments)
+        </description>
+        <initToZero></initToZero>
+        <valueType>int8</valueType>
+        <writeable/>
+        <mssAccessorName>efd_pmic1_swd_voltage_offset</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1185,106 +781,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MEM_EFF_PMIC1_REDUNDANCY</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Redundant PMIC exists for PMIC1
-        </description>
-        <enum>
-          DISABLED = 0,
-          ENABLED = 1
-        </enum>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <initToZero></initToZero>
-        <mssAccessorName>pmic1_redundancy</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC1_REVISION</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Revision ID of PMIC1
-        </description>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <initToZero></initToZero>
-        <mssAccessorName>pmic1_revision</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC1_PHASE_COMB</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Phase configuration for PMIC1
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic1_phase_comb</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC1_SEQUENCE</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Sequence order to enable PMIC1
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic1_sequence</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_EFD_PMIC1_SWA_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC1 SWA Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>efd_pmic1_swa_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_EFD_PMIC1_SWB_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC1 SWB Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>efd_pmic1_swb_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_EFD_PMIC1_SWC_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC1 SWC Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>efd_pmic1_swc_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_EFD_PMIC1_SWD_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC1 SWD Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>efd_pmic1_swd_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MEM_EFF_PMIC1_SWA_CURRENT_WARNING</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -1334,278 +830,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>pmic1_swd_current_warning</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_REVISION</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Revision ID of PMIC2
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_revision</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_PHASE_COMB</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Phase configuration for PMIC2
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_phase_comb</mssAccessorName>
-    </attribute>
-
-     <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SEQUENCE</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Sequence order to enable PMIC2
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_sequence</mssAccessorName>
-    </attribute>
-
-     <attribute>
-        <id>ATTR_MEM_EFF_EFD_PMIC2_SWA_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWA Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>efd_pmic2_swa_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_EFD_PMIC2_SWB_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWB Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>efd_pmic2_swb_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_EFD_PMIC2_SWC_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWC Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>efd_pmic2_swc_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_EFD_PMIC2_SWD_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWD Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>efd_pmic2_swd_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWA_CURRENT_WARNING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWA Current Warning Threshold. Directly maps to registers R1C to R1F.
-          Bits [7:2] x 0.125mA = threshold, bits [1:0] Reserved (0)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swa_current_warning</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWB_CURRENT_WARNING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWB Current Warning Threshold. Directly maps to registers R1C to R1F.
-          Bits [7:2] x 0.125mA = threshold, bits [1:0] Reserved (0)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swb_current_warning</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWC_CURRENT_WARNING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWC Current Warning Threshold. Directly maps to registers R1C to R1F.
-          Bits [7:2] x 0.125mA = threshold, bits [1:0] Reserved (0)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swc_current_warning</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC2_SWD_CURRENT_WARNING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC2 SWD Current Warning Threshold. Directly maps to registers R1C to R1F.
-          Bits [7:2] x 0.125mA = threshold, bits [1:0] Reserved (0)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic2_swd_current_warning</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_REVISION</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Revision ID of PMIC3
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_revision</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_PHASE_COMB</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Phase configuration for PMIC3
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_phase_comb</mssAccessorName>
-    </attribute>
-
-     <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SEQUENCE</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          Sequence order to enable PMIC3
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_sequence</mssAccessorName>
-    </attribute>
-
-     <attribute>
-        <id>ATTR_MEM_EFF_EFD_PMIC3_SWA_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWA Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>efd_pmic3_swa_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_EFD_PMIC3_SWB_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWB Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>efd_pmic3_swb_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_EFD_PMIC3_SWC_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWC Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>efd_pmic3_swc_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_EFD_PMIC3_SWD_VOLTAGE_OFFSET</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWD Voltage Offset (signed, 1 bit increments)
-        </description>
-        <initToZero></initToZero>
-        <valueType>int8</valueType>
-        <writeable/>
-        <mssAccessorName>efd_pmic3_swd_voltage_offset</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWA_CURRENT_WARNING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWA Current Warning Threshold. Directly maps to registers R1C to R1F.
-          Bits [7:2] x 0.125mA = threshold, bits [1:0] Reserved (0)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swa_current_warning</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWB_CURRENT_WARNING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWB Current Warning Threshold. Directly maps to registers R1C to R1F.
-          Bits [7:2] x 0.125mA = threshold, bits [1:0] Reserved (0)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swb_current_warning</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWC_CURRENT_WARNING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWC Current Warning Threshold. Directly maps to registers R1C to R1F.
-          Bits [7:2] x 0.125mA = threshold, bits [1:0] Reserved (0)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swc_current_warning</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MEM_EFF_PMIC3_SWD_CURRENT_WARNING</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-          PMIC3 SWD Current Warning Threshold. Directly maps to registers R1C to R1F.
-          Bits [7:2] x 0.125mA = threshold, bits [1:0] Reserved (0)
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <writeable/>
-        <mssAccessorName>pmic3_swd_current_warning</mssAccessorName>
     </attribute>
 
 </attributes>

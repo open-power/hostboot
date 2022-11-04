@@ -1,0 +1,161 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/ocmb/explorer/procedures/xml/attribute_info/exp_eff_attributes.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2022                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<attributes>
+    <attribute>
+        <id>ATTR_MEM_EFF_PSTATES</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[DIMM]
+          This byte defines the allowed number of
+          P-States for the DDR4 Differential Memory Buffer.
+          P-States can be thought of as an available performance profile.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <array>2</array>
+        <writeable/>
+        <mssAccessorName>pstates</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_BYTE_ENABLES</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[DIMM]
+          These bits are used to activate or deactivate bytes in the
+          DDR interface of the differential memory
+          buffer chip.
+          Right aligned data.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <array>2</array>
+        <writeable/>
+        <mssAccessorName>byte_enables</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_NIBBLE_ENABLES</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[DIMM]
+          These bits are used to select the active nibbles or DQS on the DDR interface.
+          Right aligned data.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint32</valueType>
+        <array>2</array>
+        <writeable/>
+        <mssAccessorName>nibble_enables</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_FOUR_RANK_MODE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[DIMM]
+          A-Side CA bus drives rank 0/1
+          and B-Side CA bus drives rank 2/3, DQ/DQS are
+          shared across the ranks
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 0, ENABLE = 1</enum>
+        <writeable/>
+        <array>2</array>
+        <mssUnits>bool</mssUnits>
+        <mssAccessorName>four_rank_mode</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_MDS_DDIMM</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[DIMM]
+          MDS DDIMM type derived attribute
+          Will be true if HYBRID_MEMORY_TYPE is MDS and HYBRID is true
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>FALSE = 0, TRUE = 1</enum>
+        <writeable/>
+        <array>2</array>
+        <mssUnits>bool</mssUnits>
+        <mssAccessorName>mds_ddimm</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_MRAM_SUPPORT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[DIMM]
+          MRAM Support
+          Support timing parameters of Everspin DDR4 MRAM
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 0, ENABLE = 1</enum>
+        <writeable/>
+        <array>2</array>
+        <mssUnits>bool</mssUnits>
+        <mssAccessorName>mram_support</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DDP_COMPATIBILITY</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[DIMM]
+          DDP Compatibility
+          Support 1 rank 3DS Device in DDP board routing.  CKE[1], CSN[1], ODT[1] of
+          PHY are connected to C[0], C[1], C[2] of DRAM
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 0, ENABLE = 1</enum>
+        <writeable/>
+        <array>2</array>
+        <mssUnits>bool</mssUnits>
+        <mssAccessorName>ddp_compatibility</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_TSV_8H_SUPPORT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          ARRAY[DIMM]
+          TSV 8H Support
+          Support 8H 3DS routing in board routing when parity check is disabled
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <enum>DISABLE = 0, ENABLE = 1</enum>
+        <writeable/>
+        <array>2</array>
+        <mssUnits>bool</mssUnits>
+        <mssAccessorName>tsv_8h_support</mssAccessorName>
+    </attribute>
+
+</attributes>
