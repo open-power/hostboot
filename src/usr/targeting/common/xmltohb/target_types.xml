@@ -1703,7 +1703,7 @@
         </field>
         <field>
           <id>deconfigureParent</id>
-          <value>1</value>
+          <value>0</value>
         </field>
         <field>
           <id>valid</id>
@@ -2274,6 +2274,46 @@
   </targetType>
 
   <targetType>
+    <!-- Power Integrated Circuit : Integrated Circuit on the DDIMM -->
+    <id>power_ic</id>
+    <parent>asic</parent>
+    <attribute>
+      <default>MEM</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
+      <default>0x00000031</default>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
+      <id>TYPE</id>
+      <default>POWER_IC</default>
+    </attribute>
+  </targetType>
+
+  <targetType>
     <!-- Base type for any logical unit inside a POWERXX processor chip -->
     <id>powerxx-chipunit</id>
     <parent>unit</parent>
@@ -2700,6 +2740,46 @@
     <attribute>
       <default>0x000603FC00000000</default>
       <id>XSCOM_BASE_ADDRESS</id>
+    </attribute>
+  </targetType>
+
+  <targetType>
+    <!-- Temperature Sensor : sensors on the DDIMM -->
+    <id>temp_sensor</id>
+    <parent>asic</parent>
+    <attribute>
+      <default>MEM</default>
+      <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
+      <default>1</default>
+      <id>DECONFIG_GARDABLE</id>
+    </attribute>
+    <attribute>
+      <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+      <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
+      <default>0x00000031</default>
+    </attribute>
+    <attribute>
+      <default>
+        <field>
+          <id>childRollupAllowed</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>deconfigureParent</id>
+          <value>0</value>
+        </field>
+        <field>
+          <id>valid</id>
+          <value>1</value>
+        </field>
+      </default>
+      <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
+      <id>TYPE</id>
+      <default>TEMP_SENSOR</default>
     </attribute>
   </targetType>
 

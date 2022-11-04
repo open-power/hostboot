@@ -127,7 +127,10 @@ def errlud_parse_entity_path(data, start):
                         0x55: "/GENERIC_I2C_DEVICE",
                         0x56: "/MDS_CTLR",
                         0x57: "/DCM",
-                        0x58: "/LAST_IN_RANGE",
+                        # intentionally leaving gap here
+                        0x66: "/POWER_IC",
+                        0x67: "/TEMP_SENSOR",
+                        0x68: "/LAST_IN_RANGE",
                       }
 
     # Entity Path Layout

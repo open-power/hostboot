@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2021
+# Contributors Listed Below - COPYRIGHT 2017,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -277,6 +277,8 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_GENERICI2CSLAVE => "generic_i2c_device",
     TARGET_TYPE_IOLINK        => "unit-smpgroup",
     TARGET_TYPE_MDS_CTLR      => "unit-mds-ctlr",
+    TARGET_TYPE_TEMP_SENSOR   => "temp_sensor",
+    TARGET_TYPE_POWER_IC      => "power_ic",
     };
 
     # Loop through all of the targets that this attribute

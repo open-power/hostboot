@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,8 @@ extern const std::array<fapi2_targeting_type, NUM_FAPI_TARGETING_TYPES>
     { fapi2::TARGET_TYPE_GENERICI2CSLAVE, TARGETING::TYPE_GENERIC_I2C_DEVICE },
     { fapi2::TARGET_TYPE_IOLINK    , TARGETING::TYPE_SMPGROUP  },
     { fapi2::TARGET_TYPE_MDS_CTLR  , TARGETING::TYPE_MDS_CTLR  },
+    { fapi2::TARGET_TYPE_TEMP_SENSOR, TARGETING::TYPE_TEMP_SENSOR },
+    { fapi2::TARGET_TYPE_POWER_IC  , TARGETING::TYPE_POWER_IC },
 };
 
 } // end fapi2::impl namespace

@@ -9896,9 +9896,18 @@
       <name>DCM</name>
       <value>87</value>
     </enumerator>
+    <!-- gap left on purpose -->
+    <enumerator>
+      <name>POWER_IC</name>
+      <value>102</value>
+    </enumerator>
+    <enumerator>
+      <name>TEMP_SENSOR</name>
+      <value>103</value>
+    </enumerator>
     <enumerator>
       <name>LAST_IN_RANGE</name>
-      <value>88</value>
+      <value>104</value>
     </enumerator>
     <id>TYPE</id>
   </enumerationType>

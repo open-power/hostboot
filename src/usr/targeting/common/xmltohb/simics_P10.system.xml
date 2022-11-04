@@ -65,11 +65,19 @@
 
      * DDIMM Components
      *
-     * Each DDR4 DDIMM contains 1 OCMB_CHIP
+     * Each DDR4 4U DDIMM contains 1 OCMB_CHIP
      *     Each OCMB_CHIP has 1 MEM_PORT (+1 in reserve for DDR5)
      *         Each MEM_PORT is connected to 1 DIMM (+1 in reserve for dual-drop)
      *     Each OCMB_CHIP is connected to 2 PMICs for 2U DDIMMs (4 PMICS for 4U DDIMMs)
-     *     Each OCMB Chip on 4U DDIMMs is conencted to 2 ADCs and 2 GPIO Expanders
+     *     Each OCMB Chip on DDR4 4U DDIMMs is connected to 2 ADCs and 2 GPIO Expanders
+     *
+     * Each DDR5 4U DDIMM contains 1 OCMB_CHIP
+     *     Each OCMB_CHIP has 2 MEM_PORTs
+     *         Each MEM_PORT is connected to 1 DIMM (+1 in reserve for dual-drop)
+     *     Each OCMB_CHIP is connected to
+     *           - 2 PMICs,POWER_IC, and TEMP_SENSORS for 2U DDIMMs
+     *           - 4 PMICS,POWER_IC, and TEMP_SENSORS for 4U DDIMMs
+     *     Each OCMB_CHIP on DDR5 4U DDIMMs is connected to 1 ADC and 0 GPIO Expanders
 
      This model contains:
      - 1 Dual Chip Module (DCM) with 2 P10 chips
@@ -16266,6 +16274,2392 @@
     </attribute>
 </targetInstance>
 
+
+<!-- ===================================================================== -->
+<!-- Temperature Sensor units -->
+<targetInstance>
+    <id>sys0node0temp_sensor0</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670000</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p00</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor1</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670001</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor2</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670002</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p02</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-2</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor3</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670003</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p03</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-3</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+
+<targetInstance>
+    <id>sys0node0temp_sensor4</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670004</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p04</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>4</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-4</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor5</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670005</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p05</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-5</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor6</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670006</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p06</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>6</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-6</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor7</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670007</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p07</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>7</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-7</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor8</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670008</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p08</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>8</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-8</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor9</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670009</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p09</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>9</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-9</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor10</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067000A</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p10</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>10</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-10</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor11</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067000B</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p11</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>11</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-11</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+
+<targetInstance>
+    <id>sys0node0temp_sensor12</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067000C</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p12</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>12</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-12</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor13</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067000D</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p13</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>13</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-13</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor14</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067000E</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p14</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>14</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-14</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor15</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067000F</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p15</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>15</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-15</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor16</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670010</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p16</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>16</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-16</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor17</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670011</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p17</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>17</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-17</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor18</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670012</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p18</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>18</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-18</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor19</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670013</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p19</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>19</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-19</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor20</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670014</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>20</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>20</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-20</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor21</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670015</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p21</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>21</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>21</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-21</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor22</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670016</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p22</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>22</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>22</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-22</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor23</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670017</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p23</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>23</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>23</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-23</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor24</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670018</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p24</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>24</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-24</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor25</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670019</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p25</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>25</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-25</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor26</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067001A</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p26</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>26</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>26</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-26</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor27</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067001B</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p27</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>27</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>27</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-27</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+
+<targetInstance>
+    <id>sys0node0temp_sensor28</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067001C</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p28</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>28</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>28</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-28</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor29</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067001D</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p29</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>29</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-29</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor30</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067001E</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p30</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>30</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>30</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-30</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor31</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067001F</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p31</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>31</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>31</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-31</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor32</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670020</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p32</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>32</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-32</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor33</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670021</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p33</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>33</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>33</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-33</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor34</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670022</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p34</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>34</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>34</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-34</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor35</id>
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670023</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p35</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>35</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>35</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-35</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+
+<!-- POWER_IC 0-35 -->
+<targetInstance>
+    <id>sys0node0power_ic0</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660000</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p00</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic1</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660001</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic2</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660002</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p02</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-2</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic3</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660003</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p03</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>3</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic4</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660004</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p04</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>4</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-4</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic5</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660005</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p05</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>5</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-5</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic6</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660006</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p06</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>6</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-6</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic7</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660007</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p07</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>7</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-7</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic8</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660008</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p08</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>8</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-8</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic9</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660009</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p09</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>9</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-9</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic10</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066000A</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p10</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>10</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-10</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic11</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066000B</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p11</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>11</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-11</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+
+<targetInstance>
+    <id>sys0node0power_ic12</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066000C</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p12</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>12</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-12</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic13</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066000D</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p13</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>13</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-13</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic14</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066000E</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p14</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>14</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-14</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic15</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066000F</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p15</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>15</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-15</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic16</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660010</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p16</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>16</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-16</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic17</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660011</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p17</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>17</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-17</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic18</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660012</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p18</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>18</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-18</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic19</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660013</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p19</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>19</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-19</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic20</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660014</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p20</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>20</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>20</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-20</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic21</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660015</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p21</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>21</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>21</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-21</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic22</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660016</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p22</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>22</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>22</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-22</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic23</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660017</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p23</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>23</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>23</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-23</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic24</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660018</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p24</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>24</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>24</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-24</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic25</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660019</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p25</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>25</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-25</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic26</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066001A</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p26</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>26</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>26</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-26</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic27</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066001B</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p27</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>27</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>27</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-27</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+
+<targetInstance>
+    <id>sys0node0power_ic28</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066001C</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p28</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>28</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>28</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-28</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic29</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066001D</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p29</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>29</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-29</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic30</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066001E</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p30</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>30</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>30</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-30</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic31</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066001F</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p31</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>31</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>31</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-31</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic32</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660020</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p32</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>32</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>32</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-32</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic33</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660021</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p33</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>33</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>33</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-33</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic34</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660022</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-2</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p34</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>34</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>34</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-34</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic35</id>
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660023</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p35</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>35</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>35</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-35</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>3</default>
+    </attribute>
+</targetInstance>
+
 <!-- ===================================================================== -->
 <!-- PMIC Units -->
 <!-- Up to 4 per OCMB: (a max of 64 per P10)-->
@@ -17802,7 +20196,8 @@
 <!-- ADC and GPIO Expander Units -->
 <!-- Up to 2 each per OCMB: (a max of 32 per P10)-->
 <!--  - 2U DDIMMs: 0 ADCs and 0 GPIO Expanders per OCMB -->
-<!--  - 4U DDIMMs: 2 ADCs and 2 GPIO Expanders per OCMB -->
+<!--  - 4U DDR4 DDIMMs: 2 ADCs and 2 GPIO Expanders per OCMB -->
+<!--  - 4U DDR5 DDIMMs: 1 ADC  and 0 GPIO Expanders per OCMB -->
 <!--                  -->
 <!-- Grouped together under "Generic I2C Device" targets, but separated by their relative position: -->
 <!-- rel pos 0: ADC0  - I2C Device Address 0x20 -->
@@ -24018,6 +26413,270 @@
 </targetInstance>
 
 <targetInstance>
+        <id>sys0node0temp_sensor64</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670040</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p64</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>64</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>64</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-64</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor65</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670041</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p65</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>65</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>65</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-65</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor66</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670042</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p66</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>66</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>66</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-66</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor67</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670043</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p67</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>67</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>67</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-67</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic64</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660040</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p64</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>64</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>64</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-64</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic65</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660041</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p65</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>65</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>65</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-65</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic66</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660042</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p66</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>66</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>66</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-66</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic67</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660043</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p67</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>67</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>67</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-67</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
         <id>sys0node0pmic64</id>
         <type>pmic</type>
         <attribute>
@@ -24545,6 +27204,270 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor68</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670044</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p68</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>68</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>68</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-68</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor69</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670045</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p69</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>69</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>69</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-69</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor70</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670046</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p70</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>70</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>70</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-70</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor71</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670047</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p71</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>71</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>71</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-71</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic68</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660044</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p68</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>68</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>68</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-68</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic69</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660045</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p69</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>69</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>69</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-69</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic70</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660046</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p70</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>70</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>70</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-70</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic71</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660047</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p71</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>71</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>71</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-71</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -25078,6 +28001,270 @@
 </targetInstance>
 
 <targetInstance>
+        <id>sys0node0temp_sensor72</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670048</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p72</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>72</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>72</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-72</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor73</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670049</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p73</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>73</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>73</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-73</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor74</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0067004A</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p74</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>74</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>74</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-74</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor75</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0067004B</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p75</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>75</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>75</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-75</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic72</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660048</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p72</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>72</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>72</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-72</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic73</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660049</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p73</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>73</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>73</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-73</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic74</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0066004A</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p74</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>74</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>74</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-74</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic75</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0066004B</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p75</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>75</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>75</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-75</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
         <id>sys0node0pmic72</id>
         <type>pmic</type>
         <attribute>
@@ -25605,6 +28792,270 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor76</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0067004C</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p76</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>76</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>76</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-76</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor77</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0067004D</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p77</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>77</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>77</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-77</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor78</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0067004E</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p78</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>78</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>78</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-78</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor79</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0067004F</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p79</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>79</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>79</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-79</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic76</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0066004C</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p76</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>76</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>76</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-76</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic77</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0066004D</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p77</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>77</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>77</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-77</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic78</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0066004E</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p78</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>78</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>78</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-78</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic79</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0066004F</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p79</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>79</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>79</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-79</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -26138,6 +29589,270 @@
 </targetInstance>
 
 <targetInstance>
+        <id>sys0node0temp_sensor80</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670050</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p80</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>80</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>80</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-80</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor81</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670051</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p81</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>81</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>81</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-81</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor82</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670052</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p82</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>82</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>82</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-82</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor83</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670053</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p83</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>83</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>83</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-83</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic80</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660050</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p80</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>80</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>80</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-80</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic81</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660051</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p81</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>81</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>81</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-81</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic82</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660052</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p82</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>82</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>82</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-82</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic83</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660053</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p83</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>83</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>83</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-83</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
         <id>sys0node0pmic80</id>
         <type>pmic</type>
         <attribute>
@@ -26665,6 +30380,270 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor84</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670054</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p84</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>84</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>84</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-84</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor85</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670055</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p85</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>85</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>85</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-85</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor86</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670056</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p86</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>86</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>86</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-86</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor87</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670057</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p87</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>87</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>87</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-87</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic84</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660054</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p84</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>84</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>84</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-84</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic85</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660055</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p85</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>85</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>85</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-85</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic86</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660056</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p86</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>86</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>86</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-86</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic87</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660057</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p87</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>87</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>87</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-87</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -27198,6 +31177,270 @@
 </targetInstance>
 
 <targetInstance>
+        <id>sys0node0temp_sensor88</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670058</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p88</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>88</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>88</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-88</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor89</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670059</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p89</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>89</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>89</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-89</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor90</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0067005A</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p90</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>90</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>90</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-90</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor91</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0067005B</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p91</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>91</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>91</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-91</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic88</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660058</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p88</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>88</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>88</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-88</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic89</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660059</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p89</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>89</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>89</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-89</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic90</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0066005A</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p90</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>90</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>90</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-90</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic91</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0066005B</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p91</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>91</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>91</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-91</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
         <id>sys0node0pmic88</id>
         <type>pmic</type>
         <attribute>
@@ -27728,6 +31971,270 @@
 </targetInstance>
 
 <targetInstance>
+        <id>sys0node0temp_sensor92</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0067005C</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p92</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>92</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>92</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-92</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor93</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0067005D</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p93</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>93</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>93</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-93</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor94</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0067005E</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p94</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>94</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>94</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-94</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor95</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0067005F</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p95</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>95</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>95</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-95</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic92</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0066005C</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p92</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>92</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>92</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-92</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic93</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0066005D</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p93</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>93</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>93</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-93</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic94</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0066005E</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p94</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>94</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>94</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-94</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic95</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x0066005F</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p95</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>95</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>95</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-95</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
         <id>sys0node0pmic92</id>
         <type>pmic</type>
         <attribute>
@@ -28255,6 +32762,270 @@
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor96</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670060</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p96</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>96</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>96</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-96</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor97</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670061</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p97</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>97</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>97</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-97</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor98</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670062</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p98</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>98</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>98</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-98</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0temp_sensor99</id>
+        <type>temp_sensor</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00670063</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>temp_sensor:k0:n0:s0:p99</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>99</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>99</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/temp_sensor-99</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic96</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660060</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-0</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p96</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>96</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>96</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-96</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>0</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic97</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660061</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-1</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p97</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>97</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>97</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-97</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>1</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic98</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660062</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-2</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p98</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>98</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>98</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-98</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>2</default>
+        </attribute>
+</targetInstance>
+
+<targetInstance>
+        <id>sys0node0power_ic99</id>
+        <type>power_ic</type>
+        <attribute>
+          <id>HUID</id>
+          <default>0x00660063</default>
+        </attribute>
+        <attribute>
+            <id>AFFINITY_PATH</id>
+            <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-3</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_NAME</id>
+            <default>power_ic:k0:n0:s0:p99</default>
+        </attribute>
+        <attribute>
+            <id>FAPI_POS</id>
+            <default>99</default>
+        </attribute>
+        <attribute>
+          <id>ORDINAL_ID</id>
+          <default>99</default>
+        </attribute>
+        <attribute>
+            <id>PHYS_PATH</id>
+            <default>physical:sys-0/node-0/power_ic-99</default>
+        </attribute>
+        <attribute>
+            <id>REL_POS</id>
+            <default>3</default>
+        </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -28789,6 +33560,138 @@
 </targetInstance>
 
 <targetInstance>
+    <id>sys0node0temp_sensor100</id><!-- port1 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670064</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p100</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>100</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>100</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-100</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor101</id><!-- port1 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670065</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p101</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>101</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>101</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-101</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic100</id><!-- port1 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660064</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p100</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>100</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>100</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-100</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic101</id><!-- port1 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660065</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p101</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>101</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>101</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-101</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
     <id>sys0node0pmic100</id><!-- port1 -->
     <type>pmic</type>
     <attribute>
@@ -29049,6 +33952,138 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor104</id><!-- port4 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670068</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p104</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>104</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>104</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-104</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor105</id><!-- port4 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670069</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p105</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>105</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>105</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-105</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic104</id><!-- port4 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660068</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p104</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>104</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>104</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-104</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic105</id><!-- port4 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660069</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p105</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>105</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>105</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-105</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -29315,6 +34350,137 @@
         <default>0</default>
     </attribute>
 </targetInstance>
+<targetInstance>
+    <id>sys0node0temp_sensor108</id><!-- port5 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067006C</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p108</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>108</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>108</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-108</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor109</id><!-- port5 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067006D</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p109</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>109</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>109</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-109</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic108</id><!-- port5 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066006C</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p108</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>108</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>108</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-108</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic109</id><!-- port5 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066006D</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p109</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>109</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>109</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-109</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
 
 <targetInstance>
     <id>sys0node0pmic108</id><!-- port5 -->
@@ -29577,6 +34743,139 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+
+<targetInstance>
+    <id>sys0node0temp_sensor112</id><!-- port6 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670070</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p112</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>112</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>112</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-112</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor113</id><!-- port6 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670071</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-0/omi-0/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p113</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>113</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>113</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-113</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic112</id><!-- port6 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660070</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p112</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>112</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>112</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-112</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic113</id><!-- port6 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660071</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p113</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>113</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>113</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-113</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -29845,6 +35144,138 @@
 </targetInstance>
 
 <targetInstance>
+    <id>sys0node0temp_sensor116</id><!-- port7 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670074</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p116</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>116</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>116</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-116</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor117</id><!-- port7 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670075</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-0/omi-1/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p117</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>117</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>117</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-117</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic116</id><!-- port7 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660074</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p116</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>116</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>116</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-116</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic117</id><!-- port7 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660075</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p117</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>117</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>117</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-117</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
     <id>sys0node0pmic116</id><!-- port7 -->
     <type>pmic</type>
     <attribute>
@@ -30109,6 +35540,138 @@
 </targetInstance>
 
 <targetInstance>
+    <id>sys0node0temp_sensor120</id><!-- port10 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670078</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p120</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>120</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>120</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-120</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor121</id><!-- port10 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00670079</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-1/omi-0/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p121</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>121</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>121</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-121</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic120</id><!-- port10 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660078</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p120</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>120</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>120</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-120</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic121</id><!-- port10 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x00660079</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p121</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>121</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>121</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-121</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
     <id>sys0node0pmic120</id><!-- port10 -->
     <type>pmic</type>
     <attribute>
@@ -30369,6 +35932,138 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor124</id><!-- port11 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067007C</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p124</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>124</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>124</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-124</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0temp_sensor125</id><!-- port11 -->
+    <type>temp_sensor</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0067007D</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-1/omi-1/ocmb_chip-0/temp_sensor-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>temp_sensor:k0:n0:s0:p125</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>125</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>125</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/temp_sensor-125</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic124</id><!-- port11 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066007C</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p124</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>124</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>124</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-124</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0power_ic125</id><!-- port11 -->
+    <type>power_ic</type>
+    <attribute>
+      <id>HUID</id>
+      <default>0x0066007D</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>power_ic:k0:n0:s0:p125</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>125</default>
+    </attribute>
+    <attribute>
+      <id>ORDINAL_ID</id>
+      <default>125</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/power_ic-125</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 

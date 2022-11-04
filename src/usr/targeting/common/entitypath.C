@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -509,6 +509,10 @@ const char* EntityPath::pathElementTypeAsString(
             return "MDS_CTLR";
         case TYPE_DCM:
             return "DCM";
+        case TYPE_TEMP_SENSOR:
+            return "TEMP_SENSOR";
+        case TYPE_POWER_IC:
+            return "POWER_IC";
         default:
             return "Unknown path type";
     }

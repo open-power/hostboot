@@ -620,6 +620,117 @@ errlHndl_t genericI2CDevicePresencePerformOp(DeviceFW::OperationType i_opType,
     return l_errl;
 }
 
+
+/**
+ * @brief Performs a presence detect operation on a temperature sensor Target
+ *
+ *
+ * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ * @param[in]   i_target        Presence detect target
+ * @param[in/out] io_buffer     Read: Pointer to output data storage
+ *                              Write: Pointer to input data storage
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes, always 1)
+ *                              Output: Success = 1, Failure = 0
+ * @param[in]   i_accessType    DeviceFW::AccessType enum (userif.H)
+ * @param[in]   i_args          This is an argument list for DD framework.
+ *                              In this function, there are no arguments.
+ * @return  errlHndl_t
+ */
+errlHndl_t tempSensorPresencePerformOp(DeviceFW::OperationType i_opType,
+                                             TARGETING::Target* i_target,
+                                             void* io_buffer,
+                                             size_t& io_buflen,
+                                             int64_t i_accessType,
+                                             va_list i_args)
+{
+    assert(1 == io_buflen, "tempSensorPresencePerformOp: Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+
+    errlHndl_t l_errl = nullptr;
+    bool l_tempSensorPresent = false;
+
+    TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
+    auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
+
+    do {
+        if(! l_parentHwasState.present)
+        {
+            // If the parent chip is not present, then neither is the temperature sensor
+            // so just break out and return not present
+            TRACSSCOMP( g_trac_i2c, ERR_MRK"tempSensorPresencePerformOp() "
+                       "Tgt HUID 0x%08X has non-present Parent HUID 0x%08X",
+                        TARGETING::get_huid(i_target),
+                        TARGETING::get_huid(l_parentOcmb));
+
+            break;
+        }
+
+        // TODO: JIRA PFHB-228 - finish presence checking
+
+    } while (0);
+
+    // Copy variable describing if target is present or not to i/o buffer param
+    memcpy(io_buffer, &l_tempSensorPresent, sizeof(l_tempSensorPresent));
+    io_buflen = sizeof(l_tempSensorPresent);
+
+    return l_errl;
+}
+
+/**
+ * @brief Performs a presence detect operation on a Power_IC Target
+ *
+ *
+ * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ * @param[in]   i_target        Presence detect target
+ * @param[in/out] io_buffer     Read: Pointer to output data storage
+ *                              Write: Pointer to input data storage
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes, always 1)
+ *                              Output: Success = 1, Failure = 0
+ * @param[in]   i_accessType    DeviceFW::AccessType enum (userif.H)
+ * @param[in]   i_args          This is an argument list for DD framework.
+ *                              In this function, there are no arguments.
+ * @return  errlHndl_t
+ */
+errlHndl_t powerIcPresencePerformOp(DeviceFW::OperationType i_opType,
+                                             TARGETING::Target* i_target,
+                                             void* io_buffer,
+                                             size_t& io_buflen,
+                                             int64_t i_accessType,
+                                             va_list i_args)
+{
+    assert(1 == io_buflen, "powerIcPresencePerformOp: Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+
+    errlHndl_t l_errl = nullptr;
+    bool l_powerIcPresent = false;
+
+    TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
+    auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
+
+    do {
+        if(! l_parentHwasState.present)
+        {
+            // If the parent chip is not present, then neither is the power_ic device
+            // so just break out and return not present
+            TRACSSCOMP( g_trac_i2c, ERR_MRK"powerIcPresencePerformOp() "
+                       "Tgt HUID 0x%08X has non-present Parent HUID 0x%08X",
+                        TARGETING::get_huid(i_target),
+                        TARGETING::get_huid(l_parentOcmb));
+
+            break;
+        }
+
+        // TODO: JIRA PFHB-228 - finish presence checking
+
+    } while (0);
+
+    // Copy variable describing if target is present or not to i/o buffer param
+    memcpy(io_buffer, &l_powerIcPresent, sizeof(l_powerIcPresent));
+    io_buflen = sizeof(l_powerIcPresent);
+    return l_errl;
+}
+
+
 // Register the ocmb presence detect function with the device framework
 DEVICE_REGISTER_ROUTE(DeviceFW::READ,
                       DeviceFW::PRESENT,
@@ -649,4 +760,16 @@ DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        DeviceFW::PRESENT,
                        TARGETING::TYPE_MDS_CTLR,
                        mdsI2CPresencePerformOp );
+
+// Register the temperature sensor detect function with the device framework
+DEVICE_REGISTER_ROUTE( DeviceFW::READ,
+                       DeviceFW::PRESENT,
+                       TARGETING::TYPE_TEMP_SENSOR,
+                       tempSensorPresencePerformOp );
+
+// Register the power_ic detect function with the device framework
+DEVICE_REGISTER_ROUTE( DeviceFW::READ,
+                       DeviceFW::PRESENT,
+                       TARGETING::TYPE_POWER_IC,
+                       powerIcPresencePerformOp );
 }

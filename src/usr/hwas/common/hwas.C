@@ -3281,6 +3281,22 @@ void presentByAssoc(TargetHandleList& i_targets)
           DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP,
           NO_CHECK_PARENT }, // asymmetrical
 
+        // Asymmetrical rule; every TEMP_SENSOR has to have an OCMB_CHIP parent,
+        // but not every OCMB_CHIP has a TEMP_SENSOR child, ie on DDR4 DDIMMs
+        { TYPE_OCMB_CHIP, TYPE_TEMP_SENSOR,
+          DeconfigGard::INVALID_DECONFIGURED_BY_REASON, // Asymmetrical rules can't
+                                                        // deconfigure the parent
+          DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP,
+          NO_CHECK_PARENT }, // asymmetrical
+
+        // Asymmetrical rule; every POWER_IC has to have an OCMB_CHIP parent,
+        // but not every OCMB_CHIP has a POWER_IC child, ie on DDR4 DDIMMs
+        { TYPE_OCMB_CHIP, TYPE_POWER_IC,
+          DeconfigGard::INVALID_DECONFIGURED_BY_REASON, // Asymmetrical rules can't
+                                                        // deconfigure the parent
+          DeconfigGard::DECONFIGURED_BY_NO_PARENT_OCMB_CHIP,
+          NO_CHECK_PARENT }, // asymmetrical
+
         { TYPE_MEM_PORT, TYPE_DIMM,
           DeconfigGard::DECONFIGURED_BY_NO_CHILD_DIMM,
           DeconfigGard::DECONFIGURED_BY_NO_PARENT_MEM_PORT },

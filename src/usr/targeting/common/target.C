@@ -636,6 +636,8 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                 case(TYPE_APSS):
                 case(TYPE_DPSS):
                 case(TYPE_TPM):
+                case(TYPE_TEMP_SENSOR):
+                case(TYPE_POWER_IC):
                 case(TYPE_MDS_CTLR):
                 {
                     // Element was a CHIP, instance is the position value for the chip

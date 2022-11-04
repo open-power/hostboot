@@ -181,7 +181,7 @@ namespace impl
 {
 
 // Size of the array below
-constexpr size_t NUM_FAPI_TARGETING_TYPES = 25;
+constexpr size_t NUM_FAPI_TARGETING_TYPES = 27;
 
 // Declaration of the array holding the associations between fapi2 target
 // types and Targeting types.
@@ -368,7 +368,9 @@ constexpr bool isProperParent(const TargetType i_child,
         {   TARGET_TYPE_PMIC
           | TARGET_TYPE_MEM_PORT
           | TARGET_TYPE_GENERICI2CSLAVE
-          | TARGET_TYPE_MDS_CTLR  , TARGET_TYPE_OCMB_CHIP },
+          | TARGET_TYPE_MDS_CTLR
+          | TARGET_TYPE_TEMP_SENSOR
+          | TARGET_TYPE_POWER_IC  , TARGET_TYPE_OCMB_CHIP },
         {   TARGET_TYPE_DIMM      , TARGET_TYPE_MEM_PORT  },
         {   TARGET_TYPE_FC        , TARGET_TYPE_EQ        },
         {   TARGET_TYPE_IOHS

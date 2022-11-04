@@ -123,6 +123,8 @@ const epubTargetTypeToSub_t TARGET_TO_SUBSYS_TABLE[] =
     { TARGETING::TYPE_FC                , EPUB_PROCESSOR_UNIT       },
     { TARGETING::TYPE_GENERIC_I2C_DEVICE, EPUB_MEMORY_SUBSYS        },
     { TARGETING::TYPE_MDS_CTLR          , EPUB_MEMORY_SUBSYS        },
+    { TARGETING::TYPE_POWER_IC          , EPUB_MEMORY_SUBSYS        },
+    { TARGETING::TYPE_TEMP_SENSOR       , EPUB_MEMORY_SUBSYS        },
 };
 
 struct epubBusTypeToSub_t
