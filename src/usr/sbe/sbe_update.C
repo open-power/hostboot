@@ -5040,15 +5040,15 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
                                get_huid(io_sbeState.target),
                                i_system_situation, l_actions);
 
-                    /*
-                     * errortype
-                     * moduleid     SBE_DECISION_TREE
-                     * reasoncode   SBE_BOOT_SIDE_DIRTY_BAD_PATH
-                     * userdata1    System Situation
-                     * userdata2    Update Actions
-                     * devdesc      Bad Path in decisionUpdateTree:
+                    /*@
+                     * @errortype
+                     * @moduleid     SBE_DECISION_TREE
+                     * @reasoncode   SBE_BOOT_SIDE_DIRTY_BAD_PATH
+                     * @userdata1    System Situation
+                     * @userdata2    Update Actions
+                     * @devdesc      Bad Path in decisionUpdateTree:
                      *               cur=DIRTY, alt=CLEAN
-                     * custdesc     A problem occurred while updating
+                     * @custdesc     A problem occurred while updating
                      *               processor boot code.
                      */
                     err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
