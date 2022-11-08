@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,6 +143,8 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     // Address Range constants
     const uint32_t OTPROM_MIN_RANGE  = 0x000C0000;
     const uint32_t OTPROM_MAX_RANGE  = 0x000C0378;
+    const uint32_t OTPROM_DATA_MIN_RANGE  = 0x00018000;
+    const uint32_t OTPROM_DATA_MAX_RANGE  = 0x0001806F;
     const uint32_t PIBMEM_MIN_RANGE  = 0xFFF80000;
     const uint32_t PIBMEM_MAX_RANGE  = 0xFFFFFFFF;
     //Boot SEEPROM
@@ -312,6 +314,14 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
     if(i_set_sdb)
     {
+        // Setting SDB during virtual halt can trigger Attention to BMC/FSP
+        // This is due to MIB HW locks down instruction fetches on SDB
+        // Below we are masking attention to BMC/FSP
+        FAPI_INF("p10_extract_sbe_rc: Disabling SBE attention to BMC/FSP");
+        l_data32.flush<0>();
+        FAPI_TRY(getCfamRegister(i_target_chip, scomt::proc::TP_TPVSB_FSI_W_FSI2PIB_TRUE_MASK_FSI, l_data32));
+        l_data32.clearBit<30>();
+        FAPI_TRY(putCfamRegister(i_target_chip, scomt::proc::TP_TPVSB_FSI_W_FSI2PIB_TRUE_MASK_FSI, l_data32));
         // Applying SDB setting required in usecase 1 & 3 only
         FAPI_INF("p10_extract_sbe_rc: Setting chip in SDB mode");
         l_data32.flush<0>();
@@ -1409,7 +1419,7 @@ fapi2::ReturnCode p10_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         // ------- LEVEL 4 ------ //
         if(l_data_mchk)
         {
-            if((OTPROM_MIN_RANGE <= l_data32_edr) && (l_data32_edr <= OTPROM_MAX_RANGE))
+            if((OTPROM_DATA_MIN_RANGE <= l_data32_edr) && (l_data32_edr <= OTPROM_DATA_MAX_RANGE))
             {
                 FAPI_INF("p10_extract_sbe_rc : EDR contains OTPROM address");
                 otprom_data_range = true;
