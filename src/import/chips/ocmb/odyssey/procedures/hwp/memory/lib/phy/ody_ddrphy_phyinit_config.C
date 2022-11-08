@@ -53,6 +53,7 @@
     #include <stdio.h>
 #endif
 
+#include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <stdlib.h>
@@ -62,6 +63,7 @@
 #include <lib/phy/ody_ddrphy_csr_defines.H>
 #include <lib/phy/ody_phy_reset.H>
 #include <lib/phy/ody_ddrphy_phyinit_structs.H>
+#include <lib/workarounds/ody_dfi_complete_workarounds.H>
 
 ///
 /// @brief Maps from drive strength in Ohms to the register value
@@ -1931,6 +1933,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     //      DFIPHYUPDRESP
     //
     //##############################################################
+    // IBM note: update init_phy_config_sim if this code changes
     {
         int DFIPHYUPD;
         int DFIPHYUPDCNT;
@@ -1947,7 +1950,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming DFIPHYUPD::DFIPHYUPDRESP to 0x%x\n", TARGTID,
                   DFIPHYUPDRESP);
 
-        dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_DFIPHYUPD_ADDR), DFIPHYUPD);
+        FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_DFIPHYUPD_ADDR), DFIPHYUPD));
     }
 
     //##############################################################
@@ -3129,7 +3132,8 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 
                 if(Ch1_ANIB == 1)
                 {
-                    dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tANIB | c_addr | csr_AcPowerDownStatic_ADDR), AcPowerDownStatic);
+                    FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tANIB | c_addr | csr_AcPowerDownStatic_ADDR),
+                             AcPowerDownStatic));
                     FAPI_DBG (TARGTIDFORMAT
                               " //// [phyinit_C_initPhyConfig] Programming AcPowerDownStatic (CH1 ANIB=%d) to 0x%x\n", TARGTID, anib,
                               AcPowerDownStatic);
@@ -3540,6 +3544,57 @@ fapi2::ReturnCode init_phy_structs( const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
 }
 
 ///
+/// @brief Configures the PHY to be ready for DRAMINIT for the simulation environment
+/// @param[in] i_target - the memory port on which to operate
+/// @param[in] i_user_input_basic - Synopsys basic user input structure
+/// @param[in] i_user_input_advanced - Synopsys advanced user input structure
+/// @param[in] i_user_input_dram_config - DRAM configuration inputs needed for PHY init (MRS/RCW)
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode init_phy_config_sim( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                       const user_input_basic_t& i_user_input_basic,
+                                       const user_input_advanced_t& i_user_input_advanced,
+                                       const user_input_dram_config_t& i_user_input_dram_config)
+{
+    // Yes, this is copied and pasted from above
+    // A comment in that code notes that this needs an update if anything above changes
+    //##############################################################
+    //
+    // Program PhyUpdate CSRs based on user input
+    //
+    // CSRs to program:
+    //      DFIPHYUPD:: DFIPHYUPDCNT
+    //               :: DFIPHYUPDRESP
+    //
+    // User input dependencies::
+    //      DFIPHYUPDCNT
+    //      DFIPHYUPDRESP
+    //
+    //##############################################################
+    {
+        int DFIPHYUPD;
+        int DFIPHYUPDCNT;
+        int DFIPHYUPDRESP;
+
+        DFIPHYUPDCNT = i_user_input_advanced.DFIPHYUPDCNT;
+        DFIPHYUPDRESP = i_user_input_advanced.DFIPHYUPDRESP;
+
+
+        DFIPHYUPD = (DFIPHYUPDRESP << csr_DFIPHYUPDRESP_LSB) | (DFIPHYUPDCNT << csr_DFIPHYUPDCNT_LSB);
+
+        FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming DFIPHYUPD::DFIPHYUPDCNT to 0x%x\n", TARGTID,
+                  DFIPHYUPDCNT);
+        FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming DFIPHYUPD::DFIPHYUPDRESP to 0x%x\n", TARGTID,
+                  DFIPHYUPDRESP);
+
+        FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_DFIPHYUPD_ADDR), DFIPHYUPD));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Runs PHY init on a specific port
 /// @param[in] i_target - the memory port on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
@@ -3553,17 +3608,34 @@ fapi2::ReturnCode run_phy_init( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>
     user_input_advanced_t l_user_input_advanced;
     user_input_dram_config_t l_user_input_dram_config;
 
+    uint8_t l_is_sim = 0;
+    uint8_t l_is_simics = 0;
+    FAPI_TRY( mss::attr::get_is_simulation(l_is_sim) );
+    FAPI_TRY( mss::attr::get_is_simics(l_is_simics) );
+
     // Configure the structure values
     FAPI_TRY(init_phy_structs(i_target,
                               l_user_input_basic,
                               l_user_input_advanced,
                               l_user_input_dram_config), TARGTIDFORMAT "failed init_phy_structs", TARGTID);
 
-    // Configure the PY based upon the structures
-    FAPI_TRY(init_phy_config(i_target,
-                             l_user_input_basic,
-                             l_user_input_advanced,
-                             l_user_input_dram_config), TARGTIDFORMAT "failed init_phy_config", TARGTID);
+    // Skip running PHY init if this is a simulation that cannot support it
+    if(!mss::ody::workarounds::is_simulation_dfi_init_workaround_needed(l_is_sim, l_is_simics))
+    {
+        // Configure the PHY based upon the structures
+        FAPI_TRY(init_phy_config(i_target,
+                                 l_user_input_basic,
+                                 l_user_input_advanced,
+                                 l_user_input_dram_config), TARGTIDFORMAT "failed init_phy_config", TARGTID);
+    }
+    // Otherwise, run the subset of registers that need to be updated for sim
+    else
+    {
+        FAPI_TRY(init_phy_config_sim(i_target,
+                                     l_user_input_basic,
+                                     l_user_input_advanced,
+                                     l_user_input_dram_config), TARGTIDFORMAT "failed init_phy_config_sim", TARGTID);
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
