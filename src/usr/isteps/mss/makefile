@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2022
+# Contributors Listed Below - COPYRIGHT 2016,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -150,6 +150,7 @@ SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_s
 SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_ddr5_eff_attributes.xml
 SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_ddr5_mr_attributes.xml
 SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/generic_memory_thermal_sensor_attributes.xml
+SOURCES += $(IMPORT_PATH)/generic/procedures/xml/attribute_info/ocmb_power_thermal.xml
 
 CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_generic_attribute_getters.H
 CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_generic_attribute_setters.H

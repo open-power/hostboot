@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,7 +143,7 @@ extern "C"
 
         // Equalize throttles to prevent variable performance
         // Note that we don't do anything with any port that exceed the power limit here, as we don't have an input power limit to go from
-        FAPI_TRY(mss::power_thermal::equalize_throttles<mss::mc_type::EXPLORER>(i_targets, mss::throttle_type::POWER,
+        FAPI_TRY(mss::power_thermal::equalize_throttles_helper<mss::mc_type::EXPLORER>(i_targets, mss::throttle_type::POWER,
                  l_exceeded_power));
 
         // Return a failing RC code if we had any input utilization values less than MIN_UTIL

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,6 +88,8 @@ class portTraits< mss::mc_type::EXPLORER >
         static constexpr uint64_t MBARPC0Q_REG = EXPLR_SRQ_MBARPC0Q;
         static constexpr uint64_t SRQ_MBAREFAQ = EXPLR_SRQ_MBAREFAQ;
         static constexpr uint64_t FARB0Q_REG = EXPLR_SRQ_MBA_FARB0Q;
+        static constexpr uint64_t FARB3Q_REG = EXPLR_SRQ_MBA_FARB3Q;
+        static constexpr uint64_t FARB4Q_REG = EXPLR_SRQ_MBA_FARB4Q;
         static constexpr uint64_t FARB5Q_REG = EXPLR_SRQ_MBA_FARB5Q;
         static constexpr uint64_t FARB6Q_REG = EXPLR_SRQ_MBA_FARB6Q;
         static constexpr uint64_t FARB9Q_REG = EXPLR_SRQ_MBA_FARB9Q;

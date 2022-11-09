@@ -45,6 +45,9 @@
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <odyssey_scom.H>
 #include <ody_scominit.H>
+#include <lib/mc/ody_port_traits.H>
+#include <lib/power_thermal/ody_throttle_traits.H>
+#include <generic/memory/lib/utils/power_thermal/gen_throttle.H>
 
 extern "C"
 {
@@ -64,6 +67,9 @@ extern "C"
         FAPI_INF( TARGTIDFORMAT " running odyssey.scom.initfile", TARGTID);
         FAPI_EXEC_HWP(l_rc, odyssey_scom, i_target, FAPI_SYSTEM);
         FAPI_TRY(l_rc, TARGTIDFORMAT " error from odyssey.scom.initfile", TARGTID);
+
+        // Write power controls and emergency throttle settings
+        FAPI_TRY(mss::power_thermal::thermal_throttle_scominit<mss::mc_type::ODYSSEY>(i_target));
 
         // Unmask the FIRs
         FAPI_TRY(mss::unmask::after_scominit<mss::mc_type::ODYSSEY>(i_target));

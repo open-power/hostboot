@@ -186,13 +186,29 @@
       Machine Readable Workbook value for maximum dram data bus utilization in centi percent (c%).
       Used to determine memory throttle values.
       Max databus utilization on a per port basis
-      Default to 90%
+      Default to 100%
     </description>
     <valueType>uint32</valueType>
     <platInit/>
     <mssUnits>c%</mssUnits>
     <default>0x00002710</default>
     <mssAccessorName>mrw_max_dram_databus_util</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_DDR5_MAX_DRAM_DATABUS_UTIL</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Machine Readable Workbook value for maximum dram data bus utilization in centi percent (c%) for DDR5 config.
+      Used to determine memory throttle values.
+      Max databus utilization on a per port basis
+      Default to 100%
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <mssUnits>c%</mssUnits>
+    <default>0x00002710</default>
+    <mssAccessorName>mrw_ddr5_max_dram_databus_util</mssAccessorName>
   </attribute>
 
   <attribute>

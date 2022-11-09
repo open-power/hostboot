@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,11 +64,11 @@ extern "C"
 
         for ( const auto& l_ocmb : i_targets)
         {
-            FAPI_TRY(mss::power_thermal::pwr_throttles(l_ocmb, i_throttle_type));
+            FAPI_TRY(mss::power_thermal::pwr_throttles<mss::mc_type::EXPLORER>(l_ocmb, i_throttle_type));
         }
 
         // Equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
-        FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets, i_throttle_type));
+        FAPI_TRY(mss::power_thermal::equalize_throttles<mss::mc_type::EXPLORER>(i_targets, i_throttle_type));
 
         FAPI_INF("End exp_bulk_pwr_throttles");
         return fapi2::current_err;

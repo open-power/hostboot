@@ -145,6 +145,98 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Reads the farb3q register
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[out] o_data data read from the register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode read_farb3q( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    // This register sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY( mss::getScom(TT::get_farb_target(i_target), TT::FARB3Q_REG, o_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Writes the farb3q register
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_data data read from the register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode write_farb3q( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    // This register sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY( mss::putScom(TT::get_farb_target(i_target), TT::FARB3Q_REG, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reads the farb4q register
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[out] o_data data read from the register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode read_farb4q( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    // This register sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY( mss::getScom(TT::get_farb_target(i_target), TT::FARB4Q_REG, o_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Writes the farb4q register
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_data data read from the register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode write_farb4q( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    // This register sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY( mss::putScom(TT::get_farb_target(i_target), TT::FARB4Q_REG, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Reads the farb6q register
 /// @tparam MC the memory controller type
 /// @tparam T the fapi2 target type of the target
@@ -185,6 +277,98 @@ fapi2::ReturnCode write_farb6q( const fapi2::Target<T>& i_target, const fapi2::b
     // In other MC's, it sits on the chip level
     // As such, a helper function is used to grab the appropriate target type to run this scom
     FAPI_TRY( fapi2::putScom(TT::get_farb_target(i_target), TT::FARB6Q_REG, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reads the mbarpc0q register
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[out] o_data data read from the register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode read_mbarpc0q( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    // This register sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY( mss::getScom(TT::get_farb_target(i_target), TT::MBARPC0Q_REG, o_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Writes the mbarpc0q register
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_data data read from the register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode write_mbarpc0q( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    // This register sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY( mss::putScom(TT::get_farb_target(i_target), TT::MBARPC0Q_REG, i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reads the str0q register
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[out] o_data data read from the register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode read_str0q( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    // This register sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY( mss::getScom(TT::get_farb_target(i_target), TT::STR0Q_REG, o_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Writes the str0q register
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_data data read from the register
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+fapi2::ReturnCode write_str0q( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    // This register sits on different chiplets depending upon the MC type in question
+    // In some MC's, it sits on the port level
+    // In other MC's, it sits on the chip level
+    // As such, a helper function is used to grab the appropriate target type to run this scom
+    FAPI_TRY( mss::putScom(TT::get_farb_target(i_target), TT::STR0Q_REG, i_data) );
 
 fapi_try_exit:
     return fapi2::current_err;

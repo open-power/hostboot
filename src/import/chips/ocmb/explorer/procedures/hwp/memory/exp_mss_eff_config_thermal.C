@@ -182,12 +182,12 @@ extern "C"
                 FAPI_INF("Starting pwr_throttles(%s) for %s",
                          mss::throttle_type::POWER == l_throttle_type ? "POWER" : "THERMAL", mss::c_str(l_ocmb));
                 //get the power limits, done per dimm and set to worst case for the slot and port throttles
-                FAPI_TRY(mss::power_thermal::pwr_throttles(l_ocmb, l_throttle_type),
+                FAPI_TRY(mss::power_thermal::pwr_throttles<mss::mc_type::EXPLORER>(l_ocmb, l_throttle_type),
                          "Fail encountered in pwr_throttles for %s", mss::c_str(l_ocmb));
             }
 
             // Equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
-            FAPI_TRY(mss::power_thermal::equalize_throttles(i_targets, l_throttle_type),
+            FAPI_TRY(mss::power_thermal::equalize_throttles<mss::mc_type::EXPLORER>(i_targets, l_throttle_type),
                      "Fail encountered in equalize_throttles");
 
             for ( const auto& l_ocmb : i_targets)

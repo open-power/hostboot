@@ -1,0 +1,243 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/generic/procedures/xml/attribute_info/ocmb_power_thermal.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- EKB-Mirror-To: hostboot, hwsv -->
+
+<attributes>
+
+    <attribute>
+        <id>ATTR_ODY_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          This is the throttled N commands per window
+          of M DRAM clocks setting for cfg_nm_n_per_port.
+          Note: This represents the combination of both sides of the OCMB for DDR5 config.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>ody_mem_throttled_n_commands_per_port</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          This is the throttle numerator setting for cfg_nm_n_per_slot
+          Note: This represents the combination of both sides of the OCMB for DDR5 config.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>ody_mem_throttled_n_commands_per_slot</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Runtime throttled N commands per
+          M DRAM clocks setting for cfg_nm_n_per_port.
+          Note: This represents the combination of both sides of the OCMB for DDR5 config.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>ody_runtime_mem_throttled_n_commands_per_port</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Runtime throttle numerator setting for cfg_nm_n_per_slot
+          Note: This represents the combination of both sides of the OCMB for DDR5 config.
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>ody_runtime_mem_throttled_n_commands_per_slot</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          This is the throttled N commands per window
+          of M DRAM clocks setting for cfg_nm_n_per_port.
+          Note: For DDR5 this represents one side of the OCMB
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>mem_throttled_n_commands_per_port</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          This is the throttle numerator setting for cfg_nm_n_per_slot.
+          Note: For DDR5 this represents one side of the OCMB
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>mem_throttled_n_commands_per_slot</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Runtime throttled N commands per
+          M DRAM clocks setting for cfg_nm_n_per_port.
+          Note: For DDR5 this represents one side of the OCMB
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>runtime_mem_throttled_n_commands_per_port</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Runtime throttle numerator setting for cfg_nm_n_per_slot.
+          Note: For DDR5 this represents one side of the OCMB
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <mssAccessorName>runtime_mem_throttled_n_commands_per_slot</mssAccessorName>
+    </attribute>
+
+    <attribute>
+      <id>ATTR_EXP_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
+      <targetType>TARGET_TYPE_MEM_PORT</targetType>
+      <description>
+          Safe mode throttle value for numerator cfg_nm_n_per_port
+          Set to below optimum value/ rate.
+          On a per port basis
+          Also used for emergency mode throttle MBA_FARB4Q_EMERGENCY_N
+          Used to thermally protect the system in all supported environmental conditions when OCC is not functional
+      </description>
+      <valueType>uint16</valueType>
+      <default>32</default>
+      <platInit/>
+      <mssAccessorName>safemode_mem_throttled_n_commands_per_port</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXP_RUNTIME_MEM_M_DRAM_CLOCKS</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>Runtime for M DRAM clocks setting for cfg_nm_m</description>
+        <initToZero></initToZero>
+        <valueType>uint32</valueType>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXP_MEM_PORT_POS_OF_FAIL_THROTTLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+          This is the fapi position of the port that failed to calculate
+          memory throttles given the passed in watt target and or utilization
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint64</valueType>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXP_MEM_WATT_TARGET</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+          Total memory power used to throttle for each dimm
+          Used to compute the throttles on the channel and/or dimms for OCC
+          OCC sets after IPL
+        </description>
+        <initToZero></initToZero>
+        <mssUnit>cW</mssUnit>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>mem_watt_target</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXP_TOTAL_PWR_SLOPE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            VDDR+VPP Power slope value for dimm
+            creator: mss_eff_config
+            consumer: mss_bulk_pwr_throttles
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>total_pwr_slope</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXP_TOTAL_PWR_INTERCEPT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            VDDR+VPP Power intercept value for dimm
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>total_pwr_intercept</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXP_PORT_MAXPOWER</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>Channel Pair Max Power output from thermal procedures</description>
+        <initToZero></initToZero>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <mssAccessorName>port_maxpower</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EXP_DIMM_THERMAL_LIMIT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            DIMM Max Power based on a thermal limit
+            Decoded from ATTR_MSS_MRW_THERMAL_POWER_LIMIT
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <mssUnit>cW</mssUnit>
+        <array>2</array>
+        <mssAccessorName>dimm_thermal_limit</mssAccessorName>
+    </attribute>
+
+</attributes>

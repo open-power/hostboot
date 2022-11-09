@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/power_thermal/exp_throttle.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/power_thermal/ody_throttle.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,9 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// EKB-Mirror-To: hostboot
 
 ///
-/// @file exp_throttle.H
+/// @file ody_throttle.H
 /// @brief throttle API
 ///
 
@@ -34,16 +35,35 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
-#ifndef _MSS_EXP_THROTTLE_
-#define _MSS_EXP_THROTTLE_
+#ifndef _MSS_ODY_THROTTLE_
+#define _MSS_ODY_THROTTLE_
 
 #include <fapi2.H>
-#include <lib/shared/exp_consts.H>
-#include <mss_explorer_attribute_setters.H>
-#include <mss_explorer_attribute_getters.H>
-#include <lib/power_thermal/exp_throttle_traits.H>
-#include <lib/mc/exp_port_traits.H>
-#include <generic/memory/lib/utils/dimm/kind.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
+namespace mss
+{
+namespace power_thermal
+{
+
+///
+/// @brief Combine the throttle values for the port targets and set the final OCMB values
+/// @param[in] i_target the MC target
+/// @param[in] i_throttle_type thermal boolean to determine whether to calculate throttles based on the power regulator or thermal limits
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// Enums are POWER for power egulator throttles and THERMAL for thermal throttles
+///
+fapi2::ReturnCode combine_port_throttles( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const mss::throttle_type i_throttle_type);
+
+///
+/// @brief Combine the runtime throttle values for the port targets and set the final OCMB values
+/// @param[in] i_target the MC target
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+fapi2::ReturnCode combine_runtime_port_throttles( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+}//namespace power_thermal
+}//namespace mss
 #endif
