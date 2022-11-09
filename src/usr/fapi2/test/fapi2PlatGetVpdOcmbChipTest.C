@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,15 +49,16 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     // Some useful variables
     size_t l_numTests(0);
     size_t l_numFails(0);
-    fapi2::ReturnCode l_rc;
+    fapi2::ReturnCode l_rc{fapi2::FAPI2_RC_SUCCESS};
     fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpdInfo(fapi2::EFD);
-
 
     /// Test case 1
     // Test with a "bad" target
     ++l_numTests;
     do
     {
+        TS_INFO("testGetVPD_EFD: Test case 1 start");
+
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_ocmbChipTarget;
         uint8_t* o_efdBuffer(nullptr);
 
@@ -73,6 +74,7 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
         }
 
     } while(0);
+    TS_INFO("testGetVPD_EFD: Test case 1 end");
 
 
     /// Test case 2
@@ -81,11 +83,13 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     // so critical that it needs to fail if unable to perform.
     do
     {
+        TS_INFO("testGetVPD_EFD: Test case 2 start");
+
         // Get a list of targets
         TARGETING::TargetRangeFilter l_targetList(
                                      TARGETING::targetService().begin(),
                                      TARGETING::targetService().end(),
-                                     NULL);
+                                     nullptr);
 
         // Iterate thru the list looking for the first NON OCMB_CHIP target
         for ( ; l_targetList; ++l_targetList)
@@ -121,18 +125,32 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
             } // end if (l_rc == fapi2::FAPI2_RC_SUCCESS)
         }  // end if (l_targetList)
     } while (0);
+    TS_INFO("testGetVPD_EFD: Test case 2 end");
 
 
     // Initialize input data
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_ocmbChipTarget(l_ocmbTargetList[0]);
     uint8_t* o_efdBuffer{nullptr};
 
+    // check if the OCMB is Planar, to add some additional data to l_vpdInfo
+    if(l_ocmbTargetList[0]->getAttr<TARGETING::ATTR_MEM_MRW_IS_PLANAR>())
+    {
+        // data taken from a Bonito config ipl.
+        // see add_planar_efd_info() for how this
+        // data is normally populated
+        l_vpdInfo.iv_dimm_count = 1;
+        l_vpdInfo.iv_total_ranks_dimm0 = 1;
+        l_vpdInfo.iv_total_ranks_dimm1 = 0;
+        l_vpdInfo.iv_dimm_type = 5;
+    }
 
     /// Test case 3
-    // Test with NULL buffer
+    // Test with nullptr buffer
     ++l_numTests;
     do
     {
+        TS_INFO("testGetVPD_EFD: Test case 3 start");
+
         // Initialize the essential input variables
         l_vpdInfo.iv_size = 0;
 
@@ -149,6 +167,7 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
             break;
         }
     } while(0);
+    TS_INFO("testGetVPD_EFD: Test case 3 end");
 
     // If no buffer size returned from previous call then set size to default
     if (!l_vpdInfo.iv_size)
@@ -165,6 +184,8 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     ++l_numTests;
     do
     {
+        TS_INFO("testGetVPD_EFD: Test case 4 start");
+
         // Initialize the other input variables
         l_vpdInfo.iv_omi_freq_mhz = 19200;
         l_vpdInfo.iv_rank = 0;
@@ -183,6 +204,7 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
             break;
         }
     } while(0);
+    TS_INFO("testGetVPD_EFD: Test case 4 end");
 
 
     /// Test case 5
@@ -191,6 +213,8 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     ++l_numTests;
     do
     {
+        TS_INFO("testGetVPD_EFD: Test case 5 start");
+
         // Initialize the other input variables
         l_vpdInfo.iv_omi_freq_mhz = 25600;
         l_vpdInfo.iv_rank = 2;
@@ -209,6 +233,7 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
             break;
         }
     } while(0);
+    TS_INFO("testGetVPD_EFD: Test case 5 end");
 
 
     /// Test case 6
@@ -217,6 +242,8 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     ++l_numTests;
     do
     {
+        TS_INFO("testGetVPD_EFD: Test case 6 start");
+
         // Initialize the other input variables
         l_vpdInfo.iv_omi_freq_mhz = 21330;
         l_vpdInfo.iv_rank = 0;
@@ -238,7 +265,7 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
             break;
         }
     } while(0);
-
+    TS_INFO("testGetVPD_EFD: Test case 6 end");
 
     /// Test case 7
     // Test when the size of the output buffer is greater than
@@ -246,6 +273,8 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     ++l_numTests;
     do
     {
+        TS_INFO("testGetVPD_EFD: Test case 7 start");
+
         // Initialize the other input variables
         l_vpdInfo.iv_omi_freq_mhz = 21330;
         l_vpdInfo.iv_rank = 0;
@@ -270,15 +299,15 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
             break;
         }
     } while(0);
+    TS_INFO("testGetVPD_EFD: Test case 7 end");
 
-
-    //TODO RTC: 258808 - Re-enable when we have VPD that supports it
-/*
     /// Test case 8
     // Test with data that is guaranteed to find a match 1
     ++l_numTests;
     do
     {
+        TS_INFO("testGetVPD_EFD: Test case 8 start");
+
         // Initialize the other input variables
         l_vpdInfo.iv_omi_freq_mhz = 25600;
         l_vpdInfo.iv_rank = 0;
@@ -301,12 +330,18 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
             break;
         }
     } while(0);
+    TS_INFO("testGetVPD_EFD: Test case 8 end");
 
+
+    //TODO RTC: 258808 - Re-enable when we have VPD that supports it
+/*
     /// Test case 9
     // Test with data that is guaranteed to find a match 2
     ++l_numTests;
     do
     {
+        TS_INFO("testGetVPD_EFD: Test case 9 start");
+
         // Initialize the other input variables
         l_vpdInfo.iv_omi_freq_mhz = 23460;
         l_vpdInfo.iv_rank = 0;
@@ -330,6 +365,8 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
             break;
         }
     } while(0);
+    TS_INFO("testGetVPD_EFD: Test case 9 end");
+
 **/
 
     /// Test case 10
@@ -337,6 +374,8 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     ++l_numTests;
     do
     {
+        TS_INFO("testGetVPD_EFD: Test case 10 start");
+
         // Initialize the other input variables
         l_vpdInfo.iv_omi_freq_mhz = 21330;
         l_vpdInfo.iv_rank = 0;
@@ -359,7 +398,7 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
             break;
         }
     } while(0);
-
+    TS_INFO("testGetVPD_EFD: Test case 10 end");
 
     // Clean up memory
     delete []o_efdBuffer;
