@@ -200,6 +200,14 @@ function verify_config_file ()
     fi
 }
 
+function cleanup_repo ()
+{
+    echo "Clobbering Hostboot repo..."
+    vexec make clobber
+    echo "Creating a new sandbox to work with..."
+    yes | hb simsetup
+}
+
 ###################################################################################################
 # Main
 ###################################################################################################
@@ -259,7 +267,6 @@ function main ()
         shift
         case "$arg" in
             "--help") set -- "$@" "-h" ;;
-            "--package-name") set -- "$@" "-p" ;;
             "--xml-only") set -- "$@" "-x" ;;
             "--no-xml") set -- "$@" "-n" ;;
             "--system-type") set -- "$@" "-s" ;;
@@ -357,11 +364,24 @@ function main ()
 
     if [ "$xml_only" == false ]; then
         verify_config_file
-        # Remind the user of their responsibilities. Put this notice here so it's not seen when doing copy-only actions.
-        echo ""
-        echo "Repo has been setup for creating standalone patches for full system simulation and hardware."
-        echo "IMPORTANT: You must 'make clobber' your repo now and perform 'hb simsetup' and 'hb prime' actions."
-        echo "           Otherwise, your patches will be built incorrectly!"
+
+        while true; do
+            read -p " To finish setup, this script must 'make clobber' and perform 'hb simsetup' in this repo. Do that now [Y/N]? " yn
+            case $yn in
+                [Yy] ) cleanup_repo
+                       echo "Hostboot repo has been clobbered and a new sandbox for this driver has been created. You may now apply your changes, compile, prime, and patch the system."
+                       echo "IMPORTANT: If you exit this shell you MUST export the correct CONFIG_FILE in the new shell to build patches again on this branch. The file is located in your project root."
+                       break ;;
+                [Nn] )
+                    # Remind the user of their responsibilities. Put this notice here so it's not seen when doing copy-only actions.
+                    echo ""
+                    echo "Repo has been setup for creating standalone patches for full system simulation and hardware."
+                    echo "IMPORTANT: You must 'make clobber' your repo now, perform 'hb simsetup' and 'hb prime' actions."
+                    echo "           Otherwise, your patches will be built incorrectly!"
+                    break ;;
+                * ) echo " Please answer Y or N." ;;
+                esac
+        done
     fi
 
 }
