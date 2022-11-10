@@ -86,6 +86,7 @@ constexpr uint32_t P10          = 0x020DA049;
 constexpr uint32_t CENTAUR      = 0x06039049;
 constexpr uint32_t EXPLORER     = 0x060D2000;
 constexpr uint32_t GEMINI       = 0x060DC000;
+constexpr uint32_t ODYSSEY      = 0x060C0049;
 
 // Shorter 16-bit value (drops Major nibble and 049)
 constexpr uint32_t NIMBUS_16       = 0x20D1;
@@ -95,6 +96,7 @@ constexpr uint32_t P10_16          = 0x20DA;
 constexpr uint32_t CENTAUR_16      = 0x6039;
 constexpr uint32_t EXPLORER_16     = 0x60D2;
 constexpr uint32_t GEMINI_16       = 0x60DC;
+constexpr uint32_t ODYSSEY_16      = 0x60C0;
 
 }; //namespace
 
