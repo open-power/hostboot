@@ -178,37 +178,52 @@ fapi2::ReturnCode enable_power_management_helper(const fapi2::Target<fapi2::TARG
     {
         case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_OFF:
             {
-                l_rpc0.clearBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
-                l_str0.clearBit<TT::CFG_STR_ENABLE>();
-                l_str0.clearBit<TT::CFG_DIS_CLK_IN_STR>();
+                l_rpc0.clearBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>()
+                .clearBit<TT::CFG_LP_CTRL_ENABLE>()
+                .clearBit<TT::CFG_LP_DATA_ENABLE>();
+                l_str0.clearBit<TT::CFG_STR_ENABLE>()
+                .clearBit<TT::CFG_DIS_CLK_IN_STR>();
                 break;
             }
 
         case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN:
             {
-                l_rpc0.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
-                l_str0.clearBit<TT::CFG_STR_ENABLE>();
-                l_str0.clearBit<TT::CFG_DIS_CLK_IN_STR>();
+                l_rpc0.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>()
+                .clearBit<TT::CFG_LP_CTRL_ENABLE>()
+                .clearBit<TT::CFG_LP_DATA_ENABLE>();
+                l_str0.clearBit<TT::CFG_STR_ENABLE>()
+                .clearBit<TT::CFG_DIS_CLK_IN_STR>();
                 break;
             }
 
         case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR:
             {
-                l_rpc0.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
-                l_str0.setBit<TT::CFG_STR_ENABLE>();
-                l_str0.clearBit<TT::CFG_DIS_CLK_IN_STR>();
+                l_rpc0.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>()
+                .setBit<TT::CFG_LP_CTRL_ENABLE>()
+                .setBit<TT::CFG_LP_DATA_ENABLE>();
+                l_str0.setBit<TT::CFG_STR_ENABLE>()
+                .clearBit<TT::CFG_DIS_CLK_IN_STR>();
                 break;
             }
 
         case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP:
         default:
             {
-                l_rpc0.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
-                l_str0.setBit<TT::CFG_STR_ENABLE>();
-                l_str0.setBit<TT::CFG_DIS_CLK_IN_STR>();
+                l_rpc0.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>()
+                .setBit<TT::CFG_LP_CTRL_ENABLE>()
+                .setBit<TT::CFG_LP_DATA_ENABLE>();
+                l_str0.setBit<TT::CFG_STR_ENABLE>()
+                .setBit<TT::CFG_DIS_CLK_IN_STR>();
                 break;
             }
     }
+
+    // Set the MIN_DOMAIN_REDUCTION time
+    l_rpc0.insertFromRight<TT::CFG_MIN_DOMAIN_REDUCTION_TIME, TT::CFG_MIN_DOMAIN_REDUCTION_TIME_LEN>
+    (TT::MIN_DOMAIN_REDUCTION_TIME);
+
+    // Set the ENTER_STR time
+    l_str0.insertFromRight<TT::CFG_ENTER_STR_TIME, TT::CFG_ENTER_STR_TIME_LEN>(TT::ENTER_STR_TIME);
 
     FAPI_TRY(fapi2::putScom(i_target, TT::MBARPC0Q_REG, l_rpc0));
     FAPI_TRY(fapi2::putScom(i_target, TT::STR0Q_REG, l_str0));
