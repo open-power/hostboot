@@ -60,6 +60,25 @@ errlHndl_t ocmbGetSPD(TARGETING::TargetHandle_t        i_target,
 bool isValidOcmbDimmType(const uint8_t i_dimmType);
 
 /**
+ * @brief This function is a wrapper to pull the Planar SPD from PNOR or #D
+ *
+ * @param[in]  i_target        The target OCMB_CHIP to access.
+ *
+ * @param[in]  i_byteAddr      The offset into the SPD layout.
+ *
+ * @param[in]  i_numbytes      Number of bytes to read.
+ *
+ * @param[out] o_data          The data buffer that will return the data read.
+ *
+ * @return     errlHndl_t   nullptr if successful, otherwise a pointer to the
+ *                          error log.
+ */
+errlHndl_t planarOcmbRetrieveSPD(TARGETING::TargetHandle_t    i_target,
+                           uint64_t                     i_byteAddr,
+                           size_t                       i_numBytes,
+                           void*                        o_data);
+
+/**
  * @brief This function is a wrapper for reading the correct keyword.
  *
  * @param[in]  i_target        The target DDIMM to access.

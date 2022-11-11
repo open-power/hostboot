@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -415,6 +415,7 @@ const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
         Util::OCC_CONTAINER_LIDID,
         Util::WOF_LIDID,
         Util::WOF_CONTAINER_LIDID,
+        Util::PSPD_CONTAINER_LIDID,
         Util::P10_HCODE_LIDID,
         Util::HCODE_CONTAINER_LIDID,
         Util::HWREFIMG_RINGOVD_LIDID,

@@ -1585,6 +1585,7 @@ errlHndl_t getLidIds(std::vector<uint8_t>& io_string_table,
         PLDM_ERR("getLidIds: Failed to lookup value for %s", PLDM_BIOS_HB_LID_IDS_STRING);
         break;
     }
+    PLDM_INF_BIN("getLidIds: o_lid_ids_string.data()=", o_lid_ids_string.data(), o_lid_ids_string.size());
     // Check for string type == 0x01 ASCII
     if (bios_string_type != PLDM_BIOS_STRING_TYPE_ASCII)
     {

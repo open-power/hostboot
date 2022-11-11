@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,8 +58,10 @@ static PnorLidsMap PnorToLidsMap =
 #ifdef CONFIG_PLDM
     { PNOR::WOFDATA,     LidAndContainerLid(INVALID_LIDID, WOF_CONTAINER_LIDID)},
     { PNOR::HB_DATA,     LidAndContainerLid(INVALID_LIDID, TARGETING_CONTAINER_LIDID)},
+    { PNOR::PSPD,        LidAndContainerLid(INVALID_LIDID, PSPD_CONTAINER_LIDID)},
 #else
     { PNOR::WOFDATA,     LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
+    { PNOR::PSPD,        LidAndContainerLid(PSPD_LIDID, PSPD_CONTAINER_LIDID)},
 #endif
     { PNOR::HCODE_LID,   LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
     { PNOR::HCODE,       LidAndContainerLid(P10_HCODE_LIDID, HCODE_CONTAINER_LIDID)},

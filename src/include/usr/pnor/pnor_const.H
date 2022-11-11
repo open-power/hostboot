@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,6 +79,7 @@ enum SectionId
 #endif
     HCODE_LID,      /**< HCODE_LID Reference image */
     HB_DATA_RW,     /**< Hostboot Data RW */
+    PSPD,           /**< Planar SPD Data  */
 #endif
     NUM_SECTIONS,   /**< Number of defined sections */
 

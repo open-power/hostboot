@@ -68,6 +68,7 @@ namespace PLDM_PNOR
         assert(i_sectionId < PNOR::NUM_SECTIONS,
               "sectionIdToLidId attempting to lookup invalid SectionId" );
         o_lidId = i_lid_ids[i_sectionId];
+        TRACFCOMP(g_trac_pnor, "sectionIdToLidId i_sectionId=0x%X o_lidId=0x%X", i_sectionId, o_lidId);
         if(o_lidId == INVALID_LID)
         {
             TRACFCOMP(g_trac_pnor,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,10 @@ namespace Util
 // Lid Ids
 //  A Container Lid can be referred to as a Secure Header. The Container Lid ID
 //  is associated with the header data that sits in front of an image.
+//
+//  The Lid Ids contained below are representative of the Rainier 2U flavors.
+//  parse_hb_lid_ids_string at execution time will perform the platform
+//  translations based on the hb_lid_ids content.
 enum LidId
 {
     TEST_LIDID = 0x00000111,
@@ -54,6 +58,8 @@ enum LidId
     // TODO RTC 172767 Make utillidmgr LIDID structure attribute driven
     WOF_LIDID = 0x81e00440,
     WOF_CONTAINER_LIDID = 0x80d00015,
+    PSPD_LIDID = 0x81e006a2,
+    PSPD_CONTAINER_LIDID = 0x80d00046,
     // Hcode Reference Image LIDs
     P10_HCODE_LIDID = 0x81e00602,
     HCODE_CONTAINER_LIDID = 0x80d0000c,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@ const PreVerifyVector preVerifiedPnorSections {
     {PNOR::WOFDATA, true},
     {PNOR::HCODE, true},
     {PNOR::RINGOVD, false},
+    {PNOR::PSPD, true},
 };
 
 bool isPreVerifiedSection(const PNOR::SectionId i_section)

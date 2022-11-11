@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2022
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -87,6 +87,7 @@ COPY_FILES = \
     obj/genfiles/target_types_full.xml:openpower,openpower-sim \
     src/usr/targeting/attroverride/README.attr_override:tools,openpower,openpower-sim \
     src/build/buildpnor/buildSbePart.pl:openpower,openpower-sim \
+    src/build/buildpnor/buildSPDImages.pl:openpower,openpower-sim \
     src/build/buildpnor/buildpnor.pl:openpower,openpower-sim \
     src/build/buildpnor/genfakeheader.pl:openpower,openpower-sim \
     src/build/buildpnor/genPnorImages.pl:openpower,openpower-sim \

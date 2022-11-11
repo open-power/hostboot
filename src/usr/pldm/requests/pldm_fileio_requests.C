@@ -175,6 +175,8 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
 
     }while(0);
 
+    // If issues with RC_INVALID_SECTION in populateTOC investigate mappings between PNOR sections
+    PLDM_INF_BIN("getFileTable (fileTable.json on the BMC) o_table.data()=", o_table.data(), o_table.size());
     PLDM_EXIT("getFileTable");
     return l_errl;
 }

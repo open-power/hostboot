@@ -30,6 +30,7 @@
 #include <endian.h>
 #include <errl/errlmanager.H>
 #include <util/misc.H>
+#include <util/utillidpnor.H>
 #include <targeting/common/utilFilter.H>
 
 #include "ocmb_spd.H"
@@ -42,6 +43,31 @@ extern trace_desc_t * g_trac_spd;
 
 //#define TRACSSCOMP(args...)  TRACFCOMP(args)
 #define TRACSSCOMP(args...)
+
+const uint32_t     SPDTOC_EYECATCH = 0x53504400;  //'SPD\0'
+
+constexpr uint8_t  RAW_CARD_BYTE_OFFSET = 195; // #D raw card offset field
+
+enum TOC_VERSION
+{
+    TOC_VERSION_1      = 0x01,
+    TOC_VERSION_LATEST = TOC_VERSION_1,
+};
+
+struct spdEntry_t
+{
+    uint32_t ec;
+    uint32_t offset;
+    uint32_t size;
+} PACKED spdEntry;
+
+struct SectionMapTOC_t
+{
+    uint32_t eyeCatch;
+    uint32_t TOC_version;
+    uint32_t TOC_count;
+    spdEntry_t PSPD_images[];
+} PACKED;
 
 // Namespace alias for targeting
 namespace T = TARGETING;
@@ -77,6 +103,224 @@ DEVICE_REGISTER_ROUTE(DeviceFW::READ,
                       DeviceFW::SPD,
                       T::TYPE_OCMB_CHIP,
                       ocmbSPDPerformOp);
+
+errlHndl_t planarOcmbRetrieveSPD(T::TargetHandle_t        i_target,
+                           uint64_t                 i_byteAddr,
+                           size_t                   i_numBytes,
+                           void*                    o_data)
+{
+    errlHndl_t l_errl = nullptr;
+    static bool found_image = false;
+    static std::vector<uint8_t> spd_cache; // local cache to store PNOR::PSPD if match found
+
+    TRACSSCOMP(g_trac_spd, ENTER_MRK"planarOcmbRetrieveSPD "
+               "i_byteAddr = 0x%X i_numBytes = %d HUID=0x%X",
+               i_byteAddr, i_numBytes, get_huid(i_target));
+    do {
+
+    // parent node
+    //   look for any parent regardless of state since there could be
+    //   a path that runs through here before all of the presence
+    //   detection is complete
+    TARGETING::TargetHandleList targetListNode;
+    TARGETING::getParentAffinityTargets(targetListNode,i_target,
+                                        TARGETING::CLASS_ENC,
+                                        TARGETING::TYPE_NODE,
+                                        false /*ignore state*/);
+    TARGETING::Target* l_pNodeTarget = targetListNode[0];
+
+    // read PSPD:#D (contains the planar SPD)
+    size_t l_size = 0;
+    l_errl = DeviceFW::deviceOp(DeviceFW::READ,
+                                l_pNodeTarget,
+                                nullptr,//returns size only
+                                l_size,
+                                DEVICE_VPD_ADDRESS(PVPD::PSPD,
+                                                   PVPD::pdD));
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_spd, ERR_MRK"planarOcmbRetrieveSPD(): error getting size of PSPD:#D");
+        break;
+    }
+
+    uint8_t l_nodeData[l_size] = {};
+    l_errl = DeviceFW::deviceOp(DeviceFW::READ,
+                                l_pNodeTarget,
+                                l_nodeData,
+                                l_size,
+                                DEVICE_VPD_ADDRESS(PVPD::PSPD,
+                                                   PVPD::pdD));
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_spd, ERR_MRK"planarOcmbRetrieveSPD(): error reading PSPD:#D");
+        break;
+    }
+
+
+    static bool unloadPSPD = false;
+// Exclude FSP since there is NO PNOR access for FSP Runtime
+#ifndef CONFIG_FSP_BUILD
+    uint8_t *pdD_raw_card = l_nodeData+RAW_CARD_BYTE_OFFSET;
+    static bool first_time = true;
+    uint8_t *pnor_raw_card = 0; // RAW_CARD_BYTE_OFFSET
+    SectionMapTOC_t* l_TOCPtr = nullptr;
+    if (first_time) // We get first time to check if PNOR::PSPD matches, if so, we make a local cache to use
+    {
+        first_time = false; // We set this early, we possibly can fail to set found_image due to condition checks,
+                            // but that's OK since we cannot use PNOR for some odd reason, etc.
+#ifndef  __HOSTBOOT_RUNTIME
+        // We first attempt to getSectionInfo, so in case that fails
+        // we can log some info, but continue since the lack of the PSPD partition
+        // is not a fatal condition.
+        //
+        // We do the getSectionInfo first as the least invasive method to check
+        // for the existance of the PSPD partition.  If for example we try to
+        // loadSecureSection, that may possibly cause a fatal shutdown flow to
+        // be triggered in the secure paths is PSPD partition is not available.
+        PNOR::SectionInfo_t l_sectionInfo_PSPD = {};
+        errlHndl_t l_errl_PSPD = nullptr;
+        l_errl_PSPD = PNOR::getSectionInfo(PNOR::PSPD, l_sectionInfo_PSPD);
+        if (l_errl_PSPD)
+        {
+            l_errl_PSPD->collectTrace(VPD_COMP_NAME, 256);
+            l_errl_PSPD->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl_PSPD, VPD_COMP_ID);
+            l_TOCPtr = 0; // if getSectionInfo setHeader fails clear the vaddr since it comes back valid
+        }
+        else
+        {
+#ifdef CONFIG_SECUREBOOT // NOT RUNTIME and SECUREBOOT
+            l_errl_PSPD = PNOR::loadSecureSection(PNOR::PSPD);
+            if (l_errl_PSPD)
+            {
+                // Log some info but continue since the lack of the PSPD partition is
+                // not a fatal condition, so basically ignore and keep on going
+                unloadPSPD = false;
+                l_errl_PSPD->collectTrace(VPD_COMP_NAME, 256);
+                l_errl_PSPD->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errlCommit(l_errl_PSPD, VPD_COMP_ID);
+                l_TOCPtr = 0; // flag so we will be sure to skip the handling
+            }
+            else
+            {
+                TRACFCOMP(g_trac_spd, "planarOcmbRetrieveSPD loadSecureSection PNOR::PSPD");
+                unloadPSPD = true;
+                l_TOCPtr = reinterpret_cast<SectionMapTOC_t*>(l_sectionInfo_PSPD.vaddr);
+            }
+#endif // CONFIG_SECUREBOOT
+        }
+#else  // RUNTIME
+       Util::LidAndContainerLid l_lids;
+       errlHndl_t l_errl_RT_PSPD = nullptr;
+       l_errl_RT_PSPD = Util::getPnorSecLidIds(PNOR::PSPD, l_lids);
+       if (l_errl_RT_PSPD)
+       {
+           // Log some info but keep the processing flowing as an optional path
+           l_errl_RT_PSPD->collectTrace(VPD_COMP_NAME, 256);
+           l_errl_RT_PSPD->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+           errlCommit(l_errl_RT_PSPD, VPD_COMP_ID);
+           l_TOCPtr = 0;  // flag so we will be sure to skip the handling
+       }
+       else
+       {
+           uint32_t l_lidNumber = l_lids.lid;
+           size_t l_lidImageSize = 0;
+           void * l_PSPD_Image =nullptr;
+           UtilLidMgr l_pspdLidMgr(l_lidNumber);
+           l_errl_RT_PSPD = l_pspdLidMgr.getLidSize(l_lidImageSize);
+           if (l_errl_RT_PSPD)
+           {
+               // Log some info but keep the processing flowing as an optional path
+               l_errl_RT_PSPD->collectTrace(VPD_COMP_NAME, 256);
+               l_errl_RT_PSPD->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+               errlCommit(l_errl_RT_PSPD, VPD_COMP_ID);
+               l_TOCPtr = 0;  // flag so we will be sure to skip the handling
+           }
+           else
+           {
+               l_errl_RT_PSPD = l_pspdLidMgr.getStoredLidImage(l_PSPD_Image, l_lidImageSize);
+               if (l_errl_RT_PSPD)
+               {
+                   // Log some info but keep the processing flowing as an optional path
+                   l_errl_RT_PSPD->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                   l_errl_RT_PSPD->collectTrace(VPD_COMP_NAME, 256);
+                   errlCommit(l_errl_RT_PSPD, VPD_COMP_ID);
+                   l_TOCPtr = 0;  // flag so we will be sure to skip the handling
+               }
+               else
+               {
+                   l_TOCPtr = reinterpret_cast<SectionMapTOC_t*>(l_PSPD_Image);
+               }
+           }
+       }
+#endif // __HOSTBOOT_RUNTIME
+
+        // We could get a blank, 0xFF filled PNOR, so validate parameters
+        if (l_TOCPtr)
+        {
+            // We will -NOT- get error from getSectionInfo if PNOR::PSPD exists but has no default images built,
+            // meaning lots of 0xFF's
+            if ((l_TOCPtr->TOC_count >= 1) &&
+                (l_TOCPtr->TOC_version == TOC_VERSION_LATEST) &&
+                (l_TOCPtr->eyeCatch == SPDTOC_EYECATCH))
+            {
+                for (uint32_t i=0; i<(l_TOCPtr->TOC_count); i++)
+                {
+                    //ranged checked that its within the range we want
+                    if ((l_TOCPtr->PSPD_images[i].size >= (i_byteAddr+i_numBytes)) &&
+                       (l_TOCPtr->PSPD_images[i].size >= RAW_CARD_BYTE_OFFSET)) // Future proof changes to RAW_CARD_TYPE
+                    {
+                        // Now that we have a candidate image, store its raw card value
+                        pnor_raw_card = reinterpret_cast<uint8_t *>( reinterpret_cast<uint8_t *>(l_TOCPtr) + (l_TOCPtr->PSPD_images[i].offset + RAW_CARD_BYTE_OFFSET));
+                        // ONLY if we MATCH the original Planar VPD #D SPD raw card byte do we use the new, refreshed PNOR::PSPD image
+                        if (*pnor_raw_card == *pdD_raw_card)
+                        {
+                            found_image = true;
+                            spd_cache.resize(l_TOCPtr->PSPD_images[i].size);
+                            TRACFCOMP(g_trac_spd, "planarOcmbRetrieveSPD *pdD_raw_card=0x%X RAW_CARD_BYTE_OFFSET=0x%X (%d) i=0x%X spd_cache.size=0x%X (%d)",
+                                                  *pdD_raw_card, RAW_CARD_BYTE_OFFSET, RAW_CARD_BYTE_OFFSET, i, spd_cache.size(), spd_cache.size());
+                            memcpy(spd_cache.data(), reinterpret_cast<uint8_t *>( reinterpret_cast<uint8_t *>(l_TOCPtr) + l_TOCPtr->PSPD_images[i].offset),spd_cache.size());
+                            break;
+                        }
+                    }
+                }
+            }
+        } // l_TOCPtr
+    } // first_time
+#endif // NOT FSP
+
+    if (found_image)
+    {
+        memcpy(o_data,
+           (spd_cache.data() + i_byteAddr),
+           i_numBytes);
+    }
+    else
+    {
+        memcpy( o_data, l_nodeData+i_byteAddr, i_numBytes );
+    }
+
+    if (unloadPSPD)
+    {
+        unloadPSPD = false;
+#ifdef CONFIG_SECUREBOOT
+#ifndef  __HOSTBOOT_RUNTIME
+        errlHndl_t l_errl_unloadPSPD = nullptr;
+        l_errl_unloadPSPD = PNOR::unloadSecureSection(PNOR::PSPD);
+        TRACFCOMP(g_trac_spd, "planarOcmbRetrieveSPD unloadSecureSection PNOR::PSPD");
+        if (l_errl_unloadPSPD)
+        {
+            delete l_errl_unloadPSPD;
+            l_errl_unloadPSPD = nullptr;
+        }
+#endif  // NOT RUNTIME
+#endif // NOT SECUREBOOT
+    }
+
+    } while(0);
+    return l_errl;
+}
+
 
 errlHndl_t ocmbGetSPD(T::TargetHandle_t        i_target,
                             void*              io_buffer,
@@ -230,46 +474,12 @@ errlHndl_t ocmbFetchData(T::TargetHandle_t    i_target,
         // Otherwise pull the data from the node VPD
         else
         {
-            // parent node
-            //  look for any parent regardless of state since there could be
-            //  a path that runs through here before all of the presence
-            //  detection is complete
-            TARGETING::TargetHandleList targetListNode;
-            TARGETING::getParentAffinityTargets(targetListNode,i_target,
-                                                TARGETING::CLASS_ENC,
-                                                TARGETING::TYPE_NODE,
-                                                false /*ignore state*/);
-            TARGETING::Target* l_pNodeTarget = targetListNode[0];
-
-            // read PSPD:#D (contains the planar SPD)
-            size_t l_size = 0;
-            err = DeviceFW::deviceOp(DeviceFW::READ,
-                                     l_pNodeTarget,
-                                     nullptr,//returns size only
-                                     l_size,
-                                     DEVICE_VPD_ADDRESS(PVPD::PSPD,
-                                                        PVPD::pdD));
-            if( err )
+            err = planarOcmbRetrieveSPD(i_target, i_byteAddr, i_numBytes, o_data);
+            if ( err )
             {
-                TRACFCOMP(g_trac_spd, ERR_MRK"ocmbFetchData(): error getting size of PSPD:#D");
+                TRACFCOMP(g_trac_spd, ERR_MRK"ocmbFetchData(): failing out of planarOcmbRetrieveSPD");
                 break;
             }
-
-            uint8_t l_nodeData[l_size] = {};
-            err = DeviceFW::deviceOp(DeviceFW::READ,
-                                     l_pNodeTarget,
-                                     l_nodeData,
-                                     l_size,
-                                     DEVICE_VPD_ADDRESS(PVPD::PSPD,
-                                                        PVPD::pdD));
-            if( err )
-            {
-                TRACFCOMP(g_trac_spd, ERR_MRK"ocmbFetchData(): error reading PSPD:#D");
-                break;
-            }
-
-            // pull out the chunk of data we want
-            memcpy( o_data, l_nodeData+i_byteAddr, i_numBytes );
         }
     } while(0);
 

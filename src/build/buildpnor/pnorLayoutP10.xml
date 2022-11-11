@@ -294,5 +294,12 @@ Layout Description
         <side>sideless</side>
         <ecc/>
     </section>
-
+    <section>
+        <description>Planar SPD (32K)</description>
+        <eyeCatch>PSPD</eyeCatch>
+        <physicalRegionSize>0x8000</physicalRegionSize>
+        <sha512Version/>
+        <side>sideless</side>
+        <readOnly/>
+    </section>
 </pnor>

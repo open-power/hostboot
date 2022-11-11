@@ -366,6 +366,7 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == HCODE_LID ||
                i_section == HB_RUNTIME ||
                i_section == WOFDATA ||
+               i_section == PSPD ||
                i_section == CAPP ||
                i_section == TESTLOAD ||
                i_section == VERSION ||
@@ -445,6 +446,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
 #endif
         "HCODE_LID",   /**< PNOR::HCODE_LID      : HCODE_LID Reference image */
         "HBD_RW",      /**< PNOR::HB_DATA_RW     : Hostboot Data ReadWrite   */
+        "PSPD",        /**< PNOR::PSPD           : Hostboot Planar SPD       */
 #endif
     };
 
@@ -485,6 +487,10 @@ const char * PNOR::SectionIdToRTString(uint32_t i_secIdIndex)
     else if(i_secIdIndex == PNOR::WOFDATA)
     {
         str = "WOFDATA_RT";
+    }
+    else if(i_secIdIndex == PNOR::PSPD)
+    {
+        str = "PSPD_RT";
     }
     return str;
 }

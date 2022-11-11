@@ -75,6 +75,7 @@ GEN_FAKE_HEADER_SCRIPT := ${BUILDPNOR}/genfakeheader.pl
 GEN_PNOR_IMAGE_SCRIPT := ${BUILDPNOR}/genPnorImages.pl
 UNPKGD_OCMBFW_IMG := ${STAGINGDIR}/ocmbfw.bin
 SBE_BUILD_SCRIPT := ${BUILDPNOR}/buildSbePart.pl
+PSPD_BUILD_SCRIPT := ${BUILDPNOR}/buildSPDImages.pl
 # Needed to sign SBE Image (which will add .sb_settings section to it)
 SBE_SIGN_SCRIPT := ${PPE_DIR}/src/tools/scripts/signSbeImage
 SBE_SCRATCH_DIR := ${STANDALONEDIR}/sbeScratchDir
@@ -108,6 +109,9 @@ SBE_SEEPROM_HDR_BIN_DD1 := ${STANDALONEDIR}/pnor/sbe_seeprom.hdr.bin.DD1
 # # Input fake images
 HBD_FAKE = ${BASEIMAGESDIR}/vbu_P10_targeting.bin
 EECACHE_IMG = ${STANDALONEDIR}/simics/eecache_vpo_prebuilt.bin.ecc
+#PSPD_IMG1 = ${STANDALONEDIR}/simics/import/vpd/bonnell_OCMB_spd_rev002.bin
+# running> backplane0.ocmb[0].ocmb_vpd_image.info ^^  Planar VPD (2U DDIMM type) OCMB SPD
+# standalone/simics/targets/bonito/simenv.simics  <--- For reference
 
 # Output final images
 HBBL_FINAL_IMG := HBBL.bin
@@ -135,6 +139,7 @@ OCC_FINAL_IMG := OCC.bin
 WOFDATA_FINAL_IMG := WOFDATA.bin
 SBE_IMG := unprocessed.SBE.bin
 DEVTREE_FINAL_IMG := DEVTREE.bin
+PSPD_FINAL_IMG := PSPD.bin
 
 # HDAT input images
 $(info    HDAT_ARTIFACT_LOCATION is $(HDAT_ARTIFACT_LOCATION))
@@ -203,10 +208,10 @@ ifeq (${FAKEPNOR},)
 HBD_RW_EXISTS:= $(shell grep 'HBD_RW' $(PNOR_LAYOUT))
 ifeq (${HBD_RW_EXISTS},)
     _GEN_BIN_FILES := SBE=${SBE_IMG},HCODE=${HCODE_IMG},OCC=${OCC_IMG},\
-    HBD=${HBD_COMBO_IMG},WOFDATA=${WOFDATA_IMG},DEVTREE=${DEVTREE_IMG},HCODE_LID=${HCODE_LID_IMG}
+    HBD=${HBD_COMBO_IMG},WOFDATA=${WOFDATA_IMG},DEVTREE=${DEVTREE_IMG},HCODE_LID=${HCODE_LID_IMG},PSPD=${PSPD_FINAL_IMG}
 else
     _GEN_BIN_FILES := SBE=${SBE_IMG},HCODE=${HCODE_IMG},OCC=${OCC_IMG},\
-    HBD=${HBD_COMBO_IMG},HBD_RW=${HBD_RW_FINAL_IMG},WOFDATA=${WOFDATA_IMG},DEVTREE=${DEVTREE_IMG},HCODE_LID=${HCODE_LID_IMG}
+    HBD=${HBD_COMBO_IMG},HBD_RW=${HBD_RW_FINAL_IMG},WOFDATA=${WOFDATA_IMG},DEVTREE=${DEVTREE_IMG},HCODE_LID=${HCODE_LID_IMG},PSPD=${PSPD_FINAL_IMG}
 endif
 
 # Parameters passed to GEN_PNOR_IMAGE_SCRIPT.
@@ -225,18 +230,18 @@ endif
     	HBEL=${HBEL_FINAL_IMG} GUARD=${GUARD_FINAL_IMG} \
     	PAYLOAD=${PAYLOAD_FINAL_IMG}  \
     	RINGOVD=${RINGOVD_FINAL_IMG} SBKT=${SBKT_FINAL_IMG} \
-    	VERSION=${VERSION_FINAL_IMG}
+    	VERSION=${VERSION_FINAL_IMG} PSPD=${PSPD_FINAL_IMG}
 
 ifeq (${HBD_RW_EXISTS},)
     SECT := HBD=${HBD_FINAL_IMG} SBE=${SBE_FINAL_IMG} HCODE=${HCODE_FINAL_IMG} \
         OCC=${OCC_FINAL_IMG} WOFDATA=${WOFDATA_FINAL_IMG} \
         EECACHE=${EECACHE_FINAL_IMG} \
-        OCMBFW=${OCMBFW_FINAL_IMG} DEVTREE=${DEVTREE_FINAL_IMG} HCODE_LID=${HCODE_LID_FINAL_IMG}
+        OCMBFW=${OCMBFW_FINAL_IMG} DEVTREE=${DEVTREE_FINAL_IMG} HCODE_LID=${HCODE_LID_FINAL_IMG} PSPD=${PSPD_FINAL_IMG}
 else
     SECT := HBD=${HBD_FINAL_IMG} HBD_RW=${HBD_RW_FINAL_IMG} SBE=${SBE_FINAL_IMG} HCODE=${HCODE_FINAL_IMG} \
         OCC=${OCC_FINAL_IMG} WOFDATA=${WOFDATA_FINAL_IMG} \
         EECACHE=${EECACHE_FINAL_IMG} \
-        OCMBFW=${OCMBFW_FINAL_IMG} DEVTREE=${DEVTREE_FINAL_IMG} HCODE_LID=${HCODE_LID_FINAL_IMG}
+        OCMBFW=${OCMBFW_FINAL_IMG} DEVTREE=${DEVTREE_FINAL_IMG} HCODE_LID=${HCODE_LID_FINAL_IMG} PSPD=${PSPD_FINAL_IMG}
 endif
 
 else
@@ -291,7 +296,7 @@ export PATH:=/usr/bin:${SIGNING_DIR}:${SIGNING_DIR}/../sb-signing-framework/sb-s
 
 ## Rules:
 
-GEN_BUILD = dump-secureboot-config gen_default_images build_sbe_img
+GEN_BUILD = dump-secureboot-config gen_default_images build_sbe_img build_spd_img
 
 # Modify the dependency list when building a CFM test image
 # Key transition mode environment var can be set as either "imprint" or
@@ -301,7 +306,7 @@ ifneq ($(strip ${SECUREBOOT_KEY_TRANSITION_MODE}),)
     ifeq ($(wildcard $(CFM_TEST_IMAGE)),)
 # The file CFM_TEST_IMAGE could be found. The perl script (IMAGE_EDIT_PROGRAM)
 # may not detect missing file
-        GEN_BUILD = dump-secureboot-config gen_default_images build_sbe_img \
+        GEN_BUILD = dump-secureboot-config gen_default_images build_sbe_img build_spd_img \
         	update_image_id
 # Note that genPnorImages.pl will catch cases when KEY_TRANSITION_MODE_PARAMS
 # is set incorrectly and report an error.
@@ -393,6 +398,18 @@ build_standalone_payload:
 sign_sbe_img:
 	${SBE_SIGN_SCRIPT} -s ${SBE_SCRATCH_DIR} -t ${SBE_TOOL} \
 		-i $(shell basename ${SBE_SEEPROM_IMAGE_DD1})
+
+# To build an empty image  ${PSPD_BUILD_SCRIPT} --spdOutBin ${PSPD_FINAL_IMG}
+# To build a single image  ${PSPD_BUILD_SCRIPT} --spdOutBin ${PSPD_FINAL_IMG} --spdImg_1 ${PSPD_IMG1}
+# To build multiple images ${PSPD_BUILD_SCRIPT} --spdOutBin ${PSPD_FINAL_IMG} --spdImg_1 ${PSPD_IMG1} --spdImg_2 ${PSPD_IMG2}
+# The count of how many SPD images is calculated in PSPD_BUILD_SCRIPT to embed in the PNOR::PSPD TOC
+#
+# $ hexdump -C PSPD.bin
+#   00000000  53 50 44 00 00 00 00 01  00 00 00 00              |SPD.........|
+#   0000000c
+
+build_spd_img:
+	${PSPD_BUILD_SCRIPT} --spdOutBin ${PSPD_FINAL_IMG}
 
 build_sbe_img: add_pnor_header
 	${SBE_BUILD_SCRIPT} --sbeOutBin ${SBE_IMG} --ecImg_10 ${SBE_SEEPROM_HDR_BIN_DD1}
