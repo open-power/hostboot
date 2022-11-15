@@ -56,9 +56,6 @@
 #include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <lib/phy/ody_phy_utils.H>
-#include <stdlib.h>
-#include <math.h>
-#include <stdio.h>
 #include <lib/shared/ody_consts.H>
 #include <lib/phy/ody_ddrphy_csr_defines.H>
 #include <lib/phy/ody_phy_reset.H>
