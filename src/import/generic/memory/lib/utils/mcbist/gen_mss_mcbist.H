@@ -3370,7 +3370,7 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const p
     for (const auto& l_cache_line : i_pattern)
     {
         // If the iterator is out of range, then exit
-        // Note: this is not an aerror as the patterns can be of different lengths between chips
+        // Note: this is not an error as the patterns can be of different lengths between chips
         if(!(l_it < l_it_end))
         {
             break;
@@ -3517,12 +3517,21 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
     {
         FAPI_INF("Setting the array access control register for %s.", mss::c_str(i_target));
         FAPI_TRY( fapi2::putScom(i_target, PT::RMW_WRT_BUF_CTL_REG, l_aacr) );
+        uint64_t l_pattern_num = 0;
 
         for (const auto& l_cache_line : i_pattern)
         {
+            // If the pattern is out of range, exit out of this loop
+            // Note: this is not an error as the patterns can be of different lengths between chips
+            if(l_pattern_num >= TT::EXPECTED_PATTERN_SIZE)
+            {
+                break;
+            }
+
             fapi2::buffer<uint64_t> l_value_first  = i_invert ? ~l_cache_line.first : l_cache_line.first;
             fapi2::buffer<uint64_t> l_value_second = i_invert ? ~l_cache_line.second : l_cache_line.second;
-            FAPI_INF("Loading cache line pattern 0x%016lx 0x%016lx for %s", l_value_first, l_value_second, mss::c_str(i_target));
+            FAPI_INF("Loading cache line pattern:%u 0x%016lx 0x%016lx for %s", l_pattern_num++, l_value_first, l_value_second,
+                     mss::c_str(i_target));
             FAPI_TRY( fapi2::putScom(i_target, PT::RMW_WRT_BUF_DATA_REG, l_value_first));
 
             // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the MCA_AAER register
