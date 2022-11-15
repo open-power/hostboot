@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 /// @file pmic_regs_fld.H
 /// @brief PMIC Register Fields
 ///
-// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@ibm.com>
+// *HWP HWP Owner: Sneha Kadam <sneha.kadam1@ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
@@ -213,6 +213,9 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t DELAY_FLD_LENGTH               = 3;
     static constexpr uint8_t VOLTAGE_SETTING_START          = 0;
     static constexpr uint8_t VOLTAGE_SETTING_LENGTH         = 7;
+
+    static constexpr uint8_t PWR_OFF_SEQ            = 7;
+    static constexpr uint8_t COMP_CONFIG            = 5;
 };
 
 #endif

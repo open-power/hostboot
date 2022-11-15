@@ -38,13 +38,27 @@
 #include <vector>
 #include <ddimm_spd_common.H>
 
-// Mapping from POWER_IC ID to SPD byte for DDR5
+// Since we'll pass in numbers 0-3 we'll denote the Power IC as such,
+//  these are the relative FAPI target numbers that correspond to
+//  the i_pmic_id input parm
+constexpr uint8_t POWERIC0 = 0;
+constexpr uint8_t POWERIC1 = 1;
+constexpr uint8_t POWERIC2 = 2;
+constexpr uint8_t POWERIC3 = 3;
+
+// Mapping from PMIC ID to SPD byte for DDR4
+constexpr uint16_t SPD_POWERIC0_I2C_BYTE = 412;
+constexpr uint16_t SPD_POWERIC1_I2C_BYTE = 413;
+constexpr uint16_t SPD_POWERIC2_I2C_BYTE = 414;
+constexpr uint16_t SPD_POWERIC3_I2C_BYTE = 415;
+
+// Mapping from REL_POS ID to GPIO/ADC address
 static const std::vector<uint16_t> DDR5_POWERIC_I2C_ADDR_VECTOR =
 {
-    412,   // 0 == Power Control 0 IIC Address
-    413,   // 1 == Power Control 1 IIC Address
-    414,   // 2 == Power Control 2 IIC Address
-    415,   // 3 == Power Control 3 IIC Address
+    SPD_POWERIC0_I2C_BYTE, // 0 = DT0
+    SPD_POWERIC1_I2C_BYTE, // 1 = DT1
+    SPD_POWERIC2_I2C_BYTE, // 2 = DT2
+    SPD_POWERIC3_I2C_BYTE, // 3 = DT3
 };
 
 

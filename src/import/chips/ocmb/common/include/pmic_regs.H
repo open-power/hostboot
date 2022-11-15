@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 /// @file pmic_regs.H
 /// @brief PMIC Registers
 ///
-// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@ibm.com>
+// *HWP HWP Owner: Sneha Kadam <sneha.kadam1@ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
@@ -59,6 +59,8 @@ struct pmicRegs<mss::pmic::product::TPS5383X>
     static constexpr uint8_t R97_SOFT_STOP_CFG_SWD = 0x97;
 
     static constexpr uint8_t R9C_ON_OFF_CONFIG_GLOBAL = 0x9C;
+
+    static constexpr uint8_t RA2_REG_LOCK = 0xA2;
 };
 
 ///
@@ -164,6 +166,11 @@ struct pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R6D                                 = 0x6D;
     static constexpr uint8_t R6E                                 = 0x6E;
     /* R6F RESERVED */
+
+    static constexpr uint8_t R82                                 = 0x82;
+    static constexpr uint8_t R85                                 = 0x85;
+    static constexpr uint8_t R88                                 = 0x88;
+    static constexpr uint8_t R8B                                 = 0x8B;
 };
 
 #endif

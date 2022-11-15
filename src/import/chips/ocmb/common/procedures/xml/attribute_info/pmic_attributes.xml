@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2020,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2020,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -47,8 +47,9 @@
         <description>
             Force one of 4 N-Mode configurations instead of N_PLUS_1 mode.
             The bits are as follows: [PMIC0, PMIC1, PMIC2, PMIC3, 0, 0, 0, 0]
-            Set the bits high for the desired PMICs to run with. A valid configuration
-            to boot with is at least a pair with one each of [0,2] and [1,3].
+            Set the bits high for the desired PMICs to run with.
+            For DDR4 a valid configuration to boot with is at least a pair with one each of [0,2] and [1,3].
+            FOr DDR5 a valid configuration to boot with is at least 3 PMICs
             This only applies to 4U DDIMMs.
         </description>
         <enum>
@@ -56,7 +57,11 @@
             PMIC01   = 0xC0,
             PMIC03   = 0x90,
             PMIC12   = 0x60,
-            PMIC23   = 0x30
+            PMIC23   = 0x30,
+            PMIC012  = 0xE0,
+            PMIC013  = 0xD0,
+            PMIC023  = 0xB0,
+            PMIC123  = 0x70
         </enum>
         <default>N_PLUS_1</default>
         <valueType>uint8</valueType>

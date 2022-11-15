@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -272,7 +272,7 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t RANGE_0                    = 0;
     static constexpr uint8_t RANGE_1                    = 1;
     static constexpr uint8_t NUM_PRIMARY_PMICS          = 2; // PMIC0/2, PMIC1/3
-    static constexpr uint8_t NUM_PMICS_4U               = 4; // 2 redundant
+    static constexpr uint8_t NUM_PMICS_4U               = 4; // DDR4: 2 redundant, DDR5: 1 redundant
     static constexpr uint8_t NUMBER_OF_RAILS            = 4;
 
     static constexpr uint8_t VENDOR_PASSWORD_LOW        = 0x73;
@@ -346,6 +346,24 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R31_VIN_BULK_EFUSE_ON_HIGH   = 0xBF;
     static constexpr uint8_t R31_VIN_BULK_EFUSE_ON_LOW    = 0x9D;
 
+    // DDR5
+    static constexpr uint8_t NUM_PRIMARY_PMICS_DDR5     = 3; // 1 redundant out of 4 PMICs
+    static constexpr uint8_t NUM_PRIMARY_DT_DDR5        = 3; // 1 redundant out of 4 DTs
+
+    static constexpr bool DISABLE               = false;
+    static constexpr bool ENABLE                = true;
+    static constexpr uint8_t SET_PMIC_EN        = 0x80;
+    static constexpr uint8_t DISABLE_PMIC_EN    = 0x00;
+    static constexpr uint8_t PRE_CONFIG_ON_OFF  = 0x02;
+    static constexpr uint8_t POST_CONFIG_ON_OFF = 0x04;
+
+    static constexpr uint8_t VIN_BULK_9_5V      = 0b00100000;
+    static constexpr uint8_t VIN_BULK_8_5V      = 0b01000000;
+    static constexpr uint8_t VIN_BULK_7_5V      = 0b01100000;
+    static constexpr uint8_t VIN_BULK_6_5V      = 0b10000000;
+    static constexpr uint8_t VIN_BULK_5_5V      = 0b10100000;
+    static constexpr uint8_t VIN_BULK_4_25V     = 0b11000000;
+
 };
 
 namespace i2c
@@ -377,6 +395,18 @@ enum generic_i2c_slave
     GPIO1 = 2,
     GPIO2 = 3,
 };
+
+///
+/// @brief Constants for GENERICI2CRESPONDER devices for DDR5
+///
+enum generic_i2c_responder
+{
+    NUM_TOTAL_DEVICES_I2C_DDR5 = 1,
+
+    // GENERICI2CRESPONDER REL_POS orderings
+    ADC = 0,
+};
+
 
 namespace gpio
 {
@@ -428,21 +458,34 @@ enum regs
 {
     SYSTEM_STATUS       = 0x00,
     GENERAL_CFG         = 0x01,
+    DATA_CFG            = 0x02,
     OSR_CFG             = 0x03,
     OPMODE_CFG          = 0x04,
     PIN_CFG             = 0x05,
+    DUMMY_BYTE_0        = 0x06,
     GPIO_CFG            = 0x07,
+    DUMMY_BYTE_1        = 0x08,
     GPO_DRIVE_CFG       = 0x09,
+    DUMMY_BYTE_2        = 0x0A,
     GPO_VALUE           = 0x0B,
+    DUMMY_BYTE_3        = 0x0C,
+    DUMMY_BYTE_4        = 0x0D,
+    DUMMY_BYTE_5        = 0x0E,
+    DUMMY_BYTE_6        = 0x0F,
     SEQUENCE_CFG        = 0x10,
+    CHANNEL_SEQ         = 0x11,
     AUTO_SEQ_CH_SEL     = 0x12,
+    DUMMY_BYTE_7        = 0x13,
     ALERT_CH_SEL        = 0x14,
+    DUMMY_BYTE_8        = 0x15,
+    ALERT_MAP           = 0x16,
     ALERT_PIN_CFG       = 0x17,
 
     EVENT_FLAG          = 0x18,
 
     HIGH_EVENT_FLAGS    = 0x1A,
     LOW_EVENT_FLAGS     = 0x1C,
+    EVENT_RGN           = 0x1E,
 
     HYSTERESIS_CH0      = 0x20,
     HIGH_TH_CH0         = 0x21,
@@ -577,12 +620,28 @@ namespace i2c
 {
 enum opcode
 {
-    READ  = 0x10,
-    WRITE = 0x08,
+    READ             = 0x10,
+    WRITE            = 0x08,
+    WRITE_CONTIGUOUS = 0x28,
 };
-};
+}; // ns i2c
 
 } // ns adc
+
+namespace dt
+{
+
+///
+/// @brief Registers for DT devices
+///
+enum regs
+{
+    FAULTS_CLEAR_0 = 0xD4,
+    FAULTS_CLEAR_1 = 0xD6,
+    EN_REGISTER    = 0xDE,
+};
+
+} // dt
 } // ns mss
 
 #endif

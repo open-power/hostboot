@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,15 +38,17 @@
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/pmic_common_utils.H>
 #include <lib/utils/pmic_enable_utils.H>
+#include <lib/utils/pmic_enable_utils_ddr5.H>
 #include <lib/utils/pmic_consts.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <mss_generic_attribute_getters.H>
 
 extern "C"
 {
     ///
-    /// @brief Enable function for pmic modules
+    /// @brief Enable function for pmic modules either on ddr4 or on ddr5
     /// @param[in] i_target ocmb target
     /// @param[in] i_mode enable mode operation
     /// @return FAPI2_RC_SUCCESS iff ok
@@ -54,40 +56,31 @@ extern "C"
     fapi2::ReturnCode pmic_enable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                   const mss::pmic::enable_mode i_mode)
     {
-        uint8_t l_module_height = 0;
+        uint8_t l_dram_gen = 0;
 
-        // Disable PMICs and clear status bits so we are starting at a known off state
-        FAPI_TRY(mss::pmic::disable_and_reset_pmics(i_ocmb_target));
-
-        // Check that we have functional pmics to enable, otherwise, we can just exit now
-        if (mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT).empty())
+        // Check if there are any DIMM targets
+        if (mss::count_dimm(i_ocmb_target) == 0)
         {
-            FAPI_INF("No PMICs to enable on %s, exiting.", mss::c_str(i_ocmb_target));
+            FAPI_INF("Skipping %s because it has no DIMM targets", mss::c_str(i_ocmb_target));
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        // This procedure can be called with non-functional targets, so here, we will only
-        // choose to enable those that are functional (duh!)
-        if (i_ocmb_target.isFunctional())
+        // We need to run pmic_enable for ddr4 or ddr5 based on the DRAM gen attribute
+        // We just need get dram gen of 1 dimm
+        // This is ok because we do not allow mixing of DRAM generation
+        for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_ocmb_target))
         {
-            // Grab the module-height attribute to determine 1U/2U vs 4U
-            FAPI_TRY(mss::attr::get_dram_module_height(i_ocmb_target, l_module_height));
+            FAPI_TRY(mss::attr::get_dram_gen(l_dimm, l_dram_gen));
+            break;
+        }
 
-            // Kick off the matching enable procedure
-            if (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)
-            {
-                FAPI_INF("Enabling PMICs on %s with Redundancy/4U Mode", mss::c_str(i_ocmb_target));
-                FAPI_TRY(mss::pmic::enable_with_redundancy(i_ocmb_target));
-
-                /// Read adc min voltage registers so that they can track any dips in the voltages after
-                /// power on as they are self resetting
-                FAPI_TRY(mss::pmic::adc_min_vltg_read(i_ocmb_target));
-            }
-            else
-            {
-                FAPI_INF("Enabling PMICs on %s with 1U/2U Mode", mss::c_str(i_ocmb_target));
-                FAPI_TRY(mss::pmic::enable_1u_2u(i_ocmb_target, i_mode));
-            }
+        if (l_dram_gen == fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4)
+        {
+            FAPI_TRY(mss::pmic::ddr4::pmic_enable(i_ocmb_target, i_mode));
+        }
+        else
+        {
+            FAPI_TRY(mss::pmic::ddr5::pmic_enable(i_ocmb_target, i_mode));
         }
 
         return fapi2::FAPI2_RC_SUCCESS;

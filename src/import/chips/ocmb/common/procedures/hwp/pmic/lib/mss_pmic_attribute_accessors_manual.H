@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,73 +73,99 @@ typedef fapi2::ReturnCode (*pmic_attr_ptr_signed)(const fapi2::Target<fapi2::TAR
 static constexpr pmic_attr_ptr get_revision[] =
 {
     mss::attr::get_pmic0_revision,
-    mss::attr::get_pmic1_revision
+    mss::attr::get_pmic1_revision,
+    mss::attr::get_pmic2_revision,
+    mss::attr::get_pmic3_revision
 };
 
 // Voltage Setting
 static constexpr pmic_attr_ptr get_swa_voltage_setting[] =
 {
     mss::attr::get_pmic0_swa_voltage_setting,
-    mss::attr::get_pmic1_swa_voltage_setting
+    mss::attr::get_pmic1_swa_voltage_setting,
+    mss::attr::get_pmic2_swa_voltage_setting,
+    mss::attr::get_pmic3_swa_voltage_setting
 };
 static constexpr pmic_attr_ptr get_swb_voltage_setting[] =
 {
     mss::attr::get_pmic0_swb_voltage_setting,
-    mss::attr::get_pmic1_swb_voltage_setting
+    mss::attr::get_pmic1_swb_voltage_setting,
+    mss::attr::get_pmic2_swb_voltage_setting,
+    mss::attr::get_pmic3_swb_voltage_setting
 };
 static constexpr pmic_attr_ptr get_swc_voltage_setting[] =
 {
     mss::attr::get_pmic0_swc_voltage_setting,
-    mss::attr::get_pmic1_swc_voltage_setting
+    mss::attr::get_pmic1_swc_voltage_setting,
+    mss::attr::get_pmic2_swc_voltage_setting,
+    mss::attr::get_pmic3_swc_voltage_setting
 };
 static constexpr pmic_attr_ptr get_swd_voltage_setting[] =
 {
     mss::attr::get_pmic0_swd_voltage_setting,
-    mss::attr::get_pmic1_swd_voltage_setting
+    mss::attr::get_pmic1_swd_voltage_setting,
+    mss::attr::get_pmic2_swd_voltage_setting,
+    mss::attr::get_pmic3_swd_voltage_setting
 };
 
 // Voltage Range Select
 static constexpr pmic_attr_ptr get_swa_voltage_range_select[] =
 {
     mss::attr::get_pmic0_swa_voltage_range_select,
-    mss::attr::get_pmic1_swa_voltage_range_select
+    mss::attr::get_pmic1_swa_voltage_range_select,
+    mss::attr::get_pmic2_swa_voltage_range_select,
+    mss::attr::get_pmic3_swa_voltage_range_select
 };
 static constexpr pmic_attr_ptr get_swb_voltage_range_select[] =
 {
     mss::attr::get_pmic0_swb_voltage_range_select,
-    mss::attr::get_pmic1_swb_voltage_range_select
+    mss::attr::get_pmic1_swb_voltage_range_select,
+    mss::attr::get_pmic2_swb_voltage_range_select,
+    mss::attr::get_pmic3_swb_voltage_range_select
 };
 static constexpr pmic_attr_ptr get_swc_voltage_range_select[] =
 {
     mss::attr::get_pmic0_swc_voltage_range_select,
-    mss::attr::get_pmic1_swc_voltage_range_select
+    mss::attr::get_pmic1_swc_voltage_range_select,
+    mss::attr::get_pmic2_swc_voltage_range_select,
+    mss::attr::get_pmic3_swc_voltage_range_select
 };
 static constexpr pmic_attr_ptr get_swd_voltage_range_select[] =
 {
     mss::attr::get_pmic0_swd_voltage_range_select,
-    mss::attr::get_pmic1_swd_voltage_range_select
+    mss::attr::get_pmic1_swd_voltage_range_select,
+    mss::attr::get_pmic2_swd_voltage_range_select,
+    mss::attr::get_pmic3_swd_voltage_range_select
 };
 
 // Voltage Offset
 static constexpr pmic_attr_ptr_signed get_swa_voltage_offset[] =
 {
     mss::attr::get_pmic0_swa_voltage_offset,
-    mss::attr::get_pmic1_swa_voltage_offset
+    mss::attr::get_pmic1_swa_voltage_offset,
+    mss::attr::get_pmic2_swa_voltage_offset,
+    mss::attr::get_pmic3_swa_voltage_offset
 };
 static constexpr pmic_attr_ptr_signed get_swb_voltage_offset[] =
 {
     mss::attr::get_pmic0_swb_voltage_offset,
-    mss::attr::get_pmic1_swb_voltage_offset
+    mss::attr::get_pmic1_swb_voltage_offset,
+    mss::attr::get_pmic2_swb_voltage_offset,
+    mss::attr::get_pmic3_swb_voltage_offset
 };
 static constexpr pmic_attr_ptr_signed get_swc_voltage_offset[] =
 {
     mss::attr::get_pmic0_swc_voltage_offset,
-    mss::attr::get_pmic1_swc_voltage_offset
+    mss::attr::get_pmic1_swc_voltage_offset,
+    mss::attr::get_pmic2_swc_voltage_offset,
+    mss::attr::get_pmic3_swc_voltage_offset
 };
 static constexpr pmic_attr_ptr_signed get_swd_voltage_offset[] =
 {
     mss::attr::get_pmic0_swd_voltage_offset,
-    mss::attr::get_pmic1_swd_voltage_offset
+    mss::attr::get_pmic1_swd_voltage_offset,
+    mss::attr::get_pmic2_swd_voltage_offset,
+    mss::attr::get_pmic3_swd_voltage_offset
 };
 
 // EFD Fields
@@ -148,50 +174,66 @@ static constexpr pmic_attr_ptr_signed get_swd_voltage_offset[] =
 static constexpr pmic_attr_ptr_signed get_efd_swa_voltage_offset[] =
 {
     mss::attr::get_efd_pmic0_swa_voltage_offset,
-    mss::attr::get_efd_pmic1_swa_voltage_offset
+    mss::attr::get_efd_pmic1_swa_voltage_offset,
+    mss::attr::get_efd_pmic2_swa_voltage_offset,
+    mss::attr::get_efd_pmic3_swa_voltage_offset
 };
 
 static constexpr pmic_attr_ptr_signed get_efd_swb_voltage_offset[] =
 {
     mss::attr::get_efd_pmic0_swb_voltage_offset,
-    mss::attr::get_efd_pmic1_swb_voltage_offset
+    mss::attr::get_efd_pmic1_swb_voltage_offset,
+    mss::attr::get_efd_pmic2_swb_voltage_offset,
+    mss::attr::get_efd_pmic3_swb_voltage_offset
 };
 
 static constexpr pmic_attr_ptr_signed get_efd_swc_voltage_offset[] =
 {
     mss::attr::get_efd_pmic0_swc_voltage_offset,
-    mss::attr::get_efd_pmic1_swc_voltage_offset
+    mss::attr::get_efd_pmic1_swc_voltage_offset,
+    mss::attr::get_efd_pmic2_swc_voltage_offset,
+    mss::attr::get_efd_pmic3_swc_voltage_offset
 };
 
 static constexpr pmic_attr_ptr_signed get_efd_swd_voltage_offset[] =
 {
     mss::attr::get_efd_pmic0_swd_voltage_offset,
-    mss::attr::get_efd_pmic1_swd_voltage_offset
+    mss::attr::get_efd_pmic1_swd_voltage_offset,
+    mss::attr::get_efd_pmic2_swd_voltage_offset,
+    mss::attr::get_efd_pmic3_swd_voltage_offset
 };
 
 // Current limiter warnings (EFD)
 static constexpr pmic_attr_ptr get_swa_current_warning[] =
 {
     mss::attr::get_pmic0_swa_current_warning,
-    mss::attr::get_pmic1_swa_current_warning
+    mss::attr::get_pmic1_swa_current_warning,
+    mss::attr::get_pmic2_swa_current_warning,
+    mss::attr::get_pmic3_swa_current_warning
 };
 
 static constexpr pmic_attr_ptr get_swb_current_warning[] =
 {
     mss::attr::get_pmic0_swb_current_warning,
-    mss::attr::get_pmic1_swb_current_warning
+    mss::attr::get_pmic1_swb_current_warning,
+    mss::attr::get_pmic2_swb_current_warning,
+    mss::attr::get_pmic3_swb_current_warning
 };
 
 static constexpr pmic_attr_ptr get_swc_current_warning[] =
 {
     mss::attr::get_pmic0_swc_current_warning,
-    mss::attr::get_pmic1_swc_current_warning
+    mss::attr::get_pmic1_swc_current_warning,
+    mss::attr::get_pmic2_swc_current_warning,
+    mss::attr::get_pmic3_swc_current_warning
 };
 
 static constexpr pmic_attr_ptr get_swd_current_warning[] =
 {
     mss::attr::get_pmic0_swd_current_warning,
-    mss::attr::get_pmic1_swd_current_warning
+    mss::attr::get_pmic1_swd_current_warning,
+    mss::attr::get_pmic2_swd_current_warning,
+    mss::attr::get_pmic3_swd_current_warning
 };
 
 // These arrays allow us to dynamically choose the right attribute getter at runtime based on the rail and mss::pmic::id
@@ -241,51 +283,69 @@ static constexpr const pmic_attr_ptr* get_current_warning[] =
 static constexpr pmic_attr_ptr get_sequence[] =
 {
     mss::attr::get_pmic0_sequence,
-    mss::attr::get_pmic1_sequence
+    mss::attr::get_pmic1_sequence,
+    mss::attr::get_pmic2_sequence,
+    mss::attr::get_pmic3_sequence
 };
 
 // Sequence Delay
 static constexpr pmic_attr_ptr get_swa_sequence_delay[] =
 {
     mss::attr::get_pmic0_swa_sequence_delay,
-    mss::attr::get_pmic1_swa_sequence_delay
+    mss::attr::get_pmic1_swa_sequence_delay,
+    mss::attr::get_pmic2_swa_sequence_delay,
+    mss::attr::get_pmic3_swa_sequence_delay
 };
 static constexpr pmic_attr_ptr get_swb_sequence_delay[] =
 {
     mss::attr::get_pmic0_swb_sequence_delay,
-    mss::attr::get_pmic1_swb_sequence_delay
+    mss::attr::get_pmic1_swb_sequence_delay,
+    mss::attr::get_pmic2_swb_sequence_delay,
+    mss::attr::get_pmic3_swb_sequence_delay
 };
 static constexpr pmic_attr_ptr get_swc_sequence_delay[] =
 {
     mss::attr::get_pmic0_swc_sequence_delay,
+    mss::attr::get_pmic1_swc_sequence_delay,
+    mss::attr::get_pmic1_swc_sequence_delay,
     mss::attr::get_pmic1_swc_sequence_delay
 };
 static constexpr pmic_attr_ptr get_swd_sequence_delay[] =
 {
     mss::attr::get_pmic0_swd_sequence_delay,
-    mss::attr::get_pmic1_swd_sequence_delay
+    mss::attr::get_pmic1_swd_sequence_delay,
+    mss::attr::get_pmic2_swd_sequence_delay,
+    mss::attr::get_pmic3_swd_sequence_delay
 };
 
 // Sequence Order
 static constexpr pmic_attr_ptr get_swa_sequence_order[] =
 {
     mss::attr::get_pmic0_swa_sequence_order,
-    mss::attr::get_pmic1_swa_sequence_order
+    mss::attr::get_pmic1_swa_sequence_order,
+    mss::attr::get_pmic2_swa_sequence_order,
+    mss::attr::get_pmic3_swa_sequence_order
 };
 static constexpr pmic_attr_ptr get_swb_sequence_order[] =
 {
     mss::attr::get_pmic0_swb_sequence_order,
-    mss::attr::get_pmic1_swb_sequence_order
+    mss::attr::get_pmic1_swb_sequence_order,
+    mss::attr::get_pmic2_swb_sequence_order,
+    mss::attr::get_pmic3_swb_sequence_order
 };
 static constexpr pmic_attr_ptr get_swc_sequence_order[] =
 {
     mss::attr::get_pmic0_swc_sequence_order,
-    mss::attr::get_pmic1_swc_sequence_order
+    mss::attr::get_pmic1_swc_sequence_order,
+    mss::attr::get_pmic2_swc_sequence_order,
+    mss::attr::get_pmic3_swc_sequence_order
 };
 static constexpr pmic_attr_ptr get_swd_sequence_order[] =
 {
     mss::attr::get_pmic0_swd_sequence_order,
-    mss::attr::get_pmic1_swd_sequence_order
+    mss::attr::get_pmic1_swd_sequence_order,
+    mss::attr::get_pmic2_swd_sequence_order,
+    mss::attr::get_pmic3_swd_sequence_order
 };
 
 static constexpr const pmic_attr_ptr* get_sequence_order[] =
@@ -308,7 +368,9 @@ static constexpr const pmic_attr_ptr* get_sequence_delay[] =
 static constexpr pmic_attr_ptr get_phase_comb[] =
 {
     mss::attr::get_pmic0_phase_comb,
-    mss::attr::get_pmic1_phase_comb
+    mss::attr::get_pmic1_phase_comb,
+    mss::attr::get_pmic2_phase_comb,
+    mss::attr::get_pmic3_phase_comb
 };
 
 ///

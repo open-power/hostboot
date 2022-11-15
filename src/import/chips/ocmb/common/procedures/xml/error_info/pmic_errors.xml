@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -456,6 +456,61 @@
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_INVALID_PMIC_DT_DDR5_TARGET_CONFIG</rc>
+    <description>
+       Expected at least 3 PMICs and 3 DTs in order to properly perform DDR5 4U pmic_enable.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>NUM_PMICS</ffdc>
+    <ffdc>NUM_DT</ffdc>
+    <ffdc>EXPECTED_MIN_PMICS</ffdc>
+    <ffdc>EXPECTED_MIN_DT</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_INVALID_GI2C_DDR5_TARGET_CONFIG</rc>
+    <description>
+       Expected at least 1 ADC in order to properly perform DDR5 4U pmic_enable.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>NUM_GI2CS</ffdc>
+    <ffdc>EXPECTED_GI2CS</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_INVALID_PMIC_INDEX_RECEIVED</rc>
+    <description>
+       Out of bounds PMIC index encountered in pmic_enable target loop.
+       Expected max 4 PMICs.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>NUM_PMICS</ffdc>
+    <ffdc>EXPECTED_MAX_PMICS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
   </hwpError>
 

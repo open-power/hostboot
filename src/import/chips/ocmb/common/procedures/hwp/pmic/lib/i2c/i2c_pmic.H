@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,9 @@ inline void add_adc_opcode(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAV
                            const mss::adc::i2c::opcode i_opcode,
                            std::vector<uint8_t>& io_command)
 {
-    // ADC's are index 0,1; GPIO0 is index 2
+    // For DDR4:ADC's are index 0,1; GPIO0 is index 2
+    // For DDR5: Going to use the same function for DDR5 since there is only 1 ADC supported in DDR5
+    // and the below condition will still be satisfied
     if (mss::index(i_target) <= mss::generic_i2c_slave::ADC2)
     {
         // ADC devices need an extra opcode frame
@@ -126,6 +128,24 @@ inline void reg_write_helper(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSL
                              std::vector<uint8_t>& io_command)
 {
     add_adc_opcode(i_target, mss::adc::i2c::opcode::WRITE, io_command);
+    io_command.push_back(i_addr);
+    io_command.push_back(uint8_t(i_data_buffer));
+}
+
+///
+/// @brief Set up i2c command buffer for the given DT target
+/// @param[in] i_target the DT target
+/// @param[in] i_addr address to read
+/// @param[in] i_data_buffer data buffer
+/// @param[in,out] io_command command buffer
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template<>
+inline void reg_write_helper(const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_target,
+                             const uint8_t i_addr,
+                             const fapi2::buffer<uint8_t> i_data_buffer,
+                             std::vector<uint8_t>& io_command)
+{
     io_command.push_back(i_addr);
     io_command.push_back(uint8_t(i_data_buffer));
 }
@@ -196,6 +216,21 @@ inline void reg_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLA
                             std::vector<uint8_t>& io_command)
 {
     add_adc_opcode(i_target, mss::adc::i2c::opcode::READ, io_command);
+    io_command.push_back(i_addr);
+}
+
+///
+/// @brief Perform a register read operation on the given DT target
+/// @param[in] i_target the DT device target
+/// @param[in] i_addr address to read
+/// @param[in,out] io_command command buffer
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template<>
+inline void reg_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_target,
+                            const uint8_t i_addr,
+                            std::vector<uint8_t>& io_command)
+{
     io_command.push_back(i_addr);
 }
 
@@ -293,6 +328,90 @@ inline fapi2::ReturnCode reg_read_reverse_buffer(const fapi2::Target<T>& i_targe
     o_data_buffer.reverse();
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Set up i2c command for writting contiguous registers of a given PMIC target
+/// @param[in] i_target the PMIC target
+/// @param[in] i_addr starting register address to write to
+/// @param[in,out] io_command command buffer
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template<fapi2::TargetType T>
+inline void reg_write_contiguous_helper(const fapi2::Target<T>& i_target,
+                                        const uint8_t i_addr,
+                                        std::vector<uint8_t>& io_command);
+///
+/// @brief Set up i2c command for writting contiguous registers of a given PMIC target
+/// @param[in] i_target the PMIC target
+/// @param[in] i_addr starting register address to write to
+/// @param[in,out] io_command command buffer
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template<>
+inline void reg_write_contiguous_helper(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_target,
+                                        const uint8_t i_addr,
+                                        std::vector<uint8_t>& io_command)
+{
+    io_command.push_back(i_addr);
+}
+
+///
+/// @brief Set up i2c command for writting contiguous registers of a given DT target
+/// @param[in] i_target the DT target
+/// @param[in] i_addr starting register address to write to
+/// @param[in,out] io_command command buffer
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template<>
+inline void reg_write_contiguous_helper(const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_target,
+                                        const uint8_t i_addr,
+                                        std::vector<uint8_t>& io_command)
+{
+    io_command.push_back(i_addr);
+}
+
+///
+/// @brief Set up i2c command for writting contiguous registers of given ADC target
+/// @param[in] i_target the ADC target
+/// @param[in] i_addr starting register address to write to
+/// @param[in,out] io_command command buffer
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template<>
+inline void reg_write_contiguous_helper(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_target,
+                                        const uint8_t i_addr,
+                                        std::vector<uint8_t>& io_command)
+{
+    add_adc_opcode(i_target, mss::adc::i2c::opcode::WRITE_CONTIGUOUS, io_command);
+    io_command.push_back(i_addr);
+}
+
+///
+/// @brief Perform register write operation on a contiguous address of given target
+/// @tparam T target type
+/// @tparam N size of the data buffer
+/// @param[in] i_target the PMIC/I2C/DT device target
+/// @param[in] i_addr starting register address to write to
+/// @param[in] i_data_buffer buffer of data to be writen to register addresses
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <fapi2::TargetType T, size_t N>
+inline fapi2::ReturnCode reg_write_contiguous(const fapi2::Target<T>& i_target,
+        const uint8_t i_addr,
+        const fapi2::buffer<uint8_t> (&i_data_buffer)[N])
+{
+    std::vector<uint8_t> l_data;
+
+    mss::pmic::i2c::reg_write_contiguous_helper(i_target, i_addr, l_data);
+
+    for(uint32_t l_count = 0; l_count < N; l_count++)
+    {
+        l_data.push_back(uint8_t(i_data_buffer[l_count]));
+    }
+
+    // Use fapi2 putI2c interface to execute command
+    return fapi2::putI2c(i_target, l_data);
 }
 } // i2c
 } // pmic

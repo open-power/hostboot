@@ -26,7 +26,7 @@
 /// @file pmic_i2c_addr_get.H
 /// @brief Function to get PMIC i2c addresses given SPD binary
 ///
-// *HWP HWP Owner: Mark Pizzutillo <mark.pizzutillo@ibm.com>
+// *HWP HWP Owner: Sneha Kadam <sneha.kadam1@ibm.com>
 // *HWP HWP Owner: Dan Crowell <dcrowell@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
@@ -68,12 +68,16 @@ static const std::vector<uint16_t> DDR4_PMIC_I2C_ADDR_VECTOR =
 };
 
 // Mapping from PMIC ID to SPD byte for DDR5
+constexpr uint16_t SPD_PMIC0_I2C_BYTE_DDR5 = 290;
+constexpr uint16_t SPD_PMIC1_I2C_BYTE_DDR5 = 291;
+constexpr uint16_t SPD_PMIC2_I2C_BYTE_DDR5 = 292;
+constexpr uint16_t SPD_PMIC3_I2C_BYTE_DDR5 = 293;
 static const std::vector<uint16_t> DDR5_PMIC_I2C_ADDR_VECTOR =
 {
-    290,   // 0 == PMIC0 IIC Address
-    291,   // 1 == PMIC1 IIC Address
-    292,   // 2 == PMIC2 IIC Address
-    293,   // 3 == PMIC3 IIC Address
+    SPD_PMIC0_I2C_BYTE_DDR5,   // 0 == PMIC0 IIC Address
+    SPD_PMIC1_I2C_BYTE_DDR5,   // 1 == PMIC1 IIC Address
+    SPD_PMIC2_I2C_BYTE_DDR5,   // 2 == PMIC2 IIC Address
+    SPD_PMIC3_I2C_BYTE_DDR5,   // 3 == PMIC3 IIC Address
 };
 
 

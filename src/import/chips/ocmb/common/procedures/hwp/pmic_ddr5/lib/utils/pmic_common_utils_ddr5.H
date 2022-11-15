@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/common/spd_access/gpio_adc_i2c_addr_get.H $ */
+/* $Source: src/import/chips/ocmb/common/procedures/hwp/pmic_ddr5/lib/utils/pmic_common_utils_ddr5.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,67 +22,59 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+
 ///
-/// @file gpio_adc_i2c_addr_get.H
-/// @brief Function to get GPIO/ADC i2c addresses given target REL_POS
+/// @file pmic_common_utils.H
+/// @brief Utility functions common for several PMIC DDR5 procedures
 ///
 // *HWP HWP Owner: Sneha Kadam <sneha.kadam1@ibm.com>
-// *HWP HWP Owner: Dan Crowell <dcrowell@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
+// EKB-Mirror-To: hostboot
 
-#ifndef __GPIO_ADC_I2C_ADDR_GET__
-#define __GPIO_ADC_I2C_ADDR_GET__
+#ifndef __PMIC_COMMON_UTILS_H__
+#define __PMIC_COMMON_UTILS_H__
 
-#include <vector>
-#include <ddimm_spd_common.H>
+#include <fapi2.H>
+#include <pmic_regs.H>
+#include <pmic_regs_fld.H>
+#include <pmic_consts.H>
+#include <lib/utils/pmic_enable_utils_ddr5.H>
+#include <mss_pmic_attribute_getters.H>
+#include <generic/memory/lib/utils/find.H>
 
-// Mapping from REL_POS ID to GPIO/ADC address
-static const std::vector<uint8_t> DDR4_GPIO_ADC_I2C_ADDR_VECTOR =
+namespace mss
 {
-    0x20, // 0 = ADC1
-    0x2E, // 1 = ADC2
-    0x70, // 2 = GPIO1
-    0x7E, // 3 = GPIO2
-};
-constexpr uint16_t DDR5_SPD_ADC_I2_ADDR = 286;
-
-///
-/// @brief Get the GPIO/ADC i2c address for the given REL_POS
-///
-/// @param[in] i_spd SPD binary
-/// @param[in] i_rel_pos REL_POS of GENERICI2CDEV target (0-3)
-/// @return uint8_t I2C address of the device for the given rel pos
-///
-inline uint8_t get_gpio_adc_i2c_addr(uint8_t const* const i_spd, const uint8_t i_rel_pos)
+namespace pmic
 {
-    // Out of range, just return 0. Failsafe so we don't segfault
-    // The caller is responsible for calling this with a valid ID
-    if (i_rel_pos >= DDR4_GPIO_ADC_I2C_ADDR_VECTOR.size())
-    {
-        return DDIMM_SPD::NO_DEVICE;
-    }
+namespace ddr5
+{
 
-    // Check the SPD to see which type of DIMM this is.
+///
+/// @brief Helper function to get the minimum vin bulk threshold
+///
+/// @param[in] i_vin_bulk_min_threshold
+/// @return VIN bulk minimum value
+///
+uint16_t get_minimum_vin_bulk_threshold_helper(
+    const uint8_t i_vin_bulk_min_threshold);
 
-    // DDR5 DDIMM only has a single ADC on the 4U
-    if ( (i_spd[DDIMM_SPD::DDR_BYTE] == DDIMM_SPD::MEM_DDR5)
-         && (i_spd[DDIMM_SPD::DIMM_TYPE_BYTE] == DDIMM_SPD::MEM_DDIMM)
-         && (i_rel_pos == 0) )
-    {
-        return uint8_t(i_spd[DDR5_SPD_ADC_I2_ADDR]);
-    }
+///
+/// @brief Get the minimum vin bulk threshold
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_vin_bulk_min VIN bulk minimum value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode get_minimum_vin_bulk_threshold(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    uint16_t& o_vin_bulk_min);
 
-    // GPIO/ADC devices only exist for 4U DDR4 DDIMMs.
-    if ( (i_spd[DDIMM_SPD::DDR_BYTE] == DDIMM_SPD::MEM_DDR4)
-         && (i_spd[DDIMM_SPD::DIMM_TYPE_BYTE] == DDIMM_SPD::MEM_DDIMM)
-         && (i_spd[DDIMM_SPD::DDR4_DIMM_SIZE_BYTE] == DDIMM_SPD::MEM_4U) )
-    {
-        return DDR4_GPIO_ADC_I2C_ADDR_VECTOR[i_rel_pos];
-    }
-
-    return 0;
-}
+} // ddr5
+} // pmic
+} // mss
 
 #endif
