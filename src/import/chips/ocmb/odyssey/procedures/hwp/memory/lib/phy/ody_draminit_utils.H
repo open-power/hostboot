@@ -4023,6 +4023,56 @@ class bad_bit_interface
         }
 };
 
+///
+/// @brief bad bit interface class for ody_host_draminit (read attr and update SPD)
+///
+class host_bad_bit_interface
+{
+    public:
+
+        // Data that actually stores all of the bad bit information
+        // We do some processing in the constructor
+        uint8_t iv_bad_bits[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT];
+
+        // No default constructor
+        host_bad_bit_interface() = delete;
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~host_bad_bit_interface() = default;
+
+        ///
+        /// @brief Constructor from DIMM bad bits attribute
+        /// @param[in] i_target the DIMM to record training results on
+        /// @param[out] o_rc the return code from attribute access
+        ///
+        host_bad_bit_interface(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                               fapi2::ReturnCode& o_rc)
+        {
+            o_rc = mss::attr::get_bad_dq_bitmap(i_target, iv_bad_bits);
+        }
+
+        ///
+        /// @brief Update the bad bits attribute (and SPD)
+        /// @param[in] i_target the DIMM to record training results on
+        /// @param[out] o_bad_dq the processed bad bits
+        ///
+        fapi2::ReturnCode record_bad_bits_interface( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                uint8_t (&o_bad_dq)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]) const
+        {
+            for(uint8_t l_rank = 0; l_rank < BAD_BITS_RANKS; l_rank++)
+            {
+                // Note: any rank swizzle is taken care of in the sppe_draminit procedure
+                std::copy(std::begin(iv_bad_bits[l_rank]),
+                          std::end(iv_bad_bits[l_rank]),
+                          std::begin(o_bad_dq[l_rank]));
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+};
+
 } // namespace phy
 } // namespace ody
 } // namespace mss

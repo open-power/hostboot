@@ -36,10 +36,14 @@
 #include <fapi2.H>
 #include <ody_host_draminit.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/mss_bad_bits.H>
+#include <lib/phy/ody_draminit_utils.H>
+
 extern "C"
 {
 ///
-/// @brief Send chipop to Odyssey via inband FIFO
+/// @brief Check FIRs after draminit training and record training fails
 /// @param[in] i_target the controller
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
@@ -47,8 +51,20 @@ extern "C"
     {
         mss::display_git_commit_info("ody_host_draminit");
 
-        // TODO:ZEN:MST-1620 Add in chip ops call for draminit
-        return fapi2::FAPI2_RC_SUCCESS;
+        for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+        {
+            fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+            // Get the bad bits from the attribute (read from Odyssey SPPE previously)
+            mss::ody::phy::host_bad_bit_interface l_interface(l_dimm, l_rc);
+            FAPI_TRY(l_rc);
+
+            // Check for FIRs then record the bad bits data into our attribute and SPD if there are no FIRs set
+            FAPI_TRY(mss::record_bad_bits<mss::mc_type::ODYSSEY>(i_target, l_interface));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
 
     }
 
