@@ -2076,6 +2076,38 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
         });
     }
 
+
+    GIVEN("Tests host_bad_bit_interface")
+    {
+        // Loops over OCMB chip targets that were defined in the associated config
+        for_each_target([](const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+        {
+            for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+            {
+                for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port))
+                {
+                    uint8_t l_dq_bitmap[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
+                    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_FALSE;
+
+                    REQUIRE_RC_PASS( mss::attr::get_bad_dq_bitmap(l_dimm, l_dq_bitmap) );
+                    mss::ody::phy::host_bad_bit_interface l_interface(l_dimm, l_rc);
+                    REQUIRE_RC_PASS(l_rc);
+
+                    // Test that bad bits in interface are equal to those in the attribute
+                    for (uint8_t l_rank = 0; l_rank < BAD_BITS_RANKS; l_rank++)
+                    {
+                        for (uint8_t l_dq = 0; l_dq < BAD_DQ_BYTE_COUNT; l_dq++)
+                        {
+                            REQUIRE(l_dq_bitmap[l_rank][l_dq] == l_interface.iv_bad_bits[l_rank][l_dq]);
+                        }
+                    }
+                }
+            }
+
+            return 0;
+        });
+    }
+
 }// scenario
 
 } // end ns test
