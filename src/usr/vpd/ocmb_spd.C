@@ -46,7 +46,14 @@ extern trace_desc_t * g_trac_spd;
 
 const uint32_t     SPDTOC_EYECATCH = 0x53504400;  //'SPD\0'
 
+// See ocmbIdecPhase1 for related manipulation of these bytes
+// In the SPD overlay logic we will check to see if these bytes are requested
+// and if so make sure we use the ORIGINAL Backplane VPD bytes which will
+// actually represent the physical part DD level on the planar board
 constexpr uint8_t  RAW_CARD_BYTE_OFFSET = 195; // #D raw card offset field
+constexpr uint8_t  DMB_REV_OFFSET       = 200; // #D DMB REV offset, the OCMB manufacturers
+                                               // version of the chip, this is later translated
+                                               // to an IBM format
 
 enum TOC_VERSION
 {
@@ -161,8 +168,8 @@ errlHndl_t planarOcmbRetrieveSPD(T::TargetHandle_t        i_target,
 // Exclude FSP since there is NO PNOR access for FSP Runtime
 #ifndef CONFIG_FSP_BUILD
     uint8_t *pdD_raw_card = l_nodeData+RAW_CARD_BYTE_OFFSET;
-    static bool first_time = true;
     uint8_t *pnor_raw_card = 0; // RAW_CARD_BYTE_OFFSET
+    static bool first_time = true;
     SectionMapTOC_t* l_TOCPtr = nullptr;
     if (first_time) // We get first time to check if PNOR::PSPD matches, if so, we make a local cache to use
     {
@@ -294,6 +301,17 @@ errlHndl_t planarOcmbRetrieveSPD(T::TargetHandle_t        i_target,
         memcpy(o_data,
            (spd_cache.data() + i_byteAddr),
            i_numBytes);
+        static const uint16_t blocked_bytes[] = {RAW_CARD_BYTE_OFFSET, DMB_REV_OFFSET};
+        for (const auto offset : blocked_bytes)
+        {
+            // Range check if the Backplane VPD DD level (or any future blocked bytes)
+            // are needing to be restored (restoration is based on memory hardware
+            // requirements)
+            if ((offset >= i_byteAddr) && (offset < i_byteAddr+i_numBytes))
+            {
+                memcpy( reinterpret_cast<uint8_t *>(o_data)+(offset-i_byteAddr), l_nodeData+offset, 1 );
+            }
+        }
     }
     else
     {
