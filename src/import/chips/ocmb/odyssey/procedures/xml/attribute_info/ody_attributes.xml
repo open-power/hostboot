@@ -363,7 +363,7 @@
             1024_MEMCLK = 1024,
             2048_MEMCLK = 2048,
             4096_MEMCLK = 4096,
-            8192_MEMCLK = 8192,
+            8192_MEMCLK = 8192
         </enum>
         <default>256_MEMCLK</default>
         <writeable/>
