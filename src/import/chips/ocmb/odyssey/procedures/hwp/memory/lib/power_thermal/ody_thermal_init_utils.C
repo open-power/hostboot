@@ -44,6 +44,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <ody_dts_read.H>
 
 namespace mss
 {
@@ -122,7 +123,7 @@ fapi2::ReturnCode thermal_sensor::read(const fapi2::Target<fapi2::TARGET_TYPE_OC
     (l_i2c_data);
 
 fapi_try_exit:
-    return process_results(i_ocmb, l_data);
+    return process_results(i_ocmb, iv_reg_addr, l_data);
 }
 
 ///
@@ -144,11 +145,13 @@ fapi2::ReturnCode thermal_sensor::i2c_read_helper(const fapi2::Target<fapi2::TAR
 ///
 /// @brief Processes the results for this thermal sensor and writes them into the sensor cache register
 /// @param[in] i_ocmb the OCMB target
+/// @param[in] i_reg_addr the register address upon which to operate
 /// @param[in] i_data register data to write. Note: this is not a pass-by-reference as it could be updated internally
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode thermal_sensor::process_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
-        fapi2::buffer<uint64_t> i_data) const
+fapi2::ReturnCode process_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+                                  const uint64_t i_reg_addr,
+                                  fapi2::buffer<uint64_t> i_data)
 {
     // If the current error is not successful, mark it as recovered
     if(fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
@@ -165,7 +168,35 @@ fapi2::ReturnCode thermal_sensor::process_results(const fapi2::Target<fapi2::TAR
     }
 
     // Write out the data to the storage address
-    return fapi2::putScom(i_ocmb, iv_reg_addr, i_data);
+    return fapi2::putScom(i_ocmb, i_reg_addr, i_data);
+}
+
+///
+/// @brief Processes the results for the On-Chip (OC) thermal sensor
+/// @param[in] i_ocmb the OCMB target
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode read_oc_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    // Mark the sensor as present
+    // Note: the cache registers use the same API, using D0THERM for the enumerated bits
+    l_data.setBit<scomt::ody::ODC_MMIO_SNSC_D0THERM_PRESENTBIT>();
+
+    int16_t l_oc_temp;
+
+    // Read the data
+    FAPI_TRY(ody_dts_read(i_ocmb, l_oc_temp));
+
+    // Assemble the data
+    // Note: the cache registers use the same API, using D0THERM for the enumerated bits
+    l_data.setBit<scomt::ody::ODC_MMIO_SNSC_D0THERM_VALIDBIT>()
+    .insertFromRight<scomt::ody::ODC_MMIO_SNSC_D0THERM_THERMALDATA, scomt::ody::ODC_MMIO_SNSC_D0THERM_THERMALDATA_LEN>
+    (static_cast<uint16_t>(l_oc_temp));
+
+fapi_try_exit:
+    return process_results(i_ocmb, scomt::ody::ODC_MMIO_SNSC_OCTHERM, l_data);
 }
 
 ///
@@ -192,7 +223,7 @@ fapi2::ReturnCode read_dts_sensors(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         FAPI_TRY(thermal_sensor_info[l_sensor_pos].read(i_ocmb, l_sensor));
     }
 
-    // TODO:ZEN:MST-1811 Add Odyssey on-chip thermal sensor read into Odyssey thermal init
+    FAPI_TRY(read_oc_results(i_ocmb));
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -72,6 +72,17 @@ fapi2::ReturnCode read_dts(const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>& 
 } // ns i2c
 
 ///
+/// @brief Processes the results for this thermal sensor and writes them into the sensor cache register
+/// @param[in] i_ocmb the OCMB target
+/// @param[in] i_reg_addr the register address upon which to operate
+/// @param[in] i_data register data to write. Note: this is not a pass-by-reference as it could be updated internally
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode process_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+                                  const uint64_t i_reg_addr,
+                                  fapi2::buffer<uint64_t> i_data);
+
+///
 /// @brief Class containing information for reading thermal sensors
 /// @note Uses function pointers to allow the code to easily run in the SPPE (as opposed to using inheritance)
 ///
@@ -108,19 +119,10 @@ class thermal_sensor
         /// @param[in] i_i2c the i2c responder target
         /// @param[out] o_i2c_data the data read from the i2c register
         /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note allows for a shim to be made for unit testing
+        /// @note Virtual declaration allows for a shim to be made for unit testing
         ///
-        fapi2::ReturnCode i2c_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>& i_i2c,
-                                          fapi2::buffer<uint16_t>& o_i2c_data) const;
-
-        ///
-        /// @brief Processes the results for this thermal sensor and writes them into the sensor cache register
-        /// @param[in] i_ocmb the OCMB target
-        /// @param[in] i_data register data to write. Note: this is not a pass-by-reference as it could be updated internally
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode process_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
-                                          fapi2::buffer<uint64_t> i_data) const;
+        virtual fapi2::ReturnCode i2c_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>& i_i2c,
+                fapi2::buffer<uint16_t>& o_i2c_data) const;
 };
 
 ///
@@ -129,6 +131,14 @@ class thermal_sensor
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode read_dts_sensors(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb);
+
+///
+/// @brief Processes the results for the On-Chip (OC) thermal sensor
+/// @param[in] i_ocmb the OCMB target
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode read_oc_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb);
+
 
 namespace mc
 {
