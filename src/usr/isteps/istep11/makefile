@@ -54,6 +54,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/common/procedures/hwp/pmic/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/lib/
 
 # Istep objs
 OBJS += call_host_prd_hwreconfig.o

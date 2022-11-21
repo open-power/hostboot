@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2021
+# Contributors Listed Below - COPYRIGHT 2015,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -46,6 +46,7 @@ EXTRAINCDIR += ${OCMB_PROCEDURES_PATH}/hwp/initfiles/
 EXTRAINCDIR += ${EXP_INCLUDE_PATH}
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/memory/
 

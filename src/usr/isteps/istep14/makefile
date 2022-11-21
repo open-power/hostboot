@@ -59,6 +59,7 @@ EXTRAINCDIR += ${EXPLORER_COMMON_PATH}/include/
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/initfiles/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/lib/
 
 # Add the sub step object files
 OBJS += call_mss_memdiag.o

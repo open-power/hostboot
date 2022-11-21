@@ -73,6 +73,7 @@ FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/p10/procedures/xml/att
 FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/*)
 FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/generic/procedures/xml/attribute_info/*)
 FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/ocmb/explorer/procedures/xml/attribute_info/*)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/ocmb/odyssey/procedures/xml/attribute_info/*)
 FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/ocmb/common/procedures/xml/attribute_info/*)
 FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/usr/targeting/common/xmltohb/deleteme_temp_hb_attrs.xml)
 

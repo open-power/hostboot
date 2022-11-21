@@ -145,6 +145,8 @@ FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p10/procedures/xml/attribute_info/*.xml)
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/usr/targeting/common/xmltohb/deleteme_temp_hb_attrs.xml)
+FAPI2_ATTR_XML += $(wildcard \
+  $(ROOTPATH)/src/import/chips/ocmb/odyssey/procedures/xml/attribute_info/*.xml)
 
 
 # Filter out Temp defaults XML file from Attribute XML files.

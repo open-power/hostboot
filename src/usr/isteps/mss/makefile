@@ -197,9 +197,9 @@ SOURCES += $(shell find $(IMPORT_PATH)/chips/ocmb/odyssey/procedures/xml/attribu
 
 CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_odyssey_attribute_getters.H
 CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_odyssey_attribute_setters.H
-CLEAN_TARGETS += ${$(GENERATED)_PATH}/.gen_exp_accessors.built
+CLEAN_TARGETS += ${$(GENERATED)_PATH}/.gen_ody_accessors.built
 
-define gen_exp_accessors_RUN
+define gen_ody_accessors_RUN
 		$(C1) mkdir $$($(GENERATED)_PATH) -p
 		$(C1) perl -I$(IMPORT_PATH)/generic/memory/tools/ $$< --system=P10 --output-dir=$$($(GENERATED)_PATH) --output-file-prefix=$$($(GENERATED)_FILE_PREFIX) $$(filter-out $$<,$$^)
 endef
