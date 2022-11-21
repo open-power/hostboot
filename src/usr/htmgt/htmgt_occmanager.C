@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -946,13 +946,13 @@ namespace HTMGT
     {
         errlHndl_t checkpointElog = nullptr;
 #ifdef CONFIG_HTMGT
-        // Wait up to 15 seconds for all OCCs to be ready (150 * 100ms = 15s)
+        // Wait up to 120 seconds for all OCCs to be ready (1200 * 100ms = 120s)
         const size_t NS_BETWEEN_READ = 100 * NS_PER_MSEC;
-        const size_t READ_RETRY_LIMIT = 150;
+        const size_t READ_RETRY_LIMIT = 1200;
 
         if (iv_occArray.size() > 0)
         {
-            uint8_t retryCount = 0;
+            size_t retryCount = 0;
             bool throttleErrors = false;
 
             TMGT_INF("_waitForOccCheckpoint: Waiting for all OCC checkpoints");
@@ -1039,8 +1039,8 @@ namespace HTMGT
                     TMGT_CONSOLE("Final OCC%d Checkpoint NOT reached (0x%04X)",
                                  occ->getInstance(), lastCheckpoint);
                     TMGT_ERR("_waitForOccCheckpoint: OCC%d still NOT ready! "
-                             "(last checkpoint=0x%04X)",
-                             occ->getInstance(), lastCheckpoint);
+                             "(last checkpoint=0x%04X, timeout=%d sec)",
+                             occ->getInstance(), lastCheckpoint, READ_RETRY_LIMIT/10);
 
                     // Clear OCC enabled sensors (to stop BMC comm)
                     errlHndl_t l_err = setOccEnabledSensors(false);
