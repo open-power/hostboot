@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,61 +82,151 @@ constexpr size_t get_bit_length (const T& i_first, const Types& ... i_args)
 }
 
 ///
-/// @brief Helper function for insertion boilerplate
-/// @tparam INPUT_BIT_LEN input bit length
-/// @tparam T input type
-/// @tparam OT output type
-/// @param[in] i_data data to insert
-/// @param[in,out] io_out buffer we wish to insert values to
+/// @brief Base function to insert entire values of any integral value into a buffer uint16 buffer with 2 uint8 numbers
+/// @param[out] o_out buffer we wish to insert values to
+/// @param[in] i_input1
+/// @param[in] i_input0
 /// @note inserts full integral size in bit length (e.g. uint8_t -> 8 bits, uint32_t -> 32 bits)
 ///
-template <size_t INPUT_BIT_LEN, typename T, typename OT>
-static void right_aligned_insert_helper(const T i_data, fapi2::buffer<OT>& io_out)
+inline void right_aligned_insert(fapi2::buffer<uint16_t>& o_out, const uint8_t i_input1, const uint8_t i_input0)
 {
-    constexpr size_t BUFFER_BIT_LEN = get_bit_length<OT>();
+    constexpr size_t INPUT_BIT_SIZE = 8;
 
-    constexpr size_t l_start_bit = BUFFER_BIT_LEN - INPUT_BIT_LEN;
-    constexpr size_t l_len = get_bit_length<T>();
+    o_out = 0;
 
-    FAPI_DBG("Total input bit length %d, output bit length %d, insert start bit %d, insert length %d, data %d",
-             INPUT_BIT_LEN, BUFFER_BIT_LEN, l_start_bit, l_len, i_data);
-
-    io_out.template insertFromRight<l_start_bit, l_len >(i_data);
+    o_out.insertFromRight<0, INPUT_BIT_SIZE>(i_input1)
+    .insertFromRight<INPUT_BIT_SIZE, INPUT_BIT_SIZE>(i_input0);
 }
 
 ///
-/// @brief Base function to insert entire values of any integral value into a buffer
-/// @tparam T input type
-/// @tparam OT output type of fapi2::buffer
-/// @param[in,out] io_out buffer we wish to insert values to
-/// @param[in] i_input argument we want to get bit length of
+/// @brief Base function to insert entire values of any integral value into a buffer int64 buffer with 2 uint8 numbers
+/// @param[out] o_out buffer we wish to insert values to
+/// @param[in] i_input1
+/// @param[in] i_input0
 /// @note inserts full integral size in bit length (e.g. uint8_t -> 8 bits, uint32_t -> 32 bits)
 ///
-template <typename T, typename OT>
-void right_aligned_insert(fapi2::buffer<OT>& io_out, const T& i_input)
+inline void right_aligned_insert(fapi2::buffer<int64_t>& o_out, const uint8_t i_input1, const uint8_t i_input0)
 {
-    constexpr size_t l_input_total_args_bit_length = get_bit_length(i_input);
-    right_aligned_insert_helper<l_input_total_args_bit_length>(i_input, io_out);
+    constexpr size_t INPUT_BIT_SIZE = 8;
+    constexpr size_t BUFFER_BIT_SIZE = 64;
+    constexpr size_t INPUT0_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 1);
+    constexpr size_t INPUT1_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 2);
+
+    o_out = 0;
+
+    o_out.insertFromRight<INPUT1_POS, INPUT_BIT_SIZE>(i_input1)
+    .insertFromRight<INPUT0_POS, INPUT_BIT_SIZE>(i_input0);
 }
 
 ///
-/// @brief Variadic function to insert entire values of any integral value into a buffer
-/// @tparam T input type
-/// @tparam OT output type of fapi2::buffer
-/// @tparam Types input type for a list in input params
-/// @param[in,out] io_out buffer we wish to insert values to
-/// @param[in] i_first first argument we want to get bit length of
-/// @param[in] i_args list of arguments we want to get the total bit length of
+/// @brief Base function to insert entire values of any integral value into a buffer uint64 buffer with 4 uint8 numbers
+/// @param[out] o_out buffer we wish to insert values to
+/// @param[in] i_input3
+/// @param[in] i_input2
+/// @param[in] i_input1
+/// @param[in] i_input0
 /// @note inserts full integral size in bit length (e.g. uint8_t -> 8 bits, uint32_t -> 32 bits)
-/// @note params are ordered to be inserted from left to right
 ///
-template <typename T, typename OT, typename... Types>
-void right_aligned_insert(fapi2::buffer<OT>& io_out, const T& first, const Types& ... args)
+inline void right_aligned_insert(fapi2::buffer<uint64_t>& o_out, const uint8_t i_input3, const uint8_t i_input2,
+                                 const uint8_t i_input1, const uint8_t i_input0)
 {
-    constexpr size_t l_input_total_args_bit_length = get_bit_length(first, args...);
-    right_aligned_insert_helper<l_input_total_args_bit_length>(first, io_out);
+    constexpr size_t INPUT_BIT_SIZE = 8;
+    constexpr size_t BUFFER_BIT_SIZE = 64;
+    constexpr size_t INPUT0_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 1);
+    constexpr size_t INPUT1_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 2);
+    constexpr size_t INPUT2_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 3);
+    constexpr size_t INPUT3_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 4);
 
-    right_aligned_insert(io_out, args...);
+    o_out = 0;
+
+    o_out.insertFromRight<INPUT3_POS, INPUT_BIT_SIZE>(i_input3)
+    .insertFromRight<INPUT2_POS, INPUT_BIT_SIZE>(i_input2)
+    .insertFromRight<INPUT1_POS, INPUT_BIT_SIZE>(i_input1)
+    .insertFromRight<INPUT0_POS, INPUT_BIT_SIZE>(i_input0);
+}
+
+///
+/// @brief Base function to insert entire values of any integral value into a buffer uint64 buffer with 5 uint8 numbers
+/// @param[out] o_out buffer we wish to insert values to
+/// @param[in] i_input4
+/// @param[in] i_input3
+/// @param[in] i_input2
+/// @param[in] i_input1
+/// @param[in] i_input0
+/// @note inserts full integral size in bit length (e.g. uint8_t -> 8 bits, uint32_t -> 32 bits)
+///
+inline void right_aligned_insert(fapi2::buffer<uint64_t>& o_out, const uint8_t i_input4, const uint8_t i_input3,
+                                 const uint8_t i_input2, const uint8_t i_input1, const uint8_t i_input0)
+{
+    constexpr size_t INPUT_BIT_SIZE = 8;
+    constexpr size_t BUFFER_BIT_SIZE = 64;
+    constexpr size_t INPUT0_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 1);
+    constexpr size_t INPUT1_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 2);
+    constexpr size_t INPUT2_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 3);
+    constexpr size_t INPUT3_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 4);
+    constexpr size_t INPUT4_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 5);
+
+    o_out = 0;
+
+    o_out.insertFromRight<INPUT4_POS, INPUT_BIT_SIZE>(i_input4)
+    .insertFromRight<INPUT3_POS, INPUT_BIT_SIZE>(i_input3)
+    .insertFromRight<INPUT2_POS, INPUT_BIT_SIZE>(i_input2)
+    .insertFromRight<INPUT1_POS, INPUT_BIT_SIZE>(i_input1)
+    .insertFromRight<INPUT0_POS, INPUT_BIT_SIZE>(i_input0);
+}
+
+///
+/// @brief Base function to insert entire values of any integral value into a buffer uint64 buffer with 4 uint16 numbers
+/// @param[out] o_out buffer we wish to insert values to
+/// @param[in] i_input3
+/// @param[in] i_input2
+/// @param[in] i_input1
+/// @param[in] i_input0
+/// @note inserts full integral size in bit length (e.g. uint8_t -> 8 bits, uint32_t -> 32 bits)
+///
+inline void right_aligned_insert(fapi2::buffer<uint64_t>& o_out, const uint16_t i_input3, const uint16_t i_input2,
+                                 const uint16_t i_input1, const uint16_t i_input0)
+{
+    constexpr size_t INPUT_BIT_SIZE = 16;
+    constexpr size_t BUFFER_BIT_SIZE = 64;
+    constexpr size_t INPUT0_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 1);
+    constexpr size_t INPUT1_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 2);
+    constexpr size_t INPUT2_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 3);
+    constexpr size_t INPUT3_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 4);
+
+    o_out = 0;
+
+    o_out.insertFromRight<INPUT3_POS, INPUT_BIT_SIZE>(i_input3)
+    .insertFromRight<INPUT2_POS, INPUT_BIT_SIZE>(i_input2)
+    .insertFromRight<INPUT1_POS, INPUT_BIT_SIZE>(i_input1)
+    .insertFromRight<INPUT0_POS, INPUT_BIT_SIZE>(i_input0);
+}
+
+///
+/// @brief Base function to insert entire values of any integral value into a buffer uint32 buffer with 4 uint8 numbers
+/// @param[out] o_out buffer we wish to insert values to
+/// @param[in] i_input3
+/// @param[in] i_input2
+/// @param[in] i_input1
+/// @param[in] i_input0
+/// @note inserts full integral size in bit length (e.g. uint8_t -> 8 bits, uint32_t -> 32 bits)
+///
+inline void right_aligned_insert(fapi2::buffer<uint32_t>& o_out, const uint8_t i_input3, const uint8_t i_input2,
+                                 const uint8_t i_input1, const uint8_t i_input0)
+{
+    constexpr size_t INPUT_BIT_SIZE = 8;
+    constexpr size_t BUFFER_BIT_SIZE = 32;
+    constexpr size_t INPUT0_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 1);
+    constexpr size_t INPUT1_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 2);
+    constexpr size_t INPUT2_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 3);
+    constexpr size_t INPUT3_POS = BUFFER_BIT_SIZE - (INPUT_BIT_SIZE * 4);
+
+    o_out = 0;
+
+    o_out.insertFromRight<INPUT3_POS, INPUT_BIT_SIZE>(i_input3)
+    .insertFromRight<INPUT2_POS, INPUT_BIT_SIZE>(i_input2)
+    .insertFromRight<INPUT1_POS, INPUT_BIT_SIZE>(i_input1)
+    .insertFromRight<INPUT0_POS, INPUT_BIT_SIZE>(i_input0);
 }
 
 }// mss
