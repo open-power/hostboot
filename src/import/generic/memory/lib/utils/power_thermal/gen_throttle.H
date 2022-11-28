@@ -1530,54 +1530,7 @@ fapi_try_exit:
 /// @return fapi2::FAPI2_RC_SUCCESS if ok
 ///
 template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
-fapi2::ReturnCode set_str_reg(const fapi2::Target<T>& i_target)
-{
-    fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_Type l_str_enable = 0;
-    fapi2::buffer<uint64_t> l_data;
-
-    FAPI_TRY(mss::attr::get_mrw_power_control_requested(l_str_enable));
-    FAPI_TRY(fapi2::getScom(i_target, TT::STR0Q_REG, l_data));
-
-    //Write bit if STR should be enabled
-    switch (l_str_enable)
-    {
-        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR:
-            l_data.setBit<TT::CFG_STR_ENABLE>();
-            l_data.clearBit<TT::CFG_DIS_CLK_IN_STR>();
-            break;
-
-        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP:
-            l_data.setBit<TT::CFG_STR_ENABLE>();
-            l_data.setBit<TT::CFG_DIS_CLK_IN_STR>();
-            break;
-
-        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN:
-        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_OFF:
-            l_data.clearBit<TT::CFG_STR_ENABLE>();
-            l_data.clearBit<TT::CFG_DIS_CLK_IN_STR>();
-            break;
-
-        default:
-            FAPI_ASSERT( false,
-                         fapi2::MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED()
-                         .set_PORT_TARGET(i_target)
-                         .set_FUNCTION(mss::SET_STR_REG)
-                         .set_VALUE(l_str_enable),
-                         "%s ATTR_MSS_MRW_POWER_CONTROL_REQUESTED not set correctly in MRW: %u",
-                         mss::c_str(i_target),
-                         l_str_enable);
-            break;
-    }
-
-    l_data.insertFromRight<TT::CFG_ENTER_STR_TIME, TT::CFG_ENTER_STR_TIME_LEN>(TT::ENTER_STR_TIME);
-
-    FAPI_TRY(fapi2::putScom(i_target, TT::STR0Q_REG, l_data));
-
-    return fapi2::FAPI2_RC_SUCCESS;
-fapi_try_exit:
-    FAPI_ERR("%s Error setting the STR register MBASTR0Q", mss::c_str(i_target));
-    return fapi2::current_err;
-}
+fapi2::ReturnCode set_str_reg(const fapi2::Target<T>& i_target);
 
 ///
 /// @brief set the general N/M throttle register
