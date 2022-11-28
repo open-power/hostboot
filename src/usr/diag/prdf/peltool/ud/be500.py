@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -191,10 +191,12 @@ def todTopologyToStr(i_topology):
 
 def tdTypeToStr(i_tdType):
 
+    # Note: This map should correspond to the 'TdType' enum defined in
+    #       prdfMemTdQueue.H
     tdTypes = {0: "VCM",
-               1: "DSD",
-               2: "TPS",
-               3: "RRD",
+               1: "RRD",
+               2: "DSD",
+               3: "TPS",
                0xf: "Invalid Event"}
 
     tdTypeStr = "Unknown " + str(i_tdType)
