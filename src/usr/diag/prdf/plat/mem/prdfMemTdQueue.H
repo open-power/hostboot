@@ -57,6 +57,9 @@ class TdEntry
      *        be handled.
      * @note  The order of the enums values is important because it is used for
      *        sorting the TdQueue by event type priority.
+     *        A copy of this enum exists in prdfMemLogParse.C as well as a
+     *        corresponding map in the 'tdTypeToStr' function of the be500.py
+     *        user data parser. These should all be kept consistent.
      */
     enum TdType
     {

@@ -625,9 +625,9 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
     enum TdType
     {
         VCM_EVENT = 0,
+        RRD_EVENT,
         DSD_EVENT,
         TPS_EVENT,
-        RRD_EVENT,
         INVALID_EVENT = 0xf,
     };
 
