@@ -101,23 +101,28 @@ void applySbeCapabilities(TargetHandle_t i_target,
               "SBE supports Hostboot requested halt status reporting: %d",
               sbeSupportsHaltReporting);
 
-    // SBE support for TPM Extend Mode as of version 2.1 or later.
-    const uint8_t sbeSupportsTpmExtendMode =
-        (   (   (i_capabilities.majorVersion == 2)
-             && (i_capabilities.minorVersion >= 1))
-         || (   (i_capabilities.majorVersion >  2)));
+    // Only interrogate the boot processor's SBE to determine if the current
+    // node is capable of having the boot processor's SBE perform the SMP
+    // stitching and TPM measurement extending.
+    if(i_target->getAttr<ATTR_PROC_MASTER_TYPE>() == PROC_MASTER_TYPE_ACTING_MASTER)
+    {
+        // SBE support for TPM Extend Mode as of version 2.1 or later.
+        const uint8_t sbeSupportsTpmExtendMode =
+            (   (   (i_capabilities.majorVersion == 2)
+                 && (i_capabilities.minorVersion >= 1))
+             || (   (i_capabilities.majorVersion >  2)));
 
 #ifndef __HOSTBOOT_RUNTIME
-    TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
+        TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
 #else
-    TargetHandle_t l_nodeTarget = UTIL::assertGetMasterNodeTarget();
+        TargetHandle_t l_nodeTarget = UTIL::assertGetMasterNodeTarget();
 #endif
-    l_nodeTarget->
-        setAttr<ATTR_SBE_HANDLES_SMP_TPM_EXTEND>(sbeSupportsTpmExtendMode);
-    TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
-              "SBE supports TPM Extend Mode: %d",
-              sbeSupportsTpmExtendMode);
-
+        l_nodeTarget->
+            setAttr<ATTR_SBE_HANDLES_SMP_TPM_EXTEND>(sbeSupportsTpmExtendMode);
+        TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
+                  "SBE supports TPM Extend Mode: %d",
+                  sbeSupportsTpmExtendMode);
+    }
 }
 
 /**
