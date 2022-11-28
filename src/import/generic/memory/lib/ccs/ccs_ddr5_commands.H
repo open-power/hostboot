@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -221,6 +221,25 @@ void add_mra7_0(const fapi2::buffer<uint64_t>& i_mra, fapi2::buffer<uint64_t>& i
 }
 
 /////////////////////////////////////////////
+///////// Function to default WRDATA_CSN bits
+/////////////////////////////////////////////
+
+///
+/// @brief function to update wrdata_csn bits
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
+/// @return Buffer with wrdata_csn bits set
+///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline fapi2::buffer<uint64_t> default_inst_arr0()
+{
+    fapi2::buffer<uint64_t> o_boilerplate_arr0;
+    o_boilerplate_arr0.setBit<TT::wrdata_csn::WRITE_DATA_PHASE0_POS, TT::wrdata_csn::WRITE_DATA_PHASE0_LEN>();
+    o_boilerplate_arr0.setBit<TT::wrdata_csn::WRITE_DATA_PHASE1_POS, TT::wrdata_csn::WRITE_DATA_PHASE1_LEN>();
+    return o_boilerplate_arr0;
+}
+
+/////////////////////////////////////////////
 //////// DDR5 commands
 /////////////////////////////////////////////
 
@@ -244,7 +263,7 @@ inline instruction_t<MC> act_command( const uint64_t i_port_rank,
                                       const fapi2::buffer<uint64_t>& i_row_addr = 0,
                                       const uint16_t i_idle = 0 )
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::ACT);
@@ -293,7 +312,7 @@ template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 inline instruction_t<MC> rcd_command(const uint64_t i_rcd,
                                      const uint16_t i_idle = 0)
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     mrs_rcd_helper<MC>(i_rcd, l_boilerplate_arr0);
@@ -318,7 +337,7 @@ inline instruction_t<MC> mrw_command ( const uint64_t i_port_rank,
                                        const uint64_t i_mrs,
                                        const uint16_t i_idle = 0 )
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     mrs_rcd_helper<MC>(i_mrs, l_boilerplate_arr0);
@@ -342,7 +361,7 @@ inline instruction_t<MC> mrr_command ( const uint64_t i_port_rank,
                                        const uint64_t i_mrs,
                                        const uint16_t i_idle = 0 )
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::MRR)
@@ -367,7 +386,7 @@ inline instruction_t<MC> pde_command( const uint64_t i_port_rank,
                                       const mss::states i_odt,
                                       const uint16_t i_idle = 0 )
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::PDE)
@@ -393,7 +412,7 @@ static fapi2::buffer<uint64_t> wr_rd_cmd_boilerplate(const fapi2::buffer<uint64_
         const fapi2::buffer<uint64_t>& i_bank_addr = 0,
         const fapi2::buffer<uint64_t>& i_column_addr = 0)
 {
-    fapi2::buffer<uint64_t> l_inst0;
+    fapi2::buffer<uint64_t> l_inst0 = default_inst_arr0<MC>();
 
     add_cid2_0<MC>(i_cid, l_inst0);
     add_ba1_0<MC>(i_bank_addr, l_inst0);
@@ -508,7 +527,7 @@ inline instruction_t<MC> precharge_all_command( const uint64_t i_port_rank,
         const fapi2::buffer<uint64_t>& i_cid = 0,
         const uint16_t i_idle = 0 )
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::PREAB)
@@ -532,7 +551,7 @@ inline instruction_t<MC> precharge_all_command( const uint64_t i_port_rank,
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 inline instruction_t<MC> self_refresh_entry_command( const uint64_t i_port_rank, const uint16_t i_idle = 0 )
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::SRE)
@@ -554,7 +573,7 @@ inline instruction_t<MC> self_refresh_entry_command( const uint64_t i_port_rank,
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 inline instruction_t<MC> self_refresh_exit_command( const uint64_t i_port_rank, const uint16_t i_idle = 0 )
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::PDX);
@@ -577,7 +596,7 @@ inline instruction_t<MC> refresh_command( const uint64_t i_port_rank,
         const fapi2::buffer<uint64_t>& i_cid = 0,
         const uint16_t i_idle = 0 )
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     // Sets up a refresh all without management
@@ -604,7 +623,7 @@ inline instruction_t<MC> refresh_command( const uint64_t i_port_rank,
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 inline instruction_t<MC> mpc_command( const uint64_t i_port_rank, const uint64_t i_op, const uint16_t i_idle = 0 )
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::MPC);
@@ -628,7 +647,7 @@ inline instruction_t<MC> vrefca_command( const uint64_t i_port_rank,
         const fapi2::buffer<uint64_t>& i_value,
         const uint16_t i_idle = 0 )
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     // Technically, only MRA6:0 are used, but we'll overwrite MRA7 below (VREFCA)
@@ -654,7 +673,7 @@ inline instruction_t<MC> vrefcs_command( const uint64_t i_port_rank,
         const fapi2::buffer<uint64_t>& i_value,
         const uint16_t i_idle = 0 )
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     // Technically, only MRA6:0 are used, but we'll overwrite MRA7 below (VREFCA)
@@ -676,7 +695,7 @@ inline instruction_t<MC> vrefcs_command( const uint64_t i_port_rank,
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 inline instruction_t<MC> des_command(const uint16_t i_idle = 0)
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::NOP);
@@ -701,7 +720,7 @@ inline instruction_t<MC> nttm_read_command()
     // This was a 4 on DDR4, so using an 8 for DDR5 (burst length is 2x as long on DDR5)
     constexpr uint64_t IDLES = 8;
 
-    fapi2::buffer<uint64_t> l_boilerplate_arr0;
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::NOP);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -250,6 +250,15 @@ class ccsTraits<mss::mc_type::ODYSSEY>
             REG_MULTIPLIER_2 = 0b01,
             REG_MULTIPLIER_4 = 0b10,
             REG_MULTIPLIER_8 = 0b11,
+        };
+
+        // Enumerations for WRDATA_CSN bits
+        enum wrdata_csn
+        {
+            WRITE_DATA_PHASE0_POS = 17,
+            WRITE_DATA_PHASE0_LEN = 2,
+            WRITE_DATA_PHASE1_POS = 49,
+            WRITE_DATA_PHASE1_LEN = 2,
         };
 
         // CSN Quad encoded settings - Not supported for Odyssey as we only have two ranks so we cannot have a quad encoded CS
