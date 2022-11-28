@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -852,22 +852,16 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
         if ( 2 <= i_ver )
         {
             i_parser.PrintString("Mem VPD DQ Mapping:", "");
-            for ( uint32_t n = 0; n < DQS_PER_DIMM; n+=20 )
+            for ( uint32_t n = 0; n < DQS_PER_DIMM; n+=10 )
             {
                 char mapping[72];
-                snprintf(mapping, 72, "%d %d %d %d %d %d %d %d %d %d "
-                                      "%d %d %d %d %d %d %d %d %d %d",
+                snprintf(mapping, 72, "%d %d %d %d %d %d %d %d %d %d",
                          extMemMru.dqMapping[n+0] , extMemMru.dqMapping[n+1],
                          extMemMru.dqMapping[n+2] , extMemMru.dqMapping[n+3],
                          extMemMru.dqMapping[n+4] , extMemMru.dqMapping[n+5],
                          extMemMru.dqMapping[n+6] , extMemMru.dqMapping[n+7],
-                         extMemMru.dqMapping[n+8] , extMemMru.dqMapping[n+9],
-                         extMemMru.dqMapping[n+10], extMemMru.dqMapping[n+11],
-                         extMemMru.dqMapping[n+12], extMemMru.dqMapping[n+13],
-                         extMemMru.dqMapping[n+14], extMemMru.dqMapping[n+15],
-                         extMemMru.dqMapping[n+16], extMemMru.dqMapping[n+17],
-                         extMemMru.dqMapping[n+18], extMemMru.dqMapping[n+19]);
-                i_parser.PrintString(mapping, "");
+                         extMemMru.dqMapping[n+8] , extMemMru.dqMapping[n+9]);
+                i_parser.PrintString("", mapping);
             }
         }
 
