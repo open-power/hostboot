@@ -396,6 +396,231 @@
   </attribute>
 
   <attribute>
+    <id>DDR5_DIMM_ERROR_TEMP_DEG_C</id>
+    <description>
+        DDR5 DIMM Temperature in degrees C that a DIMM overtemp error will be
+        logged calling out the DIMM
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>84</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_DIMM_READ_TIMEOUT_SEC</id>
+    <description>
+        Maximum time in seconds allowed without having a new DDR5 DIMM
+        temperature before memory throttling will occur
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>30</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_DIMM_THROTTLE_TEMP_DEG_C</id>
+    <description>
+        DDR5 DIMM Temperature to invoke memory throttling in degrees C
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>69</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_MC_DRAM_ERROR_TEMP_DEG_C</id>
+    <description>
+        DDR5 External MC and DRAM temperature where an error will be generated
+        in degrees C
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>99</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_MC_DRAM_READ_TIMEOUT_SEC</id>
+    <description>
+        Maximum time in seconds allowed without having a new temperature
+        for the sensor covering both DDR5 external MC and DRAM before memory
+        throttling will occur
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>30</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_MC_DRAM_THROTTLE_TEMP_DEG_C</id>
+    <description>
+        DDR5 External MC and DRAM temperature threshold where throttling will
+        occur in degrees C
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>89</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_MC_EXT_ERROR_TEMP_DEG_C</id>
+    <description>
+        DDR5 External MC temperature where an error will be generated
+        in degrees C
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>99</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_MC_EXT_READ_TIMEOUT_SEC</id>
+    <description>
+        Maximum time in seconds allowed without having a new DDR5 external MC
+        temperature before memory throttling will occur
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>30</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_MC_EXT_THROTTLE_TEMP_DEG_C</id>
+    <description>
+        DDR5 External MC temperature threshold where throttling will
+        occur in degrees C
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>89</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_MEMCTRL_ERROR_TEMP_DEG_C</id>
+    <description>
+        DDR5 Memory controller temperature where an error will occur
+        in degrees C
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>99</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_MEMCTRL_READ_TIMEOUT_SEC</id>
+    <description>
+        Maximum time in seconds allowed without having a new DDR5 MC temperature
+        before memory throttling will occur
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>30</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_MEMCTRL_THROTTLE_TEMP_DEG_C</id>
+    <description>
+         DDR5 Memory controller temperature threshold
+         where throttling will occur in degrees C
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>89</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_PMIC_ERROR_TEMP_DEG_C</id>
+    <description>
+        DDR5 PMIC temperature where an error will be generated
+        in degrees C
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>95</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_PMIC_READ_TIMEOUT_SEC</id>
+    <description>
+        Maximum time in seconds allowed without having a new DDR5 PMIC
+        temperature before memory throttling will occur
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>30</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_PMIC_THROTTLE_TEMP_DEG_C</id>
+    <description>
+        DDR5 PMIC temperature threshold where throttling will
+        occur in degrees C
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>85</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>DEALLOCATED</id>
     <description>Flag to indicate whether the target is removed
       from service by PHYP. PHYP notifies HBRT after removing a target

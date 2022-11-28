@@ -57,6 +57,7 @@ namespace HTMGT
 #define OCC_MEM_TYPE_ISDIMM   0xC0
     bool G_wofSupported = true;
     uint8_t G_system_type = 0;
+    uint8_t G_memory_type = OCC_MEM_TYPE_EXPLORER;
 
 
     // Send config format data to all OCCs
@@ -380,7 +381,7 @@ uint8_t convert_temp_type(const uint8_t i_sensor_type)
                  * @devdesc Unsupported MEM_EFF_THERM_SENSOR type
                  * @custdesc An internal firmware error occurred
                  */
-                errlHndl_t l_err = NULL;
+                errlHndl_t l_err = nullptr;
                 bldErrLog(l_err, HTMGT_MOD_CONVERT_TEMP_TYPE,
                           HTMGT_RC_INVALID_MEM_SENSOR,
                           i_sensor_type, 0,
@@ -472,7 +473,7 @@ uint8_t addOcmbInternalDts(uint8_t*  o_data,
                  *             ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE type
                  * @custdesc An internal firmware error occurred
                  */
-                errlHndl_t l_err = NULL;
+                errlHndl_t l_err = nullptr;
                 bldErrLog(l_err, HTMGT_MOD_ADD_OBMC_INTERNAL_DTS,
                           HTMGT_RC_INVALID_MEM_SENSOR,
                           dtsType, l_ocmb_huid,
@@ -501,7 +502,7 @@ uint8_t addOcmbInternalDts(uint8_t*  o_data,
              * @custdesc Failed to determine memory temperature sensor type.
              *           Some memory temperatures may not be available.
              */
-            errlHndl_t l_err = NULL;
+            errlHndl_t l_err = nullptr;
             bldErrLog(l_err, HTMGT_MOD_ADD_OBMC_INTERNAL_DTS,
                       HTMGT_RC_ATTRIBUTE_ERROR,
                       i_ocmbNum, chipId,
@@ -514,6 +515,7 @@ uint8_t addOcmbInternalDts(uint8_t*  o_data,
     {
         // EXPLORER/DDR4 OCMB Memory type (0xAn, where n is Memory Buffer 0-F)
         o_memType = OCC_MEM_TYPE_EXPLORER | i_ocmbNum;
+        G_memory_type = OCC_MEM_TYPE_EXPLORER;
 
         TMGT_INF("ocmbInit: OCMB-EXPL[%d] HUID=0x%08lX DTS[int] TYPE[%d] "
                  "(pos=0x%02X, ordinal=0x%02X)",
@@ -525,6 +527,7 @@ uint8_t addOcmbInternalDts(uint8_t*  o_data,
     {
         // ODYSSEY/DDR5 OCMB Memory type (0xBn, where n is Memory Buffer 0-F)
         o_memType = OCC_MEM_TYPE_ODYSSEY | i_ocmbNum;
+        G_memory_type = OCC_MEM_TYPE_ODYSSEY;
 
         TMGT_INF("ocmbInit: OCMB-ODYS[%d] HUID=0x%08lX DTS[int] TYPE[%d] "
                  "(pos=0x%02X, ordinal=0x%02X)",
@@ -653,7 +656,7 @@ uint8_t addOcmbExternalDts(uint8_t* o_data,
          * @custdesc Failed to determine memory temperature sensor type.
          *           Some memory temperatures may not be available.
          */
-        errlHndl_t l_err = NULL;
+        errlHndl_t l_err = nullptr;
         bldErrLog(l_err, HTMGT_MOD_ADD_OBMC_DTS,
                   HTMGT_RC_ATTRIBUTE_ERROR,
                   numSets, i_memType,
@@ -743,7 +746,7 @@ uint8_t ocmbInit(Occ *i_occ,
 
             // OCMB instance comes from the parent (OMI target)
             Target *omi_target = getImmediateParentByAffinity(ocmb);
-            if (omi_target != NULL)
+            if (omi_target != nullptr)
             {
                 // get relative OCMB per processor
                 l_ocmb_num = omi_target->getAttr<ATTR_CHIP_UNIT>();
@@ -765,7 +768,7 @@ uint8_t ocmbInit(Occ *i_occ,
                      * @custdesc Failed to determine part of the memory config.
                      *           Some memory temperatures may not be available.
                      */
-                    errlHndl_t l_err = NULL;
+                    errlHndl_t l_err = nullptr;
                     bldErrLog(l_err, HTMGT_MOD_OCMB_INIT,
                               HTMGT_RC_TARGET_NOT_FOUND,
                               i_occ->getInstance(), l_ocmb_huid,
@@ -952,7 +955,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
         // OCMB instance comes from the parent (OMI target)
         uint8_t l_ocmb_pos = 0xFF;
         TARGETING::Target * omi_target = getImmediateParentByAffinity(ocmb_target);
-        if (omi_target != NULL)
+        if (omi_target != nullptr)
         {
             // get relative OCMB per processor
             l_ocmb_pos = omi_target->getAttr<ATTR_CHIP_UNIT>();
@@ -997,7 +1000,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
              * @devdesc Failed to read throttle settings
              * @custdesc An internal firmware error occurred
              */
-            errlHndl_t l_err = NULL;
+            errlHndl_t l_err = nullptr;
             bldErrLog(l_err, HTMGT_MOD_MEMTHROTTLE,
                       HTMGT_RC_ATTRIBUTE_ERROR,
                       l_ocmb_pos, 0,
@@ -1343,22 +1346,46 @@ void getThermalControlMessageData(TARGETING::Target * i_procTarget,
     l_numSets++;
 
     // Memory Buffers
-    uint8_t l_DVFS_temp = sys->getAttr<ATTR_MEMCTRL_THROTTLE_TEMP_DEG_C>();
-    if(l_DVFS_temp == 0)
+    uint8_t l_DVFS_temp, l_ERR_temp;
+    if (G_memory_type != OCC_MEM_TYPE_ODYSSEY)
     {
-        l_DVFS_temp =  OCC_MEMCTRL_DEFAULT_THROT_TEMP;
-    }
+        l_DVFS_temp = sys->getAttr<ATTR_MEMCTRL_THROTTLE_TEMP_DEG_C>();
+        if(l_DVFS_temp == 0)
+        {
+            l_DVFS_temp =  OCC_MEMCTRL_DEFAULT_THROT_TEMP;
+        }
 
-    uint8_t l_ERR_temp = sys->getAttr<ATTR_MEMCTRL_ERROR_TEMP_DEG_C>();
-    if(l_ERR_temp == 0)
-    {
-        l_ERR_temp = OCC_MEMCTRL_DEFAULT_ERROR_TEMP;
-    }
+        l_ERR_temp = sys->getAttr<ATTR_MEMCTRL_ERROR_TEMP_DEG_C>();
+        if(l_ERR_temp == 0)
+        {
+            l_ERR_temp = OCC_MEMCTRL_DEFAULT_ERROR_TEMP;
+        }
 
-    l_timeout = sys->getAttr<ATTR_MEMCTRL_READ_TIMEOUT_SEC>();
-    if(l_timeout == 0)
+        l_timeout = sys->getAttr<ATTR_MEMCTRL_READ_TIMEOUT_SEC>();
+        if(l_timeout == 0)
+        {
+            l_timeout = OCC_MEMCTRL_DEFAULT_TIMEOUT;
+        }
+    }
+    else
     {
-        l_timeout = OCC_MEMCTRL_DEFAULT_TIMEOUT;
+        l_DVFS_temp = sys->getAttr<ATTR_DDR5_MEMCTRL_THROTTLE_TEMP_DEG_C>();
+        if(l_DVFS_temp == 0)
+        {
+            l_DVFS_temp =  OCC_MEMCTRL_DEFAULT_THROT_TEMP;
+        }
+
+        l_ERR_temp = sys->getAttr<ATTR_DDR5_MEMCTRL_ERROR_TEMP_DEG_C>();
+        if(l_ERR_temp == 0)
+        {
+            l_ERR_temp = OCC_MEMCTRL_DEFAULT_ERROR_TEMP;
+        }
+
+        l_timeout = sys->getAttr<ATTR_DDR5_MEMCTRL_READ_TIMEOUT_SEC>();
+        if(l_timeout == 0)
+        {
+            l_timeout = OCC_MEMCTRL_DEFAULT_TIMEOUT;
+        }
     }
     o_data[index++] = CFGDATA_FRU_TYPE_MEMBUF;
     o_data[index++] = l_DVFS_temp;
@@ -1369,22 +1396,45 @@ void getThermalControlMessageData(TARGETING::Target * i_procTarget,
     l_numSets++;
 
     // DIMM
-    l_DVFS_temp =sys->getAttr<ATTR_DIMM_THROTTLE_TEMP_DEG_C>();
-    if(l_DVFS_temp == 0)
+    if (G_memory_type != OCC_MEM_TYPE_ODYSSEY)
     {
-        l_DVFS_temp = OCC_DIMM_DEFAULT_DVFS_TEMP;
-    }
+        l_DVFS_temp =sys->getAttr<ATTR_DIMM_THROTTLE_TEMP_DEG_C>();
+        if(l_DVFS_temp == 0)
+        {
+            l_DVFS_temp = OCC_DIMM_DEFAULT_DVFS_TEMP;
+        }
 
-    l_ERR_temp = sys->getAttr<ATTR_DIMM_ERROR_TEMP_DEG_C>();
-    if(l_ERR_temp == 0)
-    {
-        l_ERR_temp  = OCC_DIMM_DEFAULT_ERR_TEMP;
-    }
+        l_ERR_temp = sys->getAttr<ATTR_DIMM_ERROR_TEMP_DEG_C>();
+        if(l_ERR_temp == 0)
+        {
+            l_ERR_temp  = OCC_DIMM_DEFAULT_ERR_TEMP;
+        }
 
-    l_timeout = sys->getAttr<ATTR_DIMM_READ_TIMEOUT_SEC>();
-    if(l_timeout == 0)
+        l_timeout = sys->getAttr<ATTR_DIMM_READ_TIMEOUT_SEC>();
+        if(l_timeout == 0)
+        {
+            l_timeout   = OCC_DIMM_DEFAULT_TIMEOUT;
+        }
+    }
+    else
     {
-        l_timeout   = OCC_DIMM_DEFAULT_TIMEOUT;
+        l_DVFS_temp =sys->getAttr<ATTR_DDR5_DIMM_THROTTLE_TEMP_DEG_C>();
+        if(l_DVFS_temp == 0)
+        {
+            l_DVFS_temp = OCC_DIMM_DEFAULT_DVFS_TEMP;
+        }
+
+        l_ERR_temp = sys->getAttr<ATTR_DDR5_DIMM_ERROR_TEMP_DEG_C>();
+        if(l_ERR_temp == 0)
+        {
+            l_ERR_temp  = OCC_DIMM_DEFAULT_ERR_TEMP;
+        }
+
+        l_timeout = sys->getAttr<ATTR_DDR5_DIMM_READ_TIMEOUT_SEC>();
+        if(l_timeout == 0)
+        {
+            l_timeout   = OCC_DIMM_DEFAULT_TIMEOUT;
+        }
     }
     o_data[index++] = CFGDATA_FRU_TYPE_DIMM;
     o_data[index++] = l_DVFS_temp;
@@ -1395,24 +1445,46 @@ void getThermalControlMessageData(TARGETING::Target * i_procTarget,
     l_numSets++;
 
     // DRAM  (MC+DIMM)
-    l_DVFS_temp = sys->getAttr<ATTR_MC_DRAM_THROTTLE_TEMP_DEG_C>();
-    if(l_DVFS_temp == 0)
+    if (G_memory_type != OCC_MEM_TYPE_ODYSSEY)
     {
-        l_DVFS_temp =  OCC_DRAM_DEFAULT_THROT_TEMP;
-    }
+        l_DVFS_temp = sys->getAttr<ATTR_MC_DRAM_THROTTLE_TEMP_DEG_C>();
+        if(l_DVFS_temp == 0)
+        {
+            l_DVFS_temp =  OCC_DRAM_DEFAULT_THROT_TEMP;
+        }
 
-    l_ERR_temp = sys->getAttr<ATTR_MC_DRAM_ERROR_TEMP_DEG_C>();
-    if(l_ERR_temp == 0)
+        l_ERR_temp = sys->getAttr<ATTR_MC_DRAM_ERROR_TEMP_DEG_C>();
+        if(l_ERR_temp == 0)
+        {
+            l_ERR_temp = OCC_DRAM_DEFAULT_ERROR_TEMP;
+        }
+
+        l_timeout = sys->getAttr<ATTR_MC_DRAM_READ_TIMEOUT_SEC>();
+        if(l_timeout == 0)
+        {
+            l_timeout = OCC_DRAM_DEFAULT_TIMEOUT;
+        }
+    }
+    else
     {
-        l_ERR_temp = OCC_DRAM_DEFAULT_ERROR_TEMP;
-    }
+        l_DVFS_temp = sys->getAttr<ATTR_DDR5_MC_DRAM_THROTTLE_TEMP_DEG_C>();
+        if(l_DVFS_temp == 0)
+        {
+            l_DVFS_temp =  OCC_DRAM_DEFAULT_THROT_TEMP;
+        }
 
-    l_timeout = sys->getAttr<ATTR_MC_DRAM_READ_TIMEOUT_SEC>();
-    if(l_timeout == 0)
-    {
-        l_timeout = OCC_DRAM_DEFAULT_TIMEOUT;
-    }
+        l_ERR_temp = sys->getAttr<ATTR_DDR5_MC_DRAM_ERROR_TEMP_DEG_C>();
+        if(l_ERR_temp == 0)
+        {
+            l_ERR_temp = OCC_DRAM_DEFAULT_ERROR_TEMP;
+        }
 
+        l_timeout = sys->getAttr<ATTR_DDR5_MC_DRAM_READ_TIMEOUT_SEC>();
+        if(l_timeout == 0)
+        {
+            l_timeout = OCC_DRAM_DEFAULT_TIMEOUT;
+        }
+    }
     o_data[index++] = CFGDATA_FRU_TYPE_MCDIMM;
     o_data[index++] = l_DVFS_temp;
     o_data[index++] = l_ERR_temp;
@@ -1449,24 +1521,46 @@ void getThermalControlMessageData(TARGETING::Target * i_procTarget,
     l_numSets++;
 
     // PMIC
-    l_DVFS_temp = sys->getAttr<ATTR_PMIC_THROTTLE_TEMP_DEG_C>();
-    if(l_DVFS_temp == 0)
+    if (G_memory_type != OCC_MEM_TYPE_ODYSSEY)
     {
-        l_DVFS_temp =  OCC_PMIC_DEFAULT_THROT_TEMP;
-    }
+        l_DVFS_temp = sys->getAttr<ATTR_PMIC_THROTTLE_TEMP_DEG_C>();
+        if(l_DVFS_temp == 0)
+        {
+            l_DVFS_temp =  OCC_PMIC_DEFAULT_THROT_TEMP;
+        }
 
-    l_ERR_temp = sys->getAttr<ATTR_PMIC_ERROR_TEMP_DEG_C>();
-    if(l_ERR_temp == 0)
+        l_ERR_temp = sys->getAttr<ATTR_PMIC_ERROR_TEMP_DEG_C>();
+        if(l_ERR_temp == 0)
+        {
+            l_ERR_temp = OCC_PMIC_DEFAULT_ERROR_TEMP;
+        }
+
+        l_timeout = sys->getAttr<ATTR_PMIC_READ_TIMEOUT_SEC>();
+        if(l_timeout == 0)
+        {
+            l_timeout = OCC_PMIC_DEFAULT_TIMEOUT;
+        }
+    }
+    else
     {
-        l_ERR_temp = OCC_PMIC_DEFAULT_ERROR_TEMP;
-    }
+        l_DVFS_temp = sys->getAttr<ATTR_DDR5_PMIC_THROTTLE_TEMP_DEG_C>();
+        if(l_DVFS_temp == 0)
+        {
+            l_DVFS_temp =  OCC_PMIC_DEFAULT_THROT_TEMP;
+        }
 
-    l_timeout = sys->getAttr<ATTR_PMIC_READ_TIMEOUT_SEC>();
-    if(l_timeout == 0)
-    {
-        l_timeout = OCC_PMIC_DEFAULT_TIMEOUT;
-    }
+        l_ERR_temp = sys->getAttr<ATTR_DDR5_PMIC_ERROR_TEMP_DEG_C>();
+        if(l_ERR_temp == 0)
+        {
+            l_ERR_temp = OCC_PMIC_DEFAULT_ERROR_TEMP;
+        }
 
+        l_timeout = sys->getAttr<ATTR_DDR5_PMIC_READ_TIMEOUT_SEC>();
+        if(l_timeout == 0)
+        {
+            l_timeout = OCC_PMIC_DEFAULT_TIMEOUT;
+        }
+    }
     o_data[index++] = CFGDATA_FRU_TYPE_PMIC;
     o_data[index++] = l_DVFS_temp;
     o_data[index++] = l_ERR_temp;
@@ -1476,24 +1570,46 @@ void getThermalControlMessageData(TARGETING::Target * i_procTarget,
     l_numSets++;
 
     // MEMCTRL_EXT
-    l_DVFS_temp = sys->getAttr<ATTR_MC_EXT_THROTTLE_TEMP_DEG_C>();
-    if(l_DVFS_temp == 0)
+    if (G_memory_type != OCC_MEM_TYPE_ODYSSEY)
     {
-        l_DVFS_temp =  OCC_MCEXT_DEFAULT_THROT_TEMP;
-    }
+        l_DVFS_temp = sys->getAttr<ATTR_MC_EXT_THROTTLE_TEMP_DEG_C>();
+        if(l_DVFS_temp == 0)
+        {
+            l_DVFS_temp =  OCC_MCEXT_DEFAULT_THROT_TEMP;
+        }
 
-    l_ERR_temp = sys->getAttr<ATTR_MC_EXT_ERROR_TEMP_DEG_C>();
-    if(l_ERR_temp == 0)
+        l_ERR_temp = sys->getAttr<ATTR_MC_EXT_ERROR_TEMP_DEG_C>();
+        if(l_ERR_temp == 0)
+        {
+            l_ERR_temp = OCC_MCEXT_DEFAULT_ERROR_TEMP;
+        }
+
+        l_timeout = sys->getAttr<ATTR_MC_EXT_READ_TIMEOUT_SEC>();
+        if(l_timeout == 0)
+        {
+            l_timeout = OCC_MCEXT_DEFAULT_TIMEOUT;
+        }
+    }
+    else
     {
-        l_ERR_temp = OCC_MCEXT_DEFAULT_ERROR_TEMP;
-    }
+        l_DVFS_temp = sys->getAttr<ATTR_DDR5_MC_EXT_THROTTLE_TEMP_DEG_C>();
+        if(l_DVFS_temp == 0)
+        {
+            l_DVFS_temp =  OCC_MCEXT_DEFAULT_THROT_TEMP;
+        }
 
-    l_timeout = sys->getAttr<ATTR_MC_EXT_READ_TIMEOUT_SEC>();
-    if(l_timeout == 0)
-    {
-        l_timeout = OCC_MCEXT_DEFAULT_TIMEOUT;
-    }
+        l_ERR_temp = sys->getAttr<ATTR_DDR5_MC_EXT_ERROR_TEMP_DEG_C>();
+        if(l_ERR_temp == 0)
+        {
+            l_ERR_temp = OCC_MCEXT_DEFAULT_ERROR_TEMP;
+        }
 
+        l_timeout = sys->getAttr<ATTR_DDR5_MC_EXT_READ_TIMEOUT_SEC>();
+        if(l_timeout == 0)
+        {
+            l_timeout = OCC_MCEXT_DEFAULT_TIMEOUT;
+        }
+    }
     o_data[index++] = CFGDATA_FRU_TYPE_MEMCTRL_EXT;
     o_data[index++] = l_DVFS_temp;
     o_data[index++] = l_ERR_temp;
@@ -1729,7 +1845,7 @@ void getApssMessageData(uint8_t* o_data,
          * @devdesc Invalid APSS config data was found
          * @custdesc An internal firmware error occurred
          */
-        errlHndl_t l_err = NULL;
+        errlHndl_t l_err = nullptr;
         bldErrLog(l_err, HTMGT_MOD_APSS_DATA,
                   HTMGT_RC_ATTRIBUTE_ERROR,
                   0, 0,

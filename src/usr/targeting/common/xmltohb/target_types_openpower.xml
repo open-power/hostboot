@@ -282,6 +282,51 @@
       <id>CUMULATIVE_PMCOMPLEX_RESET_COUNT</id>
     </attribute>
     <attribute>
+      <id>DDR5_DIMM_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_DIMM_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_DIMM_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_MC_DRAM_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_MC_DRAM_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_MC_DRAM_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_MC_EXT_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_MC_EXT_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_MC_EXT_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_MEMCTRL_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_MEMCTRL_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_MEMCTRL_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_PMIC_ERROR_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_PMIC_READ_TIMEOUT_SEC</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_PMIC_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
       <id>DIMM_ERROR_TEMP_DEG_C</id>
     </attribute>
     <attribute>
