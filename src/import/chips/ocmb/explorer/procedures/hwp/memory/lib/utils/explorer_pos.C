@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,9 @@
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
+#include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/pos.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 
 namespace mss
 {
@@ -68,15 +70,21 @@ relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Targe
 ///
 /// @brief Return an MEM_PORT's relative position from an OCMB
 /// @param[in] i_target a target representing the target in question
-/// @return The position relative to chiplet R
+/// @return The position of the memory port relative to the OCMB chip
 ///
 template<>
 posTraits<fapi2::TARGET_TYPE_MEM_PORT>::pos_type
 relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
         i_target)
 {
-    typedef mcTypeTraits<mss::mc_type::EXPLORER> TT;
-    return pos(i_target) % TT::PORTS_PER_OCMB;
+    uint8_t l_rel_pos = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_target, l_rel_pos));
+    return l_rel_pos;
+
+fapi_try_exit:
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_ERR(TARGTIDFORMAT " Attribute access error!", TARGTID);
+    return 0;
 }
 
 
@@ -93,9 +101,29 @@ relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>(const fapi2::Target
 }
 
 ///
+/// @brief Return an OCMB's relative position from a proc_chip
+/// @param[in] i_target a target representing the target in question
+/// @return The position of the OCMB chip relative to the processor chip
+///
+template<>
+posTraits<fapi2::TARGET_TYPE_OCMB_CHIP>::pos_type
+relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target)
+{
+    uint8_t l_bus_pos = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BUS_POS, i_target, l_bus_pos));
+    return l_bus_pos;
+
+fapi_try_exit:
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_ERR(TARGTIDFORMAT " Attribute access error!", TARGTID);
+    return 0;
+}
+
+///
 /// @brief Return a mem_port's relative position from a proc_chip
 /// @param[in] i_target a target representing the target in question
-/// @return The position relative to chiplet R
+/// @return The position of the memory port relative to the processor chip
 ///
 template<>
 posTraits<fapi2::TARGET_TYPE_MEM_PORT>::pos_type
@@ -103,26 +131,9 @@ relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Targe
         i_target)
 {
     typedef mcTypeTraits<mss::mc_type::EXPLORER> TT;
-    return fapi_pos(i_target) % (TT::PORTS_PER_OCMB *
-                                 TT::OCMB_PER_OMI * TT::OMI_PER_MCC *
-                                 TT::MCC_PER_MI *
-                                 TT::MI_PER_MC * TT::MC_PER_PROC);
-}
-
-///
-/// @brief Return an OCMB's relative position from a proc_chip
-/// @param[in] i_target a target representing the target in question
-/// @return The position relative to chiplet R
-///
-template<>
-posTraits<fapi2::TARGET_TYPE_OCMB_CHIP>::pos_type
-relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_PROC_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target)
-{
-    typedef mcTypeTraits<mss::mc_type::EXPLORER> TT;
-    return fapi_pos(i_target) % (TT::OCMB_PER_OMI *
-                                 TT::OMI_PER_MCC * TT::MCC_PER_MI *
-                                 TT::MI_PER_MC * TT::MC_PER_PROC);
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+    return (relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>(i_target)) +
+           (relative_pos<mc_type::EXPLORER, fapi2::TARGET_TYPE_PROC_CHIP>(l_ocmb) * TT::PORTS_PER_OCMB);
 }
 
 ///
