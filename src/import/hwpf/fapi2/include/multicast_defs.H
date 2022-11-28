@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,7 +77,7 @@ enum MulticastCoreSelect : uint32_t
 
 inline MulticastCoreSelect operator|(const MulticastCoreSelect a, const MulticastCoreSelect b)
 {
-    return static_cast<MulticastCoreSelect>(a | b);
+    return static_cast<MulticastCoreSelect>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
 }
 
 }

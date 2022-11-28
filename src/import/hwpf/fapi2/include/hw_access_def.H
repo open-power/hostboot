@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,7 @@ enum ChipOpModifyMode
 /// @brief Enumeration of Ring access operation modes
 ///        This is a bitmap to allow the user to specify multiple modes.
 ///
-enum RingMode
+enum RingMode : uint32_t
 {
     RING_MODE_HEADER_CHECK              = 0x00000000, ///< Check header
     RING_MODE_SET_PULSE_NO_OPCG_COND    = 0x00000001, ///< Set pulse with
@@ -69,7 +69,13 @@ enum RingMode
     RING_MODE_SET_PULSE_ALL             = 0x00000010, ///< Set pulse with pulse
     ///  to all hold types
     RING_MODE_FASTARRAY                 = 0x00000020, ///< Use fastarray TOR image
+    RING_MODE_PARALLEL_SCAN             = 0x00000040, ///< internal use only: use parallel scan
 };
+
+static inline RingMode operator|(const RingMode& a, const RingMode& b)
+{
+    return static_cast<RingMode>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
+}
 
 /// @enum OpModes operational Mode Error Functions
 enum OpModes

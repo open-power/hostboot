@@ -42,74 +42,124 @@ namespace fapi2
 /// can act generally on any type of target
 ///
 
+// Since the basic target types are one-hot bit masks let's define them
+// by their log2 and then derive the bit masks by shifting.
+enum LogTargetType : uint8_t
+{
+    LOG_TARGET_TYPE_SYSTEM              =  0, ///< System type
+    LOG_TARGET_TYPE_DIMM                =  1, ///< DIMM type
+    LOG_TARGET_TYPE_PROC_CHIP           =  2, ///< Processor type
+    LOG_TARGET_TYPE_MEMBUF_CHIP         =  3, ///< Membuf type
+    LOG_TARGET_TYPE_EX                  =  4, ///< EX - 2x Core, L2, L3 - can be deconfigured
+    LOG_TARGET_TYPE_MBA                 =  5, ///< MBA type
+    LOG_TARGET_TYPE_MCS                 =  6, ///< MCS type
+    LOG_TARGET_TYPE_XBUS                =  7, ///< XBUS type
+    LOG_TARGET_TYPE_ABUS                =  8, ///< ABUS type
+    LOG_TARGET_TYPE_L4                  =  9, ///< L4 type
+    LOG_TARGET_TYPE_CORE                = 10, ///< Core
+    LOG_TARGET_TYPE_EQ                  = 11, ///< EQ - 4x core, 2x L2, 2x L3 - can be deconfigured
+    LOG_TARGET_TYPE_MCA                 = 12, ///< MCA type
+    LOG_TARGET_TYPE_MCBIST              = 13, ///< MCBIST type
+    LOG_TARGET_TYPE_MI                  = 14, ///< MI Memory Interface (Cumulus)
+    LOG_TARGET_TYPE_CAPP                = 15, ///< CAPP target
+    LOG_TARGET_TYPE_DMI                 = 16, ///< DMI type
+    LOG_TARGET_TYPE_OBUS                = 17, ///< OBUS type
+    LOG_TARGET_TYPE_OBUS_BRICK          = 18, ///< OBUS BRICK type
+    LOG_TARGET_TYPE_SBE                 = 19, ///< SBE type
+    LOG_TARGET_TYPE_PPE                 = 20, ///< PPE type
+    LOG_TARGET_TYPE_PERV                = 21, ///< Pervasive type
+    LOG_TARGET_TYPE_PEC                 = 22, ///< PEC type
+    LOG_TARGET_TYPE_PHB                 = 23, ///< PHB type
+    LOG_TARGET_TYPE_MC                  = 24, ///< MC type
+    LOG_TARGET_TYPE_OMI                 = 25, ///< OMI type
+    LOG_TARGET_TYPE_OMIC                = 26, ///< OMIC type
+    LOG_TARGET_TYPE_MCC                 = 27, ///< MCC type
+    LOG_TARGET_TYPE_OCMB_CHIP           = 28, ///< OCMB type
+    LOG_TARGET_TYPE_MEM_PORT            = 29, ///< MEM_PORT type
+    LOG_TARGET_TYPE_NMMU                = 30, ///< NEST MMU type
+    LOG_TARGET_TYPE_RESERVED            = 31, ///< Reserved for Cronus (Z)
+    LOG_TARGET_TYPE_PAU                 = 32, ///< PAU type
+    LOG_TARGET_TYPE_IOHS                = 33, ///< IOHS type
+    LOG_TARGET_TYPE_FC                  = 34, ///< Fused Core type
+    LOG_TARGET_TYPE_PMIC                = 35, ///< PMIC type
+    LOG_TARGET_TYPE_PAUC                = 36, ///< PAUC type
+    LOG_TARGET_TYPE_GENERICI2CRESPONDER = 37, ///< GENERICI2CRESPONDER type
+    LOG_TARGET_TYPE_IOLINK              = 38, ///< IOLINK type
+    LOG_TARGET_TYPE_MDS_CTLR            = 39, ///< MDS Media Controller type
+    LOG_TARGET_TYPE_POWER_IC            = 54, ///< POWER_IC type
+    LOG_TARGET_TYPE_TEMP_SENSOR         = 55, ///< TEMP_SENSOR type
+    LOG_TARGET_TYPE_MULTICAST           = 63, ///< MULTICAST type
+};
+
 /// Target Kind
 enum TargetType : uint64_t
 {
-    TARGET_TYPE_NONE            = 0x0000000000000000, ///< No type
-    TARGET_TYPE_SYSTEM          = 0x0000000000000001, ///< System type
-    TARGET_TYPE_DIMM            = 0x0000000000000002, ///< DIMM type
-    TARGET_TYPE_PROC_CHIP       = 0x0000000000000004, ///< Processor type
-    TARGET_TYPE_MEMBUF_CHIP     = 0x0000000000000008, ///< Membuf type
-    TARGET_TYPE_EX              = 0x0000000000000010, ///< EX - 2x Core, L2, L3 - can be deconfigured
-    TARGET_TYPE_MBA             = 0x0000000000000020, ///< MBA type
-    TARGET_TYPE_MCS             = 0x0000000000000040, ///< MCS type
-    TARGET_TYPE_XBUS            = 0x0000000000000080, ///< XBUS type
-    TARGET_TYPE_ABUS            = 0x0000000000000100, ///< ABUS type
-    TARGET_TYPE_L4              = 0x0000000000000200, ///< L4 type
-    TARGET_TYPE_CORE            = 0x0000000000000400, ///< Core
-    TARGET_TYPE_EQ              = 0x0000000000000800, ///< EQ - 4x core, 2x L2, 2x L3 - can be deconfigured
-    TARGET_TYPE_MCA             = 0x0000000000001000, ///< MCA type
-    TARGET_TYPE_MCBIST          = 0x0000000000002000, ///< MCBIST type
-    TARGET_TYPE_MI              = 0x0000000000004000, ///< MI Memory Interface (Cumulus)
-    TARGET_TYPE_CAPP            = 0x0000000000008000, ///< CAPP target
-    TARGET_TYPE_DMI             = 0x0000000000010000, ///< DMI type
-    TARGET_TYPE_OBUS            = 0x0000000000020000, ///< OBUS type
-    TARGET_TYPE_OBUS_BRICK      = 0x0000000000040000, ///< OBUS BRICK type
-    TARGET_TYPE_SBE             = 0x0000000000080000, ///< SBE type
-    TARGET_TYPE_PPE             = 0x0000000000100000, ///< PPE type
-    TARGET_TYPE_PERV            = 0x0000000000200000, ///< Pervasive type
-    TARGET_TYPE_PEC             = 0x0000000000400000, ///< PEC type
-    TARGET_TYPE_PHB             = 0x0000000000800000, ///< PHB type
-    TARGET_TYPE_MC              = 0x0000000001000000, ///< MC type
-    TARGET_TYPE_OMI             = 0x0000000002000000, ///< OMI type
-    TARGET_TYPE_OMIC            = 0x0000000004000000, ///< OMIC type
-    TARGET_TYPE_MCC             = 0x0000000008000000, ///< MCC type
-    TARGET_TYPE_OCMB_CHIP       = 0x0000000010000000, ///< OCMB type
-    TARGET_TYPE_MEM_PORT        = 0x0000000020000000, ///< MEM_PORT type
-    TARGET_TYPE_NMMU            = 0x0000000040000000, ///< NEST MMU type
-    TARGET_TYPE_RESERVED        = 0x0000000080000000, ///< Reserved for Cronus (Z)
-    TARGET_TYPE_PAU             = 0x0000000100000000, ///< PAU type
-    TARGET_TYPE_IOHS            = 0x0000000200000000, ///< IOHS type
-    TARGET_TYPE_FC              = 0x0000000400000000, ///< Fused Core type
-    TARGET_TYPE_PMIC            = 0x0000000800000000, ///< PMIC type
-    TARGET_TYPE_PAUC            = 0x0000001000000000, ///< PAUC type
-    TARGET_TYPE_GENERICI2CSLAVE = 0x0000002000000000, ///< GENERICI2CSLAVE type
-    TARGET_TYPE_GENERICI2CRESPONDER = 0x0000002000000000, ///< GENERICI2RESPONDER type
-    TARGET_TYPE_IOLINK          = 0x0000004000000000, ///< IOLINK type
-    TARGET_TYPE_MDS_CTLR        = 0x0000008000000000, ///< MDS Media Controller type
+    TARGET_TYPE_NONE                = 0x0000000000000000, ///< No type
+
+    TARGET_TYPE_SYSTEM              = 1ULL << LOG_TARGET_TYPE_SYSTEM,              ///< System type
+    TARGET_TYPE_DIMM                = 1ULL << LOG_TARGET_TYPE_DIMM,                ///< DIMM type
+    TARGET_TYPE_PROC_CHIP           = 1ULL << LOG_TARGET_TYPE_PROC_CHIP,           ///< Processor type
+    TARGET_TYPE_MEMBUF_CHIP         = 1ULL << LOG_TARGET_TYPE_MEMBUF_CHIP,         ///< Membuf type
+    TARGET_TYPE_EX                  = 1ULL << LOG_TARGET_TYPE_EX,                  ///< EX - 2x Core, L2, L3 - can be deconfigured
+    TARGET_TYPE_MBA                 = 1ULL << LOG_TARGET_TYPE_MBA,                 ///< MBA type
+    TARGET_TYPE_MCS                 = 1ULL << LOG_TARGET_TYPE_MCS,                 ///< MCS type
+    TARGET_TYPE_XBUS                = 1ULL << LOG_TARGET_TYPE_XBUS,                ///< XBUS type
+    TARGET_TYPE_ABUS                = 1ULL << LOG_TARGET_TYPE_ABUS,                ///< ABUS type
+    TARGET_TYPE_L4                  = 1ULL << LOG_TARGET_TYPE_L4,                  ///< L4 type
+    TARGET_TYPE_CORE                = 1ULL << LOG_TARGET_TYPE_CORE,                ///< Core
+    TARGET_TYPE_EQ                  = 1ULL << LOG_TARGET_TYPE_EQ,                  ///< EQ - 4x core, 2x L2, 2x L3 - can be deconfigured
+    TARGET_TYPE_MCA                 = 1ULL << LOG_TARGET_TYPE_MCA,                 ///< MCA type
+    TARGET_TYPE_MCBIST              = 1ULL << LOG_TARGET_TYPE_MCBIST,              ///< MCBIST type
+    TARGET_TYPE_MI                  = 1ULL << LOG_TARGET_TYPE_MI,                  ///< MI Memory Interface (Cumulus)
+    TARGET_TYPE_CAPP                = 1ULL << LOG_TARGET_TYPE_CAPP,                ///< CAPP target
+    TARGET_TYPE_DMI                 = 1ULL << LOG_TARGET_TYPE_DMI,                 ///< DMI type
+    TARGET_TYPE_OBUS                = 1ULL << LOG_TARGET_TYPE_OBUS,                ///< OBUS type
+    TARGET_TYPE_OBUS_BRICK          = 1ULL << LOG_TARGET_TYPE_OBUS_BRICK,          ///< OBUS BRICK type
+    TARGET_TYPE_SBE                 = 1ULL << LOG_TARGET_TYPE_SBE,                 ///< SBE type
+    TARGET_TYPE_PPE                 = 1ULL << LOG_TARGET_TYPE_PPE,                 ///< PPE type
+    TARGET_TYPE_PERV                = 1ULL << LOG_TARGET_TYPE_PERV,                ///< Pervasive type
+    TARGET_TYPE_PEC                 = 1ULL << LOG_TARGET_TYPE_PEC,                 ///< PEC type
+    TARGET_TYPE_PHB                 = 1ULL << LOG_TARGET_TYPE_PHB,                 ///< PHB type
+    TARGET_TYPE_MC                  = 1ULL << LOG_TARGET_TYPE_MC,                  ///< MC type
+    TARGET_TYPE_OMI                 = 1ULL << LOG_TARGET_TYPE_OMI,                 ///< OMI type
+    TARGET_TYPE_OMIC                = 1ULL << LOG_TARGET_TYPE_OMIC,                ///< OMIC type
+    TARGET_TYPE_MCC                 = 1ULL << LOG_TARGET_TYPE_MCC,                 ///< MCC type
+    TARGET_TYPE_OCMB_CHIP           = 1ULL << LOG_TARGET_TYPE_OCMB_CHIP,           ///< OCMB type
+    TARGET_TYPE_MEM_PORT            = 1ULL << LOG_TARGET_TYPE_MEM_PORT,            ///< MEM_PORT type
+    TARGET_TYPE_NMMU                = 1ULL << LOG_TARGET_TYPE_NMMU,                ///< NEST MMU type
+    TARGET_TYPE_RESERVED            = 1ULL << LOG_TARGET_TYPE_RESERVED,            ///< Reserved for Cronus (Z)
+    TARGET_TYPE_PAU                 = 1ULL << LOG_TARGET_TYPE_PAU,                 ///< PAU type
+    TARGET_TYPE_IOHS                = 1ULL << LOG_TARGET_TYPE_IOHS,                ///< IOHS type
+    TARGET_TYPE_FC                  = 1ULL << LOG_TARGET_TYPE_FC,                  ///< Fused Core type
+    TARGET_TYPE_PMIC                = 1ULL << LOG_TARGET_TYPE_PMIC,                ///< PMIC type
+    TARGET_TYPE_PAUC                = 1ULL << LOG_TARGET_TYPE_PAUC,                ///< PAUC type
+    TARGET_TYPE_GENERICI2CSLAVE     = 1ULL << LOG_TARGET_TYPE_GENERICI2CRESPONDER, ///< GENERICI2CSLAVE type
+    TARGET_TYPE_GENERICI2CRESPONDER = 1ULL << LOG_TARGET_TYPE_GENERICI2CRESPONDER, ///< GENERICI2CRESPONDER type
+    TARGET_TYPE_IOLINK              = 1ULL << LOG_TARGET_TYPE_IOLINK,              ///< IOLINK type
+    TARGET_TYPE_MDS_CTLR            = 1ULL << LOG_TARGET_TYPE_MDS_CTLR,            ///< MDS Media Controller type
 //RESERVED BIT FIELDS - DO NOT USE
     /*
-        TARGET_TYPE_RESERVED        = 0x0000010000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0000020000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0000040000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0000080000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0000100000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0000200000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0000400000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0000800000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0001000000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0002000000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0004000000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0008000000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0010000000000000, ///< Reserved - DO NOT USE
-        TARGET_TYPE_RESERVED        = 0x0020000000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0000010000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0000020000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0000040000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0000080000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0000100000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0000200000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0000400000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0000800000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0001000000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0002000000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0004000000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0008000000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0010000000000000, ///< Reserved - DO NOT USE
+        TARGET_TYPE_RESERVED      = 0x0020000000000000, ///< Reserved - DO NOT USE
     */
-    TARGET_TYPE_POWER_IC        = 0x0040000000000000, ///< POWER_IC type
-    TARGET_TYPE_TEMP_SENSOR     = 0x0080000000000000, ///< TEMP_SENSOR type
-    TARGET_TYPE_MULTICAST       = 0x8000000000000000, ///< MULTICAST type
-    TARGET_TYPE_ALL             = 0x7FFFFFFFFFFFFFFF, ///< Any/All types
-    TARGET_TYPE_ALL_MC          = 0xFFFFFFFFFFFFFFFF, ///< Any/All types + Multicast
+    TARGET_TYPE_POWER_IC            = 1ULL << LOG_TARGET_TYPE_POWER_IC,            ///< POWER_IC type
+    TARGET_TYPE_TEMP_SENSOR         = 1ULL << LOG_TARGET_TYPE_TEMP_SENSOR,         ///< TEMP_SENSOR type
+    TARGET_TYPE_MULTICAST           = 1ULL << LOG_TARGET_TYPE_MULTICAST,           ///< MULTICAST type
 
+    TARGET_TYPE_ALL                 = 0x7FFFFFFFFFFFFFFF,                          ///< Any/All types
+    TARGET_TYPE_ALL_MC              = 0xFFFFFFFFFFFFFFFF,                          ///< Any/All types + Multicast
     // Compound target types
     TARGET_TYPE_CHIPS         = TARGET_TYPE_PROC_CHIP |
                                 TARGET_TYPE_MEMBUF_CHIP |
