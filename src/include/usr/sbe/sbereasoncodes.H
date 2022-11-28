@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,7 @@ namespace SBE
 /**
 * @enum SbeModuleid
 *
-* @brief Module Ids used in created errorlogs.  Indicates which
+* @brief Module Ids used in created errorlogs. Indicates which
 *      functions an error log was created in.
 *
 */
@@ -117,6 +117,7 @@ enum sbeReasonCode
     SBE_DATA_MISCOMPARE                 = SBE_COMP_ID | 0x24,
     SBE_INSUFFICIENT_SPACE_FOR_REQUESTED_CORES = SBE_COMP_ID | 0x25,
     SBE_DESIRED_MIN_CORES_EXCEED_MAX_CORES     = SBE_COMP_ID | 0x26,
+    SBE_UPDATE_ALREADY_IN_PROGRESS      = SBE_COMP_ID | 0x27,
 };
 
 };  // end SBE
