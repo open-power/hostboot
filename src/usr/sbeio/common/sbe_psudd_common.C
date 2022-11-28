@@ -226,6 +226,16 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
                 // not ignorable
                 o_unsupportedOp && (*o_unsupportedOp = false);
 
+                // unlock mutex here since forceSbeUpdate() spins off a
+                // new thread per SBE to update which will eventually
+                // come back down back this path (ie by calling
+                // getSbeInfoState() on the SBEs)
+                if(l_needUnlock)
+                {
+                    mutex_unlock(&l_psuOpMux);
+                    l_needUnlock = false;
+                }
+
                 // Update the SBE and reboot
                 errl = forceSbeUpdate(i_target);
                 if( errl )

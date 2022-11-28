@@ -494,6 +494,9 @@ namespace SBE
     errlHndl_t updateProcessorSbeSeeproms(
         const KEY_TRANSITION_PERM i_keyTransPerm)
     {
+        static bool l_update_in_progress = false;
+        bool l_current_thread_owns_update = false;
+
         errlHndl_t err = nullptr;
         errlHndl_t err_cleanup = nullptr;
         std::vector<PNOR::SectionId> l_loadedPnorSections;
@@ -504,6 +507,31 @@ namespace SBE
         l_loadedPnorSections.clear(); // start with no loaded sections
 
         do{
+            l_current_thread_owns_update = __sync_bool_compare_and_swap(&l_update_in_progress,
+                                                                        false,
+                                                                        true);
+            if(!l_current_thread_owns_update)
+            {
+                TRACFCOMP(g_trac_sbe, ERR_MRK"UpdateProcessorSbeSeeproms(): "
+                          "SBE Update already in progess, creating error log");
+
+                /*@
+                 * @moduleid        SBE_UPDATE_SEEPROMS
+                 * @reasoncode      SBE_UPDATE_ALREADY_IN_PROGRESS
+                 * @userdata1       UNUSED
+                 * @userdata2       UNUSED
+                 * @devdesc         Another thread is already performing an SBE update
+                 * @custdesc        An internal firmware error occurred
+                */
+                err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                    SBE_UPDATE_SEEPROMS,
+                                    SBE_UPDATE_ALREADY_IN_PROGRESS,
+                                    0,
+                                    0,
+                                    ErrlEntry::ADD_SW_CALLOUT);
+                err->collectTrace(SBE_COMP_NAME);
+                break;
+            }
 
 #ifdef CONFIG_NO_SBE_UPDATES
             TRACFCOMP( g_trac_sbe, INFO_MRK"updateProcessorSbeSeeproms() - "
@@ -522,7 +550,6 @@ namespace SBE
             }
             // else - continue on
 #endif
-
 
             // Get Target Service, and the system target.
             TargetService& tS = targetService();
@@ -637,6 +664,7 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe, ERR_MRK"updateProcessorSbeSeeproms() - failed secureKeyTransition");
                 break;
             }
+
             // Print new hw keys' hash if a key transition is required.
             if(g_do_hw_keys_hash_transition)
             {
@@ -776,6 +804,12 @@ namespace SBE
             }
 
         }while(0);
+
+        // if the current thread owns the update process, set l_update_in_progress to false
+        if (l_current_thread_owns_update)
+        {
+            l_update_in_progress = false;
+        }
 
         // Cleanup PNOR section memory
         TRACFCOMP( g_trac_sbe, INFO_MRK"updateProcessorSbeSeeproms(): Cleanup PNOR section memory" );
