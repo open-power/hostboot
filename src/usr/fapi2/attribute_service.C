@@ -347,8 +347,7 @@ ReturnCode platGetTargetName(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
         }
         else if (l_model == TARGETING::MODEL_OCMB)
         {
-            // For MODEL_OCMB the ATTR_CHIP_ID determines if it is a
-            // Gemini or an Explorer chip
+            // For MODEL_OCMB the ATTR_CHIP_ID determines what kind of chip it is
             uint32_t l_chipID =
                 l_pHbTarget->getAttr<TARGETING::ATTR_CHIP_ID>();
 
@@ -359,6 +358,10 @@ ReturnCode platGetTargetName(const Target<TARGET_TYPE_ALL>& i_pFapiTarget,
             else if (l_chipID == POWER_CHIPID::GEMINI_16)
             {
                 o_name = ENUM_ATTR_NAME_GEMINI;
+            }
+            else if (l_chipID == POWER_CHIPID::ODYSSEY_16)
+            {
+                o_name = ENUM_ATTR_NAME_ODYSSEY;
             }
             else
             {
