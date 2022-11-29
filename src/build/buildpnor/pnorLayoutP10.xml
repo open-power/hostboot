@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -163,7 +163,6 @@ Layout Description
         <physicalRegionSize>0x08E0000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
-        <ecc/>
     </section>
     <section>
         <description>Special PNOR Test Space (36K)</description>

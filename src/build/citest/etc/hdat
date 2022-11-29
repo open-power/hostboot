@@ -1,0 +1,7 @@
+# HDAT artifact ID used to assemble PNOR image
+export HDAT_ARTIFACT_ID=b221014a.phyp1030
+# Expected to be the first lid in the payload as it has offsets to get to the NACA and SPIRA info from the PHYP lid
+export HDAT_MCL_LID=88a00702.lid
+# The first PHYP lid which contains the NACA and SPIRA info needed by HDAT, this lid will be truncated to fit into
+# the payload section of the standalone PNOR
+export HDAT_PHYP_LID=80a00701.lid

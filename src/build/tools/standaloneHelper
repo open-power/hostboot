@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2022
+# Contributors Listed Below - COPYRIGHT 2012,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -45,6 +45,7 @@ assemble_setup()
 
     source ${PROJECT_ROOT}/src/build/citest/etc/sbe
     source ${PROJECT_ROOT}/src/build/citest/etc/hcode
+    source ${PROJECT_ROOT}/src/build/citest/etc/hdat
     source ${PROJECT_ROOT}/src/build/citest/etc/occ
     source ${PROJECT_ROOT}/src/build/citest/etc/wof
     source ${PROJECT_ROOT}/src/build/citest/etc/devtree

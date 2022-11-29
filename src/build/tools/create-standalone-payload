@@ -1,0 +1,96 @@
+#!/bin/bash
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/create-standalone-payload $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2022,2023
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+function main ()
+{
+    if [[ $# -eq 0 || $1 == "-h" || $1 == "--help" || $1 == "-help"  ]]; then
+        echo ""
+        echo "Description: This script will take two PHYP lids, concatenate them together and truncate the result to fit"
+        echo "             into the standalone PAYLOAD section. The resulting payload.bin should be copied to both:"
+        echo "                 * /gsa/ausgsa/projects/h/hostboot/simbuild/dependencies/hdat"
+        echo "                 * /gsa/rchgsa/projects/h/hostboot_rch/simbuild/dependencies/hdat"
+        echo "             See the README in one of those directories for more details."
+        echo ""
+        echo "Usage: ${BASH_SOURCE[0]} [hostboot repo path] master-container-lid phyp-lid-with-naca-spirah"
+        echo "           Note: If you run this script from a hostboot workon, it does not require a path to a hostboot"
+        echo "                 repo. It will just use your PROJECT_ROOT to find the files it depends on."
+        echo "Examples: ${BASH_SOURCE[0]} /esw/san5/mraybuck/repos/p10/hostboot 88a00702.lid 80a00701.lid"
+        echo "          ${BASH_SOURCE[0]} 88a00702.lid 80a00701.lid"
+        return 0
+    fi
+
+    if [[ ! "$PROJECT_ROOT" || $# -gt 2 ]]; then
+        ls $1/hb &> /dev/null
+        if [[ $? -ne 0 ]]; then
+            echo "ERROR: Must be in a hostboot workon or provide a valid path to a hostboot repo."
+            return 1
+        else
+            echo "Using $1 as the hostboot repo to pull data from..."
+            PROJECT_ROOT=$1
+            shift
+        fi
+    fi
+
+    if [[ $# -ne 2 ]]; then
+        echo "ERROR: Too many arguments given to script"
+        return 1
+    fi
+
+    MASTER_CONTAINER_LID=$1
+    PHYP_LID=$2
+    # Make sure the lids can be found.
+    ls $MASTER_CONTAINER_LID &> /dev/null
+    if [[ $? -ne 0 ]]; then
+        echo "ERROR: Invalid path or missing file for $MASTER_CONTAINER_LID"
+        return 1
+    fi
+    ls $PHYP_LID &> /dev/null
+    if [[ $? -ne 0 ]]; then
+        echo "ERROR: Invalid path or missing file for $PHYP_LID"
+        return 1
+    fi
+
+    # Get the size of the PAYLOAD section
+    PAYLOAD_SIZE=$($PROJECT_ROOT/src/build/buildpnor/parse-pnor display --layout=$PROJECT_ROOT/src/build/buildpnor/pnorLayoutP10.xml | grep PAYLOAD | cut -d- -f3 | cut -dx -f2)
+    echo "PAYLOAD section size: 0x$PAYLOAD_SIZE"
+    echo "payload.bin will be truncated to that size..."
+
+    # Create the payload binary by concatenating the two lids together
+    ( dd if=${MASTER_CONTAINER_LID}; dd if=${PHYP_LID} ) > standalone_payload.bin
+
+    # The payload section is secure so we must leave enough space to fit the secure data into the payload section.
+    # Reserving 4K for the secure section data is sufficient.
+    SECURE_DATA_SIZE=4096
+
+    # Convert to decimal since truncate will require a decimal size input.
+    PAYLOAD_SIZE=$((16#${PAYLOAD_SIZE} - ${SECURE_DATA_SIZE}))
+
+    # Truncate the binary to fit within the determined payload section size
+    truncate --size=${PAYLOAD_SIZE} standalone_payload.bin
+    ls -l standalone_payload.bin
+}
+
+main $@

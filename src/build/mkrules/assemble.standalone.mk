@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2022
+# Contributors Listed Below - COPYRIGHT 2019,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -140,6 +140,8 @@ DEVTREE_FINAL_IMG := DEVTREE.bin
 # Input image artifacts location
 OCC_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/occ/${OCC_ARTIFACT_ID}/
 $(info    OCC_ARTIFACT_LOCATION is $(OCC_ARTIFACT_LOCATION))
+HDAT_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/hdat/${HDAT_ARTIFACT_ID}/
+$(info    HDAT_ARTIFACT_LOCATION is $(HDAT_ARTIFACT_LOCATION))
 WOF_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/wof/${WOF_ARTIFACT_ID}/
 DEVTREE_ARTIFACT_LOCATION := ${HB_SIM_DEPS_PATH}/devtree/${DEVTREE_ARTIFACT_ID}/
 
@@ -160,6 +162,13 @@ OCC_IMG := ${call get_files_full_path, ${OCC_ARTIFACT_LOCATION}}
 $(info    OCC_IMG is $(OCC_IMG))
 DEVTREE_IMG := ${call get_files_full_path, ${DEVTREE_ARTIFACT_LOCATION}}
 
+PAYLOAD_MCL_LID := ${HDAT_ARTIFACT_LOCATION}${HDAT_MCL_LID}
+PAYLOAD_PHYP_LID := ${HDAT_ARTIFACT_LOCATION}${HDAT_PHYP_LID}
+$(info    PAYLOAD_LIDS are $(PAYLOAD_MCL_LID) $(PAYLOAD_PHYP_LID))
+
+STANDALONE_PAYLOAD_FINAL_IMG := ${STAGINGDIR}/standalone_payload.bin
+$(info STANDALONE_PAYLOAD_FINAL_IMG is $(STANDALONE_PAYLOAD_FINAL_IMG))
+
 # Allow for overriding the HCODE image with a user supplied image
 ifndef HCODE_OVERRIDE_IMAGE
 HCODE_IMG := ${STAGINGDIR}/p10.hw_image.bin
@@ -173,7 +182,7 @@ endif
 # Images that will be used for PNOR layout
 DEF_GEN_BIN_FILES := HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},\
 	HBRT=${HBRT_IMG},HBEL=EMPTY,GUARD=EMPTY,MVPD=EMPTY,RINGOVD=EMPTY,\
-	SBKT=EMPTY,TEST=EMPTY,TESTRO=EMPTY,TESTLOAD=EMPTY,PAYLOAD=EMPTY,\
+	SBKT=EMPTY,TEST=EMPTY,TESTRO=EMPTY,TESTLOAD=EMPTY,PAYLOAD=${STANDALONE_PAYLOAD_FINAL_IMG},\
 	VERSION=${VERSION_IMG},HBD_RW=EMPTY
 
 ## Set up for img. assembling and building a PNOR image
@@ -331,8 +340,9 @@ gen_system_specific_image: ${GEN_BUILD}
     # Call script to generate final bin file for chip/system specific images
 	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL vesion(2):" && openssl version && ${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS} ${BUILD_TYPE_PARAMS} ${SIGN_MODE_ARG}
 
-gen_default_images: copy_hb_bins
+gen_default_images: copy_hb_bins build_standalone_payload
 	ecc --inject ${HBB_IMG} --output ${HBB_ECC_IMG} --p8
+
 
 # Create 4k ocmbfw image for now (all zeroes)
 	dd if=/dev/zero of=${UNPKGD_OCMBFW_IMG} bs=1024 count=4
@@ -365,6 +375,11 @@ gen_default_images: copy_hb_bins
 
 # Call script to generate final bin files for default images
 	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS} ${BUILD_TYPE_PARAMS} ${KEY_TRANSITION_MODE_PARAMS} ${SIGN_MODE_ARG}
+
+# Generate the standalone payload.bin
+build_standalone_payload:
+	${TOOLSDIR}/create-standalone-payload ${PAYLOAD_MCL_LID} ${PAYLOAD_PHYP_LID}
+	mv standalone_payload.bin ${STAGINGDIR}
 
 #################################################
 ###  SAMPLE for building an SBE Partition with multiple ECs
