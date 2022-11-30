@@ -53,6 +53,9 @@ constexpr uint64_t literal_0x0 = 0x0;
 constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_0x04 = 0x04;
 constexpr uint64_t literal_0x08 = 0x08;
+constexpr uint64_t literal_2 = 2;
+constexpr uint64_t literal_511 = 511;
+constexpr uint64_t literal_132 = 132;
 constexpr uint64_t literal_0x02 = 0x02;
 constexpr uint64_t literal_0x00 = 0x00;
 constexpr uint64_t literal_0x0F = 0x0F;
@@ -167,6 +170,15 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             l_scom_buffer.insert<47, 1, 63, uint64_t>(literal_0x0 );
             l_scom_buffer.insert<17, 1, 63, uint64_t>(literal_0x0 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011010ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8011011ull, l_scom_buffer ));
+
+            l_scom_buffer.insert<1, 2, 62, uint64_t>(literal_2 );
+            l_scom_buffer.insert<3, 9, 55, uint64_t>(literal_511 );
+            l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_132 );
+            l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_0 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8011011ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8011012ull, l_scom_buffer ));
