@@ -147,6 +147,7 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
 
     int pstate;
     int p_addr;
+    int D5RdimmSDRmode[4] = {};
     FAPI_DBG (TARGTIDFORMAT " ", TARGTID);
     FAPI_DBG (TARGTIDFORMAT " ", TARGTID);
     FAPI_DBG (TARGTIDFORMAT " //##############################################################", TARGTID);
@@ -180,7 +181,15 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
 
         FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming PIE Production Code", TARGTID);
 
-        FAPI_TRY(dwc_ddrphy_phyinit_LoadPieProdCode(i_target, io_runtime_config));
+        if(i_user_input_basic.DimmType == UDIMM)
+        {
+            FAPI_TRY(dwc_ddrphy_phyinit_LoadPieProdCode(i_target, io_runtime_config));
+        }
+        else
+        {
+            FAPI_TRY(dwc_ddrphy_phyinit_LoadPieProdCode_rdimm(i_target, io_runtime_config));
+        }
+
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tINITENG | csr_Seq0BDisableFlag0_ADDR), 0x0000));
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tINITENG | csr_Seq0BDisableFlag1_ADDR), 0x0173));
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tINITENG | csr_Seq0BDisableFlag2_ADDR), 0x8160));
@@ -422,26 +431,23 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
                         TARGTID, i_user_input_basic.NumRank_dfi1);
         }
 
-#ifdef csr_Seq0BGPR9_ADDR
-        // GPR9 exists, GPRs have been moved so csr_Seq0BGPR4_ADDR below is conditional on pubRev
-        int pubRev = io_runtime_config.pubRev;
-#endif // csr_Seq0BGPR9_ADDR
-
-        // TODO:ZEN:MST-1585 Add in UDIMM vs RDIMM switches into the PHY init code
-#if 0
-        dwc_ddrphy_phyinit_cmnt ("%s Programming GPR4 to 0x%x\n", printf_header, MaskCs_dfi0);
-        dwc_ddrphy_phyinit_cmnt ("%s Programming GPR5 to 0x%x\n", printf_header, MaskCs_dfi1);
-
-        for (pstate = 0; pstate < pUserInputBasic->NumPStates; pstate++)
+        // RDIMM only
+        if(i_user_input_basic.DimmType != UDIMM)
         {
-            p_addr = pstate << 20;
-            dwc_ddrphy_phyinit_userCustom_io_write16((p_addr | tINITENG | csr_Seq0BGPR4_ADDR), MaskCs_dfi0);
-            dwc_ddrphy_phyinit_userCustom_io_write16((p_addr | tINITENG | csr_Seq0BGPR5_ADDR), MaskCs_dfi1);
+            FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming GPR4 to 0x%x\n", TARGTID, MaskCs_dfi0);
+            FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming GPR5 to 0x%x\n", TARGTID, MaskCs_dfi1);
+
+            for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
+            {
+                p_addr = pstate << 20;
+                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tINITENG | csr_Seq0BGPR4_ADDR), MaskCs_dfi0));
+                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tINITENG | csr_Seq0BGPR5_ADDR), MaskCs_dfi1));
+            }
+
+            MaskCs_dfi0 = 0;
+            MaskCs_dfi1 = 0;
         }
 
-        MaskCs_dfi0 = 0;
-        MaskCs_dfi1 = 0;
-#endif
         FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming D5ACSM0MaskCs to 0x%x", TARGTID, MaskCs_dfi0);
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_D5ACSM0MaskCs_ADDR), MaskCs_dfi0 ));
 
@@ -485,56 +491,8 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
     //   - Storing the values of the AddressMask in Seq0BGPR8 for RDIMM based on SDR values.
     //   - Program the AddressMask  values directly for UDIMM.
     //##############################################################
-    // TODO:ZEN:MST-1585 Add in UDIMM vs RDIMM switches into the PHY init code
-#if 0
-
-    uint16_t AddressMask;
-    int D5RdimmSDRmode[4];
-
-    for (pstate = 0; pstate < pUserInputBasic->NumPStates; pstate++)
-    {
-        p_addr = pstate << 20;
-        D5RdimmSDRmode[pstate] = (mb_DDR5R_1D[pstate].RCW00_ChA_D0 & 0x1) ? 0 : 1; // RCW00_ChA_D0[0]
-
-        switch (pUserInputAdvanced->Num_Logical_Ranks)
-        {
-            case (16)  :
-                {
-                    AddressMask = (D5RdimmSDRmode[pstate]) ? 0x078f : 0x07ff;
-                    break;
-                }
-
-            case (8)   :
-                {
-                    AddressMask = (D5RdimmSDRmode[pstate]) ? 0x078f : 0x07ff;
-                    break;
-                }
-
-            case (4)   :
-                {
-                    AddressMask = (D5RdimmSDRmode[pstate]) ? 0x27cf : 0x27ff;
-                    break;
-                }
-
-            case (2)   :
-                {
-                    AddressMask = (D5RdimmSDRmode[pstate]) ? 0x37ef : 0x37ff;
-                    break;
-                }
-
-            default    :
-                {
-                    AddressMask = (D5RdimmSDRmode[pstate]) ? 0x078f : 0x07ff;
-                }
-        }
-
-        dwc_ddrphy_phyinit_cmnt ("%s Pstate=%d, Memclk=%dMHz, Programming Seq0BGPR8[%d] with D5ACSM<0/1>AddressMask values to 0x%x\n",
-                                 printf_header, pstate, pUserInputBasic->Frequency[pstate], pstate, AddressMask);
-        dwc_ddrphy_phyinit_userCustom_io_write16( (p_addr | tINITENG | csr_Seq0BGPR8_ADDR), AddressMask);
-    }
-
-#endif
-
+    // UDIMM
+    if(i_user_input_basic.DimmType == UDIMM)
     {
         uint16_t AddressMask;
 
@@ -574,33 +532,85 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_D5ACSM0AddressMask_ADDR), AddressMask ));
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_D5ACSM1AddressMask_ADDR), AddressMask ));
     }
+    // RDIMM
+    else
+    {
+        uint16_t AddressMask;
 
+        for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
+        {
+            p_addr = pstate << 20;
+            D5RdimmSDRmode[pstate] = (i_dram_config.RCW00_ChA_D0 & 0x1) ? 0 : 1; // RCW00_ChA_D0[0]
+
+            switch (i_user_input_advanced.Num_Logical_Ranks)
+            {
+                case (16)  :
+                    {
+                        AddressMask = (D5RdimmSDRmode[pstate]) ? 0x078f : 0x07ff;
+                        break;
+                    }
+
+                case (8)   :
+                    {
+                        AddressMask = (D5RdimmSDRmode[pstate]) ? 0x078f : 0x07ff;
+                        break;
+                    }
+
+                case (4)   :
+                    {
+                        AddressMask = (D5RdimmSDRmode[pstate]) ? 0x27cf : 0x27ff;
+                        break;
+                    }
+
+                case (2)   :
+                    {
+                        AddressMask = (D5RdimmSDRmode[pstate]) ? 0x37ef : 0x37ff;
+                        break;
+                    }
+
+                default    :
+                    {
+                        AddressMask = (D5RdimmSDRmode[pstate]) ? 0x078f : 0x07ff;
+                    }
+            }
+
+            FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Pstate=%d, Memclk=%dMHz",
+                      TARGTID, pstate, i_user_input_basic.Frequency[pstate]);
+            FAPI_DBG (TARGTIDFORMAT " // Programming Seq0BGPR8[%d] with D5ACSM<0/1>AddressMask values to 0x%x",
+                      TARGTID, pstate, AddressMask);
+            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tINITENG | csr_Seq0BGPR8_ADDR), AddressMask));
+        }
+    }
 
     //##############################################################
     // Program D5ACSM<0/1>AlgaIncVal
     // - Storing the values of the AlgaIncVal in Seq0BGPR7 for RDIMM based on SDR values.
     // - Program the AlgaIncVal  values directly for UDIMM.
     //##############################################################
-    // TODO:ZEN:MST-1585 Add in UDIMM vs RDIMM switches into the PHY init code
-#if 0
-    int AlgaIncVal;
-
-    for (pstate = 0; pstate < pUserInputBasic->NumPStates; pstate++)
-    {
-        p_addr = pstate << 20;
-        AlgaIncVal = (D5RdimmSDRmode[pstate]) ? 0x81 : 0x1;
-        dwc_ddrphy_phyinit_cmnt ("%s Pstate=%d, Memclk=%dMHz, Programming Seq0BGPR7[%d] with D5ACSM<0/1>AlgaIncVal values to 0x%x\n",
-                                 printf_header, pstate, pUserInputBasic->Frequency[pstate], pstate, AlgaIncVal);
-        dwc_ddrphy_phyinit_userCustom_io_write16( (p_addr | tINITENG | csr_Seq0BGPR7_ADDR), AlgaIncVal);
-    }
-
-#endif
+    // UDIMM only
+    if(i_user_input_basic.DimmType == UDIMM)
     {
         int AlgaIncVal;
         AlgaIncVal = 0x1;
         FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming D5ACSM<0/1>AlgaIncVal=%x ", TARGTID, AlgaIncVal);
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_D5ACSM0AlgaIncVal_ADDR), AlgaIncVal ));
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_D5ACSM1AlgaIncVal_ADDR), AlgaIncVal ));
+    }
+    // RDIMM
+    else
+    {
+        int AlgaIncVal;
+
+        for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
+        {
+            p_addr = pstate << 20;
+            AlgaIncVal = (D5RdimmSDRmode[pstate]) ? 0x81 : 0x1;
+            FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Pstate=%d, Memclk=%dMHz",
+                      TARGTID, pstate, i_user_input_basic.Frequency[pstate]);
+            FAPI_DBG (TARGTIDFORMAT " Programming Seq0BGPR7[%d] with D5ACSM<0/1>AlgaIncVal values to 0x%x",
+                      TARGTID, pstate, AlgaIncVal);
+            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tINITENG | csr_Seq0BGPR7_ADDR), AlgaIncVal));
+        }
     }
 
     //##############################################################
