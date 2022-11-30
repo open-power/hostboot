@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -234,6 +234,8 @@ namespace HTMGT
                 if (nullptr == bldErr)
                 {
                     OccManager::addTraceToLog(l_err);
+
+                    addBootloaderCheckpointData(l_err, i_failedOccTarget);
                 }
                 else
                 {

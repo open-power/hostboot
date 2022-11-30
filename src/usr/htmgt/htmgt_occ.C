@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -321,6 +321,8 @@ namespace HTMGT
             l_scom_data.addData(DEVICE_SCOM_ADDRESS(0x6D070));//OCB_PIB_OCBAR3
 
             l_scom_data.addToLog(i_err);
+
+            addBootloaderCheckpointData(i_err, iv_target);
         }
         else
         {
