@@ -247,12 +247,12 @@
   <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
   <description>
       The expected number of actags to be supported by the ocmb.
-      Must be 1 for Odyssey
+      Must be 0 for Odyssey
       Validate via OCTRLTAG
       10518  OCTRLTAG_AFU_ACTAG_LENGTH_SUPPORTED
   </description>
   <valueType>uint32</valueType>
-  <default>0x1</default>
+  <default>0x0</default>
   <platInit/>
   <mrwHide/>
   <mssAccessorName>ody_afu_actag_len</mssAccessorName>
