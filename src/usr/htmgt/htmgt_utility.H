@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,6 +161,7 @@ namespace HTMGT
         //SUBSEC_ELOG_TYPE_THERMAL_DATA = 0x13,
         //SUBSEC_PROC_SCOM_REGISTERS    = 0x14,
         //SUBSEC_ELOG_TYPE_OCC_TRACE    = 0x15,
+        SUBSEC_OCC_BOOTLOADER_CHECKPOINT = 0x16,
         // 0xE0-0xEF are reserved for OCC Exceptions
     };
 
@@ -269,6 +270,14 @@ namespace HTMGT
       *
       */
      void check_reset_count();
+
+     /**
+      * @brief Add OCC Bootloader Checkpoint data to specified error log
+      *
+      * @param[in] i_err    - error log
+      * @param[in] i_target - OCC or proc target
+      */
+     void addBootloaderCheckpointData(errlHndl_t i_err, TARGETING::TargetHandle_t i_target);
 
 } // end namespace
 #endif

@@ -234,6 +234,8 @@ namespace HTMGT
                 if (nullptr == bldErr)
                 {
                     OccManager::addTraceToLog(l_err);
+
+                    addBootloaderCheckpointData(l_err, i_failedOccTarget);
                 }
                 else
                 {

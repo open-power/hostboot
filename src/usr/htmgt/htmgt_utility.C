@@ -27,6 +27,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/attributes.H>
 #include <time.h>
+#include <isteps/pm/occAccess.H>
 
 using namespace TARGETING;
 
@@ -284,6 +285,46 @@ namespace HTMGT
                     }
                 }
             }
+        }
+    }
+
+    // Add OCC Bootloader Checkpoint data to the specified elog
+    void addBootloaderCheckpointData(errlHndl_t i_err, TARGETING::TargetHandle_t i_target)
+    {
+        if ((i_err != nullptr) && (i_target != nullptr))
+        {
+            // Add bootloader checkpoint data
+            errlHndl_t l_errl = nullptr;
+            const uint32_t BOOTLOADER_CHECKPOINT_ADDR = 0xFFFFFFA0;
+            const unsigned BOOTLOADER_CHECKPOINT_SIZE = 32;
+            uint8_t l_sramData[BOOTLOADER_CHECKPOINT_SIZE] = {0};
+            l_errl = HBOCC::readSRAM(i_target,
+                                     BOOTLOADER_CHECKPOINT_ADDR,
+                                     reinterpret_cast<uint64_t*>(l_sramData),
+                                     BOOTLOADER_CHECKPOINT_SIZE );
+            if (l_errl == nullptr)
+            {
+                // Add OCC trace buffer to error log
+                i_err->addFFDC(OCCC_COMP_ID,
+                               l_sramData,
+                               BOOTLOADER_CHECKPOINT_SIZE,
+                               1, //version
+                               SUBSEC_OCC_BOOTLOADER_CHECKPOINT);
+            }
+            else
+            {
+                const unsigned long huid =
+                    i_target->getAttr<TARGETING::ATTR_HUID>();
+                TMGT_ERR("addBootloaderCheckpointData: Failed to read OCC (HUID 0x%08X) "
+                         "bootloader checkpoint data - rc=0x%04X",
+                         huid, l_errl->reasonCode());
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                ERRORLOG::errlCommit(l_errl, HTMGT_COMP_ID);
+            }
+        }
+        else
+        {
+            TMGT_ERR("addBootloaderCheckpointData: invalid parameters supplied");
         }
     }
 
