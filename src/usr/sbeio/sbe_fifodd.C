@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,6 +72,9 @@ using namespace ERRORLOG;
 namespace SBEIO
 {
 
+
+mutex_t l_pubFifoOpMux = MUTEX_INITIALIZER;
+
 SbeFifo & SbeFifo::getTheInstance()
 {
     return Singleton<SbeFifo>::instance();
@@ -105,13 +108,12 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
                              uint32_t          * i_pFifoResponse,
                              uint32_t            i_responseSize)
 {
-    errlHndl_t errl = NULL;
-    static mutex_t l_fifoOpMux = MUTEX_INITIALIZER;
-
-    SBE_TRACD(ENTER_MRK "performFifoChipOp");
+    errlHndl_t errl = nullptr;
 
     //Serialize access to PSU
-    mutex_lock(&l_fifoOpMux);
+    mutex_lock(&l_pubFifoOpMux);
+
+    SBE_TRACD(ENTER_MRK "performFifoChipOp");
 
     do
     {
@@ -136,7 +138,7 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
     }
     while (0);
 
-    mutex_unlock(&l_fifoOpMux);
+    mutex_unlock(&l_pubFifoOpMux);
 
     SBE_TRACD(EXIT_MRK "performFifoChipOp");
 
@@ -149,20 +151,19 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
  */
 errlHndl_t SbeFifo::performFifoReset(TARGETING::Target * i_target)
 {
-    errlHndl_t errl = NULL;
-    static mutex_t l_fifoOpMux = MUTEX_INITIALIZER;
-
-    SBE_TRACF(ENTER_MRK "sending FSI SBEFIFO Reset to HUID 0x%x",
-              TARGETING::get_huid(i_target));
+    errlHndl_t errl = nullptr;
 
     //Serialize access to the FIFO
-    mutex_lock(&l_fifoOpMux);
+    mutex_lock(&l_pubFifoOpMux);
+
+    SBE_TRACF(ENTER_MRK "sending FSI SBEFIFO Reset to HUID 0x%08X",
+              TARGETING::get_huid(i_target));
 
     // Perform a write to the DNFIFO Reset to cleanup the fifo
     uint32_t l_dummy = 0xDEAD;
     errl = writeFsi(i_target,SBE_FIFO_DNFIFO_RESET,&l_dummy);
 
-    mutex_unlock(&l_fifoOpMux);
+    mutex_unlock(&l_pubFifoOpMux);
 
     return errl;
 }
