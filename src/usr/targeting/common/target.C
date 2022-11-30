@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -628,6 +628,7 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                 case(TYPE_PROC):
                 case(TYPE_MEMBUF):
                 case(TYPE_DIMM):
+                case(TYPE_BMC):
                 case(TYPE_OCMB_CHIP):
                 case(TYPE_PMIC):
                 case(TYPE_GENERIC_I2C_DEVICE):
@@ -655,6 +656,7 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                 case(TYPE_PEC):
                 case(TYPE_PHB):
                 case(TYPE_OMI):
+                case(TYPE_SMPGROUP):
                 case(TYPE_MCC):
                 case(TYPE_OMIC):
                 case(TYPE_MEM_PORT):
@@ -696,7 +698,6 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                 case(TYPE_L3):
                 case(TYPE_L4):
                 case(TYPE_NPU):
-                case(TYPE_SMPGROUP):
                 case(TYPE_PCI):
                 case(TYPE_OSC):
                 case(TYPE_TODCLK):
@@ -713,7 +714,6 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                 case(TYPE_USB):
                 case(TYPE_ETH):
                 case(TYPE_PANEL):
-                case(TYPE_BMC):
                 case(TYPE_FLASH):
                 case(TYPE_SEEPROM):
                 case(TYPE_TMP):
