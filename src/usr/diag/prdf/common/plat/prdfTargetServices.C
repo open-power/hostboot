@@ -361,7 +361,6 @@ TARGETING::MODEL getChipModel( TARGETING::TargetHandle_t i_trgt )
 
 //------------------------------------------------------------------------------
 
-#ifdef __HOSTBOOT_MODULE
 uint32_t getChipId( TARGETING::TargetHandle_t i_trgt )
 {
     PRDF_ASSERT( nullptr != i_trgt );
@@ -371,7 +370,6 @@ uint32_t getChipId( TARGETING::TargetHandle_t i_trgt )
 
     return parent->getAttr<ATTR_CHIP_ID>();
 }
-#endif
 
 //------------------------------------------------------------------------------
 
@@ -1252,6 +1250,13 @@ uint8_t getNumRanksPerDimm<TYPE_OCMB_CHIP>(TargetHandle_t i_trgt, uint8_t i_ds)
     // can get the relevant port.
     TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
     return __getNumRanksPerDimm<TYPE_MEM_PORT>( memPort, i_ds );
+}
+
+bool isOdysseyOcmb(TARGETING::TargetHandle_t i_trgt)
+{
+    // The Odyssey chip ID value of 0x60C0 is copied from the chipids.H file
+    // in Hostboot.
+    return (getChipId(i_trgt) == 0x60C0);
 }
 
 //##############################################################################

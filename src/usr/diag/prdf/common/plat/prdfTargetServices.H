@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,8 +146,6 @@ TARGETING::CLASS getTargetClass( TARGETING::TargetHandle_t i_target );
  */
 TARGETING::MODEL getChipModel( TARGETING::TargetHandle_t i_trgt );
 
-#ifdef __HOSTBOOT_MODULE
-
 // NOTE: This should be used instead of getChipModel() because of the case of
 //       MODEL_OCMB, where we need the chip ID to distinguish between Explorer
 //       and Gemini.
@@ -157,8 +155,6 @@ TARGETING::MODEL getChipModel( TARGETING::TargetHandle_t i_trgt );
  * @return The chip ID.
  */
 uint32_t getChipId( TARGETING::TargetHandle_t i_trgt );
-
-#endif
 
 /**
  * @param  i_trgt A chip target or any unit target within the chip.
@@ -445,6 +441,13 @@ uint8_t getNumMasterRanksPerDimm( TARGETING::TargetHandle_t i_trgt,
  */
 template<TARGETING::TYPE T>
 uint8_t getNumRanksPerDimm( TARGETING::TargetHandle_t i_trgt, uint8_t i_ds );
+
+/**
+ * @brief   Checks if the input OCMB target is an Odyssey OCMB
+ * @param   i_trgt OCMB_CHIP target
+ * @return  true if the OCMB is an Odyssey, false otherwise
+ */
+bool isOdysseyOcmb(TARGETING::TargetHandle_t i_trgt);
 
 //##############################################################################
 //##                     MNFG Policy Flag Functions

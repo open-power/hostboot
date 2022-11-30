@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -210,8 +210,6 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
     {
         uint32_t model = getChipModel( trgt );
 
-        // TODO RTC 253274 - skip Gemini OCMBs
-
         // Ensure this model is supported.
         if ( fnMap.end() == fnMap.find(model) )
         {
@@ -230,6 +228,13 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
 
         // Get the file name for this model/type.
         const char * fileName = fnMap[model][i_type];
+
+        // If the fileName is 'explorer_ocmb', determine if we have an Odyssey
+        // OCMB instead.
+        if (explorer_ocmb == fileName && isOdysseyOcmb(trgt))
+        {
+            fileName = odyssey_ocmb;
+        }
 
         // Get the rule chip.
         RuleChip * chip = new RuleChip( fileName, trgt, scanFac, resFac, errl );

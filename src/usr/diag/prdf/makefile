@@ -41,6 +41,7 @@ include common/framework/prdf_framework.mk
 include common/plat/p10/prdf_plat_p10.mk
 include common/plat/mem/prdf_plat_mem.mk
 include common/plat/explorer/prdf_plat_explorer.mk
+include common/plat/odyssey/prdf_plat_odyssey.mk
 include plat/p10/prdf_plat_p10_hb_only.mk
 include plat/mem/prdf_plat_mem_hb_only.mk
 include plat/explorer/prdf_plat_explorer_hb_only.mk

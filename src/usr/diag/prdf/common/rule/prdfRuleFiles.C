@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,8 +49,9 @@ namespace PRDF
     const char * p10_pau  = "p10_pau";
 
 
-    // Explorer Chip
+    // OCMB Chip
     const char * explorer_ocmb = "explorer_ocmb";
+    const char * odyssey_ocmb  = "odyssey_ocmb";
 
 } // end namespace PRDF
 
