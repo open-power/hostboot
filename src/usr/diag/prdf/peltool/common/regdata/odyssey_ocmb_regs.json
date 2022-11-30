@@ -1,0 +1,1018 @@
+{
+    "0x0569": {
+        "address": "0x0000000008013000",
+        "description": "Odyssey chip ODP_FIR 0",
+        "name": "ODP_FIR_0"
+    },
+    "0x0669": {
+        "address": "0x0000000008013400",
+        "description": "Odyssey chip ODP_FIR 1",
+        "name": "ODP_FIR_1"
+    },
+    "0x0736": {
+        "address": "0x0000000008010874",
+        "description": "Odyssey chip MMIO_FIR Checkstop Config",
+        "name": "MMIO_FIR_CFG_CS"
+    },
+    "0x08aa": {
+        "address": "0x0000000008013008",
+        "description": "Odyssey chip ODP_FIR WOF 0",
+        "name": "ODP_FIR_WOF_0"
+    },
+    "0x09aa": {
+        "address": "0x0000000008013408",
+        "description": "Odyssey chip ODP_FIR WOF 1",
+        "name": "ODP_FIR_WOF_1"
+    },
+    "0x0c76": {
+        "address": "0x000000000801241a",
+        "description": "Odyssey chip DLX Skitter Control Register",
+        "name": "DLX_SKIT_CTL"
+    },
+    "0x0f95": {
+        "address": "0x0000000008011004",
+        "description": "Odyssey chip SRQ_FIR Checkstop Config",
+        "name": "SRQ_FIR_CFG_CS"
+    },
+    "0x10df": {
+        "address": "0x0000000008040000",
+        "description": "MEM Chiplet Checkstop FIR",
+        "name": "CFIR_MEM_CS"
+    },
+    "0x1204": {
+        "address": "0x0000000001040108",
+        "description": "Odyssey chip TP_LOCAL_FIR WOF",
+        "name": "TP_LOCAL_FIR_WOF"
+    },
+    "0x135e": {
+        "address": "0x0000000008040041",
+        "description": "MEM Chiplet Recoverable FIR MASK",
+        "name": "CFIR_MEM_RE_MASK"
+    },
+    "0x1518": {
+        "address": "0x000000000801241b",
+        "description": "Odyssey chip DLX Skitter Status Register",
+        "name": "DLX_SKIT_STATUS"
+    },
+    "0x16ba": {
+        "address": "0x0000000008011002",
+        "description": "Odyssey chip SRQ_FIR MASK",
+        "name": "SRQ_FIR_MASK"
+    },
+    "0x1943": {
+        "address": "0x000000000801241d",
+        "description": "Odyssey chip DLX Error Action Register",
+        "name": "DLX_ERR_ACTION"
+    },
+    "0x1954": {
+        "address": "0x0000000008010875",
+        "description": "Odyssey chip MMIO_FIR Recoverable Config",
+        "name": "MMIO_FIR_CFG_RE"
+    },
+    "0x1af6": {
+        "address": "0x0000000008013007",
+        "description": "Odyssey chip ODP_FIR Unit Checkstop Config 0",
+        "name": "ODP_FIR_CFG_UCS_0"
+    },
+    "0x1bf6": {
+        "address": "0x0000000008013407",
+        "description": "Odyssey chip ODP_FIR Unit Checkstop Config 1",
+        "name": "ODP_FIR_CFG_UCS_1"
+    },
+    "0x1de4": {
+        "address": "0x0000000008010c02",
+        "description": "Odyssey chip OCMB_PHY_FIR MASK",
+        "name": "OCMB_PHY_FIR_MASK"
+    },
+    "0x1e31": {
+        "address": "0x0000000001040003",
+        "description": "TP Chiplet Unit Checkstop FIR",
+        "name": "CFIR_TP_UCS"
+    },
+    "0x1f6d": {
+        "address": "0x000000000801087c",
+        "description": "Odyssey chip MMIO_FIR Error Report 0",
+        "name": "MMIO_ERR_RPT_0"
+    },
+    "0x1f6f": {
+        "address": "0x000000000801087e",
+        "description": "Odyssey chip MMIO_FIR Error Report 1",
+        "name": "MMIO_ERR_RPT_1"
+    },
+    "0x21aa": {
+        "address": "0x0000000008011808",
+        "description": "Odyssey chip RDF_FIR 0 WOF",
+        "name": "RDF_FIR_WOF_0"
+    },
+    "0x22aa": {
+        "address": "0x0000000008012808",
+        "description": "Odyssey chip RDF_FIR WOF 1",
+        "name": "RDF_FIR_WOF_1"
+    },
+    "0x22fd": {
+        "address": "0x0000000008040001",
+        "description": "MEM Chiplet Recoverable FIR",
+        "name": "CFIR_MEM_RE"
+    },
+    "0x2649": {
+        "address": "0x0000000008012405",
+        "description": "Odyssey chip DLX_FIR Recoverable Config",
+        "name": "DLX_FIR_CFG_RE"
+    },
+    "0x2833": {
+        "address": "0x0000000008010870",
+        "description": "Odyssey chip MMIO_FIR",
+        "name": "MMIO_FIR"
+    },
+    "0x284b": {
+        "address": "0x0000000001040002",
+        "description": "TP Chiplet Special Attention FIR",
+        "name": "CFIR_TP_SPA"
+    },
+    "0x2882": {
+        "address": "0x0000000008012408",
+        "description": "Odyssey chip DLX_FIR WOF",
+        "name": "DLX_FIR_WOF"
+    },
+    "0x28a8": {
+        "address": "0x0000000008012413",
+        "description": "Odyssey chip DLX Error Report Register",
+        "name": "DLX_ERR_RPT"
+    },
+    "0x2961": {
+        "address": "0x0000000008040107",
+        "description": "Odyssey chip Unit Checkstop Config",
+        "name": "MEM_LOCAL_FIR_CFG_UCS"
+    },
+    "0x298b": {
+        "address": "0x000000000801240f",
+        "description": "Odyssey chip DLX Performance Counter Values",
+        "name": "PMU_CNTR"
+    },
+    "0x29f1": {
+        "address": "0x0000000001040042",
+        "description": "TP Chiplet Special Attention FIR MASK",
+        "name": "CFIR_TP_SPA_MASK"
+    },
+    "0x2c69": {
+        "address": "0x0000000008011800",
+        "description": "Odyssey chip RDF_FIR 0",
+        "name": "RDF_FIR_0"
+    },
+    "0x2cb5": {
+        "address": "0x0000000008011473",
+        "description": "Odyssey chip MBA Error Mask0 Register",
+        "name": "MBA_ERR_MASK_0"
+    },
+    "0x2cb7": {
+        "address": "0x0000000008011474",
+        "description": "Odyssey chip MBA Error Mask1 Register",
+        "name": "MBA_ERR_MASK_1"
+    },
+    "0x2d69": {
+        "address": "0x0000000008012800",
+        "description": "Odyssey chip RDF_FIR 1",
+        "name": "RDF_FIR_1"
+    },
+    "0x311d": {
+        "address": "0x0000000008013006",
+        "description": "Odyssey chip ODP_FIR Special Attention Config 0",
+        "name": "ODP_FIR_CFG_SPA_0"
+    },
+    "0x321d": {
+        "address": "0x0000000008013406",
+        "description": "Odyssey chip ODP_FIR Special Attention Config 1",
+        "name": "ODP_FIR_CFG_SPA_1"
+    },
+    "0x337b": {
+        "address": "0x0000000008040106",
+        "description": "Odyssey chip Special Attention Config",
+        "name": "MEM_LOCAL_FIR_CFG_SPA"
+    },
+    "0x35d3": {
+        "address": "0x0000000008012419",
+        "description": "Odyssey chip DLX Incoming Link Info Register",
+        "name": "DLX_RMT_INFO"
+    },
+    "0x3821": {
+        "address": "0x00000000570f001a",
+        "description": "Global Special Attention FIR",
+        "name": "GFIR_SPA"
+    },
+    "0x399e": {
+        "address": "0x0000000008013005",
+        "description": "Odyssey chip ODP_FIR Recoverable Config 0",
+        "name": "ODP_FIR_CFG_RE_0"
+    },
+    "0x39a0": {
+        "address": "0x0000000008013405",
+        "description": "Odyssey chip ODP_FIR Recoverable Config 1",
+        "name": "ODP_FIR_CFG_RE_1"
+    },
+    "0x3ece": {
+        "address": "0x0000000008040108",
+        "description": "Odyssey chip WOF",
+        "name": "MEM_LOCAL_FIR_WOF"
+    },
+    "0x42df": {
+        "address": "0x0000000001040106",
+        "description": "Odyssey chip TP_LOCAL_FIR Special Attention Config",
+        "name": "TP_LOCAL_FIR_CFG_SPA"
+    },
+    "0x45f6": {
+        "address": "0x0000000008011807",
+        "description": "Odyssey chip RDF_FIR 0 Unit Checkstop Config",
+        "name": "RDF_FIR_CFG_UCS_0"
+    },
+    "0x46f6": {
+        "address": "0x0000000008012807",
+        "description": "Odyssey chip RDF_FIR Unit Checkstop Config 1",
+        "name": "RDF_FIR_CFG_UCS_1"
+    },
+    "0x4865": {
+        "address": "0x0000000008012404",
+        "description": "Odyssey chip DLX_FIR Checkstop Config",
+        "name": "DLX_FIR_CFG_CS"
+    },
+    "0x48df": {
+        "address": "0x0000000008012000",
+        "description": "Odyssey chip TLX_FIR",
+        "name": "TLX_FIR"
+    },
+    "0x4b5b": {
+        "address": "0x0000000008040100",
+        "description": "Odyssey chip MEM_LOCAL_FIR",
+        "name": "MEM_LOCAL_FIR"
+    },
+    "0x4ee8": {
+        "address": "0x0000000008010c08",
+        "description": "Odyssey chip OCMB_PHY_FIR WOF",
+        "name": "OCMB_PHY_FIR_WOF"
+    },
+    "0x4f06": {
+        "address": "0x0000000008040002",
+        "description": "MEM Chiplet Special Attention FIR",
+        "name": "CFIR_MEM_SPA"
+    },
+    "0x52bd": {
+        "address": "0x0000000008012412",
+        "description": "Odyssey chip DLX Error Mask Register",
+        "name": "DLX_ERR_MASK"
+    },
+    "0x5530": {
+        "address": "0x0000000008040003",
+        "description": "MEM Chiplet Unit Checkstop FIR",
+        "name": "CFIR_MEM_UCS"
+    },
+    "0x5790": {
+        "address": "0x0000000008012402",
+        "description": "Odyssey chip DLX_FIR MASK",
+        "name": "DLX_FIR_MASK"
+    },
+    "0x5e4b": {
+        "address": "0x00000000570f002a",
+        "description": "Global Unit Checkstop Attention FIR",
+        "name": "GFIR_UCS"
+    },
+    "0x5f45": {
+        "address": "0x0000000008012007",
+        "description": "Odyssey chip TLX_FIR Unit Checkstop Config",
+        "name": "TLX_FIR_CFG_UCS"
+    },
+    "0x649e": {
+        "address": "0x0000000008011805",
+        "description": "Odyssey chip RDF_FIR 0 Recoverable Config",
+        "name": "RDF_FIR_CFG_RE_0"
+    },
+    "0x64a0": {
+        "address": "0x0000000008012805",
+        "description": "Odyssey chip RDF_FIR Recoverable Config 1",
+        "name": "RDF_FIR_CFG_RE_1"
+    },
+    "0x64b7": {
+        "address": "0x000000000801180e",
+        "description": "Odyssey chip RDF 0 Error Report 0",
+        "name": "RDF_0_ERR_RPT_0"
+    },
+    "0x6535": {
+        "address": "0x0000000001040001",
+        "description": "TP Chiplet Recoverable FIR",
+        "name": "CFIR_TP_RE"
+    },
+    "0x65b7": {
+        "address": "0x000000000801180f",
+        "description": "Odyssey chip RDF 0 Error Report 1",
+        "name": "RDF_0_ERR_RPT_1"
+    },
+    "0x6879": {
+        "address": "0x0000000008011469",
+        "description": "Odyssey chip MBS Memory Scrub/Read Error Count Register",
+        "name": "MBSMSEC"
+    },
+    "0x68c5": {
+        "address": "0x0000000008011400",
+        "description": "Odyssey chip MCBIST_FIR",
+        "name": "MCBIST_FIR"
+    },
+    "0x6909": {
+        "address": "0x0000000001040107",
+        "description": "Odyssey chip TP_LOCAL_FIR Unit Checkstop Config",
+        "name": "TP_LOCAL_FIR_CFG_UCS"
+    },
+    "0x695f": {
+        "address": "0x0000000008012006",
+        "description": "Odyssey chip TLX_FIR Special Attention Config",
+        "name": "TLX_FIR_CFG_SPA"
+    },
+    "0x6ab7": {
+        "address": "0x000000000801280e",
+        "description": "Odyssey chip RDF 1 Error Report 0",
+        "name": "RDF_1_ERR_RPT_0"
+    },
+    "0x6b42": {
+        "address": "0x0000000008011402",
+        "description": "Odyssey chip MCBIST_FIR MASK",
+        "name": "MCBIST_FIR_MASK"
+    },
+    "0x6bb7": {
+        "address": "0x000000000801280f",
+        "description": "Odyssey chip RDF 1 Error Report 1",
+        "name": "RDF_1_ERR_RPT_1"
+    },
+    "0x6c94": {
+        "address": "0x0000000008011404",
+        "description": "Odyssey chip MCBIST_FIR Checkstop Config",
+        "name": "MCBIST_FIR_CFG_CS"
+    },
+    "0x6cc8": {
+        "address": "0x0000000008013004",
+        "description": "Odyssey chip ODP_FIR Checkstop Config 0",
+        "name": "ODP_FIR_CFG_CS_0"
+    },
+    "0x6cca": {
+        "address": "0x0000000008013404",
+        "description": "Odyssey chip ODP_FIR Checkstop Config 1",
+        "name": "ODP_FIR_CFG_CS_1"
+    },
+    "0x6de2": {
+        "address": "0x0000000001040041",
+        "description": "TP Chiplet Recoverable FIR MASK",
+        "name": "CFIR_TP_RE_MASK"
+    },
+    "0x6ff7": {
+        "address": "0x0000000008011000",
+        "description": "Odyssey chip SRQ_FIR",
+        "name": "SRQ_FIR"
+    },
+    "0x7065": {
+        "address": "0x0000000008040105",
+        "description": "Odyssey chip Recoverable Config",
+        "name": "MEM_LOCAL_FIR_CFG_RE"
+    },
+    "0x7367": {
+        "address": "0x000000000801241c",
+        "description": "Odyssey chip DLX CYA2 Register",
+        "name": "DLX_CYA2"
+    },
+    "0x74b0": {
+        "address": "0x0000000008012417",
+        "description": "Odyssey chip DLX Training Status Register",
+        "name": "DLX_TRAINING_STATUS"
+    },
+    "0x78e9": {
+        "address": "0x0000000008010876",
+        "description": "Odyssey chip MMIO_FIR Special Attention Config",
+        "name": "MMIO_FIR_CFG_SPA"
+    },
+    "0x7a94": {
+        "address": "0x00000000570f001c",
+        "description": "Global Checkstop Attention FIR",
+        "name": "GFIR_CS"
+    },
+    "0x7b7b": {
+        "address": "0x000000000801147e",
+        "description": "Odyssey chip MBS Error Vector Trap Register 0",
+        "name": "MBSEVR0"
+    },
+    "0x7c1d": {
+        "address": "0x0000000008011806",
+        "description": "Odyssey chip RDF_FIR 0 Special Attention Config",
+        "name": "RDF_FIR_CFG_SPA_0"
+    },
+    "0x7d1d": {
+        "address": "0x0000000008012806",
+        "description": "Odyssey chip RDF_FIR Special Attention Config 1",
+        "name": "RDF_FIR_CFG_SPA_1"
+    },
+    "0x7e3f": {
+        "address": "0x0000000008012410",
+        "description": "Odyssey chip DLX Configuration0 Register",
+        "name": "DLX_CONFIG0"
+    },
+    "0x7eb2": {
+        "address": "0x0000000008011405",
+        "description": "Odyssey chip MCBIST_FIR Recoverable Config",
+        "name": "MCBIST_FIR_CFG_RE"
+    },
+    "0x7f3f": {
+        "address": "0x0000000008012411",
+        "description": "Odyssey chip DLX Configuration1 Register",
+        "name": "DLX_CONFIG1"
+    },
+    "0x7f95": {
+        "address": "0x0000000008012416",
+        "description": "Odyssey chip DLX Status Register",
+        "name": "DLX_STATUS"
+    },
+    "0x7fc9": {
+        "address": "0x0000000008010c06",
+        "description": "Odyssey chip OCMB_PHY_FIR Special Attention Config",
+        "name": "OCMB_PHY_FIR_CFG_SPA"
+    },
+    "0x839d": {
+        "address": "0x0000000001040104",
+        "description": "Odyssey chip TP_LOCAL_FIR Checkstop Config",
+        "name": "TP_LOCAL_FIR_CFG_CS"
+    },
+    "0x85f3": {
+        "address": "0x0000000008010c07",
+        "description": "Odyssey chip OCMB_PHY_FIR Unit Checkstop Config",
+        "name": "OCMB_PHY_FIR_CFG_UCS"
+    },
+    "0x8675": {
+        "address": "0x0000000008011007",
+        "description": "Odyssey chip SRQ_FIR Unit Checkstop Config",
+        "name": "SRQ_FIR_CFG_UCS"
+    },
+    "0x8751": {
+        "address": "0x0000000001040000",
+        "description": "TP Chiplet Checkstop FIR",
+        "name": "CFIR_TP_CS"
+    },
+    "0x87c4": {
+        "address": "0x0000000008040102",
+        "description": "Odyssey chip MEM_LOCAL_FIR MASK",
+        "name": "MEM_LOCAL_FIR_MASK"
+    },
+    "0x88df": {
+        "address": "0x0000000008012400",
+        "description": "Odyssey chip DLX_FIR",
+        "name": "DLX_FIR"
+    },
+    "0x8a8b": {
+        "address": "0x0000000008011406",
+        "description": "Odyssey chip MCBIST_FIR Special Attention Config",
+        "name": "MCBIST_FIR_CFG_SPA"
+    },
+    "0x8cb2": {
+        "address": "0x00000000570f001b",
+        "description": "Global Recoverable Attention FIR",
+        "name": "GFIR_RE"
+    },
+    "0x8e4d": {
+        "address": "0x00000000080114db",
+        "description": "Odyssey chip MCBIST Control Register",
+        "name": "MCB_CNTL"
+    },
+    "0x906e": {
+        "address": "0x0000000008011457",
+        "description": "Odyssey chip MBS Memory Scrub/Read Error Threshold Reg",
+        "name": "MBSTR"
+    },
+    "0x908f": {
+        "address": "0x0000000008011006",
+        "description": "Odyssey chip SRQ_FIR Special Attention Config",
+        "name": "SRQ_FIR_CFG_SPA"
+    },
+    "0x90b5": {
+        "address": "0x0000000008011407",
+        "description": "Odyssey chip MCBIST_FIR Unit Checkstop Config",
+        "name": "MCBIST_FIR_CFG_UCS"
+    },
+    "0x921a": {
+        "address": "0x0000000001040040",
+        "description": "TP Chiplet Checkstop FIR MASK",
+        "name": "CFIR_TP_CS_MASK"
+    },
+    "0x9281": {
+        "address": "0x0000000008040104",
+        "description": "Odyssey chip Checkstop Config",
+        "name": "MEM_LOCAL_FIR_CFG_CS"
+    },
+    "0x9450": {
+        "address": "0x000000000801146d",
+        "description": "Odyssey chip MBS Mainline UE Address Trap Register",
+        "name": "MBUER"
+    },
+    "0x95bb": {
+        "address": "0x0000000001040105",
+        "description": "Odyssey chip TP_LOCAL_FIR Recoverable Config",
+        "name": "TP_LOCAL_FIR_CFG_RE"
+    },
+    "0x964c": {
+        "address": "0x0000000008011012",
+        "description": "Odyssey chip Address Translation Register 0",
+        "name": "MBXLT0"
+    },
+    "0x964e": {
+        "address": "0x0000000008011013",
+        "description": "Odyssey chip Address Translation Register 1",
+        "name": "MBXLT1"
+    },
+    "0x9650": {
+        "address": "0x0000000008011014",
+        "description": "Odyssey chip Address Translation Register 2",
+        "name": "MBXLT2"
+    },
+    "0x9652": {
+        "address": "0x0000000008011021",
+        "description": "Odyssey chip Address Translation Register 3",
+        "name": "MBXLT3"
+    },
+    "0x97c8": {
+        "address": "0x0000000008011804",
+        "description": "Odyssey chip RDF_FIR 0 Checkstop Config",
+        "name": "RDF_FIR_CFG_CS_0"
+    },
+    "0x97ca": {
+        "address": "0x0000000008012804",
+        "description": "Odyssey chip RDF_FIR Checkstop Config 1",
+        "name": "RDF_FIR_CFG_CS_1"
+    },
+    "0x9baa": {
+        "address": "0x000000000801241e",
+        "description": "Odyssey chip DLX Debug Aid Register",
+        "name": "DLX_DEBUG_AID"
+    },
+    "0x9c1f": {
+        "address": "0x0000000008040042",
+        "description": "MEM Chiplet Special Attention FIR MASK",
+        "name": "CFIR_MEM_SPA_MASK"
+    },
+    "0x9c46": {
+        "address": "0x0000000008011408",
+        "description": "Odyssey chip MCBIST_FIR WOF",
+        "name": "MCBIST_FIR_WOF"
+    },
+    "0x9f13": {
+        "address": "0x0000000008010877",
+        "description": "Odyssey chip MMIO_FIR Unit Checkstop Config",
+        "name": "MMIO_FIR_CFG_UCS"
+    },
+    "0xa084": {
+        "address": "0x0000000008010c04",
+        "description": "Odyssey chip OCMB_PHY_FIR Checkstop Config",
+        "name": "OCMB_PHY_FIR_CFG_CS"
+    },
+    "0xa412": {
+        "address": "0x000000000801201c",
+        "description": "Odyssey chip TLX Error Report Register 0",
+        "name": "TLX_ERR_RPT_0"
+    },
+    "0xa512": {
+        "address": "0x000000000801201d",
+        "description": "Odyssey chip TLX Error Report Register 1",
+        "name": "TLX_ERR_RPT_1"
+    },
+    "0xa612": {
+        "address": "0x000000000801201e",
+        "description": "Odyssey chip TLX Error Report Register 2",
+        "name": "TLX_ERR_RPT_2"
+    },
+    "0xa649": {
+        "address": "0x0000000008012005",
+        "description": "Odyssey chip TLX_FIR Recoverable Config",
+        "name": "TLX_FIR_CFG_RE"
+    },
+    "0xa675": {
+        "address": "0x00000000080114d7",
+        "description": "Odyssey chip Maint Current Address Trap Register",
+        "name": "MCBMCAT"
+    },
+    "0xab8f": {
+        "address": "0x0000000008013002",
+        "description": "Odyssey chip ODP_FIR MASK 0",
+        "name": "ODP_FIR_MASK_0"
+    },
+    "0xab91": {
+        "address": "0x0000000008013402",
+        "description": "Odyssey chip ODP_FIR MASK 1",
+        "name": "ODP_FIR_MASK_1"
+    },
+    "0xb228": {
+        "address": "0x0000000008010872",
+        "description": "Odyssey chip MMIO_FIR MASK",
+        "name": "MMIO_FIR_MASK"
+    },
+    "0xb2a2": {
+        "address": "0x0000000008010c05",
+        "description": "Odyssey chip OCMB_PHY_FIR Recoverable Config",
+        "name": "OCMB_PHY_FIR_CFG_RE"
+    },
+    "0xb969": {
+        "address": "0x00000000080114dc",
+        "description": "Odyssey chip Configured Command Sequence Status Reg",
+        "name": "MCB_CNTLSTAT"
+    },
+    "0xbb73": {
+        "address": "0x00000000080114d6",
+        "description": "Odyssey chip Address Generator Configuration Register",
+        "name": "MCBAGRA"
+    },
+    "0xbbed": {
+        "address": "0x0000000001040100",
+        "description": "Odyssey chip TP_LOCAL_FIR",
+        "name": "TP_LOCAL_FIR"
+    },
+    "0xc537": {
+        "address": "0x0000000008011455",
+        "description": "Odyssey chip MBS Memory Scrub/Read Error Counter Reg 0",
+        "name": "MBSEC0"
+    },
+    "0xc539": {
+        "address": "0x0000000008011456",
+        "description": "Odyssey chip MBS Memory Scrub/Read Error Counter Reg 1",
+        "name": "MBSEC1"
+    },
+    "0xc608": {
+        "address": "0x000000000801241f",
+        "description": "Odyssey chip DLX Chicken Switch Register",
+        "name": "DLX_CYA_BITS"
+    },
+    "0xc675": {
+        "address": "0x000000000801146b",
+        "description": "Odyssey chip MBS Mainline RCE Address Trap Register",
+        "name": "MBRCER"
+    },
+    "0xc865": {
+        "address": "0x0000000008012004",
+        "description": "Odyssey chip TLX_FIR Checkstop Config",
+        "name": "TLX_FIR_CFG_CS"
+    },
+    "0xc871": {
+        "address": "0x0000000008040043",
+        "description": "MEM Chiplet Unit Checkstop FIR MASK",
+        "name": "CFIR_MEM_UCS_MASK"
+    },
+    "0xc882": {
+        "address": "0x0000000008012008",
+        "description": "Odyssey chip TLX_FIR WOF",
+        "name": "TLX_FIR_WOF"
+    },
+    "0xccb7": {
+        "address": "0x000000000801180c",
+        "description": "Odyssey chip Mark Shadow Register 0",
+        "name": "MSR_0"
+    },
+    "0xcdb7": {
+        "address": "0x000000000801280c",
+        "description": "Odyssey chip Mark Shadow Register 1",
+        "name": "MSR_1"
+    },
+    "0xd339": {
+        "address": "0x000000000801100f",
+        "description": "Odyssey chip SRQ Reorder Queue Control Register 0",
+        "name": "SRQ_ROQ_CTL_0"
+    },
+    "0xd645": {
+        "address": "0x000000000801240e",
+        "description": "Odyssey chip DLX CMN Configuration Register",
+        "name": "CMN_CONFIG"
+    },
+    "0xd79c": {
+        "address": "0x000000000801146c",
+        "description": "Odyssey chip MBS Mainline MPE Address Trap Register",
+        "name": "MBMPER"
+    },
+    "0xd8cb": {
+        "address": "0x0000000008010c00",
+        "description": "Odyssey chip OCMB_PHY_FIR",
+        "name": "OCMB_PHY_FIR"
+    },
+    "0xda75": {
+        "address": "0x000000000801146a",
+        "description": "Odyssey chip MBS Mainline NCE Address Trap Register",
+        "name": "MBNCER"
+    },
+    "0xdad3": {
+        "address": "0x0000000008011c07",
+        "description": "Odyssey chip SRQ Error Report Hold Register",
+        "name": "SRQ_ERR_RPT_HOLD"
+    },
+    "0xdb3e": {
+        "address": "0x0000000008012418",
+        "description": "Odyssey chip DLX Outgoing Link Info Register",
+        "name": "DLX_RMT_CONFIG"
+    },
+    "0xdbb0": {
+        "address": "0x0000000001040043",
+        "description": "TP Chiplet Unit Checkstop FIR MASK",
+        "name": "CFIR_TP_UCS_MASK"
+    },
+    "0xdc73": {
+        "address": "0x0000000008011c06",
+        "description": "Odyssey chip Write 8BECC Syndrome Register",
+        "name": "WESR"
+    },
+    "0xdcbc": {
+        "address": "0x0000000008012415",
+        "description": "Odyssey chip DLX EDPL Max Count Register",
+        "name": "DLX_EDPL_MAX_COUNT"
+    },
+    "0xdd8f": {
+        "address": "0x0000000008011802",
+        "description": "Odyssey chip RDF_FIR 0 MASK",
+        "name": "RDF_FIR_MASK_0"
+    },
+    "0xdd91": {
+        "address": "0x0000000008012802",
+        "description": "Odyssey chip RDF_FIR MASK 1",
+        "name": "RDF_FIR_MASK_1"
+    },
+    "0xdf45": {
+        "address": "0x0000000008012407",
+        "description": "Odyssey chip DLX_FIR Unit Checkstop Config",
+        "name": "DLX_FIR_CFG_UCS"
+    },
+    "0xe088": {
+        "address": "0x000000000801200d",
+        "description": "Odyssey chip TLX Configuration Register 1",
+        "name": "TLX_CFG_1"
+    },
+    "0xe100": {
+        "address": "0x0000000001040102",
+        "description": "Odyssey chip TP_LOCAL_FIR MASK",
+        "name": "TP_LOCAL_FIR_MASK"
+    },
+    "0xe188": {
+        "address": "0x000000000801200e",
+        "description": "Odyssey chip TLX Configuration Register 2",
+        "name": "TLX_CFG_2"
+    },
+    "0xe288": {
+        "address": "0x000000000801200f",
+        "description": "Odyssey chip TLX Configuration Register 3",
+        "name": "TLX_CFG_3"
+    },
+    "0xe32c": {
+        "address": "0x0000000008010878",
+        "description": "Odyssey chip MMIO_FIR WOF",
+        "name": "MMIO_FIR_WOF"
+    },
+    "0xe4d7": {
+        "address": "0x0000000008011818",
+        "description": "Odyssey chip Firmware Mark Store Rank0 Register 0",
+        "name": "FW_MS0_0"
+    },
+    "0xe4d9": {
+        "address": "0x0000000008012818",
+        "description": "Odyssey chip Firmware Mark Store Rank0 Register 1",
+        "name": "FW_MS0_1"
+    },
+    "0xe4da": {
+        "address": "0x0000000008011819",
+        "description": "Odyssey chip Firmware Mark Store Rank1 Register 0",
+        "name": "FW_MS1_0"
+    },
+    "0xe4dc": {
+        "address": "0x0000000008012819",
+        "description": "Odyssey chip Firmware Mark Store Rank1 Register 1",
+        "name": "FW_MS1_1"
+    },
+    "0xe4dd": {
+        "address": "0x000000000801181a",
+        "description": "Odyssey chip Firmware Mark Store Rank2 Register 0",
+        "name": "FW_MS2_0"
+    },
+    "0xe4df": {
+        "address": "0x000000000801281a",
+        "description": "Odyssey chip Firmware Mark Store Rank2 Register 1",
+        "name": "FW_MS2_1"
+    },
+    "0xe4e0": {
+        "address": "0x000000000801181b",
+        "description": "Odyssey chip Firmware Mark Store Rank3 Register 0",
+        "name": "FW_MS3_0"
+    },
+    "0xe4e2": {
+        "address": "0x000000000801281b",
+        "description": "Odyssey chip Firmware Mark Store Rank3 Register 1",
+        "name": "FW_MS3_1"
+    },
+    "0xe4e3": {
+        "address": "0x000000000801181c",
+        "description": "Odyssey chip Firmware Mark Store Rank4 Register 0",
+        "name": "FW_MS4_0"
+    },
+    "0xe4e5": {
+        "address": "0x000000000801281c",
+        "description": "Odyssey chip Firmware Mark Store Rank4 Register 1",
+        "name": "FW_MS4_1"
+    },
+    "0xe4e6": {
+        "address": "0x000000000801181d",
+        "description": "Odyssey chip Firmware Mark Store Rank5 Register 0",
+        "name": "FW_MS5_0"
+    },
+    "0xe4e8": {
+        "address": "0x000000000801281d",
+        "description": "Odyssey chip Firmware Mark Store Rank5 Register 1",
+        "name": "FW_MS5_1"
+    },
+    "0xe4e9": {
+        "address": "0x000000000801181e",
+        "description": "Odyssey chip Firmware Mark Store Rank6 Register 0",
+        "name": "FW_MS6_0"
+    },
+    "0xe4eb": {
+        "address": "0x000000000801281e",
+        "description": "Odyssey chip Firmware Mark Store Rank6 Register 1",
+        "name": "FW_MS6_1"
+    },
+    "0xe4ec": {
+        "address": "0x000000000801181f",
+        "description": "Odyssey chip Firmware Mark Store Rank7 Register 0",
+        "name": "FW_MS7_0"
+    },
+    "0xe4ee": {
+        "address": "0x000000000801281f",
+        "description": "Odyssey chip Firmware Mark Store Rank7 Register 1",
+        "name": "FW_MS7_1"
+    },
+    "0xe603": {
+        "address": "0x0000000008011458",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 0",
+        "name": "MBSSYMEC0"
+    },
+    "0xe703": {
+        "address": "0x0000000008011459",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 1",
+        "name": "MBSSYMEC1"
+    },
+    "0xe790": {
+        "address": "0x0000000008012002",
+        "description": "Odyssey chip TLX_FIR MASK",
+        "name": "TLX_FIR_MASK"
+    },
+    "0xe803": {
+        "address": "0x000000000801145a",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 2",
+        "name": "MBSSYMEC2"
+    },
+    "0xe903": {
+        "address": "0x000000000801145b",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 3",
+        "name": "MBSSYMEC3"
+    },
+    "0xe95f": {
+        "address": "0x0000000008012406",
+        "description": "Odyssey chip DLX_FIR Special Attention Config",
+        "name": "DLX_FIR_CFG_SPA"
+    },
+    "0xea03": {
+        "address": "0x000000000801145c",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 4",
+        "name": "MBSSYMEC4"
+    },
+    "0xeb03": {
+        "address": "0x000000000801145d",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 5",
+        "name": "MBSSYMEC5"
+    },
+    "0xeb13": {
+        "address": "0x0000000008040040",
+        "description": "MEM Chiplet Checkstop FIR MASK",
+        "name": "CFIR_MEM_CS_MASK"
+    },
+    "0xec03": {
+        "address": "0x000000000801145e",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 6",
+        "name": "MBSSYMEC6"
+    },
+    "0xed03": {
+        "address": "0x000000000801145f",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 7",
+        "name": "MBSSYMEC7"
+    },
+    "0xed79": {
+        "address": "0x0000000008011005",
+        "description": "Odyssey chip SRQ_FIR Recoverable Config",
+        "name": "SRQ_FIR_CFG_RE"
+    },
+    "0xee03": {
+        "address": "0x0000000008011460",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 8",
+        "name": "MBSSYMEC8"
+    },
+    "0xeed7": {
+        "address": "0x0000000008011810",
+        "description": "Odyssey chip Hardware Mark Store Rank0 Register 0",
+        "name": "HW_MS0_0"
+    },
+    "0xeed9": {
+        "address": "0x0000000008012810",
+        "description": "Odyssey chip Hardware Mark Store Rank0 Register 1",
+        "name": "HW_MS0_1"
+    },
+    "0xeeda": {
+        "address": "0x0000000008011811",
+        "description": "Odyssey chip Hardware Mark Store Rank1 Register 0",
+        "name": "HW_MS1_0"
+    },
+    "0xeedc": {
+        "address": "0x0000000008012811",
+        "description": "Odyssey chip Hardware Mark Store Rank1 Register 1",
+        "name": "HW_MS1_1"
+    },
+    "0xeedd": {
+        "address": "0x0000000008011812",
+        "description": "Odyssey chip Hardware Mark Store Rank2 Register 0",
+        "name": "HW_MS2_0"
+    },
+    "0xeedf": {
+        "address": "0x0000000008012812",
+        "description": "Odyssey chip Hardware Mark Store Rank2 Register 1",
+        "name": "HW_MS2_1"
+    },
+    "0xeee0": {
+        "address": "0x0000000008011813",
+        "description": "Odyssey chip Hardware Mark Store Rank3 Register 0",
+        "name": "HW_MS3_0"
+    },
+    "0xeee2": {
+        "address": "0x0000000008012813",
+        "description": "Odyssey chip Hardware Mark Store Rank3 Register 1",
+        "name": "HW_MS3_1"
+    },
+    "0xeee3": {
+        "address": "0x0000000008011814",
+        "description": "Odyssey chip Hardware Mark Store Rank4 Register 0",
+        "name": "HW_MS4_0"
+    },
+    "0xeee5": {
+        "address": "0x0000000008012814",
+        "description": "Odyssey chip Hardware Mark Store Rank4 Register 1",
+        "name": "HW_MS4_1"
+    },
+    "0xeee6": {
+        "address": "0x0000000008011815",
+        "description": "Odyssey chip Hardware Mark Store Rank5 Register 0",
+        "name": "HW_MS5_0"
+    },
+    "0xeee8": {
+        "address": "0x0000000008012815",
+        "description": "Odyssey chip Hardware Mark Store Rank5 Register 1",
+        "name": "HW_MS5_1"
+    },
+    "0xeee9": {
+        "address": "0x0000000008011816",
+        "description": "Odyssey chip Hardware Mark Store Rank6 Register 0",
+        "name": "HW_MS6_0"
+    },
+    "0xeeeb": {
+        "address": "0x0000000008012816",
+        "description": "Odyssey chip Hardware Mark Store Rank6 Register 1",
+        "name": "HW_MS6_1"
+    },
+    "0xeeec": {
+        "address": "0x0000000008011817",
+        "description": "Odyssey chip Hardware Mark Store Rank7 Register 0",
+        "name": "HW_MS7_0"
+    },
+    "0xeeee": {
+        "address": "0x0000000008012817",
+        "description": "Odyssey chip Hardware Mark Store Rank7 Register 1",
+        "name": "HW_MS7_1"
+    },
+    "0xef03": {
+        "address": "0x0000000008011461",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 9",
+        "name": "MBSSYMEC9"
+    },
+    "0xf3ab": {
+        "address": "0x000000000801146e",
+        "description": "Odyssey chip MBS Mainline AUE Address Trap Register",
+        "name": "MBAUER"
+    },
+    "0xf863": {
+        "address": "0x00000000080114e0",
+        "description": "Odyssey chip MCBIST Configuration Register",
+        "name": "MCBCFG"
+    },
+    "0xff88": {
+        "address": "0x000000000801200c",
+        "description": "Odyssey chip TLX Configuration Register 0",
+        "name": "TLX_CFG_0"
+    },
+    "0xffa6": {
+        "address": "0x0000000008011008",
+        "description": "Odyssey chip SRQ_FIR WOF",
+        "name": "SRQ_FIR_WOF"
+    },
+    "0xffcc": {
+        "address": "0x000000000801101c",
+        "description": "Odyssey chip SRQ_ERR_RPT",
+        "name": "SRQ_ERR_RPT"
+    },
+    "target_type": "0x4b"
+}

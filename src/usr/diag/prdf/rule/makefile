@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2020
+# Contributors Listed Below - COPYRIGHT 2016,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -207,10 +207,12 @@ ${PRDR_CMP_PATH}: ${PRDR_CMP_YACC_o_PATH} ${PRDR_CMP_FLEX_o_PATH} \
 vpath %.rule \
 	  ../common/plat/p10 \
 	  ../common/plat/explorer \
+	  ../common/plat/odyssey \
 	  ../common/plat/mem
 
 PRDRPP_SEARCHDIRS = -I../common/plat/p10 \
 				    -I../common/plat/explorer \
+				    -I../common/plat/odyssey \
 					-I../common/plat/mem
 
 ${OBJ_RULE_DIR}/%.prf \

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2020
+# Contributors Listed Below - COPYRIGHT 2016,2022
 # [+] International Business Machines Corp.
 #
 #
@@ -39,6 +39,7 @@ PRDR_RULE_TABLES += p10_omic.prf
 
 # Explorer Chip
 PRDR_RULE_TABLES += explorer_ocmb.prf
+PRDR_RULE_TABLES += odyssey_ocmb.prf
 
 prd_rule_prf_targets  = ${PRDR_RULE_TABLES}
 prd_rule_err_targets  = ${PRDR_RULE_TABLES:.prf=.prf.err.C}

@@ -1,0 +1,741 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/odyssey/odyssey_ocmb_actions.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2022
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+################################################################################
+#                                Thresholds                                    #
+################################################################################
+
+# Threshold syntax:
+#   threshold( field(<timebase>) [, mfg(<timebase>)|mfg_file(<mfg_theshold>)] );
+#
+# Timebase syntax:
+#   <threshold_count> [/ [timbase_count] <sec|min|hour|day>]
+#
+# Note that <mfg_theshold> can be found in prdfMfgThresholds.lst
+#
+# Examples:
+#   threshold( field( 1        ) );
+#   threshold( field(32 /   day) );
+#   threshold( field( 5 / 2 min) );
+#   threshold( field(32 / 1 day), mfg(2 / hour) );
+#   threshold( field( 2 /   min), mfg(1       ) );
+#   threshold( field(32 /   day), mfg_file(P8CHIP_OFFNODE_BUS_CES) );
+
+/** Threshold of 1 */
+actionclass threshold1
+{
+    threshold( field(1) );
+};
+
+/** Threshold of 32 per day */
+actionclass threshold32pday
+{
+    threshold( field(32 / day) );
+};
+
+/** Threshold of 5 per day */
+actionclass threshold5pday
+{
+    threshold( field(5 / day) );
+};
+
+################################################################################
+#                               Special Flags                                  #
+################################################################################
+
+/** SUE source */
+actionclass SueSource { flag(UERE); };
+
+/** SUE originated from somewhere else */
+actionclass SueSeen { flag(SUE); };
+
+################################################################################
+#                               Simple Callouts                                #
+################################################################################
+
+# Callout self
+actionclass calloutOcmbHigh { callout(MRU_HIGH); };
+actionclass calloutOcmbMed  { callout(MRU_MED);  };
+actionclass calloutOcmbMedA { callout(MRU_MEDA); };
+actionclass calloutOcmbLow  { callout(MRU_LOW);  };
+
+# 2nd Level Support
+actionclass callout2ndLvlMed
+{ callout(procedure(LEVEL2_SUPPORT), MRU_MED); };
+
+actionclass callout2ndLvlLow
+{ callout(procedure(LEVEL2_SUPPORT), MRU_LOW); };
+
+/** Callout self with  low priority but don't gard it */
+actionclass calloutOcmbLowNoGard
+{ callout(MRU_LOW, NO_GARD); };
+
+actionclass omi_M
+{
+    callout(connected(TYPE_OMI), MRU_MED);
+};
+
+actionclass omi_L
+{
+    callout(connected(TYPE_OMI), MRU_LOW);
+};
+
+actionclass omi_bus
+{
+    # TODO
+    #funccall("calloutBusInterface");
+    TBDDefaultCallout;
+};
+
+actionclass mem_port0_M
+{
+    callout(connected(TYPE_MEM_PORT,0), MRU_MED);
+};
+
+actionclass mem_port0_L
+{
+    callout(connected(TYPE_MEM_PORT,0), MRU_LOW, NO_GARD);
+};
+
+actionclass mem_port1_M
+{
+    callout(connected(TYPE_MEM_PORT,1), MRU_MED);
+};
+
+actionclass mem_port1_L
+{
+    callout(connected(TYPE_MEM_PORT,1), MRU_LOW, NO_GARD);
+};
+
+actionclass dimm0_H
+{
+    # TODO
+    #funccall("CalloutAttachedDimmsHigh");
+    TBDDefaultCallout;
+};
+
+actionclass dimm1_H
+{
+    # TODO
+    #funccall("CalloutAttachedDimmsHigh");
+    TBDDefaultCallout;
+};
+
+actionclass parent_proc
+{
+    callout(connected(TYPE_PROC), MRU_MED);
+};
+
+################################################################################
+#                           Callouts with thresholds                           #
+################################################################################
+
+actionclass ocmb_M_th1
+{
+    calloutOcmbMed;
+    threshold1;
+};
+
+actionclass ocmb_M_th_32perDay
+{
+    calloutOcmbMed;
+    threshold32pday;
+};
+
+actionclass parent_proc_th_32perDay
+{
+    parent_proc;
+    threshold32pday;
+};
+
+actionclass level2_M_th1
+{
+    callout2ndLvlMed;
+    threshold1;
+};
+
+actionclass level2_M_th_32perDay
+{
+    callout2ndLvlMed;
+    threshold32pday;
+};
+
+actionclass level2_M_ocmb_L_th1
+{
+    callout2ndLvlMed;
+    calloutOcmbLowNoGard;
+    threshold1;
+};
+
+actionclass ocmb_M_level2_L_th1
+{
+    calloutOcmbMed;
+    callout2ndLvlLow;
+    threshold1;
+};
+
+actionclass omi_M_th1
+{
+    omi_M;
+    threshold1;
+};
+
+actionclass omi_bus_th1
+{
+    omi_bus;
+    threshold1;
+};
+
+actionclass omi_bus_th_32perDay
+{
+    omi_bus;
+    threshold32pday;
+};
+
+actionclass mem_port0_M_th1
+{
+    mem_port0_M;
+    threshold1;
+};
+
+actionclass mem_port0_M_th_32perDay
+{
+    mem_port0_M;
+    threshold32pday;
+};
+
+actionclass mem_port1_M_th1
+{
+    mem_port1_M;
+    threshold1;
+};
+
+actionclass mem_port1_M_th_32perDay
+{
+    mem_port1_M;
+    threshold32pday;
+};
+
+actionclass ocmb_H_omi_L_th1
+{
+    calloutOcmbHigh;
+    omi_L;
+    threshold1;
+};
+
+actionclass dimm0_H_mem_port0_L_th1
+{
+    dimm0_H;
+    mem_port0_L;
+    threshold1;
+};
+
+actionclass dimm0_H_mem_port0_L_th_32perDay
+{
+    dimm0_H;
+    mem_port0_L;
+    threshold32pday;
+};
+
+actionclass dimm1_H_mem_port1_L_th1
+{
+    dimm1_H;
+    mem_port1_L;
+    threshold1;
+};
+
+actionclass dimm1_H_mem_port1_L_th_32perDay
+{
+    dimm1_H;
+    mem_port1_L;
+    threshold32pday;
+};
+
+################################################################################
+#                                   Special                                    #
+################################################################################
+
+/**
+ * Threshold 32/day (field) and 1 (mnfg). Do not predictively callout on
+ * threshold in the field, instead just mask.
+ */
+actionclass info_only_th32
+{
+    threshold32pday;
+    #TODO
+    #funccall("ClearServiceCallFlag"); # must be called after thresholding
+};
+
+actionclass ocmb_M_info_only
+{
+    calloutOcmbMed;
+    info_only_th32;
+};
+
+actionclass level2_M_info_only
+{
+    callout2ndLvlMed;
+    info_only_th32;
+};
+
+actionclass mem_port0_M_info_only
+{
+    mem_port0_M;
+    info_only_th32;
+};
+
+actionclass mem_port1_M_info_only
+{
+    mem_port1_M;
+    info_only_th32;
+};
+
+actionclass omi_M_info_only
+{
+    omi_M;
+    info_only_th32;
+};
+
+actionclass omi_bus_info_only
+{
+    omi_bus;
+    info_only_th32;
+};
+
+/**
+ * Threshold on first occurence. Do not predictively callout on threshold in the
+ * field, instead just mask.
+ */
+actionclass info_only_th1
+{
+    threshold1;
+    #TODO
+    #funccall("ClearServiceCallFlag"); # must be called after thresholding
+};
+
+actionclass ocmb_M_info_only_th1
+{
+    calloutOcmbMed;
+    info_only_th1;
+};
+
+actionclass omi_degraded_mode
+{
+    # TODO
+    #try( funccall("OmiRunningInDegradedMode"),
+    #     try(funccall("CrcSideEffect_Ocmb"), omi_bus) );
+    #funccall("omiDegradeRetrainWorkaround");
+    TBDDefaultCallout;
+    threshold1;
+    #TODO
+    #funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
+};
+
+actionclass info_only_mnfgInfo_th1
+{
+    threshold1;
+    #TODO
+    #funccall("ClearServiceCallFlag_mnfgInfo"); # must be called after threshold
+};
+
+actionclass ocmb_th1_noClearFirBits
+{
+    calloutOcmbMed;
+    threshold1;
+    #TODO
+    #funccall("returnNoClearFirBits"); # must be called last
+};
+
+actionclass mem_port0_M_th1_noClearFirBits
+{
+    mem_port0_M;
+    threshold1;
+    # TODO
+    #funccall("returnNoClearFirBits"); # must be called last
+};
+
+actionclass mem_port1_M_th1_noClearFirBits
+{
+    mem_port1_M;
+    threshold1;
+    # TODO
+    #funccall("returnNoClearFirBits"); # must be called last
+};
+
+actionclass omi_bus_th1_noClearFirBits
+{
+    omi_bus;
+    threshold1;
+    #TODO
+    #funccall("returnNoClearFirBits"); # must be called last
+};
+
+actionclass ocmb_th1_x4Root
+{
+    ocmb_M_th1;
+    #TODO
+    #funccall("x4RootCause"); # must be called after threshold
+};
+
+# Bits using these actions are CRC-related errors that are potential
+# side-effects of bits in the PAU_PHY_FIR. There is additional handling
+# to determine the callout if a root cause bit is found on as well.
+actionclass omi_bus_th_32perDay_CRC
+{
+    #TODO
+    #try ( funccall("CrcSideEffect_Ocmb"), omi_bus );
+    TBDDefaultCallout;
+    threshold32pday;
+};
+
+################################################################################
+#                           Callouts with flags                                #
+################################################################################
+
+# TODO: Should just make it generic that chnl fails can't clear the FIR bits
+actionclass ocmb_M_th1_UERE      { ocmb_M_th1;      SueSource; };
+actionclass level2_M_th1_UERE    { level2_M_th1;    SueSource; };
+actionclass mem_port0_M_th1_UERE { mem_port0_M_th1; SueSource; };
+actionclass mem_port1_M_th1_UERE { mem_port1_M_th1; SueSource; };
+actionclass omi_bus_th1_UERE     { omi_bus_th1;     SueSource; };
+
+actionclass ocmb_th1_noClearFirBits_UERE
+{
+    SueSource;
+    ocmb_th1_noClearFirBits; # must be called last
+};
+
+actionclass mem_port0_M_th1_noClearFirBits_UERE
+{
+    SueSource;
+    mem_port0_M_th1_noClearFirBits; # must be called last
+};
+
+actionclass mem_port1_M_th1_noClearFirBits_UERE
+{
+    SueSource;
+    mem_port1_M_th1_noClearFirBits; # must be called last
+};
+
+actionclass omi_bus_th1_noClearFirBits_UERE
+{
+    SueSource;
+    omi_bus_th1_noClearFirBits; # must be called last
+};
+
+actionclass dimm0_H_mem_port0_L_th1_UERE
+{
+    dimm0_H_mem_port0_L_th1;
+    SueSource;
+};
+
+actionclass dimm1_H_mem_port1_L_th1_UERE
+{
+    dimm1_H_mem_port1_L_th1;
+    SueSource;
+};
+
+################################################################################
+#                               Default callouts                               #
+################################################################################
+
+/** Default action for an unexpected unmasked bit */
+actionclass defaultMaskedError
+{
+    callout2ndLvlMed;
+    threshold1;
+};
+
+/** Default TBD action */
+actionclass TBDDefaultCallout
+{
+    callout2ndLvlMed;
+    threshold( field(32 / day), mfg(32 / day) );
+};
+
+################################################################################
+#                                 OCMB Actions                                 #
+################################################################################
+
+/** MCBIST program complete */
+actionclass mcbist_program_complete
+{
+    #TODO
+    #funccall("McbistCmdComplete");
+    TBDDefaultCallout;
+};
+
+/** Verify Chip Mark */
+# TODO
+actionclass verify_chip_mark_port0_rank0
+{
+    #funccall("AnalyzeFetchMpe_0");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port0_rank1
+{
+    #funccall("AnalyzeFetchMpe_1");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port0_rank2
+{
+    #funccall("AnalyzeFetchMpe_2");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port0_rank3
+{
+    #funccall("AnalyzeFetchMpe_3");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port0_rank4
+{
+    #funccall("AnalyzeFetchMpe_4");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port0_rank5
+{
+    #funccall("AnalyzeFetchMpe_5");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port0_rank6
+{
+    #funccall("AnalyzeFetchMpe_6");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port0_rank7
+{
+    #funccall("AnalyzeFetchMpe_7");
+    TBDDefaultCallout;
+};
+
+actionclass verify_chip_mark_port1_rank0
+{
+    #funccall("AnalyzeFetchMpe_0");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port1_rank1
+{
+    #funccall("AnalyzeFetchMpe_1");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port1_rank2
+{
+    #funccall("AnalyzeFetchMpe_2");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port1_rank3
+{
+    #funccall("AnalyzeFetchMpe_3");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port1_rank4
+{
+    #funccall("AnalyzeFetchMpe_4");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port1_rank5
+{
+    #funccall("AnalyzeFetchMpe_5");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port1_rank6
+{
+    #funccall("AnalyzeFetchMpe_6");
+    TBDDefaultCallout;
+};
+actionclass verify_chip_mark_port1_rank7
+{
+    #funccall("AnalyzeFetchMpe_7");
+    TBDDefaultCallout;
+};
+
+/** Mainline NCE/TCE handling */
+actionclass mainline_nce_tce_handling
+{
+    # TODO
+    #funccall("AnalyzeFetchNceTce");
+    TBDDefaultCallout;
+};
+
+/** Handle Mainline AUEs/IAUEs */
+actionclass mainline_aue_iaue_handling0_UERE
+{
+    SueSource;
+    # TODO
+    #funccall("AnalyzeFetchAueIaue");
+    mem_port0_L;
+    threshold1;
+    # TODO
+    #funccall("returnNoClearFirBits");
+};
+
+actionclass mainline_aue_iaue_handling1_UERE
+{
+    SueSource;
+    # TODO
+    #funccall("AnalyzeFetchAueIaue");
+    mem_port1_L;
+    threshold1;
+    # TODO
+    #funccall("returnNoClearFirBits");
+};
+
+/** Mainline UE handling */
+actionclass mainline_ue_handling
+{
+    threshold( field(33 / 30 min ) ); # To prevent flooding. Will be unmasked
+                                      # when background scrubbing resumes after
+                                      # targeted diagnostics is complete.
+    # TODO
+    #funccall("AnalyzeFetchUe");
+    TBDDefaultCallout;
+};
+
+actionclass mainline_ue_handling_UERE
+{
+    SueSource;
+    mainline_ue_handling;
+    # TODO
+    #funccall("ClearMainlineIue");
+};
+
+/** Handle Mainline IUEs */
+actionclass mainline_iue_handling
+{
+    # An IUE itself is not a SUE source, however, a threshold of IUEs will
+    # trigger a port failure, which will generate SUEs. The port failure could
+    # also crash the machine so we want to make sure this bit is flagged as an
+    # SUE just in case it is needed in the checkstop analysis.
+    SueSource;
+    # Thresholding done in the plugin
+    # TODO
+    #funccall("AnalyzeMainlineIue");
+    TBDDefaultCallout;
+};
+
+/**  Handle Maintenance IUEs */
+actionclass maintenance_iue_handling
+{
+    # An IUE itself is not a SUE source, however, a threshold of IUEs will
+    # trigger a port failure, which will generate SUEs. The port failure could
+    # also crash the machine so we want to make sure this bit is flagged as an
+    # SUE just in case it is needed in the checkstop analysis.
+    SueSource;
+    # Thresholding done in the plugin
+    #TODO
+    #funccall("AnalyzeMaintIue");
+    TBDDefaultCallout;
+};
+
+actionclass memory_impe_handling
+{
+    # TODO
+    #funccall("AnalyzeImpe");
+    TBDDefaultCallout;
+};
+
+/** Handle Maintenance AUEs */
+actionclass maintenance_aue_handling0_UERE
+{
+    SueSource;
+    #TODO
+    #funccall("AnalyzeMaintAue");
+    mem_port0_L;
+    threshold1;
+    #TODO
+    #funccall("returnNoClearFirBits");
+};
+
+actionclass maintenance_aue_handling1_UERE
+{
+    SueSource;
+    #TODO
+    #funccall("AnalyzeMaintAue");
+    mem_port1_L;
+    threshold1;
+    #TODO
+    #funccall("returnNoClearFirBits");
+};
+
+/** Handle Maintenance IAUEs */
+actionclass maintenance_iaue_handling0_UERE
+{
+    SueSource;
+    dimm0_H;
+    mem_port0_L;
+    threshold1;
+    #TODO
+    #funccall("returnNoClearFirBits");
+};
+
+actionclass maintenance_iaue_handling1_UERE
+{
+    SueSource;
+    dimm0_H_mem_port0_L_th1;
+    #TODO
+    #funccall("returnNoClearFirBits");
+};
+
+actionclass mem_port0_failure_UERE
+{
+    dimm0_H_mem_port0_L_th1;
+    SueSource;
+    #TODO
+    #funccall("returnNoClearFirBits");
+};
+
+actionclass mem_port1_failure_UERE
+{
+    dimm1_H_mem_port1_L_th1;
+    SueSource;
+    #TODO
+    #funccall("returnNoClearFirBits");
+};
+
+# During analysis of another attention. PRD is required to manually trigger a
+# channel failure. In which, cases we want to suppress this the extra log,
+# unless it resulted in a system checkstop.
+actionclass fwInitChnlFail_UERE
+{
+    # TODO
+    #try( funccall("checkIueTh"), calloutOcmbMed );
+    TBDDefaultCallout;
+    info_only_mnfgInfo_th1;
+    SueSource;
+};
+
+################################################################################
+# Analyze groups
+################################################################################
+
+# TODO
+actionclass analyzeDLX_FIR
+{
+    #capture(ocmb_regs);
+    #capture(omi_ocmb_ffdc);
+    #funccall("CollectOmiFfdc");
+    analyze(gDLX_FIR);
+};
+

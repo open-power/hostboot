@@ -1,0 +1,3138 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/odyssey/odyssey_ocmb.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2020,2022
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip odyssey_ocmb
+{
+    name        "ODYSSEY OCMB target";
+    targettype  TYPE_OCMB_CHIP;
+    sigoff      0x7000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+# Import signatures
+.include "prdfMemExtraSig.H";
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # Global Checkstop Attention FIR
+    ############################################################################
+
+    register GFIR_CS
+    {
+        name        "Global Checkstop Attention FIR";
+        scomaddr    0x570F001C;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Global Recoverable Attention FIR
+    ############################################################################
+
+    register GFIR_RE
+    {
+        name        "Global Recoverable Attention FIR";
+        scomaddr    0x570F001B;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Global Special Attention FIR
+    ############################################################################
+
+    register GFIR_SPA
+    {
+        name        "Global Special Attention FIR";
+        scomaddr    0x570F001A;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Global Unit Checkstop Attention FIR
+    ############################################################################
+
+    register GFIR_UCS
+    {
+        name        "Global Unit Checkstop Attention FIR";
+        scomaddr    0x570F002A;
+        capture     group default;
+    };
+
+    ############################################################################
+    # TP Chiplet FIR
+    ############################################################################
+
+    register CFIR_TP_CS
+    {
+        name        "TP Chiplet Checkstop FIR";
+        scomaddr    0x01040000;
+        capture     group default;
+    };
+
+    register CFIR_TP_RE
+    {
+        name        "TP Chiplet Recoverable FIR";
+        scomaddr    0x01040001;
+        capture     group default;
+    };
+
+    register CFIR_TP_SPA
+    {
+        name        "TP Chiplet Special Attention FIR";
+        scomaddr    0x01040002;
+        capture     group default;
+    };
+
+    register CFIR_TP_UCS
+    {
+        name        "TP Chiplet Unit Checkstop FIR";
+        scomaddr    0x01040003;
+        capture     group default;
+    };
+
+    register CFIR_TP_CS_MASK
+    {
+        name        "TP Chiplet Checkstop FIR MASK";
+        scomaddr    0x01040040;
+        capture     group default;
+    };
+
+    register CFIR_TP_RE_MASK
+    {
+        name        "TP Chiplet Recoverable FIR MASK";
+        scomaddr    0x01040041;
+        capture     group default;
+    };
+
+    register CFIR_TP_SPA_MASK
+    {
+        name        "TP Chiplet Special Attention FIR MASK";
+        scomaddr    0x01040042;
+        capture     group default;
+    };
+
+    register CFIR_TP_UCS_MASK
+    {
+        name        "TP Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x01040043;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Odyssey chip TP_LOCAL_FIR
+    ############################################################################
+
+    register TP_LOCAL_FIR
+    {
+        name        "Odyssey chip TP_LOCAL_FIR";
+        scomaddr    0x01040100;
+        reset       (|, 0x01040100);
+        mask        (|, 0x01040103);
+        capture     group default;
+    };
+
+    register TP_LOCAL_FIR_MASK
+    {
+        name        "Odyssey chip TP_LOCAL_FIR MASK";
+        scomaddr    0x01040102;
+        capture     group default;
+    };
+
+    register TP_LOCAL_FIR_CFG_CS
+    {
+        name        "Odyssey chip TP_LOCAL_FIR Checkstop Config";
+        scomaddr    0x01040104;
+        capture     group default;
+    };
+
+    register TP_LOCAL_FIR_CFG_RE
+    {
+        name        "Odyssey chip TP_LOCAL_FIR Recoverable Config";
+        scomaddr    0x01040105;
+        capture     group default;
+    };
+
+    register TP_LOCAL_FIR_CFG_SPA
+    {
+        name        "Odyssey chip TP_LOCAL_FIR Special Attention Config";
+        scomaddr    0x01040106;
+        capture     group default;
+    };
+
+    register TP_LOCAL_FIR_CFG_UCS
+    {
+        name        "Odyssey chip TP_LOCAL_FIR Unit Checkstop Config";
+        scomaddr    0x01040107;
+        capture     group default;
+    };
+
+    register TP_LOCAL_FIR_WOF
+    {
+        name        "Odyssey chip TP_LOCAL_FIR WOF";
+        scomaddr    0x01040108;
+        capture     group default;
+    };
+
+    ############################################################################
+    # MEM Chiplet FIR
+    ############################################################################
+
+    register CFIR_MEM_CS
+    {
+        name        "MEM Chiplet Checkstop FIR";
+        scomaddr    0x08040000;
+        capture     group default;
+    };
+
+    register CFIR_MEM_RE
+    {
+        name        "MEM Chiplet Recoverable FIR";
+        scomaddr    0x08040001;
+        capture     group default;
+    };
+
+    register CFIR_MEM_SPA
+    {
+        name        "MEM Chiplet Special Attention FIR";
+        scomaddr    0x08040002;
+        capture     group default;
+    };
+
+    register CFIR_MEM_UCS
+    {
+        name        "MEM Chiplet Unit Checkstop FIR";
+        scomaddr    0x08040003;
+        capture     group default;
+    };
+
+    register CFIR_MEM_CS_MASK
+    {
+        name        "MEM Chiplet Checkstop FIR MASK";
+        scomaddr    0x08040040;
+        capture     group default;
+    };
+
+    register CFIR_MEM_RE_MASK
+    {
+        name        "MEM Chiplet Recoverable FIR MASK";
+        scomaddr    0x08040041;
+        capture     group default;
+    };
+
+    register CFIR_MEM_SPA_MASK
+    {
+        name        "MEM Chiplet Special Attention FIR MASK";
+        scomaddr    0x08040042;
+        capture     group default;
+    };
+
+    register CFIR_MEM_UCS_MASK
+    {
+        name        "MEM Chiplet Unit Checkstop FIR MASK";
+        scomaddr    0x08040043;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Odyssey chip MEM_LOCAL_FIR
+    ############################################################################
+
+    register MEM_LOCAL_FIR
+    {
+        name        "Odyssey chip MEM_LOCAL_FIR";
+        scomaddr    0x08040100;
+        reset       (|, 0x08040100);
+        mask        (|, 0x08040103);
+        capture     group default;
+    };
+
+    register MEM_LOCAL_FIR_MASK
+    {
+        name        "Odyssey chip MEM_LOCAL_FIR MASK";
+        scomaddr    0x08040102;
+        capture     group default;
+    };
+
+    register MEM_LOCAL_FIR_CFG_CS
+    {
+        name        "Odyssey chip Checkstop Config";
+        scomaddr    0x08040104;
+        capture     group default;
+    };
+
+    register MEM_LOCAL_FIR_CFG_RE
+    {
+        name        "Odyssey chip Recoverable Config";
+        scomaddr    0x08040105;
+        capture     group default;
+    };
+
+    register MEM_LOCAL_FIR_CFG_SPA
+    {
+        name        "Odyssey chip Special Attention Config";
+        scomaddr    0x08040106;
+        capture     group default;
+    };
+
+    register MEM_LOCAL_FIR_CFG_UCS
+    {
+        name        "Odyssey chip Unit Checkstop Config";
+        scomaddr    0x08040107;
+        capture     group default;
+    };
+
+    register MEM_LOCAL_FIR_WOF
+    {
+        name        "Odyssey chip WOF";
+        scomaddr    0x08040108;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Odyssey chip MMIO_FIR
+    ############################################################################
+
+    register MMIO_FIR
+    {
+        name        "Odyssey chip MMIO_FIR";
+        scomaddr    0x08010870;
+        reset       (|, 0x08010870);
+        mask        (|, 0x08010873);
+        capture     group default;
+    };
+
+    register MMIO_FIR_MASK
+    {
+        name        "Odyssey chip MMIO_FIR MASK";
+        scomaddr    0x08010872;
+        capture     group default;
+    };
+
+    register MMIO_FIR_CFG_CS
+    {
+        name        "Odyssey chip MMIO_FIR Checkstop Config";
+        scomaddr    0x08010874;
+        capture     group default;
+    };
+
+    register MMIO_FIR_CFG_RE
+    {
+        name        "Odyssey chip MMIO_FIR Recoverable Config";
+        scomaddr    0x08010875;
+        capture     group default;
+    };
+
+    register MMIO_FIR_CFG_SPA
+    {
+        name        "Odyssey chip MMIO_FIR Special Attention Config";
+        scomaddr    0x08010876;
+        capture     group default;
+    };
+
+    register MMIO_FIR_CFG_UCS
+    {
+        name        "Odyssey chip MMIO_FIR Unit Checkstop Config";
+        scomaddr    0x08010877;
+        capture     group default;
+    };
+
+    register MMIO_FIR_WOF
+    {
+        name        "Odyssey chip MMIO_FIR WOF";
+        scomaddr    0x08010878;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Odyssey chip OCMB_PHY_FIR
+    ############################################################################
+
+    register OCMB_PHY_FIR
+    {
+        name        "Odyssey chip OCMB_PHY_FIR";
+        scomaddr    0x08010C00;
+        reset       (|, 0x08010C00);
+        mask        (|, 0x08010C03);
+        capture     group default;
+    };
+
+    register OCMB_PHY_FIR_MASK
+    {
+        name        "Odyssey chip OCMB_PHY_FIR MASK";
+        scomaddr    0x08010C02;
+        capture     group default;
+    };
+
+    register OCMB_PHY_FIR_CFG_CS
+    {
+        name        "Odyssey chip OCMB_PHY_FIR Checkstop Config";
+        scomaddr    0x08010C04;
+        capture     group default;
+    };
+
+    register OCMB_PHY_FIR_CFG_RE
+    {
+        name        "Odyssey chip OCMB_PHY_FIR Recoverable Config";
+        scomaddr    0x08010C05;
+        capture     group default;
+    };
+
+    register OCMB_PHY_FIR_CFG_SPA
+    {
+        name        "Odyssey chip OCMB_PHY_FIR Special Attention Config";
+        scomaddr    0x08010C06;
+        capture     group default;
+    };
+
+    register OCMB_PHY_FIR_CFG_UCS
+    {
+        name        "Odyssey chip OCMB_PHY_FIR Unit Checkstop Config";
+        scomaddr    0x08010C07;
+        capture     group default;
+    };
+
+    register OCMB_PHY_FIR_WOF
+    {
+        name        "Odyssey chip OCMB_PHY_FIR WOF";
+        scomaddr    0x08010C08;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Odyssey chip SRQ_FIR
+    ############################################################################
+
+    register SRQ_FIR
+    {
+        name        "Odyssey chip SRQ_FIR";
+        scomaddr    0x08011000;
+        reset       (|, 0x08011000);
+        mask        (|, 0x08011003);
+        capture     group default;
+    };
+
+    register SRQ_FIR_MASK
+    {
+        name        "Odyssey chip SRQ_FIR MASK";
+        scomaddr    0x08011002;
+        capture     group default;
+    };
+
+    register SRQ_FIR_CFG_CS
+    {
+        name        "Odyssey chip SRQ_FIR Checkstop Config";
+        scomaddr    0x08011004;
+        capture     group default;
+    };
+
+    register SRQ_FIR_CFG_RE
+    {
+        name        "Odyssey chip SRQ_FIR Recoverable Config";
+        scomaddr    0x08011005;
+        capture     group default;
+    };
+
+    register SRQ_FIR_CFG_SPA
+    {
+        name        "Odyssey chip SRQ_FIR Special Attention Config";
+        scomaddr    0x08011006;
+        capture     group default;
+    };
+
+    register SRQ_FIR_CFG_UCS
+    {
+        name        "Odyssey chip SRQ_FIR Unit Checkstop Config";
+        scomaddr    0x08011007;
+        capture     group default;
+    };
+
+    register SRQ_FIR_WOF
+    {
+        name        "Odyssey chip SRQ_FIR WOF";
+        scomaddr    0x08011008;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Odyssey chip MCBIST_FIR
+    ############################################################################
+
+    register MCBIST_FIR
+    {
+        name        "Odyssey chip MCBIST_FIR";
+        scomaddr    0x08011400;
+        reset       (|, 0x08011400);
+        mask        (|, 0x08011403);
+        capture     group default;
+    };
+
+    register MCBIST_FIR_MASK
+    {
+        name        "Odyssey chip MCBIST_FIR MASK";
+        scomaddr    0x08011402;
+        capture     group default;
+    };
+
+    register MCBIST_FIR_CFG_CS
+    {
+        name        "Odyssey chip MCBIST_FIR Checkstop Config";
+        scomaddr    0x08011404;
+        capture     group default;
+    };
+
+    register MCBIST_FIR_CFG_RE
+    {
+        name        "Odyssey chip MCBIST_FIR Recoverable Config";
+        scomaddr    0x08011405;
+        capture     group default;
+    };
+
+    register MCBIST_FIR_CFG_SPA
+    {
+        name        "Odyssey chip MCBIST_FIR Special Attention Config";
+        scomaddr    0x08011406;
+        capture     group default;
+    };
+
+    register MCBIST_FIR_CFG_UCS
+    {
+        name        "Odyssey chip MCBIST_FIR Unit Checkstop Config";
+        scomaddr    0x08011407;
+        capture     group default;
+    };
+
+    register MCBIST_FIR_WOF
+    {
+        name        "Odyssey chip MCBIST_FIR WOF";
+        scomaddr    0x08011408;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Odyssey chip RDF_FIR_0
+    ############################################################################
+
+    register RDF_FIR_0
+    {
+        name        "Odyssey chip RDF_FIR 0";
+        scomaddr    0x08011800;
+        reset       (|, 0x08011800);
+        mask        (|, 0x08011803);
+        capture     group default;
+    };
+
+    register RDF_FIR_MASK_0
+    {
+        name        "Odyssey chip RDF_FIR 0 MASK";
+        scomaddr    0x08011802;
+        capture     group default;
+    };
+
+    register RDF_FIR_CFG_CS_0
+    {
+        name        "Odyssey chip RDF_FIR 0 Checkstop Config";
+        scomaddr    0x08011804;
+        capture     group default;
+    };
+
+    register RDF_FIR_CFG_RE_0
+    {
+        name        "Odyssey chip RDF_FIR 0 Recoverable Config";
+        scomaddr    0x08011805;
+        capture     group default;
+    };
+
+    register RDF_FIR_CFG_SPA_0
+    {
+        name        "Odyssey chip RDF_FIR 0 Special Attention Config";
+        scomaddr    0x08011806;
+        capture     group default;
+    };
+
+    register RDF_FIR_CFG_UCS_0
+    {
+        name        "Odyssey chip RDF_FIR 0 Unit Checkstop Config";
+        scomaddr    0x08011807;
+        capture     group default;
+    };
+
+    register RDF_FIR_WOF_0
+    {
+        name        "Odyssey chip RDF_FIR 0 WOF";
+        scomaddr    0x08011808;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Odyssey chip RDF_FIR_1
+    ############################################################################
+
+    register RDF_FIR_1
+    {
+        name        "Odyssey chip RDF_FIR 1";
+        scomaddr    0x08012800;
+        reset       (|, 0x08012800);
+        mask        (|, 0x08012803);
+        capture     group default;
+    };
+
+    register RDF_FIR_MASK_1
+    {
+        name        "Odyssey chip RDF_FIR MASK 1";
+        scomaddr    0x08012802;
+        capture     group default;
+    };
+
+    register RDF_FIR_CFG_CS_1
+    {
+        name        "Odyssey chip RDF_FIR Checkstop Config 1";
+        scomaddr    0x08012804;
+        capture     group default;
+    };
+
+    register RDF_FIR_CFG_RE_1
+    {
+        name        "Odyssey chip RDF_FIR Recoverable Config 1";
+        scomaddr    0x08012805;
+        capture     group default;
+    };
+
+    register RDF_FIR_CFG_SPA_1
+    {
+        name        "Odyssey chip RDF_FIR Special Attention Config 1";
+        scomaddr    0x08012806;
+        capture     group default;
+    };
+
+    register RDF_FIR_CFG_UCS_1
+    {
+        name        "Odyssey chip RDF_FIR Unit Checkstop Config 1";
+        scomaddr    0x08012807;
+        capture     group default;
+    };
+
+    register RDF_FIR_WOF_1
+    {
+        name        "Odyssey chip RDF_FIR WOF 1";
+        scomaddr    0x08012808;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Odyssey chip TLX_FIR
+    ############################################################################
+
+    register TLX_FIR
+    {
+        name        "Odyssey chip TLX_FIR";
+        scomaddr    0x08012000;
+        reset       (|, 0x08012000);
+        mask        (|, 0x08012003);
+        capture     group default;
+    };
+
+    register TLX_FIR_MASK
+    {
+        name        "Odyssey chip TLX_FIR MASK";
+        scomaddr    0x08012002;
+        capture     group default;
+    };
+
+    register TLX_FIR_CFG_CS
+    {
+        name        "Odyssey chip TLX_FIR Checkstop Config";
+        scomaddr    0x08012004;
+        capture     group default;
+    };
+
+    register TLX_FIR_CFG_RE
+    {
+        name        "Odyssey chip TLX_FIR Recoverable Config";
+        scomaddr    0x08012005;
+        capture     group default;
+    };
+
+    register TLX_FIR_CFG_SPA
+    {
+        name        "Odyssey chip TLX_FIR Special Attention Config";
+        scomaddr    0x08012006;
+        capture     group default;
+    };
+
+    register TLX_FIR_CFG_UCS
+    {
+        name        "Odyssey chip TLX_FIR Unit Checkstop Config";
+        scomaddr    0x08012007;
+        capture     group default;
+    };
+
+    register TLX_FIR_WOF
+    {
+        name        "Odyssey chip TLX_FIR WOF";
+        scomaddr    0x08012008;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Odyssey chip DLX_FIR
+    ############################################################################
+
+    register DLX_FIR
+    {
+        name        "Odyssey chip DLX_FIR";
+        scomaddr    0x08012400;
+        reset       (|, 0x08012400);
+        mask        (|, 0x08012403);
+        capture     group default;
+    };
+
+    register DLX_FIR_MASK
+    {
+        name        "Odyssey chip DLX_FIR MASK";
+        scomaddr    0x08012402;
+        capture     group default;
+    };
+
+    register DLX_FIR_CFG_CS
+    {
+        name        "Odyssey chip DLX_FIR Checkstop Config";
+        scomaddr    0x08012404;
+        capture     group default;
+    };
+
+    register DLX_FIR_CFG_RE
+    {
+        name        "Odyssey chip DLX_FIR Recoverable Config";
+        scomaddr    0x08012405;
+        capture     group default;
+    };
+
+    register DLX_FIR_CFG_SPA
+    {
+        name        "Odyssey chip DLX_FIR Special Attention Config";
+        scomaddr    0x08012406;
+        capture     group default;
+    };
+
+    register DLX_FIR_CFG_UCS
+    {
+        name        "Odyssey chip DLX_FIR Unit Checkstop Config";
+        scomaddr    0x08012407;
+        capture     group default;
+    };
+
+    register DLX_FIR_WOF
+    {
+        name        "Odyssey chip DLX_FIR WOF";
+        scomaddr    0x08012408;
+        capture     group default;
+    };
+
+    register DLX_ERR_MASK
+    {
+        name        "Odyssey chip DLX Error Mask Register";
+        scomaddr    0x08012412;
+        capture     group default;
+    };
+
+    register DLX_ERR_RPT
+    {
+        name        "Odyssey chip DLX Error Report Register";
+        scomaddr    0x08012413;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Odyssey chip ODP_FIR_0
+    ############################################################################
+
+    register ODP_FIR_0
+    {
+        name        "Odyssey chip ODP_FIR 0";
+        scomaddr    0x08013000;
+        reset       (|, 0x08013000);
+        mask        (|, 0x08013003);
+        capture     group default;
+    };
+
+    register ODP_FIR_MASK_0
+    {
+        name        "Odyssey chip ODP_FIR MASK 0";
+        scomaddr    0x08013002;
+        capture     group default;
+    };
+
+    register ODP_FIR_CFG_CS_0
+    {
+        name        "Odyssey chip ODP_FIR Checkstop Config 0";
+        scomaddr    0x08013004;
+        capture     group default;
+    };
+
+    register ODP_FIR_CFG_RE_0
+    {
+        name        "Odyssey chip ODP_FIR Recoverable Config 0";
+        scomaddr    0x08013005;
+        capture     group default;
+    };
+
+    register ODP_FIR_CFG_SPA_0
+    {
+        name        "Odyssey chip ODP_FIR Special Attention Config 0";
+        scomaddr    0x08013006;
+        capture     group default;
+    };
+
+    register ODP_FIR_CFG_UCS_0
+    {
+        name        "Odyssey chip ODP_FIR Unit Checkstop Config 0";
+        scomaddr    0x08013007;
+        capture     group default;
+    };
+
+    register ODP_FIR_WOF_0
+    {
+        name        "Odyssey chip ODP_FIR WOF 0";
+        scomaddr    0x08013008;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Odyssey chip ODP_FIR_1
+    ############################################################################
+
+    register ODP_FIR_1
+    {
+        name        "Odyssey chip ODP_FIR 1";
+        scomaddr    0x08013400;
+        reset       (|, 0x08013400);
+        mask        (|, 0x08013403);
+        capture     group default;
+    };
+
+    register ODP_FIR_MASK_1
+    {
+        name        "Odyssey chip ODP_FIR MASK 1";
+        scomaddr    0x08013402;
+        capture     group default;
+    };
+
+    register ODP_FIR_CFG_CS_1
+    {
+        name        "Odyssey chip ODP_FIR Checkstop Config 1";
+        scomaddr    0x08013404;
+        capture     group default;
+    };
+
+    register ODP_FIR_CFG_RE_1
+    {
+        name        "Odyssey chip ODP_FIR Recoverable Config 1";
+        scomaddr    0x08013405;
+        capture     group default;
+    };
+
+    register ODP_FIR_CFG_SPA_1
+    {
+        name        "Odyssey chip ODP_FIR Special Attention Config 1";
+        scomaddr    0x08013406;
+        capture     group default;
+    };
+
+    register ODP_FIR_CFG_UCS_1
+    {
+        name        "Odyssey chip ODP_FIR Unit Checkstop Config 1";
+        scomaddr    0x08013407;
+        capture     group default;
+    };
+
+    register ODP_FIR_WOF_1
+    {
+        name        "Odyssey chip ODP_FIR WOF 1";
+        scomaddr    0x08013408;
+        capture     group default;
+    };
+
+# Include registers not defined by the xml
+.include "odyssey_ocmb_regs.rule";
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Global Attention FIR
+################################################################################
+
+rule rGFIR
+{
+  CHECK_STOP:
+    GFIR_CS;
+  RECOVERABLE:
+    GFIR_RE;
+  UNIT_CS:
+    GFIR_UCS;
+  HOST_ATTN:
+    GFIR_SPA;
+};
+
+group gGFIR attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
+    filter singlebit
+{
+    /** GFIR[1]
+     *  Attention from TP chiplet
+     */
+    (rGFIR, bit(1)) ? analyze(gCFIR_TP);
+
+    /** GFIR[8]
+     *  Attention from MEM chiplet
+     */
+    (rGFIR, bit(8)) ? analyze(gCFIR_MEM);
+};
+
+################################################################################
+# TP Chiplet FIR
+################################################################################
+
+rule rCFIR_TP
+{
+  CHECK_STOP:
+    CFIR_TP_CS  & ~CFIR_TP_CS_MASK  & `0FFFFFFFFFFFFFFF`;
+  RECOVERABLE:
+    CFIR_TP_RE  & ~CFIR_TP_RE_MASK  & `0FFFFFFFFFFFFFFF`;
+  UNIT_CS:
+    CFIR_TP_UCS & ~CFIR_TP_UCS_MASK & `0FFFFFFFFFFFFFFF`;
+  HOST_ATTN:
+    CFIR_TP_SPA & ~CFIR_TP_SPA_MASK & `0FFFFFFFFFFFFFFF`;
+};
+
+group gCFIR_TP attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
+    filter singlebit
+{
+    /** CFIR_TP[4]
+     *  Attention from TP_LOCAL_FIR
+     */
+    (rCFIR_TP, bit(4)) ? analyze(gTP_LOCAL_FIR);
+
+};
+
+################################################################################
+# Odyssey chip TP_LOCAL_FIR
+################################################################################
+
+rule rTP_LOCAL_FIR
+{
+  CHECK_STOP:
+    TP_LOCAL_FIR & ~TP_LOCAL_FIR_MASK & TP_LOCAL_FIR_CFG_CS;
+  RECOVERABLE:
+    TP_LOCAL_FIR & ~TP_LOCAL_FIR_MASK & TP_LOCAL_FIR_CFG_RE;
+  UNIT_CS:
+    TP_LOCAL_FIR & ~TP_LOCAL_FIR_MASK & TP_LOCAL_FIR_CFG_UCS;
+  HOST_ATTN:
+    TP_LOCAL_FIR & ~TP_LOCAL_FIR_MASK & TP_LOCAL_FIR_CFG_SPA;
+};
+
+group gTP_LOCAL_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** TP_LOCAL_FIR[0]
+     *  CFIR/LFIR parity error
+     */
+    (rTP_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+
+    /** TP_LOCAL_FIR[1]
+     *  CPLT_CTRL - PCB access error
+     */
+    (rTP_LOCAL_FIR, bit(1)) ? ocmb_M_info_only;
+
+    /** TP_LOCAL_FIR[2]
+     *  CC - PCB access error
+     */
+    (rTP_LOCAL_FIR, bit(2)) ? ocmb_M_info_only;
+
+    /** TP_LOCAL_FIR[3]
+     *  CC - clock control error
+     */
+    (rTP_LOCAL_FIR, bit(3)) ? ocmb_M_th_32perDay;
+
+    /** TP_LOCAL_FIR[4]
+     *  PSC - PSCOM Access Error
+     */
+    (rTP_LOCAL_FIR, bit(4)) ? ocmb_M_th_32perDay;
+
+    /** TP_LOCAL_FIR[5]
+     *  PSC - internal or ring interface error
+     */
+    (rTP_LOCAL_FIR, bit(5)) ? ocmb_M_th_32perDay;
+
+    /** TP_LOCAL_FIR[6]
+     *  THERM - various errors
+     */
+    (rTP_LOCAL_FIR, bit(6)) ? ocmb_M_info_only;
+
+    /** TP_LOCAL_FIR[7]
+     *  DBG - SCOM parity fail
+     */
+    (rTP_LOCAL_FIR, bit(7)) ? ocmb_M_info_only;
+
+    /** TP_LOCAL_FIR[8]
+     *  unused
+     */
+    (rTP_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+
+    /** TP_LOCAL_FIR[9]
+     *  FSI errors (OTP, I2C)
+     */
+    (rTP_LOCAL_FIR, bit(9)) ? ocmb_M_info_only;
+
+    /** TP_LOCAL_FIR[10]
+     *  Trace00 - SCOM parity error
+     */
+    (rTP_LOCAL_FIR, bit(10)) ? ocmb_M_info_only;
+
+    /** TP_LOCAL_FIR[11]
+     *  ITR - FMU error
+     */
+    (rTP_LOCAL_FIR, bit(11)) ? ocmb_M_info_only;
+
+    /** TP_LOCAL_FIR[12]
+     *  ITR - PCB error
+     */
+    (rTP_LOCAL_FIR, bit(12)) ? ocmb_M_info_only;
+
+    /** TP_LOCAL_FIR[13]
+     *  PCB master - timeout
+     */
+    (rTP_LOCAL_FIR, bit(13)) ? ocmb_M_info_only;
+
+    /** TP_LOCAL_FIR[14]
+     *  I2CM - parity errors
+     */
+    (rTP_LOCAL_FIR, bit(14)) ? ocmb_M_info_only;
+
+    /** TP_LOCAL_FIR[15:17]
+     *  unused
+     */
+    (rTP_LOCAL_FIR, bit(15|16|17)) ? defaultMaskedError;
+
+    /** TP_LOCAL_FIR[18]
+     *  Error reported from one or more PCB responder - PL
+     */
+    (rTP_LOCAL_FIR, bit(18)) ? defaultMaskedError;
+
+    /** TP_LOCAL_FIR[19]
+     *  SBE - PPE internal hardware error
+     */
+    (rTP_LOCAL_FIR, bit(19)) ? ocmb_M_th1;
+
+    /** TP_LOCAL_FIR[20]
+     *  SBE - PPE external hardware error
+     */
+    (rTP_LOCAL_FIR, bit(20)) ? ocmb_M_th1;
+
+    /** TP_LOCAL_FIR[21]
+     *  SBE - PPE code error
+     */
+    (rTP_LOCAL_FIR, bit(21)) ? ocmb_M_th1;
+
+    /** TP_LOCAL_FIR[22]
+     *  SBE - PPE debug code breakpoint
+     */
+    (rTP_LOCAL_FIR, bit(22)) ? level2_M_ocmb_L_th1;
+
+    /** TP_LOCAL_FIR[23]
+     *  SBE - PPE in halted state
+     */
+    (rTP_LOCAL_FIR, bit(23)) ? ocmb_M_level2_L_th1;
+
+    /** TP_LOCAL_FIR[24]
+     *  SBE - PPE watchdog timeout
+     */
+    (rTP_LOCAL_FIR, bit(24)) ? ocmb_M_level2_L_th1;
+
+    /** TP_LOCAL_FIR[25:26]
+     *  SBE - unused
+     */
+    (rTP_LOCAL_FIR, bit(25|26)) ? defaultMaskedError;
+
+    /** TP_LOCAL_FIR[27]
+     *  SBE - PPE triggers DBG
+     */
+    (rTP_LOCAL_FIR, bit(27)) ? level2_M_ocmb_L_th1;
+
+    /** TP_LOCAL_FIR[28:29]
+     *  unused
+     */
+    (rTP_LOCAL_FIR, bit(28|29)) ? defaultMaskedError;
+
+    /** TP_LOCAL_FIR[31]
+     *  PCB controller - parity error
+     */
+    (rTP_LOCAL_FIR, bit(31)) ? ocmb_M_th1;
+
+    /** TP_LOCAL_FIR[32:35]
+     *  unused
+     */
+    (rTP_LOCAL_FIR, bit(32|33|34|35)) ? defaultMaskedError;
+
+    /** TP_LOCAL_FIR[36]
+     *  PIBMEM
+     */
+    (rTP_LOCAL_FIR, bit(36)) ? ocmb_M_th1;
+
+    /** TP_LOCAL_FIR[37]
+     *  PIBMEM
+     */
+    (rTP_LOCAL_FIR, bit(37)) ? ocmb_M_th1;
+
+    /** TP_LOCAL_FIR[38:44]
+     *  unused
+     */
+    (rTP_LOCAL_FIR, bit(38|39|40|41|42|43|44)) ? defaultMaskedError;
+
+    /** TP_LOCAL_FIR[45]
+     *  SPI controller 0 error
+     */
+    (rTP_LOCAL_FIR, bit(45)) ? ocmb_M_th1;
+
+    /** TP_LOCAL_FIR[46:62]
+     *  unused
+     */
+    (rTP_LOCAL_FIR, bit(46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62)) ? defaultMaskedError;
+
+    /** TP_LOCAL_FIR[63]
+     *  external local checkstop
+     */
+    (rTP_LOCAL_FIR, bit(63)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# MEM Chiplet FIR
+################################################################################
+
+rule rCFIR_MEM
+{
+  CHECK_STOP:
+    CFIR_MEM_CS  & ~CFIR_MEM_CS_MASK & `0FFFFFFFFFFFFFFF`;
+  RECOVERABLE:
+    CFIR_MEM_RE  & ~CFIR_MEM_RE_MASK & `0FFFFFFFFFFFFFFF`;
+  UNIT_CS:
+    CFIR_MEM_UCS & ~CFIR_MEM_UCS_MASK & `0FFFFFFFFFFFFFFF`;
+  HOST_ATTN:
+    CFIR_MEM_SPA & ~CFIR_MEM_SPA_MASK & `0FFFFFFFFFFFFFFF`;
+};
+
+group gCFIR_MEM attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
+    filter singlebit
+{
+    /** CFIR_MEM[4]
+     *  Attention from MEM_LOCAL_FIR
+     */
+    (rCFIR_MEM, bit(4)) ? analyze(gMEM_LOCAL_FIR);
+
+    /** CFIR_MEM[5]
+     *  Attention from DLX_FIR
+     */
+    (rCFIR_MEM, bit(5)) ? analyzeDLX_FIR;
+
+    /** CFIR_MEM[6]
+     *  Attention from MCBIST_FIR
+     */
+    (rCFIR_MEM, bit(6)) ? analyze(gMCBIST_FIR);
+
+    /** CFIR_MEM[7]
+     *  Attention from MMIO_FIR
+     */
+    (rCFIR_MEM, bit(7)) ? analyze(gMMIO_FIR);
+
+    /** CFIR_MEM[8]
+     *  Attention from RDF_FIR_0
+     */
+    (rCFIR_MEM, bit(8)) ? analyze(gRDF_FIR_0);
+
+    /** CFIR_MEM[9]
+     *  Attention from RDF_FIR_1
+     */
+    (rCFIR_MEM, bit(9)) ? analyze(gRDF_FIR_1);
+
+    /** CFIR_MEM[10]
+     *  Attention from SRQ_FIR
+     */
+    (rCFIR_MEM, bit(10)) ? analyze(gSRQ_FIR);
+
+    /** CFIR_MEM[11]
+     *  Attention from TLX_FIR
+     */
+    (rCFIR_MEM, bit(11)) ? analyze(gTLX_FIR);
+
+    /** CFIR_MEM[12]
+     *  Attention from ODP_FIR_0
+     */
+    (rCFIR_MEM, bit(12)) ? analyze(gODP_FIR_0);
+
+    /** CFIR_MEM[13]
+     *  Attention from ODP_FIR_1
+     */
+    (rCFIR_MEM, bit(13)) ? analyze(gODP_FIR_1);
+
+    /** CFIR_MEM[14]
+     *  Attention from OCMB_PHY_FIR
+     */
+    (rCFIR_MEM, bit(14)) ? analyze(gOCMB_PHY_FIR);
+
+};
+
+################################################################################
+# Odyssey chip MEM_LOCAL_FIR
+################################################################################
+
+rule rMEM_LOCAL_FIR
+{
+  CHECK_STOP:
+    MEM_LOCAL_FIR & ~MEM_LOCAL_FIR_MASK & MEM_LOCAL_FIR_CFG_CS;
+  RECOVERABLE:
+    MEM_LOCAL_FIR & ~MEM_LOCAL_FIR_MASK & MEM_LOCAL_FIR_CFG_RE;
+  UNIT_CS:
+    MEM_LOCAL_FIR & ~MEM_LOCAL_FIR_MASK & MEM_LOCAL_FIR_CFG_UCS;
+  HOST_ATTN:
+    MEM_LOCAL_FIR & ~MEM_LOCAL_FIR_MASK & MEM_LOCAL_FIR_CFG_SPA;
+};
+
+group gMEM_LOCAL_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** MEM_LOCAL_FIR[0]
+     *  CFIR/LFIR parity error
+     */
+    (rMEM_LOCAL_FIR, bit(0)) ? defaultMaskedError;
+
+    /** MEM_LOCAL_FIR[1]
+     *  CPLT_CTRL - PCB access error
+     */
+    (rMEM_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+
+    /** MEM_LOCAL_FIR[2]
+     *  CC - PCB access error
+     */
+    (rMEM_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+
+    /** MEM_LOCAL_FIR[3]
+     *  CC - clock control error
+     */
+    (rMEM_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+
+    /** MEM_LOCAL_FIR[4]
+     *  PSC - PSCOM Access Error
+     */
+    (rMEM_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+
+    /** MEM_LOCAL_FIR[5]
+     *  PSC - internal or ring interface error
+     */
+    (rMEM_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+
+    /** MEM_LOCAL_FIR[6]
+     *  THERM - various errors
+     */
+    (rMEM_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+
+    /** MEM_LOCAL_FIR[7]
+     *  DBG - SCOM parity fail
+     */
+    (rMEM_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+
+    /** MEM_LOCAL_FIR[8]
+     *  unused
+     */
+    (rMEM_LOCAL_FIR, bit(8)) ? defaultMaskedError;
+
+    /** MEM_LOCAL_FIR[9]
+     *  unused
+     */
+    (rMEM_LOCAL_FIR, bit(9)) ? defaultMaskedError;
+
+    /** MEM_LOCAL_FIR[10]
+     *  Trace00 - SCOM parity error
+     */
+    (rMEM_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+
+    /** MEM_LOCAL_FIR[11:62]
+     *  unused
+     */
+    (rMEM_LOCAL_FIR, bit(11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62)) ? defaultMaskedError;
+
+    /** MEM_LOCAL_FIR[63]
+     *  external local checkstop
+     */
+    (rMEM_LOCAL_FIR, bit(63)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# Odyssey chip MMIO_FIR
+################################################################################
+
+rule rMMIO_FIR
+{
+  CHECK_STOP:
+    MMIO_FIR & ~MMIO_FIR_MASK & MMIO_FIR_CFG_CS;
+  RECOVERABLE:
+    MMIO_FIR & ~MMIO_FIR_MASK & MMIO_FIR_CFG_RE;
+  UNIT_CS:
+    MMIO_FIR & ~MMIO_FIR_MASK & MMIO_FIR_CFG_UCS;
+  HOST_ATTN:
+    MMIO_FIR & ~MMIO_FIR_MASK & MMIO_FIR_CFG_SPA;
+};
+
+group gMMIO_FIR
+    filter singlebit,
+           cs_root_cause(4,5,6)
+{
+    /** MMIO_FIR[0]
+     *  Internal SCOM logic parity error
+     */
+    (rMMIO_FIR, bit(0)) ? defaultMaskedError;
+
+    /** MMIO_FIR[1]
+     *  Attempt to access an unimplemented address in the
+     */
+    (rMMIO_FIR, bit(1)) ? defaultMaskedError;
+
+    /** MMIO_FIR[2]
+     *  Error detected during MMIO inband or senor cache a
+     */
+    (rMMIO_FIR, bit(2)) ? defaultMaskedError;
+
+    /** MMIO_FIR[3]
+     *  Parity error in SCOM satellite component FSM
+     */
+    (rMMIO_FIR, bit(3)) ? defaultMaskedError;
+
+    /** MMIO_FIR[4]
+     *  Parity error in MMIO/CFG logic FSM
+     */
+    (rMMIO_FIR, bit(4)) ? ocmb_M_th1_UERE;
+
+    /** MMIO_FIR[5]
+     *  Overflow detected in internal MMIO/CFG logic FIFO
+     */
+    (rMMIO_FIR, bit(5)) ? ocmb_M_th1_UERE;
+
+    /** MMIO_FIR[6]
+     *  Fatal parity error detected in control register
+     */
+    (rMMIO_FIR, bit(6)) ? ocmb_M_th1_UERE;
+
+    /** MMIO_FIR[7]
+     *  Parity error detected in informational register
+     */
+    (rMMIO_FIR, bit(7)) ? ocmb_M_th1;
+
+    /** MMIO_FIR[8]
+     *  Both start signals asserted to Sensor cache logic
+     */
+    (rMMIO_FIR, bit(8)) ? defaultMaskedError;
+
+    /** MMIO_FIR[9]
+     *  Multiple parity errors on data from sequencer to s
+     */
+    (rMMIO_FIR, bit(9)) ? defaultMaskedError;
+
+    /** MMIO_FIR[10]
+     *  State machine parity error in sensor cache logic
+     */
+    (rMMIO_FIR, bit(10)) ? defaultMaskedError;
+
+    /** MMIO_FIR[11]
+     *  Sensor cache register parity error
+     */
+    (rMMIO_FIR, bit(11)) ? defaultMaskedError;
+
+    /** MMIO_FIR[12]
+     *  acTAG PASID config error
+     */
+    (rMMIO_FIR, bit(12)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# Odyssey chip OCMB_PHY_FIR
+################################################################################
+
+rule rOCMB_PHY_FIR
+{
+  CHECK_STOP:
+    OCMB_PHY_FIR & ~OCMB_PHY_FIR_MASK & OCMB_PHY_FIR_CFG_CS;
+  RECOVERABLE:
+    OCMB_PHY_FIR & ~OCMB_PHY_FIR_MASK & OCMB_PHY_FIR_CFG_RE;
+  UNIT_CS:
+    OCMB_PHY_FIR & ~OCMB_PHY_FIR_MASK & OCMB_PHY_FIR_CFG_UCS;
+  HOST_ATTN:
+    OCMB_PHY_FIR & ~OCMB_PHY_FIR_MASK & OCMB_PHY_FIR_CFG_SPA;
+};
+
+group gOCMB_PHY_FIR
+    filter singlebit,
+           cs_root_cause
+{
+    /** OCMB_PHY_FIR[0]
+     *  SCOM FSM or FIR register parity error
+     */
+    (rOCMB_PHY_FIR, bit(0)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[1]
+     *  RX state machine parity or mode register parity er
+     */
+    (rOCMB_PHY_FIR, bit(1)) ? ocmb_M_info_only_th1;
+
+    /** OCMB_PHY_FIR[2]
+     *  reserved
+     */
+    (rOCMB_PHY_FIR, bit(2)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[3]
+     *  reserved
+     */
+    (rOCMB_PHY_FIR, bit(3)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[4]
+     *  reserved
+     */
+    (rOCMB_PHY_FIR, bit(4)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[5]
+     *  TX state machine parity or mode register parity er
+     */
+    (rOCMB_PHY_FIR, bit(5)) ? ocmb_M_info_only_th1;
+
+    /** OCMB_PHY_FIR[6]
+     *  reserved
+     */
+    (rOCMB_PHY_FIR, bit(6)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[7]
+     *  reserved
+     */
+    (rOCMB_PHY_FIR, bit(7)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[8]
+     *  reserved
+     */
+    (rOCMB_PHY_FIR, bit(8)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[9]
+     *  reserved
+     */
+    (rOCMB_PHY_FIR, bit(9)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[10]
+     *  reserved
+     */
+    (rOCMB_PHY_FIR, bit(10)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[11]
+     *  reserved
+     */
+    (rOCMB_PHY_FIR, bit(11)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[12]
+     *  reserved
+     */
+    (rOCMB_PHY_FIR, bit(12)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[13]
+     *  PPE internal error
+     */
+    (rOCMB_PHY_FIR, bit(13)) ? ocmb_M_th1;
+
+    /** OCMB_PHY_FIR[14]
+     *  PPE external error
+     */
+    (rOCMB_PHY_FIR, bit(14)) ? ocmb_M_th1;
+
+    /** OCMB_PHY_FIR[15]
+     *  PPE Halt due to Watchdog or Interrupt
+     */
+    (rOCMB_PHY_FIR, bit(15)) ? ocmb_M_level2_L_th1;
+
+    /** OCMB_PHY_FIR[16]
+     *  PPE Halt due to Debug
+     */
+    (rOCMB_PHY_FIR, bit(16)) ? level2_M_ocmb_L_th1;
+
+    /** OCMB_PHY_FIR[17]
+     *  PPE Halted
+     */
+    (rOCMB_PHY_FIR, bit(17)) ? ocmb_M_level2_L_th1;
+
+    /** OCMB_PHY_FIR[18]
+     *  PPE Watchdog Timeout
+     */
+    (rOCMB_PHY_FIR, bit(18)) ? ocmb_M_level2_L_th1;
+
+    /** OCMB_PHY_FIR[19]
+     *  PPE Array Scrub was missed
+     */
+    (rOCMB_PHY_FIR, bit(19)) ? ocmb_M_info_only;
+
+    /** OCMB_PHY_FIR[20]
+     *  PPE Array uncorrectable error
+     */
+    (rOCMB_PHY_FIR, bit(20)) ? ocmb_M_th1;
+
+    /** OCMB_PHY_FIR[21]
+     *  PPE Array correctable error
+     */
+    (rOCMB_PHY_FIR, bit(21)) ? ocmb_M_th_32perDay;
+
+    /** OCMB_PHY_FIR[22]
+     *  PPE Code Recal Abort
+     */
+    (rOCMB_PHY_FIR, bit(22)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[23]
+     *  PPE Code Fatal Error
+     */
+    (rOCMB_PHY_FIR, bit(23)) ? level2_M_ocmb_L_th1;
+
+    /** OCMB_PHY_FIR[24]
+     *  PPE Code Bad Lane Warning
+     */
+    (rOCMB_PHY_FIR, bit(24)) ? ocmb_M_th_32perDay;
+
+    /** OCMB_PHY_FIR[25]
+     *  PPE Code DFT Error
+     */
+    (rOCMB_PHY_FIR, bit(25)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[26]
+     *  PPE Code Recal Not Run
+     */
+    (rOCMB_PHY_FIR, bit(26)) ? level2_M_ocmb_L_th1;
+
+    /** OCMB_PHY_FIR[27]
+     *  PPE Code Thread Locked
+     */
+    (rOCMB_PHY_FIR, bit(27)) ? level2_M_ocmb_L_th1;
+
+    /** OCMB_PHY_FIR[28]
+     *  PPE Code Thread Active Time Exceeded
+     */
+    (rOCMB_PHY_FIR, bit(28)) ? defaultMaskedError;
+
+    /** OCMB_PHY_FIR[29]
+     *  reserved
+     */
+    (rOCMB_PHY_FIR, bit(29)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# Odyssey chip SRQ_FIR
+################################################################################
+
+rule rSRQ_FIR
+{
+  CHECK_STOP:
+    SRQ_FIR & ~SRQ_FIR_MASK & SRQ_FIR_CFG_CS;
+  RECOVERABLE:
+    SRQ_FIR & ~SRQ_FIR_MASK & SRQ_FIR_CFG_RE;
+  UNIT_CS:
+    SRQ_FIR & ~SRQ_FIR_MASK & SRQ_FIR_CFG_UCS;
+  HOST_ATTN:
+    SRQ_FIR & ~SRQ_FIR_MASK & SRQ_FIR_CFG_SPA;
+};
+
+group gSRQ_FIR
+    filter singlebit,
+           cs_root_cause(1,5,7,10,11,12,16,17,18,19,20,22,26,27,31,37,38,39,43,44,45)
+{
+    /** SRQ_FIR[0]
+     *  Internal parity error
+     */
+    (rSRQ_FIR, bit(0)) ? defaultMaskedError;
+
+    /** SRQ_FIR[1]
+     *  SRQ nonrecoverable error
+     */
+    (rSRQ_FIR, bit(1)) ? ocmb_M_th1_UERE;
+
+    /** SRQ_FIR[2]
+     *  refresh overrun port0
+     */
+    (rSRQ_FIR, bit(2)) ? mem_port0_M_th_32perDay;
+
+    /** SRQ_FIR[3]
+     *  WAT error
+     */
+    (rSRQ_FIR, bit(3)) ? defaultMaskedError;
+
+    /** SRQ_FIR[4]
+     *  RCD parity error port0
+     */
+    (rSRQ_FIR, bit(4)) ? defaultMaskedError;
+
+    /** SRQ_FIR[5]
+     *  MCB control logic Error in NCF
+     */
+    (rSRQ_FIR, bit(5)) ? ocmb_M_th1_UERE;
+
+    /** SRQ_FIR[6]
+     *  Emergency throttle engaged
+     */
+    (rSRQ_FIR, bit(6)) ? defaultMaskedError;
+
+    /** SRQ_FIR[7]
+     *  DSM errors port0
+     */
+    (rSRQ_FIR, bit(7)) ? mem_port0_M_th1_UERE;
+
+    /** SRQ_FIR[8]
+     *  event_n was active on the DDR interface port0
+     */
+    (rSRQ_FIR, bit(8)) ? defaultMaskedError;
+
+    /** SRQ_FIR[9]
+     *  WRQ or RRQ is in a hung state port0
+     */
+    (rSRQ_FIR, bit(9)) ? mem_port0_M_th1;
+
+    /** SRQ_FIR[10]
+     *  state machine one hot error port0
+     */
+    (rSRQ_FIR, bit(10)) ? mem_port0_M_th1_UERE;
+
+    /** SRQ_FIR[11]
+     *  ROQ errors port0
+     */
+    (rSRQ_FIR, bit(11)) ? mem_port0_M_th1_UERE;
+
+    /** SRQ_FIR[12]
+     *  Address parity error seen internal to sequencer on
+     */
+    (rSRQ_FIR, bit(12)) ? mem_port0_M_th1_UERE;
+
+    /** SRQ_FIR[13]
+     *  port0 has failed due to a persistent retry
+     */
+    (rSRQ_FIR, bit(13)) ? defaultMaskedError;
+
+    /** SRQ_FIR[14]
+     *  informational register parity error
+     */
+    (rSRQ_FIR, bit(14)) ? ocmb_M_info_only;
+
+    /** SRQ_FIR[15]
+     *  soft error reported from error report register
+     */
+    (rSRQ_FIR, bit(15)) ? defaultMaskedError;
+
+    /** SRQ_FIR[16]
+     *  WDF unrecoverable mainline error
+     */
+    (rSRQ_FIR, bit(16)) ? ocmb_M_th1_UERE;
+
+    /** SRQ_FIR[17]
+     *  WDF mmio error
+     */
+    (rSRQ_FIR, bit(17)) ? ocmb_M_th1_UERE;
+
+    /** SRQ_FIR[18]
+     *  WDF array UE on mainline operations (SUE put in me
+     */
+    (rSRQ_FIR, bit(18)) ? ocmb_M_th1_UERE;
+
+    /** SRQ_FIR[19]
+     *  WDF mainline dataflow error (SUE not reliably put
+     */
+    (rSRQ_FIR, bit(19)) ? ocmb_M_th1_UERE;
+
+    /** SRQ_FIR[20]
+     *  WDF scom register parity error, affecting mainline
+     */
+    (rSRQ_FIR, bit(20)) ? ocmb_M_th1_UERE;
+
+    /** SRQ_FIR[21]
+     *  WDF scom register parity error, affecting scom ops
+     */
+    (rSRQ_FIR, bit(21)) ? ocmb_M_th1;
+
+    /** SRQ_FIR[22]
+     *  WDF SCOM fsm parity error
+     */
+    (rSRQ_FIR, bit(22)) ? ocmb_M_th1_UERE;
+
+    /** SRQ_FIR[23]
+     *  WDF write buffer array CE
+     */
+    (rSRQ_FIR, bit(23)) ? ocmb_M_th_32perDay;
+
+    /** SRQ_FIR[24]
+     *  refresh management CE port0
+     */
+    (rSRQ_FIR, bit(24)) ? mem_port0_M_th_32perDay;
+
+    /** SRQ_FIR[25]
+     *  refresh management RAA counter UE port0
+     */
+    (rSRQ_FIR, bit(25)) ? mem_port0_M_th_32perDay;
+
+    /** SRQ_FIR[26]
+     *  NCF fifo error port0
+     */
+    (rSRQ_FIR, bit(26)) ? mem_port0_M_th1_UERE;
+
+    /** SRQ_FIR[27]
+     *  NCF fifo error port1
+     */
+    (rSRQ_FIR, bit(27)) ? mem_port1_M_th1_UERE;
+
+    /** SRQ_FIR[28]
+     *  memcntl cmd xstop
+     */
+    (rSRQ_FIR, bit(28)) ? defaultMaskedError;
+
+    /** SRQ_FIR[29]
+     *  SRQ recoverable error
+     */
+    (rSRQ_FIR, bit(29)) ? ocmb_M_th1;
+
+    /** SRQ_FIR[30]
+     *  DFI error port0
+     */
+    (rSRQ_FIR, bit(30)) ? mem_port0_M_th1;
+
+    /** SRQ_FIR[31]
+     *  xlat addr error port0
+     */
+    (rSRQ_FIR, bit(31)) ? mem_port0_M_th1_UERE;
+
+    /** SRQ_FIR[32]
+     *  refresh overrun port1
+     */
+    (rSRQ_FIR, bit(32)) ? mem_port1_M_th_32perDay;
+
+    /** SRQ_FIR[33]
+     *  RCD parity error port1
+     */
+    (rSRQ_FIR, bit(33)) ? defaultMaskedError;
+
+    /** SRQ_FIR[34]
+     *  DFI error port1
+     */
+    (rSRQ_FIR, bit(34)) ? mem_port1_M_th1;
+
+    /** SRQ_FIR[35]
+     *  event_n was active on the DDR interface port1
+     */
+    (rSRQ_FIR, bit(35)) ? defaultMaskedError;
+
+    /** SRQ_FIR[36]
+     *  WRQ or RRQ is in a hung state port1
+     */
+    (rSRQ_FIR, bit(36)) ? mem_port1_M_th1;
+
+    /** SRQ_FIR[37]
+     *  state machine one hot error port1
+     */
+    (rSRQ_FIR, bit(37)) ? mem_port1_M_th1_UERE;
+
+    /** SRQ_FIR[38]
+     *  ROQ errors port1
+     */
+    (rSRQ_FIR, bit(38)) ? mem_port1_M_th1_UERE;
+
+    /** SRQ_FIR[39]
+     *  Address parity error seen internal to sequencer on
+     */
+    (rSRQ_FIR, bit(39)) ? mem_port1_M_th1_UERE;
+
+    /** SRQ_FIR[40]
+     *  port1 has failed due to a persistent retry
+     */
+    (rSRQ_FIR, bit(40)) ? defaultMaskedError;
+
+    /** SRQ_FIR[41]
+     *  refresh management CE port1
+     */
+    (rSRQ_FIR, bit(41)) ? mem_port1_M_th_32perDay;
+
+    /** SRQ_FIR[42]
+     *  refresh management RAA counter UE port1
+     */
+    (rSRQ_FIR, bit(42)) ? mem_port1_M_th_32perDay;
+
+    /** SRQ_FIR[43]
+     *  xlat addr error port1
+     */
+    (rSRQ_FIR, bit(43)) ? mem_port1_M_th1_UERE;
+
+    /** SRQ_FIR[44]
+     *  check on ccs in progress bit
+     */
+    (rSRQ_FIR, bit(44)) ? ocmb_M_th1_UERE;
+
+    /** SRQ_FIR[45]
+     *  DSM errors port1
+     */
+    (rSRQ_FIR, bit(45)) ? mem_port1_M_th1_UERE;
+
+};
+
+################################################################################
+# Odyssey chip MCBIST_FIR
+################################################################################
+
+rule rMCBIST_FIR
+{
+  CHECK_STOP:
+    MCBIST_FIR & ~MCBIST_FIR_MASK & MCBIST_FIR_CFG_CS;
+  RECOVERABLE:
+    MCBIST_FIR & ~MCBIST_FIR_MASK & MCBIST_FIR_CFG_RE;
+  UNIT_CS:
+    MCBIST_FIR & ~MCBIST_FIR_MASK & MCBIST_FIR_CFG_UCS;
+  HOST_ATTN:
+    MCBIST_FIR & ~MCBIST_FIR_MASK & MCBIST_FIR_CFG_SPA;
+};
+
+group gMCBIST_FIR
+    filter singlebit,
+           cs_root_cause(2,3,4,15)
+{
+    /** MCBIST_FIR[0]
+     *  Internal parity error in scom component
+     */
+    (rMCBIST_FIR, bit(0)) ? defaultMaskedError;
+
+    /** MCBIST_FIR[1]
+     *  Invalid maint address
+     */
+    (rMCBIST_FIR, bit(1)) ? defaultMaskedError;
+
+    /** MCBIST_FIR[2]
+     *  Command address timeout
+     */
+    (rMCBIST_FIR, bit(2)) ? ocmb_M_th1_UERE;
+
+    /** MCBIST_FIR[3]
+     *  Internal FSM error
+     */
+    (rMCBIST_FIR, bit(3)) ? ocmb_M_th1_UERE;
+
+    /** MCBIST_FIR[4]
+     *  CSS Array uncorrected CE or UE
+     */
+    (rMCBIST_FIR, bit(4)) ? ocmb_M_th1_UERE;
+
+    /** MCBIST_FIR[5]
+     *  MCBIST data error
+     */
+    (rMCBIST_FIR, bit(5)) ? defaultMaskedError;
+
+    /** MCBIST_FIR[6]
+     *  Hard NCE ETE attn
+     */
+    (rMCBIST_FIR, bit(6)) ? defaultMaskedError;
+
+    /** MCBIST_FIR[7]
+     *  Soft NCE ETE attn
+     */
+    (rMCBIST_FIR, bit(7)) ? defaultMaskedError;
+
+    /** MCBIST_FIR[8]
+     *  Int NCE ETE attn
+     */
+    (rMCBIST_FIR, bit(8)) ? defaultMaskedError;
+
+    /** MCBIST_FIR[9]
+     *  IUE ETE attn
+     */
+    (rMCBIST_FIR, bit(9)) ? defaultMaskedError;
+
+    /** MCBIST_FIR[10]
+     *  ICE (IMPE) ETE attn
+     */
+    (rMCBIST_FIR, bit(10)) ? defaultMaskedError;
+
+    /** MCBIST_FIR[11]
+     *  MCBIST program complete
+     */
+    (rMCBIST_FIR, bit(11)) ? mcbist_program_complete;
+
+    /** MCBIST_FIR[12]
+     *  MCBIST CCS subtest done
+     */
+    (rMCBIST_FIR, bit(12)) ? defaultMaskedError;
+
+    /** MCBIST_FIR[13]
+     *  WAT debug bus attn
+     */
+    (rMCBIST_FIR, bit(13)) ? defaultMaskedError;
+
+    /** MCBIST_FIR[14]
+     *  SCOM recoverable register parity error
+     */
+    (rMCBIST_FIR, bit(14)) ? ocmb_M_th1;
+
+    /** MCBIST_FIR[15]
+     *  SCOM fatal reg parity error
+     */
+    (rMCBIST_FIR, bit(15)) ? ocmb_M_th1_UERE;
+
+    /** MCBIST_FIR[16]
+     *  SCOM WAT and debug reg parity error
+     */
+    (rMCBIST_FIR, bit(16)) ? defaultMaskedError;
+
+    /** MCBIST_FIR[17]
+     *  IAUE ETE attn
+     */
+    (rMCBIST_FIR, bit(17)) ? defaultMaskedError;
+
+    /** MCBIST_FIR[18]
+     *  IRCD ETE attn
+     */
+    (rMCBIST_FIR, bit(18)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# Odyssey chip RDF_FIR 0
+################################################################################
+
+rule rRDF_FIR_0
+{
+  CHECK_STOP:
+    RDF_FIR_0 & ~RDF_FIR_MASK_0 & RDF_FIR_CFG_CS_0;
+  RECOVERABLE:
+    RDF_FIR_0 & ~RDF_FIR_MASK_0 & RDF_FIR_CFG_RE_0;
+  UNIT_CS:
+    RDF_FIR_0 & ~RDF_FIR_MASK_0 & RDF_FIR_CFG_UCS_0;
+  HOST_ATTN:
+    RDF_FIR_0 & ~RDF_FIR_MASK_0 & RDF_FIR_CFG_SPA_0;
+};
+
+group gRDF_FIR_0
+    filter singlebit,
+           cs_root_cause(14,15,16,17,18,34,37,38,44,45,48,49,54)
+{
+    /** RDF_FIR_0[0]
+     *  Internal SCOM error
+     */
+    (rRDF_FIR_0, bit(0)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[1]
+     *  Mainline read MPE on rank 0
+     */
+    (rRDF_FIR_0, bit(1)) ? verify_chip_mark_port0_rank0;
+
+    /** RDF_FIR_0[2]
+     *  Mainline read MPE on rank 1
+     */
+    (rRDF_FIR_0, bit(2)) ? verify_chip_mark_port0_rank1;
+
+    /** RDF_FIR_0[3]
+     *  Mainline read MPE on rank 2
+     */
+    (rRDF_FIR_0, bit(3)) ? verify_chip_mark_port0_rank2;
+
+    /** RDF_FIR_0[4]
+     *  Mainline read MPE on rank 3
+     */
+    (rRDF_FIR_0, bit(4)) ? verify_chip_mark_port0_rank3;
+
+    /** RDF_FIR_0[5]
+     *  Mainline read MPE on rank 4
+     */
+    (rRDF_FIR_0, bit(5)) ? verify_chip_mark_port0_rank4;
+
+    /** RDF_FIR_0[6]
+     *  Mainline read MPE on rank 5
+     */
+    (rRDF_FIR_0, bit(6)) ? verify_chip_mark_port0_rank5;
+
+    /** RDF_FIR_0[7]
+     *  Mainline read MPE on rank 6
+     */
+    (rRDF_FIR_0, bit(7)) ? verify_chip_mark_port0_rank6;
+
+    /** RDF_FIR_0[8]
+     *  Mainline read MPE on rank 7
+     */
+    (rRDF_FIR_0, bit(8)) ? verify_chip_mark_port0_rank7;
+
+    /** RDF_FIR_0[9]
+     *  Mainline read NCE
+     */
+    (rRDF_FIR_0, bit(9)) ? mainline_nce_tce_handling;
+
+    /** RDF_FIR_0[10]
+     *  Mainline read TCE
+     */
+    (rRDF_FIR_0, bit(10)) ? mainline_nce_tce_handling;
+
+    /** RDF_FIR_0[11]
+     *  Mainline read SCE
+     */
+    (rRDF_FIR_0, bit(11)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[12]
+     *  Mainline read MCE
+     */
+    (rRDF_FIR_0, bit(12)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[13]
+     *  Mainline read SUE
+     */
+    (rRDF_FIR_0, bit(13)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[14]
+     *  Mainline read AUE
+     */
+    (rRDF_FIR_0, bit(14)) ? mainline_aue_iaue_handling0_UERE;
+
+    /** RDF_FIR_0[15]
+     *  Mainline read UE
+     */
+    (rRDF_FIR_0, bit(15)) ? mainline_ue_handling_UERE;
+
+    /** RDF_FIR_0[16]
+     *  Mainline read RCD
+     */
+    (rRDF_FIR_0, bit(16)) ? mem_port0_M_th1_UERE;
+
+    /** RDF_FIR_0[17]
+     *  Mainline read IAUE
+     */
+    (rRDF_FIR_0, bit(17)) ? mainline_aue_iaue_handling0_UERE;
+
+    /** RDF_FIR_0[18]
+     *  Mainline read IUE
+     */
+    (rRDF_FIR_0, bit(18)) ? mainline_iue_handling;
+
+    /** RDF_FIR_0[19]
+     *  Mainline read IRCD
+     */
+    (rRDF_FIR_0, bit(19)) ? mem_port0_M_th_32perDay;
+
+    /** RDF_FIR_0[20]
+     *  Mainline read IMPE
+     */
+    (rRDF_FIR_0, bit(20)) ? memory_impe_handling;
+
+    /** RDF_FIR_0[21:28]
+     *  Maintenance MPE
+     */
+    (rRDF_FIR_0, bit(21|22|23|24|25|26|27|28)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[29]
+     *  Maintenance NCE
+     */
+    (rRDF_FIR_0, bit(29)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[30]
+     *  Maintenance TCE
+     */
+    (rRDF_FIR_0, bit(30)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[31]
+     *  Maintenance SCE
+     */
+    (rRDF_FIR_0, bit(31)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[32]
+     *  Maintenance MCE
+     */
+    (rRDF_FIR_0, bit(32)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[33]
+     *  Maintenance SUE
+     */
+    (rRDF_FIR_0, bit(33)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[34]
+     *  Maintenance AUE
+     */
+    (rRDF_FIR_0, bit(34)) ? maintenance_aue_handling0_UERE;
+
+    /** RDF_FIR_0[35]
+     *  Maintenance UE
+     */
+    (rRDF_FIR_0, bit(35)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[36]
+     *  Maintenance RCD
+     */
+    (rRDF_FIR_0, bit(36)) ? mem_port0_M_th1;
+
+    /** RDF_FIR_0[37]
+     *  Maintenance IAUE
+     */
+    (rRDF_FIR_0, bit(37)) ? maintenance_iaue_handling0_UERE;
+
+    /** RDF_FIR_0[38]
+     *  Maintenance IUE
+     */
+    (rRDF_FIR_0, bit(38)) ? maintenance_iue_handling;
+
+    /** RDF_FIR_0[39]
+     *  Maintenance IRCD
+     */
+    (rRDF_FIR_0, bit(39)) ? mem_port0_M_th1;
+
+    /** RDF_FIR_0[40]
+     *  Maintenance IMPE
+     */
+    (rRDF_FIR_0, bit(40)) ? memory_impe_handling;
+
+    /** RDF_FIR_0[41]
+     *  RDDATA valid error
+     */
+    (rRDF_FIR_0, bit(41)) ? mem_port0_M_th_32perDay;
+
+    /** RDF_FIR_0[42]
+     *  SCOM status register parity error
+     */
+    (rRDF_FIR_0, bit(42)) ? mem_port0_M_info_only;
+
+    /** RDF_FIR_0[43]
+     *  SCOM recoverable register parity error
+     */
+    (rRDF_FIR_0, bit(43)) ? mem_port0_M_th1;
+
+    /** RDF_FIR_0[44]
+     *  SCOM unrecoverable register parity error
+     */
+    (rRDF_FIR_0, bit(44)) ? mem_port0_M_th1_UERE;
+
+    /** RDF_FIR_0[45]
+     *  ECC corrector internal parity error
+     */
+    (rRDF_FIR_0, bit(45)) ? mem_port0_M_th1_UERE;
+
+    /** RDF_FIR_0[46]
+     *  Rd Buff ECC CHK Cor CE DW0 Detected
+     */
+    (rRDF_FIR_0, bit(46)) ? mem_port0_M_th_32perDay;
+
+    /** RDF_FIR_0[47]
+     *  Rd Buff ECC CHK Cor CE DW1 Detected
+     */
+    (rRDF_FIR_0, bit(47)) ? mem_port0_M_th_32perDay;
+
+    /** RDF_FIR_0[48]
+     *  Rd Buff ECC CHK Cor UE DW0 Detected
+     */
+    (rRDF_FIR_0, bit(48)) ? mem_port0_M_th1_UERE;
+
+    /** RDF_FIR_0[49]
+     *  Rd Buff ECC CHK Cor UE DW1 Detected
+     */
+    (rRDF_FIR_0, bit(49)) ? mem_port0_M_th1_UERE;
+
+    /** RDF_FIR_0[50]
+     *  Prefetch buffer ECC CHK Cor CE DW0 Detected
+     */
+    (rRDF_FIR_0, bit(50)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[51]
+     *  Prefetch buffer ECC CHK Cor CE DW1 Detected
+     */
+    (rRDF_FIR_0, bit(51)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[52]
+     *  Prefetch buffer ECC CHK Cor UE DW0 Detected
+     */
+    (rRDF_FIR_0, bit(52)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[53]
+     *  Prefetch buffer ECC CHK Cor UE DW1 Detected
+     */
+    (rRDF_FIR_0, bit(53)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[54]
+     *  Parity error on TLXT to RDF read buffer interface
+     */
+    (rRDF_FIR_0, bit(54)) ? mem_port0_M_th1_UERE;
+
+    /** RDF_FIR_0[55]
+     *  Parity error on TLXT to RDF read prefetch interfac
+     */
+    (rRDF_FIR_0, bit(55)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[56:60]
+     *  reserved
+     */
+    (rRDF_FIR_0, bit(56|57|58|59|60)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[61]
+     *  SCOM register parity error for debug/wat control
+     */
+    (rRDF_FIR_0, bit(61)) ? defaultMaskedError;
+
+    /** RDF_FIR_0[62]
+     *  Reserved
+     */
+    (rRDF_FIR_0, bit(62)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# Odyssey chip RDF_FIR 1
+################################################################################
+
+rule rRDF_FIR_1
+{
+  CHECK_STOP:
+    RDF_FIR_1 & ~RDF_FIR_MASK_1 & RDF_FIR_CFG_CS_1;
+  RECOVERABLE:
+    RDF_FIR_1 & ~RDF_FIR_MASK_1 & RDF_FIR_CFG_RE_1;
+  UNIT_CS:
+    RDF_FIR_1 & ~RDF_FIR_MASK_1 & RDF_FIR_CFG_UCS_1;
+  HOST_ATTN:
+    RDF_FIR_1 & ~RDF_FIR_MASK_1 & RDF_FIR_CFG_SPA_1;
+};
+
+group gRDF_FIR_1
+    filter singlebit,
+           cs_root_cause(14,15,16,17,18,34,37,38,44,45,48,49,54)
+{
+    /** RDF_FIR_1[0]
+     *  Internal SCOM error
+     */
+    (rRDF_FIR_1, bit(0)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[1]
+     *  Mainline read MPE on rank 0
+     */
+    (rRDF_FIR_1, bit(1)) ? verify_chip_mark_port1_rank0;
+
+    /** RDF_FIR_1[2]
+     *  Mainline read MPE on rank 1
+     */
+    (rRDF_FIR_1, bit(2)) ? verify_chip_mark_port1_rank1;
+
+    /** RDF_FIR_1[3]
+     *  Mainline read MPE on rank 2
+     */
+    (rRDF_FIR_1, bit(3)) ? verify_chip_mark_port1_rank2;
+
+    /** RDF_FIR_1[4]
+     *  Mainline read MPE on rank 3
+     */
+    (rRDF_FIR_1, bit(4)) ? verify_chip_mark_port1_rank3;
+
+    /** RDF_FIR_1[5]
+     *  Mainline read MPE on rank 4
+     */
+    (rRDF_FIR_1, bit(5)) ? verify_chip_mark_port1_rank4;
+
+    /** RDF_FIR_1[6]
+     *  Mainline read MPE on rank 5
+     */
+    (rRDF_FIR_1, bit(6)) ? verify_chip_mark_port1_rank5;
+
+    /** RDF_FIR_1[7]
+     *  Mainline read MPE on rank 6
+     */
+    (rRDF_FIR_1, bit(7)) ? verify_chip_mark_port1_rank6;
+
+    /** RDF_FIR_1[8]
+     *  Mainline read MPE on rank 7
+     */
+    (rRDF_FIR_1, bit(8)) ? verify_chip_mark_port1_rank7;
+
+    /** RDF_FIR_1[9]
+     *  Mainline read NCE
+     */
+    (rRDF_FIR_1, bit(9)) ? mainline_nce_tce_handling;
+
+    /** RDF_FIR_1[10]
+     *  Mainline read TCE
+     */
+    (rRDF_FIR_1, bit(10)) ? mainline_nce_tce_handling;
+
+    /** RDF_FIR_1[11]
+     *  Mainline read SCE
+     */
+    (rRDF_FIR_1, bit(11)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[12]
+     *  Mainline read MCE
+     */
+    (rRDF_FIR_1, bit(12)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[13]
+     *  Mainline read SUE
+     */
+    (rRDF_FIR_1, bit(13)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[14]
+     *  Mainline read AUE
+     */
+    (rRDF_FIR_1, bit(14)) ? mainline_aue_iaue_handling1_UERE;
+
+    /** RDF_FIR_1[15]
+     *  Mainline read UE
+     */
+    (rRDF_FIR_1, bit(15)) ? mainline_ue_handling_UERE;
+
+    /** RDF_FIR_1[16]
+     *  Mainline read RCD
+     */
+    (rRDF_FIR_1, bit(16)) ? mem_port1_M_th1_UERE;
+
+    /** RDF_FIR_1[17]
+     *  Mainline read IAUE
+     */
+    (rRDF_FIR_1, bit(17)) ? mainline_aue_iaue_handling1_UERE;
+
+    /** RDF_FIR_1[18]
+     *  Mainline read IUE
+     */
+    (rRDF_FIR_1, bit(18)) ? mainline_iue_handling;
+
+    /** RDF_FIR_1[19]
+     *  Mainline read IRCD
+     */
+    (rRDF_FIR_1, bit(19)) ? mem_port1_M_th_32perDay;
+
+    /** RDF_FIR_1[20]
+     *  Mainline read IMPE
+     */
+    (rRDF_FIR_1, bit(20)) ? memory_impe_handling;
+
+    /** RDF_FIR_1[21:28]
+     *  Maintenance MPE
+     */
+    (rRDF_FIR_1, bit(21|22|23|24|25|26|27|28)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[29]
+     *  Maintenance NCE
+     */
+    (rRDF_FIR_1, bit(29)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[30]
+     *  Maintenance TCE
+     */
+    (rRDF_FIR_1, bit(30)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[31]
+     *  Maintenance SCE
+     */
+    (rRDF_FIR_1, bit(31)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[32]
+     *  Maintenance MCE
+     */
+    (rRDF_FIR_1, bit(32)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[33]
+     *  Maintenance SUE
+     */
+    (rRDF_FIR_1, bit(33)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[34]
+     *  Maintenance AUE
+     */
+    (rRDF_FIR_1, bit(34)) ? maintenance_aue_handling1_UERE;
+
+    /** RDF_FIR_1[35]
+     *  Maintenance UE
+     */
+    (rRDF_FIR_1, bit(35)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[36]
+     *  Maintenance RCD
+     */
+    (rRDF_FIR_1, bit(36)) ? mem_port1_M_th1;
+
+    /** RDF_FIR_1[37]
+     *  Maintenance IAUE
+     */
+    (rRDF_FIR_1, bit(37)) ? maintenance_iaue_handling1_UERE;
+
+    /** RDF_FIR_1[38]
+     *  Maintenance IUE
+     */
+    (rRDF_FIR_1, bit(38)) ? maintenance_iue_handling;
+
+    /** RDF_FIR_1[39]
+     *  Maintenance IRCD
+     */
+    (rRDF_FIR_1, bit(39)) ? mem_port1_M_th1;
+
+    /** RDF_FIR_1[40]
+     *  Maintenance IMPE
+     */
+    (rRDF_FIR_1, bit(40)) ? memory_impe_handling;
+
+    /** RDF_FIR_1[41]
+     *  RDDATA valid error
+     */
+    (rRDF_FIR_1, bit(41)) ? mem_port1_M_th_32perDay;
+
+    /** RDF_FIR_1[42]
+     *  SCOM status register parity error
+     */
+    (rRDF_FIR_1, bit(42)) ? mem_port1_M_info_only;
+
+    /** RDF_FIR_1[43]
+     *  SCOM recoverable register parity error
+     */
+    (rRDF_FIR_1, bit(43)) ? mem_port1_M_th1;
+
+    /** RDF_FIR_1[44]
+     *  SCOM unrecoverable register parity error
+     */
+    (rRDF_FIR_1, bit(44)) ? mem_port1_M_th1_UERE;
+
+    /** RDF_FIR_1[45]
+     *  ECC corrector internal parity error
+     */
+    (rRDF_FIR_1, bit(45)) ? mem_port1_M_th1_UERE;
+
+    /** RDF_FIR_1[46]
+     *  Rd Buff ECC CHK Cor CE DW0 Detected
+     */
+    (rRDF_FIR_1, bit(46)) ? mem_port1_M_th_32perDay;
+
+    /** RDF_FIR_1[47]
+     *  Rd Buff ECC CHK Cor CE DW1 Detected
+     */
+    (rRDF_FIR_1, bit(47)) ? mem_port1_M_th_32perDay;
+
+    /** RDF_FIR_1[48]
+     *  Rd Buff ECC CHK Cor UE DW0 Detected
+     */
+    (rRDF_FIR_1, bit(48)) ? mem_port1_M_th1_UERE;
+
+    /** RDF_FIR_1[49]
+     *  Rd Buff ECC CHK Cor UE DW1 Detected
+     */
+    (rRDF_FIR_1, bit(49)) ? mem_port1_M_th1_UERE;
+
+    /** RDF_FIR_1[50]
+     *  Prefetch buffer ECC CHK Cor CE DW0 Detected
+     */
+    (rRDF_FIR_1, bit(50)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[51]
+     *  Prefetch buffer ECC CHK Cor CE DW1 Detected
+     */
+    (rRDF_FIR_1, bit(51)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[52]
+     *  Prefetch buffer ECC CHK Cor UE DW0 Detected
+     */
+    (rRDF_FIR_1, bit(52)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[53]
+     *  Prefetch buffer ECC CHK Cor UE DW1 Detected
+     */
+    (rRDF_FIR_1, bit(53)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[54]
+     *  Parity error on TLXT to RDF read buffer interface
+     */
+    (rRDF_FIR_1, bit(54)) ? mem_port1_M_th1_UERE;
+
+    /** RDF_FIR_1[55]
+     *  Parity error on TLXT to RDF read prefetch interfac
+     */
+    (rRDF_FIR_1, bit(55)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[56:60]
+     *  reserved
+     */
+    (rRDF_FIR_1, bit(56|57|58|59|60)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[61]
+     *  SCOM register parity error for debug/wat control
+     */
+    (rRDF_FIR_1, bit(61)) ? defaultMaskedError;
+
+    /** RDF_FIR_1[62]
+     *  Reserved
+     */
+    (rRDF_FIR_1, bit(62)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# Odyssey chip TLX_FIR
+################################################################################
+
+rule rTLX_FIR
+{
+  CHECK_STOP:
+    TLX_FIR & ~TLX_FIR_MASK & TLX_FIR_CFG_CS;
+  RECOVERABLE:
+    TLX_FIR & ~TLX_FIR_MASK & TLX_FIR_CFG_RE;
+  UNIT_CS:
+    TLX_FIR & ~TLX_FIR_MASK & TLX_FIR_CFG_UCS;
+  HOST_ATTN:
+    TLX_FIR & ~TLX_FIR_MASK & TLX_FIR_CFG_SPA;
+};
+
+group gTLX_FIR
+    filter singlebit,
+           cs_root_cause(1,2,3,4,5,6,7,8,9,10,11,12,14,17,18,19,20,21,23,25)
+{
+    /** TLX_FIR[0]
+     *  Internal parity error
+     */
+    (rTLX_FIR, bit(0)) ? defaultMaskedError;
+
+    /** TLX_FIR[1]
+     *  TLXT control register parity error
+     */
+    (rTLX_FIR, bit(1)) ? ocmb_M_th1_UERE;
+
+    /** TLX_FIR[2]
+     *  TLX VC0 return credit overflow
+     */
+    (rTLX_FIR, bit(2)) ? omi_bus_th1_UERE;
+
+    /** TLX_FIR[3]
+     *  TLX VC3 return credit overflow
+     */
+    (rTLX_FIR, bit(3)) ? omi_bus_th1_UERE;
+
+    /** TLX_FIR[4]
+     *  TLX DCP0 return credit overflow
+     */
+    (rTLX_FIR, bit(4)) ? omi_bus_th1_UERE;
+
+    /** TLX_FIR[5]
+     *  TLX DCP3 return credit overflow
+     */
+    (rTLX_FIR, bit(5)) ? omi_bus_th1_UERE;
+
+    /** TLX_FIR[6]
+     *  TLXC error
+     */
+    (rTLX_FIR, bit(6)) ? ocmb_M_th1_UERE;
+
+    /** TLX_FIR[7]
+     *  TLXC parity error
+     */
+    (rTLX_FIR, bit(7)) ? ocmb_M_th1_UERE;
+
+    /** TLX_FIR[8]
+     *  TLXT config parity error
+     */
+    (rTLX_FIR, bit(8)) ? ocmb_M_th1_UERE;
+
+    /** TLX_FIR[9]
+     *  TLXT response parity error
+     */
+    (rTLX_FIR, bit(9)) ? ocmb_M_th1_UERE;
+
+    /** TLX_FIR[10]
+     *  TLXT framer control parity error
+     */
+    (rTLX_FIR, bit(10)) ? ocmb_M_th1_UERE;
+
+    /** TLX_FIR[11]
+     *  TLXT Xarb control error
+     */
+    (rTLX_FIR, bit(11)) ? ocmb_M_th1_UERE;
+
+    /** TLX_FIR[12]
+     *  TLXT DLX interface error
+     */
+    (rTLX_FIR, bit(12)) ? ocmb_M_th1_UERE;
+
+    /** TLX_FIR[13]
+     *  TLX info register parity error
+     */
+    (rTLX_FIR, bit(13)) ? ocmb_M_info_only;
+
+    /** TLX_FIR[14]
+     *  TLX reorder queue error
+     */
+    (rTLX_FIR, bit(14)) ? ocmb_M_th1_UERE;
+
+    /** TLX_FIR[15]
+     *  TLXT invalid configuration
+     */
+    (rTLX_FIR, bit(15)) ? ocmb_M_th1;
+
+    /** TLX_FIR[16]
+     *  TLXR is dropping commands after a fatal error
+     */
+    (rTLX_FIR, bit(16)) ? defaultMaskedError;
+
+    /** TLX_FIR[17]
+     *  Malformed OC packet received
+     */
+    (rTLX_FIR, bit(17)) ? omi_bus_th1_UERE;
+
+    /** TLX_FIR[18]
+     *  Protocol error detected in OC downstream sequence
+     */
+    (rTLX_FIR, bit(18)) ? omi_bus_th1_UERE;
+
+    /** TLX_FIR[19]
+     *  Legal OC command not supported
+     */
+    (rTLX_FIR, bit(19)) ? omi_bus_th1_UERE;
+
+    /** TLX_FIR[20]
+     *  Legal OC command length not supported
+     */
+    (rTLX_FIR, bit(20)) ? omi_bus_th1_UERE;
+
+    /** TLX_FIR[21]
+     *  TLXR OC Misaligned
+     */
+    (rTLX_FIR, bit(21)) ? omi_bus_th1_UERE;
+
+    /** TLX_FIR[22]
+     *  MMIO returned non-zero response to a write
+     */
+    (rTLX_FIR, bit(22)) ? defaultMaskedError;
+
+    /** TLX_FIR[23]
+     *  Hardware error in TLXR control logic
+     */
+    (rTLX_FIR, bit(23)) ? ocmb_M_th1_UERE;
+
+    /** TLX_FIR[24]
+     *  TLXR Info Event
+     */
+    (rTLX_FIR, bit(24)) ? defaultMaskedError;
+
+    /** TLX_FIR[25]
+     *  TLXR detected internal error
+     */
+    (rTLX_FIR, bit(25)) ? ocmb_M_th1_UERE;
+
+    /** TLX_FIR[26]
+     *  TLXR Threshold errors
+     */
+    (rTLX_FIR, bit(26)) ? ocmb_M_th_32perDay;
+
+    /** TLX_FIR[27]
+     *  Trace_Stop from TLXR
+     */
+    (rTLX_FIR, bit(27)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# Odyssey chip DLX_FIR
+################################################################################
+
+rule rDLX_FIR
+{
+  CHECK_STOP:
+    DLX_FIR & ~DLX_FIR_MASK & DLX_FIR_CFG_CS;
+  RECOVERABLE:
+    DLX_FIR & ~DLX_FIR_MASK & DLX_FIR_CFG_RE;
+  UNIT_CS:
+    DLX_FIR & ~DLX_FIR_MASK & DLX_FIR_CFG_UCS;
+  HOST_ATTN:
+    DLX_FIR & ~DLX_FIR_MASK & DLX_FIR_CFG_SPA;
+};
+
+group gDLX_FIR
+    filter singlebit,
+           cs_root_cause(2)
+{
+    /** DLX_FIR[0]
+     *  Internal parity error in SCOM component
+     */
+    (rDLX_FIR, bit(0)) ? defaultMaskedError;
+
+    /** DLX_FIR[1]
+     *  DL0 fatal error
+     */
+    (rDLX_FIR, bit(1)) ? analyze(gDLX_ERR_RPT);
+
+    /** DLX_FIR[2]
+     *  DL0 buffer UE / insufficient working lanes
+     */
+    (rDLX_FIR, bit(2)) ? ocmb_M_th1_UERE;
+
+    /** DLX_FIR[3]
+     *  DL0 CE on TL flit
+     */
+    (rDLX_FIR, bit(3)) ? ocmb_M_th_32perDay;
+
+    /** DLX_FIR[4]
+     *  DL0 detected a CRC error
+     */
+    (rDLX_FIR, bit(4)) ? omi_bus_info_only;
+
+    /** DLX_FIR[5]
+     *  DL0 received a nack
+     */
+    (rDLX_FIR, bit(5)) ? defaultMaskedError;
+
+    /** DLX_FIR[6]
+     *  DL0 running in degraded mode
+     */
+    (rDLX_FIR, bit(6)) ? omi_degraded_mode;
+
+    /** DLX_FIR[7]
+     *  DL0 parity error detection on a lane
+     */
+    (rDLX_FIR, bit(7)) ? omi_bus_info_only;
+
+    /** DLX_FIR[8]
+     *  DL0 retrained due to no forward progress
+     */
+    (rDLX_FIR, bit(8)) ? omi_bus_th_32perDay;
+
+    /** DLX_FIR[9]
+     *  DL0 remote side initiated a retrain
+     */
+    (rDLX_FIR, bit(9)) ? defaultMaskedError;
+
+    /** DLX_FIR[10]
+     *  DL0 retrain due to internal error or software
+     */
+    (rDLX_FIR, bit(10)) ? omi_bus_th_32perDay;
+
+    /** DLX_FIR[11]
+     *  DL0 threshold reached
+     */
+    (rDLX_FIR, bit(11)) ? omi_bus_th_32perDay;
+
+    /** DLX_FIR[12]
+     *  DL0 trained
+     */
+    (rDLX_FIR, bit(12)) ? defaultMaskedError;
+
+    /** DLX_FIR[13]
+     *  DL0 received replay flit with link_errors bit 0
+     */
+    (rDLX_FIR, bit(13)) ? defaultMaskedError;
+
+    /** DLX_FIR[14]
+     *  DL0 received replay flit with link_errors bit 1
+     */
+    (rDLX_FIR, bit(14)) ? defaultMaskedError;
+
+    /** DLX_FIR[15]
+     *  DL0 received replay flit with link_errors bit 2
+     */
+    (rDLX_FIR, bit(15)) ? defaultMaskedError;
+
+    /** DLX_FIR[16]
+     *  DL0 received replay flit with link_errors bit 3
+     */
+    (rDLX_FIR, bit(16)) ? defaultMaskedError;
+
+    /** DLX_FIR[17]
+     *  DL0 received replay flit with link_errors bit 4
+     */
+    (rDLX_FIR, bit(17)) ? defaultMaskedError;
+
+    /** DLX_FIR[18]
+     *  DL0 received replay flit with link_errors bit 5
+     */
+    (rDLX_FIR, bit(18)) ? defaultMaskedError;
+
+    /** DLX_FIR[19]
+     *  DL0 received replay flit with link_errors bit 6
+     */
+    (rDLX_FIR, bit(19)) ? defaultMaskedError;
+
+    /** DLX_FIR[20]
+     *  DL0 received replay flit with link_errors bit 7
+     */
+    (rDLX_FIR, bit(20)) ? defaultMaskedError;
+
+    /** DLX_FIR[21]
+     *  DL0 skitter error
+     */
+    (rDLX_FIR, bit(21)) ? ocmb_M_info_only_th1;
+
+    /** DLX_FIR[22]
+     *  DL0 skitter drift detected
+     */
+    (rDLX_FIR, bit(22)) ? omi_bus_th_32perDay;
+
+    /** DLX_FIR[23:63]
+     *  reserved
+     */
+    (rDLX_FIR, bit(23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# Odyssey chip DLX_ERR_RPT
+################################################################################
+
+rule rDLX_ERR_RPT
+{
+  CHECK_STOP:
+    DLX_ERR_RPT & `0000000000003FFF`;
+  RECOVERABLE:
+    DLX_ERR_RPT & `0000000000003FFF`;
+  UNIT_CS:
+    DLX_ERR_RPT & `0000000000003FFF`;
+  HOST_ATTN:
+    DLX_ERR_RPT & `0000000000003FFF`;
+};
+
+group gDLX_ERR_RPT
+    filter singlebit,
+           cs_root_cause(50,51,52,53,54,55,56,57,58,59,60,61,62,63)
+{
+    /** DLX_ERR_RPT[50]
+     *  buffer UE
+     */
+    (rDLX_ERR_RPT, bit(50)) ? TBDDefaultCallout;
+
+    /** DLX_ERR_RPT[51]
+     *  insufficient working lanes
+     */
+    (rDLX_ERR_RPT, bit(51)) ? TBDDefaultCallout;
+
+    /** DLX_ERR_RPT[52]
+     *  bad CRC from TLXT
+     */
+    (rDLX_ERR_RPT, bit(52)) ? ocmb_M_th1_UERE;
+
+    /** DLX_ERR_RPT[53]
+     *  flit hammer
+     */
+    (rDLX_ERR_RPT, bit(53)) ? ocmb_M_th1_UERE;
+
+    /** DLX_ERR_RPT[54]
+     *  TX lane reversal
+     */
+    (rDLX_ERR_RPT, bit(54)) ? omi_bus_th1_UERE;
+
+    /** DLX_ERR_RPT[55]
+     *  RX receiving slow A
+     */
+    (rDLX_ERR_RPT, bit(55)) ? ocmb_M_th1_UERE;
+
+    /** DLX_ERR_RPT[56]
+     *  RX receiving illegal run length
+     */
+    (rDLX_ERR_RPT, bit(56)) ? omi_bus_th1_UERE;
+
+    /** DLX_ERR_RPT[57]
+     *  control parity error
+     */
+    (rDLX_ERR_RPT, bit(57)) ? ocmb_M_th1_UERE;
+
+    /** DLX_ERR_RPT[58]
+     *  scom register parity error
+     */
+    (rDLX_ERR_RPT, bit(58)) ? ocmb_M_th1_UERE;
+
+    /** DLX_ERR_RPT[59]
+     *  truncated flit from TL
+     */
+    (rDLX_ERR_RPT, bit(59)) ? ocmb_M_th1_UERE;
+
+    /** DLX_ERR_RPT[60]
+     *  illegal run length from TL
+     */
+    (rDLX_ERR_RPT, bit(60)) ? ocmb_M_th1_UERE;
+
+    /** DLX_ERR_RPT[61]
+     *  ack pointer overflow
+     */
+    (rDLX_ERR_RPT, bit(61)) ? omi_bus_th1_UERE;
+
+    /** DLX_ERR_RPT[62]
+     *  UE on bus from TLXT
+     */
+    (rDLX_ERR_RPT, bit(62)) ? ocmb_M_th1_UERE;
+
+    /** DLX_ERR_RPT[63]
+     *  ECC UE on dword containing run length
+     */
+    (rDLX_ERR_RPT, bit(63)) ? ocmb_M_th1_UERE;
+};
+
+################################################################################
+# Odyssey chip ODP_FIR 0
+################################################################################
+
+rule rODP_FIR_0
+{
+  CHECK_STOP:
+    ODP_FIR_0 & ~ODP_FIR_MASK_0 & ODP_FIR_CFG_CS_0;
+  RECOVERABLE:
+    ODP_FIR_0 & ~ODP_FIR_MASK_0 & ODP_FIR_CFG_RE_0;
+  UNIT_CS:
+    ODP_FIR_0 & ~ODP_FIR_MASK_0 & ODP_FIR_CFG_UCS_0;
+  HOST_ATTN:
+    ODP_FIR_0 & ~ODP_FIR_MASK_0 & ODP_FIR_CFG_SPA_0;
+};
+
+group gODP_FIR_0
+    filter singlebit,
+           cs_root_cause
+{
+    /** ODP_FIR_0[0]
+     *  Internal parity error
+     */
+    (rODP_FIR_0, bit(0)) ? defaultMaskedError;
+
+    /** ODP_FIR_0[1]
+     *  SCOM2APB state machine parity error
+     */
+    (rODP_FIR_0, bit(1)) ? mem_port0_M_th1;
+
+    /** ODP_FIR_0[2]
+     *  Write data parity error
+     */
+    (rODP_FIR_0, bit(2)) ? mem_port0_M_th1;
+
+    /** ODP_FIR_0[3]
+     *  APB responder error
+     */
+    (rODP_FIR_0, bit(3)) ? mem_port0_M_th1;
+
+    /** ODP_FIR_0[4]
+     *  ODPCTRL register parity error
+     */
+    (rODP_FIR_0, bit(4)) ? mem_port0_M_th1;
+
+    /** ODP_FIR_0[5]
+     *  PHY error
+     */
+    (rODP_FIR_0, bit(5)) ? defaultMaskedError;
+
+    /** ODP_FIR_0[6]
+     *  PHY Sticky Unlock Error
+     */
+    (rODP_FIR_0, bit(6)) ? mem_port0_M_th1;
+
+    /** ODP_FIR_0[7]
+     *  Bsi Interrupt occurred
+     */
+    (rODP_FIR_0, bit(7)) ? defaultMaskedError;
+
+    /** ODP_FIR_0[8]
+     *  ANIB Receive Error
+     */
+    (rODP_FIR_0, bit(8)) ? defaultMaskedError;
+
+    /** ODP_FIR_0[9]
+     *  Parity Error (even parity) for D5ACSM Channel 1 Pa
+     */
+    (rODP_FIR_0, bit(9)) ? mem_port0_M_th1;
+
+    /** ODP_FIR_0[10]
+     *  Parity Error (even parity) for D5ACSM Channel 0 Pa
+     */
+    (rODP_FIR_0, bit(10)) ? mem_port0_M_th1;
+
+    /** ODP_FIR_0[11]
+     *  PHY RX FIFO Check Error
+     */
+    (rODP_FIR_0, bit(11)) ? mem_port0_M_th1;
+
+    /** ODP_FIR_0[12]
+     *  PHY RX TX PPT Error
+     */
+    (rODP_FIR_0, bit(12)) ? mem_port0_M_th1;
+
+    /** ODP_FIR_0[13]
+     *  PHY ECC Error ARC ECC Interrupt
+     */
+    (rODP_FIR_0, bit(13)) ? mem_port0_M_th1;
+
+    /** ODP_FIR_0[14:18]
+     *  Reserved Firmware Interrupt
+     */
+    (rODP_FIR_0, bit(14|15|16|17|18)) ? defaultMaskedError;
+
+    /** ODP_FIR_0[19]
+     *  PHY Training Failure Interrupt
+     */
+    (rODP_FIR_0, bit(19)) ? defaultMaskedError;
+
+    /** ODP_FIR_0[20]
+     *  PHY Initialization Complete Interrupt
+     */
+    (rODP_FIR_0, bit(20)) ? defaultMaskedError;
+
+    /** ODP_FIR_0[21]
+     *  PHY Training Complete Interrupt
+     */
+    (rODP_FIR_0, bit(21)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# Odyssey chip ODP_FIR 1
+################################################################################
+
+rule rODP_FIR_1
+{
+  CHECK_STOP:
+    ODP_FIR_1 & ~ODP_FIR_MASK_1 & ODP_FIR_CFG_CS_1;
+  RECOVERABLE:
+    ODP_FIR_1 & ~ODP_FIR_MASK_1 & ODP_FIR_CFG_RE_1;
+  UNIT_CS:
+    ODP_FIR_1 & ~ODP_FIR_MASK_1 & ODP_FIR_CFG_UCS_1;
+  HOST_ATTN:
+    ODP_FIR_1 & ~ODP_FIR_MASK_1 & ODP_FIR_CFG_SPA_1;
+};
+
+group gODP_FIR_1
+    filter singlebit,
+           cs_root_cause
+{
+    /** ODP_FIR_1[0]
+     *  Internal parity error
+     */
+    (rODP_FIR_1, bit(0)) ? defaultMaskedError;
+
+    /** ODP_FIR_1[1]
+     *  SCOM2APB state machine parity error
+     */
+    (rODP_FIR_1, bit(1)) ? mem_port1_M_th1;
+
+    /** ODP_FIR_1[2]
+     *  Write data parity error
+     */
+    (rODP_FIR_1, bit(2)) ? mem_port1_M_th1;
+
+    /** ODP_FIR_1[3]
+     *  APB responder error
+     */
+    (rODP_FIR_1, bit(3)) ? mem_port1_M_th1;
+
+    /** ODP_FIR_1[4]
+     *  ODPCTRL register parity error
+     */
+    (rODP_FIR_1, bit(4)) ? mem_port1_M_th1;
+
+    /** ODP_FIR_1[5]
+     *  PHY error
+     */
+    (rODP_FIR_1, bit(5)) ? defaultMaskedError;
+
+    /** ODP_FIR_1[6]
+     *  PHY Sticky Unlock Error
+     */
+    (rODP_FIR_1, bit(6)) ? mem_port1_M_th1;
+
+    /** ODP_FIR_1[7]
+     *  Bsi Interrupt occurred
+     */
+    (rODP_FIR_1, bit(7)) ? defaultMaskedError;
+
+    /** ODP_FIR_1[8]
+     *  ANIB Receive Error
+     */
+    (rODP_FIR_1, bit(8)) ? defaultMaskedError;
+
+    /** ODP_FIR_1[9]
+     *  Parity Error (even parity) for D5ACSM Channel 1 Pa
+     */
+    (rODP_FIR_1, bit(9)) ? mem_port1_M_th1;
+
+    /** ODP_FIR_1[10]
+     *  Parity Error (even parity) for D5ACSM Channel 0 Pa
+     */
+    (rODP_FIR_1, bit(10)) ? mem_port1_M_th1;
+
+    /** ODP_FIR_1[11]
+     *  PHY RX FIFO Check Error
+     */
+    (rODP_FIR_1, bit(11)) ? mem_port1_M_th1;
+
+    /** ODP_FIR_1[12]
+     *  PHY RX TX PPT Error
+     */
+    (rODP_FIR_1, bit(12)) ? mem_port1_M_th1;
+
+    /** ODP_FIR_1[13]
+     *  PHY ECC Error ARC ECC Interrupt
+     */
+    (rODP_FIR_1, bit(13)) ? mem_port1_M_th1;
+
+    /** ODP_FIR_1[14:18]
+     *  Reserved Firmware Interrupt
+     */
+    (rODP_FIR_1, bit(14|15|16|17|18)) ? defaultMaskedError;
+
+    /** ODP_FIR_1[19]
+     *  PHY Training Failure Interrupt
+     */
+    (rODP_FIR_1, bit(19)) ? defaultMaskedError;
+
+    /** ODP_FIR_1[20]
+     *  PHY Initialization Complete Interrupt
+     */
+    (rODP_FIR_1, bit(20)) ? defaultMaskedError;
+
+    /** ODP_FIR_1[21]
+     *  PHY Training Complete Interrupt
+     */
+    (rODP_FIR_1, bit(21)) ? defaultMaskedError;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the actions defined for this target
+.include "odyssey_ocmb_actions.rule";
+
