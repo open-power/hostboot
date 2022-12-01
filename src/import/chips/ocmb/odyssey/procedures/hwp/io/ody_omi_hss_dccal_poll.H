@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/ody_omi_setup.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/ody_omi_hss_dccal_poll.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,20 +22,20 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <fapi2.H>
 ///------------------------------------------------------------------------------
-/// @file ody_omi_setup.H
-/// @brief Setup OMI DL
+/// @file ody_omi_hss_dccal_poll.H
+/// @brief Polls DC cal
 ///
 /// *HWP HW Maintainer : Josh Chica <josh.chica@ibm.com>
 /// *HWP FW Maintainer :
 /// *HWP Consumed by: SBE
 ///------------------------------------------------------------------------------
+#include <fapi2.H>
 
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
-typedef fapi2::ReturnCode (*ody_omi_setup_FP_t)(
+typedef fapi2::ReturnCode (*ody_omi_hss_dccal_poll_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
 
 //------------------------------------------------------------------------------
@@ -46,12 +46,12 @@ extern "C"
 {
 
 ///
-/// @brief Setup OMI DL
+/// @brief Polls DC cal
 ///
 /// @param[in] i_target Chip target to start
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-    fapi2::ReturnCode ody_omi_setup(
+    fapi2::ReturnCode ody_omi_hss_dccal_poll(
         const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 } // extern "C"

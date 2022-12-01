@@ -22,7 +22,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
+///------------------------------------------------------------------------------
+/// @file ody_omi_setup.C
+/// @brief Setup OMI DL
+///
+/// *HWP HW Maintainer : Josh Chica <josh.chica@ibm.com>
+/// *HWP FW Maintainer :
+/// *HWP Consumed by: SBE
+///------------------------------------------------------------------------------
 #include <ody_omi_setup.H>
 #include <ody_io_ppe_common.H>
 #include <ody_scom_omi.H>

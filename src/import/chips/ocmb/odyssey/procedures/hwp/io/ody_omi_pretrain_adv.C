@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/ody_omi_setup.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/ody_omi_pretrain_adv.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,36 +22,28 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <fapi2.H>
-///------------------------------------------------------------------------------
-/// @file ody_omi_setup.H
-/// @brief Setup OMI DL
 ///
-/// *HWP HW Maintainer : Josh Chica <josh.chica@ibm.com>
-/// *HWP FW Maintainer :
+/// @file ody_omi_pretrain_adv.C
+/// @brief Runs final adjustments before training
+///
+/// *HWP HW Maintainer: Josh Chica <josh.chica@ibm.com>
+/// *HWP FW Maintainer:
 /// *HWP Consumed by: SBE
-///------------------------------------------------------------------------------
+///
 
 //------------------------------------------------------------------------------
-// Structure definitions
+// Includes
 //------------------------------------------------------------------------------
-typedef fapi2::ReturnCode (*ody_omi_setup_FP_t)(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+#include <ody_omi_pretrain_adv.H>
 
 //------------------------------------------------------------------------------
-// Function prototypes
+// Function definitions
 //------------------------------------------------------------------------------
-
-extern "C"
+fapi2::ReturnCode ody_omi_pretrain_adv(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
+    FAPI_DBG("Start");
 
-///
-/// @brief Setup OMI DL
-///
-/// @param[in] i_target Chip target to start
-///
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-    fapi2::ReturnCode ody_omi_setup(
-        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
-
-} // extern "C"
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/ody_omi_setup.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/ody_omi_hss_ppe_start.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,36 +22,25 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include <fapi2.H>
 ///------------------------------------------------------------------------------
-/// @file ody_omi_setup.H
-/// @brief Setup OMI DL
+/// @file ody_omi_hss_ppe_start.H
+/// @brief Header file for Odyssey hss PPE start HWP
 ///
 /// *HWP HW Maintainer : Josh Chica <josh.chica@ibm.com>
 /// *HWP FW Maintainer :
 /// *HWP Consumed by: SBE
 ///------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// Structure definitions
-//------------------------------------------------------------------------------
-typedef fapi2::ReturnCode (*ody_omi_setup_FP_t)(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+#pragma once
+#include <fapi2.H>
 
-//------------------------------------------------------------------------------
-// Function prototypes
-//------------------------------------------------------------------------------
+// Function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*ody_omi_hss_ppe_start_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
 
 extern "C"
 {
-
-///
-/// @brief Setup OMI DL
-///
-/// @param[in] i_target Chip target to start
-///
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-    fapi2::ReturnCode ody_omi_setup(
-        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
-
-} // extern "C"
+    /// @brief Starts Odyssey's HSS PPE
+    /// @param[in]  i_target  Reference to TARGET_TYPE_OCMB_CHIP target
+    /// @return  FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode ody_omi_hss_ppe_start(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+}

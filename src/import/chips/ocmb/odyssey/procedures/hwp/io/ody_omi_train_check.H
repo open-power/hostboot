@@ -22,6 +22,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///------------------------------------------------------------------------------
+/// @file ody_omi_train_check.H
+/// @brief Check OMI training
+///
+/// *HWP HW Maintainer : Josh Chica <josh.chica@ibm.com>
+/// *HWP FW Maintainer :
+/// *HWP Consumed by: SBE
+///------------------------------------------------------------------------------
 #include <fapi2.H>
 
 //------------------------------------------------------------------------------
