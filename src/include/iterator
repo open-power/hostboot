@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,7 @@
 #ifndef __STL_ITERATOR
 #define __STL_ITERATOR
 
+#include <utility>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -174,6 +175,12 @@ class back_insert_iterator
         back_insert_iterator& operator=(const value_type& v)
         {
             sequence.push_back(v);
+            return *this;
+        }
+
+        back_insert_iterator& operator=(value_type&& v)
+        {
+            sequence.push_back(std::move(v));
             return *this;
         }
 

@@ -789,6 +789,62 @@ class STLTest : public CxxTest::TestSuite
                 TS_FAIL("Vector shrink_to_fit capacity incorrect: cap=%d",
                         v2.capacity());
             }
+
+            // Vector of non-copyable objects.
+            class Foo
+            {
+              public:
+                Foo() = default;
+                explicit Foo(int i) : iv_i(i) {}
+
+                // make non-copyable
+                Foo(const Foo&) = delete;
+                Foo& operator=(const Foo&) = delete;
+
+                // make movable
+                Foo(Foo&&) = default;
+                Foo& operator=(Foo&&) = default;
+
+                int get() const { return iv_i; }
+
+              private:
+                int iv_i = 0xff;
+            };
+
+            std::vector<Foo> v3;
+            v3.reserve(5);      // capacity is at least 5, could be more.
+            v3.shrink_to_fit(); // capacity is exactly 5.
+
+            // Add data under to capacity
+            v3.emplace(v3.end(),       2); // 2
+            v3.emplace(v3.begin(),     0); // 0 2
+            v3.emplace(v3.begin() + 1, 1); // 0 1 2
+            v3.emplace(v3.end(),       3); // 0 1 2 3
+            v3.emplace_back(4);            // 0 1 2 3 4
+
+            // Capacity should not have changed.
+            if (v3.size() != v3.capacity())
+            {
+                TS_FAIL("Vector emplace under capacity failed: size=%d, "
+                        "capacity=%d", v3.size(), v3.capacity());
+            }
+
+            // Add data at capacity.
+            v3.shrink_to_fit(); v3.emplace(v3.begin(),     5); //5 0 1 2 3 4
+            v3.shrink_to_fit(); v3.emplace(v3.begin() + 3, 6); //5 0 1 6 2 3 4
+            v3.shrink_to_fit(); v3.emplace(v3.end()   - 1, 7); //5 0 1 6 2 3 7 4
+            v3.shrink_to_fit(); v3.emplace(v3.end(),       8); //5 0 1 6 2 3 7 4 8
+
+            int exp[] = {5, 0, 1, 6, 2, 3, 7, 4, 8};
+
+            for (std::vector<Foo>::size_type i = 0; i < v3.size(); ++i)
+            {
+                if (exp[i] != v3[i].get())
+                {
+                    TS_FAIL("Vector emplace under capacity failed: "
+                            "exp[%d]=%d, v3[%d]=%d", i, exp[i], i, v3[i].get());
+                }
+            }
         }
 
         template<typename T> struct ForEachFunctor

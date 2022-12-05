@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,13 @@
 #include <utility>
 
 #ifdef __cplusplus
+
+#if (202002L <= __cplusplus)
+  #define CPP20_CONSTEXPR constexpr
+#else
+  #define CPP20_CONSTEXPR
+#endif
+
 namespace std
 {
     /**
@@ -76,6 +83,32 @@ namespace std
             *result = *last;
         }
         return result;
+    }
+
+    /** Since C++11. */
+    template <class InputIt, class OutputIt>
+    inline CPP20_CONSTEXPR
+    OutputIt move(InputIt first, InputIt last, OutputIt d_first)
+    {
+        while (first != last)
+        {
+            *d_first++ = std::move(*first++);
+        }
+
+        return d_first;
+    }
+
+    /** Since C++11. */
+    template <class BidirIt1, class BidirIt2>
+    inline CPP20_CONSTEXPR
+    BidirIt2 move_backward(BidirIt1 first, BidirIt1 last, BidirIt2 d_last)
+    {
+        while (first != last)
+        {
+            *(--d_last) = std::move(*(--last));
+        }
+
+        return d_last;
     }
 
     /**

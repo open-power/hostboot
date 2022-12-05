@@ -573,6 +573,27 @@ namespace std
                     iv_finish = iv_start + n;
                 }
 
+                #if (__cplusplus < 201703L)
+
+                /** Since C++11, until C++17. */
+                template<class... Args>
+                void emplace_back(Args&&... args)
+                {
+                    reserve(size() + 1);
+                    new (iv_finish++) T(std::forward<Args>(args)...);
+                }
+
+                #elif (201703L <= __cplusplus)
+
+                /** Since C++17. */
+                template<class... Args>
+                CPP20_CONSTEXPR reference emplace_back(Args&&... args)
+                {
+                    reserve(size() + 1);
+                    return *new (iv_finish++) T(std::forward<Args>(args)...);
+                }
+
+                #endif
 
                 /**
                  * Add element to the back of the container
@@ -611,6 +632,11 @@ namespace std
                 {
                     erase(iv_finish-1,iv_finish);
                 }
+
+                /** Since C++11. */
+                template <class... Args>
+                CPP20_CONSTEXPR
+                iterator emplace(const_iterator pos, Args&&... args);
 
                 /**
                  * Insert an element into the container at a given position
@@ -923,6 +949,64 @@ namespace std
     }
 
 }; // end namespace std
+
+// -----------------------------------------------------------------------------
+
+template <class T>
+template <class... Args>
+CPP20_CONSTEXPR typename
+std::vector<T>::iterator std::vector<T>::emplace(const_iterator pos,
+                                                 Args&&... args)
+{
+    auto new_size = size() + 1;
+
+    auto dist = std::distance<const_iterator>(begin(), pos);
+
+    iterator new_pos {};
+
+    if (capacity() < new_size) // need to allocate more space
+    {
+        // We could simply call reserve(new_size) on this vector, but that
+        // could result in moving the entire vector twice (once in reserve()
+        // and once here). Instead, start with the inevitable new array and
+        // move the data only once.
+
+        // Use the default constructor then call reserve() on the new vector
+        // instead of the constructor that allocates space. This is because
+        // reserve() only allocates new capacity to the empty vector, where the
+        // constructor will fill the vector with default objects.
+        vector<T> new_vec;
+        new_vec.reserve(new_size);
+
+        // Move everything up to `pos` to the end of the new vector.
+        std::move(begin(), begin() + dist, std::back_inserter(new_vec));
+
+        // Create the new object at the end of the new vector.
+        new_vec.emplace_back(std::forward<Args>(args)...);
+
+        // Get the iterator to the newly created object.
+        new_pos = new_vec.end() - 1;
+
+        // Move everything from `pos` to the end of the new vector.
+        std::move(begin() + dist, end(), std::back_inserter(new_vec));
+
+        // Finally, swap this vector with the new vector.
+        swap(new_vec);
+    }
+    else // already have the capacity to insert the new object
+    {
+        // Need a non-const iterator of the target `pos`.
+        new_pos = begin() + dist;
+
+        // Shift everything from `pos` to the right one position.
+        std::move_backward(new_pos, end(), ++iv_finish);
+
+        // Create the new object at `pos`.
+        new (new_pos) T(std::forward<Args>(args)...);
+    }
+
+    return new_pos;
+}
 
 // ------------------------------------------------------------------------------------------------
 
