@@ -46,6 +46,34 @@ namespace ody
 
 namespace ib
 {
+
+//--------------------------------------------------------------------------------
+// Read operations
+//--------------------------------------------------------------------------------
+
+/// @brief Reads 64 bits of data from MMIO space on the selected Odyssey
+///
+/// @param[in] i_target     The Odyssey chip to read data from
+/// @param[in] i_addr       The address to read
+/// @param[out] o_data      The data read from the address
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode getMMIO64(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint64_t i_addr,
+    fapi2::buffer<uint64_t>& o_data)
+{
+    uint64_t l_rd = 0;
+    std::vector<uint8_t> l_data(8);
+    uint32_t l_idx = 0;
+    FAPI_TRY(fapi2::getMMIO(i_target, ODY_IB_MMIO_OFFSET | i_addr, 8, l_data));
+    readLE(l_data, l_idx, l_rd);
+    o_data = l_rd;
+fapi_try_exit:
+    FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t)fapi2::current_err);
+    return fapi2::current_err;
+}
+
 /// @brief Reads 32 bits of data from OpenCAPI config space on the selected Odyssey
 ///
 /// @param[in] i_target     The Odyssey chip to read data from
@@ -82,6 +110,28 @@ fapi2::ReturnCode getOCCfg(
 fapi_try_exit:
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t)fapi2::current_err);
     return fapi2::current_err;
+}
+
+//--------------------------------------------------------------------------------
+// Write operations
+//--------------------------------------------------------------------------------
+
+/// @brief Writes 64 bits of data to MMIO space to the selected Odyssey
+///
+/// @param[in] i_target     The Odyssey chip to write
+/// @param[in] i_addr       The address to write
+/// @param[in] i_data       The data to write
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode putMMIO64(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const uint64_t i_addr,
+    const fapi2::buffer<uint64_t>& i_data)
+{
+    uint64_t l_v = static_cast<uint64_t>(i_data);
+    std::vector<uint8_t> l_wd;
+    forceLE(l_v, l_wd);
+    return fapi2::putMMIO(i_target, ODY_IB_MMIO_OFFSET | i_addr, 8, l_wd);
 }
 
 /// @brief Writes 32 bits of data to OpenCAPI config space
