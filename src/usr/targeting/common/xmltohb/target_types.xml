@@ -2307,6 +2307,9 @@
       <id>DECONFIG_GARDABLE</id>
     </attribute>
     <attribute>
+      <id>FAPI_I2C_CONTROL_INFO</id>
+    </attribute>
+    <attribute>
       <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
       <!-- GARD_APPLIED, RESRC_RECOV, GARD -->
       <default>0x00000031</default>

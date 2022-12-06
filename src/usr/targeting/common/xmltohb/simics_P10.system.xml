@@ -75,9 +75,10 @@
      *     Each OCMB_CHIP has 2 MEM_PORTs
      *         Each MEM_PORT is connected to 1 DIMM (+1 in reserve for dual-drop)
      *     Each OCMB_CHIP is connected to
-     *           - 2 PMICs,POWER_IC, and TEMP_SENSORS for 2U DDIMMs
-     *           - 4 PMICS,POWER_IC, and TEMP_SENSORS for 4U DDIMMs
+     *           - 2 PMICs, 0 POWER_IC, and ? TEMP_SENSORS for 2U DDIMMs
+     *           - 4 PMICS, 4 POWER_IC, and 4 TEMP_SENSORS for 4U DDIMMs
      *     Each OCMB_CHIP on DDR5 4U DDIMMs is connected to 1 ADC and 0 GPIO Expanders
+     *     Each OCMB_CHIP on DDR5 2U DDIMMs is connected to 0 ADC and 0 GPIO Expanders
 
      This model contains:
      - 1 Dual Chip Module (DCM) with 2 P10 chips
@@ -17482,6 +17483,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p00</default>
     </attribute>
@@ -17513,6 +17523,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -17548,6 +17567,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-2</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p02</default>
     </attribute>
@@ -17579,6 +17607,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -17614,6 +17651,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p04</default>
     </attribute>
@@ -17645,6 +17691,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -17680,6 +17735,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-2</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p06</default>
     </attribute>
@@ -17711,6 +17775,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -17746,6 +17819,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p08</default>
     </attribute>
@@ -17777,6 +17859,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -17812,6 +17903,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-2</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p10</default>
     </attribute>
@@ -17843,6 +17943,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -17879,6 +17988,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p12</default>
     </attribute>
@@ -17910,6 +18028,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -17945,6 +18072,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-2</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p14</default>
     </attribute>
@@ -17976,6 +18112,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -18011,6 +18156,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p16</default>
     </attribute>
@@ -18042,6 +18196,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -18077,6 +18240,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-2</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p18</default>
     </attribute>
@@ -18108,6 +18280,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -18143,6 +18324,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p20</default>
     </attribute>
@@ -18174,6 +18364,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -18209,6 +18408,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-2</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p22</default>
     </attribute>
@@ -18240,6 +18448,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -18275,6 +18492,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p24</default>
     </attribute>
@@ -18306,6 +18532,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -18341,6 +18576,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-2</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p26</default>
     </attribute>
@@ -18372,6 +18616,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -18408,6 +18661,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p28</default>
     </attribute>
@@ -18439,6 +18701,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -18474,6 +18745,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-2</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p30</default>
     </attribute>
@@ -18505,6 +18785,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -18540,6 +18829,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-0</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p32</default>
     </attribute>
@@ -18571,6 +18869,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -18606,6 +18913,15 @@
         <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-2</default>
     </attribute>
     <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p34</default>
     </attribute>
@@ -18637,6 +18953,15 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/power_ic-3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_I2C_CONTROL_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>devAddr</id><value>0xFF</value></field>
+        </default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>

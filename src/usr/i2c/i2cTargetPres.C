@@ -319,7 +319,8 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
                                     int64_t i_accessType,
                                     va_list i_args)
 {
-    assert(1 == io_buflen, "Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(1 == io_buflen, "pmicI2CPresencePerformOp(): Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(nullptr != io_buffer, "pmicI2CPresencePerformOp(): Expected a non-null io_buffer");
 
     errlHndl_t l_errl = nullptr;
     bool l_pmicPresent = false;
@@ -421,7 +422,8 @@ errlHndl_t mdsI2CPresencePerformOp(DeviceFW::OperationType,    // DD framework p
                                    size_t& io_buflen,
                                    int64_t, va_list) // DD framework parameters, not used
 {
-    assert(1 == io_buflen, "Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(1 == io_buflen, "mdsI2CPresencePerformOp(): Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(nullptr != o_buffer, "mdsI2CPresencePerformOp(): Expected a non-null i=o_buffer");
 
     errlHndl_t l_errl(nullptr);
 
@@ -513,7 +515,8 @@ errlHndl_t muxI2CPresencePerformOp(DeviceFW::OperationType i_opType,
                                      int64_t i_accessType,
                                      va_list i_args)
 {
-    assert(1 == io_buflen, "Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(1 == io_buflen, "muxI2CPresencePerformOp(): Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(nullptr != io_buffer, "muxI2CPresencePerformOp(): Expected a non-null io_buffer");
 
     bool l_muxPresent = 0;
     errlHndl_t l_errl = nullptr;
@@ -560,7 +563,8 @@ errlHndl_t genericI2CDevicePresencePerformOp(DeviceFW::OperationType i_opType,
                                             int64_t i_accessType,
                                             va_list i_args)
 {
-    assert(1 == io_buflen, "Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(1 == io_buflen, "genericI2CDevicePresencePerformOp(): Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(nullptr != io_buffer, "genericI2CDevicePresencePerformOp(): Expected a non-null io_buffer");
 
     errlHndl_t l_errl = nullptr;
     bool l_gi2cPresent = false;
@@ -653,7 +657,8 @@ errlHndl_t tempSensorPresencePerformOp(DeviceFW::OperationType i_opType,
                                              int64_t i_accessType,
                                              va_list i_args)
 {
-    assert(1 == io_buflen, "tempSensorPresencePerformOp: Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(1 == io_buflen, "tempSensorPresencePerformOp(): Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(nullptr != io_buffer, "tempSensorPresencePerformOp(): Expected a non-null io_buffer");
 
     errlHndl_t l_errl = nullptr;
     bool l_tempSensorPresent = false;
@@ -708,7 +713,8 @@ errlHndl_t powerIcPresencePerformOp(DeviceFW::OperationType i_opType,
                                              int64_t i_accessType,
                                              va_list i_args)
 {
-    assert(1 == io_buflen, "powerIcPresencePerformOp: Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(1 == io_buflen, "powerIcPresencePerformOp(): Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(nullptr != io_buffer, "powerIcPresencePerformOp(): Expected a non-null io_buffer");
 
     errlHndl_t l_errl = nullptr;
     bool l_powerIcPresent = false;
