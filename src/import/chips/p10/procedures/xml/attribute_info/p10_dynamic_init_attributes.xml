@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2020,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2020,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,7 +25,7 @@
 <attributes>
   <attribute>
     <id>ATTR_DYNAMIC_INIT_FEATURE_VEC</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_OCMB_CHIP</targetType>
     <description>
      Bit vector of dynamic init features which are applied 
      when customizing the IPL image. Individual 
