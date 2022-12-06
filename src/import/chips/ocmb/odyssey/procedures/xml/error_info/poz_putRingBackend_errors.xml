@@ -1,0 +1,77 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/ocmb/odyssey/procedures/xml/error_info/poz_putRingBackend_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+
+<hwpErrors>
+  <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_UNSUPPORTED_SCAN_TARGET_TYPE</rc>
+      <description>Unsupported FAPI target type for scanning</description>
+      <ffdc>TARGET</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_SCAN_CHIPLET_NOT_FUNCTIONAL</rc>
+      <description>Attempted to create a single chiplet target for scanning but the requested chiplet is not functional</description>
+      <ffdc>CHIP_TARGET</ffdc>
+      <ffdc>CHIPLET_ID</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_INVALID_SCAN_TARGET_TYPE</rc>
+      <description>Scan image target type does not match expectation based on FAPI target</description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>VALID_TARGET_TYPES</ffdc>
+      <ffdc>RS4_TARGET_TYPE</ffdc>
+      <ffdc>RS4_HEADER</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_CORE_MULTICAST_SCAN_INVALID_ARGS</rc>
+      <description>Core multicast scan attempted with empty core selection or on regions that don't support parallel scan</description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>CORE_SELECT</ffdc>
+      <ffdc>REGIONS</ffdc>
+      <ffdc>RS4_HEADER</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_INVALID_RING_IMAGE</rc>
+      <description>Invalid RS4 header in scan image</description>
+      <ffdc>RS4_HEADER</ffdc>
+      <ffdc>OFFSET</ffdc>
+      <ffdc>MAGIC</ffdc>
+      <ffdc>VERSION</ffdc>
+      <ffdc>VERSION_REQUIRED</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
+  <!-- template
+    <hwpError>
+      <rc>RC_</rc>
+      <description></description>
+      <ffdc></ffdc>
+    </hwpError>
+  -->
+  <!-- ******************************************************************** -->
+</hwpErrors>
