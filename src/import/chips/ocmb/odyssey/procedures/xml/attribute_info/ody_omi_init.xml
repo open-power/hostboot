@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -58,14 +58,14 @@
   <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
   <description>
          Enable Odyssey upstream transmit template 5.
-         Should be enabled by default.
+         Should not be enabled by default.
   </description>
   <valueType>uint8</valueType>
   <enum>
     DISABLED = 0x00,
     ENABLED = 0x01
   </enum>
-  <default>ENABLED</default>
+  <default>DISABLED</default>
   <platInit/>
   <mrwHide/>
   <mssAccessorName>ody_enable_us_tmpl_5</mssAccessorName>
