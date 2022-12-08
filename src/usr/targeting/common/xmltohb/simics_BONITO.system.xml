@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -13912,6 +13912,10 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0</default>
     </attribute>
     <attribute>
+        <id>BUS_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>ocmb:k0:n0:s0:p00</default>
     </attribute>
@@ -13960,6 +13964,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>BUS_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -14012,6 +14020,10 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0</default>
     </attribute>
     <attribute>
+        <id>BUS_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>ocmb:k0:n0:s0:p02</default>
     </attribute>
@@ -14060,6 +14072,10 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0</default>
+    </attribute>
+    <attribute>
+        <id>BUS_POS</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
