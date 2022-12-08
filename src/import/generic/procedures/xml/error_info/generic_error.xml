@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -1916,6 +1916,46 @@
     </callout>
     <deconfigure>
       <target>SMALLER_DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_DDR5_NOT_SUPPORTED</rc>
+    <description>
+        A DDR5 DIMM was plugged when support is not allowed
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+     <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_DRAM_GENERATION_MIXING_NOT_SUPPORTED</rc>
+    <description>
+        Different DRAM generations were plugged on the same backplane which is not supported
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>THIS_DRAM_GEN</ffdc>
+    <ffdc>FIRST_DRAM_GEN</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+     <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
     </deconfigure>
   </hwpError>
 

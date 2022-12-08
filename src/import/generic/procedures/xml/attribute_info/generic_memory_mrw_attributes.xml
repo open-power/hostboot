@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -865,6 +865,17 @@
     <array>50</array>
     <default>0xFFFFFFC009C40000</default>
     <mssAccessorName>mrw_ocmb_safemode_util_array</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_ALLOW_DDR5</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Used for to determine if DDR5 is supported by this system.</description>
+    <valueType>uint8</valueType>
+    <enum>ALLOW = 1, REJECT = 0</enum>
+    <platInit/>
+    <default>REJECT</default>
+    <mssAccessorName>mrw_allow_ddr5</mssAccessorName>
   </attribute>
 
 </attributes>

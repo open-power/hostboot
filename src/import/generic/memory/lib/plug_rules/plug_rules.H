@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -242,6 +242,155 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Plug rule helper for not allowing DDR5 DIMM's to be plugged
+/// @tparam MC mss::mc_type, the memory controller type
+/// @param[in] i_target omic target
+/// @param[in] i_kinds a vector of DIMMs plugged into target
+/// @param[in] i_mrw_allow_ddr5 MRW attribute value noting if DDR5 is allowed
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note This function will commit error logs representing the mixing failure and make UT'ing the attrs easy
+///
+template< mss::mc_type MC >
+fapi2::ReturnCode ddr5_allowed_helper(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                                      const std::vector<mss::dimm::kind<MC>>& i_kinds,
+                                      const uint8_t i_mrw_allow_ddr5)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Check for the DDR5 allowed plug rule
+    if(i_mrw_allow_ddr5 == fapi2::ENUM_ATTR_MSS_MRW_ALLOW_DDR5_ALLOW)
+    {
+        FAPI_INF("%s Attribute set to allow DDR5, skipping check", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Loops through and compares against all the DIMM's
+    for(const auto& l_kind : i_kinds)
+    {
+        // Check for DDR5 DIMM's; if DDR5 is found, then exit out with an error
+        FAPI_ASSERT( (l_kind.iv_dram_generation != fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5),
+                     fapi2::MSS_PLUG_RULES_DDR5_NOT_SUPPORTED()
+                     .set_DIMM_TARGET(l_kind.iv_target),
+                     "%s is a DDR5 DIMM and DDR5 is not allowed on this system",
+                     mss::c_str(l_kind.iv_target));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Plug rule for not allowing DDR5 DIMM's to be plugged
+/// @tparam MC mss::mc_type, the memory controller type
+/// @param[in] i_target omic target
+/// @param[in] i_kinds a vector of DIMMs plugged into target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note This function will commit error logs representing the mixing failure
+///
+template< mss::mc_type MC >
+fapi2::ReturnCode ddr5_allowed(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+                               const std::vector<mss::dimm::kind<MC>>& i_kinds)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_mrw_ddr5_allowed = 0;
+
+    // Get the attribute that notes if DDR5 is allowed or not
+    FAPI_TRY( mss::attr::get_mrw_allow_ddr5(l_mrw_ddr5_allowed) );
+
+    // Helper function so that the attributes can be UT'ed
+    FAPI_TRY(ddr5_allowed_helper(i_target, i_kinds, l_mrw_ddr5_allowed));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Plug rule helper for not allowing any DRAM generation mixing
+/// @tparam MC mss::mc_type, the memory controller type
+/// @param[in] i_kinds a vector of DIMMs plugged into target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note This function will commit error logs representing the mixing failure
+///
+template< mss::mc_type MC >
+fapi2::ReturnCode dram_gen_mixing_helper(const std::vector<mss::dimm::kind<MC>>& i_kinds)
+{
+    // One or fewer DIMM's? then we pass this check automatically
+    constexpr uint64_t CHECK_REQUIRED = 2;
+
+    if(i_kinds.size() < CHECK_REQUIRED)
+    {
+        FAPI_INF("Fewer than 2 DIMM's found, no need to check for DRAM generation mixing");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // We know we should have more than one DIMM passed in
+    const auto& l_kind0 = i_kinds[0];
+
+    // Loops through and compares against all the DIMM's
+    for(const auto& l_kind : i_kinds)
+    {
+        // Check for difference in DRAM generations on the 2 DIMMs'; if different then exit out with an error
+        FAPI_ASSERT( (l_kind.iv_dram_generation == l_kind0.iv_dram_generation),
+                     fapi2::MSS_PLUG_RULES_DRAM_GENERATION_MIXING_NOT_SUPPORTED()
+                     .set_DIMM_TARGET(l_kind.iv_target)
+                     .set_FIRST_DRAM_GEN(l_kind0.iv_dram_generation)
+                     .set_THIS_DRAM_GEN(l_kind.iv_dram_generation),
+                     "%s has two different DRAM generations this:%d vs first dimm:%d. Cannot mix DRAM generations on a system planar",
+                     mss::c_str(l_kind.iv_target), l_kind.iv_dram_generation, l_kind0.iv_dram_generation );
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Plug rule for not allowing any DRAM generation mixing
+/// @tparam MC mss::mc_type, the memory controller type
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note This function will commit error logs representing the mixing failure
+///
+template< mss::mc_type MC >
+fapi2::ReturnCode dram_gen_mixing()
+{
+    std::vector<mss::dimm::kind<MC>> l_kinds;
+
+    for (const auto& l_proc : mss::find_targets<fapi2::TARGET_TYPE_PROC_CHIP>(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>()))
+    {
+        for (const auto& l_omic : mss::find_targets<fapi2::TARGET_TYPE_OMIC>(l_proc))
+        {
+            for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(l_omic))
+            {
+                for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
+                {
+                    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_ocmb))
+                    {
+                        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+                        mss::dimm::kind<MC> l_kind(l_dimm, l_rc);
+                        FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(l_dimm));
+                        l_kinds.push_back(l_kind);
+                    }
+                }
+            }
+        }
+    }
+
+    // Helper function so that the attributes can be UT'ed
+    FAPI_TRY(dram_gen_mixing_helper(l_kinds));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Enforce the plug-rules we can do at the beginning of eff_config_thermal
 /// @tparam MC mss::mc_type, the memory controller type
 /// @param[in] i_target FAPI2 target (ocmb_chip)
@@ -288,6 +437,12 @@ fapi2::ReturnCode enforce_pre_eff_config_thermal(const fapi2::Target<fapi2::TARG
 
     // Checking the plug rule for dimm height mix
     FAPI_TRY( dimm_height_mixing<MC>( l_omic, l_kinds ) );
+
+    // Check if any DDR5 DIMM's are plugged
+    FAPI_TRY( ddr5_allowed<MC>( l_omic, l_kinds ) );
+
+    // Check if any DRAM technology generations are mixed
+    FAPI_TRY( dram_gen_mixing<MC>() );
 
 fapi_try_exit:
     return fapi2::current_err;
