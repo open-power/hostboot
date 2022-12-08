@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,12 @@
 #include <algorithm>
 #include <assert.h>
 #include <initializer_list>
+
+#if (202002L <= __cplusplus)
+  #define CPP20_CONSTEXPR constexpr
+#else
+  #define CPP20_CONSTEXPR
+#endif
 
 namespace std
 {
@@ -361,14 +367,50 @@ namespace std
                     return(size() == 0);
                 }
 
-                 /**
-                  * Reserve storage for a given number of elements
-                  * @param[in] n The requested capacity of the vector
-                  * @pre  None
-                  * @post If current cpacity() < n then new capcity == n; else no change.
-                  *       All previously obtained iterators are invalid
-                  */
-                void reserve(size_type n);
+                /**
+                 * Increases the capacity of the vector to a value that is
+                 * greater than or equal to new_cap.
+                 *
+                 * @param[in] new_cap The new capacity of the vector.
+                 *
+                 * @note Nothing is done if current capacity is greater than or
+                 *       equal to new_cap.
+                 *
+                 * @post new_cap <= capacity()
+                 * @post size() is unchanged
+                 *
+                 * @post If reallocation occured, all iterators and references
+                 *       to the elements are invalidated.
+                 */
+                CPP20_CONSTEXPR void reserve(size_type new_cap)
+                {
+                    size_type c = capacity();
+                    if (c < new_cap)
+                    {
+                        // If new_cap is less than 10% greater than the current
+                        // capacity, increase capacity by 10%.
+                        new_cap = std::max(new_cap, c + ((c + 5) / 10));
+
+                        reallocate(new_cap);
+                    }
+                }
+
+                /**
+                 * Changes current capacity to equal size().
+                 *
+                 * @note Nothing is done if the current capacity equals size().
+                 *
+                 * @post capacity() == size()
+                 *
+                 * @post size() is unchanged
+                 *
+                 * @post If reallocation occured, all iterators and references
+                 *       to the elements are invalidated.
+                 */
+                CPP20_CONSTEXPR void shrink_to_fit()
+                {
+                    reallocate(size());
+                }
 
                 // - Element Access -----------------------------------
 
@@ -806,6 +848,48 @@ namespace std
                  }
 
                 /**
+                 * Changes current capacity by allocating new memory, moving
+                 * current elements, and freeing old memory.
+                 *
+                 * @param[in] new_cap The new capacity of the vector.
+                 *
+                 * @note To avoid accidental deletion, new_cap is set to size()
+                 *       if new_cap is less than size().
+                 *
+                 * @note Nothing is done if new_cap equals capacity().
+                 *
+                 * @post capacity() == max(new_cap, size())
+                 *
+                 * @post size() is unchanged
+                 *
+                 * @post If reallocation occured, all iterators and references
+                 *       to the elements are invalidated.
+                 */
+                void reallocate(size_type new_cap)
+                {
+                    new_cap = std::max(new_cap, size());
+
+                    if (capacity() != new_cap)
+                    {
+                        iterator new_start = allocate_storage(new_cap);
+                        if (nullptr == iv_start)
+                        {
+                            iv_finish = new_start;
+                        }
+                        else
+                        {
+                            iterator new_finish = ctor_move(iv_start, iv_finish,
+                                                            new_start);
+                            clear();
+                            iv_finish = new_finish;
+                            free_storage(iv_start);
+                        }
+                        iv_end_of_storage = new_start + new_cap;
+                        iv_start = new_start;
+                    }
+                }
+
+                /**
                  * debug dump
                  */
                 //void dump(const char * msg = "")
@@ -839,40 +923,6 @@ namespace std
     }
 
 }; // end namespace std
-
-// ------------------------------------------------------------------------------------------------
-
-template <class T>
-void std::vector<T>::reserve(size_type n)
-{
-    size_type c = capacity();
-    if(n > c)
-    {
-        // if requested new capacity < 10% of current capacity then increase by 10%
-        size_type dif = n - c;
-        size_type inc = 1 + (c/size_type(10));
-        if(dif < inc)
-        {
-            n += inc;
-        }
-
-        iterator newStart = allocate_storage(n);
-        if(NULL == iv_start)
-        {
-            iv_finish = newStart;
-        }
-        else
-        {
-            iterator newFinish = ctor_move(iv_start, iv_finish, newStart);
-            clear();
-            iv_finish = newFinish;
-            free_storage(iv_start);
-        }
-        iv_end_of_storage = newStart + n;
-        iv_start = newStart;
-    }
-}
-
 
 // ------------------------------------------------------------------------------------------------
 

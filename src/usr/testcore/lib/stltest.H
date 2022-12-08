@@ -773,6 +773,22 @@ class STLTest : public CxxTest::TestSuite
             {
                 TS_FAIL("Vector erase to end not at end()");
             }
+
+            std::vector<int> v2;
+            v2.reserve(5);
+            if (v2.capacity() < 5)
+            {
+                TS_FAIL("Vector reserve capacity incorrect: cap=%d",
+                        v2.capacity());
+            }
+
+            v2.push_back(0xff);
+            v2.shrink_to_fit();
+            if (1 != v2.capacity())
+            {
+                TS_FAIL("Vector shrink_to_fit capacity incorrect: cap=%d",
+                        v2.capacity());
+            }
         }
 
         template<typename T> struct ForEachFunctor
