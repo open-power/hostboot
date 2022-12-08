@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -31,6 +31,8 @@ use Data::Dumper;
 use Exporter;
 our @EXPORT_OK = ('main');
 
+use constant FLIGHT_RECORDER_MAX => 250;
+
 struct( pldm_flight_symbols => {
     fr_debug_sym => '$',
     fr_class_sym => '$',
@@ -45,6 +47,8 @@ sub main
 my $max_flights= ::read64
     ::findPointer("PLDMFRMX",
                   "PldmFR::iv_frMax");
+my $pldm_initialized = 1;
+my $next_index = 0;
 
 my @pldm_flight_records;
 {
@@ -74,11 +78,23 @@ my @pldm_flight_records;
 foreach my $fr_info(@pldm_flight_records) {
     bless $fr_info, 'pldm_flight_symbols';
     my $fr_data_start;
-    my $fr_data_len;
+    my $fr_data_len = 0;
+    my $fr_entry_sz = 0;
     ($fr_data_start, $fr_data_len) =
         ::findPointer($fr_info->fr_debug_sym,
                       $fr_info->fr_class_sym);
-    my $fr_entry_sz = $fr_data_len/$max_flights;
+    if ($fr_data_len == 0)
+    {
+        # Set to allow loop and further logic to operate properly
+        $max_flights = FLIGHT_RECORDER_MAX;
+        $pldm_initialized = 0;
+        $fr_data_len = 0;
+        ::userDisplay sprintf("\n *** CAUTION: PLDM may be UNINITIAZED do NOT expect output ***\n");
+    }
+    else
+    {
+        $fr_entry_sz = $fr_data_len/$max_flights;
+    }
     my @requests;
     my @request;
     my @a = (0..$fr_data_len-1);
@@ -123,10 +139,19 @@ foreach my $fr_info(@pldm_flight_records) {
 
     }
 
-    my $next_index  = ::read64
-        ::findPointer($fr_info->next_debug_sym,
-                      $fr_info->next_class_sym);
-    ::userDisplay "\n".($fr_info->flight_name).", next index=$next_index (buffer wraps):\n";
+    if ($pldm_initialized)
+    {
+        $next_index  = ::read64
+            ::findPointer($fr_info->next_debug_sym,
+                          $fr_info->next_class_sym);
+        ::userDisplay "\n".($fr_info->flight_name).", next index=$next_index (buffer wraps):\n";
+    }
+    else
+    {
+        # Set so we can properly mark the Last Entry
+        $next_index = 1;
+        ::userDisplay "\n".($fr_info->flight_name).", PLDM UNINITIALIZED :\n";
+    }
 
     my $i = 0;
     for my $entry(@entries)
@@ -134,7 +159,14 @@ foreach my $fr_info(@pldm_flight_records) {
         my $last_entry="";
         if($i == ($next_index-1))
         {
-            $last_entry = "<--------- Last Entry";
+            if (($next_index-1) == 0)
+            {
+                $last_entry = "<--------- UNINITIALIZED";
+            }
+            else
+            {
+                $last_entry = "<--------- Last Entry";
+            }
         }
         ::userDisplay sprintf("Index %0.3d: %s %s\n", $i, $entry, $last_entry);
         $i = $i+1;
