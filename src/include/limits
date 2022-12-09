@@ -1,0 +1,193 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/limits $                                          */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+#pragma once
+
+#include <limits.h>
+
+namespace std
+{
+
+template<class T> class numeric_limits
+{
+  public:
+    static constexpr bool is_specialized = false;
+
+    static constexpr T min() noexcept { return T(); }
+    static constexpr T max() noexcept { return T(); }
+
+    static constexpr bool is_signed = false;
+    static constexpr bool is_integer = false;
+};
+
+template<> class numeric_limits<bool>
+{
+  public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr bool min() noexcept { return false; }
+    static constexpr bool max() noexcept { return true; }
+
+    static constexpr bool is_signed = false;
+    static constexpr bool is_integer = true;
+};
+
+template <> class numeric_limits<char>
+{
+  public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr bool min() noexcept { return CHAR_MIN; }
+    static constexpr bool max() noexcept { return CHAR_MAX; }
+
+#ifdef __CHAR_UNSIGNED__
+    static constexpr bool is_signed = false;
+#else
+    static constexpr bool is_signed = true;
+#endif
+    static constexpr bool is_integer = true;
+};
+
+template <> class numeric_limits<signed char>
+{
+  public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr bool min() noexcept { return SCHAR_MIN; }
+    static constexpr bool max() noexcept { return SCHAR_MAX; }
+
+    static constexpr bool is_signed = true;
+    static constexpr bool is_integer = true;
+};
+
+template <> class numeric_limits<unsigned char>
+{
+  public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr bool min() noexcept { return 0; }
+    static constexpr bool max() noexcept { return UCHAR_MAX; }
+
+    static constexpr bool is_signed = false;
+    static constexpr bool is_integer = true;
+};
+
+template <> class numeric_limits<short>
+{
+  public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr bool min() noexcept { return SHRT_MIN; }
+    static constexpr bool max() noexcept { return SHRT_MAX; }
+
+    static constexpr bool is_signed = true;
+    static constexpr bool is_integer = true;
+};
+
+template <> class numeric_limits<int>
+{
+  public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr bool min() noexcept { return INT_MIN; }
+    static constexpr bool max() noexcept { return INT_MAX; }
+
+    static constexpr bool is_signed = true;
+    static constexpr bool is_integer = true;
+};
+
+template <> class numeric_limits<long>
+{
+  public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr bool min() noexcept { return LONG_MIN; }
+    static constexpr bool max() noexcept { return LONG_MAX; }
+
+    static constexpr bool is_signed = true;
+    static constexpr bool is_integer = true;
+};
+
+template <> class numeric_limits<long long>
+{
+  public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr bool min() noexcept { return LLONG_MIN; }
+    static constexpr bool max() noexcept { return LLONG_MAX; }
+
+    static constexpr bool is_signed = true;
+    static constexpr bool is_integer = true;
+};
+
+template <> class numeric_limits<unsigned short>
+{
+  public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr bool min() noexcept { return 0; }
+    static constexpr bool max() noexcept { return USHRT_MAX; }
+
+    static constexpr bool is_signed = false;
+    static constexpr bool is_integer = true;
+};
+
+template <> class numeric_limits<unsigned int>
+{
+  public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr bool min() noexcept { return 0; }
+    static constexpr bool max() noexcept { return UINT_MAX; }
+
+    static constexpr bool is_signed = false;
+    static constexpr bool is_integer = true;
+};
+
+template <> class numeric_limits<unsigned long>
+{
+  public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr bool min() noexcept { return 0; }
+    static constexpr bool max() noexcept { return ULONG_MAX; }
+
+    static constexpr bool is_signed = false;
+    static constexpr bool is_integer = true;
+};
+
+template <> class numeric_limits<unsigned long long>
+{
+  public:
+    static constexpr bool is_specialized = true;
+
+    static constexpr bool min() noexcept { return 0; }
+    static constexpr bool max() noexcept { return ULLONG_MAX; }
+
+    static constexpr bool is_signed = false;
+    static constexpr bool is_integer = true;
+};
+
+} // namespace std
