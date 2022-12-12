@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -179,6 +179,7 @@ fapi2::ReturnCode process_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 fapi2::ReturnCode read_oc_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
 {
     fapi2::buffer<uint64_t> l_data;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     // Mark the sensor as present
     // Note: the cache registers use the same API, using D0THERM for the enumerated bits
@@ -187,7 +188,8 @@ fapi2::ReturnCode read_oc_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     int16_t l_oc_temp;
 
     // Read the data
-    FAPI_TRY(ody_dts_read(i_ocmb, l_oc_temp));
+    FAPI_EXEC_HWP(l_rc, ody_dts_read, i_ocmb, l_oc_temp);
+    FAPI_TRY(l_rc);
 
     // Assemble the data
     // Note: the cache registers use the same API, using D0THERM for the enumerated bits
