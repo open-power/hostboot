@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -489,7 +489,148 @@ inline void get_rce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_va
     FAPI_INF("get_rce_count: 0x%03lx", o_value);
 }
 
+///
+/// @brief get_iue_count
+/// @param[in] i_data the register value
+/// @param[out] o_value the value of the field
+/// @note MBSEC1Q_IUE_COUNT: IUE Count This is a 12-bit count of
+/// @note Intermittent Uncorrectable Error events. Will freeze its value upon
+/// @note incrementing to the max value until reset.
+///
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
+inline void get_iue_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
+{
+    i_data.extractToRight<TT::IUE_COUNT, TT::IUE_COUNT_LEN>(o_value);
+    FAPI_INF("get_iue_count: 0x%03lx", o_value);
+}
+
+
+///
+/// @brief set_iue_count
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
+/// @param[in, out] io_data the register value
+/// @param[in] i_value the value of the field
+/// @note MBSEC1Q_IUE_COUNT: IUE Count This is a 12-bit count of
+/// @note Retried Correctable Error events. Will freeze its value upon
+/// @note incrementing to the max value until reset.
+///
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
+inline void set_iue_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
+{
+    io_data.insertFromRight<TT::IUE_COUNT, TT::IUE_COUNT_LEN>(i_value);
+    FAPI_INF("set_iue_count: 0x%03lx", i_value);
+}
+
 } // close namespace read_error_count_reg1
+
+namespace read_error_count_reg2
+
+{
+///
+/// @brief Read MBS Memory Scrub/Read Error Count Register 2 (MBSEC2Q)
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @tparam TT traits type defaults to eccTraits<MC, T>
+/// @param[in] i_target the fapi2 target of the mcbist
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
+inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::READ_ERROR_COUNT_REG2, o_data) );
+    FAPI_INF("%s read: 0x%016lx", mss::c_str(i_target), o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write MBS Memory Scrub/Read Error Count Register 2 (MBSEC2Q)
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type - derived from i_target's type
+/// @tparam TT traits type defaults to eccTraits<MC, T>
+/// @param[in] i_target the fapi2 target of the mcbist
+/// @param[in] i_data the value to write to the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
+inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_TRY( mss::putScom(i_target, TT::READ_ERROR_COUNT_REG2, i_data) );
+    FAPI_INF("%s write: 0x%016lx", mss::c_str(i_target), i_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief set_iaue_count
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
+/// @param[in, out] io_data the register value
+/// @param[in] i_value the value of the field
+/// @note MBSEC2Q_IAUE_COUNT: IAUE Count This is a 12-bit count of
+/// @note Intermittent AUE Error events. Will freeze its value upon
+/// @note incrementing to the max value until reset.
+///
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
+inline void set_iaue_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
+{
+    io_data.insertFromRight<TT::IAUE_COUNT, TT::IAUE_COUNT_LEN>(i_value);
+    FAPI_INF("set_iaue_count: 0x%03lx", i_value);
+}
+
+///
+/// @brief set_ircd_count
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccTraits<MC>::MC_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
+/// @param[in, out] io_data the register value
+/// @param[in] i_value the value of the field
+/// @note MBSEC2Q_IRCD_COUNT: IRCD Count This is a 12-bit count of
+/// @note Intermittent RCD Error events. Will freeze its value upon
+/// @note incrementing to the max value until reset.
+///
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
+inline void set_ircd_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
+{
+    io_data.insertFromRight<TT::IRCD_COUNT, TT::IRCD_COUNT_LEN>(i_value);
+    FAPI_INF("set_ircd_count: 0x%03lx", i_value);
+}
+
+///
+/// @brief get_iaue_count
+/// @param[in] i_data the register value
+/// @param[out] o_value the value of the field
+/// @note MBSEC2Q_IAUE_COUNT: IUE Count This is a 12-bit count of
+/// @note Intermittent AUE Error events. Will freeze its value upon
+/// @note incrementing to the max value until reset.
+///
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
+inline void get_iaue_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
+{
+    i_data.extractToRight<TT::IAUE_COUNT, TT::IAUE_COUNT_LEN>(o_value);
+    FAPI_INF("get_iaue_count: 0x%03lx", o_value);
+}
+
+///
+/// @brief get_ircd_count
+/// @param[in] i_data the register value
+/// @param[out] o_value the value of the field
+/// @note MBSEC2Q_IRCD_COUNT: IUE Count This is a 12-bit count of
+/// @note Intermittent RCD Error events. Will freeze its value upon
+/// @note incrementing to the max value until reset.
+///
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE, typename TT = eccTraits<MC, T> >
+inline void get_ircd_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
+{
+    i_data.extractToRight<TT::IRCD_COUNT, TT::IRCD_COUNT_LEN>(o_value);
+    FAPI_INF("get_iue_count: 0x%03lx", o_value);
+}
+
+} // close namespace read_error_count_reg2
 
 namespace mark_symbol_count_reg
 {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -266,6 +266,7 @@ class eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
         // MCBIST ECC registers - must be 64 bits.
         static constexpr uint64_t READ_ERROR_COUNT_REG0 = scomt::ody::ODC_MCBIST_SCOM_MBSEC0Q;
         static constexpr uint64_t READ_ERROR_COUNT_REG1 = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q;
+        static constexpr uint64_t READ_ERROR_COUNT_REG2 = scomt::ody::ODC_MCBIST_SCOM_MBSEC2Q;
         static constexpr uint64_t MARK_SYMBOL_COUNT_REG = scomt::ody::ODC_MCBIST_SCOM_MBSMSECQ;
         static constexpr uint64_t MODAL_SYM_COUNT0_REG = scomt::ody::ODC_MCBIST_SCOM_MBSSYMEC0Q;
         static constexpr uint64_t MODAL_SYM_COUNT1_REG = scomt::ody::ODC_MCBIST_SCOM_MBSSYMEC1Q;
@@ -307,9 +308,12 @@ class eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
             UE_COUNT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_UE_COUNT_LEN,
             AUE_COUNT = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_AUE_COUNT,
             AUE_COUNT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_AUE_COUNT_LEN,
-            // TODO:MST-1672 find out if RCE is now IUE
-            RCE_COUNT = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_IUE_COUNT,
-            RCE_COUNT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_IUE_COUNT_LEN,
+            IUE_COUNT = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_IUE_COUNT,
+            IUE_COUNT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEC1Q_IUE_COUNT_LEN,
+            IAUE_COUNT = scomt::ody::ODC_MCBIST_SCOM_MBSEC2Q_AUE_COUNT,
+            IAUE_COUNT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEC2Q_AUE_COUNT_LEN,
+            IRCD_COUNT = scomt::ody::ODC_MCBIST_SCOM_MBSEC2Q_RCD_COUNT,
+            IRCD_COUNT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEC2Q_RCD_COUNT_LEN,
             SYMBOL0_COUNT = scomt::ody::ODC_MCBIST_SCOM_MBSMSECQ_0_COUNT,
             SYMBOL0_COUNT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSMSECQ_0_COUNT_LEN,
             SYMBOL1_COUNT = scomt::ody::ODC_MCBIST_SCOM_MBSMSECQ_1_COUNT,

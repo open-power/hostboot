@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -627,17 +627,79 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
-inline fapi2::ReturnCode get_rce_count( const fapi2::Target<T>& i_target,
-                                        uint64_t& o_count )
+fapi2::ReturnCode get_rce_count( const fapi2::Target<T>& i_target,
+                                 uint64_t& o_count)
 {
     fapi2::buffer<uint64_t> l_buffer;
 
-    FAPI_TRY( mss::ecc::read_error_count_reg1::read<MC>(i_target, l_buffer) );
+    FAPI_TRY( mss::ecc::read_error_count_reg1::read<MC>(i_target, l_buffer));
     mss::ecc::read_error_count_reg1::get_rce_count<MC>(l_buffer, o_count);
 
 fapi_try_exit:
     return fapi2::current_err;
-}
+};
+
+///
+/// @brief Get IUE error count
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType - derived
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_count count of IUE events
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode get_iue_count( const fapi2::Target<T>& i_target,
+                                 uint64_t& o_count)
+{
+    fapi2::buffer<uint64_t> l_buffer;
+
+    FAPI_TRY( mss::ecc::read_error_count_reg1::read<MC>(i_target, l_buffer));
+    mss::ecc::read_error_count_reg1::get_iue_count<MC>(l_buffer, o_count);
+
+fapi_try_exit:
+    return fapi2::current_err;
+};
+
+///
+/// @brief Get IAUE error count
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType - derived
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_count count of IAUE events
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode get_iaue_count( const fapi2::Target<T>& i_target,
+                                  uint64_t& o_count)
+{
+    fapi2::buffer<uint64_t> l_buffer;
+
+    FAPI_TRY( mss::ecc::read_error_count_reg2::read<MC>(i_target, l_buffer));
+    mss::ecc::read_error_count_reg2::get_iaue_count<MC>(l_buffer, o_count);
+
+fapi_try_exit:
+    return fapi2::current_err;
+};
+///
+/// @brief Get IRCD error count
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType - derived
+/// @param[in] i_target the fapi2 target
+/// @param[out] o_count count of IRCD events
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode get_ircd_count( const fapi2::Target<T>& i_target,
+                                  uint64_t& o_count)
+{
+    fapi2::buffer<uint64_t> l_buffer;
+
+    FAPI_TRY( mss::ecc::read_error_count_reg2::read<MC>(i_target, l_buffer));
+    mss::ecc::read_error_count_reg2::get_ircd_count<MC>(l_buffer, o_count);
+
+fapi_try_exit:
+    return fapi2::current_err;
+};
 
 ///
 /// @brief Get MCE symbol count
