@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -334,6 +334,9 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             //            - then attempt to restart the sbe w/ iv_sbeRestartMethod
             //        NO_RECOVERY_ACTION = 8,
             //            - we deconfigure the processor we are retrying and fail out
+            //        REIPL_BKP_BMSEEPROM  = 9,
+            //            - Select the backup Measurement and Boot seeproms
+            //            - then attempt to restart the sbe w/ iv_sbeRestartMethod
             //        RECONFIG_WITH_CLOCK_GARD = 10,
             //            - we deconfigure the processor we are retrying and fail out
             //
@@ -597,11 +600,14 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             // OPTION 2 - Check if we are DONE on THIS SIDE BOOT ATTEMPTS for MAX on seeprom or mseeprom
             // each cycle we are working on the SEEPROM or MSEEPROM, so each cycle a new object is instantiated
             if( ((this->iv_currentSideBootAttempts >= MAX_SIDE_BOOT_ATTEMPTS) &&
-                ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM) ||
-                    (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM)) ) ||
-                ((this->iv_currentSideBootAttempts_mseeprom >= MAX_SIDE_BOOT_ATTEMPTS) &&
-                ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM) ||
-                    (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM)) ) )
+                  ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM) ||
+                   (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM) ||
+                   (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_BMSEEPROM)))
+                ||
+                ((this->iv_currentSideBootAttempts_mseeprom >= MAX_SIDE_BOOT_ATTEMPTS)&&
+                  ((this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM) ||
+                   (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM) ||
+                   (this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_BMSEEPROM))))
             {
                /*@
                 * @errortype  ERRL_SEV_PREDICTIVE
@@ -654,7 +660,7 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                     this->iv_currentSideBootAttempts_mseeprom++;
                     // increment even though we may switch sides later
                 }
-                else
+                else //catch all other cases, i.e. REIPL_BKP_BMSEEPROM and any other future proofing
                 {
                     this->iv_currentSideBootAttempts++;
                     this->iv_currentSideBootAttempts_mseeprom++;
@@ -1609,6 +1615,19 @@ void SbeRetryHandler::bestEffortCheck()
             this->iv_currentAction = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
         }
     }
+    else if(this->iv_currentAction == P10_EXTRACT_SBE_RC::REIPL_BKP_BMSEEPROM)
+    {
+        // Only switch to NO_RECOVERY_ACTION if BOTH sides have reached the maximum limit
+        // - This means if (only) 1 side has reached the limit both sides will still be switched
+        // as there is still a chance that switching the other side might help
+        if ((this->iv_switchSidesCount >= MAX_SWITCH_SIDE_COUNT) &&
+            (this->iv_switchSidesCount_mseeprom >= MAX_SWITCH_SIDE_COUNT))
+        {
+            SBE_TRACF("bestEffortCheck(): suggested action was REIPL_BKP_BMSEEPROM but that is not possible so changing to NO_RECOVERY_ACTION");
+            this->iv_currentAction = P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+        }
+    }
+
     // If the extract sbe rc hwp tells us to restart, and we have already
     // done 2 retries on this side, then attempt to switch sides, if we can't
     // switch sides, set currentAction to NO_RECOVERY_ACTION
@@ -1644,6 +1663,7 @@ void SbeRetryHandler::bestEffortCheck()
             }
         }
     }
+
     SBE_TRACF(EXIT_MRK"bestEffortCheck: iv_switchSidesCount=%llx iv_switchSidesCount_mseeprom=%llx "
                       "iv_currentSideBootAttempts=%llx iv_currentSideBootAttempts_mseeprom=%llx iv_boot_restart_count=%d",
                       this->iv_switchSidesCount, this->iv_switchSidesCount_mseeprom,
@@ -1705,35 +1725,38 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(P10_EXTRACT_SBE_RC::RETURN_ACTION i
     }
 #endif
 
-    // Default values are FAIL SAFE case in below logic
-    uint32_t l_sbeOperationMask = SBE::SBE_BOOT_SELECT_MASK >> 32; // PROC register bit 17 and bit 18 value handling
-    uint8_t l_sbe_mvpd_reipl_mask = REIPL_MSEEPROM_MASK; // MVPD masking flags on struct mvpdSbKeyword_t
+    bool l_switch_boot_seeprom = false;
+    bool l_switch_measurement_seeprom = false;
 
     if ((i_action == P10_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM) ||
         (i_action == P10_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM))
     {
-        l_sbeOperationMask = SBE::SBE_BOOT_SELECT_MASK >> 32;
-        // currently only setting MVPD for the MSEEPROM, so this is for future exploitation
-        // Should never hit this branch today, but for future
-        l_sbe_mvpd_reipl_mask = REIPL_SEEPROM_MASK;
+        l_switch_boot_seeprom = true;
     }
     else if ((i_action == P10_EXTRACT_SBE_RC::REIPL_BKP_MSEEPROM) ||
         (i_action == P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM))
     {
-        l_sbeOperationMask = SBE::SBE_MBOOT_SELECT_MASK >> 32;
-        // used for setting MVPD for MSEEPROM
-        l_sbe_mvpd_reipl_mask = REIPL_MSEEPROM_MASK;
+        l_switch_measurement_seeprom = true;
+    }
+    else if (i_action == P10_EXTRACT_SBE_RC::REIPL_BKP_BMSEEPROM)
+    {
+        l_switch_boot_seeprom = true;
+        l_switch_measurement_seeprom = true;
     }
     else
     {
-        SBE_TRACF("switch_sbe_sides: Working on FAIL SAFE case i_action=0x%X", i_action);
+        // FAIL SAFE option is to flip both boot and measurement
+        l_switch_boot_seeprom = true;
+        l_switch_measurement_seeprom = true;
+        SBE_TRACF("switch_sbe_sides: FAIL SAFE case i_action=0x%X, switch boot and measurement seeprom sides",
+                  i_action);
     }
-    SBE_TRACF("switch_sbe_sides: i_action=0x%X l_sbeOperationMask=0x%X l_sbe_mvpd_reipl_mask=0x%X l_mvpdSbKeyword.flags=0x%X",
-              i_action, l_sbeOperationMask, l_sbe_mvpd_reipl_mask, l_mvpdSbKeyword.flags);
-
+    SBE_TRACF("switch_sbe_sides: i_action=0x%X l_switch_boot_seeprom=%d, "
+              "l_switch_measurement_seeprom=%d l_mvpdSbKeyword.flags=0x%X",
+              i_action, l_switch_boot_seeprom, l_switch_measurement_seeprom, l_mvpdSbKeyword.flags);
 
     do{
-        // Read the Selfboot Control/Status register from the appropriate place
+        // Read the Selfboot Control/Status reg (used as the authoritative source at this point)
         uint32_t l_ctl_reg = 0;
         l_errl = accessControlReg( ACCESS_READ, l_ctl_reg );
         if( l_errl )
@@ -1745,31 +1768,55 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(P10_EXTRACT_SBE_RC::RETURN_ACTION i
             break;
         }
 
-        // Determine how boot side is currently set
-        // Works on the previously set l_sbeOperationMask which is either the SEEPROM or MSEEPROM
-        // We check either bit 17 (SEEPROM) or bit 18 (MSEEPROM) based on the previous logic above
-        // Operations are done on single SEEPROM at a time
+        // Determine which boot and measurement sides are currently set and
+        // then flip sides accordingly based on logic above
+        // NOTE: bit 17 represents the boot seeprm (SEEPROM)
+        //       bit 18 represents the measurement seeprom (MSEEPROM)
         SBE_TRACF("switch_sbe_sides: HUID=0x%X Currently l_ctl_reg=0x%.8X",
                   TARGETING::get_huid(iv_proc), l_ctl_reg);
-        // Check if bit 17 or bit 18 currently set for Boot Side 1, mask set previously for which SEEPROM
-        if(l_ctl_reg & l_sbeOperationMask)
+
+        if (l_switch_boot_seeprom)
         {
-            // Set Boot Side 0
-            SBE_TRACF( "switch_sbe_sides: iv_switchSidesCount=%d iv_switchSidesCount_mseeprom=%d: Flip to Set Boot Side 0 for HUID 0x%08X",
-                       iv_switchSidesCount, iv_switchSidesCount_mseeprom,
-                       TARGETING::get_huid(iv_proc));
-            l_ctl_reg &= ~l_sbeOperationMask; // clear bit 17 or bit 18 based on previously set mask for SEEPROM
-            l_mvpdSbKeyword.flags &= ~l_sbe_mvpd_reipl_mask;  // clear MVPD SEEPROM flag bit
-            // We are reading the PROC register as the authoritative source at this point in time
+            if (l_ctl_reg & (SBE::SBE_BOOT_SELECT_MASK >> 32))
+            {
+                // bit17 already set, so clear it
+                // Set Boot Side 0
+                SBE_TRACF("switch_sbe_sides: iv_switchSidesCount=%d, Flip to Set Boot Seeprom Side 0 for HUID 0x%08X",
+                          iv_switchSidesCount, TARGETING::get_huid(iv_proc));
+                l_ctl_reg &= ~(SBE::SBE_BOOT_SELECT_MASK >> 32); // clear bit 17
+                l_mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK;  // clear MVPD SEEPROM flag bit
+            }
+            else
+            {
+                // bit17 is not set, so set it
+                // Set Boot Side 1
+                SBE_TRACF("switch_sbe_sides: iv_switchSidesCount=%d, Flip to Set Boot Seeprom Side 1 for HUID 0x%08X",
+                          iv_switchSidesCount, TARGETING::get_huid(iv_proc));
+                l_ctl_reg |= (SBE::SBE_BOOT_SELECT_MASK >> 32); // set bit 17
+                l_mvpdSbKeyword.flags |= REIPL_SEEPROM_MASK;   // set MVPD SEEPROM flag bit
+            }
         }
-        else // Opposite case for the mask previously set for SEEPROM
+
+        if (l_switch_measurement_seeprom)
         {
-            // Set Boot Side 1
-            SBE_TRACF( "switch_sbe_sides: iv_switchSidesCount=%d iv_switchSidesCount_mseeprom=%d: Flip to Set Boot Side 1 for HUID 0x%08X",
-                       iv_switchSidesCount, iv_switchSidesCount_mseeprom,
-                       TARGETING::get_huid(iv_proc));
-            l_ctl_reg |= l_sbeOperationMask; // set bit 17 or bit 18 based on previously set mask for SEEPROM
-            l_mvpdSbKeyword.flags |= l_sbe_mvpd_reipl_mask;   // set MVPD SEEPROM flag bit
+            if (l_ctl_reg & (SBE::SBE_MBOOT_SELECT_MASK >> 32))
+            {
+                // bit18 already set, so clear it
+                // Set Measurement Side 0
+                SBE_TRACF("switch_sbe_sides: iv_switchSidesCount_mseeprom=%d, Flip to Set Measurement Seeprom Side 0 for HUID 0x%08X",
+                          iv_switchSidesCount_mseeprom, TARGETING::get_huid(iv_proc));
+                l_ctl_reg &= ~(SBE::SBE_MBOOT_SELECT_MASK >> 32); // clear bit 18
+                l_mvpdSbKeyword.flags &= ~REIPL_MSEEPROM_MASK;  // clear MVPD MSEEPROM flag bit
+            }
+            else
+            {
+                // bit18 is not set, so set it
+                // Set Measurement Side 1
+                SBE_TRACF("switch_sbe_sides: iv_switchSidesCount_mseeprom=%d, Flip to Set Measurement Seeprom Side 1 for HUID 0x%08X",
+                          iv_switchSidesCount_mseeprom, TARGETING::get_huid(iv_proc));
+                l_ctl_reg |= (SBE::SBE_MBOOT_SELECT_MASK >> 32); // set bit 18
+                l_mvpdSbKeyword.flags |= REIPL_MSEEPROM_MASK;   // set MVPD MSEEPROM flag bit
+            }
         }
         SBE_TRACF("switch_sbe_sides: HUID=0x%X register to WRITE l_read_reg=0x%.8X MVPDOP_WRITE l_mvpdSbKeyword.flags=0x%X",
                   TARGETING::get_huid(iv_proc), l_ctl_reg, l_mvpdSbKeyword.flags);
@@ -1826,7 +1873,7 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(P10_EXTRACT_SBE_RC::RETURN_ACTION i
 #endif
 
         // Increment switch sides count
-        if (l_sbeOperationMask == SBE::SBE_BOOT_SELECT_MASK >> 32) // SEEPROM
+        if (l_switch_boot_seeprom) // SEEPROM
         {
             ++(this->iv_switchSidesCount);
             ++(this->iv_switchSidesFlag);
@@ -1834,7 +1881,7 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(P10_EXTRACT_SBE_RC::RETURN_ACTION i
             // set the current attempts for this side to be 0
             this->iv_currentSideBootAttempts = 0;
         }
-        else if (l_sbeOperationMask == SBE::SBE_MBOOT_SELECT_MASK >> 32) // MSEEPROM
+        if (l_switch_measurement_seeprom) // MSEEPROM
         {
             ++(this->iv_switchSidesCount_mseeprom);
             ++(this->iv_switchSidesFlag);
@@ -1843,9 +1890,9 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(P10_EXTRACT_SBE_RC::RETURN_ACTION i
             this->iv_currentSideBootAttempts_mseeprom = 0;
         }
         SBE_TRACF("switch_sbe_sides: iv_switchSidesCount=%llx iv_switchSidesCount_mseeprom=%llx "
-                      "iv_currentSideBootAttempts=%llx iv_currentSideBootAttempts_mseeprom=%llx iv_boot_restart_count=%d",
-                      this->iv_switchSidesCount, this->iv_switchSidesCount_mseeprom,
-                      this->iv_currentSideBootAttempts, this->iv_currentSideBootAttempts_mseeprom, this->iv_boot_restart_count);
+                  "iv_currentSideBootAttempts=%llx iv_currentSideBootAttempts_mseeprom=%llx iv_boot_restart_count=%d",
+                  this->iv_switchSidesCount, this->iv_switchSidesCount_mseeprom,
+                  this->iv_currentSideBootAttempts, this->iv_currentSideBootAttempts_mseeprom, this->iv_boot_restart_count);
     }while(0);
 
     if (l_errl)

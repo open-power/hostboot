@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,7 +130,7 @@ class SbeRetryHandler
             {TEST_RESTART_SBE, P10_EXTRACT_SBE_RC::RESTART_SBE},
             {TEST_RESTART_CBS, P10_EXTRACT_SBE_RC::RESTART_CBS},
             {TEST_MAX_LIMITS, P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM},
-            {TEST_SBE_FAILURE, P10_EXTRACT_SBE_RC::RESTART_SBE},
+            {TEST_SBE_FAILURE, P10_EXTRACT_SBE_RC::RESTART_SBE}, // NOTE: covers REIPL_BKP_BMSEEPROM
         };
 #endif
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -599,6 +599,8 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
      *        and test out
      *
      *        This will not run fully without a slave SBE
+     *
+     *        NOTE: This covers the case of recovery action REIPL_BKP_BMSEEPROM
      */
     void testSBEFlowRESTART_SBE_FAILURE(void)
     {
@@ -650,11 +652,17 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
             // Most important values here are the SwitchSidesCount, CurrentSideCount and RestartCount
             // The flow would have switched sides on just the boot seeprom and
             // not the mseeprom and finally given up
-            if ((l_sbeTestSwitchSidesCount != 1) || (l_sbeTestSwitchSidesCountMseeprom != 0) ||
-                (l_sbeTestCurrentSideCount != 1) || (l_sbeTestCurrentSideCountMseeprom != 3) ||
+            if ((l_sbeTestSwitchSidesCount != 1) || (l_sbeTestSwitchSidesCountMseeprom != 1) ||
+                (l_sbeTestCurrentSideCount != 1) || (l_sbeTestCurrentSideCountMseeprom != 1) ||
                 (l_sbeTestBootRestartCount != 2))
             {
-                TS_FAIL("testSBEFlowRESTART_SBE_FAILURE failed to properly handle SBE Failures");
+                TS_FAIL("testSBEFlowRESTART_SBE_FAILURE failed to properly handle SBE Failures: "
+                        "l_sbeTestSwitchSidesCount=%d, l_sbeTestSwitchSidesCountMseeprom=%d, "
+                        "l_sbeTestCurrentSideCount=%d, l_sbeTestCurrentSideCountMseeprom=%d, "
+                        "l_sbeTestBootRestartCount=%d",
+                        l_sbeTestSwitchSidesCount, l_sbeTestSwitchSidesCountMseeprom,
+                        l_sbeTestCurrentSideCount, l_sbeTestCurrentSideCountMseeprom,
+                        l_sbeTestBootRestartCount);
             }
             else
             {
