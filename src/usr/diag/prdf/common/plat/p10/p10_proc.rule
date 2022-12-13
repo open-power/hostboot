@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -4071,22 +4071,22 @@ group gINT_CQ_FIR
     /** INT_CQ_FIR[47]
      *  PC recoverable error summary, as indicated on pc_c
      */
-    (rINT_CQ_FIR, bit(47)) ? self_th_1;
+    (rINT_CQ_FIR, bit(47)) ? self_th_32perDay;
 
     /** INT_CQ_FIR[48]
      *  PC recoverable error summary, as indicated on pc_c
      */
-    (rINT_CQ_FIR, bit(48)) ? self_th_1;
+    (rINT_CQ_FIR, bit(48)) ? self_th_32perDay;
 
     /** INT_CQ_FIR[49]
      *  PC recoverable error summary, as indicated on pc_c
      */
-    (rINT_CQ_FIR, bit(49)) ? self_th_1;
+    (rINT_CQ_FIR, bit(49)) ? self_th_32perDay;
 
     /** INT_CQ_FIR[50]
      *  PC recoverable error summary, as indicated on pc_c
      */
-    (rINT_CQ_FIR, bit(50)) ? self_th_1;
+    (rINT_CQ_FIR, bit(50)) ? self_th_32perDay;
 
     /** INT_CQ_FIR[51]
      *  PC informational error summary, as indicated on pc
