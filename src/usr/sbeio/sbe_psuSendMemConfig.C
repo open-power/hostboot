@@ -37,7 +37,7 @@
 #include <errno.h>
 #include <sbeio/sbe_utils.H>                   // SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES
 #include <targeting/common/mfgFlagAccessors.H> // areAllSrcsTerminating
-#include <vpd/spd_if.H>
+#include <vpd/vpd_if.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -308,9 +308,11 @@ errlHndl_t getPmicHealthCheckData(Target * i_proc, Target * i_ocmb, const uint32
 
 void get4uDdimmPmicHealthCheckData(Target * i_ocmb, const uint32_t i_plid)
 {
-    uint8_t ddimmHeight = SPD::DDIMM_MOD_HEIGHT_INVALID;
     do {
-        errlHndl_t errl = SPD::getDdimmModHeight(ddimmHeight, i_ocmb);
+        SPD::spdMemType_t l_memType = SPD::MEM_TYPE_INVALID;
+        SPD::spdModType_t l_memModType = SPD::MOD_TYPE_INVALID;
+        SPD::dimmModHeight_t l_memHeight = SPD::DDIMM_MOD_HEIGHT_INVALID;
+        errlHndl_t errl = SPD::getMemInfo(i_ocmb,l_memType,l_memModType,l_memHeight);
         if (errl)
         {
             // This function is collecting additional "nice to have" data.
@@ -323,7 +325,10 @@ void get4uDdimmPmicHealthCheckData(Target * i_ocmb, const uint32_t i_plid)
             break;
         }
 
-        if (ddimmHeight == SPD::DDIMM_MOD_HEIGHT_4U)
+        // Only DDR4 DDIMMS support this interface
+        if( (SPD::DDR4_TYPE == l_memType)
+            && (SPD::MOD_TYPE_DDIMM == l_memModType)
+            && (SPD::DDIMM_MOD_HEIGHT_4U == l_memHeight) )
         {
             TargetHandleList parentProc;
             getParentAffinityTargetsByState(parentProc,

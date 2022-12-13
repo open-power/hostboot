@@ -126,7 +126,7 @@ enum dimmModHeight_t : uint8_t
 enum
 {
     // ==============================================================
-    // Normal SPD Keywords (Available for both DDR3 and DDR4 DIMMs)
+    // Normal SPD Keywords (Available for all DIMMs)
     CRC_EXCLUDE                      = SPD_FIRST_NORM_KEYWORD | 0x00,
     SPD_BYTES_TOTAL                  = SPD_FIRST_NORM_KEYWORD | 0x01,
     SPD_BYTES_USED                   = SPD_FIRST_NORM_KEYWORD | 0x02,
@@ -416,12 +416,17 @@ enum
     LRMM_ODT_RTT_PARK_2400_3200      = SPD_FIRST_MOD_SPEC | 0xb2,
     RMM_CRC                          = SPD_FIRST_MOD_SPEC | 0xb3,
     LRMM_CRC                         = SPD_FIRST_MOD_SPEC | 0xb4,
+
+
+    // ==============================================================
+    // Module Specific Keywords (Available for DDIMMs only)
     IBM_11S_PN                       = SPD_FIRST_MOD_SPEC | 0xb5,
     IBM_11S_SN                       = SPD_FIRST_MOD_SPEC | 0xb6,
     IBM_11S_CC                       = SPD_FIRST_MOD_SPEC | 0xb7,
     EXPLORER_FW_VERSION              = SPD_FIRST_MOD_SPEC | 0xb8,
     SAFE_PARK_ZONE                   = SPD_FIRST_MOD_SPEC | 0xb9,
-    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xba,
+    DDIMM_MODULE_HEIGHT              = SPD_FIRST_MOD_SPEC | 0xba,
+    SPD_LAST_MOD_SPEC                = SPD_FIRST_MOD_SPEC | 0xbb,
 
     // Latest DDIMM SPD specifications have standard SPD
     // in the front followed by extendable function

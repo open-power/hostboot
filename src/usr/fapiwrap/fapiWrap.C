@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,31 +81,33 @@ namespace FAPIWRAP
     }
 
     /**
-     * @brief This function retrieves the DDR4 SPD data from the given OCMB target
+     * @brief This function retrieves the SPD data from the given OCMB target
      *
-     * @param[in]  i_ocmbChip - The OCMB target to retrieve the DDR4 SPD data from
+     * @param[in]  i_ocmbChip - The OCMB target to retrieve the DDR portion of
+     *                          the SPD data from the DDIMM
      * @param[out] o_spdDataBuffer - Buffer to contain the SPD data if retrieved
-     * @param[in]  i_spdDataBufferSize - Size of the buffer of the SPD data
+     * @param[inout]  io_spdDataBufferSize - Size of the buffer of the SPD data,
+     *        if o_spdDataBuffer is null then required size is returned.
      *
      * @pre The target supplied is indeed an OCMB target.  This method will not verify.
      *
      * @return errlHndl_t - nullptr if no error, otherwise contains error
      */
-    errlHndl_t get_ddr4_spd_data( TARGETING::Target *i_ocmbChip,
-                                            uint8_t *o_spdDataBuffer,
-                                             size_t  i_spdDataBufferSize )
+    errlHndl_t get_ddimm_spd_data( TARGETING::Target *i_ocmbChip,
+                                   uint8_t *o_spdDataBuffer,
+                                   size_t&  io_spdDataBufferSize )
     {
         errlHndl_t l_errl(nullptr);
 
         do{
             l_errl = deviceRead( i_ocmbChip,
                                  static_cast<void*>(o_spdDataBuffer),
-                                 i_spdDataBufferSize,
+                                 io_spdDataBufferSize,
                                  DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD_WITHOUT_EFD) );
 
             if (l_errl)
             {
-                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_ddr4_spd_data() "
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_ddimm_spd_data() "
                             "Error reading SPD associated with OCMB 0x%.08X",
                             TARGETING::get_huid(i_ocmbChip));
                 break;
@@ -113,7 +115,7 @@ namespace FAPIWRAP
         } while(0);
 
         return l_errl;
-    } // get_ddr4_spd_data
+    } // get_ddimm_spd_data
 
     // get_pmic_dev_addr
     errlHndl_t get_pmic_dev_addr( TARGETING::Target * i_ocmbChip,
@@ -136,14 +138,23 @@ namespace FAPIWRAP
                 break;
             }
 
-            size_t  l_spdSize(SPD::DDIMM_DDR4_SPD_SIZE);
-            uint8_t l_spdBlob[l_spdSize];
-            l_errl = get_ddr4_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
-
+            size_t  l_spdSize = 0;
+            l_errl = get_ddimm_spd_data(i_ocmbChip, nullptr, l_spdSize);
             if (l_errl)
             {
                 TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_pmic_dev_addr() "
-                           "Call to get_ddr4_spd_data failed for OCMB target 0x%.8X, "
+                           "Call 1 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
+                           "device address not retrieved for PMIC ID %d",
+                           TARGETING::get_huid(i_ocmbChip), i_pmic_id );
+                break;
+            }
+
+            uint8_t l_spdBlob[l_spdSize];
+            l_errl = get_ddimm_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_pmic_dev_addr() "
+                           "Call 2 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
                            "device address not retrieved for PMIC ID %d",
                            TARGETING::get_huid(i_ocmbChip), i_pmic_id );
                 break;
@@ -177,15 +188,25 @@ namespace FAPIWRAP
                 break;
             }
 
-            size_t  l_spdSize(SPD::DDIMM_DDR4_SPD_SIZE);
+            size_t  l_spdSize = 0;
+            l_errl = get_ddimm_spd_data(i_ocmbChip, nullptr, l_spdSize);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_mds_dev_addr() "
+                           "Call 1 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
+                           "mds device address not retrieved for target.",
+                           TARGETING::get_huid(i_ocmbChip) );
+                break;
+            }
+
             uint8_t l_spdBlob[l_spdSize];
-            l_errl = get_ddr4_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
+            l_errl = get_ddimm_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
 
             if (l_errl)
             {
                 TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_mds_dev_addr() "
-                           "Call to get_ddr4_spd_data failed for OCMB target 0x%.8X, "
-                           "device address not retrieved for target.",
+                           "Call 2 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
+                           "mds device address not retrieved for target.",
                            TARGETING::get_huid(i_ocmbChip) );
                 break;
             }
@@ -214,15 +235,25 @@ namespace FAPIWRAP
                 break;
             }
 
-            size_t  l_spdSize(SPD::DDIMM_DDR4_SPD_SIZE);
+            size_t  l_spdSize = 0;
+            l_errl = get_ddimm_spd_data(i_ocmbChip, nullptr, l_spdSize);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_gpio_adc_dev_addr() "
+                           "Call 1 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
+                           "gpio/adc device address not retrieved for target.",
+                           TARGETING::get_huid(i_ocmbChip) );
+                break;
+            }
+
             uint8_t l_spdBlob[l_spdSize];
-            l_errl = get_ddr4_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
+            l_errl = get_ddimm_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
 
             if (l_errl)
             {
-                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_mds_dev_addr() "
-                           "Call to get_ddr4_spd_data failed for OCMB target 0x%.8X, "
-                           "device address not retrieved for target.",
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_gpio_adc_dev_addr() "
+                           "Call 2 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
+                           "gpio/adc device address not retrieved for target.",
                            TARGETING::get_huid(i_ocmbChip) );
                 break;
             }

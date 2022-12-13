@@ -280,7 +280,8 @@ errlHndl_t ocmbFetchData(T::TargetHandle_t    i_target,
 // ------------------------------------------------------------------
 bool isValidOcmbDimmType(const uint8_t i_dimmType)
 {
-    return ((SPD::DDR4_TYPE == i_dimmType ));
+    return ((SPD::DDR4_TYPE == i_dimmType)
+            ||(SPD::DDR5_TYPE == i_dimmType));
 }
 
 // See above for details

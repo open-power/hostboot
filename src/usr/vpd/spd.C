@@ -53,6 +53,7 @@
 #include "spdDDR3.H"
 #include "spdDDR4.H"
 #include "spdDDR4_DDIMM.H"
+#include "spdDDR5_DDIMM.H"
 #include "spd_planar.H"
 #include "errlud_vpd.H"
 #include <targeting/targplatutil.H>     // assertGetToplevelTarget
@@ -272,7 +273,8 @@ EEPROM_CONTENT_TYPE getEepromType( Target* i_target )
 bool isValidDimmType ( const uint8_t i_dimmType )
 {
     return ( ( SPD::DDR3_TYPE == i_dimmType ) ||
-             ( SPD::DDR4_TYPE == i_dimmType ) );
+             ( SPD::DDR4_TYPE == i_dimmType ) ||
+             ( SPD::DDR5_TYPE == i_dimmType ) );
 }
 
 
@@ -952,6 +954,14 @@ errlHndl_t spdSetSize ( Target &io_target,
                         SPD::DDR4_SPD_SIZE);
             io_target.setAttr<ATTR_DIMM_SPD_BYTE_SIZE>(SPD::DDR4_SPD_SIZE);
         }
+        else if ( SPD::DDR5_TYPE == i_dimmType )
+        {
+            io_target.setAttr<ATTR_DIMM_SPD_BYTE_SIZE>(SPD::DDR5_SPD_SIZE);
+            TRACSSCOMP( g_trac_spd, "found DIMM w/ HUID 0x%08X to be type "
+                        "DDR5, set ATTR_DIMM_SPD_BYTE_SIZE to be %d",
+                        get_huid(&io_target),
+                        SPD::DDR5_SPD_SIZE );
+        }
         else
         {
             TRACFCOMP( g_trac_spd,
@@ -991,7 +1001,7 @@ errlHndl_t spdSetSize ( Target &io_target,
 /**
  * @brief Checks for redundant memory type by reading SPD data, then
  *        sets the target to its appropriate redundancy setting.
- *        Specifically checking for DDR4 4U DDIMM
+ *        Specifically checking for 4U DDIMM
  * @param i_target DIMM target
  * @param i_memtype Memory type returned from getMemType()
  * @return nullptr if redundancy set correctly, else error
@@ -1005,101 +1015,104 @@ errlHndl_t spdUpdateEepromRedundancy(Target * i_target, const uint8_t i_memType)
     do {
         if (newEepromRedundancy == EEPROM_VPD_REDUNDANCY_POSSIBLE)
         {
-            // Check for redundant DDR4 4U DDIMM
-            if (i_memType == SPD::DDR4_TYPE)
+            modSpecTypes_t modType = NA;
+            err = getModType(modType, i_target, i_memType);
+            if ( err )
             {
-                modSpecTypes_t modType = NA;
-                err = getModType(modType, i_target, i_memType);
+                errlCommit(err, VPD_COMP_ID);
+                break;
+            }
+
+            if (modType == DDIMM)
+            {
+                uint8_t ddimmModHeight = DDIMM_MOD_HEIGHT_INVALID;
+                err = getDdimmModHeight(ddimmModHeight, i_target);
                 if ( err )
                 {
                     errlCommit(err, VPD_COMP_ID);
                     break;
                 }
 
-                if (modType == DDIMM)
+                if (SPD::DDR5_TYPE == i_memType)
                 {
-                    uint8_t ddimmModHeight = DDIMM_MOD_HEIGHT_INVALID;
-                    err = getDdimmModHeight(ddimmModHeight, i_target);
-                    if ( err )
-                    {
-                        errlCommit(err, VPD_COMP_ID);
-                        break;
-                    }
-
-                    if (ddimmModHeight == DDIMM_MOD_HEIGHT_4U)
-                    {
-                        TRACFCOMP( g_trac_spd,
-                            "spdUpdateEepromRedundancy> Found 0x%08X is an eeprom-redundant DDR4 4U DDIMM",
-                            get_huid(i_target) );
-                        newEepromRedundancy = EEPROM_VPD_REDUNDANCY_PRESENT;
-                    }
-                    else if ((ddimmModHeight == DDIMM_MOD_HEIGHT_2U) ||
-                             (ddimmModHeight == DDIMM_MOD_HEIGHT_1U))
-                    {
-                        TRACFCOMP( g_trac_spd,
-                            "spdUpdateEepromRedundancy> 0x%08X is a NON-REDUNDANT DDR4 %dU DDIMM",
-                            get_huid(i_target), (ddimmModHeight == DDIMM_MOD_HEIGHT_2U)?2:1 );
-                        newEepromRedundancy = EEPROM_VPD_REDUNDANCY_NOT_PRESENT;
-                    }
-                    else
-                    {
-                        TRACFCOMP( g_trac_spd,
-                            "spdUpdateEepromRedundancy> DDIMM 0x%08X has a mod height of 0x%X, which is unknown to have redundant eeprom. "
-                            "Creating info error log and leaving as EEPROM_VPD_REDUNDANCY_POSSIBLE",
-                            get_huid(i_target), ddimmModHeight );
-
-                        /*@
-                         * @moduleid         VPD::VPD_SPD_EEPROM_REDUNDANCY
-                         * @reasoncode       VPD::VPD_SPD_UNEXPECTED_DDIMM_HEIGHT
-                         * @userdata1        HUID of DIMM target
-                         * @userdata2        Unexpected DDIMM Module Height
-                         * @devdesc          An unexpected value for a DDIMM's height likely
-                         *                   means that his func needs to account for a new
-                         *                   valid value, and should be updated. However there
-                         *                   is a small chance that the SPD byte holding the
-                         *                   height value is corrupted. In the case that this
-                         *                   target does have a redundant eeprom, we will leave
-                         *                   the attr value as POSSIBLE so that writes will still
-                         *                   be attempted to the backup
-                         * @custdesc         A problem occurred during the IPL
-                         *                   of the system.
-                         */
-                        err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                                       VPD::VPD_SPD_EEPROM_REDUNDANCY,
-                                                       VPD::VPD_SPD_UNEXPECTED_DDIMM_HEIGHT,
-                                                       get_huid(i_target),
-                                                       ddimmModHeight,
-                                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                        err->collectTrace(VPD_COMP_NAME);
-                        errlCommit(err, VPD_COMP_ID);
-                    }
-
+                    TRACFCOMP( g_trac_spd,
+                               "spdUpdateEepromRedundancy> Found 0x%08X is an eeprom-redundant DDR5 DDIMM",
+                               get_huid(i_target) );
+                    newEepromRedundancy = EEPROM_VPD_REDUNDANCY_PRESENT;
+                }
+                else if (ddimmModHeight == DDIMM_MOD_HEIGHT_4U)
+                {
+                    TRACFCOMP( g_trac_spd,
+                               "spdUpdateEepromRedundancy> Found 0x%08X is an eeprom-redundant DDR4 4U DDIMM",
+                               get_huid(i_target) );
+                    newEepromRedundancy = EEPROM_VPD_REDUNDANCY_PRESENT;
+                }
+                else if ((ddimmModHeight == DDIMM_MOD_HEIGHT_2U) ||
+                         (ddimmModHeight == DDIMM_MOD_HEIGHT_1U))
+                {
+                    TRACFCOMP( g_trac_spd,
+                               "spdUpdateEepromRedundancy> 0x%08X is a NON-REDUNDANT DDR4 %dU DDIMM",
+                               get_huid(i_target), (ddimmModHeight == DDIMM_MOD_HEIGHT_2U)?2:1 );
+                    newEepromRedundancy = EEPROM_VPD_REDUNDANCY_NOT_PRESENT;
                 }
                 else
                 {
                     TRACFCOMP( g_trac_spd,
-                        "spdUpdateEepromRedundancy> modType (0x%X) indicates target 0x%08X is an isdimm that has no redundant eeprom, "
-                        "or courupted modType value for DDIMM",
-                        modType, get_huid(i_target));
+                               "spdUpdateEepromRedundancy> DDIMM 0x%08X has a mod height of 0x%X, which is unknown to have redundant eeprom. "
+                               "Creating info error log and leaving as EEPROM_VPD_REDUNDANCY_POSSIBLE",
+                               get_huid(i_target), ddimmModHeight );
 
-                    TRACDCOMP( g_trac_spd,
-                        "spdUpdateEepromRedundancy> calling eepromPresence() to determine if 0x%08X has EEPROM_VPD_BACKUP_INFO",
-                        get_huid(i_target));
+                    /*@
+                     * @moduleid         VPD::VPD_SPD_EEPROM_REDUNDANCY
+                     * @reasoncode       VPD::VPD_SPD_UNEXPECTED_DDIMM_HEIGHT
+                     * @userdata1        HUID of DIMM target
+                     * @userdata2        Unexpected DDIMM Module Height
+                     * @devdesc          An unexpected value for a DDIMM's height likely
+                     *                   means that this func needs to account for a new
+                     *                   valid value, and should be updated. However there
+                     *                   is a small chance that the SPD byte holding the
+                     *                   height value is corrupted. In the case that this
+                     *                   target does have a redundant eeprom, we will leave
+                     *                   the attr value as POSSIBLE so that writes will still
+                     *                   be attempted to the backup
+                     * @custdesc         A problem occurred during the IPL
+                     *                   of the system.
+                     */
+                    err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                                   VPD::VPD_SPD_EEPROM_REDUNDANCY,
+                                                   VPD::VPD_SPD_UNEXPECTED_DDIMM_HEIGHT,
+                                                   get_huid(i_target),
+                                                   ddimmModHeight,
+                                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    err->collectTrace(VPD_COMP_NAME);
+                    errlCommit(err, VPD_COMP_ID);
+                }
 
-                    if (EEPROM::eepromPresence(i_target, true))
-                    {
-                        TRACFCOMP( g_trac_spd,
-                            "spdUpdateEepromRedundancy> 0x%08X has valid EEPROM_VPD_BACKUP_INFO, setting EEPROM_VPD_REDUNDANCY_PRESENT",
-                            get_huid(i_target) );
-                        newEepromRedundancy = EEPROM_VPD_REDUNDANCY_PRESENT;
-                    }
-                    else
-                    {
-                        TRACFCOMP( g_trac_spd,
-                            "spdUpdateEepromRedundancy> 0x%08X does not have valid EEPROM_VPD_BACKUP_INFO, setting EEPROM_VPD_REDUNDANCY_NOT_PRESENT",
-                            get_huid(i_target));
-                        newEepromRedundancy = EEPROM_VPD_REDUNDANCY_NOT_PRESENT;
-                    }
+            }
+            else
+            {
+                TRACFCOMP( g_trac_spd,
+                           "spdUpdateEepromRedundancy> modType (0x%X) indicates target 0x%08X is an isdimm that has no redundant eeprom, "
+                           "or courupted modType value for DDIMM",
+                           modType, get_huid(i_target));
+
+                TRACDCOMP( g_trac_spd,
+                           "spdUpdateEepromRedundancy> calling eepromPresence() to determine if 0x%08X has EEPROM_VPD_BACKUP_INFO",
+                           get_huid(i_target));
+
+                if (EEPROM::eepromPresence(i_target, true))
+                {
+                    TRACFCOMP( g_trac_spd,
+                               "spdUpdateEepromRedundancy> 0x%08X has valid EEPROM_VPD_BACKUP_INFO, setting EEPROM_VPD_REDUNDANCY_PRESENT",
+                               get_huid(i_target) );
+                    newEepromRedundancy = EEPROM_VPD_REDUNDANCY_PRESENT;
+                }
+                else
+                {
+                    TRACFCOMP( g_trac_spd,
+                               "spdUpdateEepromRedundancy> 0x%08X does not have valid EEPROM_VPD_BACKUP_INFO, setting EEPROM_VPD_REDUNDANCY_NOT_PRESENT",
+                               get_huid(i_target));
+                    newEepromRedundancy = EEPROM_VPD_REDUNDANCY_NOT_PRESENT;
                 }
             }
 
@@ -1653,11 +1666,15 @@ errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
         {
             err = ddr4SpecialCases(i_kwdData,io_buffer,i_target);
         }
+        else if (SPD::DDR5_TYPE == i_DDRRev)
+        {
+            // There are no special cases that we care about for DDR5
+        }
         else
         {
             TRACFCOMP( g_trac_spd,
-                       ERR_MRK"Unsupported DDRx Revision (0x%04x)",
-                       i_DDRRev );
+                       ERR_MRK"Unsupported DDRx Revision (0x%04x) on %.8X",
+                       i_DDRRev, TARGETING::get_huid(i_target) );
 
             /*@
              * @errortype
@@ -1665,7 +1682,8 @@ errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         VPD::VPD_SPD_SPECIAL_CASES
              * @userdata1        SPD Keyword
-             * @userdata2        DIMM DDR Revision
+             * @userdata2[00:31] Target HUID
+             * @userdata2[32:63] DIMM DDR Revision
              * @devdesc          Invalid DDR Revision
              * @custdesc         A problem occurred during the IPL
              *                   of the system.
@@ -1674,7 +1692,9 @@ errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
                                            VPD::VPD_SPD_SPECIAL_CASES,
                                            VPD::VPD_INVALID_BASIC_MEMORY_TYPE,
                                            i_kwdData.keyword,
-                                           i_DDRRev );
+                                           TWO_UINT32_TO_UINT64(
+                                              TARGETING::get_huid(i_target),
+                                              i_DDRRev) );
 
            // User could have installed a bad/unsupported dimm
             err->addHwCallout( i_target,
@@ -1960,72 +1980,46 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
     {
         modTypeVal &= MOD_TYPE_MASK;
 
-        if (SPD::DDR3_TYPE == i_memType)
+        // Only supports DDR4 or DDR5
+        if ((MOD_TYPE_UDIMM == modTypeVal)      ||
+            (MOD_TYPE_SO_DIMM == modTypeVal)    ||
+            (MOD_TYPE_MINI_UDIMM == modTypeVal) ||
+            (MOD_TYPE_SO_UDIMM == modTypeVal))
         {
-            if ((MOD_TYPE_UDIMM == modTypeVal)      ||
-                (MOD_TYPE_SO_DIMM == modTypeVal)    ||
-                (MOD_TYPE_MICRO_DIMM == modTypeVal) ||
-                (MOD_TYPE_MINI_UDIMM == modTypeVal) ||
-                (MOD_TYPE_SO_UDIMM == modTypeVal))
-            {
-                o_modType = UMM;
-            }
-            else if ((MOD_TYPE_RDIMM == modTypeVal)      ||
-                     (MOD_TYPE_MINI_RDIMM == modTypeVal) ||
-                     (MOD_TYPE_SO_RDIMM == modTypeVal))
-            {
-                o_modType = RMM;
-            }
-            else if ((MOD_TYPE_MINI_CDIMM == modTypeVal) ||
-                     (MOD_TYPE_SO_CDIMM == modTypeVal))
-            {
-                o_modType = CMM;
-            }
-            else if (MOD_TYPE_LRDIMM == modTypeVal)
-            {
-                o_modType = LRMM;
-            }
+            o_modType = UMM;
         }
-        else if (SPD::DDR4_TYPE == i_memType)
+        else if ((MOD_TYPE_RDIMM == modTypeVal)      ||
+                 (MOD_TYPE_MINI_RDIMM == modTypeVal) ||
+                 (MOD_TYPE_SO_RDIMM == modTypeVal))
         {
-            if ((MOD_TYPE_UDIMM == modTypeVal)      ||
-                (MOD_TYPE_SO_DIMM == modTypeVal)    ||
-                (MOD_TYPE_MINI_UDIMM == modTypeVal) ||
-                (MOD_TYPE_SO_UDIMM == modTypeVal))
-            {
-                o_modType = UMM;
-            }
-            else if ((MOD_TYPE_RDIMM == modTypeVal)      ||
-                     (MOD_TYPE_MINI_RDIMM == modTypeVal) ||
-                     (MOD_TYPE_SO_RDIMM == modTypeVal))
-            {
-                o_modType = RMM;
-            }
-            else if (MOD_TYPE_LRDIMM == modTypeVal)
-            {
-                o_modType = LRMM;
-            }
-            else if( MOD_TYPE_DDIMM == modTypeVal)
-            {
-                o_modType = DDIMM;
-            }
-            else if (MOD_TYPE_PLANAR == modTypeVal)
-            {
-                o_modType = PLANAR;
-            }
+            o_modType = RMM;
+        }
+        else if (MOD_TYPE_LRDIMM == modTypeVal)
+        {
+            o_modType = LRMM;
+        }
+        else if( MOD_TYPE_DDIMM == modTypeVal)
+        {
+            o_modType = DDIMM;
+        }
+        else if (MOD_TYPE_PLANAR == modTypeVal)
+        {
+            o_modType = PLANAR;
         }
 
         if (o_modType == NA)
         {
-            TRACFCOMP( g_trac_spd, ERR_MRK"Module type 0x%02X unrecognized", modTypeVal );
+            TRACFCOMP( g_trac_spd, ERR_MRK"Module type 0x%02X unrecognized on %.8X",
+                       modTypeVal, TARGETING::get_huid(i_target) );
 
             /*@
              * @errortype
              * @reasoncode       VPD::VPD_MOD_SPECIFIC_UNSUPPORTED
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         VPD::VPD_SPD_GET_MOD_TYPE
-             * @userdata1        Module Type (byte 3[3:0])
-             * @userdata2        Memory Type (byte 2)
+             * @userdata1[00:31] Module Type (byte 3[3:0])
+             * @userdata1[32:63] Memory Type (byte 2)
+             * @userdata2        Target HUID
              * @devdesc          Unrecognized Module Type.
              * @custdesc         A problem occurred during the IPL
              *                   of the system.
@@ -2034,7 +2028,8 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 VPD::VPD_SPD_GET_MOD_TYPE,
                 VPD::VPD_MOD_SPECIFIC_UNSUPPORTED,
-                modTypeVal, i_memType,
+                TWO_UINT32_TO_UINT64(modTypeVal, i_memType),
+                TARGETING::get_huid(i_target),
                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
             err->collectTrace( "SPD", 256);
@@ -2086,43 +2081,52 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
 
     do
     {
+        modSpecTypes_t l_modType = NA;
+        err = getModType(l_modType, i_target, i_memType);
+        if( err )
+        {
+            break;
+        }
+
         if ( SPD::DDR3_TYPE == i_memType )
         {
             arraySize = (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
             kwdData = ddr3Data;
         }
-        else if ( SPD::DDR4_TYPE == i_memType )
+        else if ( (SPD::DDR4_TYPE == i_memType) && (l_modType == DDIMM) )
         {
-            modSpecTypes_t modType = NA;
-            err = getModType(modType, i_target, i_memType);
-            if (modType == DDIMM)
-            {
-                arraySize = (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]));
-                kwdData = ddr4DDIMMData;
-            }
-            else if (modType == PLANAR)
-            {
-                arraySize = (sizeof(planarEepromData)/sizeof(planarEepromData[0]));
-                kwdData = planarEepromData;
-            }
-            else
-            {
-                arraySize = (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
-                kwdData = ddr4Data;
-            }
+            arraySize = (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]));
+            kwdData = ddr4DDIMMData;
+        }
+        else if ( (SPD::DDR4_TYPE == i_memType) && (l_modType == PLANAR) )
+        {
+            arraySize = (sizeof(planarEepromData)/sizeof(planarEepromData[0]));
+            kwdData = planarEepromData;
+        }
+        else if ( SPD::DDR4_TYPE == i_memType ) //all ISDIMMs
+        {
+            arraySize = (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+            kwdData = ddr4Data;
+        }
+        else if ( (SPD::DDR5_TYPE == i_memType) && (l_modType == DDIMM) )
+        {
+            arraySize = (sizeof(ddr5DDIMMData)/sizeof(ddr5DDIMMData[0]));
+            kwdData = ddr5DDIMMData;
         }
         else
         {
-            TRACFCOMP( g_trac_spd, ERR_MRK"Unsupported DDRx Revision (0x%04X)",
-                       i_memType );
+            TRACFCOMP( g_trac_spd, ERR_MRK"Unsupported DDRx Revision (0x%04X) on %.8X",
+                       i_memType, TARGETING::get_huid(i_target) );
 
             /*@
              * @errortype
              * @reasoncode       VPD::VPD_INVALID_BASIC_MEMORY_TYPE
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         VPD::VPD_SPD_GET_KEYWORD_ENTRY
-             * @userdata1        SPD Keyword
-             * @userdata2        The DDR Revision
+             * @userdata1[00:31] Module type
+             * @userdata1[32:63] SPD Keyword
+             * @userdata2[00:31] Target HUID
+             * @userdata2[32:63] DDR Revision
              * @devdesc          Invalid DDR Revision
              * @custdesc         A problem occurred during the IPL
              *                   of the system.
@@ -2130,8 +2134,12 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_GET_KEYWORD_ENTRY,
                                            VPD::VPD_INVALID_BASIC_MEMORY_TYPE,
-                                           i_keyword,
-                                           i_memType );
+                                           TWO_UINT32_TO_UINT64(
+                                              l_modType,
+                                              i_keyword),
+                                           TWO_UINT32_TO_UINT64(
+                                              TARGETING::get_huid(i_target),
+                                              i_memType) );
 
             // User could have installed a bad/unsupported dimm
             err->addHwCallout( i_target,
@@ -2161,15 +2169,17 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
         if( ( entry == &kwdData[arraySize] ) ||
             ( i_keyword != entry->keyword ) )
         {
-            TRACFCOMP( g_trac_spd, ERR_MRK"No matching keyword entry found for 0x%X!", i_keyword);
+            TRACFCOMP( g_trac_spd, ERR_MRK"No matching keyword entry found for 0x%X of memtype=%d and modtype=%d!", i_keyword, i_memType, l_modType );
 
             /*@
              * @errortype
              * @reasoncode       VPD::VPD_KEYWORD_NOT_FOUND
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
              * @moduleid         VPD::VPD_SPD_GET_KEYWORD_ENTRY
-             * @userdata1        SPD Keyword
-             * @userdata2        target HUID reading the SPD for
+             * @userdata1[00:31] Module type
+             * @userdata1[32:63] SPD Keyword
+             * @userdata2[00:31] Mem type
+             * @userdata2[32:63] target HUID reading the SPD for
              * @devdesc          Invalid SPD Keyword
              * @custdesc         A problem occurred during the IPL
              *                   of the system.
@@ -2177,8 +2187,11 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
             err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                            VPD::VPD_SPD_GET_KEYWORD_ENTRY,
                                            VPD::VPD_KEYWORD_NOT_FOUND,
-                                           i_keyword,
-                                           get_huid(i_target),
+                                           TWO_UINT32_TO_UINT64(
+                                              l_modType,
+                                              i_keyword),
+                                           TWO_UINT32_TO_UINT64(i_memType,
+                                                                get_huid(i_target)),
                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
             err->collectTrace( "SPD", 256);

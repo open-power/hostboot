@@ -494,8 +494,16 @@ errlHndl_t getOcmbIdecFromSpd(const TARGETING::TargetHandle_t& i_target,
         HWAS_INF("getOcmbIdecFromSpd> OCMB 0x%08X l_spdId = 0x%04X l_spdDmbRev = 0x%02X",
                  TARGETING::get_huid(i_target), l_spdId, l_spdDmbRev);
 
-        if (DDIMM_DMB_ID::EXPLORER == l_spdId)
+        // All DDR5 DDIMMs are Odyssey
+        if( l_spdDRAMInterfaceType == SPD::DDR5_TYPE )
         {
+            o_chipId = POWER_CHIPID::ODYSSEY_16;
+            o_ec = l_spdDmbRev;
+        }
+        // else DDR4 has two options
+        else if (DDIMM_DMB_ID::MICROCHIP == l_spdId)
+        {
+            // A DDR4 DDIMM built by Microchip contains the Explorer OCMB
             o_chipId = POWER_CHIPID::EXPLORER_16;
             // Must convert Explorer's versioning into IBM-style EC levels.
             // Explorer vendor has stated versioning will start at 0xA0 and increment
@@ -508,8 +516,9 @@ errlHndl_t getOcmbIdecFromSpd(const TARGETING::TargetHandle_t& i_target,
             // Resulting formula from pattern in examples above is as follows:
             o_ec = (l_spdDmbRev - 0x90);
         }
-        else if (DDIMM_DMB_ID::GEMINI == l_spdId)
+        else if (DDIMM_DMB_ID::IBM == l_spdId)
         {
+            // A DDR4 DDIMM built by IBM contains the Gemini FPGA-emulated OCMB
             o_chipId = POWER_CHIPID::GEMINI_16;
 
             HWAS_ASSERT(l_spdDmbRev == 0x0,
@@ -562,19 +571,35 @@ errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target)
     errlHndl_t l_errl = nullptr;
 
     // Allocate buffer to hold SPD and init to 0
-    size_t l_spdBufferSize = SPD::DDIMM_DDR4_SPD_SIZE;
-    uint8_t* l_spdBuffer = new uint8_t[l_spdBufferSize];
-    memset(l_spdBuffer, 0, l_spdBufferSize);
+    size_t l_spdBufferSize = 0;
+    uint8_t* l_spdBuffer = nullptr;
     uint16_t l_chipId = 0;
     uint8_t l_chipEc = 0;
 
     do {
 
         // Read the SPD off the ocmb but skip reading the EFD to save time.
+
+        // get the size back by passing in a null buffer
         l_errl = deviceRead(i_target,
-                           l_spdBuffer,
-                           l_spdBufferSize,
-                           DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD_WITHOUT_EFD));
+                            nullptr,
+                            l_spdBufferSize,
+                            DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD_WITHOUT_EFD));
+        if (l_errl != nullptr)
+        {
+            HWAS_ERR("ocmbIdecPhase1> Error while trying to read "
+                     "ENTIRE SPD from 0x%08X ",
+                     TARGETING::get_huid(i_target));
+            break;
+        }
+
+        // now read the actual data
+        uint8_t* l_spdBuffer = new uint8_t[l_spdBufferSize];
+        memset(l_spdBuffer, 0, l_spdBufferSize);
+        l_errl = deviceRead(i_target,
+                            l_spdBuffer,
+                            l_spdBufferSize,
+                            DEVICE_SPD_ADDRESS(SPD::ENTIRE_SPD_WITHOUT_EFD));
 
         // If unable to retrieve the SPD buffer then can't
         // extract the IDEC data, so return error.
@@ -585,13 +610,6 @@ errlHndl_t ocmbIdecPhase1(const TARGETING::TargetHandle_t& i_target)
                      TARGETING::get_huid(i_target));
             break;
         }
-
-        // Make sure we got back the size we were expecting.
-        assert(l_spdBufferSize == SPD::DDIMM_DDR4_SPD_SIZE,
-               "ocmbIdecPhase1> OCMB SPD read size %d "
-               "doesn't match the expected size %d",
-               l_spdBufferSize,
-               SPD::DDIMM_DDR4_SPD_SIZE);
 
         l_errl = getOcmbIdecFromSpd(i_target,
                                     l_spdBuffer,

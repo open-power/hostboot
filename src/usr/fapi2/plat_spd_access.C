@@ -94,6 +94,7 @@ fapi2::ReturnCode getSPD(
                     break;
 
                 case SPD::DDR4_TYPE:
+                case SPD::DDR5_TYPE:
                 {
                     uint8_t l_memModule = 0x0;
 
@@ -115,11 +116,15 @@ fapi2::ReturnCode getSPD(
                         // data so be sure to reflect that in the size we return.
                         o_size = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
                     }
-                    else
+                    else if( SPD::DDR4_TYPE == l_memGen )
                     {
                         o_size = SPD::DDR4_SPD_SIZE;
                     }
-                }// case DDR4_TYPE
+                    else if( SPD::DDR5_TYPE == l_memGen )
+                    {
+                        o_size = SPD::DDR5_SPD_SIZE;
+                    }
+                }// case DDR4 or DDR5
                 break;
 
                 default:
