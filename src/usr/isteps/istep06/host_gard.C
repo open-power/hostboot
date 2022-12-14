@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -327,6 +327,40 @@ errlHndl_t establish_boot_core( void )
     return l_err;
 }
 
+/**
+ * @brief If there are no guards present in the system, this function will clear ATTR_BLOCK_SPEC_DECONFIG.
+ * @note  This was added to address the behavior seen in defects where ATTR_BLOCK_SPEC_DECONFIG was not being cleared
+ *        despite no guards present in the system. As a result, on a subsequent IPLs manual guards were being resource
+ *        recovered when it wasn't necessary.
+ */
+errlHndl_t forceClearBlockSpecDeconfig()
+{
+    errlHndl_t l_err = nullptr;
+    do {
+        // Get all GARD Records
+        HWAS::DeconfigGard::GardRecords_t l_gardRecords;
+        l_err = HWAS::theDeconfigGard().platGetGardRecords(nullptr, l_gardRecords);
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Error from platGetGardRecords");
+            break;
+        }
+        if (l_gardRecords.size() == 0)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Found no guard records, clearing ATTR_BLOCK_SPEC_DECONFIG system wide.");
+            TargetHandleList l_nodelist;
+            getEncResources(l_nodelist, TARGETING::TYPE_NODE, TARGETING::UTIL_FILTER_FUNCTIONAL);
+            for( auto l_node : l_nodelist )
+            {
+                l_node->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
+            }
+        }
+    } while(0);
+
+    return l_err;
+}
+
 void* host_gard( void *io_pArgs )
 {
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_gard entry" );
@@ -424,6 +458,12 @@ void* host_gard( void *io_pArgs )
         ERRORLOG::ErrlManager::callFlushErrorLogs();
         l_pTopLevel->setAttr<TARGETING::ATTR_ENABLE_RECONFIG_DUE_TO_DECONFIG>(true);
 
+        // If there are no guards present in the system then clear ATTR_BLOCK_SPEC_DECONFIG.
+        l_err = forceClearBlockSpecDeconfig();
+        if (l_err)
+        {
+            break;
+        }
 
         // check and see if we still have enough hardware to continue
         // if this checkMinimumHardware() fails then we fail the ipl.
