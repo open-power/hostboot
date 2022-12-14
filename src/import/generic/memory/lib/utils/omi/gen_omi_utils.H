@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,7 +130,7 @@ inline fapi2::ReturnCode check_mfir_actag_pasid_cfg(const fapi2::Target<fapi2::T
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     // Reading from the register into l_reg_data
-    FAPI_TRY(mss::getScom(i_target, TT::MMIO_MFIR_RW_WCLEAR, l_reg_data));
+    FAPI_TRY(fapi2::getScom(i_target, TT::MMIO_MFIR_RW_WCLEAR, l_reg_data));
 
 
     FAPI_ASSERT(!l_reg_data.getBit<TT::ACTAG_PASID_CFG_ERR>(),

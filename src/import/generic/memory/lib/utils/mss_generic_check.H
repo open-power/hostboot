@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,42 +38,11 @@
 
 #include <fapi2.H>
 
+
 #ifdef __PPE__
-
-#include <mss_generic_consts.H>
-
-//Macro -- PPE doesn't want to include generic_consts.H
-// so we'll define it here directly
-#define TARGTIDFORMAT "0x%08X"
-#define TARGTID i_target.get()
-
-#define GENTARGTIDFORMAT "0x%08X"
-#define GENTARGTID(_tgt_) _tgt_.get()
-
-// Macro for printing 64-bit values on PPE - use this instead of %016LX
-// Note that the PPE version of the formatter requires two VARGS in the trace
-#define UINT64FORMAT "0x%08X%08X"
-#define UINT64_VALUE(_val_) \
-    static_cast<uint32_t>((_val_ & 0xFFFFFFFF00000000) >> 32), static_cast<uint32_t>(_val_ & 0x00000000FFFFFFFF)
-
+    #include <c_str.H>
 #else
-
-#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#include <generic/memory/lib/utils/scom.H>
-#include <generic/memory/lib/utils/c_str.H>
-//Macro -- PPE doesn't want to include generic_consts.H
-// so we'll define it here directly
-#define TARGTIDFORMAT "%s"
-#define TARGTID mss::spd::c_str(i_target)
-
-#define GENTARGTIDFORMAT "%s"
-#define GENTARGTID(_tgt_) mss::spd::c_str(_tgt_)
-
-// Macro for printing 64-bit values on PPE (Cronus mode) - use this instead of %016LX
-#define UINT64FORMAT "0x%016LX"
-#define UINT64_VALUE(_val_) \
-    _val_
-
+    #include <generic/memory/lib/utils/c_str.H>
 #endif
 
 namespace mss
