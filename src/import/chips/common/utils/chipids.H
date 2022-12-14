@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,8 +121,11 @@ namespace DDIMM_DMB_ID
 {
 
 // DDR4 DDIMM - Bytes [198][199]
-constexpr uint16_t EXPLORER    = 0x8029;
-constexpr uint16_t GEMINI      = 0x80A4;
+constexpr uint16_t MICROCHIP   = 0x8029;
+constexpr uint16_t IBM         = 0x80A4;
+constexpr uint16_t EXPLORER    = MICROCHIP;
+constexpr uint16_t GEMINI      = IBM;
+constexpr uint16_t ODYSSEY     = IBM;
 
 };
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,28 +44,38 @@
 #define __PMIC_I2C_ADDR_GET__
 
 #include <vector>
-
-constexpr uint16_t SPD_PMIC0_I2C_BYTE = 260;
-constexpr uint16_t SPD_PMIC1_I2C_BYTE = 261;
-constexpr uint16_t SPD_PMIC0_REDUNDANT_I2C_BYTE = 262;
-constexpr uint16_t SPD_PMIC1_REDUNDANT_I2C_BYTE = 263;
+#include <ddimm_spd_common.H>
 
 // Since we'll pass in numbers 0-3 we'll denote the PMICs as such,
-// PMIC2 = redundant 0
-// PMIC3 = redundant 1
+//  these are the relative FAPI target numbers that correspond to
+//  the i_pmic_id input parm
 constexpr uint8_t PMIC0 = 0;
 constexpr uint8_t PMIC1 = 1;
 constexpr uint8_t PMIC2 = 2;
 constexpr uint8_t PMIC3 = 3;
 
-// Mapping from PMIC ID to SPD byte
-static const std::vector<uint16_t> PMIC_I2C_ADDR_VECTOR =
+// Mapping from PMIC ID to SPD byte for DDR4
+constexpr uint16_t SPD_PMIC0_I2C_BYTE = 260;
+constexpr uint16_t SPD_PMIC1_I2C_BYTE = 261;
+constexpr uint16_t SPD_PMIC0_REDUNDANT_I2C_BYTE = 262;
+constexpr uint16_t SPD_PMIC1_REDUNDANT_I2C_BYTE = 263;
+static const std::vector<uint16_t> DDR4_PMIC_I2C_ADDR_VECTOR =
 {
-    SPD_PMIC0_I2C_BYTE,             // 0 == PMIC0
-    SPD_PMIC1_I2C_BYTE,             // 1 == PMIC1
-    SPD_PMIC0_REDUNDANT_I2C_BYTE,   // 2 == PMIC2 (redundant 0)
-    SPD_PMIC1_REDUNDANT_I2C_BYTE,   // 3 == PMIC3 (redundant 1)
+    SPD_PMIC0_I2C_BYTE,             // 0 == PMIC0 IIC Address
+    SPD_PMIC1_I2C_BYTE,             // 1 == PMIC1 IIC Address
+    SPD_PMIC0_REDUNDANT_I2C_BYTE,   // 2 == Redundant PMIC0 IIC Address
+    SPD_PMIC1_REDUNDANT_I2C_BYTE,   // 3 == Redundant PMIC1 IIC Address
 };
+
+// Mapping from PMIC ID to SPD byte for DDR5
+static const std::vector<uint16_t> DDR5_PMIC_I2C_ADDR_VECTOR =
+{
+    294,   // 0 == PMIC0 IIC Address
+    295,   // 1 == PMIC1 IIC Address
+    296,   // 2 == PMIC2 IIC Address
+    297,   // 3 == PMIC3 IIC Address
+};
+
 
 ///
 /// @brief Get the pmic i2c address for the given PMIC ID
@@ -77,14 +87,30 @@ static const std::vector<uint16_t> PMIC_I2C_ADDR_VECTOR =
 ///
 inline uint8_t get_pmic_i2c_addr(const char* i_spd, const uint8_t i_pmic_id)
 {
-    // Out of range, just return 0. Failsafe so we don't segfault
-    // The caller is responsible for calling this with a valid ID
-    if (i_pmic_id >= PMIC_I2C_ADDR_VECTOR.size())
+    const std::vector<uint16_t>* l_addr_array = nullptr;
+
+    // Use the byte offsets appropriate to the dimm type
+    if ( i_spd[DDIMM_SPD::DDR_BYTE] == DDIMM_SPD::MEM_DDR4 )
+    {
+        l_addr_array = &DDR4_PMIC_I2C_ADDR_VECTOR;
+    }
+    else if ( i_spd[DDIMM_SPD::DDR_BYTE] == DDIMM_SPD::MEM_DDR5 )
+    {
+        l_addr_array = &DDR5_PMIC_I2C_ADDR_VECTOR;
+    }
+    else
     {
         return 0;
     }
 
-    const uint16_t l_byte = PMIC_I2C_ADDR_VECTOR[i_pmic_id];
+    // Out of range, just return 0. Failsafe so we don't segfault
+    // The caller is responsible for calling this with a valid ID
+    if (i_pmic_id >= (*l_addr_array).size())
+    {
+        return 0;
+    }
+
+    const uint16_t l_byte = (*l_addr_array)[i_pmic_id];
     return uint8_t(i_spd[l_byte]);
 }
 
