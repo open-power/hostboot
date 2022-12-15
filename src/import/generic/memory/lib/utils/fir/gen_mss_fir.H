@@ -67,6 +67,17 @@ namespace fir
 {
 
 ///
+/// @brief FIR action types, used in some unmask functions
+///
+enum action : uint8_t
+{
+    ATTN,
+    LXSTOP,
+    RECOV,
+    XSTOP,
+};
+
+///
 /// @brief Small class to hold Explorer, P10 and previous generations FIR register
 /// @tparam R the FIR register
 /// @tparam RT the type traits for this register (derived)
