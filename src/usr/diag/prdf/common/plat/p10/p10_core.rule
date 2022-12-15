@@ -1075,7 +1075,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[52]
      *  Hang Recovery Failed
      */
-    (rEQ_CORE_FIR, bit(52)) ? self_th_1;
+    (rEQ_CORE_FIR, bit(52)) ? hangRecoveryFailed;
 
     /** EQ_CORE_FIR[53]
      *  Core Hang detected
