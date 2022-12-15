@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #endif
 
 #include <generic/memory/lib/utils/mss_generic_check.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <odyssey_scom.H>
 #include <ody_scominit.H>
 
@@ -63,6 +64,9 @@ extern "C"
         FAPI_INF( TARGTIDFORMAT " running odyssey.scom.initfile", TARGTID);
         FAPI_EXEC_HWP(l_rc, odyssey_scom, i_target, FAPI_SYSTEM);
         FAPI_TRY(l_rc, TARGTIDFORMAT " error from odyssey.scom.initfile", TARGTID);
+
+        // Unmask the FIRs
+        FAPI_TRY(mss::unmask::after_scominit<mss::mc_type::ODYSSEY>(i_target));
 
     fapi_try_exit:
         FAPI_INF("End MSS SCOM init");
