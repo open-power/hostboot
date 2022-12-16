@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2020
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -858,8 +858,8 @@ sub generate_getters
         }
         else
         {
-            $getterString .= "        FAPI_ERR(\"failed getting $attr->{id}: 0x%lx (target: %s)\",\n";
-            $getterString .= "                 uint64_t(fapi2::current_err), mss::c_str(i_target));\n";
+            $getterString .= "        FAPI_ERR(\"failed getting $attr->{id}: 0x%lx (target: \" TARGTIDFORMAT \")\",\n";
+            $getterString .= "                 uint64_t(fapi2::current_err), TARGTID);\n";
         }
 
         $getterString .= "        return fapi2::current_err;\n";
@@ -917,8 +917,8 @@ sub generate_setters
         }
         else
         {
-            $setterString .= "        FAPI_ERR(\"failed setting $attr->{id}: 0x%lx (target: %s)\",\n";
-            $setterString .= "                 uint64_t(fapi2::current_err), mss::c_str(i_target));\n";
+            $setterString .= "        FAPI_ERR(\"failed setting $attr->{id}: 0x%lx (target: \" TARGTIDFORMAT \")\",\n";
+            $setterString .= "                 uint64_t(fapi2::current_err), TARGTID);\n";
         }
 
         $setterString .= "        return fapi2::current_err;\n";
