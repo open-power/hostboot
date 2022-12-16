@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -58,9 +58,7 @@
 #include <targeting/common/mfgFlagAccessors.H>
 #include <chipids.H>
 #include <vpd/spdenums.H>
-#include <spd.H>
 #include <errl/hberrltypes.H>
-
 
 #include <map>
 
@@ -2170,6 +2168,94 @@ errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target)
     HWAS_DBG(EXIT_MRK"crosscheck_sp_presence_target");
 
     return l_errhdl;
+}
+
+errlHndl_t deconfigureUnmatchedPairsOnDDIMM()
+{
+    errlHndl_t l_err{nullptr};
+
+    TargetHandleList l_ocmbTargetList;
+    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP, true);
+
+    HWAS_DBG("deconfigureUnmatchedPairedSibling(): Found %d functional OCMBs", l_ocmbTargetList.size());
+
+    for (const auto & l_ocmbTarget : l_ocmbTargetList)
+    {
+        // Read the Basic Memory Type
+        SPD::spdMemType_t l_memType(SPD::MEM_TYPE_INVALID);
+        SPD::spdModType_t l_memMod(SPD::MOD_TYPE_INVALID);
+        SPD::dimmModHeight_t l_memHeight(SPD::DDIMM_MOD_HEIGHT_INVALID);
+
+        l_err = SPD::getMemInfo(l_ocmbTarget, l_memType, l_memMod, l_memHeight);
+        if (l_err)
+        {
+            HWAS_ERR("deconfigureUnmatchedPairedSibling(): Error from getMemInfo() for OCMB "
+                "0x%08X, memory type = 0x%2X, mod = 0x%2X and height = 0x%2X",
+                TARGETING::get_huid(l_ocmbTarget), l_memType, l_memMod, l_memHeight);
+            break;
+        }
+
+        // Only DDR5 DDIMM 4U supports POWER_IC targets
+        if ( (l_memType == SPD::DDR5_TYPE) &&
+             ((l_memMod & SPD::MOD_TYPE_MASK) == SPD::MOD_TYPE_DDIMM) &&
+             (l_memHeight == SPD::DDIMM_MOD_HEIGHT_4U) )
+        {
+            // get functional PMIC and POWER_IC targets under this OCMB
+            TargetHandleList l_pmicTargetList;
+            TargetHandleList l_powericTargetList;
+            getChildAffinityTargets(l_pmicTargetList, l_ocmbTarget, CLASS_NA, TYPE_PMIC);
+            getChildAffinityTargets(l_powericTargetList, l_ocmbTarget, CLASS_NA, TYPE_POWER_IC);
+
+            HWAS_DBG("deconfigureUnmatchedPairedSibling(): OCMB 0x%08X has %d PMICs and %d POWER_IC targets",
+                TARGETING::get_huid(l_ocmbTarget), l_pmicTargetList.size(), l_powericTargetList.size() );
+
+            // loop through functional pmic list and verify each
+            // pmic's paired power_ic is also functional
+            for (auto & l_pmic : l_pmicTargetList)
+            {
+                bool foundFunctionalPairedSibling{false};
+
+                // find sibling in power_ic list
+                ATTR_POSITION_type l_pmic_position = l_pmic->getAttr<ATTR_REL_POS>();
+
+                auto it = l_powericTargetList.begin();
+                while (it != l_powericTargetList.end())
+                {
+                    if ((*it)->getAttr<ATTR_REL_POS>() == l_pmic_position)
+                    {
+                        foundFunctionalPairedSibling = true;
+                        it = l_powericTargetList.erase(it); // remove paired power_ic target
+                        break;
+                    }
+                    it++;
+                }
+                if (!foundFunctionalPairedSibling)
+                {
+                    HWAS_INF("Deconfig PMIC 0x%08X as it has no functional POWER_IC pair",
+                        TARGETING::get_huid(l_pmic));
+                    // need to deconfig this PMIC as no functional POWER_IC found
+                    theDeconfigGard().deconfigureTarget(*l_pmic,
+                                                HWAS::DeconfigGard::DECONFIGURED_BY_NO_PEER_TARGET);
+                }
+            } // end of functional PMIC list loop
+
+            // non-matched functional POWER_IC
+            for (auto & l_poweric : l_powericTargetList)
+            {
+                HWAS_INF("Deconfig POWER_IC 0x%08X as it has no functional PMIC pair",
+                        TARGETING::get_huid(l_poweric));
+                theDeconfigGard().deconfigureTarget(*l_poweric,
+                                                HWAS::DeconfigGard::DECONFIGURED_BY_NO_PEER_TARGET);
+            }
+        } // end of DDR5 4U DDIMM type check
+        else
+        {
+            HWAS_DBG("deconfigureUnmatchedPairedSibling(): No pairs to check for OCMB 0x%08X with memory type 0x%2X",
+                TARGETING::get_huid(l_ocmbTarget), l_memType);
+        }
+    } // end of OCMB list loop
+
+    return l_err;
 }
 
 } // namespace HWAS

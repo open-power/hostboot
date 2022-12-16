@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2022
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -26,7 +26,6 @@ ROOTPATH = ../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwas
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/hwas/common
-EXTRAINCDIR += ${ROOTPATH}/src/usr/vpd/
 
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer

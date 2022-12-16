@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -179,7 +179,7 @@ class ExpUpdateTest: public CxxTest::TestSuite
         // Get SPD-keyword EXPLORER_FW_VERSION length
         const uint64_t l_fwVersionKW = SPD::EXPLORER_FW_VERSION;
         const SPD::KeywordData *l_fWVerKeyword = {nullptr};
-        uint8_t l_memType(SPD::MEM_TYPE_INVALID);
+        SPD::spdMemType_t l_memType(SPD::MEM_TYPE_INVALID);
 
         do
         {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,9 +98,11 @@ namespace OCMB_SPD
  * @return errlHndl_t - nullptr if successful, otherwise a pointer
  *      to the error log.
  */
-errlHndl_t getMemType(uint8_t&                      o_memType,
+errlHndl_t getMemType(SPD::spdMemType_t&            o_memType,
                       TARGETING::TargetHandle_t     i_target,
                       EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
+
+
 }
 
 #endif

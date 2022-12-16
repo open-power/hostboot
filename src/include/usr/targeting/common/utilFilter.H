@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -493,7 +493,7 @@ void getParentAffinityTargets ( TARGETING::TargetHandleList& o_vector,
 const Target * getParentChip( const Target * i_pChiplet );
 
 /**
- * @brief return the parent target of the specified input unit
+ * @brief return the physical parent target of the specified input unit
  *
  * @parm[in]  i_unit, unit target used for finding the parent target
  * @parm[in]  i_pType, type of the parent
@@ -713,6 +713,17 @@ void getPeerTargets(
     const Target*                      i_pSrcTarget,
     const PredicateBase*               i_pPeerFilter = NULL,
     const PredicateBase*               i_pResultFilter = NULL);
+
+/**
+ * @brief Locates a present paired_type target that is paired based on rel_pos
+ *
+ * @param[in] i_source_tgt  Search for this target's pair
+ * @param[in] i_paired_type Search for this type of paired target
+ *                          (TYPE_PMIC and TYPE_POWER_IC are supported types)
+ * @return Pointer to paired target or nullptr
+ */
+Target * getPositionPairedTarget(const Target * i_source_tgt,
+                                 TYPE i_paired_type);
 
 }
 

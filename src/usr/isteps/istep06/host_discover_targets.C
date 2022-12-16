@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -562,6 +562,13 @@ void* host_discover_targets( void *io_pArgs )
         {
             HWAS::HWASDiscovery l_HWASDiscovery;
             l_err = l_HWASDiscovery.discoverTargets();
+        }
+
+        if (nullptr == l_err)
+        {
+            // PMIC and POWER_IC targets have been marked functional
+            // now check that their pairing status matches
+            l_err = HWAS::deconfigureUnmatchedPairsOnDDIMM();
         }
     }
 

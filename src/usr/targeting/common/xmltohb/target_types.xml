@@ -1722,7 +1722,7 @@
         </field>
         <field>
           <id>deconfigureParent</id>
-          <value>0</value>
+          <value>1</value>
         </field>
         <field>
           <id>valid</id>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -620,6 +620,10 @@ const Target * getParentChip( const Target * i_pChiplet )
     else if (l_chipList.size() == 0)
     {
         TARG_ERR("Failed to find a parent chip target for huid=%.8X", TARGETING::get_huid(i_pChiplet));
+        auto l_ppath = i_pChiplet->getAttr<ATTR_PHYS_PATH>();
+        char* l_ppathstr = l_ppath.toString();
+        TARG_ERR("ATTR_PHYS_PATH=%s", l_ppathstr);
+        free(l_ppathstr);
     }
     else
     {
@@ -647,8 +651,12 @@ Target * getImmediateParentByAffinity(const Target * i_child )
     }
     else if (l_chipList.size() == 0)
     {
-        TARG_ERR("Failed to find a parent target for huid=%.8X",
+        TARG_ERR("Failed to find affinity parent target for huid=%.8X",
                 TARGETING::get_huid(i_child));
+        auto l_apath = i_child->getAttr<ATTR_AFFINITY_PATH>();
+        char* l_apathstr = l_apath.toString();
+        TARG_ERR("ATTR_AFFINITY_PATH=%s", l_apathstr);
+        free(l_apathstr);
     }
     else
     {
@@ -682,7 +690,11 @@ Target * getParent( const Target * i_unit , TARGETING::TYPE i_pType)
     }
     else if (l_chipList.size() == 0)
     {
-        TARG_ERR("Failed to find a parent target for huid=%.8X", TARGETING::get_huid(i_unit));
+        TARG_ERR("Failed to find a parent target for huid=%.8X of type %d", TARGETING::get_huid(i_unit),i_pType);
+        auto l_ppath = i_unit->getAttr<ATTR_PHYS_PATH>();
+        char* l_ppathstr = l_ppath.toString();
+        TARG_ERR("ATTR_PHYS_PATH=%s", l_ppathstr);
+        free(l_ppathstr);
     }
     else
     {
@@ -1100,6 +1112,53 @@ void getPeerTargets(
     }
     TARG_EXIT();
     #undef TARG_FN
+}
+
+Target * getPositionPairedTarget(const Target * i_source_tgt, TYPE i_paired_type)
+{
+    #define TARG_FN "getPositionPairedTarget(...)"
+    //TARG_INF("getPositionPairedTarget(): target %p=0x%08X, type %d",
+    //         i_source_tgt, get_huid(i_source_tgt), i_paired_type);
+
+    Target * pairedTarget = nullptr;
+    TYPE sourceType = i_source_tgt->getAttr<ATTR_TYPE>();
+    switch (sourceType)
+    {
+        case TYPE_PMIC:
+        case TYPE_POWER_IC:
+        {
+            // find PMIC<>POWER_IC pair
+            const auto parent_ocmb = getImmediateParentByAffinity(i_source_tgt);
+            TargetHandleList l_childTargets;
+            getAffinityTargets(l_childTargets,
+                               parent_ocmb,
+                               CLASS_UNIT,
+                               i_paired_type,
+                               UTIL_FILTER_PRESENT,
+                               TARGETING::TargetService::CHILD_BY_AFFINITY);
+
+            auto l_src_position = i_source_tgt->getAttr<ATTR_REL_POS>();
+            for (const auto l_child : l_childTargets)
+            {
+                if (l_child->getAttr<ATTR_REL_POS>() == l_src_position)
+                {
+                    pairedTarget = l_child;
+                    break;
+                }
+            }
+            break;
+        }
+        default:
+        {
+            // unsupported target type
+            TARG_INF("getPositionPairedTarget(): target 0x%08X has unsupported type 0x%X",
+                get_huid(i_source_tgt), sourceType);
+            TARG_ASSERT(0, TARG_LOC "Unsupported target type");
+            break;
+        }
+    }
+    #undef TARG_FN
+    return pairedTarget;
 }
 
 #undef TARG_CLASS

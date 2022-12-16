@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,7 +82,7 @@ fapi2::ReturnCode platGetVPD(
         {
 
             // Read the Basic Memory Type
-            uint8_t l_memType(SPD::MEM_TYPE_INVALID);
+            SPD::spdMemType_t l_memType(SPD::MEM_TYPE_INVALID);
             l_errl = OCMB_SPD::getMemType(l_memType, l_ocmbTarget, EEPROM::AUTOSELECT);
 
             if (l_errl || !SPD::isValidOcmbDimmType(l_memType))

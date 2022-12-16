@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -433,6 +433,26 @@ void DeconfigGard::_deconfigureByAssoc(
             // If an IO SCM chip was found then put on list of targets to be deconfigured
             if (l_ioScmChip) { pTempList.push_back(l_ioScmChip); };
         #endif
+    }
+    else if (l_targetType == TYPE_PMIC)
+    {
+        TargetHandle_t pPOWER_IC = getPositionPairedTarget(&i_target, TYPE_POWER_IC);
+        if (pPOWER_IC != nullptr)
+        {
+            HWAS_INF("_deconfigureByAssoc PMIC %.8X deconfigure its paired POWER_IC tgt %.8X",
+                 l_targetHuid, get_huid(pPOWER_IC));
+            pTempList.push_back(pPOWER_IC);
+        }
+    }
+    else if (l_targetType == TYPE_POWER_IC)
+    {
+        TargetHandle_t pPMIC = getPositionPairedTarget(&i_target, TYPE_PMIC);
+        if (pPMIC != nullptr)
+        {
+            HWAS_INF("_deconfigureByAssoc POWER_IC %.8X deconfigure its paired PMIC tgt %.8X",
+                 l_targetHuid, get_huid(pPMIC));
+            pTempList.push_back(pPMIC);
+        }
     }
 
     // Append the temporary list to the child list

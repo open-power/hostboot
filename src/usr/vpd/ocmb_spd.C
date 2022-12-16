@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -280,7 +280,7 @@ errlHndl_t ocmbFetchData(T::TargetHandle_t    i_target,
 // ------------------------------------------------------------------
 bool isValidOcmbDimmType(const uint8_t i_dimmType)
 {
-    return ((SPD::SPD_DDR4_TYPE == i_dimmType ));
+    return ((SPD::DDR4_TYPE == i_dimmType ));
 }
 
 // See above for details
@@ -300,7 +300,7 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
     do
     {
         // Read the Basic Memory Type
-        uint8_t memType(SPD::MEM_TYPE_INVALID);
+        spdMemType_t memType(SPD::MEM_TYPE_INVALID);
         errl = OCMB_SPD::getMemType(memType, i_target, EEPROM::AUTOSELECT);
 
         if( errl )
@@ -815,6 +815,72 @@ DEVICE_REGISTER_ROUTE(DeviceFW::READ,
                       ocmbSPDPerformOp_generic );
 
 
+errlHndl_t getMemInfo(T::TargetHandle_t     i_target,
+                      spdMemType_t & o_memType,
+                      spdModType_t & o_memModType,
+                      dimmModHeight_t & o_memHeight,
+                      EEPROM::EEPROM_SOURCE i_eepromSource)
+{
+    errlHndl_t err{nullptr};
+
+    // initialize to invalid data
+    o_memType = SPD::MEM_TYPE_INVALID;
+    o_memModType = SPD::MOD_TYPE_INVALID;
+    o_memHeight = SPD::DDIMM_MOD_HEIGHT_INVALID;
+
+    do {
+        err = OCMB_SPD::getMemType(o_memType, i_target, i_eepromSource);
+        if (err)
+        {
+            break;
+        }
+
+        if (SPD::isValidOcmbDimmType(o_memType))
+        {
+            static_assert( sizeof(o_memModType) == SPD::MOD_TYPE_SZ );
+            err = ocmbFetchData(i_target,
+                                SPD::MOD_TYPE_ADDR,
+                                SPD::MOD_TYPE_SZ,
+                                &o_memModType,
+                                i_eepromSource);
+            if (err)
+            {
+                TRACFCOMP(g_trac_spd,
+                      ERR_MRK"getMemInfo> Unable to read modType for OCMB 0x%08X",
+                      TARGETING::get_huid(i_target));
+                break;
+            }
+
+            if (o_memModType == SPD::MOD_TYPE_DDIMM)
+            {
+                static_assert( sizeof(o_memHeight) == SPD::DDIMM_MOD_HEIGHT_SZ );
+                err = ocmbFetchData(i_target,
+                                    SPD::DDIMM_MOD_HEIGHT_ADDR,
+                                    SPD::DDIMM_MOD_HEIGHT_SZ,
+                                    &o_memHeight,
+                                    i_eepromSource);
+                if (err)
+                {
+                    TRACFCOMP(g_trac_spd,
+                      ERR_MRK"getMemInfo> Unable to read DDIMM height for OCMB 0x%08X",
+                      TARGETING::get_huid(i_target));
+                    break;
+                }
+            }
+        }
+        else
+        {
+            TRACFCOMP(g_trac_spd,
+                      ERR_MRK"getMemInfo> Unsupported OCMB dimm type 0x%02X for OCMB 0x%08X",
+                      o_memType, TARGETING::get_huid(i_target));
+            break;
+        }
+
+    } while(0);
+
+    return err;
+}
+
 } // End of SPD namespace
 
 
@@ -824,12 +890,13 @@ namespace OCMB_SPD
 // ------------------------------------------------------------------
 // getMemType
 // ------------------------------------------------------------------
-errlHndl_t getMemType(uint8_t&              o_memType,
+errlHndl_t getMemType(SPD::spdMemType_t&    o_memType,
                       T::TargetHandle_t     i_target,
                       EEPROM::EEPROM_SOURCE i_location)
 {
     errlHndl_t err = nullptr;
 
+    static_assert( sizeof(o_memType) == SPD::MEM_TYPE_SZ );
     err = ocmbFetchData(i_target,
                         SPD::MEM_TYPE_ADDR,
                         SPD::MEM_TYPE_SZ,
@@ -843,6 +910,8 @@ errlHndl_t getMemType(uint8_t&              o_memType,
 
     return err;
 }
+
+
 
 
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,11 +89,11 @@ fapi2::ReturnCode getSPD(
 
             switch(l_memGen)
             {
-                case SPD::MEM_DDR3:
+                case SPD::DDR3_TYPE:
                     o_size = SPD::DDR3_SPD_SIZE;
                     break;
 
-                case SPD::MEM_DDR4:
+                case SPD::DDR4_TYPE:
                 {
                     uint8_t l_memModule = 0x0;
 
@@ -119,7 +119,7 @@ fapi2::ReturnCode getSPD(
                     {
                         o_size = SPD::DDR4_SPD_SIZE;
                     }
-                }// case MEM_DDR4
+                }// case DDR4_TYPE
                 break;
 
                 default:

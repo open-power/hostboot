@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <pnor/pnorif.H>
 #include <map>
 #include <eeprom/eeprom_const.H>
+#include <vpd/spdenums.H>
 
 namespace VPD
 {
@@ -254,5 +255,24 @@ namespace SPD
      * @return  errlHndl_t
      */
     errlHndl_t ddimmParkEeprom(TARGETING::TargetHandle_t i_target);
+
+    /*
+     * @brief This function will read the DIMM memory information for OCMBs.
+     *
+     * @param[in] i_target       - The OCMB target to read data from.
+     * @param[out] o_memType      - DDR revision (e.g. DDR4, DDR5).
+     * @param[out] o_memModType   - DIMM module type (e.g. DDIMM, RDIMM).
+     * @param[out] o_memHeight    - DIMM Height (e.g. 4U, 2U).
+     * @param[in] i_eepromSource - The EEPROM source (CACHE/HARDWARE or AUTOSELECT).
+     *
+     * @return errlHndl_t - nullptr if successful, otherwise a pointer
+     *      to the error log.
+     */
+    errlHndl_t getMemInfo(TARGETING::TargetHandle_t     i_target,
+                          SPD::spdMemType_t &           o_memType,
+                          SPD::spdModType_t &           o_memModType,
+                          SPD::dimmModHeight_t &        o_memHeight,
+                          EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
+
 }
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -218,7 +218,7 @@ bool checkAndSetForceFlag(TargetHandle_t i_ocmb,
         // Get SPD keyword EXPLORER_FW_VERSION info
         const SPD::KeywordData *l_fWVerKeyword = {nullptr};
         l_err = getKeywordEntry( SPD::EXPLORER_FW_VERSION,
-                                 SPD::SPD_DDR4_TYPE,
+                                 SPD::DDR4_TYPE,
                                  i_ocmb,
                                  l_fWVerKeyword);
         if( l_err )
@@ -310,7 +310,7 @@ void writeExplorerFwVersion(TargetHandle_t i_ocmb, const uint8_t* i_versionStr, 
 
     do
     {
-        l_err = getKeywordEntry(SPD::EXPLORER_FW_VERSION, SPD::SPD_DDR4_TYPE, i_ocmb, l_fWVerKeyword);
+        l_err = getKeywordEntry(SPD::EXPLORER_FW_VERSION, SPD::DDR4_TYPE, i_ocmb, l_fWVerKeyword);
 
         if (l_err)
         {
@@ -774,7 +774,7 @@ void explorerUpdateCheck(IStepError& o_stepError,
                 // Get SPD keyword EXPLORER_FW_VERSION info
                 const SPD::KeywordData *l_fWVerKeyword = {nullptr};
                 l_err = getKeywordEntry( SPD::EXPLORER_FW_VERSION,
-                                         SPD::SPD_DDR4_TYPE,
+                                         SPD::DDR4_TYPE,
                                          l_ocmbTarget,
                                          l_fWVerKeyword);
                 if( l_err )

@@ -38,63 +38,12 @@
 // ----------------------------------------------
 #include <errl/errlentry.H>
 #include <vpd/spdenums.H>
-#include <vpd/spd_if.H>
 #include "vpd.H"
 #include <attributeenums.H>
 #include <eeprom/eeprom_const.H>
 
 namespace SPD
 {
-
-enum spdMemType_t
-{
-    // Memory Type address/size/constants for DDRx (DDR3, DDR4, etc)
-    // Some values are assigned to equivalent values found in file
-    // vpd/spdenums.H to avoid mismatches and errors
-    MEM_TYPE_INVALID = 0x0,
-    MEM_TYPE_ADDR = 0x2,
-    MEM_TYPE_SZ = 0x1,
-    SPD_DDR3_TYPE = SPD::MEM_DDR3,       // SPD type for DDR3 as found in SPD byte 2
-    SPD_DDR4_TYPE = SPD::MEM_DDR4,       // SPD type for DDR4 as found in SPD byte 2
-    SPD_DDR5_TYPE = 0x12,                // SPD type for DDR5 as found in SPD byte 2
-    SPD_DDR3_SIZE = SPD::DDR3_SPD_SIZE,  // SPD size for DDR3, 256 bytes
-    SPD_DDR4_SIZE = SPD::DDR4_SPD_SIZE,  // SPD size for DDR4, 512 bytes
-    SPD_DDR5_SIZE = 1024,
-};
-
-enum spdModType_t
-{
-    // Module Type address/size/mask/constants for DDRx (DDR3, DDR4, etc)
-    MOD_TYPE_ADDR            = 0x03,
-    MOD_TYPE_SZ              = 0x01,
-    MOD_TYPE_MASK            = 0x0F,
-
-    MOD_TYPE_DDR3_RDIMM      = 0x01,
-    MOD_TYPE_DDR3_UDIMM      = 0x02,
-    MOD_TYPE_DDR3_SO_DIMM    = 0x03,
-    MOD_TYPE_DDR3_MICRO_DIMM = 0x04,
-    MOD_TYPE_DDR3_MINI_RDIMM = 0x05,
-    MOD_TYPE_DDR3_MINI_UDIMM = 0x06,
-    MOD_TYPE_DDR3_MINI_CDIMM = 0x07,
-    MOD_TYPE_DDR3_SO_UDIMM   = 0x08,
-    MOD_TYPE_DDR3_SO_RDIMM   = 0x09,
-    MOD_TYPE_DDR3_SO_CDIMM   = 0x0A,
-    MOD_TYPE_DDR3_LRDIMM     = 0x0B,
-
-    MOD_TYPE_DDR4_RDIMM      = 0x01,
-    MOD_TYPE_DDR4_UDIMM      = 0x02,
-    MOD_TYPE_DDR4_SO_DIMM    = 0x03,
-    MOD_TYPE_DDR4_LRDIMM     = 0x04,
-    MOD_TYPE_DDR4_MINI_RDIMM = 0x05,
-    MOD_TYPE_DDR4_MINI_UDIMM = 0x06,
-    MOD_TYPE_DDR4_SO_RDIMM   = 0x08,
-    MOD_TYPE_DDR4_SO_UDIMM   = 0x09,
-    MOD_TYPE_DDIMM           = 0x0A,
-    MOD_TYPE_PLANAR          = 0x0C,
-
-    MOD_TYPE_MDS_DDIMM       = 0xBA,
-    MOD_TYPE_MDS_PLANAR      = 0xBC,
-};
 
 /**
  * @brief Enumerations for Module Specific Keywords

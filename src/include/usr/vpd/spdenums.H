@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,7 @@
 #ifndef __SPDENUMS_H
 #define __SPDENUMS_H
 
+#include <stdint.h>
 #include <mbox/mbox_queues.H>
 #include <vpd/ipvpdenums.H> //just for INVALID_RECORD
 
@@ -39,6 +40,7 @@ enum
 {
     SPD_FIRST_NORM_KEYWORD      = 0x0,
     SPD_FIRST_MOD_SPEC          = 0x8000,
+    SPD_FIRST_DDIM_SPEC         = 0x9000,
 };
 
 enum
@@ -52,12 +54,71 @@ enum
 */
 enum
 {
-    MEM_DDR3 = 0xB,
-    MEM_DDR4 = 0xC,
-    DDR3_SPD_SIZE = 256,
-    DDR4_SPD_SIZE = 512,
+    DDR3_SPD_SIZE = 256,  // SPD size for DDR3, 256 bytes
+    DDR4_SPD_SIZE = 512,  // SPD size for DDR4, 512 bytes
+    DDR5_SPD_SIZE = 1024, // SPD size for DDR5, 1024 bytes
     DDIMM_DDR4_SPD_SIZE = 640,
+    DDIMM_DDR5_SPD_SIZE = 1024,
 };
+
+/**
+ * @brief Memory Type address/size/constants for DDRx (DDR3, DDR4, etc) per JEDEC 
+ */
+enum spdMemType_t : uint8_t
+{
+    // Some values are assigned to equivalent values found in file
+    // vpd/spdenums.H to avoid mismatches and errors
+    MEM_TYPE_INVALID = 0x0,
+    MEM_TYPE_ADDR = 0x2,
+    MEM_TYPE_SZ = 0x1,
+
+    DDR3_TYPE = 0x0B,    // SPD type for DDR3 as found in SPD byte 2
+    DDR4_TYPE = 0x0C,    // SPD type for DDR4 as found in SPD byte 2
+    DDR5_TYPE = 0x12,    // SPD type for DDR5 as found in SPD byte 2
+};
+
+/**
+ * @brief Module Type address/size/mask/constants for DDRx (DDR3, DDR4, etc) per JEDEC 
+ */
+enum spdModType_t : uint8_t
+{
+    MOD_TYPE_ADDR            = 0x03,
+    MOD_TYPE_SZ              = 0x01,
+    MOD_TYPE_MASK            = 0x0f,
+
+    MOD_TYPE_RDIMM           = 0x01,
+    MOD_TYPE_UDIMM           = 0x02,
+    MOD_TYPE_SO_DIMM         = 0x03,
+    MOD_TYPE_MICRO_DIMM      = 0x04,
+    MOD_TYPE_MINI_RDIMM      = 0x05,
+    MOD_TYPE_MINI_UDIMM      = 0x06,
+    MOD_TYPE_MINI_CDIMM      = 0x07,
+    MOD_TYPE_SO_UDIMM        = 0x08,
+    MOD_TYPE_SO_RDIMM        = 0x09,
+    MOD_TYPE_SO_CDIMM        = 0x0a,
+    MOD_TYPE_LRDIMM          = 0x0b,
+    MOD_TYPE_DDIMM           = 0x0A,
+    MOD_TYPE_PLANAR          = 0x0C,
+    MOD_TYPE_MDS_DDIMM       = 0xBA,
+    MOD_TYPE_MDS_PLANAR      = 0xBC,
+    MOD_TYPE_INVALID         = 0xFF,
+};
+
+/**
+ * @brief Enumerations for DIMM Heights per JEDEC
+ */
+enum dimmModHeight_t : uint8_t
+{
+    // DDIMM Mod height (1U/2U/4U)
+    DDIMM_MOD_HEIGHT_ADDR      = 0xC1,
+    DDIMM_MOD_HEIGHT_SZ        = 0x01,
+
+    DDIMM_MOD_HEIGHT_4U        = 0x80,
+    DDIMM_MOD_HEIGHT_2U        = 0x20,
+    DDIMM_MOD_HEIGHT_1U        = 0x00,
+    DDIMM_MOD_HEIGHT_INVALID   = 0xFF,
+};
+
 
 /**
 * @brief Enumerations for fields that can be accessed in the SPD

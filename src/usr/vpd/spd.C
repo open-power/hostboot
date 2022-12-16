@@ -183,6 +183,27 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
                         Target * i_target,
                         uint64_t i_memType );
 
+
+/**
+ * @brief This function will read the DDIMM mod height.
+ * @pre Assumes modType = DDIMM
+ *
+ * @param[out] o_ddimmModHeight - The DIMM mod height reading
+ *                               (use DDIMM_MOD_HEIGHT enums to translate to 4U, 2U or 1U)
+ *
+ * @param[in] i_target       - The target to read data from.
+ *
+ * @param[in] i_eepromSource - The EEPROM source (CACHE/HARDWARE).
+ *                             Default to AUTOSELECT.
+ *
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer
+ *      to the error log.
+ */
+errlHndl_t getDdimmModHeight(uint8_t & o_ddimmModHeight,
+                           Target * i_target,
+                           EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
+
+
 /**
  * @brief This function will set the size of SPD for the given target based on
  *        the DIMM type.
@@ -250,8 +271,8 @@ EEPROM_CONTENT_TYPE getEepromType( Target* i_target )
 // ------------------------------------------------------------------
 bool isValidDimmType ( const uint8_t i_dimmType )
 {
-    return ( ( SPD_DDR3_TYPE == i_dimmType ) ||
-             ( SPD_DDR4_TYPE == i_dimmType ) );
+    return ( ( SPD::DDR3_TYPE == i_dimmType ) ||
+             ( SPD::DDR4_TYPE == i_dimmType ) );
 }
 
 
@@ -915,21 +936,21 @@ errlHndl_t spdSetSize ( Target &io_target,
 
     do
     {
-        if ( SPD_DDR3_TYPE == i_dimmType )
+        if ( SPD::DDR3_TYPE == i_dimmType )
         {
             TRACSSCOMP( g_trac_spd, "found DIMM w/ HUID 0x%08X to be type "
                         "DDR3, set ATTR_DIMM_SPD_BYTE_SIZE to be %d",
                         get_huid(&io_target),
-                        SPD_DDR3_SIZE);
-            io_target.setAttr<ATTR_DIMM_SPD_BYTE_SIZE>(SPD_DDR3_SIZE);
+                        SPD::DDR3_SPD_SIZE);
+            io_target.setAttr<ATTR_DIMM_SPD_BYTE_SIZE>(SPD::DDR3_SPD_SIZE);
         }
-        else if ( SPD_DDR4_TYPE == i_dimmType )
+        else if ( SPD::DDR4_TYPE == i_dimmType )
         {
             TRACSSCOMP( g_trac_spd, "found DIMM w/ HUID 0x%08X to be type "
                         "DDR4, set ATTR_DIMM_SPD_BYTE_SIZE to be %d",
                         get_huid(&io_target),
-                        SPD_DDR4_SIZE);
-            io_target.setAttr<ATTR_DIMM_SPD_BYTE_SIZE>(SPD_DDR4_SIZE);
+                        SPD::DDR4_SPD_SIZE);
+            io_target.setAttr<ATTR_DIMM_SPD_BYTE_SIZE>(SPD::DDR4_SPD_SIZE);
         }
         else
         {
@@ -985,7 +1006,7 @@ errlHndl_t spdUpdateEepromRedundancy(Target * i_target, const uint8_t i_memType)
         if (newEepromRedundancy == EEPROM_VPD_REDUNDANCY_POSSIBLE)
         {
             // Check for redundant DDR4 4U DDIMM
-            if (i_memType == SPD_DDR4_TYPE)
+            if (i_memType == SPD::DDR4_TYPE)
             {
                 modSpecTypes_t modType = NA;
                 err = getModType(modType, i_target, i_memType);
@@ -1182,7 +1203,7 @@ bool spdPresent ( Target * i_target )
                     err2 = nullptr;
 
                     // we saw something so default it to DDR4
-                    memType = SPD_DDR4_TYPE;
+                    memType = SPD::DDR4_TYPE;
                 }
 
                 // Try the other EEPROM if possible
@@ -1624,11 +1645,11 @@ errlHndl_t spdSpecialCases ( const KeywordData & i_kwdData,
     do
     {
         // Handle each of the special cases here
-        if( SPD_DDR3_TYPE == i_DDRRev )
+        if( SPD::DDR3_TYPE == i_DDRRev )
         {
             err = ddr3SpecialCases(i_kwdData,io_buffer,i_target);
         }
-        else if (SPD_DDR4_TYPE == i_DDRRev)
+        else if (SPD::DDR4_TYPE == i_DDRRev)
         {
             err = ddr4SpecialCases(i_kwdData,io_buffer,i_target);
         }
@@ -1939,48 +1960,48 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
     {
         modTypeVal &= MOD_TYPE_MASK;
 
-        if (SPD_DDR3_TYPE == i_memType)
+        if (SPD::DDR3_TYPE == i_memType)
         {
-            if ((MOD_TYPE_DDR3_UDIMM == modTypeVal)      ||
-                (MOD_TYPE_DDR3_SO_DIMM == modTypeVal)    ||
-                (MOD_TYPE_DDR3_MICRO_DIMM == modTypeVal) ||
-                (MOD_TYPE_DDR3_MINI_UDIMM == modTypeVal) ||
-                (MOD_TYPE_DDR3_SO_UDIMM == modTypeVal))
+            if ((MOD_TYPE_UDIMM == modTypeVal)      ||
+                (MOD_TYPE_SO_DIMM == modTypeVal)    ||
+                (MOD_TYPE_MICRO_DIMM == modTypeVal) ||
+                (MOD_TYPE_MINI_UDIMM == modTypeVal) ||
+                (MOD_TYPE_SO_UDIMM == modTypeVal))
             {
                 o_modType = UMM;
             }
-            else if ((MOD_TYPE_DDR3_RDIMM == modTypeVal)      ||
-                     (MOD_TYPE_DDR3_MINI_RDIMM == modTypeVal) ||
-                     (MOD_TYPE_DDR3_SO_RDIMM == modTypeVal))
+            else if ((MOD_TYPE_RDIMM == modTypeVal)      ||
+                     (MOD_TYPE_MINI_RDIMM == modTypeVal) ||
+                     (MOD_TYPE_SO_RDIMM == modTypeVal))
             {
                 o_modType = RMM;
             }
-            else if ((MOD_TYPE_DDR3_MINI_CDIMM == modTypeVal) ||
-                     (MOD_TYPE_DDR3_SO_CDIMM == modTypeVal))
+            else if ((MOD_TYPE_MINI_CDIMM == modTypeVal) ||
+                     (MOD_TYPE_SO_CDIMM == modTypeVal))
             {
                 o_modType = CMM;
             }
-            else if (MOD_TYPE_DDR3_LRDIMM == modTypeVal)
+            else if (MOD_TYPE_LRDIMM == modTypeVal)
             {
                 o_modType = LRMM;
             }
         }
-        else if (SPD_DDR4_TYPE == i_memType)
+        else if (SPD::DDR4_TYPE == i_memType)
         {
-            if ((MOD_TYPE_DDR4_UDIMM == modTypeVal)      ||
-                (MOD_TYPE_DDR4_SO_DIMM == modTypeVal)    ||
-                (MOD_TYPE_DDR4_MINI_UDIMM == modTypeVal) ||
-                (MOD_TYPE_DDR4_SO_UDIMM == modTypeVal))
+            if ((MOD_TYPE_UDIMM == modTypeVal)      ||
+                (MOD_TYPE_SO_DIMM == modTypeVal)    ||
+                (MOD_TYPE_MINI_UDIMM == modTypeVal) ||
+                (MOD_TYPE_SO_UDIMM == modTypeVal))
             {
                 o_modType = UMM;
             }
-            else if ((MOD_TYPE_DDR4_RDIMM == modTypeVal)      ||
-                     (MOD_TYPE_DDR4_MINI_RDIMM == modTypeVal) ||
-                     (MOD_TYPE_DDR4_SO_RDIMM == modTypeVal))
+            else if ((MOD_TYPE_RDIMM == modTypeVal)      ||
+                     (MOD_TYPE_MINI_RDIMM == modTypeVal) ||
+                     (MOD_TYPE_SO_RDIMM == modTypeVal))
             {
                 o_modType = RMM;
             }
-            else if (MOD_TYPE_DDR4_LRDIMM == modTypeVal)
+            else if (MOD_TYPE_LRDIMM == modTypeVal)
             {
                 o_modType = LRMM;
             }
@@ -2065,12 +2086,12 @@ errlHndl_t getKeywordEntry ( VPD::vpdKeyword i_keyword,
 
     do
     {
-        if ( SPD_DDR3_TYPE == i_memType )
+        if ( SPD::DDR3_TYPE == i_memType )
         {
             arraySize = (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
             kwdData = ddr3Data;
         }
-        else if ( SPD_DDR4_TYPE == i_memType )
+        else if ( SPD::DDR4_TYPE == i_memType )
         {
             modSpecTypes_t modType = NA;
             err = getModType(modType, i_target, i_memType);

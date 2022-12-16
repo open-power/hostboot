@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -144,11 +144,11 @@ class SPDTest: public CxxTest::TestSuite
 
               // figure out the expected size based on the memory type
               size_t l_compareSize = 0;
-              if( (l_memModule == SPD::MOD_TYPE_DDIMM) && (l_memGen == SPD::MEM_DDR4) )
+              if( (l_memModule == SPD::MOD_TYPE_DDIMM) && (l_memGen == SPD::DDR4_TYPE) )
               {
                   l_compareSize = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
               }
-              else if( (l_memModule != SPD::MOD_TYPE_DDIMM) && (l_memGen == SPD::MEM_DDR4) )
+              else if( (l_memModule != SPD::MOD_TYPE_DDIMM) && (l_memGen == SPD::DDR4_TYPE) )
               {
                   l_compareSize = SPD::DDR4_SPD_SIZE;
               }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -159,7 +159,7 @@ class SPDTest: public CxxTest::TestSuite
 
                     // Get the required size of the buffer
                     theSize = 0;
-                    if( SPD_DDR4_TYPE == memType )
+                    if( SPD::DDR4_TYPE == memType )
                     {
                         size_t dataSize = (modType == DDIMM)
                             ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
@@ -393,7 +393,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // Get the size
-                if( SPD_DDR4_TYPE == memType )
+                if( SPD::DDR4_TYPE == memType )
                 {
                     size_t dataSize = (modType == DDIMM)
                         ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
@@ -624,7 +624,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // Get the size
-                if( SPD_DDR4_TYPE == memType )
+                if( SPD::DDR4_TYPE == memType )
                 {
                     size_t dataSize = (modType == DDIMM)
                         ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
@@ -851,7 +851,7 @@ class SPDTest: public CxxTest::TestSuite
                 // Get the size
                 size_t theSize = 0;
                 uint16_t theKeyword = INVALID_SPD_KEYWORD;
-                if( SPD_DDR3_TYPE == memType )
+                if( SPD::DDR3_TYPE == memType )
                 {
                     for( uint32_t entry = 0;
                          entry < (sizeof(ddr3Data)/sizeof(ddr3Data[0]));
@@ -869,7 +869,7 @@ class SPDTest: public CxxTest::TestSuite
                         }
                     }
                 }
-                else if( SPD_DDR4_TYPE == memType )
+                else if( SPD::DDR4_TYPE == memType )
                 {
                     for( uint32_t entry = 0;
                          entry < (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
@@ -1268,7 +1268,7 @@ class SPDTest: public CxxTest::TestSuite
                     // Get the required size of the buffer
                     theSize = 0;
                     KeywordData kwdData;
-                    if( SPD_DDR4_TYPE == memType )
+                    if( SPD::DDR4_TYPE == memType )
                     {
                         size_t dataSize = (modType == DDIMM)
                             ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
@@ -1577,7 +1577,7 @@ class SPDTest: public CxxTest::TestSuite
 
                     // Get the required size of the buffer
                     theSize = 0;
-                    if( SPD_DDR4_TYPE == memType )
+                    if( SPD::DDR4_TYPE == memType )
                     {
                         size_t dataSize = (modType == DDIMM)
                             ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
@@ -1812,7 +1812,7 @@ class SPDTest: public CxxTest::TestSuite
                 }
 
                 // Get the size
-                if( SPD_DDR4_TYPE == memType )
+                if( SPD::DDR4_TYPE == memType )
                 {
                     size_t dataSize = (modType == DDIMM)
                         ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -3087,7 +3087,10 @@ void invokePresentByAssoc()
                  omiPred(CLASS_NA, TYPE_OMI),
                  omicPred(CLASS_NA, TYPE_OMIC),
                  ocmbPred(CLASS_CHIP, TYPE_OCMB_CHIP),
-                 memportPred(CLASS_NA, TYPE_MEM_PORT);
+                 memportPred(CLASS_NA, TYPE_MEM_PORT),
+                 pmicPred(CLASS_NA, TYPE_PMIC),
+                 powerIcPred(CLASS_NA, TYPE_POWER_IC),
+                 adcPred(CLASS_NA, TYPE_GENERIC_I2C_DEVICE);
     PredicateHwas functionalPred;
     functionalPred.functional(true);
 
@@ -3096,7 +3099,8 @@ void invokePresentByAssoc()
 
     PredicatePostfixExpr l_funcAxoneMemoryUnits;
     l_funcAxoneMemoryUnits.push(&mccPred).push(&omiPred).Or()
-        .push(&omicPred).Or().push(&ocmbPred).Or().push(&memportPred)
+        .push(&omicPred).Or().push(&ocmbPred).Or().push(&memportPred).Or()
+        .push(&pmicPred).Or().push(&powerIcPred).Or().push(&adcPred)
         .Or().push(&functionalPred).And();
 
     TargetHandleList l_funcAxoneTargetList;
