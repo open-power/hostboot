@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,11 +64,13 @@ class planar_rdimm_efd_0_4 : public ddimm_efd_0_4
         /// @brief Construct a new planar rdimm efd rev 0.4 object
         ///
         /// @param[in] i_dimm DIMM target
-        /// @param[in] i_rank_info the current rank info class
+        /// @param[in] i_phy_rank PHY rank to provide an EFD for
+        /// @param[out] o_rc return code
+        ///
         ///
         planar_rdimm_efd_0_4(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-                             const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info)
-            : ddimm_efd_0_4(i_dimm, i_rank_info)
+                             const uint16_t i_phy_rank, fapi2::ReturnCode& o_rc)
+            : ddimm_efd_0_4(i_dimm, i_phy_rank, o_rc)
         {
         }
 

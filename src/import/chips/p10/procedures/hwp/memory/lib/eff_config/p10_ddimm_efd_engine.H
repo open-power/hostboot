@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,15 +73,14 @@ class base
         ///
         /// @brief Construct a new DDIMM EFD base object
         /// @param[in] i_dimm DIMM target
-        /// @param[in] i_rank_info the current rank info class
+        /// @param[in] i_phy_rank the phy rank used to build rank info class
+        /// @param[out] o_rc return code
         ///
         base(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-             const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info) :
+             const uint16_t i_phy_rank, fapi2::ReturnCode& o_rc) :
             iv_dimm(i_dimm),
             iv_port(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_dimm)),
-            iv_ocmb(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_dimm)),
-            iv_dimm_rank(i_rank_info.get_dimm_rank()),
-            iv_phy_rank(i_rank_info.get_phy_rank()) {}
+            iv_ocmb(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_dimm)) {}
 
         ///
         /// @brief Destroy the base object
@@ -134,8 +133,15 @@ class ddimm_efd_0_3 : public base
         /// @param[in] i_rank_info the current rank info class
         ///
         ddimm_efd_0_3(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-                      const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info) :
-            base(i_dimm, i_rank_info) {}
+                      const uint16_t i_phy_rank, fapi2::ReturnCode& o_rc) :
+            base(i_dimm, i_phy_rank, o_rc)
+        {
+            // Had to move this creating rank info here from
+            // base class because it is used for DDR4 and DDR5
+            const mss::rank::info<mss::mc_type::EXPLORER> i_rank_info(i_dimm, i_phy_rank, o_rc);
+            iv_dimm_rank = i_rank_info.get_dimm_rank();
+            iv_phy_rank = i_rank_info.get_phy_rank();
+        }
 
         ///
         /// @brief Destroy the ddimm_efd_0_3 object
@@ -2688,8 +2694,8 @@ class ddimm_efd_0_4 : public ddimm_efd_0_3
         /// @param[in] i_rank_info the current rank info class
         ///
         ddimm_efd_0_4(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-                      const mss::rank::info<mss::mc_type::EXPLORER>& i_rank_info)
-            : ddimm_efd_0_3(i_dimm, i_rank_info)
+                      const uint16_t i_phy_rank, fapi2::ReturnCode& o_rc)
+            : ddimm_efd_0_3(i_dimm, i_phy_rank, o_rc)
         {
         }
 

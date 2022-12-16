@@ -81,6 +81,7 @@ MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/lrdimm/ddr4/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/rdimm/ddr4/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/common/ddr4/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/ddimm/ddr4/
+MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/ddimm/ddr5/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/ccs/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/data_engine/

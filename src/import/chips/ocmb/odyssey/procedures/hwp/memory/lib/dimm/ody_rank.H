@@ -31,6 +31,7 @@
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
+// EKB-Mirror-To: hostboot
 
 #ifndef _ODY_RANK_H_
 #define _ODY_RANK_H_

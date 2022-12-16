@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -72,6 +72,7 @@
       If value is set to 0x0 this indicate value was never
       initialized correctly.
     </description>
+    <enum>1N = 1, 2N = 2</enum>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,11 +38,41 @@
 
 #include <fapi2.H>
 #include <vpd_access.H>
+#include <lib/dimm/exp_rank.H>
+#include <lib/dimm/ody_rank.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
 namespace spd
 {
+///
+/// @brief Helper to to run ranks_on_dimm on the correct mc rank info using dram gen attr
+/// @tparam MC the memory controller type
+/// @param[in] i_dimm DIMM target
+/// @param[out] o_phy_ranks vector of phy ranks
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<mss::mc_type MC>
+fapi2::ReturnCode get_phy_ranks_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                                       std::vector<uint8_t>& o_phy_ranks)
+{
+    // Clear the vector before using
+    o_phy_ranks.clear();
+
+    // Create l_rank_infos using the dram gen attr
+    std::vector<mss::rank::info<MC>> l_rank_infos;
+    FAPI_TRY(mss::rank::ranks_on_dimm(i_dimm, l_rank_infos));
+
+    // Loop through and assemble the ranks
+    for(const auto& l_rank_info : l_rank_infos)
+    {
+        o_phy_ranks.push_back(l_rank_info.get_phy_rank());
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 namespace ddr4
 {
 

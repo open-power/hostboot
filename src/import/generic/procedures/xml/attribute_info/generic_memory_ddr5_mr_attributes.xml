@@ -815,6 +815,7 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
+    <enum>STEP0 = 0, STEP1 = 1, STEP2 = 2, STEP3 = 3</enum>
     <array>2 4</array>
     <mssAccessorName>ddr5_dfe_gain_bias</mssAccessorName>
   </attribute>

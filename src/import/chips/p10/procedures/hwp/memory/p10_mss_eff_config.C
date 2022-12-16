@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,25 +98,33 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
         }
     }// dimm
 
-    for(const auto& dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
         std::vector<uint8_t> l_raw_spd;
         uint64_t l_freq = 0;
         uint32_t l_omi_freq = 0;
         uint8_t l_dram_gen = 0;
-        std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_rank_infos;
+        std::vector<uint8_t> l_phy_ranks;
 
         FAPI_TRY( mss::attr::get_freq(i_target, l_freq) );
         FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(i_target, l_freq, l_omi_freq));
-        FAPI_TRY( mss::attr::get_dram_gen(dimm, l_dram_gen) );
+        FAPI_TRY( mss::attr::get_dram_gen(l_dimm, l_dram_gen) );
 
-        FAPI_TRY(mss::spd::get_raw_data(dimm, l_is_planar, l_raw_spd));
-
-        // Make sure to run ranks_on_dimm AFTER the base and DDIMM module data has been processed!
+        // Make sure to run ranks_on_dimm()(that is run inside get_phy_ranks_helper())
+        // AFTER the base and DDIMM module data has been processed!
         // This is so we handle the decoding of the ranks properly
-        FAPI_TRY(mss::rank::ranks_on_dimm(dimm, l_rank_infos));
+        if(l_dram_gen == fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4)
+        {
+            FAPI_TRY( mss::spd::get_phy_ranks_helper<mss::mc_type::EXPLORER>(l_dimm, l_phy_ranks));
+        }
+        else
+        {
+            FAPI_TRY( mss::spd::get_phy_ranks_helper<mss::mc_type::ODYSSEY>(l_dimm, l_phy_ranks));
+        }
 
-        for (const auto& l_rank_info : l_rank_infos)
+        FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_is_planar, l_raw_spd));
+
+        for (const auto& l_phy_rank : l_phy_ranks)
         {
             std::shared_ptr<mss::efd::ddimm_efd_base> l_ddimm_efd;
 
@@ -125,11 +133,11 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpd_info(l_vpd_type);
 
             // Our EFD is stored in terms of our PHY ranks (and DIMM config for planar)
-            l_vpd_info.iv_rank = l_rank_info.get_phy_rank();
+            l_vpd_info.iv_rank = l_phy_rank;
             l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
 
             // Add planar EFD lookup info if we need it
-            FAPI_TRY(mss::spd::ddr4::add_planar_efd_info(dimm, l_is_planar, l_vpd_info));
+            FAPI_TRY(mss::spd::ddr4::add_planar_efd_info(l_dimm, l_is_planar, l_vpd_info));
 
             FAPI_TRY( fapi2::getVPD(l_ocmb, l_vpd_info, nullptr), "failed getting VPD size from getVPD" );
 
@@ -144,7 +152,7 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
                 // The attributes use the IBM perspective, which aligns to the DIMM rank
                 // Knowing both allows us to decode from the SPD and encode the data for the attributes
                 // The encode/decode is in accordance with fixes for JIRA355
-                FAPI_TRY(mss::efd::factory(dimm, l_spd_rev, l_dram_gen, l_is_planar, l_rank_info, l_ddimm_efd));
+                FAPI_TRY(mss::efd::factory(l_dimm, l_spd_rev, l_dram_gen, l_is_planar, l_phy_rank, l_ddimm_efd));
                 FAPI_TRY(l_ddimm_efd->process(l_vpd_raw));
                 FAPI_TRY(l_ddimm_efd->process_overrides(l_raw_spd));
             }
