@@ -28,7 +28,7 @@
 ///
 /// *HWP HW Maintainer: Thi Tran <thi@us.ibm.com>
 /// *HWP FW Maintainer:
-/// *HWP Consumed by: SBE
+/// *HWP Consumed by: SBE, Cronus
 ///
 
 //------------------------------------------------------------------------------
@@ -53,7 +53,6 @@ const uint64_t SRAM_MEM_REG_THREAD2_OFFSET   = 0xFFFF600000000000ULL;
 const uint64_t SRAM_MEM_REG_THREAD3_OFFSET   = 0xFFFF640000000000ULL;
 const uint64_t SRAM_MEM_REG_THREAD4_OFFSET   = 0xFFFF680000000000ULL;
 const uint8_t  NUM_OF_MEM_REGS = 5;  // 4 threads + supervisor thread
-const uint32_t MEM_IMG_SIZE = 1024; // Bytes
 
 uint64_t MEM_REG_OFFSETS[NUM_OF_MEM_REGS] =
 {
@@ -71,59 +70,98 @@ uint64_t MEM_REG_OFFSETS[NUM_OF_MEM_REGS] =
 /// NOTE: doxygen in header
 fapi2::ReturnCode ody_omi_hss_ppe_load(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    uint8_t* const i_ody_ppe_image,
+    uint8_t* const i_img_data,
     uint32_t const i_img_size,
-    uint8_t* const i_mem_regs_image)
+    uint32_t const i_offset,
+    IO_PPE_Image_Type_t i_type)
 {
     FAPI_DBG("Start");
+
     PHY_PPE_WRAP0_XIXCR_t WRAP0_XIXCR;
     PHY_PPE_WRAP0_SCOM_CNTL_t WRAP0_SCOM_CNTL;
 
     // Validate inputs
-    FAPI_ASSERT( (i_ody_ppe_image != NULL) &&
-                 (i_img_size != 0) &&
-                 (i_mem_regs_image != NULL),
+    bool l_invalid = false;
+
+    if (i_img_data == NULL)
+    {
+        l_invalid = true;
+    }
+    // IOPPE_BASE_IMAGE
+    else if (i_type == IO_PPE_Image_Type_t::IOPPE_BASE_IMAGE)
+    {
+        if ( (i_img_size != SIZE_32K_BYTES) ||
+             ( (i_offset != OFFSET_0K) && (i_offset != OFFSET_32K) && (i_offset != OFFSET_64K) ) )
+        {
+            l_invalid = true;
+        }
+    }
+    // IOPPE_MEMREGS_IMAGE
+    else
+    {
+        if ( (i_img_size != SIZE_1K_BYTES) || (i_offset != OFFSET_0K) )
+        {
+            l_invalid = true;
+        }
+    }
+
+    FAPI_ASSERT( !l_invalid,
                  fapi2::ODY_IO_LOAD_PPE_IMG_ERROR()
                  .set_TARGET(i_target)
-                 .set_IO_PPE_IMAGE(i_ody_ppe_image)
-                 .set_IO_PPE_IMAGE_SIZE(i_img_size)
-                 .set_MEM_REGS_IMAGE(i_mem_regs_image),
-                 "ody_omi_hss_ppe_load: Invalid image: PPE image ptr %p, Size 0x%.8X, MEM_REGS image %p",
-                 i_ody_ppe_image, i_img_size, i_mem_regs_image);
+                 .set_IMAGE_DATA(i_img_data)
+                 .set_IMAGE_SIZE(i_img_size)
+                 .set_OFFSET(i_offset)
+                 .set_IMAGE_TYPE(i_type),
+                 "ody_omi_hss_ppe_load: Invalid image: IMAGE_DATA %p, Size %u, Offset 0x%.8X, type %d",
+                 i_img_data, i_img_size, i_offset, i_type);
 
-    FAPI_DBG("IO PPE img: Ptr %p, size %u; MEM_REGS img %p.",
-             i_ody_ppe_image, i_img_size, i_mem_regs_image);
+    FAPI_DBG("IO PPE img: Ptr %p, size %u; offset 0x%.8X, type %d.",
+             i_img_data, i_img_size, i_offset, i_type);
 
-    // Halt PPE
-    FAPI_DBG("Halt PPE.");
-    WRAP0_XIXCR.set_PPE_XIXCR_XCR(1); // Write 0b001
-    FAPI_TRY(WRAP0_XIXCR.putScom(i_target),
-             "Error putscom to PPE_XIXCR_XCR (halt PPE).");
-
-    // Logic IO reset, toggle SCOM_PPE_IORESET
-    FAPI_DBG("IO reset.");
-    WRAP0_SCOM_CNTL.set_SCOM_PPE_IORESET(1);
-    FAPI_TRY(WRAP0_SCOM_CNTL.putScom(i_target),
-             "Error putscom to SCOM_PPE_IORESET (1).");
-    WRAP0_SCOM_CNTL.set_SCOM_PPE_IORESET(0);
-    FAPI_TRY(WRAP0_SCOM_CNTL.putScom(i_target),
-             "Error putscom to SCOM_PPE_IORESET (0).");
-
-    // Load IO PPE image to SRAM
-    // The SBE will compile this HWP natively and HB will tap the SBE (with an istep chipop) to
-    // execute the load -- the SBE will call the HWP and supply data read from the NOR flash
-    // locally/on DIMM (There is no external data transfer through the SBE FIFO)
-    FAPI_TRY(ody_putsram(i_target, SRAM_IO_PPE_IMAGE_OFFSET, i_img_size, i_ody_ppe_image),
-             "Error returned from ody_putsram (IO PPE image)");
-
-    // Load Memregs
-    for (uint8_t ii = 0; ii < NUM_OF_MEM_REGS; ii++)
+    // Loading IOPPE_BASE_IMAGE
+    if (i_type == IO_PPE_Image_Type_t::IOPPE_BASE_IMAGE)
     {
-        FAPI_TRY(ody_putsram(i_target,
-                             MEM_REG_OFFSETS[ii],
-                             MEM_IMG_SIZE,
-                             i_mem_regs_image),
-                 "Error returned from ody_putsram (Memregs %d)", ii);
+        // Setup HW if this call load first 32K IOPPE_BASE_IMAGE data at offset 0
+        if (i_offset == OFFSET_0K)
+        {
+            // Halt PPE
+            FAPI_DBG("Halt PPE.");
+            WRAP0_XIXCR.set_PPE_XIXCR_XCR(1); // Write 0b001
+            FAPI_TRY(WRAP0_XIXCR.putScom(i_target),
+                     "Error putscom to PPE_XIXCR_XCR (halt PPE).");
+
+            // Logic IO reset, toggle SCOM_PPE_IORESET
+            FAPI_DBG("IO reset");
+            WRAP0_SCOM_CNTL.set_SCOM_PPE_IORESET(1);
+            FAPI_TRY(WRAP0_SCOM_CNTL.putScom(i_target),
+                     "Error putscom to SCOM_PPE_IORESET (1).");
+            WRAP0_SCOM_CNTL.set_SCOM_PPE_IORESET(0);
+            FAPI_TRY(WRAP0_SCOM_CNTL.putScom(i_target),
+                     "Error putscom to SCOM_PPE_IORESET (0).");
+        }
+
+        // Load IO PPE base image to SRAM
+        // SBE will compile this HWP natively (with an istep chipop) to execute the load
+        // It calls the HWP and supplies image data read from the NOR flash
+        FAPI_TRY(ody_putsram(i_target, SRAM_IO_PPE_IMAGE_OFFSET + (static_cast<uint64_t>(i_offset) << 32), i_img_size,
+                             i_img_data),
+                 "Error returned from ody_putsram (PPE image type)");
+
+    }
+
+    // Loading IOPPE_MEMREGS_IMAGE
+    else
+    {
+        for (uint8_t ii = 0; ii < NUM_OF_MEM_REGS; ii++)
+        {
+            // Intentionally ignore input offset, use fixed
+            // offsets defined for memregs
+            FAPI_TRY(ody_putsram(i_target,
+                                 MEM_REG_OFFSETS[ii],
+                                 i_img_size,
+                                 i_img_data),
+                     "Error returned from ody_putsram (Memregs %d)", ii);
+        }
     }
 
     // Notes:
