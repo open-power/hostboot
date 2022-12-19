@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022
+# Contributors Listed Below - COPYRIGHT 2022,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -36,5 +36,4 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/odyssey
 ################################################################################
 
 # rule plugin related
-# TODO
-#prd_rule_plugin += prdfOdysseyPlugins_common.o
+prd_rule_plugin += prdfOdysseyPlugins_common.o

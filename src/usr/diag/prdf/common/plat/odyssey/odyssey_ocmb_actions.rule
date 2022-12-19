@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022
+# Contributors Listed Below - COPYRIGHT 2022,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -360,38 +360,6 @@ actionclass info_only_mnfgInfo_th1
     #funccall("ClearServiceCallFlag_mnfgInfo"); # must be called after threshold
 };
 
-actionclass ocmb_th1_noClearFirBits
-{
-    calloutOcmbMed;
-    threshold1;
-    #TODO
-    #funccall("returnNoClearFirBits"); # must be called last
-};
-
-actionclass mem_port0_M_th1_noClearFirBits
-{
-    mem_port0_M;
-    threshold1;
-    # TODO
-    #funccall("returnNoClearFirBits"); # must be called last
-};
-
-actionclass mem_port1_M_th1_noClearFirBits
-{
-    mem_port1_M;
-    threshold1;
-    # TODO
-    #funccall("returnNoClearFirBits"); # must be called last
-};
-
-actionclass omi_bus_th1_noClearFirBits
-{
-    omi_bus;
-    threshold1;
-    #TODO
-    #funccall("returnNoClearFirBits"); # must be called last
-};
-
 actionclass ocmb_th1_x4Root
 {
     ocmb_M_th1;
@@ -421,30 +389,6 @@ actionclass mem_port0_M_th1_UERE { mem_port0_M_th1; SueSource; };
 actionclass mem_port1_M_th1_UERE { mem_port1_M_th1; SueSource; };
 actionclass omi_bus_th1_UERE     { omi_bus_th1;     SueSource; };
 
-actionclass ocmb_th1_noClearFirBits_UERE
-{
-    SueSource;
-    ocmb_th1_noClearFirBits; # must be called last
-};
-
-actionclass mem_port0_M_th1_noClearFirBits_UERE
-{
-    SueSource;
-    mem_port0_M_th1_noClearFirBits; # must be called last
-};
-
-actionclass mem_port1_M_th1_noClearFirBits_UERE
-{
-    SueSource;
-    mem_port1_M_th1_noClearFirBits; # must be called last
-};
-
-actionclass omi_bus_th1_noClearFirBits_UERE
-{
-    SueSource;
-    omi_bus_th1_noClearFirBits; # must be called last
-};
-
 actionclass dimm0_H_mem_port0_L_th1_UERE
 {
     dimm0_H_mem_port0_L_th1;
@@ -455,6 +399,41 @@ actionclass dimm1_H_mem_port1_L_th1_UERE
 {
     dimm1_H_mem_port1_L_th1;
     SueSource;
+};
+
+# Channel fails are always SUE sources. Also, registers on the OCMB cannot be
+# written after a channel fail so PRD_NO_CLEAR_FIR_BITS will be returned to
+# ensure the rule code does not try to clear or mask the FIRs after analysis.
+actionclass ocmb_M_th1_chnlFail
+{
+    SueSource;
+    calloutOcmbMed;
+    threshold1;
+    funccall("returnNoClearFirBits"); # must be called last
+};
+
+actionclass mem_port0_M_th1_chnlFail
+{
+    SueSource;
+    mem_port0_M;
+    threshold1;
+    funccall("returnNoClearFirBits"); # must be called last
+};
+
+actionclass mem_port1_M_th1_chnlFail
+{
+    SueSource;
+    mem_port1_M;
+    threshold1;
+    funccall("returnNoClearFirBits"); # must be called last
+};
+
+actionclass omi_bus_th1_chnlFail
+{
+    SueSource;
+    omi_bus;
+    threshold1;
+    funccall("returnNoClearFirBits"); # must be called last
 };
 
 ################################################################################
@@ -580,26 +559,24 @@ actionclass mainline_nce_tce_handling
 };
 
 /** Handle Mainline AUEs/IAUEs */
-actionclass mainline_aue_iaue_handling0_UERE
+actionclass mainline_aue_iaue_handling0_chnlFail
 {
     SueSource;
     # TODO
     #funccall("AnalyzeFetchAueIaue");
     mem_port0_L;
     threshold1;
-    # TODO
-    #funccall("returnNoClearFirBits");
+    funccall("returnNoClearFirBits");
 };
 
-actionclass mainline_aue_iaue_handling1_UERE
+actionclass mainline_aue_iaue_handling1_chnlFail
 {
     SueSource;
     # TODO
     #funccall("AnalyzeFetchAueIaue");
     mem_port1_L;
     threshold1;
-    # TODO
-    #funccall("returnNoClearFirBits");
+    funccall("returnNoClearFirBits");
 };
 
 /** Mainline UE handling */
@@ -657,67 +634,61 @@ actionclass memory_impe_handling
 };
 
 /** Handle Maintenance AUEs */
-actionclass maintenance_aue_handling0_UERE
+actionclass maintenance_aue_handling0_chnlFail
 {
     SueSource;
     #TODO
     #funccall("AnalyzeMaintAue");
     mem_port0_L;
     threshold1;
-    #TODO
-    #funccall("returnNoClearFirBits");
+    funccall("returnNoClearFirBits");
 };
 
-actionclass maintenance_aue_handling1_UERE
+actionclass maintenance_aue_handling1_chnlFail
 {
     SueSource;
     #TODO
     #funccall("AnalyzeMaintAue");
     mem_port1_L;
     threshold1;
-    #TODO
-    #funccall("returnNoClearFirBits");
+    funccall("returnNoClearFirBits");
 };
 
 /** Handle Maintenance IAUEs */
-actionclass maintenance_iaue_handling0_UERE
+actionclass maintenance_iaue_handling0_chnlFail
 {
     SueSource;
     dimm0_H;
     mem_port0_L;
     threshold1;
-    #TODO
-    #funccall("returnNoClearFirBits");
+    funccall("returnNoClearFirBits");
 };
 
-actionclass maintenance_iaue_handling1_UERE
+actionclass maintenance_iaue_handling1_chnlFail
 {
     SueSource;
     dimm0_H_mem_port0_L_th1;
-    #TODO
-    #funccall("returnNoClearFirBits");
+    funccall("returnNoClearFirBits");
 };
 
-actionclass mem_port0_failure_UERE
+actionclass mem_port0_failure_chnlFail
 {
     dimm0_H_mem_port0_L_th1;
     SueSource;
-    #TODO
-    #funccall("returnNoClearFirBits");
+    funccall("returnNoClearFirBits");
 };
 
-actionclass mem_port1_failure_UERE
+actionclass mem_port1_failure_chnlFail
 {
     dimm1_H_mem_port1_L_th1;
     SueSource;
-    #TODO
-    #funccall("returnNoClearFirBits");
+    funccall("returnNoClearFirBits");
 };
 
 # During analysis of another attention. PRD is required to manually trigger a
 # channel failure. In which, cases we want to suppress this the extra log,
 # unless it resulted in a system checkstop.
-actionclass fwInitChnlFail_UERE
+actionclass fwInitChnlFail
 {
     # TODO
     #try( funccall("checkIueTh"), calloutOcmbMed );

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -1354,17 +1354,17 @@ group gMMIO_FIR
     /** MMIO_FIR[4]
      *  Parity error in MMIO/CFG logic FSM
      */
-    (rMMIO_FIR, bit(4)) ? ocmb_M_th1_UERE;
+    (rMMIO_FIR, bit(4)) ? ocmb_M_th1_chnlFail;
 
     /** MMIO_FIR[5]
      *  Overflow detected in internal MMIO/CFG logic FIFO
      */
-    (rMMIO_FIR, bit(5)) ? ocmb_M_th1_UERE;
+    (rMMIO_FIR, bit(5)) ? ocmb_M_th1_chnlFail;
 
     /** MMIO_FIR[6]
      *  Fatal parity error detected in control register
      */
-    (rMMIO_FIR, bit(6)) ? ocmb_M_th1_UERE;
+    (rMMIO_FIR, bit(6)) ? ocmb_M_th1_chnlFail;
 
     /** MMIO_FIR[7]
      *  Parity error detected in informational register
@@ -1598,7 +1598,7 @@ group gSRQ_FIR
     /** SRQ_FIR[1]
      *  SRQ nonrecoverable error
      */
-    (rSRQ_FIR, bit(1)) ? ocmb_M_th1_UERE;
+    (rSRQ_FIR, bit(1)) ? ocmb_M_th1_chnlFail;
 
     /** SRQ_FIR[2]
      *  refresh overrun port0
@@ -1618,7 +1618,7 @@ group gSRQ_FIR
     /** SRQ_FIR[5]
      *  MCB control logic Error in NCF
      */
-    (rSRQ_FIR, bit(5)) ? ocmb_M_th1_UERE;
+    (rSRQ_FIR, bit(5)) ? ocmb_M_th1_chnlFail;
 
     /** SRQ_FIR[6]
      *  Emergency throttle engaged
@@ -1628,7 +1628,7 @@ group gSRQ_FIR
     /** SRQ_FIR[7]
      *  DSM errors port0
      */
-    (rSRQ_FIR, bit(7)) ? mem_port0_M_th1_UERE;
+    (rSRQ_FIR, bit(7)) ? mem_port0_M_th1_chnlFail;
 
     /** SRQ_FIR[8]
      *  event_n was active on the DDR interface port0
@@ -1643,17 +1643,17 @@ group gSRQ_FIR
     /** SRQ_FIR[10]
      *  state machine one hot error port0
      */
-    (rSRQ_FIR, bit(10)) ? mem_port0_M_th1_UERE;
+    (rSRQ_FIR, bit(10)) ? mem_port0_M_th1_chnlFail;
 
     /** SRQ_FIR[11]
      *  ROQ errors port0
      */
-    (rSRQ_FIR, bit(11)) ? mem_port0_M_th1_UERE;
+    (rSRQ_FIR, bit(11)) ? mem_port0_M_th1_chnlFail;
 
     /** SRQ_FIR[12]
      *  Address parity error seen internal to sequencer on
      */
-    (rSRQ_FIR, bit(12)) ? mem_port0_M_th1_UERE;
+    (rSRQ_FIR, bit(12)) ? mem_port0_M_th1_chnlFail;
 
     /** SRQ_FIR[13]
      *  port0 has failed due to a persistent retry
@@ -1673,27 +1673,27 @@ group gSRQ_FIR
     /** SRQ_FIR[16]
      *  WDF unrecoverable mainline error
      */
-    (rSRQ_FIR, bit(16)) ? ocmb_M_th1_UERE;
+    (rSRQ_FIR, bit(16)) ? ocmb_M_th1_chnlFail;
 
     /** SRQ_FIR[17]
      *  WDF mmio error
      */
-    (rSRQ_FIR, bit(17)) ? ocmb_M_th1_UERE;
+    (rSRQ_FIR, bit(17)) ? ocmb_M_th1_chnlFail;
 
     /** SRQ_FIR[18]
      *  WDF array UE on mainline operations (SUE put in me
      */
-    (rSRQ_FIR, bit(18)) ? ocmb_M_th1_UERE;
+    (rSRQ_FIR, bit(18)) ? ocmb_M_th1_chnlFail;
 
     /** SRQ_FIR[19]
      *  WDF mainline dataflow error (SUE not reliably put
      */
-    (rSRQ_FIR, bit(19)) ? ocmb_M_th1_UERE;
+    (rSRQ_FIR, bit(19)) ? ocmb_M_th1_chnlFail;
 
     /** SRQ_FIR[20]
      *  WDF scom register parity error, affecting mainline
      */
-    (rSRQ_FIR, bit(20)) ? ocmb_M_th1_UERE;
+    (rSRQ_FIR, bit(20)) ? ocmb_M_th1_chnlFail;
 
     /** SRQ_FIR[21]
      *  WDF scom register parity error, affecting scom ops
@@ -1703,7 +1703,7 @@ group gSRQ_FIR
     /** SRQ_FIR[22]
      *  WDF SCOM fsm parity error
      */
-    (rSRQ_FIR, bit(22)) ? ocmb_M_th1_UERE;
+    (rSRQ_FIR, bit(22)) ? ocmb_M_th1_chnlFail;
 
     /** SRQ_FIR[23]
      *  WDF write buffer array CE
@@ -1723,12 +1723,12 @@ group gSRQ_FIR
     /** SRQ_FIR[26]
      *  NCF fifo error port0
      */
-    (rSRQ_FIR, bit(26)) ? mem_port0_M_th1_UERE;
+    (rSRQ_FIR, bit(26)) ? mem_port0_M_th1_chnlFail;
 
     /** SRQ_FIR[27]
      *  NCF fifo error port1
      */
-    (rSRQ_FIR, bit(27)) ? mem_port1_M_th1_UERE;
+    (rSRQ_FIR, bit(27)) ? mem_port1_M_th1_chnlFail;
 
     /** SRQ_FIR[28]
      *  memcntl cmd xstop
@@ -1748,7 +1748,7 @@ group gSRQ_FIR
     /** SRQ_FIR[31]
      *  xlat addr error port0
      */
-    (rSRQ_FIR, bit(31)) ? mem_port0_M_th1_UERE;
+    (rSRQ_FIR, bit(31)) ? mem_port0_M_th1_chnlFail;
 
     /** SRQ_FIR[32]
      *  refresh overrun port1
@@ -1778,17 +1778,17 @@ group gSRQ_FIR
     /** SRQ_FIR[37]
      *  state machine one hot error port1
      */
-    (rSRQ_FIR, bit(37)) ? mem_port1_M_th1_UERE;
+    (rSRQ_FIR, bit(37)) ? mem_port1_M_th1_chnlFail;
 
     /** SRQ_FIR[38]
      *  ROQ errors port1
      */
-    (rSRQ_FIR, bit(38)) ? mem_port1_M_th1_UERE;
+    (rSRQ_FIR, bit(38)) ? mem_port1_M_th1_chnlFail;
 
     /** SRQ_FIR[39]
      *  Address parity error seen internal to sequencer on
      */
-    (rSRQ_FIR, bit(39)) ? mem_port1_M_th1_UERE;
+    (rSRQ_FIR, bit(39)) ? mem_port1_M_th1_chnlFail;
 
     /** SRQ_FIR[40]
      *  port1 has failed due to a persistent retry
@@ -1808,17 +1808,17 @@ group gSRQ_FIR
     /** SRQ_FIR[43]
      *  xlat addr error port1
      */
-    (rSRQ_FIR, bit(43)) ? mem_port1_M_th1_UERE;
+    (rSRQ_FIR, bit(43)) ? mem_port1_M_th1_chnlFail;
 
     /** SRQ_FIR[44]
      *  check on ccs in progress bit
      */
-    (rSRQ_FIR, bit(44)) ? ocmb_M_th1_UERE;
+    (rSRQ_FIR, bit(44)) ? ocmb_M_th1_chnlFail;
 
     /** SRQ_FIR[45]
      *  DSM errors port1
      */
-    (rSRQ_FIR, bit(45)) ? mem_port1_M_th1_UERE;
+    (rSRQ_FIR, bit(45)) ? mem_port1_M_th1_chnlFail;
 
 };
 
@@ -1855,17 +1855,17 @@ group gMCBIST_FIR
     /** MCBIST_FIR[2]
      *  Command address timeout
      */
-    (rMCBIST_FIR, bit(2)) ? ocmb_M_th1_UERE;
+    (rMCBIST_FIR, bit(2)) ? ocmb_M_th1;
 
     /** MCBIST_FIR[3]
      *  Internal FSM error
      */
-    (rMCBIST_FIR, bit(3)) ? ocmb_M_th1_UERE;
+    (rMCBIST_FIR, bit(3)) ? ocmb_M_th1_chnlFail;
 
     /** MCBIST_FIR[4]
      *  CSS Array uncorrected CE or UE
      */
-    (rMCBIST_FIR, bit(4)) ? ocmb_M_th1_UERE;
+    (rMCBIST_FIR, bit(4)) ? ocmb_M_th1_chnlFail;
 
     /** MCBIST_FIR[5]
      *  MCBIST data error
@@ -1920,7 +1920,7 @@ group gMCBIST_FIR
     /** MCBIST_FIR[15]
      *  SCOM fatal reg parity error
      */
-    (rMCBIST_FIR, bit(15)) ? ocmb_M_th1_UERE;
+    (rMCBIST_FIR, bit(15)) ? ocmb_M_th1_chnlFail;
 
     /** MCBIST_FIR[16]
      *  SCOM WAT and debug reg parity error
@@ -2032,7 +2032,7 @@ group gRDF_FIR_0
     /** RDF_FIR_0[14]
      *  Mainline read AUE
      */
-    (rRDF_FIR_0, bit(14)) ? mainline_aue_iaue_handling0_UERE;
+    (rRDF_FIR_0, bit(14)) ? mainline_aue_iaue_handling0_chnlFail;
 
     /** RDF_FIR_0[15]
      *  Mainline read UE
@@ -2047,7 +2047,7 @@ group gRDF_FIR_0
     /** RDF_FIR_0[17]
      *  Mainline read IAUE
      */
-    (rRDF_FIR_0, bit(17)) ? mainline_aue_iaue_handling0_UERE;
+    (rRDF_FIR_0, bit(17)) ? mainline_aue_iaue_handling0_chnlFail;
 
     /** RDF_FIR_0[18]
      *  Mainline read IUE
@@ -2097,7 +2097,7 @@ group gRDF_FIR_0
     /** RDF_FIR_0[34]
      *  Maintenance AUE
      */
-    (rRDF_FIR_0, bit(34)) ? maintenance_aue_handling0_UERE;
+    (rRDF_FIR_0, bit(34)) ? maintenance_aue_handling0_chnlFail;
 
     /** RDF_FIR_0[35]
      *  Maintenance UE
@@ -2112,7 +2112,7 @@ group gRDF_FIR_0
     /** RDF_FIR_0[37]
      *  Maintenance IAUE
      */
-    (rRDF_FIR_0, bit(37)) ? maintenance_iaue_handling0_UERE;
+    (rRDF_FIR_0, bit(37)) ? maintenance_iaue_handling0_chnlFail;
 
     /** RDF_FIR_0[38]
      *  Maintenance IUE
@@ -2147,12 +2147,12 @@ group gRDF_FIR_0
     /** RDF_FIR_0[44]
      *  SCOM unrecoverable register parity error
      */
-    (rRDF_FIR_0, bit(44)) ? mem_port0_M_th1_UERE;
+    (rRDF_FIR_0, bit(44)) ? mem_port0_M_th1_chnlFail;
 
     /** RDF_FIR_0[45]
      *  ECC corrector internal parity error
      */
-    (rRDF_FIR_0, bit(45)) ? mem_port0_M_th1_UERE;
+    (rRDF_FIR_0, bit(45)) ? mem_port0_M_th1_chnlFail;
 
     /** RDF_FIR_0[46]
      *  Rd Buff ECC CHK Cor CE DW0 Detected
@@ -2167,12 +2167,12 @@ group gRDF_FIR_0
     /** RDF_FIR_0[48]
      *  Rd Buff ECC CHK Cor UE DW0 Detected
      */
-    (rRDF_FIR_0, bit(48)) ? mem_port0_M_th1_UERE;
+    (rRDF_FIR_0, bit(48)) ? mem_port0_M_th1_chnlFail;
 
     /** RDF_FIR_0[49]
      *  Rd Buff ECC CHK Cor UE DW1 Detected
      */
-    (rRDF_FIR_0, bit(49)) ? mem_port0_M_th1_UERE;
+    (rRDF_FIR_0, bit(49)) ? mem_port0_M_th1_chnlFail;
 
     /** RDF_FIR_0[50]
      *  Prefetch buffer ECC CHK Cor CE DW0 Detected
@@ -2197,7 +2197,7 @@ group gRDF_FIR_0
     /** RDF_FIR_0[54]
      *  Parity error on TLXT to RDF read buffer interface
      */
-    (rRDF_FIR_0, bit(54)) ? mem_port0_M_th1_UERE;
+    (rRDF_FIR_0, bit(54)) ? mem_port0_M_th1_chnlFail;
 
     /** RDF_FIR_0[55]
      *  Parity error on TLXT to RDF read prefetch interfac
@@ -2314,7 +2314,7 @@ group gRDF_FIR_1
     /** RDF_FIR_1[14]
      *  Mainline read AUE
      */
-    (rRDF_FIR_1, bit(14)) ? mainline_aue_iaue_handling1_UERE;
+    (rRDF_FIR_1, bit(14)) ? mainline_aue_iaue_handling1_chnlFail;
 
     /** RDF_FIR_1[15]
      *  Mainline read UE
@@ -2329,7 +2329,7 @@ group gRDF_FIR_1
     /** RDF_FIR_1[17]
      *  Mainline read IAUE
      */
-    (rRDF_FIR_1, bit(17)) ? mainline_aue_iaue_handling1_UERE;
+    (rRDF_FIR_1, bit(17)) ? mainline_aue_iaue_handling1_chnlFail;
 
     /** RDF_FIR_1[18]
      *  Mainline read IUE
@@ -2379,7 +2379,7 @@ group gRDF_FIR_1
     /** RDF_FIR_1[34]
      *  Maintenance AUE
      */
-    (rRDF_FIR_1, bit(34)) ? maintenance_aue_handling1_UERE;
+    (rRDF_FIR_1, bit(34)) ? maintenance_aue_handling1_chnlFail;
 
     /** RDF_FIR_1[35]
      *  Maintenance UE
@@ -2394,7 +2394,7 @@ group gRDF_FIR_1
     /** RDF_FIR_1[37]
      *  Maintenance IAUE
      */
-    (rRDF_FIR_1, bit(37)) ? maintenance_iaue_handling1_UERE;
+    (rRDF_FIR_1, bit(37)) ? maintenance_iaue_handling1_chnlFail;
 
     /** RDF_FIR_1[38]
      *  Maintenance IUE
@@ -2429,12 +2429,12 @@ group gRDF_FIR_1
     /** RDF_FIR_1[44]
      *  SCOM unrecoverable register parity error
      */
-    (rRDF_FIR_1, bit(44)) ? mem_port1_M_th1_UERE;
+    (rRDF_FIR_1, bit(44)) ? mem_port1_M_th1_chnlFail;
 
     /** RDF_FIR_1[45]
      *  ECC corrector internal parity error
      */
-    (rRDF_FIR_1, bit(45)) ? mem_port1_M_th1_UERE;
+    (rRDF_FIR_1, bit(45)) ? mem_port1_M_th1_chnlFail;
 
     /** RDF_FIR_1[46]
      *  Rd Buff ECC CHK Cor CE DW0 Detected
@@ -2449,12 +2449,12 @@ group gRDF_FIR_1
     /** RDF_FIR_1[48]
      *  Rd Buff ECC CHK Cor UE DW0 Detected
      */
-    (rRDF_FIR_1, bit(48)) ? mem_port1_M_th1_UERE;
+    (rRDF_FIR_1, bit(48)) ? mem_port1_M_th1_chnlFail;
 
     /** RDF_FIR_1[49]
      *  Rd Buff ECC CHK Cor UE DW1 Detected
      */
-    (rRDF_FIR_1, bit(49)) ? mem_port1_M_th1_UERE;
+    (rRDF_FIR_1, bit(49)) ? mem_port1_M_th1_chnlFail;
 
     /** RDF_FIR_1[50]
      *  Prefetch buffer ECC CHK Cor CE DW0 Detected
@@ -2479,7 +2479,7 @@ group gRDF_FIR_1
     /** RDF_FIR_1[54]
      *  Parity error on TLXT to RDF read buffer interface
      */
-    (rRDF_FIR_1, bit(54)) ? mem_port1_M_th1_UERE;
+    (rRDF_FIR_1, bit(54)) ? mem_port1_M_th1_chnlFail;
 
     /** RDF_FIR_1[55]
      *  Parity error on TLXT to RDF read prefetch interfac
@@ -2531,62 +2531,62 @@ group gTLX_FIR
     /** TLX_FIR[1]
      *  TLXT control register parity error
      */
-    (rTLX_FIR, bit(1)) ? ocmb_M_th1_UERE;
+    (rTLX_FIR, bit(1)) ? ocmb_M_th1_chnlFail;
 
     /** TLX_FIR[2]
      *  TLX VC0 return credit overflow
      */
-    (rTLX_FIR, bit(2)) ? omi_bus_th1_UERE;
+    (rTLX_FIR, bit(2)) ? omi_bus_th1_chnlFail;
 
     /** TLX_FIR[3]
      *  TLX VC3 return credit overflow
      */
-    (rTLX_FIR, bit(3)) ? omi_bus_th1_UERE;
+    (rTLX_FIR, bit(3)) ? omi_bus_th1_chnlFail;
 
     /** TLX_FIR[4]
      *  TLX DCP0 return credit overflow
      */
-    (rTLX_FIR, bit(4)) ? omi_bus_th1_UERE;
+    (rTLX_FIR, bit(4)) ? omi_bus_th1_chnlFail;
 
     /** TLX_FIR[5]
      *  TLX DCP3 return credit overflow
      */
-    (rTLX_FIR, bit(5)) ? omi_bus_th1_UERE;
+    (rTLX_FIR, bit(5)) ? omi_bus_th1_chnlFail;
 
     /** TLX_FIR[6]
      *  TLXC error
      */
-    (rTLX_FIR, bit(6)) ? ocmb_M_th1_UERE;
+    (rTLX_FIR, bit(6)) ? ocmb_M_th1_chnlFail;
 
     /** TLX_FIR[7]
      *  TLXC parity error
      */
-    (rTLX_FIR, bit(7)) ? ocmb_M_th1_UERE;
+    (rTLX_FIR, bit(7)) ? ocmb_M_th1_chnlFail;
 
     /** TLX_FIR[8]
      *  TLXT config parity error
      */
-    (rTLX_FIR, bit(8)) ? ocmb_M_th1_UERE;
+    (rTLX_FIR, bit(8)) ? ocmb_M_th1_chnlFail;
 
     /** TLX_FIR[9]
      *  TLXT response parity error
      */
-    (rTLX_FIR, bit(9)) ? ocmb_M_th1_UERE;
+    (rTLX_FIR, bit(9)) ? ocmb_M_th1_chnlFail;
 
     /** TLX_FIR[10]
      *  TLXT framer control parity error
      */
-    (rTLX_FIR, bit(10)) ? ocmb_M_th1_UERE;
+    (rTLX_FIR, bit(10)) ? ocmb_M_th1_chnlFail;
 
     /** TLX_FIR[11]
      *  TLXT Xarb control error
      */
-    (rTLX_FIR, bit(11)) ? ocmb_M_th1_UERE;
+    (rTLX_FIR, bit(11)) ? ocmb_M_th1_chnlFail;
 
     /** TLX_FIR[12]
      *  TLXT DLX interface error
      */
-    (rTLX_FIR, bit(12)) ? ocmb_M_th1_UERE;
+    (rTLX_FIR, bit(12)) ? ocmb_M_th1_chnlFail;
 
     /** TLX_FIR[13]
      *  TLX info register parity error
@@ -2596,7 +2596,7 @@ group gTLX_FIR
     /** TLX_FIR[14]
      *  TLX reorder queue error
      */
-    (rTLX_FIR, bit(14)) ? ocmb_M_th1_UERE;
+    (rTLX_FIR, bit(14)) ? ocmb_M_th1_chnlFail;
 
     /** TLX_FIR[15]
      *  TLXT invalid configuration
@@ -2611,27 +2611,27 @@ group gTLX_FIR
     /** TLX_FIR[17]
      *  Malformed OC packet received
      */
-    (rTLX_FIR, bit(17)) ? omi_bus_th1_UERE;
+    (rTLX_FIR, bit(17)) ? omi_bus_th1_chnlFail;
 
     /** TLX_FIR[18]
      *  Protocol error detected in OC downstream sequence
      */
-    (rTLX_FIR, bit(18)) ? omi_bus_th1_UERE;
+    (rTLX_FIR, bit(18)) ? omi_bus_th1_chnlFail;
 
     /** TLX_FIR[19]
      *  Legal OC command not supported
      */
-    (rTLX_FIR, bit(19)) ? omi_bus_th1_UERE;
+    (rTLX_FIR, bit(19)) ? omi_bus_th1_chnlFail;
 
     /** TLX_FIR[20]
      *  Legal OC command length not supported
      */
-    (rTLX_FIR, bit(20)) ? omi_bus_th1_UERE;
+    (rTLX_FIR, bit(20)) ? omi_bus_th1_chnlFail;
 
     /** TLX_FIR[21]
      *  TLXR OC Misaligned
      */
-    (rTLX_FIR, bit(21)) ? omi_bus_th1_UERE;
+    (rTLX_FIR, bit(21)) ? omi_bus_th1_chnlFail;
 
     /** TLX_FIR[22]
      *  MMIO returned non-zero response to a write
@@ -2641,7 +2641,7 @@ group gTLX_FIR
     /** TLX_FIR[23]
      *  Hardware error in TLXR control logic
      */
-    (rTLX_FIR, bit(23)) ? ocmb_M_th1_UERE;
+    (rTLX_FIR, bit(23)) ? ocmb_M_th1_chnlFail;
 
     /** TLX_FIR[24]
      *  TLXR Info Event
@@ -2651,7 +2651,7 @@ group gTLX_FIR
     /** TLX_FIR[25]
      *  TLXR detected internal error
      */
-    (rTLX_FIR, bit(25)) ? ocmb_M_th1_UERE;
+    (rTLX_FIR, bit(25)) ? ocmb_M_th1_chnlFail;
 
     /** TLX_FIR[26]
      *  TLXR Threshold errors
@@ -2698,7 +2698,7 @@ group gDLX_FIR
     /** DLX_FIR[2]
      *  DL0 buffer UE / insufficient working lanes
      */
-    (rDLX_FIR, bit(2)) ? ocmb_M_th1_UERE;
+    (rDLX_FIR, bit(2)) ? ocmb_M_th1_chnlFail;
 
     /** DLX_FIR[3]
      *  DL0 CE on TL flit
@@ -2840,62 +2840,62 @@ group gDLX_ERR_RPT
     /** DLX_ERR_RPT[52]
      *  bad CRC from TLXT
      */
-    (rDLX_ERR_RPT, bit(52)) ? ocmb_M_th1_UERE;
+    (rDLX_ERR_RPT, bit(52)) ? ocmb_M_th1_chnlFail;
 
     /** DLX_ERR_RPT[53]
      *  flit hammer
      */
-    (rDLX_ERR_RPT, bit(53)) ? ocmb_M_th1_UERE;
+    (rDLX_ERR_RPT, bit(53)) ? ocmb_M_th1_chnlFail;
 
     /** DLX_ERR_RPT[54]
      *  TX lane reversal
      */
-    (rDLX_ERR_RPT, bit(54)) ? omi_bus_th1_UERE;
+    (rDLX_ERR_RPT, bit(54)) ? omi_bus_th1_chnlFail;
 
     /** DLX_ERR_RPT[55]
      *  RX receiving slow A
      */
-    (rDLX_ERR_RPT, bit(55)) ? ocmb_M_th1_UERE;
+    (rDLX_ERR_RPT, bit(55)) ? ocmb_M_th1_chnlFail;
 
     /** DLX_ERR_RPT[56]
      *  RX receiving illegal run length
      */
-    (rDLX_ERR_RPT, bit(56)) ? omi_bus_th1_UERE;
+    (rDLX_ERR_RPT, bit(56)) ? omi_bus_th1_chnlFail;
 
     /** DLX_ERR_RPT[57]
      *  control parity error
      */
-    (rDLX_ERR_RPT, bit(57)) ? ocmb_M_th1_UERE;
+    (rDLX_ERR_RPT, bit(57)) ? ocmb_M_th1_chnlFail;
 
     /** DLX_ERR_RPT[58]
      *  scom register parity error
      */
-    (rDLX_ERR_RPT, bit(58)) ? ocmb_M_th1_UERE;
+    (rDLX_ERR_RPT, bit(58)) ? ocmb_M_th1_chnlFail;
 
     /** DLX_ERR_RPT[59]
      *  truncated flit from TL
      */
-    (rDLX_ERR_RPT, bit(59)) ? ocmb_M_th1_UERE;
+    (rDLX_ERR_RPT, bit(59)) ? ocmb_M_th1_chnlFail;
 
     /** DLX_ERR_RPT[60]
      *  illegal run length from TL
      */
-    (rDLX_ERR_RPT, bit(60)) ? ocmb_M_th1_UERE;
+    (rDLX_ERR_RPT, bit(60)) ? ocmb_M_th1_chnlFail;
 
     /** DLX_ERR_RPT[61]
      *  ack pointer overflow
      */
-    (rDLX_ERR_RPT, bit(61)) ? omi_bus_th1_UERE;
+    (rDLX_ERR_RPT, bit(61)) ? omi_bus_th1_chnlFail;
 
     /** DLX_ERR_RPT[62]
      *  UE on bus from TLXT
      */
-    (rDLX_ERR_RPT, bit(62)) ? ocmb_M_th1_UERE;
+    (rDLX_ERR_RPT, bit(62)) ? ocmb_M_th1_chnlFail;
 
     /** DLX_ERR_RPT[63]
      *  ECC UE on dword containing run length
      */
-    (rDLX_ERR_RPT, bit(63)) ? ocmb_M_th1_UERE;
+    (rDLX_ERR_RPT, bit(63)) ? ocmb_M_th1_chnlFail;
 };
 
 ################################################################################
