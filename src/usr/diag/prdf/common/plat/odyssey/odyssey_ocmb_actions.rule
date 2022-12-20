@@ -697,6 +697,27 @@ actionclass fwInitChnlFail
     SueSource;
 };
 
+actionclass srq_rcd_parity_error_0
+{
+    dimm0_H_mem_port0_L_th_32perDay;
+    # TODO
+    #funccall("SrqRcdParityError");
+};
+
+actionclass srq_rcd_parity_error_1
+{
+    dimm1_H_mem_port1_L_th_32perDay;
+    # TODO
+    #funccall("SrqRcdParityError");
+};
+
+actionclass srq_recov_parity_error
+{
+    ocmb_M_th1;
+    # TODO
+    #funccall("SrqRecovParityError");
+};
+
 ################################################################################
 # Analyze groups
 ################################################################################

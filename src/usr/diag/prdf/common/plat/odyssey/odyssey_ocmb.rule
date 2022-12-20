@@ -1613,7 +1613,7 @@ group gSRQ_FIR
     /** SRQ_FIR[4]
      *  RCD parity error port0
      */
-    (rSRQ_FIR, bit(4)) ? defaultMaskedError;
+    (rSRQ_FIR, bit(4)) ? srq_rcd_parity_error_0;
 
     /** SRQ_FIR[5]
      *  MCB control logic Error in NCF
@@ -1658,7 +1658,7 @@ group gSRQ_FIR
     /** SRQ_FIR[13]
      *  port0 has failed due to a persistent retry
      */
-    (rSRQ_FIR, bit(13)) ? defaultMaskedError;
+    (rSRQ_FIR, bit(13)) ? dimm0_H_mem_port0_L_th1;
 
     /** SRQ_FIR[14]
      *  informational register parity error
@@ -1738,7 +1738,7 @@ group gSRQ_FIR
     /** SRQ_FIR[29]
      *  SRQ recoverable error
      */
-    (rSRQ_FIR, bit(29)) ? ocmb_M_th1;
+    (rSRQ_FIR, bit(29)) ? srq_recov_parity_error;
 
     /** SRQ_FIR[30]
      *  DFI error port0
@@ -1758,7 +1758,7 @@ group gSRQ_FIR
     /** SRQ_FIR[33]
      *  RCD parity error port1
      */
-    (rSRQ_FIR, bit(33)) ? defaultMaskedError;
+    (rSRQ_FIR, bit(33)) ? srq_rcd_parity_error_1;
 
     /** SRQ_FIR[34]
      *  DFI error port1
@@ -1793,7 +1793,7 @@ group gSRQ_FIR
     /** SRQ_FIR[40]
      *  port1 has failed due to a persistent retry
      */
-    (rSRQ_FIR, bit(40)) ? defaultMaskedError;
+    (rSRQ_FIR, bit(40)) ? dimm1_H_mem_port1_L_th1;
 
     /** SRQ_FIR[41]
      *  refresh management CE port1
@@ -2042,7 +2042,7 @@ group gRDF_FIR_0
     /** RDF_FIR_0[16]
      *  Mainline read RCD
      */
-    (rRDF_FIR_0, bit(16)) ? mem_port0_M_th1_UERE;
+    (rRDF_FIR_0, bit(16)) ? dimm0_H_mem_port0_L_th1_UERE;
 
     /** RDF_FIR_0[17]
      *  Mainline read IAUE
@@ -2057,7 +2057,7 @@ group gRDF_FIR_0
     /** RDF_FIR_0[19]
      *  Mainline read IRCD
      */
-    (rRDF_FIR_0, bit(19)) ? mem_port0_M_th_32perDay;
+    (rRDF_FIR_0, bit(19)) ? dimm0_H_mem_port0_L_th_32perDay;
 
     /** RDF_FIR_0[20]
      *  Mainline read IMPE
@@ -2107,7 +2107,7 @@ group gRDF_FIR_0
     /** RDF_FIR_0[36]
      *  Maintenance RCD
      */
-    (rRDF_FIR_0, bit(36)) ? mem_port0_M_th1;
+    (rRDF_FIR_0, bit(36)) ? dimm0_H_mem_port0_L_th1;
 
     /** RDF_FIR_0[37]
      *  Maintenance IAUE
@@ -2122,7 +2122,7 @@ group gRDF_FIR_0
     /** RDF_FIR_0[39]
      *  Maintenance IRCD
      */
-    (rRDF_FIR_0, bit(39)) ? mem_port0_M_th1;
+    (rRDF_FIR_0, bit(39)) ? dimm0_H_mem_port0_L_th_32perDay;
 
     /** RDF_FIR_0[40]
      *  Maintenance IMPE
@@ -2324,7 +2324,7 @@ group gRDF_FIR_1
     /** RDF_FIR_1[16]
      *  Mainline read RCD
      */
-    (rRDF_FIR_1, bit(16)) ? mem_port1_M_th1_UERE;
+    (rRDF_FIR_1, bit(16)) ? dimm1_H_mem_port1_L_th1_UERE;
 
     /** RDF_FIR_1[17]
      *  Mainline read IAUE
@@ -2339,7 +2339,7 @@ group gRDF_FIR_1
     /** RDF_FIR_1[19]
      *  Mainline read IRCD
      */
-    (rRDF_FIR_1, bit(19)) ? mem_port1_M_th_32perDay;
+    (rRDF_FIR_1, bit(19)) ? dimm1_H_mem_port1_L_th_32perDay;
 
     /** RDF_FIR_1[20]
      *  Mainline read IMPE
@@ -2389,7 +2389,7 @@ group gRDF_FIR_1
     /** RDF_FIR_1[36]
      *  Maintenance RCD
      */
-    (rRDF_FIR_1, bit(36)) ? mem_port1_M_th1;
+    (rRDF_FIR_1, bit(36)) ? dimm1_H_mem_port1_L_th1;
 
     /** RDF_FIR_1[37]
      *  Maintenance IAUE
@@ -2404,7 +2404,7 @@ group gRDF_FIR_1
     /** RDF_FIR_1[39]
      *  Maintenance IRCD
      */
-    (rRDF_FIR_1, bit(39)) ? mem_port1_M_th1;
+    (rRDF_FIR_1, bit(39)) ? dimm1_H_mem_port1_L_th_32perDay;
 
     /** RDF_FIR_1[40]
      *  Maintenance IMPE
