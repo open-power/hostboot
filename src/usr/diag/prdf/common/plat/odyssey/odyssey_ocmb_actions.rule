@@ -722,10 +722,46 @@ actionclass srq_recov_parity_error
 # Analyze groups
 ################################################################################
 
+actionclass analyzeMMIO_FIR
+{
+    capture(mmio_fir_regs);
+    analyze(gMMIO_FIR);
+};
+
+actionclass analyzeSRQ_FIR
+{
+    capture(srq_fir_regs);
+    analyze(gSRQ_FIR);
+};
+
+actionclass analyzeMCBIST_FIR
+{
+    capture(mcbist_fir_regs);
+    analyze(gMCBIST_FIR);
+};
+
+actionclass analyzeRDF_FIR_0
+{
+    capture(rdf_fir_0_regs);
+    analyze(gRDF_FIR_0);
+};
+
+actionclass analyzeRDF_FIR_1
+{
+    capture(rdf_fir_1_regs);
+    analyze(gRDF_FIR_1);
+};
+
+actionclass analyzeTLX_FIR
+{
+    capture(tlx_fir_regs);
+    analyze(gTLX_FIR);
+};
+
 # TODO
 actionclass analyzeDLX_FIR
 {
-    #capture(ocmb_regs);
+    capture(dlx_fir_regs);
     #capture(omi_ocmb_ffdc);
     #funccall("CollectOmiFfdc");
     analyze(gDLX_FIR);

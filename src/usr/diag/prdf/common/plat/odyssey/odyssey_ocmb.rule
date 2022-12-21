@@ -1180,32 +1180,32 @@ group gCFIR_MEM attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN
     /** CFIR_MEM[6]
      *  Attention from MCBIST_FIR
      */
-    (rCFIR_MEM, bit(6)) ? analyze(gMCBIST_FIR);
+    (rCFIR_MEM, bit(6)) ? analyzeMCBIST_FIR;
 
     /** CFIR_MEM[7]
      *  Attention from MMIO_FIR
      */
-    (rCFIR_MEM, bit(7)) ? analyze(gMMIO_FIR);
+    (rCFIR_MEM, bit(7)) ? analyzeMMIO_FIR;
 
     /** CFIR_MEM[8]
      *  Attention from RDF_FIR_0
      */
-    (rCFIR_MEM, bit(8)) ? analyze(gRDF_FIR_0);
+    (rCFIR_MEM, bit(8)) ? analyzeRDF_FIR_0;
 
     /** CFIR_MEM[9]
      *  Attention from RDF_FIR_1
      */
-    (rCFIR_MEM, bit(9)) ? analyze(gRDF_FIR_1);
+    (rCFIR_MEM, bit(9)) ? analyzeRDF_FIR_1;
 
     /** CFIR_MEM[10]
      *  Attention from SRQ_FIR
      */
-    (rCFIR_MEM, bit(10)) ? analyze(gSRQ_FIR);
+    (rCFIR_MEM, bit(10)) ? analyzeSRQ_FIR;
 
     /** CFIR_MEM[11]
      *  Attention from TLX_FIR
      */
-    (rCFIR_MEM, bit(11)) ? analyze(gTLX_FIR);
+    (rCFIR_MEM, bit(11)) ? analyzeTLX_FIR;
 
     /** CFIR_MEM[12]
      *  Attention from ODP_FIR_0

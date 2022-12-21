@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022
+# Contributors Listed Below - COPYRIGHT 2022,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -34,14 +34,14 @@
     {
         name        "Odyssey chip MMIO_FIR Error Report 0";
         scomaddr    0x0801087C;
-        capture     group default;
+        capture     group mmio_fir_regs;
     };
 
     register MMIO_ERR_RPT_1
     {
         name        "Odyssey chip MMIO_FIR Error Report 1";
         scomaddr    0x0801087E;
-        capture     group default;
+        capture     group mmio_fir_regs;
     };
 
     ############################################################################
@@ -52,49 +52,49 @@
     {
         name        "Odyssey chip SRQ_ERR_RPT";
         scomaddr    0x0801101C;
-        capture     group default;
+        capture     group srq_fir_regs;
     };
 
     register MBXLT0
     {
         name        "Odyssey chip Address Translation Register 0";
         scomaddr    0x08011012;
-        capture     group default;
+        capture     group srq_fir_regs;
     };
 
     register MBXLT1
     {
         name        "Odyssey chip Address Translation Register 1";
         scomaddr    0x08011013;
-        capture     group default;
+        capture     group srq_fir_regs;
     };
 
     register MBXLT2
     {
         name        "Odyssey chip Address Translation Register 2";
         scomaddr    0x08011014;
-        capture     group default;
+        capture     group srq_fir_regs;
     };
 
     register MBXLT3
     {
         name        "Odyssey chip Address Translation Register 3";
         scomaddr    0x08011021;
-        capture     group default;
+        capture     group srq_fir_regs;
     };
 
     register WESR
     {
         name        "Odyssey chip Write 8BECC Syndrome Register";
         scomaddr    0x08011C06;
-        capture     group default;
+        capture     group srq_fir_regs;
     };
 
     register SRQ_ERR_RPT_HOLD
     {
         name        "Odyssey chip SRQ Error Report Hold Register";
         scomaddr    0x08011C07;
-        capture     group default;
+        capture     group srq_fir_regs;
     };
 
     ############################################################################
@@ -105,189 +105,189 @@
     {
         name        "Odyssey chip MBS Memory Scrub/Read Error Counter Reg 0";
         scomaddr    0x08011455;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSEC1
     {
         name        "Odyssey chip MBS Memory Scrub/Read Error Counter Reg 1";
         scomaddr    0x08011456;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSTR
     {
         name        "Odyssey chip MBS Memory Scrub/Read Error Threshold Reg";
         scomaddr    0x08011457;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSSYMEC0
     {
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 0";
         scomaddr    0x08011458;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSSYMEC1
     {
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 1";
         scomaddr    0x08011459;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSSYMEC2
     {
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 2";
         scomaddr    0x0801145A;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSSYMEC3
     {
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 3";
         scomaddr    0x0801145B;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSSYMEC4
     {
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 4";
         scomaddr    0x0801145C;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSSYMEC5
     {
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 5";
         scomaddr    0x0801145D;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSSYMEC6
     {
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 6";
         scomaddr    0x0801145E;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSSYMEC7
     {
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 7";
         scomaddr    0x0801145F;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSSYMEC8
     {
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 8";
         scomaddr    0x08011460;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSSYMEC9
     {
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 9";
         scomaddr    0x08011461;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSMSEC
     {
         name        "Odyssey chip MBS Memory Scrub/Read Error Count Register";
         scomaddr    0x08011469;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBNCER
     {
         name        "Odyssey chip MBS Mainline NCE Address Trap Register";
         scomaddr    0x0801146A;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBRCER
     {
         name        "Odyssey chip MBS Mainline RCE Address Trap Register";
         scomaddr    0x0801146B;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBMPER
     {
         name        "Odyssey chip MBS Mainline MPE Address Trap Register";
         scomaddr    0x0801146C;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBUER
     {
         name        "Odyssey chip MBS Mainline UE Address Trap Register";
         scomaddr    0x0801146D;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBAUER
     {
         name        "Odyssey chip MBS Mainline AUE Address Trap Register";
         scomaddr    0x0801146E;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBA_ERR_MASK_0
     {
         name        "Odyssey chip MBA Error Mask0 Register";
         scomaddr    0x08011473;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBA_ERR_MASK_1
     {
         name        "Odyssey chip MBA Error Mask1 Register";
         scomaddr    0x08011474;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MBSEVR0
     {
         name        "Odyssey chip MBS Error Vector Trap Register 0";
         scomaddr    0x0801147E;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MCBAGRA
     {
         name        "Odyssey chip Address Generator Configuration Register";
         scomaddr    0x080114D6;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MCBMCAT
     {
         name        "Odyssey chip Maint Current Address Trap Register";
         scomaddr    0x080114D7;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MCB_CNTL
     {
         name        "Odyssey chip MCBIST Control Register";
         scomaddr    0x080114DB;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MCB_CNTLSTAT
     {
         name        "Odyssey chip Configured Command Sequence Status Reg";
         scomaddr    0x080114DC;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     register MCBCFG
     {
         name        "Odyssey chip MCBIST Configuration Register";
         scomaddr    0x080114E0;
-        capture     group default;
+        capture     group mcbist_fir_regs;
     };
 
     ############################################################################
@@ -298,133 +298,133 @@
     {
         name        "Odyssey chip RDF 0 Error Report 0";
         scomaddr    0x0801180E;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register RDF_0_ERR_RPT_1
     {
         name        "Odyssey chip RDF 0 Error Report 1";
         scomaddr    0x0801180F;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register MSR_0
     {
         name        "Odyssey chip Mark Shadow Register 0";
         scomaddr    0x0801180C;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register HW_MS0_0
     {
         name        "Odyssey chip Hardware Mark Store Rank0 Register 0";
         scomaddr    0x08011810;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register HW_MS1_0
     {
         name        "Odyssey chip Hardware Mark Store Rank1 Register 0";
         scomaddr    0x08011811;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register HW_MS2_0
     {
         name        "Odyssey chip Hardware Mark Store Rank2 Register 0";
         scomaddr    0x08011812;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register HW_MS3_0
     {
         name        "Odyssey chip Hardware Mark Store Rank3 Register 0";
         scomaddr    0x08011813;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register HW_MS4_0
     {
         name        "Odyssey chip Hardware Mark Store Rank4 Register 0";
         scomaddr    0x08011814;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register HW_MS5_0
     {
         name        "Odyssey chip Hardware Mark Store Rank5 Register 0";
         scomaddr    0x08011815;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register HW_MS6_0
     {
         name        "Odyssey chip Hardware Mark Store Rank6 Register 0";
         scomaddr    0x08011816;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register HW_MS7_0
     {
         name        "Odyssey chip Hardware Mark Store Rank7 Register 0";
         scomaddr    0x08011817;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register FW_MS0_0
     {
         name        "Odyssey chip Firmware Mark Store Rank0 Register 0";
         scomaddr    0x08011818;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register FW_MS1_0
     {
         name        "Odyssey chip Firmware Mark Store Rank1 Register 0";
         scomaddr    0x08011819;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register FW_MS2_0
     {
         name        "Odyssey chip Firmware Mark Store Rank2 Register 0";
         scomaddr    0x0801181A;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register FW_MS3_0
     {
         name        "Odyssey chip Firmware Mark Store Rank3 Register 0";
         scomaddr    0x0801181B;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register FW_MS4_0
     {
         name        "Odyssey chip Firmware Mark Store Rank4 Register 0";
         scomaddr    0x0801181C;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register FW_MS5_0
     {
         name        "Odyssey chip Firmware Mark Store Rank5 Register 0";
         scomaddr    0x0801181D;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register FW_MS6_0
     {
         name        "Odyssey chip Firmware Mark Store Rank6 Register 0";
         scomaddr    0x0801181E;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     register FW_MS7_0
     {
         name        "Odyssey chip Firmware Mark Store Rank7 Register 0";
         scomaddr    0x0801181F;
-        capture     group default;
+        capture     group rdf_fir_0_regs;
     };
 
     ############################################################################
@@ -435,133 +435,133 @@
     {
         name        "Odyssey chip RDF 1 Error Report 0";
         scomaddr    0x0801280E;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register RDF_1_ERR_RPT_1
     {
         name        "Odyssey chip RDF 1 Error Report 1";
         scomaddr    0x0801280F;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register MSR_1
     {
         name        "Odyssey chip Mark Shadow Register 1";
         scomaddr    0x0801280C;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register HW_MS0_1
     {
         name        "Odyssey chip Hardware Mark Store Rank0 Register 1";
         scomaddr    0x08012810;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register HW_MS1_1
     {
         name        "Odyssey chip Hardware Mark Store Rank1 Register 1";
         scomaddr    0x08012811;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register HW_MS2_1
     {
         name        "Odyssey chip Hardware Mark Store Rank2 Register 1";
         scomaddr    0x08012812;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register HW_MS3_1
     {
         name        "Odyssey chip Hardware Mark Store Rank3 Register 1";
         scomaddr    0x08012813;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register HW_MS4_1
     {
         name        "Odyssey chip Hardware Mark Store Rank4 Register 1";
         scomaddr    0x08012814;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register HW_MS5_1
     {
         name        "Odyssey chip Hardware Mark Store Rank5 Register 1";
         scomaddr    0x08012815;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register HW_MS6_1
     {
         name        "Odyssey chip Hardware Mark Store Rank6 Register 1";
         scomaddr    0x08012816;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register HW_MS7_1
     {
         name        "Odyssey chip Hardware Mark Store Rank7 Register 1";
         scomaddr    0x08012817;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register FW_MS0_1
     {
         name        "Odyssey chip Firmware Mark Store Rank0 Register 1";
         scomaddr    0x08012818;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register FW_MS1_1
     {
         name        "Odyssey chip Firmware Mark Store Rank1 Register 1";
         scomaddr    0x08012819;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register FW_MS2_1
     {
         name        "Odyssey chip Firmware Mark Store Rank2 Register 1";
         scomaddr    0x0801281A;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register FW_MS3_1
     {
         name        "Odyssey chip Firmware Mark Store Rank3 Register 1";
         scomaddr    0x0801281B;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register FW_MS4_1
     {
         name        "Odyssey chip Firmware Mark Store Rank4 Register 1";
         scomaddr    0x0801281C;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register FW_MS5_1
     {
         name        "Odyssey chip Firmware Mark Store Rank5 Register 1";
         scomaddr    0x0801281D;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register FW_MS6_1
     {
         name        "Odyssey chip Firmware Mark Store Rank6 Register 1";
         scomaddr    0x0801281E;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     register FW_MS7_1
     {
         name        "Odyssey chip Firmware Mark Store Rank7 Register 1";
         scomaddr    0x0801281F;
-        capture     group default;
+        capture     group rdf_fir_1_regs;
     };
 
     ############################################################################
@@ -572,56 +572,56 @@
     {
         name        "Odyssey chip SRQ Reorder Queue Control Register 0";
         scomaddr    0x0801100F;
-        capture     group default;
+        capture     group tlx_fir_regs;
     };
 
     register TLX_CFG_0
     {
         name        "Odyssey chip TLX Configuration Register 0";
         scomaddr    0x0801200C;
-        capture     group default;
+        capture     group tlx_fir_regs;
     };
 
     register TLX_CFG_1
     {
         name        "Odyssey chip TLX Configuration Register 1";
         scomaddr    0x0801200D;
-        capture     group default;
+        capture     group tlx_fir_regs;
     };
 
     register TLX_CFG_2
     {
         name        "Odyssey chip TLX Configuration Register 2";
         scomaddr    0x0801200E;
-        capture     group default;
+        capture     group tlx_fir_regs;
     };
 
     register TLX_CFG_3
     {
         name        "Odyssey chip TLX Configuration Register 3";
         scomaddr    0x0801200F;
-        capture     group default;
+        capture     group tlx_fir_regs;
     };
 
     register TLX_ERR_RPT_0
     {
         name        "Odyssey chip TLX Error Report Register 0";
         scomaddr    0x0801201C;
-        capture     group default;
+        capture     group tlx_fir_regs;
     };
 
     register TLX_ERR_RPT_1
     {
         name        "Odyssey chip TLX Error Report Register 1";
         scomaddr    0x0801201D;
-        capture     group default;
+        capture     group tlx_fir_regs;
     };
 
     register TLX_ERR_RPT_2
     {
         name        "Odyssey chip TLX Error Report Register 2";
         scomaddr    0x0801201E;
-        capture     group default;
+        capture     group tlx_fir_regs;
     };
 
     ############################################################################
@@ -632,103 +632,103 @@
     {
         name        "Odyssey chip DLX CMN Configuration Register";
         scomaddr    0x0801240E;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register PMU_CNTR
     {
         name        "Odyssey chip DLX Performance Counter Values";
         scomaddr    0x0801240F;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_CONFIG0
     {
         name        "Odyssey chip DLX Configuration0 Register";
         scomaddr    0x08012410;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_CONFIG1
     {
         name        "Odyssey chip DLX Configuration1 Register";
         scomaddr    0x08012411;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_EDPL_MAX_COUNT
     {
         name        "Odyssey chip DLX EDPL Max Count Register";
         scomaddr    0x08012415;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_STATUS
     {
         name        "Odyssey chip DLX Status Register";
         scomaddr    0x08012416;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_TRAINING_STATUS
     {
         name        "Odyssey chip DLX Training Status Register";
         scomaddr    0x08012417;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_RMT_CONFIG
     {
         name        "Odyssey chip DLX Outgoing Link Info Register";
         scomaddr    0x08012418;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_RMT_INFO
     {
         name        "Odyssey chip DLX Incoming Link Info Register";
         scomaddr    0x08012419;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_SKIT_CTL
     {
         name        "Odyssey chip DLX Skitter Control Register";
         scomaddr    0x0801241A;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_SKIT_STATUS
     {
         name        "Odyssey chip DLX Skitter Status Register";
         scomaddr    0x0801241B;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_CYA2
     {
         name        "Odyssey chip DLX CYA2 Register";
         scomaddr    0x0801241C;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_ERR_ACTION
     {
         name        "Odyssey chip DLX Error Action Register";
         scomaddr    0x0801241D;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_DEBUG_AID
     {
         name        "Odyssey chip DLX Debug Aid Register";
         scomaddr    0x0801241E;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
 
     register DLX_CYA_BITS
     {
         name        "Odyssey chip DLX Chicken Switch Register";
         scomaddr    0x0801241F;
-        capture     group default;
+        capture     group dlx_fir_regs;
     };
