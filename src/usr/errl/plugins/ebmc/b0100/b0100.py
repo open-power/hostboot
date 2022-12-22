@@ -548,7 +548,9 @@ class errludP_errl:
             tableEntries = 0
             if len(data) >= 2:
                 tableEntries, i=intConcat(data, i, i+2)
-            actualTableCount = (len(data) - sizeofTableEntries) / sizeofwofOverrideCompareData
+
+            # sometimes 00's get added to the end of data
+            actualTableCount = int((len(data) - sizeofTableEntries) / sizeofwofOverrideCompareData)
 
             if tableEntries != actualTableCount:
                 d['Total Entries Calculated']=actualTableCount
@@ -560,13 +562,14 @@ class errludP_errl:
             if (len(data) - sizeofTableEntries - (tableEntries * sizeofwofOverrideCompareData)) >= 0:
                 d['Total WOF override set entries compared']=tableEntries-1
                 for x in range(tableEntries):
+                    subd = dict()
+                    subd['Core Count'], i=intConcat(data, i, i+1)
+                    subd['Socket Power (Watts)'], i=intConcat(data, i, i+2)
+                    subd['Sort Power Freq (MHz)'], i=intConcat(data, i, i+2)
                     if x == 0:
-                        d['Searched for This Entry']='Tried to Match This:'
+                        d['Searched for This Entry']=subd;
                     else:
-                        d['Wof Table']='#' + str(x)
-                    d['Core Count'], i=intConcat(data, i, i+1)
-                    d['Socket Power (Watts)'], i=intConcat(data, i, i+2)
-                    d['Sort Power Freq (MHz)'], i=intConcat(data, i, i+2)
+                        d['WOF Table '+ str(x)] = subd;
             else:
                 subd = dict()
                 subd['WOF Buffer Length']=hex(len(data))
