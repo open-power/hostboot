@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -34,7 +34,17 @@ then
     if [ ! -f $HOOKSDIR/commit-msg ]
     then
         echo "Copying Gerrit hooks..."
-        scp -p -q $GERRIT_SRV:hooks/commit-msg $HOOKSDIR
+        # gerrit needs -O flag as sftp is not enabled
+        # get version major number
+        # OpenSSH_9.0p1, OpenSSL 1.1.1f  31 Mar 2020
+        version=($(ssh -V |& awk -F'[_.]' '{ print $2 }'))
+        use_legacy=$(echo "$version >= 9" | bc -l)
+        if (( $use_legacy ))
+        then
+            scp -O -p -q $GERRIT_SRV:hooks/commit-msg $HOOKSDIR
+        else
+            scp -p -q $GERRIT_SRV:hooks/commit-msg $HOOKSDIR
+        fi
     fi
 
     # Copy custom pre/post commit hooks from tools directory.
