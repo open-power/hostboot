@@ -40,10 +40,10 @@ enum ODY_CBS_START_Private_Constants
 {
 };
 
-ReturnCode ody_cbs_start(const Target<TARGET_TYPE_OCMB_CHIP>& i_target, bool i_start_sbe)
+ReturnCode ody_cbs_start(const Target<TARGET_TYPE_OCMB_CHIP>& i_target, bool i_start_sbe, bool i_scan0_clockstart)
 {
     FAPI_INF("Entering ...");
-    FAPI_TRY(mod_cbs_start(i_target, i_start_sbe));
+    FAPI_TRY(mod_cbs_start(i_target, i_start_sbe, i_scan0_clockstart));
 
 fapi_try_exit:
     FAPI_INF("Exiting ...");

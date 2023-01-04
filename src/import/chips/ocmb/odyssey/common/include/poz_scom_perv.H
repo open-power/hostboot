@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/perv/poz_ring_ids.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/common/include/poz_scom_perv.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2023                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,17 +24,6 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #pragma once
 
-namespace ring_id
-{
-
-#define RING_ID_MAXLEN 32
-#define RING_ID(id) const char id[] = #id; static_assert(sizeof(id) <= RING_ID_MAXLEN, "Ring ID " #id " exceeds maximum length")
-
-// Regenerate using:
-// cat composite_ring_sorting.txt | sed 's/#.*$//;/^[ \t]*$/ d;' | cut -d' ' -f1 | grep -v FAIL | sed 's/.*/    RING_ID(\0);/'
-
-RING_ID(perv_rtg);
-RING_ID(perv_initf);
-RING_ID(chiplet_rtg);
-
-}
+#include "poz_scom_perv_cfam.H"
+#include "poz_scom_perv_tpchip.H"
+#include "poz_scom_tp.H"

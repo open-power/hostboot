@@ -48,7 +48,7 @@ enum POZ_PERV_MOD_MISC_Private_Constants
     CBS_IDLE_SIM_CYCLE_DELAY = 750000, // unit is sim cycles,to match the poll count change ( 250000 * 30 )
     MC_GROUP_MEMBERSHIP_BITX_READ = 0x500F0001,
     PCB_RESPONDER_MCAST_GROUP_1 = 0xF0001,
-    HOST_MASK_REG_IPOLL_MASK = 0xFC00000000000000,
+    HOST_MASK_REG_IPOLL_MASK = 0xF800000000000000,
     XSTOP1_INIT_VALUE = 0x97FFE00000000000,
     PGOOD_REGIONS_STARTBIT = 4,
     PGOOD_REGIONS_LENGTH = 15,
@@ -80,7 +80,6 @@ ReturnCode mod_cbs_start_prep(
 
     FAPI_INF("Read FSI2PIB_STATUS register and check whether VDN power is on or not(VDD_NEST_OBSERVE).");
     FAPI_TRY(FSI2PIB_STATUS.getCfam(i_target));
-
     FAPI_ASSERT(FSI2PIB_STATUS.get_VDD_NEST_OBSERVE(),
                 fapi2::POZ_VDN_POWER_NOT_ON()
                 .set_FSI2PIB_STATUS_READ(FSI2PIB_STATUS)
@@ -94,14 +93,16 @@ ReturnCode mod_cbs_start_prep(
     FSB_DOWNFIFO_RESET = 0x80000000;
     FAPI_TRY(FSB_DOWNFIFO_RESET.putCfam(i_target));
 
+    FAPI_INF("Read CBS_ENVSTAT register to check the status of TEST_ENABLE C4 pin");
     FAPI_TRY(CBS_ENVSTAT.getCfam(i_target));
 
     if (CBS_ENVSTAT.get_CBS_ENVSTAT_C4_TEST_ENABLE())
     {
         FAPI_INF("Test mode, enable TP drivers/receivers for GSD scan out");
+        ROOT_CTRL1 = 0;
         ROOT_CTRL1.set_TP_RI_DC_N(1);
         ROOT_CTRL1.set_TP_DI2_DC_N(1);
-        FAPI_TRY(ROOT_CTRL1.putCfam(i_target));
+        FAPI_TRY(ROOT_CTRL1.putCfam_SET(i_target));
     }
 
     FAPI_INF("Prepare for CBS start.");
@@ -121,14 +122,14 @@ ReturnCode mod_cbs_cleanup(const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_target)
     SB_CS_t SB_CS;
 
     FAPI_INF("Clear CBS command to enable clock gating inside clock controller");
-    FAPI_TRY(ROOT_CTRL0.getScom(i_target));
+    FAPI_TRY(ROOT_CTRL0.getCfam(i_target));
     ROOT_CTRL0.set_FSI_CC_CBS_CMD(0);
-    FAPI_TRY(ROOT_CTRL0.putScom(i_target));
+    FAPI_TRY(ROOT_CTRL0.putCfam(i_target));
 
     FAPI_INF("Clear SBE start bit to facilitate restarts later");
-    FAPI_TRY(SB_CS.getScom(i_target));
+    FAPI_TRY(SB_CS.getCfam(i_target));
     SB_CS.set_START_RESTART_VECTOR0(0);
-    FAPI_TRY(SB_CS.putScom(i_target));
+    FAPI_TRY(SB_CS.putCfam(i_target));
 
 fapi_try_exit:
     return current_err;
@@ -195,13 +196,15 @@ ReturnCode mod_switch_pcbmux(
     mux_type i_path)
 {
     ROOT_CTRL0_t ROOT_CTRL0;
-    uint8_t l_oob_mux_save;
+    uint8_t l_oob_mux_save = 0;
 
     FAPI_INF("Entering ...");
+    FAPI_DBG("Save OOB Mux setting.");
     FAPI_TRY(ROOT_CTRL0.getScom(i_target));
     l_oob_mux_save = ROOT_CTRL0.get_OOB_MUX();
 
     FAPI_DBG("Raise OOB Mux.");
+    ROOT_CTRL0 = 0;
     ROOT_CTRL0.set_OOB_MUX(1);
     FAPI_TRY(ROOT_CTRL0.putScom_SET(i_target));
 
@@ -228,10 +231,67 @@ ReturnCode mod_switch_pcbmux(
     ROOT_CTRL0.set_PCB_RESET(1);
     FAPI_TRY(ROOT_CTRL0.putScom_CLEAR(i_target));
 
-    FAPI_DBG("Drop OOB Mux.");
-    FAPI_TRY(ROOT_CTRL0.getScom(i_target));
-    ROOT_CTRL0.set_OOB_MUX(l_oob_mux_save);
-    FAPI_TRY(ROOT_CTRL0.putScom(i_target));
+    if (l_oob_mux_save == 0)
+    {
+        FAPI_DBG("Restore OOB Mux setting.");
+        ROOT_CTRL0 = 0;
+        ROOT_CTRL0.set_OOB_MUX(1);
+        FAPI_TRY(ROOT_CTRL0.putScom_CLEAR(i_target));
+    }
+
+fapi_try_exit:
+    FAPI_INF("Exiting ...");
+    return current_err;
+}
+
+ReturnCode mod_switch_pcbmux_cfam(
+    const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_target,
+    mux_type i_path)
+{
+    ROOT_CTRL0_t ROOT_CTRL0;
+    uint8_t l_oob_mux_save = 0;
+
+    FAPI_INF("Entering ...");
+    FAPI_DBG("Save OOB Mux setting.");
+    FAPI_TRY(ROOT_CTRL0.getCfam(i_target));
+    l_oob_mux_save = ROOT_CTRL0.get_OOB_MUX();
+
+    FAPI_DBG("Raise OOB Mux.");
+    ROOT_CTRL0 = 0;
+    ROOT_CTRL0.set_OOB_MUX(1);
+    FAPI_TRY(ROOT_CTRL0.putCfam_SET(i_target));
+
+    FAPI_DBG("Set PCB_RESET bit in ROOT_CTRL0 register.");
+    ROOT_CTRL0 = 0;
+    ROOT_CTRL0.set_PCB_RESET(1);
+    FAPI_TRY(ROOT_CTRL0.putCfam_SET(i_target));
+
+    FAPI_DBG("Enable the new path first to prevent glitches.");
+    ROOT_CTRL0 = 0;
+    FAPI_TRY(ROOT_CTRL0.setBit(i_path));
+    FAPI_TRY(ROOT_CTRL0.putCfam_SET(i_target));
+
+    FAPI_DBG("Disable the old path.");
+    ROOT_CTRL0 = 0;
+    ROOT_CTRL0.set_FSI2PCB(1);
+    ROOT_CTRL0.set_PIB2PCB(1);
+    ROOT_CTRL0.set_PCB2PCB(1);
+    FAPI_TRY(ROOT_CTRL0.clearBit(i_path));
+    FAPI_TRY(ROOT_CTRL0.putCfam_CLEAR(i_target));
+
+    FAPI_DBG("Clear PCB_RESET.");
+    ROOT_CTRL0 = 0;
+    ROOT_CTRL0.set_PCB_RESET(1);
+    FAPI_TRY(ROOT_CTRL0.putCfam_CLEAR(i_target));
+
+    FAPI_DBG("Restore OOB Mux setting.");
+
+    if (l_oob_mux_save == 0)
+    {
+        ROOT_CTRL0 = 0;
+        ROOT_CTRL0.set_OOB_MUX(1);
+        FAPI_TRY(ROOT_CTRL0.putCfam_CLEAR(i_target));
+    }
 
 fapi_try_exit:
     FAPI_INF("Exiting ...");
@@ -341,6 +401,7 @@ ReturnCode mod_hangpulse_setup(const Target < TARGET_TYPE_PERV | TARGET_TYPE_MUL
 
     while(1)
     {
+        FAPI_DBG("Set frequency value for the hang pulse");
         HANG_PULSE_0 = 0;
         HANG_PULSE_0.set_HANG_PULSE_REG_0(i_hangpulse_table->value);
         HANG_PULSE_0.set_SUPPRESS_HANG_0(i_hangpulse_table->stop_on_xstop);
@@ -415,14 +476,7 @@ ReturnCode mod_poz_tp_init_common(const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_targ
 
     FAPI_DBG("Disable alignment pulse");
     CPLT_CTRL0.flush<0>();
-    CPLT_CTRL0.set_CTRL_CC_FORCE_ALIGN(1);
-    FAPI_TRY(CPLT_CTRL0.putScom_CLEAR(l_tpchiplet));
-
-    FAPI_TRY(delay(DELAY_10us, SIM_CYCLE_DELAY));
-
-    FAPI_DBG("Allow chiplet PLATs to enter flush");
-    CPLT_CTRL0.flush<0>();
-    CPLT_CTRL0.set_CTRL_CC_FLUSHMODE_INH(1);
+    CPLT_CTRL0.set_FORCE_ALIGN(1);
     FAPI_TRY(CPLT_CTRL0.putScom_CLEAR(l_tpchiplet));
 
 fapi_try_exit:

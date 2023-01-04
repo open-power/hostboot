@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/perv/poz_ring_ids.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/perv/ody_sppe_check_for_ready.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,19 +22,27 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#pragma once
+//------------------------------------------------------------------------------
+/// @file  ody_sppe_check_for_ready.C
+/// @brief Confirm SPPE boot progress
+//------------------------------------------------------------------------------
+// *HWP HW Maintainer   : Anusha Reddy (anusrang@in.ibm.com)
+// *HWP FW Maintainer   : Raja Das (rajadas2@in.ibm.com)
+//------------------------------------------------------------------------------
 
-namespace ring_id
+#include <ody_sppe_check_for_ready.H>
+#include <poz_perv_common_params.H>
+
+using namespace fapi2;
+
+enum ODY_SPPE_BOOT_CHECK_Private_Constants
+{
+};
+
+ReturnCode ody_sppe_check_for_ready(const Target<TARGET_TYPE_OCMB_CHIP>& i_target)
 {
 
-#define RING_ID_MAXLEN 32
-#define RING_ID(id) const char id[] = #id; static_assert(sizeof(id) <= RING_ID_MAXLEN, "Ring ID " #id " exceeds maximum length")
 
-// Regenerate using:
-// cat composite_ring_sorting.txt | sed 's/#.*$//;/^[ \t]*$/ d;' | cut -d' ' -f1 | grep -v FAIL | sed 's/.*/    RING_ID(\0);/'
-
-RING_ID(perv_rtg);
-RING_ID(perv_initf);
-RING_ID(chiplet_rtg);
-
+fapi_try_exit:
+    return current_err;
 }

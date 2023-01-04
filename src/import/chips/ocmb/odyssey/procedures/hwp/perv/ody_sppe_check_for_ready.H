@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/perv/poz_ring_ids.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/perv/ody_sppe_check_for_ready.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,19 +22,26 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+//------------------------------------------------------------------------------
+/// @file  ody_sppe_check_for_ready.H
+/// @brief Confirm SPPE boot progress
+//------------------------------------------------------------------------------
+// *HWP HW Maintainer   : Anusha Reddy (anusrang@in.ibm.com)
+// *HWP FW Maintainer   : Raja Das (rajadas2@in.ibm.com)
+//------------------------------------------------------------------------------
+
 #pragma once
 
-namespace ring_id
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*ody_sppe_check_for_ready_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+
+/// @brief Confirm SPPE boot progress
+///
+/// @param[in]   i_target                  Reference to TARGET_TYPE_OCMB_CHIP
+///
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+extern "C"
 {
-
-#define RING_ID_MAXLEN 32
-#define RING_ID(id) const char id[] = #id; static_assert(sizeof(id) <= RING_ID_MAXLEN, "Ring ID " #id " exceeds maximum length")
-
-// Regenerate using:
-// cat composite_ring_sorting.txt | sed 's/#.*$//;/^[ \t]*$/ d;' | cut -d' ' -f1 | grep -v FAIL | sed 's/.*/    RING_ID(\0);/'
-
-RING_ID(perv_rtg);
-RING_ID(perv_initf);
-RING_ID(chiplet_rtg);
-
+    fapi2::ReturnCode ody_sppe_check_for_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 }

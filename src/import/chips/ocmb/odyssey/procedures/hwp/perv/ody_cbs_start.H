@@ -34,15 +34,17 @@
 
 #include <fapi2.H>
 
-typedef fapi2::ReturnCode (*ody_cbs_start_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&, bool);
+typedef fapi2::ReturnCode (*ody_cbs_start_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&, bool, bool);
 
 /// @brief Start CFAM boot sequencer
 ///
 /// @param[in]   i_target                  Reference to TARGET_TYPE_OCMB_CHIP
 /// @param[in]   i_start_sbe               Optionally start SBE (default=true)
+/// @param[in]   i_scan0_clockstart        Optionally do scan0 clockstart (default=true)
 ///
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 extern "C"
 {
-    fapi2::ReturnCode ody_cbs_start(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target, bool i_start_sbe = true);
+    fapi2::ReturnCode ody_cbs_start(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target, bool i_start_sbe = true,
+                                    bool i_scan0_clockstart = true);
 }

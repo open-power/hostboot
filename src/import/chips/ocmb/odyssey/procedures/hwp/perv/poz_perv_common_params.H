@@ -126,9 +126,10 @@ namespace mux
 {
 enum mux_type : int
 {
-    FSI2PCB = 16,
-    PIB2PCB = 18,
-    PCB2PCB = 19,
+    FSI2PCB = 16, ///< Direct connection between FSI2PIB engine and TP chiplet, PIB+PCB bypassed
+    PIB2PCB = 18, ///< Direct connection between PIB and TP chiplet, PCB bypassed
+    PCB2PCB = 19, ///< Normal operation, all chiplet requests go through PCB
+    I2C2PCB = 24, ///< Odyssey only, direct connection between I2C responder and TP chiplet, LBUS+PIB+PCB bypassed
 };
 };
 

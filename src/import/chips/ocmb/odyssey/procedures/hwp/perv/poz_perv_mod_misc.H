@@ -55,10 +55,21 @@ fapi2::ReturnCode mod_cbs_start(
 /// -- enable the new path first and disable the old path.
 ///
 /// @param[in]   i_target                  Reference to TARGET_TYPE_ANY_POZ_CHIP
-/// @param[in]   i_path                    Path to be enabled FSI2PCB/PIB2PCB/PCB2PCB
+/// @param[in]   i_path                    Path to be enabled FSI2PCB/PIB2PCB/PCB2PCB/I2C2PCB
 ///
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode mod_switch_pcbmux(
+    const fapi2::Target<fapi2::TARGET_TYPE_ANY_POZ_CHIP>& i_target,
+    mux_type i_path);
+
+/// @brief Switch pcbmux module using cfams
+/// -- enable the new path first and disable the old path.
+///
+/// @param[in]   i_target                  Reference to TARGET_TYPE_ANY_POZ_CHIP
+/// @param[in]   i_path                    Path to be enabled FSI2PCB/PIB2PCB/PCB2PCB/I2C2PCB
+///
+/// @return  FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode mod_switch_pcbmux_cfam(
     const fapi2::Target<fapi2::TARGET_TYPE_ANY_POZ_CHIP>& i_target,
     mux_type i_path);
 
