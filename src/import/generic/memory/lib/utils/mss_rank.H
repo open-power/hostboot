@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,8 +103,8 @@ class info
                         fapi2::MSS_RANK_OUT_OF_RANGE()
                         .set_TARGET(i_dimm_target)
                         .set_RANK(i_index),
-                        "Rank %u provided to info constructor for DIMM %s exceeded the number of master ranks per DIMM",
-                        i_index, mss::c_str(i_dimm_target));
+                        "Rank %u provided to info constructor for DIMM " TARGTIDFORMAT " exceeded the number of master ranks per DIMM",
+                        i_index, GENTARGTID(i_dimm_target));
             // Targets
             iv_dimm_target = i_dimm_target;
             iv_port_target = mss::find_target<TT::MEM_PORT_TARGET_TYPE>(i_dimm_target);
@@ -138,8 +138,8 @@ class info
                          fapi2::MSS_EMPTY_VECTOR().
                          set_FUNCTION(INIT_RANK_INFO).
                          set_TARGET(i_port_target),
-                         "Empty dimm vector received on port %s",
-                         mss::spd::c_str(i_port_target));
+                         "Empty dimm vector received on port " TARGTIDFORMAT,
+                         GENTARGTID(i_port_target));
 
             {
                 // This will remain false in two cases:
@@ -172,8 +172,8 @@ class info
                             fapi2::MSS_RANK_OUT_OF_RANGE()
                             .set_TARGET(i_port_target)
                             .set_RANK(i_index),
-                            "Rank %u provided to rank_info constructor for PORT %s was out of range",
-                            i_index, mss::c_str(i_port_target));
+                            "Rank %u provided to rank_info constructor for PORT " TARGTIDFORMAT " was out of range",
+                            i_index, GENTARGTID(i_port_target));
 
                 // Port Target
                 iv_port_target = i_port_target;
@@ -310,8 +310,8 @@ fapi2::ReturnCode ranks_on_port(const fapi2::Target<TT::MEM_PORT_TARGET_TYPE>& i
                  (l_master_ranks_per_dimm[1] <= TT::MAX_RANKS_PER_DIMM)),
                 fapi2::MSS_TOO_MANY_PRIMARY_RANKS_ON_PORT()
                 .set_PORT_TARGET(i_port_target),
-                "Primary ranks on PORT %s exceeded %u",
-                mss::c_str(i_port_target),
+                "Primary ranks on PORT " TARGTIDFORMAT " exceeded %u",
+                GENTARGTID(i_port_target),
                 TT::MAX_RANKS_PER_DIMM);
 
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_port_target))
@@ -354,9 +354,9 @@ fapi2::ReturnCode ranks_on_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_
                 fapi2::MSS_TOO_MANY_PRIMARY_RANKS_ON_DIMM()
                 .set_RANK_COUNT(l_master_ranks_per_dimm)
                 .set_DIMM_TARGET(i_dimm_target),
-                "Seeing %d primary ranks on DIMM %s",
+                "Seeing %d primary ranks on DIMM " TARGTIDFORMAT,
                 l_master_ranks_per_dimm,
-                mss::c_str(i_dimm_target));
+                GENTARGTID(i_dimm_target));
     {
         // Return code for constructor call
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -365,8 +365,8 @@ fapi2::ReturnCode ranks_on_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_
         for (uint8_t l_index = 0; l_index < l_master_ranks_per_dimm; l_index++)
         {
             o_vect.push_back(mss::rank::info<MC>(i_dimm_target, l_index, l_rc));
-            FAPI_TRY(l_rc, "ranks_on_dimm(): Error in rank::info constructor call for DIMM %s and rank %u",
-                     mss::c_str(i_dimm_target), l_index);
+            FAPI_TRY(l_rc, "ranks_on_dimm(): Error in rank::info constructor call for DIMM " TARGTIDFORMAT " and rank %u",
+                     GENTARGTID(i_dimm_target), l_index);
         }
     }
     return fapi2::FAPI2_RC_SUCCESS;

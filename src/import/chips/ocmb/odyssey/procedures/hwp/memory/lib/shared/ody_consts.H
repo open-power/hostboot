@@ -37,9 +37,7 @@
 #ifndef _MSS_ODY_CONSTS_H_
 #define _MSS_ODY_CONSTS_H_
 
-#ifndef __PPE__
-    #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
-#endif
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
@@ -50,8 +48,6 @@ namespace ody
 // This constant is for MMIO scoms. MMIO addresses are addressed by byte,
 // while scoms are numbered by register. So multiply by 8, aka shift by 3
 constexpr uint32_t OCMB_ADDR_SHIFT = 3;
-
-#ifndef __PPE__
 
 ///
 /// @brief common Odyssey sizes
@@ -105,8 +101,6 @@ enum sizes
     // Maximum number of external DTS sensors
     NUM_DTS = 4,
 };
-
-#endif
 
 ///
 /// @brief Odyssey ffdc codes

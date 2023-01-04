@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,6 +80,7 @@ static const uint64_t SIM_CYCLES_PER_CYCLE = 8;
 namespace mss
 {
 
+#ifndef __PPE__
 namespace dram_freq
 {
 //
@@ -172,6 +173,7 @@ fapi_try_exit:
     return fapi2::current_err;
 
 }
+#endif
 
 ///
 /// @brief Translate from cycles to sim cycles
@@ -184,6 +186,7 @@ inline uint64_t cycles_to_simcycles( const uint64_t i_cycles )
     return i_cycles * SIM_CYCLES_PER_CYCLE;
 }
 
+#ifndef __PPE__
 ///
 /// @brief Return the number of cycles contained in a count of picoseconds
 /// @tparam T clock period input type
@@ -436,6 +439,7 @@ inline uint64_t cycles_to_us(const uint64_t i_clock_period, const uint64_t i_cyc
 
     return l_us;
 }
+#endif
 
 ///
 /// @brief Convert nanoseconds to picoseconds
@@ -466,6 +470,7 @@ inline T ps_to_ns(const T i_time_in_ps)
     return l_time_in_ns + ( remainder == 0 ? 0 : 1 );
 }
 
+#ifndef __PPE__
 ///
 /// @brief Return the maximum of two values *in clocks*, the first in clocks the second in ns
 /// @param[in] i_clock_period the clock period in PS
@@ -477,6 +482,7 @@ inline uint64_t max_ck_ns(const uint64_t i_clock_period, const uint64_t i_clocks
 {
     return std::max( i_clocks, ns_to_cycles(i_clock_period, i_time) );
 }
+#endif
 
 } // mss namespace
 

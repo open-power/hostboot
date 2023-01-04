@@ -86,6 +86,7 @@
     </description>
     <ffdc>RECEIVED</ffdc>
     <ffdc>FUNCTION</ffdc>
+    <ffdc>TARGET</ffdc>
     <callout>
       <target>TARGET</target>
       <priority>MEDIUM</priority>
@@ -1538,6 +1539,7 @@
         Too many primary ranks were seen on the dimm according
         to the call to master_ranks_per_dimm</description>
     <ffdc>RANK_COUNT</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
@@ -1563,6 +1565,7 @@
     <description>
         Too many primary ranks were seen on the port according
         to the call to master_ranks_per_dimm</description>
+    <ffdc>PORT_TARGET</ffdc>
     <callout>
       <target>PORT_TARGET</target>
       <priority>HIGH</priority>
@@ -1981,6 +1984,92 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MAINT_BAD_RANK_INPUT</rc>
+    <description>
+       The rank passed into a steer function was invalid.
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MAINT_BAD_STEER_MUX_TYPE</rc>
+    <description>
+       The steer mux type passed into a steer function was invalid.
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>STEER_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MAINT_INVALID_SYMBOL</rc>
+    <description>
+       The symbol passed into a steer function was invalid.
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>SYMBOL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MAINT_BAD_SPARE_INDEX</rc>
+    <description>
+       A spare index returned from symbol translation was invalid.
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>SPARE0_INDEX</ffdc>
+    <ffdc>SPARE1_INDEX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MAINT_SYMBOL_NOT_FOUND</rc>
+    <description>
+       The requested symbol does not match a steer index.
+    </description>
+    <ffdc>SYMBOL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_EXP_MAINT_DO_STEER_ALL_SPARES_DEPLOYED</rc>
+    <description>
+       All spares are already deployed when do_steer called.
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>RANK</ffdc>
+    <ffdc>SYMBOL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfig>
+      <target>PORT_TARGET</target>
+    </deconfig>
   </hwpError>
 
 </hwpErrors>

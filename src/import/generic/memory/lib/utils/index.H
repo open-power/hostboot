@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,8 +41,8 @@
 
 #ifdef __PPE__
     #include "plat_target.H"
-    #include "mss_generic_consts.H"
     #include "plat_utils.H"
+    #include <mss_generic_consts.H>
 #else
     #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #endif
@@ -64,7 +64,7 @@ inline size_t index(const fapi2::Target<T>& i_target)
 #ifdef __PPE__
     STATIC_CHECK(T == fapi2::TARGET_TYPE_GENERICI2CSLAVE,
                  "index() called for Invalid target type");
-    l_pos = i_target.get().fields.chiplet_num % GI2C_PER_OCMB;
+    l_pos = i_target.get().getTargetInstance();
 #else
     // Unrolled c_str to avoid a circular include
     char l_c_str_storage[fapi2::MAX_ECMD_STRING_LEN] = {};

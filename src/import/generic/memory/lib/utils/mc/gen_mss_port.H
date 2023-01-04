@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,7 @@
 
 namespace mss
 {
+#ifndef __PPE__
 ///
 /// @brief Configure clock stabilization time field
 /// @tparam MC the memory controller type
@@ -76,10 +77,10 @@ fapi2::ReturnCode configure_tstab(const fapi2::Target<T>& i_target, const bool i
 
     // Convert the ns to cycles.
     l_tstab_cfg_val = mss::ns_to_cycles(i_target, TSTAB_VAL_IN_NS, l_rc);
-    FAPI_TRY(l_rc, "%s ns_to_cycles failed", mss::c_str(i_target));
+    FAPI_TRY(l_rc, TARGTIDFORMAT " ns_to_cycles failed", TARGTID);
 
     // Reading from the register into l_reg_data
-    FAPI_TRY(mss::getScom(i_target, TT::SRQ_MBAREFAQ, l_reg_data));
+    FAPI_TRY(fapi2::getScom(i_target, TT::SRQ_MBAREFAQ, l_reg_data));
 
 
     // tSTAB should be 5us if RCD exists, otherwise default of 0
@@ -88,14 +89,14 @@ fapi2::ReturnCode configure_tstab(const fapi2::Target<T>& i_target, const bool i
                                (i_has_rcd ? l_tstab_cfg_val : 0);
 
     // Writing the updated value to the regitster
-    FAPI_TRY(mss::putScom(i_target, TT::SRQ_MBAREFAQ, l_reg_data));
+    FAPI_TRY(fapi2::putScom(i_target, TT::SRQ_MBAREFAQ, l_reg_data));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
 }
-
+#endif
 
 ///
 /// @brief Reads the farb0q register
@@ -114,7 +115,7 @@ fapi2::ReturnCode read_farb0q( const fapi2::Target<T>& i_target, fapi2::buffer<u
     // In some MC's, it sits on the port level
     // In other MC's, it sits on the chip level
     // As such, a helper function is used to grab the appropriate target type to run this scom
-    FAPI_TRY( mss::getScom(TT::get_farb_target(i_target), TT::FARB0Q_REG, o_data) );
+    FAPI_TRY( fapi2::getScom(TT::get_farb_target(i_target), TT::FARB0Q_REG, o_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -137,7 +138,7 @@ fapi2::ReturnCode write_farb0q( const fapi2::Target<T>& i_target, const fapi2::b
     // In some MC's, it sits on the port level
     // In other MC's, it sits on the chip level
     // As such, a helper function is used to grab the appropriate target type to run this scom
-    FAPI_TRY( mss::putScom(TT::get_farb_target(i_target), TT::FARB0Q_REG, i_data) );
+    FAPI_TRY( fapi2::putScom(TT::get_farb_target(i_target), TT::FARB0Q_REG, i_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -160,7 +161,7 @@ fapi2::ReturnCode read_farb6q( const fapi2::Target<T>& i_target, fapi2::buffer<u
     // In some MC's, it sits on the port level
     // In other MC's, it sits on the chip level
     // As such, a helper function is used to grab the appropriate target type to run this scom
-    FAPI_TRY( mss::getScom(TT::get_farb_target(i_target), TT::FARB6Q_REG, o_data) );
+    FAPI_TRY( fapi2::getScom(TT::get_farb_target(i_target), TT::FARB6Q_REG, o_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -183,7 +184,7 @@ fapi2::ReturnCode write_farb6q( const fapi2::Target<T>& i_target, const fapi2::b
     // In some MC's, it sits on the port level
     // In other MC's, it sits on the chip level
     // As such, a helper function is used to grab the appropriate target type to run this scom
-    FAPI_TRY( mss::putScom(TT::get_farb_target(i_target), TT::FARB6Q_REG, i_data) );
+    FAPI_TRY( fapi2::putScom(TT::get_farb_target(i_target), TT::FARB6Q_REG, i_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -256,11 +257,11 @@ fapi2::ReturnCode change_iml_complete( const fapi2::Target<T>& i_target, states 
 {
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_DBG("Change the IML init complete bit to high for %s %s", (i_state == HIGH ? "high" : "low"),
-             mss::c_str(i_target));
-    FAPI_TRY( mss::getScom(i_target, TT::PMU8Q_REG, l_data) );
+    FAPI_DBG("Change the IML init complete bit to high for %s " TARGTIDFORMAT, (i_state == HIGH ? "high" : "low"),
+             TARGTID);
+    FAPI_TRY( fapi2::getScom(i_target, TT::PMU8Q_REG, l_data) );
     l_data.writeBit<TT::CFG_INIT_COMPLETE>(i_state);
-    FAPI_TRY( mss::putScom(i_target, TT::PMU8Q_REG, l_data) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::PMU8Q_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -278,9 +279,9 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode read_recr_register( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_buffer )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::ECC_REG, o_buffer) );
+    FAPI_TRY( fapi2::getScom(i_target, TT::ECC_REG, o_buffer) );
 
-    FAPI_INF( "Read ECC Control register is 0x%016lx for %s", uint64_t(o_buffer), mss::c_str(i_target) );
+    FAPI_INF( "Read ECC Control register is 0x%016lx for " TARGTIDFORMAT, uint64_t(o_buffer), TARGTID );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -298,9 +299,9 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode write_recr_register( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_buffer )
 {
-    FAPI_INF( "Change Read ECC Control register to 0x%016lx for %s",  i_buffer, mss::c_str(i_target) );
+    FAPI_INF( "Change Read ECC Control register to 0x%016lx for " TARGTIDFORMAT,  i_buffer, TARGTID );
 
-    FAPI_TRY( mss::putScom(i_target, TT::ECC_REG, i_buffer) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::ECC_REG, i_buffer) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -354,13 +355,13 @@ fapi2::ReturnCode setup_tce_correction (const fapi2::Target<T>& i_target)
     // Check for manufacturing disable dram repair flag to disable TCE correction
     FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_DISABLE_MEMORY_eREPAIR, l_erepairs_disabled));
 
-    FAPI_TRY(mss::read_recr_register<MC>(i_target, l_data ), "%s: Failed read_recr_register",
-             mss::c_str(i_target));
+    FAPI_TRY(mss::read_recr_register<MC>(i_target, l_data ), TARGTIDFORMAT ": Failed read_recr_register",
+             TARGTID);
     l_state = l_erepairs_disabled ? mss::OFF : mss::ON;
     mss::set_tce_correction<MC>(l_data, l_state);
 
-    FAPI_TRY( mss::write_recr_register<MC>(i_target, l_data), "%s: Failed write_recr_register",
-              mss::c_str(i_target));
+    FAPI_TRY( mss::write_recr_register<MC>(i_target, l_data), TARGTIDFORMAT ": Failed write_recr_register",
+              TARGTID);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -381,10 +382,10 @@ fapi2::ReturnCode change_port_fail_disable( const fapi2::Target<T>& i_target, st
 {
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_DBG("Change port fail disable to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
-    FAPI_TRY( mss::getScom(i_target, TT::FARB0Q_REG, l_data) );
+    FAPI_DBG("Change port fail disable to %s " TARGTIDFORMAT, (i_state == HIGH ? "high" : "low"), TARGTID);
+    FAPI_TRY( fapi2::getScom(i_target, TT::FARB0Q_REG, l_data) );
     l_data.writeBit<TT::PORT_FAIL_DISABLE>(i_state);
-    FAPI_TRY( mss::putScom(i_target, TT::FARB0Q_REG, l_data) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::FARB0Q_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -405,10 +406,10 @@ fapi2::ReturnCode change_dfi_init_start( const fapi2::Target<T>& i_target, state
 {
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_DBG("Change rcd recovery disable to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
-    FAPI_TRY( mss::getScom(i_target, TT::FARB0Q_REG, l_data) );
+    FAPI_DBG("Change rcd recovery disable to %s " TARGTIDFORMAT, (i_state == HIGH ? "high" : "low"), TARGTID);
+    FAPI_TRY( fapi2::getScom(i_target, TT::FARB0Q_REG, l_data) );
     l_data.writeBit<TT::DFI_INIT_START>(i_state);
-    FAPI_TRY( mss::putScom(i_target, TT::FARB0Q_REG, l_data) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::FARB0Q_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -429,10 +430,10 @@ fapi2::ReturnCode change_addr_mux_sel( const fapi2::Target<T>& i_target, states 
 {
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_DBG("Change addr_mux_sel to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
-    FAPI_TRY( mss::getScom(i_target, TT::FARB5Q_REG, l_data) );
+    FAPI_DBG("Change addr_mux_sel to %s " TARGTIDFORMAT, (i_state == HIGH ? "high" : "low"), TARGTID);
+    FAPI_TRY( fapi2::getScom(i_target, TT::FARB5Q_REG, l_data) );
     l_data.writeBit<TT::CFG_CCS_ADDR_MUX_SEL>(i_state);
-    FAPI_TRY( mss::putScom(i_target, TT::FARB5Q_REG, l_data) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::FARB5Q_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -452,7 +453,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<T>& i_target )
 
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_TRY( mss::getScom(i_target, TT::FARB9Q_REG, l_data) );
+    FAPI_TRY( fapi2::getScom(i_target, TT::FARB9Q_REG, l_data) );
 
     // Set up noise window triggered calibration
     l_data.setBit<TT::CFG_CTRLUPD_AFTER_ERR>();
@@ -469,7 +470,7 @@ fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<T>& i_target )
     l_data.insertFromRight<TT::CFG_MC_PER_CAL_CTRLUPD_MIN,
                            TT::CFG_MC_PER_CAL_CTRLUPD_MIN_LEN>(TT::CAL_CTRLUPD_MIN_VALUE);
 
-    FAPI_TRY( mss::putScom(i_target, TT::FARB9Q_REG, l_data) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::FARB9Q_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -490,10 +491,10 @@ fapi2::ReturnCode change_force_str( const fapi2::Target<T>& i_target, const stat
 {
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_DBG("Change force_str to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
-    FAPI_TRY( mss::getScom(i_target, TT::STR0Q_REG, l_data) );
+    FAPI_DBG("Change force_str to %s " TARGTIDFORMAT, (i_state == HIGH ? "high" : "low"), TARGTID);
+    FAPI_TRY( fapi2::getScom(i_target, TT::STR0Q_REG, l_data) );
     l_data.writeBit<TT::CFG_FORCE_STR>(i_state);
-    FAPI_TRY( mss::putScom(i_target, TT::STR0Q_REG, l_data) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::STR0Q_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -514,10 +515,10 @@ fapi2::ReturnCode change_refresh_enable( const fapi2::Target<T>& i_target, const
 {
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_DBG("Change refresh enable to %s %s", (i_state == HIGH ? "high" : "low"), mss::c_str(i_target));
-    FAPI_TRY( mss::getScom(i_target, TT::REFRESH_REG, l_data) );
+    FAPI_DBG("Change refresh enable to %s " TARGTIDFORMAT, (i_state == HIGH ? "high" : "low"), TARGTID);
+    FAPI_TRY( fapi2::getScom(i_target, TT::REFRESH_REG, l_data) );
     l_data.writeBit<TT::REFRESH_ENABLE>(i_state);
-    FAPI_TRY( mss::putScom(i_target, TT::REFRESH_REG, l_data) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::REFRESH_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -537,10 +538,10 @@ fapi2::ReturnCode enable_zq_cal( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_DBG("Enable periodic zq cal for %s", mss::c_str(i_target));
-    FAPI_TRY( mss::getScom(i_target, TT::FARB9Q_REG, l_data) );
+    FAPI_DBG("Enable periodic zq cal for " TARGTIDFORMAT, TARGTID);
+    FAPI_TRY( fapi2::getScom(i_target, TT::FARB9Q_REG, l_data) );
     l_data.writeBit<TT::CFG_ZQ_PER_CAL_ENABLE>(mss::HIGH);
-    FAPI_TRY( mss::putScom(i_target, TT::FARB9Q_REG, l_data) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::FARB9Q_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -569,7 +570,7 @@ fapi2::ReturnCode ecc_reg_settings_draminit_mc( const fapi2::Target<T>& i_target
     // Set up CTCR timers to 20x4^3 (1280 clock cycles; typical read latency is 120ish, so this is about 10x)
     // This is a preliminary guess from the design team. Also enable UE lockout window
     // CTCR -> 51A8E00000000000
-    FAPI_TRY( mss::getScom(i_target, TT::CTCR_REG, l_ctcr_data) );
+    FAPI_TRY( fapi2::getScom(i_target, TT::CTCR_REG, l_ctcr_data) );
 
     l_ctcr_data.insertFromRight<TT::CTCR_MPE_TIMER, TT::CTCR_MPE_TIMER_LEN>(TT::MPE_TIMER_SETTING);
     l_ctcr_data.insertFromRight<TT::CTCR_MPE_TIMEBASE, TT::CTCR_MPE_TIMEBASE_LEN>(TT::MPE_TIMEBASE_SETTING);
@@ -577,7 +578,7 @@ fapi2::ReturnCode ecc_reg_settings_draminit_mc( const fapi2::Target<T>& i_target
     l_ctcr_data.insertFromRight<TT::CTCR_UE_TIMEBASE, TT::CTCR_UE_TIMEBASE_LEN>(TT::UE_TIMEBASE_SETTING);
     l_ctcr_data.setBit<TT::CTCR_UE_LOCKOUT_ENABLE>();
 
-    FAPI_TRY( mss::putScom(i_target, TT::CTCR_REG, l_ctcr_data) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::CTCR_REG, l_ctcr_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -600,9 +601,9 @@ fapi2::ReturnCode enable_read_ecc( const fapi2::Target<T>& i_target )
     uint8_t l_sim = 0;
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_sim) );
 
-    FAPI_DBG("Enable Read ECC %s", mss::c_str(i_target));
+    FAPI_DBG("Enable Read ECC " TARGTIDFORMAT, TARGTID);
 
-    FAPI_TRY( mss::getScom(i_target, TT::ECC_REG, l_data) );
+    FAPI_TRY( fapi2::getScom(i_target, TT::ECC_REG, l_data) );
     l_data.clearBit<TT::ECC_CHECK_DISABLE>();
     l_data.clearBit<TT::ECC_CORRECT_DISABLE>();
 
@@ -623,7 +624,7 @@ fapi2::ReturnCode enable_read_ecc( const fapi2::Target<T>& i_target )
     // bits: 60 MBSTRQ_CFG_MAINT_RCE_WITH_CE
     // cfg_maint_rce_with_ce - not implemented. Need to investigate if needed for nimbus.
 
-    FAPI_TRY( mss::putScom(i_target, TT::ECC_REG, l_data) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::ECC_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -672,10 +673,12 @@ inline fapi2::ReturnCode reset_reorder_queue_settings(const fapi2::Target<T>& i_
         // Two settings are FIFO and REORDER.  FIFO is a 1 in the registers, while reorder is a 0 state
         const mss::states l_state = ((l_reorder_queue == fapi2::ENUM_ATTR_MEM_REORDER_QUEUE_SETTING_FIFO) ?
                                      mss::states::ON : mss::states::OFF);
-        FAPI_TRY(mss::template configure_rrq<MC>(i_target, l_state), "%s failed to reset read reorder queue settings",
-                 mss::c_str(i_target));
-        FAPI_TRY(mss::template configure_wrq<MC>(i_target, l_state), "%s failed to reset write reorder queue settings",
-                 mss::c_str(i_target));
+        FAPI_TRY(mss::template configure_rrq<MC>(i_target, l_state),
+                 TARGTIDFORMAT " failed to reset read reorder queue settings",
+                 TARGTID);
+        FAPI_TRY(mss::template configure_wrq<MC>(i_target, l_state),
+                 TARGTIDFORMAT " failed to reset write reorder queue settings",
+                 TARGTID);
     }
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -163,7 +163,6 @@ bool find_key_from_value(const pair<T, OT> (&i_array_of_pairs)[N],
 
     o_key = l_value_iterator->first;
     return true;
-
 }// find_value_from_key
 } // namespace mss
 

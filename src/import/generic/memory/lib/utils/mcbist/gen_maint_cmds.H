@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,7 +157,7 @@ fapi2::ReturnCode rank(
                 fapi2::EXP_MAINT_BAD_RANK_INPUT()
                 .set_PORT_TARGET(i_target)
                 .set_RANK(i_port_rank),
-                "i_port_rank input to exp steer function out of range on %s.", mss::c_str(i_target));
+                "i_port_rank input to exp steer function out of range on " TARGTIDFORMAT, TARGTID);
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -181,8 +181,8 @@ inline fapi2::ReturnCode mux_type(
                 fapi2::EXP_MAINT_BAD_STEER_MUX_TYPE()
                 .set_PORT_TARGET(i_target)
                 .set_STEER_TYPE(i_steer_type),
-                "i_steer_type input to exp steer function out of range on %s.",
-                mss::c_str(i_target));
+                "i_steer_type input to exp steer function out of range on " TARGTIDFORMAT,
+                TARGTID);
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -207,8 +207,8 @@ fapi2::ReturnCode symbol(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_tar
                 fapi2::EXP_MAINT_INVALID_SYMBOL()
                 .set_PORT_TARGET(i_target)
                 .set_SYMBOL(i_symbol),
-                "i_symbol input to put_steer_mux out of range on %s.",
-                mss::c_str(i_target));
+                "i_symbol input to put_steer_mux out of range on " TARGTIDFORMAT,
+                TARGTID);
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -241,7 +241,7 @@ fapi2::ReturnCode spare_index(
                 .set_PORT_TARGET(i_target)
                 .set_SPARE0_INDEX(i_dram_spare0_index)
                 .set_SPARE1_INDEX(i_dram_spare1_index),
-                "Out of range spare index returned from mux register on %s.", mss::c_str(i_target));
+                "Out of range spare index returned from mux register on " TARGTIDFORMAT, TARGTID);
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -354,8 +354,8 @@ fapi2::ReturnCode get_spare_nibbles( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
                 l_byte,
                 l_nibble))
         {
-            FAPI_DBG("%s Skip processing bits on rank:%d nibble%d because they are non-existent spares",
-                     mss::c_str(i_target), l_dimm_rank, (l_byte * NIBBLES_PER_BYTE) + l_nibble);
+            FAPI_DBG(TARGTIDFORMAT " Skip processing bits on rank:%d nibble%d because they are non-existent spares",
+                     TARGTID, l_dimm_rank, (l_byte * NIBBLES_PER_BYTE) + l_nibble);
             continue;
         }
 
@@ -491,8 +491,8 @@ fapi2::ReturnCode get_steer_mux(
         o_dram_spare1_symbol = genSteerTraits<MC>::spare_to_symbol[l_dramSpare1Index];
     }
 
-    FAPI_INF("get_steer_mux(): target = %s, rank%d, spare0 = %d, spare1 = %d",
-             mss::c_str(i_target), i_port_rank, o_dram_spare0_symbol, o_dram_spare1_symbol );
+    FAPI_INF("get_steer_mux(): target = " TARGTIDFORMAT ", rank%d, spare0 = %d, spare1 = %d",
+             TARGTID, i_port_rank, o_dram_spare0_symbol, o_dram_spare1_symbol );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -526,7 +526,7 @@ fapi2::ReturnCode put_steer_mux(
 
     // Get rank information
     mss::rank::info<MC> l_rank_info(i_target, i_port_rank, l_rc);
-    FAPI_TRY(l_rc, "%s failed to obtain rank info", mss::c_str(i_target));
+    FAPI_TRY(l_rc, TARGTIDFORMAT " failed to obtain rank info", TARGTID);
 
     // Check for i_port_rank or i_steer_type or i_symbol out of range
     // TODO:ZEN306 Add HWP support for planar OCMB
@@ -635,7 +635,7 @@ fapi2::ReturnCode check_if_spare_is_free(const fapi2::Target<fapi2::TARGET_TYPE_
     uint8_t l_dram_spare1_symbol = 0;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     mss::rank::info<MC> l_rank_info(i_target, i_port_rank, l_rc);
-    FAPI_TRY(l_rc, "%s failed to obtain rank info", mss::c_str(i_target));
+    FAPI_TRY(l_rc, TARGTIDFORMAT " failed to obtain rank info", TARGTID);
     // 1) Checks if the spares exist
     FAPI_TRY(mss::attr::get_dimm_spare(l_rank_info.get_dimm_target(), l_dimm_spare));
     // The logic is inverted to what we want. True means the spare doesn't exist when returned out of the function
@@ -750,8 +750,8 @@ fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
                 .set_PORT_TARGET(i_target)
                 .set_RANK(i_port_rank)
                 .set_SYMBOL(i_symbol),
-                "Both Spare0 and Spare1 are already deployed on %s rank %u symbol %u.",
-                mss::c_str(i_target), i_port_rank, i_symbol);
+                "Both Spare0 and Spare1 are already deployed on " TARGTIDFORMAT " rank %u symbol %u.",
+                TARGTID, i_port_rank, i_symbol);
 
     // Default to using spare 0 first
     l_target_spare = l_spare0_free ? steer_type::DRAM_SPARE0 : steer_type::DRAM_SPARE1;
@@ -792,8 +792,8 @@ fapi2::ReturnCode deploy_spare_helper( const fapi2::Target<fapi2::TARGET_TYPE_DI
                 .set_DIMM_TARGET(i_target)
                 .set_NIBBLE_IDX(i_nibble_idx)
                 .set_MAX_NIBBLE_IDX(MAX_NIBBLE_IDX),
-                "%s Nibble index %u provided to deploy_spare_helper was beyond the max nibble index %u",
-                mss::c_str(i_target), i_nibble_idx, MAX_NIBBLE_IDX);
+                TARGTIDFORMAT " Nibble index %u provided to deploy_spare_helper was beyond the max nibble index %u",
+                TARGTID, i_nibble_idx, MAX_NIBBLE_IDX);
 
     {
         // Grab nibble and byte

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,29 +93,6 @@ inline fapi2::ReturnCode putScom(const fapi2::Target<K>& i_target,
 #endif
 }
 
-/// @brief Writes a SCOM register under mask on a chip
-/// @tparam K template parameter, passed in target.
-/// @param[in] i_target     HW target to operate on.
-/// @param[in] i_address    SCOM register address to write to.
-/// @param[in] i_data       Buffer that holds data to write into address.
-/// @param[in] i_mask       Buffer that holds the mask value.
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-/// @note We wrap scom operations in the mss library so that we can hook
-/// into them in the lab. For IPL firmware, this should compile out.
-template< fapi2::TargetType K >
-inline fapi2::ReturnCode putScomUnderMask(const fapi2::Target<K>& i_target,
-        const uint64_t i_address,
-        const fapi2::buffer<uint64_t> i_data,
-        const fapi2::buffer<uint64_t> i_mask)
-{
-#ifdef PSYSTEMS_MSS_LAB_ONLY
-    // Place holder for lab-hooks
-    return fapi2::putScomUnderMask(i_target, i_address, i_data, i_mask);
-#else
-    return fapi2::putScomUnderMask(i_target, i_address, i_data, i_mask);
-#endif
-}
-
 ///
 /// @brief Blast one peice of data across a vector of addresses
 /// @param[in] i_target the target for the scom
@@ -144,7 +121,6 @@ fapi2::ReturnCode scom_blastah( const fapi2::Target<T>& i_target,
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-    FAPI_ERR( "scom_blastah failed: %d of %d executed against %s", count, i_addrs.size(), mss::c_str(i_target));
     return fapi2::current_err;
 }
 
@@ -242,6 +218,9 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+// SBE does not support pair, but scom_blastah is not needed in SBE at this time
+// If it is needed, convert to using the mss::pair class
+#ifndef __PPE__
 ///
 /// @brief Blast parallel vectors of data and address pairs to a single target
 /// @param[in] i_target the target for the scom
@@ -309,6 +288,7 @@ fapi_try_exit:
     FAPI_ERR( "pairs scom_blastah failed: %d of %d", count, i_addr.size() );
     return fapi2::current_err;
 }
+#endif
 
 ///
 /// @brief Suck one peice of data from a vector of addresses
@@ -340,10 +320,13 @@ fapi2::ReturnCode scom_suckah( const fapi2::Target<T>& i_target,
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-    FAPI_ERR( "scom_suckah failed: %d of %d executed against %s", count, i_addr.size(), mss::c_str(i_target));
+    FAPI_ERR( "scom_suckah failed: %d of %d executed against " TARGTIDFORMAT, count, i_addr.size(), TARGTID);
     return fapi2::current_err;
 }
 
+// SBE does not support pair, but scom_blastah is not needed in SBE at this time
+// If it is needed, convert to using the mss::pair class
+#ifndef __PPE__
 
 ///
 /// @brief Suck one peice of data from a vector of address pairs
@@ -378,10 +361,10 @@ fapi2::ReturnCode scom_suckah( const fapi2::Target<T>& i_target,
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-    FAPI_ERR( "scom_suckah failed: %d of %d executed against %s", count, i_addr.size(), mss::c_str(i_target));
+    FAPI_ERR( "scom_suckah failed: %d of %d executed against " TARGTIDFORMAT, count, i_addr.size(), TARGTID);
     return fapi2::current_err;
 }
-
+#endif
 
 }
 #endif
