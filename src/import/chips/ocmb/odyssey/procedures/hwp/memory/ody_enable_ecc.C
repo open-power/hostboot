@@ -37,6 +37,7 @@
 #include <fapi2.H>
 #include <ody_enable_ecc.H>
 #include <lib/mc/ody_port_traits.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
 
