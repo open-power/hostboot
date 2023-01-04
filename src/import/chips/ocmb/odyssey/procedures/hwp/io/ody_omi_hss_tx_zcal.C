@@ -36,9 +36,9 @@
 //------------------------------------------------------------------------------
 #include <ody_omi_hss_tx_zcal.H>
 #include <common_io_omi_tdr.H>
+#include <io_scom_lib.H>
 #include <ody_scom_omi.H>
 #include <ody_io_ppe_common.H>
-#include <io_scom_lib.H>
 #include <fapi2_subroutine_executor.H>
 
 // Structures
@@ -100,8 +100,7 @@ fapi2::ReturnCode forceZCalToDefault(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
 {
     FAPI_DBG("Start - Setting Z Cal to Defaults");
 
-    constexpr uint32_t c_pre1Val = 0x00F;
-    constexpr uint32_t c_pre2Val = 0x00F;
+    constexpr uint32_t c_preVal = 0x00F;
     constexpr uint32_t c_postVal = 0x1FF;
     constexpr uint32_t c_mainVal = 0x1FF;
     constexpr uint32_t c_startBit = 48;
@@ -111,17 +110,17 @@ fapi2::ReturnCode forceZCalToDefault(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
     uint64_t l_addr = 0;
 
     // Set P Pre1
-    FAPI_DBG("Setting P Pre1 0x%x", c_pre1Val);
+    FAPI_DBG("Setting P Pre1 0x%x", c_preVal);
     l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_PRE1]);
     l_buffer.flush<0>();
-    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE1]>(c_pre1Val);
+    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE1]>(c_preVal);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set P Pre2
-    FAPI_DBG("Setting P Pre2 0x%x", c_pre2Val);
+    FAPI_DBG("Setting P Pre2 0x%x", c_preVal);
     l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_PRE2]);
     l_buffer.flush<0>();
-    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE2]>(c_pre2Val);
+    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE2]>(c_preVal);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set P Post
@@ -139,17 +138,17 @@ fapi2::ReturnCode forceZCalToDefault(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set N Pre1
-    FAPI_DBG("Setting N Pre1 0x%x", c_pre1Val);
+    FAPI_DBG("Setting N Pre1 0x%x", c_preVal);
     l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_PRE1]);
     l_buffer.flush<0>();
-    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE1]>(c_pre1Val);
+    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE1]>(c_preVal);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set N Pre2
-    FAPI_DBG("Setting N Pre2 0x%x", c_pre2Val);
+    FAPI_DBG("Setting N Pre2 0x%x", c_preVal);
     l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_PRE2]);
     l_buffer.flush<0>();
-    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE2]>(c_pre2Val);
+    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE2]>(c_preVal);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set N Post
@@ -233,8 +232,8 @@ fapi2::ReturnCode ody_omi_hss_tx_zcal(const fapi2::Target<fapi2::TARGET_TYPE_OCM
 {
     FAPI_DBG("Start");
 
-    const uint64_t c_odyOmiBaseAddr = 0x0000000008010C00;
-    const uint32_t l_numLanes  = 8;
+    const uint32_t c_odyOmiBaseAddr = 0x0000000008010C00;
+    const uint8_t l_numLanes  = 8;
 
     uint32_t l_lane = 0;
 

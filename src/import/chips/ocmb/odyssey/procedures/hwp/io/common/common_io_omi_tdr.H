@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/ody_omi_hss_bist_init.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/common/common_io_omi_tdr.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,42 +23,44 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file ody_omi_hss_bist_init.H
-/// @brief Initializes the OMI SerDes for BIST functionality
+/// @file common_io_omi_tdr.H
+/// @brief OMI TDR procedure
 ///
-/// *HWP HW Maintainer: Josh Chica <josh.chica@ibm.com>
+/// *HWP HW Maintainer: Josh Chica <Josh.Chica@ibm.com>
 /// *HWP FW Maintainer:
 /// *HWP Consumed by: SBE
 ///
 
-#pragma once
-
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#pragma once
 #include <fapi2.H>
 
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
-// Function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode(*ody_omi_hss_bist_init_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+
+/// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*common_io_omi_tdr_FP_t)(const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP |
+        fapi2::TARGET_TYPE_OMI > &,
+        const uint64_t&);
 
 //------------------------------------------------------------------------------
-// Function prototype
+// Function prototypes
 //------------------------------------------------------------------------------
-//
-extern "C" {
 
-///
-/// @brief Initializes the OMI SerDes for BIST functionality
-///
-/// @param[in]  i_target            Reference to Odyssey chip target
-///
-/// @return FAPI_RC_SUCCESS if success, else error code
-///
-    fapi2::ReturnCode ody_omi_hss_bist_init(
-        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+extern "C"
+{
 
-} //extern "C"
+    ///
+    /// @brief OMI TDR procedure
+    ///
+    /// @param[in] i_target       Reference to TARGET_TYPE_OCMB_CHIP target
+    /// @return fapi::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
+    ///
+    fapi2::ReturnCode common_io_omi_tdr(const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP | fapi2::TARGET_TYPE_OMI >
+                                        &i_tgt,
+                                        const uint64_t& i_base_addr);
+
+} // extern "C"

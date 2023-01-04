@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/ody_io_ppe_common.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/common/io_ppe_cache.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,19 +23,32 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+///
+/// @file io_ppe_cache.H
+/// @brief Cache utility class
+///
+/// *HWP HW Maintainer: Josh Chica <Josh.Chica@ibm.com>
+/// *HWP FW Maintainer:
+/// *HWP Consumed by: SBE
+///
 
 #pragma once
 
-#include <fapi2.H>
+#define IO_PPE_MAX_CACHE_SIZE 128
 
-#include <ody_io_ppe_regs.H>
-#include <io_ppe_lib.H>
-
-const uint64_t PHY_PPE_WRAP0_ARB_CSAR = 0x8010C0Dull;
-const uint64_t PHY_PPE_WRAP0_ARB_CSDR = 0x8010C0Eull;
-const uint64_t PHY_PPE_WRAP0_XIXCR = 0x8010C10ull;
-
-namespace ody_io
+class io_ppe_cache
 {
-#include <io_ppe_common.H>
-}
+    private:
+        int iv_size;
+        int iv_head;
+        uint64_t iv_address[IO_PPE_MAX_CACHE_SIZE];
+        uint64_t iv_data[IO_PPE_MAX_CACHE_SIZE];
+        uint8_t iv_modified[IO_PPE_MAX_CACHE_SIZE];
+
+    public:
+        io_ppe_cache();
+        bool hasAddress(uint64_t i_addr);
+        uint64_t getData(uint64_t i_addr);
+        bool add(uint64_t i_addr, uint64_t i_data, uint8_t i_modified);
+        bool pop(uint64_t& o_addr, uint64_t& o_data, uint8_t& o_modified);
+};
