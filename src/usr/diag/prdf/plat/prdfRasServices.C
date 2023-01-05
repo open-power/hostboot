@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,6 +122,85 @@ void ErrDataService::commitErrLog( errlHndl_t & io_errl,
 {
     errlCommit( io_errl, PRDF_COMP_ID );
     io_errl = nullptr;
+}
+
+//------------------------------------------------------------------------------
+
+void collectPmicTelemetry(const SDC_MRU_LIST & i_mruList, uint32_t i_plid)
+{
+    // List of ocmbs to collect telemetry for
+    TargetHandleList ocmbList;
+
+    // Loop through the callout list
+    for (const auto & mru : i_mruList)
+    {
+        // Skip any callout that is set to NO_GARD
+        if (NO_GARD == mru.gardState) continue;
+
+        PRDcallout callout = mru.callout;
+        // Check for any memory target callouts
+        if (PRDcalloutData::TYPE_TARGET == callout.getType())
+        {
+            TargetHandle_t target = callout.getTarget();
+            TYPE trgtType = getTargetType(target);
+
+            switch(trgtType)
+            {
+                case TYPE_MEM_PORT:
+                case TYPE_DIMM:
+                {
+                    TargetHandle_t ocmb = getConnectedParent(target,
+                        TYPE_OCMB_CHIP);
+                    if (std::find(ocmbList.begin(), ocmbList.end(), ocmb) ==
+                        ocmbList.end())
+                    {
+                        ocmbList.push_back(ocmb);
+                    }
+                    break;
+                }
+                case TYPE_OCMB_CHIP:
+                {
+                    if (std::find(ocmbList.begin(), ocmbList.end(), target) ==
+                        ocmbList.end())
+                    {
+                        ocmbList.push_back(target);
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        // Check for any memmru callouts
+        else if (PRDcalloutData::TYPE_MEMMRU == callout.getType())
+        {
+            MemoryMru memMru (callout.flatten());
+
+            // Add any DIMMs to the list if they aren't already there
+            TargetHandleList dimms = memMru.getCalloutList();
+            for (const auto & dimm : dimms)
+            {
+                if (TYPE_DIMM == getTargetType(dimm))
+                {
+                    // Get the parent OCMB
+                    TargetHandle_t ocmb = getConnectedParent(dimm,
+                        TYPE_OCMB_CHIP);
+
+                    if (std::find(ocmbList.begin(), ocmbList.end(), ocmb) ==
+                        ocmbList.end())
+                    {
+                        ocmbList.push_back(ocmb);
+                    }
+                }
+            }
+        }
+    }
+
+    // Call the function to collect the PMIC telemetry for all DIMMs in the list
+    for (const auto & ocmb : ocmbList)
+    {
+        getPmicTelemetry(ocmb, i_plid);
+    }
 }
 
 } // end namespace PRDF
