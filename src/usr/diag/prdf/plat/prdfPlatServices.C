@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,6 @@
 #include <prdfMemScrubUtils.H>
 #include <prdfMemUtils.H>
 
-#include <iipServiceDataCollector.h>
 #include <UtilHash.H>
 
 #include <errno.h>
@@ -60,6 +59,7 @@
 #include <fapi2_hwp_executor.H>
 #include <errl/errludlogregister.H>
 #include <prdfP10IohsExtraSig.H>
+#include <sbeio/sbeioif.H>
 
 #include <exp_rank.H>
 #include <kind.H>
@@ -838,6 +838,16 @@ uint32_t omiDegradeDlReconfig(TargetHandle_t i_target)
     }
 
     return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+void getPmicTelemetry(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid)
+{
+    PRDF_ASSERT(nullptr != i_ocmb);
+    PRDF_ASSERT(TYPE_OCMB_CHIP == getTargetType(i_ocmb));
+
+    SBEIO::get4uDdimmPmicHealthCheckData(i_ocmb, i_plid);
 }
 
 //##############################################################################
