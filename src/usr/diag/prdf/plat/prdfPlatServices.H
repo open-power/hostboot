@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -220,6 +220,16 @@ void nvdimmAddFfdc( TARGETING::TargetHandle_t i_nvdimm, errlHndl_t & io_errl  );
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 uint32_t omiDegradeDlReconfig(TARGETING::TargetHandle_t i_target);
+
+/**
+ * @brief Calls a Hostboot interface to collect PMIC telemetry for any dimms
+ *        in the callout list. An optional plid can be input to link a log to
+ *        the PMIC telemetry log that will be created.
+ * @param i_ocmb The OCMB target to collect PMIC telemetry for.
+ * @param i_plid The optional plid of the PRD log to link to. If 0, the logs
+ *               will not be linked.
+ */
+void getPmicTelemetry(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid = 0);
 
 //##############################################################################
 //##                    Maintenance Command wrappers

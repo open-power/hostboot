@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -726,6 +726,14 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     // Add the MNFG trace information.
     MnfgTrace( io_sdc.GetErrorSignature(), pfaData );
 
+
+    #ifdef __HOSTBOOT_MODULE
+    // Collect telemetry for the PMICs on any DIMMs that were called out
+    uint32_t errlPlid = 0;
+    PRDF_GET_PLID(iv_errl, errlPlid);
+    collectPmicTelemetry(mruList, errlPlid);
+    #endif
+
     // If this is not a terminating condition, commit the error log. If the
     // error log is not committed, the error log will be passed back to
     // PRDF::main() and eventually ATTN.
@@ -761,6 +769,7 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         PRDF_ERR( "Write() to clear failed on HB_SCRATCH_10 proc=0x%08x",
                   proc->getHuid() );
     }
+
     #endif
 
 
