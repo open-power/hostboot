@@ -191,7 +191,7 @@
         Software reported that CCS did not finish in alloted time after manually triggering stop
     </description>
     <collectRegisterFfdc>
-      <id>REG_FFDC_EXP_CCS_FAILURE</id>
+      <id>REG_FFDC_ODY_CCS_FAILURE</id>
       <target>MC_TARGET</target>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
     </collectRegisterFfdc>
