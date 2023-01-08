@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <mss_odyssey_attribute_getters.H>
 #include <mss_odyssey_attribute_setters.H>
 #include <lib/phy/ody_draminit_procedure.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 
 namespace mss
 {
@@ -126,7 +127,7 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_
     }
 
     // Unmask FIRs (done on the OCMB chip level)
-    // TODO:ZEN:MST-1530 Specialize unmask::after_draminit_training for Odyssey
+    FAPI_TRY(mss::unmask::after_draminit_training<mss::mc_type::ODYSSEY>(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,99 @@ namespace mss
 
 namespace unmask
 {
+
+///
+/// @brief Finds if a specific port is present
+/// @param[in] i_ports the vector of ports present on this OCMB chip
+/// @param[in] i_port_pos the port to look for in terms of the relative pos
+/// @return true if the port is present, otherwise false
+///
+bool is_port_present(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>& i_ports, const uint8_t i_port_pos)
+{
+    bool l_is_present = false;
+
+    // Loops through all ports
+    for(const auto& l_port : i_ports)
+    {
+        // If this port has the same relative position as the desired port, set to true and break out of the loop
+        if(mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port) == i_port_pos)
+        {
+            l_is_present = true;
+            break;
+        }
+    }
+
+    // Return the result
+    return l_is_present;
+}
+
+///
+/// @brief Unmask and setup actions performed after draminit_training
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note mc_type::ODYSSEY specialization
+///
+template<>
+fapi2::ReturnCode after_draminit_training<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target )
+{
+    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+
+    // Create registers and check success for MCBISTFIR and SRQFIR
+    mss::fir::reg2<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_RW_WCLEAR> l_mcbist_reg(i_target);
+    mss::fir::reg2<scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR> l_srq_reg(i_target);
+
+    // Write MCBISTFIR register per Odyssey unmask spec
+    FAPI_TRY(l_mcbist_reg.recoverable_error<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_COMMAND_ADDRESS_TIMEOUT>()
+             .checkstop<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_INTERNAL_FSM_ERROR>()
+             .checkstop<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_CCS_ARRAY_UNCORRECT_CE_OR_UE>()
+             .recoverable_error<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_SCOM_RECOVERABLE_REG_PE>()
+             .checkstop<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_SCOM_FATAL_REG_PE>()
+             .write(), "Failed to write MCBIST FIR register for " GENTARGTIDFORMAT, GENTARGTID(i_target));
+
+    // Write SRQ LFIR register per Odyssey unmask spec
+    l_srq_reg.checkstop<scomt::ody::ODC_SRQ_LFIR_05>()
+    .checkstop<scomt::ody::ODC_SRQ_LFIR_18>()
+    .checkstop<scomt::ody::ODC_SRQ_LFIR_19>()
+    .recoverable_error<scomt::ody::ODC_SRQ_LFIR_23>();
+
+    // Port specific errors
+    // Port 0
+    if(is_port_present(l_ports, 0))
+    {
+        l_srq_reg.recoverable_error<scomt::ody::ODC_SRQ_LFIR_02>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_07>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_09>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_10>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_11>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_12>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_24>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_25>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_26>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_31>();
+    }
+
+    // Port 1
+    if(is_port_present(l_ports, 1))
+    {
+        l_srq_reg.checkstop<scomt::ody::ODC_SRQ_LFIR_27>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_32>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_36>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_37>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_38>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_39>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_41>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_42>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_43>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_45>();
+    }
+
+    FAPI_TRY(l_srq_reg.write(), "Failed to write SRQ FIR register for " GENTARGTIDFORMAT, GENTARGTID(i_target));
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Unmask and setup actions for memdiags related FIR
