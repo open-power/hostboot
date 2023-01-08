@@ -200,5 +200,56 @@ fapi_try_exit:
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
+///
+/// @brief Unmask and setup actions performed after draminit_mc
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note mc_type::ODYSSEY specialization
+///
+template<>
+fapi2::ReturnCode after_draminit_mc<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target )
+{
+    fapi2::buffer<uint64_t> l_reg_data;
+
+    // Create register for MCBISTFIR
+    mss::fir::reg2<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_RW_WCLEAR> l_mcbist_reg(i_target);
+
+    // Write MCBISTFIR register per Explorer unmask spec
+    // NOTE: when this gets ported to p11 this will need to be changed to recoverable
+    FAPI_TRY(l_mcbist_reg.attention<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_MCBIST_PROGRAM_COMPLETE>()
+             .write(), "Failed to Write MCBIST FIR register " GENTARGTIDFORMAT, GENTARGTID(i_target));
+
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        // Create register for RDFFIR
+        mss::fir::reg2<scomt::ody::ODC_RDF0_SCOM_FIR_RW_WCLEAR> l_rdf_reg(l_port);
+
+        // Set this to mask off missing dfi_rddata_valid from triggering ODC_RDF0_SCOM_FIR_RDDATA_VALID_ERROR
+        FAPI_TRY(fapi2::getScom(l_port, scomt::ody::ODC_RDF0_SCOM_MASK1, l_reg_data));
+        l_reg_data.setBit<scomt::ody::ODC_RDF0_SCOM_MASK1_MISSING_RDDATA_VALID>();
+        FAPI_TRY(fapi2::putScom(l_port, scomt::ody::ODC_RDF0_SCOM_MASK1, l_reg_data));
+
+        // Write RDF FIR register per Explorer unmask spec
+        FAPI_TRY(l_rdf_reg.recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_AUE>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_IAUE>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_IRCD>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_RCD>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_RDDATA_VALID_ERROR>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_SCOM_PARITY_CLASS_STATUS>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_SCOM_PARITY_CLASS_RECOVERABLE>()
+                 .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_SCOM_PARITY_CLASS_UNRECOVERABLE>()
+                 .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_ECC_CORRECTOR_INTERNAL_PARITY_ERROR>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_ECC_RBUF_CE_DW0>()
+                 .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_ECC_RBUF_UE_DW0>()
+                 .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_TLXT_RDF_RBUF_PERR>()
+                 .write(), "Failed to Write RDF FIR register " GENTARGTIDFORMAT, GENTARGTID(l_port));
+    }
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
+
 } // end unmask ns
 } // end mss ns
