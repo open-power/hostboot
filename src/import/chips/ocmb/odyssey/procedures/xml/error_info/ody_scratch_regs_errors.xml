@@ -51,4 +51,19 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_ODY_SCRATCH_REGS_UTILS_LOOKUP_ERR</rc>
+    <description>
+      Unable to match desired Odyssey freqeuncy with supported PLL bucket
+      setting
+    </description>
+    <ffdc>TARGET_CHIP</ffdc>
+    <ffdc>HOST_TARGET</ffdc>
+    <ffdc>HOST_FREQ_GRID_MHZ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
