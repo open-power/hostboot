@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -156,40 +156,7 @@ void* call_omi_io_run_training (void *io_pArgs)
         sys->setAttr<ATTR_ATTN_POLL_PLID>(1);
 
 
-        // 12.7.a p10_omi_train.C
-        TargetHandleList l_omicTargetList;
-        getAllChiplets(l_omicTargetList, TYPE_OMIC);
-
-        for (const auto & l_omic_target : l_omicTargetList)
-        {
-            //  Create a new workitem from this omic and feed it to the
-            //  thread pool for processing.  Thread pool handles workitem
-            //  cleanup.
-            threadpool.insert(new WorkItem_p10_omi_train(l_StepError,
-                                                         *l_omic_target));
-        }
-
-        // Start the threads and wait for completion
-        if( ISTEP::HwpWorkItem::start_threads( threadpool,
-                                               l_StepError,
-                                               l_omicTargetList.size() ) )
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                      ERR_MRK"call_omi_io_run_training: start_threads returned an error for p10_omi_train" );
-            break;
-        }
-
-        // Do not continue if an error was encountered
-        if(WorkItem_p10_omi_train::cv_encounteredHwpError)
-        {
-            TRACFCOMP( g_trac_isteps_trace,
-                INFO_MRK "call_omi_io_run_training exited early because p10_omi_train "
-                "had failures");
-            break;
-        }
-
-
-        // 12.7.b exp_omi_train.C
+        // 12.7.a exp_omi_train.C
         TargetHandleList l_ocmbTargetList;
         getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
@@ -226,6 +193,38 @@ void* call_omi_io_run_training (void *io_pArgs)
         {
             TRACFCOMP(g_trac_isteps_trace,
                       ERR_MRK"call_omi_io_run_training: start_threads returned an error for exp_omi_train" );
+            break;
+        }
+
+        // Do not continue if an error was encountered
+        if(WorkItem_exp_omi_train::cv_encounteredHwpError)
+        {
+            TRACFCOMP( g_trac_isteps_trace,
+                INFO_MRK "call_omi_io_run_training exited early because exp_omi_train had failures");
+            break;
+        }
+
+
+        // 12.7.b p10_omi_train.C
+        TargetHandleList l_omicTargetList;
+        getAllChiplets(l_omicTargetList, TYPE_OMIC);
+
+        for (const auto & l_omic_target : l_omicTargetList)
+        {
+            //  Create a new workitem from this omic and feed it to the
+            //  thread pool for processing.  Thread pool handles workitem
+            //  cleanup.
+            threadpool.insert(new WorkItem_p10_omi_train(l_StepError,
+                                                         *l_omic_target));
+        }
+
+        // Start the threads and wait for completion
+        if( ISTEP::HwpWorkItem::start_threads( threadpool,
+                                               l_StepError,
+                                               l_omicTargetList.size() ) )
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                      ERR_MRK"call_omi_io_run_training: start_threads returned an error for p10_omi_train" );
             break;
         }
 
