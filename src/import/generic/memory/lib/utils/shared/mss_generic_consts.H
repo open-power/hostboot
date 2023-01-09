@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -380,6 +380,12 @@ enum generic_ffdc_codes : uint16_t
 
     // Spare Device SPD field
     SET_DIMM_SPARE = 0x10E0,
+
+    // Memory alert pull up field
+    SET_MEM_ALERT_PULL_UP = 0x10E1,
+
+    // External calibration Resistor value
+    SET_EXTCALRESVAL = 0x10E2,
 
 };
 

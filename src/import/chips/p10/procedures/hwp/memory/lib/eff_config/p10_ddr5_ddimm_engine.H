@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,7 @@
 #include <mss_pmic_attribute_setters.H>
 #include <mss_odyssey_attribute_setters.H>
 #include <mss_odyssey_attribute_getters.H>
+
 
 namespace mss
 {
@@ -709,6 +710,132 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         }
 
         ///
+        /// @brief Set the mem alert enable field
+        ///
+        /// @param[in] i_spd SPD
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_mem_alert_en(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_mem_alert_a0_b0_en;
+            uint8_t l_mem_alert_a1_b1_en;
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PHY_A0_B0_MEM_ALERT, i_spd, ody::SET_MEM_ALERT_EN, l_mem_alert_a0_b0_en));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PHY_A1_B1_MEM_ALERT, i_spd, ody::SET_MEM_ALERT_EN, l_mem_alert_a1_b1_en));
+            l_field = l_mem_alert_a0_b0_en || l_mem_alert_a1_b1_en;
+
+            FAPI_TRY(mss::attr::set_memalerten(iv_port, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the memory alert pull up field
+        ///
+        /// @param[in] i_spd SPD
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_mem_alert_pullup(const std::vector<uint8_t>& i_spd) const
+        {
+            // Get the memport relative position
+            // The relative_pos() only returns 0 or 1 for this type of function
+            // to decide whether to use port0 or port1
+            uint8_t l_rel_pos =  0;
+            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_memalert_pullup_val = 0;
+            uint8_t l_memalert_pullup_attr = 0;
+
+            const std::vector< std::pair<uint8_t, uint8_t> > MEM_ALERT_PULL_UP_MAP =
+            {
+                // {key byte, MEM ALERT PULL UP VALUES (ohms)}
+                {0b0000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_DISABLE},
+                {0b0001, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_40},
+                {0b0011, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_60},
+                {0b0100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_80},
+                {0b0101, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_120},
+                {0b0110, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_240},
+                // All others reserved/not used for DDR5
+
+            };
+
+            // Get the relative position
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, iv_port, l_rel_pos));
+
+            // Get the appropriate port's attribute value
+            if (l_rel_pos == 0)
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_A0_B0_MEM_ALERT_PULL_UP_VALUE, i_spd, SET_MEM_ALERT_PULL_UP,
+                                                 l_memalert_pullup_val));
+            }
+            else
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_A1_B1_MEM_ALERT_PULL_UP_VALUE, i_spd, SET_MEM_ALERT_PULL_UP,
+                                                 l_memalert_pullup_val));
+            }
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(iv_dimm, MEM_ALERT_PULL_UP_MAP, SET_MEM_ALERT_PULL_UP, l_memalert_pullup_val,
+                                        l_memalert_pullup_attr),
+                     "%s failed MEM_ALERT_PULL_UP_MAP lookup check", spd::c_str(iv_dimm) );
+
+            // Assign the array with same attr value
+            memset(l_field, l_memalert_pullup_attr, mss::ody::sizes::MAX_RANK_PER_DIMM);
+
+            FAPI_TRY(mss::attr::set_si_mc_rcv_imp_alert_n(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the external phy calibration resistor value field
+        ///
+        /// @param[in] i_spd SPD
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_extcal_res_val(const std::vector<uint8_t>& i_spd) const
+        {
+            // Get the memport relative position
+            // The relative_pos() only returns 0 or 1 for this type of function
+            // to decide whether to use port0 or port1
+            uint8_t l_rel_pos = 0;
+            uint8_t l_field = 0;
+            uint8_t l_extcalres_val = 0;
+            const std::vector< std::pair<uint8_t, uint8_t> > EXTCALRESVAL_MAP =
+            {
+                // {key byte, EXT CALIBRATION RESISTOR VAL (ohms)}
+                {0b0001, fapi2::ENUM_ATTR_MEM_EFF_EXTCALRESVAL_40_OHM},
+                {0b0101, fapi2::ENUM_ATTR_MEM_EFF_EXTCALRESVAL_120_OHM},
+                {0b0110, fapi2::ENUM_ATTR_MEM_EFF_EXTCALRESVAL_240_OHM},
+                // All others reserved/not used for DDR5
+            };
+
+            // Get the relative position
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, iv_port, l_rel_pos));
+
+            // Get the appropriate port's attribute value
+            if (l_rel_pos == 0)
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_A0_B0_CAL_RESISTOR, i_spd, SET_EXTCALRESVAL, l_field));
+            }
+            else
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_A1_B1_CAL_RESISTOR, i_spd, SET_EXTCALRESVAL, l_field));
+            }
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(iv_dimm, EXTCALRESVAL_MAP, SET_EXTCALRESVAL, l_field, l_extcalres_val),
+                     "%s failed EXTCALRESVAL_MAP lookup check", spd::c_str(iv_dimm) );
+
+            FAPI_TRY(mss::attr::set_extcalresval(iv_port, l_extcalres_val));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the address mirror field
         ///
         /// @param[in] i_spd SPD
@@ -835,31 +962,30 @@ class ddimm_0_0 : public mss::spd::module_specific_base
 
 
         ///
-        /// @brief Set the redundant chip select field
+        /// @brief Set the redundant chip select field for channel a0
         ///
         /// @param[in] i_spd SPD binary
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
         ///
         virtual fapi2::ReturnCode set_redundant_cs_en(const std::vector<uint8_t>& i_spd) const
         {
+            uint8_t l_redundant_cs_a0 = 0;
+            uint8_t l_redundant_cs_b0 = 0;
+            uint8_t l_redundant_cs_a1 = 0;
+            uint8_t l_redundant_cs_b1 = 0;
             uint8_t l_field = 0;
 
-            FAPI_TRY(get_field_spd(iv_ocmb, F::DDIMM_COMPAT, i_spd, ody::SET_REDUNDANT_CS_EN, l_field));
-
-            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
-                                  iv_ocmb,
-                                  check_ddimm_compat(l_field),
-                                  F::DDIMM_COMPAT.get_byte(i_spd),
-                                  l_field,
-                                  ody::SET_REDUNDANT_CS_EN,
-                                  "DDIMM compatability"));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::REDUNDANT_CS_EN_CHA0, i_spd, ody::SET_REDUNDANT_CS_EN, l_redundant_cs_a0));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::REDUNDANT_CS_EN_CHB0, i_spd, ody::SET_REDUNDANT_CS_EN, l_redundant_cs_b0));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::REDUNDANT_CS_EN_CHA1, i_spd, ody::SET_REDUNDANT_CS_EN, l_redundant_cs_a1));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::REDUNDANT_CS_EN_CHB1, i_spd, ody::SET_REDUNDANT_CS_EN, l_redundant_cs_b1));
+            l_field = l_redundant_cs_a0 || l_redundant_cs_b0 || l_redundant_cs_a1 || l_redundant_cs_b1;
 
             FAPI_TRY(mss::attr::set_ddr5_redundant_cs_en(iv_dimm, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
         }
-
 
         ///
         /// @brief Set the spare device mapping field
@@ -966,24 +1092,24 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint16_t l_field = 0;
             fapi2::buffer<uint16_t> l_buffer;
 
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_CONT_CODE, i_spd, pmic::SET_PMIC0_MFG_ID, l_byte0));
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_LAST_NON_ZERO, i_spd, pmic::SET_PMIC0_MFG_ID, l_byte1));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_MFG_CODE_FIRST, i_spd, pmic::SET_PMIC0_MFG_ID, l_byte0));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_MFG_CODE_SECOND, i_spd, pmic::SET_PMIC0_MFG_ID, l_byte1));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_pmic_cont_code(l_byte0),
-                                  F::PMIC0_CONT_CODE.get_byte(i_spd),
+                                  F::PMIC0_MFG_CODE_FIRST.get_byte(i_spd),
                                   l_byte0,
                                   pmic::SET_PMIC0_MFG_ID,
-                                  "PMIC0 Cont Code"));
+                                  "PMIC0 First byte"));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_pmic_last_non_zero(l_byte1),
-                                  F::PMIC0_LAST_NON_ZERO.get_byte(i_spd),
+                                  F::PMIC0_MFG_CODE_SECOND.get_byte(i_spd),
                                   l_byte1,
                                   pmic::SET_PMIC0_MFG_ID,
-                                  "PMIC0 Last Non-Zero"));
+                                  "PMIC0 Second byte"));
 
             right_aligned_insert(l_buffer, l_byte1, l_byte0);
             l_field = l_buffer;
@@ -1006,12 +1132,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_pmic0_rev(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_REV, i_spd, pmic::SET_PMIC0_REVISION, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_DEVICE_REV_NUM, i_spd, pmic::SET_PMIC0_REVISION, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_pmic_rev(l_field),
-                                  F::PMIC0_REV.get_byte(i_spd),
+                                  F::PMIC0_DEVICE_REV_NUM.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC0_REVISION,
                                   "PMIC0 Revision"));
@@ -1060,24 +1186,24 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint16_t l_field = 0;
             fapi2::buffer<uint16_t> l_buffer;
 
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_CONT_CODE, i_spd, pmic::SET_PMIC1_MFG_ID, l_byte0));
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_LAST_NON_ZERO, i_spd, pmic::SET_PMIC1_MFG_ID, l_byte1));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_MFG_CODE_FIRST, i_spd, pmic::SET_PMIC1_MFG_ID, l_byte0));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_MFG_CODE_SECOND, i_spd, pmic::SET_PMIC1_MFG_ID, l_byte1));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_pmic_cont_code(l_byte0),
-                                  F::PMIC1_CONT_CODE.get_byte(i_spd),
+                                  F::PMIC1_MFG_CODE_FIRST.get_byte(i_spd),
                                   l_byte0,
                                   pmic::SET_PMIC1_MFG_ID,
-                                  "PMIC1 Cont Code"));
+                                  "PMIC1 First byte"));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_pmic_last_non_zero(l_byte1),
-                                  F::PMIC1_LAST_NON_ZERO.get_byte(i_spd),
+                                  F::PMIC1_MFG_CODE_SECOND.get_byte(i_spd),
                                   l_byte1,
                                   pmic::SET_PMIC1_MFG_ID,
-                                  "PMIC1 Last Non-Zero"));
+                                  "PMIC1 Second byte"));
 
             right_aligned_insert(l_buffer, l_byte1, l_byte0);
             l_field = l_buffer;
@@ -1100,12 +1226,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_pmic1_rev(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_REV, i_spd, pmic::SET_PMIC1_REVISION, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_DEVICE_REV_NUM, i_spd, pmic::SET_PMIC1_REVISION, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_pmic_rev(l_field),
-                                  F::PMIC1_REV.get_byte(i_spd),
+                                  F::PMIC1_DEVICE_REV_NUM.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC1_REVISION,
                                   "PMIC1 Revision"));
@@ -1154,24 +1280,24 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint16_t l_field = 0;
             fapi2::buffer<uint16_t> l_buffer;
 
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_CONT_CODE, i_spd, pmic::SET_PMIC2_MFG_ID, l_byte0));
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_LAST_NON_ZERO, i_spd, pmic::SET_PMIC2_MFG_ID, l_byte1));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_MFG_CODE_FIRST, i_spd, pmic::SET_PMIC2_MFG_ID, l_byte0));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_MFG_CODE_SECOND, i_spd, pmic::SET_PMIC2_MFG_ID, l_byte1));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_pmic_cont_code(l_byte0),
-                                  F::PMIC2_CONT_CODE.get_byte(i_spd),
+                                  F::PMIC2_MFG_CODE_FIRST.get_byte(i_spd),
                                   l_byte0,
                                   pmic::SET_PMIC2_MFG_ID,
-                                  "PMIC2 Cont Code"));
+                                  "PMIC2 First byte"));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_pmic_last_non_zero(l_byte1),
-                                  F::PMIC2_LAST_NON_ZERO.get_byte(i_spd),
+                                  F::PMIC2_MFG_CODE_SECOND.get_byte(i_spd),
                                   l_byte1,
                                   pmic::SET_PMIC2_MFG_ID,
-                                  "PMIC2 Last Non-Zero"));
+                                  "PMIC2 Second byte"));
 
             right_aligned_insert(l_buffer, l_byte1, l_byte0);
             l_field = l_buffer;
@@ -1194,12 +1320,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_pmic2_rev(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_REV, i_spd, pmic::SET_PMIC2_REVISION, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_DEVICE_REV_NUM, i_spd, pmic::SET_PMIC2_REVISION, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_pmic_rev(l_field),
-                                  F::PMIC2_REV.get_byte(i_spd),
+                                  F::PMIC2_DEVICE_REV_NUM.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC2_REVISION,
                                   "PMIC2 Revision"));
@@ -1248,24 +1374,24 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint16_t l_field = 0;
             fapi2::buffer<uint16_t> l_buffer;
 
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_CONT_CODE, i_spd, pmic::SET_PMIC3_MFG_ID, l_byte0));
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_LAST_NON_ZERO, i_spd, pmic::SET_PMIC3_MFG_ID, l_byte1));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_MFG_CODE_FIRST, i_spd, pmic::SET_PMIC3_MFG_ID, l_byte0));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_MFG_CODE_SECOND, i_spd, pmic::SET_PMIC3_MFG_ID, l_byte1));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_pmic_cont_code(l_byte0),
-                                  F::PMIC3_CONT_CODE.get_byte(i_spd),
+                                  F::PMIC3_MFG_CODE_FIRST.get_byte(i_spd),
                                   l_byte0,
                                   pmic::SET_PMIC3_MFG_ID,
-                                  "PMIC3 Cont Code"));
+                                  "PMIC3 First byte"));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_pmic_last_non_zero(l_byte1),
-                                  F::PMIC3_LAST_NON_ZERO.get_byte(i_spd),
+                                  F::PMIC3_MFG_CODE_SECOND.get_byte(i_spd),
                                   l_byte1,
                                   pmic::SET_PMIC3_MFG_ID,
-                                  "PMIC3 Last Non-Zero"));
+                                  "PMIC3 Second byte"));
 
             right_aligned_insert(l_buffer, l_byte1, l_byte0);
             l_field = l_buffer;
@@ -1288,12 +1414,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_pmic3_rev(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_REV, i_spd, pmic::SET_PMIC3_REVISION, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_DEVICE_REV_NUM, i_spd, pmic::SET_PMIC3_REVISION, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_pmic_rev(l_field),
-                                  F::PMIC3_REV.get_byte(i_spd),
+                                  F::PMIC3_DEVICE_REV_NUM.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC3_REVISION,
                                   "PMIC3 Revision"));
@@ -3656,12 +3782,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_0_avail(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_0_AVAIL, i_spd, ody::SET_THERM_SENSOR_0_AVAIL, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_0_AVAIL, i_spd, ody::SET_THERM_SENSOR_0_AVAIL, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_avail(l_field),
-                                  F::THERM_SENSOR_0_AVAIL.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_0_AVAIL.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_0_AVAIL,
                                   "Thermal Sensor 0 Availability"));
@@ -3686,12 +3812,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             // This attribute enum no longer exists, so we can use a constexpr
             constexpr uint8_t THERM_SENSOR_USAGE_DRAM_AND_PMIC = 0x03;
 
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_0_USAGE, i_spd, ody::SET_THERM_SENSOR_0_USAGE, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_0_USAGE, i_spd, ody::SET_THERM_SENSOR_0_USAGE, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_usage(l_field),
-                                  F::THERM_SENSOR_0_USAGE.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_0_USAGE.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_0_USAGE,
                                   "Thermal Sensor 0 Usage"));
@@ -3716,12 +3842,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_0_type(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_0_TYPE, i_spd, ody::SET_THERM_SENSOR_0_TYPE, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_0_TYPE, i_spd, ody::SET_THERM_SENSOR_0_TYPE, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_type(l_field),
-                                  F::THERM_SENSOR_0_TYPE.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_0_TYPE.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_0_TYPE,
                                   "Thermal Sensor 0 Type"));
@@ -3741,12 +3867,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_0_i2c_address(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_0_I2C_ADDRESS, i_spd, ody::SET_THERM_SENSOR_0_I2C_ADDR, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_0_I2C_ADDRESS, i_spd, ody::SET_THERM_SENSOR_0_I2C_ADDR, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_i2c_address(l_field),
-                                  F::THERM_SENSOR_0_I2C_ADDRESS.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_0_I2C_ADDRESS.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_0_I2C_ADDR,
                                   "Thermal Sensor 0 I2C addr"));
@@ -3766,12 +3892,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_0_location(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_0_LOCATION, i_spd, ody::SET_THERM_SENSOR_0_LOCATION, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_0_LOCATION, i_spd, ody::SET_THERM_SENSOR_0_LOCATION, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_location(l_field),
-                                  F::THERM_SENSOR_0_LOCATION.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_0_LOCATION.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_0_LOCATION,
                                   "Thermal Sensor 0 Location"));
@@ -3791,12 +3917,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_1_avail(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_1_AVAIL, i_spd, ody::SET_THERM_SENSOR_1_AVAIL, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_1_AVAIL, i_spd, ody::SET_THERM_SENSOR_1_AVAIL, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_avail(l_field),
-                                  F::THERM_SENSOR_1_AVAIL.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_1_AVAIL.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_1_AVAIL,
                                   "Thermal Sensor 1 Avail"));
@@ -3821,12 +3947,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             // This attribute enum no longer exists, so we can use a constexpr
             constexpr uint8_t THERM_SENSOR_USAGE_DRAM_AND_PMIC = 0x03;
 
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_1_USAGE, i_spd, ody::SET_THERM_SENSOR_1_USAGE, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_1_USAGE, i_spd, ody::SET_THERM_SENSOR_1_USAGE, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_usage(l_field),
-                                  F::THERM_SENSOR_1_USAGE.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_1_USAGE.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_1_USAGE,
                                   "Thermal Sensor 1 usage"));
@@ -3851,12 +3977,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_1_type(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_1_TYPE, i_spd, ody::SET_THERM_SENSOR_1_TYPE, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_1_TYPE, i_spd, ody::SET_THERM_SENSOR_1_TYPE, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_type(l_field),
-                                  F::THERM_SENSOR_1_TYPE.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_1_TYPE.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_1_TYPE,
                                   "Thermal Sensor 1 type"));
@@ -3876,12 +4002,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_1_i2c_address(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_1_I2C_ADDRESS, i_spd, ody::SET_THERM_SENSOR_1_I2C_ADDR, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_1_I2C_ADDRESS, i_spd, ody::SET_THERM_SENSOR_1_I2C_ADDR, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_i2c_address(l_field),
-                                  F::THERM_SENSOR_1_I2C_ADDRESS.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_1_I2C_ADDRESS.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_1_I2C_ADDR,
                                   "Thermal Sensor 1 I2C Address"));
@@ -3901,12 +4027,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_1_location(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_1_LOCATION, i_spd, ody::SET_THERM_SENSOR_1_LOCATION, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_1_LOCATION, i_spd, ody::SET_THERM_SENSOR_1_LOCATION, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_location(l_field),
-                                  F::THERM_SENSOR_1_LOCATION.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_1_LOCATION.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_1_LOCATION,
                                   "Thermal Sensor 1 I2C Address"));
@@ -3926,12 +4052,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_2_avail(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_2_AVAIL, i_spd, ody::SET_THERM_SENSOR_2_AVAIL, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_2_AVAIL, i_spd, ody::SET_THERM_SENSOR_2_AVAIL, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_avail(l_field),
-                                  F::THERM_SENSOR_2_AVAIL.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_2_AVAIL.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_2_AVAIL,
                                   "Thermal Sensor 2 Avail"));
@@ -3956,12 +4082,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             // This attribute enum no longer exists, so we can use a constexpr
             constexpr uint8_t THERM_SENSOR_USAGE_DRAM_AND_PMIC = 0x03;
 
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_2_USAGE, i_spd, ody::SET_THERM_SENSOR_2_USAGE, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_2_USAGE, i_spd, ody::SET_THERM_SENSOR_2_USAGE, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_usage(l_field),
-                                  F::THERM_SENSOR_2_USAGE.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_2_USAGE.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_2_USAGE,
                                   "Thermal Sensor 2 usage"));
@@ -3986,12 +4112,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_2_type(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_2_TYPE, i_spd, ody::SET_THERM_SENSOR_2_TYPE, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_2_TYPE, i_spd, ody::SET_THERM_SENSOR_2_TYPE, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_type(l_field),
-                                  F::THERM_SENSOR_2_TYPE.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_2_TYPE.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_2_TYPE,
                                   "Thermal Sensor 2 type"));
@@ -4011,12 +4137,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_2_i2c_address(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_2_I2C_ADDRESS, i_spd, ody::SET_THERM_SENSOR_2_I2C_ADDR, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_2_I2C_ADDRESS, i_spd, ody::SET_THERM_SENSOR_2_I2C_ADDR, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_i2c_address(l_field),
-                                  F::THERM_SENSOR_2_I2C_ADDRESS.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_2_I2C_ADDRESS.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_2_I2C_ADDR,
                                   "Thermal Sensor 2 I2C Address"));
@@ -4036,12 +4162,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_2_location(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_2_LOCATION, i_spd, ody::SET_THERM_SENSOR_2_LOCATION, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_2_LOCATION, i_spd, ody::SET_THERM_SENSOR_2_LOCATION, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_location(l_field),
-                                  F::THERM_SENSOR_2_LOCATION.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_2_LOCATION.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_2_LOCATION,
                                   "Thermal Sensor 2 I2C Address"));
@@ -4061,12 +4187,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_3_avail(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_3_AVAIL, i_spd, ody::SET_THERM_SENSOR_3_AVAIL, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_3_AVAIL, i_spd, ody::SET_THERM_SENSOR_3_AVAIL, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_avail(l_field),
-                                  F::THERM_SENSOR_3_AVAIL.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_3_AVAIL.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_3_AVAIL,
                                   "Thermal Sensor 3 Avail"));
@@ -4091,12 +4217,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             // This attribute enum no longer exists, so we can use a constexpr
             constexpr uint8_t THERM_SENSOR_USAGE_DRAM_AND_PMIC = 0x03;
 
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_3_USAGE, i_spd, ody::SET_THERM_SENSOR_3_USAGE, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_3_USAGE, i_spd, ody::SET_THERM_SENSOR_3_USAGE, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_usage(l_field),
-                                  F::THERM_SENSOR_3_USAGE.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_3_USAGE.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_3_USAGE,
                                   "Thermal Sensor 3 usage"));
@@ -4121,12 +4247,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_3_type(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_3_TYPE, i_spd, ody::SET_THERM_SENSOR_3_TYPE, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_3_TYPE, i_spd, ody::SET_THERM_SENSOR_3_TYPE, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_type(l_field),
-                                  F::THERM_SENSOR_3_TYPE.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_3_TYPE.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_3_TYPE,
                                   "Thermal Sensor 3 type"));
@@ -4146,12 +4272,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_3_i2c_address(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_3_I2C_ADDRESS, i_spd, ody::SET_THERM_SENSOR_3_I2C_ADDR, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_3_I2C_ADDRESS, i_spd, ody::SET_THERM_SENSOR_3_I2C_ADDR, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_i2c_address(l_field),
-                                  F::THERM_SENSOR_3_I2C_ADDRESS.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_3_I2C_ADDRESS.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_3_I2C_ADDR,
                                   "Thermal Sensor 3 I2C Address"));
@@ -4171,12 +4297,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_3_location(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_3_LOCATION, i_spd, ody::SET_THERM_SENSOR_3_LOCATION, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_3_LOCATION, i_spd, ody::SET_THERM_SENSOR_3_LOCATION, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_location(l_field),
-                                  F::THERM_SENSOR_3_LOCATION.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_3_LOCATION.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_3_LOCATION,
                                   "Thermal Sensor 3 I2C Address"));
@@ -4196,12 +4322,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_diff_avail(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_DIFF_AVAIL, i_spd, ody::SET_THERM_SENSOR_DIFF_AVAIL, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_DIFF_AVAIL, i_spd, ody::SET_THERM_SENSOR_DIFF_AVAIL, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_diff_avail(l_field),
-                                  F::THERM_SENSOR_DIFF_AVAIL.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_DIFF_AVAIL.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_DIFF_AVAIL,
                                   "Thermal Sensor Diff Avail"));
@@ -4221,12 +4347,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_diff_usage(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_DIFF_USAGE, i_spd, ody::SET_THERM_SENSOR_DIFF_USAGE, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_DIFF_USAGE, i_spd, ody::SET_THERM_SENSOR_DIFF_USAGE, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_diff_usage(l_field),
-                                  F::THERM_SENSOR_DIFF_USAGE.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_DIFF_USAGE.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_DIFF_USAGE,
                                   "Thermal Sensor Diff Usage"));
@@ -4246,12 +4372,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_diff_type(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_DIFF_TYPE, i_spd, ody::SET_THERM_SENSOR_DIFF_TYPE, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_DIFF_TYPE, i_spd, ody::SET_THERM_SENSOR_DIFF_TYPE, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_diff_type(l_field),
-                                  F::THERM_SENSOR_DIFF_TYPE.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_DIFF_TYPE.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_DIFF_TYPE,
                                   "Thermal Sensor Diff Type"));
@@ -4271,12 +4397,13 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_therm_sensor_diff_i2c_address(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::THERM_SENSOR_DIFF_I2C_ADDRESS, i_spd, ody::SET_THERM_SENSOR_DIFF_I2C_ADDR, l_field));
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSOR_DIFF_I2C_ADDRESS, i_spd, ody::SET_THERM_SENSOR_DIFF_I2C_ADDR,
+                                   l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
                                   check_therm_sensor_diff_i2c_address(l_field),
-                                  F::THERM_SENSOR_DIFF_I2C_ADDRESS.get_byte(i_spd),
+                                  F::THERMAL_SENSOR_DIFF_I2C_ADDRESS.get_byte(i_spd),
                                   l_field,
                                   ody::SET_THERM_SENSOR_DIFF_I2C_ADDR,
                                   "Thermal Sensor Diff I2C Addr"));
@@ -4666,6 +4793,9 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         {
             FAPI_TRY(set_module_base_height(i_spd));
             FAPI_TRY(set_mod_thermal_sensor(i_spd));
+            FAPI_TRY(set_mem_alert_en(i_spd));
+            FAPI_TRY(set_mem_alert_pullup(i_spd));
+            FAPI_TRY(set_extcal_res_val(i_spd));
             FAPI_TRY(set_address_mirror(i_spd));
             FAPI_TRY(set_byte_enables(i_spd));
             FAPI_TRY(set_nibble_enables(i_spd));

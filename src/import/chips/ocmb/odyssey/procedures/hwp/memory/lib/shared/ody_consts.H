@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -180,6 +180,8 @@ enum ffdc_codes : uint16_t
     SET_THERM_SENSOR_0_LOCATION = 0x1079,
     SET_THERM_SENSOR_2_LOCATION = 0x107A,
     SET_THERM_SENSOR_3_LOCATION = 0x107B,
+
+    SET_MEM_ALERT_EN = 0x107C,
 
 };
 
