@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,12 +98,29 @@ struct p10_mc_pll_bucket_descriptor_t
 // array of bucket descriptors, index is bucket number
 const p10_mc_pll_bucket_descriptor_t P10_MC_PLL_BUCKETS[P10_NUM_MC_PLL_BUCKETS] =
 {
-    { REFCLOCK_FREQ_133, 1600, 25600 }, // bucket 0 DDR4-3200
+    { REFCLOCK_FREQ_133, 1600, 25600 }, // bucket 0 DDR[45]-3200
     { REFCLOCK_FREQ_133, 1466, 23460 }, // bucket 1 DDR4-2933
     { REFCLOCK_FREQ_133, 1333, 21330 }, // bucket 2 DDR4-2667
-    { REFCLOCK_FREQ_133, 2000, 32000 }  // bucket 3 DDR5
+    { REFCLOCK_FREQ_133, 2000, 32000 }, // bucket 3 DDR5-4000
 };
 
+///
+/// Odyssey
+///
+
+// constants defining number of PLL frequency options ('buckets')
+// documented in bucket descriptor structure (currently used/max)
+const uint8_t ODY_NUM_PLL_BUCKETS = 3;
+const uint8_t ODY_MAX_PLL_BUCKETS = 16;
+
+// array of bucket descriptors (use existing p10 MC struct definition as the fields match 1:1),
+// index is bucket number
+const p10_mc_pll_bucket_descriptor_t ODY_PLL_BUCKETS[ODY_NUM_PLL_BUCKETS] =
+{
+    { REFCLOCK_FREQ_133, 1600, 25600 }, // bucket 0 DDR[45]-3200
+    { REFCLOCK_FREQ_133, 2000, 32000 }, // bucket 1 DDR5-4000
+    { REFCLOCK_FREQ_133, 2400, 38400 }, // bucket 2 DDR5-4800 (unsupported for P10 processor)
+};
 
 //
 // IOHS
