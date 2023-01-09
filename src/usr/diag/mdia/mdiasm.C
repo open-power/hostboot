@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@
 #include <sys/time.h>
 #include <sys/misc.h>
 
-#include <exp_rank.H>
+#include <chipids.H>
 #include <kind.H>
 #include <hwp_wrappers.H>
 #include <pldm/extended/pldm_watchdog.H>
@@ -104,6 +104,13 @@ void StateMachine::running(bool & o_running)
     o_running = !(iv_done || iv_shutdown);
 
     mutex_unlock(&iv_mutex);
+}
+
+bool isOdysseyOcmb(TARGETING::TargetHandle_t i_trgt)
+{
+    // The Odyssey chip ID value of 0x60C0 is copied from the chipids.H file
+    // in Hostboot.
+    return (i_trgt->getAttr<ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16);
 }
 
 void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
@@ -392,14 +399,25 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 MDIA_FAST("sm: stopping command HUID:0x%08X", get_huid(target));
 
                 fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
-                FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
+
+                // Check for Odyssey OCMBs
+                if (isOdysseyOcmb(target))
+                {
+                    FAPI_INVOKE_HWP( err, ody_stop, fapiOcmb );
+                }
+                // Default to Explorer OCMBs
+                else
+                {
+                    FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
+                }
+
                 if ( nullptr != err )
                 {
-                    MDIA_ERR("sm: exp_stop failed");
+                    MDIA_ERR("sm: stop failed");
                     errlCommit(err, MDIA_COMP_ID);
                 }
 
-                // exp_stop will set the command complete
+                // stop will set the command complete
                 // attention so we need to clear those
                 bitMask = ~bitMask;
 
@@ -679,8 +697,18 @@ errlHndl_t __runPostMemdiagsHwps( TargetHandle_t i_trgt )
                    "target HUID 0x%08X.", get_huid(i_trgt));
 
         // Unmask mainline FIRs.
-        FAPI_INVOKE_HWP( err,
-            mss::unmask::after_memdiags<mss::mc_type::EXPLORER>, fapiTrgt );
+        // Check for Odyssey OCMBs
+        if (isOdysseyOcmb(i_trgt))
+        {
+            FAPI_INVOKE_HWP( err,
+                mss::unmask::after_memdiags<mss::mc_type::ODYSSEY>, fapiTrgt );
+        }
+        // Default to Explorer OCMBs
+        else
+        {
+            FAPI_INVOKE_HWP( err,
+                mss::unmask::after_memdiags<mss::mc_type::EXPLORER>, fapiTrgt );
+        }
 
         if ( err )
         {
@@ -699,9 +727,21 @@ errlHndl_t __runPostMemdiagsHwps( TargetHandle_t i_trgt )
                    "target HUID 0x%08X.", get_huid(i_trgt) );
 
         // Turn off FIFO mode to improve performance.
-        FAPI_INVOKE_HWP( err,
-            mss::reset_reorder_queue_settings<mss::mc_type::EXPLORER>,
-            fapiTrgt );
+        // Check for Odyssey OCMBs
+        if (isOdysseyOcmb(i_trgt))
+        {
+            FAPI_INVOKE_HWP( err,
+                mss::reset_reorder_queue_settings<mss::mc_type::ODYSSEY>,
+                fapiTrgt );
+        }
+        // Default to Explorer OCMBs
+        else
+        {
+            FAPI_INVOKE_HWP( err,
+                mss::reset_reorder_queue_settings<mss::mc_type::EXPLORER>,
+                fapiTrgt );
+        }
+
         if ( err )
         {
             MDIA_FAST( "ERROR: mss::reset_reorder_queue_settings HWP call on "
@@ -872,38 +912,70 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
         // new command...use the full range
 
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
-        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
 
         switch(workItem)
         {
             case START_RANDOM_PATTERN:
 
-                FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
-                                 mss::mcbist::PATTERN_RANDOM );
+                // Check for Odyssey OCMBs
+                if (isOdysseyOcmb(target))
+                {
+                    FAPI_INVOKE_HWP( err, ody_sf_init, fapiOcmb,
+                                     mss::mcbist::PATTERN_RANDOM );
+                }
+                // Default to Explorer OCMBs
+                else
+                {
+                    FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
+                                     mss::mcbist::PATTERN_RANDOM );
+                }
                 MDIA_FAST( "sm: random init %p on: 0x%08x", fapiOcmb,
                            get_huid(target) );
                 break;
 
             case START_SCRUB:
-
-                // set stop conditions
-                stopCond.set_pause_on_mpe(mss::ON);
-                stopCond.set_pause_on_ue( mss::ON);
-                stopCond.set_pause_on_aue(mss::ON);
-                stopCond.set_nce_inter_symbol_count_enable(mss::ON);
-                stopCond.set_nce_soft_symbol_count_enable( mss::ON);
-                stopCond.set_nce_hard_symbol_count_enable( mss::ON);
-                if ( iv_globals.queryMnfgIplCeChecking() )
+            {
+                // Check for Odyssey OCMBs
+                if (isOdysseyOcmb(target))
                 {
-                    stopCond.set_pause_on_nce_hard(mss::ON);
-                }
+                    // set stop conditions
+                    mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> sc;
+                    sc.set_pause_on_mpe(mss::ON);
+                    sc.set_pause_on_ue( mss::ON);
+                    sc.set_pause_on_aue(mss::ON);
+                    sc.set_nce_inter_symbol_count_enable(mss::ON);
+                    sc.set_nce_soft_symbol_count_enable( mss::ON);
+                    sc.set_nce_hard_symbol_count_enable( mss::ON);
+                    if ( iv_globals.queryMnfgIplCeChecking() )
+                    {
+                        sc.set_pause_on_nce_hard(mss::ON);
+                    }
 
-                FAPI_INVOKE_HWP( err, exp_sf_read, fapiOcmb,
-                                 stopCond );
+                    FAPI_INVOKE_HWP( err, ody_sf_read, fapiOcmb,
+                                     sc );
+                }
+                // Default to Explorer OCMBs
+                else
+                {
+                    // set stop conditions
+                    mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> sc;
+                    sc.set_pause_on_mpe(mss::ON);
+                    sc.set_pause_on_ue( mss::ON);
+                    sc.set_pause_on_aue(mss::ON);
+                    sc.set_nce_inter_symbol_count_enable(mss::ON);
+                    sc.set_nce_soft_symbol_count_enable( mss::ON);
+                    sc.set_nce_hard_symbol_count_enable( mss::ON);
+                    if ( iv_globals.queryMnfgIplCeChecking() )
+                    {
+                        sc.set_pause_on_nce_hard(mss::ON);
+                    }
+
+                    FAPI_INVOKE_HWP( err, exp_sf_read, fapiOcmb, sc );
+                }
                 MDIA_FAST( "sm: scrub %p on: 0x%08x", fapiOcmb,
                            get_huid(target) );
                 break;
-
+            }
             case START_PATTERN_0:
             case START_PATTERN_1:
             case START_PATTERN_2:
@@ -913,8 +985,18 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             case START_PATTERN_6:
             case START_PATTERN_7:
 
-                FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
-                                 workItem );
+                // Check for Odyssey OCMBs
+                if (isOdysseyOcmb(target))
+                {
+                    FAPI_INVOKE_HWP( err, ody_sf_init, fapiOcmb,
+                                     workItem );
+                }
+                // Default to Explorer OCMBs
+                else
+                {
+                    FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
+                                     workItem );
+                }
                 MDIA_FAST( "sm: init %p on: 0x%08x", fapiOcmb,
                            get_huid(target) );
                 break;
@@ -1085,11 +1167,21 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
         {
             MDIA_FAST("sm: stopping command: %p", target);
             fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
-            FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
+
+            // Check for Odyssey OCMBs
+            if (isOdysseyOcmb(target))
+            {
+                FAPI_INVOKE_HWP( err, ody_stop, fapiOcmb );
+            }
+            // Default to Explorer OCMBs
+            else
+            {
+                FAPI_INVOKE_HWP( err, exp_stop, fapiOcmb );
+            }
 
             if(nullptr != err)
             {
-                MDIA_ERR("sm: exp_stop failed");
+                MDIA_ERR("sm: stop failed");
                 errlCommit(err, MDIA_COMP_ID);
             }
         }

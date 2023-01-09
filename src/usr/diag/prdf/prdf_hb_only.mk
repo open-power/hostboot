@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2022
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -82,6 +82,7 @@ prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
 prd_incpath += ${ROOTPATH}/src/usr/isteps/nvdimm
 
 # For including hwp_wrappers.H
+prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/
 prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/prd/
 prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/mcbist/
 prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/dimm/
@@ -97,7 +98,9 @@ prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/fir/
 prd_incpath += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
+
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
+prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mcbist/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
 
 ################################################################################
@@ -218,6 +221,24 @@ prd_obj_no_sim += exp_kind.o
 prd_obj_no_sim += exp_fir_workarounds.o
 prd_obj_no_sim += exp_phy_utils.o
 prd_obj_no_sim += exp_maint_cmds.o
+
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mc/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/eff_config/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mcbist/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/utils/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/ecc/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/fir/
+prd_obj_no_sim += hwp_wrappers_ody.o
+prd_obj_no_sim += ody_port.o
+prd_obj_no_sim += odyssey_memory_size.o
+prd_obj_no_sim += ody_memdiags.o
+prd_obj_no_sim += odyssey_pos.o
+prd_obj_no_sim += ody_mcbist.o
+prd_obj_no_sim += ody_maint_cmds.o
+prd_obj_no_sim += ecc_traits_odyssey.o
+prd_obj_no_sim += ody_unmask.o
 
 # Needed for the exp_deploy_row_repairs procedure
 prd_obj_no_sim += exp_deploy_row_repairs.o
