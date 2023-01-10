@@ -383,12 +383,20 @@ void populate_gpio_data(
     fapi2::buffer<uint8_t> l_reg_contents_1;
     fapi2::buffer<uint8_t> l_reg_contents_2;
 
+    // In the case of an I2C read failure, we don't want to abort the procedure. The
+    // struct values will remain zeroed, which is fine for telemetry collection.
+    // reg_read has an informative trace in case of an error that will be sufficient.
+    // We already handled earlier i2c failures on these parts and how to log them
+    // appropriately. We will op to skip error handling now.
+
     FAPI_INF(TARGTIDFORMAT " Reading GPIO Input Port State", MSSTARGID(i_gpio1));
     mss::pmic::i2c::reg_read(i_gpio1, mss::gpio::regs::INPUT_PORT_REG, l_reg_contents_1);
+    o_data.iv_gpio1_port_state = l_reg_contents_1;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     FAPI_INF(TARGTIDFORMAT " Reading GPIO Input Port State", MSSTARGID(i_gpio2));
     mss::pmic::i2c::reg_read(i_gpio2, mss::gpio::regs::INPUT_PORT_REG, l_reg_contents_2);
+    o_data.iv_gpio2_port_state = l_reg_contents_2;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     FAPI_INF(TARGTIDFORMAT " Reading GPIO EFUSE output", MSSTARGID(i_gpio1));
@@ -420,14 +428,6 @@ void populate_gpio_data(
     mss::pmic::i2c::reg_read(i_gpio2, mss::gpio::regs::CONFIGURATION, l_reg_contents_2);
     o_data.iv_gpio2_r03_configuration = l_reg_contents_2;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-
-    // In the case of an I2C read failure, we don't want to abort the procedure. The
-    // struct values will remain zeroed, which is fine for telemetry collection.
-    // reg_read has an informative trace in case of an error that will be sufficient.
-    // We already handled earlier i2c failures on these parts and how to log them
-    // appropriately. We will op to skip error handling now.
-    o_data.iv_gpio1_port_state = l_reg_contents_1;
-    o_data.iv_gpio2_port_state = l_reg_contents_2;
 }
 
 
@@ -623,11 +623,11 @@ void populate_adc_data(
     static constexpr uint8_t REG_SIZE_BITS = 8;
     fapi2::buffer<uint8_t> l_reg_contents;
 
-    mss::pmic::i2c::reg_read_reverse_buffer(i_adc, mss::adc::regs::SYSTEM_STATUS, l_reg_contents);
+    mss::pmic::i2c::reg_read(i_adc, mss::adc::regs::SYSTEM_STATUS, l_reg_contents);
     o_adc_data.iv_system_status = l_reg_contents;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    mss::pmic::i2c::reg_read_reverse_buffer(i_adc, mss::adc::regs::AUTO_SEQ_CH_SEL, l_reg_contents);
+    mss::pmic::i2c::reg_read(i_adc, mss::adc::regs::AUTO_SEQ_CH_SEL, l_reg_contents);
     o_adc_data.iv_auto_seq_ch_sel = l_reg_contents;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
