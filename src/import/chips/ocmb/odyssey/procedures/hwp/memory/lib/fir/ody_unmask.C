@@ -38,7 +38,10 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/fir/ody_fir_traits.H>
+#include <lib/fir/ody_unmask.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
+#include <mss_generic_system_attribute_getters.H>
 
 namespace mss
 {
@@ -54,21 +57,18 @@ namespace unmask
 ///
 bool is_port_present(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>& i_ports, const uint8_t i_port_pos)
 {
-    bool l_is_present = false;
-
     // Loops through all ports
     for(const auto& l_port : i_ports)
     {
         // If this port has the same relative position as the desired port, set to true and break out of the loop
         if(mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port) == i_port_pos)
         {
-            l_is_present = true;
-            break;
+            return true;
         }
     }
 
-    // Return the result
-    return l_is_present;
+    // No port with this position exists, so return false
+    return false;
 }
 
 ///
@@ -147,9 +147,56 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode after_memdiags<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
 {
-    // TODO:ZEN:MST-1536 Specialize unmask::after_memdiags for Odyssey
-    // This function is blank to unblock simulation work, but needs to have guts added in
-    // The above TODO should handle getting the proper coded added in
+    constexpr uint8_t PORT0 = 0;
+    constexpr uint8_t PORT1 = 1;
+
+    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+    bool l_has_rcd = false;
+    uint8_t l_is_planar = 0;
+    bool l_mfg_thresholds = false;
+
+    // Create registers and check success for SRQFIR
+    mss::fir::reg2<scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR> l_srq_reg(i_target);
+
+    // Check MNFG THRESHOLDS Policy flag
+    FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS, l_mfg_thresholds));
+    FAPI_TRY(mss::has_rcd(i_target, l_has_rcd));
+    FAPI_TRY(mss::attr::get_mem_mrw_is_planar(i_target, l_is_planar));
+
+    // Unmask SRQ FIRs
+    if (l_has_rcd && l_is_planar)
+    {
+        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_13>(l_ports, PORT0, mss::fir::action::LXSTOP, l_srq_reg));
+        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_40>(l_ports, PORT1, mss::fir::action::LXSTOP, l_srq_reg));
+
+        FAPI_TRY(l_srq_reg.write(), "Failed to write SRQ FIR register for " GENTARGTIDFORMAT, GENTARGTID(i_target));
+    }
+
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        // Create register for RDFFIR
+        mss::fir::reg2<scomt::ody::ODC_RDF0_SCOM_FIR_RW_WCLEAR> l_rdf_reg(l_port);
+
+        if(!l_mfg_thresholds)
+        {
+            // Unmask FIR_MAINTENANCE_IUE to recoverable if Threshold not set
+            l_rdf_reg.recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_IUE>();
+        }
+
+        // Unmask remaining RDF FIRs
+        FAPI_TRY(l_rdf_reg.checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_AUE>()
+                 // Note: MAINLINE_UE will need to be changed to lxstop on P11
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_UE>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_RCD>()
+                 .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_IAUE>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_IUE>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_IRCD>()
+                 .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_AUE>()
+                 .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_IAUE>()
+                 .write(), "Failed to Write RDF FIR register " GENTARGTIDFORMAT, GENTARGTID(l_port));
+    }
+
+fapi_try_exit:
     return fapi2::FAPI2_RC_SUCCESS;
 }
 

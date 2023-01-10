@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,17 @@ struct firTraits2;
 
 namespace fir
 {
+
+///
+/// @brief FIR action types, used in some unmask functions
+///
+enum action : uint8_t
+{
+    ATTN,
+    LXSTOP,
+    RECOV,
+    XSTOP,
+};
 
 ///
 /// @brief Small class to hold Explorer, P10 and previous generations FIR register
