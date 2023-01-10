@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -251,7 +251,16 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         {
             if (attrs.attr_boot_voltage_mv[VDN])
             {
-                FAPI_INF("Setting Boot voltage value for VDN (%d mv)", attrs.attr_boot_voltage_mv[VDN]);
+                uint32_t vdn_origin = attrs.attr_boot_voltage_mv[VDN];
+
+                if( attrs.attr_boot_voltage_mv[VDN] > 1200 ||
+                    attrs.attr_boot_voltage_mv[VDN] < 600 )
+                {
+                    attrs.attr_boot_voltage_mv[VDN] = 1000;
+                }
+
+                FAPI_INF("Setting Boot voltage value for VDN (%d mv), origin (%d mv)",
+                         attrs.attr_boot_voltage_mv[VDN], vdn_origin);
                 FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
                                                      attrs.attr_avs_bus_num[VDN],
                                                      attrs.attr_avs_bus_rail_select[VDN],
