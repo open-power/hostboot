@@ -81,7 +81,7 @@ const uint8_t P10_MAX_FILTER_PLL_BUCKETS = 4;
 
 // constants defining number of MC PLL frequency options ('buckets')
 // documented in bucket descriptor structure (currently used/max)
-const uint8_t P10_NUM_MC_PLL_BUCKETS = 4;
+const uint8_t P10_NUM_MC_PLL_BUCKETS = 7;
 const uint8_t P10_MAX_MC_PLL_BUCKETS = 8;
 
 // MC PLL bucket descriptor, defines bucket properties in terms of:
@@ -102,6 +102,9 @@ const p10_mc_pll_bucket_descriptor_t P10_MC_PLL_BUCKETS[P10_NUM_MC_PLL_BUCKETS] 
     { REFCLOCK_FREQ_133, 1466, 23460 }, // bucket 1 DDR4-2933
     { REFCLOCK_FREQ_133, 1333, 21330 }, // bucket 2 DDR4-2667
     { REFCLOCK_FREQ_133, 2000, 32000 }, // bucket 3 DDR5-4000
+    { REFCLOCK_FREQ_133, 1333, 10667 }, // bucket 4 RBI ring mode
+    { REFCLOCK_FREQ_133, 1600, 12800 }, // bucket 5 IP ring mode
+    { REFCLOCK_FREQ_133, 2400, 38400 }, // bucket 6 DDR5-4800 (unsupported for P10 processor)
 };
 
 ///
