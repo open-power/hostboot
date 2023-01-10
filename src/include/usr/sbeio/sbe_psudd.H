@@ -145,7 +145,7 @@ class SbePsu
             SBE_PSU_OCMB_CONFIG              = 0x09,
             SBE_PSU_TOPOLOGY_ID_TABLE        = 0x0A, //syncFabTopoIdTable
             SBE_CMD_MEM_CONFIG               = 0x0B, //getMemConfigInfo
-            SBE_CMD_PMIC_HEALTH_CHECK_DATA   = 0x0C, //getPmicHlthCheckData
+            SBE_CMD_PMIC_HEALTH_CHECK_DATA   = 0x0C, //getAllPmicHealthCheckData
         };
 
         /**

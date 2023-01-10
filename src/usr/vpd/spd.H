@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -38,6 +38,7 @@
 // ----------------------------------------------
 #include <errl/errlentry.H>
 #include <vpd/spdenums.H>
+#include <vpd/spd_if.H>
 #include "vpd.H"
 #include <attributeenums.H>
 #include <eeprom/eeprom_const.H>
@@ -91,14 +92,6 @@ enum
     MOD_TYPE_PLANAR          = 0x0B,
     MOD_TYPE_MDS_DDIMM       = 0xBA,
 
-    // DDIMM Mod height (1U/2U/4U)
-    DDIMM_MOD_HEIGHT_ADDR      = 0xC1,
-    DDIMM_MOD_HEIGHT_SZ        = 0x01,
-    DDIMM_MOD_HEIGHT_4U        = 0x80,
-    DDIMM_MOD_HEIGHT_2U        = 0x20,
-    DDIMM_MOD_HEIGHT_1U        = 0x00,
-    DDIMM_MOD_HEIGHT_INVALID   = 0xFF,
-
     DIMM_SPD_SECTION_SIZE = 0x200,  // Size each DIMM SPD section
     DIMM_SPD_MAX_SECTIONS = 512,    // Maximum number of sections
 
@@ -118,7 +111,6 @@ typedef enum
     PLANAR    = 0x20, // Planar EEPROM
     ALL       = 0xFFFF,
 } modSpecTypes_t;
-
 
 /**
 * @brief Structure to define the lookup table for SPD keywords

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 #include <sbeio/runtime/sbeio_vpd_override.H>
 #include <sbeio/runtime/sbeio_attr_override.H>
 #include <sbeio/sbeioreasoncodes.H>
-#include <sbeio/sbeioif.H>                 // getPmicHlthCheckData
+#include <sbeio/sbeioif.H>                 // getAllPmicHealthCheckData
 #include <errno.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -727,7 +727,7 @@ namespace RT_SBEIO
         *o_rspDataSize = 0;
         *o_rspData = 0;
 
-        l_err = SBEIO::getPmicHlthCheckData();
+        l_err = SBEIO::getAllPmicHealthCheckData();
 
         if (l_err)
         {   // if error, return a bad status
