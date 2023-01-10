@@ -191,12 +191,23 @@ struct __attribute__((__packed__)) telemetry_data
 
 ///
 /// @brief Runtime N-Mode Detect / Telemetry Info to return to SBE
+/// Revision history:
+///     0x03: Added the following ADC, PMIC and GPIO regs to the structure:
+///             ADC:  0x00, 0x12
+///             PMIC: 0x1B, 0x2E, 0x2F, 0x32, 0x9C
+///             GPIO: 0x01, 0x02, 0x03
+///     0x04: ADC 0x00 and 0x12 regs read in revision 0x03 were using reg_read_reverse_buffer()
+///             which made the regs print values in reverse. Changed the regs to be read using
+///             reg_read()
+///           For GPIO1 and GPIO2, iv_gpio1_port_state and iv_gpio2_port_state were getting the
+///             values of iv_gpio1_r03_configuration and iv_gpio2_r03_configuration respectively.
+///             Fixed that by assigning them the correct values
 ///
 struct __attribute__((__packed__)) runtime_n_mode_telem_info
 {
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision = 0x03;
+    uint8_t iv_revision = 0x04;
 
     aggregate_state iv_aggregate_error = aggregate_state::N_PLUS_1;
     uint8_t iv_pmic1_errors = 0;
