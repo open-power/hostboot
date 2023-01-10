@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -456,7 +456,7 @@ uint32_t getMemMaintEndAddr<TYPE_MBA>( ExtensibleChip * i_chip,
     {
         // Get the address object.
         uint64_t addr = reg->GetBitFieldJustified( 0, 64 );
-        o_addr = MemAddr::fromMaintAddr<TYPE_MBA>( addr );
+        o_addr = MemAddr::fromMaintEndAddr<TYPE_MBA>( addr );
     }
 
     return o_rc;

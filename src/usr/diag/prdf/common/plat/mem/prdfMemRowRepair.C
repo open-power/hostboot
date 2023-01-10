@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -311,10 +311,10 @@ uint32_t setRowRepairData( TargetHandle_t i_dimm,
         // Adjust for mba port 1 address inversion if necessary
         if ( (1 == getDimmPort(i_dimm) % 2) && (T == TYPE_MBA) )
         {
-            // Bits flipped in port 1 inversion: (10:12, 16:22, 24, 26:28)
-            // mask:
-            // 0000 0000 0011 1000 1111 1110 1011 1000
-            uint32_t mask = 0x0038FEB8;
+            // Bits flipped in port 1 inversion: bg1, bg0, b1, b0, r17, r13,
+            // r11, r9:r3
+            // mask: 0000 0000 1101 1100 0101 0111 1111 0000
+            uint32_t mask = 0x00DC57F0;
             l_tmp ^= mask;
         }
 
