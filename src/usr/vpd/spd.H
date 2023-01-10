@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -38,6 +38,7 @@
 // ----------------------------------------------
 #include <errl/errlentry.H>
 #include <vpd/spdenums.H>
+#include <vpd/spd_if.H>
 #include "vpd.H"
 #include <attributeenums.H>
 #include <eeprom/eeprom_const.H>
@@ -108,17 +109,6 @@ enum modSpecTypes_t
     DDIMM     = 0x10, // Differential DIMM
     PLANAR    = 0x20, // Planar EEPROM
     ALL       = 0xFFFF,
-};
-
-enum dimmModHeight_t
-{
-    // DDIMM Mod height (1U/2U/4U)
-    DDIMM_MOD_HEIGHT_ADDR      = 0xC1,
-    DDIMM_MOD_HEIGHT_SZ        = 0x01,
-    DDIMM_MOD_HEIGHT_4U        = 0x80,
-    DDIMM_MOD_HEIGHT_2U        = 0x20,
-    DDIMM_MOD_HEIGHT_1U        = 0x00,
-    DDIMM_MOD_HEIGHT_INVALID   = 0xFF,
 };
 
 /**

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
  */
 
 #include <sbeio/sbe_retry_handler.H>       // SbeRetryHandler
-#include <sbeio/sbeioif.H>                 // getPmicHlthCheckData
+#include <sbeio/sbeioif.H>                 // getAllPmicHealthCheckData
 #include <sbeio/sbe_psudd.H>               // SbePsu
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <runtime/interface.h>             // g_hostInterfaces
@@ -1086,11 +1086,11 @@ void handlePmicHealthCheckCallback(void)
         // Call function to create a PEL with PMIC telemetry data from the SBE.
         // This info PEL will be committed inside the health check function.
         // The error returned indicates a problem with the health check, commit it.
-        l_err = SBEIO::getPmicHlthCheckData();
+        l_err = SBEIO::getAllPmicHealthCheckData();
         if (l_err)
         {
             TRACFCOMP(g_trac_hbrt,
-                "handlePmicHealthCheckCallback: Call to getPmicHlthCheckData failed");
+                "handlePmicHealthCheckCallback: Call to getAllPmicHealthCheckData failed");
             // Do not break out, commit the error then create a new
             // callback and try again, make sure the error is informational
             l_err->setSev(ERRL_SEV_INFORMATIONAL);

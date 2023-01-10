@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -229,13 +229,23 @@ namespace SBEIO
      */
     errlHndl_t psuSendSbeCoreConfig(TARGETING::Target* i_pProc);
 
+
+    /*
+     * @brief Get PMIC Health Check Data from the SBE for the given 4U DDIMM. Optionally, associate the committed health
+     *        check log with the given PLID.
+     *
+     * @param[in]  i_ocmb     The OCMB target used to collect the 4U DDIMM data from.
+     * @param[in]  i_plid     The PLID to associate the committed log to, if needed.
+     */
+    void get4uDdimmPmicHealthCheckData(TARGETING::Target * i_ocmb, uint32_t i_plid = 0);
+
     /**
      * @brief Get PMIC Health Check Data from the SBE
      *
      * @return errlHndl_t Error log handle on failure.
      *
      */
-    errlHndl_t getPmicHlthCheckData();
+    errlHndl_t getAllPmicHealthCheckData();
 
      /**
      * @brief Get the capabilities of the SBE via PSU

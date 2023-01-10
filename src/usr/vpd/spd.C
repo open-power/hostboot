@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
@@ -182,27 +182,6 @@ errlHndl_t getMemType(uint8_t &                     o_memType,
 errlHndl_t getModType ( modSpecTypes_t & o_modType,
                         Target * i_target,
                         uint64_t i_memType );
-
-
-/**
- * @brief This function will read the DDIMM mod height.
- * @pre Assumes dimmType = DDR4 and modType = DDIMM
- *
- * @param[out] o_ddimmModHeight - The DIMM mod height reading
- *                               (use DDIMM_MOD_HEIGHT enums to translate to 4U, 2U or 1U)
- *
- * @param[in] i_target       - The target to read data from.
- *
- * @param[in] i_eepromSource - The EEPROM source (CACHE/HARDWARE).
- *                             Default to AUTOSELECT.
- *
- * @return errlHndl_t - nullptr if successful, otherwise a pointer
- *      to the error log.
- */
-errlHndl_t getDdimmModHeight(uint8_t & o_ddimmModHeight,
-                           Target * i_target,
-                           EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
-
 
 /**
  * @brief This function will set the size of SPD for the given target based on

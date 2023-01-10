@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <errno.h>
 #include <sbeio/sbe_utils.H>                   // SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES
 #include <targeting/common/mfgFlagAccessors.H> // areAllSrcsTerminating
+#include <vpd/spd_if.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -54,23 +55,311 @@ uint32_t getMemConfigInfo(const TargetHandle_t i_pProc,
                            uint32_t i_max_number,
                            SbePsu::MemConfigData_t * io_buffer);
 
-
  /** @brief Get PMIC Health Check Data from the SBE
  *
  *  @return nullptr if no error else an error log
  */
-errlHndl_t getPmicHlthCheckData()
+errlHndl_t getPmicHealthCheckData(Target * i_proc, Target * i_ocmb, const uint32_t i_plid = 0)
 {
     errlHndl_t l_err(nullptr);
     bool l_pmic_health_log = true;
-
-    TRACFCOMP(g_trac_sbeio, ENTER_MRK"getPmicHlthCheckData");
 
     //Allocate and align memory due to SBE requirements
     void* l_sbeMemAlloc = nullptr;
     SBEIO::sbeAllocationHandle_t l_alignedMemHandle { };
     uint64_t l_pmicHlthCheckDataSize = SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES;
     l_alignedMemHandle = sbeMalloc(l_pmicHlthCheckDataSize, l_sbeMemAlloc);
+
+    do
+    {
+        const ATTR_FAPI_POS_type l_fapiPos = i_ocmb->getAttr<ATTR_FAPI_POS>();
+        uint8_t l_InstanceId = l_fapiPos % SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER;
+        TRACFCOMP( g_trac_sbeio, "getPmicHealthCheckData PROC HUID=0x%X OCMB HUID=0x%X l_InstanceId=%d",
+                get_huid(i_proc), get_huid(i_ocmb), l_InstanceId);
+        // Create a PSU command message and initialize it with Health Check specific flags
+        SbePsu::psuCommand l_psuCommand(
+                SbePsu::SBE_REQUIRE_RESPONSE,                 // control flag
+                SbePsu::SBE_PSU_GENERIC_MESSAGE,              // command class
+                SbePsu::SBE_CMD_PMIC_HEALTH_CHECK_DATA);      // command (0x0C)
+        memset(l_alignedMemHandle.dataPtr, 0, l_pmicHlthCheckDataSize);
+
+        // SBE consumes a physical address
+        // Assume the virtual pages returned by malloc() are backed by contiguous physical pages
+
+        TRACFCOMP(g_trac_sbeio, "getPmicHealthCheckData: SBE indirect data at physical address 0x%lx "
+                "dataPtr=0x%X SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES=%d SBE_TARGET_TYPE_OCMB_CHIP=0x%X l_sbeMemAlloc=0x%X",
+                l_alignedMemHandle.physAddr, l_alignedMemHandle.dataPtr, SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES,
+                SBE_TARGET_TYPE_OCMB_CHIP, l_sbeMemAlloc);
+
+        l_psuCommand.cd7_getPmicHlthCheckData_DataAddr = l_alignedMemHandle.physAddr;
+        l_psuCommand.cd7_getPmicHlthCheckData_MbxReg1_OCMB_TYPE = SBE_TARGET_TYPE_OCMB_CHIP;
+        l_psuCommand.cd7_getPmicHlthCheckData_MbxReg1_InstanceId = l_InstanceId;
+
+        // Create a PSU response message
+        SbePsu::psuResponse l_psuResponse;
+
+        bool command_unsupported = false;
+
+        // Make the call to perform the PSU Chip Operation
+        l_err = SbePsu::getTheInstance().performPsuChipOp(
+                i_proc,
+                &l_psuCommand,
+                &l_psuResponse,
+                SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
+                SbePsu::SBE_HEALTH_CHECK_DATA_REQ_USED_REGS,
+                SbePsu::SBE_HEALTH_CHECK_DATA_RSP_USED_REGS,
+                SbePsu::COMMAND_SUPPORT_OPTIONAL,
+                &command_unsupported);
+
+        if ( command_unsupported )
+        {
+            // Traces have already been logged
+            TRACFCOMP( g_trac_sbeio, ERR_MRK"getPmicHealthCheckData: SBE firmware "
+                    "does not support PSU getPmicHealthCheckData information for "
+                    "PROC HUID=0x%X OCMB HUID=0x%X", get_huid(i_proc), get_huid(i_ocmb));
+            break;
+        }
+
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_sbeio, ERR_MRK"getPmicHealthCheckData: ERROR: "
+                    "Call to performPsuChipOp failed, error returned for PROC HUID=0x%X "
+                    "OCMB HUID=0x%X l_InstanceId=%d",
+                    get_huid(i_proc), get_huid(i_ocmb), l_InstanceId);
+            l_pmic_health_log = false;
+            l_err->collectTrace(SBEIO_COMP_NAME);
+            errlCommit(l_err, SBEIO_COMP_ID);
+
+            // We will log the data later to show an entry for this Target even though we had
+            // a problem getting its Health Check Data so we will show an entry, otherwise it will
+            // be a missing entry and lead to tracking down the why it is missing versus we know
+            // it is missing due to the l_pmic_health_log flag saying we were unable to get any good data, etc.
+        }
+
+        uint8_t l_pmic_revision = 0;
+        uint8_t l_pmic_status = 0;
+
+        TRACFCOMP ( g_trac_sbeio, "getPmicHealthCheckData: l_psuResponse.pmic_health_check_data_size=%d",
+                l_psuResponse.pmic_health_check_data_size);
+
+        if (l_psuResponse.pmic_health_check_data_size > 0)
+        {
+            l_pmic_revision = reinterpret_cast<SbePsu::pmic_health_data_t *>(l_alignedMemHandle.dataPtr)->pmic_revision;
+            l_pmic_status = reinterpret_cast<SbePsu::pmic_health_data_t *>(l_alignedMemHandle.dataPtr)->pmic_status;
+        }
+        else
+        {
+            // We have no data to log, but no explicit ERRORS
+            l_pmic_health_log = false; // we will log PMIC Health Check Data -NOT- available
+        }
+
+        TRACFCOMP( g_trac_sbeio, "getPmicHealthCheckData: l_pmic_revision=0x%X l_pmic_status=0x%X",
+                l_pmic_revision, l_pmic_status);
+
+        // See HWSV hwcoSbeSvc.C
+        if ((l_pmic_status == SbePsu::SBE_N_MODE) || (l_pmic_status == SbePsu::SBE_LOST) ||
+                (l_pmic_status == SbePsu::SBE_GI2C_FAIL) || (l_pmic_status == SbePsu::SBE_DIMM_NOT_4U))
+        {
+            if (l_pmic_status != SbePsu::SBE_DIMM_NOT_4U)
+            {
+                // Produce a visible log in Mfg Mode for failed health check
+                if (TARGETING::areAllSrcsTerminating())
+                {
+                    /*@
+                     * @moduleid         SBEIO_PSU_PMIC_HEALTH_CHECK
+                     * @reasoncode       SBEIO_PMIC_FAILED_HEALTH_CHECK
+                     * @userdata1[00:31] PROC Target HUID
+                     * @userdata1[32:63] OCMB Target HUID
+                     * @userdata2[00:07] l_pmic_revision
+                     * @userdata2[08:15] l_pmic_status
+                     * @userdata2[16:23] l_InstanceId
+                     * @userdata2[24:31] l_pmic_health_log <-- True if we should have non-zero addFFDC data
+                     * @userdata2[32:47] l_psuResponse.primaryStatus
+                     * @userdata2[48:63] l_psuResponse.secondaryStatus
+                     * @devdesc          PMIC Health Check Data Failed in Mfg Mode
+                     * @custdesc         PMIC Health Check Data Failed in Mfg Mode
+                     */
+                    l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                            SBEIO_PSU_PMIC_HEALTH_CHECK,
+                            SBEIO_PMIC_FAILED_HEALTH_CHECK,
+                            TWO_UINT32_TO_UINT64(
+                                get_huid(i_proc),
+                                get_huid(i_ocmb)),
+                            TWO_UINT32_TO_UINT64(
+                                FOUR_UINT8_TO_UINT32(
+                                    l_pmic_revision,
+                                    l_pmic_status,
+                                    l_InstanceId,
+                                    l_pmic_health_log),
+                                TWO_UINT16_TO_UINT32(
+                                    l_psuResponse.primaryStatus,
+                                    l_psuResponse.secondaryStatus)));
+
+                    // If MFG mode add a HW Callout to properly identify the location code,
+                    // but continue to create the Health Check Data entry to show a complete
+                    // set of expected logs for OCMBs as usual, additional data logged may
+                    // aide in root cause problem determination
+                    //
+                    // Identify this OCMB for the MFG check failure
+                    l_err->addHwCallout( i_ocmb,
+                            HWAS::SRCI_PRIORITY_HIGH,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL);
+                    l_err->collectTrace(SBEIO_COMP_NAME);
+                    if (l_psuResponse.pmic_health_check_data_size > 0)
+                    {
+                        l_err->addFFDC( SBEIO_COMP_ID,
+                                l_alignedMemHandle.dataPtr,
+                                l_psuResponse.pmic_health_check_data_size,
+                                1,                           // Version
+                                SBEIO_UDT_NO_FORMAT,         // parser ignores data
+                                false );                     // merge
+                    }
+                    errlCommit(l_err, SBEIO_COMP_ID);
+                }
+            }
+        }
+
+        // Currently primaryStatus and secondaryStatus return zeros
+        // even when Non functional targets are selected, seems like it should return
+        // SBE_PRI_INVALID_DATA (SBE_SEC_OCMB_TARGET_NOT_FUNCTIONAL)
+        //
+        // See sbecmdpmictelemetry.C
+        //
+        // *NOTE* - even if the primaryStatus and secondaryStatus get fixed/changed
+        // this logic will handle both current implementation and any future mods
+        //
+        // Summary - We are logging all the data we can to aide analysis
+        TRACFCOMP( g_trac_sbeio, ERR_MRK"getPmicHealthCheckData: PMIC "
+                "Health Check Data for "
+                "PROC HUID=0x%X OCMB HUID=0x%X "
+                "l_psuResponse.pmic_health_check_data_size=%d "
+                "l_pmic_revision=0x%X l_pmic_status=0x%X "
+                "l_InstanceId=%d l_pmic_health_log=%d "
+                "l_psuResponse.primaryStatus=0x%X "
+                "l_psuResponse.secondaryStatus=0x%X",
+                get_huid(i_proc), get_huid(i_ocmb),
+                l_psuResponse.pmic_health_check_data_size,
+                l_pmic_revision, l_pmic_status,
+                l_InstanceId, l_pmic_health_log,
+                l_psuResponse.primaryStatus,
+                l_psuResponse.secondaryStatus);
+        /*@
+         * @moduleid         SBEIO_PSU_PMIC_HEALTH_CHECK
+         * @reasoncode       SBEIO_PMIC_HEALTH_CHECK_DATA
+         * @userdata1[00:31] PROC Target HUID
+         * @userdata1[32:63] OCMB Target HUID
+         * @userdata2[00:07] l_pmic_revision
+         * @userdata2[08:15] l_pmic_status
+         * @userdata2[16:23] l_InstanceId
+         * @userdata2[24:31] l_pmic_health_log <-- True if we should have non-zero addFFDC data
+         * @userdata2[32:47] l_psuResponse.primaryStatus
+         * @userdata2[48:63] l_psuResponse.secondaryStatus
+         * @devdesc          PMIC Health Check Data
+         * @custdesc         PMIC Health Check Data
+         */
+        l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                SBEIO_PSU_PMIC_HEALTH_CHECK,
+                SBEIO_PMIC_HEALTH_CHECK_DATA,
+                TWO_UINT32_TO_UINT64(
+                    get_huid(i_proc),
+                    get_huid(i_ocmb)),
+                TWO_UINT32_TO_UINT64(
+                    FOUR_UINT8_TO_UINT32(
+                        l_pmic_revision,
+                        l_pmic_status,
+                        l_InstanceId,
+                        l_pmic_health_log),
+                    TWO_UINT16_TO_UINT32(
+                        l_psuResponse.primaryStatus,
+                        l_psuResponse.secondaryStatus)));
+        // Identify this OCMB for the Health Check Data Log
+        l_err->addHwCallout(i_ocmb,
+                            HWAS::SRCI_PRIORITY_LOW,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL);
+
+        if (l_psuResponse.pmic_health_check_data_size > 0)
+        {
+            l_err->addFFDC( SBEIO_COMP_ID,
+                    l_alignedMemHandle.dataPtr,
+                    l_psuResponse.pmic_health_check_data_size,
+                    1,                           // Version
+                    SBEIO_UDT_NO_FORMAT,         // parser ignores data
+                    false );                     // merge
+        }
+
+        l_err->collectTrace(SBEIO_COMP_NAME);
+        l_err->updateActionFlags(ERRORLOG::ERRL_ACTIONS_CALL_HOME);
+        if (i_plid != 0)
+        {
+            l_err->plid(i_plid);
+        }
+        errlCommit(l_err, SBEIO_COMP_ID);
+
+    } while (0);
+    // Free the buffer
+    sbeFree(l_alignedMemHandle);
+
+    TRACFCOMP(g_trac_sbeio, EXIT_MRK "getPmicHealthCheckData");
+
+    return l_err;
+}; // getPmicHealthCheckData
+
+void get4uDdimmPmicHealthCheckData(Target * i_ocmb, const uint32_t i_plid)
+{
+    uint8_t ddimmHeight = SPD::DDIMM_MOD_HEIGHT_INVALID;
+    do {
+        errlHndl_t errl = SPD::getDdimmModHeight(ddimmHeight, i_ocmb);
+        if (errl)
+        {
+            // This function is collecting additional "nice to have" data.
+            // Since we couldn't get ddimm height, just leave.
+            TRACFCOMP(g_trac_sbeio, ERR_MRK"get4uDdimmPmicHealthCheckData: "
+                      "Failed to get DDIMM Module Height using OCMB[0x%X]. Deleting error and leaving.",
+                      get_huid(i_ocmb));
+            delete errl;
+            errl = nullptr;
+            break;
+        }
+
+        if (ddimmHeight == SPD::DDIMM_MOD_HEIGHT_4U)
+        {
+            TargetHandleList parentProc;
+            getParentAffinityTargetsByState(parentProc,
+                                            i_ocmb,
+                                            CLASS_NA,
+                                            TYPE_PROC,
+                                            UTIL_FILTER_ALL);
+            if (parentProc.size())
+            {
+                Target * l_proc = parentProc[0];
+                errl = getPmicHealthCheckData(l_proc, i_ocmb, i_plid);
+                if (errl)
+                {
+                    // This function is collecting additional "nice to have" data.
+                    // If it fails to do so then delete and move on.
+                    TRACFCOMP(g_trac_sbeio, ERR_MRK"get4uDdimmPmicHealthCheckData: "
+                              "Failed to get PMIC health check data for OCMB[0x%X]. Deleting error and leaving.",
+                              get_huid(i_ocmb));
+                    delete errl;
+                    errl = nullptr;
+                    break;
+                }
+            }
+        }
+    } while(0);
+}
+
+ /** @brief Get PMIC Health Check Data from the SBE
+ *
+ *  @return nullptr if no error else an error log
+ */
+errlHndl_t getAllPmicHealthCheckData()
+{
+    errlHndl_t l_err(nullptr);
+
+    TRACFCOMP(g_trac_sbeio, ENTER_MRK"getAllPmicHealthCheckData");
 
     do
     {
@@ -96,242 +385,19 @@ errlHndl_t getPmicHlthCheckData()
                                             CLASS_NA,
                                             TYPE_OCMB_CHIP,
                                             UTIL_FILTER_FUNCTIONAL);
-            TRACFCOMP( g_trac_sbeio, "getPmicHlthCheckData PROC HUID=0x%X OCMB_CHIP targets found=%d",
+            TRACFCOMP( g_trac_sbeio, "getAllPmicHealthCheckData PROC HUID=0x%X OCMB_CHIP targets found=%d",
                 get_huid(l_pProc), l_TargetList.size());
             for (const auto & l_Target: l_TargetList)
             {
-                l_pmic_health_log = true; // loop each time to maybe get something
-                const ATTR_FAPI_POS_type l_fapiPos = l_Target->getAttr<ATTR_FAPI_POS>();
-                uint8_t l_InstanceId = l_fapiPos % SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER;
-                TRACFCOMP( g_trac_sbeio, "getPmicHlthCheckData PROC HUID=0x%X OCMB HUID=0x%X l_InstanceId=%d",
-                    get_huid(l_pProc), get_huid(l_Target), l_InstanceId);
-                // Create a PSU command message and initialize it with Health Check specific flags
-                SbePsu::psuCommand l_psuCommand(
-                    SbePsu::SBE_REQUIRE_RESPONSE,                 // control flag
-                    SbePsu::SBE_PSU_GENERIC_MESSAGE,              // command class
-                    SbePsu::SBE_CMD_PMIC_HEALTH_CHECK_DATA);      // command (0x0C)
-                memset(l_alignedMemHandle.dataPtr, 0, l_pmicHlthCheckDataSize);
-
-                // SBE consumes a physical address
-                // Assume the virtual pages returned by malloc() are backed by contiguous physical pages
-
-                TRACFCOMP(g_trac_sbeio, "getPmicHlthCheckData: SBE indirect data at physical address 0x%lx "
-                    "dataPtr=0x%X SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES=%d SBE_TARGET_TYPE_OCMB_CHIP=0x%X l_sbeMemAlloc=0x%X",
-                    l_alignedMemHandle.physAddr, l_alignedMemHandle.dataPtr, SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES,
-                    SBE_TARGET_TYPE_OCMB_CHIP, l_sbeMemAlloc);
-
-                l_psuCommand.cd7_getPmicHlthCheckData_DataAddr = l_alignedMemHandle.physAddr;
-                l_psuCommand.cd7_getPmicHlthCheckData_MbxReg1_OCMB_TYPE = SBE_TARGET_TYPE_OCMB_CHIP;
-                l_psuCommand.cd7_getPmicHlthCheckData_MbxReg1_InstanceId = l_InstanceId;
-
-                // Create a PSU response message
-                SbePsu::psuResponse l_psuResponse;
-
-                bool command_unsupported = false;
-
-                // Make the call to perform the PSU Chip Operation
-                l_err = SbePsu::getTheInstance().performPsuChipOp(
-                            l_pProc,
-                            &l_psuCommand,
-                            &l_psuResponse,
-                            SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
-                            SbePsu::SBE_HEALTH_CHECK_DATA_REQ_USED_REGS,
-                            SbePsu::SBE_HEALTH_CHECK_DATA_RSP_USED_REGS,
-                            SbePsu::COMMAND_SUPPORT_OPTIONAL,
-                            &command_unsupported);
-
-                if ( command_unsupported )
-                {
-                    // Traces have already been logged
-                    TRACFCOMP( g_trac_sbeio, ERR_MRK"getPmicHlthCheckData: SBE firmware "
-                               "does not support PSU getPmicHlthCheckData information for "
-                               "PROC HUID=0x%X OCMB HUID=0x%X", get_huid(l_pProc), get_huid(l_Target));
-                    break;
-                }
-
-                if (l_err)
-                {
-                    TRACFCOMP( g_trac_sbeio, ERR_MRK"getPmicHlthCheckData: ERROR: "
-                               "Call to performPsuChipOp failed, error returned for PROC HUID=0x%X "
-                               "OCMB HUID=0x%X l_InstanceId=%d",
-                               get_huid(l_pProc), get_huid(l_Target), l_InstanceId);
-                    l_pmic_health_log = false;
-                    l_err->collectTrace(SBEIO_COMP_NAME);
-                    errlCommit(l_err, SBEIO_COMP_ID);
-
-                    // We will log the data later to show an entry for this Target even though we had
-                    // a problem getting its Health Check Data so we will show an entry, otherwise it will
-                    // be a missing entry and lead to tracking down the why it is missing versus we know
-                    // it is missing due to the l_pmic_health_log flag saying we were unable to get any good data, etc.
-                }
-
-                uint8_t l_pmic_revision = 0;
-                uint8_t l_pmic_status = 0;
-
-                TRACFCOMP ( g_trac_sbeio, "getPmicHlthCheckData: l_psuResponse.pmic_health_check_data_size=%d",
-                    l_psuResponse.pmic_health_check_data_size);
-
-                if (l_psuResponse.pmic_health_check_data_size > 0)
-                {
-                    l_pmic_revision = reinterpret_cast<SbePsu::pmic_health_data_t *>(l_alignedMemHandle.dataPtr)->pmic_revision;
-                    l_pmic_status = reinterpret_cast<SbePsu::pmic_health_data_t *>(l_alignedMemHandle.dataPtr)->pmic_status;
-                }
-                else
-                {
-                    // We have no data to log, but no explicit ERRORS
-                    l_pmic_health_log = false; // we will log PMIC Health Check Data -NOT- available
-                }
-
-                TRACFCOMP( g_trac_sbeio, "getPmicHlthCheckData: l_pmic_revision=0x%X l_pmic_status=0x%X",
-                    l_pmic_revision, l_pmic_status);
-
-                // See HWSV hwcoSbeSvc.C
-                if ((l_pmic_status == SbePsu::SBE_N_MODE) || (l_pmic_status == SbePsu::SBE_LOST) ||
-                   (l_pmic_status == SbePsu::SBE_GI2C_FAIL) || (l_pmic_status == SbePsu::SBE_DIMM_NOT_4U))
-                {
-                    if (l_pmic_status != SbePsu::SBE_DIMM_NOT_4U)
-                    {
-                        // Produce a visible log in Mfg Mode for failed health check
-                        if (TARGETING::areAllSrcsTerminating())
-                        {
-                            /*@
-                             * @moduleid         SBEIO_PSU_PMIC_HEALTH_CHECK
-                             * @reasoncode       SBEIO_PMIC_FAILED_HEALTH_CHECK
-                             * @userdata1[00:31] PROC Target HUID
-                             * @userdata1[32:63] OCMB Target HUID
-                             * @userdata2[00:07] l_pmic_revision
-                             * @userdata2[08:15] l_pmic_status
-                             * @userdata2[16:23] l_InstanceId
-                             * @userdata2[24:31] l_pmic_health_log <-- True if we should have non-zero addFFDC data
-                             * @userdata2[32:47] l_psuResponse.primaryStatus
-                             * @userdata2[48:63] l_psuResponse.secondaryStatus
-                             * @devdesc          PMIC Health Check Data Failed in Mfg Mode
-                             * @custdesc         PMIC Health Check Data Failed in Mfg Mode
-                             */
-                            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                                             SBEIO_PSU_PMIC_HEALTH_CHECK,
-                                                             SBEIO_PMIC_FAILED_HEALTH_CHECK,
-                                                             TWO_UINT32_TO_UINT64(
-                                                                         get_huid(l_pProc),
-                                                                         get_huid(l_Target)),
-                                                             TWO_UINT32_TO_UINT64(
-                                                                         FOUR_UINT8_TO_UINT32(
-                                                                             l_pmic_revision,
-                                                                             l_pmic_status,
-                                                                             l_InstanceId,
-                                                                             l_pmic_health_log),
-                                                                         TWO_UINT16_TO_UINT32(
-                                                                             l_psuResponse.primaryStatus,
-                                                                             l_psuResponse.secondaryStatus)));
-
-                            // If MFG mode add a HW Callout to properly identify the location code,
-                            // but continue to create the Health Check Data entry to show a complete
-                            // set of expected logs for OCMBs as usual, additional data logged may
-                            // aide in root cause problem determination
-                            //
-                            // Identify this OCMB for the MFG check failure
-                            l_err->addHwCallout( l_Target,
-                                                 HWAS::SRCI_PRIORITY_HIGH,
-                                                 HWAS::NO_DECONFIG,
-                                                 HWAS::GARD_NULL);
-                            l_err->collectTrace(SBEIO_COMP_NAME);
-                            if (l_psuResponse.pmic_health_check_data_size > 0)
-                            {
-                                l_err->addFFDC( SBEIO_COMP_ID,
-                                            l_alignedMemHandle.dataPtr,
-                                            l_psuResponse.pmic_health_check_data_size,
-                                            1,                           // Version
-                                            SBEIO_UDT_NO_FORMAT,         // parser ignores data
-                                            false );                     // merge
-                            }
-                            errlCommit(l_err, SBEIO_COMP_ID);
-                        }
-                    }
-                }
-
-                // Currently primaryStatus and secondaryStatus return zeros
-                // even when Non functional targets are selected, seems like it should return
-                // SBE_PRI_INVALID_DATA (SBE_SEC_OCMB_TARGET_NOT_FUNCTIONAL)
-                //
-                // See sbecmdpmictelemetry.C
-                //
-                // *NOTE* - even if the primaryStatus and secondaryStatus get fixed/changed
-                // this logic will handle both current implementation and any future mods
-                //
-                // Summary - We are logging all the data we can to aide analysis
-                TRACFCOMP( g_trac_sbeio, ERR_MRK"getPmicHlthCheckData: PMIC "
-                           "Health Check Data for "
-                           "PROC HUID=0x%X OCMB HUID=0x%X "
-                           "l_psuResponse.pmic_health_check_data_size=%d "
-                           "l_pmic_revision=0x%X l_pmic_status=0x%X "
-                           "l_InstanceId=%d l_pmic_health_log=%d "
-                           "l_psuResponse.primaryStatus=0x%X "
-                           "l_psuResponse.secondaryStatus=0x%X",
-                            get_huid(l_pProc), get_huid(l_Target),
-                            l_psuResponse.pmic_health_check_data_size,
-                            l_pmic_revision, l_pmic_status,
-                            l_InstanceId, l_pmic_health_log,
-                            l_psuResponse.primaryStatus,
-                            l_psuResponse.secondaryStatus);
-                /*@
-                 * @moduleid         SBEIO_PSU_PMIC_HEALTH_CHECK
-                 * @reasoncode       SBEIO_PMIC_HEALTH_CHECK_DATA
-                 * @userdata1[00:31] PROC Target HUID
-                 * @userdata1[32:63] OCMB Target HUID
-                 * @userdata2[00:07] l_pmic_revision
-                 * @userdata2[08:15] l_pmic_status
-                 * @userdata2[16:23] l_InstanceId
-                 * @userdata2[24:31] l_pmic_health_log <-- True if we should have non-zero addFFDC data
-                 * @userdata2[32:47] l_psuResponse.primaryStatus
-                 * @userdata2[48:63] l_psuResponse.secondaryStatus
-                 * @devdesc          PMIC Health Check Data
-                 * @custdesc         PMIC Health Check Data
-                 */
-                l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                                 SBEIO_PSU_PMIC_HEALTH_CHECK,
-                                                 SBEIO_PMIC_HEALTH_CHECK_DATA,
-                                                 TWO_UINT32_TO_UINT64(
-                                                             get_huid(l_pProc),
-                                                             get_huid(l_Target)),
-                                                 TWO_UINT32_TO_UINT64(
-                                                             FOUR_UINT8_TO_UINT32(
-                                                                 l_pmic_revision,
-                                                                 l_pmic_status,
-                                                                 l_InstanceId,
-                                                                 l_pmic_health_log),
-                                                             TWO_UINT16_TO_UINT32(
-                                                                 l_psuResponse.primaryStatus,
-                                                                 l_psuResponse.secondaryStatus)));
-                // Identify this OCMB for the Health Check Data Log
-                l_err->addHwCallout( l_Target,
-                                     HWAS::SRCI_PRIORITY_LOW,
-                                     HWAS::NO_DECONFIG,
-                                     HWAS::GARD_NULL);
-
-                if (l_psuResponse.pmic_health_check_data_size > 0)
-                {
-                    l_err->addFFDC( SBEIO_COMP_ID,
-                                l_alignedMemHandle.dataPtr,
-                                l_psuResponse.pmic_health_check_data_size,
-                                1,                           // Version
-                                SBEIO_UDT_NO_FORMAT,         // parser ignores data
-                                false );                     // merge
-                }
-
-                l_err->collectTrace(SBEIO_COMP_NAME);
-                l_err->updateActionFlags(ERRORLOG::ERRL_ACTIONS_CALL_HOME);
-                errlCommit(l_err, SBEIO_COMP_ID);
-
+                getPmicHealthCheckData(l_pProc, l_Target);
             } // end for l_Target
         } // end for l_pProc
     } while (0);
-    // Free the buffer
-    sbeFree(l_alignedMemHandle);
 
-    TRACFCOMP(g_trac_sbeio, EXIT_MRK "getPmicHlthCheckData");
+    TRACFCOMP(g_trac_sbeio, EXIT_MRK "getAllPmicHealthCheckData");
 
     return l_err;
-}; // getPmicHlthCheckData
+}; // getAllPmicHealthCheckData
 
 
  /** @brief Populate the PSU Command with Memory target configuration info
