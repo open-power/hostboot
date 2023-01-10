@@ -48,6 +48,7 @@
     <ffdc>NUMACTIVEDBYTEDFI0</ffdc>
     <ffdc>NUMACTIVEDBYTEDFI1</ffdc>
     <ffdc>NUMDBYTE</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>

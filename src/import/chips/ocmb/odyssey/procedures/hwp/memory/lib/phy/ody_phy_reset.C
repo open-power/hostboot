@@ -36,6 +36,7 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/pos.H>
 #include <ody_phy_reset.H>
 #include <lib/shared/ody_consts.H>
 namespace mss
