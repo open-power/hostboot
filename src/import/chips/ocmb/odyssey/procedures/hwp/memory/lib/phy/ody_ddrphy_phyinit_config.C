@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -378,6 +378,8 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_userCustom_io_write16(const fapi2::Target<f
     fapi2::buffer<uint64_t> l_data(i_data);
     const uint64_t IBM_ADDR = mss::ody::phy::convert_synopsys_to_ibm_reg_addr(i_addr);
 
+    // SBE does not support or recognize FAPI_LAB, so do not do the prints below
+#ifndef __PPE__
     // Prints out the Synopsys style for the register accesses
     // Note: this is added to facilitate with simulation and debugging
     // Need to split trace to limit variables per trace message to <= 4
@@ -386,6 +388,7 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_userCustom_io_write16(const fapi2::Target<f
              UINT64_VALUE(IBM_ADDR));
     FAPI_LAB("                                  // " TARGTIDFORMAT " IBM data:" UINT64FORMAT, TARGTID,
              UINT64_VALUE(uint64_t(l_data)));
+#endif
 
     return fapi2::putScom(i_target, IBM_ADDR, l_data);
 }
