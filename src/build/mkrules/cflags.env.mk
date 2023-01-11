@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2021
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -48,7 +48,7 @@ CFLAGS += $(COMMONFLAGS) -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\
 	  -ffunction-sections -fdata-sections -ffreestanding -mbig-endian
 ASMFLAGS += $(COMMONFLAGS) -mcpu=power7 -mbig-endian -ffreestanding -mabi=elfv1
 CXXFLAGS += $(CFLAGS) -nostdinc++ -fno-rtti -fno-exceptions -Werror -Wall \
-	    -fuse-cxa-atexit -std=gnu++14
+	    -fuse-cxa-atexit -std=gnu++17 -Wno-register
 LDFLAGS += --nostdlib --sort-common -EB $(COMMONFLAGS)
 
 INCFLAGS = $(addprefix -I, $(INCDIR) )

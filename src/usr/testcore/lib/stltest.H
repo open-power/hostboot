@@ -34,6 +34,8 @@
 #include <iterator>
 #include <functional>
 #include <sys/task.h>
+#include <tuple>
+#include <string.h>
 
 class STLTest : public CxxTest::TestSuite
 {
@@ -684,6 +686,100 @@ class STLTest : public CxxTest::TestSuite
                     TS_FAIL("Vector iterator value mismatch %d:%d.", *itr, i);
                 }
             }
+        }
+
+        void testTuple()
+        {
+            TS_INFO(ENTER_MRK"testTuple");
+
+            std::tuple<int, const char*> tup(3, "hi");
+
+            static_assert(std::is_same<decltype(std::get<0>(tup)), int&>::value);
+            static_assert(std::is_same<decltype(std::get<1>(tup)), const char*&>::value);
+
+            const std::tuple<int, const char*> ctup(3, "hi");
+
+            static_assert(std::is_same<decltype(std::get<0>(ctup)), const int&>::value);
+            static_assert(std::is_same<decltype(std::get<1>(ctup)), const char* const&>::value);
+
+            auto [ v1, v2 ] = tup;
+
+            if (std::get<0>(tup) != 3 || v1 != 3)
+            {
+                TS_FAIL("std::get<0> failed");
+            }
+
+            if (strcmp(std::get<1>(tup), "hi") || strcmp(v2, "hi"))
+            {
+                TS_FAIL("std::get<1> failed");
+            }
+
+            int a[] = { 1, 2 };
+            int b[] = { 4, 5, 6 };
+
+            int count = 0;
+            for (auto [ x, y ] : hbstd::zip(a, b))
+            {
+                x = 0;
+                y = 1;
+                count++;
+            }
+
+            if (count != std::size(a))
+            {
+                TS_FAIL("hbstd::zip iterated too many elements");
+            }
+
+            if (a[0] != 0 || a[1] != 0 || b[0] != 1 || b[1] != 1 || b[2] != 6)
+            {
+                TS_FAIL("hbstd::zip iteration is wrong");
+            }
+
+            count = 0;
+            for (auto [ a, b ] : hbstd::czip(a, b)) // just make sure this compiles
+            {
+                (void)a; (void)b;
+                count++;
+            }
+
+            // Test multiple elements, and const containers
+            const int e1[] = { 1, 2, 3 };
+            const int e2[] = { 4, 5, 6 };
+            const int e3[] = { 7, 8, 9 };
+            const int e4[] = { 10, 11, 12 };
+
+            count = 0;
+            for (auto [ a, b, c, d, e, f ] : hbstd::czip(e1, e2, e3, e4, e4, e1))
+            {
+                if (a != f || d != e || b == c || d == b)
+                {
+                    TS_FAIL("testTuple: fail in multi-variable iteration on pass %d: "
+                            "a: %d; b: %d, c: %d, d: %d, e: %d, f: %d",
+                            count, a, b, c, d, e, f);
+                }
+                count++;
+            }
+
+            std::tuple<int, char> c1(1, 'h'), c2(2, 'i');
+
+            c1.swap(c2);
+
+            if (std::get<0>(c1) != 2 || std::get<1>(c1) != 'i'
+                || std::get<0>(c2) != 1 || std::get<1>(c2) != 'h')
+            {
+                TS_FAIL("testTuple: swap failed");
+            }
+
+            int f1 = 1, f2 = 2;
+
+            std::tie(f1, f2) = std::make_tuple(10, 20);
+
+            if (f1 != 10 || f2 != 20)
+            {
+                TS_FAIL("testTuple: std::tie failed");
+            }
+
+            TS_INFO(EXIT_MRK"testTuple");
         }
 
         void testDistance()

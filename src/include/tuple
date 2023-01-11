@@ -1,0 +1,377 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/include/tuple $                                           */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+#ifndef TUPLE_H
+#define TUPLE_H
+
+/* @brief Implementation of the std::tuple class.
+ *        See https://en.cppreference.com/w/cpp/utility/tuple for documentation.
+ */
+
+#include <utility>
+#include <algorithm>
+
+namespace std
+{
+
+template<typename... Types>
+struct tuple;
+
+template<>
+struct tuple<>
+{
+
+};
+
+namespace detail
+{
+
+// @brief Swap the given parameters using ADL to find the appropriate
+// "swap" function.
+template<typename T1, typename T2>
+void do_swap_adl(T1& t1, T2& t2)
+{
+    swap(t1, t2);
+}
+
+}
+
+template<typename T>
+struct tuple<T>
+{
+    constexpr tuple() = default;
+    constexpr tuple(tuple&) = default;
+    constexpr tuple(const tuple&) = default;
+    constexpr tuple(tuple&&) = default;
+
+    constexpr tuple(T&& v) : value(forward<T>(v)), rest() { }
+    constexpr tuple(T&& v, tuple<>) : value(forward<T>(v)), rest() { }
+
+    constexpr void swap(tuple& other)
+    {
+        detail::do_swap_adl(value, other.value);
+    }
+
+    template<typename Arg, typename... Args>
+    constexpr void operator=(const tuple<Arg, Args...>& rhs)
+    {
+        value = rhs.value;
+    }
+
+    template<typename Arg, typename... Args>
+    constexpr void operator=(tuple<Arg, Args...>&& rhs)
+    {
+        value = move(rhs.value);
+    }
+
+    T value;
+    tuple<> rest;
+};
+
+template<typename T, typename... Types>
+struct tuple<T, Types...>
+{
+    constexpr tuple() = default;
+    constexpr tuple(tuple&) = default;
+    constexpr tuple(const tuple&) = default;
+    constexpr tuple(tuple&&) = default;
+
+    template<typename Arg, typename... Args>
+    constexpr tuple(Arg&& arg, Args&&... args)
+        : value(std::forward<Arg>(arg)), rest(std::forward<Args>(args)...)
+    { }
+
+    template<typename Arg, typename... Args>
+    constexpr void operator=(const tuple<Arg, Args...>& rhs)
+    {
+        value = rhs.value;
+        rest = rhs.rest;
+    }
+
+    template<typename Arg, typename... Args>
+    constexpr void operator=(tuple<Arg, Args...>&& rhs)
+    {
+        value = move(rhs.value);
+        rest = move(rhs.rest);
+    }
+
+    constexpr void swap(tuple& other)
+    {
+
+        detail::do_swap_adl(value, other.value);
+        rest.swap(other.rest);
+    }
+
+    T value;
+    tuple<Types...> rest;
+};
+
+template<typename... Args>
+struct tuple_size;
+
+template<typename... Args>
+struct tuple_size<tuple<Args...>>
+{
+    static constexpr size_t value = sizeof...(Args);
+};
+
+template<typename... Args>
+struct tuple_size<const tuple<Args...>>
+{
+    static constexpr size_t value = sizeof...(Args);
+};
+
+template<size_t I, typename... Args>
+struct tuple_element;
+
+template<typename T, typename... Args>
+struct tuple_element<0, tuple<T, Args...>>
+{
+    using type = T;
+};
+
+template<size_t I, typename T, typename... Args>
+struct tuple_element<I, tuple<T, Args...>>
+{
+    using type = typename tuple_element<I-1, tuple<Args...>>::type;
+};
+
+template<size_t I, typename... Args>
+struct tuple_element<I, const tuple<Args...>>
+{
+    using type = typename tuple_element<I, tuple<Args...>>::type;
+};
+
+namespace detail
+{
+
+/* @brief Helper class, allows partial specialization on the tuple
+ * element index for getting tuple members.
+ */
+template<size_t I>
+struct get_helper
+{
+    template<typename... Types>
+    static constexpr typename tuple_element<I, tuple<Types...>>::type&
+    get(tuple<Types...>& tup)
+    {
+        return get_helper<I-1>::get(tup.rest);
+    }
+
+    template<typename... Types>
+    static constexpr typename tuple_element<I, tuple<Types...>>::type const&
+    get(const tuple<Types...>& tup)
+    {
+        return get_helper<I-1>::get(tup.rest);
+    }
+};
+
+template<>
+template<typename... Types>
+constexpr typename tuple_element<0, tuple<Types...>>::type&
+get_helper<0>::get(tuple<Types...>& tup)
+{
+    return tup.value;
+}
+
+template<>
+template<typename... Types>
+constexpr typename tuple_element<0, tuple<Types...>>::type const&
+get_helper<0>::get(const tuple<Types...>& tup)
+{
+    return tup.value;
+}
+
+}
+
+template<size_t I, typename... Args>
+constexpr typename tuple_element<I, tuple<Args...>>::type&
+get(tuple<Args...>& tup)
+{
+    return detail::get_helper<I>::get(tup);
+}
+
+template<size_t I, typename... Args>
+constexpr typename tuple_element<I, tuple<Args...>>::type&
+get(tuple<Args...>&& tup)
+{
+    return detail::get_helper<I>::get(tup);
+}
+
+template<size_t I, typename... Args>
+constexpr typename tuple_element<I, tuple<Args...>>::type const&
+get(const tuple<Args...>& tup)
+{
+    return detail::get_helper<I>::get(tup);
+}
+
+template<typename... Args>
+constexpr tuple<Args...> make_tuple(Args&&... args)
+{
+    return tuple<Args...> { std::forward<Args>(args)... };
+}
+
+template<typename... Args>
+constexpr tuple<Args&...> tie(Args&... args)
+{
+    return tuple<Args&...> { args... };
+}
+
+namespace detail
+{
+
+/* @brief Class that can be constructed and assigned to, and just
+ * ignores assignments. Used to implement std::ignore.
+ */
+struct ignore_t
+{
+    template<typename T>
+    constexpr void operator=(T&&) const
+    { }
+};
+
+}
+
+constexpr detail::ignore_t ignore;
+
+template<typename... Types>
+constexpr tuple<Types&&...> forward_as_tuple(Types&&... args)
+{
+    return tuple<Types&&...> { args... };
+}
+
+template<typename... ATypes, typename... BTypes>
+constexpr bool operator==(const tuple<ATypes...>& lhs, const tuple<BTypes...>& rhs)
+{
+    return (lhs.value == rhs.value) && (lhs.rest == rhs.rest);
+}
+
+constexpr bool operator==(const tuple<>& lhs, const tuple<>& rhs)
+{
+    return true;
+}
+
+template<typename... ATypes, typename... BTypes>
+constexpr bool operator!=(const tuple<ATypes...>& lhs, const tuple<BTypes...>& rhs)
+{
+    return (lhs.value != rhs.value) || (lhs.rest != rhs.rest);
+}
+
+constexpr bool operator!=(const tuple<>& lhs, const tuple<>& rhs)
+{
+    return false;
+}
+
+template<typename... ATypes, typename... BTypes>
+constexpr bool operator<(const tuple<ATypes...>& lhs, const tuple<BTypes...>& rhs)
+{
+    return (lhs.value < rhs.value) || ((lhs.value == rhs.value) && (lhs.rest < rhs.rest));
+}
+
+constexpr bool operator<(const tuple<>& lhs, const tuple<>& rhs)
+{
+    return false;
+}
+
+template<typename... ATypes, typename... BTypes>
+constexpr bool operator>(const tuple<ATypes...>& lhs, const tuple<BTypes...>& rhs)
+{
+    return (lhs.value > rhs.value) || ((lhs.value == rhs.value) && (lhs.rest > rhs.rest));
+}
+
+constexpr bool operator>(const tuple<>& lhs, const tuple<>& rhs)
+{
+    return false;
+}
+
+template<typename... ATypes, typename... BTypes>
+constexpr bool operator<=(const tuple<ATypes...>& lhs, const tuple<BTypes...>& rhs)
+{
+    return (lhs.value < rhs.value) || ((lhs.value == rhs.value) && (lhs.rest <= rhs.rest));
+}
+
+constexpr bool operator<=(const tuple<>& lhs, const tuple<>& rhs)
+{
+    return true;
+}
+
+template<typename... ATypes, typename... BTypes>
+constexpr bool operator>=(const tuple<ATypes...>& lhs, const tuple<BTypes...>& rhs)
+{
+    return (lhs.value > rhs.value) || ((lhs.value == rhs.value) && (lhs.rest >= rhs.rest));
+}
+
+constexpr bool operator>=(const tuple<>& lhs, const tuple<>& rhs)
+{
+    return true;
+}
+
+template<typename... ATypes, typename... BTypes>
+constexpr void swap(tuple<ATypes...>& lhs, tuple<ATypes...>& rhs)
+{
+    lhs.swap(rhs);
+}
+
+}
+
+namespace hbstd
+{
+
+/* @brief Transform the elements of a tuple in-place according to a
+ * given function.
+ */
+template<typename F>
+constexpr void tuple_transform(std::tuple<>& t, F&& function)
+{
+}
+
+template<typename F, typename... Types>
+constexpr void tuple_transform(std::tuple<Types...>& t, F&& function)
+{
+    function(t.value);
+    tuple_transform(t.rest, std::forward<F>(function));
+}
+
+/* @brief Create a new tuple with the elements of the given tuple
+ * transformed by the given function.
+ */
+template<typename F>
+constexpr std::tuple<> tuple_map(std::tuple<>& t, F&& function)
+{
+    return { };
+}
+
+template<typename F, typename... Types>
+constexpr auto tuple_map(std::tuple<Types...>& t, F&& function)
+{
+    return std::tuple<decltype(function(std::declval<Types&>()))...>(
+        function(t.value),
+        tuple_map(t.rest, std::forward<F>(function))
+    );
+}
+
+}
+
+#endif

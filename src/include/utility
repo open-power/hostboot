@@ -34,24 +34,24 @@ namespace std
      * See the C++ spec
      */
     template <typename T1, typename T2>
-        struct pair
-        {
-            typedef T1 first_type;
-            typedef T2 second_type;
+    struct pair
+    {
+        typedef T1 first_type;
+        typedef T2 second_type;
 
-            T1 first;
-            T2 second;
-            constexpr pair() : first(), second() {}
-            constexpr pair(const T1 & x, const T2 & y) : first(x), second(y) {}
+        T1 first;
+        T2 second;
+        constexpr pair() : first(), second() {}
+        constexpr pair(const T1 & x, const T2 & y) : first(x), second(y) {}
 
-            template <typename U, typename V>
-                pair (const pair<U,V> & p) : first(p.first), second(p.second) {}
+        template <typename U, typename V>
+        pair (const pair<U,V> & p) : first(p.first), second(p.second) {}
 
-            pair(const pair&) = default;
-            pair(pair&&) = default;
-            pair& operator=(const pair&) = default;
-            pair& operator=(pair&&) = default;
-        };
+        pair(const pair&) = default;
+        pair(pair&&) = default;
+        pair& operator=(const pair&) = default;
+        pair& operator=(pair&&) = default;
+    };
 
 
     /**
@@ -61,10 +61,10 @@ namespace std
      * @return a newly-constructed pair<> object
      */
     template <typename T1, typename T2> __attribute__ ((always_inline))
-        inline pair<T1,T2> make_pair (T1 x, T2 y)
-        {
-            return ( pair<T1,T2>(x,y) );
-        }
+    inline pair<T1,T2> make_pair (T1 x, T2 y)
+    {
+        return ( pair<T1,T2>(x,y) );
+    }
 
     /**
      * pair eq comparison
@@ -73,10 +73,10 @@ namespace std
      * @return true if x is strictly eq y
      */
     template <typename T1, typename T2> __attribute__ ((always_inline))
-        inline bool operator==(const pair<T1, T2>& x, const pair<T1, T2>& y)
-        {
-            return x.first == y.first && x.second == y.second;
-        }
+    inline bool operator==(const pair<T1, T2>& x, const pair<T1, T2>& y)
+    {
+        return x.first == y.first && x.second == y.second;
+    }
 
     /**
      * pair lt comparison
@@ -85,11 +85,11 @@ namespace std
      * @return true if x < y
      */
     template<typename T1, typename T2> __attribute__ ((always_inline))
-        inline bool operator<(const pair<T1, T2>& x, const pair<T1, T2>& y)
-        {
-            return (x.first < y.first) ||
-                (!(y.first < x.first) && x.second < y.second);
-        }
+    inline bool operator<(const pair<T1, T2>& x, const pair<T1, T2>& y)
+    {
+        return (x.first < y.first) ||
+            (!(y.first < x.first) && x.second < y.second);
+    }
 
     /**
      * pair ne comparison
@@ -98,10 +98,10 @@ namespace std
      * @return true if x != y
      */
     template<typename T1, typename T2> __attribute__ ((always_inline))
-        inline bool operator!=(const pair<T1, T2>& x, const pair<T1, T2>& y)
-        {
-            return !(x == y);
-        }
+    inline bool operator!=(const pair<T1, T2>& x, const pair<T1, T2>& y)
+    {
+        return !(x == y);
+    }
 
 
     /**
@@ -111,10 +111,10 @@ namespace std
      * @return true if x > y
      */
     template<typename T1, typename T2> __attribute__ ((always_inline))
-        inline bool operator>(const pair<T1, T2>& x, const pair<T1, T2>& y)
-        {
-            return y < x;
-        }
+    inline bool operator>(const pair<T1, T2>& x, const pair<T1, T2>& y)
+    {
+        return y < x;
+    }
 
     /**
      * pair le comparison
@@ -123,10 +123,10 @@ namespace std
      * @return true if x <= y
      */
     template<typename T1, typename T2> __attribute__ ((always_inline))
-        inline bool operator<=(const pair<T1, T2>& x, const pair<T1, T2>& y)
-        {
-            return !(y < x);
-        }
+    inline bool operator<=(const pair<T1, T2>& x, const pair<T1, T2>& y)
+    {
+        return !(y < x);
+    }
 
     /**
      * pair >= comparison
@@ -135,35 +135,120 @@ namespace std
      * @return true if x >= y
      */
     template<typename T1, typename T2> __attribute__ ((always_inline))
-        inline bool operator>=(const pair<T1, T2>& x, const pair<T1, T2>& y)
-        {
-            return !(x < y);
-        }
+    inline bool operator>=(const pair<T1, T2>& x, const pair<T1, T2>& y)
+    {
+        return !(x < y);
+    }
 
     template<typename T>
-        constexpr typename std::remove_reference<T>::type&& move(T&& t)
-        {
-            return static_cast<typename std::remove_reference<T>::type&&>(t);
-        }
+    constexpr typename std::remove_reference<T>::type&& move(T&& t)
+    {
+        return static_cast<typename std::remove_reference<T>::type&&>(t);
+    }
 
     template<typename T>
-        constexpr T&& forward(typename std::remove_reference<T>::type& t)
-        {
-            return static_cast<T&&>(t);
-        }
+    constexpr T&& forward(typename std::remove_reference<T>::type& t)
+    {
+        return static_cast<T&&>(t);
+    }
 
     template<typename T>
-        constexpr T&& forward(typename std::remove_reference<T>::type&& t)
-        {
-            static_assert(!std::is_lvalue_reference<T>::value,
-                          "Incorrect substitution of lvalue reference.");
-            return static_cast<T&&>(t);
-        }
+    constexpr T&& forward(typename std::remove_reference<T>::type&& t)
+    {
+        static_assert(!std::is_lvalue_reference<T>::value,
+                      "Incorrect substitution of lvalue reference.");
+        return static_cast<T&&>(t);
+    }
 
     template<typename T>
-        typename std::add_rvalue_reference<T>::type declval();
+    typename std::add_rvalue_reference<T>::type declval();
 
-};
+    template<size_t I, typename... Args>
+    struct tuple_element;
+
+    template<typename T1, typename T2>
+    struct tuple_element<0, pair<T1, T2>>
+    {
+        using type = T1;
+    };
+
+    template<typename T1, typename T2>
+    struct tuple_element<1, pair<T1, T2>>
+    {
+        using type = T2;
+    };
+
+    template<size_t I, typename T1, typename T2>
+    struct tuple_element<I, const pair<T1, T2>>
+    {
+        using type = typename tuple_element<I, pair<T1, T2>>::type;
+    };
+
+    namespace detail
+    {
+
+    template<size_t I>
+    struct pair_get_helper;
+
+    template<>
+    struct pair_get_helper<0>
+    {
+        template<typename T1, typename T2>
+        static constexpr typename tuple_element<0, pair<T1, T2>>::type&
+        get(pair<T1, T2>& p)
+        {
+            return p.first;
+        }
+
+        template<typename T1, typename T2>
+        static constexpr typename tuple_element<0, pair<T1, T2>>::type&
+        get(const pair<T1, T2>& p)
+        {
+            return p.first;
+        }
+    };
+
+    template<>
+    struct pair_get_helper<1>
+    {
+        template<typename T1, typename T2>
+        constexpr static typename tuple_element<1, pair<T1, T2>>::type&
+        get(pair<T1, T2>& p)
+        {
+            return p.second;
+        }
+
+        template<typename T1, typename T2>
+        constexpr static typename tuple_element<1, pair<T1, T2>>::type&
+        get(const pair<T1, T2>& p)
+        {
+            return p.second;
+        }
+    };
+
+    }
+
+    template<size_t I, typename... Args>
+    constexpr typename tuple_element<I, pair<Args...>>::type&
+    get(pair<Args...>& tup)
+    {
+        return detail::pair_get_helper<I>::get(tup);
+    }
+
+    template<size_t I, typename... Args>
+    constexpr typename tuple_element<I, pair<Args...>>::type&
+    get(pair<Args...>&& tup)
+    {
+        return detail::pair_get_helper<I>::get(tup);
+    }
+
+    template<size_t I, typename... Args>
+    constexpr typename tuple_element<I, pair<Args...>>::type const&
+    get(const pair<Args...>& tup)
+    {
+        return detail::pair_get_helper<I>::get(tup);
+    }
+}
 
 
 #endif

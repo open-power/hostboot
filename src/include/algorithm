@@ -28,6 +28,8 @@
 #include <iterator>
 #include <util/impl/qsort.H>
 #include <utility>
+#include <tuple>
+#include <limits>
 
 #ifdef __cplusplus
 
@@ -153,9 +155,9 @@ namespace std
         inline void
         swap(T& a, T& b )
     {
-        T tmp(std::move(a));
-        a = std::move(b);
-        b = std::move(tmp);
+        T tmp(move(a));
+        a = move(b);
+        b = move(tmp);
     }
 
     /**
@@ -262,7 +264,7 @@ namespace std
      *         matching element was found.
      */
     template <typename InputIterator, typename EqualityComparable>
-    inline InputIterator
+    inline constexpr InputIterator
     find(InputIterator first, InputIterator last,
          const EqualityComparable& value)
     {
@@ -297,6 +299,36 @@ namespace std
         while(first != last)
         {
             if (pred(*first))
+                return first;
+
+            ++first;
+        }
+
+        return last;
+    }
+
+    /**
+     * Find the location of the first element within a range that does
+     * NOT satisfy the predicate.
+     *
+     * @param[in] first InputIterator to the first position in the range.
+     * @param[in] last  InputIterator to the last position in the range.
+     * @param[in] pred  Predicate used to search.
+     *
+     * Returns the first iterator i in the range [first,last) such that
+     *     pred(*i) is false or else last if no such element is found.
+     *
+     * @return An iterator in the range [first,last].  last implies that no
+     *         element was found for which the predicate returns false.
+     */
+    template <typename InputIterator, typename Predicate>
+    inline InputIterator
+    find_if_not(InputIterator first, InputIterator last,
+                Predicate pred)
+    {
+        while(first != last)
+        {
+            if (!pred(*first))
                 return first;
 
             ++first;
@@ -443,14 +475,14 @@ namespace std
                   const LessThanComparable& value )
     {
         ForwardIterator it;
-        auto range = std::distance<ForwardIterator>( first, last );
+        auto range = distance<ForwardIterator>( first, last );
         auto num = decltype(range)();
 
         while( range > 0 )
         {
             it = first;
             num = range / 2;
-            std::advance( it, num );
+            advance( it, num );
 
             if( (*it) < value )
             {
@@ -485,14 +517,14 @@ namespace std
                   StrictWeakOrdering comp )
     {
         ForwardIterator it;
-        auto range = std::distance<ForwardIterator>( first, last );
+        auto range = distance<ForwardIterator>( first, last );
         auto num = decltype(range)();
 
         while( range > 0 )
         {
             it = first;
             num = range / 2;
-            std::advance( it, num );
+            advance( it, num );
 
             if( comp( (*it), value ) )
             {
@@ -526,14 +558,14 @@ namespace std
     {
         ForwardIterator it;
 
-        auto range = std::distance<ForwardIterator>( first, last );
+        auto range = distance<ForwardIterator>( first, last );
         auto num = decltype(range)();
 
         while( range > 0 )
         {
             it = first;
             num = range / 2;
-            std::advance( it, num );
+            advance( it, num );
 
             if( !(value < *it))
             {
@@ -568,14 +600,14 @@ namespace std
                   StrictWeakOrdering comp )
     {
         ForwardIterator it;
-        auto range = std::distance<ForwardIterator>( first, last );
+        auto range = distance<ForwardIterator>( first, last );
         auto num = decltype(range)();
 
         while( range > 0 )
         {
             it = first;
             num = range / 2;
-            std::advance( it, num );
+            advance( it, num );
 
             if( !comp( (*it), value ) )
             {
@@ -606,7 +638,7 @@ namespace std
     bool binary_search(ForwardIterator first,
                        ForwardIterator last, const T& value)
     {
-        first = std::lower_bound(first, last, value);
+        first = lower_bound(first, last, value);
         return (!(first == last) && !(value < *first));
     }
 
@@ -628,7 +660,7 @@ namespace std
                        const T& value,
                        StrictWeakOrdering comp)
     {
-        first = std::lower_bound(first, last, value);
+        first = lower_bound(first, last, value);
         return (!(first == last) && !(comp(value,*first)));
     }
 
@@ -900,6 +932,28 @@ namespace std
         Util::__Util_QSort_Impl::sort(first, last, pred);
     }
 
+    template<class It, class Pred>
+    It partition(It first, It last, Pred&& pred)
+    {
+        first = find_if_not(first, last, pred);
+
+        if (first == last)
+        {
+            return first;
+        }
+
+        for (It it = first + 1; it != last; ++it)
+        {
+            if (pred(*it))
+            {
+                iter_swap(it, first);
+                ++first;
+            }
+        }
+
+        return first;
+    }
+
     /** Transform one sequence into another.
      *
      *  Executes an operator against all elements in [first, last) and writes
@@ -1087,6 +1141,183 @@ T deduplicate(T i_container)
     sort(begin(i_container), end(i_container));
     i_container.erase(unique(begin(i_container), end(i_container)), end(i_container));
     return move(i_container);
+}
+
+/* @brief Iterator class for the zipped_containers class
+ */
+template<typename ItTup, typename... Types>
+struct zipped_containers_it
+{
+    std::tuple<Types...> operator*()
+    {
+        return tuple_map(its, [](auto& x) -> decltype(*x) { return *x; });
+    }
+
+    void operator++()
+    {
+        tuple_transform(its, [](auto& x) { x++; });
+    }
+
+    void operator++(int)
+    {
+        tuple_transform(its, [](auto& x) { x++; });
+    }
+
+    bool operator!=(zipped_containers_it& rhs) const
+    { return !any_same(its, rhs.its); }
+    bool operator!=(const zipped_containers_it& rhs) const
+    { return !any_same(its, rhs.its); }
+
+    bool operator==(zipped_containers_it& rhs) const
+    { return any_same(its, rhs.its); }
+    bool operator==(const zipped_containers_it& rhs) const
+    { return any_same(its, rhs.its); }
+
+    ItTup its;
+
+private:
+
+    /* @brief Return true if any of the elements in the given tuples
+     * are equal.
+     */
+    static bool any_same(std::tuple<>, std::tuple<>)
+    {
+        return false;
+    }
+
+    template<typename T1, typename T2>
+    static bool any_same(const T1& tup1, const T2& tup2)
+    {
+        return (tup1.value == tup2.value
+                || any_same(tup1.rest, tup2.rest));
+    }
+
+    template<typename T1, typename T2>
+    static bool any_same(T1& tup1, T2& tup2)
+    {
+        return (tup1.value == tup2.value
+                || any_same(tup1.rest, tup2.rest));
+    }
+};
+
+/* @brief Helper class representing a series of n "zipped"
+   containers. Contains n begin and end iterators; the begin() and
+   end() functions allow for iterating all n containers in parallel.
+ */
+template<typename BeginTup, typename EndTup, typename... ValueTypes>
+struct zipped_containers
+{
+    BeginTup beginits;
+    EndTup endits;
+
+    auto begin() const
+    {
+        return zipped_containers_it<BeginTup, ValueTypes...> { beginits };
+    }
+
+    auto end() const
+    {
+        return zipped_containers_it<EndTup, ValueTypes...> { endits };
+    }
+};
+
+/* @brief Zip any number of containers to iterate them in parallel.
+ *
+ * Example:
+ *
+ *   int grades[] = { 97, 95, 99 };
+ *   const char* students[] = { "Alice", "Bob", "Cheryl" };
+ *
+ *   for (auto [ grade, name ] : zip(grades, students))
+ *     printf("Student %s has grade %d\n", grade, name);
+ *
+ * @param[in] conts...  Containers to iterate.
+ * @return auto         A pseudo-container that can be iterated with
+ *                      begin() and end(). The iterators produce a
+ *                      tuple of n elements, each one coming from the
+ *                      corresponding container given to zip(). If the
+ *                      containers are different lengths, the shortest
+ *                      one determines the number of elements in the
+ *                      pseudo-container.
+ */
+template<typename... Conts>
+auto zip(Conts&&... conts)
+{
+    using std::begin;
+    using std::end;
+
+    std::tuple<decltype(begin(conts))...> beginits = { begin(conts)... };
+    std::tuple<decltype(end(conts))...> endits = { end(conts)... };
+
+    return zipped_containers<decltype(beginits), decltype(endits),
+                             decltype(*begin(conts))...>
+        { beginits, endits };
+}
+
+/* @brief Same as zip(), but use constant iterators.
+ */
+template<typename... Conts>
+auto czip(Conts&&... conts)
+{
+    using std::cbegin;
+    using std::cend;
+
+    std::tuple<decltype(cbegin(conts))...> beginits = { cbegin(conts)... };
+    std::tuple<decltype(cend(conts))...> endits = { cend(conts)... };
+
+    return zipped_containers<decltype(beginits), decltype(endits),
+                             decltype(*cbegin(conts))...>
+        { beginits, endits };
+}
+
+/* Iterator class for the numeric_range pseudo-container.
+ */
+template<typename T>
+struct numeric_range_iterator
+{
+    T operator*() const
+    { return value; }
+
+    void operator++()
+    { ++value; }
+
+    void operator++(int)
+    { ++value; }
+
+    bool operator!=(const numeric_range_iterator& rhs) const
+    { return value != rhs.value; }
+
+    bool operator==(const numeric_range_iterator& rhs) const
+    { return value == rhs.value; }
+
+    T value;
+};
+
+/* @brief Pseudo-container class for a half-open range of integers.
+ */
+template<typename T>
+struct numeric_range
+{
+    numeric_range_iterator<T> begin() const
+    {
+        return { start };
+    }
+
+    numeric_range_iterator<T> end() const
+    {
+        return { finish };
+    }
+
+    T start, finish;
+};
+
+/* @brief Create a pseudo-container that contains a range of numbers
+ * in the given half-open range.
+ */
+template<typename T>
+numeric_range<T> irange(T begin = {}, T end = std::numeric_limits<T>::max())
+{
+    return numeric_range<T> { begin, end };
 }
 
 }
