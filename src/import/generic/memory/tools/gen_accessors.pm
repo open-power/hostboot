@@ -335,11 +335,6 @@ sub generate_other_attr_params
     my $target_type     = "";
     my $target_variable = "";
 
-    $g_parameter->{customErrTrace} .= "        FAPI_ERR(\"failed getting $attr->{id}: 0x%lx\",\n";
-    $g_parameter->{customErrTrace} .= "                 uint64_t(fapi2::current_err));\n";
-    $s_parameter->{customErrTrace} .= "        FAPI_ERR(\"failed setting $attr->{id}: 0x%lx\",\n";
-    $s_parameter->{customErrTrace} .= "                 uint64_t(fapi2::current_err));\n";
-
     # See what type of target we have, since we need slightly different code for system targets
     if ( $attr->{targetType} eq "TARGET_TYPE_SYSTEM" )
     {
@@ -848,19 +843,8 @@ sub generate_getters
 
         $getterString .= "        FAPI_TRY( " . $parameter->{fetchString} . " );\n" if $parameter->{fetchString};
         $getterString .= "        " . $parameter->{exeString}                       if $parameter->{exeString};
-        $getterString .= "        return fapi2::current_err;\n";
         $getterString .= "\n";
         $getterString .= "    fapi_try_exit:\n";
-
-        if ( $parameter->{customErrTrace} )
-        {
-            $getterString .= $parameter->{customErrTrace};
-        }
-        else
-        {
-            $getterString .= "        FAPI_ERR(\"failed getting $attr->{id}: 0x%lx (target: \" TARGTIDFORMAT \")\",\n";
-            $getterString .= "                 uint64_t(fapi2::current_err), TARGTID);\n";
-        }
 
         $getterString .= "        return fapi2::current_err;\n";
         $getterString .= "    }\n\n";
@@ -907,19 +891,8 @@ sub generate_setters
         $setterString .= "        FAPI_TRY( " . $parameter->{fetchString} . " );\n" if $parameter->{fetchString};
         $setterString .= "        " . $parameter->{exeString}                       if $parameter->{exeString};
         $setterString .= "        FAPI_TRY( " . $parameter->{storeString} . " );\n" if $parameter->{storeString};
-        $setterString .= "        return fapi2::current_err;\n";
         $setterString .= "\n";
         $setterString .= "    fapi_try_exit:\n";
-
-        if ( $parameter->{customErrTrace} )
-        {
-            $setterString .= $parameter->{customErrTrace};
-        }
-        else
-        {
-            $setterString .= "        FAPI_ERR(\"failed setting $attr->{id}: 0x%lx (target: \" TARGTIDFORMAT \")\",\n";
-            $setterString .= "                 uint64_t(fapi2::current_err), TARGTID);\n";
-        }
 
         $setterString .= "        return fapi2::current_err;\n";
         $setterString .= "    }\n\n";
