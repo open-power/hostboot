@@ -43,7 +43,7 @@
 //------------------------------------------------------------------------------
 // Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode(*ody_omi_hss_bist_poll_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&, fapi2::buffer<uint64_t>);
 
 //------------------------------------------------------------------------------
 // Function prototype
@@ -59,6 +59,7 @@ extern "C" {
 /// @return FAPI_RC_SUCCESS if success, else error code
 ///
     fapi2::ReturnCode ody_omi_hss_bist_poll(
-        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        fapi2::buffer<uint64_t> i_ext_cmd_override);
 
 } //extern "C"

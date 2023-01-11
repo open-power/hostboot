@@ -146,9 +146,14 @@ fapi2::ReturnCode ody_omi_hss_dccal_start(const fapi2::Target<fapi2::TARGET_TYPE
 
     ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
 
-    const fapi2::buffer<uint64_t> l_rx_lanes = 0xFF000000;
-    const fapi2::buffer<uint64_t> l_tx_lanes = 0xFF000000;
+    const uint32_t l_rx_lanes = 0xFF000000;
+    const uint32_t l_tx_lanes = 0xFF000000;
     const fapi2::buffer<uint64_t> l_num_threads = 1;
+
+    //static fapi2::buffer<uint32_t> EXT_CMD = 0x9D80;
+    static fapi2::buffer<uint64_t> l_cmd = ody_io::HW_REG_INIT_PG | ody_io::DCCAL_PL |
+                                           ody_io::TX_ZCAL_PL | ody_io::TX_FFE_PL |
+                                           ody_io::POWER_ON_PL | ody_io::TX_FIFO_INIT_PL;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, l_sys, l_sim));
 
@@ -159,8 +164,8 @@ fapi2::ReturnCode ody_omi_hss_dccal_start(const fapi2::Target<fapi2::TARGET_TYPE
         FAPI_TRY(l_ppe_common.fast_mode(i_target, l_num_threads));
     }
 
-    FAPI_DBG("ody_omi_hss_dccal_start calling l_ppe.init_start");
-    FAPI_TRY(l_ppe_common.init_start(i_target, l_num_threads, l_rx_lanes, l_tx_lanes));
+    FAPI_DBG("ody_omi_hss_dccal_start calling l_ppe.bist_start");
+    FAPI_TRY(l_ppe_common.ext_cmd_start(i_target, l_num_threads, l_rx_lanes, l_tx_lanes, l_cmd));
     FAPI_TRY(l_ppe_regs.flushCache(i_target));
 
 fapi_try_exit:

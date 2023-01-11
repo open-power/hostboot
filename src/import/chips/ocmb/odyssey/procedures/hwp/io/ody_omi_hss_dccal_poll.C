@@ -51,27 +51,19 @@ fapi2::ReturnCode ody_omi_hss_dccal_poll(const fapi2::Target<fapi2::TARGET_TYPE_
 
     ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
 
-    const fapi2::buffer<uint64_t> l_rx_lanes = 0xFF000000;
-    const fapi2::buffer<uint64_t> l_tx_lanes = 0xFF000000;
+    static fapi2::buffer<uint64_t> l_cmd = ody_io::HW_REG_INIT_PG | ody_io::DCCAL_PL |
+                                           ody_io::TX_ZCAL_PL | ody_io::TX_FFE_PL |
+                                           ody_io::POWER_ON_PL | ody_io::TX_FIFO_INIT_PL;
+
     const fapi2::buffer<uint64_t> l_num_threads = 1;
-    fapi2::buffer<uint8_t> l_done = 0;
-    int l_trys = ody_io::IO_PPE_DCCAL_DONE_POLL_TRYS;
+    fapi2::buffer<uint64_t> l_done = 0;
+    fapi2::buffer<uint64_t> l_fail = 0;
 
-    while (!l_done && l_trys > 0)
-    {
-        l_ppe_regs.flushCache(i_target);
-        FAPI_TRY(l_ppe_common.check_init_start_done(i_target, l_num_threads,
-                 l_rx_lanes, l_tx_lanes, l_done));
+    l_ppe_regs.flushCache(i_target);
+    FAPI_TRY(l_ppe_common.ext_cmd_poll(i_target, l_num_threads, l_cmd, l_done, l_fail));
 
-        if (!l_done)
-        {
-            fapi2::delay(ody_io::IO_PPE_DCCAL_DONE_POLL_DELAY_NS, ody_io::IO_PPE_DCCAL_DONE_POLL_DELAY_SIM_CYCLES);
-        }
 
-        l_trys--;
-    }
-
-    FAPI_ASSERT(l_done,
+    FAPI_ASSERT(l_done && !l_fail,
                 fapi2::IO_PPE_DONE_POLL_FAILED()
                 .set_TARGET(i_target),
                 "IO PPE done poll time-out" );

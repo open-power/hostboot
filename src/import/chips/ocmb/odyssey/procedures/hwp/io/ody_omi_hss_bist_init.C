@@ -59,13 +59,13 @@ fapi2::ReturnCode ody_omi_hss_bist_init(const fapi2::Target<fapi2::TARGET_TYPE_O
     uint8_t l_bist_timer = 0;
 
     // Get the necessary attributes
+    FAPI_DBG("Getting attributes");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_LANES, i_target, l_numTxLanes));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LANES, i_target, l_numRxLanes));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_BIST_DAC_TEST, i_target, l_dacTest));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_BIST_ESD_TEST, i_target, l_esdTest));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_BIST_TIMER, i_target, l_bist_timer));
 
-    // call common io bist init
     FAPI_TRY(l_ppe_common.bist_init(i_target, 0, l_bist_timer),
              "Failed to run common HSS BIST init");
     FAPI_TRY(l_ppe_common.bist_init_rx(i_target, c_odyOmiBaseAddr, 0, l_esdTest, l_dacTest, l_numRxLanes),

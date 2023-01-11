@@ -117,8 +117,6 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
     FAPI_TRY(l_dl0_cya.getScom(i_target));
     l_dl0_cya.set_FRBUF_FULL(1);
-    l_dl0_cya.set_MESO_BUFFER_ENABLE(1);
-    l_dl0_cya.set_MESO_BUFFER_DEPTH(1);
     FAPI_TRY(l_dl0_cya.putScom(i_target));
 
 fapi_try_exit:

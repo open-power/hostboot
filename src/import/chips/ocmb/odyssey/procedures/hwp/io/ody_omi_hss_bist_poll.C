@@ -35,15 +35,35 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <ody_omi_hss_bist_poll.H>
+#include <ody_io_ppe_common.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
-fapi2::ReturnCode ody_omi_hss_bist_poll(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+fapi2::ReturnCode ody_omi_hss_bist_poll(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                        fapi2::buffer<uint64_t> i_ext_cmd_override)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("HWP Start: ody_omi_hss_bist_poll");
+
+    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSAR,
+            PHY_PPE_WRAP0_ARB_CSDR,
+            PHY_PPE_WRAP0_XIXCR);
+
+    ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
+
+    const fapi2::buffer<uint64_t> l_num_threads = 1;
+    fapi2::buffer<uint64_t> l_done = 0;
+    fapi2::buffer<uint64_t> l_fail = 0;
+
+    FAPI_TRY(l_ppe_common.bist_poll(i_target, l_num_threads, l_done, l_fail, i_ext_cmd_override));
+
+    FAPI_ASSERT(l_done && !l_fail,
+                fapi2::IO_PPE_DONE_POLL_FAILED()
+                .set_TARGET(i_target),
+                "IO PPE done poll time-out or ext_cmd_fail seen!");
+
 
 fapi_try_exit:
-    FAPI_DBG("End");
+    FAPI_DBG("HWP End: ody_omi_hss_bist_poll");
     return fapi2::current_err;
 }

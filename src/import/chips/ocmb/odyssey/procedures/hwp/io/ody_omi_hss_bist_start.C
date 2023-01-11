@@ -29,21 +29,39 @@
 /// *HWP HW Maintainer : Josh Chica <Josh.Chica@ibm.com>
 /// *HWP FW Maintainer :
 /// *HWP Consumed by: SBE
-///------------------------------------------------------------------------------
+///
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include <ody_omi_hss_bist_start.H>
+#include <ody_io_ppe_common.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
-fapi2::ReturnCode ody_omi_hss_bist_start(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+fapi2::ReturnCode ody_omi_hss_bist_start(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        fapi2::buffer<uint64_t> i_ext_cmd_override)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("HWP Start: ody_omi_hss_bist_start");
+
+    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSAR,
+            PHY_PPE_WRAP0_ARB_CSDR,
+            PHY_PPE_WRAP0_XIXCR);
+
+    ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
+
+    uint32_t l_rx_lanes = 0;
+    uint32_t l_tx_lanes = 0;
+    const fapi2::buffer<uint64_t> l_num_threads = 1;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LANES, i_target, l_rx_lanes));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_LANES, i_target, l_tx_lanes));
+
+    FAPI_TRY(l_ppe_common.bist_start(i_target, l_num_threads, l_rx_lanes, l_tx_lanes, i_ext_cmd_override));
+    FAPI_TRY(l_ppe_regs.flushCache(i_target));
 
 fapi_try_exit:
-    FAPI_DBG("End");
+    FAPI_DBG("HWP End: ody_omi_hss_bist_start");
     return fapi2::current_err;
 }
