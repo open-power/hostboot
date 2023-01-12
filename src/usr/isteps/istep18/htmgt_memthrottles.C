@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,15 +46,24 @@ using namespace TARGETING;
 
 
 /**
+ * Uses system attributes:
+ *   ATTR_REGULATOR_EFFICIENCY_FACTOR    - Power supply efficiency
+ *   ATTR_N_MAX_MEM_POWER_WATTS          - Max memory power for N
+ *   ATTR_N_PLUS_ONE_MAX_MEM_POWER_WATTS - Max memory power for N+1
+ *   ATTR_MIN_MEM_UTILIZATION_THROTTLING - Min memory utilization
+ *
  * Calculates the memory throttling numerator values/power for:
  * - OT  : System in over-temperature condition
  * - N+1 : System has redundant power
- * The results are stored in attributes under the corresponding OCMB.
+ * - N   : System is in oversubscription (lost redundant power supplies)
  *
- * System attributes:
- *   ATTR_REGULATOR_EFFICIENCY_FACTOR - Power supply efficiency
- *   ATTR_N_PLUS_ONE_MAX_MEM_POWER_WATTS - Max memory power for N+1
- *   ATTR_MIN_MEM_UTILIZATION_THROTTLING - Min memory utilization
+ * Writes throttles to attributes under the corresponding OCMB (for HTMGT/OCC use)
+ *   ATTR_N_PLUS_ONE_N_PER_SLOT - Redundant throttles per slot
+ *   ATTR_N_PLUS_ONE_N_PER_PORT - Redundant throttles per port
+ *   ATTR_N_PLUS_ONE_MEM_POWER  - Redundant memory power
+ *   ATTR_OVERSUB_N_PER_SLOT    - Oversubscription throttles per slot
+ *   ATTR_OVERSUB_N_PER_PORT    - Oversubscription throttles per port
+ *   ATTR_OVERSUB_MEM_POWER     - Oversubscription memory power
  */
 errlHndl_t calcMemThrottles();
 
@@ -660,6 +669,228 @@ errlHndl_t memPowerThrottleRedPower(
 } // end memPowerThrottleRedPower()
 
 
+/**
+ * Calculate throttles for when system is oversubscribed (N mode)
+ *
+ * @param[in] i_fapi_target_list - list of FAPI OCMB targets
+ * @param[in] i_efficiency - the regulator efficiency (percent)
+ */
+errlHndl_t memPowerThrottleOversub(
+         std::vector <fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>> i_fapi_target_list,
+                              const uint8_t i_efficiency)
+{
+    errlHndl_t err = nullptr;
+    Target* sys = UTIL::assertGetToplevelTarget();
+    uint32_t power = 0;
+    uint32_t wattTarget = 0;
+
+    //Get the max oversubscribed (N) power allocated to memory
+    power = sys->getAttr<ATTR_N_MAX_MEM_POWER_WATTS>();
+    power *= 100; // convert to centiWatts
+
+    //Account for the regulator efficiency (percentage), if supplied
+    if (i_efficiency != 0)
+    {
+        power *= (i_efficiency / 100.0);
+    }
+
+    //Find the Watt target for each present DIMM
+    TargetHandleList dimm_list;
+    getClassResources(dimm_list, CLASS_LOGICAL_CARD, TYPE_DIMM, UTIL_FILTER_PRESENT);
+    if (dimm_list.size())
+    {
+        wattTarget = power / dimm_list.size();
+    }
+    TMGT_INF("memPowerThrottleOversub: N power: %dW (%d present DIMMs) -> "
+             "%dcW per DIMM", power/100, dimm_list.size(), wattTarget);
+
+    //Calculate the throttles
+    err = call_bulk_pwr_throttles(i_fapi_target_list, wattTarget);
+    if (nullptr == err)
+    {
+        uint32_t tot_mem_power_cw = 0;
+        for(auto & ocmb_fapi_target : i_fapi_target_list)
+        {
+            bool attr_failure = false;
+            // Read HWP output parms:
+            uint32_t l_power[2] = {0};
+            uint16_t l_slot[HTMGT_MAX_SLOT_PER_OCMB_PORT] = {0};
+            uint16_t l_port[HTMGT_MAX_SLOT_PER_OCMB_PORT] = {0};
+
+            // Get list of functional memory ports associated with this OCMB_CHIP
+            TARGETING::Target * ocmb_target = ocmb_fapi_target.get();
+            TargetHandleList port_list;
+            getChildAffinityTargets(port_list, ocmb_target,
+                                    CLASS_UNIT, TYPE_MEM_PORT);
+            for (const auto & l_portTarget : port_list)
+            {
+                uint8_t l_port_unit;
+                if (!l_portTarget->tryGetAttr<ATTR_CHIP_UNIT>(l_port_unit))
+                {
+                    TMGT_ERR("memPowerThrottleOversub: failed to read CHIP_UNIT");
+                    attr_failure = true;
+                }
+                if (l_port_unit >= HTMGT_MAX_PORT_PER_OCMB_CHIP)
+                {
+                    TMGT_ERR("memPowerThrottleOversub: Invalid CHIP_UNIT "
+                             "%d for MEM_PORT", l_port_unit);
+                    attr_failure = true;
+                    l_port_unit = 0;
+                }
+                if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT>
+                    (l_slot[l_port_unit]))
+                {
+                    TMGT_ERR("memPowerThrottleOversub: failed to read "
+                             "EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT");
+                    attr_failure = true;
+                }
+                if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT>
+                    (l_port[l_port_unit]))
+                {
+                    TMGT_ERR("memPowerThrottleOversub: failed to read "
+                             "EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT");
+                    attr_failure = true;
+                }
+                if (!l_portTarget->tryGetAttr<ATTR_EXP_PORT_MAXPOWER>
+                    (l_power[l_port_unit]))
+                {
+                    TMGT_ERR("memPowerThrottleOversub: failed to read EXP_PORT_MAXPOWER");
+                    attr_failure = true;
+                }
+
+                if (attr_failure)
+                {
+                    /*@
+                     * @errortype
+                     * @subsys EPUB_FIRMWARE_SP
+                     * @moduleid HTMGT_MOD_MEM_THROTTLE_OVERSUB
+                     * @reasoncode HTMGT_RC_ATTRIBUTE_ERROR
+                     * @userdata1 ocmb HUID
+                     * @userdata2 port HUID
+                     * @devdesc Failed to read throttle procedure results
+                     * @custdesc An internal firmware error occurred
+                     */
+                    err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                  HTMGT_MOD_MEM_THROTTLE_OVERSUB,
+                                                  HTMGT_RC_ATTRIBUTE_ERROR,
+                                                  get_huid(ocmb_target),
+                                                  get_huid(l_portTarget),
+                                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    err->collectTrace(FAPI_TRACE_NAME);
+                    err->collectTrace(FAPI_IMP_TRACE_NAME);
+                    // HTMGT traces added later
+                    break;
+                }
+            } // for each port
+            if (err) break;
+
+            // Calculate memory power at min throttles
+            tot_mem_power_cw += l_power[0] + l_power[1];
+
+            // Update OCMB data (to be sent to OCC)
+            // Get functional parent processor
+            TARGETING::TargetHandleList proc_targets;
+            getParentAffinityTargets (proc_targets, ocmb_target, CLASS_CHIP, TYPE_PROC);
+            if (proc_targets.size() > 0)
+            {
+                ConstTargetHandle_t proc_target = proc_targets[0];
+                assert(proc_target != nullptr);
+                const uint8_t occ_instance =
+                    proc_target->getAttr<TARGETING::ATTR_POSITION>();
+
+                // OCMB instance comes from the parents OMI target
+                uint8_t l_ocmb_pos = 0xFF;
+                TARGETING::Target * omi_target =
+                    getImmediateParentByAffinity(ocmb_target);
+                if (omi_target != nullptr)
+                {
+                    // get relative OCMB per processor
+                    l_ocmb_pos = omi_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                }
+                else
+                {
+                    TMGT_ERR("memPowerThrottleOversub: Unable to find OCMB's "
+                             "parent for HUID 0x%08X", get_huid(ocmb_target));
+                    attr_failure = true;
+                }
+
+                TMGT_INF("memPowerThrottleOversub: OCC%d/OCMB%d - "
+                         "N/slot: %3d/%3d, N/port: %3d/%3d, Power: %4d/%4dcW",
+                         occ_instance, l_ocmb_pos, l_slot[0], l_slot[1],
+                         l_port[0], l_port[1], l_power[0], l_power[1]);
+
+                if (!ocmb_target->trySetAttr<ATTR_OVERSUB_N_PER_SLOT>(l_slot))
+                {
+                    TMGT_ERR("memPowerThrottleOversub: Failed to set "
+                             "OVERSUB_N_PER_SLOT");
+                    attr_failure = true;
+                }
+                if (!ocmb_target->trySetAttr<ATTR_OVERSUB_N_PER_PORT>(l_port))
+                {
+                    TMGT_ERR("memPowerThrottleOversub: Failed to set "
+                             "OVERSUB_N_PER_PORT");
+                    attr_failure = true;
+                }
+                if (!ocmb_target->trySetAttr<ATTR_OVERSUB_MEM_POWER>(l_power))
+                {
+                    TMGT_ERR("memPowerThrottleOversub: Failed to set "
+                             "OVERSUB_MEM_POWER");
+                    attr_failure = true;
+                }
+            }
+            else
+            {
+                // Grab the name of the target
+                TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
+                fapi2::toString(ocmb_fapi_target, l_targName, sizeof(l_targName));
+                TMGT_ERR("memPowerThrottleOversub: Unable to determine "
+                         "parent chip for OCMB %s", l_targName);
+                attr_failure = true;
+            }
+
+            if (attr_failure)
+            {
+                /*@
+                 * @errortype
+                 * @subsys EPUB_FIRMWARE_SP
+                 * @moduleid HTMGT_MOD_MEM_THROTTLE_OVERSUB
+                 * @reasoncode HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL
+                 * @userdata1 ocmb HUID
+                 * @devdesc Failed to save throttle procedure results
+                 * @custdesc An internal firmware error occurred
+                 */
+                err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                              HTMGT_MOD_MEM_THROTTLE_OVERSUB,
+                                              HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL,
+                                              get_huid(ocmb_target), 0,
+                                              ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                err->collectTrace(FAPI_TRACE_NAME);
+                err->collectTrace(FAPI_IMP_TRACE_NAME);
+                // HTMGT traces added later
+                break;
+            }
+        } // for each ocmb
+
+        if (0 != i_efficiency)
+        {
+            // Upconvert from regulator loss
+            tot_mem_power_cw /= (i_efficiency / 100.0);
+        }
+        TMGT_INF("memPowerThrottleOversub: Total Oversubscription Memory Power: %dcW (input)",
+                 tot_mem_power_cw);
+    }
+
+    if (err)
+    {
+        TMGT_ERR("memPowerThrottleOversub: Failed to calculate oversubscription "
+                 "memory throttles, rc=0x%04X", err->reasonCode());
+    }
+
+    return err;
+
+} // end memPowerThrottleOversub()
+
+
 // Function: calcMemThrottles
 //
 // Main function to intiate the memory throttle calculation
@@ -756,6 +987,12 @@ errlHndl_t calcMemThrottles()
         //Run across all OCMB chips in a node
         err = memPowerThrottleRedPower(l_full_fapi_target_list,
                                        efficiency);
+        if (nullptr == err)
+        {
+            //Calculate Throttle settings when system is in oversubscription (N)
+            err = memPowerThrottleOversub(l_full_fapi_target_list,
+                                          efficiency);
+        }
     }
 
     if (err)

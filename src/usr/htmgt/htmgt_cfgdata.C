@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -384,7 +384,7 @@ uint8_t convert_temp_type(const uint8_t i_sensor_type)
                 errlHndl_t l_err = nullptr;
                 bldErrLog(l_err, HTMGT_MOD_CONVERT_TEMP_TYPE,
                           HTMGT_RC_INVALID_MEM_SENSOR,
-                          i_sensor_type, 0,
+                          i_sensor_type, 0, 0, 0,
                           ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                 ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
             }
@@ -476,7 +476,7 @@ uint8_t addOcmbInternalDts(uint8_t*  o_data,
                 errlHndl_t l_err = nullptr;
                 bldErrLog(l_err, HTMGT_MOD_ADD_OBMC_INTERNAL_DTS,
                           HTMGT_RC_INVALID_MEM_SENSOR,
-                          dtsType, l_ocmb_huid,
+                          dtsType, l_ocmb_huid, 0, 0,
                           ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                 ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
             }
@@ -505,7 +505,7 @@ uint8_t addOcmbInternalDts(uint8_t*  o_data,
             errlHndl_t l_err = nullptr;
             bldErrLog(l_err, HTMGT_MOD_ADD_OBMC_INTERNAL_DTS,
                       HTMGT_RC_ATTRIBUTE_ERROR,
-                      i_ocmbNum, chipId,
+                      i_ocmbNum, chipId, 0, 0,
                       ERRORLOG::ERRL_SEV_UNRECOVERABLE);
             ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
         }
@@ -659,7 +659,7 @@ uint8_t addOcmbExternalDts(uint8_t* o_data,
         errlHndl_t l_err = nullptr;
         bldErrLog(l_err, HTMGT_MOD_ADD_OBMC_DTS,
                   HTMGT_RC_ATTRIBUTE_ERROR,
-                  numSets, i_memType,
+                  numSets, i_memType, 0, 0,
                   ERRORLOG::ERRL_SEV_UNRECOVERABLE);
         ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
     }
@@ -771,7 +771,7 @@ uint8_t ocmbInit(Occ *i_occ,
                     errlHndl_t l_err = nullptr;
                     bldErrLog(l_err, HTMGT_MOD_OCMB_INIT,
                               HTMGT_RC_TARGET_NOT_FOUND,
-                              i_occ->getInstance(), l_ocmb_huid,
+                              i_occ->getInstance(), l_ocmb_huid, 0, 0,
                               ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
                     L_logged_error = true;
@@ -950,6 +950,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
     //Bytes 18-19:  Oversubscription N_PER_PORT
     //Bytes 20-21:  Reserved
 
+    bool loggedAttrFailure = false;
     for(const auto & ocmb_target : ocmb_list)
     {
         // OCMB instance comes from the parent (OMI target)
@@ -988,24 +989,41 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
             TMGT_ERR("getMemThrottleMessageData: failed to read N_PLUS_ONE_N_PER_PORT");
             attr_failure = true;
         }
+        ATTR_OVERSUB_N_PER_SLOT_type nps_oversub;
+        ATTR_OVERSUB_N_PER_PORT_type npp_oversub;
+        if (!ocmb_target->tryGetAttr<ATTR_OVERSUB_N_PER_SLOT>(nps_oversub))
+        {
+            TMGT_ERR("getMemThrottleMessageData: failed to read OVERSUB_N_PER_SLOT");
+            attr_failure = true;
+        }
+        if (!ocmb_target->tryGetAttr<ATTR_OVERSUB_N_PER_PORT>(npp_oversub))
+        {
+            TMGT_ERR("getMemThrottleMessageData: failed to read OVERSUB_N_PER_PORT");
+            attr_failure = true;
+        }
 
         if (attr_failure)
         {
-            /*@
-             * @errortype
-             * @subsys EPUB_FIRMWARE_SP
-             * @moduleid HTMGT_MOD_MEMTHROTTLE
-             * @reasoncode HTMGT_RC_ATTRIBUTE_ERROR
-             * @userdata1 ocmb instance
-             * @devdesc Failed to read throttle settings
-             * @custdesc An internal firmware error occurred
-             */
-            errlHndl_t l_err = nullptr;
-            bldErrLog(l_err, HTMGT_MOD_MEMTHROTTLE,
-                      HTMGT_RC_ATTRIBUTE_ERROR,
-                      l_ocmb_pos, 0,
-                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+            if (!loggedAttrFailure)
+            {
+                /*@
+                 * @errortype
+                 * @subsys EPUB_FIRMWARE_SP
+                 * @moduleid HTMGT_MOD_MEMTHROTTLE
+                 * @reasoncode HTMGT_RC_ATTRIBUTE_ERROR
+                 * @userdata1 ocmb instance
+                 * @userdata2 occ instance
+                 * @devdesc Failed to read throttle settings
+                 * @custdesc An internal firmware error occurred
+                 */
+                errlHndl_t l_err = nullptr;
+                bldErrLog(l_err, HTMGT_MOD_MEMTHROTTLE,
+                          HTMGT_RC_ATTRIBUTE_ERROR,
+                          l_ocmb_pos, i_occ_instance, 0, 0,
+                          ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                loggedAttrFailure = true;
+            }
             // Skip to next ocmb
             continue;
         }
@@ -1021,13 +1039,16 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
                 <TARGETING::ATTR_CHIP_UNIT>();
             const uint8_t port_rel_pos = port_unit % 2;
             if ((nps_min[port_rel_pos] == 0) ||
-                (nps_redun[port_rel_pos] == 0))
+                (nps_redun[port_rel_pos] == 0) ||
+                (nps_oversub[port_rel_pos] == 0))
             {
                 TMGT_ERR("getMemThrottleMessageData: OCMB%d/Port%d [%d]"
                          " - Ignored due to null throttle",
                          l_ocmb_pos, port_unit, port_rel_pos);
-                TMGT_ERR("N/slot: Min=%d, Redun=%d",
-                         nps_min[port_rel_pos], nps_redun[port_rel_pos]);
+                TMGT_ERR("N/slot: Min=%d, Redun=%d, Oversub=%d",
+                         nps_min[port_rel_pos],
+                         nps_redun[port_rel_pos],
+                         nps_oversub[port_rel_pos]);
                 continue;
             }
             if (port_rel_pos >= HTMGT_MAX_PORT_PER_OCMB_CHIP)
@@ -1054,8 +1075,8 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
             UINT16_PUT(&o_data[index+12], nps_redun[port_rel_pos]);
             UINT16_PUT(&o_data[index+14], npp_redun[port_rel_pos]);
             // Oversubscription
-            UINT16_PUT(&o_data[index+16], nps_redun[port_rel_pos]);
-            UINT16_PUT(&o_data[index+18], npp_redun[port_rel_pos]);
+            UINT16_PUT(&o_data[index+16], nps_oversub[port_rel_pos]);
+            UINT16_PUT(&o_data[index+18], npp_oversub[port_rel_pos]);
             // reserved
             memset(&o_data[index+20], 0, 2); // reserved
             index += 22;
@@ -1841,14 +1862,13 @@ void getApssMessageData(uint8_t* o_data,
          * @subsys EPUB_FIRMWARE_SP
          * @moduleid HTMGT_MOD_APSS_DATA
          * @reasoncode HTMGT_RC_ATTRIBUTE_ERROR
-         * @userdata1 ocmb instance
          * @devdesc Invalid APSS config data was found
          * @custdesc An internal firmware error occurred
          */
         errlHndl_t l_err = nullptr;
         bldErrLog(l_err, HTMGT_MOD_APSS_DATA,
                   HTMGT_RC_ATTRIBUTE_ERROR,
-                  0, 0,
+                  0, 0, 0, 0,
                   ERRORLOG::ERRL_SEV_UNRECOVERABLE);
         ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
     }

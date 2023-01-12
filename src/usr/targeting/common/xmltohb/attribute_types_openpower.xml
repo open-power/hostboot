@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -1700,6 +1700,60 @@ ID for the sensor number returned with the elog. -->
     <description>
         Lowest per slot numerator ever allowed when OCC is
         throttling due to OT.
+        Values populated during istep 18.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0,0</default>
+      </uint16_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>OVERSUB_MEM_POWER</id>
+    <description>
+        Maximum memory power in centiWatts when in
+        oversubscription.
+        Values populated during istep 18.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0,0</default>
+      </uint32_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>OVERSUB_N_PER_PORT</id>
+    <description>
+        Static per port numerator setting when in
+        oversubscription.
+        Values populated during istep 18.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0,0</default>
+      </uint16_t>
+      <array>2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>OVERSUB_N_PER_SLOT</id>
+    <description>
+        Static per slot numerator setting when in
+        oversubscription.
         Values populated during istep 18.
     </description>
     <simpleType>

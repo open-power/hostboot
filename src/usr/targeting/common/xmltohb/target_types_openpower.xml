@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -91,6 +91,15 @@
     </attribute>
     <attribute>
       <id>OT_MIN_N_PER_SLOT</id>
+    </attribute>
+    <attribute>
+      <id>OVERSUB_MEM_POWER</id>
+    </attribute>
+    <attribute>
+      <id>OVERSUB_N_PER_PORT</id>
+    </attribute>
+    <attribute>
+      <id>OVERSUB_N_PER_SLOT</id>
     </attribute>
   </targetTypeExtension>
 
