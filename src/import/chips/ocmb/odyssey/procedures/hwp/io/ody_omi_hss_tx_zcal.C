@@ -41,6 +41,42 @@
 #include <io_scom_lib.H>
 #include <fapi2_subroutine_executor.H>
 
+// Structures
+
+enum ody_omi_tx_zcal
+{
+    ODY_OMI_TX_ZCAL_PRE1 = 0,
+    ODY_OMI_TX_ZCAL_PRE2 = 1,
+    ODY_OMI_TX_ZCAL_POST = 2,
+    ODY_OMI_TX_ZCAL_MAIN = 3,
+    ODY_OMI_TX_ZCAL_ALL  = 4,
+};
+
+constexpr uint64_t pSegRegisters[] =
+{
+    0x08E,
+    0x08D,
+    0x098,
+    0x089
+};
+
+constexpr uint64_t nSegRegisters[] =
+{
+    0x090,
+    0x08F,
+    0x099,
+    0x08A
+};
+
+constexpr uint8_t segLens[] =
+{
+    9,
+    5,
+    9,
+    16
+};
+
+
 inline uint32_t decodeSegs(uint32_t i_segs)
 {
     uint32_t r_numSegs = 0;
@@ -57,70 +93,88 @@ inline uint32_t decodeSegs(uint32_t i_segs)
     return r_numSegs;
 }
 
-inline void forceZCalToDefault(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                               const uint64_t& i_baseAddr,
-                               const uint32_t& i_group,
-                               const uint32_t& i_lane)
+fapi2::ReturnCode forceZCalToDefault(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                     const uint64_t& i_baseAddr,
+                                     const uint32_t& i_group,
+                                     const uint32_t& i_lane)
 {
     FAPI_DBG("Start - Setting Z Cal to Defaults");
 
-    const uint32_t c_pre1Val = 0x00F;
-    const uint32_t c_pre2Val = 0x00F;
-    const uint32_t c_postVal = 0x1FF;
-    const uint32_t c_mainVal = 0x1FF;
-    const uint8_t c_segBit = 48;
+    constexpr uint32_t c_pre1Val = 0x00F;
+    constexpr uint32_t c_pre2Val = 0x00F;
+    constexpr uint32_t c_postVal = 0x1FF;
+    constexpr uint32_t c_mainVal = 0x1FF;
+    constexpr uint32_t c_startBit = 48;
+
+    fapi2::buffer<uint64_t> l_buffer;
 
     uint64_t l_addr = 0;
 
     // Set P Pre1
     FAPI_DBG("Setting P Pre1 0x%x", c_pre1Val);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[0]);
-    rmwIoHardwareReg(i_target, l_addr, c_pre1Val, c_segBit, segLens[0]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_PRE1]);
+    l_buffer.flush<0>();
+    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE1]>(c_pre1Val);
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set P Pre2
     FAPI_DBG("Setting P Pre2 0x%x", c_pre2Val);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[1]);
-    rmwIoHardwareReg(i_target, l_addr, c_pre2Val, c_segBit, segLens[1]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_PRE2]);
+    l_buffer.flush<0>();
+    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE2]>(c_pre2Val);
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set P Post
     FAPI_DBG("Setting P Post 0x%x", c_postVal);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[2]);
-    rmwIoHardwareReg(i_target, l_addr, c_postVal, c_segBit, segLens[2]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_POST]);
+    l_buffer.flush<0>();
+    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_POST]>(c_postVal);
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set P Main
     FAPI_DBG("Setting P Main 0x%x", c_mainVal);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[3]);
-    rmwIoHardwareReg(i_target, l_addr, c_mainVal, c_segBit, segLens[3]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_MAIN]);
+    l_buffer.flush<0>();
+    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_MAIN]>(c_mainVal);
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set N Pre1
     FAPI_DBG("Setting N Pre1 0x%x", c_pre1Val);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[0]);
-    rmwIoHardwareReg(i_target, l_addr, c_pre1Val, c_segBit, segLens[0]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_PRE1]);
+    l_buffer.flush<0>();
+    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE1]>(c_pre1Val);
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set N Pre2
     FAPI_DBG("Setting N Pre2 0x%x", c_pre2Val);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[1]);
-    rmwIoHardwareReg(i_target, l_addr, c_pre2Val, c_segBit, segLens[1]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_PRE2]);
+    l_buffer.flush<0>();
+    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE2]>(c_pre2Val);
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set N Post
     FAPI_DBG("Setting N Post 0x%x", c_postVal);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[2]);
-    rmwIoHardwareReg(i_target, l_addr, c_postVal, c_segBit, segLens[2]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_POST]);
+    l_buffer.flush<0>();
+    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_POST]>(c_postVal);
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set N Main
     FAPI_DBG("Setting N Main 0x%x", c_mainVal);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[3]);
-    rmwIoHardwareReg(i_target, l_addr, c_mainVal, c_segBit, segLens[3]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_MAIN]);
+    l_buffer.flush<0>();
+    l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_MAIN]>(c_mainVal);
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
+fapi_try_exit:
     FAPI_DBG("End - Setting Z Cal to Defaults");
-
-    return;
+    return fapi2::current_err;
 }
 
-inline void verifyZCal(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                       const uint64_t& i_baseAddr,
-                       const uint32_t& i_group,
-                       const uint32_t& i_lane)
+fapi2::ReturnCode verifyZCal(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                             const uint64_t& i_baseAddr,
+                             const uint32_t& i_group,
+                             const uint32_t& i_lane)
 {
     FAPI_DBG("Start - Verifying Z Cal");
 
@@ -134,31 +188,42 @@ inline void verifyZCal(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_targ
     uint8_t l_totalNSegs = 0;
 
     // Checks each P segment values.
-    for (uint8_t l_index = 0; l_index < 4; l_index++)
+    for (uint8_t l_index = ODY_OMI_TX_ZCAL_PRE1; l_index < ODY_OMI_TX_ZCAL_ALL; l_index++)
     {
         l_data = 0;
-        FAPI_DBG("Address 0x%08X, Group %d, Lane %d, Reg 0x%x", i_baseAddr, i_group, i_lane, pSegRegisters[l_index]);
+        FAPI_DBG("Psegs Address 0x%08X, Group %d, Lane %d, Reg 0x%x", i_baseAddr, i_group, i_lane, pSegRegisters[l_index]);
         l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[l_index]);
-        FAPI_DBG("Address 0x%08X", l_addr);
-        readIoHardwareReg(i_target, l_addr, c_segBit, segLens[l_index], l_data);
+        FAPI_TRY(readIoHardwareReg(i_target, l_addr, c_segBit, segLens[l_index], l_data));
         l_totalPSegs += decodeSegs(l_data);
     }
 
     FAPI_DBG("Total P Segs %d", l_totalPSegs);
 
     // Checks each N segment values.
+    for (uint8_t l_index = ODY_OMI_TX_ZCAL_PRE1; l_index < ODY_OMI_TX_ZCAL_ALL; l_index++)
+    {
+        l_data = 0;
+        FAPI_DBG("Nsegs Address 0x%08X, Group %d, Lane %d, Reg 0x%x", i_baseAddr, i_group, i_lane, nSegRegisters[l_index]);
+        l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[l_index]);
+        FAPI_TRY(readIoHardwareReg(i_target, l_addr, c_segBit, segLens[l_index], l_data));
+        l_totalNSegs += decodeSegs(l_data);
+    }
+
+    FAPI_DBG("Total N Segs %d", l_totalNSegs);
 
     // Check if the number of segements is within the thresholds
-    if ((c_minSegs >= l_totalPSegs) || (l_totalPSegs >= c_maxSegs) || (c_minSegs >= l_totalNSegs)
-        || (l_totalNSegs >= c_maxSegs))
+    if ((c_minSegs >= l_totalPSegs) || (l_totalPSegs >= c_maxSegs) ||
+        (c_minSegs >= l_totalNSegs) || (l_totalNSegs >= c_maxSegs))
     {
         FAPI_DBG("Failed Z Cal - Number of segmnents is outisde of range (%d-%d) P(%d) | N(%d)",
                  c_minSegs, c_maxSegs, l_totalPSegs, l_totalNSegs);
         // Force value of 25 on leg
-        forceZCalToDefault(i_target, i_baseAddr, i_group, i_lane);
+        FAPI_TRY(forceZCalToDefault(i_target, i_baseAddr, i_group, i_lane));
     }
 
+fapi_try_exit:
     FAPI_DBG("End - Verifying Z Cal");
+    return fapi2::current_err;
 }
 
 //------------------------------------------------------------------------------

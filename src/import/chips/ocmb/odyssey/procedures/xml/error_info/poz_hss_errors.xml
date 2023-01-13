@@ -29,6 +29,7 @@
       PPE failed to reset
     </description>
     <ffdc>TARGET_CHIP</ffdc>
+    <ffdc>IAR</ffdc>
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>

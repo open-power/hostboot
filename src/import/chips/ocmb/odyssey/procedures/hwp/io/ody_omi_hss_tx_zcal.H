@@ -34,42 +34,6 @@
 #pragma once
 #include <fapi2.H>
 
-// Structures
-
-// Structure of the arrays:
-// psegPre1
-// psegPre2
-// psegPost
-// psegMain
-uint64_t pSegRegisters[] =
-{
-    0x08E,
-    0x46C,
-    0x4C4,
-    0x44C
-};
-
-// Structure of the arrays:
-// nsegPre1
-// nsegPre2
-// nsegPost
-// nsegMain
-uint64_t nSegRegisters[] =
-{
-    0x484,
-    0x47C,
-    0x4CC,
-    0x454
-};
-
-uint8_t segLens[] =
-{
-    9,
-    2,
-    9,
-    16
-};
-
 // Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*ody_omi_hss_tx_zcal_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
 

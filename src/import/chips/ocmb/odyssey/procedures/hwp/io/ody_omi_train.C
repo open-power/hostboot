@@ -32,7 +32,6 @@
 ///------------------------------------------------------------------------------
 
 #include <ody_omi_train.H>
-#include <ody_io_ppe_common.H>
 #include <ody_scom_omi.H>
 
 SCOMT_OMI_USE_D_REG_DL0_CONFIG0
@@ -51,6 +50,9 @@ fapi2::ReturnCode ody_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
     D_REG_DL0_CONFIG0_t l_dl0_config0;
 
+    // Puts the OMI DL into Auto Train mode.
+    // At this point the Odyssey will be driving pattern A and
+    //   waiting to receive pattern A.
     FAPI_TRY(l_dl0_config0.getScom(i_target));
     l_dl0_config0.set_CFG_TL_CREDITS(0x12);
     l_dl0_config0.set_TL_EVENT_ACTIONS(0);
