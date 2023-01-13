@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,16 +43,18 @@
 #include <explorer_scom_addresses.H>
 #include <mss_generic_system_attribute_getters.H>
 
-///
-/// @brief Check training state of OMI
-/// @param[in] i_target Reference to OMI endpoint target
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-///
-fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target)
-{
-    // Const
-    constexpr uint8_t MAX_LOOP_COUNT = 20;  // Retry times
 
+enum p10_omi_train_check_consts
+{
+    P10_OMI_TRAINING_COMPLETE_STATE = 7,
+    P10_OMI_TRAINING_CYCLES = 10000000,
+    P10_OMI_TRAINING_NS = 10000,
+    P10_OMI_TRAINING_LOOPS = 20,
+};
+
+fapi2::ReturnCode p10_omi_train_check_create_training_fail(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi,
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
+{
     // Declares variables
     fapi2::buffer<uint64_t> l_omi_status;
     fapi2::buffer<uint64_t> l_omi_training_status;
@@ -64,59 +66,28 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     fapi2::buffer<uint64_t> l_exp_dl0_status;
     fapi2::buffer<uint64_t> l_exp_dl0_training_status;
     uint64_t l_state_machine_state = 0;
-    uint8_t l_tries = 0;
     uint32_t l_omi_freq = 0;
-    uint8_t l_sim = 0;
 
-    const auto& l_ocmbs = mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
-    const auto& l_omic = mss::find_target<fapi2::TARGET_TYPE_OMIC>(i_target);
+    const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_ocmb);
+    const auto& l_omic = mss::find_target<fapi2::TARGET_TYPE_OMIC>(i_omi);
 
-    // Sanity check for no empty vector
-    if (l_ocmbs.empty())
-    {
-        FAPI_DBG("Exiting OMI train check, no OCMB targets on %s", mss::c_str(i_target));
-        // No training could have occurred
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    const auto& l_ocmb = l_ocmbs[0];
-
-    const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(l_ocmbs[0]);
-    FAPI_TRY(mss::omi::omi_train_status(i_target, l_state_machine_state, l_omi_status));
-
-    while (l_tries < MAX_LOOP_COUNT && !(mss::omi::state_machine_success(l_state_machine_state)))
-    {
-        // HW delay from P10 results
-        // Sim delay from VBU testing
-        fapi2::delay(500 * mss::DELAY_1MS, 50 * mss::DELAY_1MS);
-
-        // Check OMI training status
-        FAPI_TRY(mss::omi::omi_train_status(i_target, l_state_machine_state, l_omi_status));
-        l_tries++;
-    }
-
-    // Note: this is very useful debug information while trying to debug training during polling
-    FAPI_TRY(scomt::omi::GET_TRAINING_STATUS(i_target, l_omi_training_status));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq));
-    FAPI_TRY(scomt::omi::GET_CONFIG1(i_target, l_config1));
-    FAPI_TRY(scomt::omi::GET_ERROR_HOLD(i_target, l_host_error_hold));
-    FAPI_TRY(scomt::omi::GET_EDPL_MAX_COUNT(i_target, l_host_edpl_max_count));
 
-    FAPI_TRY(mss::attr::get_is_simulation(l_sim));
+    FAPI_TRY(scomt::omi::GET_TRAINING_STATUS(i_omi, l_omi_training_status));
+    FAPI_TRY(scomt::omi::GET_CONFIG1(i_omi, l_config1));
+    FAPI_TRY(scomt::omi::GET_ERROR_HOLD(i_omi, l_host_error_hold));
+    FAPI_TRY(scomt::omi::GET_EDPL_MAX_COUNT(i_omi, l_host_edpl_max_count));
 
-    if (!l_sim)
-    {
-        FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_ERROR_HOLD, l_exp_dl0_error_hold));
-        FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_EDPL_MAX_COUNT, l_exp_dl0_edpl_max_count));
-        FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_STATUS, l_exp_dl0_status));
-        FAPI_TRY(fapi2::getScom(l_ocmb, EXPLR_DLX_DL0_TRAINING_STATUS, l_exp_dl0_training_status));
-    }
+    FAPI_TRY(fapi2::getScom(i_ocmb, EXPLR_DLX_DL0_ERROR_HOLD, l_exp_dl0_error_hold));
+    FAPI_TRY(fapi2::getScom(i_ocmb, EXPLR_DLX_DL0_EDPL_MAX_COUNT, l_exp_dl0_edpl_max_count));
+    FAPI_TRY(fapi2::getScom(i_ocmb, EXPLR_DLX_DL0_STATUS, l_exp_dl0_status));
+    FAPI_TRY(fapi2::getScom(i_ocmb, EXPLR_DLX_DL0_TRAINING_STATUS, l_exp_dl0_training_status));
 
-    FAPI_ASSERT(mss::omi::state_machine_success(l_state_machine_state),
+    FAPI_ASSERT(false,
                 fapi2::P10_OMI_TRAIN_ERR()
                 .set_OMIC_TARGET(l_omic)
-                .set_OMI_TARGET(i_target)
-                .set_OCMB_TARGET(l_ocmb)
+                .set_OMI_TARGET(i_omi)
+                .set_OCMB_TARGET(i_ocmb)
                 .set_EXPECTED_SM_STATE(mss::omi::STATE_MACHINE_SUCCESS)
                 .set_ACTUAL_SM_STATE(l_state_machine_state)
                 .set_STATUS(l_omi_status)
@@ -128,7 +99,7 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
                 "HOST_DL0_ERROR_HOLD:0x%016llx HOST_DL0_EDPL_MAX_COUNT:0x%016llx"
                 "EXP_DL0_ERROR_HOLD:0x%016llx EXP_DL0_EDPL_MAX_COUNT:0x%016llx"
                 "EXP_DL0_STATUS:0x%016llx EXP_DL0_TRAINING_STATUS:0x%016llx",
-                mss::c_str(i_target),
+                mss::c_str(i_omi),
                 mss::omi::STATE_MACHINE_SUCCESS,
                 l_state_machine_state,
                 l_omi_status,
@@ -146,12 +117,69 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
              l_state_machine_state,
              l_omi_status,
              l_omi_training_status);
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-    FAPI_TRY(mss::unmask::after_p10_omi_train_check(mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target)));
+///
+/// @brief Check training state of OMI
+/// @param[in] i_target Reference to OMI endpoint target
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p10_omi_train_check_common(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi,
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
+{
+    // Declares variables
+    fapi2::buffer<uint64_t> l_omi_status;
+    uint64_t l_state_machine_state = 0;
+    uint8_t l_tries = 0;
+
+    FAPI_TRY(scomt::omi::GET_STATUS(i_omi, l_omi_status));
+    scomt::omi::GET_STATUS_TRAINING_STATE_MACHINE(l_omi_status, l_state_machine_state);
+
+    while (l_tries < P10_OMI_TRAINING_LOOPS && l_state_machine_state != P10_OMI_TRAINING_COMPLETE_STATE)
+    {
+        // HW delay from P10 results
+        // Sim delay from VBU testing
+        fapi2::delay(P10_OMI_TRAINING_NS, P10_OMI_TRAINING_CYCLES);
+
+        // Check OMI training status
+        FAPI_TRY(scomt::omi::GET_STATUS(i_omi, l_omi_status));
+        scomt::omi::GET_STATUS_TRAINING_STATE_MACHINE(l_omi_status, l_state_machine_state);
+        l_tries++;
+    }
+
+    if (l_state_machine_state != P10_OMI_TRAINING_COMPLETE_STATE)
+    {
+        FAPI_TRY(p10_omi_train_check_create_training_fail(i_omi, i_ocmb));
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     // If OMI training failed or timed out, we need to check some FIRs
-    return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_target, fapi2::current_err);
+    return mss::check::fir_or_pll_fail<mss::mc_type::EXPLORER, mss::check::firChecklist::OMI>(i_omi, fapi2::current_err);
+}
+
+
+fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi)
+{
+    FAPI_INF("%s Starting p10_omi_train", mss::c_str(i_omi));
+    const auto& l_ocmbs = mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_omi);
+
+    // Sanity check for no empty vector
+    if (l_ocmbs.empty())
+    {
+        FAPI_DBG("Exiting OMI train check, no OCMB targets on %s", mss::c_str(i_omi));
+        // No training could have occurred
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    const auto& l_ocmb = l_ocmbs[0];
+
+    FAPI_TRY(p10_omi_train_check_common(i_omi, l_ocmb));
+
+fapi_try_exit:
+    FAPI_INF("%s End p10_omi_train", mss::c_str(i_omi));
+    return fapi2::current_err;
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -860,6 +860,14 @@ fapi2::ReturnCode p10_io_init::sim_speedup(const fapi2::Target<fapi2::TARGET_TYP
                                                 l_num_lanes,
                                                 0));
 
+                // RX A VGA
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_GAIN,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_GAIN_LEN,
+                                                l_num_lanes,
+                                                9));
+
                 // RX B CTLE_PEAK1
                 FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
                                                 RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL,
@@ -875,6 +883,14 @@ fapi2::ReturnCode p10_io_init::sim_speedup(const fapi2::Target<fapi2::TARGET_TYP
                                                 RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN,
                                                 l_num_lanes,
                                                 0));
+
+                // RX B VGA
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_GAIN,
+                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_GAIN_LEN,
+                                                l_num_lanes,
+                                                9));
             }
 
         }
@@ -884,6 +900,15 @@ fapi2::ReturnCode p10_io_init::sim_speedup(const fapi2::Target<fapi2::TARGET_TYP
         for (auto l_iohs_target : l_iohs_targets)
         {
             int l_num_lanes = P10_IO_LIB_NUMBER_OF_IOHS_LANES;
+            // RX A CTLE_GAIN
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_GAIN,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_GAIN_LEN,
+                                             l_num_lanes,
+                                             9));
+
+
             // RX A CTLE_PEAK1
             FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
                                              IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL,
@@ -899,6 +924,14 @@ fapi2::ReturnCode p10_io_init::sim_speedup(const fapi2::Target<fapi2::TARGET_TYP
                                              IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK2_LEN,
                                              l_num_lanes,
                                              0));
+
+            // RX B CTLE_GAIN
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_GAIN,
+                                             IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_GAIN_LEN,
+                                             l_num_lanes,
+                                             9));
 
             // RX B CTLE_PEAK1
             FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
@@ -948,8 +981,10 @@ fapi2::ReturnCode p10_io_init::sim_speedup(const fapi2::Target<fapi2::TARGET_TYP
             FAPI_TRY(p10_io_ppe_rx_vga_recal_min_target[i].putData(l_pauc_target, 0x28));
 
             //Disable long running tasks
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_vga_cal[i].putData(l_pauc_target, 0x0));
             FAPI_TRY(p10_io_ppe_rx_eo_enable_lte_cal[i].putData(l_pauc_target, 0x0));
             FAPI_TRY(p10_io_ppe_rx_eo_enable_dfe_cal[i].putData(l_pauc_target, 0x0));
+            FAPI_TRY(p10_io_ppe_rx_eo_enable_dfe_full_cal[i].putData(l_pauc_target, 0x0));
             FAPI_TRY(p10_io_ppe_rx_eo_enable_ddc[i].putData(l_pauc_target, 0x0));
             FAPI_TRY(p10_io_ppe_rx_eo_enable_quad_phase_cal[i].putData(l_pauc_target, 0x0));
             FAPI_TRY(p10_io_ppe_rx_rc_enable_lte_cal[i].putData(l_pauc_target, 0x0));
