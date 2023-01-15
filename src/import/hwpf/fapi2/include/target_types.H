@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -217,6 +217,36 @@ enum TargetType : uint64_t
     TARGET_TYPE_XBUS_ENDPOINT = TARGET_TYPE_XBUS,
     TARGET_TYPE_ABUS_ENDPOINT = TARGET_TYPE_ABUS,
 };
+
+/**
+ * @brief The helper function used in the conversion of TargetType to LogTargetType.
+ *        This is a recursive function which call itself until the value being passed
+ *        to it is 1.
+ *
+ */
+constexpr uint8_t getBitPos(const uint64_t i_val, const uint8_t i_cur_bit)
+{
+    return ((i_val & 0x1) == 0x1) ?
+           i_cur_bit :
+           getBitPos(i_val >> 1, i_cur_bit + 1);
+}
+
+/**
+ * @brief Function to convert TargetType to LogTargetType
+ *
+ * @return LogTargetType
+ *
+ * Note:
+ *
+ * C++11 allows only a return statement inside a constexpr function,
+ */
+template<TargetType T>
+constexpr LogTargetType toLogTargetType()
+{
+    static_assert(((T - 1) & T) == 0,
+                  "Composite target cannot be converted to LOG_TARGET");
+    return (LogTargetType)getBitPos(T, 0);
+}
 
 // The fsp x86 compiler is too old to support the full C++11 standard and
 // they have not been able to upgrade to a later compiler yet due to a
