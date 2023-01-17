@@ -43,10 +43,15 @@
 
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <generic/memory/lib/utils/find.H>
+#include <lib/power_thermal/ody_throttle.H>
+#include <lib/fir/ody_unmask.H>
+#include <odyssey_mp_scom.H>
 #include <odyssey_scom.H>
 #include <ody_scominit.H>
 #include <lib/mc/ody_port_traits.H>
 #include <lib/power_thermal/ody_throttle_traits.H>
+#include <lib/workarounds/ody_scominit_phy_check_workaround.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle.H>
 
 extern "C"
@@ -62,11 +67,35 @@ extern "C"
         mss::display_git_commit_info("ody_scominit");
 #endif
 
+        const auto& l_port_targets = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+
+        if (l_port_targets.empty())
+        {
+            FAPI_INF(TARGTIDFORMAT "... skipping mss_scominit no Ports ...", TARGTID);
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
         fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(i_target);
+
+        // Assuming RDF0/1 are the same across all kind traits will need to add plug rule to confirm this
         FAPI_INF( TARGTIDFORMAT " running odyssey.scom.initfile", TARGTID);
-        FAPI_EXEC_HWP(l_rc, odyssey_scom, i_target, FAPI_SYSTEM);
+        FAPI_EXEC_HWP(l_rc, odyssey_scom, i_target, l_port_targets[0], FAPI_SYSTEM, l_mc);
         FAPI_TRY(l_rc, TARGTIDFORMAT " error from odyssey.scom.initfile", TARGTID);
+
+        for(const auto& l_port : l_port_targets)
+        {
+            FAPI_INF(GENTARGTIDFORMAT " phy scominit for MEM_PORT type ATTRs on port", GENTARGTID(l_port));
+
+            FAPI_INF( GENTARGTIDFORMAT " running odyssey.mp.scom.initfile", GENTARGTID(l_port));
+            FAPI_EXEC_HWP(l_rc, odyssey_mp_scom, l_port);
+            FAPI_TRY(l_rc, GENTARGTIDFORMAT " error from odyssey.mp.scom.initfile", GENTARGTID(l_port));
+
+        }
+
+        // Helper funct to set MBXLT0 bits if 2 phy/ports found
+        FAPI_TRY(mss::ody::workarounds::mbxlt0_helper(i_target, l_port_targets.size()));
 
         // Write power controls and emergency throttle settings
         FAPI_TRY(mss::power_thermal::thermal_throttle_scominit<mss::mc_type::ODYSSEY>(i_target));

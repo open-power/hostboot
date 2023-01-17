@@ -490,15 +490,32 @@
       Minimum CAS to CAS Delay Time, same bank group
       in nck (number of clock cycles).
       Decodes SPD byte 40 (bits 7~0) and byte 117 (bits 7~0).
-      This is for DDR4 MRS6.
+      This is for DDR5 RDs.
       Each memory channel will have a value.
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
-    <enum>4NCK = 4, 5NCK = 5, 6NCK = 6, 7NCK = 7, 8NCK = 8</enum>
+    <enum>4NCK = 4, 5NCK = 5, 6NCK = 6, 7NCK = 7, 8NCK = 8, 12NCK = 12</enum>
     <writeable/>
     <mssUnits> nck </mssUnits>
     <mssAccessorName>dram_tccd_l</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DRAM_TCCD_L_WR</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Minimum CAS to CAS Delay Time, same bank group
+      in nck (number of clock cycles).
+      Decodes SPD byte 40 (bits 7~0) and byte 117 (bits 7~0).
+      This is for DDR5 WRs.
+      Each memory channel will have a value.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>32NCK = 32, 36NCK = 36, 40NCK = 40, 44NCK = 44, 48NCK = 48</enum>
+    <writeable/>
+    <mssUnits> nck </mssUnits>
   </attribute>
 
   <attribute>

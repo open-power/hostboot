@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/procedures/hwp/initfiles/odyssey_scom.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/workarounds/ody_scominit_phy_check_workaround.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2023                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,26 +22,41 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef _INIT_ODYSSEY_SCOM_PROCEDURE_H_
-#define _INIT_ODYSSEY_SCOM_PROCEDURE_H_
+// EKB-Mirror-To: hostboot
 
+///
+/// @file ody_scominit_phy_check_workaround.H
+/// @brief Odyssey workarounds set MBXLT0 bits relative to num PHY/ports found
+///
+// *HWP HWP Owner: David J Chung <dj.chung@ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: HB:FSP
 
-#include <stddef.h>
-#include <stdint.h>
+#ifndef _MSS_ODY_SCOMINIT_PHY_CHECK_WORKAROUNDS_H_
+#define _MSS_ODY_SCOMINIT_PHY_CHECK_WORKAROUNDS_H_
+
 #include <fapi2.H>
 
 
-typedef fapi2::ReturnCode (*odyssey_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_MC>&);
-
-extern "C"
+namespace mss
 {
+namespace ody
+{
+namespace workarounds
+{
+///
+/// @brief Checks if 2 mem ports are found and sets MBXLT0 bits accordingly
+/// @param[in] i_target the OCMB target to operate on
+/// @param[in] i_num_ports num mem ports found on ocmb
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode mbxlt0_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                const int16_t i_num_ports);
 
-    fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& TGT0,
-                                   const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2,
-                                   const fapi2::Target<fapi2::TARGET_TYPE_MC>& TGT3);
-
-}
+} // ns workarounds
+} // ns ody
+} // ns mss
 
 #endif

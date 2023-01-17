@@ -192,6 +192,21 @@ inline fapi2::Target<fapi2::TARGET_TYPE_MCC> find_target(const fapi2::Target<fap
            .getParent<fapi2::TARGET_TYPE_MCC>();
 }
 
+///
+/// @brief find the MC given a OCMB_CHIP
+/// @param[in] i_target the fapi2 target OCMB_CHIP
+/// @return a MC target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_MC> find_target(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target)
+{
+    return i_target.getParent<fapi2::TARGET_TYPE_OMI>()
+           .getParent<fapi2::TARGET_TYPE_MCC>()
+           .getParent<fapi2::TARGET_TYPE_MI>()
+           .getParent<fapi2::TARGET_TYPE_MC>();
+}
+
 /// @brief find the OMIC given a OCMB_CHIP
 /// @param[in] i_target the fapi2 target OCMB_CHIP
 /// @return a OMIC target.
