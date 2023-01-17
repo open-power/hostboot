@@ -36,5 +36,6 @@ namespace ring_id
 RING_ID(perv_rtg);
 RING_ID(perv_initf);
 RING_ID(chiplet_rtg);
+RING_ID(chiplet_initf);
 
 }
