@@ -349,7 +349,7 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::ODYSSEY>( const fapi2::Target<
     // Create register for MCBISTFIR
     mss::fir::reg2<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_RW_WCLEAR> l_mcbist_reg(i_target);
 
-    // Write MCBISTFIR register per Explorer unmask spec
+    // Write MCBISTFIR register per Odyssey unmask spec
     // NOTE: when this gets ported to p11 this will need to be changed to recoverable
     FAPI_TRY(l_mcbist_reg.attention<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_MCBIST_PROGRAM_COMPLETE>()
              .write(), "Failed to Write MCBIST FIR register " GENTARGTIDFORMAT, GENTARGTID(i_target));
@@ -364,7 +364,7 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::ODYSSEY>( const fapi2::Target<
         l_reg_data.setBit<scomt::ody::ODC_RDF0_SCOM_MASK1_MISSING_RDDATA_VALID>();
         FAPI_TRY(fapi2::putScom(l_port, scomt::ody::ODC_RDF0_SCOM_MASK1, l_reg_data));
 
-        // Write RDF FIR register per Explorer unmask spec
+        // Write RDF FIR register per Odyssey unmask spec
         FAPI_TRY(l_rdf_reg.recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_AUE>()
                  .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_IAUE>()
                  .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_IRCD>()
@@ -382,6 +382,35 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::ODYSSEY>( const fapi2::Target<
 
 fapi_try_exit:
 
+    return fapi2::current_err;
+}
+
+///
+/// @brief Unmask and setup actions for scrub related FIR
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note mc_type::ODYSSEY specialization
+template<>
+fapi2::ReturnCode after_background_scrub<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target )
+{
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        // Create register for RDFFIR
+        mss::fir::reg2<scomt::ody::ODC_RDF0_SCOM_FIR_RW_WCLEAR> l_rdf_reg(l_port);
+
+        // Write RDF FIR register per Odyssey unmask spec
+        // Note we can't put MAINLINE_MPE_RANK_0_TO_7 into the FAPI_TRY because it won't parse within the macro
+        l_rdf_reg.recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_MPE_RANK_0_TO_7,
+                                    scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_MPE_RANK_0_TO_7_LEN>()
+                                    .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_NCE>()
+                                    .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_TCE>()
+                                    .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_IMPE>()
+                                    .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_IMPE>();
+        FAPI_TRY( l_rdf_reg.write(), "Failed to Write RDF FIR register " GENTARGTIDFORMAT, GENTARGTID(l_port) );
+    }
+
+fapi_try_exit:
     return fapi2::current_err;
 }
 
