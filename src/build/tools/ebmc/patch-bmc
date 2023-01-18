@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022
+# Contributors Listed Below - COPYRIGHT 2022,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -132,6 +132,7 @@ function PATCH_HBI_HBB () {
 
     # Copy the symbol files over for debug
     SSHPASS $COPY `find $IMG_DIR/hbotStringFile $IMG_DIR/*.list.bz2 $IMG_DIR/*.syms $IMG_DIR/*.bin.modinfo | grep -v _test` "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
+    REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf hbdebug/hbotStringFile $HBOTSTRINGFILE.lid"
 }
 
 function PATCH_HBD () {
