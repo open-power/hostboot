@@ -541,7 +541,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::READ_ERROR_COUNT_REG2, o_data) );
-    FAPI_INF("%s read: 0x%016lx", mss::c_str(i_target), o_data);
+    FAPI_INF(TARGTIDFORMAT " read: 0x%016lx", TARGTID,  o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -559,7 +559,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::READ_ERROR_COUNT_REG2, i_data) );
-    FAPI_INF("%s write: 0x%016lx", mss::c_str(i_target), i_data);
+    FAPI_INF(TARGTIDFORMAT " write: 0x%016lx", TARGTID, i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
