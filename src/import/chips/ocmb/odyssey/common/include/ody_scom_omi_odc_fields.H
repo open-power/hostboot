@@ -22,6 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// EKB-Mirror-To: hostboot
+
 #pragma once
 #include "scomt_regs.H"
 

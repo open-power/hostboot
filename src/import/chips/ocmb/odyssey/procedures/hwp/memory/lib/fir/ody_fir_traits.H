@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <ody_scom_ody.H>
 #include <ody_scom_perv.H>
 #include <ody_scom_omi.H>
+#include <ody_scom_mp.H>
 
 namespace mss
 {
@@ -178,6 +179,25 @@ struct firTraits2<scomt::ody::ODC_MMIO_MFIR_RW_WCLEAR>
 
     // Target type of this register
     static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_OCMB_CHIP;
+};
+
+///
+/// @brief FIR Reg Traits for Odyssey ODP LFIR
+///
+template<>
+struct firTraits2<scomt::mp::S_LFIR_RW_WCLEAR>
+{
+    static constexpr uint64_t FIR_CLEAR = scomt::mp::S_LFIR_RW_WCLEAR;
+    static constexpr uint64_t FIR_SET = scomt::mp::S_LFIR_WO_OR;
+    static constexpr uint64_t ATTN = scomt::mp::S_CFG_ATTN;
+    static constexpr uint64_t LXSTOP = scomt::mp::S_CFG_LXSTOP;
+    static constexpr uint64_t RECOV = scomt::mp::S_CFG_RECOV;
+    static constexpr uint64_t XSTOP = scomt::mp::S_CFG_XSTOP;
+    static constexpr uint64_t MASK_CLEAR = scomt::mp::S_MASK_RW_WCLEAR;
+    static constexpr uint64_t MASK_SET = scomt::mp::S_MASK_WO_OR;
+
+    // Target type of this register
+    static constexpr fapi2::TargetType T = fapi2::TARGET_TYPE_MEM_PORT;
 };
 
 } // end mss ns

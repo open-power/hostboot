@@ -37,6 +37,9 @@
 #include <fapi2.H>
 #include <ody_scom_ody_odc.H>
 #include <ody_scom_omi_odc.H>
+#include <ody_scom_mp.H>
+#include <ody_scom_mp_mastr_b0.H>
+#include <ody_scom_mp_drtub0.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/fir/ody_fir_traits.H>
@@ -490,6 +493,72 @@ fapi2::ReturnCode after_background_scrub<mss::mc_type::ODYSSEY>( const fapi2::Ta
     }
 
 fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Unmask and setup actions performed after mss_ddr_phy_reset
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode after_phy_reset<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+    fapi2::buffer<uint64_t> l_reg_data;
+    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+
+    for (const auto& l_port : l_ports)
+    {
+        // Create register for ODP_TOP0 temporarily declared in ody_fir_traits.h until added into engd
+        mss::fir::reg2<scomt::mp::S_LFIR_RW_WCLEAR> l_top0_lfir(l_port);
+
+        // Phy special set up
+
+        //PhyInterruptEnable bits [15, 12-8]
+        FAPI_TRY(fapi2::getScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE, l_reg_data));
+        l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYSTICKYUNLOCKEN>();
+        l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYD5ACSM0PARITYEN>();
+        l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYD5ACSM1PARITYEN>();
+        l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYRXFIFOCHECKEN>();
+        l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYTXPPTEN>();
+        l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYECCEN>();
+        FAPI_TRY(fapi2::putScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE, l_reg_data));
+
+
+        // LcdlDbgCntl3_p0 setup StickyUnlockThreshold - recommended minimum threshold is 3 = 0b011
+        constexpr uint64_t l_min_stickythreshold = 0x0000000000000003;
+        FAPI_TRY(fapi2::getScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_LCDLDBGCNTL3_P0, l_reg_data));
+        l_reg_data.insertFromRight<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_LCDLDBGCNTL3_P0_STICKYUNLOCKTHRESHOLD,
+                                   scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_LCDLDBGCNTL3_P0_STICKYUNLOCKTHRESHOLD_LEN>
+                                   (l_min_stickythreshold);
+        FAPI_TRY(fapi2::putScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_LCDLDBGCNTL3_P0, l_reg_data));
+
+        // ArcPmuEccCtl Overrides/Control for ARC Error Protection Hardware Control Register, ECC Enable => Bits 1:0 = 0b00, Do not change Debug Bits 2:5
+        FAPI_TRY(fapi2::getScom(l_port, scomt::mp::DWC_DDRPHYA_DRTUB0_ARCPMUECCCTL, l_reg_data));
+        l_reg_data.clearBit<scomt::mp::DWC_DDRPHYA_DRTUB0_ARCPMUECCCTL_ARCPMUECCCTL, 2>();
+        FAPI_TRY(fapi2::putScom(l_port, scomt::mp::DWC_DDRPHYA_DRTUB0_ARCPMUECCCTL, l_reg_data));
+
+
+        // Flush reg and clear PHYERR bit 5 before unmasking since it comes on erroneously during Odyssey ABIST
+        l_reg_data.flush<0>();
+        l_reg_data.setBit<scomt::mp::S_LFIR_PHYERR>();
+        FAPI_TRY(fapi2::putScom(l_port, scomt::mp::S_LFIR_RW_WCLEAR, l_reg_data));
+
+        FAPI_TRY(l_top0_lfir.recoverable_error<scomt::mp::S_LFIR_FSMPERR>()
+                 .recoverable_error<scomt::mp::S_LFIR_WPERR>()
+                 .recoverable_error<scomt::mp::S_LFIR_PSLVPERR>()
+                 .recoverable_error<scomt::mp::S_LFIR_ODPCTRLPERR>()
+                 .recoverable_error<scomt::mp::S_LFIR_PHYSTICKYUNLOCKERR>()
+                 .recoverable_error<scomt::mp::S_LFIR_PHYD5ACSM0PARITYERR>()
+                 .recoverable_error<scomt::mp::S_LFIR_PHYD5ACSM1PARITYERR>()
+                 .recoverable_error<scomt::mp::S_LFIR_PHYRXFIFOCHECKERR>()
+                 .recoverable_error<scomt::mp::S_LFIR_PHYRXTXPPTERR>()
+                 .recoverable_error<scomt::mp::S_LFIR_PHYECCERR>()
+                 .write(), "Failed to Write ODP FIR register " GENTARGTIDFORMAT, GENTARGTID(l_port));
+    }
+
+fapi_try_exit:
+
     return fapi2::current_err;
 }
 
