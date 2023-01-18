@@ -983,6 +983,17 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_UNSUPPORTED_DRAM_GEN</rc>
+    <description>Unsupported DRAM generation</description>
+    <ffdc>DRAM_GEN</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_PORT_DOES_NOT_SUPPORT_MAJORITY_FREQ</rc>
     <description>
       When considering the frequencies in the MRW and the max supported

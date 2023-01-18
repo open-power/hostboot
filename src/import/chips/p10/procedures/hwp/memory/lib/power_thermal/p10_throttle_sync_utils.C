@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,8 @@
 #include <explorer_scom_addresses_fld.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <lib/workarounds/p10_mc_workarounds.H>
+#include <generic/memory/lib/mss_generic_attribute_getters.H>
+#include <ody_scom_ody_odc.H>
 
 namespace mss
 {
@@ -57,12 +59,6 @@ namespace mss
 fapi2::ReturnCode configure_ocmb_sync_operations(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target,
         const mss::states i_enable)
 {
-    fapi2::buffer<uint64_t> l_scomData;
-    fapi2::buffer<uint64_t> l_scomMask;
-
-    // Force bit to the proper state
-    l_scomData.writeBit<EXPLR_SRQ_MBA_SYNCCNTLQ_SYNC_REF_EN>(i_enable);
-    l_scomMask.setBit<EXPLR_SRQ_MBA_SYNCCNTLQ_SYNC_REF_EN>();
 
     // Iterate through OCMBs to make sure refresh SYNC bit is set
     for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target))
@@ -73,12 +69,58 @@ fapi2::ReturnCode configure_ocmb_sync_operations(const fapi2::Target<fapi2::TARG
             continue;
         }
 
-        FAPI_DBG("Writing EXPLR_SRQ_MBA_SYNCCNTLQ 0x%016llX: Data 0x%016llX Mask 0x%016llX on %s",
-                 EXPLR_SRQ_MBA_SYNCCNTLQ, l_scomData, l_scomMask, mss::c_str(l_ocmb));
+        for (const auto l_dimm_target : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_ocmb))
+        {
+            fapi2::buffer<uint64_t> l_scomData;
+            fapi2::buffer<uint64_t> l_scomMask;
+            uint8_t l_dram_gen;
 
-        FAPI_TRY(fapi2::putScomUnderMask(l_ocmb, EXPLR_SRQ_MBA_SYNCCNTLQ, l_scomData, l_scomMask),
-                 "putScomUnderMask() failed on EXPLR_SRQ_MBA_SYNCCNTLQ 0x%016llX for %s",
-                 EXPLR_SRQ_MBA_SYNCCNTLQ, mss::c_str(l_ocmb));
+            FAPI_TRY(mss::attr::get_dram_gen(l_dimm_target, l_dram_gen));
+
+            switch(l_dram_gen)
+            {
+                case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4:
+
+                    // Force bit to the proper state
+                    l_scomData.writeBit<EXPLR_SRQ_MBA_SYNCCNTLQ_SYNC_REF_EN>(i_enable);
+                    l_scomMask.setBit<EXPLR_SRQ_MBA_SYNCCNTLQ_SYNC_REF_EN>();
+
+                    FAPI_DBG("Writing EXPLR_SRQ_MBA_SYNCCNTLQ 0x%016llX: Data 0x%016llX Mask 0x%016llX on %s",
+                             EXPLR_SRQ_MBA_SYNCCNTLQ, l_scomData, l_scomMask, mss::c_str(l_ocmb));
+
+                    FAPI_TRY(fapi2::putScomUnderMask(l_ocmb, EXPLR_SRQ_MBA_SYNCCNTLQ, l_scomData, l_scomMask),
+                             "putScomUnderMask() failed on EXPLR_SRQ_MBA_SYNCCNTLQ 0x%016llX for %s",
+                             EXPLR_SRQ_MBA_SYNCCNTLQ, mss::c_str(l_ocmb));
+                    break;
+
+                case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5:
+
+                    // Force bit to the proper state
+                    l_scomData.writeBit<scomt::ody::ODC_SRQ_MBA_SYNCCNTLQ_SYNC_REF_EN>(i_enable);
+                    l_scomMask.setBit<scomt::ody::ODC_SRQ_MBA_SYNCCNTLQ_SYNC_REF_EN>();
+
+                    FAPI_DBG("Writing ODC_SRQ_MBA_SYNCCNTLQ 0x%016llX: Data 0x%016llX Mask 0x%016llX on %s",
+                             scomt::ody::ODC_SRQ_MBA_SYNCCNTLQ, l_scomData, l_scomMask, mss::c_str(l_ocmb));
+
+                    FAPI_TRY(fapi2::putScomUnderMask(l_ocmb, scomt::ody::ODC_SRQ_MBA_SYNCCNTLQ, l_scomData, l_scomMask),
+                             "putScomUnderMask() failed on ODC_SRQ_MBA_SYNCCNTLQ 0x%016llX for %s",
+                             scomt::ody::ODC_SRQ_MBA_SYNCCNTLQ, mss::c_str(l_ocmb));
+                    break;
+
+                default :
+                    // Error if DRAM generation not found above in case statements
+                    FAPI_ASSERT(false,
+                                fapi2::MSS_UNSUPPORTED_DRAM_GEN().
+                                set_DRAM_GEN(l_dram_gen).
+                                set_PORT_TARGET(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm_target)),
+                                "Unsupported DRAM generation (%d) in configure_ocmb_sync_operations. target: %s",
+                                l_dram_gen,
+                                mss::c_str(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm_target)));
+            }
+
+            // break out since all DIMMs for this OCMB will have the same DRAM generation
+            break;
+        }
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
