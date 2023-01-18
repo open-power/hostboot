@@ -874,7 +874,7 @@
     <valueType>uint8</valueType>
     <enum>ALLOW = 1, REJECT = 0</enum>
     <platInit/>
-    <default>REJECT</default>
+    <default>ALLOW</default>
     <mssAccessorName>mrw_allow_ddr5</mssAccessorName>
   </attribute>
 
