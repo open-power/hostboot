@@ -128,6 +128,9 @@ enum api_addr_bits
     MRA7_0      = 56,
     MRA7_0_LEN  = 8,
 
+    MR_OP7_0      = 56,
+    MR_OP7_0_LEN  = 8,
+
     ROW3_0      = 60,
     ROW3_0_LEN  = 4,
     ROW16_4     = 47,
@@ -220,6 +223,19 @@ void add_mra7_0(const fapi2::buffer<uint64_t>& i_mra, fapi2::buffer<uint64_t>& i
     addr_bit_swizzle<TT::MRA0_7, api_addr_bits::MRA7_0_LEN, api_addr_bits::MRA7_0>( i_mra, io_inst0 );
 }
 
+///
+/// @brief Adds MROP[7:0] to a command
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
+/// @param[in] i_mro the MRO to add in - MRO is in the format of MRO[7:0]
+/// @param[in,out] io_inst0 the instruction on which to operate
+///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+void add_mr_op7_0(const fapi2::buffer<uint64_t>& i_mro, fapi2::buffer<uint64_t>& io_inst0)
+{
+    addr_bit_swizzle<TT::MR_OP0_7, api_addr_bits::MR_OP7_0_LEN, api_addr_bits::MR_OP7_0>( i_mro, io_inst0 );
+}
+
 /////////////////////////////////////////////
 ///////// Function to default WRDATA_CSN bits
 /////////////////////////////////////////////
@@ -290,14 +306,16 @@ inline instruction_t<MC> act_command( const uint64_t i_port_rank,
 /// @tparam MC The memory controller type of the traits
 /// @tparam TT the CCS traits related to MC
 /// @param[in] i_num the mode register number for this command
+/// @param[in] i_data the mode register data for this command
 /// @param[in,out] i_arr0 fapi2::buffer<uint64_t> representing the ARR0 of the instruction
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
-static void mrs_rcd_helper( const uint64_t i_num, fapi2::buffer<uint64_t>& io_arr0 )
+static void mrs_rcd_helper( const uint64_t i_num, const uint64_t i_data, fapi2::buffer<uint64_t>& io_arr0 )
 {
     io_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::MRW);
-
     add_mra7_0<MC>(i_num, io_arr0);
+
+    add_mr_op7_0<MC>(i_data, io_arr0);
 }
 
 ///
@@ -305,17 +323,19 @@ static void mrs_rcd_helper( const uint64_t i_num, fapi2::buffer<uint64_t>& io_ar
 /// @tparam MC The memory controller type of the traits
 /// @tparam TT the CCS traits related to MC
 /// @param[in] i_rcd the RCD number for this instruction
+/// @param[in] i_rcd_data the specific op code for the MR in this format MR[7:0]
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the RCD CCS instruction
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 inline instruction_t<MC> rcd_command(const uint64_t i_rcd,
+                                     const uint64_t i_rcd_data,
                                      const uint16_t i_idle = 0)
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
-    mrs_rcd_helper<MC>(i_rcd, l_boilerplate_arr0);
+    mrs_rcd_helper<MC>(i_rcd, i_rcd_data, l_boilerplate_arr0);
 
     l_boilerplate_arr0.template setBit<TT::CW>();
 
@@ -329,18 +349,20 @@ inline instruction_t<MC> rcd_command(const uint64_t i_rcd,
 /// @tparam TT the CCS traits related to MC
 /// @param[in] i_port_rank the port rank
 /// @param[in] i_mrs the specific MRS
+/// @param[in] i_mr_data the specific op code for the MR in this format MR[7:0]
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the MRW CCS instruction
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 inline instruction_t<MC> mrw_command ( const uint64_t i_port_rank,
                                        const uint64_t i_mrs,
+                                       const uint64_t i_mr_data,
                                        const uint16_t i_idle = 0 )
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
-    mrs_rcd_helper<MC>(i_mrs, l_boilerplate_arr0);
+    mrs_rcd_helper<MC>(i_mrs, i_mr_data, l_boilerplate_arr0);
 
     l_boilerplate_arr0.template clearBit<TT::CW>();
 
