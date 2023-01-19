@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,6 +86,20 @@ namespace HTMGT
         return l_found;
     }
 
+    // Return true if Oversubscription errors should be ignored
+    bool ignore_oversub_check()
+    {
+        bool l_ignoreOversub = false;
+        uint8_t ignoreFlag = 0;
+
+        TARGETING::Target* sys = TARGETING::UTIL::assertGetToplevelTarget();
+        if (sys->tryGetAttr<TARGETING::ATTR_IGNORE_OVERSUB_ERRORS>(ignoreFlag))
+        {
+            l_ignoreOversub = (ignoreFlag != 0);
+        }
+
+        return l_ignoreOversub;
+    }
 
     // Process elog entry from OCC poll response
     void Occ::occProcessElog(const uint8_t  i_id,
@@ -149,218 +163,227 @@ namespace HTMGT
                              " - NOT AN ERROR");
                 }
 
-                // Translate Severity
-                const uint8_t l_occSeverity = l_occElog->severity;
-                if (l_occSeverity < OCC_SEV_ACTION_XLATE_SIZE)
+                if ( (i_source == OCC_ERRSRC_405) &&
+                     ((l_occSrc == 0x2A05) || (l_occSrc == 0x2A33)) &&
+                     (ignore_oversub_check()) )
                 {
-                    severity =
-                     occSeverityErrorActionXlate[l_occSeverity].occErrlSeverity;
+                    TMGT_INF("Ignoring 0x%04X due to IGNORE_OVERSUB_ERRORS attribute", l_occSrc);
                 }
                 else
                 {
-                    TMGT_ERR("occProcessElog: Severity translate failure"
-                             " (severity = 0x%02X)", l_occElog->severity);
-                }
-
-                // Process Actions
-                bool l_call_home_event = false;
-                elogProcessActions(l_occElog->actions,
-                                   l_occSrc,
-                                   l_usrDtls_ptr->userData1,
-                                   severity,
-                                   l_call_home_event);
-
-                // Create OCC error log
-                // NOTE: word 4 (used by extended reason code) to save off OCC
-                //       sub component value which is needed to correctly parse
-                //       srcs which have similar uniqueness
-                // NOTE: SRC tags are NOT required here as these logs will get
-                //       parsed with the OCC src tags
-                bldErrLog(l_errlHndl,
-                          (htmgtModuleId)(l_usrDtls_ptr->modId & 0x00FF),
-                          (htmgtReasonCode)l_occSrc, // occ reason code
-                          l_usrDtls_ptr->userData1,
-                          l_usrDtls_ptr->userData2,
-                          l_usrDtls_ptr->userData3,
-                          (l_usrDtls_ptr->modId << 16 ) |
-                          l_occElog->extendedRC, // extended reason code
-                          severity);
-
-
-                // Add callout information
-                const uint8_t l_max_callouts = l_occElog->maxCallouts;
-                bool l_bad_fru_data = false;
-                bool l_sensor_callout_found = false;
-                bool l_sensor_callout_invalid = true;
-                uint8_t numCallouts = 0;
-                uint8_t calloutIndex = 0;
-                while (calloutIndex < l_max_callouts)
-                {
-                    const occErrlCallout_t callout =
-                        l_occElog->callout[calloutIndex];
-                    if (callout.type != 0)
+                    // Translate Severity
+                    const uint8_t l_occSeverity = l_occElog->severity;
+                    if (l_occSeverity < OCC_SEV_ACTION_XLATE_SIZE)
                     {
-                        if (callout.type == OCC_CALLOUT_TYPE_SENSOR)
+                        severity =
+                            occSeverityErrorActionXlate[l_occSeverity].occErrlSeverity;
+                    }
+                    else
+                    {
+                        TMGT_ERR("occProcessElog: Severity translate failure"
+                                 " (severity = 0x%02X)", l_occElog->severity);
+                    }
+
+                    // Process Actions
+                    bool l_call_home_event = false;
+                    elogProcessActions(l_occElog->actions,
+                                       l_occSrc,
+                                       l_usrDtls_ptr->userData1,
+                                       severity,
+                                       l_call_home_event);
+
+                    // Create OCC error log
+                    // NOTE: word 4 (used by extended reason code) to save off OCC
+                    //       sub component value which is needed to correctly parse
+                    //       srcs which have similar uniqueness
+                    // NOTE: SRC tags are NOT required here as these logs will get
+                    //       parsed with the OCC src tags
+                    bldErrLog(l_errlHndl,
+                              (htmgtModuleId)(l_usrDtls_ptr->modId & 0x00FF),
+                              (htmgtReasonCode)l_occSrc, // occ reason code
+                              l_usrDtls_ptr->userData1,
+                              l_usrDtls_ptr->userData2,
+                              l_usrDtls_ptr->userData3,
+                              (l_usrDtls_ptr->modId << 16 ) |
+                              l_occElog->extendedRC, // extended reason code
+                              severity);
+
+
+                    // Add callout information
+                    const uint8_t l_max_callouts = l_occElog->maxCallouts;
+                    bool l_bad_fru_data = false;
+                    bool l_sensor_callout_found = false;
+                    bool l_sensor_callout_invalid = true;
+                    uint8_t numCallouts = 0;
+                    uint8_t calloutIndex = 0;
+                    while (calloutIndex < l_max_callouts)
+                    {
+                        const occErrlCallout_t callout =
+                            l_occElog->callout[calloutIndex];
+                        if (callout.type != 0)
                         {
-                            l_sensor_callout_found = true;
-                        }
-                        HWAS::callOutPriority priority;
-                        bool l_success = true;
-                        l_success = elogXlateSrciPriority(callout.priority,
-                                                          priority);
-                        if (l_success == true)
-                        {
-                            l_success = elogAddCallout(l_errlHndl,
-                                                       priority,
-                                                       callout,
-                                                       numCallouts);
-                            if (l_success)
+                            if (callout.type == OCC_CALLOUT_TYPE_SENSOR)
                             {
-                                if (callout.type == OCC_CALLOUT_TYPE_SENSOR)
+                                l_sensor_callout_found = true;
+                            }
+                            HWAS::callOutPriority priority;
+                            bool l_success = true;
+                            l_success = elogXlateSrciPriority(callout.priority,
+                                                              priority);
+                            if (l_success == true)
+                            {
+                                l_success = elogAddCallout(l_errlHndl,
+                                                           priority,
+                                                           callout,
+                                                           numCallouts);
+                                if (l_success)
                                 {
-                                    // Got at least one good sensor callout
-                                    l_sensor_callout_invalid = false;
+                                    if (callout.type == OCC_CALLOUT_TYPE_SENSOR)
+                                    {
+                                        // Got at least one good sensor callout
+                                        l_sensor_callout_invalid = false;
+                                    }
+                                }
+                                else
+                                {
+                                    l_bad_fru_data = true;
                                 }
                             }
                             else
                             {
                                 l_bad_fru_data = true;
+                                TMGT_ERR("occProcessElog: Priority translate"
+                                         " failure (priority = 0x%02X)",
+                                         callout.priority);
                             }
                         }
                         else
-                        {
-                            l_bad_fru_data = true;
-                            TMGT_ERR("occProcessElog: Priority translate"
-                                     " failure (priority = 0x%02X)",
-                                     callout.priority);
-                        }
-                    }
-                    else
-                    {   // make sure all the remaining callout data are zeros,
-                        // otherwise mark bad fru data
-                        const occErrlCallout_t zeros = { 0 };
-                        while (calloutIndex < l_max_callouts)
-                        {
-                            if (memcmp(&l_occElog->callout[calloutIndex],
-                                       &zeros, sizeof(occErrlCallout_t)))
+                        {   // make sure all the remaining callout data are zeros,
+                            // otherwise mark bad fru data
+                            const occErrlCallout_t zeros = { 0 };
+                            while (calloutIndex < l_max_callouts)
                             {
-                                TMGT_ERR("occProcessElog: The remaining"
-                                         " callout data should be all zeros");
-                                l_bad_fru_data = true;
-                                break;
+                                if (memcmp(&l_occElog->callout[calloutIndex],
+                                           &zeros, sizeof(occErrlCallout_t)))
+                                {
+                                    TMGT_ERR("occProcessElog: The remaining"
+                                             " callout data should be all zeros");
+                                    l_bad_fru_data = true;
+                                    break;
+                                }
+                                ++calloutIndex;
                             }
-                            ++calloutIndex;
+                            break;
                         }
-                        break;
+                        ++calloutIndex;
                     }
-                    ++calloutIndex;
-                }
 
-                // Any bad fru data found ?
-                errlHndl_t err2 = nullptr;
-                if (l_bad_fru_data == true)
-                {
-                    TMGT_BIN("Callout Data", &l_occElog->callout[0],
-                             sizeof(occErrlCallout)*ERRL_MAX_CALLOUTS);
-                    /*@
-                     * @errortype
-                     * @refcode LIC_REFCODE
-                     * @subsys EPUB_FIRMWARE_SP
-                     * @reasoncode HTMGT_RC_BAD_FRU_CALLOUTS
-                     * @moduleid HTMGT_MODID_PROCESS_ELOG
-                     * @userdata1[0:15]  OCC elog id
-                     * @userdata1[16:31] Bad callout index
-                     * @devdesc Bad FRU data received in OCC error log
-                     * @custdesc An internal firmware error occurred
-                     */
-                    bldErrLog(err2, HTMGT_MODID_PROCESS_ELOG,
-                              HTMGT_RC_BAD_FRU_CALLOUTS,
-                              i_id, calloutIndex, 0, 0,
-                              ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                    ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
-                }
-
-                bool l_addProcCallout = false;
-                if (l_sensor_callout_found && l_sensor_callout_invalid)
-                {
-                    // OCC called out sensor, but no valid sensors found so add proc callout
-                    l_addProcCallout = true;
-                }
-
-                if ((numCallouts == 0) &&
-                    (severity != ERRORLOG::ERRL_SEV_INFORMATIONAL))
-                {
-                    if (i_source == OCC_ERRSRC_405)
+                    // Any bad fru data found ?
+                    errlHndl_t err2 = nullptr;
+                    if (l_bad_fru_data == true)
                     {
-                        TMGT_ERR("occProcessElog: No FRU callouts found for "
-                                 "OCC%d elog_id:0x%02X, severity:0x%0X",
-                                 iv_instance, i_id, severity);
+                        TMGT_BIN("Callout Data", &l_occElog->callout[0],
+                                 sizeof(occErrlCallout)*ERRL_MAX_CALLOUTS);
                         /*@
                          * @errortype
                          * @refcode LIC_REFCODE
                          * @subsys EPUB_FIRMWARE_SP
-                         * @reasoncode HTMGT_RC_MISMATCHING_SEVERITY
+                         * @reasoncode HTMGT_RC_BAD_FRU_CALLOUTS
                          * @moduleid HTMGT_MODID_PROCESS_ELOG
                          * @userdata1[0:15]  OCC elog id
-                         * @userdata1[16:31] OCC severity
-                         * @devdesc No FRU callouts found for non-info OCC Error
+                         * @userdata1[16:31] Bad callout index
+                         * @devdesc Bad FRU data received in OCC error log
                          * @custdesc An internal firmware error occurred
                          */
                         bldErrLog(err2, HTMGT_MODID_PROCESS_ELOG,
-                                  HTMGT_RC_MISMATCHING_SEVERITY,
-                                  i_id, severity, 0, 0,
+                                  HTMGT_RC_BAD_FRU_CALLOUTS,
+                                  i_id, calloutIndex, 0, 0,
                                   ERRORLOG::ERRL_SEV_INFORMATIONAL);
                         ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
                     }
-                    else
+
+                    bool l_addProcCallout = false;
+                    if (l_sensor_callout_found && l_sensor_callout_invalid)
                     {
-                        // Add processor callout for PM code logs with not callout
+                        // OCC called out sensor, but no valid sensors found so add proc callout
                         l_addProcCallout = true;
                     }
-                }
 
-                if (l_addProcCallout)
-                {
-                    // Add Processor callout for PGPE/XGPE/QME
-                    TMGT_ERR("occProcessElog: Adding processor callout for"
-                             " OCC%d", iv_instance);
-                    TARGETING::ConstTargetHandle_t l_proc_target =
-                        TARGETING::getParentChip(iv_target);
-                    l_errlHndl->addHwCallout(l_proc_target,
-                                             HWAS::SRCI_PRIORITY_MED,
-                                             HWAS::NO_DECONFIG,
-                                             HWAS::GARD_NULL);
-                }
-
-                if (int_flags_set(FLAG_HALT_ON_OCC_SRC))
-                {
-                    // Check if OCC SRC matches our trigger SRC
-                    if ((l_occSrc & 0xFF) == (get_int_flags() >> 24))
+                    if ((numCallouts == 0) &&
+                        (severity != ERRORLOG::ERRL_SEV_INFORMATIONAL))
                     {
-                        TMGT_ERR("occProcessElog: OCC%d reported 0x%04X and "
-                                 "HALT_ON_SRC is set.  Resets will be disabled",
-                                 iv_instance, l_occSrc);
-                        set_int_flags(get_int_flags() | FLAG_RESET_DISABLED);
-                        // Force unrecoverable elog
-                        l_errlHndl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                        if (i_source == OCC_ERRSRC_405)
+                        {
+                            TMGT_ERR("occProcessElog: No FRU callouts found for "
+                                     "OCC%d elog_id:0x%02X, severity:0x%0X",
+                                     iv_instance, i_id, severity);
+                            /*@
+                             * @errortype
+                             * @refcode LIC_REFCODE
+                             * @subsys EPUB_FIRMWARE_SP
+                             * @reasoncode HTMGT_RC_MISMATCHING_SEVERITY
+                             * @moduleid HTMGT_MODID_PROCESS_ELOG
+                             * @userdata1[0:15]  OCC elog id
+                             * @userdata1[16:31] OCC severity
+                             * @devdesc No FRU callouts found for non-info OCC Error
+                             * @custdesc An internal firmware error occurred
+                             */
+                            bldErrLog(err2, HTMGT_MODID_PROCESS_ELOG,
+                                      HTMGT_RC_MISMATCHING_SEVERITY,
+                                      i_id, severity, 0, 0,
+                                      ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                            ERRORLOG::errlCommit(err2, HTMGT_COMP_ID);
+                        }
+                        else
+                        {
+                            // Add processor callout for PM code logs with not callout
+                            l_addProcCallout = true;
+                        }
                     }
-                }
+
+                    if (l_addProcCallout)
+                    {
+                        // Add Processor callout for PGPE/XGPE/QME
+                        TMGT_ERR("occProcessElog: Adding processor callout for"
+                                 " OCC%d", iv_instance);
+                        TARGETING::ConstTargetHandle_t l_proc_target =
+                            TARGETING::getParentChip(iv_target);
+                        l_errlHndl->addHwCallout(l_proc_target,
+                                                 HWAS::SRCI_PRIORITY_MED,
+                                                 HWAS::NO_DECONFIG,
+                                                 HWAS::GARD_NULL);
+                    }
+
+                    if (int_flags_set(FLAG_HALT_ON_OCC_SRC))
+                    {
+                        // Check if OCC SRC matches our trigger SRC
+                        if ((l_occSrc & 0xFF) == (get_int_flags() >> 24))
+                        {
+                            TMGT_ERR("occProcessElog: OCC%d reported 0x%04X and "
+                                     "HALT_ON_SRC is set.  Resets will be disabled",
+                                     iv_instance, l_occSrc);
+                            set_int_flags(get_int_flags() | FLAG_RESET_DISABLED);
+                            // Force unrecoverable elog
+                            l_errlHndl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                        }
+                    }
 
 #ifdef CONFIG_CONSOLE_OUTPUT_OCC_COMM
-                char header[64];
-                sprintf(header, "OCC%d ELOG: (0x%04X bytes)", iv_instance,
-                        i_length);
-                dumpToConsole(header, (const uint8_t *)l_occElog,
-                              std::min(i_length,(uint16_t)512));
+                    char header[64];
+                    sprintf(header, "OCC%d ELOG: (0x%04X bytes)", iv_instance,
+                            i_length);
+                    dumpToConsole(header, (const uint8_t *)l_occElog,
+                                  std::min(i_length,(uint16_t)512));
 #endif
 
-                // Add full OCC error log data as a User Details section
-                l_errlHndl->addFFDC(l_comp_id,
-                                    l_occElog,
-                                    i_length,
-                                    1,  // version
-                                    0); // subsection
-                ERRORLOG::errlCommit(l_errlHndl, HTMGT_COMP_ID);
+                    // Add full OCC error log data as a User Details section
+                    l_errlHndl->addFFDC(l_comp_id,
+                                        l_occElog,
+                                        i_length,
+                                        1,  // version
+                                        0); // subsection
+                    ERRORLOG::errlCommit(l_errlHndl, HTMGT_COMP_ID);
+                }
             }
             else
             {

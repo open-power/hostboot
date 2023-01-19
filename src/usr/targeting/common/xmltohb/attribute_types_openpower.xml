@@ -1140,6 +1140,21 @@
   </attribute>
 
   <attribute>
+    <id>IGNORE_OVERSUB_ERRORS</id>
+    <description>
+        Set to 0x01 to indicate that oversubscription errors from the OCC should be ignored.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0x00</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>IPMI_INSTANCE</id>
     <description>Holds the IPMI instance number for this entity.</description>
     <simpleType>

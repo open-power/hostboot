@@ -360,6 +360,9 @@
       <id>HYP_INHIBIT_RUNTIME_BMC_RESET</id>
     </attribute>
     <attribute>
+      <id>IGNORE_OVERSUB_ERRORS</id>
+    </attribute>
+    <attribute>
       <id>IPMI_MAX_BUFFER_SIZE</id>
     </attribute>
     <attribute>
