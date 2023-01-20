@@ -2072,12 +2072,23 @@
 
   <targetType>
     <!-- Special target to decode the 4U DDIMM from the MRW -->
+    <id>lcard-dimm-ddimm-ddr5-4u</id>
+    <parent>lcard-dimm-ddimm</parent>
+  </targetType>
+
+  <targetType>
+    <!-- Special target to decode the 4U DDIMM from the MRW -->
     <id>lcard-dimm-ddimm4u</id>
     <parent>lcard-dimm-ddimm</parent>
   </targetType>
 
   <targetType>
     <id>lcard-dimm-ddr4</id>
+    <parent>lcard-dimm</parent>
+  </targetType>
+
+  <targetType>
+    <id>lcard-dimm-ddr5</id>
     <parent>lcard-dimm</parent>
   </targetType>
 

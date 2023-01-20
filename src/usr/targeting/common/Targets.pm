@@ -906,7 +906,8 @@ sub getFapiName
     elsif ($targetType eq "PROC"   || $targetType eq "DIMM" ||
            $targetType eq "MEMBUF" || $targetType eq "PMIC" ||
            $targetType eq "OCMB_CHIP" || $targetType eq "GENERIC_I2C_DEVICE" ||
-           $targetType eq "MDS_CTLR" )
+           $targetType eq "MDS_CTLR"  || $targetType eq "POWER_IC" ||
+           $targetType eq "TEMP_SENSOR")
     {
         if ($node eq "" || $chipPos eq "")
         {

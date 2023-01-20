@@ -117,8 +117,10 @@ my %MAX_INST_PER_PARENT =
     MDS_CTLR  => 1, # Number of MDS_CTLRs per OCMB
     PMIC      => 4, # Number of PMICs per OCMB.  Adjusted for future
                     # systems.  Meaning, the current system may not have this many.
+    POWER_IC  => 4, # Number of POWER_ICs per OCMB
     GENERIC_I2C_DEVICE  => 4, # Number of GENERIC_I2C_DEVICEs per OCMB.
                               # Max of 4, but not all DIMMs will have these.
+    TEMP_SENSOR => 3, # Number of TEMP_SENSORs per OCMB
     MEM_PORT  => 2, # Number of MEM_PORTs per OCMB
     DIMM      => 2, # Number of DIMMs per MEM_PORT
 
@@ -169,6 +171,9 @@ my %MAX_INST_PER_PROC =
     OCMB_CHIP  => getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
                   getMaxInstPerParent("MCC") * getMaxInstPerParent("OMI") *
                   getMaxInstPerParent("OCMB_CHIP"),
+    TEMP_SENSOR=> getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
+                  getMaxInstPerParent("MCC") * getMaxInstPerParent("OMI") *
+                  getMaxInstPerParent("OCMB_CHIP") * getMaxInstPerParent("TEMP_SENSOR"),
     MEM_PORT   => getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
                   getMaxInstPerParent("MCC") * getMaxInstPerParent("OMI") *
                   getMaxInstPerParent("OCMB_CHIP") * getMaxInstPerParent("MEM_PORT"),
@@ -182,6 +187,10 @@ my %MAX_INST_PER_PROC =
     PMIC       => getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
                   getMaxInstPerParent("MCC") * getMaxInstPerParent("OMI") *
                   getMaxInstPerParent("OCMB_CHIP") * getMaxInstPerParent("PMIC"),
+
+    POWER_IC   => getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
+                  getMaxInstPerParent("MCC") * getMaxInstPerParent("OMI") *
+                  getMaxInstPerParent("OCMB_CHIP") * getMaxInstPerParent("POWER_IC"),
 
     GENERIC_I2C_DEVICE =>
                   getMaxInstPerParent("MC") * getMaxInstPerParent("MI") *
@@ -530,7 +539,7 @@ sub processTargets
     # Excluding the SYS target, which is the starting point, the targets in
     # this list are targets that are not easily accessible from the SYS target,
     # the NODE target or as a child from the given targets. Example, the PROC
-    # is not directly accessible from the SYS target or it's child, the NODE
+    # is not directly accessible from the SYS target or its child, the NODE
     # target. The same is true for the DIMM, BMC, POWER_SEQUENCER and TPM
     my @processTargetControl = qw (SYS PROC DIMM BMC POWER_SEQUENCER TPM OCMB_CHIP);
     foreach my $targetTypeControl (@processTargetControl)
@@ -565,10 +574,12 @@ sub processTargets
             # Look for DDIMMs (note the double "D")
             elsif ( ($type eq "DIMM")   &&
                     (($xmlType eq "lcard-dimm-ddimm") ||
-                     ($xmlType eq "lcard-dimm-ddimm4u")) )
+                     ($xmlType eq "lcard-dimm-ddimm4u") ||
+                     ($xmlType eq "lcard-dimm-ddimm-ddr5") ||
+                     ($xmlType eq "lcard-dimm-ddimm-ddr5-4u")) )
             {
-                # The P10 children that get processed are PMIC, OCMB, MEM_PORT,
-                # and GENERIC_I2C_DEVICE
+                # The P10 children that get processed are PMIC, POWER_IC, OCMB,
+                # MEM_PORT, TEMP_SENSOR, and GENERIC_I2C_DEVICE
                 processDdimmAndChildren($targetObj, $target);
             }
             # Look for Industry Standard DIMMs (aka ISDIMMs)
@@ -1173,7 +1184,7 @@ sub processProcessorAndChildren
     markTargetAsProcessed($targetObj, $target);
 
     # Iterate over the children of the PROC and set some attributes for them
-    # NOTE: Must send in the target PROC itself, not it's children.
+    # NOTE: Must send in the target PROC itself, not its children.
     # Rainier children: CORE, EQ, FC, IOHS, ABUS, MC, MCC, MI, NMMU, NX,
     #         OCC, OMI, OMIC, OSCREFCLK, PAU, PAUC, PEC, PERV, SEEPROM
     # Children may differ for different systems.
@@ -1183,7 +1194,7 @@ sub processProcessorAndChildren
 
 #--------------------------------------------------
 # @brief Process targets of type DIMM and its children,
-#        like PMIC, GENERIC_I2C_DEVICE, and OCMB
+#        like PMIC, POWER_IC, GENERIC_I2C_DEVICE, and OCMB
 #
 # @pre SYS, NODE and PROC targets need to be processed beforehand
 #
@@ -1222,85 +1233,50 @@ sub processDdimmAndChildren
     my $procPosRelativeToNode = "ERR";
     my $omiIdPerProc = 0;
 
-    # Find connections for target (DIMM) of bus type ("OMI"), ignore
-    # connections FROM this target ("") but find connections TO this target(1).
-    my $conn = $targetObj->findConnectionsByDirection($target, "OMI", "", 1);
-    if ($conn ne "")
+    # Waterfall logic to find the DDR connection
+    my $is_ddr5 = false;
+    my $source_ddr = "ERR";
+    my $conn_ddr = $targetObj->findConnectionsByDirection($target, "DDR5", "", 1);
+    if ($conn_ddr eq "") {
+        $conn_ddr = $targetObj->findConnectionsByDirection($target, "DDR4", "", 1);
+    }
+    else
     {
-        # Find the OMI bus connection to determine target values
-        my $mc_num   = "ERR";
-        my $mi_num   = "ERR";
-        my $mcc_num  = "ERR";
-        my $omi_num  = "ERR";
-        my $ocmb_num = "ERR";
-        my $mem_num  = "ERR";
+        $is_ddr5 = true;
+    }
 
-        foreach my $conn (@{$conn->{CONN}})
+    if ($conn_ddr ne "")
+    {
+        # Use the DDR connection to get the OCMB_CHIP info (via MEM_PORT)
+        foreach my $conn_ddr_loop (@{$conn_ddr->{CONN}})
         {
-            my $source = $conn->{SOURCE};
-            # Split the source into proc#, mc#, mi#, mcc#, omic#, omi#
-            my @targets = split(/\//, $source);
-            # Splitting on "/" makes the first array index an empty string,
-            # to correct for this we can simply shift off the first element.
-            shift @targets;
-            # After splitting and the shift:
-            # Source example:/sys-#/node-#/nisqually-#/proc_socket-#/godel-#/power10-#/mc#/mi#/mcc#/omic#/omi#
-            # Array index     0     1      2           3             4       5         6   7   8    9     10
+            $source_ddr = $conn_ddr_loop->{SOURCE};
+            print "processDdimmAndChildren: DDR conn source=$source_ddr\n" if $targetObj->{debug};
 
-            # Strip down the target names to just the instance numbers.
-            # Due to inconsistent naming and numerical characters being present
-            # in some instance names that aren't the instance number this needs
-            # to be done in two steps.
-            foreach my $target (@targets)
-            {
-                # This removes all characters before the -
-                # ex. power10-1 becomes 1
-                $target =~ s/.*-//g;
-                # This removes all non-digit characters.
-                # ex. omi0 becomes 0
-                $target =~ s/\D//g;
-            }
+            # The DDR connection returns a MEM_PORT, so get its OCMB parent
+            # and the instance position of the mem port
+            # NOTE: Going on the assumption that 1 OCMB per DDIMM
+            #
+            my $ocmbParent = $targetObj->getTargetParent($source_ddr);
+            my $memPortInstancePos = $targetObj->getInstanceNum($source_ddr);
 
-            # Index into the targets array, with identification of index data
-            use constant PROC_SOCKET_INDEX => 3;
-            use constant PROC_INDEX        => 5;
-            use constant MC_INDEX          => 6;
-            use constant MI_INDEX          => 7;
-            use constant MCC_INDEX         => 8;
-            use constant OMI_INDEX         => 10;
+            # Call helper function to get affinity and other information from OMI connection
+            ($ddimmAffinity, $ddimmPosPerParent, $procPosRelativeToNode, $omiIdPerProc)
+                = getDataFromOmiConnection($targetObj, $ocmbParent, "DIMM", $memPortInstancePos);
+        }
+    }
+    else
+    {
+        # Legacy support for MRWs that are missing DDR connection
+        # data, e.g. pre-DDR5 Denali. For these, always assume a
+        # 1-to-1 relationship of OCMB:DIMM:MEMPORT.
 
-            # Target breakdown, excerpt from simics_P10.system.xml:
-            # Each P10 has 4 MC units
-            # =>Each MC unit has 1 MI unit (a total of 4 per chip)
-            # ==>Each MI unit has 2 MCC units (a total of 8 per chip)
-            # ===>Each MCC unit has 2 OMI Units (A total of 16 per chip)
-            # NOTE: OMI Units are special as they have two parents (MCC + OMIC)
-            use integer;
-            $procPosRelativeToNode =
-                calculateProcPositionPerNode($targetObj,
-                                             $targets[PROC_SOCKET_INDEX],
-                                             $targets[PROC_INDEX]);
+        my $memPortInstancePos = 0;
 
-            $mc_num = $targets[MC_INDEX] % getMaxInstPerParent("MC");
-            $mi_num = $targets[MI_INDEX]   % getMaxInstPerParent("MI");
-            $mcc_num = $targets[MCC_INDEX] % getMaxInstPerParent("MCC");
-            $omi_num = $targets[OMI_INDEX] % getMaxInstPerParent("OMI");
-            $omiIdPerProc = $targets[OMI_INDEX];
-
-            # The values for these are 0
-            # NOTE: Going on the assumption that 1 OCMB per DDIMM with
-            #       1 MEM_PORT and 1 DIMM, but this may not always be case.
-            $ocmb_num = 0;
-            $mem_num  = 0;
-            $ddimmPosPerParent = 0;
-
-            # Update the affinity path with the data gathered above.
-            $ddimmAffinity = "/proc-$procPosRelativeToNode/mc-$mc_num/".
-                             "mi-$mi_num/mcc-$mcc_num/omi-$omi_num/".
-                             "ocmb_chip-$ocmb_num/mem_port-$mem_num/".
-                             "dimm-$ddimmPosPerParent";
-        } # end foreach my $conn (@{$conn->{CONN}})
-    } # end if ($conn ne "")
+        # Call helper function to get affinity and other information from OMI connection
+        ($ddimmAffinity, $ddimmPosPerParent, $procPosRelativeToNode, $omiIdPerProc)
+            = getDataFromOmiConnection($targetObj, $target, "DIMM", $memPortInstancePos);
+    }
 
     # Make a temporary attribute to remember the logical position of the DDIMM
     #  based on the OMI logic.  This will be used to process the downstream
@@ -1374,6 +1350,7 @@ sub processDdimmAndChildren
     # Sanity check flag, to make sure that this code is still valid.
     my $foundPmic = false;
     my $foundOcmb = false;
+    my $foundPowerIc = false;
 
     # If an error, such as 'Can't use string ("") as an ARRAY', then the
     # structure of the MRW has changed and this script needs updating.
@@ -1384,10 +1361,33 @@ sub processDdimmAndChildren
 
         if ($childTargetType eq "chip-vreg-generic")
         {
-            # Update TYPE to PMIC, because it is set to N/A and that won't fly
-            $targetObj->setAttribute($child, "TYPE", "PMIC");
-            processPmic($targetObj, $child, $dimmId);
-            $foundPmic = true;
+            my $childInstanceName = $targetObj->getInstanceName($child);
+
+            # Strip off hyphen and/or instance number
+            $childInstanceName =~ s/\-?\d$//g;
+
+            # Update to appropriate TYPE, because it is set to N/A and that won't fly
+            if ($childInstanceName eq "pmic")
+            {
+                $targetObj->setAttribute($child, "TYPE", "PMIC");
+                processPmic($targetObj, $child, $dimmId);
+                $foundPmic = true;
+            }
+            elsif ($childInstanceName eq "dt")
+            {
+                $targetObj->setAttribute($child, "TYPE", "POWER_IC");
+                processPowerIc($targetObj, $child, $dimmId);
+                $foundPowerIc = true;
+            }
+            else
+            {
+                select()->flush(); # flush buffer before spewing out error message
+                die "\nprocessDdimmAndChildren::ERROR: Encountered an unsupported " .
+                    "instance type ($childInstanceName) for this DDIMM ($target). " .
+                    " Did the MRW structure change?  If so update this script to " .
+                    "reflect changes.  Error"
+            }
+
         }
         elsif ($childType eq "OCMB_CHIP")
         {
@@ -1417,6 +1417,15 @@ sub processDdimmAndChildren
     {
         select()->flush(); # flush buffer before spewing out error message
         die "\nprocessDdimmAndChildren::ERROR: Did not find an \"OCMB\" " .
+            "child for this DDIMM ($target). Did the MRW structure " .
+            "change?  If so update this script to reflect changes.  Error"
+    }
+
+    # This check should only be performed for DDR5 4U DDIMM
+    if ($is_ddr5 == true && $foundPowerIc == false)
+    {
+        select()->flush(); # flush buffer before spewing out error message
+        die "\nprocessDdimmAndChildren::ERROR: Did not find a \"POWER_IC\" " .
             "child for this DDIMM ($target). Did the MRW structure " .
             "change?  If so update this script to reflect changes.  Error"
     }
@@ -1501,7 +1510,7 @@ sub processIsdimmAndChildren
 
             # Call helper function to get affinity and other information from OMI connection
             ($dimmAffinity, $dimmPosPerParent, $procPosRelativeToNode, $omiIdPerProc)
-                = getDataFromOmiConnection($targetObj, $ocmbParent, "DIMM");
+                = getDataFromOmiConnection($targetObj, $ocmbParent, "DIMM", 0);
 
         } # end of loop on each ddr4 connection
     } # end of ($conn_ddr4 ne "") check
@@ -1644,6 +1653,57 @@ sub processPmic
 } # end sub processPmic
 
 #--------------------------------------------------
+# @brief Process targets of type POWER_IC
+#
+# @pre DIMM targets need to be processed beforehand
+#
+# @param[in] $targetObj - The global target object blob
+# @param[in] $target    - The POWER_IC target
+# @param[in] $dimmId    - The DIMM's ID, used to calculate the POWER_IC's ID
+#--------------------------------------------------
+sub processPowerIc
+{
+    my $targetObj = shift;
+    my $target    = shift;
+    my $dimmId    = shift;
+
+    my $path = $targetObj->getAttribute($target,"INSTANCE_PATH");
+    my $name = $targetObj->getInstanceName($target);
+    print "processPowerIc($name,$path,$dimmId)\n"  if $targetObj->{debug};
+    # Some sanity checks.  Make sure we are processing the correct target type
+    # and make sure the target's parent has been processed.
+    my $targetType = targetTypeSanityCheck($targetObj, $target, "POWER_IC");
+    validateParentHasBeenProcessed($targetObj, $target);
+
+    # 1 OCMB per DDIMM so compute the number of my type per OCMB
+    my $maxPerOcmb = getMaxInstPerParent($targetType);
+
+    # Set the POWER_IC's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
+    # FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
+    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target,
+                                                     $dimmId, $targetType,
+                                                     $maxPerOcmb);
+
+    # Set the FAPI_I2C_CONTROL_INFO attribute
+    setFapi2AttributeForDdimmI2cDevices($targetObj, $target, $targetType);
+
+    # Get some useful data from the POWER_IC parent's SYS, NODE and self targets
+    my $sysParent = $targetObj->findParentByType($target, "SYS");
+    my $sysParentPos = $targetObj->getAttribute($sysParent, "ORDINAL_ID");
+    my $nodeParent = $targetObj->findParentByType($target, "NODE");
+    my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
+    my $powerIcPosPerSystem = $targetObj->getAttribute($target, "FAPI_POS");
+
+    # Save this target for retrieval later when printing the xml (sub printXML)
+    $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
+                {POWER_ICS}[$powerIcPosPerSystem]{KEY} = $target;
+    print "*** Saving SYS-$sysParentPos/NODES-$nodeParentPos/POWER_ICS-$powerIcPosPerSystem\n"  if $targetObj->{debug};
+
+    # Mark this target as processed
+    markTargetAsProcessed($targetObj, $target);
+} # end sub processPower_Ic
+
+#--------------------------------------------------
 # @brief Process targets of type GENERIC_I2C_DEVICE
 #
 # @pre DIMM targets need to be processed beforehand
@@ -1668,7 +1728,7 @@ sub processGenericI2cDevice
     validateParentHasBeenProcessed($targetObj, $target);
 
     ## Get the instance name and set the device type (I2C_DEV_TYPE).
-    # Currently supported instance names: adc0, adc1, PCA9554A, PCA9554B
+    # Currently supported instance names: adc0, adc1, PCA9554A/B
     # Although different, the ADCs and the GPIO Expanders (PCA9554A/B) are grouped
     # together under GENERIC_I2C_DEVICES.
     # Instance position is set in method setCommonAttributesForTargetsAssociatedWithDdimm below.
@@ -1771,7 +1831,7 @@ sub processMdsCtlr
 } # end sub processMdsCtlr
 
 #--------------------------------------------------
-# @brief Process targets of type OCMB_CHIP and it's child MEM_PORT
+# @brief Process targets of type OCMB_CHIP and its child MEM_PORT
 #
 # @pre DIMM targets need to be processed beforehand
 #
@@ -1826,18 +1886,35 @@ sub processOcmbChipAndChildren
     # Mark this target as processed
     markTargetAsProcessed($targetObj, $target);
 
-    ## Process child MEM_PORT. Children may differ for different systems.
+    ## Process children MEM_PORT and TEMP_SENSOR
+    # Children may differ for different systems.
     # Sanity check flag, to make sure that this code is still valid.
     my $foundMemPort = false;
+    my $foundTempSensor = false;
 
-    # If an error, such as 'Can't use string ("") as an ARRAY', then the
-    # structure of the MRW has changed and this script needs updating.
     foreach my $child (@{ $targetObj->getTargetChildren($target) })
     {
-        if ( ($targetObj->getType($child)) eq "MEM_PORT")
+        my $childType = $targetObj->getType($child);
+
+        if ($childType eq "MEM_PORT")
         {
             processMemPort($targetObj, $child);
             $foundMemPort = true;
+        }
+        else
+        {
+            my $childInstanceName = $targetObj->getInstanceName($child);
+
+            # Strip off hyphen and/or instance number
+            $childInstanceName =~ s/\-?\d$//g;
+
+            # Update to appropriate TYPE, because it is set to N/A and that won't fly
+            if ($childInstanceName eq "i2c-ts")
+            {
+                $targetObj->setAttribute($child, "TYPE", "TEMP_SENSOR");
+                processTempSensor($targetObj, $child);
+                $foundTempSensor = true;
+            }
         }
     }
 
@@ -1845,6 +1922,19 @@ sub processOcmbChipAndChildren
     {
         select()->flush(); # flush buffer before spewing out error message
         die "\nprocessOcmbChipAndChildren::ERROR: Did not find a \"MEM_PORT\" " .
+            "child for this OCMB_CHIP ($target). Did the MRW structure " .
+            "change?  If so update this script to reflect changes.  Error"
+    }
+
+    # This check should only be performed for DDR5 4U DDIMM
+    my $ocmbParent = $targetObj->getTargetParent($target);
+    my $conn_ddr5 = $targetObj->findConnectionsByDirection($ocmbParent, "DDR5", "", 1);
+    my $is_ddr5 = $conn_ddr5 ne "" ? true : false;
+
+    if ($is_ddr5 == true && $foundTempSensor == false)
+    {
+        select()->flush(); # flush buffer before spewing out error message
+        die "\nprocessOcmbChipAndChildren::ERROR: Did not find a \"TEMP_SENSOR\" " .
             "child for this OCMB_CHIP ($target). Did the MRW structure " .
             "change?  If so update this script to reflect changes.  Error"
     }
@@ -1886,7 +1976,7 @@ sub processOcmbChipPlanarAndChildren
 
     # Call helper function to get affinity and other information from OMI connection
     ($ocmbAffinity, $ocmbPosPerParent, $procPosRelativeToNode, $omiIdPerProc)
-      = getDataFromOmiConnection($targetObj, $target, $type);
+      = getDataFromOmiConnection($targetObj, $target, $type, 0);
 
     # The BUS_POS of the OCMB is associated with the OMI id so set it here
     $targetObj->setAttribute($target, "BUS_POS", $omiIdPerProc);
@@ -1994,14 +2084,82 @@ sub processOcmbChipPlanarAndChildren
     }
 } # end sub processOcmbChipPlanarAndChildren
 
+#--------------------------------------------------
+# @brief Process targets of type TEMP_SENSOR
+#
+# @param[in] $targetObj - The global target object blob
+# @param[in] $target    - The TEMP_SENSOR target
+#--------------------------------------------------
+sub processTempSensor
+{
+    my $targetObj         = shift;
+    my $target            = shift;
+    my $path = $targetObj->getAttribute($target,"INSTANCE_PATH");
+    my $name = $targetObj->getInstanceName($target);
+    print "processTempSensor($name,$path)\n"  if $targetObj->{debug};
+
+    # Some sanity checks.  Make sure we are processing the correct target type
+    # and make sure the target's parent has been processed.
+    my $type = targetTypeSanityCheck($targetObj, $target, "TEMP_SENSOR");
+    validateParentHasBeenProcessed($targetObj, $target);
+
+    # Get some useful info from the TEMP_SENSOR parent's SYS, NODE and OCMB targets
+    my $sysParent = $targetObj->findParentByType($target, "SYS");
+    my $sysParentPos = $targetObj->getAttribute($sysParent, "ORDINAL_ID");
+    my $nodeParent = $targetObj->findParentByType($target, "NODE");
+    my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
+    my $ocmbParent = $targetObj->getTargetParent($target);
+    my $ocmbParentAffinity = $targetObj->getAttribute($ocmbParent, "AFFINITY_PATH");
+    my $ocmbParentPhysical = $targetObj->getAttribute($ocmbParent, "PHYS_PATH");
+    my $ocmbParentPos = $targetObj->getAttribute($ocmbParent, "FAPINAME_POS");
+
+    # Get the instance number (position) of the temp sensor
+    my $tempSensorInstancePos = $targetObj->getInstanceNum($target);
+
+    # Use the parent OCMB's FAPI_POS, per system, to set the TEMP_SENSOR's
+    # FAPI_POS, per system. IE, the FAPI_POS is an increasing sequential
+    # number, starting at 0, and ending with the last TEMP_SENSOR for the system
+    # (target type SYS).
+    my $tempSensorPosPerSystem = $targetObj->getAttribute($ocmbParent, "FAPI_POS")
+                              * getMaxInstPerParent($type)
+                              + $tempSensorInstancePos;
+
+    # Up to 3 tempSensor instances per OCMB are supported, use the sensor's instance
+    # position to compute the unique position per node.
+    my $tempSensorPosPerNode = ($ocmbParentPos * getMaxInstPerParent($type)) + $tempSensorInstancePos;
+
+    # Get the FAPI_NAME by using the data gathered above.
+    my $tempSensorFapiName = $targetObj->getFapiName($type, $nodeParentPos, $ocmbParentPos, $tempSensorInstancePos);
+
+    # Take advantage of previous work done on the DDIMMs.  Use the parent DDIMM's
+    # affinity/physical path for our self and append the temp_sensor to the end.
+    my $tempSensorAffinity = $ocmbParentAffinity . "/temp_sensor-" . $tempSensorInstancePos;
+    my $tempSensorPhysical = $ocmbParentPhysical . "/temp_sensor-" . $tempSensorInstancePos;
+
+    # Now that we collected all the data we need, set some target attributes
+    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $tempSensorPosPerNode);
+    $targetObj->setAttribute($target, "FAPI_POS",      $tempSensorPosPerSystem);
+    $targetObj->setAttribute($target, "FAPI_NAME",     $tempSensorFapiName);
+    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
+    $targetObj->setAttribute($target, "FAPINAME_POS",  $ocmbParentPos);
+    $targetObj->setAttribute($target, "FAPINAME_UNIT", $tempSensorInstancePos);
+    $targetObj->setAttribute($target, "REL_POS",       $tempSensorInstancePos);
+    $targetObj->setAttribute($target, "AFFINITY_PATH", $tempSensorAffinity);
+    $targetObj->setAttribute($target, "PHYS_PATH",     $tempSensorPhysical);
+
+    # Save this target for retrieval later when printing the xml (sub printXML)
+    $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
+                {TEMP_SENSORS}[$tempSensorPosPerNode]{KEY} = $target;
+    print "*** Saving SYS-$sysParentPos/NODES-$nodeParentPos/TEMP_SENSORS-$tempSensorPosPerNode\n"  if $targetObj->{debug};
+
+    # Mark this target as processed
+    markTargetAsProcessed($targetObj, $target);
+} # end sub processTempSensor
 
 #--------------------------------------------------
 # @brief Process targets of type MEM_PORT
 #
 # @pre DIMM targets need to be processed beforehand
-#
-# @pre There is a 1 to 1 relationship with MEM_PORT and OCMB
-# @note This method will need to be updated if/when OCMB have multiple MEM_PORTs
 #
 # @param[in] $targetObj - The global target object blob
 # @param[in] $target    - The MEM_PORT target
@@ -2029,29 +2187,28 @@ sub processMemPort
     my $ocmbParentPhysical = $targetObj->getAttribute($ocmbParent, "PHYS_PATH");
     my $ocmbParentPos = $targetObj->getAttribute($ocmbParent, "FAPINAME_POS");
 
+    # Get the instance number (position) of the mem port
+    my $memPortInstancePos = $targetObj->getInstanceNum($target);
+
     # Use the parent OCMB's FAPI_POS, per system, to set the MEM_PORT's
     # FAPI_POS, per system. IE, the FAPI_POS is an increasing sequential
     # number, starting at 0, and ending with the last MEM_PORT for the system
     # (target type SYS).
     my $memPortPosPerSystem = $targetObj->getAttribute($ocmbParent, "FAPI_POS")
-                              * getMaxInstPerParent($type);
-                              # will add relative position here when needed
+                              * getMaxInstPerParent($type)
+                              + $memPortInstancePos;
 
-    # Only one memport per OCMB is in the xml but we are reserving space for 2
-    # instances per OCMB.  (Eventually we will need to pull a relative position
-    # from somewhere but not available yet.)
-    my $memPortPosPerNode = $ocmbParentPos * getMaxInstPerParent($type);
-
-    # Until we really support multiple ports behind a OCMB, just hardcode to zero
-    my $memPortPosPerParent = 0;
+    # Up to 2 memport instances per OCMB are supported, use the port's instance
+    # position to compute the unique position per node.
+    my $memPortPosPerNode = ($ocmbParentPos * getMaxInstPerParent($type)) + $memPortInstancePos;
 
     # Get the FAPI_NAME by using the data gathered above.
-    my $memPortFapiName = $targetObj->getFapiName($type, $nodeParentPos, $ocmbParentPos, $memPortPosPerParent);
+    my $memPortFapiName = $targetObj->getFapiName($type, $nodeParentPos, $ocmbParentPos, $memPortInstancePos);
 
     # Take advantage of previous work done on the OCMBs.  Use the parent OCMB's
     # affinity/physical path for our self and append the mem_port to the end.
-    my $memPortAffinity = $ocmbParentAffinity . "/mem_port-" . $memPortPosPerParent;
-    my $memPortPhysical = $ocmbParentPhysical . "/mem_port-" . $memPortPosPerParent;
+    my $memPortAffinity = $ocmbParentAffinity . "/mem_port-" . $memPortInstancePos;
+    my $memPortPhysical = $ocmbParentPhysical . "/mem_port-" . $memPortInstancePos;
 
     # Now that we collected all the data we need, set some target attributes
     $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $memPortPosPerNode);
@@ -2059,8 +2216,8 @@ sub processMemPort
     $targetObj->setAttribute($target, "FAPI_NAME",     $memPortFapiName);
     $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
     $targetObj->setAttribute($target, "FAPINAME_POS",  $ocmbParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_UNIT", $memPortPosPerParent);
-    $targetObj->setAttribute($target, "REL_POS",       $memPortPosPerParent);
+    $targetObj->setAttribute($target, "FAPINAME_UNIT", $memPortInstancePos);
+    $targetObj->setAttribute($target, "REL_POS",       $memPortInstancePos);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $memPortAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $memPortPhysical);
 
@@ -2369,6 +2526,11 @@ sub setCommonAttributesForTargetsAssociatedWithDdimm
     # Ex. for pmic1, dimm19 = pmic77   ((19 * 4) + 1)
     # Ex. for pmic2, dimm19 = pmic78   ((19 * 4) + 2)
     # Ex. for pmic3, dimm19 = pmic79   ((19 * 4) + 3)
+    ## POWER_IC ordering
+    # Ex. for power_ic0, dimm19 = power_ic76   ((19 * 4) + 0)
+    # Ex. for power_ic1, dimm19 = power_ic77   ((19 * 4) + 1)
+    # Ex. for power_ic2, dimm19 = power_ic78   ((19 * 4) + 2)
+    # Ex. for power_ic3, dimm19 = power_ic79   ((19 * 4) + 3)
     ## Generic I2C Device ordering
     # Ex. for adc0, dimm19 = generici2cdevice76   ((19 * 4) + 0)
     # Ex. for adc1, dimm19 = generici2cdevice77   ((19 * 4) + 1)
@@ -3543,6 +3705,9 @@ sub processMslChecks
 #                                      - can be different than the $target's type
 #                                        - For instance, can pass in an OCMB_CHIP $target, but get
 #                                          info for the associated dimm
+# @param[in] $targetArg              - Target type-specific parameter
+#                                       + DIMM: memport instance
+#                                       + OCMB_CHIP: <undefined>
 # @param[out] $targetAffinity        - The affinity path derived from the OMI information
 # @param[out] $targetPosPerParent    - The target position per parent derived from the OMI info
 # @param[out] $procPosRelativeToNode - The proc position relative to the node derived from the OMI info
@@ -3551,7 +3716,7 @@ sub processMslChecks
 sub getDataFromOmiConnection
 {
 
-    my ($targetObj, $target, $targetType) = @_;
+    my ($targetObj, $target, $targetType, $targetArg) = @_;
     my $targetAffinity = "ERR";
     my $targetPosPerParent = "ERR";
     my $procPosRelativeToNode = "ERR";
@@ -3643,6 +3808,9 @@ sub getDataFromOmiConnection
 
             if ($targetType eq "DIMM")
             {
+                # MEM_PORT instance provided by caller
+                $mem_num = $targetArg;
+
                 # Update the affinity path with the data gathered above.
                 $targetAffinity = "/proc-$procPosRelativeToNode/mc-$mc_num/".
                                   "mi-$mi_num/mcc-$mcc_num/omi-$omi_num/".
@@ -5993,6 +6161,7 @@ sub convertTopologyIdToIndex
     ##      OR GGCC to 0GGCC
     my $group = getTopologyIdGroup($topologyId, $topologyMode);
     my $chip = getTopologyIdChip($topologyId, $topologyMode);
+
     $topologyIndex = ($group << 2) | ($chip);
 
     return ($topologyIndex);
@@ -6893,7 +7062,9 @@ sub extractDimmData
 
         if ( ($type eq "DIMM")   &&
              (($targetObj->getTargetType($target) eq "lcard-dimm-ddimm") ||
-               ($targetObj->getTargetType($target) eq "lcard-dimm-ddimm4u"))  &&
+               ($targetObj->getTargetType($target) eq "lcard-dimm-ddimm4u") ||
+               ($targetObj->getTargetType($target) eq "lcard-dimm-ddimm-ddr5") ||
+               ($targetObj->getTargetType($target) eq "lcard-dimm-ddimm-ddr5-4u"))  &&
              ($targetObj->getAttribute($target, 'AFFINITY_PATH') =~ m/node-0/) )
         {
             # Use the position of the DIMM as the key in hash to map to the DIMM target.
@@ -6952,7 +7123,7 @@ sub __extractDimmData__
 
     # Extract the Logical Path (mc-#/mi-#/mcc-#/omi-#) from the DIMM's AFFINITY_PATH
     $ddimmAffinity =~ s#affinity:sys-0/node-./proc-./##;
-    $ddimmAffinity =~ s#/ocmb_chip-0/mem_port-0/dimm-0##;
+    $ddimmAffinity =~ s#/ocmb_chip-0/mem_port-./dimm-0##;
 
     # Get the DIMM's FAPI_POS
     my $dimmFapiPos = $targetObj->getAttribute($dimmTarget, "FAPI_POS");
@@ -7153,7 +7324,7 @@ sub testTopologyIdToTopologyIndex
             {
                 $testPassed = false;
                 print "ERROR: conversion on topology Id($topologyId) with ";
-                print "topology mode($topologyMode) returned ";
+                print "topology mode($topologyModeNumber) returned ";
                 print "topology index($topologyIndex), but expected ";
                 print "topology index($toplogyModeArray[$topologyId]) \n";
             }
@@ -7251,10 +7422,12 @@ sub testMaxInstPerProc
         MCC       => 8,
         OMI       => 16,
         OCMB_CHIP => 16,
-        MEM_PORT  => 16,
-        DIMM      => 16,
-        PMIC      => 32,
-        GENERIC_I2C_DEVICE   => 32,
+        MEM_PORT  => 32,
+        DIMM      => 64,
+        PMIC      => 64,
+        POWER_IC  => 64,
+        TEMP_SENSOR        => 48,
+        GENERIC_I2C_DEVICE => 64,
         OMIC      => 8,
 
         PAUC      => 4,
