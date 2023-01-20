@@ -36,6 +36,8 @@
 #include <chipids.H>               // for GEMINI ID
 #include <gpio_adc_i2c_addr_get.H> // for get_gpio_adc_i2c_addr
 #include <mds_i2c_addr_get.H>      // get_mds_i2c_addr
+#include <poweric_i2c_addr_get.H>    // get_poweric_i2c_addr
+#include <tempsensor_i2c_addr_get.H> // get_tempsensor_i2c_addr
 
 trace_desc_t* g_trac_fapiwrap;
 TRAC_INIT(&g_trac_fapiwrap, FAPIWRAP_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -149,7 +151,7 @@ namespace FAPIWRAP
                 break;
             }
 
-            uint8_t l_spdBlob[l_spdSize];
+            uint8_t l_spdBlob[l_spdSize] = {};
             l_errl = get_ddimm_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
             if (l_errl)
             {
@@ -199,7 +201,7 @@ namespace FAPIWRAP
                 break;
             }
 
-            uint8_t l_spdBlob[l_spdSize];
+            uint8_t l_spdBlob[l_spdSize] = {};
             l_errl = get_ddimm_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
 
             if (l_errl)
@@ -223,11 +225,12 @@ namespace FAPIWRAP
                                      uint8_t& o_devAddr)
     {
         errlHndl_t l_errl = nullptr;
+        o_devAddr = NO_DEV_ADDR;
 
         do{
             if (isGeminiChip(*i_ocmbChip))
             {
-                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_gpio_dev_addr() "
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_gpio_adc_dev_addr() "
                            "OCMB target 0x%.8X is a Gemini Chip. No GPIOs associated "
                            "with the Gemini Chip therefore device address not "
                            "retrieved for target",
@@ -246,7 +249,7 @@ namespace FAPIWRAP
                 break;
             }
 
-            uint8_t l_spdBlob[l_spdSize];
+            uint8_t l_spdBlob[l_spdSize] = {};
             l_errl = get_ddimm_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
 
             if (l_errl)
@@ -264,5 +267,101 @@ namespace FAPIWRAP
         return l_errl;
     }
 
+    // get_tempsensor_dev_addr
+    errlHndl_t get_tempsensor_dev_addr(TARGETING::Target *i_ocmbChip,
+                                       const uint8_t i_rel_pos,
+                                       uint8_t& o_devAddr)
+    {
+        errlHndl_t l_errl = nullptr;
+        o_devAddr = NO_DEV_ADDR;
+
+        do{
+            if (isGeminiChip(*i_ocmbChip))
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_tempsensor_dev_addr() "
+                           "OCMB target 0x%.8X is a Gemini Chip. No GPIOs associated "
+                           "with the Gemini Chip therefore device address not "
+                           "retrieved for target",
+                           TARGETING::get_huid(i_ocmbChip) );
+                break;
+            }
+
+            size_t  l_spdSize = 0;
+            l_errl = get_ddimm_spd_data(i_ocmbChip, nullptr, l_spdSize);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_tempsensor_dev_addr() "
+                           "Call 1 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
+                           "gpio/adc device address not retrieved for target.",
+                           TARGETING::get_huid(i_ocmbChip) );
+                break;
+            }
+
+            uint8_t l_spdBlob[l_spdSize] = {};
+            l_errl = get_ddimm_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_tempsensor_dev_addr() "
+                           "Call 2 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
+                           "gpio/adc device address not retrieved for target.",
+                           TARGETING::get_huid(i_ocmbChip) );
+                break;
+            }
+
+            o_devAddr = get_tempsensor_i2c_addr(l_spdBlob, i_rel_pos);
+
+        }while(0);
+        return l_errl;
+    }
+
+    // get_poweric_dev_addr
+    errlHndl_t get_poweric_dev_addr( TARGETING::Target * i_ocmbChip,
+                                     const uint8_t i_poweric_id,
+                                     uint8_t& o_poweric_devAddr)
+    {
+        errlHndl_t l_errl(nullptr);
+
+        // Default the out going parameter, o_poweric_devAddr, to NO_DEV_ADDR
+        o_poweric_devAddr = NO_DEV_ADDR;
+
+        do{
+            if (isGeminiChip(*i_ocmbChip))
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_POWERIC_dev_addr() "
+                           "OCMB target 0x%.8X is a Gemini Chip. No POWERICs associated "
+                           "with the Gemini Chip therefore device address not "
+                           "retrieved for POWERIC ID %d",
+                           TARGETING::get_huid(i_ocmbChip), i_poweric_id );
+                break;
+            }
+
+            size_t  l_spdSize = 0;
+            l_errl = get_ddimm_spd_data(i_ocmbChip, nullptr, l_spdSize);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_POWERIC_dev_addr() "
+                           "Call 1 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
+                           "device address not retrieved for POWERIC ID %d",
+                           TARGETING::get_huid(i_ocmbChip), i_poweric_id );
+                break;
+            }
+
+            uint8_t l_spdBlob[l_spdSize] = {};
+            l_errl = get_ddimm_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_POWERIC_dev_addr() "
+                           "Call 2 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
+                           "device address not retrieved for POWERIC ID %d",
+                           TARGETING::get_huid(i_ocmbChip), i_poweric_id );
+                break;
+            }
+
+            o_poweric_devAddr = get_poweric_i2c_addr(
+                                   l_spdBlob,
+                                   i_poweric_id);
+        }while(0);
+        return l_errl;
+    }
 
 }

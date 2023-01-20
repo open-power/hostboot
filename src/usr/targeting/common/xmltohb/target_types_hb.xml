@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2023                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -321,6 +321,14 @@
   </targetTypeExtension>
 
   <targetTypeExtension>
+    <id>power_ic</id>
+    <attribute>
+      <id>DYNAMIC_I2C_DEVICE_ADDRESS</id>
+      <default>0</default>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
     <id>sys</id>
     <attribute>
       <id>ENABLE_RECONFIG_DUE_TO_DECONFIG</id>
@@ -418,6 +426,14 @@
     </attribute>
     <attribute>
       <id>SBE_HBRT_PSU_VIRT_ADDR</id>
+    </attribute>
+  </targetTypeExtension>
+
+  <targetTypeExtension>
+    <id>temp_sensor</id>
+    <attribute>
+      <id>DYNAMIC_I2C_DEVICE_ADDRESS</id>
+      <default>0</default>
     </attribute>
   </targetTypeExtension>
 

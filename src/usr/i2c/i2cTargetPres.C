@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -298,7 +298,9 @@ errlHndl_t ocmbI2CPresencePerformOp(DeviceFW::OperationType i_opType,
 }
 
 /**
- * @brief Performs a presence detect operation on a PMIC Target
+ * @brief Performs a presence detect operation on a Target in a DDIMM
+ *        that has a dynamic i2c address.  This includes :
+ *        PMIC, GENERIC_I2C_DEVICE, POWER_IC
  *
  * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
  *                              in driverif.H
@@ -312,23 +314,24 @@ errlHndl_t ocmbI2CPresencePerformOp(DeviceFW::OperationType i_opType,
  *                              In this function, there are no arguments.
  * @return  errlHndl_t
  */
-errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
-                                    TARGETING::Target* i_target,
-                                    void* io_buffer,
-                                    size_t& io_buflen,
-                                    int64_t i_accessType,
-                                    va_list i_args)
+errlHndl_t ddimmDynamicI2CPresence(DeviceFW::OperationType i_opType,
+                                   TARGETING::Target* i_target,
+                                   void* io_buffer,
+                                   size_t& io_buflen,
+                                   int64_t i_accessType,
+                                   va_list i_args)
 {
-    assert(1 == io_buflen, "pmicI2CPresencePerformOp(): Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
-    assert(nullptr != io_buffer, "pmicI2CPresencePerformOp(): Expected a non-null io_buffer");
+    assert(1 == io_buflen, "ddimmDynamicI2CPresence(): Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(nullptr != io_buffer, "ddimmDynamicI2CPresence(): Expected a non-null io_buffer");
 
     errlHndl_t l_errl = nullptr;
-    bool l_pmicPresent = false;
+    bool l_devPresent = false;
     uint8_t l_devAddr = 0;
-    TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
-    auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
 
     do{
+        TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
+        auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
+        auto l_devType = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
         if(! l_parentHwasState.present)
         {
@@ -340,46 +343,62 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
         TARGETING::ATTR_REL_POS_type l_relPos
           = i_target->getAttr<TARGETING::ATTR_REL_POS>();
 
-        // PMICs will have a different device address depending on the vendor.
-        // Prior to doing present detection on a pmic we must first query the
-        // device address from the parent OCMB's SPD
-        l_errl = FAPIWRAP::get_pmic_dev_addr(l_parentOcmb,
-                                             l_relPos,
-                                             l_devAddr);
+        // This device has a different device address depending on the vendor.
+        // Prior to doing present detection on these parts we must first query
+        // the device address from the parent OCMB's SPD
+        if( TARGETING::TYPE_PMIC == l_devType )
+        {
+            l_errl = FAPIWRAP::get_pmic_dev_addr(l_parentOcmb,
+                                                 l_relPos,
+                                                 l_devAddr);
+        }
+        else if( TARGETING::TYPE_GENERIC_I2C_DEVICE == l_devType )
+        {
+            l_errl = FAPIWRAP::get_gpio_adc_dev_addr(l_parentOcmb,
+                                                     l_relPos,
+                                                     l_devAddr);
+        }
+        else if( TARGETING::TYPE_POWER_IC == l_devType )
+        {
+            l_errl = FAPIWRAP::get_poweric_dev_addr(l_parentOcmb,
+                                                    l_relPos,
+                                                    l_devAddr);
+        }
+        else
+        {
+            assert(0,"ddimmDynamicI2CPresence - Invalid type %d for device %.8X",
+                   l_devType,
+                   TARGETING::get_huid(i_target));
+        }
         if (l_errl)
         {
-            TRACFCOMP( g_trac_i2c, ERR_MRK"pmicI2CPresencePerformOp() "
-                        "Error attempting to read pmic device address on OCMB 0x%.08X",
+            TRACFCOMP( g_trac_i2c, ERR_MRK"ddimmDynamicI2CPresence() "
+                        "Error attempting to read device 0x%.8X's address on OCMB 0x%.08X",
+                        TARGETING::get_huid(i_target),
                         TARGETING::get_huid(l_parentOcmb));
             break;
         }
 
-        if (l_devAddr == 0)
+        if (l_devAddr == FAPIWRAP::NO_DEV_ADDR)
         {
-            TRACFCOMP(g_trac_i2c, ERR_MRK"pmicI2CPresencePerformOp() "
-                      "Found devAddr for PMIC 0x%.08x to be 0. Likely that SPD returned "
-                      "a value of 0 because this PMIC at REL_POS=%d does not exist for "
-                      "parent OCMB 0x%.8X",
-                      TARGETING::get_huid(i_target), l_relPos,
+            TRACFCOMP(g_trac_i2c, ERR_MRK"ddimmDynamicI2CPresence() "
+                      "Found devAddr for device 0x%.08x to be invalid. Likely that this device at REL_POS=%d does not exist for parent OCMB 0x%.8X",
+                      TARGETING::get_huid(i_target),
+                      l_relPos,
                       TARGETING::get_huid(l_parentOcmb));
             break;
         }
 
-        if(l_devAddr == FAPIWRAP::NO_DEV_ADDR)
-        {
-            // There is no pmic device address for this rel position on this ocmb so
-            // break and return not present.
-            break;
-        }
-
+        // Remember the value we determined
         i_target->setAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_devAddr);
 
+        // Do some i2c ops to physically detect the part
         l_errl = genericI2CTargetPresenceDetect(i_target,
-                                                l_pmicPresent);
+                                                l_devPresent);
 
         if (l_errl)
         {
-            TRACFCOMP( g_trac_i2c, ERR_MRK"pmicI2CPresencePerformOp() "
+            TRACFCOMP( g_trac_i2c, ERR_MRK"ddimmDynamicI2CPresence() "
                         "Error detecting target 0x%.08X",
                         TARGETING::get_huid(i_target));
             break;
@@ -389,12 +408,12 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
 
     if(l_errl)
     {
-        l_pmicPresent = false;
+        l_devPresent = false;
     }
 
     // Copy variable describing if target is present or not to i/o buffer param
-    memcpy(io_buffer, &l_pmicPresent, sizeof(l_pmicPresent));
-    io_buflen = sizeof(l_pmicPresent);
+    memcpy(io_buffer, &l_devPresent, sizeof(l_devPresent));
+    io_buflen = sizeof(l_devPresent);
 
     return l_errl;
 }
@@ -540,101 +559,6 @@ errlHndl_t muxI2CPresencePerformOp(DeviceFW::OperationType i_opType,
 }
 
 /**
- * @brief Performs a presence detect operation on a Generic I2C Device Target
- *        that has the ATTR_FAPI_I2C_CONTROL_INFO and can be detected
- *
- *
- * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
- *                              in driverif.H
- * @param[in]   i_target        Presence detect target
- * @param[in/out] io_buffer     Read: Pointer to output data storage
- *                              Write: Pointer to input data storage
- * @param[in/out] io_buflen     Input: size of io_buffer (in bytes, always 1)
- *                              Output: Success = 1, Failure = 0
- * @param[in]   i_accessType    DeviceFW::AccessType enum (userif.H)
- * @param[in]   i_args          This is an argument list for DD framework.
- *                              In this function, there are no arguments.
- * @return  errlHndl_t
- */
-errlHndl_t genericI2CDevicePresencePerformOp(DeviceFW::OperationType i_opType,
-                                            TARGETING::Target* i_target,
-                                            void* io_buffer,
-                                            size_t& io_buflen,
-                                            int64_t i_accessType,
-                                            va_list i_args)
-{
-    assert(1 == io_buflen, "genericI2CDevicePresencePerformOp(): Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
-    assert(nullptr != io_buffer, "genericI2CDevicePresencePerformOp(): Expected a non-null io_buffer");
-
-    errlHndl_t l_errl = nullptr;
-    bool l_gi2cPresent = false;
-    uint8_t l_devAddr = 0;
-    TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
-    auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
-
-    do {
-        if(! l_parentHwasState.present)
-        {
-            // If the parent chip is not present, then neither is the generic i2c device
-            // so just break out and return not present
-            TRACSSCOMP( g_trac_i2c, ERR_MRK"genericI2CDevicePresencePerformOp() "
-                       "Tgt HUID 0x%.08X has non-present Parent HUID 0x%.08X",
-                        TARGETING::get_huid(i_target),
-                        TARGETING::get_huid(l_parentOcmb));
-
-            break;
-        }
-
-        // Dynamically look up i2c device address (like we do for PMICs) via FAPIWRAP
-
-        TARGETING::ATTR_REL_POS_type l_relPos
-          = i_target->getAttr<TARGETING::ATTR_REL_POS>();
-
-        l_errl = FAPIWRAP::get_gpio_adc_dev_addr(l_parentOcmb,
-                                                 l_relPos,
-                                                 l_devAddr);
-        if (l_errl)
-        {
-            TRACFCOMP( g_trac_i2c, ERR_MRK"genericI2CDevicePresencePerformOp() "
-                       "Error attempting to read device address for HUID 0x%.08X, "
-                       "rel_pos=%d",
-                        TARGETING::get_huid(i_target), l_relPos);
-            break;
-        }
-
-        if (l_devAddr == 0)
-        {
-            TRACFCOMP(g_trac_i2c, ERR_MRK"genericI2CDevicePresencePerformOp() "
-                      "Found devAddr for HUID 0x%.08x to be 0. Likely an error meaning "
-                      "that REL_POS=%d does not exist",
-                      TARGETING::get_huid(i_target), l_relPos);
-            break;
-        }
-
-        i_target->setAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_devAddr);
-
-        l_errl = genericI2CTargetPresenceDetect(i_target,
-                                                l_gi2cPresent);
-        if (l_errl)
-        {
-            TRACFCOMP( g_trac_i2c, ERR_MRK"genericI2CTargetPresenceDetect() "
-                        "Error detecting target 0x%.08X, io_buffer will not be set",
-                        TARGETING::get_huid(i_target));
-        }
-        else
-        {
-            // Copy variable describing if target is present or not to i/o buffer param
-            memcpy(io_buffer, &l_gi2cPresent, sizeof(l_gi2cPresent));
-            io_buflen = sizeof(l_gi2cPresent);
-        }
-
-    } while(0);
-
-    return l_errl;
-}
-
-
-/**
  * @brief Performs a presence detect operation on a temperature sensor Target
  *
  *
@@ -663,10 +587,10 @@ errlHndl_t tempSensorPresencePerformOp(DeviceFW::OperationType i_opType,
     errlHndl_t l_errl = nullptr;
     bool l_tempSensorPresent = false;
 
-    TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
-    auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
-
     do {
+        TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
+        auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
+
         if(! l_parentHwasState.present)
         {
             // If the parent chip is not present, then neither is the temperature sensor
@@ -679,7 +603,35 @@ errlHndl_t tempSensorPresencePerformOp(DeviceFW::OperationType i_opType,
             break;
         }
 
-        // TODO: JIRA PFHB-228 - finish presence checking
+        // Check the SPD to determine the i2c address for the given sensor
+        TARGETING::ATTR_REL_POS_type l_relPos
+          = i_target->getAttr<TARGETING::ATTR_REL_POS>();
+
+        uint8_t l_devAddr(0);
+        l_errl = FAPIWRAP::get_tempsensor_dev_addr( l_parentOcmb, l_relPos, l_devAddr );
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"get_tempsensor_dev_addr() "
+                        "Error attempting to read temp sensor device address on OCMB 0x%.08X",
+                        TARGETING::get_huid(l_parentOcmb));
+            break;
+        }
+
+        if( l_devAddr == FAPIWRAP::NO_DEV_ADDR )
+        {
+            TRACFCOMP(g_trac_i2c, ERR_MRK"tempSensorPresencePerformOp() "
+                      "Found devAddr for sensor 0x%.08x to be invalid.  This means the part isn't valid based on the SPD for parent OCMB 0x%.8X",
+                      TARGETING::get_huid(i_target),
+                      TARGETING::get_huid(l_parentOcmb));
+            break;
+        }
+
+        // Set an attribute that we will push to the SPPE for their use
+        i_target->setAttr<TARGETING::ATTR_SPPE_I2C_DEV_ADDR>(l_devAddr);
+
+        // A valid i2c address means that the target exists.  HB can't physically
+        //  talk to it since it sits behind the OCMB so we just mark it valid.
+        l_tempSensorPresent = true;
 
     } while (0);
 
@@ -690,60 +642,6 @@ errlHndl_t tempSensorPresencePerformOp(DeviceFW::OperationType i_opType,
     return l_errl;
 }
 
-/**
- * @brief Performs a presence detect operation on a Power_IC Target
- *
- *
- * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
- *                              in driverif.H
- * @param[in]   i_target        Presence detect target
- * @param[in/out] io_buffer     Read: Pointer to output data storage
- *                              Write: Pointer to input data storage
- * @param[in/out] io_buflen     Input: size of io_buffer (in bytes, always 1)
- *                              Output: Success = 1, Failure = 0
- * @param[in]   i_accessType    DeviceFW::AccessType enum (userif.H)
- * @param[in]   i_args          This is an argument list for DD framework.
- *                              In this function, there are no arguments.
- * @return  errlHndl_t
- */
-errlHndl_t powerIcPresencePerformOp(DeviceFW::OperationType i_opType,
-                                             TARGETING::Target* i_target,
-                                             void* io_buffer,
-                                             size_t& io_buflen,
-                                             int64_t i_accessType,
-                                             va_list i_args)
-{
-    assert(1 == io_buflen, "powerIcPresencePerformOp(): Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
-    assert(nullptr != io_buffer, "powerIcPresencePerformOp(): Expected a non-null io_buffer");
-
-    errlHndl_t l_errl = nullptr;
-    bool l_powerIcPresent = false;
-
-    TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
-    auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
-
-    do {
-        if(! l_parentHwasState.present)
-        {
-            // If the parent chip is not present, then neither is the power_ic device
-            // so just break out and return not present
-            TRACSSCOMP( g_trac_i2c, ERR_MRK"powerIcPresencePerformOp() "
-                       "Tgt HUID 0x%08X has non-present Parent HUID 0x%08X",
-                        TARGETING::get_huid(i_target),
-                        TARGETING::get_huid(l_parentOcmb));
-
-            break;
-        }
-
-        // TODO: JIRA PFHB-228 - finish presence checking
-
-    } while (0);
-
-    // Copy variable describing if target is present or not to i/o buffer param
-    memcpy(io_buffer, &l_powerIcPresent, sizeof(l_powerIcPresent));
-    io_buflen = sizeof(l_powerIcPresent);
-    return l_errl;
-}
 
 
 // Register the ocmb presence detect function with the device framework
@@ -762,13 +660,13 @@ DEVICE_REGISTER_ROUTE( DeviceFW::READ,
 DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        DeviceFW::PRESENT,
                        TARGETING::TYPE_PMIC,
-                       pmicI2CPresencePerformOp );
+                       ddimmDynamicI2CPresence );
 
 // Register the Generic I2C Device presence detect function with the device framework
 DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        DeviceFW::PRESENT,
                        TARGETING::TYPE_GENERIC_I2C_DEVICE,
-                       genericI2CDevicePresencePerformOp );
+                       ddimmDynamicI2CPresence );
 
 // Register the MDS presence detect function with the device framework
 DEVICE_REGISTER_ROUTE( DeviceFW::READ,
@@ -786,5 +684,5 @@ DEVICE_REGISTER_ROUTE( DeviceFW::READ,
 DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        DeviceFW::PRESENT,
                        TARGETING::TYPE_POWER_IC,
-                       powerIcPresencePerformOp );
+                       ddimmDynamicI2CPresence );
 }

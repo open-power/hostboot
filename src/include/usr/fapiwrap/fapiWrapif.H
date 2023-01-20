@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ namespace FAPIWRAP
 
 // Global constant
     // If no device address is found for a given target then NO_DEV_ADDR will be returned
-    constexpr uint8_t NO_DEV_ADDR = 0xFF;
+    constexpr uint8_t NO_DEV_ADDR = 0x00;
 
     /**
      * @brief This function wraps around the FAPI2 HWP "exp_getidec" which
@@ -63,11 +63,11 @@ namespace FAPIWRAP
 
     /**
      * @brief This function wraps around the FAPI2 HWP "get_pmic_i2c_addr" which
-     *        takes in a DDIMM's DDR4 SPD data and a PMIC's position relative to
+     *        takes in a DDIMM's SPD data and a PMIC's position relative to
      *        its parent OCMB's chip and returns the device address of that pmic
      *        This wrapper will actually lookup the SPD of a given ocmb target so
      *        the caller doesnt need to worry about it.
-     * @param[in] i_ocmbChip - Parent ocmb of the PMIC we wish to find the device addres of
+     * @param[in] i_ocmbChip - Parent ocmb of the PMIC we wish to find the device address of
      * @param[in] i_pmic_id  - PMIC's position relative to parent OCMB
      * @param[out]o_pmic_devAddr - If this pmic exists on the ocmb then return the device address
      *                             found in the SPD. Otherwise return NO_DEV_ADDR
@@ -81,9 +81,9 @@ namespace FAPIWRAP
 
     /**
      * @brief This function wraps around the FAPI2 HWP "get_mds_i2c_addr" which
-     *        takes in a DDIMM's DDR4 SPD and returns the device address for the
+     *        takes in a DDIMM's SPD and returns the device address for the
      *        MDS targets.
-     * @param[in] i_ocmbChip - Parent ocmb of the MDS we wish to find the device addres of
+     * @param[in] i_ocmbChip - Parent ocmb of the MDS we wish to find the device address of
      * @param[out]o_mds_devAddr - If this exists on the OCMB then return the device address
      *                            found in the SPD. Otherwise return NO_DEV_ADDR
      * @return errlHndl_t - nullptr if no error, otherwise contains error
@@ -98,7 +98,7 @@ namespace FAPIWRAP
      *        takes in the relative position of a ADC or GPIO Expansion target (relative
      *        to its parent OCMB's chip) on a 4U DDIMM and returns the i2c device address
      *        of that target.
-     * @param[in] i_ocmbChip - Parent ocmb of the MDS we wish to find the device addres of
+     * @param[in] i_ocmbChip - Parent ocmb of the MDS we wish to find the device address of
      * @param[in]  i_rel_pos  - The ADC or GPIO Expansion's position relative to parent OCMB
      * @param[out] o_devAddr - Returns the i2c device address
      * @return errlHndl_t - nullptr if no error, otherwise contains error
@@ -106,6 +106,38 @@ namespace FAPIWRAP
     errlHndl_t get_gpio_adc_dev_addr(TARGETING::Target* i_ocmbChip,
                                      const uint8_t i_rel_pos,
                                      uint8_t& o_devAddr);
+
+    /**
+     * @brief This function wraps around the FAPI2 HWP "get_tempsensor_i2c_addr" which
+     *        takes in the relative position of a TEMP_SENSOR target (relative
+     *        to its parent OCMB chip) and returns the i2c device address
+     *        of that target.
+     * @param[in] i_ocmbChip - Parent ocmb of the MDS we wish to find the device address of
+     * @param[in]  i_rel_pos  - The Sensor's position relative to parent OCMB
+     * @param[out] o_devAddr - Returns the i2c device address
+     * @return errlHndl_t - nullptr if no error, otherwise contains error
+     */
+    errlHndl_t get_tempsensor_dev_addr(TARGETING::Target* i_ocmbChip,
+                                       const uint8_t i_rel_pos,
+                                       uint8_t& o_devAddr);
+
+    /**
+     * @brief This function wraps around the FAPI2 HWP "get_poweric_i2c_addr" which
+     *        takes in a DDIMM's SPD data and a poweric's position relative to
+     *        its parent OCMB's chip and returns the device address of that POWERIC
+     *        This wrapper will actually lookup the SPD of a given ocmb target so
+     *        the caller doesnt need to worry about it.
+     * @param[in] i_ocmbChip - Parent ocmb of the poweric we wish to find the device address of
+     * @param[in] i_poweric_id  - poweric's position relative to parent OCMB
+     * @param[out]o_poweric_devAddr - If this poweric exists on the ocmb then return the device address
+     *                             found in the SPD. Otherwise return NO_DEV_ADDR
+     * @return errlHndl_t - nullptr if no error, otherwise contains error
+     *
+     * @pre i_ocmbChip is a valid pointer to an OCMB target
+     */
+    errlHndl_t get_poweric_dev_addr( TARGETING::Target * i_ocmbChip,
+                                     const uint8_t i_poweric_id,
+                                     uint8_t& o_poweric_devAddr);
 
 }
 
