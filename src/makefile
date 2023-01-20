@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2022
+# Contributors Listed Below - COPYRIGHT 2010,2023
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -163,7 +163,9 @@ endif
 # This is exported so that gcov knows the list of base modules to
 # exclude from instrumentation. We can't simply export BASE_MODULES or
 # else we get duplicate modules in the list which causes linker errors.
-export BASE_MODULES_GCOV_BLACKLIST:=$(BASE_MODULES)
+GCOV_BLACKLIST += $(BASE_MODULES) mctp pldm_base
+GCOV_BLACKLIST += $(DIRECT_BOOT_OBJECTS) tls.o
+export BASE_MODULES_GCOV_BLACKLIST:=$(GCOV_BLACKLIST)
 
 EXTENDED_MODULES += istep06
 EXTENDED_MODULES += isteps

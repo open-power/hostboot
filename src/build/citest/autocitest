@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2022
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -388,7 +388,7 @@ while [ $(($modsstarted)) -lt 1 -o $(($modsstarted)) -ne $(($modscompleted)) ]; 
         loop_timeout=400
     else
         # Increase timeout for code coverage
-        loop_timeout=800
+        loop_timeout=1200
     fi
 
     if [ "$loopcount" -ge "$loop_timeout" ];   then
