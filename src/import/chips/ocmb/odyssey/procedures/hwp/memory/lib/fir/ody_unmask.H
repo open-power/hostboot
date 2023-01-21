@@ -119,6 +119,15 @@ fapi_try_exit:
 fapi2::ReturnCode after_scominit_disable_rcd_recovery_helper( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target );
 
+///
+/// @brief Helper function to enable the RCD recovery
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note Code is based upon the RAS document from 16DEC2022
+///
+fapi2::ReturnCode after_memdiags_enable_rcd_recovery_helper( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target );
+
 } // end unmask ns
 } // end mss ns
 

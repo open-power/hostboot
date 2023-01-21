@@ -41,14 +41,18 @@
 #include <lib/fir/ody_fir_traits.H>
 #include <lib/fir/ody_unmask.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
-#include <generic_attribute_accessors_manual.H>
 #include <generic/memory/lib/utils/pos.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
+#include <mss_generic_system_attribute_getters.H>
 
 namespace mss
 {
 
 namespace unmask
 {
+
+constexpr uint8_t IDX_PORT0 = 0;
+constexpr uint8_t IDX_PORT1 = 1;
 
 ///
 /// @brief Finds if a specific port is present
@@ -160,6 +164,41 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function to enable the RCD recovery
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note Code is based upon the RAS document from 16DEC2022
+///
+fapi2::ReturnCode after_memdiags_enable_rcd_recovery_helper( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target )
+{
+    fapi2::buffer<uint64_t> l_dsm0;
+    fapi2::buffer<uint64_t> l_farb0;
+    uint8_t l_wrdone_dly = 0;
+
+    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_MBA_DSM0Q, l_dsm0));
+    l_dsm0.extractToRight<scomt::ody::ODC_SRQ_MBA_DSM0Q_WRDONE_DLY, scomt::ody::ODC_SRQ_MBA_DSM0Q_WRDONE_DLY_LEN>
+    (l_wrdone_dly);
+
+    // Prevent an underflow of RCD_PROTECTION_TIME since we subtract 1 below
+    l_wrdone_dly = (l_wrdone_dly < 1) ? 1 : l_wrdone_dly;
+
+    // Per the unmask spec, need to set DISABLE_RCD_RECOVERY and PORT_FAIL_DISABLE to '0'
+    // and set RCD_PROTECTION_TIME to just less than WRDONE_DLY
+    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB0Q, l_farb0));
+
+    l_farb0.clearBit<scomt::ody::ODC_SRQ_MBA_FARB0Q_CFG_DISABLE_RCD_RECOVERY>()
+    .clearBit<scomt::ody::ODC_SRQ_MBA_FARB0Q_CFG_PORT_FAIL_DISABLE>()
+    .insertFromRight<scomt::ody::ODC_SRQ_MBA_FARB0Q_CFG_RCD_PROTECTION_TIME,
+                     scomt::ody::ODC_SRQ_MBA_FARB0Q_CFG_RCD_PROTECTION_TIME_LEN>(l_wrdone_dly - 1);
+
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB0Q, l_farb0));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Unmask and setup actions performed after mss_scominit - specialization for Odyssey
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
@@ -168,9 +207,6 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode after_scominit<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
 {
-    constexpr uint8_t PORT0 = 0;
-    constexpr uint8_t PORT1 = 1;
-
     const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
     bool l_has_rcd = false;
     uint8_t l_is_planar = 0;
@@ -193,13 +229,13 @@ fapi2::ReturnCode after_scominit<mss::mc_type::ODYSSEY>( const fapi2::Target<fap
 
     // Port specific errors
     // Port 0
-    if(is_port_present(l_ports, PORT0))
+    if(is_port_present(l_ports, IDX_PORT0))
     {
         l_srq_lfir.recoverable_error<scomt::ody::ODC_SRQ_LFIR_30>();
     }
 
     // Port 1
-    if(is_port_present(l_ports, PORT1))
+    if(is_port_present(l_ports, IDX_PORT1))
     {
         l_srq_lfir.recoverable_error<scomt::ody::ODC_SRQ_LFIR_34>();
     }
@@ -214,8 +250,14 @@ fapi2::ReturnCode after_scominit<mss::mc_type::ODYSSEY>( const fapi2::Target<fap
         FAPI_TRY(after_scominit_disable_rcd_recovery_helper(i_target));
 
         // Set the RCD errors to recoverable based upon the port
-        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_04>(l_ports, PORT0, mss::fir::action::RECOV, l_srq_lfir));
-        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_33>(l_ports, PORT1, mss::fir::action::RECOV, l_srq_lfir));
+        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_04>(l_ports,
+                 IDX_PORT0,
+                 mss::fir::action::RECOV,
+                 l_srq_lfir));
+        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_33>(l_ports,
+                 IDX_PORT1,
+                 mss::fir::action::RECOV,
+                 l_srq_lfir));
     }
 
     // Configure the FIR register
@@ -233,9 +275,62 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode after_memdiags<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
 {
-    // TODO:ZEN:MST-1536 Specialize unmask::after_memdiags for Odyssey
-    // This function is blank to unblock simulation work, but needs to have guts added in
-    // The above TODO should handle getting the proper coded added in
+    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+    bool l_has_rcd = false;
+    uint8_t l_is_planar = 0;
+    bool l_mfg_thresholds = false;
+
+    // Create registers and check success for SRQFIR
+    mss::fir::reg2<scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR> l_srq_reg(i_target);
+
+    // Check MNFG THRESHOLDS Policy flag
+    FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS, l_mfg_thresholds));
+    FAPI_TRY(mss::has_rcd(i_target, l_has_rcd));
+    FAPI_TRY(mss::attr::get_mem_mrw_is_planar(i_target, l_is_planar));
+
+    // Unmask SRQ FIRs
+    if (l_has_rcd && l_is_planar)
+    {
+        // Enable the port fail and RCD recovery mechanisms and set RCD protection time
+        FAPI_TRY(after_memdiags_enable_rcd_recovery_helper(i_target));
+
+        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_13>(l_ports,
+                 IDX_PORT0,
+                 mss::fir::action::LXSTOP,
+                 l_srq_reg));
+        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_40>(l_ports,
+                 IDX_PORT1,
+                 mss::fir::action::LXSTOP,
+                 l_srq_reg));
+
+        FAPI_TRY(l_srq_reg.write(), "Failed to write SRQ FIR register for " GENTARGTIDFORMAT, GENTARGTID(i_target));
+    }
+
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        // Create register for RDFFIR
+        mss::fir::reg2<scomt::ody::ODC_RDF0_SCOM_FIR_RW_WCLEAR> l_rdf_reg(l_port);
+
+        if(!l_mfg_thresholds)
+        {
+            // Unmask FIR_MAINTENANCE_IUE to recoverable if Threshold not set
+            l_rdf_reg.recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_IUE>();
+        }
+
+        // Unmask remaining RDF FIRs
+        FAPI_TRY(l_rdf_reg.checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_AUE>()
+                 // Note: MAINLINE_UE will need to be changed to lxstop on P11
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_UE>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_RCD>()
+                 .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_IAUE>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_IUE>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINLINE_IRCD>()
+                 .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_AUE>()
+                 .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_IAUE>()
+                 .write(), "Failed to Write RDF FIR register " GENTARGTIDFORMAT, GENTARGTID(l_port));
+    }
+
+fapi_try_exit:
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
