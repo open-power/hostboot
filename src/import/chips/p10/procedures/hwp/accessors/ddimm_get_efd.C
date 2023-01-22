@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@
 //#undef FAPI_DBG
 //#define FAPI_DBG(args...) FAPI_INF(args)
 
-/// SPD memory addressing constants
+/// Common SPD memory addressing constants
 /// These offsets are relative to the start of the SPD
 /// 0 based addressing
 // Offset to the memory type (DDR4, etc) of the DDIMM.
@@ -61,23 +61,26 @@ const size_t SPD_MODULE_TYPE_ADDR = 3;
 const size_t SPD_BASE_MODULE_TYPE_MASK = 0x0F;
 // Value of the base module type for a planar DIMM config
 const size_t SPD_PLANAR_VALUE = 0x0C;
+
+/// DDR4 SPD memory addressing constants
 // Offset to the SPD's DMB manufacturer ID
 // See SPD_DDR4_EXPECTED_DMB_MFG_ID below for the expected value for DDR4
 // size is 2 bytes; address 198 - 199
-const size_t SPD_DMB_DMB_MFG_ID_ADDR = 198;
+const size_t SPD_DDR4_DMB_DMB_MFG_ID_ADDR = 198;
+// Offset to the SPD's DMB manufacturer ID
 // Offset to the SPD's DMB revision.
 // See SPD_DDR4_EXPECTED_DMB_REVISION below for the expected value for DDR4
 // size is 1 byte: address 200
-const size_t SPD_DMB_REVISION_ADDR = 200;
-// Offset to the EFD memory space/block offset.  The value, at this location,
+const size_t SPD_DDR4_DMB_REVISION_ADDR = 200;
+// Offset to the DDR4 EFD memory space/block offset.  The value, at this location,
 // is where the EFD block data offset begins.
 // size is 8 bytes: address 277 to 284
-const size_t SPD_EFD_MEMORY_SPACE_OFFSET_ADDR = 277;
-// Offset to the EFD's memory space size.  The value at this offset is used
+const size_t SPD_DDR4_EFD_MEMORY_SPACE_OFFSET_ADDR = 277;
+// Offset to the DDR4 EFD's memory space size.  The value at this offset is used
 // to calculate the actual EFD memory size (see calculateEfdMemorySpaceSize(..))
 // size is 1 byte: address 285
 // only bits 0 - 4 used (see following MASK const)
-const size_t SPD_EFD_MEMORY_SPACE_SIZE_ADDR = 285;
+const size_t SPD_DDR4_EFD_MEMORY_SPACE_SIZE_ADDR = 285;
 // Bit mask to the EFD memory space size
 // Bits 0 - 4: Valid values are 0 - 5; 0=1K, 1=2KB, 2=4KB, 3=8KB, 4=16KB, 5=32KB
 const uint8_t SPD_EFD_MEMORY_SPACE_SIZE_MASK = 0x0F;
@@ -88,18 +91,46 @@ const uint8_t SPD_EFD_MEMORY_SPACE_SIZE_MAX_VALUE = 0x05;
 const uint8_t SPD_PLANAR_EFD_MEMORY_SPACE_SIZE_MASK = 0x7F;
 const uint8_t SPD_PLANAR_EFD_MEMORY_SPACE_SIZE_ADDER_MASK = 0x80;
 const size_t SPD_PLANAR_EFD_MEMORY_SPACE_SIZE_ADDER = 512;
-// Offset to the number of all EFDs that is contained in the EFD memory space.
-// The value at this offset is how many EFDs exists within the EFD memory space.
+// Offset to the number of all EFDs that is contained in the DDR4 EFD memory space.
+// The value at this offset is how many EFDs exists within the DDR4 EFD memory space.
 // size is 2 bytes; address 286 to 287
-const size_t SPD_EFD_COUNT_ADDR = 286;
+const size_t SPD_DDR4_EFD_COUNT_ADDR = 286;
 // Bit mask to the number of all EFDs
 // Bits 0 - 5: Valid values are 0 - 63(0x003F)
 const uint16_t SPD_EFD_COUNT_MASK = 0x003F;
-// Offset to the EFD meta data within the SPD.
+// Offset to the DDR4 EFD meta data within the SPD.
 // size is 128 bytes; address 288 to 415; 32 EFD meta data's sized 4 bytes each
-const size_t SPD_EFD_META_DATA_ADDR = 288;
-// Offset to Host Interface Speed Supported within the SPD.
-const size_t SPD_SUPPORTED_HOST_SPEEDS_ADDR = 205;
+const size_t SPD_DDR4_EFD_META_DATA_ADDR = 288;
+// Offset to Host Interface Speed Supported within the DDR4 SPD.
+const size_t SPD_DDR4_SUPPORTED_HOST_SPEEDS_ADDR = 205;
+
+/// DDR5 SPD memory addressing constants
+// Offset to the SPD's DMB manufacturer ID
+// See SPD_DDR5_EXPECTED_DMB_MFG_ID below for the expected value for DDR5
+// size is 2 bytes; address 282 - 283
+const size_t SPD_DDR5_DMB_DMB_MFG_ID_ADDR = 282;
+// Offset to the SPD's DMB revision.
+// See SPD_DDR5_EXPECTED_DMB_REVISION below for the expected value for DDR5
+// size is 1 byte: address 284
+const size_t SPD_DDR5_DMB_REVISION_ADDR = 284;
+// Offset to the DDR5 EFD memory space/block offset.  The value, at this location,
+// is where the EFD block data offset begins.
+// size is 8 bytes: address 381 to 388
+const size_t SPD_DDR5_EFD_MEMORY_SPACE_OFFSET_ADDR = 381;
+// Offset to the DDR5 EFD's memory space size.  The value at this offset is used
+// to calculate the actual EFD memory size (see calculateEfdMemorySpaceSize(..))
+// size is 1 byte: address 389
+// only bits 0 - 4 used (see following MASK const)
+const size_t SPD_DDR5_EFD_MEMORY_SPACE_SIZE_ADDR = 389;
+// Offset to the number of all EFDs that is contained in the DDR5 EFD memory space.
+// The value at this offset is how many EFDs exists within the DDR5 EFD memory space.
+// size is 2 bytes; address 390 to 391
+const size_t SPD_DDR5_EFD_COUNT_ADDR = 390;
+// Offset to the DDR5 EFD meta data within the SPD.
+// size is 24 bytes; address 392 to 415; 6 EFD meta data's sized 4 bytes each
+const size_t SPD_DDR5_EFD_META_DATA_ADDR = 392;
+// Offset to Host Interface Speed Supported within the DDR5 SPD.
+const size_t SPD_DDR5_SUPPORTED_HOST_SPEEDS_ADDR = 363;
 
 /// SPD - EFD meta data constants
 // Size of the EFD meta data's within the SPD
@@ -109,7 +140,7 @@ const size_t SPD_EFD_META_DATA_BYTE_SIZE = 4;
 /// SPD - EFD meta data addressing constants.
 /// These offsets are relative to the start of a given EFD meta data section,
 /// located in the EFD meta data block, as describe in const
-/// SPD_EFD_META_DATA_ADDR above
+/// SPD_DDR4_EFD_META_DATA_ADDR above
 /// 0 based addressing
 // Byte 1 offset to an individual EFD meta data
 // Bits 0 - 4: EFD Extended Function Type
@@ -138,32 +169,35 @@ const size_t SPD_EFD_INCREMENTAL_BLOCK_BYTE_SIZE = 32;
 // EFD total memory space size can be 1KB, 2KB, 4KB, 8KB, etc.,
 // This value is used in an exponential function of the form y = ab^x
 // Where 'EFD total memory space size' is y, EFD_EXPONENTIAL_BLOCK_MEMORY_SIZE
-// is a, value found at SPD_EFD_MEMORY_SPACE_SIZE_ADDR is b, and x is 2
-// also see SPD_EFD_MEMORY_SPACE_SIZE_ADDR and calculateEfdMemorySpaceSize(..)
+// is a, value found at SPD_DDR4_EFD_MEMORY_SPACE_SIZE_ADDR is b, and x is 2
+// also see SPD_DDR4_EFD_MEMORY_SPACE_SIZE_ADDR and calculateEfdMemorySpaceSize(..)
 const size_t EFD_EXPONENTIAL_BLOCK_MEMORY_SIZE = 1024;
 // The 'assumed' maximum byte size.  The reason it is assumed, is because
 // the maximum size could get updated.  Having this value allows for quick
 // turn around on initial call.  On subsequent call, size is verified and
 // asserted if the assumption is incorrect.
-const size_t SPD_EFD_ASSUMED_MAX_BYTE_SIZE = (4 *
+const size_t SPD_DDR4_EFD_ASSUMED_MAX_BYTE_SIZE = (4 *
+        SPD_EFD_INCREMENTAL_BLOCK_BYTE_SIZE);
+const size_t SPD_DDR5_EFD_ASSUMED_MAX_BYTE_SIZE = (16 *
         SPD_EFD_INCREMENTAL_BLOCK_BYTE_SIZE);
 
 /// EFD - DDR4 memory addressing constants.
 /// These offsets are relative to the start of the actual EFD block
-/// as describe in const SPD_EFD_MEMORY_SPACE_OFFSET_ADDR above
+/// as describe in const SPD_DDR4_EFD_MEMORY_SPACE_OFFSET_ADDR above
 /// 0 based addressing
 // Offset to the DDR4's frequency within an individual EFD
 // size is 2 bytes: address 0 - 1
 const size_t EFD_DDR4_FREQUENCY_ADDR = 0;
 // Offset to the DDR4's master rank data within an individual EFD
 // size is 1 byte: address 2
-const size_t EFD_DDR4_MASTER_RANK_ADDR = 2;
+const size_t EFD_DDR4_MRANK_ADDR = 2;
 // Offset to the DDR4's Channel supported data within an individual EFD
 // size is 1 byte: address 15
 // Only used on planar SPD
 const size_t EFD_DDR4_CHANNEL_SUPPORT_ADDR = 3;
 // Offset to the DDR4's Dimms supported data within an individual EFD
 // size is 1 byte: address 7
+// Only used on planar SPD
 const size_t EFD_DDR4_DIMM_SUPPORTED_ADDR = 7;
 
 /// SPD - DDR4 expected values
@@ -187,12 +221,38 @@ const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP = 0xA1;
 const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_B0_MICROCHIP = 0xB0;
 const uint8_t SPD_DDR4_EXPECTED_DMB_REVISION_IBM = 0x00;
 
+/// EFD - DDR5 memory addressing constants.
+/// These offsets are relative to the start of the actual EFD block
+/// as describe in const SPD_DDR5_EFD_MEMORY_SPACE_OFFSET_ADDR above
+/// 0 based addressing
+// Offset to the DDR5's frequency within an individual EFD
+// size is 1 byte: address 0
+const size_t EFD_DDR5_FREQUENCY_ADDR = 0;
+// Offset to the DDR5's master rank data within an individual EFD
+// size is 1 byte: address 2
+const size_t EFD_DDR5_MRANK_ADDR = 2;
+
+/// SPD - DDR5 expected values
+// SPD type for DDR5 as found in SPD byte 2
+// size is 1 byte
+const uint8_t SPD_DDR5_TYPE = 0x12;
+// SPD size for DDR5, 512 bytes as described in document 1U2UDDIMM_SPD.docx
+const size_t SPD_DDR5_SIZE = 512;
+// SPD - DDR5 expected value for the DMB manufacturer ID
+// size is 2 bytes
+const uint16_t SPD_DDR5_DMB_MFG_ID_IBM = 0xA480;
+// SPD - DDR5 expected value for the DMB revision.
+// Currently at initial revision - revision 0
+// size is 1 byte
+const uint8_t SPD_DDR5_EXPECTED_DMB_REVISION_0_IBM = 0x00;
+
 // Maximum number of FFDC elements we will save off
 //  (should stay in sync with error xml)
 const size_t MAX_EFD_FFDC = 32;
 
 /// Local enumerations
-// * Bytes 205 and 206 of SPD and bytes 0 & 1 of EFD contain the frequency info.
+// * Bytes 205 and 206 of DDR4 SPD and bytes 0 & 1 of EFD contain the frequency info.
+// * Bytes 363 and 364 of DDR5 SPD and bytes 0 & 1 of EFD contain the frequency info.
 enum DDR_FREQUENCY : uint16_t
 {
     DDR4_FREQ_VAL_0 = 12800,
@@ -202,6 +262,10 @@ enum DDR_FREQUENCY : uint16_t
     DDR4_FREQ_VAL_4 = 21330,
     DDR4_FREQ_VAL_5 = 23460,
     DDR4_FREQ_VAL_6 = 25600,
+
+    DDR5_FREQ_VAL_0 = 25600,
+    DDR5_FREQ_VAL_1 = 32000,
+    DDR5_FREQ_VAL_2 = 38400,
 
     DDR_FREQ_BIT_MASK_0 = 0x0001,
     DDR_FREQ_BIT_MASK_1 = 0x0002,
@@ -234,26 +298,38 @@ enum DDR_MASTER_RANK : uint8_t
 };
 
 ///
-/// @brief Check that MFG ID matches possible values
+/// @brief Check that DDR4 MFG ID matches possible values
 ///
 /// @param[in] i_mfg_id MFG ID
 /// @return boolean valid/invalid
 /// @note Can be expanded for future MFG IDs
 ///
-bool check_valid_mfg_id(const uint16_t i_mfg_id)
+bool check_ddr4_valid_mfg_id(const uint16_t i_mfg_id)
 {
     return (SPD_DDR4_DMB_MFG_ID_MICROCHIP == i_mfg_id ||
             SPD_DDR4_DMB_MFG_ID_IBM == i_mfg_id);
 }
 
 ///
-/// @brief Gets the expected DMB revision of a particular MFG ID
+/// @brief Check that DDR5 MFG ID matches possible values
+///
+/// @param[in] i_mfg_id MFG ID
+/// @return boolean valid/invalid
+/// @note Can be expanded for future MFG IDs
+///
+bool check_ddr5_valid_mfg_id(const uint16_t i_mfg_id)
+{
+    return (SPD_DDR5_DMB_MFG_ID_IBM == i_mfg_id);
+}
+
+///
+/// @brief Gets the expected DMB revision of a particular DDR4 MFG ID
 ///
 /// @param[in] i_mfg_id MFG ID
 /// @param[in] i_dmb_revision DMB revision
 /// @return expected DMB revision for ID
 ///
-uint16_t check_valid_dmb_revision(const uint16_t i_mfg_id, const uint8_t i_dmb_revision)
+uint16_t check_ddr4_valid_dmb_revision(const uint16_t i_mfg_id, const uint8_t i_dmb_revision)
 {
     if (i_mfg_id == SPD_DDR4_DMB_MFG_ID_IBM)
     {
@@ -280,6 +356,23 @@ uint16_t check_valid_dmb_revision(const uint16_t i_mfg_id, const uint8_t i_dmb_r
 }
 
 ///
+/// @brief Gets the expected DMB revision of a particular DDR5 MFG ID
+///
+/// @param[in] i_mfg_id MFG ID
+/// @param[in] i_dmb_revision DMB revision
+/// @return expected DMB revision for ID
+///
+uint16_t check_ddr5_valid_dmb_revision(const uint16_t i_mfg_id, const uint8_t i_dmb_revision)
+{
+    // We asserted earlier that we are IBM mfg ID
+    FAPI_DBG("ddr5_get_efd: SPD DMB revision = 0x%.2X, expected DMB revision = 0x%.2X",
+             i_dmb_revision,
+             SPD_DDR5_EXPECTED_DMB_REVISION_0_IBM);
+
+    return (i_dmb_revision == SPD_DDR5_EXPECTED_DMB_REVISION_0_IBM);
+}
+
+///
 /// @brief Checks if the SPD is for a planar config
 ///
 /// @param[in] i_module_type Module Type (byte 3) from SPD
@@ -296,7 +389,7 @@ bool is_planar_config(const uint8_t i_module_type)
 //
 // @param[in]  i_frequency, the frequency in numeric form
 // @return the bit mask that represents given frequency if found, else 0
-uint16_t ddrFrequencyToBitMask(const uint64_t i_frequency)
+uint16_t ddr4FrequencyToBitMask(const uint64_t i_frequency)
 {
     uint16_t l_bitMask{0};
 
@@ -328,6 +421,37 @@ uint16_t ddrFrequencyToBitMask(const uint64_t i_frequency)
 
         case DDR4_FREQ_VAL_6:
             l_bitMask = DDR_FREQ_BIT_MASK_6;
+            break;
+
+        default:
+            l_bitMask = 0;
+            break;
+    }
+
+    return l_bitMask;
+}
+
+// @brief Maps the frequency numeric value to it's bit mask equivalent
+//        Uses the enums in DDR_FREQUENCY above
+//
+// @param[in]  i_frequency, the frequency in numeric form
+// @return the bit mask that represents given frequency if found, else 0
+uint16_t ddr5FrequencyToBitMask(const uint64_t i_frequency)
+{
+    uint16_t l_bitMask{0};
+
+    switch (i_frequency)
+    {
+        case DDR5_FREQ_VAL_0:
+            l_bitMask = DDR_FREQ_BIT_MASK_0;
+            break;
+
+        case DDR5_FREQ_VAL_1:
+            l_bitMask = DDR_FREQ_BIT_MASK_1;
+            break;
+
+        case DDR5_FREQ_VAL_2:
+            l_bitMask = DDR_FREQ_BIT_MASK_2;
             break;
 
         default:
@@ -410,30 +534,7 @@ uint64_t calculateEfdMemorySpaceSize(const uint8_t i_efdMemorySpaceByte,
 extern "C"
 {
 
-/// ddr4_get_efd forward declaration
-/// @brief Return the DDR4's EFD based on VPDInfo
-///        This procedure explicitly returns the EFD data, associated with a
-///        DDR4, that matches given frequency and master rank criteria.
-///
-/// @param[in]  i_ocmbFapi2Target, a valid fapi2 OCMB_CHIP target
-/// @param[in]  io_vpdInfo, @see ddimm_get_efd
-/// @param[out] o_efdData, @see ddimm_get_efd
-/// @param[in]  i_spdBuffer, pointer to the DDR4 SPD data
-/// @param[in]  i_spdBufferSize, size of the DDR4 SPD data
-/// @note The size of blob may be less than io_vpdInfo.iv_size
-/// @note If data is returned for o_efdData, it will be in little endian
-/// @note Caller is responsible for allocating the buffers of o_efdData and
-///       i_spdBuffer.  This procedure will NOT manage these buffers. This
-///       procedure will only read/write to buffers, not allocate.
-/// @return FAPI2_RC_SUCCESS iff ok
-    fapi2::ReturnCode ddr4_get_efd(
-        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&  i_ocmbFapi2Target,
-        fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP>& io_vpdInfo, // Can modify data
-        uint8_t* const o_efdData,    // Don't change pointer but can modify data
-        const uint8_t* const i_spdBuffer,// Don't change pointer nor modify data
-        size_t   i_spdBufferSize);   // Don't modify
-
-// ddimm_get_efd
+    // ddimm_get_efd
     fapi2::ReturnCode ddimm_get_efd(
         const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&  i_ocmbFapi2Target,
         fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP>& io_vpdInfo,
@@ -445,6 +546,11 @@ extern "C"
 
         // Initialize the error flag to success
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+        // Initialize DRAM gen consts
+        const uint8_t SPD_TYPE = i_spdBuffer[SPD_MEM_TYPE_ADDR];
+        const uint8_t DRAM_GEN = SPD_TYPE;
+        const size_t SPD_SIZE = (SPD_TYPE == SPD_DDR4_TYPE) ? SPD_DDR4_SIZE : SPD_DDR5_SIZE;
 
         // Sanity check that buffer is large enough to read DIMM Type
         // SPD size must be large enough to gather the DDIMM type info
@@ -460,32 +566,34 @@ extern "C"
                      i_spdBufferSize,
                      SPD_MEM_TYPE_ADDR);
 
-        // If working with a DDR4 then the SPD data size must
-        // be at a minumum of what is required for a DDR4
-        FAPI_ASSERT( ( (i_spdBuffer[SPD_MEM_TYPE_ADDR] == SPD_DDR4_TYPE) &&
-                       (i_spdBufferSize >= SPD_DDR4_SIZE) ),
+        // Check that we got a valid DDR4 or DDR5 SPD and that the SPD data size
+        // is at a minumum of what is required for the DRAM generation
+        FAPI_ASSERT( ( (SPD_TYPE == SPD_DDR4_TYPE) || (SPD_TYPE == SPD_DDR5_TYPE) ) &&
+                     (i_spdBufferSize >= SPD_SIZE),
                      fapi2::DDIMM_GET_EFD_VPD_BUFFER_INADEQUATE_FOR_DDR().
                      set_VPD_BUFFER_SIZE(i_spdBufferSize).
-                     set_DDR_TYPE(static_cast<uint32_t>
-                                  (i_spdBuffer[SPD_MEM_TYPE_ADDR])).
-                     set_REQUIRED_MIN_BUFFER_SIZE(SPD_DDR4_SIZE).
-                     set_REQUIRED_DDR_TYPE(SPD_DDR4_TYPE).
+                     set_DDR_TYPE(static_cast<uint32_t>(SPD_TYPE)).
+                     set_REQUIRED_MIN_BUFFER_SIZE(SPD_SIZE).
+                     set_REQUIRED_DDR4_TYPE(SPD_DDR4_TYPE).
+                     set_REQUIRED_DDR5_TYPE(SPD_DDR5_TYPE).
                      set_OCMB_CHIP_TARGET(i_ocmbFapi2Target).
                      set_VPD_TYPE(io_vpdInfo.iv_vpd_type),
                      "ddimm_get_efd::Either the VPD buffer size(%d) is less "
-                     "than the required DDR4 size(%d) or the DDR memory "
-                     "type(0x%.2X) does not match the DDR4 memory type(0x%.2X)",
+                     "than the required SPD size(%d) or the DDR memory "
+                     "type(0x%.2X) does not match the DDR4 or DDR5 memory type(0x%.2X or 0x%.2X)",
                      i_spdBufferSize,
-                     SPD_DDR4_SIZE,
+                     SPD_SIZE,
                      i_spdBuffer[SPD_MEM_TYPE_ADDR],
-                     SPD_DDR4_TYPE);
+                     SPD_DDR4_TYPE,
+                     SPD_DDR5_TYPE);
 
-        // Call the explicit code for a DDR4
-        FAPI_TRY_NO_TRACE(ddr4_get_efd( i_ocmbFapi2Target,
-                                        io_vpdInfo,
-                                        o_efdData,
-                                        i_spdBuffer,
-                                        i_spdBufferSize));
+        // Call the explicit code for a DDR4 or DDR5
+        FAPI_TRY_NO_TRACE(ddr4_ddr5_get_efd( i_ocmbFapi2Target,
+                                             io_vpdInfo,
+                                             o_efdData,
+                                             i_spdBuffer,
+                                             i_spdBufferSize,
+                                             DRAM_GEN));
 
     fapi_try_exit:
 
@@ -495,15 +603,55 @@ extern "C"
         return fapi2::current_err;
     }
 
-// ddr4_get_efd
-    fapi2::ReturnCode ddr4_get_efd(
+    /// @brief Return the DDR4/5's EFD based on VPDInfo
+    ///        This procedure explicitly returns the EFD data, associated with a
+    ///        DDR4 or DDR5, that matches given frequency and master rank criteria.
+    ///
+    /// @param[in]  i_ocmbFapi2Target, a valid fapi2 OCMB_CHIP target
+    /// @param[in]  io_vpdInfo, @see ddimm_get_efd
+    /// @param[out] o_efdData, @see ddimm_get_efd
+    /// @param[in]  i_spdBuffer, pointer to the SPD data
+    /// @param[in]  i_spdBufferSize, size of the SPD data
+    /// @param[in]  i_dram_gen, DRAM generation encoding (SPD_DDR4_TYPE or SPD_DDR5_TYPE) of the SPD
+    /// @note The size of blob may be less than io_vpdInfo.iv_size
+    /// @note If data is returned for o_efdData, it will be in little endian
+    /// @note Caller is responsible for allocating the buffers of o_efdData and
+    ///       i_spdBuffer.  This procedure will NOT manage these buffers. This
+    ///       procedure will only read/write to buffers, not allocate.
+    /// @return FAPI2_RC_SUCCESS iff ok
+    fapi2::ReturnCode ddr4_ddr5_get_efd(
         const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&  i_ocmbFapi2Target,
         fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP>& io_vpdInfo,
         uint8_t* const o_efdData,
         const uint8_t* const i_spdBuffer,
-        const size_t   i_spdBufferSize)
+        const size_t   i_spdBufferSize,
+        const uint8_t i_dram_gen)
     {
-        FAPI_DBG("ddr4_get_efd: enter");
+        // Initialize DRAM gen consts
+        const size_t SPD_SIZE = (i_dram_gen == SPD_DDR4_TYPE) ? SPD_DDR4_SIZE : SPD_DDR5_SIZE;
+        const size_t EFD_MEMORY_SPACE_OFFSET_ADDR = (i_dram_gen == SPD_DDR4_TYPE) ?
+                SPD_DDR4_EFD_MEMORY_SPACE_OFFSET_ADDR : SPD_DDR5_EFD_MEMORY_SPACE_OFFSET_ADDR;
+        const size_t EFD_MEMORY_SPACE_SIZE_ADDR = (i_dram_gen == SPD_DDR4_TYPE) ?
+                SPD_DDR4_EFD_MEMORY_SPACE_SIZE_ADDR : SPD_DDR5_EFD_MEMORY_SPACE_SIZE_ADDR;
+        const size_t EFD_COUNT_ADDR = (i_dram_gen == SPD_DDR4_TYPE) ?
+                                      SPD_DDR4_EFD_COUNT_ADDR : SPD_DDR5_EFD_COUNT_ADDR;
+        const size_t EFD_META_DATA_ADDR = (i_dram_gen == SPD_DDR4_TYPE) ?
+                                          SPD_DDR4_EFD_META_DATA_ADDR : SPD_DDR5_EFD_META_DATA_ADDR;
+        const size_t DMB_MFG_ID_ADDR = (i_dram_gen == SPD_DDR4_TYPE) ?
+                                       SPD_DDR4_DMB_DMB_MFG_ID_ADDR : SPD_DDR5_DMB_DMB_MFG_ID_ADDR;
+        const size_t DMB_REVISION_ADDR = (i_dram_gen == SPD_DDR4_TYPE) ?
+                                         SPD_DDR4_DMB_REVISION_ADDR : SPD_DDR5_DMB_REVISION_ADDR;
+        const size_t SUPPORTED_HOST_SPEEDS_ADDR = (i_dram_gen == SPD_DDR4_TYPE) ?
+                SPD_DDR4_SUPPORTED_HOST_SPEEDS_ADDR : SPD_DDR5_SUPPORTED_HOST_SPEEDS_ADDR;
+        const size_t EFD_FREQUENCY_ADDR = (i_dram_gen == SPD_DDR4_TYPE) ?
+                                          EFD_DDR4_FREQUENCY_ADDR : EFD_DDR5_FREQUENCY_ADDR;
+        const size_t EFD_MRANK_ADDR = (i_dram_gen == SPD_DDR4_TYPE) ?
+                                      EFD_DDR4_MRANK_ADDR : EFD_DDR5_MRANK_ADDR;
+        const size_t EFD_ASSUMED_MAX_BYTE_SIZE = (i_dram_gen == SPD_DDR4_TYPE) ?
+                SPD_DDR4_EFD_ASSUMED_MAX_BYTE_SIZE : SPD_DDR5_EFD_ASSUMED_MAX_BYTE_SIZE;
+
+
+        FAPI_DBG("ddr4_ddr5_get_efd: enter");
 
         // Initialize the error flag
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -529,6 +677,7 @@ extern "C"
         const uint8_t* l_efdDataNptr(nullptr);
         // Host Interface Supported Speeds field
         uint16_t l_supportedSpeeds(0);
+        bool l_planar_config = is_planar_config(i_spdBuffer[SPD_MODULE_TYPE_ADDR]);
 
         // Fill in a data buffer for FFDC purposes that contains
         //  the first 8 bytes from the SPD (freq,rank,channel,dimms)
@@ -542,8 +691,8 @@ extern "C"
         // forcing caller to go thru a lot of code, twice, to verify size.
         if ( nullptr == o_efdData ) // just return size
         {
-            io_vpdInfo.iv_size = SPD_EFD_ASSUMED_MAX_BYTE_SIZE;
-            FAPI_INF ("ddr4_get_efd: Caller passed in an EFD data nullptr, so "
+            io_vpdInfo.iv_size = EFD_ASSUMED_MAX_BYTE_SIZE;
+            FAPI_INF ("ddr4_ddr5_get_efd: Caller passed in an EFD data nullptr, so "
                       "returning size = %d so caller can allocate space for "
                       "EFD data",
                       io_vpdInfo.iv_size);
@@ -555,50 +704,60 @@ extern "C"
         //// First, set and validate all the variables necessary to retrieve
         //// data from the SPD, EFD meta data and the EFD memory space/block
 
-        // From previous assert, buffer size is large enough to contain DDR4
-        FAPI_DBG ( "ddr4_get_efd: SPD DDR4 size = %d, SPD buffer size = %d",
-                   SPD_DDR4_SIZE, i_spdBufferSize);
+        // From previous assert, buffer size is large enough to contain DDR4 and DDR5
+        FAPI_DBG ( "ddr4_ddr5_get_efd: SPD DDR type 0x%02X size = %d, SPD buffer size = %d",
+                   i_dram_gen, SPD_SIZE, i_spdBufferSize);
+
+        // Sanity check that we're not a DDR5 planar SPD since this is not supported
+        FAPI_ASSERT( !( (i_dram_gen == SPD_DDR5_TYPE) && l_planar_config ),
+                     fapi2::DDIMM_GET_EFD_MEMORY_CONFIG_UNSUPPORTED().
+                     set_DDR_TYPE(static_cast<uint32_t>(i_spdBuffer[SPD_MEM_TYPE_ADDR])).
+                     set_PLANAR_CONFIG(l_planar_config).
+                     set_OCMB_CHIP_TARGET(i_ocmbFapi2Target),
+                     "ddr4_ddr5_get_efd: DDR type 0x%02X and planar memory config "
+                     "combination is not supported.",
+                     i_dram_gen );
 
         /// Get the EFD memory space offset (8 bytes)
         // The address where the EFD memory space is located at within the
         // SPD buffer
         l_efdMemorySpaceOffset = *reinterpret_cast<const uint64_t*>
-                                 (&i_spdBuffer[SPD_EFD_MEMORY_SPACE_OFFSET_ADDR]);
+                                 (&i_spdBuffer[EFD_MEMORY_SPACE_OFFSET_ADDR]);
         // Swap endianess to host format.
         l_efdMemorySpaceOffset = le64toh(l_efdMemorySpaceOffset);
 
-        FAPI_DBG ("ddr4_get_efd: EFD memory space location = %d",
+        FAPI_DBG ("ddr4_ddr5_get_efd: EFD memory space location = %d",
                   l_efdMemorySpaceOffset);
 
         /// Sanity check the EFD memory space offset.
-        // Make sure the EFD memory space is not within the SPD DDR4 memory
+        // Make sure the EFD memory space is not within the SPD DDR4/DDR5 memory
         // space. The EFD memory space cannot share the same memory space as
-        // the SPD DDR4.
-        FAPI_ASSERT( (l_efdMemorySpaceOffset >= SPD_DDR4_SIZE),
+        // the SPD base config or module specific config.
+        FAPI_ASSERT( (l_efdMemorySpaceOffset >= SPD_SIZE),
                      fapi2::DDIMM_GET_EFD_EFD_MEMORY_SPACE_OFFSET_ERROR().
                      set_EFD_MEMORY_SPACE_OFFSET(l_efdMemorySpaceOffset).
-                     set_DDR4_MEMORY_SIZE(static_cast<uint32_t>(SPD_DDR4_SIZE)).
+                     set_BASE_MEMORY_SIZE(static_cast<uint32_t>(SPD_SIZE)).
                      set_OCMB_CHIP_TARGET(i_ocmbFapi2Target).
                      set_VPD_TYPE(static_cast<uint32_t>(io_vpdInfo.iv_vpd_type)).
                      set_DDR_TYPE(static_cast<uint32_t>
                                   (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
-                     "ddr4_get_efd: EFD memory space offset = %d resides "
-                     "within the SPD DDR4 memory size = %d. These two cannot "
+                     "ddr4_ddr5_get_efd: EFD memory space offset = %d resides "
+                     "within the SPD base+module memory size = %d. These two cannot "
                      "share the same meory space.",
                      l_efdMemorySpaceOffset,
-                     SPD_DDR4_SIZE );
+                     SPD_SIZE );
 
         /// Get and convert the EFD's memory space size exponential factor
         // Convert to the actual size of the EFD's memory space.
         // The EFD memory space size's exponential factor is 8 bytes.
         l_efdMemorySpaceSize = calculateEfdMemorySpaceSize(
-                                   i_spdBuffer[SPD_EFD_MEMORY_SPACE_SIZE_ADDR],
+                                   i_spdBuffer[EFD_MEMORY_SPACE_SIZE_ADDR],
                                    is_planar_config(i_spdBuffer[SPD_MODULE_TYPE_ADDR]));
 
-        FAPI_DBG ("ddr4_get_efd: EFD memory space size factor = %d, "
+        FAPI_DBG ("ddr4_ddr5_get_efd: EFD memory space size factor = %d, "
                   "converted to EFD memory space size = %d ",
                   static_cast<uint32_t>
-                  (i_spdBuffer[SPD_EFD_MEMORY_SPACE_SIZE_ADDR] &
+                  (i_spdBuffer[EFD_MEMORY_SPACE_SIZE_ADDR] &
                    SPD_EFD_MEMORY_SPACE_SIZE_MASK),
                   l_efdMemorySpaceSize);
 
@@ -608,20 +767,20 @@ extern "C"
                      fapi2::DDIMM_GET_EFD_EFD_MEMORY_SIZE_MAPPING_ERROR().
                      set_EFD_MEMORY_SPACE_MAPPING_VALUE
                      (static_cast<uint32_t>
-                      (i_spdBuffer[SPD_EFD_MEMORY_SPACE_SIZE_ADDR])).
+                      (i_spdBuffer[EFD_MEMORY_SPACE_SIZE_ADDR])).
                      set_OCMB_CHIP_TARGET(i_ocmbFapi2Target).
                      set_VPD_TYPE(static_cast<uint32_t>(io_vpdInfo.iv_vpd_type)).
                      set_DDR_TYPE(static_cast<uint32_t>
                                   (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
-                     "ddr4_get_efd: Mapping unsuccessful for EFD space "
+                     "ddr4_ddr5_get_efd: Mapping unsuccessful for EFD space "
                      "size factor = 0x%0.2X",
-                     i_spdBuffer[SPD_EFD_MEMORY_SPACE_SIZE_ADDR] );
+                     i_spdBuffer[EFD_MEMORY_SPACE_SIZE_ADDR] );
 
         /// Sanity check the EFD memory space offset + EFD memory space size.
         // Make sure the size of the SPD buffer is large enough to contain
         // the EFD memory space located at the EFD memory space offset.
         // From previous assert, the EFD memory space offset is at the
-        // the end of the DDR4 SPD data.
+        // the end of the DDR4 or DDR5 SPD data.
         FAPI_ASSERT( (i_spdBufferSize >=
                       (l_efdMemorySpaceOffset + l_efdMemorySpaceSize)),
                      fapi2::DDIMM_GET_EFD_EFD_MEMORY_SPACE_SIZE_ERROR().
@@ -632,24 +791,25 @@ extern "C"
                      set_VPD_TYPE(static_cast<uint32_t>(io_vpdInfo.iv_vpd_type)).
                      set_DDR_TYPE(static_cast<uint32_t>
                                   (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
-                     "ddr4_get_efd: SPD buffer size = %d is insufficient to "
+                     "ddr4_ddr5_get_efd: SPD buffer size = %d is insufficient to "
                      "accommodate the EFD memory space size = %d at "
-                     "offset = %d; a minimum SPD buffer needed = %d",
+                     "offset = %d for DDR type 0x%02X; a minimum SPD buffer needed = %d",
                      i_spdBufferSize,
                      l_efdMemorySpaceSize,
                      l_efdMemorySpaceOffset,
+                     i_dram_gen,
                      ( l_efdMemorySpaceOffset + l_efdMemorySpaceSize ) );
 
         /// Get the number of EFDs contained within the EFD memory space.
         // The number of EFDs value is 2 bytes.
         l_efdCount = *reinterpret_cast<const uint16_t*>
-                     (&i_spdBuffer[SPD_EFD_COUNT_ADDR]);
+                     (&i_spdBuffer[EFD_COUNT_ADDR]);
         // Swap endianess to host format.
         l_efdCount = le16toh(l_efdCount);
         // Extract the number of EFDs
         l_efdCount &= SPD_EFD_COUNT_MASK;
 
-        FAPI_DBG ("ddr4_get_efd: The number of EFDs = %d", l_efdCount);
+        FAPI_DBG ("ddr4_ddr5_get_efd: The number of EFDs = %d", l_efdCount);
 
         /// Sanity check the number of EFDs extracted.
         // Make sure there is at least one EFD to work with
@@ -659,19 +819,19 @@ extern "C"
                      set_VPD_TYPE(static_cast<uint32_t>(io_vpdInfo.iv_vpd_type)).
                      set_DDR_TYPE(static_cast<uint32_t>
                                   (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
-                     "ddr4_get_efd: The number of EFDs is 0. Need at least one");
+                     "ddr4_ddr5_get_efd: The number of EFDs is 0. Need at least one");
 
         // The size of the EFD can be extrapolated from the first EFD.
         // Use the ending block info (byte 2) from EFD[0] to determine size.
         // Mask out the EFD block multiplier value and multiply
         // that with the incremental block byte size
         // This value should be constant for all EFDs
-        l_efdSize = (i_spdBuffer[SPD_EFD_META_DATA_ADDR +
+        l_efdSize = (i_spdBuffer[EFD_META_DATA_ADDR +
                                  SPD_EFD_META_DATA_EFD_BYTE_2_OFFSET] &
                      SPD_EFD_META_DATA_EFD_BLOCK_OFFSET_MASK) *
                     SPD_EFD_INCREMENTAL_BLOCK_BYTE_SIZE;
 
-        FAPI_DBG ("ddr4_get_efd: The EFD data block size = %d", l_efdSize);
+        FAPI_DBG ("ddr4_ddr5_get_efd: The EFD data block size = %d", l_efdSize);
 
         // Verify that io_vpdInfo.iv_size is large enough to
         // hold the EFD data. If not, then assert.
@@ -683,53 +843,59 @@ extern "C"
                      set_VPD_TYPE(static_cast<uint32_t>(io_vpdInfo.iv_vpd_type)).
                      set_DDR_TYPE(static_cast<uint32_t>
                                   (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
-                     "ddr4_get_efd: EFD block size = %d exceeds outgoing buffer "
-                     "size = %d. Code const SPD_EFD_ASSUMED_MAX_BYTE_SIZE = %d "
+                     "ddr4_ddr5_get_efd: EFD block size = %d exceeds outgoing buffer "
+                     "size = %d. Code const EFD_ASSUMED_MAX_BYTE_SIZE = %d "
                      "needs a size increase to match the EFD block size",
                      l_efdSize,
                      io_vpdInfo.iv_size,
-                     static_cast<uint32_t>(SPD_EFD_ASSUMED_MAX_BYTE_SIZE));
+                     static_cast<uint32_t>(EFD_ASSUMED_MAX_BYTE_SIZE));
 
         //// Secondly, get/confirm and set as much outgoing data as possible
 
-        /// Set the outgoing to DDR4
-        io_vpdInfo.iv_ddr_mode = SPD_DDR4_TYPE;
+        /// Set the outgoing to DDR4 or DDR5
+        io_vpdInfo.iv_ddr_mode = i_dram_gen;
 
-        FAPI_DBG ("ddr4_get_efd: DDR mode = 0x%.2X",
+        FAPI_DBG ("ddr4_ddr5_get_efd: DDR mode = 0x%.2X",
                   io_vpdInfo.iv_ddr_mode);
 
         /// Confirm that the DMB manufacturer ID of the SPD data
         /// is what is expected
         // Get the DMB manufacturer ID - 2 bytes
         l_dmbMfgId = *reinterpret_cast<const uint16_t*>
-                     (&i_spdBuffer[SPD_DMB_DMB_MFG_ID_ADDR]);
+                     (&i_spdBuffer[DMB_MFG_ID_ADDR]);
         // Swap endianess to host format.
         l_dmbMfgId = le16toh(l_dmbMfgId);
 
-        FAPI_DBG ( "ddr4_get_efd: SPD DMB manufacturer ID = 0x%.4X", l_dmbMfgId);
+        FAPI_DBG ( "ddr4_ddr5_get_efd: SPD DMB manufacturer ID = 0x%.4X", l_dmbMfgId);
 
         // Confirm the DMB manufacturer ID value is what is expected
-        FAPI_ASSERT(check_valid_mfg_id(l_dmbMfgId),
-                    fapi2::DDIMM_GET_EFD_UNSUPPORTED_DMB_MFG_ID().
-                    set_DMB_MFG_ID(static_cast<uint32_t>(l_dmbMfgId)).
-                    set_OCMB_CHIP_TARGET(i_ocmbFapi2Target).
-                    set_VPD_TYPE(io_vpdInfo.iv_vpd_type).
-                    set_DDR_TYPE(static_cast<uint32_t>
-                                 (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
-                    "ddr4_get_efd: SPD DMB manufacturer ID 0x%.4X is not of "
-                    "expected DMB manufacturer IDs MCHP: 0x%.4X or IBM: 0x%.4X",
-                    l_dmbMfgId, SPD_DDR4_DMB_MFG_ID_MICROCHIP, SPD_DDR4_DMB_MFG_ID_IBM);
+        FAPI_ASSERT( ( (i_dram_gen == SPD_DDR4_TYPE) && check_ddr4_valid_mfg_id(l_dmbMfgId) ) ||
+                     ( (i_dram_gen == SPD_DDR5_TYPE) && check_ddr5_valid_mfg_id(l_dmbMfgId) ),
+                     fapi2::DDIMM_GET_EFD_UNSUPPORTED_DMB_MFG_ID().
+                     set_DMB_MFG_ID(static_cast<uint32_t>(l_dmbMfgId)).
+                     set_OCMB_CHIP_TARGET(i_ocmbFapi2Target).
+                     set_VPD_TYPE(io_vpdInfo.iv_vpd_type).
+                     set_DDR_TYPE(static_cast<uint32_t>
+                                  (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
+                     "ddr4_ddr5_get_efd: SPD DMB manufacturer ID 0x%.4X is not of "
+                     "expected DMB manufacturer IDs MCHP DDR4: 0x%.4X, "
+                     "IBM DDR4: 0x%.4X, IBM DDR5: 0x%.4X",
+                     l_dmbMfgId,
+                     SPD_DDR4_DMB_MFG_ID_MICROCHIP,
+                     SPD_DDR4_DMB_MFG_ID_IBM,
+                     SPD_DDR5_DMB_MFG_ID_IBM);
 
         // Set the outgoing DMB manufacturer ID
         io_vpdInfo.iv_dmb_mfg_id = l_dmbMfgId;
 
-        FAPI_DBG ( "ddr4_get_efd: SPD DMB manufacturer ID = 0x%.4X",
+        FAPI_DBG ( "ddr4_ddr5_get_efd: SPD DMB manufacturer ID = 0x%.4X",
                    io_vpdInfo.iv_dmb_mfg_id);
 
-        l_dmb_revision = *reinterpret_cast<const uint8_t*>(&i_spdBuffer[SPD_DMB_REVISION_ADDR]);
+        l_dmb_revision = *reinterpret_cast<const uint8_t*>(&i_spdBuffer[DMB_REVISION_ADDR]);
 
         // Confirm that the DMB revision is what is expected
-        FAPI_ASSERT( check_valid_dmb_revision(l_dmbMfgId, l_dmb_revision),
+        FAPI_ASSERT( ( (i_dram_gen == SPD_DDR4_TYPE) && check_ddr4_valid_dmb_revision(l_dmbMfgId, l_dmb_revision) ) ||
+                     ( (i_dram_gen == SPD_DDR5_TYPE) && check_ddr5_valid_dmb_revision(l_dmbMfgId, l_dmb_revision) ),
                      fapi2::DDIMM_GET_EFD_UNSUPPORTED_DMB_REVISION().
                      set_DMB_REVISION(static_cast<uint32_t>
                                       (l_dmb_revision)).
@@ -737,11 +903,12 @@ extern "C"
                      set_VPD_TYPE(io_vpdInfo.iv_vpd_type).
                      set_DDR_TYPE(static_cast<uint32_t>
                                   (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
-                     "ddr4_get_efd: SPD DMB revision 0x%.2X is not an expected revision: "
-                     "IBM expected: 0x%.2X "
+                     "ddr4_ddr5_get_efd: SPD DMB revision 0x%.2X is not an expected revision: "
+                     "IBM expected: DDR4 0x%.2X, DDR5 0x%.2X "
                      "MCHP expected: 0x%.2X or 0x%.2X or 0x%.2X or 0x%.2X",
                      l_dmb_revision,
                      SPD_DDR4_EXPECTED_DMB_REVISION_IBM,
+                     SPD_DDR5_EXPECTED_DMB_REVISION_0_IBM,
                      SPD_DDR4_EXPECTED_DMB_REVISION_0_MICROCHIP,
                      SPD_DDR4_EXPECTED_DMB_REVISION_A0_MICROCHIP,
                      SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP,
@@ -750,7 +917,7 @@ extern "C"
         // Set the outgoing DMB revision
         io_vpdInfo.iv_dmb_revision = l_dmb_revision;
 
-        FAPI_DBG ( "ddr4_get_efd: SPD DMB revision = 0x%.2X",
+        FAPI_DBG ( "ddr4_ddr5_get_efd: SPD DMB revision = 0x%.2X",
                    io_vpdInfo.iv_dmb_revision);
 
 
@@ -760,14 +927,23 @@ extern "C"
         /// Get the EFD frequency
         // Look up the bit mask for the given frequency
         // No need to swap endian, already in host format
-        l_freqMask = ddrFrequencyToBitMask(io_vpdInfo.iv_omi_freq_mhz);
+        l_freqMask = (i_dram_gen == SPD_DDR4_TYPE) ?
+                     ddr4FrequencyToBitMask(io_vpdInfo.iv_omi_freq_mhz) :
+                     ddr5FrequencyToBitMask(io_vpdInfo.iv_omi_freq_mhz);
 
-        FAPI_DBG ( "ddr4_get_efd: Caller supplied frequency = %d",
+        FAPI_DBG ( "ddr4_ddr5_get_efd: Caller supplied frequency = %d",
                    io_vpdInfo.iv_omi_freq_mhz );
 
         // Confirm that mapping the frequency succeeded
         if (!l_freqMask)
         {
+            const uint16_t FREQ0 = (i_dram_gen == SPD_DDR4_TYPE) ? DDR4_FREQ_VAL_0 : DDR5_FREQ_VAL_0;
+            const uint16_t FREQ1 = (i_dram_gen == SPD_DDR4_TYPE) ? DDR4_FREQ_VAL_1 : DDR5_FREQ_VAL_1;
+            const uint16_t FREQ2 = (i_dram_gen == SPD_DDR4_TYPE) ? DDR4_FREQ_VAL_2 : DDR5_FREQ_VAL_2;
+            const uint16_t FREQ3 = (i_dram_gen == SPD_DDR4_TYPE) ? DDR4_FREQ_VAL_3 : 0;
+            const uint16_t FREQ4 = (i_dram_gen == SPD_DDR4_TYPE) ? DDR4_FREQ_VAL_4 : 0;
+            const uint16_t FREQ5 = (i_dram_gen == SPD_DDR4_TYPE) ? DDR4_FREQ_VAL_5 : 0;
+            const uint16_t FREQ6 = (i_dram_gen == SPD_DDR4_TYPE) ? DDR4_FREQ_VAL_6 : 0;
 
             // If no value for freq, then mapping of frequency was unsuccessful
             // Note we don't want to produce FFDC if the ffdc_enabled flag is not set
@@ -776,42 +952,41 @@ extern "C"
                          fapi2::DDIMM_GET_EFD_UNSUPPORTED_FREQUENCY().
                          set_UNSUPPORTED_FREQ(static_cast<uint32_t>
                                               (io_vpdInfo.iv_omi_freq_mhz)).
-                         set_FREQ0(static_cast<uint32_t>(DDR4_FREQ_VAL_0)).
-                         set_FREQ1(static_cast<uint32_t>(DDR4_FREQ_VAL_1)).
-                         set_FREQ2(static_cast<uint32_t>(DDR4_FREQ_VAL_2)).
-                         set_FREQ3(static_cast<uint32_t>(DDR4_FREQ_VAL_3)).
-                         set_FREQ4(static_cast<uint32_t>(DDR4_FREQ_VAL_4)).
-                         set_FREQ5(static_cast<uint32_t>(DDR4_FREQ_VAL_5)).
-                         set_FREQ6(static_cast<uint32_t>(DDR4_FREQ_VAL_6)).
+                         set_FREQ0(static_cast<uint32_t>(FREQ0)).
+                         set_FREQ1(static_cast<uint32_t>(FREQ1)).
+                         set_FREQ2(static_cast<uint32_t>(FREQ2)).
+                         set_FREQ3(static_cast<uint32_t>(FREQ3)).
+                         set_FREQ4(static_cast<uint32_t>(FREQ4)).
+                         set_FREQ5(static_cast<uint32_t>(FREQ5)).
+                         set_FREQ6(static_cast<uint32_t>(FREQ6)).
                          set_OCMB_CHIP_TARGET(i_ocmbFapi2Target).
                          set_VPD_TYPE(io_vpdInfo.iv_vpd_type).
                          set_DDR_TYPE(static_cast<uint32_t>
                                       (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
-                         "ddr4_get_efd: Frequency %d is not supported by Axone",
+                         "ddr4_ddr5_get_efd: Frequency %d is not supported",
                          io_vpdInfo.iv_omi_freq_mhz );
 
             // If not asserting, still must exit .. can't continue with bad data
-            FAPI_INF("ddr4_get_efd: Frequency %d not supported by Axone. Valid "
+            FAPI_INF("ddr4_ddr5_get_efd: Frequency %d not supported. Valid "
                      "values are %d, %d, %d, %d, %d, %d or %d",
-                     io_vpdInfo.iv_omi_freq_mhz, DDR4_FREQ_VAL_0, DDR4_FREQ_VAL_1,
-                     DDR4_FREQ_VAL_2, DDR4_FREQ_VAL_3, DDR4_FREQ_VAL_4,
-                     DDR4_FREQ_VAL_5, DDR4_FREQ_VAL_6);
+                     io_vpdInfo.iv_omi_freq_mhz, FREQ0, FREQ1,
+                     FREQ2, FREQ3, FREQ4, FREQ5, FREQ6);
 
             FAPI_TRY_NO_TRACE(fapi2::FAPI2_RC_FALSE);
         }
 
-        FAPI_DBG ("ddr4_get_efd: Caller supplied frequency = %d, "
+        FAPI_DBG ("ddr4_ddr5_get_efd: Caller supplied frequency = %d, "
                   "converted to frequency bit value mask = 0x%.4X",
                   io_vpdInfo.iv_omi_freq_mhz, l_freqMask);
 
-        /// Get the EFD MR
-        // Look up the bit mask for the given MR
+        /// Get the EFD MRANK
+        // Look up the bit mask for the given MRANK
         l_rankMask = ddrMasterRankToBitMask( io_vpdInfo.iv_rank);
 
         // Confirm that mapping the master rank succeeded
         if ( !l_rankMask)
         {
-            // If no value for MR, then mapping of MR was unsuccessful
+            // If no value for MRANK, then mapping of MRANK was unsuccessful
             // Note we don't want to produce FFDC if the ffdc_enabled flag is not set
             // i.e. if we're just probing the EFD for its supported frequencies
             FAPI_ASSERT( ( !io_vpdInfo.iv_is_config_ffdc_enabled ),
@@ -826,12 +1001,11 @@ extern "C"
                          set_VPD_TYPE(io_vpdInfo.iv_vpd_type).
                          set_DDR_TYPE(static_cast<uint32_t>
                                       (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
-                         "ddr4_get_efd: Master rank %d is not supported by "
-                         "Axone. ",
+                         "ddr4_ddr5_get_efd: Master rank %d is not supported. ",
                          io_vpdInfo.iv_rank );
 
             // If not asserting, still must exit .. can't continue with bad data
-            FAPI_INF("ddr4_get_efd: Master rank %d not supported by Axone. "
+            FAPI_INF("ddr4_ddr5_get_efd: MRANK %d not supported. "
                      "Valid values are %d, %d, %d, or %d",
                      io_vpdInfo.iv_rank,
                      static_cast<uint32_t>(DDR_MR_VAL_0),
@@ -842,18 +1016,18 @@ extern "C"
             FAPI_TRY_NO_TRACE(fapi2::FAPI2_RC_FALSE);
         }
 
-        FAPI_DBG ("ddr4_get_efd: Caller supplied master rank = %d, "
-                  "converted to master rank bit value mask = 0x%.2X",
+        FAPI_DBG ("ddr4_ddr5_get_efd: Caller supplied mrank = %d, "
+                  "converted to mrank bit value mask = 0x%.2X",
                   io_vpdInfo.iv_rank, l_rankMask);
 
 
         //// Fourthly, find the EFD that matches the given frequency
-        //// and master rank
+        //// and mrank
 
         // Check the master list of supported frequencies before walking
         //  through the EFDs
         l_supportedSpeeds = *reinterpret_cast<const uint16_t*>
-                            (i_spdBuffer + SPD_SUPPORTED_HOST_SPEEDS_ADDR);
+                            (i_spdBuffer + SUPPORTED_HOST_SPEEDS_ADDR);
         l_supportedSpeeds = le16toh(l_supportedSpeeds);
 
         if (!(l_freqMask & l_supportedSpeeds))
@@ -873,7 +1047,7 @@ extern "C"
                          io_vpdInfo.iv_omi_freq_mhz, l_supportedSpeeds );
 
             // If unable to collect FFDC and assert, at least trace out and exit with false
-            FAPI_INF ("ddr4_get_efd: Unsupported frequency %d (frequency bit mask = 0x%.4X, "
+            FAPI_INF ("ddr4_ddr5_get_efd: Unsupported frequency %d (frequency bit mask = 0x%.4X, "
                       "supported mask = 0x%.4X)",
                       io_vpdInfo.iv_omi_freq_mhz, l_freqMask, l_supportedSpeeds);
 
@@ -881,13 +1055,13 @@ extern "C"
         }
 
         // Point to the beginning of the EFD meta data, AKA EFD[0] meta data.
-        l_efdMetaDataPtr = i_spdBuffer + SPD_EFD_META_DATA_ADDR;
+        l_efdMetaDataPtr = i_spdBuffer + EFD_META_DATA_ADDR;
 
         // Point to the beginning of the EFD data AKA EFD[0] data
         l_efdDataPtr = i_spdBuffer + l_efdMemorySpaceOffset;
 
-        FAPI_DBG ("ddr4_get_efd: Looking to match caller supplied frequency = "
-                  "%d (mapped to 0x%.4X) and caller supplied master rank = "
+        FAPI_DBG ("ddr4_ddr5_get_efd: Looking to match caller supplied frequency = "
+                  "%d (mapped to 0x%.4X) and caller supplied mrank = "
                   "%d (mapped to 0x%.2X)",
                   io_vpdInfo.iv_omi_freq_mhz, l_freqMask,
                   io_vpdInfo.iv_rank, l_rankMask);
@@ -941,7 +1115,7 @@ extern "C"
 
             // Get the EFD's frequency bit mask
             uint16_t l_efdFreqMask = *reinterpret_cast<const uint16_t*>
-                                     (&l_efdDataNptr[EFD_DDR4_FREQUENCY_ADDR]);
+                                     (&l_efdDataNptr[EFD_FREQUENCY_ADDR]);
             // Swap endianess to host format.
             l_efdFreqMask = le16toh(l_efdFreqMask);
 
@@ -955,7 +1129,7 @@ extern "C"
 
             // If the 'is implemented flag' is true for the EFD,
             // AND if the EFD frequency mask contains the frequency mask we are looking for
-            // AND the EFD master rank bitmap includes the master rank we are looking for
+            // AND the EFD mrank bitmap includes the mrank we are looking for
             // AND if we're on a planar config:
             //     if the EFD slot supported flag is set for the OCMB_CHIP's position
             //     if the EFD DIMM count supported matches our DIMM config
@@ -963,15 +1137,15 @@ extern "C"
             //     if the EFD DIMM type supported matches our DIMM config
             // then copy the EFD block for the caller.
             // TODO: Zen:MST-1690 Add in part/revision specific lookup if we need it
-            const fapi2::buffer<uint8_t> l_efd_ddr4_master_rank(l_efdDataNptr[EFD_DDR4_MASTER_RANK_ADDR]);
-            const uint8_t l_total_dimms_supported = (l_efd_ddr4_master_rank.getBit<DDR_DROPS_BIT>()) ? 2 : 1;
+            const fapi2::buffer<uint8_t> l_efd_ddr4_mrank(l_efdDataNptr[EFD_MRANK_ADDR]);
+            const uint8_t l_total_dimms_supported = (l_efd_ddr4_mrank.getBit<DDR_DROPS_BIT>()) ? 2 : 1;
             uint8_t l_total_ranks_supported = 0;
-            l_efd_ddr4_master_rank.extractToRight<DDR_TOTAL_MR_START, DDR_TOTAL_MR_LEN>(l_total_ranks_supported);
+            l_efd_ddr4_mrank.extractToRight<DDR_TOTAL_MR_START, DDR_TOTAL_MR_LEN>(l_total_ranks_supported);
 
             if ( (l_efdMetaDataNptr[SPD_EFD_META_DATA_EFD_BYTE_3_OFFSET] &
                   SPD_EFD_META_DATA_EFD_IS_IMPLEMENTED_MASK) &&
                  (l_efdFreqMask & l_freqMask)                               &&
-                 (l_efdDataNptr[EFD_DDR4_MASTER_RANK_ADDR] & l_rankMask) &&
+                 (l_efdDataNptr[EFD_MRANK_ADDR] & l_rankMask) &&
                  ( !l_is_planar ||
                    ( (l_efdDataNptr[EFD_DDR4_CHANNEL_SUPPORT_ADDR] & l_slot_supp_flag) &&
                      (l_total_dimms_supported == io_vpdInfo.iv_dimm_count) &&
@@ -994,9 +1168,9 @@ extern "C"
                     l_efdMetaDataNptr[SPD_EFD_META_DATA_EFD_BYTE_1_OFFSET] &
                     SPD_EFD_META_DATA_EFD_FUNCTION_TYPE_MASK;
 
-                FAPI_INF ("ddr4_get_efd: EFD[%d] block matched frequency %d "
-                          "(frequency bit mask 0x%.4X) and master rank %d "
-                          "(master rank bit mask 0x%.2X), efd size = %d",
+                FAPI_INF ("ddr4_ddr5_get_efd: EFD[%d] block matched frequency %d "
+                          "(frequency bit mask 0x%.4X) and mrank %d "
+                          "(mrank bit mask 0x%.2X), efd size = %d",
                           ii,
                           io_vpdInfo.iv_omi_freq_mhz, l_freqMask,
                           io_vpdInfo.iv_rank, l_rankMask,
@@ -1004,7 +1178,7 @@ extern "C"
 
                 if (l_is_planar)
                 {
-                    FAPI_INF ("ddr4_get_efd: EFD[%d] block also matched planar fields "
+                    FAPI_INF ("ddr4_ddr5_get_efd: EFD[%d] block also matched planar fields "
                               "total ranks on DIMM0 %d, total ranks on DIMM1 %d, "
                               "Channel number %d, DIMM count %d, and type 0x%02X",
                               ii,
@@ -1016,12 +1190,12 @@ extern "C"
             }  // end if ((l_efdMetaDataNptr[SPD_EFD_META_DATA_EFD_ ...
 
             // This EFD is not a match, send trace stating so
-            FAPI_INF ("ddr4_get_efd: Match failed for EFD[%d], freq bit mask "
+            FAPI_INF ("ddr4_ddr5_get_efd: Match failed for EFD[%d], freq bit mask "
                       "= 0x%.4X, rank bit mask = 0x%.2X, EFD memory location "
                       "= %d, EFD size = %d, is implemented flag = %s",
                       ii,
                       l_efdFreqMask,
-                      l_efdDataNptr[EFD_DDR4_MASTER_RANK_ADDR],
+                      l_efdDataNptr[EFD_MRANK_ADDR],
                       (l_efdMemorySpaceOffset + (ii * l_efdSize)),
                       l_efdSize,
                       ((l_efdMetaDataNptr[SPD_EFD_META_DATA_EFD_BYTE_3_OFFSET] &
@@ -1030,7 +1204,7 @@ extern "C"
 
             if (l_is_planar)
             {
-                FAPI_INF ("ddr4_get_efd: and planar fields "
+                FAPI_INF ("ddr4_ddr5_get_efd: and planar fields "
                           "total ranks on DIMM0 %d, total ranks on DIMM1 %d, "
                           "Channel number %d, DIMM count %d, and type 0x%02X (supported type = 0x%02X)",
                           io_vpdInfo.iv_total_ranks_dimm0, io_vpdInfo.iv_total_ranks_dimm1,
@@ -1040,7 +1214,7 @@ extern "C"
 
         if (ii >= l_efdCount)
         {
-            // Did not find an EFD to match frequency and master rank criteria
+            // Did not find an EFD to match frequency and mrank criteria
             // Collect FFDC and assert if iv_is_config_ffdc_enabled is true
             // Note we don't want to produce FFDC if the ffdc_enabled flag is not set
             // i.e. if we're just probing the EFD for its supported frequencies
@@ -1049,8 +1223,8 @@ extern "C"
                          set_FREQUENCY(io_vpdInfo.iv_omi_freq_mhz).
                          set_FREQUENCY_MAPPED_VALUE
                          (static_cast<uint32_t>(l_freqMask)).
-                         set_MASTER_RANK(io_vpdInfo.iv_rank).
-                         set_MASTER_RANK_MAPPED_VALUE
+                         set_MRANK(io_vpdInfo.iv_rank).
+                         set_MRANK_MAPPED_VALUE
                          (static_cast<uint32_t>(l_rankMask)).
                          set_OCMB_CHIP_TARGET(i_ocmbFapi2Target).
                          set_VPD_TYPE(static_cast<uint32_t>
@@ -1089,18 +1263,18 @@ extern "C"
                          set_EFD_METADATA29(l_ffdc_EFD[29]).
                          set_EFD_METADATA30(l_ffdc_EFD[30]).
                          set_EFD_METADATA31(l_ffdc_EFD[31]),
-                         "ddr4_get_efd: ALL EFDs have been exhausted.  NO "
+                         "ddr4_ddr5_get_efd: ALL EFDs have been exhausted.  NO "
                          "match for frequency %d (frequency bit mask 0x%.4X) "
-                         "and master rank %d (master rank bit mask 0x%.2X), or "
+                         "and mrank %d (mrank bit mask 0x%.2X), or "
                          "there was a match but the block is not implemented.",
                          io_vpdInfo.iv_omi_freq_mhz, l_freqMask,
                          io_vpdInfo.iv_rank, l_rankMask);
 
             // If unable to collect FFDC and assert, at least trace out error
             // and exit with false
-            FAPI_INF ("ddr4_get_efd: ALL EFDs have been exhausted.  NO match "
+            FAPI_INF ("ddr4_ddr5_get_efd: ALL EFDs have been exhausted.  NO match "
                       "for frequency = %d (frequency bit mask = 0x%.4X) and "
-                      "master rank = %d (master rank bit mask = 0x%.2X), or "
+                      "mrank = %d (mrank bit mask = 0x%.2X), or "
                       "there was a match but the block is not implemented.",
                       io_vpdInfo.iv_omi_freq_mhz, l_freqMask,
                       io_vpdInfo.iv_rank, l_rankMask);
@@ -1110,7 +1284,7 @@ extern "C"
 
     fapi_try_exit:
 
-        FAPI_DBG("ddr4_get_efd: exiting with %s",
+        FAPI_DBG("ddr4_ddr5_get_efd: exiting with %s",
                  ( (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS) ?
                    "no errors" : "errors" ));
         return fapi2::current_err;

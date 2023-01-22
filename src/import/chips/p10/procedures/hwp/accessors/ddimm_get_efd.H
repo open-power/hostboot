@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,30 @@ typedef fapi2::ReturnCode (*ddimm_get_efd_FP_t)(
     const size_t);
 extern "C"
 {
+/// @brief Return the DDR4/5's EFD based on VPDInfo
+///        This procedure explicitly returns the EFD data, associated with a
+///        DDR4 or DDR5, that matches given frequency and master rank criteria.
+///
+/// @param[in]  i_ocmbFapi2Target, a valid fapi2 OCMB_CHIP target
+/// @param[in]  io_vpdInfo, @see ddimm_get_efd
+/// @param[out] o_efdData, @see ddimm_get_efd
+/// @param[in]  i_spdBuffer, pointer to the SPD data
+/// @param[in]  i_spdBufferSize, size of the SPD data
+/// @param[in]  i_dram_gen, DRAM generation (4 or 5) of the SPD
+/// @note The size of blob may be less than io_vpdInfo.iv_size
+/// @note If data is returned for o_efdData, it will be in little endian
+/// @note Caller is responsible for allocating the buffers of o_efdData and
+///       i_spdBuffer.  This procedure will NOT manage these buffers. This
+///       procedure will only read/write to buffers, not allocate.
+/// @return FAPI2_RC_SUCCESS iff ok
+    fapi2::ReturnCode ddr4_ddr5_get_efd(
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&  i_ocmbFapi2Target,
+        fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP>& io_vpdInfo, // Can modify data
+        uint8_t* const o_efdData,    // Don't change pointer but can modify data
+        const uint8_t* const i_spdBuffer,// Don't change pointer nor modify data
+        size_t   i_spdBufferSize,    // Don't modify
+        const uint8_t i_dram_gen);   // Don't modify
+
 
 /// @brief Return the DDIMMs EFD based on VPDInfo
 ///        This procedure returns the EFD data that matches given

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -46,9 +46,35 @@
     <ffdc>VPD_BUFFER_SIZE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
     <ffdc>REQUIRED_MIN_BUFFER_SIZE</ffdc>
-    <ffdc>REQUIRED_DDR_TYPE</ffdc>
+    <ffdc>REQUIRED_DDR4_TYPE</ffdc>
+    <ffdc>REQUIRED_DDR5_TYPE</ffdc>
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
+    <!-- Most likely scenario is an unsupported card getting plugged in -->
+    <deconfigure>
+      <target>OCMB_CHIP_TARGET</target>
+    </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_CHIP_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <!-- Could also be a code bug -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_DDIMM_GET_EFD_MEMORY_CONFIG_UNSUPPORTED</rc>
+    <description>The SPD DRAM generation and memory config combination
+                 are unsupported.</description>
+    <ffdc>DDR_TYPE</ffdc>
+    <ffdc>PLANAR_CONFIG</ffdc>
+    <ffdc>OCMB_CHIP_TARGET</ffdc>
     <!-- Most likely scenario is an unsupported card getting plugged in -->
     <deconfigure>
       <target>OCMB_CHIP_TARGET</target>
@@ -72,7 +98,7 @@
     <description>The EFD memory space offset resides
                  within the DDR4 memory space.</description>
     <ffdc>EFD_MEMORY_SPACE_OFFSET</ffdc>
-    <ffdc>DDR4_MEMORY_SIZE</ffdc>
+    <ffdc>BASE_MEMORY_SIZE</ffdc>
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
@@ -327,8 +353,8 @@
     <description>No EFD found to match frequency and MR criteria.</description>
     <ffdc>FREQUENCY</ffdc>
     <ffdc>FREQUENCY_MAPPED_VALUE</ffdc>
-    <ffdc>MASTER_RANK</ffdc>
-    <ffdc>MASTER_RANK_MAPPED_VALUE</ffdc>
+    <ffdc>MRANK</ffdc>
+    <ffdc>MRANK_MAPPED_VALUE</ffdc>
     <ffdc>OCMB_CHIP_TARGET</ffdc>
     <ffdc>VPD_TYPE</ffdc>
     <ffdc>DDR_TYPE</ffdc>
