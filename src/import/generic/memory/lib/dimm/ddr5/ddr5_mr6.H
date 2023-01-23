@@ -98,30 +98,8 @@ class mr6_data : public mr_base_data<MC>
         ///
         mr6_data(): mr_base_data<MC>(iv_mr) {};
 
-        static constexpr const pair<uint8_t, uint8_t> TRTP_TABLE[9] =
-        {
-            {12, 0b0000},
-            {14, 0b0001},
-            {15, 0b0010},
-            {17, 0b0011},
-            {18, 0b0100},
-            {20, 0b0101},
-            {21, 0b0110},
-            {23, 0b0111},
-            {24, 0b1000},
-        };
-        static constexpr const pair<uint8_t, uint8_t> WR_TABLE[9] =
-        {
-            {48, 0b0000},
-            {54, 0b0001},
-            {60, 0b0010},
-            {66, 0b0011},
-            {72, 0b0100},
-            {78, 0b0101},
-            {84, 0b0110},
-            {90, 0b0111},
-            {96, 0b1000},
-        };
+        static const pair<uint8_t, uint8_t> TRTP_TABLE[9];
+        static const pair<uint8_t, uint8_t> WR_TABLE[9];
 
         ///
         /// @brief Checks and converts the write recovery value from an attribute to the MR field value
@@ -317,9 +295,31 @@ class mr6_data : public mr_base_data<MC>
 
 // Add declarations to ensure proper linking
 template<mss::mc_type MC>
-constexpr const pair<uint8_t, uint8_t> mr6_data<MC>::TRTP_TABLE[9];
+const pair<uint8_t, uint8_t> mr6_data<MC>::TRTP_TABLE[9] =
+{
+    pair<uint8_t, uint8_t>(12, 0b0000),
+    pair<uint8_t, uint8_t>(14, 0b0001),
+    pair<uint8_t, uint8_t>(15, 0b0010),
+    pair<uint8_t, uint8_t>(17, 0b0011),
+    pair<uint8_t, uint8_t>(18, 0b0100),
+    pair<uint8_t, uint8_t>(20, 0b0101),
+    pair<uint8_t, uint8_t>(21, 0b0110),
+    pair<uint8_t, uint8_t>(23, 0b0111),
+    pair<uint8_t, uint8_t>(24, 0b1000),
+};
 template<mss::mc_type MC>
-constexpr const pair<uint8_t, uint8_t> mr6_data<MC>::WR_TABLE[9];
+const pair<uint8_t, uint8_t> mr6_data<MC>::WR_TABLE[9] =
+{
+    pair<uint8_t, uint8_t>(48, 0b0000),
+    pair<uint8_t, uint8_t>(54, 0b0001),
+    pair<uint8_t, uint8_t>(60, 0b0010),
+    pair<uint8_t, uint8_t>(66, 0b0011),
+    pair<uint8_t, uint8_t>(72, 0b0100),
+    pair<uint8_t, uint8_t>(78, 0b0101),
+    pair<uint8_t, uint8_t>(84, 0b0110),
+    pair<uint8_t, uint8_t>(90, 0b0111),
+    pair<uint8_t, uint8_t>(96, 0b1000),
+};
 
 } // ns ddr5
 

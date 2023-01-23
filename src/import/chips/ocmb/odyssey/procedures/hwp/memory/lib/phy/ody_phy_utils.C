@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,6 @@
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
-
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <lib/phy/ody_ddrphy_phyinit_config.H>
@@ -43,6 +42,7 @@
 #include <generic/memory/lib/utils/poll.H>
 #include <lib/phy/ody_draminit_utils.H>
 #include <mss_odyssey_attribute_setters.H>
+#include <generic/memory/lib/utils/fapi_try_lambda.H>
 
 namespace mss
 {
@@ -301,10 +301,10 @@ fapi2::ReturnCode reset_dmem( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
         const bool l_poll_return = mss::poll(i_target, l_poll_params, [&i_target]()->bool
         {
             fapi2::buffer<uint64_t> l_data;
-            FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_DRTUB0_DCCMCLEARRUNNING, l_data));
+            FAPI_TRY_LAMBDA(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_DRTUB0_DCCMCLEARRUNNING, l_data));
             return (!l_data.getBit<scomt::mp::DWC_DDRPHYA_DRTUB0_DCCMCLEARRUNNING_DCCMCLEARRUNNING>());
 
-        fapi_try_exit:
+        fapi_try_exit_lambda:
             FAPI_ERR("mss::poll() hit an error in mss::getScom");
             return false;
         });

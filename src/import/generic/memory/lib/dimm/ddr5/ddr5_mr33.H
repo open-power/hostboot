@@ -96,28 +96,8 @@ class mr33_data : public mr_base_data<MC>
         ///
         mr33_data(): mr_base_data<MC>(iv_mr) {};
 
-        static constexpr const pair<uint16_t, uint8_t> ODT_TABLE[7] =
-        {
-            {fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_DISABLE , 0b000},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM40   , 0b111},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM60   , 0b101},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM80   , 0b100},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM120  , 0b011},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM240  , 0b010},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM480  , 0b001},
-        };
-
-        static constexpr const pair<uint8_t, uint8_t> DQS_TABLE[8] =
-        {
-            {fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_DISABLE , 0b000},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM34   , 0b111},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM40   , 0b110},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM48   , 0b101},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM60   , 0b100},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM80   , 0b011},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM120  , 0b010},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM240  , 0b001},
-        };
+        static const pair<uint16_t, uint8_t> ODT_TABLE[7];
+        static const pair<uint8_t, uint8_t> DQS_TABLE[8];
 
         ///
         /// @brief Checks to ensure the strap value is in bounds
@@ -419,9 +399,28 @@ class mr33_data : public mr_base_data<MC>
 
 // Declarations here to make the compiler happy with the linkage
 template<mss::mc_type MC>
-constexpr const pair<uint16_t, uint8_t> mr33_data<MC>::ODT_TABLE[7];
+const pair<uint16_t, uint8_t> mr33_data<MC>::ODT_TABLE[7] =
+{
+    pair<uint16_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_DISABLE , 0b000),
+    pair<uint16_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM40   , 0b111),
+    pair<uint16_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM60   , 0b101),
+    pair<uint16_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM80   , 0b100),
+    pair<uint16_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM120  , 0b011),
+    pair<uint16_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM240  , 0b010),
+    pair<uint16_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM480  , 0b001),
+};
 template<mss::mc_type MC>
-constexpr const pair<uint8_t, uint8_t> mr33_data<MC>::DQS_TABLE[8];
+const pair<uint8_t, uint8_t> mr33_data<MC>::DQS_TABLE[8] =
+{
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_DISABLE , 0b000),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM34   , 0b111),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM40   , 0b110),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM48   , 0b101),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM60   , 0b100),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM80   , 0b011),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM120  , 0b010),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM240  , 0b001),
+};
 
 } // ns ddr5
 

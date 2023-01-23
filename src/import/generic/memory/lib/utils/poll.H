@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/scom.H>
+#include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
@@ -161,9 +162,11 @@ inline bool poll(const fapi2::Target<T>& i_target,
 {
     fapi2::buffer<uint64_t> l_reg;
 
+#ifndef __PPE__
     FAPI_DBG("%s polling 0x%llx: initial delay %luns(%lusc) poll %luns(%lusc) %lu iters",
              mss::c_str(i_target), i_addr, i_params.iv_initial_delay, i_params.iv_initial_sim_delay,
              i_params.iv_delay, i_params.iv_sim_delay, i_params.iv_poll_count);
+#endif
 
     // We know to wait this long before polling
     FAPI_TRY( fapi2::delay(i_params.iv_initial_delay, i_params.iv_initial_sim_delay) );
@@ -175,14 +178,22 @@ inline bool poll(const fapi2::Target<T>& i_target,
         {
             fapi2::buffer<uint64_t> l_data;
             FAPI_TRY( mss::getScom(p.iv_target, p.iv_register, l_data) );
-            FAPI_INF("%s: %s 0x%016llx 0x%016llx", mss::c_str(p.iv_target), p.iv_tag, p.iv_register, l_data);
+
+            // PPE cannot print 64-bit numbers and only allows for 4 variables per print statement
+            // using an ifdef to keep the nice inline format for non-PPE applications
+#ifdef __PPE__
+            FAPI_INF( TARGTIDFORMAT ": %s REG: " UINT64FORMAT, GENTARGTID(p.iv_target), p.iv_tag, UINT64_VALUE(p.iv_register));
+            FAPI_INF( TARGTIDFORMAT ": %s ADDR:" UINT64FORMAT, GENTARGTID(p.iv_target), p.iv_tag, UINT64_VALUE(l_data));
+#else
+            FAPI_INF( TARGTIDFORMAT ": %s 0x%016llx 0x%016llx", GENTARGTID(p.iv_target), p.iv_tag, p.iv_register, l_data);
+#endif
         }
 
         FAPI_TRY( mss::getScom(i_target, i_addr, l_reg) );
 
         if (i_fn(l_poll_limit, l_reg) == true)
         {
-            FAPI_DBG("%s polling finished. %d iterations remaining" , mss::c_str(i_target), l_poll_limit);
+            FAPI_DBG(TARGTIDFORMAT " polling finished. %d iterations remaining" , TARGTID, l_poll_limit);
             return true;
         }
 
@@ -190,7 +201,7 @@ inline bool poll(const fapi2::Target<T>& i_target,
     }
 
     // If we're here, we ran out of poll iterations
-    FAPI_INF("%s WARNING: Timeout on polling", mss::c_str(i_target));
+    FAPI_INF(TARGTIDFORMAT " WARNING: Timeout on polling", TARGTID);
     return false;
 
 fapi_try_exit:
@@ -220,9 +231,11 @@ inline bool poll(const fapi2::Target<T>& i_target,
                  const poll_parameters i_params,
                  L i_fn)
 {
-    FAPI_DBG("%s polling initial delay %luns(%lusc) poll %luns(%lusc) %lu iters",
-             mss::c_str(i_target), i_params.iv_initial_delay, i_params.iv_initial_sim_delay,
+#ifndef __PPE__
+    FAPI_DBG(TARGTIDFORMAT " polling initial delay %luns(%lusc) poll %luns(%lusc) %lu iters",
+             TARGTID, i_params.iv_initial_delay, i_params.iv_initial_sim_delay,
              i_params.iv_delay, i_params.iv_sim_delay, i_params.iv_poll_count);
+#endif
 
     // We know to wait this long before polling
     FAPI_TRY( fapi2::delay(i_params.iv_initial_delay, i_params.iv_initial_sim_delay) );
@@ -231,7 +244,7 @@ inline bool poll(const fapi2::Target<T>& i_target,
     {
         if (i_fn())
         {
-            FAPI_DBG("%s polling finished. %d iterations remaining" , mss::c_str(i_target), l_poll_limit);
+            FAPI_DBG(TARGTIDFORMAT " polling finished. %d iterations remaining" , TARGTID, l_poll_limit);
             return true;
         }
 
@@ -239,7 +252,7 @@ inline bool poll(const fapi2::Target<T>& i_target,
     }
 
     // If we're here, we ran out of poll iterations
-    FAPI_INF("%s WARNING: Timeout on polling", mss::c_str(i_target));
+    FAPI_INF(TARGTIDFORMAT " WARNING: Timeout on polling", TARGTID);
     return false;
 
 fapi_try_exit:

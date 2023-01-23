@@ -97,17 +97,7 @@ class mr34_data : public mr_base_data<MC>
         mr34_data(): mr_base_data<MC>(iv_mr) {};
 
 
-        static constexpr const pair<uint8_t, uint8_t> RTT_TABLE[8] =
-        {
-            {fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_DISABLE , 0b000},
-            {fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM34   , 0b111},
-            {fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM40   , 0b110},
-            {fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM48   , 0b101},
-            {fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM60   , 0b100},
-            {fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM80   , 0b011},
-            {fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM120  , 0b010},
-            {fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM240  , 0b001},
-        };
+        static const pair<uint8_t, uint8_t> RTT_TABLE[8];
 
         ///
         /// @brief Checks and converts the attribute CA DQS value to its associated field value
@@ -132,8 +122,13 @@ class mr34_data : public mr_base_data<MC>
                         .set_DIMM_RANK(i_dimm_rank)
                         .set_VALUE(i_value)
                         .set_IS_RTT_WR(i_is_rtt_wr),
+#ifdef __PPE__
+                        TARGTIDFORMAT " DDR5 MR34. Bad RTT %u value on DIMM rank %u, Value: %u", TARGTID,
+                        i_is_rtt_wr, i_dimm_rank, i_value);
+#else
                         TARGTIDFORMAT " DDR5 MR34. Bad RTT %s value on DIMM rank %u, Value: %u", TARGTID,
                         i_is_rtt_wr ? "WR" : "PARK", i_dimm_rank, i_value);
+#endif
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
@@ -163,8 +158,13 @@ class mr34_data : public mr_base_data<MC>
                         .set_DIMM_RANK(i_dimm_rank)
                         .set_FIELD(i_field)
                         .set_IS_RTT_WR(i_is_rtt_wr),
+#ifdef __PPE__
+                        TARGTIDFORMAT " DDR5 MR34. Bad RTT %u field on DIMM rank %u. Field value: %u", TARGTID,
+                        i_is_rtt_wr, i_dimm_rank, i_field);
+#else
                         TARGTIDFORMAT " DDR5 MR34. Bad RTT %s field on DIMM rank %u. Field value: %u", TARGTID,
                         i_is_rtt_wr ? "WR" : "PARK", i_dimm_rank, i_field);
+#endif
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
@@ -290,7 +290,17 @@ class mr34_data : public mr_base_data<MC>
 };
 
 template<mss::mc_type MC>
-constexpr const pair<uint8_t, uint8_t> mr34_data<MC>::RTT_TABLE[8];
+constexpr const pair<uint8_t, uint8_t> mr34_data<MC>::RTT_TABLE[8] =
+{
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_DISABLE , 0b000),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM34   , 0b111),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM40   , 0b110),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM48   , 0b101),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM60   , 0b100),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM80   , 0b011),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM120  , 0b010),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM240  , 0b001),
+};
 
 } // ns ddr5
 

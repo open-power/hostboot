@@ -481,7 +481,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         VREGCtrl3 = (VshCtrlUpdate << csr_VshCtrlUpdate_LSB);
 
         FAPI_DBG (TARGTIDFORMAT
-                  " // [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VREGCtrl3::VshCtrlUpdate to 0x%x for MASTER",
+                  " // [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VREGCtrl3::VshCtrlUpdate to 0x%x for MASTER ",
                   TARGTID, 0, i_user_input_basic.Frequency[0], VshCtrlUpdate);
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target,  (tMASTER | csr_VREGCtrl3_ADDR), VREGCtrl3));
 
@@ -693,7 +693,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                           " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz",
                           TARGTID, pstate,  i_user_input_basic.Frequency[pstate]);
                 FAPI_DBG (TARGTIDFORMAT
-                          " //// [phyinit_C_initPhyConfig] Programming ATxSlewRate::CsrATxSrc ANIB %d to 0x%x",
+                          " //// [phyinit_C_initPhyConfig] Programming ATxSlewRate::CsrATxSrc ANIB %d to 0x%x.",
                           TARGTID, anib, CsrATxSrc);
                 FAPI_DBG (TARGTIDFORMAT
                           " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz",
@@ -755,7 +755,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                   TARGTID, 0,
                   i_user_input_basic.Frequency[0], MasterTxSlewRate);
         FAPI_DBG (TARGTIDFORMAT
-                  " //// [phyinit_C_initPhyConfig] ### NOTE ### Optimal setting for CalPreDriverOverride::CsrTxOvSrc are technology specific.",
+                  " //// [phyinit_C_initPhyConfig] ### NOTE ### Optimal setting for CalPreDriverOverride::CsrTxOvSrc are technology specific..",
                   TARGTID);
         FAPI_DBG (TARGTIDFORMAT
                   " //// [phyinit_C_initPhyConfig] ### NOTE ### Please consult the \"Output Slew Rate\" section of HSpice Model App Note in specific technology for recommended settings\n",
@@ -1709,11 +1709,11 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                       TARGTID, pstate, i_user_input_basic.Frequency[pstate], TxStrenEqLoPd[pstate]);
 
             FAPI_DBG (TARGTIDFORMAT
-                      " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming TxImpedanceCtrl1::TxStrenPu to 0x%x",
+                      " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming TxImpedanceCtrl1::TxStrenPu to 0x%x..",
                       TARGTID,
                       pstate, i_user_input_basic.Frequency[pstate], TxStrenPu[pstate]);
             FAPI_DBG (TARGTIDFORMAT
-                      " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming TxImpedanceCtrl1::TxStrenPd to 0x%x",
+                      " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming TxImpedanceCtrl1::TxStrenPd to 0x%x.",
                       TARGTID,
                       pstate, i_user_input_basic.Frequency[pstate], TxStrenPd[pstate]);
 
@@ -1983,7 +1983,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
             GlobalVrefInDAC = compute_global_vref_in_dac(i_user_input_dram_config.PhyVref );
 
             VrefInGlobal = (GlobalVrefInDAC << csr_GlobalVrefInDAC_LSB) | GlobalVrefInSel;
-            FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Pstate=%d, Programming VrefInGlobal::GlobalVrefInSel to 0x%x",
+            FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Pstate=%d, Programming VrefInGlobal::GlobalVrefInSel to 0x%x.",
                       TARGTID, pstate,
                       GlobalVrefInSel);
             FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Pstate=%d, Programming VrefInGlobal::GlobalVrefInDAC to 0x%x",
@@ -3217,7 +3217,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                 FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming AForceTriCont (anib=5) to 0xc", TARGTID);
                 FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming AForceTriCont (anib=6) to 0xc", TARGTID);
                 FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming AForceTriCont (anib=7) to 0xa", TARGTID);
-                FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming AForceTriCont (anib=8) to 0xa", TARGTID);
+                FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming AForceTriCont (anib=8) to 0xa.", TARGTID);
                 FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tANIB | 0x1000 | csr_AForceTriCont_ADDR), 0x8));
                 FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tANIB | 0x2000 | csr_AForceTriCont_ADDR), 0xa));
                 FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tANIB | 0x3000 | csr_AForceTriCont_ADDR), 0xa));

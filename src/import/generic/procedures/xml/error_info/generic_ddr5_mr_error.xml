@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -48,6 +48,7 @@
     <ffdc>MAX</ffdc>
     <ffdc>DRAM</ffdc>
     <ffdc>MR</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -69,6 +70,7 @@
     <ffdc>MAX</ffdc>
     <ffdc>STRAP</ffdc>
     <ffdc>MR</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -92,6 +94,7 @@
     <ffdc>CAS_LATENCY</ffdc>
     <ffdc>MAX_CAS_LATENCY</ffdc>
     <ffdc>MIN_CAS_LATENCY</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -112,6 +115,7 @@
     </description>
     <ffdc>BURST_LENGTH</ffdc>
     <ffdc>MAX_BURST_LENGTH</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -136,6 +140,7 @@
     </description>
     <ffdc>MAX</ffdc>
     <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -170,6 +175,7 @@
     </description>
     <ffdc>MIN_REFRESH_RATE</ffdc>
     <ffdc>WIDE_RANGE</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -193,6 +199,7 @@
     <ffdc>VALUE</ffdc>
     <ffdc>DIMM_RANK</ffdc>
     <ffdc>IS_PULL_UP</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -214,6 +221,7 @@
     <ffdc>FIELD</ffdc>
     <ffdc>DIMM_RANK</ffdc>
     <ffdc>IS_PULL_UP</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -235,6 +243,7 @@
        A bad drive WR recovery value was passed to MR6
     </description>
     <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -254,6 +263,7 @@
        A bad drive WR recovery value was passed by MR6
     </description>
     <ffdc>FIELD</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -273,6 +283,7 @@
        A bad tRTP value was passed to MR6
     </description>
     <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -292,6 +303,7 @@
        A bad tRTP field value was passed by MR6
     </description>
     <ffdc>FIELD</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -313,6 +325,7 @@
        A bad drive WR preamble value was passed to MR8
     </description>
     <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -332,6 +345,7 @@
        A bad drive RD preamble value was passed to MR8
     </description>
     <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -351,6 +365,7 @@
        A bad drive WR preamble value was passed by MR8
     </description>
     <ffdc>FIELD</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -370,6 +385,7 @@
        A bad drive RD preamble value was passed by MR8
     </description>
     <ffdc>FIELD</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -394,6 +410,7 @@
     <ffdc>VALUE</ffdc>
     <ffdc>RANK</ffdc>
     <ffdc>DRAM</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -418,6 +435,7 @@
     <ffdc>VALUE</ffdc>
     <ffdc>RANK</ffdc>
     <ffdc>DRAM</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -442,6 +460,7 @@
     <ffdc>VALUE</ffdc>
     <ffdc>RANK</ffdc>
     <ffdc>DRAM</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -465,6 +484,7 @@
     <ffdc>MAX</ffdc>
     <ffdc>MIN</ffdc>
     <ffdc>TCCD_L</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -487,6 +507,7 @@
     </description>
     <ffdc>MAX</ffdc>
     <ffdc>CID</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -509,6 +530,7 @@
     </description>
     <ffdc>MAX</ffdc>
     <ffdc>THRESHOLD</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -533,6 +555,7 @@
     <ffdc>VALUE</ffdc>
     <ffdc>DIMM_RANK</ffdc>
     <ffdc>IS_CS</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -555,6 +578,7 @@
     <ffdc>FIELD</ffdc>
     <ffdc>DIMM_RANK</ffdc>
     <ffdc>IS_CS</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -578,6 +602,7 @@
     <ffdc>STRAP</ffdc>
     <ffdc>VALUE</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -599,6 +624,7 @@
     <ffdc>STRAP</ffdc>
     <ffdc>FIELD</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -620,6 +646,7 @@
     <ffdc>STRAP</ffdc>
     <ffdc>VALUE</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -641,6 +668,7 @@
     <ffdc>STRAP</ffdc>
     <ffdc>FIELD</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -664,6 +692,7 @@
     <ffdc>IS_RTT_WR</ffdc>
     <ffdc>VALUE</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -685,6 +714,7 @@
     <ffdc>IS_RTT_WR</ffdc>
     <ffdc>FIELD</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -708,6 +738,7 @@
     <ffdc>IS_RTT_NOM_RD</ffdc>
     <ffdc>VALUE</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -729,6 +760,7 @@
     <ffdc>IS_RTT_NOM_RD</ffdc>
     <ffdc>FIELD</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -753,6 +785,7 @@
     <ffdc>MAX</ffdc>
     <ffdc>VALUE</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -775,6 +808,7 @@
     <ffdc>MAX</ffdc>
     <ffdc>VALUE</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -799,6 +833,7 @@
     <ffdc>MAX</ffdc>
     <ffdc>VALUE</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -821,6 +856,7 @@
     <ffdc>MAX</ffdc>
     <ffdc>VALUE</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -845,6 +881,7 @@
     <ffdc>MAX</ffdc>
     <ffdc>VALUE</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -867,6 +904,7 @@
     <ffdc>MAX</ffdc>
     <ffdc>VALUE</ffdc>
     <ffdc>DIMM_RANK</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -893,6 +931,7 @@
     </description>
     <ffdc>MAX</ffdc>
     <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -915,6 +954,7 @@
     </description>
     <ffdc>MAX</ffdc>
     <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -940,6 +980,7 @@
     <ffdc>MAX</ffdc>
     <ffdc>RANK</ffdc>
     <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

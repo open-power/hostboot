@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,16 +122,16 @@ struct msg_block_vars
     uint8_t iv_CsPresentChB[mss::ody::MAX_DIMM_PER_PORT] = {0};
     uint8_t iv_MR0[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR2[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR3[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {0};
+    uint8_t iv_MR3[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {};
     uint8_t iv_MR4[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR5[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR6[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR32[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR32_ORG[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR8[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR10[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {0};
-    uint8_t iv_MR11[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {0};
-    uint8_t iv_MR12[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {0};
+    uint8_t iv_MR10[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {};
+    uint8_t iv_MR11[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {};
+    uint8_t iv_MR12[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {};
     uint8_t iv_MR13[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR14[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR15[mss::ody::MAX_RANK_PER_DIMM] = {0};
@@ -164,7 +164,7 @@ struct msg_block_vars
     uint8_t iv_WL_ADJ_START = 0;
     uint8_t iv_WL_ADJ_END = 0;
     uint8_t iv_RCW[NUM_RCW] = {0};
-    uint8_t iv_DisabledDB[mss::ody::MAX_BYTES_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t iv_DisabledDB[mss::ody::MAX_BYTES_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
 };
 
 ///
@@ -376,20 +376,6 @@ class msg_block_params
         fapi_try_exit:
             o_rc = fapi2::current_err;
         }
-
-        ///
-        /// @brief Constructor
-        ///
-        /// @brief Set params as per the value initialized (useful for testing)
-        /// @param[in] i_target the fapi2 target
-        /// @param[in] i_phy_param_attrs explorer specific data structure
-        /// @param[in] i_rank_info rank information
-        ///
-        msg_block_params(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                         const msg_block_vars& i_msg_block_vars,
-                         const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> i_rank_infos):
-            iv_target(i_target), iv_msg_block_vars(i_msg_block_vars), iv_rank_infos(i_rank_infos)
-        {}
 
         ///
         /// @brief default copy assignment operator

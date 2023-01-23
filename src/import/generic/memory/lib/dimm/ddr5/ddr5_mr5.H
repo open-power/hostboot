@@ -99,12 +99,7 @@ class mr5_data : public mr_base_data<MC>
         ///
         mr5_data(): mr_base_data<MC>(iv_mr) {};
 
-        static constexpr const pair<uint8_t, uint8_t> DRV_IMP_TABLE[3] =
-        {
-            {fapi2::ENUM_ATTR_DRAM_PU_DRV_IMP_OHM_34, 0b00},
-            {fapi2::ENUM_ATTR_DRAM_PU_DRV_IMP_OHM_40, 0b01},
-            {fapi2::ENUM_ATTR_DRAM_PU_DRV_IMP_OHM_48, 0b10},
-        };
+        static const pair<uint8_t, uint8_t> DRV_IMP_TABLE[3];
 
         ///
         /// @brief Checks and converts a drive impedance attribute value to the MR field value
@@ -129,8 +124,13 @@ class mr5_data : public mr_base_data<MC>
                         .set_DIMM_RANK(i_dimm_rank)
                         .set_VALUE(i_attr)
                         .set_IS_PULL_UP(i_is_pu),
+#ifdef __PPE__
+                        TARGTIDFORMAT " DDR5 MR5. Bad %u DRV impedance value on DIMM rank %u. Value: %u", TARGTID,
+                        i_is_pu, i_dimm_rank, i_attr);
+#else
                         TARGTIDFORMAT " DDR5 MR5. Bad %s DRV impedance value on DIMM rank %u. Value: %u", TARGTID,
                         i_is_pu ? "pull up" : "pull down", i_dimm_rank, i_attr);
+#endif
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
@@ -160,8 +160,13 @@ class mr5_data : public mr_base_data<MC>
                         .set_DIMM_RANK(i_dimm_rank)
                         .set_FIELD(i_field)
                         .set_IS_PULL_UP(i_is_pu),
+#ifdef __PPE__
+                        TARGTIDFORMAT " DDR5 MR5. Bad %u DRV impedance value on DIMM rank %u. field: %u", TARGTID,
+                        i_is_pu, i_dimm_rank, i_field);
+#else
                         TARGTIDFORMAT " DDR5 MR5. Bad %s DRV impedance value on DIMM rank %u. field: %u", TARGTID,
                         i_is_pu ? "pull up" : "pull down", i_dimm_rank, i_field);
+#endif
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
@@ -306,7 +311,12 @@ class mr5_data : public mr_base_data<MC>
 };
 
 template<mss::mc_type MC>
-constexpr const pair<uint8_t, uint8_t> mr5_data<MC>::DRV_IMP_TABLE[3];
+const pair<uint8_t, uint8_t> mr5_data<MC>::DRV_IMP_TABLE[3] =
+{
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DRAM_PU_DRV_IMP_OHM_34, 0b00),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DRAM_PU_DRV_IMP_OHM_40, 0b01),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DRAM_PU_DRV_IMP_OHM_48, 0b10),
+};
 
 } // ns ddr5
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,15 +34,6 @@
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
-///
-/// @brief FAPI_TRY for lambda functions, which goes to a different label
-///
-#define FAPI_TRY_LAMBDA( __operation__ )                               \
-    if ((fapi2::current_err = (__operation__)) != fapi2::FAPI2_RC_SUCCESS) \
-    {                                                                      \
-        goto fapi_try_exit_lambda;                                         \
-    }
-
 #ifndef __PMIC_COMMON_UTILS_H__
 #define __PMIC_COMMON_UTILS_H__
 
@@ -52,6 +43,7 @@
 #include <lib/utils/pmic_consts.H>
 #include <mss_pmic_attribute_getters.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/fapi_try_lambda.H>
 
 namespace mss
 {

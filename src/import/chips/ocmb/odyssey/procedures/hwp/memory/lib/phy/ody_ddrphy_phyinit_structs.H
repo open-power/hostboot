@@ -45,13 +45,13 @@
 //
 // Structure for basic (mandatory) user inputs
 //
-typedef enum DramTypes
+typedef enum DramTypes : int
 {
     DDR4,
     DDR5
 } DramType_t;
 
-typedef enum DimmTypes
+typedef enum DimmTypes : int
 {
     UDIMM,
     SODIMM,
@@ -244,7 +244,7 @@ typedef struct user_input_basic
     int Dfi1Exists;
 
 
-} user_input_basic_t;
+} user_input_basic_t __attribute__ ((aligned (8)));
 
 
 //#############################################################################

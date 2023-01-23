@@ -93,21 +93,8 @@ class mr8_data : public mr_base_data<MC>
             FAPI_ERR(TARGTIDFORMAT " unable to get attributes for ddr5::mr4", TARGTID);
             return;
         }
-        static constexpr const pair<uint8_t, uint8_t> WR_TABLE[3] =
-        {
-            {fapi2::ENUM_ATTR_DDR5_DRAM_WR_PREAMBLE_TCK2, 0b001},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_WR_PREAMBLE_TCK3, 0b010},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_WR_PREAMBLE_TCK4, 0b011},
-        };
-
-        static constexpr const pair<uint8_t, uint8_t> RD_TABLE[5] =
-        {
-            {fapi2::ENUM_ATTR_DDR5_DRAM_RD_PREAMBLE_TCK1,      0b000},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_RD_PREAMBLE_TCK2_OPT1, 0b001},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_RD_PREAMBLE_TCK2_OPT2, 0b010},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_RD_PREAMBLE_TCK3,      0b011},
-            {fapi2::ENUM_ATTR_DDR5_DRAM_RD_PREAMBLE_TCK4,      0b100},
-        };
+        static const pair<uint8_t, uint8_t> WR_TABLE[3];
+        static const pair<uint8_t, uint8_t> RD_TABLE[5];
 
         ///
         /// @brief Default constructor
@@ -316,9 +303,21 @@ class mr8_data : public mr_base_data<MC>
 
 // Adds in linkage
 template<mss::mc_type MC>
-constexpr const pair<uint8_t, uint8_t> mr8_data<MC>::WR_TABLE[3];
+const pair<uint8_t, uint8_t> mr8_data<MC>::WR_TABLE[3] =
+{
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_WR_PREAMBLE_TCK2, 0b001),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_WR_PREAMBLE_TCK3, 0b010),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_WR_PREAMBLE_TCK4, 0b011),
+};
 template<mss::mc_type MC>
-constexpr const pair<uint8_t, uint8_t> mr8_data<MC>::RD_TABLE[5];
+const pair<uint8_t, uint8_t> mr8_data<MC>::RD_TABLE[5] =
+{
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RD_PREAMBLE_TCK1,      0b000),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RD_PREAMBLE_TCK2_OPT1, 0b001),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RD_PREAMBLE_TCK2_OPT2, 0b010),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RD_PREAMBLE_TCK3,      0b011),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RD_PREAMBLE_TCK4,      0b100),
+};
 
 } // ns ddr5
 
