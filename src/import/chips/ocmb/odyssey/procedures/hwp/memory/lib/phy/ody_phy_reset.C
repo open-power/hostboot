@@ -63,24 +63,21 @@ fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targ
     // Local buffer
     fapi2::buffer<uint64_t> l_buffer;
 
-    // Number of ports
-    static constexpr size_t NUM_OF_PORTS = mss::ody::MAX_PORT_PER_OCMB;
-
     // Registers to set and clear
     constexpr uint64_t CPLT_CONF1_REG_SET = 0x08000019;
     constexpr uint64_t CPLT_CONF1_REG_CLEAR = 0x08000029;
-
-    // Bits in the register for both port0 and port1
-    constexpr uint32_t CPLT_CONF1_DDR_RESET[NUM_OF_PORTS] = {2, 3};
-    constexpr uint32_t CPLT_CONF1_DFICLK_RESET[NUM_OF_PORTS] = {10, 11};
-    constexpr uint32_t CPLT_CONF1_DDR_APBRESETn[NUM_OF_PORTS] = {14, 15};
 
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
     // Get the memport relative position
     // The relative_pos() only returns 0 or 1 for this type of function
     // to decide whether to use port0 or port1
-    const uint8_t l_rel_pos =  mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+    const uint32_t l_rel_pos =  mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
+    // Bits in the register for both port0 and port1
+    const uint32_t CPLT_CONF1_DDR_RESET = l_rel_pos == 0 ? 2 : 3;
+    const uint32_t CPLT_CONF1_DFICLK_RESET = l_rel_pos == 0 ? 10 : 11;
+    const uint32_t CPLT_CONF1_DDR_APBRESETn = l_rel_pos == 0 ? 14 : 15;
 
 
     // 6. Wait a minimum of 128 clock cycles which is the reset period for phy
@@ -90,8 +87,8 @@ fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targ
     // 7. Drive Reset to 0 and DfiClkReset to 0 because the PUB databook says
     // Reset and DfiClkReset need to be asserted/deasserted together
     // Note: All DFI and APB inputs must be driven at valid reset states before the deassertion of Reset.
-    FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DDR_RESET[l_rel_pos]));
-    FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DFICLK_RESET[l_rel_pos]));
+    FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DDR_RESET));
+    FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DFICLK_RESET));
     FAPI_TRY(fapi2::putScom(l_ocmb, CPLT_CONF1_REG_CLEAR, l_buffer));
     l_buffer.flush<0>();
 
@@ -99,7 +96,7 @@ fapi2::ReturnCode reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targ
     FAPI_TRY(fapi2::delay(24, 24));
 
     // 9. Drive PRESETn_APB to 1 to de-assert reset on the APB bus.
-    FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DDR_APBRESETn[l_rel_pos]));
+    FAPI_TRY(l_buffer.setBit(CPLT_CONF1_DDR_APBRESETn));
     FAPI_TRY(fapi2::putScom(l_ocmb, CPLT_CONF1_REG_SET, l_buffer));
     l_buffer.flush<0>();
 

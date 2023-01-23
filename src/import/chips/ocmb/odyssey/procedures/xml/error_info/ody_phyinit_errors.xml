@@ -180,6 +180,7 @@
   <hwpError>
     <rc>RC_ODY_DMEM_RESET_TIMEOUT</rc>
     <description>Odyssey timed out while trying to reset the DMEM</description>
+    <ffdc>PORT_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
