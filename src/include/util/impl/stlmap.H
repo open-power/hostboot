@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -368,19 +368,20 @@ namespace Util
 
                     _Tree::node * hint_node = nullptr;
 
+                    iv_tree.lock();
+
                     bool rc = iv_tree.find_hint((_Tree::node*)p, hint_node);
                     if (!rc)
                     {
                         // node not found, so insert new one
                         iv_tree.insert((_Tree::node*)p);
+                        iv_tree.unlock();
                         return make_pair(iterator(_TreeItr(&iv_tree, (_Tree::node*)p)), true);
                     }
-                    else
-                    {
-                        // node already exists, delete new one
-                        delete p;
-                        return make_pair(iterator(_TreeItr(&iv_tree, (_Tree::node*)hint_node)), false);
-                    }
+                    iv_tree.unlock();
+                    // node already exists, delete new one
+                    delete p;
+                    return make_pair(iterator(_TreeItr(&iv_tree, (_Tree::node*)hint_node)), false);
                 }
 
                 std::pair<iterator,bool> insert(const value_type& x)
@@ -549,6 +550,14 @@ namespace Util
                 {
                     return make_pair(lower_bound(k),upper_bound(k));
                 }
+
+                // lock/unlock for the container
+                void lock()   const {iv_tree.lock();}
+                void unlock() const {iv_tree.unlock();}
+
+                // dual lock/unlock for the container and parameter "x"
+                void lock  (const Map<Key,T,Compare>& x) const {iv_tree.lock(x.iv_tree);}
+                void unlock(const Map<Key,T,Compare>& x) const {iv_tree.unlock(x.iv_tree);}
 
             private:
 

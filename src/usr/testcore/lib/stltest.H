@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,9 +33,391 @@
 #include <algorithm>
 #include <iterator>
 #include <functional>
+#include <sys/task.h>
 
 class STLTest : public CxxTest::TestSuite
 {
+    class ThreadSafeMapTest
+    {
+        ////////////////////////////////////////////////////////////////////////
+        // The ThreadSafeMapTest has several threads calling the same function
+        // "run_thread" where all threads insert/remove/compare/etc into the
+        // same map. The map contains pairs of integers which match, like
+        // (0,0)(1,1). Each thread has a different start number and all threads
+        // insert/remove into their own range of numbers. All threads insert
+        // 40 pairs and remove 20 pairs each loop until each thread enters 1000
+        // pairs.
+        ////////////////////////////////////////////////////////////////////////
+
+        #ifndef __HOSTBOOT_RUNTIME
+
+        class ThreadSafeMap
+        {
+            void do_find(int const& key)
+            {
+                std::map<int,int>::iterator itr = map.find(key);
+
+                if (itr == map.end())
+                {
+                    // key not found
+                    err = 1;
+                }
+                else if (key != itr->second)
+                {
+                    // value does not match key
+                    err = 2;
+                }
+                else
+                {
+                    // test operators and misc functions
+                    map.lower_bound(key);
+                    map.upper_bound(key);
+                    map.equal_range(key);
+                    if (map.count(key) != 1)
+                    {
+                        // there is a duplicate pair for key
+                        err = 3;
+                    }
+                    if (map[key] != key)
+                    {
+                        // value does not match key
+                        err = 4;
+                    }
+                    if (map.at(key) != key)
+                    {
+                        // value does not match key
+                        err = 5;
+                    }
+                }
+                return;
+            }
+
+            void do_insert(int start, int len)
+            {
+                for (int i=start; i<start+len; i++)
+                {
+                    map[i] = i;
+                }
+            }
+
+            void do_remove(int start, int len)
+            {
+                // remove len pairs backwards from start
+                for (int i=start; i>start-len; i--)
+                {
+                    if (map.erase(i) != 1)
+                    {
+                        err = 6;
+                    }
+                }
+            }
+
+        public:
+            std::map<int,int> map;  // shared map for insert/remove/etc
+            std::map<int,int> map2; // used with map for = == !=
+            std::map<int,int> map3; // used with map2 for swap
+
+            int thdN   = 8;      // number of threads
+            int pairsN = 20;     // number of pairs to insert/remove
+            int keysN  = 8000;   // number of pairs in the map
+            int idN    = 1;      // used to give each thread its id and base
+            int err    = 0;      // error indicating for all threads to exit
+
+            void run_thread(void)
+            {
+                std::map<int,int> l_map2_copy,l_map3_copy;
+                int  id   = __sync_fetch_and_add(&idN, 1);
+                int  base = id * 100000; // base int for pairs
+                int  bump = 0;           // tracks num of pairs entered
+                int  max  = keysN/thdN;  // max number of pairs for this thread
+                int  i,j;
+
+                TS_INFO("ThreadSafeMapTest RUNNING id:%d",id);
+
+                // insert the initial pairs
+                do_insert(base,pairsN);
+
+                // track the number of pairs entered for this thread
+                bump += pairsN;
+
+                // main work loop for each thread
+                while (base+bump < base+max && !err)
+                {
+                    // test misc functions
+                    map.begin();
+                    map.end();
+                    map.rbegin();
+                    map.rend();
+                    map.empty();
+                    map.size();
+                    map.max_size();
+
+                    // add pairsN
+                    do_insert(base+bump,pairsN);
+                    bump += pairsN;
+
+                    // find this threads pairs, forwards
+                    for (j=base; j<base+bump && !err; j++)
+                    {
+                        do_find(j);
+                    }
+
+                    // add another pairsN
+                    do_insert(base+bump,pairsN);
+                    bump += pairsN;
+
+                    // find this threads pairs, forwards
+                    for (j=base+bump-pairsN; j<base+bump && !err; j++)
+                    {
+                        do_find(j);
+                    }
+
+                    // remove pairsN
+                    do_remove(base+bump-1,pairsN);
+                    bump -= pairsN;
+
+                    // find this threads pairs, backwards
+                    for (int j=base+bump-1; j>=base && !err; j--)
+                    {
+                        do_find(j);
+                    }
+
+                    // traverse the map for some pairs forwards,
+                    // copy pairs to new_map
+                    std::map<int,int> new_map;
+                    std::map<int,int>::iterator itr;
+                    map.lock();
+                    for (itr = map.begin(), i=0;
+                         itr != map.end() && i<bump;
+                         ++itr, i++)
+                    {
+                        new_map[itr->first] = itr->second;
+                    }
+                    map.unlock();
+
+                    // traverse new_map for all pairs forwards
+                    for (itr = new_map.begin();
+                         itr != new_map.end();
+                         ++itr)
+                    {
+                    }
+
+                    // traverse map for some pairs in reverse
+                    std::map<int,int>::reverse_iterator ritr;
+                    map.lock();
+                    for (ritr = map.rbegin(), i=bump-1;
+                         ritr != map.rend() && i;
+                         ++ritr, i--)
+                    {
+                    }
+                    map.unlock();
+
+                    // copy all pairs in map into a l_cc_map
+                    map.lock();
+                    std::map<int,int> *l_cc_map = new std::map<int,int>(map.begin(), map.end());
+
+                    // traverse l_cc_map for all pairs forwards
+                    for (itr = l_cc_map->begin();
+                         itr != l_cc_map->end();
+                         ++itr)
+                    {
+                    }
+                    // ensure all pairs were copied to l_cc_map from map
+                    if (*l_cc_map != map)
+                    {
+                        err = 7;
+                        break;
+                    }
+                    map.unlock();
+                    delete l_cc_map;
+
+                    // test =,==,!=
+                    std::map<int,int> l_copy5,l_copy6;
+                    l_copy5 = map;
+                    l_copy6 = l_copy5;
+
+                    // maps should be equal
+                    if (l_copy6 != l_copy5)
+                    {
+                        err = 8;
+                        break;
+                    }
+
+                    // change the value for key=1
+                    l_copy5.erase(1);
+                    l_copy5[1] = 2;
+
+                    // maps should not be equal
+                    if (l_copy6 == l_copy5)
+                    {
+                        err = 9;
+                        break;
+                    }
+
+                    // add back (1,1), and add another pair
+                    l_copy5[1]  = 1;
+                    l_copy5[-1] = -1;
+
+                    // maps should not be equal
+                    if (l_copy6 == l_copy5)
+                    {
+                        err = 10;
+                        break;
+                    }
+                    l_copy6.clear();
+                    l_copy5.clear();
+
+                    // test swap
+                    map2.lock(map3);  // grab dual lock
+
+                    // set map3 = map2 = map
+                    map3 = map;
+                    for (auto pair : map3)
+                    {
+                        map2.emplace(pair);
+                    }
+
+                    // ensure map3 != map2
+                    map3[-1] = -1;
+
+                    // make copies to later compare after swaps
+                    l_map2_copy = map2;
+                    l_map3_copy = map3;
+
+                    map2.swap(map3); // do the swap
+
+                    if (map2 != l_map3_copy)
+                    {
+                        err = 12;
+                        break;
+                    }
+                    if (map2 == l_map2_copy)
+                    {
+                        err = 13;
+                        break;
+                    }
+                    std::pair<int,int> a,b;
+
+                    // ensure iterators work
+                    for (auto pair : map2) {a=pair;b=a;a=b;}
+                    for (auto pair : map3) {a=pair;b=a;a=b;}
+
+                    map2.swap(map3);  // swap back
+
+                    if (map2 != l_map2_copy)
+                    {
+                        err = 17;
+                        break;
+                    }
+                    if (map3 != l_map3_copy)
+                    {
+                        err = 18;
+                        break;
+                    }
+                    // ensure iterators work
+                    for (auto pair : map2) {a=pair;b=a;a=b;}
+                    for (auto pair : map3) {a=pair;b=a;a=b;}
+
+                    map2.unlock(map3); // free dual locks for swap
+                }
+
+                // ensure all keys for this thread exist in the map
+                for (j=base; j<base+bump && !err; j++)
+                {
+                    do_find(j);
+                }
+
+                TS_INFO("ThreadSafeMapTest DONE id:%d",id);
+
+                return;
+            }
+        };
+
+        static void* start_thread(void *p)
+        {
+            ThreadSafeMap *tsmap = (ThreadSafeMap*)p;
+            tsmap->run_thread();
+            return NULL;
+        }
+
+        void check_status(tid_t tid, tid_t ret_tid, int rc)
+        {
+            if (ret_tid == tid && rc == TASK_STATUS_EXITED_CLEAN)
+            {
+                TS_INFO("ThreadSafeMapTest: %d SUCCESS",tid);
+            }
+            else
+            {
+                TS_FAIL("ThreadSafeMapTest: %d ERROR %d %d",tid, ret_tid, rc);
+            }
+        }
+
+        #endif
+
+        public:
+            int testThreadSafeMap(void)
+            {
+                int rc = 0;
+
+                #ifndef __HOSTBOOT_RUNTIME
+
+                ThreadSafeMap    tsmap;
+                int              thd_rc;
+                std::list<tid_t> tlist;  // list of the running threads
+
+                // start the threads
+                for (int i=0; i<tsmap.thdN; i++)
+                {
+                    tid_t tid = task_create(start_thread, &tsmap);
+                    TS_INFO("ThreadSafeMapTest STARTED tid:%d",tid);
+                    tlist.push_back(tid);
+                }
+
+                // wait for the threads to complete
+                while (!tlist.empty())
+                {
+                    tid_t tid = tlist.front();
+                    tid_t ret_tid;
+                    tlist.pop_front();
+
+                    ret_tid = task_wait_tid(tid, &thd_rc, nullptr);
+                    check_status(tid, ret_tid, thd_rc);
+                }
+
+                // ensure the map contains all the pairs
+                if ((int)tsmap.map.size() != (tsmap.thdN*tsmap.keysN))
+                {
+                    tsmap.err = 40;
+                }
+                else if (tsmap.err == 0)
+                {
+                    // no errors, so do some final tests
+
+                    std::map<int,int> map = tsmap.map;
+
+                    // erase all pairs in the map
+                    tsmap.map.lock(map);
+                    for (auto pair : map)
+                    {
+                        tsmap.map.erase(pair.first);
+                    }
+                    // ensure the map is now empty
+                    if (tsmap.map.size() != 0)
+                    {
+                        tsmap.err = 50;
+                    }
+                    tsmap.map.unlock(map);
+                }
+
+                rc = tsmap.err;
+                TS_INFO("ThreadSafeMapTest testMap rc:%d",rc);
+
+                #endif
+
+                return rc;
+            }
+    };
+
     public:
         class V
         {
@@ -60,6 +442,15 @@ class STLTest : public CxxTest::TestSuite
 
                 bool operator==(const V & v) const;
         };
+
+        void testThreadSafeMap()
+        {
+            // Do not run EARLY, because it uses too much memory and hangs.
+            #if !defined CONFIG_EARLY_TESTCASES
+            ThreadSafeMapTest tsmTest;
+            tsmTest.testThreadSafeMap();
+            #endif
+        }
 
         void testMap()
         {

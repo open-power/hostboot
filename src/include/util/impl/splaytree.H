@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,7 @@
 #include <new>
 #include <stdint.h>
 #include <utility>
+#include <sys/sync.h>
 
 namespace Util
 {
@@ -218,12 +219,31 @@ namespace Util
                  *  Only want to allow SplayTree to use this, because we're
                  *  going to copy pointers as well.
                  */
+                Node& operator=(Node<T>& r)
+                {
+                    parent = r.parent;
+                    child[LEFT] = r.child[LEFT];
+                    child[RIGHT] = r.child[RIGHT];
+
+                    data.~T();
+                    new (&data) T(r.data);
+
+                    return *this;
+                }
+
+                /** Assignment operator
+                 *  Default copy would work here but define to be explicit.
+                 *
+                 *  Only want to allow SplayTree to use this, because we're
+                 *  going to copy pointers as well.
+                 */
                 Node& operator=(const Node<T>& r)
                 {
                     parent = r.parent;
                     child[LEFT] = r.child[LEFT];
                     child[RIGHT] = r.child[RIGHT];
 
+                    data.~T();
                     new (&data) T(r.data);
 
                     return *this;
@@ -416,26 +436,17 @@ namespace Util
                 node* upper_bound_by_value(const void** v) const;
 
                     /** Determine if the tree is empty. */
-                bool empty() const
-                    { return (header_n()->data == 0); };
+                bool empty() const;
                     /** Determine the size (in nodes) of the tree. */
-                size_t size() const
-                    { return (header_n()->data); };
-
+                size_t size() const;
                     /** Get a pointer to the first node (smallest by value). */
-                node* front()
-                    { return header.child[LEFT]; };
+                node* front();
                     /** Get a pointer to the first node (smallest by value). */
-                const node* front() const
-                    { return header.child[LEFT]; };
-
+                const node* front() const;
                     /** Get a pointer to the last node (largest by value). */
-                node* back()
-                    { return header.child[RIGHT]; };
+                node* back();
                     /** Get a pointer to the last node (largest by value). */
-                const node* back() const
-                    { return header.child[RIGHT]; };
-
+                const node* back() const;
                     /** Get the iterator to the beginning of the tree. */
                 Iterator begin();
                     /** Get the iterator to the beginning of the tree. */
@@ -454,6 +465,15 @@ namespace Util
                     /** Get the reverse iterator past the end. */
                 ConstRIterator rend() const;
 
+                    // lock/unlock for the SplayTree
+                void lock() const;
+                void unlock() const;
+
+                    // Dual lock/unlock for the SplayTree and the paramenter "t".
+                    // Ensure a consistent ordering when obtaining the two locks.
+                void lock  (const SplayTree& t) const;
+                void unlock(const SplayTree& t) const;
+
                     // Allow the iterator classes to access our internal
                     // methods (successor / predecessor especially).
                 friend class Iterator;
@@ -468,6 +488,7 @@ namespace Util
                      *  nodes.  Store size in data as a size_t with header_n().
                      */
                 node header;
+                mutable mutex_t *mutex;
 
                     // Storage locations for the functors.
                 comparator compare_functor;
@@ -540,6 +561,10 @@ namespace Util
                                         successor(
                                             const_cast<const node*>(n)));
                         };
+
+                    // internal dual lock/unlock functions called by the public methods
+                void _lock(const SplayTree& t) const;
+                void _unlock(const SplayTree& t) const;
 
                     /** Rotate a node "up" in a direction.
                      *

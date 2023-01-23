@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -472,7 +472,21 @@ namespace std
             pair<const_iterator, const_iterator>
                 equal_range( const key_type& k) const
                     { return submap::equal_range(k); }
-    };
+
+            /**
+             * lock/unlock for the map
+             */
+            __attribute__ ((always_inline)) void lock()   {submap::lock();}
+            __attribute__ ((always_inline)) void unlock() {submap::unlock();}
+
+            /**
+             * dual lock/unlock for the map and the parameter "x"
+             */
+            __attribute__ ((always_inline))
+            void lock(const map<Key,T,Compare>& i_x) const {submap::lock(i_x);}
+            __attribute__ ((always_inline))
+            void unlock(const map<Key,T,Compare>& i_x) const {submap::unlock(i_x);}
+};
 
     /**
      *  @brief  Map equality comparison.
@@ -488,8 +502,11 @@ namespace std
     inline bool operator==(const map<_K,_T,_C>& lhs,
                            const map<_K,_T,_C>& rhs)
     {
-        return (lhs.size() == rhs.size()) &&
-               (std::equal(lhs.begin(), lhs.end(), rhs.begin()));
+        lhs.lock(rhs); // lock both lhs and rhs
+        bool rc = (lhs.size() == rhs.size() &&
+                  (std::equal(lhs.begin(), lhs.end(), rhs.begin())));
+        lhs.unlock(rhs);
+        return rc;
     }
 
     /**

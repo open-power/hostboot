@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -170,23 +170,6 @@ void mutex_lock(mutex_t * i_mutex);
  */
 void mutex_unlock(mutex_t * i_mutex);
 
-#ifdef __cplusplus
-using mutex_lock_t = std::unique_ptr<mutex_t, decltype(&mutex_unlock)>;
-
-/* @brief Locks a mutex and returns an object which owns the lock. The object
- *        will automatically unlock the mutex when it is destroyed. The object
- *        can be moved to transfer ownership of the lock.
- *
- * @param[in] i_mutex  Mutex to lock
- * @return mutex_lock_t  Lock object
- */
-inline mutex_lock_t scoped_mutex_lock(mutex_t& i_mutex)
-{
-    mutex_lock(&i_mutex);
-    return { &i_mutex, mutex_unlock };
-}
-#endif
-
 /**
  * @fn recursive_mutex_lock
  * @brief Obtain a lock on a recursive mutex. If a non-recursive mutex is passed
@@ -204,6 +187,38 @@ void recursive_mutex_lock(mutex_t * i_mutex);
  * @post mutex lock released or mutex iv_ownerLockCount decremented.
  */
 void recursive_mutex_unlock(mutex_t * i_mutex);
+
+#ifdef __cplusplus
+using mutex_lock_t = std::unique_ptr<mutex_t, decltype(&mutex_unlock)>;
+
+/* @brief Locks a mutex and returns an object which owns the lock. The object
+ *        will automatically unlock the mutex when it is destroyed. The object
+ *        can be moved to transfer ownership of the lock.
+ *
+ * @param[in] i_mutex  Mutex to lock
+ * @return mutex_lock_t  Lock object
+ */
+inline mutex_lock_t scoped_mutex_lock(mutex_t& i_mutex)
+{
+    mutex_lock(&i_mutex);
+    return { &i_mutex, mutex_unlock };
+}
+
+using recursive_mutex_lock_t = std::unique_ptr<mutex_t, decltype(&recursive_mutex_unlock)>;
+
+/* @brief Locks a recursive mutex and returns an object which owns the lock.
+ *        The object will automatically unlock the mutex when it is destroyed.
+ *        The object can be moved to transfer ownership of the lock.
+ *
+ * @param[in] i_mutex  recursive mutex to lock
+ * @return mutex_lock_t  Lock object
+ */
+inline recursive_mutex_lock_t scoped_recursive_mutex_lock(mutex_t& i_mutex)
+{
+    recursive_mutex_lock(&i_mutex);
+    return { &i_mutex, recursive_mutex_unlock };
+}
+#endif
 
 /**
  * @fn sync_cond_init
