@@ -38,14 +38,15 @@
 #include <vector>
 #include <ddimm_spd_common.H>
 
-// Mapping from REL_POS ID to GPIO/ADC address
-static const std::vector<uint8_t> DDR5_POWERIC_I2C_ADDR_VECTOR =
+// Mapping from POWER_IC ID to SPD byte for DDR5
+static const std::vector<uint16_t> DDR5_POWERIC_I2C_ADDR_VECTOR =
 {
-    0x26, // 0 = DT0
-    0x28, // 1 = DT1
-    0x2A, // 2 = DT2
-    0x2C, // 3 = DT3
+    412,   // 0 == Power Control 0 IIC Address
+    413,   // 1 == Power Control 1 IIC Address
+    414,   // 2 == Power Control 2 IIC Address
+    415,   // 3 == Power Control 3 IIC Address
 };
+
 
 ///
 /// @brief Get the GPIO/ADC i2c address for the given REL_POS
@@ -54,13 +55,13 @@ static const std::vector<uint8_t> DDR5_POWERIC_I2C_ADDR_VECTOR =
 /// @param[in] i_rel_pos REL_POS of POWER_IC target (0-3)
 /// @return uint8_t I2C address of the device for the given rel pos
 ///
-inline uint8_t get_poweric_i2c_addr(uint8_t const* const i_spd, const uint8_t i_rel_pos)
+inline uint8_t get_poweric_i2c_addr(uint8_t const* i_spd, const uint8_t i_rel_pos)
 {
     // Out of range, just return 0. Failsafe so we don't segfault
     // The caller is responsible for calling this with a valid ID
     if (i_rel_pos >= DDR5_POWERIC_I2C_ADDR_VECTOR.size())
     {
-        return 0;
+        return DDIMM_SPD::NO_DEVICE;
     }
 
     // Check the SPD to see which type of DIMM this is.
@@ -68,18 +69,19 @@ inline uint8_t get_poweric_i2c_addr(uint8_t const* const i_spd, const uint8_t i_
     // There are no POWER_ICs on DDR4 DIMMs
     if ( i_spd[DDIMM_SPD::DDR_BYTE] == DDIMM_SPD::MEM_DDR4 )
     {
-        return 0;
+        return DDIMM_SPD::NO_DEVICE;
     }
 
     // DDR5 DDIMM has 4 DoubleTops on the 4U and 0 on the 2U
-    if ( (i_spd[DDIMM_SPD::DDR_BYTE] == MEM_DDR5)
+    if ( (i_spd[DDIMM_SPD::DDR_BYTE] == DDIMM_SPD::MEM_DDR5)
          && (i_spd[DDIMM_SPD::DIMM_TYPE_BYTE] == DDIMM_SPD::MEM_DDIMM)
-         && (i_spd[DDIMM_SPD::DIMM_SIZE_BYTE] == DDIMM_SPD::MEM_4U) )
+         && (i_spd[DDIMM_SPD::DDR5_DIMM_SIZE_BYTE] == DDIMM_SPD::MEM_4U) )
     {
-        return DDR5_POWERIC_I2C_ADDR_VECTOR[i_rel_pos];
+        const uint16_t l_byte = DDR5_POWERIC_I2C_ADDR_VECTOR[i_rel_pos];
+        return uint8_t(i_spd[l_byte]);
     }
 
-    return 0;
+    return DDIMM_SPD::NO_DEVICE;
 }
 
 #endif

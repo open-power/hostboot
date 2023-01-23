@@ -70,10 +70,10 @@ static const std::vector<uint16_t> DDR4_PMIC_I2C_ADDR_VECTOR =
 // Mapping from PMIC ID to SPD byte for DDR5
 static const std::vector<uint16_t> DDR5_PMIC_I2C_ADDR_VECTOR =
 {
-    294,   // 0 == PMIC0 IIC Address
-    295,   // 1 == PMIC1 IIC Address
-    296,   // 2 == PMIC2 IIC Address
-    297,   // 3 == PMIC3 IIC Address
+    290,   // 0 == PMIC0 IIC Address
+    291,   // 1 == PMIC1 IIC Address
+    292,   // 2 == PMIC2 IIC Address
+    293,   // 3 == PMIC3 IIC Address
 };
 
 
@@ -100,14 +100,14 @@ inline uint8_t get_pmic_i2c_addr(const char* i_spd, const uint8_t i_pmic_id)
     }
     else
     {
-        return 0;
+        return DDIMM_SPD::NO_DEVICE;
     }
 
     // Out of range, just return 0. Failsafe so we don't segfault
     // The caller is responsible for calling this with a valid ID
     if (i_pmic_id >= (*l_addr_array).size())
     {
-        return 0;
+        return DDIMM_SPD::NO_DEVICE;
     }
 
     const uint16_t l_byte = (*l_addr_array)[i_pmic_id];

@@ -46,10 +46,13 @@ constexpr uint16_t DIMM_TYPE_BYTE = 3;
 constexpr uint8_t MEM_DDIMM = 0x0A;
 
 // Module/Package Size/Height
-constexpr uint16_t DIMM_SIZE_BYTE = 193;
+constexpr uint16_t DDR4_DIMM_SIZE_BYTE = 193;
+constexpr uint16_t DDR5_DIMM_SIZE_BYTE = 230;
 constexpr uint8_t MEM_4U    = 0x80;
 constexpr uint8_t MEM_2U    = 0x20;
 
+// Default value that means no device is present
+constexpr uint8_t NO_DEVICE = 0x00;
 };
 
 #endif //__DDIMM_SPD_COMMON__
