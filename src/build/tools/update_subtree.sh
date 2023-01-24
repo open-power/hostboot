@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2022
+# Contributors Listed Below - COPYRIGHT 2021,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -260,7 +260,7 @@ if [ "$PUSH_COMMITS" == "1" ]; then
     # In which case, we want to make sure the gerrit remote exists before
     # pushing.
     if ! git remote | grep gerrit > /dev/null; then
-        git remote add gerrit $(git remote get-url origin)
+        git remote add gerrit $(git config --get remote.origin.url)
     fi
 
     git push gerrit HEAD:refs/for/$PUSH_BRANCH
