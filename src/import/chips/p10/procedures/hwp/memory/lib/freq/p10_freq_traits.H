@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,13 +69,10 @@ class frequency_traits<mss::proc_type::PROC_P10>
         static constexpr uint64_t MAX_DIMM_PER_PORT = 2;
         // Maxium number of primary ranks on a DIMM
         static constexpr uint64_t MAX_PRIMARY_RANK_PER_DIMM = 4;
-        // MC type for P10 is constant - EXPLORER
-        static constexpr mss::mc_type MC = mss::mc_type::EXPLORER;
         static constexpr const char* PROC_STR = "P10";
 
         // VPD traits values
-        // TK Resolve these when we know what they are for P10
-        static constexpr uint64_t VPD_KEYWORD_MAX = 255;
+        static constexpr uint64_t VPD_KEYWORD_MAX = 512;
         static constexpr const char* VPD_BLOB_NAME = "EFD";
         static constexpr auto VPD_BLOB = fapi2::MemVpdData::EFD;
         static constexpr auto LRDIMM_TYPE = fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM;

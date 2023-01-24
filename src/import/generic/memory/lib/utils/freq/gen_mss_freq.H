@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/freq/gen_mss_freq_traits.H>
 #include <generic/memory/lib/utils/find.H>
-#include <generic/memory/lib/spd/spd_utils_ddr4.H>
+#include <generic/memory/lib/spd/spd_utils.H>
 #include <generic/memory/lib/utils/freq/cas_latency.H>
 #include <generic/memory/lib/utils/freq/mss_freq_scoreboard.H>
 #include <generic/memory/lib/utils/count_dimm.H>
@@ -47,6 +47,7 @@
 
 namespace mss
 {
+
 ///
 /// @brief      Sets DRAM CAS latency attributes
 /// @tparam P mss::proc_type on which to operate
@@ -186,6 +187,7 @@ fapi_try_exit:
 
 ///
 /// @brief Check VPD config for support of a given freq
+/// @tparam MC mss:mc_type memory controller type
 /// @tparam P mss::proc_type on which to operate
 /// @tparam TT Traits associated with the processor type
 /// @param[in] i_target the target on which to operate
@@ -193,7 +195,7 @@ fapi_try_exit:
 /// @param[out] o_supported true if VPD supports the proposed frequency
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
+template<mss::mc_type MC, mss::proc_type P, typename TT = mss::frequency_traits<P>>
 fapi2::ReturnCode check_freq_support_vpd( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
         const uint64_t i_proposed_freq,
         bool& o_supported);
@@ -271,10 +273,10 @@ inline fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TT::FREQ_DOMAIN_
             FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
 
             FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_is_planar, l_spd));
-            FAPI_TRY( spd::ddr4::get_tckmax(l_dimm, l_spd, l_tckmax_in_ps),
-                      "%s. Failed to get tCKmax", mss::c_str(l_dimm) );
-            FAPI_TRY( spd::ddr4::get_tckmin(l_dimm, l_spd, l_tck_min_in_ps),
-                      "%s. Failed to get tCKmin", mss::c_str(l_dimm) );
+            FAPI_TRY(mss::spd::get_tckmax_helper<MC>(l_dimm, l_spd, l_tckmax_in_ps),
+                     "%s. Failed to get tCKmax", mss::c_str(l_dimm) );
+            FAPI_TRY(mss::spd::get_tckmin_helper<MC>(l_dimm, l_spd, l_tck_min_in_ps),
+                     "%s. Failed to get tCKmin", mss::c_str(l_dimm) );
 
             // Determine a proposed tCK value that is greater than or equal tCKmin
             // But less than tCKmax
@@ -343,7 +345,7 @@ fapi2::ReturnCode vpd_supported_freqs( const fapi2::Target<TT::FREQ_DOMAIN_TARGE
         {
             bool l_supported = false;
 
-            FAPI_TRY(check_freq_support_vpd<P>(p, freq, l_supported));
+            FAPI_TRY( (check_freq_support_vpd<MC, P>(p, freq, l_supported)) );
 
             // Add supported freqs to our output
             if (l_supported)
@@ -379,6 +381,7 @@ fapi_try_exit:
 
 ///
 /// @brief Finds the minimum dimm frequencies
+/// @tparam MC mss:mc_type memory controller type
 /// @tparam P mss::proc_type on which to operate
 /// @tparam TT Traits associated with the processor type
 /// @param[in] i_target the target on which to operate
@@ -386,7 +389,7 @@ fapi_try_exit:
 /// @param[out] o_supported_freqs reference to vector of supported frequencies for each port
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
+template<mss::mc_type MC, mss::proc_type P, typename TT = mss::frequency_traits<P>>
 inline fapi2::ReturnCode find_min_dimm_freq(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
         const std::vector<uint32_t>& i_supported_freqs,
         std::vector<uint64_t>& o_min_dimm_freq)
@@ -397,7 +400,7 @@ inline fapi2::ReturnCode find_min_dimm_freq(const fapi2::Target<TT::FREQ_DOMAIN_
         uint64_t l_desired_cl = 0;
 
         // Instantiation of class that calculates CL algorithm
-        mss::cas_latency<TT::MC> l_cas_latency( l_port, i_supported_freqs, l_rc );
+        mss::cas_latency<MC> l_cas_latency( l_port, i_supported_freqs, l_rc );
 
         FAPI_TRY( l_rc, "%s. Failed to initialize cas_latency ctor", mss::c_str(l_port) );
 
@@ -477,7 +480,7 @@ inline fapi2::ReturnCode supported_freqs(const fapi2::Target<TT::FREQ_DOMAIN_TAR
               "%s vpd supported freqs", mss::c_str(i_target) );
 
     // Limits the frequency by the processor constraints (sync mode)
-    FAPI_TRY( limit_freq_by_processor<P>(i_target, l_scoreboard) );
+    FAPI_TRY( (limit_freq_by_processor<MC, P>(i_target, l_scoreboard)) );
 
     // Limit frequency scoreboard according to MRW constraints
     FAPI_TRY( (limit_freq_by_mrw<MC, P>(i_target, l_max_mrw_freqs, l_scoreboard)) );
@@ -540,8 +543,8 @@ fapi2::ReturnCode generate_freq(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>
               mss::c_str(i_target) );
 
     // Finds the minimum supported DIMM frequencies for this domain
-    FAPI_TRY(mss::find_min_dimm_freq<P>(i_target, l_supported_freqs, l_min_dimm_freq),
-             "%s. Failed find_min_dimm_freq()", mss::c_str(i_target) );
+    FAPI_TRY( (mss::find_min_dimm_freq<MC, P>(i_target, l_supported_freqs, l_min_dimm_freq)),
+              "%s. Failed find_min_dimm_freq()", mss::c_str(i_target) );
 
     FAPI_TRY(mss::set_freq_attrs<P>(i_target, l_min_dimm_freq),
              "%s. Failed set_freq_attrs()", mss::c_str(i_target) );

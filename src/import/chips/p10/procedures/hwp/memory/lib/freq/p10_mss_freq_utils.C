@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,11 @@
 // Explorer rank API
 #include <lib/dimm/exp_rank.H>
 
+// Odyssey rank API
+#include <lib/dimm/ody_rank.H>
+
 // Memory libraries
+#include <lib/freq/p10_mss_freq_utils.H>
 #include <lib/freq/p10_freq_traits.H>
 #include <lib/shared/p10_consts.H>
 #include <lib/freq/p10_sync.H>
@@ -228,132 +232,90 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Determines if rank info object is that of an LR dimm
-///
-/// @param[in] i_rank_info rank info object
-/// @param[out] l_lr_dimm true if LRDIMM, else false
+/// @brief Determines if a DIMM is an LR dimm
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[out] o_is_lr_dimm true if LRDIMM, else false
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success
 ///
-inline fapi2::ReturnCode rank_is_lr_dimm(const mss::rank::info<mss::mc_type::EXPLORER> i_rank_info, bool& o_lr_dimm)
+// TODO Zen:MST-1901 Move this function to generic_attribute_accessors_manual.H for general use
+fapi2::ReturnCode is_lr_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, bool& o_is_lr_dimm)
 {
     uint8_t l_dimm_type = 0;
-    FAPI_TRY(mss::attr::get_dimm_type(i_rank_info.get_dimm_target(), l_dimm_type));
+    FAPI_TRY(mss::attr::get_dimm_type(i_target, l_dimm_type));
 
-    o_lr_dimm = (l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM);
+    o_is_lr_dimm = (l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_LRDIMM);
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Check VPD config for support of a given freq - PROC_P10 specialization
+/// @brief Check VPD config for support of a given freq - EXPLORER, PROC_P10 specialization
 /// @param[in] i_target the target on which to operate
 /// @param[in] i_proposed_freq frequency to check for support
-/// @param[out] o_supported true if VPD supports the proposed frequency
+/// @param[out] o_is_supported true if VPD supports the proposed frequency
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode check_freq_support_vpd<mss::proc_type::PROC_P10>( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
-        i_target,
-        const uint64_t i_proposed_freq,
-        bool& o_supported)
+fapi2::ReturnCode check_freq_support_vpd<mss::mc_type::EXPLORER, mss::proc_type::PROC_P10>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const uint64_t i_proposed_freq,
+    bool& o_is_supported)
 {
-    using TT = mss::frequency_traits<mss::proc_type::PROC_P10>;
-    o_supported = false;
-
-    std::vector<mss::rank::info<mss::mc_type::EXPLORER>> l_ranks;
-    fapi2::VPDInfo<TT::VPD_TARGET_TYPE> l_vpd_info(TT::VPD_BLOB);
-
-    const auto& l_vpd_target = mss::find_target<TT::VPD_TARGET_TYPE>(i_target);
-    uint32_t l_omi_freq = 0;
-    uint8_t l_is_planar = 0;
-
-    l_vpd_info.iv_is_config_ffdc_enabled = false;
-
-    FAPI_TRY(convert_ddr_freq_to_omi_freq(i_target, i_proposed_freq, l_omi_freq));
-    l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
-
-    // Add planar EFD lookup info if we need it
-    FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_vpd_target, l_is_planar) );
-
-    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
-    {
-        FAPI_TRY(mss::spd::ddr4::add_planar_efd_info(l_dimm, l_is_planar, l_vpd_info));
-    }
-
-    // DDIMM SPD can contain different SI settings for each master rank.
-    // To determine which frequencies are supported, we have to check for each valid
-    // master rank on the port's DIMMs
-    FAPI_TRY(mss::rank::ranks_on_port(i_target, l_ranks));
-
-    for (const auto& l_rank : l_ranks)
-    {
-        // We will skip LRDIMMs with ranks > 0
-        bool l_is_lr_dimm = false;
-        FAPI_TRY(rank_is_lr_dimm(l_rank, l_is_lr_dimm));
-
-        if (rank_not_supported_in_vpd_config(l_is_lr_dimm, l_rank.get_dimm_rank()))
-        {
-            FAPI_DBG("LRDIMM ranks > 0 are not supported for check_freq_support_vpd. Skipping this rank. Target: %s",
-                     mss::c_str(i_target));
-            continue;
-        }
-
-        l_vpd_info.iv_rank = l_rank.get_phy_rank();
-
-        // Check if this VPD configuration is supported
-        FAPI_TRY(is_vpd_config_supported<mss::proc_type::PROC_P10>(l_vpd_target, i_proposed_freq, l_vpd_info, o_supported),
-                 "%s failed to determine if %u freq is supported on rank %d", mss::c_str(i_target), i_proposed_freq, l_vpd_info.iv_rank);
-
-        // If we fail any of the ranks, then this VPD configuration is not supported
-        if(o_supported == false)
-        {
-            FAPI_INF("%s is not supported on rank %u exiting...", mss::c_str(i_target), l_rank.get_port_rank());
-            break;
-        }
-    }
+    FAPI_TRY(mss::check_freq_support_vpd_p10<mss::mc_type::EXPLORER>(i_target, i_proposed_freq, o_is_supported));
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Update supported frequency scoreboard according to processor limits - specialization for PROC_P10 and PROC_CHIP
+/// @brief Check VPD config for support of a given freq - ODYSSEY, PROC_P10 specialization
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_proposed_freq frequency to check for support
+/// @param[out] o_is_supported true if VPD supports the proposed frequency
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode check_freq_support_vpd<mss::mc_type::ODYSSEY, mss::proc_type::PROC_P10>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const uint64_t i_proposed_freq,
+    bool& o_is_supported)
+{
+    FAPI_TRY(mss::check_freq_support_vpd_p10<mss::mc_type::ODYSSEY>(i_target, i_proposed_freq, o_is_supported));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Update supported frequency scoreboard according to processor limits - specialization for EXPLORER, PROC_P10, and PROC_CHIP
 /// @param[in] i_target processor frequency domain
 /// @param[in,out] io_scoreboard scoreboard of port targets supporting each frequency
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
-fapi2::ReturnCode limit_freq_by_processor<mss::proc_type::PROC_P10>(
+fapi2::ReturnCode limit_freq_by_processor<mss::mc_type::EXPLORER, mss::proc_type::PROC_P10>(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     freq_scoreboard& io_scoreboard)
 {
-    fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_OMI_FREQ_Type l_limited_omi_freq;
+    FAPI_TRY(limit_freq_by_processor_p10<mss::mc_type::EXPLORER>(i_target, io_scoreboard));
 
-    // Set omi frequency limit flag based on whether the system is DD1
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_OMI_FREQ, i_target, l_limited_omi_freq),
-             "%s failed to read ATTR_CHIP_EC_FEATURE_DD1_LIMITED_OMI_FREQ", mss::c_str(i_target));
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-    // OCMB always needs to be in sync between OMI and DDR, by the given ratio
-    // so we convert the supported OMI freqs and remove every other DDR freq
-    // from the scoreboard
-    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
-    {
-        const auto l_port_pos = mss::relative_pos<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_PROC_CHIP>(l_port);
-
-        std::vector<uint64_t> l_converted_omi_freqs;
-        const std::vector<uint64_t> l_P10_OMI_FREQ_DD1{P10_OMI_FREQS[0]};
-
-        // Check for DD1 OMI frequency limitation - if exists use 21330 MHz
-        for (const auto l_omi_freq : (l_limited_omi_freq ? l_P10_OMI_FREQ_DD1 : P10_OMI_FREQS))
-        {
-            uint64_t l_ddr_freq = 0;
-            FAPI_TRY(convert_omi_freq_to_ddr_freq(l_port, l_omi_freq, l_ddr_freq));
-            l_converted_omi_freqs.push_back(l_ddr_freq);
-        }
-
-        FAPI_TRY(io_scoreboard.remove_freqs_not_on_list(l_port_pos, l_converted_omi_freqs));
-    }
+///
+/// @brief Update supported frequency scoreboard according to processor limits - specialization for ODYSSEY, PROC_P10, and PROC_CHIP
+/// @param[in] i_target processor frequency domain
+/// @param[in,out] io_scoreboard scoreboard of port targets supporting each frequency
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode limit_freq_by_processor<mss::mc_type::ODYSSEY, mss::proc_type::PROC_P10>(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    freq_scoreboard& io_scoreboard)
+{
+    FAPI_TRY(limit_freq_by_processor_p10<mss::mc_type::ODYSSEY>(i_target, io_scoreboard));
 
 fapi_try_exit:
     return fapi2::current_err;

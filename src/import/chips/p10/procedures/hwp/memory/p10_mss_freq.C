@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,10 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
+    // DRAM gen declared outside of loop because it will be reused later
+    // This is ok since we prohibit DRAM gen mixing
+    uint8_t l_dram_gen = 0;
+
     // We will first set pre-eff_config attributes
     // Note that we have to go through the MEM_PORT to get to the DIMM targets because of the
     // target hierarchy on P10
@@ -74,7 +78,6 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
             const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(d);
             std::vector<uint8_t> l_raw_spd;
             uint8_t l_spd_rev = 0;
-            uint8_t l_dram_gen = 0;
             uint8_t l_is_planar = 0;
 
             FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
@@ -95,8 +98,16 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
               "Failed enforce_plug_rules for %s", mss::c_str(i_target) );
 
     // Set frequency attributes
-    // TODO: MST-1439: Add DDR5 support
-    FAPI_TRY((mss::generate_freq<mss::mc_type::EXPLORER, mss::proc_type::PROC_P10>(i_target)));
+    if (l_dram_gen == fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4)
+    {
+        FAPI_INF("%s Processing memory frequencies for DDR4", mss::c_str(i_target));
+        FAPI_TRY((mss::generate_freq<mss::mc_type::EXPLORER, mss::proc_type::PROC_P10>(i_target)));
+    }
+    else // We only support DDR4 and DDR5 so DDR5 is the only other option
+    {
+        FAPI_INF("%s Processing memory frequencies for DDR5", mss::c_str(i_target));
+        FAPI_TRY((mss::generate_freq<mss::mc_type::ODYSSEY, mss::proc_type::PROC_P10>(i_target)));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

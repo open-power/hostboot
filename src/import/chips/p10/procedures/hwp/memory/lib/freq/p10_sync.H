@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,7 @@
 namespace mss
 {
 
-// List of the OMI frequencies for P10
+// List of the OMI frequencies for P10 newer than DD1
 // Note: these need to be sorted so binary search works
 static const std::vector<uint64_t> P10_OMI_FREQS =
 {
@@ -58,6 +58,13 @@ static const std::vector<uint64_t> P10_OMI_FREQS =
     23460, // fapi2::ENUM_ATTR_FREQ_OMI_MHZ_23460,
     25600, // fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600,
     32000, // fapi2::ENUM_ATTR_FREQ_OMI_MHZ_32000,
+};
+
+// List of the OMI frequencies for P10 DD1
+// Note: these need to be sorted so binary search works
+static const std::vector<uint64_t> P10_LIMITED_OMI_FREQS =
+{
+    21330, // fapi2::ENUM_ATTR_FREQ_OMI_MHZ_21330,
 };
 
 ///

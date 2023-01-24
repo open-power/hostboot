@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -217,4 +217,4 @@ fapi2::ReturnCode calc_time_in_nck(
 
 }// mss
 
-#endif // _MSS_SPD_UTILS_H_
+#endif // _MSS_SPD_UTILS_DDR4_H_

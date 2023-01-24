@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 
 
 #include <generic/memory/lib/spd/spd_utils_ddr4.H>
+#include <generic/memory/lib/spd/spd_utils.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/spd/spd_fields_ddr4.H>
@@ -45,6 +46,45 @@ namespace mss
 {
 namespace spd
 {
+
+///
+/// @brief Retrieves SDRAM Maximum Cycle Time (tCKmax) from SPD - specialization for EXPLORER
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
+/// @param[out] o_value tCKmax value in ps
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode get_tckmax_helper<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+    const std::vector<uint8_t>& i_spd,
+    uint64_t& o_value)
+{
+    FAPI_TRY( ddr4::get_tckmax(i_dimm, i_spd, o_value) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Retrieves SDRAM Minimum Cycle Time (tCKmin) from SPD - specialization for EXPLORER
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
+/// @param[out] o_value tCKmin value in ps
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode get_tckmin_helper<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+    const std::vector<uint8_t>& i_spd,
+    uint64_t& o_value)
+{
+    FAPI_TRY( ddr4::get_tckmin(i_dimm, i_spd, o_value) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 namespace ddr4
 {
 

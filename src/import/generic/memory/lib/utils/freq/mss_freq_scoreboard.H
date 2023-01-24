@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -543,13 +543,14 @@ class freq_scoreboard
 
 ///
 /// @brief Update supported frequency scoreboard according to processor limits
+/// @tparam MC mss::mc_type memory controller type
 /// @tparam P mss::proc_type on which to operate
 /// @tparam TT Traits associated with the processor type
 /// @param[in] i_target processor frequency domain
 /// @param[in,out] io_scoreboard scoreboard of port targets supporting each frequency
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template<mss::proc_type P, typename TT = mss::frequency_traits<P>>
+template<mss::mc_type MC, mss::proc_type P, typename TT = mss::frequency_traits<P>>
 fapi2::ReturnCode limit_freq_by_processor(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_TYPE>& i_target,
         freq_scoreboard& io_scoreboard);
 
