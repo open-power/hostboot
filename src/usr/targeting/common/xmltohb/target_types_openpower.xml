@@ -291,6 +291,12 @@
       <id>CUMULATIVE_PMCOMPLEX_RESET_COUNT</id>
     </attribute>
     <attribute>
+      <id>CURRENT_N_BULK_POWER_LIMIT_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
+    </attribute>
+    <attribute>
       <id>DDR5_DIMM_ERROR_TEMP_DEG_C</id>
     </attribute>
     <attribute>
@@ -361,6 +367,18 @@
     </attribute>
     <attribute>
       <id>IGNORE_OVERSUB_ERRORS</id>
+    </attribute>
+    <attribute>
+      <id>INDEX_BULK_POWER</id>
+    </attribute>
+    <attribute>
+      <id>INDEX_N_BULK_POWER_LIMIT_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>INDEX_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>INDEX_POWER_LIMIT_CONFIG</id>
     </attribute>
     <attribute>
       <id>IPMI_MAX_BUFFER_SIZE</id>

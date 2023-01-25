@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -757,6 +757,55 @@ void parse_hb_secure_ver_lockin_enabled(std::vector<uint8_t>& io_string_table,
 
     const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
     sys->setAttr<TARGETING::ATTR_SECURE_VERSION_LOCKIN_POLICY>(lockinEnabled);
+}
+
+void parse_hb_ps_config(std::vector<uint8_t>& io_string_table,
+                        std::vector<uint8_t>& io_attr_table,
+                        ISTEP_ERROR::IStepError & io_stepError)
+{
+    uint32_t NumberOfPowerSupplies = 0;
+    uint16_t InputVoltPowerSupplies = 0;
+    uint16_t CcinPowerSupplies = 0;
+
+    errlHndl_t l_errl = PLDM::getPowerSupplyConfig(io_string_table,
+                                                   io_attr_table,
+                                                   NumberOfPowerSupplies,
+                                                   InputVoltPowerSupplies,
+                                                   CcinPowerSupplies);
+
+    if(l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "parse_hb_ps_config: An error occurred getting data from the BMC");
+        l_errl->collectTrace("PLDM", 256);
+        NumberOfPowerSupplies = 0;
+        InputVoltPowerSupplies = 0;
+        CcinPowerSupplies = 0;
+
+        errlCommit( l_errl, ISTEP_COMP_ID );
+    }
+
+    // INDEX: Byte 0,1:CCIN   Not_Used(0000), CCIN, Any(FFFF)
+    //        Byte 1  :Type   Not_Used(00), 110(01),  220(02)
+    //        Byte 2  :#_PS   Not_Used(00), Number of PS should be installed.
+
+    // Set Byte 3 for number of PS.
+    uint32_t bulk_power_index = NumberOfPowerSupplies;
+
+    // Set Byte 2 for input Voltage
+    if (InputVoltPowerSupplies == 110)
+    {
+        bulk_power_index = bulk_power_index | 0x00000100;
+    }
+    else if (InputVoltPowerSupplies == 220)
+    {
+        bulk_power_index = bulk_power_index | 0x00000200;
+    }
+    // Set Byte 0&1 for PS CCIN
+    bulk_power_index = bulk_power_index | (CcinPowerSupplies << 16);
+
+    const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+    l_sys->setAttr<ATTR_INDEX_BULK_POWER>(bulk_power_index);
 }
 
 } // end of namespace ISTEP

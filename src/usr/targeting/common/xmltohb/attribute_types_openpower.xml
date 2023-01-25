@@ -379,6 +379,38 @@
   </attribute>
 
   <attribute>
+    <id>CURRENT_N_BULK_POWER_LIMIT_WATTS</id>
+    <description>
+        System maximum power cap in output watts when system is oversubscribed.
+        This value must guarantee WOF base.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
+    <description>
+        System maximum power cap in output watts when system has redundant power supplies
+        (not in oversubscription)  This value must guarantee WOF base.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>CURRENT_SBE_HRESET_STATUS</id>
     <description>
       The state of the ongoing HRESET operation, if any.
@@ -1155,6 +1187,76 @@
   </attribute>
 
   <attribute>
+    <id>INDEX_BULK_POWER</id>
+    <description>
+      Power Supply Config from BMC information to search and index into
+      INDEX_POWER_LIMIT_CONFIG.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>INDEX_N_BULK_POWER_LIMIT_WATTS</id>
+    <description>
+          Array of system maximum power caps in output watts from MRW when system config in 
+          INDEX_POWER_LIMIT_CONFIG matches, and system is oversubscribed.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0</default>
+      </uint16_t>
+      <array>12</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>INDEX_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
+    <description>
+        Array of system maximum power cap in output watts from MRW when system config in
+        INDEX_POWER_LIMIT_CONFIG matches, and system has redundant power supplies
+        (not oversubscribed).
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0</default>
+      </uint16_t>
+      <array>12</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>INDEX_POWER_LIMIT_CONFIG</id>
+    <description>
+        Array of PS Configs that need special N, N+1 bulk power limits.  This index from this
+        array must match the index for needed power limits in INDEX_N_BULK_POWER_LIMIT_WATTS and
+        INDEX_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS.
+            Power Supply Config Format:
+            Byte 0,1 : CCIN   Not_Used(0000), CCIN, Any(FFFF)
+            Byte 2   : Type   Not_Used(00), 110(01),  220(02)
+            Byte 3   : #_PS   Not_Used(00), Number of PS should be installed.
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0</default>
+      </uint32_t>
+      <array>12</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>IPMI_INSTANCE</id>
     <description>Holds the IPMI instance number for this entity.</description>
     <simpleType>
@@ -1524,8 +1626,7 @@ ID for the sensor number returned with the elog. -->
   <attribute>
     <id>N_BULK_POWER_LIMIT_WATTS</id>
     <description>
-        System maximum power cap in output watts when Quick Power Drop line
-        is asserted.  This value must guarantee WOF base.
+        System maximum power cap in output watts from MRW when system is oversubscribed.
     </description>
     <simpleType>
       <uint16_t>
@@ -1558,8 +1659,8 @@ ID for the sensor number returned with the elog. -->
   <attribute>
     <id>N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
     <description>
-        System maximum power cap in output watts when Quick Power Drop line is not asserted.
-        (redundant power supplies)  This value must guarantee WOF base.
+        System maximum power cap in output watts from MRW when system has redundant
+        power supplies (not oversubscribed).
     </description>
     <simpleType>
       <uint16_t>

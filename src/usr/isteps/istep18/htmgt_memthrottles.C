@@ -445,6 +445,128 @@ errlHndl_t call_bulk_pwr_throttles(
 
 
 /**
+ * Function: init_bulk_power_limits()
+ *
+ *  Main function to initialize the power limit cap for N and N+1.
+ *
+ */
+void init_bulk_power_limits(void)
+{
+    Target* sys = UTIL::assertGetToplevelTarget();
+
+    auto Index_Config = sys->getAttrAsStdArr<ATTR_INDEX_POWER_LIMIT_CONFIG>();
+    auto N_Power = sys->getAttrAsStdArr<ATTR_INDEX_N_BULK_POWER_LIMIT_WATTS>();
+    auto Nplus_Power = sys->getAttrAsStdArr<ATTR_INDEX_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>();
+
+    bool useSingleEntryBulkPower = true;
+    if (Index_Config[0] != 0)
+    {
+        // Continue Read and Search for the Power Config.
+
+        // READ PS Config index.
+        uint32_t MyConfig = 0;
+        // INDEX: Byte 0,1:CCIN   Not_Used(0000), CCIN, Any(FFFF)
+        //        Byte 1  :Type   Not_Used(00), 110(01),  220(02)
+        //        Byte 2  :#_PS   Not_Used(00), Number of PS should be installed.
+        sys->tryGetAttr<ATTR_INDEX_BULK_POWER>(MyConfig);
+        if (MyConfig != 0xFFFF0000)
+        {
+            // Search through table of Power Limits for this Config Signature.
+            for(uint16_t Index_Loop = 0 ; Index_Loop < Index_Config.size() ; Index_Loop++)
+            {
+                // If match on PS config, and N / N+1 bulk power limits != 0
+                if ((Index_Config[Index_Loop] == MyConfig) &&
+                    (N_Power[Index_Loop]      != 0) &&
+                    (Nplus_Power[Index_Loop]  != 0))
+                {
+                    useSingleEntryBulkPower = false;
+
+                    // Set the run time version of Bulk Power for both N and N+1.
+                    if ((!sys->trySetAttr<ATTR_CURRENT_N_BULK_POWER_LIMIT_WATTS>
+                                            (N_Power[Index_Loop])) ||
+                        (!sys->trySetAttr<ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>
+                                        (Nplus_Power[Index_Loop])))
+                    {
+                        TMGT_ERR("init_bulk_power_limits: Failed Attr Write  "
+                                        "ATTR_REAL_XXX_BULK_POWER_LIMIT_WATTS ");
+                        useSingleEntryBulkPower = true;
+
+                        /*@
+                        * @errortype
+                        * @subsys EPUB_FIRMWARE_SP
+                        * @moduleid HTMGT_MOD_PS_CONFIG_POWER_LIMIT
+                        * @reasoncode HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL
+                        * @userdata2 N Bulk power limit
+                        * @userdata3 N+1 Bulk power limit
+                        * @devdesc Software problem, Failed to write bulk power limit attributes
+                        * @custdesc An internal firmware error occurred
+                        */
+                        errlHndl_t err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                    HTMGT_MOD_PS_CONFIG_POWER_LIMIT,
+                                                    HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL,
+                                                    N_Power[Index_Loop],
+                                                    Nplus_Power[Index_Loop],
+                                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                        errlCommit(err, HTMGT_COMP_ID);
+                    }
+                    else
+                    {
+                        TMGT_INF("init_bulk_power_limits: Bulk Power PS Config "
+                                "0x%08X : N(%dW) : N+1(%dW)",
+                                MyConfig,
+                                N_Power[Index_Loop],
+                                Nplus_Power[Index_Loop]);
+                    }
+                    break; // Stop on first found, Config should not have duplicates.
+                }
+            }
+        }
+    }
+
+    // If we can not use the PS Config Bulk power Limits, then use original set limits.
+    if (useSingleEntryBulkPower == true)
+    {
+        //Get the max redundant (N) power allocated to memory
+        uint32_t power1 = 0;
+        power1 = sys->getAttr<ATTR_N_BULK_POWER_LIMIT_WATTS>();
+
+        uint32_t power2 = 0;
+        power2 = sys->getAttr<ATTR_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>();
+
+        // Set the run time version of Bulk Power for both N and N+1.
+        if ((!sys->trySetAttr<ATTR_CURRENT_N_BULK_POWER_LIMIT_WATTS>(power1)) ||
+            (!sys->trySetAttr<ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>(power2)))
+        {
+            TMGT_ERR("init_bulk_power_limits: FAILED write Original bulk power limits "
+                    "- ATTR_REAL_XXX_BULK_POWER_LIMIT_WATTS ");
+
+            /*@
+            * @errortype
+            * @subsys EPUB_FIRMWARE_SP
+            * @moduleid HTMGT_MOD_MRW_POWER_LIMIT
+            * @reasoncode HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL
+            * @userdata2 N Bulk power limit
+            * @userdata3 N+1 Bulk power limit
+            * @devdesc Software problem, Failed to write bulk power limit attributes
+            * @custdesc An internal firmware error occurred
+            */
+            errlHndl_t err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        HTMGT_MOD_MRW_POWER_LIMIT,
+                                        HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL,
+                                        power1,
+                                        power2,
+                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            errlCommit(err, HTMGT_COMP_ID);
+        }
+    }
+
+    TMGT_INF("init_bulk_power_limits: bulk power limits N(%dW)  and  N+1(%dW) ",
+                    sys->getAttr<ATTR_CURRENT_N_BULK_POWER_LIMIT_WATTS>(),
+                    sys->getAttr<ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>());
+
+}
+
+/**
  * Calculate throttles for when system has redundant power (N+1 mode)
  *
  * @param[in] i_fapi_target_list - list of FAPI OCMB targets
@@ -458,6 +580,8 @@ errlHndl_t memPowerThrottleRedPower(
     Target* sys = UTIL::assertGetToplevelTarget();
     uint32_t power = 0;
     uint32_t wattTarget = 0;
+
+    init_bulk_power_limits();
 
     //Get the max redundant (N+1) power allocated to memory
     power = sys->getAttr<ATTR_N_PLUS_ONE_MAX_MEM_POWER_WATTS>();
@@ -476,7 +600,7 @@ errlHndl_t memPowerThrottleRedPower(
     {
         wattTarget = power / dimm_list.size();
     }
-    TMGT_INF("memPowerThrottleRedPower: N+1 power: %dW (%d present DIMMs) -> "
+    TMGT_INF("memPowerThrottleRedPower: N+1 max mem power: %dW (%d present DIMMs) -> "
              "%dcW per DIMM", power/100, dimm_list.size(), wattTarget);
 
     //Calculate the throttles
