@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,8 @@ namespace HTMGT
         HTMGT_MOD_MEM_UTIL_TO_THROTTLE  = 0x22,
         HTMGT_MOD_MEM_BULK_PWR_THROTTLE = 0x23,
         HTMGT_MOD_APSS_DATA             = 0x24,
+        HTMGT_MOD_MRW_POWER_LIMIT       = 0x40,
+        HTMGT_MOD_PS_CONFIG_POWER_LIMIT = 0x41,
         HTMGT_MOD_OCC_POLL              = 0x76,
         HTMGT_MOD_READ_OCC_SRAM         = 0x85,
         HTMGT_MOD_OCMB_INIT             = 0x8B,

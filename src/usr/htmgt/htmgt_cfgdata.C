@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -914,7 +914,7 @@ uint16_t getMaxPowerCap(Target *i_sys, bool & o_is_redundant)
 
     // Read the default N+1 bulk power limit (redundant PS policy)
     o_maxPcap = i_sys->
-        getAttr<ATTR_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>();
+        getAttr<ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>();
     TMGT_INF("getMaxPowerCap: maximum power cap = %dW "
              "(redundant PS bulk power limit)", o_maxPcap);
     return o_maxPcap;
@@ -957,20 +957,20 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     UINT16_PUT(&o_data[index], max_pcap);
     index += 2;
 
-    // Quick Power Drop Power Cap
-    ATTR_N_BULK_POWER_LIMIT_WATTS_type qpd_pcap;
+    // Oversubscription Power Drop Power Cap
+    ATTR_CURRENT_N_BULK_POWER_LIMIT_WATTS_type opl_pcap;
     if ( ! sys->tryGetAttr
-         <ATTR_N_BULK_POWER_LIMIT_WATTS>(qpd_pcap))
+         <ATTR_CURRENT_N_BULK_POWER_LIMIT_WATTS>(opl_pcap))
     {
         // attr does not exist, so disable by sending 0
-        qpd_pcap = 0;
+        opl_pcap = 0;
     }
-    UINT16_PUT(&o_data[index], qpd_pcap);
+    UINT16_PUT(&o_data[index], opl_pcap);
     index += 2;
 
     TMGT_INF("getPowerCapMessageData: pcaps - soft min: %d, min: %d, max: %d,"
-             " qpd: %d (in Watts)",
-             soft_pcap, min_pcap, max_pcap, qpd_pcap);
+             " Oversubscription: %d (in Watts)",
+             soft_pcap, min_pcap, max_pcap, opl_pcap);
     o_size = index;
 }
 

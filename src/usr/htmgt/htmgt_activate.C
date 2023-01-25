@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -202,7 +202,6 @@ namespace HTMGT
         do
         {
 
-// TODO: RTC 209572 Support power caps based on power supply type
 #ifdef CONFIG_PLDM
             err = PLDM::getPowerLimit(active, limit);
             if(err)

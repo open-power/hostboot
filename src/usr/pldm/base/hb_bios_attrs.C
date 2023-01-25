@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <util/comptime_util.H>
 #include <algorithm>
 #include <stdlib.h>
+
 
 #include <map>
 
@@ -79,6 +80,22 @@ const char PLDM_BIOS_HB_PROC_FAVOR_AGGRESSIVE_PREFETCH_STRING[] = "hb_proc_favor
 // always want the most recent values here.
 const char PLDM_BIOS_HB_POWER_LIMIT_ENABLE_STRING[]        = "hb_power_limit_enable";
 const char PLDM_BIOS_HB_POWER_LIMIT_IN_WATTS_STRING[]      = "hb_power_limit_in_watts";
+
+const char PLDM_BIOS_HB_PS0_MODEL[]                        = "hb_power_PS0_model";
+const char PLDM_BIOS_HB_PS1_MODEL[]                        = "hb_power_PS1_model";
+const char PLDM_BIOS_HB_PS2_MODEL[]                        = "hb_power_PS2_model";
+const char PLDM_BIOS_HB_PS3_MODEL[]                        = "hb_power_PS3_model";
+
+const char PLDM_BIOS_HB_PS0_INPUT_VOLTAGE[]                = "hb_power_PS0_input_voltage";
+const char PLDM_BIOS_HB_PS1_INPUT_VOLTAGE[]                = "hb_power_PS1_input_voltage";
+const char PLDM_BIOS_HB_PS2_INPUT_VOLTAGE[]                = "hb_power_PS2_input_voltage";
+const char PLDM_BIOS_HB_PS3_INPUT_VOLTAGE[]                = "hb_power_PS3_input_voltage";
+
+const char PLDM_BIOS_HB_PS0_FUNCTIONAL[]                   = "hb_power_PS0_functional";
+const char PLDM_BIOS_HB_PS1_FUNCTIONAL[]                   = "hb_power_PS1_functional";
+const char PLDM_BIOS_HB_PS2_FUNCTIONAL[]                   = "hb_power_PS2_functional";
+const char PLDM_BIOS_HB_PS3_FUNCTIONAL[]                   = "hb_power_PS3_functional";
+
 
 const char PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING[]  = "hb_secure_ver_lockin_enabled";
 const char PLDM_BIOS_HB_LID_IDS_STRING[]                   = "hb_lid_ids";
@@ -141,6 +158,13 @@ const std::vector<const char*> POSSIBLE_HB_MEM_REGION_SIZE_STRINGS = {PLDM_BIOS_
 
 const std::vector<const char*> POSSIBLE_HB_POWER_LIMIT_STRINGS = {PLDM_BIOS_ENABLED_STRING,
                                                                   PLDM_BIOS_DISABLED_STRING};
+
+
+const std::vector<const char*> POSSIBLE_HB_PS_FUNCTIONAL_STRINGS = {PLDM_BIOS_ENABLED_STRING,
+                                                                     PLDM_BIOS_DISABLED_STRING};
+
+
+
 
 const std::vector<const char*> POSSIBLE_FW_BOOT_SIDE_STRINGS = {PLDM_BIOS_PERM_STRING,
                                                                     PLDM_BIOS_TEMP_STRING};
@@ -2249,6 +2273,234 @@ errlHndl_t getPowerLimit(bool &o_powerLimitEnable,
     PLDM_INF("Power Limit Watts from BMC PLDM BIOS attribute 0x%X",o_powerLimitWatts);
 
     }while(0);
+
+    return errl;
+}
+
+
+errlHndl_t getPowerSupplyConfig(std::vector<uint8_t>& string_table,
+                                std::vector<uint8_t>& attr_table,
+                                uint32_t &o_NumberOfPowerSupplies,
+                                uint16_t &o_InputVoltPowerSupplies,
+                                uint16_t &o_CcinOfPowerSupplies )
+{
+    const std::vector<char> ps_model_failed({ 'F', 'F', 'F', 'F' });
+    std::vector<char> modelPowerSupplies = {};
+    o_NumberOfPowerSupplies = 0;
+    o_InputVoltPowerSupplies = 0;
+    o_CcinOfPowerSupplies = 0;
+    errlHndl_t errl = nullptr;
+
+    static const char* const ps_attr_string[] = {PLDM_BIOS_HB_PS0_FUNCTIONAL,
+                                                 PLDM_BIOS_HB_PS1_FUNCTIONAL,
+                                                 PLDM_BIOS_HB_PS2_FUNCTIONAL,
+                                                 PLDM_BIOS_HB_PS3_FUNCTIONAL};
+
+    static const char* const ps_model_attr_string[] = {
+                                                 PLDM_BIOS_HB_PS0_MODEL,
+                                                 PLDM_BIOS_HB_PS1_MODEL,
+                                                 PLDM_BIOS_HB_PS2_MODEL,
+                                                 PLDM_BIOS_HB_PS3_MODEL};
+
+    static const char* const ps_input_volt_attr_string[] = {
+                                                PLDM_BIOS_HB_PS0_INPUT_VOLTAGE,
+                                                PLDM_BIOS_HB_PS1_INPUT_VOLTAGE,
+                                                PLDM_BIOS_HB_PS2_INPUT_VOLTAGE,
+                                                PLDM_BIOS_HB_PS3_INPUT_VOLTAGE};
+
+
+    // Loop for total number of Power Supplies allowed.
+    for (int j=0; j<4; j++)
+    {
+        bool ps_functional = false;
+        // ########################################################################
+        //  Power Supplies check if functional
+        // ########################################################################
+        std::vector<char>l_decodedValue = {};
+        errl = getDecodedEnumAttr(string_table,
+                            attr_table,
+                            ps_attr_string[j],
+                            POSSIBLE_HB_PS_FUNCTIONAL_STRINGS,
+                            l_decodedValue);
+        if(errl)
+        {
+            PLDM_ERR("getPowerSupplyConfig() Failed to lookup value for %s",
+                        ps_attr_string[j]);
+            modelPowerSupplies = ps_model_failed;
+            o_NumberOfPowerSupplies = 0;
+            o_InputVoltPowerSupplies = 0;
+            break;
+        }
+
+        if ( strncmp(l_decodedValue.data(), PLDM_BIOS_ENABLED_STRING, l_decodedValue.size()) == 0 )
+        {
+            ps_functional = true;
+            o_NumberOfPowerSupplies++;
+        }
+
+
+        // If found functional Power Supply then read CCIN and input Voltage.
+        if (ps_functional)
+        {
+            // ########################################################################
+            //  PS Model read attribute.
+            // ########################################################################
+            uint8_t bios_string_type = 0;
+            std::vector<char> PS_Model_string = {};
+            errl = systemStringAttrLookup(string_table,
+                                attr_table,
+                                ps_model_attr_string[j],
+                                bios_string_type,
+                                PS_Model_string);
+            if(errl)
+            {
+                PLDM_ERR("getPowerSupplyConfig Failed to lookup value for %s",
+                            ps_model_attr_string[j]);
+
+                modelPowerSupplies = ps_model_failed;
+                o_NumberOfPowerSupplies = 0;
+                o_InputVoltPowerSupplies = 0;
+                break;
+            }
+
+            if (bios_string_type != PLDM_BIOS_STRING_TYPE_ASCII)
+            {
+                PLDM_ERR("getPowerSupplyConfig: Unexpected string type 0x%X for %s",
+                        bios_string_type, PLDM_BIOS_STRING_TYPE_ASCII);
+                /*@
+                * @errortype
+                * @severity   ERRL_SEV_PREDICTIVE
+                * @moduleid   MOD_GET_POWER_SUPPLY_CONFIG
+                * @reasoncode RC_UNSUPPORTED_STRING_TYPE
+                * @userdata1  Expected String Type
+                * @userdata2  Returned String Type
+                * @devdesc    Software problem, Invalid power supply model found
+                * @custdesc   A software error occurred during system boot
+                */
+                errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                    MOD_GET_POWER_SUPPLY_CONFIG,
+                                    RC_UNSUPPORTED_STRING_TYPE,
+                                    PLDM_BIOS_STRING_TYPE_ASCII,
+                                    bios_string_type,
+                                    ErrlEntry::NO_SW_CALLOUT);
+                ErrlUserDetailsString(ps_model_attr_string[j]).addToLog(errl);
+                addBmcErrorCallouts(errl);
+                addPldmFrData(errl);
+                modelPowerSupplies = ps_model_failed;
+                o_NumberOfPowerSupplies = 0;
+                o_InputVoltPowerSupplies = 0;
+                break;
+            }
+
+            // New Find, need to store.
+            if (modelPowerSupplies.empty())
+            {
+                modelPowerSupplies = PS_Model_string;
+            }
+            // 2+ compare and if it does not match... set to failed.
+            else if ( std::equal(modelPowerSupplies.begin(), modelPowerSupplies.end(),
+                                            PS_Model_string.begin() ) == 0 )
+            {
+                PLDM_ERR("getPowerSupplyConfig: all PS need to be same CCIN! "
+                                            "%s : %s : (%s)", ps_model_attr_string[j],
+                                                              PS_Model_string.data(),
+                                                              modelPowerSupplies.data());
+                modelPowerSupplies = ps_model_failed;
+                o_NumberOfPowerSupplies = 0;
+                o_InputVoltPowerSupplies = 0;
+
+                break;
+            }
+
+
+            // ########################################################################
+            //  PS Input Voltage read attribute.
+            // ########################################################################
+            uint64_t l_retrievedBmcAttributeValue = 0;
+            errl = systemIntAttrLookup( string_table,
+                                            attr_table,
+                                            ps_input_volt_attr_string[j],
+                                            l_retrievedBmcAttributeValue);
+
+            if(errl)
+            {
+                PLDM_ERR("getPowerSupplyConfig Failed to lookup value for %s",
+                            ps_model_attr_string[j]);
+
+                modelPowerSupplies = ps_model_failed;
+                o_NumberOfPowerSupplies = 0;
+                o_InputVoltPowerSupplies = 0;
+
+                break;
+            }
+
+            // Determine Voltage 110 vs 220 like Power does.
+            if ( l_retrievedBmcAttributeValue > 0 )
+            {
+                if (l_retrievedBmcAttributeValue < 160)
+                {
+                    // Add new 110 for future compare.
+                    if (o_InputVoltPowerSupplies == 0)
+                    {
+                        o_InputVoltPowerSupplies = 110;
+                    }
+                    // else 220 over 110, then clear
+                    else if (o_InputVoltPowerSupplies != 110)
+                    {
+                        o_InputVoltPowerSupplies = 0;
+                    }
+                    // else this would be 110 over 110 then no-op.
+                }
+                else if (l_retrievedBmcAttributeValue >= 160)
+                {
+                    // Add new 220 for future compare.
+                    if (o_InputVoltPowerSupplies == 0)
+                    {
+                        o_InputVoltPowerSupplies = 220;
+                    }
+                    // else 110 over 220, then clear
+                    else if (o_InputVoltPowerSupplies != 220)
+                    {
+                        o_InputVoltPowerSupplies = 0;
+                    }
+                    // else this would be 220 over 220 then no-op.
+                }
+            }
+
+            if (o_InputVoltPowerSupplies == 0)
+            {
+                PLDM_ERR("getPowerSupplyConfig: Power Supplies input voltage not valid "
+                                        "or matching! %s : %d", ps_input_volt_attr_string[j],
+                                        l_retrievedBmcAttributeValue );
+
+                modelPowerSupplies = ps_model_failed;
+                o_NumberOfPowerSupplies = 0;
+
+                /*@
+                * @errortype
+                * @severity   ERRL_SEV_UNRECOVERABLE
+                * @moduleid   MOD_GET_POWER_SUPPLY_CONFIG
+                * @reasoncode RC_PS_INPUT_VOLTAGE_NOT_FOUND
+                * @userdata1  Unused
+                * @userdata2  Unused
+                * @devdesc    Software problem, PS input Voltage data from BMC not found.
+                * @custdesc   A software error occurred during system boot
+                */
+                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                    MOD_GET_POWER_SUPPLY_CONFIG,
+                                    RC_PS_INPUT_VOLTAGE_NOT_FOUND,
+                                    0,
+                                    0,
+                                    ErrlEntry::ADD_SW_CALLOUT);
+                addPldmFrData(errl);
+
+                break;
+            }
+        }
+    }//End for loop functional
+
+    // Change CCIN Char string into Hex number.
+    o_CcinOfPowerSupplies = strtoul(modelPowerSupplies.data(), nullptr, 16);
 
     return errl;
 }

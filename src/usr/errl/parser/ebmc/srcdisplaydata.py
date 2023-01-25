@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022
+# Contributors Listed Below - COPYRIGHT 2022,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -8887,5 +8887,29 @@ srcInfo = {
                            "reasoncode": "PNOR::RC_INVALID_LID_ID",
                            "userdata1":  "Lid Id Found",
                            "userdata2":  "Section Id Found",
+                      },
+            0x470E4C: {    "devdesc": "Software problem, invalid power supply config from the BMC.",
+                           "moduleid": "MOD_GET_POWER_SUPPLY_CONFIG",
+                           "reasoncode": "RC_UNSUPPORTED_TYPE",
+                           "userdata1":  "Actual type returned",
+                           "userdata2":  "Expected type",
+                      },
+            0x47424C: {    "devdesc": "Software problem, PS input Voltage data from BMC not found.",
+                           "moduleid": "MOD_GET_POWER_SUPPLY_CONFIG",
+                           "reasoncode": "RC_PS_INPUT_VOLTAGE_NOT_FOUND",
+                           "userdata1":  "unused",
+                           "userdata2":  "unused",
+                      },
+            0x260740: {    "devdesc": "Software problem, Failed to write bulk power limit attributes",
+                           "moduleid": "HTMGT_MOD_MRW_POWER_LIMIT",
+                           "reasoncode": "HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL",
+                           "userdata1":  "N Bulk power limit",
+                           "userdata2":  "N+1 Bulk power limit",
+                      },
+            0x260741: {    "devdesc": "Software problem, Failed to write bulk power limit attributes",
+                           "moduleid": "HTMGT_MOD_PS_CONFIG_POWER_LIMIT",
+                           "reasoncode": "HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL",
+                           "userdata1":  "N Bulk power limit",
+                           "userdata2":  "N+1 Bulk power limit",
                       },
           }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,6 +114,7 @@ namespace PLDM
         MOD_MAKE_PLDM_REQUEST_RUNTIME                = 0x49, // sendrecv_pldm_request (runtime)
         MOD_CHECK_FOR_HB_TERMINUS_LOCATOR            = 0x4A, // checkForHbTerminusLocator
         MOD_GET_PROC_FAVOR_AGGRESSIVE_PREFETCH       = 0x4B, // getProcFavorAggressivePrefetch
+        MOD_GET_POWER_SUPPLY_CONFIG                  = 0x4C, // parse_hb_ps_config
     };
 
     enum PLDMReasonCode
@@ -183,6 +184,7 @@ namespace PLDM
         RC_PN_NOT_FOUND               = PLDM_COMP_ID | 0x3F,
         RC_SN_NOT_FOUND               = PLDM_COMP_ID | 0x40,
         RC_CCIN_NOT_FOUND             = PLDM_COMP_ID | 0x41,
+        RC_PS_INPUT_VOLTAGE_NOT_FOUND = PLDM_COMP_ID | 0x42,
     };
 
     /**

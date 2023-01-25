@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -295,6 +295,24 @@ namespace PLDM
     */
     errlHndl_t getPowerLimit(bool &o_powerLimitEnable,
                              uint16_t &o_powerLimitWatts);
+
+    /** @brief Retrieve the current power supply config
+    *          Needed for PowerCap.
+    *
+    * @param[in,out] io_string_table  See brief at the top of this file.
+    * @param[in,out] io_attr_table    See brief at the top of this file.
+    * @param[out] o_NumberOfPowerSupplies Number of Power Supplies Functional.
+    * @param[out] o_InputVoltPowerSuppliesV Input Voltage(volts) of power supplies when all Power
+    *                                 supply input voltages match.
+    * @param[out] o_CcinOfPowerSupplies CCIN of power supplies when all power supply CCIN's match.
+    *
+    * @return Error if any, otherwise nullptr.
+    */
+    errlHndl_t getPowerSupplyConfig(std::vector<uint8_t>& string_table,
+                                    std::vector<uint8_t>& attr_table,
+                                    uint32_t &o_NumberOfPowerSupplies,
+                                    uint16_t &o_InputVoltPowerSuppliesV,
+                                    uint16_t &o_CcinOfPowerSupplies );
 
     /** @brief Retrieve the current value of the hb_debug_console
     *          PLDM bios attribute, convert it to a boolean value.

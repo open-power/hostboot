@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -308,6 +308,21 @@ void parse_hb_cap_freq_mhz(std::vector<uint8_t>& io_string_table,
 void parse_hb_secure_ver_lockin_enabled(std::vector<uint8_t>& io_string_table,
                                         std::vector<uint8_t>& io_attr_table,
                                         ISTEP_ERROR::IStepError & io_stepError);
+
+/**
+ * @brief Retrieve Power Supply Information needed for Power limit based
+ *        on power supply configuration.
+ *
+ * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H
+ * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H
+ * @param[in,out] io_stepError      See brief in file hb_bios_attrs.H
+ *
+ * @return void
+ */
+void parse_hb_ps_config(std::vector<uint8_t>& io_string_table,
+                        std::vector<uint8_t>& io_attr_table,
+                        ISTEP_ERROR::IStepError & io_stepError);
+
 
 } // end of namespace ISTEP
 
