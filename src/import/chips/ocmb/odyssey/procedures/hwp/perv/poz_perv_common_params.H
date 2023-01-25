@@ -63,19 +63,27 @@ namespace cc
 {
 constexpr uint16_t REGION(const int number)
 {
-    return 0x8000 >> number;
+    return static_cast<uint16_t>(0x8000u >> number);
 };
 
 enum clock_region
 {
 
+    // Regions shared across all chiplets
     REGION_PERV = REGION(0),
-    REGION_PLL  = REGION(13),
+    REGION_PLL  = REGION(13),   // Filter/Tank PLLs; DPLLs have their own separate regions
 
+    // Regions shared across chips
+    REGION_PERV_SBE = REGION(1),
+    REGION_PERV_PIB = REGION(2),
+
+    // Common combined regions
     REGION_ALL  = 0xFFFE,
     REGION_ALL_BUT_PLL = REGION_ALL & ~REGION_PLL,
     REGION_ALL_BUT_PERV_PLL = REGION_ALL & ~REGION_PERV & ~REGION_PLL,
+    REGION_ALL_BUT_PERV_SBE = REGION_ALL & ~REGION_PERV_SBE,
 
+    // Odyssey regions
     ODY_PERV_PERV = REGION(0),
     ODY_PERV_SBE = REGION(1),
     ODY_PERV_PIB = REGION(2),
@@ -133,6 +141,7 @@ enum mux_type : int
 };
 };
 
+/* Chiplet delays measured in PCB network levels relative to the lowest level chiplet */
 /* Odyssey is super boring since it only has two chiplets and both are at the same level */
 const uint8_t ody_chiplet_delay_table[64] = { 0 };
 

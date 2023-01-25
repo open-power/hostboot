@@ -64,6 +64,7 @@ ReturnCode mod_cbs_start_prep(
     ROOT_CTRL1_t ROOT_CTRL1;
     CBS_ENVSTAT_t CBS_ENVSTAT;
     ROOT_CTRL0_COPY_t ROOT_CTRL0_COPY;
+    ROOT_CTRL1_COPY_t ROOT_CTRL1_COPY;
     CBS_CS_t CBS_CS;
     SBE_FIFO_FSB_DOWNFIFO_RESET_t FSB_DOWNFIFO_RESET;
     FSI2PIB_STATUS_t FSI2PIB_STATUS;
@@ -103,6 +104,12 @@ ReturnCode mod_cbs_start_prep(
         ROOT_CTRL1.set_TP_RI_DC_N(1);
         ROOT_CTRL1.set_TP_DI2_DC_N(1);
         FAPI_TRY(ROOT_CTRL1.putCfam_SET(i_target));
+
+        // Don't forget the copy reg
+        FAPI_TRY(ROOT_CTRL1_COPY.getCfam(i_target));
+        ROOT_CTRL1_COPY.setBit(FSXCOMP_FSXLOG_ROOT_CTRL1_TP_RI_DC_N);
+        ROOT_CTRL1_COPY.setBit(FSXCOMP_FSXLOG_ROOT_CTRL1_TP_DI2_DC_N);
+        FAPI_TRY(ROOT_CTRL1_COPY.putCfam(i_target));
     }
 
     FAPI_INF("Prepare for CBS start.");
