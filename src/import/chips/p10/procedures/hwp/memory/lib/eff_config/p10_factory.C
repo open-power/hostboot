@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,6 @@ namespace efd
 /// @param[in] i_rank_info the current rank info class
 /// @param[out] o_efd_engine shared pointer to the EFD engine in question
 /// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
-/// @note TODO/TK can be updated in the future for different dimm types and DDR4/5
 ///
 fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                           const uint8_t i_rev,
@@ -61,7 +60,7 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
 {
     // Poor man's fallback technique: if we receive a revision that's later than (or numerically
     // greater than) the latest supported, we'll decode as if it's the latest supported rev
-    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_MAX) ? mss::spd::rev::DDIMM_MAX : i_rev;
+    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_DDR4_MAX) ? mss::spd::rev::DDIMM_DDR4_MAX : i_rev;
 
     // DRAM generation is the biggest switch we have, so doing that switch first
     switch (i_gen)
@@ -175,14 +174,15 @@ fapi2::ReturnCode base_module_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIM
                                       const uint8_t i_gen,
                                       std::shared_ptr<mss::spd::base_cnfg_base>& o_base_engine)
 {
-    // Poor man's fallback technique: if we receive a revision that's later than (or numerically
-    // greater than) the latest supported, we'll decode as if it's the latest supported rev
-    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_MAX) ? mss::spd::rev::DDIMM_MAX : i_rev;
+    uint8_t l_fallback_rev = 0;
 
     // DRAM generation is the biggest switch we have, so doing that switch first
     switch (i_gen)
     {
         case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4:
+            // Poor man's fallback technique: if we receive a revision that's later than (or numerically
+            // greater than) the latest supported, we'll decode as if it's the latest supported rev
+            l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_DDR4_MAX) ? mss::spd::rev::DDIMM_DDR4_MAX : i_rev;
 
             // Then switch over the SPD revision
             switch (l_fallback_rev)
@@ -220,6 +220,9 @@ fapi2::ReturnCode base_module_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIM
             break;
 
         case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5:
+            // Poor man's fallback technique: if we receive a revision that's later than (or numerically
+            // greater than) the latest supported, we'll decode as if it's the latest supported rev
+            l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_DDR5_MAX) ? mss::spd::rev::DDIMM_DDR5_MAX : i_rev;
             o_base_engine = std::make_shared<mss::spd::ddr5::base_0_0>(i_target);
             return fapi2::FAPI2_RC_SUCCESS;
             break;
@@ -257,7 +260,7 @@ fapi2::ReturnCode ddimm_module_specific_factory(const fapi2::Target<fapi2::TARGE
 {
     // Poor man's fallback technique: if we receive a revision that's later than (or numerically
     // greater than) the latest supported, we'll decode as if it's the latest supported rev
-    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_MAX) ? mss::spd::rev::DDIMM_MAX : i_rev;
+    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_DDR4_MAX) ? mss::spd::rev::DDIMM_DDR4_MAX : i_rev;
 
     // Then switch over the SPD revision
     switch (l_fallback_rev)
@@ -365,7 +368,7 @@ fapi2::ReturnCode ddimm_module_specific_factory(const fapi2::Target<fapi2::TARGE
 {
     // Poor man's fallback technique: if we receive a revision that's later than (or numerically
     // greater than) the latest supported, we'll decode as if it's the latest supported rev
-    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_MAX) ? mss::spd::rev::DDIMM_MAX : i_rev;
+    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_DDR5_MAX) ? mss::spd::rev::DDIMM_DDR5_MAX : i_rev;
 
     // Then switch over the SPD revision
     switch (l_fallback_rev)
