@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,7 +60,7 @@
 #include <pldm/pldmif.H>
 
 // libpldm subtree headers
-#include <openbmc/pldm/libpldm/fru.h>
+#include <openbmc/pldm/libpldm/include/libpldm/fru.h>
 
 // getAllChips
 #include <targeting/common/utilFilter.H>

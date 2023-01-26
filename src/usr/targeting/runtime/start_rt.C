@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 #include <targeting/common/trace.H>
 #include <targeting/common/utilFilter.H>
 #ifdef CONFIG_PLDM
-#include <openbmc/pldm/libpldm/state_set.h>
+#include <openbmc/pldm/libpldm/include/libpldm/state_set.h>
 #endif
 
 using namespace TARGETING;

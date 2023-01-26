@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,9 +50,9 @@
 #include <sys/msg.h>
 
 // libpldm headers from pldm subtree
-#include <openbmc/pldm/libpldm/platform.h>
-#include <openbmc/pldm/libpldm/pdr.h>
-#include <openbmc/pldm/libpldm/state_set.h>
+#include <openbmc/pldm/libpldm/include/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/include/libpldm/pdr.h>
+#include <openbmc/pldm/libpldm/include/libpldm/state_set.h>
 
 // Hostboot PLDM/MCTP
 #include <mctp/mctp_message_types.H>
@@ -374,7 +374,7 @@ errlHndl_t getRemotePdrRepository(pldm_pdr* const io_repo)
                          pdr.data.data(),
                          pdr.data.size(),
                          pdr.record_handle,
-                         false);
+                         false,thePdrManager().hostbootTerminusId());
         }
     }
 

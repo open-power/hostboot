@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,11 +40,11 @@
 #include <pldm/responses/pldm_fru_data_responders.H>
 
 // libpldm headers from pldm subtree
-#include <openbmc/pldm/libpldm/platform.h>
-#include <openbmc/pldm/libpldm/base.h>
-#include <openbmc/pldm/libpldm/fru.h>
+#include <openbmc/pldm/libpldm/include/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/include/libpldm/base.h>
+#include <openbmc/pldm/libpldm/include/libpldm/fru.h>
 
-#include <openbmc/pldm/oem/ibm/libpldm/fru.h>
+#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/libpldm/fru_oem_ibm.h>
 
 // Targeting
 #include <targeting/common/utilFilter.H>

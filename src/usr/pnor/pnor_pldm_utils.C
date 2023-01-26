@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 #include <util/utillidpnor.H>
 
 /* PLDM Subtree Includes */
-#include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
+#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/libpldm/file_io.h>
 extern trace_desc_t* g_trac_pnor;
 
 /**

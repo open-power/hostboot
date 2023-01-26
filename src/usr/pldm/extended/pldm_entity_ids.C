@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@
 #include <errl/errlmanager.H>
 
 // libpldm header from pldm subtree
-#include <openbmc/pldm/libpldm/pdr.h>
+#include <openbmc/pldm/libpldm/include/libpldm/pdr.h>
 
 using namespace ERRORLOG;
 

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -26,7 +26,7 @@
 ROOTPATH = ../../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
-EXTRAINCDIR += $(if $(CONFIG_FILE_XFER_VIA_PLDM),${ROOTPATH}/src/subtree/openbmc/pldm/libpldm)
+EXTRAINCDIR += $(if $(CONFIG_FILE_XFER_VIA_PLDM),${ROOTPATH}/src/subtree/openbmc/pldm/libpldm/include/libpldm)
 
 MODULE = testpnor
 

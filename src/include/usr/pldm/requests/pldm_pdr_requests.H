@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,8 +35,8 @@
 #include <pldm/pldmif.H>
 #include <pldm/pldm_const.H>
 
-#include <openbmc/pldm/libpldm/platform.h>
-#include <openbmc/pldm/libpldm/state_set.h>
+#include <openbmc/pldm/libpldm/include/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/include/libpldm/state_set.h>
 
 
 // Struct representing PDR repository (see DSP0248 v1.2.0, section 8)

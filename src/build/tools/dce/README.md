@@ -182,7 +182,7 @@ If you need to add include directories to the compiler's search path, you can pr
 to the makefile:
 
 ```bash
-$ INCDIR=$PROJECT_ROOT/src/subtree/openbmc/pldm/libpldm  make foo.dce.lid
+$ INCDIR=$PROJECT_ROOT/src/subtree/openbmc/pldm/libpldm/include/libpldm  make foo.dce.lid
 ```
 
 Note: any time you rebuild hbicore.bin you have to rebuild the DCE code lid too, because the linker needs to know the

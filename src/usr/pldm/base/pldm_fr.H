@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 #ifndef PLDMFR_H
 #define PLDMFR_H
 
-#include <openbmc/pldm/libpldm/base.h>
+#include <openbmc/pldm/libpldm/include/libpldm/base.h>
 #include <pldm/pldmif.H>
 #include <sys/sync.h> // mutex_t
 

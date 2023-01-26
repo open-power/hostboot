@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 #include <sys/vfs.h>
 #include <sys/sync.h>
 #include <pldm/pldm_request.H>
-#include <libpldm/platform.h>
+#include <libpldm/include/libpldm/platform.h>
 
 /* @file pldm_watchdog.C
  *

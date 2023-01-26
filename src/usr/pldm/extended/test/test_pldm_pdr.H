@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,8 +31,8 @@
 #include <cxxtest/TestSuite.H>
 
 // libpldm
-#include <openbmc/pldm/libpldm/pdr.h>
-#include <openbmc/pldm/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/include/libpldm/pdr.h>
+#include <openbmc/pldm/libpldm/include/libpldm/platform.h>
 
 // hostboot pldm
 #include <pldm/extended/hb_pdrs.H>

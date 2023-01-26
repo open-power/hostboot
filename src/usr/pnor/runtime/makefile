@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2021
+# Contributors Listed Below - COPYRIGHT 2014,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -37,7 +37,7 @@ OBJS += $(if $(CONFIG_FILE_XFER_VIA_PLDM),$(PLDM_DEPS))
 
 SUBDIRS += test.d
 
-EXTRAINCDIR += $(if $(CONFIG_FILE_XFER_VIA_PLDM),${ROOTPATH}/src/subtree/openbmc/pldm/libpldm)
+EXTRAINCDIR += $(if $(CONFIG_FILE_XFER_VIA_PLDM),${ROOTPATH}/src/subtree/openbmc/pldm/libpldm/include/libpldm)
 
 VPATH += ../
 

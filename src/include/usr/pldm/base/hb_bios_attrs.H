@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,8 +49,8 @@
  *       vectors the underlying code skips the lookups entirely. Otherwise, the code is forced to do the lookup.
  **/
 
-#include <openbmc/pldm/libpldm/bios_table.h>
-#include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
+#include <openbmc/pldm/libpldm/include/libpldm/bios_table.h>
+#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/libpldm/file_io.h>
 #include <pnor/pnor_const.H>
 #include <attributetraits.H>
 #include <attributeenums.H>

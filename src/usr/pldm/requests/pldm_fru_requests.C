@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@
 #include <pldm/pldm_trace.H>
 // libpldm
 #include <fru.h>
-#include <openbmc/pldm/libpldm/utils.h>
+#include <openbmc/pldm/libpldm/include/libpldm/utils.h>
 // Local includes
 #include "pldm_request_utils.H"
 

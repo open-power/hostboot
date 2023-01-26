@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -30,7 +30,7 @@ include ../../common/common.mk
 MODULE = testpldm_extended
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/
-EXTRAINCDIR += ${ROOTPATH}/src/import/openbmc/pldm/libpldm
+EXTRAINCDIR += ${ROOTPATH}/src/import/openbmc/pldm/libpldm/include/libpldm
 
 TESTS = *.H
 

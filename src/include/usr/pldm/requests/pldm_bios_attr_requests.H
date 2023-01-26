@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
  */
 
 #include <errl/errlentry.H>
-#include <openbmc/pldm/libpldm/bios_table.h>
+#include <openbmc/pldm/libpldm/include/libpldm/bios_table.h>
 
 namespace PLDM {
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,9 +43,9 @@
 #include <pldm/pldm_util.H>
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/requests/pldm_pdr_requests.H>
-#include <openbmc/pldm/libpldm/platform.h>
-#include <openbmc/pldm/libpldm/base.h>
-#include <openbmc/pldm/libpldm/state_set.h>
+#include <openbmc/pldm/libpldm/include/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/include/libpldm/base.h>
+#include <openbmc/pldm/libpldm/include/libpldm/state_set.h>
 
 // System/kernel
 #include <sys/misc.h>

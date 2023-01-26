@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2022
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -53,7 +53,7 @@ OBJS += $(if $(CONFIG_SFC_IS_FAKE),sfc_fake.o)
 OBJS += $(if $(CONFIG_ALLOW_MICRON_PNOR),nor_micron.o)
 
 #Extra includes
-EXTRAINCDIR += $(if $(CONFIG_PLDM),${ROOTPATH}/src/subtree/openbmc/pldm/libpldm)
+EXTRAINCDIR += $(if $(CONFIG_PLDM),${ROOTPATH}/src/subtree/openbmc/pldm/libpldm/include/libpldm)
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

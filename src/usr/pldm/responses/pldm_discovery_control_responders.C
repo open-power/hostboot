@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 
 #include <pldm/responses/pldm_discovery_control_responders.H>
 #include <pldm/pldm_trace.H>    // PLDM_INF
-#include <libpldm/base.h>       // PLDM_ERROR_UNSUPPORTED_PLDM_CMD
+#include <libpldm/include/libpldm/base.h>       // PLDM_ERROR_UNSUPPORTED_PLDM_CMD
 #include <pldm/pldm_response.H> // send_cc_only_response
 #include <sys/misc.h>           // SHUTDOWN_STATUS_PLDM_RESET_DETECTED
 #include <initservice/initserviceif.H> // INITSERVICE::doShutdown

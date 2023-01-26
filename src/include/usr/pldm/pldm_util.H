@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 #ifndef PLDM_UTIL_H
 #define PLDM_UTIL_H
 
-#include <openbmc/pldm/libpldm/pdr.h>
+#include <openbmc/pldm/libpldm/include/libpldm/pdr.h>
 #include <sys/msg.h>
 
 namespace PLDM

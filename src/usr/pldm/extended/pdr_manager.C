@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,9 +41,9 @@
 #include <util/singleton.H>
 
 #include "openbmc/libmctp/libmctp-astlpc.h"
-#include <openbmc/pldm/libpldm/platform.h>
-#include <openbmc/pldm/libpldm/pdr.h>
-#include <openbmc/pldm/libpldm/state_set.h>
+#include <openbmc/pldm/libpldm/include/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/include/libpldm/pdr.h>
+#include <openbmc/pldm/libpldm/include/libpldm/state_set.h>
 
 #include <sys/msg.h>
 #include <util/misc.H>
@@ -677,7 +677,7 @@ void PdrManager::addStateSensorPdr(Target* const i_target,
 
     pldm_pdr_add(iv_pdr_repo.get(), encoded_pdr, actual_pdr_size,
                  PDR_AUTO_CALCULATE_RECORD_HANDLE,
-                 PDR_IS_NOT_REMOTE);
+                 PDR_IS_NOT_REMOTE,hostbootTerminusId());
 
     PLDM_INF("Added state sensor PDR for target 0x%08x, sensor id = 0x%08x, state set ID = %d",
              get_huid(i_target),
@@ -764,7 +764,7 @@ void PdrManager::addStateEffecterPdr(Target* const i_target,
 
     pldm_pdr_add(iv_pdr_repo.get(), encoded_pdr, actual_pdr_size,
                  PDR_AUTO_CALCULATE_RECORD_HANDLE,
-                 PDR_IS_NOT_REMOTE);
+                 PDR_IS_NOT_REMOTE,hostbootTerminusId());
 
     PLDM_INF("Added state effecter PDR for target 0x%08x, sensor id = 0x%08x, state set id = %d",
              get_huid(i_target),
@@ -827,7 +827,7 @@ void PdrManager::addTerminusLocatorPDR()
                  reinterpret_cast<const uint8_t*>(&l_pdr),
                  sizeof(l_pdr),
                  PDR_AUTO_CALCULATE_RECORD_HANDLE,
-                 PDR_IS_NOT_REMOTE);
+                 PDR_IS_NOT_REMOTE,hostbootTerminusId());
 }
 
 errlHndl_t PdrManager::setStateEffecterStates(const MCTP::mctp_outbound_msgq_t i_msgQ,
@@ -1243,7 +1243,7 @@ void PdrManager::addEntityAssociationPdrs(const pldm_entity_association_tree& i_
 
     pldm_entity_association_pdr_add(const_cast<pldm_entity_association_tree*>(&i_tree),
                                     iv_pdr_repo.get(),
-                                    i_is_remote);
+                                    i_is_remote,hostbootTerminusId());
 }
 
 #ifndef __HOSTBOOT_RUNTIME

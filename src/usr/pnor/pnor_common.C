@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -47,7 +47,7 @@
 
 #ifdef CONFIG_FILE_XFER_VIA_PLDM
 #include <pnor/pnor_pldm_utils.H>
-#include <openbmc/pldm/oem/ibm/libpldm/file_io.h>
+#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/libpldm/file_io.h>
 #include <pldm/requests/pldm_fileio_requests.H>
 #include <pldm/base/hb_bios_attrs.H>
 #include <pldm/pldm_errl.H>

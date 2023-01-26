@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,9 +46,9 @@
 #include <pldm/responses/pldm_monitor_control_responders.H>
 
 // libpldm headers from pldm subtree
-#include <openbmc/pldm/libpldm/pdr.h>
-#include <openbmc/pldm/libpldm/platform.h>
-#include <openbmc/pldm/libpldm/state_set.h>
+#include <openbmc/pldm/libpldm/include/libpldm/pdr.h>
+#include <openbmc/pldm/libpldm/include/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/include/libpldm/state_set.h>
 
 // Targeting
 #include <targeting/common/targetservice.H>

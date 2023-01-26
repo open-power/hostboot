@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -33,12 +33,17 @@ COMMON_ROOTPATH = ../../../..
 #external pldm libs
 EXTERN_PLDM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm
 EXTERN_LIBPLDM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm/libpldm
-EXTERN_LIBPLDM_OEM_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/pldm/oem/ibm/libpldm
+EXTERN_LIBPLDM_INC_PATH = ${EXTERN_LIBPLDM_PATH}/include/libpldm
+EXTERN_LIBPLDM_SRC_PATH = ${EXTERN_LIBPLDM_PATH}/src
+EXTERN_LIBPLDM_OEM_INC_PATH = ${EXTERN_LIBPLDM_INC_PATH}/oem/ibm/libpldm
+EXTERN_LIBPLDM_OEM_INC_ROOT_PATH = ${EXTERN_LIBPLDM_INC_PATH}/oem/ibm/
+EXTERN_LIBPLDM_OEM_SRC_PATH = ${EXTERN_LIBPLDM_SRC_PATH}/oem/ibm
 EXTERN_LIBMCTP_PATH = ${COMMON_ROOTPATH}/src/subtree/openbmc/libmctp/
 
 EXTRAINCDIR += ${EXTERN_PLDM_PATH}
-EXTRAINCDIR += ${EXTERN_LIBPLDM_PATH}
-EXTRAINCDIR += ${EXTERN_LIBPLDM_OEM_PATH}
+EXTRAINCDIR += ${EXTERN_LIBPLDM_INC_PATH}
+EXTRAINCDIR += ${EXTERN_LIBPLDM_OEM_INC_ROOT_PATH}
+EXTRAINCDIR += ${EXTERN_LIBPLDM_OEM_INC_PATH}
 EXTRAINCDIR += ${EXTERN_LIBMCTP_PATH}
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/utils/imageProcs
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/hwpf/fapi2/include/
@@ -85,8 +90,8 @@ PLDM_EXTENDED_COMMON_OBJS += pldm_oem_responders.o
 
 # add these paths to VPATH so compiler knows
 # where to find the .C/.c files we need
-VPATH += ${EXTERN_LIBPLDM_PATH}
-VPATH += ${EXTERN_LIBPLDM_OEM_PATH}
+VPATH += ${EXTERN_LIBPLDM_SRC_PATH}
+VPATH += ${EXTERN_LIBPLDM_OEM_SRC_PATH}
 VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/common
 VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/requests
 VPATH += ${COMMON_ROOTPATH}/src/usr/pldm/responses

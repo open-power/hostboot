@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,7 @@
 #include <pldm/pldm_trace.H>
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_util.H>
-#include <openbmc/pldm/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/include/libpldm/platform.h>
 
 // Miscellaneous
 #include <sys/msg.h>

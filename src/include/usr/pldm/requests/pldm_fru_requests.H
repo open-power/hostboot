@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,7 @@
  */
 
 #include <errl/errlentry.H>
-#include <openbmc/pldm/libpldm/fru.h>
+#include <openbmc/pldm/libpldm/include/libpldm/fru.h>
 
 namespace PLDM
 {
