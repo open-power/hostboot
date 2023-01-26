@@ -1,9 +1,0 @@
-[Unit]
-Description=Reset PHYP-NVRAM file
-Requires=pldm-create-phyp-nvram.service
-Before=pldm-create-phyp-nvram.service
-
-[Service]
-ExecStart=/bin/rm -f /var/lib/pldm/PHYP-NVRAM
-Type=oneshot
-RemainAfterExit=no
