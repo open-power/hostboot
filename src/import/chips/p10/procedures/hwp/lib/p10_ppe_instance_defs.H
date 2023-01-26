@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,12 +69,14 @@ enum PPE_TYPES
     PPE_TYPE_GPE     = 1,
     PPE_TYPE_QME     = 2,
     PPE_TYPE_IO      = 3,
-    PPE_TYPE_MAX      = 4,
+    PPE_TYPE_SPPE    = 4,
+    PPE_TYPE_MAX     = 5,
 };
 
 enum PPE_BASE_ADDRESSES
 {
     PPE_SBE_BASE_ADDRESS    = 0x000E0000,
+    PPE_SPPE_BASE_ADDRESS   = 0x000D0000,
     PPE_GPE_BASE_ADDRESS    = 0x00060000,
     PPE_QME_BASE_ADDRESS    = 0x200E0000,
     PPE_IOPPE_BASE_ADDRESS  = 0x10012C00,
@@ -232,7 +234,31 @@ static PPE_Type_t G_PPE_Types[PPE_TYPE_MAX] =
         0,
         {   {0,  0 }},
         {{}}
-    }//PPE_TYPE_IO
+    },//PPE_TYPE_IO
+    {
+        "SPPE",
+        PPE_SPPE_BASE_ADDRESS,
+        1, //Only one SPPE per chip
+        0, //Only valid if num_instances > 1
+        {   {PPE_IDX_XIXCR,    0x0},
+            {PPE_IDX_XIRAMRA,  0x1},
+            {PPE_IDX_XIRAMGA,  0x2},
+            {PPE_IDX_XIRAMDBG, 0x3},
+            {PPE_IDX_XIRAMEDR, 0x4},
+            {PPE_IDX_XIDBGPRO, 0x5},
+            {PPE_IDX_XIDBGINF, 0xF}
+        },
+        {   {PPE_IDX_XISIB,     0x6},
+            {PPE_IDX_XIMEM,     0x7},
+            {PPE_IDX_XISGB,     0x8},
+            {PPE_IDX_XIICAC,    0x9},
+        },
+        0,                  //No VDR available through XIR
+        {   {0,     0x0}},
+        0,                  //No specific registers
+        {   {0,     0x0}},
+        {{}}
+    },//PPE_TYPE_SPPE
 };
 
 
