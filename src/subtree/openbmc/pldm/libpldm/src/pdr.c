@@ -52,9 +52,30 @@ static void add_record(pldm_pdr *repo, pldm_pdr_record *record)
 
 static inline uint32_t get_new_record_handle(const pldm_pdr *repo)
 {
+	static const uint32_t HB_PDR_OFFSET = 0x01000000;
+	static uint32_t current_hb_handle = HB_PDR_OFFSET;
 	assert(repo != NULL);
-	uint32_t last_used_hdl =
-	    repo->last != NULL ? repo->last->record_handle : 0;
+	uint32_t last_used_hdl = 0;
+	if(repo->last != NULL)
+	{
+		if(repo->last->record_handle >= HB_PDR_OFFSET) // It's an HB PDR
+		{
+			last_used_hdl = repo->last->record_handle;
+			current_hb_handle = last_used_hdl + 1;
+		}
+		else // It's a BMC PDR
+		{
+			// We don't want to continue counting from the BMC PDR's
+			// handle, nor do we want to restart, so continue where
+			// we left off.
+			last_used_hdl = current_hb_handle++;
+		}
+	}
+	else
+	{
+		last_used_hdl = HB_PDR_OFFSET;
+		current_hb_handle = last_used_hdl + 1;
+	}
 	assert(last_used_hdl != UINT32_MAX);
 
 	return last_used_hdl + 1;
@@ -968,5 +989,39 @@ void pldm_entity_association_pdr_extract(const uint8_t *pdr, uint16_t pdr_len,
 		    le16toh(curr_entity->entity_container_id);
 		++curr_entity;
 		++i;
+	}
+}
+
+void pldm_delete_by_record_handle(pldm_pdr *repo, uint32_t record_handle,
+				  bool is_remote)
+{
+	assert(repo != NULL);
+
+	pldm_pdr_record *record = repo->first;
+	pldm_pdr_record *prev = NULL;
+	while (record != NULL) {
+		pldm_pdr_record *next = record->next;
+		struct pldm_pdr_hdr *hdr = (struct pldm_pdr_hdr *)record->data;
+		if ((record->is_remote == is_remote) &&
+		    (hdr->record_handle == record_handle)) {
+			if (repo->first == record) {
+				repo->first = next;
+			} else {
+				prev->next = next;
+			}
+			if (repo->last == record) {
+				repo->last = prev;
+			}
+			if (record->data) {
+				free(record->data);
+			}
+			--repo->record_count;
+			repo->size -= record->size;
+			free(record);
+			break;
+		} else {
+			prev = record;
+		}
+		record = next;
 	}
 }
