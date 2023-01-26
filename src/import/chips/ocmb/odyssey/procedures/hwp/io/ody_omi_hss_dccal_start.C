@@ -61,10 +61,10 @@ fapi2::ReturnCode ody_omi_sim_fast_mode(const fapi2::Target<fapi2::TARGET_TYPE_O
     OMI0_RX_GRP0_CTL_REGS_MODE8_PG_t l_rx_ctl_mode8_pg;
     fapi2::buffer<uint64_t> l_data;
 
-    l_rx_ctl_mode15_pg.set_0(1);
-    l_rx_ctl_mode15_pg.set_1(1);
-    l_rx_ctl_mode15_pg.set_2(1);
-    l_rx_ctl_mode15_pg.set_3(2);
+    l_rx_ctl_mode15_pg.set_DEPTH0(1);
+    l_rx_ctl_mode15_pg.set_DEPTH1(1);
+    l_rx_ctl_mode15_pg.set_DEPTH2(1);
+    l_rx_ctl_mode15_pg.set_DEPTH3(2);
     FAPI_TRY(l_rx_ctl_mode15_pg.putScom(i_target));
 
     l_rx_ctl_mode16_pg.set_INC_DEC_AMT0(5);
