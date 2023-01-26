@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 // EKB-Mirror-To: hostboot
 
@@ -41,14 +41,14 @@
 
 // Required for Cronus
 typedef fapi2::ReturnCode (*ody_mss_eff_config_thermal_FP_t) (const
-        std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >& i_targets);
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >&);
 
 extern "C"
 {
 
 ///
 /// @brief Determine thermal throttling setttings based on system policies
-/// @param[in] i_target the controller
+/// @param[in] i_targets vector of OCMB chip
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode ody_mss_eff_config_thermal( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >&

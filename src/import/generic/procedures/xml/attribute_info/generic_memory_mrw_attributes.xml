@@ -80,7 +80,7 @@
     <valueType>uint64</valueType>
     <platInit/>
     <array>100</array>
-    <default>0xfffff8000384044C</default>
+    <default>0xFFFFF8000384044C</default>
     <mssAccessorName>mrw_pwr_intercept</mssAccessorName>
   </attribute>
 
@@ -110,7 +110,7 @@
     <valueType>uint64</valueType>
     <platInit/>
     <array>100</array>
-    <default>0xfffff800041A044C</default>
+    <default>0xFFFFF800041A044C</default>
     <mssAccessorName>mrw_pwr_slope</mssAccessorName>
   </attribute>
 
@@ -563,7 +563,7 @@
     </description>
     <valueType>uint8</valueType>
     <platInit/>
-    <default> 0xc0 </default>
+    <default> 0xC0 </default>
     <enum> X4 = 0, X8 = 1 </enum>
     <mssAccessorName>mrw_supported_dram_width</mssAccessorName>
   </attribute>
@@ -575,7 +575,7 @@
         Machine Readable Workbook Thermal Memory Power Limit
         Used to calculate throttles to meet the thermal power per DIMM limit
         Per DIMM basis, uses first matching KEY entry
-        KEY (0-21): In order
+        KEY (0-27): In order
         DIMM_SIZE = bits 0-3,
         DIMM_GEN = 4-5,
         DIMM_TYPE = 6-8,
@@ -584,14 +584,16 @@
         DIMM_STACK_TYPE = 15-16,
         DRAM_MFGID = 17-19,
         DIMM_HEIGHT = 20-21,
-        Bits 22-32: Not used
+        DIMM_COUNT = 22-25,
+        DIMM_ATTACHED = 26-27,
+        Bits 28-31: Not used
         VALUE (bits 32-47) in cW: thermal power limit
           DDIMM: Total OCMB+DRAM power limit per DDIMM
           non-DDIMM: VMEM+VPP power limit per DIMM
     </description>
     <valueType>uint64</valueType>
     <mssUnits>cW</mssUnits>
-    <default>0xfffffc0009c40000</default>
+    <default>0xFFFFFC3009C40000</default>
     <array>25</array>
     <platInit/>
     <mssAccessorName>mrw_ocmb_thermal_memory_power_limit</mssAccessorName>
@@ -604,7 +606,7 @@
         Machine Readable Workbook Power Curve Slope for DIMM
         Used to calculate thermal throttles and port power
         Per DIMM basis, uses first matching KEY entry
-        KEY (0-21): In order
+        KEY (0-27): In order
         DIMM_SIZE = bits 0-3,
         DIMM_GEN = 4-5,
         DIMM_TYPE = 6-8,
@@ -613,14 +615,16 @@
         DIMM_STACK_TYPE = 15-16,
         DRAM_MFGID = 17-19,
         DIMM_HEIGHT = 20-21,
-        Bits 22-32: Not used
+        DIMM_COUNT = Bits 22-25,
+        DIMM_ATTACHED = 26-27,
+        Bits 28-31: Not used
         VALUE (bits 32-47) in cW/utilization: DIMM power slope
           DDIMM: Total OCMB+DRAM power slope per DDIMM
           non-DDIMM: VMEM+VPP power slope per DIMM
     </description>
     <valueType>uint64</valueType>
     <mssUnits>cW</mssUnits>
-    <default>0xfffffc0004620000</default>
+    <default>0xFFFFFC3004620000</default>
     <array>50</array>
     <platInit/>
     <mssAccessorName>mrw_ocmb_pwr_slope</mssAccessorName>
@@ -633,7 +637,7 @@
         Machine Readable Workbook Power Curve Intercept for DIMM
         Used to calculate thermal throttles and port power
         Per DIMM basis, uses first matching KEY entry
-        KEY (0-21): In order
+        KEY (0-27): In order
         DIMM_SIZE = bits 0-3,
         DIMM_GEN = 4-5,
         DIMM_TYPE = 6-8,
@@ -642,14 +646,23 @@
         DIMM_STACK_TYPE = 15-16,
         DRAM_MFGID = 17-19,
         DIMM_HEIGHT = 20-21,
-        Bits 22-32: Not used
+        DIMM_COUNT = Bits 22-25 (Number of configured DIMMs under processor (supported values are 2,4,6,8,16,32)
+          0b0000 = 2 DIMMs
+          0b0001 = 4 DIMMs
+          0b0010 = 6 DIMMs
+          0b0011 = 8 DIMMs
+          0b0100 = 16 DIMMs
+          0b0101 = 32 DIMMs
+          0b1111 = wildcard,
+        DIMM_ATTACHED = 26-27,
+        Bits 28-31: Not used
         VALUE (bits 32-47) in cW/utilization: DIMM power intercept
           DDIMM: Total OCMB+DRAM power intercept per DDIMM
           non-DDIMM: VMEM+VPP power intercept per DIMM
     </description>
     <valueType>uint64</valueType>
     <mssUnits>cW/utilization</mssUnits>
-    <default>0xfffffc0005260000</default>
+    <default>0xFFFFFC3005260000</default>
     <array>50</array>
     <platInit/>
     <mssAccessorName>mrw_ocmb_pwr_intercept</mssAccessorName>
@@ -663,7 +676,7 @@
         Used to calculate throttles to meet regulator current per DIMM limit
         Per DIMM basis, uses first matching KEY entry
         For DDIMM, use PMIC SW output that provides worst case throttling
-        KEY (0-21): In order
+        KEY (0-27): In order
         DIMM_SIZE = bits 0-3,
         DIMM_GEN = 4-5,
         DIMM_TYPE = 6-8,
@@ -672,7 +685,9 @@
         DIMM_STACK_TYPE = 15-16,
         DRAM_MFGID = 17-19,
         DIMM_HEIGHT = 20-21,
-        Bits 22-32: Not used
+        DIMM_COUNT = Bits 22-25,
+        DIMM_ATTACHED = 26-27,
+        Bits 28-31: Not used
         VALUE (bits 32-39): Current limit (dA)
           DDIMM: PMIC output current limit per DDIMM
           non-DDIMM: VMEM regulator current limit per DIMM
@@ -685,7 +700,7 @@
     </description>
     <valueType>uint64</valueType>
     <mssUnits>dA, cA/utilization, cA</mssUnits>
-    <default>0xFFFFFC0064152094</default>
+    <default>0xFFFFFC3064152094</default>
     <array>25</array>
     <platInit/>
     <mssAccessorName>mrw_ocmb_current_curve_with_limit</mssAccessorName>
@@ -826,7 +841,7 @@
     </description>
     <valueType>uint64</valueType>
     <mssUnits>cW</mssUnits>
-    <default>0xfffff80000000794</default>
+    <default>0xFFFFF80000000794</default>
     <array>10</array>
     <platInit/>
     <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
@@ -856,7 +871,7 @@
     <description>
         Memory safemode throttle settings based on DIMM configurations
         Key Value pair
-        KEY (0-25): In order
+        KEY (0-27): In order
         DIMM_SIZE = bits 0-3,
         DIMM_GEN = 4-5,
         DIMM_TYPE = 6-8,
@@ -872,14 +887,15 @@
           0b0011 = 8 DIMMs
           0b0100 = 16 DIMMs
           0b0101 = 32 DIMMs
-          0b1111 = wildcard
-        Bits 26-31: Not used
+          0b1111 = wildcard,
+        DIMM_ATTACHED = 26-27,
+        Bits 28-31: Not used
         VALUE (bits 32-47) safemode dram data bus utilization in c%
     </description>
     <valueType>uint64</valueType>
     <platInit/>
     <array>50</array>
-    <default>0xFFFFFFC009C40000</default>
+    <default>0xFFFFFFF009C40000</default>
     <mssAccessorName>mrw_ocmb_safemode_util_array</mssAccessorName>
   </attribute>
 

@@ -46,6 +46,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/power_thermal/gen_decoder.H>
 #include <lib/power_thermal/ody_throttle_traits.H>
+#include <lib/power_thermal/ody_throttle.H>
 
 namespace mss
 {

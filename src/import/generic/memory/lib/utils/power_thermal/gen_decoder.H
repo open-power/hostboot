@@ -603,8 +603,7 @@ fapi2::ReturnCode decoder<MC, TT>::generate_encoding(const uint8_t i_safemode_th
              "DRAM_MFG_ID", iv_kind.iv_mfgid, mss::c_str(iv_kind.iv_target) );
 
     // DIMM_ATTACHED
-    FAPI_TRY(( encode<TT::DIMM_ATTACHED_START, TT::DIMM_ATTACHED_LEN>
-               (iv_kind.iv_target, iv_kind.iv_attached_dimm_count, TT::DIMM_ATTACHED_MAP, iv_gen_key)),
+    FAPI_TRY(( encode_dimm_attached()),
              "Failed to generate power thermal encoding for %s val %d on target: %s",
              "DIMM_ATTACHED", iv_kind.iv_attached_dimm_count, mss::c_str(iv_kind.iv_target) );
 

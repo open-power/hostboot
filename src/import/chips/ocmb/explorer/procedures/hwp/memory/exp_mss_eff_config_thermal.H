@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ extern "C"
 
     ///
     /// @brief Config the thermal/power throttle setting
-    /// @param[in] i_target vector of OCMB chip
+    /// @param[in] i_targets vector of OCMB chip
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode exp_mss_eff_config_thermal( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >&
