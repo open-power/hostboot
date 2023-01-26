@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -638,22 +638,13 @@ static const uint32_t DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B118S2_SEQUENCEREG0
 static const uint32_t DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B118S2_SEQUENCEREG0B118S2_LEN = 9;
 
 
-static const uint64_t DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S0 = 0x8009018E0801303Full;
-
-static const uint32_t DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S0_SEQUENCEREG0B119S0 = 48;
-static const uint32_t DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S0_SEQUENCEREG0B119S0_LEN = 16;
 
 
-static const uint64_t DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S1 = 0x8009018F0801303Full;
-
-static const uint32_t DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S1_SEQUENCEREG0B119S1 = 48;
-static const uint32_t DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S1_SEQUENCEREG0B119S1_LEN = 16;
 
 
-static const uint64_t DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S2 = 0x800901900801303Full;
 
-static const uint32_t DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S2_SEQUENCEREG0B119S2 = 55;
-static const uint32_t DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S2_SEQUENCEREG0B119S2_LEN = 9;
+
+
 
 
 static const uint64_t DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B11S0 = 0x8009004A0801303Full;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -33,10 +33,7 @@ namespace mp
 {
 #endif
 
-static const uint64_t DWC_DDRPHYA_APBONLY0_DCTWRITEONLY = 0x800D00300801303Full;
 
-static const uint32_t DWC_DDRPHYA_APBONLY0_DCTWRITEONLY_DCTWRITEONLY = 48;
-static const uint32_t DWC_DDRPHYA_APBONLY0_DCTWRITEONLY_DCTWRITEONLY_LEN = 16;
 
 
 static const uint64_t DWC_DDRPHYA_APBONLY0_DCTWRITEPROT = 0x800D00310801303Full;
@@ -56,10 +53,7 @@ static const uint32_t DWC_DDRPHYA_APBONLY0_DFI0DEBUGCAPTURE1_DFI0DEBUGCAPTURE1 =
 static const uint32_t DWC_DDRPHYA_APBONLY0_DFI0DEBUGCAPTURE1_DFI0DEBUGCAPTURE1_LEN = 10;
 
 
-static const uint64_t DWC_DDRPHYA_APBONLY0_DFI0DEBUGCONTROL = 0x800D00400801303Full;
 
-static const uint32_t DWC_DDRPHYA_APBONLY0_DFI0DEBUGCONTROL_RFU_DFI0DEBUGCONTROL = 48;
-static const uint32_t DWC_DDRPHYA_APBONLY0_DFI0DEBUGCONTROL_RFU_DFI0DEBUGCONTROL_LEN = 16;
 
 
 static const uint64_t DWC_DDRPHYA_APBONLY0_DFI0DEBUGPERFCTR = 0x800D00440801303Full;
@@ -85,10 +79,7 @@ static const uint32_t DWC_DDRPHYA_APBONLY0_DFI1DEBUGCAPTURE1_DFI1DEBUGCAPTURE1 =
 static const uint32_t DWC_DDRPHYA_APBONLY0_DFI1DEBUGCAPTURE1_DFI1DEBUGCAPTURE1_LEN = 10;
 
 
-static const uint64_t DWC_DDRPHYA_APBONLY0_DFI1DEBUGCONTROL = 0x800D00480801303Full;
 
-static const uint32_t DWC_DDRPHYA_APBONLY0_DFI1DEBUGCONTROL_RFU_DFI1DEBUGCONTROL = 48;
-static const uint32_t DWC_DDRPHYA_APBONLY0_DFI1DEBUGCONTROL_RFU_DFI1DEBUGCONTROL_LEN = 16;
 
 
 static const uint64_t DWC_DDRPHYA_APBONLY0_DFI1DEBUGPERFCTR = 0x800D004C0801303Full;

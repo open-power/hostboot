@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,9 +41,9 @@
     { \
         public: \
             _SCOMT_REGISTER_BEGIN(SCOM_AACR_t); \
-            _SCOMT_BOOL_FIELD(SCOM_AACR_t, RRAYSEL, 0); \
-            _SCOMT_INT_FIELD(SCOM_AACR_t, DDRESS, 1, 9); \
-            _SCOMT_BOOL_FIELD(SCOM_AACR_t, UTOINC, 10); \
+            _SCOMT_BOOL_FIELD(SCOM_AACR_t, ARRAYSEL, 0); \
+            _SCOMT_INT_FIELD(SCOM_AACR_t, ADDRESS, 1, 9); \
+            _SCOMT_BOOL_FIELD(SCOM_AACR_t, AUTOINC, 10); \
     }; _SCOMT_CLOSE_NAMESPACE
 
 #define SCOMT_MP_USE_SCOM_AADR \
@@ -630,8 +630,8 @@
     { \
         public: \
             _SCOMT_REGISTER_BEGIN(SCOM_RSPAR_t); \
-            _SCOMT_INT_FIELD(SCOM_RSPAR_t, 0_LEFT, 0, 5); \
-            _SCOMT_INT_FIELD(SCOM_RSPAR_t, 0_RIGHT, 5, 5); \
-            _SCOMT_INT_FIELD(SCOM_RSPAR_t, 1_LEFT, 10, 5); \
-            _SCOMT_INT_FIELD(SCOM_RSPAR_t, 1_RIGHT, 15, 5); \
+            _SCOMT_INT_FIELD(SCOM_RSPAR_t, R0_LEFT, 0, 5); \
+            _SCOMT_INT_FIELD(SCOM_RSPAR_t, R0_RIGHT, 5, 5); \
+            _SCOMT_INT_FIELD(SCOM_RSPAR_t, R1_LEFT, 10, 5); \
+            _SCOMT_INT_FIELD(SCOM_RSPAR_t, R1_RIGHT, 15, 5); \
     }; _SCOMT_CLOSE_NAMESPACE

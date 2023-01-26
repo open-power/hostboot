@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,8 +67,8 @@ const std::vector<uint8_t> genSteerTraits< mss::mc_type::ODYSSEY>::spare_to_symb
 ///
 const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::WRITE_MUX >::muxregs_left =
 {
-    scomt::ody::ODC_WDF_REGS_WSPAR_0_LEFT,
-    scomt::ody::ODC_WDF_REGS_WSPAR_1_LEFT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_R0_LEFT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_R1_LEFT,
 };
 
 ///
@@ -76,8 +76,8 @@ const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::WRIT
 ///
 const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::WRITE_MUX >::muxregs_right =
 {
-    scomt::ody::ODC_WDF_REGS_WSPAR_0_RIGHT,
-    scomt::ody::ODC_WDF_REGS_WSPAR_1_RIGHT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_R0_RIGHT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_R1_RIGHT,
 };
 
 ///
@@ -85,8 +85,8 @@ const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::WRIT
 ///
 const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::READ_MUX >::muxregs_left =
 {
-    scomt::ody::ODC_RDF0_SCOM_RSPAR_0_LEFT,
-    scomt::ody::ODC_RDF0_SCOM_RSPAR_1_LEFT,
+    scomt::ody::ODC_RDF0_SCOM_RSPAR_R0_LEFT,
+    scomt::ody::ODC_RDF0_SCOM_RSPAR_R1_LEFT,
 };
 
 ///
@@ -94,8 +94,8 @@ const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::READ
 ///
 const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::READ_MUX >::muxregs_right =
 {
-    scomt::ody::ODC_RDF0_SCOM_RSPAR_0_RIGHT,
-    scomt::ody::ODC_RDF0_SCOM_RSPAR_1_RIGHT,
+    scomt::ody::ODC_RDF0_SCOM_RSPAR_R0_RIGHT,
+    scomt::ody::ODC_RDF0_SCOM_RSPAR_R1_RIGHT,
 };
 
 } // ns steer

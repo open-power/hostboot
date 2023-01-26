@@ -31,7 +31,7 @@
 //------------------------------------------------------------------------------
 
 #include <ody_dts_read.H>
-#include <ody_scom_perv.H>
+#include <ody_scom_perv_tcmc.H>
 #include <target_filters.H>
 
 SCOMT_PERV_USE_TCMC_EPS_DTS_MEASURE_REQ;
@@ -80,7 +80,7 @@ ReturnCode ody_dts_read(
     {
         FAPI_TRY(l_raw_data.getScom(l_mc));
 
-        if (l_raw_data.get_0_DTR0_RAW_VALID())
+        if (l_raw_data.get_DTS0_DTR0_RAW_VALID())
         {
             break;
         }
@@ -107,10 +107,10 @@ ReturnCode ody_dts_read(
     ody_dts_decode_calib_coeffs(l_fuse_value, l_coeffs);
 
     FAPI_INF("Calculating calibrated temperature");
-    o_temperature = ody_dts_get_calibrated_temp(l_raw_data.get_0_DTR0_RAW_VALUE(), l_coeffs);
+    o_temperature = ody_dts_get_calibrated_temp(l_raw_data.get_DTS0_DTR0_RAW_VALUE(), l_coeffs);
 
     FAPI_INF("Raw reading: %d, P/M/B: %d/%d/%d",
-             l_raw_data.get_0_DTR0_RAW_VALUE(),
+             l_raw_data.get_DTS0_DTR0_RAW_VALUE(),
              l_coeffs.p, l_coeffs.m, l_coeffs.b);
     FAPI_INF("    => Temperature: %d", o_temperature);
 

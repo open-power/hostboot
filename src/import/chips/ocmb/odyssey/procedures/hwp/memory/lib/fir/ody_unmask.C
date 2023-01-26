@@ -93,48 +93,48 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::ODYSSEY>( const fapi2::T
     mss::fir::reg2<scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR> l_srq_reg(i_target);
 
     // Write MCBISTFIR register per Odyssey unmask spec
-    FAPI_TRY(l_mcbist_reg.recoverable_error<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_COMMAND_ADDRESS_TIMEOUT>()
-             .checkstop<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_INTERNAL_FSM_ERROR>()
-             .checkstop<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_CCS_ARRAY_UNCORRECT_CE_OR_UE>()
-             .recoverable_error<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_SCOM_RECOVERABLE_REG_PE>()
-             .checkstop<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_SCOM_FATAL_REG_PE>()
+    FAPI_TRY(l_mcbist_reg.recoverable_error<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_COMMAND_ADDRESS_TIMEOUT>()
+             .checkstop<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_INTERNAL_FSM_ERROR>()
+             .checkstop<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_CCS_ARRAY_UNCORRECT_CE_OR_UE>()
+             .recoverable_error<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_SCOM_RECOVERABLE_REG_PE>()
+             .checkstop<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_SCOM_FATAL_REG_PE>()
              .write(), "Failed to write MCBIST FIR register for " GENTARGTIDFORMAT, GENTARGTID(i_target));
 
     // Write SRQ LFIR register per Odyssey unmask spec
-    l_srq_reg.checkstop<scomt::ody::ODC_SRQ_LFIR_05>()
-    .checkstop<scomt::ody::ODC_SRQ_LFIR_18>()
-    .checkstop<scomt::ody::ODC_SRQ_LFIR_19>()
-    .recoverable_error<scomt::ody::ODC_SRQ_LFIR_23>();
+    l_srq_reg.checkstop<scomt::ody::ODC_SRQ_LFIR_IN05>()
+    .checkstop<scomt::ody::ODC_SRQ_LFIR_IN18>()
+    .checkstop<scomt::ody::ODC_SRQ_LFIR_IN19>()
+    .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN23>();
 
     // Port specific errors
     // Port 0
     if(is_port_present(l_ports, 0))
     {
-        l_srq_reg.recoverable_error<scomt::ody::ODC_SRQ_LFIR_02>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_07>()
-        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_09>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_10>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_11>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_12>()
-        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_24>()
-        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_25>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_26>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_31>();
+        l_srq_reg.recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN02>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN07>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN09>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN10>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN11>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN12>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN24>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN25>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN26>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN31>();
     }
 
     // Port 1
     if(is_port_present(l_ports, 1))
     {
-        l_srq_reg.checkstop<scomt::ody::ODC_SRQ_LFIR_27>()
-        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_32>()
-        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_36>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_37>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_38>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_39>()
-        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_41>()
-        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_42>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_43>()
-        .checkstop<scomt::ody::ODC_SRQ_LFIR_45>();
+        l_srq_reg.checkstop<scomt::ody::ODC_SRQ_LFIR_IN27>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN32>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN36>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN37>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN38>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN39>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN41>()
+        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN42>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN43>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN45>();
     }
 
     FAPI_TRY(l_srq_reg.write(), "Failed to write SRQ FIR register for " GENTARGTIDFORMAT, GENTARGTID(i_target));
@@ -215,29 +215,29 @@ fapi2::ReturnCode after_scominit<mss::mc_type::ODYSSEY>( const fapi2::Target<fap
     mss::fir::reg2<scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR> l_srq_lfir(i_target);
 
     // Checkstops + unmasks
-    l_srq_lfir.checkstop<scomt::ody::ODC_SRQ_LFIR_01>()
-    .checkstop<scomt::ody::ODC_SRQ_LFIR_16>()
-    .checkstop<scomt::ody::ODC_SRQ_LFIR_17>()
-    .checkstop<scomt::ody::ODC_SRQ_LFIR_20>()
-    .checkstop<scomt::ody::ODC_SRQ_LFIR_22>()
-    .checkstop<scomt::ody::ODC_SRQ_LFIR_44>()
+    l_srq_lfir.checkstop<scomt::ody::ODC_SRQ_LFIR_IN01>()
+    .checkstop<scomt::ody::ODC_SRQ_LFIR_IN16>()
+    .checkstop<scomt::ody::ODC_SRQ_LFIR_IN17>()
+    .checkstop<scomt::ody::ODC_SRQ_LFIR_IN20>()
+    .checkstop<scomt::ody::ODC_SRQ_LFIR_IN22>()
+    .checkstop<scomt::ody::ODC_SRQ_LFIR_IN44>()
 
     // Recoverables + unmasks
-    .recoverable_error<scomt::ody::ODC_SRQ_LFIR_14>()
-    .recoverable_error<scomt::ody::ODC_SRQ_LFIR_21>()
-    .recoverable_error<scomt::ody::ODC_SRQ_LFIR_29>();
+    .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN14>()
+    .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN21>()
+    .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN29>();
 
     // Port specific errors
     // Port 0
     if(is_port_present(l_ports, IDX_PORT0))
     {
-        l_srq_lfir.recoverable_error<scomt::ody::ODC_SRQ_LFIR_30>();
+        l_srq_lfir.recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN30>();
     }
 
     // Port 1
     if(is_port_present(l_ports, IDX_PORT1))
     {
-        l_srq_lfir.recoverable_error<scomt::ody::ODC_SRQ_LFIR_34>();
+        l_srq_lfir.recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN34>();
     }
 
     FAPI_TRY(mss::has_rcd(i_target, l_has_rcd));
@@ -250,11 +250,11 @@ fapi2::ReturnCode after_scominit<mss::mc_type::ODYSSEY>( const fapi2::Target<fap
         FAPI_TRY(after_scominit_disable_rcd_recovery_helper(i_target));
 
         // Set the RCD errors to recoverable based upon the port
-        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_04>(l_ports,
+        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN04>(l_ports,
                  IDX_PORT0,
                  mss::fir::action::RECOV,
                  l_srq_lfir));
-        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_33>(l_ports,
+        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN33>(l_ports,
                  IDX_PORT1,
                  mss::fir::action::RECOV,
                  l_srq_lfir));
@@ -294,11 +294,11 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::ODYSSEY>( const fapi2::Target<fap
         // Enable the port fail and RCD recovery mechanisms and set RCD protection time
         FAPI_TRY(after_memdiags_enable_rcd_recovery_helper(i_target));
 
-        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_13>(l_ports,
+        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN13>(l_ports,
                  IDX_PORT0,
                  mss::fir::action::LXSTOP,
                  l_srq_reg));
-        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_40>(l_ports,
+        FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN40>(l_ports,
                  IDX_PORT1,
                  mss::fir::action::LXSTOP,
                  l_srq_reg));
@@ -351,7 +351,7 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::ODYSSEY>( const fapi2::Target<
 
     // Write MCBISTFIR register per Odyssey unmask spec
     // NOTE: when this gets ported to p11 this will need to be changed to recoverable
-    FAPI_TRY(l_mcbist_reg.attention<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_MCBIST_PROGRAM_COMPLETE>()
+    FAPI_TRY(l_mcbist_reg.attention<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>()
              .write(), "Failed to Write MCBIST FIR register " GENTARGTIDFORMAT, GENTARGTID(i_target));
 
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))

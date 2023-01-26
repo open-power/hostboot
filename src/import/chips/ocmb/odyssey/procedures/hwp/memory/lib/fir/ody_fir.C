@@ -119,8 +119,8 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::DRAMINIT>(
     o_fir_error = false;
 
     // Unmask bit 4 or 33 depending on which port we're on
-    constexpr uint32_t SRQ0_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_04;
-    constexpr uint32_t SRQ1_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_33;
+    constexpr uint32_t SRQ0_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_IN04;
+    constexpr uint32_t SRQ1_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_IN33;
 
     if (l_pos == 0)
     {
@@ -163,8 +163,8 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::CCS>(
     o_fir_error = false;
 
     // Unmask bits 4 and 33
-    constexpr uint32_t SRQ0_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_04;
-    constexpr uint32_t SRQ1_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_33;
+    constexpr uint32_t SRQ0_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_IN04;
+    constexpr uint32_t SRQ1_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_IN33;
     l_check_mask.clearBit<SRQ0_RCD_PARITY_ERROR>()
     .clearBit<SRQ1_RCD_PARITY_ERROR>();
 
@@ -178,8 +178,8 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::CCS>(
     // Mask all, then unmask bits 3,4
     if (o_fir_error != true)
     {
-        l_check_mask.flush<1>().clearBit<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_INTERNAL_FSM_ERROR>()
-        .clearBit<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_ISTFIRQ_CCS_ARRAY_UNCORRECT_CE_OR_UE>();
+        l_check_mask.flush<1>().clearBit<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_INTERNAL_FSM_ERROR>()
+        .clearBit<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_CCS_ARRAY_UNCORRECT_CE_OR_UE>();
 
         FAPI_TRY(bad_fir_bits_helper_with_mask(i_target,
                                                scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_RW_WCLEAR,

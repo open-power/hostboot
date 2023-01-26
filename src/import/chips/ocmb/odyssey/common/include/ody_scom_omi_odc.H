@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -263,22 +263,22 @@ static const uint32_t D_REG_DL0_DEBUG_AID_PRBS_STATUS_LEN = 8;
 
 static const uint64_t D_REG_DL0_EDPL_MAX_COUNT = 0x8012415ull;
 
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_7_MAX_COUNT = 0;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_7_MAX_COUNT_LEN = 8;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_6_MAX_COUNT = 8;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_6_MAX_COUNT_LEN = 8;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_5_MAX_COUNT = 16;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_5_MAX_COUNT_LEN = 8;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_4_MAX_COUNT = 24;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_4_MAX_COUNT_LEN = 8;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_3_MAX_COUNT = 32;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_3_MAX_COUNT_LEN = 8;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_2_MAX_COUNT = 40;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_2_MAX_COUNT_LEN = 8;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_1_MAX_COUNT = 48;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_1_MAX_COUNT_LEN = 8;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_0_MAX_COUNT = 56;
-static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_0_MAX_COUNT_LEN = 8;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L7_MAX_COUNT = 0;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L7_MAX_COUNT_LEN = 8;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L6_MAX_COUNT = 8;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L6_MAX_COUNT_LEN = 8;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L5_MAX_COUNT = 16;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L5_MAX_COUNT_LEN = 8;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L4_MAX_COUNT = 24;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L4_MAX_COUNT_LEN = 8;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L3_MAX_COUNT = 32;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L3_MAX_COUNT_LEN = 8;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L2_MAX_COUNT = 40;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L2_MAX_COUNT_LEN = 8;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L1_MAX_COUNT = 48;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L1_MAX_COUNT_LEN = 8;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L0_MAX_COUNT = 56;
+static const uint32_t D_REG_DL0_EDPL_MAX_COUNT_L0_MAX_COUNT_LEN = 8;
 
 
 static const uint64_t D_REG_DL0_ERROR_ACTION = 0x801241Dull;
@@ -574,14 +574,14 @@ static const uint32_t D_REG_MC_OMI_FIR_WOF_MC_OMI_FIR_WOF_LEN = 45;
 
 static const uint64_t D_REG_PMU_CNTR = 0x801240Full;
 
-static const uint32_t D_REG_PMU_CNTR_3 = 0;
-static const uint32_t D_REG_PMU_CNTR_3_LEN = 16;
-static const uint32_t D_REG_PMU_CNTR_2 = 16;
-static const uint32_t D_REG_PMU_CNTR_2_LEN = 16;
-static const uint32_t D_REG_PMU_CNTR_1 = 32;
-static const uint32_t D_REG_PMU_CNTR_1_LEN = 16;
-static const uint32_t D_REG_PMU_CNTR_0 = 48;
-static const uint32_t D_REG_PMU_CNTR_0_LEN = 16;
+static const uint32_t D_REG_PMU_CNTR_PMU3 = 0;
+static const uint32_t D_REG_PMU_CNTR_PMU3_LEN = 16;
+static const uint32_t D_REG_PMU_CNTR_PMU2 = 16;
+static const uint32_t D_REG_PMU_CNTR_PMU2_LEN = 16;
+static const uint32_t D_REG_PMU_CNTR_PMU1 = 32;
+static const uint32_t D_REG_PMU_CNTR_PMU1_LEN = 16;
+static const uint32_t D_REG_PMU_CNTR_PMU0 = 48;
+static const uint32_t D_REG_PMU_CNTR_PMU0_LEN = 16;
 
 
 

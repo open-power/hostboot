@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -199,32 +199,8 @@
             _SCOMT_INT_FIELD(DWC_DDRPHYA_ANIB11_BASE0_ATUDLY_P0_t, ATUDLY_P0, 56, 8); \
     }; _SCOMT_CLOSE_NAMESPACE
 
-#define SCOMT_MP_USE_DWC_DDRPHYA_ANIB11_BASE0_ATXDLY2NMODE_P0 \
-    _SCOMT_OPEN_NAMESPACE(mp) \
-    class DWC_DDRPHYA_ANIB11_BASE0_ATXDLY2NMODE_P0_t : public ScomRegister<0x8000B0830801303F> \
-    { \
-        public: \
-            _SCOMT_REGISTER_BEGIN(DWC_DDRPHYA_ANIB11_BASE0_ATXDLY2NMODE_P0_t); \
-            _SCOMT_INT_FIELD(DWC_DDRPHYA_ANIB11_BASE0_ATXDLY2NMODE_P0_t, ATXDLY2NMODE_P0, 56, 8); \
-    }; _SCOMT_CLOSE_NAMESPACE
 
-#define SCOMT_MP_USE_DWC_DDRPHYA_ANIB11_BASE0_ATXDLYSELECT_P0 \
-    _SCOMT_OPEN_NAMESPACE(mp) \
-    class DWC_DDRPHYA_ANIB11_BASE0_ATXDLYSELECT_P0_t : public ScomRegister<0x8000B0850801303F> \
-    { \
-        public: \
-            _SCOMT_REGISTER_BEGIN(DWC_DDRPHYA_ANIB11_BASE0_ATXDLYSELECT_P0_t); \
-            _SCOMT_INT_FIELD(DWC_DDRPHYA_ANIB11_BASE0_ATXDLYSELECT_P0_t, ATXDLYSELECT_P0, 62, 2); \
-    }; _SCOMT_CLOSE_NAMESPACE
 
-#define SCOMT_MP_USE_DWC_DDRPHYA_ANIB11_BASE0_ATXDLY_P0 \
-    _SCOMT_OPEN_NAMESPACE(mp) \
-    class DWC_DDRPHYA_ANIB11_BASE0_ATXDLY_P0_t : public ScomRegister<0x8000B0800801303F> \
-    { \
-        public: \
-            _SCOMT_REGISTER_BEGIN(DWC_DDRPHYA_ANIB11_BASE0_ATXDLY_P0_t); \
-            _SCOMT_INT_FIELD(DWC_DDRPHYA_ANIB11_BASE0_ATXDLY_P0_t, ATXDLY_P0, 56, 8); \
-    }; _SCOMT_CLOSE_NAMESPACE
 
 #define SCOMT_MP_USE_DWC_DDRPHYA_ANIB11_BASE0_ATXIMPEDANCE \
     _SCOMT_OPEN_NAMESPACE(mp) \

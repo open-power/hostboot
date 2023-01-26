@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -935,32 +935,8 @@
             _SCOMT_INT_FIELD(DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B118S2_t, SEQUENCEREG0B118S2, 55, 9); \
     }; _SCOMT_CLOSE_NAMESPACE
 
-#define SCOMT_MP_USE_DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S0 \
-    _SCOMT_OPEN_NAMESPACE(mp) \
-    class DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S0_t : public ScomRegister<0x8009018E0801303F> \
-    { \
-        public: \
-            _SCOMT_REGISTER_BEGIN(DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S0_t); \
-            _SCOMT_INT_FIELD(DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S0_t, SEQUENCEREG0B119S0, 48, 16); \
-    }; _SCOMT_CLOSE_NAMESPACE
 
-#define SCOMT_MP_USE_DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S1 \
-    _SCOMT_OPEN_NAMESPACE(mp) \
-    class DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S1_t : public ScomRegister<0x8009018F0801303F> \
-    { \
-        public: \
-            _SCOMT_REGISTER_BEGIN(DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S1_t); \
-            _SCOMT_INT_FIELD(DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S1_t, SEQUENCEREG0B119S1, 48, 16); \
-    }; _SCOMT_CLOSE_NAMESPACE
 
-#define SCOMT_MP_USE_DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S2 \
-    _SCOMT_OPEN_NAMESPACE(mp) \
-    class DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S2_t : public ScomRegister<0x800901900801303F> \
-    { \
-        public: \
-            _SCOMT_REGISTER_BEGIN(DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S2_t); \
-            _SCOMT_INT_FIELD(DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B119S2_t, SEQUENCEREG0B119S2, 55, 9); \
-    }; _SCOMT_CLOSE_NAMESPACE
 
 #define SCOMT_MP_USE_DWC_DDRPHYA_INITENG0_BASE0_SEQUENCEREG0B11S0 \
     _SCOMT_OPEN_NAMESPACE(mp) \

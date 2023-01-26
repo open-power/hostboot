@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -216,14 +216,14 @@
     { \
         public: \
             _SCOMT_REGISTER_BEGIN(D_REG_DL0_EDPL_MAX_COUNT_t); \
-            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, 7_MAX_COUNT, 0, 8); \
-            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, 6_MAX_COUNT, 8, 8); \
-            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, 5_MAX_COUNT, 16, 8); \
-            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, 4_MAX_COUNT, 24, 8); \
-            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, 3_MAX_COUNT, 32, 8); \
-            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, 2_MAX_COUNT, 40, 8); \
-            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, 1_MAX_COUNT, 48, 8); \
-            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, 0_MAX_COUNT, 56, 8); \
+            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, L7_MAX_COUNT, 0, 8); \
+            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, L6_MAX_COUNT, 8, 8); \
+            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, L5_MAX_COUNT, 16, 8); \
+            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, L4_MAX_COUNT, 24, 8); \
+            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, L3_MAX_COUNT, 32, 8); \
+            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, L2_MAX_COUNT, 40, 8); \
+            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, L1_MAX_COUNT, 48, 8); \
+            _SCOMT_INT_FIELD(D_REG_DL0_EDPL_MAX_COUNT_t, L0_MAX_COUNT, 56, 8); \
     }; _SCOMT_CLOSE_NAMESPACE
 
 #define SCOMT_OMI_USE_D_REG_DL0_ERROR_ACTION \
@@ -544,8 +544,8 @@
     { \
         public: \
             _SCOMT_REGISTER_BEGIN(D_REG_PMU_CNTR_t); \
-            _SCOMT_INT_FIELD(D_REG_PMU_CNTR_t, 3, 0, 16); \
-            _SCOMT_INT_FIELD(D_REG_PMU_CNTR_t, 2, 16, 16); \
-            _SCOMT_INT_FIELD(D_REG_PMU_CNTR_t, 1, 32, 16); \
-            _SCOMT_INT_FIELD(D_REG_PMU_CNTR_t, 0, 48, 16); \
+            _SCOMT_INT_FIELD(D_REG_PMU_CNTR_t, PMU3, 0, 16); \
+            _SCOMT_INT_FIELD(D_REG_PMU_CNTR_t, PMU2, 16, 16); \
+            _SCOMT_INT_FIELD(D_REG_PMU_CNTR_t, PMU1, 32, 16); \
+            _SCOMT_INT_FIELD(D_REG_PMU_CNTR_t, PMU0, 48, 16); \
     }; _SCOMT_CLOSE_NAMESPACE

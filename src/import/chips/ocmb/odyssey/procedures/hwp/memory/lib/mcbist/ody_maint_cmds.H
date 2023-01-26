@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,7 +96,7 @@ class steerTraits< mss::mc_type::ODYSSEY, mux_type::READ_MUX >
         {
             // Function spaces
             MUX_REGISTER = scomt::ody::ODC_RDF0_SCOM_RSPAR,
-            SPARE_MUX_LEN = scomt::ody::ODC_RDF0_SCOM_RSPAR_0_LEFT_LEN,
+            SPARE_MUX_LEN = scomt::ody::ODC_RDF0_SCOM_RSPAR_R0_LEFT_LEN,
         };
 
 };
@@ -128,7 +128,7 @@ class steerTraits< mss::mc_type::ODYSSEY, mux_type::WRITE_MUX >
         {
             // Function spaces
             MUX_REGISTER = scomt::ody::ODC_WDF_REGS_WSPAR,
-            SPARE_MUX_LEN = scomt::ody::ODC_WDF_REGS_WSPAR_0_LEFT_LEN,
+            SPARE_MUX_LEN = scomt::ody::ODC_WDF_REGS_WSPAR_R0_LEFT_LEN,
         };
 
 };

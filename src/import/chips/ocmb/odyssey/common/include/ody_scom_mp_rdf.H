@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,10 +41,10 @@ static const uint32_t CNTL_ELPR_POINTER_LEN = 6;
 
 static const uint64_t SCOM_AACR = 0x8011829ull;
 
-static const uint32_t SCOM_AACR_RRAYSEL = 0;
-static const uint32_t SCOM_AACR_DDRESS = 1;
-static const uint32_t SCOM_AACR_DDRESS_LEN = 9;
-static const uint32_t SCOM_AACR_UTOINC = 10;
+static const uint32_t SCOM_AACR_ARRAYSEL = 0;
+static const uint32_t SCOM_AACR_ADDRESS = 1;
+static const uint32_t SCOM_AACR_ADDRESS_LEN = 9;
+static const uint32_t SCOM_AACR_AUTOINC = 10;
 
 
 static const uint64_t SCOM_AADR = 0x801182Aull;
@@ -536,14 +536,14 @@ static const uint32_t SCOM_RDFFIRWOF_RDFFIRWOF_FIR_WOF_LEN = 63;
 
 static const uint64_t SCOM_RSPAR = 0x8011820ull;
 
-static const uint32_t SCOM_RSPAR_0_LEFT = 0;
-static const uint32_t SCOM_RSPAR_0_LEFT_LEN = 5;
-static const uint32_t SCOM_RSPAR_0_RIGHT = 5;
-static const uint32_t SCOM_RSPAR_0_RIGHT_LEN = 5;
-static const uint32_t SCOM_RSPAR_1_LEFT = 10;
-static const uint32_t SCOM_RSPAR_1_LEFT_LEN = 5;
-static const uint32_t SCOM_RSPAR_1_RIGHT = 15;
-static const uint32_t SCOM_RSPAR_1_RIGHT_LEN = 5;
+static const uint32_t SCOM_RSPAR_R0_LEFT = 0;
+static const uint32_t SCOM_RSPAR_R0_LEFT_LEN = 5;
+static const uint32_t SCOM_RSPAR_R0_RIGHT = 5;
+static const uint32_t SCOM_RSPAR_R0_RIGHT_LEN = 5;
+static const uint32_t SCOM_RSPAR_R1_LEFT = 10;
+static const uint32_t SCOM_RSPAR_R1_LEFT_LEN = 5;
+static const uint32_t SCOM_RSPAR_R1_RIGHT = 15;
+static const uint32_t SCOM_RSPAR_R1_RIGHT_LEN = 5;
 
 
 

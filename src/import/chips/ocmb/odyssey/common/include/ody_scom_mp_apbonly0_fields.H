@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -26,14 +26,6 @@
 #pragma once
 #include "scomt_regs.H"
 
-#define SCOMT_MP_USE_DWC_DDRPHYA_APBONLY0_DCTWRITEONLY \
-    _SCOMT_OPEN_NAMESPACE(mp) \
-    class DWC_DDRPHYA_APBONLY0_DCTWRITEONLY_t : public ScomRegister<0x800D00300801303F> \
-    { \
-        public: \
-            _SCOMT_REGISTER_BEGIN(DWC_DDRPHYA_APBONLY0_DCTWRITEONLY_t); \
-            _SCOMT_INT_FIELD(DWC_DDRPHYA_APBONLY0_DCTWRITEONLY_t, DCTWRITEONLY, 48, 16); \
-    }; _SCOMT_CLOSE_NAMESPACE
 
 #define SCOMT_MP_USE_DWC_DDRPHYA_APBONLY0_DCTWRITEPROT \
     _SCOMT_OPEN_NAMESPACE(mp) \
@@ -62,14 +54,6 @@
             _SCOMT_INT_FIELD(DWC_DDRPHYA_APBONLY0_DFI0DEBUGCAPTURE1_t, DFI0DEBUGCAPTURE1, 54, 10); \
     }; _SCOMT_CLOSE_NAMESPACE
 
-#define SCOMT_MP_USE_DWC_DDRPHYA_APBONLY0_DFI0DEBUGCONTROL \
-    _SCOMT_OPEN_NAMESPACE(mp) \
-    class DWC_DDRPHYA_APBONLY0_DFI0DEBUGCONTROL_t : public ScomRegister<0x800D00400801303F> \
-    { \
-        public: \
-            _SCOMT_REGISTER_BEGIN(DWC_DDRPHYA_APBONLY0_DFI0DEBUGCONTROL_t); \
-            _SCOMT_INT_FIELD(DWC_DDRPHYA_APBONLY0_DFI0DEBUGCONTROL_t, RFU_DFI0DEBUGCONTROL, 48, 16); \
-    }; _SCOMT_CLOSE_NAMESPACE
 
 #define SCOMT_MP_USE_DWC_DDRPHYA_APBONLY0_DFI0DEBUGPERFCTR \
     _SCOMT_OPEN_NAMESPACE(mp) \
@@ -107,14 +91,6 @@
             _SCOMT_INT_FIELD(DWC_DDRPHYA_APBONLY0_DFI1DEBUGCAPTURE1_t, DFI1DEBUGCAPTURE1, 54, 10); \
     }; _SCOMT_CLOSE_NAMESPACE
 
-#define SCOMT_MP_USE_DWC_DDRPHYA_APBONLY0_DFI1DEBUGCONTROL \
-    _SCOMT_OPEN_NAMESPACE(mp) \
-    class DWC_DDRPHYA_APBONLY0_DFI1DEBUGCONTROL_t : public ScomRegister<0x800D00480801303F> \
-    { \
-        public: \
-            _SCOMT_REGISTER_BEGIN(DWC_DDRPHYA_APBONLY0_DFI1DEBUGCONTROL_t); \
-            _SCOMT_INT_FIELD(DWC_DDRPHYA_APBONLY0_DFI1DEBUGCONTROL_t, RFU_DFI1DEBUGCONTROL, 48, 16); \
-    }; _SCOMT_CLOSE_NAMESPACE
 
 #define SCOMT_MP_USE_DWC_DDRPHYA_APBONLY0_DFI1DEBUGPERFCTR \
     _SCOMT_OPEN_NAMESPACE(mp) \

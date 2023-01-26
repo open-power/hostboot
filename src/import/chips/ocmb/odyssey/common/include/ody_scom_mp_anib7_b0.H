@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -151,22 +151,13 @@ static const uint32_t DWC_DDRPHYA_ANIB7_BASE0_ATUDLY_P0_ATUDLY_P0 = 56;
 static const uint32_t DWC_DDRPHYA_ANIB7_BASE0_ATUDLY_P0_ATUDLY_P0_LEN = 8;
 
 
-static const uint64_t DWC_DDRPHYA_ANIB7_BASE0_ATXDLY2NMODE_P0 = 0x800070830801303Full;
-
-static const uint32_t DWC_DDRPHYA_ANIB7_BASE0_ATXDLY2NMODE_P0_ATXDLY2NMODE_P0 = 56;
-static const uint32_t DWC_DDRPHYA_ANIB7_BASE0_ATXDLY2NMODE_P0_ATXDLY2NMODE_P0_LEN = 8;
 
 
-static const uint64_t DWC_DDRPHYA_ANIB7_BASE0_ATXDLYSELECT_P0 = 0x800070850801303Full;
-
-static const uint32_t DWC_DDRPHYA_ANIB7_BASE0_ATXDLYSELECT_P0_ATXDLYSELECT_P0 = 62;
-static const uint32_t DWC_DDRPHYA_ANIB7_BASE0_ATXDLYSELECT_P0_ATXDLYSELECT_P0_LEN = 2;
 
 
-static const uint64_t DWC_DDRPHYA_ANIB7_BASE0_ATXDLY_P0 = 0x800070800801303Full;
 
-static const uint32_t DWC_DDRPHYA_ANIB7_BASE0_ATXDLY_P0_ATXDLY_P0 = 56;
-static const uint32_t DWC_DDRPHYA_ANIB7_BASE0_ATXDLY_P0_ATXDLY_P0_LEN = 8;
+
+
 
 
 static const uint64_t DWC_DDRPHYA_ANIB7_BASE0_ATXIMPEDANCE = 0x800070430801303Full;
