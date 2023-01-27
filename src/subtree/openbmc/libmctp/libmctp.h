@@ -132,7 +132,16 @@ struct mctp_binding {
 	void *control_rx_data;
 };
 
+enum mctp_bus_state {
+        mctp_bus_state_constructed = 0,
+        mctp_bus_state_tx_enabled,
+        mctp_bus_state_tx_disabled,
+};
+
 void mctp_binding_set_tx_enabled(struct mctp_binding *binding, bool enable);
+
+
+enum mctp_bus_state mctp_bus_get_state(struct mctp_bus *bus);
 
 /*
  * Receive a packet from binding to core. Takes ownership of pkt, free()-ing it

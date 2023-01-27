@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,10 +39,12 @@
 #define ENOMEM          12      // Not enough space
 #define EACCES          13      // Permission denied
 #define EFAULT          14      // Bad address
+#define EBUSY           16      // Device or resource busy
 #define EINVAL          22      // Invalid argument
 #define ENFILE          23      // Too many open files in system
 #define EDEADLK         35      // Operation would cause deadlock.
 #define ETIME           62      // Time expired.
+#define EMSGSIZE        90      // Message too long
 #define EHOSTDOWN       112     // Host is down
 #define EALREADY        114     // Operation already in progress
 
