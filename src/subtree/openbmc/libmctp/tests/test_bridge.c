@@ -11,22 +11,22 @@
 #include "test-utils.h"
 
 struct mctp_binding_bridge {
-	struct mctp_binding	binding;
-	int			rx_count;
-	int			tx_count;
-	uint8_t			last_pkt_data;
+	struct mctp_binding binding;
+	int rx_count;
+	int tx_count;
+	uint8_t last_pkt_data;
 };
 
 struct test_ctx {
-	struct mctp			*mctp;
-	struct mctp_binding_bridge	*bindings[2];
+	struct mctp *mctp;
+	struct mctp_binding_bridge *bindings[2];
 };
 
 static int mctp_binding_bridge_tx(struct mctp_binding *b,
-		struct mctp_pktbuf *pkt)
+				  struct mctp_pktbuf *pkt)
 {
-	struct mctp_binding_bridge *binding = container_of(b,
-			struct mctp_binding_bridge, binding);
+	struct mctp_binding_bridge *binding =
+		container_of(b, struct mctp_binding_bridge, binding);
 
 	binding->tx_count++;
 	assert(mctp_pktbuf_size(pkt) == sizeof(struct mctp_hdr) + 1);
@@ -36,14 +36,13 @@ static int mctp_binding_bridge_tx(struct mctp_binding *b,
 }
 
 static void mctp_binding_bridge_rx(struct mctp_binding_bridge *binding,
-		uint8_t key)
+				   uint8_t key)
 {
 	struct mctp_pktbuf *pkt;
 	struct mctp_hdr *hdr;
 	uint8_t *buf;
 
-	pkt = mctp_pktbuf_alloc(&binding->binding,
-			sizeof(struct mctp_hdr) + 1);
+	pkt = mctp_pktbuf_alloc(&binding->binding, sizeof(struct mctp_hdr) + 1);
 	assert(pkt);
 
 	hdr = mctp_pktbuf_hdr(pkt);
@@ -83,9 +82,8 @@ int main(void)
 	ctx->bindings[0] = mctp_binding_bridge_init();
 	ctx->bindings[1] = mctp_binding_bridge_init();
 
-	mctp_bridge_busses(ctx->mctp,
-			&ctx->bindings[0]->binding,
-			&ctx->bindings[1]->binding);
+	mctp_bridge_busses(ctx->mctp, &ctx->bindings[0]->binding,
+			   &ctx->bindings[1]->binding);
 
 	mctp_binding_set_tx_enabled(&ctx->bindings[0]->binding, true);
 	mctp_binding_set_tx_enabled(&ctx->bindings[1]->binding, true);

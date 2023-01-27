@@ -103,8 +103,8 @@ static void receive_ptkbuf(struct mctp_binding_test *binding,
 }
 
 static void receive_one_fragment(struct mctp_binding_test *binding,
-				uint8_t *payload, size_t fragment_size,
-				uint8_t flags_seq_tag, struct pktbuf *pktbuf)
+				 uint8_t *payload, size_t fragment_size,
+				 uint8_t flags_seq_tag, struct pktbuf *pktbuf)
 {
 	pktbuf->hdr.flags_seq_tag = flags_seq_tag;
 	pktbuf->payload = payload;
@@ -112,10 +112,10 @@ static void receive_one_fragment(struct mctp_binding_test *binding,
 }
 
 static void receive_two_fragment_message(struct mctp_binding_test *binding,
-					uint8_t *payload,
-					size_t fragment1_size,
-					size_t fragment2_size,
-					struct pktbuf *pktbuf)
+					 uint8_t *payload,
+					 size_t fragment1_size,
+					 size_t fragment2_size,
+					 struct pktbuf *pktbuf)
 {
 	uint8_t tag = MCTP_HDR_FLAG_TO | get_tag();
 	uint8_t flags_seq_tag;
@@ -123,12 +123,12 @@ static void receive_two_fragment_message(struct mctp_binding_test *binding,
 	flags_seq_tag = MCTP_HDR_FLAG_SOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, payload, fragment1_size, flags_seq_tag,
-			pktbuf);
+			     pktbuf);
 
 	flags_seq_tag = MCTP_HDR_FLAG_EOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, payload + fragment1_size, fragment2_size,
-			flags_seq_tag, pktbuf);
+			     flags_seq_tag, pktbuf);
 }
 
 static void mctp_core_test_simple_rx()
@@ -150,7 +150,7 @@ static void mctp_core_test_simple_rx()
 
 	/* Receive 2 fragments of equal size */
 	receive_two_fragment_message(binding, test_payload, MCTP_BTU, MCTP_BTU,
-			&pktbuf);
+				     &pktbuf);
 
 	assert(test_param.seen);
 	assert(test_param.message_size == 2 * MCTP_BTU);
@@ -182,16 +182,16 @@ static void mctp_core_test_receive_equal_length_fragments()
 	flags_seq_tag = MCTP_HDR_FLAG_SOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload, MCTP_BTU, flags_seq_tag,
-			&pktbuf);
+			     &pktbuf);
 
 	flags_seq_tag = (get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload + MCTP_BTU, MCTP_BTU,
-			flags_seq_tag, &pktbuf);
+			     flags_seq_tag, &pktbuf);
 
 	flags_seq_tag = MCTP_HDR_FLAG_EOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload + (2 * MCTP_BTU), MCTP_BTU,
-			flags_seq_tag, &pktbuf);
+			     flags_seq_tag, &pktbuf);
 
 	assert(test_param.seen);
 	assert(test_param.message_size == 3 * MCTP_BTU);
@@ -223,16 +223,16 @@ static void mctp_core_test_receive_unexpected_smaller_middle_fragment()
 	flags_seq_tag = MCTP_HDR_FLAG_SOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload, MCTP_BTU, flags_seq_tag,
-			&pktbuf);
+			     &pktbuf);
 
 	flags_seq_tag = (get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload + MCTP_BTU, MCTP_BTU - 1,
-			flags_seq_tag, &pktbuf);
+			     flags_seq_tag, &pktbuf);
 
 	flags_seq_tag = MCTP_HDR_FLAG_EOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload + (2 * MCTP_BTU), MCTP_BTU,
-			flags_seq_tag, &pktbuf);
+			     flags_seq_tag, &pktbuf);
 
 	assert(!test_param.seen);
 
@@ -263,16 +263,16 @@ static void mctp_core_test_receive_unexpected_bigger_middle_fragment()
 	flags_seq_tag = MCTP_HDR_FLAG_SOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload, MCTP_BTU, flags_seq_tag,
-			&pktbuf);
+			     &pktbuf);
 
 	flags_seq_tag = (get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload + MCTP_BTU, MCTP_BTU + 1,
-			flags_seq_tag, &pktbuf);
+			     flags_seq_tag, &pktbuf);
 
 	flags_seq_tag = MCTP_HDR_FLAG_EOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload + (2 * MCTP_BTU), MCTP_BTU,
-			flags_seq_tag, &pktbuf);
+			     flags_seq_tag, &pktbuf);
 
 	assert(!test_param.seen);
 
@@ -303,20 +303,20 @@ static void mctp_core_test_receive_smaller_end_fragment()
 	flags_seq_tag = MCTP_HDR_FLAG_SOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload, MCTP_BTU, flags_seq_tag,
-			&pktbuf);
+			     &pktbuf);
 
 	flags_seq_tag = (get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload + MCTP_BTU, MCTP_BTU,
-			flags_seq_tag, &pktbuf);
+			     flags_seq_tag, &pktbuf);
 
 	flags_seq_tag = MCTP_HDR_FLAG_EOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload + (2 * MCTP_BTU),
-			end_frag_size, flags_seq_tag, &pktbuf);
+			     end_frag_size, flags_seq_tag, &pktbuf);
 
 	assert(test_param.seen);
 	assert(test_param.message_size ==
-			(size_t)(2 * MCTP_BTU + end_frag_size));
+	       (size_t)(2 * MCTP_BTU + end_frag_size));
 
 	mctp_binding_test_destroy(binding);
 	mctp_destroy(mctp);
@@ -345,16 +345,16 @@ static void mctp_core_test_receive_bigger_end_fragment()
 	flags_seq_tag = MCTP_HDR_FLAG_SOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload, MCTP_BTU, flags_seq_tag,
-			&pktbuf);
+			     &pktbuf);
 
 	flags_seq_tag = (get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload + MCTP_BTU, MCTP_BTU,
-			flags_seq_tag, &pktbuf);
+			     flags_seq_tag, &pktbuf);
 
 	flags_seq_tag = MCTP_HDR_FLAG_EOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 	receive_one_fragment(binding, test_payload + (2 * MCTP_BTU),
-			end_frag_size, flags_seq_tag, &pktbuf);
+			     end_frag_size, flags_seq_tag, &pktbuf);
 
 	assert(!test_param.seen);
 
@@ -383,7 +383,8 @@ static void mctp_core_test_drop_large_fragments()
 	* 2nd fragment of SIZE_MAX */
 
 	receive_two_fragment_message(binding, test_payload, MCTP_BTU,
-		SIZE_MAX - sizeof(struct mctp_hdr), &pktbuf);
+				     SIZE_MAX - sizeof(struct mctp_hdr),
+				     &pktbuf);
 
 	assert(!test_param.seen);
 
@@ -417,7 +418,7 @@ static void mctp_core_test_exhaust_context_buffers()
 		flags_seq_tag = MCTP_HDR_FLAG_SOM |
 				(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
 		receive_one_fragment(binding, test_payload, MCTP_BTU,
-				flags_seq_tag, &pktbuf);
+				     flags_seq_tag, &pktbuf);
 
 		/* Change source EID so that different contexts are created */
 		pktbuf.hdr.src++;
@@ -426,7 +427,7 @@ static void mctp_core_test_exhaust_context_buffers()
 	/* Send a full message from a different EID */
 	pktbuf.hdr.src++;
 	receive_two_fragment_message(binding, test_payload, MCTP_BTU, MCTP_BTU,
-			&pktbuf);
+				     &pktbuf);
 
 	/* Message assembly should fail */
 	assert(!test_param.seen);
@@ -435,8 +436,8 @@ static void mctp_core_test_exhaust_context_buffers()
 	pktbuf.hdr.src -= max_context_buffers;
 	flags_seq_tag = MCTP_HDR_FLAG_EOM |
 			(get_sequence() << MCTP_HDR_SEQ_SHIFT) | tag;
-	receive_one_fragment(binding, test_payload, MCTP_BTU,
-			flags_seq_tag, &pktbuf);
+	receive_one_fragment(binding, test_payload, MCTP_BTU, flags_seq_tag,
+			     &pktbuf);
 
 	assert(test_param.seen);
 	assert(test_param.message_size == (2 * MCTP_BTU));
@@ -566,10 +567,10 @@ int main(void)
 	BUILD_ASSERT(ARRAY_SIZE(mctp_core_tests) < SIZE_MAX);
 	for (i = 0; i < ARRAY_SIZE(mctp_core_tests); i++) {
 		mctp_prlog(MCTP_LOG_DEBUG, "begin: %s",
-				mctp_core_tests[i].name);
+			   mctp_core_tests[i].name);
 		mctp_core_tests[i].test();
 		mctp_prlog(MCTP_LOG_DEBUG, "end: %s\n",
-				mctp_core_tests[i].name);
+			   mctp_core_tests[i].name);
 	}
 
 	return 0;

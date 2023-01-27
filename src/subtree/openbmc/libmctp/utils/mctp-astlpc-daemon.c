@@ -18,7 +18,7 @@ static const uint8_t echo_req = 1;
 static const uint8_t echo_resp = 2;
 
 struct ctx {
-	struct mctp	*mctp;
+	struct mctp *mctp;
 };
 
 static void tx_message(struct ctx *ctx, mctp_eid_t eid, void *msg, size_t len)
@@ -41,7 +41,7 @@ static void rx_message(uint8_t eid, uint8_t msg_tag, bool tag_owner, void *data,
 	type = len > 0 ? *(uint8_t *)(msg) : 0x00;
 
 	fprintf(stderr, "RX: src EID 0x%02x: %zd bytes, first byte [0x%02x]\n",
-			eid, len, type);
+		eid, len, type);
 
 	if (type == echo_req) {
 		*(uint8_t *)(msg) = echo_resp;
@@ -77,8 +77,7 @@ int main(void)
 		pollfds[0].fd = STDIN_FILENO;
 		pollfds[0].events = POLLIN;
 
-		pollfds[1].fd = mctp_astlpc_get_fd(astlpc);
-		pollfds[1].events = POLLIN;
+		mctp_astlpc_init_pollfd(astlpc, &pollfds[1]);
 
 		rc = poll(pollfds, 2, -1);
 		if (rc < 0)
@@ -106,9 +105,7 @@ int main(void)
 			break;
 
 #endif
-
 	}
 
 	return EXIT_SUCCESS;
-
 }

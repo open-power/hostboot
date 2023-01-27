@@ -9,19 +9,20 @@
 #include "libmctp.h"
 #include "test-utils.h"
 
+#ifndef ARRAY_SIZE
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+#endif
 
 struct test_ctx {
-	struct mctp			*mctp;
-	struct mctp_binding_test	*binding;
-	int				rx_count;
-	uint8_t				rx_data[4];
-	size_t				rx_len;
+	struct mctp *mctp;
+	struct mctp_binding_test *binding;
+	int rx_count;
+	uint8_t rx_data[4];
+	size_t rx_len;
 };
 
-static void
-test_rx(uint8_t eid __unused, bool tag_owner __unused,
-	uint8_t msg_tag __unused, void *data, void *msg, size_t len)
+static void test_rx(uint8_t eid __unused, bool tag_owner __unused,
+		    uint8_t msg_tag __unused, void *data, void *msg, size_t len)
 {
 	struct test_ctx *ctx = data;
 
@@ -38,10 +39,10 @@ test_rx(uint8_t eid __unused, bool tag_owner __unused,
 #define SEQ(x) (x << MCTP_HDR_SEQ_SHIFT)
 
 struct test {
-	int		n_packets;
-	uint8_t		flags_seq_tags[4];
-	int		exp_rx_count;
-	size_t		exp_rx_len;
+	int n_packets;
+	uint8_t flags_seq_tags[4];
+	int exp_rx_count;
+	size_t exp_rx_len;
 } tests[] = {
 	{
 		/* single packet */
@@ -100,8 +101,8 @@ static void run_one_test(struct test_ctx *ctx, struct test *test)
 	const mctp_eid_t local_eid = 8;
 	const mctp_eid_t remote_eid = 9;
 	struct {
-		struct mctp_hdr	hdr;
-		uint8_t		payload[1];
+		struct mctp_hdr hdr;
+		uint8_t payload[1];
 	} pktbuf;
 	int i;
 
@@ -119,8 +120,7 @@ static void run_one_test(struct test_ctx *ctx, struct test *test)
 		pktbuf.hdr.flags_seq_tag = test->flags_seq_tags[i];
 		pktbuf.payload[0] = i;
 
-		mctp_binding_test_rx_raw(ctx->binding,
-				&pktbuf, sizeof(pktbuf));
+		mctp_binding_test_rx_raw(ctx->binding, &pktbuf, sizeof(pktbuf));
 	}
 
 	assert(ctx->rx_count == test->exp_rx_count);
@@ -133,7 +133,6 @@ static void run_one_test(struct test_ctx *ctx, struct test *test)
 	mctp_binding_test_destroy(ctx->binding);
 	mctp_destroy(ctx->mctp);
 }
-
 
 int main(void)
 {

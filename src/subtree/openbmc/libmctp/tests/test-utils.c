@@ -9,11 +9,11 @@
 #include "test-utils.h"
 
 struct mctp_binding_test {
-	struct mctp_binding	binding;
+	struct mctp_binding binding;
 };
 
 static int mctp_binding_test_tx(struct mctp_binding *b __attribute__((unused)),
-		struct mctp_pktbuf *pkt __attribute__((unused)))
+				struct mctp_pktbuf *pkt __attribute__((unused)))
 {
 	/* we are not expecting TX packets */
 	assert(0);
@@ -40,8 +40,8 @@ void mctp_binding_test_destroy(struct mctp_binding_test *test)
 	__mctp_free(test);
 }
 
-void mctp_binding_test_rx_raw(struct mctp_binding_test *test,
-		void *buf, size_t len)
+void mctp_binding_test_rx_raw(struct mctp_binding_test *test, void *buf,
+			      size_t len)
 {
 	struct mctp_pktbuf *pkt;
 
@@ -52,14 +52,13 @@ void mctp_binding_test_rx_raw(struct mctp_binding_test *test,
 }
 
 void mctp_binding_test_register_bus(struct mctp_binding_test *binding,
-		struct mctp *mctp, mctp_eid_t eid)
+				    struct mctp *mctp, mctp_eid_t eid)
 {
 	mctp_register_bus(mctp, &binding->binding, eid);
 }
 
 void mctp_test_stack_init(struct mctp **mctp,
-		struct mctp_binding_test **binding,
-		mctp_eid_t eid)
+			  struct mctp_binding_test **binding, mctp_eid_t eid)
 {
 	*mctp = mctp_init();
 	assert(*mctp);

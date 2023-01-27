@@ -10,9 +10,9 @@
 #endif
 
 struct {
-	void	*(*m_alloc)(size_t);
-	void	(*m_free)(void *);
-	void	*(*m_realloc)(void *, size_t);
+	void *(*m_alloc)(size_t);
+	void (*m_free)(void *);
+	void *(*m_realloc)(void *, size_t);
 } alloc_ops = {
 #ifdef MCTP_DEFAULT_ALLOC
 	malloc,
@@ -50,9 +50,8 @@ void *__mctp_realloc(void *ptr, size_t size)
 	return NULL;
 }
 
-void mctp_set_alloc_ops(void *(*m_alloc)(size_t),
-		void (*m_free)(void *),
-		void *(m_realloc)(void *, size_t))
+void mctp_set_alloc_ops(void *(*m_alloc)(size_t), void (*m_free)(void *),
+			void *(m_realloc)(void *, size_t))
 {
 	alloc_ops.m_alloc = m_alloc;
 	alloc_ops.m_free = m_free;

@@ -150,9 +150,10 @@ static const struct mctp_binding_astlpc_ops astlpc_indirect_mmio_ops = {
 	.lpc_write = mctp_astlpc_mmio_lpc_write,
 };
 
-static void rx_message(uint8_t eid __unused, bool tag_owner __unused,
-		       uint8_t msg_tag __unused, void *data __unused, void *msg,
-		       size_t len)
+static void astlpc_test_rx_message(uint8_t eid __unused,
+				   bool tag_owner __unused,
+				   uint8_t msg_tag __unused,
+				   void *data __unused, void *msg, size_t len)
 {
 	struct astlpc_test *test = data;
 
@@ -255,7 +256,7 @@ static void astlpc_test_packetised_message_bmc_to_host(void)
 
 	ctx.msg = &msg[0];
 	ctx.count = 0;
-	mctp_set_rx_all(ctx.host.mctp, rx_message, &ctx);
+	mctp_set_rx_all(ctx.host.mctp, astlpc_test_rx_message, &ctx);
 
 	/* BMC sends a message */
 	rc = mctp_message_tx(ctx.bmc.mctp, 9, MCTP_MESSAGE_TO_SRC, 0, msg,
@@ -297,7 +298,7 @@ static void astlpc_test_simple_message_host_to_bmc(void)
 
 	ctx.msg = &msg[0];
 	ctx.count = 0;
-	mctp_set_rx_all(ctx.bmc.mctp, rx_message, &ctx);
+	mctp_set_rx_all(ctx.bmc.mctp, astlpc_test_rx_message, &ctx);
 
 	/* Host sends the single-packet message */
 	rc = mctp_message_tx(ctx.host.mctp, 8, MCTP_MESSAGE_TO_DST, tag, msg,
@@ -339,7 +340,7 @@ static void astlpc_test_simple_message_bmc_to_host(void)
 
 	ctx.msg = &msg[0];
 	ctx.count = 0;
-	mctp_set_rx_all(ctx.host.mctp, rx_message, &ctx);
+	mctp_set_rx_all(ctx.host.mctp, astlpc_test_rx_message, &ctx);
 
 	/* BMC sends the single-packet message */
 	rc = mctp_message_tx(ctx.bmc.mctp, 9, MCTP_MESSAGE_TO_SRC, tag, msg,
@@ -598,7 +599,7 @@ static void astlpc_test_simple_indirect_message_bmc_to_host(void)
 
 	ctx.msg = &msg[0];
 	ctx.count = 0;
-	mctp_set_rx_all(ctx.host.mctp, rx_message, &ctx);
+	mctp_set_rx_all(ctx.host.mctp, astlpc_test_rx_message, &ctx);
 
 	/* BMC sends the single-packet message */
 	rc = mctp_message_tx(ctx.bmc.mctp, 9, MCTP_MESSAGE_TO_SRC, tag, msg,
@@ -653,7 +654,7 @@ static void astlpc_test_host_tx_bmc_gone(void)
 	rc = endpoint_init(&ctx.bmc, 8, MCTP_BINDING_ASTLPC_MODE_BMC, MCTP_BTU,
 			   &ctx.kcs, ctx.lpc_mem);
 	assert(!rc);
-	mctp_set_rx_all(ctx.bmc.mctp, rx_message, &ctx);
+	mctp_set_rx_all(ctx.bmc.mctp, astlpc_test_rx_message, &ctx);
 
 	/* Host triggers channel init */
 	mctp_astlpc_poll(ctx.host.astlpc);
@@ -1115,7 +1116,7 @@ static void astlpc_test_send_large_packet(void)
 	assert(!rc);
 
 	ctx.count = 0;
-	mctp_set_rx_all(bmc->mctp, rx_message, &ctx);
+	mctp_set_rx_all(bmc->mctp, astlpc_test_rx_message, &ctx);
 
 	rc = mctp_astlpc_poll(bmc->astlpc);
 	assert(rc == 0);
@@ -1146,6 +1147,115 @@ static void astlpc_test_send_large_packet(void)
 	endpoint_destroy(host);
 	endpoint_destroy(bmc);
 	free(lpc_mem);
+}
+
+static void astlpc_test_negotiate_mtu_high_low(void)
+{
+	uint8_t msg[3 * MCTP_BTU] = { 0 };
+	struct astlpc_test ctx = { 0 };
+	uint32_t bmtu, hmtu;
+	uint8_t tag = 0;
+	int rc;
+
+	/* Configure message */
+	memset(&msg[0], 0xa5, sizeof(msg));
+
+	/* Test harness initialisation */
+	ctx.lpc_mem = calloc(1, 1 * 1024 * 1024);
+	assert(ctx.lpc_mem);
+
+	/* BMC initialisation */
+	bmtu = 3 * MCTP_BTU;
+	rc = endpoint_init(&ctx.bmc, 8, MCTP_BINDING_ASTLPC_MODE_BMC, bmtu,
+			   &ctx.kcs, ctx.lpc_mem);
+	assert(!rc);
+
+	/* Host initialisation with low MTU */
+	hmtu = 3 * MCTP_BTU;
+	rc = endpoint_init(&ctx.host, 9, MCTP_BINDING_ASTLPC_MODE_HOST, hmtu,
+			   &ctx.kcs, ctx.lpc_mem);
+	assert(!rc);
+
+	/* Configure host message handler */
+	ctx.msg = &msg[0];
+	ctx.count = 0;
+	mctp_set_rx_all(ctx.host.mctp, astlpc_test_rx_message, &ctx);
+
+	/* Startup BMC and host interfaces */
+	rc = mctp_astlpc_poll(ctx.bmc.astlpc);
+	assert(rc == 0);
+	rc = mctp_astlpc_poll(ctx.host.astlpc);
+	assert(rc == 0);
+
+	/*
+	 * Transmit a message to place a packet on the interface. This releases the buffer and
+	 * disables the binding, plugging the binding's transmit queue while the host hasn't polled
+	 * to pull the packet off.
+	 */
+	rc = mctp_message_tx(ctx.bmc.mctp, 9, MCTP_MESSAGE_TO_DST, tag, msg,
+			     sizeof(msg));
+
+	/* Leave the packet in place on the interface by not polling the host binding */
+
+	/*
+	 * Transmit another message to force packetisation at the current MTU while the binding is
+	 * disabled, leaving the packet(s) in the binding's transmit queue
+	 */
+	rc = mctp_message_tx(ctx.bmc.mctp, 9, MCTP_MESSAGE_TO_DST, tag, msg,
+			     sizeof(msg));
+
+	/* Tear-down the host so we can bring up a new one */
+	endpoint_destroy(&ctx.host);
+
+	/* Bring up a new host endpoint with a lower MTU than we previously negotiated */
+	hmtu = 2 * MCTP_BTU;
+	rc = endpoint_init(&ctx.host, 9, MCTP_BINDING_ASTLPC_MODE_HOST, hmtu,
+			   &ctx.kcs, ctx.lpc_mem);
+	assert(!rc);
+
+	/* Configure host message handler again after reinitialisation */
+	ctx.msg = &msg[0];
+	ctx.count = 0;
+	mctp_set_rx_all(ctx.host.mctp, astlpc_test_rx_message, &ctx);
+
+	/* Process low MTU proposal */
+	rc = mctp_astlpc_poll(ctx.bmc.astlpc);
+	assert(rc == 0);
+
+	/* Accept low MTU proposal */
+	rc = mctp_astlpc_poll(ctx.host.astlpc);
+	assert(rc == 0);
+
+	/*
+	 * Check that there are no outstanding messages to be received by the host. The message
+	 * packetised on the BMC at the larger MTU must be dropped as its now no longer possible to
+	 * transmit those packets
+	 */
+	rc = mctp_astlpc_poll(ctx.host.astlpc);
+	assert(rc == 0);
+	assert(ctx.count == 0);
+
+	/* Transmit another message from the BMC to the host, packetised using the new MTU */
+	rc = mctp_message_tx(ctx.bmc.mctp, 9, MCTP_MESSAGE_TO_DST, tag, msg,
+			     hmtu);
+
+	/* Check that the most recent BMC transmission is received by the host */
+	rc = mctp_astlpc_poll(ctx.host.astlpc);
+	assert(rc == 0);
+	assert(ctx.count == 1);
+
+	/* Ensure buffer ownership is returned to the BMC and the BMC Tx queue is processed */
+	rc = mctp_astlpc_poll(ctx.bmc.astlpc);
+	assert(rc == 0);
+
+	/* Check that no further messages are propagated to the host */
+	rc = mctp_astlpc_poll(ctx.host.astlpc);
+	assert(rc == 0);
+	assert(ctx.count == 1);
+
+	endpoint_destroy(&ctx.host);
+	endpoint_destroy(&ctx.bmc);
+	free(ctx.lpc_mem);
 }
 
 static void astlpc_test_tx_before_channel_init(void)
@@ -1205,7 +1315,7 @@ static void astlpc_test_corrupt_host_tx(void)
 
 	ctx.msg = &msg[0];
 	ctx.count = 0;
-	mctp_set_rx_all(ctx.bmc.mctp, rx_message, &ctx);
+	mctp_set_rx_all(ctx.bmc.mctp, astlpc_test_rx_message, &ctx);
 
 	/* Host sends the single-packet message */
 	rc = mctp_message_tx(ctx.host.mctp, 8, MCTP_MESSAGE_TO_DST, tag, msg,
@@ -1259,7 +1369,7 @@ static void astlpc_test_corrupt_bmc_tx(void)
 
 	ctx.msg = &msg[0];
 	ctx.count = 0;
-	mctp_set_rx_all(ctx.host.mctp, rx_message, &ctx);
+	mctp_set_rx_all(ctx.host.mctp, astlpc_test_rx_message, &ctx);
 
 	/* BMC sends the single-packet message */
 	rc = mctp_message_tx(ctx.bmc.mctp, 9, MCTP_MESSAGE_TO_SRC, tag, msg,
@@ -1291,6 +1401,68 @@ static void astlpc_test_corrupt_bmc_tx(void)
 	/* BMC dequeues ownership hand-over */
 	rc = mctp_astlpc_poll(ctx.bmc.astlpc);
 	assert(rc == 0);
+
+	network_destroy(&ctx);
+}
+
+static void astlpc_test_async_exchange(void)
+{
+	struct astlpc_test ctx = { 0 };
+	uint8_t msg[MCTP_BTU];
+	struct pollfd pollfd;
+	uint8_t tag = 0;
+
+	network_init(&ctx);
+
+	memset(&msg[0], 0x5a, MCTP_BTU);
+
+	/* (1)
+	 * Fill the KCS transmit buffer by sending a message from the BMC to the host without
+	 * dequeuing it on the host side
+	 */
+	mctp_message_tx(ctx.bmc.mctp, 9, MCTP_MESSAGE_TO_SRC, tag, msg,
+			sizeof(msg));
+
+	/* (2)
+	 * Assert that we're still listening for in-bound messages on the BMC
+	 */
+	mctp_astlpc_init_pollfd(ctx.bmc.astlpc, &pollfd);
+	assert(pollfd.events & POLLIN);
+	assert(!(pollfd.events & POLLOUT));
+
+	/* (3)
+	 * Send a message from the host to the BMC and dequeue the message on the BMC, triggering a
+	 * buffer ownership transfer command back to the host
+	 */
+	mctp_message_tx(ctx.host.mctp, 8, MCTP_MESSAGE_TO_SRC, tag, msg,
+			sizeof(msg));
+	mctp_astlpc_poll(ctx.bmc.astlpc);
+
+	/* (4)
+	 * Assert that the BMC has to wait for the host to dequeue the ownership transfer command
+	 * from (1) before further transfers take place.
+	 */
+	mctp_astlpc_init_pollfd(ctx.bmc.astlpc, &pollfd);
+	assert(!(pollfd.events & POLLIN));
+	assert(pollfd.events & POLLOUT);
+
+	/* (5)
+	 * Dequeue the message from (1) on the host side, allowing transmisson of the outstanding
+	 * ownership transfer command from (3)
+	 */
+	mctp_astlpc_poll(ctx.host.astlpc);
+
+	/* (6)
+	 * Emulate a POLLOUT event on the BMC side
+	 */
+	mctp_astlpc_poll(ctx.bmc.astlpc);
+
+	/* (7)
+	 * Assert that we're again listening for in-bound messages on the BMC.
+	 */
+	mctp_astlpc_init_pollfd(ctx.bmc.astlpc, &pollfd);
+	assert(pollfd.events & POLLIN);
+	assert(!(pollfd.events & POLLOUT));
 
 	network_destroy(&ctx);
 }
@@ -1334,10 +1506,12 @@ static const struct {
 	TEST_CASE(astlpc_test_buffers_bad_host_init),
 	TEST_CASE(astlpc_test_negotiate_increased_mtu),
 	TEST_CASE(astlpc_test_negotiate_mtu_low_high),
+	TEST_CASE(astlpc_test_negotiate_mtu_high_low),
 	TEST_CASE(astlpc_test_send_large_packet),
 	TEST_CASE(astlpc_test_tx_before_channel_init),
 	TEST_CASE(astlpc_test_corrupt_host_tx),
 	TEST_CASE(astlpc_test_corrupt_bmc_tx),
+	TEST_CASE(astlpc_test_async_exchange),
 };
 /* clang-format on */
 

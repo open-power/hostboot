@@ -15,6 +15,7 @@
 #endif
 
 #include <assert.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -101,7 +102,8 @@ int main(void)
 	a->egress = p[1][1];
 	mctp_serial_open_fd(a->serial, a->ingress);
 	mctp_serial_set_tx_fn(a->serial, mctp_binding_serial_pipe_tx, a);
-	mctp_register_bus(scenario[0].mctp, mctp_binding_serial_core(a->serial), 8);
+	mctp_register_bus(scenario[0].mctp, mctp_binding_serial_core(a->serial),
+			  8);
 
 	/* Instantiate the B side of the serial pipe */
 	scenario[1].mctp = mctp_init();
@@ -114,7 +116,8 @@ int main(void)
 	b->egress = p[0][1];
 	mctp_serial_open_fd(b->serial, b->ingress);
 	mctp_serial_set_tx_fn(b->serial, mctp_binding_serial_pipe_tx, a);
-	mctp_register_bus(scenario[1].mctp, mctp_binding_serial_core(b->serial), 9);
+	mctp_register_bus(scenario[1].mctp, mctp_binding_serial_core(b->serial),
+			  9);
 
 	/* Transmit a message from A to B, with message tag */
 	rc = mctp_message_tx(scenario[0].mctp, 9, tag_owner, msg_tag,

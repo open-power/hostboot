@@ -27,6 +27,7 @@ case "${BOOTSTRAP_MODE}" in
             "$@"
         ;;
     *)
+        # shellcheck disable=SC2016
         echo 'Run "./configure ${CONFIGURE_FLAGS} && make"'
         ;;
 esac

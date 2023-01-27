@@ -12,9 +12,9 @@
 #include <sys/poll.h>
 #include <sys/socket.h>
 
-static void
-rx_message(uint8_t eid __unused, bool tag_owner __unused,
-	   uint8_t msg_tag __unused, void *data __unused, void *msg, size_t len)
+static void rx_message(uint8_t eid __unused, bool tag_owner __unused,
+		       uint8_t msg_tag __unused, void *data __unused, void *msg,
+		       size_t len)
 {
 	ssize_t rc;
 
@@ -28,7 +28,7 @@ rx_message(uint8_t eid __unused, bool tag_owner __unused,
 int main(void)
 {
 	struct mctp_binding_serial *serial[2];
-	mctp_eid_t eids[] = {8, 9};
+	mctp_eid_t eids[] = { 8, 9 };
 	struct pollfd pollfds[3];
 	int rc, n, mctp_fds[2];
 	struct mctp *mctp[2];
@@ -50,8 +50,10 @@ int main(void)
 	mctp_serial_open_fd(serial[0], mctp_fds[0]);
 	mctp_serial_open_fd(serial[1], mctp_fds[1]);
 
-	mctp_register_bus(mctp[0], mctp_binding_serial_core(serial[0]), eids[0]);
-	mctp_register_bus(mctp[1], mctp_binding_serial_core(serial[1]), eids[1]);
+	mctp_register_bus(mctp[0], mctp_binding_serial_core(serial[0]),
+			  eids[0]);
+	mctp_register_bus(mctp[1], mctp_binding_serial_core(serial[1]),
+			  eids[1]);
 
 	mctp_set_rx_all(mctp[1], rx_message, NULL);
 
@@ -102,5 +104,4 @@ int main(void)
 	}
 
 	return EXIT_SUCCESS;
-
 }

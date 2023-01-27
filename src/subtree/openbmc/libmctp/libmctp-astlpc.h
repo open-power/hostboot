@@ -28,7 +28,7 @@ struct mctp_binding_astlpc_ops {
 	int (*lpc_write)(void *data, const void *buf, long offset, size_t len);
 };
 
-#define MCTP_BINDING_ASTLPC_MODE_BMC 0
+#define MCTP_BINDING_ASTLPC_MODE_BMC  0
 #define MCTP_BINDING_ASTLPC_MODE_HOST 1
 struct mctp_binding_astlpc *
 mctp_astlpc_init(uint8_t mode, uint32_t mtu, void *lpc_map,
@@ -45,7 +45,10 @@ int mctp_astlpc_poll(struct mctp_binding_astlpc *astlpc);
 
 /* fileio-based interface */
 struct mctp_binding_astlpc *mctp_astlpc_init_fileio(void);
-int mctp_astlpc_get_fd(struct mctp_binding_astlpc *astlpc);
+
+struct pollfd;
+int mctp_astlpc_init_pollfd(struct mctp_binding_astlpc *astlpc,
+			    struct pollfd *pollfd);
 
 #ifdef __cplusplus
 }
