@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2020
+# Contributors Listed Below - COPYRIGHT 2017,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -467,8 +467,9 @@ actionclass TodRegisterAnalyzeFail
  */
 actionclass TodReportByPHYP
 {
+    capture(TODReg);
     threshold1;
-    funccall("todStepCheckFault");
+    try( funccall("todStepCheckFault"), self_H_th_1 );
 };
 
 /**
@@ -477,7 +478,7 @@ actionclass TodReportByPHYP
 actionclass analyzeStepCheckErr
 {
     threshold32pday;
-    funccall("todStepCheckFault");
+    try( funccall("todStepCheckFault"), self_H_th_1 );
 };
 
 /** action for tod errors which do not need any specific ananlysis */

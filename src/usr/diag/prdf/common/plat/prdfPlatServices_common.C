@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,13 @@
 #include <p9_io_dmi_clear_firs.H>
 #include <p9_io_dmi_pdwn_lanes.H>
 #include <p9_io_obus_pdwn_lanes.H>
+#endif
+
+
+#if !defined(__HOSTBOOT_MODULE) // FSP only
+  #include <services/todservice/hwsvTodControls.H>
+#elif defined(__HOSTBOOT_RUNTIME) // HBRT only
+  #include <rt_todintf.H>
 #endif
 
 using namespace TARGETING;
@@ -1674,6 +1681,70 @@ CEN_SYMBOL::WiringType getMemBufRawCardType<TYPE_MBA>( TargetHandle_t i_trgt )
 
     #undef PRDF_FUNC
 }
+
+//------------------------------------------------------------------------------
+
+//##############################################################################
+//##                         TOD functions
+//##############################################################################
+
+// FSP or HBRT only, not Hostboot
+#if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME)
+
+int32_t getTodPortControlReg(const TARGETING::TargetHandle_t& i_procTgt,
+                             bool i_slvPath0, uint32_t &o_regValue)
+{
+    #define PRDF_FUNC "[PlatServices::getTodPortControlReg] "
+
+    // Query the TOD data file via HWSV.
+    #ifdef __HOSTBOOT_RUNTIME
+
+    TOD::TodChipDataContainer todRegData;
+    errlHndl_t errl = TOD::readTodProcDataFromFile(todRegData);
+
+    #else // FSP
+
+    HWSV::TodChipDataContainer todRegData;
+    const auto& hwsv = HWSV::theHwsvTodControls_t::Instance();
+    errlHndl_t errl = hwsv.readTodProcDataFromFile(todRegData);
+
+    #endif
+
+    if (nullptr != errl)
+    {
+        PRDF_ERR(PRDF_FUNC "Failed to get TOD reg data from hwsv: "
+                 "i_procTgt=0x%08x", getHuid(i_procTgt));
+        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+        return FAIL;
+    }
+
+    // Look for the chip matching this ordinal ID.
+    const uint32_t ordId = i_procTgt->getAttr<ATTR_ORDINAL_ID>();
+    bool foundChip = false;
+
+    for (const auto& chip : todRegData)
+    {
+        if (chip.header.chipID == ordId)
+        {
+            o_regValue = i_slvPath0 ? chip.regs.pcrp0 : chip.regs.scrp1;
+            foundChip = true;
+            break;
+        }
+    }
+
+    if (!foundChip)
+    {
+        PRDF_ERR(PRDF_FUNC "Could not find TOD reg data: i_procTgt=0x%08x "
+                 "ordId=%d", getHuid(i_procTgt), ordId );
+        return FAIL;
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+#endif // FSP or HBRT only, not Hostboot
 
 //------------------------------------------------------------------------------
 
