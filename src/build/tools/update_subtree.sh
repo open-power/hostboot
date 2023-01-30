@@ -151,7 +151,7 @@ fi
 CURRENT_TOP_COMMIT=$(git rev-parse --short HEAD)
 
 # Find the Change-Id of the subtree's last sync with the upstream repo.
-LAST_SYNC_CHANGE_ID=$(grep $SUBTREE src/subtree/latest_commit_sync | awk '{print $2}')
+LAST_SYNC_CHANGE_ID=$(grep "^$SUBTREE " src/subtree/latest_commit_sync | awk '{print $2}')
 if [ -z $LAST_SYNC_CHANGE_ID ]; then
     echo "Unable to find Change-Id subtree: $SUBTREE"
     exit 1
