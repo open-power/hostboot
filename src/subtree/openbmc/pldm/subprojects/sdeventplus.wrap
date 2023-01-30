@@ -1,0 +1,6 @@
+[wrap-git]
+url = https://github.com/openbmc/sdeventplus.git
+revision = HEAD
+
+[provide]
+sdeventplus = sdeventplus_dep

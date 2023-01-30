@@ -1,0 +1,60 @@
+{
+    "entries": [
+        {
+            "attribute_name": "HMCManagedState",
+            "possible_values": ["On", "Off"],
+            "default_values": ["On"],
+            "readOnly": false,
+            "helpText": "HMCManagedState HelpText",
+            "displayName": "HMCManagedState DisplayName",
+            "dbus": {
+                "object_path": "/xyz/abc/def",
+                "interface": "xyz.openbmc_project.HMCManaged.State",
+                "property_name": "State",
+                "property_type": "string",
+                "property_values": [
+                    "xyz.openbmc_project.State.On",
+                    "xyz.openbmc_project.State.Off"
+                ]
+            }
+        },
+        {
+            "attribute_name": "FWBootSide",
+            "possible_values": ["Perm", "Temp"],
+            "default_values": ["Perm"],
+            "readOnly": false,
+            "helpText": "FWBootSide HelpText",
+            "displayName": "FWBootSide DisplayName",
+            "dbus": {
+                "object_path": "/xyz/abc/def",
+                "interface": "xyz.openbmc.FWBoot.Side",
+                "property_name": "Side",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "attribute_name": "InbandCodeUpdate",
+            "possible_values": ["Allowed", "NotAllowed"],
+            "default_values": ["Allowed"],
+            "readOnly": false,
+            "helpText": "InbandCodeUpdate HelpText",
+            "displayName": "InbandCodeUpdate DisplayName",
+            "dbus": {
+                "object_path": "/xyz/abc/def",
+                "interface": "xyz.openbmc.InBandCodeUpdate",
+                "property_name": "Policy",
+                "property_type": "uint8_t",
+                "property_values": [0, 1]
+            }
+        },
+        {
+            "attribute_name": "CodeUpdatePolicy",
+            "possible_values": ["Concurrent", "Disruptive"],
+            "default_values": ["Concurrent"],
+            "readOnly": true,
+            "helpText": "CodeUpdatePolicy HelpText",
+            "displayName": "CodeUpdatePolicy DisplayName"
+        }
+    ]
+}

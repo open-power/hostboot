@@ -1,0 +1,186 @@
+{
+    "entries": [
+        {
+            "attribute_name": "vmi_if0_ipv4_prefix_length",
+            "lower_bound": 0,
+            "upper_bound": 32,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "vmi_if0_ipv4_prefix_length",
+            "displayName": "vmi_if0_ipv4_prefix_length"
+        },
+        {
+            "attribute_name": "vmi_if1_ipv4_prefix_length",
+            "lower_bound": 0,
+            "upper_bound": 32,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "vmi_if1_ipv4_prefix_length",
+            "displayName": "vmi_if1_ipv4_prefix_length"
+        },
+        {
+            "attribute_name": "vmi_if0_ipv6_prefix_length",
+            "lower_bound": 1,
+            "upper_bound": 128,
+            "scalar_increment": 1,
+            "default_value": 128,
+            "helpText": "vmi_if0_ipv6_prefix_length",
+            "displayName": "vmi_if0_ipv6_prefix_length"
+        },
+        {
+            "attribute_name": "vmi_if1_ipv6_prefix_length",
+            "lower_bound": 1,
+            "upper_bound": 128,
+            "scalar_increment": 1,
+            "default_value": 128,
+            "helpText": "vmi_if1_ipv6_prefix_length",
+            "displayName": "vmi_if1_ipv6_prefix_length"
+        },
+        {
+            "attribute_name": "hb_number_huge_pages",
+            "lower_bound": 0,
+            "upper_bound": 65535,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "Specifies the number of huge pages available for memory management, requires a reboot for a change to be applied.",
+            "displayName": "Number Huge Pages (pending)"
+        },
+        {
+            "attribute_name": "hb_number_huge_pages_current",
+            "lower_bound": 0,
+            "upper_bound": 65535,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "Specifies the number of huge pages available for memory management for the current IPL. Do not set this attribute directly; set hb_number_huge_pages instead.",
+            "displayName": "Number Huge Pages (current)"
+        },
+        {
+            "attribute_name": "hb_huge_page_size",
+            "lower_bound": 0,
+            "upper_bound": 255,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "Specifies the size of huge pages, 0 = 16GB, requires a reboot for a change to be applied.",
+            "displayName": "Huge Page Size (pending)"
+        },
+        {
+            "attribute_name": "hb_huge_page_size_current",
+            "lower_bound": 0,
+            "upper_bound": 255,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "Specifies the size of huge pages, 0 = 16GB, for the current IPL. Do not set this attribute directly; set hb_huge_page_size instead.",
+            "displayName": "Huge Page Size (current)"
+        },
+        {
+            "attribute_name": "hb_field_core_override",
+            "lower_bound": 0,
+            "upper_bound": 255,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "The maximum number of cores to activate where 0 being to activate all available cores. Requires a reboot for a change to be applied.",
+            "displayName": "Field Core Override (pending)"
+        },
+        {
+            "attribute_name": "hb_field_core_override_current",
+            "lower_bound": 0,
+            "upper_bound": 255,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "The maximum number of cores to activate where 0 being to activate all available cores. Value applicable for the current IPL. Do not set this attribute directly; set hb_field_core_override instead.",
+            "displayName": "Field Core Override (current)"
+        },
+        {
+            "attribute_name": "hb_power_limit_in_watts",
+            "lower_bound": 0,
+            "upper_bound": 65535,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "Specifies the power limit in watts.",
+            "displayName": "Power Limit In Watts",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/control/host0/power_cap",
+                "interface": "xyz.openbmc_project.Control.Power.Cap",
+                "property_type": "uint32_t",
+                "property_name": "PowerCap"
+            }
+        },
+        {
+            "attribute_name": "hb_max_number_huge_pages",
+            "lower_bound": 0,
+            "upper_bound": 65535,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "readOnly": true,
+            "helpText": "Specifies the actual maximum number of huge pages available given the current system configuration.",
+            "displayName": "Max Number Huge Pages"
+        },
+        {
+            "attribute_name": "hb_ioadapter_enlarged_capacity",
+            "lower_bound": 0,
+            "upper_bound": 255,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "Specifies the enlarged IO capacity, requires a reboot for a change to be applied.",
+            "displayName": "Enlarged IO Capacity (pending)"
+        },
+        {
+            "attribute_name": "hb_ioadapter_enlarged_capacity_current",
+            "lower_bound": 0,
+            "upper_bound": 255,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "readOnly": true,
+            "helpText": "Specifies the enlarged IO capacity for the current IPL. Do not set this attribute directly; set hb_ioadapter_enlarged_capacity instead.",
+            "displayName": "Enlarged IO Capacity (current)"
+        },
+        {
+            "attribute_name": "hb_effective_secure_version",
+            "lower_bound": 0,
+            "upper_bound": 255,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "readOnly": true,
+            "helpText": "Specifies the effective secure version of the host FW. In secure mode, the secure version value of a driver must be greater than or equal to this effective secure version to allow the system to boot.",
+            "displayName": "Effective Secure Version"
+        },
+        {
+            "attribute_name": "hb_cap_freq_mhz_min",
+            "lower_bound": 0,
+            "upper_bound": 4294967295,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "readOnly": true,
+            "helpText": "Specifies the lowest floor frequency across all chips in the system.",
+            "displayName": "Minimum Core Freq MHZ"
+        },
+        {
+            "attribute_name": "hb_cap_freq_mhz_max",
+            "lower_bound": 0,
+            "upper_bound": 4294967295,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "readOnly": true,
+            "helpText": "Specifies the highest ceiling frequency across all chips in the system.",
+            "displayName": "Maximum Core Freq MHZ"
+        },
+        {
+            "attribute_name": "hb_cap_freq_mhz_request",
+            "lower_bound": 0,
+            "upper_bound": 4294967295,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "Specifies the desired frequency across all chips in the system.  Requires a reboot for a change to be applied.",
+            "displayName": "Requested Core Freq MHZ (pending)"
+        },
+        {
+            "attribute_name": "hb_cap_freq_mhz_request_current",
+            "lower_bound": 0,
+            "upper_bound": 4294967295,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "Specifies the desired frequency across all chips in the system.  Do not set this attribute directly; set hb_cap_freq_mhz_request instead.",
+            "displayName": "Requested Core Freq MHZ (current)"
+        }
+    ]
+}

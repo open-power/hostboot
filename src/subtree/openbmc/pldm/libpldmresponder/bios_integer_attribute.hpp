@@ -1,0 +1,79 @@
+#pragma once
+
+#include "bios_attribute.hpp"
+
+class TestBIOSIntegerAttribute;
+
+namespace pldm
+{
+namespace responder
+{
+namespace bios
+{
+
+/** @class BIOSIntegerAttribute
+ *  @brief Associate integer entry(attr table and attribute value table) and
+ *         dbus attribute
+ */
+class BIOSIntegerAttribute : public BIOSAttribute
+{
+  public:
+    friend class ::TestBIOSIntegerAttribute;
+
+    /** @brief Construct a bios integer attribute
+     *  @param[in] entry - Json Object
+     *  @param[in] dbusHandler - Dbus Handler
+     */
+    BIOSIntegerAttribute(const Json& entry,
+                         pldm::utils::DBusHandler* const dbusHandler);
+
+    /** @brief Set Attribute value On Dbus according to the attribute value
+     *         entry
+     *  @param[in] attrValueEntry - The attribute value entry
+     *  @param[in] attrEntry - The attribute entry corresponding to the
+     *                         attribute value entry
+     *  @param[in] stringTable - The string table
+     */
+    void
+        setAttrValueOnDbus(const pldm_bios_attr_val_table_entry* attrValueEntry,
+                           const pldm_bios_attr_table_entry* attrEntry,
+                           const BIOSStringTable& stringTable) override;
+
+    /** @brief Construct corresponding entries at the end of the attribute table
+     *         and attribute value tables
+     *  @param[in] stringTable - The string Table
+     *  @param[in,out] attrTable - The attribute table
+     *  @param[in,out] attrValueTable - The attribute value table
+     *  @param[in,out] optAttributeValue - init value of the attribute
+     */
+    void constructEntry(const BIOSStringTable& stringTable, Table& attrTable,
+                        Table& attrValueTable,
+                        std::optional<std::variant<int64_t, std::string>>
+                            optAttributeValue = std::nullopt) override;
+
+    /** @brief Generate attribute entry by the spec DSP0247_1.0.0 Table 14
+     *  @param[in] attributevalue - attribute value(Enumeration, String and
+     *             Integer)
+     *  @param[in,out] attrValueEntry - attribute entry
+     */
+    void generateAttributeEntry(
+        const std::variant<int64_t, std::string>& attributevalue,
+        Table& attrValueEntry) override;
+
+    int updateAttrVal(Table& newValue, uint16_t attrHdl, uint8_t attrType,
+                      const pldm::utils::PropertyValue& newPropVal);
+
+  private:
+    /** @brief Integer field from json */
+    table::attribute::IntegerField integerInfo;
+
+    /** @brief Get pldm value from dbus propertyValue */
+    uint64_t getAttrValue(const pldm::utils::PropertyValue& value);
+
+    /** @brief Get value on dbus */
+    uint64_t getAttrValue();
+};
+
+} // namespace bios
+} // namespace responder
+} // namespace pldm

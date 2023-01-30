@@ -1,0 +1,4 @@
+host-bmc/test/host_effecter_jsons/malformed/dbus_to_host_effecter.json
+host-bmc/test/host_effecter_jsons/no_json/dummy.json
+libpldmresponder/test/pdr_jsons/state_effecter/malformed/effecter_pdr.json
+libpldmresponder/test/pdr_jsons/state_sensor/malformed/sensor_pdr.json

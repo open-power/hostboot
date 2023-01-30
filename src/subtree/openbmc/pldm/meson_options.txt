@@ -1,0 +1,28 @@
+option('tests', type: 'feature', description: 'Build tests', value: 'enabled')
+option('oe-sdk', type: 'feature', description: 'Enable OE SDK')
+option('oem-ibm', type: 'feature', description: 'Enable IBM OEM PLDM')
+option('utilities', type: 'feature', description: 'Enable debug utilities', value: 'enabled')
+option('libpldmresponder', type: 'feature', description: 'Enable libpldmresponder', value: 'enabled')
+
+option('oem-ibm-dma-maxsize', type: 'integer', min:4096, max: 16773120, description: 'OEM-IBM: max DMA size', value: 8384512) #16MB - 4K
+option('softoff', type: 'feature', description: 'Build soft power off application', value: 'enabled')
+option('softoff-timeout-seconds', type: 'integer', description: 'softoff: Time to wait for host to gracefully shutdown', value: 7200)
+
+option('systemd', type: 'feature', description: 'Include systemd support', value: 'enabled')
+
+# Timing specifications for PLDM messages
+option('number-of-request-retries', type: 'integer', min: 2, max: 30, description: 'The number of times a requester is obligated to retry a request', value: 2)
+option('instance-id-expiration-interval', type: 'integer', min: 5, max: 6, description: 'Instance ID expiration interval in seconds', value: 5)
+# Default response-time-out set to 2 seconds to facilitate a minimum retry of the request of 2.
+option('response-time-out', type: 'integer', min: 300, max: 4800, description: 'The amount of time a requester has to wait for a response message in milliseconds', value: 2000)
+
+option('heartbeat-timeout-seconds', type: 'integer', description: ' The amount of time host waits for BMC to respond to pings from host, as part of host-bmc surveillance', value: 120)
+
+# PLDM Terminus options
+option('terminus-id', type:'integer', min:0, max: 255, description: 'The terminus id value of the device that is running this pldm stack', value:1)
+option('terminus-handle',type:'integer',min:0, max:65535, description: 'The terminus handle value of the device that is running this pldm stack', value:1)
+
+# Firmware update configuration parameters
+option('maximum-transfer-size', type: 'integer', min: 16, max: 4294967295, description: 'Maximum size in bytes of the variable payload allowed to be requested by the FD, via RequestFirmwareData command', value: 4096)
+# Flight Recorder for PLDM Daemon
+option('flightrecorder-max-entries', type:'integer',min:0, max:30, description: 'The max number of pldm messages that can be stored in the recorder, this feature will be disabled if it is set to 0', value: 10)

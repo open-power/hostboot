@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ -f /var/lib/pldm/PHYP-NVRAM-CKSUM ]; then
+    mv /var/lib/pldm/PHYP-NVRAM-CKSUM /var/lib/phosphor-software-manager/hostfw/nvram/PHYP-NVRAM-CKSUM;
+else
+    dd if=/dev/zero of=/var/lib/phosphor-software-manager/hostfw/nvram/PHYP-NVRAM-CKSUM bs=16 count=1;
+fi

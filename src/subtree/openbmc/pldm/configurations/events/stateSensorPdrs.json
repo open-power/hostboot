@@ -1,0 +1,1436 @@
+{
+    "entries": [
+        {
+            "containerID": 0,
+            "entityType": 32801,
+            "entityInstance": 0,
+            "sensorOffset": 0,
+            "event_states": [1, 2, 3, 5, 7, 9, 21, 22, 26],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/state/host0",
+                "interface": "xyz.openbmc_project.State.Boot.Progress",
+                "property_name": "BootProgress",
+                "property_type": "string",
+                "property_values": [
+                    "xyz.openbmc_project.State.Boot.Progress.ProgressStages.Unspecified",
+                    "xyz.openbmc_project.State.Boot.Progress.ProgressStages.SystemInitComplete",
+                    "xyz.openbmc_project.State.Boot.Progress.ProgressStages.MemoryInit",
+                    "xyz.openbmc_project.State.Boot.Progress.ProgressStages.SecondaryProcInit",
+                    "xyz.openbmc_project.State.Boot.Progress.ProgressStages.SystemSetup",
+                    "xyz.openbmc_project.State.Boot.Progress.ProgressStages.PCIInit",
+                    "xyz.openbmc_project.State.Boot.Progress.ProgressStages.OSRunning",
+                    "xyz.openbmc_project.State.Boot.Progress.ProgressStages.BusInit",
+                    "xyz.openbmc_project.State.Boot.Progress.ProgressStages.PrimaryProcInit"
+                ]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 0,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm0",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 1,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm1",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 2,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm2",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 3,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm3",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 4,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm4",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 5,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm5",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 6,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm6",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 7,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm7",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 8,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm8",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 9,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm9",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 10,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm10",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 11,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm11",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 12,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm12",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 13,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm13",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 14,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm14",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 15,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm15",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 16,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm16",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 17,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm17",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 18,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm18",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 19,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm19",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 20,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm20",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 21,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm21",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 22,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm22",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 23,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm23",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 24,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm24",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 25,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm25",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 26,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm26",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 27,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm27",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 28,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm28",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 29,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm29",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 30,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm30",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 31,
+            "sensorOffset": 0,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm31",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 32,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm32",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 33,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm33",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 34,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm34",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 35,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm35",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 36,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm36",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 37,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm37",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 38,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm38",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 39,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm39",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 40,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm40",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 41,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm41",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 42,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm42",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 43,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm43",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 44,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm44",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 45,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm45",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 46,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm46",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 47,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm47",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 48,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm48",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 49,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm49",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 50,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm50",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 51,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm51",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 52,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm52",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 53,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm53",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 54,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm54",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 55,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm55",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 56,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm56",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 57,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm57",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 58,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm58",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 59,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm59",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 60,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm60",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 61,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm61",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 62,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm62",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 63,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm63",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 32,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm32",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 33,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm33",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 34,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm34",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 35,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm35",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 36,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm36",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 37,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm37",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 38,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm38",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 39,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm39",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 40,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm40",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 41,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm41",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 42,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm42",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 43,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm43",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 44,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm44",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 45,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm45",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 46,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm46",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 47,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm47",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 48,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm48",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 49,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm49",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 50,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm50",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 51,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm51",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 52,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm52",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 53,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm53",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 54,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm54",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 55,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm55",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 56,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm56",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 57,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm57",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 58,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm58",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 59,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm59",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 60,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm60",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 61,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm61",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 62,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm62",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "containerID": 3,
+            "entityType": 66,
+            "entityInstance": 63,
+            "sensorOffset": 0,
+            "stateSetId": 1,
+            "event_states": [1, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/dimm63",
+                "interface": "xyz.openbmc_project.State.Decorator.OperationalStatus",
+                "property_name": "Functional",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        }
+    ]
+}

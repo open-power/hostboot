@@ -1,0 +1,14 @@
+[Unit]
+Description=Phosphor PLDM Daemon
+Wants=xyz.openbmc_project.biosconfig_manager.service
+After=xyz.openbmc_project.biosconfig_manager.service
+
+[Service]
+Restart=always
+Type=dbus
+BusName=xyz.openbmc_project.PLDM
+EnvironmentFile=-/etc/default/pldmd
+ExecStart=/usr/bin/pldmd $PLDMD_ARGS
+
+[Install]
+WantedBy=multi-user.target
