@@ -1,0 +1,3 @@
+option('tests', type: 'feature', description: 'Build tests', value: 'enabled')
+option('oem-ibm', type: 'feature', description: 'Enable IBM OEM PLDM', yield: true)
+option('requester-api', type: 'feature', description: 'Enable libpldm requester API', value: 'enabled')
