@@ -46,7 +46,6 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/mss_math.H>
-#include <lib/ccs/ody_ccs_traits.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <lib/shared/ody_consts.H>
 #include <lib/dimm/ody_rank.H>
@@ -62,6 +61,7 @@
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr2.H>
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr8.H>
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr50.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 
 ///
 /// @brief Maps from drive strength in Ohms to the register value
@@ -481,7 +481,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         VREGCtrl3 = (VshCtrlUpdate << csr_VshCtrlUpdate_LSB);
 
         FAPI_DBG (TARGTIDFORMAT
-                  " // [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VREGCtrl3::VshCtrlUpdate to 0x%x for MASTER ",
+                  " // [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VREGCtrl3::VshCtrlUpdate to 0x%x for MASTER",
                   TARGTID, 0, i_user_input_basic.Frequency[0], VshCtrlUpdate);
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target,  (tMASTER | csr_VREGCtrl3_ADDR), VREGCtrl3));
 
@@ -1709,7 +1709,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                       TARGTID, pstate, i_user_input_basic.Frequency[pstate], TxStrenEqLoPd[pstate]);
 
             FAPI_DBG (TARGTIDFORMAT
-                      " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming TxImpedanceCtrl1::TxStrenPu to 0x%x..",
+                      " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming TxImpedanceCtrl1::TxStrenPu to 0x%x",
                       TARGTID,
                       pstate, i_user_input_basic.Frequency[pstate], TxStrenPu[pstate]);
             FAPI_DBG (TARGTIDFORMAT
@@ -3217,7 +3217,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                 FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming AForceTriCont (anib=5) to 0xc", TARGTID);
                 FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming AForceTriCont (anib=6) to 0xc", TARGTID);
                 FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming AForceTriCont (anib=7) to 0xa", TARGTID);
-                FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming AForceTriCont (anib=8) to 0xa.", TARGTID);
+                FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming AForceTriCont (anib=8) to 0xa", TARGTID);
                 FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tANIB | 0x1000 | csr_AForceTriCont_ADDR), 0x8));
                 FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tANIB | 0x2000 | csr_AForceTriCont_ADDR), 0xa));
                 FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tANIB | 0x3000 | csr_AForceTriCont_ADDR), 0xa));
