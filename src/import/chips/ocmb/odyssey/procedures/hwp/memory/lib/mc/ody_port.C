@@ -48,7 +48,6 @@
 #include <lib/mc/ody_port_traits.H>
 #include <lib/mc/ody_port.H>
 #include <lib/ecc/ecc_traits_odyssey.H>
-#include <lib/mcbist/ody_mcbist_traits.H>
 #include <lib/mcbist/ody_maint_cmds.H>
 #include <mss_generic_attribute_getters.H>
 #include <ody_scom_ody_odc.H>
@@ -57,6 +56,7 @@
 
 namespace mss
 {
+#ifndef __PPE__
 const std::vector<uint8_t> portTraits< mss::mc_type::ODYSSEY >::NON_SPARE_NIBBLES =
 {
     0,
@@ -86,7 +86,7 @@ const std::vector<uint8_t> portTraits< mss::mc_type::ODYSSEY >::SPARE_NIBBLES =
     10,
     11
 };
-
+#endif
 ///
 /// @brief Configures the write reorder queue bit - Odyssey specialization
 /// @param[in] i_target the target to effect
@@ -117,15 +117,15 @@ fapi2::ReturnCode configure_rrq<mss::mc_type::ODYSSEY>(
     fapi2::buffer<uint64_t> l_data;
 
     // Gets the reg
-    FAPI_TRY(mss::getScom(i_target, TT::ROQ_REG, l_data), "%s failed to getScom from ROQ0Q",
-             mss::c_str(i_target));
+    FAPI_TRY(mss::getScom(i_target, TT::ROQ_REG, l_data), TARGTIDFORMAT " failed to getScom from ROQ0Q",
+             TARGTID);
 
     // Sets the bit
     l_data.writeBit<TT::ROQ_FIFO_MODE>(i_state == mss::states::ON);
 
     // Sets the regs
-    FAPI_TRY(mss::putScom(i_target, TT::ROQ_REG, l_data), "%s failed to putScom to ROQ0Q",
-             mss::c_str(i_target));
+    FAPI_TRY(mss::putScom(i_target, TT::ROQ_REG, l_data), TARGTIDFORMAT " failed to putScom to ROQ0Q",
+             TARGTID);
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -315,7 +315,7 @@ fapi2::ReturnCode enable_power_management<mss::mc_type::ODYSSEY>( const fapi2::T
         i_target )
 {
     //Enable Power management based off of mrw_power_control_requested
-    FAPI_INF("%s Enable Power min max domains", mss::c_str(i_target));
+    FAPI_INF(TARGTIDFORMAT " Enable Power min max domains", TARGTID);
 
     uint8_t l_pwr_cntrl = 0;
 

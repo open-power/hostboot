@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -252,8 +252,8 @@ inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target,
                          .set_RANK(i_port_rank)
                          .set_TARGET(i_target)
                          .set_FUNCTION(FWMS_READ),
-                         "%s Invalid rank passed to fwms::ecc::read (%d)",
-                         mss::c_str(i_target),
+                         TARGTIDFORMAT " Invalid rank passed to fwms::ecc::read (%d)",
+                         TARGTID,
                          i_port_rank);
     }
 
@@ -440,8 +440,8 @@ inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target,
                          .set_RANK(i_port_rank)
                          .set_TARGET(i_target)
                          .set_FUNCTION(FWMS_WRITE),
-                         "%s Invalid rank passed to fwms::ecc::write (%d)",
-                         mss::c_str(i_target),
+                         TARGTIDFORMAT " Invalid rank passed to fwms::ecc::write (%d)",
+                         TARGTID,
                          i_port_rank);
     }
 

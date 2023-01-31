@@ -117,8 +117,10 @@ class portTraits< mss::mc_type::ODYSSEY >
 
         static constexpr uint8_t SYMBOL_ROUNDER = 4;
 
+#ifndef __PPE__
         static const std::vector<uint8_t> NON_SPARE_NIBBLES;
         static const std::vector<uint8_t> SPARE_NIBBLES;
+#endif
 
         // Settings: INTERVAL = 16K * 128 = 2M cycles, CTRLUPD_MIN = 128
         static constexpr uint8_t CAL_INTERVAL_TB_16384_CYCLES = 0x02;

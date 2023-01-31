@@ -302,7 +302,7 @@ bool skip_dne_spare_nibble(const uint8_t i_spare_support,
             (i_spare_support == fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE));
 }
 
-
+#ifndef __PPE__
 ///
 /// @brief Grab a vector of non-spare nibbles - specialization for mc_type
 /// @tparam MC the memory controller type
@@ -366,7 +366,7 @@ fapi2::ReturnCode get_spare_nibbles( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 fapi_try_exit:
     return fapi2::current_err;
 }
-
+#endif
 ///
 /// @brief Round the symbol from dq_to_symbol to its base multiple of 4, for use with steering
 /// @tparam MC the memory controller type

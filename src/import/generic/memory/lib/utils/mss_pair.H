@@ -37,6 +37,8 @@
 #ifndef _MSS_PAIR_H_
 #define _MSS_PAIR_H_
 
+#include <fapi2.H>
+
 namespace mss
 {
 
@@ -85,6 +87,16 @@ class pair
             }
 
             return second < i_rhs.second;
+        }
+
+        ///
+        /// @brief Equal to operator between two pairs
+        /// @param[in] i_rhs right hand side in the comparison operator
+        /// @return true if i_rhs is equal to this pair class
+        ///
+        bool operator==(const pair<T1, T2>& i_rhs) const
+        {
+            return (first == i_rhs.first) && (second == i_rhs.second);
         }
 };
 

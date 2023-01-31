@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,10 +37,10 @@
 #define _GEN_MSS_MCBIST_FWMS_ADDRESS_H_
 
 #include <fapi2.H>
-#include <utility>
 #include <generic/memory/lib/ecc/ecc_traits.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
+#include <generic/memory/lib/utils/mss_pair.H>
 
 namespace mss
 {
@@ -70,7 +70,7 @@ class address
 {
     public:
         // first is the start bit of the field, second is the length
-        using field = std::pair<uint64_t, uint64_t>;
+        using field = mss::pair<uint64_t, uint64_t>;
 
         constexpr static field DIMM = {TT::FIRMWARE_MS_ADDRESS, 1};
         constexpr static field MRANK = {TT::FIRMWARE_MS_ADDRESS + 1, 2};

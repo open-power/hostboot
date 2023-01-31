@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #define _MSS_GEN_MCBIST_PATTERNS_
 
 #include <vector>
+#include <generic/memory/lib/utils/mss_pair.H>
 
 namespace mss
 {
@@ -85,7 +86,7 @@ constexpr uint64_t RANDOM24_SEED_MAP_FIELD_LEN = 4;
 
 
 /// Vector of cache lines, separated in to two 64B chunks
-using cache_line = std::pair<uint64_t, uint64_t> ;
+using cache_line = mss::pair<uint64_t, uint64_t> ;
 using pattern = std::vector< cache_line > ;
 extern const std::vector< pattern > patterns;
 
