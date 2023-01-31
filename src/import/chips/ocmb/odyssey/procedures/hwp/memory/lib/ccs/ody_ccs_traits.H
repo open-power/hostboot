@@ -163,6 +163,9 @@ class ccsTraits<mss::mc_type::ODYSSEY>
             CCS_ARRAY_LEN = 32,
             CCS_ARR0_START = scomt::ody::ODC_MCBIST_CCS_INST_ARR0_00,
             CCS_ARR1_START = scomt::ody::ODC_MCBIST_CCS_INST_ARR1_00,
+
+            // Due to extra deselect at beginning and end of arr, max depth is decremented by 2
+            MAX_INST_DEPTH = CCS_ARRAY_LEN - 2,
         };
 
         ///

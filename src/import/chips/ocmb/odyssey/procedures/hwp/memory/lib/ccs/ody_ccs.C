@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,6 @@ namespace mss
 {
 namespace ccs
 {
-
 ///
 /// @brief Create, initialize a JEDEC Device Deselect CCS command - Odyssey specialization
 /// @param[in] i_idle the idle time to the next command (default to 0)
@@ -101,7 +100,7 @@ void instruction_t<mss::mc_type::ODYSSEY>::get_cke_helper(uint8_t& o_cke) const
 }
 
 ///
-/// @brief Gets the CKE signals (Memory controller and DRAM technology dependent) - Odyssey specialization
+/// @brief Sets the CKE signals (Memory controller and DRAM technology dependent) - Odyssey specialization
 /// @param[in] i_cke the CKE for this instruction
 /// @note nothing to do for Odyssey
 ///

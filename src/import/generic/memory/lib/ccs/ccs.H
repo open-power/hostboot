@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,13 +49,13 @@
 #include <generic/memory/lib/ccs/ccs_traits.H>
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/ccs/ccs_instruction.H>
+#include <generic/memory/lib/workarounds/ccs_des_insert_workaround.H>
 
 namespace mss
 {
 
 namespace ccs
 {
-
 // Generally, the CCS commands are split up into separate files for DDR4 and for DDR5
 // However, the execute functions need access to a generic deselect function
 // As such, a deselect helper has been created that can be specialized on a per memory controller basis
@@ -538,7 +538,7 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
         const fapi2::Target<P>& i_port )
 {
     // Subtract one for the idle we insert at the end
-    constexpr size_t CCS_INSTRUCTION_DEPTH = TT::CCS_ARRAY_LEN - 1;
+    constexpr size_t CCS_INSTRUCTION_DEPTH = TT::MAX_INST_DEPTH;
     constexpr uint64_t CCS_ARR0_ZERO = TT::CCS_ARR0_START;
     constexpr uint64_t CCS_ARR1_ZERO = TT::CCS_ARR1_START;
 
@@ -550,10 +550,12 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
 
     // Grab port index and first inst
     const auto l_port_index = mss::relative_pos<MC, T>(i_port);
-    ccs::instruction_t<MC> l_des =  mss::ccs::des_command<MC>();
 
     std::vector<rank_configuration> l_rank_configs;
     FAPI_TRY(get_rank_config<MC>(i_target, l_rank_configs));
+
+    // ODY needs insert of DES at first arr index with TRFC delay does nothing for EXP
+    FAPI_TRY(workarounds::insert_des<MC>(i_target, i_port, l_inst_count, l_current_cke, l_rank_configs[l_port_index]));
 
     // Shove the instructions into the CCS engine, in 32 instruction chunks, and execute them
     // NOTE: For concurrent CCS the CCS_INSTRUCTION_DEPTH of 32 will never be hit
@@ -576,6 +578,7 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
 
         // Make sure this instruction leads to the next. Notice this limits this mechanism to pretty
         // simple (straight line) CCS programs. Anything with a loop or such will need another mechanism.
+
         io_inst_iter->arr1.template insertFromRight<TT::ARR1_GOTO_CMD, TT::ARR1_GOTO_CMD_LEN>(l_inst_count + 1);
         FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, io_inst_iter->arr0) );
         FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, io_inst_iter->arr1) );
@@ -602,18 +605,8 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
              io_program.iv_instructions.size(), l_inst_count, io_program.iv_poll.iv_initial_delay, mss::c_str(i_target));
 
     // Deselect
-    l_des.set_cke_helper(l_current_cke);
-
-    // Insert a DES as our last instruction. DES is idle state anyway and having this
-    // here as an instruction forces the CCS engine to wait the delay specified in
-    // the last instruction in this array (which it otherwise doesn't do.)
-    l_des.arr1.template setBit<TT::ARR1_END>();
-    FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_des.arr0) );
-    FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_des.arr1) );
-
-    FAPI_INF("css inst %d fixup: 0x%016lX 0x%016lX (0x%lx, 0x%lx) %s",
-             l_inst_count, l_des.arr0, l_des.arr1,
-             CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count, mss::c_str(i_target));
+    // Ody des insert with delay 1, Exp default
+    FAPI_TRY(workarounds::insert_des<MC>(i_target, i_port, l_inst_count, l_current_cke, l_rank_configs[l_port_index]));
 
 fapi_try_exit:
     io_program.iv_instructions.clear();

@@ -221,6 +221,7 @@ prd_obj_no_sim += exp_kind.o
 prd_obj_no_sim += exp_fir_workarounds.o
 prd_obj_no_sim += exp_phy_utils.o
 prd_obj_no_sim += exp_maint_cmds.o
+prd_obj_no_sim += exp_ccs_des_insert_workaround.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/
@@ -230,6 +231,8 @@ prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/utils/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/ecc/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/fir/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/workarounds/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/ccs/
 prd_obj_no_sim += hwp_wrappers_ody.o
 prd_obj_no_sim += ody_port.o
 prd_obj_no_sim += odyssey_memory_size.o
@@ -239,6 +242,9 @@ prd_obj_no_sim += ody_mcbist.o
 prd_obj_no_sim += ody_maint_cmds.o
 prd_obj_no_sim += ecc_traits_odyssey.o
 prd_obj_no_sim += ody_unmask.o
+prd_obj_no_sim += ody_ccs_des_insert_workaround.o
+prd_obj_no_sim += ody_ccs.o
+prd_obj_no_sim += ody_fir.o
 
 # Needed for the exp_deploy_row_repairs procedure
 prd_obj_no_sim += exp_deploy_row_repairs.o

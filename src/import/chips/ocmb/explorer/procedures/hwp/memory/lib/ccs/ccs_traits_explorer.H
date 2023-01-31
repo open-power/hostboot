@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -180,6 +180,9 @@ class ccsTraits<mss::mc_type::EXPLORER>
             CCS_ARRAY_LEN = 32,
             CCS_ARR0_START = EXPLR_MCBIST_CCS_INST_ARR0_00,
             CCS_ARR1_START = EXPLR_MCBIST_CCS_INST_ARR1_00,
+
+            // Used for instruction set up decremented by 1 since arr starts at  0
+            MAX_INST_DEPTH = CCS_ARRAY_LEN - 1,
         };
 
         ///

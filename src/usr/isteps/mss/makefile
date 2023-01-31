@@ -41,6 +41,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${IMPORT_PATH}/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${IMPORT_PATH}/chips/ocmb/odyssey/common/include/
 EXTRAINCDIR += ${EXPLORER_PROCEDURES_PATH}
+EXTRAINCDIR += ${ODYSSEY_PROCEDURES_PATH}
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/p10/procedures/hwp/memory/lib/
@@ -52,6 +53,8 @@ EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 EXTRAINCDIR += ${PMIC_PROCEDURES_PATH}/hwp/pmic/
 EXTRAINCDIR += ${PMIC_PROCEDURES_PATH}/hwp/pmic/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/
+EXTRAINCDIR += ${ODYSSEY_PROCEDURES_PATH}/hwp/perv/
 
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib
@@ -107,6 +110,12 @@ MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/ecc/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/inband/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/workarounds/
 MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/workarounds/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/mcbist/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/fir/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/power_thermal/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/inband/
 
 EXTRAINCDIR += ${MSS_LIB}
 
@@ -274,6 +283,10 @@ MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_GENERIC_MEMORY_SOURCE))
 MSS_PATH_EXPLORER := $(EXPLORER_PROCEDURES_PATH)/hwp/memory/lib
 MSS_EXPLORER_SOURCE := $(shell find $(MSS_PATH_EXPLORER) -name '*.C' -exec basename {} \;)
 MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_EXPLORER_SOURCE))
+
+MSS_PATH_ODYSSEY := $(ODYSSEY_PROCEDURES_PATH)/hwp/memory/lib/workarounds
+MSS_ODYSSEY_SOURCE := $(shell find $(MSS_PATH_ODYSSEY) -name '*.C' -exec basename {} \;)
+MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_ODYSSEY_SOURCE))
 
 MODULE = isteps_mss
 
