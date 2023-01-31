@@ -231,8 +231,6 @@ int32_t getCfam( ExtensibleChip * i_chip,
 
     int32_t rc = SUCCESS;
 
-    uint16_t byteAddr = (i_wordAddr & 0xfe00) | ((i_wordAddr & 0x01ff) * 4);
-
     do
     {
         // HB doesn't allow cfam access on master proc
@@ -255,12 +253,12 @@ int32_t getCfam( ExtensibleChip * i_chip,
         errlHndl_t errH = nullptr;
         size_t l_size = sizeof(uint32_t);
         errH = deviceRead(l_procTgt, &o_data, l_size,
-                          DEVICE_FSI_ADDRESS((uint64_t) byteAddr));
+                          DEVICE_CFAM_ADDRESS((uint64_t) i_wordAddr));
         if (errH)
         {
             rc = FAIL;
-            PRDF_ERR( PRDF_FUNC "chip: 0x%.8X, failed to get cfam byte addr: "
-                      "0x%X", i_chip->GetId(), byteAddr );
+            PRDF_ERR( PRDF_FUNC "chip: 0x%.8X, failed to get cfam addr: "
+                      "0x%X", i_chip->GetId(), i_wordAddr );
             PRDF_COMMIT_ERRL(errH, ERRL_ACTION_SA|ERRL_ACTION_REPORT);
             break;
         }
