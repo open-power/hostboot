@@ -167,8 +167,16 @@ fi
 # Figure out all of the changes we have made to the subtree between now and
 # the last sync commit. Note this command will create outstanding changes
 # that undo all of the downstream work hostboot has done on the subtree
-# that has not been upstreamed yet
-git checkout $LAST_SYNC_COMMIT -- src/subtree/openbmc/$SUBTREE/*
+# that has not been upstreamed yet.
+#
+# Special case: since libpldm sits in a subtree of the pldm subtree, exempt
+# libpldm files from checkout when the pldm subtree is in play
+if [ "$SUBTREE" = "pldm" ]; then
+    git checkout $LAST_SYNC_COMMIT -- `git ls-files src/subtree/openbmc/$SUBTREE/* | grep -v src/subtree/openbmc/$SUBTREE/libpldm`
+else
+    git checkout $LAST_SYNC_COMMIT -- src/subtree/openbmc/$SUBTREE/*
+fi
+
 diff_found=0
 
 # If outstanding changes are detected we know there are some changes
