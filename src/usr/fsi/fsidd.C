@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,6 @@
 /*****************************************************************************/
 // I n c l u d e s
 /*****************************************************************************/
-#include "fsidd.H"
 #include <fsi/fsi_reasoncodes.H>
 #include <fsi/fsiif.H>
 #include <devicefw/driverif.H>
@@ -45,6 +44,7 @@
 #include <string.h>
 #include <algorithm>
 #include <targeting/common/commontargeting.H>
+#include "fsidd.H"
 #include "errlud_fsi.H"
 #include <util/misc.H>
 #include <targeting/common/util.H>
@@ -80,12 +80,12 @@ namespace FSI
  *
  * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
  *                              in driverif.H
- * @param[in]   i_target        FSI target
+ * @param[in]   i_target        Target chip
  * @param[in/out] io_buffer     Read: Pointer to output data storage
  *                              Write: Pointer to input data storage
- * @param[in/out] io_buflen     Input: size of io_buffer (in bytes, always 4)
- *                              Output: Success = 4, Failure = 0
- * @param[in]   i_accessType    DeviceFW::AccessType enum (userif.H)
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes 1/2/4)
+ *                              Output: Success = 1/2/4, Failure = 0
+ * @param[in]   i_accessType    Always DeviceFW::FSI or DeviceFW::CFAM
  * @param[in]   i_args          This is an argument list for DD framework.
  *                              In this function, there's only one argument,
  *                              containing the FSI address
@@ -181,6 +181,13 @@ errlHndl_t ddOp(DeviceFW::OperationType i_opType,
             break;
         }
 
+        // When called with a CFAM context, we need to convert the word
+        //  address to a byte address while maintaining the engine number.
+        if( DeviceFW::CFAM == i_accessType )
+        {
+            i_addr = ((i_addr & 0xFE00) | ((i_addr & 0x01FF)*4) );
+        }
+
         // do the read
         if( DeviceFW::READ == i_opType )
         {
@@ -254,6 +261,16 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
 DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
                       DeviceFW::FSI,
                       TARGETING::TYPE_MEMBUF,
+                      ddOp);
+
+// Register fsidd access functions to DD framework for CFAM accesses
+DEVICE_REGISTER_ROUTE(DeviceFW::READ,
+                      DeviceFW::CFAM,
+                      TARGETING::TYPE_PROC,
+                      ddOp);
+DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
+                      DeviceFW::CFAM,
+                      TARGETING::TYPE_PROC,
                       ddOp);
 
 
@@ -355,6 +372,7 @@ void getFsiLinkInfo( TARGETING::Target* i_slave,
 {
     Singleton<FsiDD>::instance().getFsiLinkInfo( i_slave, o_info );
 }
+
 
 }; //end FSI namespace
 

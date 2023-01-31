@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -76,6 +76,7 @@ namespace DeviceFW
         IDEC,         // Read and set EC and CHIPID values
         EEPROM_CACHE, // Read EEPROM over I2C and write to PNOR
         VPD,          // Generic VPD access
+        CFAM,         // CFAM registers (regardless of physical layer)
         LAST_ACCESS_TYPE,
     };
 
@@ -152,13 +153,13 @@ namespace DeviceFW
     #define DEVICE_FSI_ADDRESS(i_address) \
         DeviceFW::FSI, static_cast<uint64_t>((i_address))
 
-    /** Construct the device addressing parameters for FSI device ops
+    /** Construct the device addressing parameters for device ops
      *   using the more common CFAM address format : EEEE.EEEA.AAAA.AAAA.
      *   E=Engine, A=Address in 4-byte words
      *  @param[in] i_address - CFAM address to operate on.
      */
     #define DEVICE_CFAM_ADDRESS(i_address) \
-        DeviceFW::FSI, static_cast<uint64_t>((i_address & 0xFE00) | ((i_address & 0x01FF)*4) )
+        DeviceFW::CFAM, static_cast<uint64_t>((i_address))
 
     /**
      * Construct the device addressing parameters for the SPD device ops.
