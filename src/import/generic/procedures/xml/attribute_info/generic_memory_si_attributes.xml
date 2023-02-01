@@ -659,7 +659,7 @@
         <enum>HIGH_IMP = 0, OHM_40 = 40, OHM_60 = 60, OHM_80 = 80, OHM_120 = 120,
               OHM_240 = 240</enum>
         <mssUnits>ohm</mssUnits>
-        <!-- <mssAccessorName>si_phy_drv_imp_dq_dqs_pull_up</mssAccessorName> -->
+        <mssAccessorName>si_phy_drv_imp_dq_dqs_pull_up</mssAccessorName>
     </attribute>
 
 </attributes>

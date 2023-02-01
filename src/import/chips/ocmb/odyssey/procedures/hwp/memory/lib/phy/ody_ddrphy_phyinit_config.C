@@ -3801,8 +3801,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     io_user_input_advanced.ATxImpedance = l_attr_arr_rank[0][0];
 
     // TxImpedance
-//    FAPI_TRY(mss::attr::get_si_phy_drv_imp_dq_dqs_pull_up(i_target, l_attr_data_16));
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP, i_target, l_attr_data_16) );
+    FAPI_TRY(mss::attr::get_si_phy_drv_imp_dq_dqs_pull_up(i_target, l_attr_data_16));
 
     for (auto p_state = 0; p_state < mss::ody::NUM_PSTATES; p_state++)
     {
