@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,8 @@ namespace MMIO
         MOD_DETERMINE_CALLOUTS       = 0x08,
         MOD_DETERMINE_EXP_CALLOUTS   = 0x09,
         RT_OCMB_MMIO_PERFORM_OP      = 0x0A,
+        MOD_DETERMINE_ODY_CALLOUTS   = 0x0B,
+        MOD_CHECK_OCMB_ERRORS        = 0x0C,
     };
 
     enum MMIOReasonCode

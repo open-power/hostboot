@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,8 @@ namespace SCOM
         SCOM_CALL_WAKEUP_HWP            = 0x0F,
         SCOM_DO_MULTICAST_WORKAROUND    = 0x10,
         SCOM_TRANSLATE_P10              = 0x11,
+        // 0x12 reserved
+        MOD_ROUTE_IBSCOM                = 0x13,
     };
 
     enum scomReasonCode
@@ -84,6 +86,7 @@ namespace SCOM
         SCOM_MULTICAST_MISCOMPARE      = SCOM_COMP_ID | 0x21,
         SCOM_INVALID_ECO_TYPE          = SCOM_COMP_ID | 0x22,
         SCOM_SPCWKUP_COUNT_INCONSISTENT = SCOM_COMP_ID | 0x23,
+        SCOM_UNSUPPORTED_CHIPID        = SCOM_COMP_ID | 0x24,
     };
 
     enum UserDetailsTypes

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,14 +38,14 @@ namespace MMIOSCOMDD
 {
 
 /**
- * @brief Performs an MMIOSCOM access operation
- * This function performs an MMIOSCOM access operation. It follows a pre-defined
+ * @brief Performs an IBSCOM (MMIO) access operation
+ * This function performs an MMIO-based SCOM access operation. It follows a pre-defined
  * prototype functions in order to be registered with the device-driver
  * framework.
  *
  * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
  *                              in driverif.H
- * @param[in]   i_target        MMIOSCOM Explorer Chip target
+ * @param[in]   i_target        Explorer Chip target
  * @param[in/out] io_buffer     Read: Pointer to output data storage
  *                              Write: Pointer to input data storage
  * @param[in/out] io_buflen     Input: size of io_buffer (in bytes)

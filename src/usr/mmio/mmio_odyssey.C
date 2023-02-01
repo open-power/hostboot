@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/mmio/mmio_explorer.C $                                */
+/* $Source: src/usr/mmio/mmio_odyssey.C $                                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2023                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,8 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 /**
- * @file  mmio_explorer.C
- * @brief Function definitions that are specific to the Explorer OCMB
+ * @file  mmio_odyssey.C
+ * @brief Function definitions that are specific to the Odyssey OCMB
  * implementation of MMIO.
  */
 
@@ -34,147 +34,25 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <errl/errludlogregister.H>
-#include <explorer_scom_addresses.H>
-#include <exp_inband.H>
 #include <mmio/mmio_reasoncodes.H>
+#include <sys/sync.h>
+#include "mmio_odyssey.H"
 
 // Trace definition
 extern trace_desc_t* g_trac_mmio; //from mmio.C
 
 using namespace TARGETING;
 
-namespace MMIOEXP
+namespace MMIOODY
 {
 
-#define MMIOEXP_SCOM2OFFSET(_SCOM_ADDR) \
-    (mss::exp::ib::EXPLR_IB_MMIO_OFFSET | (_SCOM_ADDR << 3))
-
-/**
- * @brief Possible Open CAPI response codes for config operations
- */
-enum
-{
-    OCAPI_RETRY_REQUEST         = 0x2,
-    OCAPI_DATA_ERROR            = 0x8,
-    OCAPI_UNSUPPORTED_OP_LENGTH = 0x9,
-    OCAPI_BAD_ADDRESS           = 0xB,
-    OCAPI_FAILED                = 0xE,
-};
-
-/**
- * @brief Possible PCB error codes for non-config operations
- */
-enum
-{
-    PCB_OK                      = 0x0,
-    PCB_INVALID_ADDRESS         = 0x4,
-    PCB_PARITY_ERROR            = 0x6,
-    PCB_TIMEOUT                 = 0x7,
-};
-
-/**
- * @brief bit-field definitions for MCFGERR register
- */
-typedef union mcfgerrReg
-{
-    struct
-    {
-        uint64_t reserved           :16;
-        uint64_t resp_code          :4;
-        uint64_t bdi                :1;
-        uint64_t error_type         :3;
-        uint64_t device             :5;
-        uint64_t function           :3;
-        uint64_t dev_func_mismatch  :1;
-        uint64_t detect_bad_op      :1;
-        uint64_t tbit_is_1          :1;
-        uint64_t data_is_bad        :1;
-        uint64_t pl_is_invalid      :1;
-        uint64_t bad_op_or_align    :1;
-        uint64_t addr_no_implemented:1;
-        uint64_t rdata_vld          :1;
-        uint64_t tbit               :1;
-        uint64_t plen               :3;
-        uint64_t portnun            :2;
-        uint64_t dl                 :2;
-        uint64_t capptag            :16;
-    };
-    uint64_t word64;
-}mcfgerrReg_t;
-
-/**
- * @brief bit-field definitions for GIF2PCB_ERROR register
- */
-typedef union gif2pcbErrorReg
-{
-    struct
-    {
-        uint64_t parity_error_rsp_info              :1;
-        uint64_t parity_error_rsp_data_0            :1;
-        uint64_t parity_error_rsp_data_1            :1;
-        uint64_t parity_error_rsp_data_2            :1;
-        uint64_t parity_error_rsp_data_3            :1;
-        uint64_t timeout_error                      :1;
-        uint64_t int_addr_access_error              :1;
-        uint64_t invalid_access                     :1;
-        uint64_t pcb_err_code                       :3;
-        uint64_t axi_read_addr_parity_error         :1;
-        uint64_t axi_write_addr_parity_error        :1;
-        uint64_t axi_write_data_parity_error_31_24  :1;
-        uint64_t axi_write_data_parity_error_23_16  :1;
-        uint64_t axi_write_data_parity_error_15_8   :1;
-        uint64_t axi_write_data_parity_error_7_0    :1;
-        uint64_t pib2gif_parity_error               :1;
-        uint64_t reserved                           :46;
-    };
-    struct
-    {
-        uint64_t used_bits                          :18;
-        uint64_t unused_bits                        :46;
-    };
-    uint64_t word64;
-}gif2pcbErrorReg_t;
-
-/**
- * @brief bit-field definitions for PIB2GIF_ERROR register
- */
-typedef union pib2gifErrorReg
-{
-    struct
-    {
-        uint64_t parity_error_req_data_0:1;
-        uint64_t parity_error_req_data_1:1;
-        uint64_t parity_error_req_data_2:1;
-        uint64_t parity_error_req_data_3:1;
-        uint64_t parity_error_req_addr_0:1;
-        uint64_t parity_error_req_addr_1:1;
-        uint64_t parity_error_req_ctrl:1;
-        uint64_t timeout_error:1;
-        uint64_t int_addr_access_error:1;
-        uint64_t parity_error_on_fsm:1;
-        uint64_t parity_error_on_reg0:1;
-        uint64_t parity_error_on_reg1:1;
-        uint64_t parity_error_on_reg2:1;
-        uint64_t parity_error_on_reg3:1;
-        uint64_t parity_error_on_reg4:1;
-        uint64_t parity_error_on_reg5:1;
-        uint64_t invalid_address_error:1;
-        uint64_t reserved1:15;
-        uint64_t gif2pcb_error:18;
-        uint64_t reserved2:14;
-    };
-    uint64_t word64;
-}pib2gifErrorReg_t;
-
-// Explorer MMIO addresses only have 35 bits
-constexpr uint64_t MASK_35BITS = 0x7FFFFFFFFull;
 
 
 /*******************************************************************************
  *
  * See header file for comments
  */
-errlHndl_t determineExpCallouts(const TARGETING::TargetHandle_t i_expTarget,
+errlHndl_t determineOdyCallouts(const TARGETING::TargetHandle_t i_odyTarget,
                                 const uint64_t i_offset,
                                 DeviceFW::OperationType i_opType,
                                 errlHndl_t i_err,
@@ -183,7 +61,7 @@ errlHndl_t determineExpCallouts(const TARGETING::TargetHandle_t i_expTarget,
     bool l_fwFailure = false; //default to a hw failure
     errlHndl_t l_err = nullptr;
     size_t l_reqSize = 0;
-    ERRORLOG::ErrlUserDetailsLogRegister l_regDump(i_expTarget);
+    ERRORLOG::ErrlUserDetailsLogRegister l_regDump(i_odyTarget);
 
     do
     {
@@ -195,20 +73,18 @@ errlHndl_t determineExpCallouts(const TARGETING::TargetHandle_t i_expTarget,
         {
             switch(i_offset)
             {
-                case MMIOEXP_SCOM2OFFSET(EXPLR_MMIO_MCFGERR):
-                case MMIOEXP_SCOM2OFFSET(EXPLR_MMIO_MCFGERRA):
-                case MMIOEXP_SCOM2OFFSET(EXPLR_MMIO_MMIOERR):
-                case MMIOEXP_SCOM2OFFSET(EXPLR_TP_MB_UNIT_TOP_PIB2GIF_ERROR_REG):
-                case MMIOEXP_SCOM2OFFSET(EXPLR_TP_MB_UNIT_TOP_GIF2PCB_ERROR_REG):
-                case MMIOEXP_SCOM2OFFSET(EXPLR_MMIO_MFIR):
-                case MMIOEXP_SCOM2OFFSET(EXPLR_MMIO_MFIRWOF):
+                case MMIOCOMMON_scom_to_offset(ODY_MMIO_MCFGERR):
+                case MMIOCOMMON_scom_to_offset(ODY_MMIO_MCFGERRA):
+                case MMIOCOMMON_scom_to_offset(ODY_MMIO_MMIOERR):
+                case MMIOCOMMON_scom_to_offset(ODY_MMIO_MFIR):
+                case MMIOCOMMON_scom_to_offset(ODY_MMIO_MFIRWOF):
                     TRACFCOMP(g_trac_mmio,
-                      "determineExpCallouts: recursive loop detected:"
+                      "determineOdyCallouts: recursive loop detected:"
                       " OCMB[0x%08x] offset[0x%016llx]",
-                      TARGETING::get_huid(i_expTarget), i_offset);
+                      TARGETING::get_huid(i_odyTarget), i_offset);
                     /*@
                      * @errortype
-                     * @moduleid         MMIO::MOD_DETERMINE_EXP_CALLOUTS
+                     * @moduleid         MMIO::MOD_DETERMINE_ODY_CALLOUTS
                      * @reasoncode       MMIO::RC_BAD_MMIO_READ
                      * @userdata1        OCMB huid
                      * @userdata2        Address offset
@@ -218,9 +94,9 @@ errlHndl_t determineExpCallouts(const TARGETING::TargetHandle_t i_expTarget,
                      */
                     l_err = new ERRORLOG::ErrlEntry(
                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                    MMIO::MOD_DETERMINE_EXP_CALLOUTS,
+                                    MMIO::MOD_DETERMINE_ODY_CALLOUTS,
                                     MMIO::RC_BAD_MMIO_READ,
-                                    TARGETING::get_huid(i_expTarget),
+                                    TARGETING::get_huid(i_odyTarget),
                                     i_offset,
                                     ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
                     break;
@@ -235,46 +111,46 @@ errlHndl_t determineExpCallouts(const TARGETING::TargetHandle_t i_expTarget,
         }
 
         // Check if this is an access to config space
-        if(i_offset < mss::exp::ib::EXPLR_IB_MMIO_OFFSET)
+        if(i_offset < MMIOCOMMON::OCMB_IB_MMIO_OFFSET)
         {
-            mcfgerrReg_t l_reg;
+            MMIOCOMMON::mcfgerrReg_t l_reg;
 
             TRACFCOMP(g_trac_mmio,
-                   "determineExpCallouts: getting callouts for failed config"
-                   " space transaction on OCMB[0x%08x]", get_huid(i_expTarget));
+                   "determineOdyCallouts: getting callouts for failed config"
+                   " space transaction on OCMB[0x%08x]", get_huid(i_odyTarget));
 
-            // Read the Explorer MCFGERR register
+            // Read the Odyssey MCFGERR register
             // NOTE: This register is not clearable
             l_reqSize = sizeof(l_reg.word64);
             l_err = DeviceFW::deviceRead(
-                                     i_expTarget,
+                                     i_odyTarget,
                                      &l_reg.word64,
                                      l_reqSize,
-                                     DEVICE_SCOM_ADDRESS(EXPLR_MMIO_MCFGERR));
+                                     DEVICE_SCOM_ADDRESS(ODY_MMIO_MCFGERR));
             if(l_err)
             {
                 TRACFCOMP(g_trac_mmio, ERR_MRK
-                          "determineExpCallouts: getscom(MCFGERR) failed"
-                        " on OCMB[0x%08x]", get_huid(i_expTarget));
+                          "determineOdyCallouts: getscom(MCFGERR) failed"
+                          " on OCMB[0x%08x]", get_huid(i_odyTarget));
                 break;
             }
 
             TRACFCOMP(g_trac_mmio,
-                      "determineExpCallouts: MCFGERR: 0x%016llx on"
-                        " OCMB[0x%08x]", l_reg.word64, get_huid(i_expTarget));
+                      "determineOdyCallouts: MCFGERR: 0x%016llx on"
+                      " OCMB[0x%08x]", l_reg.word64, get_huid(i_odyTarget));
 
             // Extract the OCAPI response code from the register
             switch(l_reg.resp_code)
             {
                 // Firmware Errors
-                case OCAPI_UNSUPPORTED_OP_LENGTH:
-                case OCAPI_BAD_ADDRESS:
+                case MMIOCOMMON::OCAPI_UNSUPPORTED_OP_LENGTH:
+                case MMIOCOMMON::OCAPI_BAD_ADDRESS:
                     l_fwFailure = true;
                     break;
 
                 // This one could be caused by a bad address (FW) if there is
                 // a device/function mismatch.  Otherwise, it's bad HW.
-                case OCAPI_FAILED:
+                case MMIOCOMMON::OCAPI_FAILED:
                     if(l_reg.dev_func_mismatch)
                     {
                         l_fwFailure = true;
@@ -289,10 +165,13 @@ errlHndl_t determineExpCallouts(const TARGETING::TargetHandle_t i_expTarget,
 
             // Dump some regs specific to config failures
             l_regDump.addDataBuffer(&l_reg.word64, sizeof(l_reg.word64),
-                                    DEVICE_SCOM_ADDRESS(EXPLR_MMIO_MCFGERR));
-            l_regDump.addData(DEVICE_SCOM_ADDRESS(EXPLR_MMIO_MCFGERRA));
+                                    DEVICE_SCOM_ADDRESS(ODY_MMIO_MCFGERR));
+            l_regDump.addData(DEVICE_SCOM_ADDRESS(ODY_MMIO_MCFGERRA));
             break;
         }
+
+        //@fixme JIRA:PFHB-403 -- Update this logic for Odyssey
+#if 0
 
         // We were accessing a SCOM reg, MSCC reg, or SRAM
 
@@ -300,28 +179,28 @@ errlHndl_t determineExpCallouts(const TARGETING::TargetHandle_t i_expTarget,
         gif2pcbErrorReg_t l_gif2pcb;
 
         TRACFCOMP(g_trac_mmio,
-                  "determineExpCallouts: getting callouts for failed MMIO space"
-                  " transaction on OCMB[0x%08x]", get_huid(i_expTarget));
+                  "determineOdyCallouts: getting callouts for failed MMIO space"
+                  " transaction on OCMB[0x%08x]", get_huid(i_odyTarget));
 
         // Read the PIB2GIF error reg
         // NOTE: This register is ONLY accessible through MMIO path, not I2C.
         l_reqSize = sizeof(l_pib2gif.word64);
         l_err = DeviceFW::deviceRead(
-                   i_expTarget,
+                   i_odyTarget,
                    &l_pib2gif.word64,
                    l_reqSize,
                    DEVICE_SCOM_ADDRESS(EXPLR_TP_MB_UNIT_TOP_PIB2GIF_ERROR_REG));
         if(l_err)
         {
             TRACFCOMP(g_trac_mmio, ERR_MRK
-                    "determineExpCallouts: getscom(PIB2GIF_ERROR_REG) failed"
-                    " on OCMB[0x%08x]", get_huid(i_expTarget));
+                    "determineOdyCallouts: getscom(PIB2GIF_ERROR_REG) failed"
+                    " on OCMB[0x%08x]", get_huid(i_odyTarget));
             break;
         }
 
         TRACFCOMP(g_trac_mmio,
-                  "determineExpCallouts: PIB2GIF_ERROR_REG: 0x%016llx"
-                  " on OCMB[0x%08x]", l_pib2gif.word64, get_huid(i_expTarget));
+                  "determineOdyCallouts: PIB2GIF_ERROR_REG: 0x%016llx"
+                  " on OCMB[0x%08x]", l_pib2gif.word64, get_huid(i_odyTarget));
 
         // The pib2gif error register contains a copy of the gif2pcb error reg.
         // No need to read it again, just copy it into our struct.
@@ -329,8 +208,8 @@ errlHndl_t determineExpCallouts(const TARGETING::TargetHandle_t i_expTarget,
         l_gif2pcb.used_bits = l_pib2gif.gif2pcb_error;
 
         TRACFCOMP(g_trac_mmio,
-                  "determineExpCallouts: GIF2PCB_ERROR_REG: 0x%016llx"
-                  " on OCMB[0x%08x]", l_gif2pcb.word64, get_huid(i_expTarget));
+                  "determineOdyCallouts: GIF2PCB_ERROR_REG: 0x%016llx"
+                  " on OCMB[0x%08x]", l_gif2pcb.word64, get_huid(i_odyTarget));
 
         // Check for software errors
         if((l_pib2gif.invalid_address_error) ||
@@ -347,13 +226,14 @@ errlHndl_t determineExpCallouts(const TARGETING::TargetHandle_t i_expTarget,
                    DEVICE_SCOM_ADDRESS(EXPLR_TP_MB_UNIT_TOP_GIF2PCB_ERROR_REG));
         l_regDump.addData(DEVICE_SCOM_ADDRESS(EXPLR_MMIO_MMIOERR));
         break;
+#endif
     }while(0);
 
     if(!l_err)
     {
         // Dump some registers common to both types of transaction types
-        l_regDump.addData(DEVICE_SCOM_ADDRESS(EXPLR_MMIO_MFIR));
-        l_regDump.addData(DEVICE_SCOM_ADDRESS(EXPLR_MMIO_MFIRWOF));
+        l_regDump.addData(DEVICE_SCOM_ADDRESS(ODY_MMIO_MFIR));
+        l_regDump.addData(DEVICE_SCOM_ADDRESS(ODY_MMIO_MFIRWOF));
 
         // Add our register dump to the error log.
         l_regDump.addToLog(i_err);
@@ -364,4 +244,64 @@ errlHndl_t determineExpCallouts(const TARGETING::TargetHandle_t i_expTarget,
     return l_err;
 }
 
-}; // End MMIOEXP namespace
+/**
+ * @brief Executes an IBSCOM (MMIO) access operation to an Odyssey chip
+ * This function performs an MMIO-based SCOM access operation.
+ * It follows a pre-defined prototype functions in order to be registered
+ * with the device-driver framework.
+ *
+ * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ * @param[in]   i_target        OCMB Chip target
+ * @param[in/out] io_buffer     Read: Pointer to output data storage
+ *                              Write: Pointer to input data storage
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes)
+ *                              Output:
+ *                                  Read: Size of output data
+ *                                  Write: Size of data written
+ * @param[in]   i_accessType    DeviceFW::AccessType enum (=IBSCOM_ODY)
+ * @param[in]   i_args          This is an argument list for DD framework.
+ *                              In this function, there's only one argument,
+ *                              which is the scom address
+ * @return  errlHndl_t
+ */
+errlHndl_t routeIbScom(DeviceFW::OperationType i_opType,
+                       TARGETING::Target* i_target,
+                       void* io_buffer,
+                       size_t& io_buflen,
+                       int64_t i_accessType,
+                       va_list i_args)
+{
+    errlHndl_t l_errhdl = nullptr;
+
+    // Since the error handling is not atomic, need to make sure only one
+    //  thread is doing a scom at a time.
+    auto mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SCOM_ACCESS_MUTEX>();
+    recursive_mutex_lock(mutex);
+
+    do {
+        // Only one arg : scom address
+        uint64_t l_scomAddr = va_arg(i_args,uint64_t);
+
+        // Transform the scom address into the MMIO address
+        uint64_t l_mmioAddr = MMIOCOMMON_scom_to_offset(l_scomAddr);
+
+        // Call the MMIO driver to actually perform the operation
+        l_errhdl = DeviceFW::deviceOp(i_opType,
+                                      i_target,
+                                      io_buffer,
+                                      io_buflen,
+                                      DEVICE_MMIO_ADDRESS(l_mmioAddr, io_buflen));
+        if( l_errhdl )
+        {
+            break;
+        }
+
+    } while(0);
+
+    recursive_mutex_unlock(mutex);
+
+    return l_errhdl;
+}
+
+}; // End MMIOODY namespace

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -44,6 +44,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 
 #include unique object modules
 OBJS += mmio.o
+OBJS += mmio_ocmb_common.o
 OBJS += mmio_explorer.o
+OBJS += mmio_odyssey.o
 
 include $(ROOTPATH)/config.mk

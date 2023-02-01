@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 #include <targeting/common/target.H>
 
 /** @file  mmio.H
- *  @brief Provides interface to perform MMIO operations to Explorer chips
+ *  @brief Provides interface to perform MMIO operations to OCMB chips
  *  */
 
 #define IGNORE_HRMOR 0x8000000000000000

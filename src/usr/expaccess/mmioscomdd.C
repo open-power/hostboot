@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ namespace MMIOSCOMDD
 {
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
-                      DeviceFW::IBSCOM,
+                      DeviceFW::IBSCOM_EXP,
                       TYPE_OCMB_CHIP,
                       mmioScomPerformOp);
 

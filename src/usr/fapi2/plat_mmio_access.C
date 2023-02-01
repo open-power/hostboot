@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <hwpf_fapi2_reasoncodes.H>
 #include <fapi2/plat_mmio_access.H>
 #include <initservice/istepdispatcherif.H>
+#include <chipids.H>
 
 namespace fapi2
 {
@@ -284,37 +285,43 @@ bool useI2cInsteadOfMmio( const TARGETING::Target * i_ocmb,
     TARGETING::Target* l_sys = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_sys);
     crit_assert(l_sys != nullptr);
-    attrAllowedI2c = l_sys->getAttr<TARGETING::ATTR_FORCE_SRAM_MMIO_OVER_I2C>();
 
-    // If not forced to use i2c, then check if that is the current scom setting
-    if (!attrAllowedI2c)
+    // I2c-based MMIOs are only valid for Explorer
+    const auto l_ocmbChipId = i_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>();
+    if( POWER_CHIPID::EXPLORER_16 == l_ocmbChipId )
     {
-        // The SCOM_SWITCHES attribute will keep track of when it is safe
-        // to access the ocmb via inband vs when we should do accesses over
-        // i2c. Use this attribute to decide which we want to use.
-        auto ocmb_info = i_ocmb->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
-        if (!ocmb_info.useInbandScom)
-        {
-            attrAllowedI2c = 1;
-        }
-    }
+        attrAllowedI2c = l_sys->getAttr<TARGETING::ATTR_FORCE_SRAM_MMIO_OVER_I2C>();
 
-    // Attribute settings must allow i2c operation before checking
-    // for a valid address range
-    if (attrAllowedI2c)
-    {
-        // Verify address is within valid SRAM range
-        if ( ((i_mmioAddress & 0x0F00000000) == EXPLR_IB_MMIO_OFFSET) &&
-             ((i_mmioAddress & 0x0FFFFFFFF) >= MIN_I2C_SRAM_SPACE_ADDRESS) &&
-             ((i_mmioAddress & 0x0FFFFFFFF) <= MAX_I2C_SRAM_SPACE_ADDRESS) )
+        // If not forced to use i2c, then check if that is the current scom setting
+        if (!attrAllowedI2c)
         {
-            useI2c = true;
+            // The SCOM_SWITCHES attribute will keep track of when it is safe
+            // to access the ocmb via inband vs when we should do accesses over
+            // i2c. Use this attribute to decide which we want to use.
+            auto ocmb_info = i_ocmb->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+            if (!ocmb_info.useInbandScom)
+            {
+                attrAllowedI2c = 1;
+            }
         }
-        else
+
+        // Attribute settings must allow i2c operation before checking
+        // for a valid address range
+        if (attrAllowedI2c)
         {
-            // NOTE: This should only be seen for the config space 
-            FAPI_DBG("0x%08X OCMB address 0x%.8X is outside of SRAM range so using mmio",
-              TARGETING::get_huid(i_ocmb), i_mmioAddress);
+            // Verify address is within valid SRAM range
+            if ( ((i_mmioAddress & 0x0F00000000) == EXPLR_IB_MMIO_OFFSET) &&
+                 ((i_mmioAddress & 0x0FFFFFFFF) >= MIN_I2C_SRAM_SPACE_ADDRESS) &&
+                 ((i_mmioAddress & 0x0FFFFFFFF) <= MAX_I2C_SRAM_SPACE_ADDRESS) )
+            {
+                useI2c = true;
+            }
+            else
+            {
+                // NOTE: This should only be seen for the config space 
+                FAPI_DBG("0x%08X OCMB address 0x%.8X is outside of SRAM range so using mmio",
+                         TARGETING::get_huid(i_ocmb), i_mmioAddress);
+            }
         }
     }
 

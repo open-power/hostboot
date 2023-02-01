@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,7 @@
 /**
  * @file mmio.C
  *
- * @brief Implementation of MMIO operations to Explorer chips
+ * @brief Implementation of MMIO operations to OCMB chips
  *
  */
 
@@ -48,6 +48,8 @@
 #include <p10_scom_mcc_b.H>
 #include <error_info_defs.H>
 
+#include "mmio_ocmb_common.H"
+#include "mmio_odyssey.H"
 #include "mmio_explorer.H"
 #include <utils/chipids.H>
 
@@ -358,13 +360,14 @@ errlHndl_t checkOcmbError(const TargetHandle_t i_ocmbTarget,
     switch(l_ocmbChipId)
     {
         case POWER_CHIPID::EXPLORER_16:
-            l_err = MMIOEXP::checkExpError(i_ocmbTarget,
-                                           i_va,
-                                           i_accessLimit,
-                                           i_offset,
-                                           i_opType,
-                                           o_errorAddressMatches,
-                                           o_errorAddressIsZero);
+        case POWER_CHIPID::ODYSSEY_16:
+            l_err = MMIOCOMMON::checkOcmbError(i_ocmbTarget,
+                                               i_va,
+                                               i_accessLimit,
+                                               i_offset,
+                                               i_opType,
+                                               o_errorAddressMatches,
+                                               o_errorAddressIsZero);
             break;
 
         default:
@@ -422,6 +425,13 @@ void determineCallouts(const TargetHandle_t i_ocmbTarget,
     {
         case POWER_CHIPID::EXPLORER_16:
             l_err = MMIOEXP::determineExpCallouts(i_ocmbTarget,
+                                                  i_offset,
+                                                  i_opType,
+                                                  i_err,
+                                                  l_fwFailure);
+            break;
+        case POWER_CHIPID::ODYSSEY_16:
+            l_err = MMIOODY::determineOdyCallouts(i_ocmbTarget,
                                                   i_offset,
                                                   i_opType,
                                                   i_err,
@@ -578,6 +588,7 @@ errlHndl_t validateOcmbMmioOp(DeviceFW::OperationType   i_opType,
         switch(l_ocmbChipId)
         {
             case POWER_CHIPID::EXPLORER_16:
+            case POWER_CHIPID::ODYSSEY_16:
                 break;
             default:
                 TRACFCOMP(g_trac_mmio, ERR_MRK
@@ -1053,7 +1064,7 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                                   io_buflen),
                                 ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
 
-                // NOTE: Explorer error regs cannot be cleared without resetting
+                // NOTE: OCMB error regs cannot be cleared without resetting
                 //       the chip.  Error regs may contain failure data from
                 //       previous write transaction.
                 //
@@ -1090,7 +1101,7 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                 }
                 else if(l_errorAddressIsZero)
                 {
-                    // P9A disagrees with OCMB?
+                    // Processor disagrees with OCMB?
                     TRACFCOMP(g_trac_mmio,
                         "ocmbMmioPerformOp(read): No Error found on OCMB??"
                         " 0x%08x", get_huid(i_ocmbTarget));
@@ -1239,7 +1250,7 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
         {
             // Switch over to requesting the SBE to perform i2c scoms to prevent
             // further MMIO access to this OCMB (error regs cannot be cleared
-            // on Explorer).
+            // on OCMB).
             disableInbandScomsOcmb(i_ocmbTarget);
         }
 
@@ -1481,20 +1492,6 @@ void addChannelFailureRegisterData(Target * i_ocmb, errlHndl_t & io_errl)
 {
     TargetHandleList l_target_list = grabMmioFailureRegisterTargets(i_ocmb);
 
-    // Explorer Scoms
-    const uint32_t ocmb_registerList[] = {
-                                      0x08012800,   // OMI_FIR REG
-                                      0x08010870,   // MMIOFIR
-                                      0x08011800,   // MCBISTFIR
-                                      0x08011c00,   // RDFFIR
-                                      0x08011400,   // SRQFIR
-                                      0x08012400,   // TLXFIR
-                                      0x0804000A,   // OCMB_LFIR
-                                      0x08040000,   // XFIR
-                                      0x08040001,   // RFIR
-                                      0x08040004,   // Special Attention
-                                      0x08040018 }; // Local Checkstop FIR
-
     // P10 Scoms
     const uint32_t omic_registerList[] = {
                                       0x0C011400 }; // DLME.REG0.MC_OMI_FIR_REG
@@ -1539,9 +1536,21 @@ void addChannelFailureRegisterData(Target * i_ocmb, errlHndl_t & io_errl)
         switch (l_targetType)
         {
             case TYPE_OCMB_CHIP:
-              TRACFCOMP(g_trac_mmio, "add_channel_failure_register_data: OCMB 0x%.8X", get_huid(tgt));
-              listSize = sizeof(ocmb_registerList)/sizeof(ocmb_registerList[0]);
-              registerList = ocmb_registerList;
+              {
+                const auto l_chipId = i_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>();
+                if( POWER_CHIPID::EXPLORER_16 == l_chipId )
+                {
+                    TRACFCOMP(g_trac_mmio, "add_channel_failure_register_data: OCMB 0x%.8X (Explorer)", get_huid(tgt));
+                    listSize = std::size(MMIOEXP::FFDC_REGISTERLIST);
+                    registerList = MMIOEXP::FFDC_REGISTERLIST;
+                }
+                else if( POWER_CHIPID::ODYSSEY_16 == l_chipId )
+                {
+                    TRACFCOMP(g_trac_mmio, "add_channel_failure_register_data: OCMB 0x%.8X (Odyssey)", get_huid(tgt));
+                    listSize = std::size(MMIOODY::FFDC_REGISTERLIST);
+                    registerList = MMIOODY::FFDC_REGISTERLIST;
+                }
+              }
               break;
             case TYPE_OMIC:
               TRACFCOMP(g_trac_mmio, "add_channel_failure_register_data: OMIC 0x%.8X", get_huid(tgt));
