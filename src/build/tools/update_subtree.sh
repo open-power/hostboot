@@ -42,6 +42,7 @@ function usage()
     echo ""
     echo "update_subtree.sh"
     echo "    -h --help"
+    echo "    -l --relpath=<relative subtree path>"
     echo "    -p --push"
     echo "    -r --reviewer=<reviewer email>"
     echo "    -s --subtree=<subtree>"
@@ -52,9 +53,10 @@ function usage()
 
 PUSH_COMMITS="0"
 PUSH_BRANCH="master-p10"
-SUPPORTED_SUBTREES="pldm,libmctp"
+SUPPORTED_SUBTREES="pldm,libpldm,libmctp"
 REVIEWER=""
 SUBTREE="wrong"
+SUBTREE_RELPATH=""
 UPSTREAM_REV=""
 
 while [ "$1" != "" ]; do
@@ -64,6 +66,9 @@ while [ "$1" != "" ]; do
         -h | --help)
             usage
             exit
+            ;;
+        -l | --relpath)
+            SUBTREE_RELPATH=$VALUE;
             ;;
         -p | --push)
             PUSH_COMMITS="1";
@@ -85,6 +90,8 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+
+SUBTREE_PATH=$SUBTREE_RELPATH$SUBTREE
 
 UPSTREAM_REMOTE="bmc-$SUBTREE"
 if [ -z $UPSTREAM_REV ]; then
@@ -172,9 +179,9 @@ fi
 # Special case: since libpldm sits in a subtree of the pldm subtree, exempt
 # libpldm files from checkout when the pldm subtree is in play
 if [ "$SUBTREE" = "pldm" ]; then
-    git checkout $LAST_SYNC_COMMIT -- `git ls-files src/subtree/openbmc/$SUBTREE/* | grep -v src/subtree/openbmc/$SUBTREE/libpldm`
+    git checkout $LAST_SYNC_COMMIT -- `git ls-files src/subtree/openbmc/$SUBTREE_PATH/* | grep -v src/subtree/openbmc/$SUBTREE_PATH/libpldm`
 else
-    git checkout $LAST_SYNC_COMMIT -- src/subtree/openbmc/$SUBTREE/*
+    git checkout $LAST_SYNC_COMMIT -- src/subtree/openbmc/$SUBTREE_PATH/*
 fi
 
 diff_found=0
@@ -182,7 +189,7 @@ diff_found=0
 # If outstanding changes are detected we know there are some changes
 # that we want to try to patch after updating from upstream
 if ! git diff-index --quiet HEAD --; then
-    echo "Changes have been made to src/subtree/openbmc/$SUBTREE locally since the last sync, creating a patch that apply these changes post sync"
+    echo "Changes have been made to src/subtree/openbmc/$SUBTREE_PATH locally since the last sync, creating a patch that apply these changes post sync"
     diff_found=1
     git add --a
     # temporarily commit the changes, this will undo all of the downstream edits hostboot has done
@@ -207,7 +214,7 @@ git fetch $UPSTREAM_REMOTE > /dev/null 2>&1
 BMC_SUBTREE_TOP_COMMIT=`git rev-parse --short $UPSTREAM_REV`
 
 # Forcefully subtree update to the target upstream revision, discard all local changes
-CMD="git merge --squash -s recursive -Xsubtree=src/subtree/openbmc/$SUBTREE -Xtheirs $UPSTREAM_REV"
+CMD="git merge --squash -s recursive -Xsubtree=src/subtree/openbmc/$SUBTREE_PATH -Xtheirs $UPSTREAM_REV"
 if check_git_version '2.10.0'; then
     CMD="${CMD} --allow-unrelated-histories"
 fi
