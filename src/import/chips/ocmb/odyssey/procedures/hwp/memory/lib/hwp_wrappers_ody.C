@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,17 +150,32 @@ fapi2::ReturnCode ody_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
 }
 
 ///
+/// @brief Update bad DQ bits in SPD for Odyssey
+/// @param[in] i_target A target representing an ocmb_chip
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode ody_update_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+    return mss::update_bad_bits<mss::mc_type::ODYSSEY>(i_target);
+}
+
+///
 /// @brief Restore DRAM repairs wrapper for Odyssey
 /// @param[in] i_target A target representing a port
 /// @param[in,out] io_repairs_applied bit mask, where a bit set means a rank had repairs applied (bit0 = rank0, etc)
 /// @param[in,out] io_repairs_exceeded bit mask, where a bit set means a DIMM had more bad bits than could be repaired (bit0 = DIMM0 etc)
 /// @return FAPI2_RC_SUCCESS iff ok
+/// @note Odyssey version writes the ATTR_BAD_DQ_BITMAP content to SPD before calling mss::restore_repairs
 ///
 fapi2::ReturnCode ody_restore_repairs( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                        fapi2::buffer<uint8_t>& io_repairs_applied,
                                        fapi2::buffer<uint8_t>& io_repairs_exceeded )
 {
-    return mss::restore_repairs<mss::mc_type::ODYSSEY>(i_target, io_repairs_applied, io_repairs_exceeded);
+    FAPI_TRY(ody_update_bad_bits(i_target));
+    FAPI_TRY(mss::restore_repairs<mss::mc_type::ODYSSEY>(i_target, io_repairs_applied, io_repairs_exceeded));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,6 @@
 #include <lib/shared/ody_consts.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
-#include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 extern "C"
@@ -62,6 +61,7 @@ extern "C"
         uint8_t l_post_memdiags_subtest = 0;
 
         FAPI_INF("Start ody_mss_memdiag on: %s", mss::c_str( i_target ));
+
         FAPI_TRY(mss::memdiags::mss_initialize_memory<mss::mc_type::ODYSSEY>(i_target));
 
         FAPI_TRY(mss::attr::get_post_memdiags_read_subtest(i_target, l_post_memdiags_subtest));

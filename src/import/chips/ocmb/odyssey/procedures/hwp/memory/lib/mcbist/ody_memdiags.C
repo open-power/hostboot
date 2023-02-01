@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,10 +41,38 @@
 #include <lib/mcbist/ody_mcbist.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/poll.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
+#include <lib/utils/ody_bad_bits.H>
 
 
 namespace mss
 {
+
+///
+/// @brief Update bad DQ bits in SPD - Odyssey specialization
+/// @param[in] i_target A target representing an ocmb_chip
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode update_bad_bits<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+        // Get the bad bits from the attribute (read from Odyssey SPPE previously)
+        mss::ody::phy::host_bad_bit_interface l_interface(l_dimm, l_rc);
+        FAPI_TRY(l_rc);
+
+        // Record the bad bits data into our attribute and SPD
+        FAPI_TRY(mss::record_bad_bits(i_target, l_interface));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 namespace memdiags
 {

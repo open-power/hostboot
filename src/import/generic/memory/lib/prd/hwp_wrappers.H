@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -273,6 +273,13 @@ fapi2::ReturnCode ody_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
                                         mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>
                                         (mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>::DONT_CHANGE),
                                     const mss::mcbist::speed i_speed = mss::mcbist::speed::SAME_SPEED );
+
+///
+/// @brief Update bad DQ bits in SPD for Odyssey
+/// @param[in] i_target A target representing an ocmb_chip
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode ody_update_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target );
 
 ///
 /// @brief Restore DRAM repairs wrapper for Odyssey

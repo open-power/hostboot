@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,38 +145,16 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Records bad bits into the bad bits attribute
-/// @tparam MC MC type on which training was run
+/// @brief Record bad bits into the bad bits attribute
 /// @tparam T fapi2::TargetType on which training was conducted
 /// @tparam I Interface class used to abstract converting bad bits into the attribute
-/// @param[in] i_target the fapi2 target oon which training was conducted
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
-/// @note calling GENERIC bad_fir_bits to cover this case in HB -- GENERIC firChecklist not specified (see bad_fir_bits for more details)
+/// @param[in] i_target the fapi2 target on which training was conducted
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff successful
+/// @note This function should only be called if the FIR checklist has previously been checked and a FIR could not be blamed
 ///
-template <mss::mc_type MC, fapi2::TargetType T, class I >
+template < fapi2::TargetType T, class I >
 inline fapi2::ReturnCode record_bad_bits( const fapi2::Target<T>& i_target, const I& i_helper )
 {
-    // If we have a FIR set that could have caused our training fail, then skip checking bad bits in FW
-    // PRD will handle the FIR and retrigger the procedure
-#if defined(__HOSTBOOT_MODULE) || defined(__PPE__)
-    bool l_fir_error = false;
-
-    // Note: using success here will cause an RC to not be logged
-    // We can still see if we do have a FIR error though
-    // NOTE: calling GENERIC bad_fir_bits to cover this case in HB -- GENERIC firChecklist not specified (see bad_fir_bits for more details)
-    fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
-    FAPI_TRY((mss::check::bad_fir_bits<MC, mss::check::firChecklist::GENERIC, T>(i_target, l_rc, l_fir_error)),
-             TARGTIDFORMAT " took an error while checking FIR's", TARGTID);
-
-    // Exit if we took a FIR error - PRD will handle bad bits
-    if(l_fir_error)
-    {
-        FAPI_INF(TARGTIDFORMAT " has FIR's set, exiting to let PRD handle it", TARGTID);
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-#endif
-
     for( const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
     {
         uint8_t l_data[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};

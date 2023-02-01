@@ -236,6 +236,46 @@ fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
 #endif
 
 ///
+/// @brief Check GENERIC FIR checklist to see if we can blame any FIRs for a given DRAM training error code
+/// @tparam MC MC type on which training was run
+/// @tparam T fapi2::TargetType on which training was conducted
+/// @param[in] i_target the fapi2 target on which training was conducted
+/// @param[out] o_firs_found set to true if a FIR has been found set in the checklist
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff successful
+/// @note calling GENERIC bad_fir_bits to cover this case in HB -- GENERIC firChecklist not specified (see bad_fir_bits for more details)
+///
+template <mss::mc_type MC, fapi2::TargetType T >
+inline fapi2::ReturnCode blame_firs( const fapi2::Target<T>& i_target, bool& o_firs_found )
+{
+    o_firs_found = false;
+
+    // If we have a FIR set that could have caused our training fail, then skip checking bad bits in FW
+    // PRD will handle the FIR and retrigger the procedure
+#if defined(__HOSTBOOT_MODULE) || defined(__PPE__)
+
+    // Note: using success here will cause an RC to not be logged
+    // We can still see if we do have a FIR error though
+    // NOTE: calling GENERIC bad_fir_bits to cover this case in HB -- GENERIC firChecklist not specified (see bad_fir_bits for more details)
+    fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+    FAPI_TRY((mss::check::bad_fir_bits<MC, mss::check::firChecklist::GENERIC, T>(i_target, l_rc, o_firs_found)),
+             TARGTIDFORMAT " took an error while checking FIR's", TARGTID);
+
+    // Exit if we took a FIR error - PRD will handle bad bits
+    if(o_firs_found)
+    {
+        FAPI_INF(TARGTIDFORMAT " has FIR's set, exiting to let PRD handle it", TARGTID);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+#endif
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Checks conditional passes and implements traces & exits if it fails
 /// @tparam T fapi2 target type
 /// @tparam IT input data type

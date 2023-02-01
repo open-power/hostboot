@@ -9544,7 +9544,9 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
     constexpr uint8_t MSG_BLOCK_TRAIN_PASS = 0x00;
 
     mss::ody::phy::bad_bit_interface l_interface(i_msg_block_response);
+    bool l_firs_found = false;
 
+    // First check for catastrophic training failure. No need to check FIRs if training failed completely
     // Check training complete mail message
     FAPI_ASSERT((i_status == SUCCESSFUL_COMPLETION),
                 fapi2::ODY_DRAMINIT_TRAINING_FAILURE_MAIL()
@@ -9568,8 +9570,13 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
                 TARGTID, i_msg_block_response.CsTestFail, MSG_BLOCK_TRAIN_PASS);
 
     // Check for FIRs then record the bad bits data into our attribute if there are no FIRs set
-    // Hostboot will consume the bad bits attribute in the host_draminit procedure
-    FAPI_TRY(mss::record_bad_bits<mss::mc_type::ODYSSEY>(i_target, l_interface));
+    // Hostboot will consume the bad bits attribute in the memdiags procedure
+    FAPI_TRY(mss::check::blame_firs<mss::mc_type::ODYSSEY>(i_target, l_firs_found));
+
+    if (!l_firs_found)
+    {
+        FAPI_TRY(mss::record_bad_bits(i_target, l_interface));
+    }
 
     FAPI_INF(TARGTIDFORMAT " DRAM training returned PASSING status", TARGTID);
     return fapi2::FAPI2_RC_SUCCESS;

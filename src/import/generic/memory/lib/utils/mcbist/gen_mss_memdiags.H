@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,15 @@
 
 namespace mss
 {
+
+///
+/// @brief Update bad DQ bits in SPD
+/// @tparam MC mss::mc_type memory controller type
+/// @param[in] i_target A target representing an ocmb_chip
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC >
+fapi2::ReturnCode update_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target );
 
 ///
 /// @brief Determine if a thing is functional

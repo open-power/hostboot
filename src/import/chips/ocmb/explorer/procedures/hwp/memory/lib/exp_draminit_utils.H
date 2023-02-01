@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 #include <lib/phy/exp_train_display.H>
 #include <lib/phy/exp_train_handler.H>
 #include <lib/exp_attribute_accessors_manual.H>
@@ -334,10 +335,16 @@ fapi2::ReturnCode explorer_detailed_training_codes(const fapi2::Target<fapi2::TA
 
         // This is the only RC which we want to record bad bits for. record_bad_bits
         // given an MSDG struct will record bad bits for DRAMINIT
-        // record_bad_bits does check the FIRs, so we don't need to explicitly blame
-        // FIRs here
+        // We only want to record the bad bits if the FIR checklist is clean
         mss::exp::bad_bit_interface<T> l_interface(i_rsp_msdg);
-        FAPI_TRY(mss::record_bad_bits<mss::mc_type::EXPLORER>(i_target, l_interface));
+        bool l_firs_found = false;
+
+        FAPI_TRY(mss::check::blame_firs<mss::mc_type::EXPLORER>(i_target, l_firs_found));
+
+        if (!l_firs_found)
+        {
+            FAPI_TRY(mss::record_bad_bits(i_target, l_interface));
+        }
 
         // Now read them back out
         FAPI_TRY(mss::attr::get_bad_dq_bitmap(l_dimm, l_bad_dq_array));
