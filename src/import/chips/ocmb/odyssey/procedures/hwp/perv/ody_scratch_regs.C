@@ -248,6 +248,23 @@ fapi2::ReturnCode ody_scratch_regs_update(
         l_scratch16_reg.setBit<SCRATCH8_REG_VALID_BIT>();
     }
 
+    // scratch 11 -- FW mode flags
+    if (i_update_all || !l_scratch16_reg.getBit<SCRATCH11_REG_VALID_BIT>())
+    {
+        fapi2::buffer<uint32_t> l_scratch11_reg = 0;
+        fapi2::ATTR_OCMB_BOOT_FLAGS_Type l_attr_ocmb_boot_flags;
+
+        FAPI_DBG("Reading ATTR_OCMB_BOOT_FLAGS");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_BOOT_FLAGS, i_target, l_attr_ocmb_boot_flags),
+                 "Error from FAPI_ATTR_GET (ATTR_OCMB_BOOT_FLAGS)");
+        l_scratch11_reg.insertFromRight<ATTR_OCMB_BOOT_FLAGS_STARTBIT, ATTR_OCMB_BOOT_FLAGS_LENGTH>(l_attr_ocmb_boot_flags);
+
+        FAPI_DBG("Setting up value of Scratch 11 mailbox register");
+        FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER11, l_scratch11_reg));
+
+        l_scratch16_reg.setBit<SCRATCH11_REG_VALID_BIT>();
+    }
+
     FAPI_DBG("Setting up value of Scratch 16 mailbox register (valid)");
     FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER16, l_scratch16_reg));
 
