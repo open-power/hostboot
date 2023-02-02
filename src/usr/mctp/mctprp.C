@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 // Headers from local directory
 #include "mctprp.H"
 #include "mctp_trace.H"
+#include "mctp_plat_core.H"
 #include <libmctp-astlpc.h>
 #include <hostboot_mctp.H>
 // System Headers
@@ -204,9 +205,18 @@ static void rx_message(uint8_t i_eid, bool i_tag_owner, uint8_t i_msg_tag, void 
           PLDM::logPldmMsg(pldm_hdr_ptr, PLDM::INBOUND);
           errlHndl_t errl = nullptr;
 
+          TRACDCOMP(g_trac_mctp, "MCTP IPL rx tag %d owner %d",i_msg_tag,i_tag_owner);
+
           const PLDM::pldm_mctp_message_view msg
           {
-              .mctp_tag_owner = i_tag_owner,
+              // If the remote end sent a message with an mctp_tag_owner field
+              // of true, then the remote is initiating a new request and
+              // Hostboot should echo the incoming tag back to the requester,
+              // along with an mctp_tag_owner of false, in any response.
+              // Otherwise, the remote end is responding to a previous Hostboot
+              // request and is parroting the original Hostboot tag value back.
+              // See "MCTP packet fields" section of DSP0236 for more info.
+              .mctp_tag_owner = i_tag_owner ? false : i_tag_owner,
               .mctp_msg_tag = i_msg_tag,
 
               // Offset into sizeof(MCTP::MCTP_MSG_TYPE_PLDM) MCTP packet payload
@@ -307,7 +317,17 @@ void MctpRP::handle_outbound_messages(void)
               {
                   const auto lock = scoped_mutex_lock(iv_mutex);
 
+                  if(msg->hdr.tag_owner) // HB is originating a message
+                  {
+                      // Ensure a unique 3-bit tag which responder must
+                      // echo back
+                      msg->hdr.msg_tag = get_mctp_tag();
+                  }
+
                   PLDM::logPldmMsg(pldm_hdr_ptr, PLDM::OUTBOUND);
+
+                  TRACDCOMP(g_trac_mctp, "MCTP IPL tx tag %d owner %d",
+                    msg->hdr.msg_tag,msg->hdr.tag_owner);
 
                   TRACDBIN(g_trac_mctp, "Calling mctp_message_tx with : ",
                            &msg->hdr.mctp_msg_type, msg->data_size + sizeof(msg->hdr.mctp_msg_type));

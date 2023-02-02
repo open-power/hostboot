@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,9 +173,11 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_body,
     };
 
     msgbuf->data_size = total_buffer_size - sizeof(pldm_mctp_msgbuf_t::mctp_msg);
-    msgbuf->hdr.tag_owner = false; // Hostboot doesn't send tags
-    msgbuf->hdr.msg_tag = 0;       // itself; they only matter when
-                                   // sending replies to the BMC.
+    msgbuf->hdr.tag_owner = true; // Hostboot is originating a new request
+    msgbuf->hdr.msg_tag = 0;      // message so tag owner = 0b1.  Lower layer of
+                                  // MCTP stack will create a unique tag at the
+                                  // message serialization point, since message
+                                  // retries/etc. can change the tag.
     msgbuf->hdr.mctp_msg_type = MCTP::MCTP_MSG_TYPE_PLDM;
 
     const auto pldm_request = reinterpret_cast<pldm_msg*>(msgbuf->data);

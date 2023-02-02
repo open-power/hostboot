@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include "mctprp_rt.H"
 #include "../mctp_trace.H"
 #include "libmctp-hbrtvirt.h"
+#include "mctp_plat_core.H"
 // System Headers
 #include <stdlib.h>
 #include <string.h>
@@ -89,10 +90,21 @@ int MctpRP::send_message(const outgoing_mctp_msg* const i_msg)
              mctp_msg,
              mctp_msg_len);
 
+    auto msgTag = i_msg->hdr.msg_tag;
+    if(i_msg->hdr.tag_owner) // HB is originating a message
+    {
+        // Ensure a unique 3-bit tag which responder must
+        // echo back
+        msgTag = get_mctp_tag();
+    }
+
+    TRACDCOMP(g_trac_mctp,
+              "MCTP RT tx tag %d owner %d",msgTag,i_msg->hdr.tag_owner);
+
     return mctp_message_tx(iv_mctp,
                            BMC_EID,
                            i_msg->hdr.tag_owner,
-                           i_msg->hdr.msg_tag,
+                           msgTag,
                            // TODO https://github.com/openbmc/libmctp/issues/4
                            // remove const_cast
                            const_cast<void*>(mctp_msg),
@@ -114,8 +126,23 @@ static void rx_message(uint8_t i_eid, bool i_tag_owner, uint8_t i_msg_tag,
       {
           std::vector<uint8_t> pldm_msg_data(msg_bytes + sizeof(MCTP::message_type),
                                              msg_bytes + i_len);
+          TRACDCOMP(g_trac_mctp,
+                    "MCTP RT rx tag %d owner %d",i_msg_tag, i_tag_owner);
 
-          PLDM::pldm_mctp_message req(i_tag_owner, i_msg_tag, move(pldm_msg_data));
+          auto tagOwner = i_tag_owner;
+          if(tagOwner)
+          {
+              // If the remote end sent a message with an mctp_tag_owner field
+              // of true, then the remote is initiating a new request and
+              // Hostboot should echo the incoming tag back to the requester,
+              // along with an mctp_tag_owner of false, in any response.
+              // Otherwise, the remote end is responding to a previous Hostboot
+              // request and is parroting the original Hostboot tag value back.
+              // See "MCTP packet fields" section of DSP0236 for more info.
+              tagOwner = 0;
+          }
+
+          PLDM::pldm_mctp_message req(tagOwner, i_msg_tag, move(pldm_msg_data));
 
           // Skip first byte of the MCTP payload which has the payload type.
           // The PLDM layer is unaware of this byte.

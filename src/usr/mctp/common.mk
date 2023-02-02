@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -32,6 +32,7 @@ OBJS += core.o
 OBJS += alloc.o
 OBJS += log.o
 OBJS += mctp_trace.o
+OBJS += mctp_plat_core.o
 
 VPATH += ${ROOTPATH}/src/usr/mctp
 VPATH += ${ROOTPATH}/src/subtree/openbmc/libmctp/
