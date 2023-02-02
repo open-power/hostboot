@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,8 +90,9 @@ void* call_host_load_payload (void *io_pArgs)
 
         payloadBase = payloadBase * MEGABYTE;
 
-        // Load payload data from PNOR in Sapphire mode
-        if(is_sapphire_load())
+        // Load payload data from PNOR in Sapphire mode or if this is standalone simics.
+        if(is_sapphire_load()
+          || (Util::isSimicsRunning() && sys->getAttr<TARGETING::ATTR_IS_STANDALONE>()))
         {
             PNOR::SectionId l_secID = PNOR::PAYLOAD;
 
@@ -374,6 +375,14 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
                                       fapi::MOD_START_XZ_PAYLOAD,
                                       fapi::RC_MM_UNMAP_ERR,
                                       0,0,0);
+    }
+
+    if (Util::isSimicsRunning()
+        && UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_STANDALONE>()
+        && (i_section == PNOR::PAYLOAD))
+    {
+        // Unload the secure payload section to free up pages for the testcases.
+        PNOR::unloadSecureSection(PNOR::PAYLOAD);
     }
     return err;
 }

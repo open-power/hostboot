@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,17 +42,6 @@
 #include <runtime/runtime_reasoncodes.H>
 #include <vfs/vfs.H>
 
-/*
- * To test with a custom HDAT do the following:
- *   #define REAL_HDAT_TEST in hdatservicetest.H
- *   #define REAL_HDAT_TEST in hdatservice.C
- *   When MAGIC_BREAK hits run this in simics:
- *      system_cmp0.phys_mem.load-file hdat.bin 0x10000000
- *
- *   Note that there will be DumpTest failures.
- */
-//#define REAL_HDAT_TEST
-
 extern trace_desc_t* g_trac_runtime;
 
 class HdatServiceTest: public CxxTest::TestSuite
@@ -64,15 +53,16 @@ class HdatServiceTest: public CxxTest::TestSuite
         errlHndl_t errhdl = NULL;
 
         // Figure out if we expect to have this data or not
-        TARGETING::Target * sys = NULL;
-        TARGETING::targetService().getTopLevelTarget( sys );
-        assert(sys != NULL);
-        TARGETING::ATTR_PAYLOAD_KIND_type payload_kind =
-          sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
+        TARGETING::Target * sys = TARGETING::UTIL::assertGetToplevelTarget();
+        TARGETING::ATTR_PAYLOAD_KIND_type payload_kind = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
 
-#ifdef REAL_HDAT_TEST
-        payload_kind = TARGETING::PAYLOAD_KIND_PHYP;
-#endif
+        // @TODO JIRA PFHB-15 Remove this if statement and force PHYP for Bonito simics as well.
+        if (sys->getAttr<TARGETING::ATTR_IS_STANDALONE>())
+        {
+            // Force payload kind to be PHYP for the test. There are some areas of code where the kind remains NONE for
+            // standalone. However, for this test we want to exercise the PHYP payload kind path.
+            payload_kind =  TARGETING::PAYLOAD_KIND_PHYP;
+        }
 
         // Verify something in the system parms
         uint64_t sys_parms_addr = 0;
@@ -82,7 +72,7 @@ class HdatServiceTest: public CxxTest::TestSuite
                                     0,
                                     sys_parms_addr,
                                     sys_parms_size );
-        if( payload_kind == TARGETING::PAYLOAD_KIND_PHYP )
+        if ( payload_kind == TARGETING::PAYLOAD_KIND_PHYP)
         {
             if( errhdl  )
             {
@@ -94,7 +84,7 @@ class HdatServiceTest: public CxxTest::TestSuite
                 TS_FAIL("testHdat> NULL returned for get_host_data_section(IPLPARMS_SYSTEM)");
             }
             else if( (sys_parms_size < sizeof(hdatSysParms_t))
-                     || (sys_parms_size == RUNTIME::DATA_SIZE_UNKNOWN) )
+                    || (sys_parms_size == RUNTIME::DATA_SIZE_UNKNOWN) )
             {
                 TS_FAIL("testHdat> Size of IPLPARMS_SYSTEM data too small");
             }
@@ -109,10 +99,10 @@ class HdatServiceTest: public CxxTest::TestSuite
                 TARGETING::targetService().masterProcChipTargetHandle( procmaster );
                 assert( procmaster != NULL );
                 TARGETING::ATTR_MODEL_type model =
-                  procmaster->getAttr<TARGETING::ATTR_MODEL>();
+                    procmaster->getAttr<TARGETING::ATTR_MODEL>();
 
                 if( (model == TARGETING::MODEL_POWER10)
-                    && !((pvr & 0x00FF0000) == 0x00800000) )
+                        && !((pvr & 0x00FF0000) == 0x00800000) )
                 {
                     TS_FAIL("testHdat> PVR model %.8X != 80 for P10",pvr);
                 }
@@ -120,17 +110,16 @@ class HdatServiceTest: public CxxTest::TestSuite
         }
         else
         {
-            if( !errhdl )
+            if (!errhdl)
             {
                 TS_FAIL("testHdat> Did not get expected error trying to locate IPLPARMS_SYSTEM for non-PHYP Payload");
             }
             else
             {
                 delete errhdl;
+                errhdl = nullptr;
             }
         }
-
-
 
         // Verify the Dump Tables
         uint64_t dump_addr = 0;
@@ -142,26 +131,26 @@ class HdatServiceTest: public CxxTest::TestSuite
                                     dump_size );
 
         if( errhdl
-            && ((payload_kind == TARGETING::PAYLOAD_KIND_PHYP) 
-                || (payload_kind == TARGETING::PAYLOAD_KIND_NONE)))
+            && ((payload_kind == TARGETING::PAYLOAD_KIND_PHYP)
+               || (payload_kind == TARGETING::PAYLOAD_KIND_NONE)))
         {
             TS_FAIL("testHdat> Error trying to locate MS_DUMP_SRC_TBL");
             errlCommit(errhdl,RUNTIME_COMP_ID);
         }
         else if( !errhdl
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
+            && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP)
+            && (payload_kind != TARGETING::PAYLOAD_KIND_NONE))
         {
             TS_FAIL("testHdat> Did not get expected error trying to locate MS_DUMP_SRC_TBL for non-PHYP/Standalone Payload");
         }
         else if( ((dump_addr == 0) || (dump_size < 16))
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
+            && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP)
+            && (payload_kind != TARGETING::PAYLOAD_KIND_NONE))
         {
             TS_FAIL("testHdat> NULL or zero size returned for get_host_data_section(MS_DUMP_SRC_TBL)");
         }
         else if( (dump_size <16)
-                 || (dump_size == RUNTIME::DATA_SIZE_UNKNOWN) )
+                 || (dump_size == RUNTIME::DATA_SIZE_UNKNOWN))
         {
             TS_FAIL("testHdat> Size of MS_DUMP_SRC_TBL is unexpected");
         }
@@ -170,33 +159,32 @@ class HdatServiceTest: public CxxTest::TestSuite
             delete errhdl;
         }
 
-
         errhdl = RUNTIME::get_host_data_section(
                                     RUNTIME::MS_DUMP_DST_TBL,
                                     0,
                                     dump_addr,
                                     dump_size );
         if( errhdl
-            && ((payload_kind == TARGETING::PAYLOAD_KIND_PHYP) 
-                || (payload_kind == TARGETING::PAYLOAD_KIND_NONE)) )
+            && ((payload_kind == TARGETING::PAYLOAD_KIND_PHYP)
+            || (payload_kind == TARGETING::PAYLOAD_KIND_NONE)))
         {
             TS_FAIL("testHdat> Error trying to locate MS_DUMP_DST_TBL");
             errlCommit(errhdl,RUNTIME_COMP_ID);
         }
         else if( !errhdl
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP)
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE))
         {
             TS_FAIL("testHdat> Did not get expected error trying to locate MS_DUMP_DST_TBL for non-PHYP/Standalone Payload");
         }
         else if( ((dump_addr == 0) || (dump_size < 16))
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP)
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE))
         {
             TS_FAIL("testHdat> NULL or zero size returned for get_host_data_section(MS_DUMP_DST_TBL)");
         }
         else if( (dump_size <16)
-                 || (dump_size == RUNTIME::DATA_SIZE_UNKNOWN) )
+                 || (dump_size == RUNTIME::DATA_SIZE_UNKNOWN))
         {
             TS_FAIL("testHdat> Size of MS_DUMP_DST_TBL is unexpected");
         }
@@ -205,7 +193,6 @@ class HdatServiceTest: public CxxTest::TestSuite
             delete errhdl;
         }
 
-
         errhdl = RUNTIME::get_host_data_section(
                                     RUNTIME::MS_DUMP_RESULTS_TBL,
                                     0,
@@ -213,26 +200,26 @@ class HdatServiceTest: public CxxTest::TestSuite
                                     dump_size );
 
         if( errhdl
-            && ((payload_kind == TARGETING::PAYLOAD_KIND_PHYP) 
-                || (payload_kind == TARGETING::PAYLOAD_KIND_NONE)) )
+            && ((payload_kind == TARGETING::PAYLOAD_KIND_PHYP)
+            || (payload_kind == TARGETING::PAYLOAD_KIND_NONE)))
         {
             TS_FAIL("testHdat> Error trying to locate MS_DUMP_SRC_TBL");
             errlCommit(errhdl,RUNTIME_COMP_ID);
         }
         else if( !errhdl
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP)
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE))
         {
             TS_FAIL("testHdat> Did not get expected error trying to locate MS_DUMP_RESULTS_TBL for non-PHYP/Standalone Payload");
         }
         else if( ((dump_addr == 0) || (dump_size < 16))
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP) 
-                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE) )
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_PHYP)
+                 && (payload_kind != TARGETING::PAYLOAD_KIND_NONE))
         {
             TS_FAIL("testHdat> NULL or zero size returned for get_host_data_section(MS_DUMP_RESULTS_TBL)");
         }
         else if( (dump_size <16)
-                 || (dump_size == RUNTIME::DATA_SIZE_UNKNOWN) )
+                 || (dump_size == RUNTIME::DATA_SIZE_UNKNOWN))
         {
             TS_FAIL("testHdat> Size of MS_DUMP_RESULTS_TBL is unexpected");
         }
@@ -246,7 +233,11 @@ class HdatServiceTest: public CxxTest::TestSuite
 
     void testSpira( void )
     {
-#ifdef REAL_HDAT_TEST
+        // @TODO JIRA PFHB-15 Remove this if statement.
+        if ( ! TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_STANDALONE>())
+        {
+            return;
+        }
         TRACFCOMP( g_trac_runtime, "testSpira> start" );
         errlHndl_t errhdl = NULL;
 
@@ -273,6 +264,7 @@ class HdatServiceTest: public CxxTest::TestSuite
         }
 
 
+        bool found_spira_l = false, found_spira_s = false, found_spira_h = false;
         uint64_t spiral_addr = 0;
         size_t spiral_size = 0;
         errhdl = RUNTIME::get_host_data_section(
@@ -287,12 +279,16 @@ class HdatServiceTest: public CxxTest::TestSuite
         }
         else if( spiral_addr == 0 )
         {
-            TS_FAIL("testSpira> NULL returned for get_host_data_section(SPIRA_L)");
+            TS_INFO("testSpira> NULL returned for get_host_data_section(SPIRA_L). Will check SPIRA H/S");
         }
         else if( (spiral_size == 0)
                  || (spiral_size == RUNTIME::DATA_SIZE_UNKNOWN) )
         {
             TS_FAIL("testSpira> Size of SPIRA_L data too small");
+        }
+        else
+        {
+            found_spira_l = true;
         }
 
 
@@ -308,16 +304,19 @@ class HdatServiceTest: public CxxTest::TestSuite
             TS_FAIL("testSpira> Error trying to locate SPIRA_S");
             errlCommit(errhdl,RUNTIME_COMP_ID);
         }
-        else if( spiras_addr == 0 )
+        else if( spiras_addr == 0  && !found_spira_l)
         {
-            TS_FAIL("testSpira> NULL returned for get_host_data_section(SPIRA_S)");
+            TS_FAIL("testSpira> NULL returned for get_host_data_section(SPIRA_S) and could not find Legacy SPIRA either!");
         }
         else if( (spiras_size == 0)
                  || (spiras_size == RUNTIME::DATA_SIZE_UNKNOWN) )
         {
             TS_FAIL("testSpira> Size of SPIRA-S data too small");
         }
-
+        else
+        {
+            found_spira_s = true;
+        }
 
         uint64_t spirah_addr = 0;
         size_t spirah_size = 0;
@@ -331,14 +330,37 @@ class HdatServiceTest: public CxxTest::TestSuite
             TS_FAIL("testSpira> Error trying to locate SPIRA_H");
             errlCommit(errhdl,RUNTIME_COMP_ID);
         }
-        else if( spirah_addr == 0 )
+        else if(spirah_addr == 0)
         {
-            TS_FAIL("testSpira> NULL returned for get_host_data_section(SPIRA_H)");
+            if ( found_spira_s )
+            {
+                TS_FAIL("testSpira> NULL returned for get_host_data_section(SPIRA_H)");
+            }
+            // A later check will handle the case where the Legacy SPIRA was found and used instead of SPIRA H/S.
+            // So, do nothing and leave this if/else if logic.
         }
         else if( (spirah_size == 0)
                  || (spirah_size == RUNTIME::DATA_SIZE_UNKNOWN) )
         {
             TS_FAIL("testSpira> Size of SPIRA_H data too small");
+        }
+        else
+        {
+            found_spira_h = true;
+        }
+
+        // Make sure either Legacy SPIRA or SPIRA H/S were found during the test.
+        if (!found_spira_l && !found_spira_s && !found_spira_h)
+        {
+            TS_FAIL("testSpira> Did not find any SPIRAs!");
+        }
+        // Ensure that SPIRA S and H were found together. Need both.
+        if ((found_spira_s && !found_spira_h)
+             || (!found_spira_s && found_spira_h))
+        {
+            TS_FAIL("testSpira> Only 1 of SPIRA H/S was found. The other was not. Found S = %d, Found H = %d",
+                    found_spira_s,
+                    found_spira_h);
         }
 
         errhdl = new ERRORLOG::ErrlEntry(
@@ -346,17 +368,14 @@ class HdatServiceTest: public CxxTest::TestSuite
                             RUNTIME::MOD_HDATSERVICE_VERIFY_HDAT_ADDRESS,
                             RUNTIME::RC_BAD_HDAT_HEADER,
                             0,0 );
-        add_host_data_ffdc(RUNTIME::HSVC_NODE_DATA,errhdl);
-        add_host_data_ffdc(RUNTIME::HSVC_SYSTEM_DATA,errhdl);
-        add_host_data_ffdc(RUNTIME::NACA,errhdl);
-        add_host_data_ffdc(RUNTIME::SPIRA_L,errhdl);
-        add_host_data_ffdc(RUNTIME::SPIRA_S,errhdl);
-        add_host_data_ffdc(RUNTIME::SPIRA_H,errhdl);
+        RUNTIME::add_host_data_ffdc(RUNTIME::NACA,errhdl);
+        RUNTIME::add_host_data_ffdc(RUNTIME::SPIRA_L,errhdl);
+        RUNTIME::add_host_data_ffdc(RUNTIME::SPIRA_S,errhdl);
+        RUNTIME::add_host_data_ffdc(RUNTIME::SPIRA_H,errhdl);
         errlCommit(errhdl,RUNTIME_COMP_ID);
 
 
         TRACFCOMP( g_trac_runtime, "testSpira> finish" );
-#endif
     }
 
     // Handle the case where we are running the testcases before the

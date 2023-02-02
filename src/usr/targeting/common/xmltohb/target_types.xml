@@ -2490,6 +2490,10 @@
       <id>ISTEP_PAUSE_ENABLE</id>
     </attribute>
     <attribute>
+      <default>0x0</default>
+      <id>IS_STANDALONE</id>
+    </attribute>
+    <attribute>
       <id>KEY_CLEAR_REQUEST</id>
     </attribute>
     <attribute>

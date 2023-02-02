@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -156,18 +156,12 @@ void *  call_hdat_steps( void *io_pArgs )
     hdatMsAddr_t i_msAddr,l_cpuAddr;
     hdat5Tuple_t l_spirasHostEntry, l_spirhCpuCtrlEntry;
     do {
+        Target * sys = TARGETING::UTIL::assertGetToplevelTarget();
 
-        TARGETING::Target * sys = NULL;
-        TARGETING::targetService().getTopLevelTarget( sys );
-        assert(sys != NULL);
-
-        // Figure out what kind of payload we have
-        TARGETING::PAYLOAD_KIND payload_kind
-                 = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
-
-        //true => FSP present. OR Payload Kind None
-        if(INITSERVICE::spBaseServicesEnabled() ||
-                    payload_kind == TARGETING::PAYLOAD_KIND_NONE  )
+        //true => FSP present or payload kind is none and not P10 standalone.
+        if(INITSERVICE::spBaseServicesEnabled()
+           || ((sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>() == TARGETING::PAYLOAD_KIND_NONE)
+                && !sys->getAttr<ATTR_IS_STANDALONE>()))
         {
             break;
         }

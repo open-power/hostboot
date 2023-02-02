@@ -3480,6 +3480,23 @@
   </attribute>
 
   <attribute>
+    <id>IS_STANDALONE</id>
+    <description>
+        Attribute to determine if this is full system or standalone simics config.
+        Useful for when full system configs should behave different from standalone.
+        1 = Standalone simics
+        0 = Full system hardware or simics
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>KEY_CLEAR_REQUEST</id>
     <description>
         Indicates types of Key Clear Requests are being made

@@ -139,6 +139,10 @@
         <default>0x00010000</default>
     </attribute>
     <attribute>
+        <id>IS_STANDALONE</id>
+        <default>0x1</default>
+    </attribute>
+    <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
@@ -265,6 +269,10 @@
         <default>HB_DEFAULT</default><!-- Run with minimum cache -->
     </attribute>
     <attribute>
+        <id>SYSTEM_TYPE</id>
+        <default>ibm,rainier-2s2u</default><!-- Required to make HDAT work -->
+    </attribute>
+    <attribute>
         <id>MSS_INTERLEAVE_ENABLE</id>
         <default>0xAE</default><!-- Require pairs -->
     </attribute>
@@ -316,6 +324,21 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>NODE0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>2</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>eepromContentType</id><value>0x2</value></field>
+        </default>
     </attribute>
 </targetInstance>
 

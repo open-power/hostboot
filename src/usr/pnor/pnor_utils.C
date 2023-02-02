@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 
 #include "pnor_utils.H"
 #include <pnor/pnor_const.H>
+#include <util/misc.H>
 
 #ifdef BOOTLOADER
 #include <bootloader/bootloader_trace.H>
@@ -62,7 +63,6 @@ extern trace_desc_t* g_trac_pnor;;
 #endif
 
 #endif
-
 
 #include "common/ffs_hb.H"
 #include <util/align.H>

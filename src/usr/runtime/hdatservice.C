@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,8 +41,7 @@
 #include <errl/errlmanager.H>
 #include <targeting/attrrp.H>
 #include <dump/dumpif.H>
-
-//#define REAL_HDAT_TEST
+#include <util/misc.H>
 
 extern trace_desc_t* g_trac_runtime;
 
@@ -470,12 +469,13 @@ errlHndl_t hdatService::loadHostData(void)
         TARGETING::targetService().getTopLevelTarget( sys );
         assert(sys != NULL);
 
-#ifdef REAL_HDAT_TEST
-        // Manually load HDAT memory now
-        TRACFCOMP( g_trac_runtime, "Forcing PHYP mode for testing" );
-        MAGIC_INSTRUCTION(MAGIC_BREAK);
-        payload_kind = TARGETING::PAYLOAD_KIND_PHYP;
-#endif
+        if (Util::isSimicsRunning()
+            && sys->getAttr<TARGETING::ATTR_IS_STANDALONE>())
+        {
+            // Manually load HDAT memory now
+            TRACFCOMP( g_trac_runtime, "Forcing PHYP mode for standalone simics" );
+            payload_kind = TARGETING::PAYLOAD_KIND_PHYP;
+        }
 
         //If PHYP or Sapphire
         if( (TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) ||
@@ -507,29 +507,43 @@ errlHndl_t hdatService::loadHostData(void)
                     TRACFCOMP( g_trac_runtime, "No relocated payload base found, continuing on");
                 }
             }
-
-#ifdef REAL_HDAT_TEST
-            hdat_start = 256*MEGABYTE;
-#endif
             // make sure that our numbers are page-aligned, expected by
             // rest of hdatservice code
             assert(hdat_start == ALIGN_PAGE(hdat_start));
             assert (hdat_size == ALIGN_PAGE(hdat_size));
 
             errhdl = mapRegion(hdat_start, hdat_size, l_dummy);
+
+            if (Util::isSimicsRunning() && sys->getAttr<TARGETING::ATTR_IS_STANDALONE>())
+            {
+                // @TODO JIRA PFHB-398 Remove this if branch once dump tests can use HDAT properly.
+                // Map in some arbitrary memory for the DumpTest code to use
+                TRACFCOMP( g_trac_runtime, "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)",
+                          DUMP_TEST_MEMORY_ADDR,
+                          DUMP_TEST_MEMORY_ADDR + DUMP_TEST_MEMORY_SIZE,
+                          DUMP_TEST_MEMORY_SIZE);
+
+                errhdl = mapRegion(DUMP_TEST_MEMORY_ADDR,
+                                   DUMP_TEST_MEMORY_SIZE, l_dummy);
+                if(errhdl)
+                {
+                    break;
+                }
+            }
         }
-        else if( TARGETING::PAYLOAD_KIND_NONE == payload_kind )
+        else if ( TARGETING::PAYLOAD_KIND_NONE == payload_kind)
         {
+            // @TODO JIRA PFHB-15 Remove this elseif branch once HDAT is working for bonito
             // Standalone Test Image with no payload
             FakePayload::load();
 
             // Map in some arbitrary memory for the HostServices code to use
             TRACFCOMP( g_trac_runtime, "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", VMM_ATTR_DATA_START_OFFSET,
-                VMM_ATTR_DATA_START_OFFSET+VMM_ATTR_DATA_SIZE,
-                VMM_ATTR_DATA_SIZE);
+                    VMM_ATTR_DATA_START_OFFSET+VMM_ATTR_DATA_SIZE,
+                    VMM_ATTR_DATA_SIZE);
 
             errhdl = mapRegion(VMM_ATTR_DATA_START_OFFSET,
-                               VMM_ATTR_DATA_SIZE, l_dummy);
+                    VMM_ATTR_DATA_SIZE, l_dummy);
             if(errhdl)
             {
                 break;
@@ -537,11 +551,11 @@ errlHndl_t hdatService::loadHostData(void)
 
             // Map in some arbitrary memory for the DumpTest code to use
             TRACFCOMP( g_trac_runtime, "load_host_data> STANDALONE: Mapping in 0x%X-0x%X (%d MB)", DUMP_TEST_MEMORY_ADDR,
-                DUMP_TEST_MEMORY_ADDR+DUMP_TEST_MEMORY_SIZE,
-                DUMP_TEST_MEMORY_SIZE);
+                    DUMP_TEST_MEMORY_ADDR+DUMP_TEST_MEMORY_SIZE,
+                    DUMP_TEST_MEMORY_SIZE);
 
             errhdl = mapRegion(DUMP_TEST_MEMORY_ADDR,
-                               DUMP_TEST_MEMORY_SIZE, l_dummy);
+                    DUMP_TEST_MEMORY_SIZE, l_dummy);
             if(errhdl)
             {
                 break;
@@ -581,24 +595,24 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
 
         //Store record size for later
         size_t record_size = 0;
+        hdat5Tuple_t* tuple = nullptr;
 
         TARGETING::Target * sys = NULL;
         TARGETING::targetService().getTopLevelTarget( sys );
         assert(sys != NULL);
 
         // Figure out what kind of payload we have
-        TARGETING::PAYLOAD_KIND payload_kind
-          = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
+        TARGETING::PAYLOAD_KIND payload_kind = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
 
-#ifdef REAL_HDAT_TEST
-        TRACFCOMP( g_trac_runtime, "Forcing PHYP mode for testing" );
-        payload_kind = TARGETING::PAYLOAD_KIND_PHYP;
-#endif
-
-        hdat5Tuple_t* tuple = nullptr;
-
-        if( TARGETING::PAYLOAD_KIND_NONE == payload_kind )
+        if ((payload_kind == TARGETING::PAYLOAD_KIND_NONE)
+            && (( RUNTIME::MS_DUMP_SRC_TBL == i_section )
+                || ( RUNTIME::MS_DUMP_DST_TBL == i_section )
+                || ( RUNTIME::MS_DUMP_RESULTS_TBL == i_section )))
         {
+            // For now, standalone will continue to use hardcoded MS dump table memory locations.
+            // This check is done without the use of ATTR_IS_STANDALONE and relying on PAYLOAD_KIND_NONE since Bonito
+            // cannot load HDAT yet. JIRA PFHB-15 will fix this issue.
+            // @TODO JIRA PFHB-398 will implement standalone DUMP collect support. Using HDAT provided values
             errhdl = get_standalone_section( i_section,
                                              i_instance,
                                              o_dataAddr,
@@ -606,6 +620,15 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             // we're all done
             break;
         }
+
+        if (Util::isSimicsRunning() && sys->getAttr<TARGETING::ATTR_IS_STANDALONE>())
+        {
+            // For standlone we want to use PHYP as the payload kind to force the code to use HDAT. There are other
+            // areas of code where payload kind being NONE is still required for standalone.
+            TRACFCOMP( g_trac_runtime, "Forcing PHYP mode for standalone simics" );
+            payload_kind = TARGETING::PAYLOAD_KIND_PHYP;
+        }
+
         //If payload is not (PHYP or Sapphire)
         else if( !((TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) ||
             (TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind )))
@@ -646,7 +669,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             o_dataSize = sizeof(hdatNaca_t);
         }
         // SPIRA-H
-        else if( (RUNTIME::SPIRA_H == i_section) && iv_spiraH )
+        else if( (RUNTIME::SPIRA_H == i_section) )
         {
             o_dataAddr = reinterpret_cast<uint64_t>(iv_spiraH);
             if( iv_spiraH )
@@ -659,7 +682,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             }
         }
         // SPIRA-S
-        else if( (RUNTIME::SPIRA_S == i_section) && iv_spiraS )
+        else if( (RUNTIME::SPIRA_S == i_section) )
         {
             o_dataAddr = reinterpret_cast<uint64_t>(iv_spiraS);
             if( iv_spiraS )
@@ -672,7 +695,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             }
         }
         // Legacy SPIRA
-        else if( (RUNTIME::SPIRA_L == i_section) && iv_spiraL )
+        else if( (RUNTIME::SPIRA_L == i_section) )
         {
             o_dataAddr = reinterpret_cast<uint64_t>(iv_spiraL);
             if( iv_spiraL )
@@ -978,10 +1001,21 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             break;
         }
 
-        // Make sure the range we return is pointing somewhere valid
-        errhdl = verify_hdat_address( reinterpret_cast<void*>(o_dataAddr),
-                                      o_dataSize );
-        if( errhdl ) { break; }
+        if ((i_section == RUNTIME::SPIRA_L) && (iv_spiraL == nullptr) && (iv_spiraS != nullptr))
+        {
+            TRACFCOMP ( g_trac_runtime, "getHostDataSection> SPIRA L not found, but SPIRA S is not null. "
+                       "Skip verifying hdat address.");
+        }
+        else
+        {
+            // Make sure the range we return is pointing somewhere valid
+            errhdl = verify_hdat_address( reinterpret_cast<void*>(o_dataAddr),
+                                          o_dataSize );
+            if( errhdl )
+            {
+                break;
+            }
+        }
 
         // Override the data size value if we've got a stored actual
         if( iv_actuals[i_section] != ACTUAL_NOT_SET )
