@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -683,8 +683,7 @@ fapi2::ReturnCode ody_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     FAPI_TRY(omiSetACTagPASIDMetaData(i_target));
     FAPI_TRY(omiEnableAFU(i_target));
 
-    // TODO: MST-1532: Specialize this function for odyssey
-    //FAPI_TRY(mss::unmask::after_mc_omi_init<mss::mc_type::ODYSSEY>(i_target));
+    FAPI_TRY(mss::unmask::after_mc_omi_init<mss::mc_type::ODYSSEY>(i_target));
 
 fapi_try_exit:
 

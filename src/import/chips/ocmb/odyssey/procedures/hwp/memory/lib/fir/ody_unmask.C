@@ -36,6 +36,7 @@
 
 #include <fapi2.H>
 #include <ody_scom_ody_odc.H>
+#include <ody_scom_omi_odc.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/fir/ody_fir_traits.H>
@@ -193,6 +194,84 @@ fapi2::ReturnCode after_memdiags_enable_rcd_recovery_helper( const fapi2::Target
                      scomt::ody::ODC_SRQ_MBA_FARB0Q_CFG_RCD_PROTECTION_TIME_LEN>(l_wrdone_dly - 1);
 
     FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB0Q, l_farb0));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Unmask and setup actions performed after omi_init - specialization for Odyssey
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note Code is based upon the RAS document from 1FEB2023
+///
+template<>
+fapi2::ReturnCode after_mc_omi_init<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    constexpr uint32_t MNFG_OMI_CRC_EDPL_SCREEN = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_POLICY_FLAG_AVAIL_05;
+
+    fapi2::buffer<uint64_t> l_reg_data;
+
+    bool l_mfg_omi_crc_edpl_screen = false;
+
+    // Create registers and check success for SRQFIR
+    mss::fir::reg2<scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR> l_srq_reg(i_target);
+
+    // Create register for MMIO_MFIR, TLX_LFIR, and MC_OMI_FIR
+    mss::fir::reg2<scomt::ody::ODC_MMIO_MFIR_RW_WCLEAR> l_mmio_mfir_reg(i_target);
+    mss::fir::reg2<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_RW_WCLEAR> l_tlx_lfir_reg(i_target);
+    mss::fir::reg2<scomt::omi::D_REG_MC_OMI_FIR_RW_WCLEAR> l_mc_omi_fir_reg(i_target);
+
+    // Check MNFG OMI_CRC_EDPL_SCREEN Policy flag
+    FAPI_TRY(mss::check_mfg_flag(MNFG_OMI_CRC_EDPL_SCREEN, l_mfg_omi_crc_edpl_screen));
+
+    // Unmask MMIO_MFIR
+    FAPI_TRY(l_mmio_mfir_reg.checkstop<scomt::ody::ODC_MMIO_MFIR_FSM_PERR>()
+             .checkstop<scomt::ody::ODC_MMIO_MFIR_FIFO_OVERFLOW>()
+             .checkstop<scomt::ody::ODC_MMIO_MFIR_CTL_REG_PERR>()
+             .recoverable_error<scomt::ody::ODC_MMIO_MFIR_INFO_REG_PERR>()
+             .write(), "Failed to Write MMIO MFIR register " GENTARGTIDFORMAT, GENTARGTID(i_target));
+
+    // Unmask TLX_LFIR
+    FAPI_TRY(l_tlx_lfir_reg.checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN08>()
+             .checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN09>()
+             .checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN10>()
+             .checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN11>()
+             .checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN12>()
+             .recoverable_error<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN13>()
+             .checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN14>()
+             .recoverable_error<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN15>()
+             .checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN17>()
+             .checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN18>()
+             .checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN19>()
+             .checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN20>()
+             .checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN21>()
+             .checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN23>()
+             .checkstop<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN25>()
+             .recoverable_error<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_IN26>()
+             .write(), "Failed to Write TLX LFIR register " GENTARGTIDFORMAT, GENTARGTID(i_target));
+
+    // Special setup for checkers that feed MC_OMI_FIR
+    FAPI_TRY(fapi2::getScom(i_target, scomt::omi::D_REG_DL0_ERROR_MASK, l_reg_data));
+    l_reg_data.clearBit<scomt::omi::D_REG_DL0_ERROR_MASK_14>()
+    .clearBit<scomt::omi::D_REG_DL0_ERROR_MASK_15>()
+    .clearBit<scomt::omi::D_REG_DL0_ERROR_MASK_16>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::omi::D_REG_DL0_ERROR_MASK, l_reg_data));
+
+
+    // Unmask MC_OMI_FIR
+    l_mc_omi_fir_reg.recoverable_error<scomt::omi::D_REG_MC_OMI_FIR_DL0_FLIT_CE>();
+
+    // Conditional unmasks
+    if (!l_mfg_omi_crc_edpl_screen)
+    {
+        l_mc_omi_fir_reg.recoverable_error<scomt::omi::D_REG_MC_OMI_FIR_DL0_CRC_ERROR>()
+        .recoverable_error<scomt::omi::D_REG_MC_OMI_FIR_DL0_EDPL>();
+    }
+
+    FAPI_TRY(l_mc_omi_fir_reg.write(), "Failed to Write MC OMI FIR register " GENTARGTIDFORMAT, GENTARGTID(i_target));
+
+    // TODO: Zen:MST-1929: Add code to enable Odyssey FIR interrupts using the global FIR register
 
 fapi_try_exit:
     return fapi2::current_err;
