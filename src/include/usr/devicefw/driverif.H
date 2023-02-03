@@ -74,6 +74,8 @@ namespace DeviceFW
         I2C_MUX,
         SPI_EEPROM,
         SPI_TPM,
+        I2CR_SCOM,         // Access Odyssey SCOM over I2CR
+        I2CR_CFAM,         // Access Odyssey CFAM (FSI) over I2CR
         LAST_DRIVER_ACCESS_TYPE
     };
 
@@ -106,6 +108,18 @@ namespace DeviceFW
      */
     #define DEVICE_FSISCOM_ADDRESS(i_address) \
         DeviceFW::FSISCOM, static_cast<uint64_t>((i_address))
+
+    /** Construct the device addressing parameters for I2CR device ops.
+     *  @param[in] i_address - I2CR SCOM address to operate on.
+     */
+    #define DEVICE_I2CR_SCOM_ADDRESS(i_address) \
+        DeviceFW::I2CR_SCOM, static_cast<uint64_t>((i_address))
+
+    /** Construct the device addressing parameters for I2CR device ops.
+     *  @param[in] i_address - I2CR FSI/CFAM word address to operate on.
+     */
+    #define DEVICE_I2CR_CFAM_ADDRESS(i_address) \
+        DeviceFW::I2CR_CFAM, static_cast<uint64_t>((i_address))
 
     /** Construct the device addressing parameters for XSCOM device ops.
      *  @param[in] i_address - XSCom address to operate on.

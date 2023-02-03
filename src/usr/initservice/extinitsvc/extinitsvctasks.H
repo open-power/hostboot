@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -243,6 +243,20 @@ const TaskInfo g_exttaskinfolist[]   =   {
                 EXT_IMAGE,                      // Extended Module
             }
         },
+
+
+        /**
+         * @brief   I2CR Device Driver
+         */
+        {
+            "libi2cr.so" ,                      // taskname
+            NULL,                               // no pointer to fn
+            {
+                INIT_TASK,                      // task type
+                EXT_IMAGE,                      // Extended Module
+            }
+        },
+
 
         /**
          * @brief   Eeprom Task

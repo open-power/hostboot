@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2022
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -208,6 +208,7 @@ my $resident_modules = {
     "libmdia.so"                => '1',
     "libattn.so"                => '1',
     "libi2c.so"                 => '1',
+    "libi2cr.so"                => '1',
     "libeeprom.so"              => '1',
     "libspi.so"                 => '1',
     "libutil.so"                => '1',

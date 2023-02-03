@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -543,10 +543,18 @@ const char MDS_ACCESS_COMP_NAME[] = "mdsaccess";
 
 //
 //
+/** @name I2CR
+ *  I2CR Odyssey SCOM/CFAM device driver component
+ */
+//@{
+const compId_t I2CR_COMP_ID = 0x4900;
+const char I2CR_COMP_NAME[] = "i2cr";
+//@}
+
 /** @name HDAT
  *  HDAT component
- *  @Note HDAT_COMP_ID=0x9000 matches with what
- *  defined in fips_comp_id.H
+ *  @Note HDAT_COMP_ID=0x9000 matches with what is
+ *  defined in fips_comp_id.H 
  */
 //@{
 const compId_t HDAT_COMP_ID = 0x9000;

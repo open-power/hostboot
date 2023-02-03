@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -71,8 +71,8 @@
 trace_desc_t* g_trac_i2c = nullptr;
 TRAC_INIT( & g_trac_i2c, I2C_COMP_NAME, KILOBYTE );
 
-trace_desc_t* g_trac_i2cr = nullptr;
-TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
+trace_desc_t* g_trac_i2creg = nullptr;
+TRAC_INIT( & g_trac_i2creg, "I2CREG", KILOBYTE );
 
 // Easy macro replace for unit testing
 // #define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -2466,7 +2466,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
     TRACUCOMP( g_trac_i2c,
                ENTER_MRK"i2cRead()" );
 
-    TRACSCOMP( g_trac_i2cr,
+    TRACSCOMP( g_trac_i2creg,
                "I2C READ  START : engine %.2X : port %.2X : devAddr %.2X : "
                "len %d",
                i_args.engine, i_args.port, i_args.devAddr, i_buflen);
@@ -2616,7 +2616,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
             // Every time FIFO is read, reset timeout count
             timeoutCount = I2C_TIMEOUT_COUNT( interval_ns );
 
-            TRACUCOMP( g_trac_i2cr,
+            TRACUCOMP( g_trac_i2creg,
                        "I2C READ  DATA  : engine %.2X : port %.2x : "
                        "devAddr %.2X : byte %d : %.2X (0x%lx)",
                        i_args.engine, i_args.port, i_args.devAddr,
@@ -2653,7 +2653,7 @@ errlHndl_t i2cRead ( TARGETING::Target * i_target,
         }
     } while( 0 );
 
-    TRACSCOMP( g_trac_i2cr,
+    TRACSCOMP( g_trac_i2creg,
                "I2C READ  END   : engine %.2X : port %.2x : devAddr %.2X : "
                "len %d",
                i_args.engine, i_args.port, i_args.devAddr, i_buflen );
@@ -2754,7 +2754,7 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
                 break;
             }
 
-            TRACSCOMP( g_trac_i2cr,
+            TRACSCOMP( g_trac_i2creg,
                        "I2C WRITE DATA  : engine %.2X : port %.2X : "
                        "devAddr %.2X : byte %d : %.2X (0x%lx)",
                        i_args.engine, i_args.port, i_args.devAddr,
@@ -2779,7 +2779,7 @@ errlHndl_t i2cWrite ( TARGETING::Target * i_target,
         io_buflen = bytesWritten;
     } while( 0 );
 
-    TRACSCOMP( g_trac_i2cr,
+    TRACSCOMP( g_trac_i2creg,
                "I2C WRITE END   : engine %.2X: port %.2X : devAddr %.2X : "
                "len %d", i_args.engine, i_args.port, i_args.devAddr, io_buflen);
 
