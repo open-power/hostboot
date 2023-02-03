@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2022
+# Contributors Listed Below - COPYRIGHT 2016,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -32,6 +32,7 @@ P10_PATH = ${SRC_IMPORT_PATH}/chips/p10
 P10_PROCEDURES_PATH = ${P10_PATH}/procedures/hwp
 OCMB_PATH = ${SRC_IMPORT_PATH}/chips/ocmb
 EXP_PROCEDURES_PATH = ${OCMB_PATH}/explorer/procedures/hwp
+ODY_PROCEDURES_PATH = ${OCMB_PATH}/odyssey/procedures/hwp
 
 # Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
@@ -48,6 +49,8 @@ EXTRAINCDIR += ${P10_PROCEDURES_PATH}/memory
 EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/ocmb/explorer/procedures/hwp/memory
 EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/ocmb/explorer/procedures/hwp/memory/lib
 EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/ocmb/explorer/common/include
+EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/ocmb/odyssey/procedures/hwp/memory
+EXTRAINCDIR += ${SRC_IMPORT_PATH}/chips/ocmb/odyssey/common/include
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/lib/
@@ -62,6 +65,8 @@ OBJS += establish_system_smp.o
 OBJS += htmgt_memthrottles.o
 OBJS += p10_mss_utils_to_throttle.o
 OBJS += exp_bulk_pwr_throttles.o
+OBJS += ody_bulk_pwr_throttles.o
+OBJS += ody_throttle.o
 
 # Include the makefiles to compile the HWPs needed by the sub steps
 include ${ROOTPATH}/procedure.rules.mk
@@ -75,6 +80,8 @@ VPATH += ${P10_PROCEDURES_PATH}/nest
 VPATH += ${P10_PROCEDURES_PATH}/pm
 VPATH += ${P10_PROCEDURES_PATH}/memory
 VPATH += ${EXP_PROCEDURES_PATH}/memory
+VPATH += ${ODY_PROCEDURES_PATH}/memory
+VPATH += ${ODY_PROCEDURES_PATH}/memory/lib/power_thermal/
 
 # Include the configuration after everything else has been added
 include ${ROOTPATH}/config.mk

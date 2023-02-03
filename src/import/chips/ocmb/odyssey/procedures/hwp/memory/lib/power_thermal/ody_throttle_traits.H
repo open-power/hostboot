@@ -22,13 +22,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// EKB-Mirror-To: hostboot
 
 ///
 /// @file ody_throttle_traits.H
 /// @brief throttle register traits API
 ///
 
-// *HWP HWP Owner: Matt Hickman <Matthew.Hickman@ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
