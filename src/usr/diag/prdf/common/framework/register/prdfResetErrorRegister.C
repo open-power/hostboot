@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,8 +40,6 @@
 
 #include <iipscr.h>
 #include <iipResetErrorRegister.h>
-#include <iipXorResetErrorRegister.h>
-#include <xspprdAndResetErrorRegister.h>
 #include <iipServiceDataCollector.h>
 
 #ifndef __HOSTBOOT_MODULE
@@ -142,65 +140,6 @@ ResetAndMaskErrorRegister::Reset(const BitKey & bit_list,
     }
 
     return rc;
-}
-
-// ----------------------------------------------------------------------
-
-int32_t XorResetErrorRegister::Reset(const BitKey & bit_list,
-                                    STEP_CODE_DATA_STRUCT & error)
-{
-  #ifndef __HOSTBOOT_MODULE
-  ServiceDataCollector & sdc = *(error.service_data);
-  SyncAnalysis (sdc);
-  #endif
-
-  int32_t rc = ErrorRegisterMask::Reset(bit_list,error);  // set mask bits and undo filters
-  uint32_t bl_length = bit_list.size();
-
-  if(bl_length != 0) // Check for bits to reset
-  {
-    scr.clearAllBits();
-
-    // Turn on all bits to be reset
-    // We acted on all bits in bit_list so they should all be on
-    // in the hdw register
-    uint32_t i;
-    for(i = 0; i < bl_length; ++i)  // Turn on bits to be reset
-    {
-      scr.SetBit(bit_list.getListValue(i));
-    }
-    rc = scr.Write();    // Write hardware
-  }
-  return rc;
-}
-
-// -----------------------------------------------------------------------
-
-int32_t AndResetErrorRegister::Reset(const BitKey & bit_list,
-                                    STEP_CODE_DATA_STRUCT & error)
-{
-  #ifndef __HOSTBOOT_MODULE
-  ServiceDataCollector & sdc = *(error.service_data);
-  SyncAnalysis (sdc);
-  #endif
-
-  // set internal mask bits if threshold
-  int32_t rc = ErrorRegisterMask::Reset(bit_list,error); // set mask bits and undo filters
-
-  uint32_t bl_length = bit_list.size();
-  if(bl_length !=0)
-  {
-    BitStringBuffer bs(xAndResetScr.GetBitLength());
-    bs.setAll(); // set to all ones
-    uint32_t i;
-    for(i = 0; i < bl_length; ++i)  // Turn off all bits used to isolate problem
-    {
-      bs.clearBit(bit_list.getListValue(i));
-    }
-    xAndResetScr.SetBitString(&bs); // copy bs to SCR bit string
-    rc = xAndResetScr.Write();   // Write hardware (result = Hareware value ANDed with bs)
-  }
-  return rc;
 }
 
 } //End namespace PRDF
