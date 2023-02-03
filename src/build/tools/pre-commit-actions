@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2022
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -43,6 +43,17 @@ if ( @fileList )
     print "\n";
 
     my $nproc = `nproc`;
+
+    unless (defined $nproc)
+    {
+        # Some users will use MacOS (Unix) instead of Linux, which does not
+        # have `nproc`. If that did not return a value, try the MacOS method.
+        $nproc = `sysctl -n hw.logicalcpu`;
+    }
+
+    # Just in case the above commands fail for some reason. Otherwise, the
+    # script will hang in an infinite loop.
+    $nproc = 1 unless (defined $nproc);
 
     my @fileListCopy = @fileList;
     my @pids;
