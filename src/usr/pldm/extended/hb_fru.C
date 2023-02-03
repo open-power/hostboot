@@ -58,6 +58,8 @@
 #include <pldm/requests/pldm_fru_requests.H>
 #include <pldm/pldm_trace.H>
 #include <pldm/pldmif.H>
+#include <pldm/requests/pldm_fileio_requests.H>
+#include <oem/ibm/libpldm/file_io.h>
 
 // libpldm subtree headers
 #include <openbmc/pldm/libpldm/include/libpldm/fru.h>
@@ -81,6 +83,27 @@ const std::map<uint32_t, std::vector<uint16_t> > record_keyword_field_map {
   { VINI, { std::begin(valid_vini_keywords), std::end(valid_vini_keywords) } },
   { VSYS, { std::begin(valid_vsys_keywords), std::end(valid_vsys_keywords) } },
   { LXR0, { std::begin(valid_lxr0_keywords), std::end(valid_lxr0_keywords) } },
+  { PSPD, { std::begin(valid_pspd_keywords), std::end(valid_pspd_keywords) } },
+};
+
+// Map to identify the list of pound keywords to ADD
+// special_add_pspd_keywords (and any future changes) will iterate
+// over the list as whitelisted keywords to be added for the RECORD,
+// i.e. in this case the RECORD is PSPD
+const std::map<uint32_t, std::vector<uint16_t> > special_record_keywords_map {
+  { PSPD, { std::begin(special_add_pspd_keywords), std::end(special_add_pspd_keywords) } },
+};
+
+// Map of parameters to help abstract the call to getLidFileFromOffset
+// Needs a unique key to pull parms
+const std::map<uint64_t, vpdParms> special_record_keyword_parm_map {
+  //   For debug, you can add filehandle equal to the lid you want to load with 0x0 type
+  //   For debug, place the lid in /usr/local/share/hostfw/running
+  //   One-off design for PLDM is the filehandle will be zero for special pound keywords
+  //   Key in this map are the upper 32 bits are the RECORD name, lower 32 bits are the KEYWORD name
+  //   PSPD=0x50535044  #D=0x2344
+  //   parm_index                     filehandle  type                             record keyword -> struct vpdParms
+  { (((uint64_t) PSPD << 32) | pdD), {0x00000000,PLDM_FILE_TYPE_PSPD_VPD_PDD_KEYWORD,PSPD,pdD} }, // PSPD #D
 };
 
 /**
@@ -155,6 +178,150 @@ bool getRecordSetRecordValue(const uint8_t* const i_pldm_fru_table_buf,
     }
 
     return !o_value.empty();
+}
+
+/**
+ * @brief Retrieves the # keyword data payload, content only
+ *
+ * @param[in/out] io_lid_content byte vector to contain the # keyword content
+ * @param[in/out] io_vpd_parms  parmaeters to use for the file i/o,
+ *                              length will be output
+ *
+ * @return returns error log if error occurs, otherwise returns nullptr
+ */
+
+errlHndl_t retrieve_pound_keyword(std::vector<uint8_t>& io_lid_content,
+                             vpdParms& io_vpd_parms)
+{
+    errlHndl_t errl = nullptr;
+    const size_t READ_CHUNK_SIZE = 4096;
+    io_lid_content.clear();
+    io_lid_content.resize(READ_CHUNK_SIZE);
+    uint32_t offset = 0;
+    PLDM_INF("retrieve_pound_keyword io_vpd_parms.filehandle=0x%X io_vpd_parms.type=0x%X", io_vpd_parms.filehandle, io_vpd_parms.type);
+    while (true)
+    {
+        uint32_t bytes_read = READ_CHUNK_SIZE;
+
+        bool eof = false;
+        // Need to LOOP to get full content
+        errl = PLDM::getLidFileFromOffset(io_vpd_parms.filehandle,
+                                           offset,
+                                           bytes_read,
+                                           io_lid_content.data() + offset,
+                                           &eof,
+                                           io_vpd_parms.type);
+        if (errl)
+        {
+            // bytes_read should reflect either zero
+            // or value to handle cases below
+            delete errl;
+            errl = nullptr;
+        }
+        offset += bytes_read;
+        if (offset > MAX_RECORD_SIZE)
+        {
+            PLDM_INF("retrieve_pound_keyword FILE TOO BIG !! bytes_read=0x%X offset=0x%X", bytes_read, offset);
+            bytes_read = 0;
+            offset = 0;
+        }
+        if (bytes_read < READ_CHUNK_SIZE)
+        {
+            // if problem reading, bytes_read will be smaller than READ_CHUNK_SIZE
+            // so the resize will make adjustments for the caller, even in zero cases
+            io_lid_content.resize(offset); // adjust vector to what we read
+            break;
+        }
+
+        io_lid_content.resize(io_lid_content.size() + READ_CHUNK_SIZE); // add another chunk
+
+    } // while true
+
+    // Caller will get length retrieved from the size of the io_lid_content
+    PLDM_INF("retrieve_pound_keyword oi_lid_content.size()=0x%X", io_lid_content.size());
+    return errl;
+}
+
+/**
+ * @brief Append special # keywords in IPZ format to the record vector
+ *
+ * @param[in/out] io_record_bytes byte vector to contain the special keyword
+ *                                in IPZ format
+ * @param[in] i_record_name record name (ASCII) of the IPZ keyword to be appended to
+ *
+ * @return returns error log if error occurs, otherwise returns nullptr
+ */
+
+errlHndl_t append_keywords( std::vector<uint8_t>& io_record_bytes,
+                            uint32_t i_record_name)
+{
+    errlHndl_t errl = nullptr;
+    uint64_t parm_index = 0;
+    std::vector<uint8_t> pound_keyword_lid_content;
+    const auto& add_me_keywords = special_record_keywords_map.at(i_record_name);
+    for (const auto special_keyword : add_me_keywords)
+    {
+        pound_keyword_lid_content.clear();
+        parm_index = (uint64_t) i_record_name << 32 | special_keyword;
+        vpdParms parm_values = {};
+        PLDM_INF("append_keywords CHECKING parm_index=0x%X", parm_index);
+        const auto special_parms = special_record_keyword_parm_map.find(parm_index);
+        if (special_parms != special_record_keyword_parm_map.end())
+        {
+            parm_values = special_parms->second;
+            errl = retrieve_pound_keyword(pound_keyword_lid_content, parm_values);
+            if (errl)
+            {
+                PLDM_INF("append_keywords UNEXPECTED errl from retrieve_pound_keyword");
+                delete errl;
+                errl = nullptr;
+            }
+            if (!pound_keyword_lid_content.size())
+            {
+                // We thought there should have been something and we got nothing
+                PLDM_ERR("append_keywords CAUTION EXPECTED SOMETHING and GOT NOTHING !"
+                         " pound_keyword_lid_content.size()=0x%X i_record_name=0x%X special_keyword=0x%X",
+                         pound_keyword_lid_content.size(), i_record_name, special_keyword);
+                /*@
+                 * @errortype  ERRL_SEV_PREDICTIVE
+                 * @moduleid   MOD_APPEND_KEYWORDS
+                 * @reasoncode RC_FILE_IO_PROBLEM
+                 * @userdata1  i_record_name
+                 * @userdata2  special_keyword
+                 * @devdesc    Possible issue with retrieving PLDM file
+                 * @custdesc   A software error occurred during system boot
+                 */
+                 errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                      MOD_APPEND_KEYWORDS,
+                                      RC_FILE_IO_PROBLEM,
+                                      i_record_name,
+                                      special_keyword,
+                                      ErrlEntry::NO_SW_CALLOUT);
+                 addBmcErrorCallouts(errl);
+                 addPldmFrData(errl);
+                 errlCommit(errl, PLDM_COMP_ID);
+            }
+        }
+
+        if (pound_keyword_lid_content.size())
+        {
+            PLDM_INF("append_keywords ADDING record=0x%X keyword=0x%X length=0x%X (%d)",
+                     i_record_name, special_keyword, pound_keyword_lid_content.size(), pound_keyword_lid_content.size());
+            // ONLY length is little endian swapped in the io_record_bytes
+            io_record_bytes.push_back(parm_values.keyword >> 8);   // MSB keyword
+            io_record_bytes.push_back(parm_values.keyword & 0xFF); // LSB keyword
+
+            // push back in little endian order
+            io_record_bytes.push_back(pound_keyword_lid_content.size() & 0xFF); // LSB length
+            io_record_bytes.push_back(pound_keyword_lid_content.size() >> 8);   // MSB length
+
+            io_record_bytes.insert(io_record_bytes.end(),
+                                  pound_keyword_lid_content.begin(),
+                                  pound_keyword_lid_content.end());
+       }
+    }
+
+    return errl;
 }
 
 /**
@@ -900,7 +1067,7 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
                        fru_tlv->length);
                 record_name = *reinterpret_cast<const uint32_t *>(fru_tlv->value);
                 is_ipz_record = true;
-                PLDM_INF("generate_ipz_formatted_vpd: found record 0x%.08x", record_name);
+                PLDM_INF("generate_ipz_formatted_vpd: CANDIDATE MATCH found record_name=0x%X", record_name);
             }
 
 
@@ -955,6 +1122,20 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
                 std::copy(fru_tlv->value,
                           fru_tlv->value + fru_tlv->length,
                           back_inserter(record_bytes));
+                // We need to NOT handle anything before the first RT keyword and ONLY if we have extra keywords to add
+                if (j == (record_data->num_fru_fields-1)) // last time thru and any new keywords
+                {
+                    if (special_record_keywords_map.count(record_name) != 0)
+                    {
+                        PLDM_INF("generate_ipz_formatted_vpd: ADD SPECIAL keywords for record_name=0x%X", record_name);
+                        errl = append_keywords(record_bytes, record_name);
+                        if (errl)
+                        {
+                            delete errl;
+                            errl = nullptr;
+                        }
+                    }
+                }
             }
 
             if(is_ipz_record && !is_known_ipz_record)
@@ -989,6 +1170,7 @@ errlHndl_t generate_ipz_formatted_vpd(const uint8_t* const i_pldm_fru_table_buf,
             // NOTE : field is little-endian and we don't include the size of
             // the resource ids (2 bytes) nor the record length (2 bytes)
             // according to the Common VPD specification
+            //
             auto record_hdr_ptr =
               reinterpret_cast<standard_ipz_record_hdr *>(record_bytes.data());
             record_hdr_ptr->record_length = htole16(record_bytes.size() -
@@ -1035,6 +1217,7 @@ errlHndl_t pldmFruRecordSetToIPZ(const uint8_t* const i_pldm_fru_table_buf,
     // first process the input PLDM Fru records and translate them into
     // IPZ formated VPD Records
     std::vector<std::vector<uint8_t>> ipz_records;
+
     errl = generate_ipz_formatted_vpd(i_pldm_fru_table_buf,
                                       i_pldm_fru_record_count,
                                       ipz_records);
@@ -1101,7 +1284,7 @@ errlHndl_t pldmFruRecordSetToIPZ(const uint8_t* const i_pldm_fru_table_buf,
               back_inserter(o_ipz_vpd_buf));
     PLDM_DBG("pldmFruRecordSetToIPZ: o_ipz_vpd_buf size after copying vtoc record: %d", o_ipz_vpd_buf.size());
 
-    // copy the each of the translated IPZ records into the output buffer
+    // copy each of the translated IPZ records into the output buffer
     for(size_t i = 0; i < ipz_records.size(); i++)
     {
         std::copy(ipz_records[i].begin(),
@@ -1249,7 +1432,10 @@ bool get_vpd_kw_from_recordset(const uint8_t* i_pldm_fru_table_buf,
                         "get_vpd_kw_from_recordset: unexpected field length 0x%.02x or RT keyword",
                         fru_tlv->length);
                 record_name = *reinterpret_cast<const uint32_t *>(fru_tlv->value);
-                PLDM_INF("get_vpd_kw_from_recordset: found record 0x%.08x", record_name);
+                // This trace will show which RECORD RT's are processed in case PDR exchange
+                // does -NOT- send everything expected (aide in debugging any future issues)
+                // See record_keyword_field_map for expected RECORDs
+                PLDM_INF("get_vpd_kw_from_recordset: CANDIDATE MATCH found record 0x%X RT", record_name);
             }
 
             is_known_ipz_record = (record_keyword_field_map.find(record_name) !=
@@ -1755,6 +1941,16 @@ errlHndl_t cacheRemoteFruVpd()
                 {
                     PLDM_ERR("cacheRemoteFruVpd: An error occurred during pldmFruRecordSetToIPZ");
                     break;
+                }
+
+                // Dump out the possible IPZ Records being looked for, compare to records_in_set.
+                // records_in_set does -NOT- necessarily match, PDRs may contain IPZ RECORDs
+                // that we do -NOT- care about and we may -NOT- get all the record_keyword_field_map KEYs
+                // in the table, e.g. PSPD KEY will only be populated on Bonnell systems.
+                for (auto it = record_keyword_field_map.begin(); it != record_keyword_field_map.end(); it++)
+                {
+                    // See the other CANDIDATE MATCH to compare if results from append_keywords unexpected
+                    PLDM_INF("cacheRemoveFruVpd CANDIDATE MATCH record_keyword_field_map IPZ KEY=0x%X HUID=0x%X", it->first, get_huid(entity_target));
                 }
 
                 errl = EEPROM::cacheEepromBuffer(entity_target,

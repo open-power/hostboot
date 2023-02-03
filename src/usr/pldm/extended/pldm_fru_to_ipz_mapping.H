@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,8 @@
  *        PLDM FRU IPZ Keyword Mapping Doc
  */
 
+#include <oem/ibm/libpldm/file_io.h>
+
 namespace PLDM
 {
 
@@ -46,6 +48,12 @@ enum valid_records : uint32_t
     VINI = 0x56494E49,
     VSYS = 0x56535953,
     LXR0 = 0x4C585230,
+    PSPD = 0x50535044,
+};
+
+enum valid_special_keywords : uint16_t
+{
+    pdD  = 0x2344,
 };
 
 constexpr uint8_t RT_FIELD_TYPE = 2;
@@ -126,6 +134,38 @@ const uint16_t valid_lxr0_keywords[]
                   0x4C58,  // LX
                   0x565A   // VZ
                 };
+
+// Order must match PLDM FRU IPZ Keyword Mapping Doc
+const uint16_t valid_pspd_keywords[]
+                { 0xFFFF,  // invalid
+                  0xFFFF,  // invalid
+                  0x5254,  // RT
+                  0x5046,  // PF - not used
+                  0x564D,  // VM - not used
+                  0x565A,  // VZ - not used
+                };
+
+// special_add_xxx_keywords are a special type of
+// additional # keywords that will be appended
+// to the end of existing keywords for a record
+//
+// Special # keywords allowed to be explicitly ADDED
+// Must also be entered in special_record_keywords_map
+// Must also be entered in special_record_keyword_parm_map
+
+const uint16_t special_add_pspd_keywords[]
+                { pdD,  // #D
+                };
+
+// vpdParms are the parameters that are used to retrieve the special # keyword
+// data blobs (content only)
+struct vpdParms {
+                   uint32_t filehandle;        // input for getLidFileFromOffset
+                   pldm_fileio_file_type type; // input for getLidFileFromOffset
+                   uint32_t record;            // record value for meta data
+                   uint16_t keyword;           // keyword value for meta data
+};
+
 }
 
 #endif

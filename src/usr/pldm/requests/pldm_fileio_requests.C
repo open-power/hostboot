@@ -195,10 +195,11 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
                                 const uint32_t i_offset,
                                 uint32_t& io_numBytesToRead,
                                 uint8_t* o_file,
-                                bool* const o_eof)
+                                bool* const o_eof,
+                                pldm_fileio_file_type i_pound_keyword_type)
 {
-    PLDM_DBG("getLidFileFromOffset: File handle 0x%08x, Input size 0x%08x, Offset 0x%08x",
-               i_fileHandle, io_numBytesToRead, i_offset);
+    PLDM_DBG("getLidFileFromOffset: File handle 0x%08x, Input size 0x%08x, Offset 0x%08x i_pound_keyword_type=0x%X",
+               i_fileHandle, io_numBytesToRead, i_offset, i_pound_keyword_type);
     errlHndl_t l_errl = nullptr;
 
     size_t l_numTransfers = 1;
@@ -213,6 +214,17 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
         .offset = i_offset,
         .length = 0, // calculated later
     };
+
+    // i_pound_keyword_type will provide special case values provided for one-off pound keyword
+    // support provided by PLDM, i.e. today the ONLY case supported is PLDM_FILE_TYPE_PSPD_VPD_PDD_KEYWORD
+    // In the future additional one-off pound keyword values will be added if required
+    if (i_pound_keyword_type != PLDM_FILE_TYPE_INVALID)
+    {
+        l_req.file_type = i_pound_keyword_type;
+        // This field allows special request types to be sent to PLDM, i.e. PLDM_FILE_TYPE_PSPD_VPD_PDD_KEYWORD
+        PLDM_INF("getLidFileFromOffset SPECIAL OVERRIDE l_req.file_type=0x%X l_req.file_handle=0x%X",
+                 l_req.file_type, l_req.file_handle);
+    }
 
     if(io_numBytesToRead > MAX_TRANSFER_SIZE_BYTES)
     {

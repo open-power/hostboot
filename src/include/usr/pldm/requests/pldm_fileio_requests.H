@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 
 #include <errl/errlentry.H>
 #include <vector>
+#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/libpldm/file_io.h>
 
 namespace PLDM {
 
@@ -83,13 +84,15 @@ errlHndl_t getLidFile(uint32_t i_fileHandle,
  *                no more data to read.
  * @param[out] o_file the pointer to memory where the file is to be written
  * @param[out] o_eof whether an eof condition was encountered
+ * @param[in]  i_pound_keyword_type file i/o special type for PLDM to retrieve
  * @return nullptr on success; non-nullptr on error
  */
 errlHndl_t getLidFileFromOffset(uint32_t i_fileHandle,
                                 uint32_t i_offset,
                                 uint32_t& io_numBytesToRead,
                                 uint8_t* o_file,
-                                bool* o_eof = nullptr);
+                                bool* o_eof = nullptr,
+                                pldm_fileio_file_type i_pound_keyword_type = PLDM_FILE_TYPE_INVALID);
 
 /**
  * @brief Requests to write to a lid file starting with the specified offset
