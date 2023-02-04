@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,8 +35,6 @@
 #include <scom/runtime/rt_scomif.H>
 #include <targeting/common/utilFilter.H>
 #include <sbeio/sbeioif.H>
-
-#include <plat/mem/prdfMemChnlFailCache.H> // chnlFailScomList
 
 #include <map>
 

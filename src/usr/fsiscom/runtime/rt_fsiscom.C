@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,6 @@
 
 #include <runtime/hbrt_utilities.H>        // createGenericFspMsg
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
-#include <plat/mem/prdfMemChnlFailCache.H> // chnlFailScomList
 
 #include <map>
 
