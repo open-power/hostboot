@@ -218,14 +218,20 @@ class mr12_data : public mr_base_data<MC>
             return fapi2::current_err;
         }
 
+
         ///
-        /// @brief Sets the attribute for this MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @brief Sets the attribute for this MR for lab tool
+        /// @param[in] i_rank_info the rank on which to operate
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode set_attribute(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
-            return mss::attr::set_ddr5_dram_vrefcs(i_target, iv_vrefcs_value);
+            FAPI_TRY( mss::attr::set_ddr5_dram_vrefcs(i_rank_info.get_dimm_target(), iv_vrefcs_value),
+                      "Unable to get attributes for ddr5::mr12_data()" );
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         // All 8 bits are used, no need for bit enumerators

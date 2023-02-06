@@ -40,6 +40,7 @@
 #include <fapi2.H>
 
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_rank.H>
@@ -168,6 +169,29 @@ class mr2_data : public mr_base_data<MC>
             iv_device15_mpsm = l_data.getBit<DEVICE15_MPSM>();
             iv_internal_wr_timing = l_data.getBit<INTERNAL_WR_TIMING>();
             return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Sets the attribute for this MR for lab tool
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        {
+            const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_rank_info.get_port_target());
+            FAPI_TRY( mss::attr::set_mem_2n_mode(l_ocmb, iv_2n_mode_read_only), "Unable to set attributes for ddr5::mr2_data()" );
+            FAPI_TRY( mss::attr::set_mpsm(i_rank_info.get_port_target(), iv_mpsm),
+                      "Unable to set attributes for ddr5::mr2_data()" );
+            FAPI_TRY( mss::attr::set_cs_assert_in_mpc(i_rank_info.get_port_target(), iv_cs_during_mpc),
+                      "Unable to set attributes for ddr5::mr2_data()" );
+            FAPI_TRY( mss::attr::set_device15_mpsm(i_rank_info.get_port_target(), iv_device15_mpsm),
+                      "Unable to set attributes for ddr5::mr2_data()" );
+            FAPI_TRY( mss::attr::set_internal_wr_timing_mode(i_rank_info.get_port_target(), iv_internal_wr_timing),
+                      "Unable to set attributes for ddr5::mr2_data()" );
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         enum

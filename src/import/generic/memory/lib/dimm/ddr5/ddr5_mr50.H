@@ -40,6 +40,7 @@
 #include <fapi2.H>
 
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
@@ -163,6 +164,25 @@ class mr50_data : public mr_base_data<MC>
             iv_wr_crc_autodisable_status = l_data. template getBit<WR_CRC_AUTODISABLE_STATUS>();
 
             return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Sets the attribute for this MR for lab tool
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        {
+            FAPI_TRY(mss::attr::set_ddr5_wr_crc_err_status(i_rank_info.get_port_target(), iv_wr_crc_error_status),
+                     "Unable to set attributes for ddr5::mr50_data()");
+            FAPI_TRY(mss::attr::set_ddr5_wr_crc_autodisable_enable(i_rank_info.get_port_target(), iv_wr_crc_autodisable_enable),
+                     "Unable to set attributes for ddr5::mr50_data()");
+            FAPI_TRY(mss::attr::set_ddr5_wr_crc_autodisable_status(i_rank_info.get_port_target(), iv_wr_crc_autodisable_status),
+                     "Unable to set attributes for ddr5::mr50_data()");
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         enum

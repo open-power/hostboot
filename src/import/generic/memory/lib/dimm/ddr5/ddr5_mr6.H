@@ -40,6 +40,7 @@
 #include <fapi2.H>
 
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
@@ -266,6 +267,23 @@ class mr6_data : public mr_base_data<MC>
                      l_trtp_field,
                      iv_trtp));
 
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Sets the attribute for this MR for lab tool
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        {
+            FAPI_TRY( mss::attr::set_dram_twr(i_rank_info.get_port_target(), iv_wr_recovery),
+                      "Unable to set attributes for ddr5::mr6_data()" );
+            FAPI_TRY( mss::attr::set_dram_trtp(i_rank_info.get_port_target(), iv_trtp),
+                      "Unable to set attributes for ddr5::mr6_data()" );
+
+            return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
             return fapi2::current_err;
         }

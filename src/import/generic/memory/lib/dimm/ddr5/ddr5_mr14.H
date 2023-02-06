@@ -40,6 +40,7 @@
 #include <fapi2.H>
 
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_rank.H>
@@ -186,6 +187,27 @@ class mr14_data : public mr_base_data<MC>
             l_data. template extractToRight<CID, CID_LEN>(iv_ecs_reg_index);
 
             return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Sets the attribute for this MR for lab tool
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        {
+            FAPI_TRY( mss::attr::set_ddr5_dram_ecs_mode(i_rank_info.get_port_target(), iv_ecs_mode),
+                      "Unable to set attributes for ddr5::mr14_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_dram_ecs_reset_counter(i_rank_info.get_port_target(), iv_ecs_reset),
+                      "Unable to set attributes for ddr5::mr14_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_dram_ecs_count_mode(i_rank_info.get_port_target(), iv_row_count),
+                      "Unable to set attributes for ddr5::mr14_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_dram_ecs_srank_select(i_rank_info.get_port_target(), iv_ecs_reg_index),
+                      "Unable to set attributes for ddr5::mr14_data()" );
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         enum

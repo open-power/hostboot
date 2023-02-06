@@ -40,6 +40,7 @@
 #include <fapi2.H>
 
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
@@ -267,6 +268,27 @@ class mr8_data : public mr_base_data<MC>
                               fapi2::ENUM_ATTR_DDR5_DRAM_RD_POSTAMBLE_TCK0P5;
             iv_wr_postamble = l_data.getBit<WR_POSTAMBLE>() ? fapi2::ENUM_ATTR_DDR5_DRAM_WR_POSTAMBLE_TCK1P5 :
                               fapi2::ENUM_ATTR_DDR5_DRAM_WR_POSTAMBLE_TCK0P5;
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Sets the attribute for this MR for lab tool
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        {
+            FAPI_TRY( mss::attr::set_ddr5_dram_rd_preamble(i_rank_info.get_port_target(), iv_rd_preamble),
+                      "Unable to set attributes for ddr5::mr8_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_dram_wr_preamble(i_rank_info.get_port_target(), iv_wr_preamble),
+                      "Unable to set attributes for ddr5::mr8_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_dram_rd_postamble(i_rank_info.get_port_target(), iv_rd_postamble),
+                      "Unable to set attributes for ddr5::mr8_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_dram_wr_postamble(i_rank_info.get_port_target(), iv_wr_postamble),
+                      "Unable to set attributes for ddr5::mr8_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:

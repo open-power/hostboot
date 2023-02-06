@@ -116,6 +116,13 @@ class mr_base_data
         ///
         virtual fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const = 0 ;
 
+        ///
+        /// @brief Sets the attribute for this MR for lab tool
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        virtual fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) = 0;
+
 
 };
 

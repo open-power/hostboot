@@ -40,6 +40,7 @@
 #include <fapi2.H>
 
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_rank.H>
@@ -159,6 +160,29 @@ class mr111_data : public mr_base_data<MC>
             iv_global_dfe4_enable = l_data . template getBit<TAP4>();
 
             return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Sets the attribute for this MR for lab tool
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        {
+            FAPI_TRY( mss::attr::set_ddr5_global_dfe_gain(i_rank_info.get_port_target(), iv_global_dfe_gain_enable),
+                      "Unable to set attributes for ddr5::mr111_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_global_dfe_tap1(i_rank_info.get_port_target(), iv_global_dfe1_enable),
+                      "Unable to set attributes for ddr5::mr111_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_global_dfe_tap2(i_rank_info.get_port_target(), iv_global_dfe2_enable),
+                      "Unable to set attributes for ddr5::mr111_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_global_dfe_tap3(i_rank_info.get_port_target(), iv_global_dfe3_enable),
+                      "Unable to set attributes for ddr5::mr111_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_global_dfe_tap4(i_rank_info.get_port_target(), iv_global_dfe4_enable),
+                      "Unable to set attributes for ddr5::mr111_data()" );
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         enum

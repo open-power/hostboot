@@ -40,6 +40,7 @@
 #include <fapi2.H>
 
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_rank.H>
@@ -186,6 +187,23 @@ class mr112_data : public mr_base_data<MC>
             // Checks the gain bias
             FAPI_TRY(check_gain_bias(i_rank_info.get_dimm_target(), l_dimm_rank, l_gain_bias_field));
             iv_dfe_gain_bias[l_dimm_rank] = l_gain_bias_field;
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Sets the attribute for this MR for lab tool
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        {
+            FAPI_TRY( mss::attr::set_ddr5_dfe_gain_bias(i_rank_info.get_dimm_target(), iv_dfe_gain_bias),
+                      "Unable to set attributes ddr5::mr112_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_dfe_sign_bit(i_rank_info.get_dimm_target(), iv_dfe_sign_bit),
+                      "Unable to set attributes ddr5::mr112_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:

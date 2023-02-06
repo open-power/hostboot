@@ -40,6 +40,7 @@
 #include <fapi2.H>
 
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
@@ -264,6 +265,25 @@ class mr5_data : public mr_base_data<MC>
                      l_pd_field,
                      false,
                      iv_pd_drv_imp[i_rank_info.get_dimm_rank()]));
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Sets the attribute for this MR for lab tool
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        {
+            FAPI_TRY( mss::attr::set_dram_pu_drv_imp(i_rank_info.get_dimm_target(), iv_pu_drv_imp),
+                      "Unable to set attribute for ddr5::mr5_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_dram_test_mode(i_rank_info.get_port_target(), iv_drv_test_mode_supported_read_only),
+                      "Unable to set attribute for ddr5::mr5_data()" );
+            FAPI_TRY( mss::attr::set_dram_pd_drv_imp(i_rank_info.get_dimm_target(), iv_pd_drv_imp),
+                      "Unable to set attribute for ddr5::mr5_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:

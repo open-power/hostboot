@@ -40,6 +40,7 @@
 #include <fapi2.H>
 
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_rank.H>
@@ -171,6 +172,21 @@ class mr52_data : public mr_base_data<MC>
             l_data. template extractToRight<WINDOW, WINDOW_LEN>(iv_wr_crc_autodisable_window);
 
             return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Sets the attribute for this MR for lab tool
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        {
+            FAPI_TRY(mss::attr::set_ddr5_wr_crc_autodisable_window(i_rank_info.get_port_target(), iv_wr_crc_autodisable_window),
+                     "Unable to set attributes for ddr5::mr52_data()");
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         enum

@@ -40,6 +40,7 @@
 #include <fapi2.H>
 
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
@@ -213,6 +214,27 @@ class mr4_data : public mr_base_data<MC>
             FAPI_TRY(check_min_refresh_range(i_rank_info.get_dimm_target(),
                                              iv_wide_range_read_only,
                                              iv_min_refresh_rate_read_only));
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Sets the attribute for this MR for lab tool
+        /// @param[in] i_rank_info the rank on which to operate
+        /// @return FAPI2_RC_SUCCESS if and only if ok
+        ///
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        {
+            FAPI_TRY( mss::attr::set_ddr5_min_ref_rate(i_rank_info.get_port_target(), iv_min_refresh_rate_read_only),
+                      "Unable to set attributes for ddr5::mr4_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_ref_wide_range(i_rank_info.get_port_target(), iv_wide_range_read_only),
+                      "Unable to set attributes for ddr5::mr4_data()" );
+            FAPI_TRY( mss::attr::set_ddr5_ref_tuf(i_rank_info.get_port_target(), iv_tuf_read_only),
+                      "Unable to set attributes for ddr5::mr4_data()" );
+            FAPI_TRY( mss::attr::set_ref_rate_indic(i_rank_info.get_port_target(), iv_refresh_interval_rate),
+                      "Unable to set attributes for ddr5::mr4_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
