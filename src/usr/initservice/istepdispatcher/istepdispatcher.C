@@ -3257,6 +3257,11 @@ void IStepDispatcher::doWait(uint16_t i_waitSec)
     // Otherwise sleep for the requested number of seconds
     else
     {
+        CONSOLE::displayf(CONSOLE::VUART1, NULL,
+                          "**Pausing IPL for %d seconds (ATTR_ISTEP_PAUSE_ENABLE)**",
+                          i_waitSec);
+        CONSOLE::flush();
+
 #ifdef CONFIG_PLDM
         // Send heartbeats in intervals of min watchdog timeout / 2 so that
         // there is enough time for processing and propagation of the message
