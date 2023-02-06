@@ -24,9 +24,8 @@
 #
 # IBM_PROLOG_END_TAG
 
-function main ()
+function usage ()
 {
-    if [[ $# -eq 0 || $1 == "-h" || $1 == "--help" || $1 == "-help"  ]]; then
         echo ""
         echo "Description: This script will take two PHYP lids, concatenate them together and truncate the result to fit"
         echo "             into the standalone PAYLOAD section. The resulting payload.bin should be copied to both:"
@@ -39,6 +38,12 @@ function main ()
         echo "                 repo. It will just use your PROJECT_ROOT to find the files it depends on."
         echo "Examples: ${BASH_SOURCE[0]} /esw/san5/mraybuck/repos/p10/hostboot 88a00702.lid 80a00701.lid"
         echo "          ${BASH_SOURCE[0]} 88a00702.lid 80a00701.lid"
+}
+
+function main ()
+{
+    if [[ $# -eq 0 || $1 == "-h" || $1 == "--help" || $1 == "-help"  ]]; then
+        usage
         return 0
     fi
 
@@ -46,6 +51,7 @@ function main ()
         ls $1/hb &> /dev/null
         if [[ $? -ne 0 ]]; then
             echo "ERROR: Must be in a hostboot workon or provide a valid path to a hostboot repo."
+            usage
             return 1
         else
             echo "Using $1 as the hostboot repo to pull data from..."
@@ -54,22 +60,28 @@ function main ()
         fi
     fi
 
-    if [[ $# -ne 2 ]]; then
+    if [[ $# -gt 2 ]]; then
         echo "ERROR: Too many arguments given to script"
+        usage
+        return 1
+    fi
+    if [[ $# -ne 2 ]]; then
+        echo "ERROR: Too few arguments given to script"
+        usage
         return 1
     fi
 
     MASTER_CONTAINER_LID=$1
     PHYP_LID=$2
     # Make sure the lids can be found.
-    ls $MASTER_CONTAINER_LID &> /dev/null
-    if [[ $? -ne 0 ]]; then
-        echo "ERROR: Invalid path or missing file for $MASTER_CONTAINER_LID"
+    if [[ ! -e "$MASTER_CONTAINER_LID" ]]; then
+        echo "ERROR: Invalid path or missing file for $MASTER_CONTAINER_LID (master container lid)"
+        usage
         return 1
     fi
-    ls $PHYP_LID &> /dev/null
-    if [[ $? -ne 0 ]]; then
-        echo "ERROR: Invalid path or missing file for $PHYP_LID"
+    if [[ ! -e "$PHYP_LID" ]]; then
+        echo "ERROR: Invalid path or missing file for $PHYP_LID (phyp lid)"
+        usage
         return 1
     fi
 
