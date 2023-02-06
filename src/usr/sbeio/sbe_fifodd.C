@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,7 +161,7 @@ errlHndl_t SbeFifo::performFifoReset(TARGETING::Target * i_target)
 
     // Perform a write to the DNFIFO Reset to cleanup the fifo
     uint32_t l_dummy = 0xDEAD;
-    errl = writeFsi(i_target,SBE_FIFO_DNFIFO_RESET,&l_dummy);
+    errl = writeCfam(i_target,SBE_FIFO_DNFIFO_RESET,&l_dummy);
 
     mutex_unlock(&l_pubFifoOpMux);
 
@@ -186,7 +186,7 @@ errlHndl_t SbeFifo::writeRequest(TARGETING::Target * i_target,
         // protocol issues)
         uint64_t l_addr       = SBE_FIFO_DNFIFO_MAX_TSFR;
         uint32_t l_data       = 0;
-        errl = writeFsi(i_target,l_addr,&l_data);
+        errl = writeCfam(i_target,l_addr,&l_data);
         if (errl) break;
 
         //The first uint32_t has the number of uint32_t words in the request
@@ -203,7 +203,7 @@ errlHndl_t SbeFifo::writeRequest(TARGETING::Target * i_target,
             if (errl) break;
 
             // Send data into fifo
-            errl = writeFsi(i_target,l_addr,l_pSent);
+            errl = writeCfam(i_target,l_addr,l_pSent);
             if (errl) break;
 
             l_pSent++;
@@ -216,7 +216,7 @@ errlHndl_t SbeFifo::writeRequest(TARGETING::Target * i_target,
 
         l_addr = SBE_FIFO_UPFIFO_SIG_EOT;
         l_data = FSB_UPFIFO_SIG_EOT;
-        errl = writeFsi(i_target,l_addr,&l_data);
+        errl = writeCfam(i_target,l_addr,&l_data);
         if (errl) break;
 
     }
@@ -243,7 +243,7 @@ errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
     do
     {
         // read upstream status to see if room for more data
-        errl = readFsi(i_target,l_addr,&l_data);
+        errl = readCfam(i_target,l_addr,&l_data);
         if (errl) break;
 
         if ( !(l_data & UPFIFO_STATUS_FIFO_FULL) )
@@ -349,7 +349,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
             {
                 uint32_t l_data{};
                 // read next word
-                errl = readFsi(i_target,SBE_FIFO_DNFIFO_DATA_OUT,&l_data);
+                errl = readCfam(i_target,SBE_FIFO_DNFIFO_DATA_OUT,&l_data);
                 if (errl) break;
 
                 l_fifoBuffer.append(l_data);
@@ -391,7 +391,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
 
         //notify that EOT has been received
         uint32_t l_eotSig = FSB_UPFIFO_SIG_EOT;
-        errl = writeFsi(i_target,SBE_FIFO_DNFIFO_ACK_EOT,&l_eotSig);
+        errl = writeCfam(i_target,SBE_FIFO_DNFIFO_ACK_EOT,&l_eotSig);
         if (errl) break;
 
         //Determine if successful.
@@ -630,7 +630,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
     {
         // read dnstream status to see if data ready to be read
         // or if has hit the EOT
-        errl = readFsi(i_target,l_addr,&o_status);
+        errl = readCfam(i_target,l_addr,&o_status);
         if (errl) break;
 
         if (  (!(o_status & DNFIFO_STATUS_FIFO_EMPTY)) ||
@@ -740,7 +740,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
 /**
  * @brief read FSI
  */
-errlHndl_t SbeFifo::readFsi(TARGETING::Target * i_target,
+errlHndl_t SbeFifo::readCfam(TARGETING::Target * i_target,
                      uint64_t   i_addr,
                      uint32_t * o_pData)
 {
@@ -751,8 +751,8 @@ errlHndl_t SbeFifo::readFsi(TARGETING::Target * i_target,
                     i_target,
                     o_pData,
                     l_32bitSize,
-                    DEVICE_FSI_ADDRESS(i_addr));
-    SBE_TRACU("  readFsi addr=0x%08lx data=0x%08x",
+                    DEVICE_CFAM_ADDRESS(i_addr));
+    SBE_TRACU("  readCfam addr=0x%08lx data=0x%08x",
                          i_addr,*o_pData);
 
     return errl;
@@ -761,20 +761,20 @@ errlHndl_t SbeFifo::readFsi(TARGETING::Target * i_target,
 /**
  * @brief write FSI
  */
-errlHndl_t SbeFifo::writeFsi(TARGETING::Target * i_target,
+errlHndl_t SbeFifo::writeCfam(TARGETING::Target * i_target,
                      uint64_t   i_addr,
                      uint32_t * i_pData)
 {
     errlHndl_t errl = NULL;
 
-    SBE_TRACU("  writeFsi addr=0x%08lx data=0x%08x",
+    SBE_TRACU("  writeCfam addr=0x%08lx data=0x%08x",
                          i_addr,*i_pData);
     size_t l_32bitSize = sizeof(uint32_t);
     errl = deviceOp(DeviceFW::WRITE,
                     i_target,
                     i_pData,
                     l_32bitSize,
-                    DEVICE_FSI_ADDRESS(i_addr));
+                    DEVICE_CFAM_ADDRESS(i_addr));
 
     return errl;
 }

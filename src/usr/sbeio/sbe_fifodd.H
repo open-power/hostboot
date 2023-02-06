@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -646,42 +646,43 @@ class SbeFifo
                                    uint32_t          & o_status);
 
         /**
-         * @brief encapulate FSI read
+         * @brief Encapsulates a CFAM read.
          *
          * @param[in]  i_target         Target to access
-         * @param[in]  i_addr           FSI addressd
+         * @param[in]  i_addr           CFAM address
          * @param[out] o_pData          Pointer to receive data
          * @return errlHndl_t Error log handle on failure.
          */
-        errlHndl_t readFsi(TARGETING::Target * i_target,
+        errlHndl_t readCfam(TARGETING::Target * i_target,
                              uint64_t   i_addr,
                              uint32_t * o_pData);
         /**
-         * @brief encapulate FSI write
+         * @brief Encapsulates a CFAM write.
          *
          * @param[in]  i_target         Target to access
-         * @param[in]  i_addr           FSI addressd
+         * @param[in]  i_addr           CFAM address
          * @param[in]  i_pData          Pointer to receive data
          * @return errlHndl_t Error log handle on failure.
          */
-        errlHndl_t writeFsi(TARGETING::Target * i_target,
+        errlHndl_t writeCfam(TARGETING::Target * i_target,
                              uint64_t   i_addr,
                              uint32_t * i_pData);
 
         /**
-         * @brief SBE FIFO FSI register addresses
+         * @brief SBE FIFO CFAM register addresses. These addresses will be translated at the FSI device driver layer
+         *        into their byte address equivalents which is what the SBE FIFO expects to receive.
          */
         enum fifoRegisterAddress
         {
-            SBE_FIFO_UPFIFO_DATA_IN    = 0x00002480,
-            SBE_FIFO_UPFIFO_STATUS     = 0x00002484,
-            SBE_FIFO_UPFIFO_SIG_EOT    = 0x00002488,
-            SBE_FIFO_UPFIFO_REQ_RESET  = 0x0000248C,
-            SBE_FIFO_DNFIFO_DATA_OUT   = 0x000024C0,
-            SBE_FIFO_DNFIFO_STATUS     = 0x000024C4,
-            SBE_FIFO_DNFIFO_RESET      = 0x000024D0,
-            SBE_FIFO_DNFIFO_ACK_EOT    = 0x000024D4,
-            SBE_FIFO_DNFIFO_MAX_TSFR   = 0x000024D8,
+            SBE_FIFO_UPFIFO_DATA_IN    = 0x00002420, // Byte Addr 2480
+            SBE_FIFO_UPFIFO_STATUS     = 0x00002421, // Byte Addr 2484
+            SBE_FIFO_UPFIFO_SIG_EOT    = 0x00002422, // Byte Addr 2488
+            SBE_FIFO_UPFIFO_REQ_RESET  = 0x00002423, // Byte Addr 248C
+            SBE_FIFO_DNFIFO_DATA_OUT   = 0x00002430, // Byte Addr 24C0
+            SBE_FIFO_DNFIFO_STATUS     = 0x00002431, // Byte Addr 24C4
+            SBE_FIFO_DNFIFO_RESET      = 0x00002434, // Byte Addr 24D0
+            SBE_FIFO_DNFIFO_ACK_EOT    = 0x00002435, // Byte Addr 24D4
+            SBE_FIFO_DNFIFO_MAX_TSFR   = 0x00002436, // Byte Addr 24D8
         };
 
         enum sbeFifoUpstreamStatus
