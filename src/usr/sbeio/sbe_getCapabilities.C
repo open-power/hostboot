@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 #include <errl/errlmanager.H> // errlHndl_t
 #include <sbeio/sbe_psudd.H>  // SbeFifo::psuCommand
 #include "sbe_fifodd.H"       // SbeFifo::fifoGetCapabilitiesRequest
-#include <sbeio/sbe_utils.H>  // sbeCapabilities_t
+#include <sbeio/sbe_utils.H>  // sbeCapabilities2_t
 #include <sbeio/sbeioreasoncodes.H> // SBEIO_PSU, SBEIO_FIFO,
 #include <targeting/common/commontargeting.H>  // get_huid
 #include <targeting/targplatutil.H>  //getCurrentNodeTarget
@@ -54,7 +54,7 @@ using namespace ERRORLOG;
  *
  */
 void applySbeCapabilities(TargetHandle_t i_target,
-                          sbeCapabilities_t &i_capabilities)
+                          sbeCapabilities2_t &i_capabilities)
 {
     // Get the SBE Version from the SBE Capabilities and set the
     // attribute associated with SBE Version
@@ -135,7 +135,7 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
     TRACDCOMP(g_trac_sbeio, ENTER_MRK "getPsuSbeCapabilities");
 
     // Cache the SBE Capabilities' size for future uses
-    size_t l_sbeCapabilitiesSize = sizeof(sbeCapabilities_t);
+    size_t l_sbeCapabilitiesSize = sizeof(sbeCapabilities2_t);
 
     auto l_alignedMemHandle = sbeMalloc(l_sbeCapabilitiesSize);
 
@@ -253,8 +253,8 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
 
         // Create an SBE Capabilities structure to make it easy to pull data;
         // clear memory before use
-        sbeCapabilities_t l_sbeCapabilities;
-        memset(&l_sbeCapabilities, 0, sizeof(sbeCapabilities_t));
+        sbeCapabilities2_t l_sbeCapabilities;
+        memset(&l_sbeCapabilities, 0, sizeof(sbeCapabilities2_t));
 
         // If the returned size is greater than or equal to the needed size,
         // then copy all of the SBE capabilities
@@ -303,13 +303,13 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
     {
         // Get the needed structures to make the FIFO call
         // Create a FIFO request message. Default ctor initializes correctly
-        SbeFifo::fifoGetCapabilitiesRequest2 l_fifoRequest;
+        SbeFifo::fifoGetCapabilities2Request l_fifoRequest;
 
         // Create a FIFO response message.  No need to iniitilaize
-        SbeFifo::fifoGetCapabilitiesResponseEnd * l_fifoResponseEnd;
+        SbeFifo::fifoGetCapabilities2ResponseEnd * l_fifoResponseEnd;
 
         // create a large buffer for MAX response
-        uint8_t l_fifoResponseBuffer[sizeof(SBEIO::sbeCapabilities_t) + sizeof(*l_fifoResponseEnd)] = {0};
+        uint8_t l_fifoResponseBuffer[sizeof(SBEIO::sbeCapabilities2_t) + sizeof(*l_fifoResponseEnd)] = {0};
 
         // Make the call to perform the FIFO Chip Operation
         l_errl = SbeFifo::getTheInstance().performFifoChipOp(
@@ -326,8 +326,8 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
         }
 
         // Different versions change capabilites size
-        SBEIO::sbeCapabilities_t * pSbeCapabilities =
-            reinterpret_cast<SBEIO::sbeCapabilities_t *>(l_fifoResponseBuffer);
+        SBEIO::sbeCapabilities2_t * pSbeCapabilities =
+            reinterpret_cast<SBEIO::sbeCapabilities2_t *>(l_fifoResponseBuffer);
 
         // offset into l_fifoResponseBuffer for start of l_fifoResponseEnd
         uint32_t rspEndOffset = 0;
@@ -342,7 +342,7 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
                          sizeof(pSbeCapabilities->releaseTag) +
                    (sizeof(pSbeCapabilities->capabilities[0]) * capabilities_array_size);
 
-        l_fifoResponseEnd = reinterpret_cast<SbeFifo::fifoGetCapabilitiesResponseEnd *>
+        l_fifoResponseEnd = reinterpret_cast<SbeFifo::fifoGetCapabilities2ResponseEnd *>
                                 (l_fifoResponseBuffer + rspEndOffset);
 
         // Sanity check - are HW and HB communications in sync?
@@ -409,7 +409,7 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
         // verify attribute size large enough for all capabilites array
         static_assert(
              sizeof(ATTR_SBE_FIFO_CAPABILITIES_type) >= sizeof(pSbeCapabilities->capabilities),
-            "ATTR_SBE_FIFO_CAPABILITIES size out of sync with sbeCapabilities_t capabilities field size" );
+            "ATTR_SBE_FIFO_CAPABILITIES size out of sync with sbeCapabilities2_t capabilities field size" );
         TARGETING::ATTR_SBE_FIFO_CAPABILITIES_type l_fifo_capabilities = {};
         memcpy(l_fifo_capabilities, pSbeCapabilities->capabilities, (sizeof(pSbeCapabilities->capabilities[0]) * capabilities_array_size));
         i_target->setAttr<TARGETING::ATTR_SBE_FIFO_CAPABILITIES>(l_fifo_capabilities);

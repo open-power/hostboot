@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,14 +34,15 @@
 
 namespace SBEIO
 {
+    static constexpr size_t SBE_MAX_LENGTH_IMAGE_HASH = 16;
     /**
     * @brief Struct for the SBE Capabilities
     *
     * Complies with document Host_SBE_Interface_Specification_v0.9e.pdf
     */
     static constexpr uint8_t SBE_RELEASE_TAG_MAX_CHARS = 20;
+    static constexpr uint8_t SBE_MAX_CAPABILITIES = 24;
     static constexpr uint8_t SBE_MAX_CAPABILITIES_2 = 26;
-
     // access values into capabilities array
     static constexpr uint8_t  SBE_CAPABILITY_HALT_OFFSET = 22;
     static constexpr uint32_t SBE_CMD_HALT_SUPPORTED = 0xAB000001;
@@ -52,9 +53,27 @@ namespace SBEIO
         uint16_t minorVersion;
         uint32_t commitId;
         char     releaseTag[SBE_RELEASE_TAG_MAX_CHARS];  // AKA build tag
-        uint32_t capabilities[SBE_MAX_CAPABILITIES_2];
+        uint32_t capabilities[SBE_MAX_CAPABILITIES];
 
         sbeCapabilities_t() :
+              majorVersion(0),
+              minorVersion(0),
+              commitId(0),
+              releaseTag{ 0 },
+              capabilities{ 0 }
+        {
+        }
+    } PACKED;  // end struct sbeCapabilities_t
+
+    struct sbeCapabilities2_t
+    {
+        uint16_t majorVersion;
+        uint16_t minorVersion;
+        uint32_t commitId;
+        char     releaseTag[SBE_RELEASE_TAG_MAX_CHARS];  // AKA build tag
+        uint32_t capabilities[SBE_MAX_CAPABILITIES_2];
+
+        sbeCapabilities2_t() :
               majorVersion(0)
             , minorVersion(0)
             , commitId(0)
@@ -62,7 +81,7 @@ namespace SBEIO
             , capabilities{ 0 }
         {
         }
-    } PACKED;  // end struct sbeCapabilities_t
+    } PACKED;  // end struct sbeCapabilities2_t
 
     // For 4U max is 181 bytes - setting max to 256 words
     // See fips1010 sbeiInternal.H
