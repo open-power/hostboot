@@ -32,6 +32,9 @@
       <id>CLASS</id>
       <default>ASIC</default>
     </attribute>
+    <attribute>
+      <id>POSITION</id>
+    </attribute>
   </targetType>
 
   <targetType>
@@ -2122,9 +2125,6 @@
         </field>
       </default>
       <id>PARENT_DECONFIG_RULES</id>
-    </attribute>
-    <attribute>
-      <id>POSITION</id>
     </attribute>
     <attribute>
       <default>
