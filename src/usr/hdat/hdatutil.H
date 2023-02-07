@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,8 +86,11 @@ const uint16_t HDAT_VERSION3 = 3;
 #define SVPD_SN_KW_OFFSET                   68
 #define SVPD_SZ_KW_OFFSET                   94
 #define SVPD_DR_KW_OFFSET                   13
+#define SVPD_I_BLK_SZ_OFFSET                164
 #define SVPD_I_BLK_OFFSET                   166
+#define SVPD_A_BLK_SZ_OFFSET                4264
 #define SVPD_A_BLK_OFFSET                   4266
+#define SVPD_B_BLK_SZ_OFFSET                5292
 #define SVPD_B_BLK_OFFSET                   5294
 
 // SPD IPZ keyword sizes
@@ -103,6 +106,7 @@ const uint8_t  SVPD_JEDEC_DR_KW_SIZE = 16;
 #define SVPD_SPD_BYTE_TWO                   2
 #define SVPD_SPD_BYTE_THREE                 3
 #define SVPD_DDIMM_MODULE_TYPE              0x0A
+#define SVPD_PLANAR_MODULE_TYPE             0x0C
 #define SVPD_DDR4_DEVICE_TYPE               0x0C
 #define SVPD_DDR5_DEVICE_TYPE               0x12
 #define SVPD_JEDEC_BYTE_4                   4
@@ -124,6 +128,10 @@ const uint8_t  SVPD_JEDEC_DR_KW_SIZE = 16;
 #define SVPD_JEDEC_SINGLE_LOAD_STACK        0x02
 #define SVPD_JEDEC_SIGNAL_LOADING_MASK      0x03
 #define SVPD_JEDEC_DIE_COUNT_RIGHT_SHIFT    4
+
+// 384-511 #A RBS (Redundant Bit Steering)
+#define SVPD_DDR4_RBS_SZ                            128
+#define SVPD_DDR4_RBS_OFFSET                        384
 
 // Bytes 416~445 OEM Supplemental Information
 
@@ -656,6 +664,7 @@ uint32_t hdatCreateSzKeyWord(const char *i_jedec_vpd_ptr);
  * @param[in] i_jedec_ptr: Raw SPD keyword data
  * @param[out] o_fmtkwdSize: IPZ Formatted keyword data size
  * @param[out] o_fmtKwd: IPZ Formatted keyword data
+ * @param[in] i_target Target for PN/FN/SN/CCIN attributes
  *
  * @return errlHndl_t NULL on success
  *
@@ -665,7 +674,8 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
     const size_t      i_jedec_sz,
     char              *&i_jedec_ptr,
     size_t            &o_fmtkwdSize,
-    char              *&o_fmtKwd);
+    char              *&o_fmtKwd,
+    TARGETING::Target * i_target);
 
 /**
  * @brief Get the Max Cec nde count

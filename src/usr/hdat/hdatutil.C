@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,8 +27,8 @@
 #include <eeprom/eepromif.H>
 #include <stdio.h>
 #include <string.h>
-//*TODO RTC:216061 Re-enable when attr exists #include <p9_frequency_buckets.H>
 #include <util/utilcommonattr.H>
+#include <util/random.H>
 
 // To fetch topology id related structures
 #include <arch/memorymap.H>
@@ -1605,7 +1605,8 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
     const size_t      i_jedec_sz,
     char              *&i_jedec_ptr,
     size_t            &o_fmtkwdSize,
-    char              *&o_fmtKwd)
+    char              *&o_fmtKwd,
+    TARGETING::Target * i_target)
 {
     errlHndl_t l_err = nullptr;
     char     l_dr_str[SVPD_JEDEC_DR_KW_SIZE+1] = "       MB MEMORY";
@@ -1621,20 +1622,14 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
         // data. As of now the only supported format is DDR4 module with DDIMM.
         // So if its a DDR5 module (VPD format is unknown now) or any other
         // unknown types, we wont proceed further and return back.
-        if(i_jedec_ptr[SVPD_SPD_BYTE_THREE] == SVPD_DDIMM_MODULE_TYPE)
+        if((i_jedec_ptr[SVPD_SPD_BYTE_THREE] == SVPD_DDIMM_MODULE_TYPE) ||
+          (i_jedec_ptr[SVPD_SPD_BYTE_THREE] == SVPD_PLANAR_MODULE_TYPE))
         {
-            // It's a DDIMM
-            if ((i_jedec_ptr[SVPD_SPD_BYTE_TWO] == SVPD_DDR4_DEVICE_TYPE) &&
-                (0 == strncmp((char*)&i_jedec_ptr[DDIMM_SPD_BYTE_416],
-                              IBM_SPECIFIC_11S_FORMAT,SPD_SIZE_3_BYTES)))
+            if (i_jedec_ptr[SVPD_SPD_BYTE_TWO] == SVPD_DDR4_DEVICE_TYPE)
             {
-                // It's a DDR4 DDIMM
-                HDAT_DBG("Detected DDR4 DDIMM");
+                HDAT_DBG("Detected DDR4");
             }
-            else if ((i_jedec_ptr[SVPD_SPD_BYTE_TWO] ==
-                      SVPD_DDR5_DEVICE_TYPE) &&
-                     (0 == strncmp((char*)&i_jedec_ptr[DDIMM_SPD_BYTE_416],
-                                IBM_SPECIFIC_11S_FORMAT,SPD_SIZE_3_BYTES)))
+            else if (i_jedec_ptr[SVPD_SPD_BYTE_TWO] == SVPD_DDR5_DEVICE_TYPE)
             {
                 // It's a DDR5 DDIMM
                 HDAT_DBG("Detected DDR5 DDIMM, VPD format is unknown");
@@ -1642,7 +1637,7 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
             }
             else
             {
-                HDAT_DBG("Detected an unknown DDIMM");
+                HDAT_DBG("Detected an unknown DDR type");
                 HDAT_ERR("Invalid Byte 2 value(0x%2X), Unable to "
                          "determine DDR type for RID 0x%X.",
                          i_jedec_ptr[SVPD_SPD_BYTE_TWO],
@@ -1712,6 +1707,30 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
             i_jedec_ptr[SVPD_SPD_BYTE_TWO]);
         HDAT_DBG("i_jedec_ptr[SVPD_SPD_BYTE_THREE]=0x%x",
             i_jedec_ptr[SVPD_SPD_BYTE_THREE]);
+
+        TARGETING::ATTR_MEM_MRW_IS_PLANAR_type isDimms = false;
+        if (!i_target->tryGetAttr<ATTR_MEM_MRW_IS_PLANAR>(isDimms))
+        {
+            isDimms = false;
+        }
+        HDAT_INF("hdatConvertRawSpdToIpzFormat HUID=0x%X isDimms=0x%X", TARGETING::get_huid(i_target), isDimms);
+
+        TARGETING::ATTR_SERIAL_NUMBER_type l_SN = {'0'};
+        TARGETING::ATTR_PART_NUMBER_type l_PN = {'0'};
+        TARGETING::ATTR_FRU_CCIN_type l_CC = 0;
+
+        if (!(i_target->tryGetAttr<TARGETING::ATTR_FRU_CCIN>(l_CC)))
+        {
+            HDAT_INF("hdatConvertRawSpdToIpzFormat PROBLEM retrieving ATTR_FRU_CCIN HUID=0x%X", TARGETING::get_huid(i_target));
+        }
+        if (!(i_target->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_SN)))
+        {
+            HDAT_INF("hdatConvertRawSpdToIpzFormat PROBLEM retrieving ATTR_SERIAL_NUMBER HUID=0x%X", TARGETING::get_huid(i_target));
+        }
+        if (!(i_target->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_PN)))
+        {
+            HDAT_INF("hdatConvertRawSpdToIpzFormat PROBLEM retrieving ATTR_PART_NUMBER HUID=0x%X", TARGETING::get_huid(i_target));
+        }
 
         /* Synthesize SZ */
         l_szValue = hdatCreateSzKeyWord(i_jedec_ptr);
@@ -1796,23 +1815,30 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
                       ERRORLOG::ERRL_SEV_UNRECOVERABLE);
             return l_err;
         }
+        // If we are here we have a template
+        // src/usr/hdat/spd_ipz_template.dat
+        uint16_t template_I_sz = le16toh(*(reinterpret_cast<const uint16_t* const>(&o_fmtKwd[SVPD_I_BLK_SZ_OFFSET])));
+        uint16_t template_A_sz = le16toh(*(reinterpret_cast<const uint16_t* const>(&o_fmtKwd[SVPD_A_BLK_SZ_OFFSET])));
+        uint16_t template_B_sz = le16toh(*(reinterpret_cast<const uint16_t* const>(&o_fmtKwd[SVPD_B_BLK_SZ_OFFSET])));
+        HDAT_INF("hdatConvertRawSpdToIpzFormat template_I_sz=0x%X template_A_sz=0x%X template_B_sz=0x%X",
+                 template_I_sz, template_A_sz, template_B_sz);
         /****************** Synthesize VINI Block ******************/
 
-        // Copy CC keyword
+        // Copy CC keyword from Attribute
         memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_CC_KW_OFFSET]),
-            &i_jedec_ptr[DDIMM_SPD_BYTE_438], SVPD_JEDEC_CC_KW_SIZE);
+            &l_CC, std::min( (static_cast<uint16_t>(sizeof(l_CC))), (static_cast<uint16_t>(SVPD_JEDEC_CC_KW_SIZE))));
 
-        // Copy FN keyword
+        // Copy FN keyword (FN and PN values same) from Attribute
         memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_FN_KW_OFFSET]),
-            &i_jedec_ptr[DDIMM_SPD_BYTE_419], SVPD_FN_KW_SIZE);
+            l_PN, std::min( (static_cast<uint16_t>(sizeof(l_PN))), (static_cast<uint16_t>(SVPD_FN_KW_SIZE))));
 
-        // Copy PN keyword (PN and FN values are same)
+        // Copy PN keyword (PN and FN values same) from Attribute
         memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_PN_KW_OFFSET]),
-            &i_jedec_ptr[DDIMM_SPD_BYTE_419], SVPD_PN_KW_SIZE);
+            l_PN, std::min( (static_cast<uint16_t>(sizeof(l_PN))), (static_cast<uint16_t>(SVPD_PN_KW_SIZE))));
 
-        // Copy SN keyword
+        // Copy SN keyword from Attribute
         memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_SN_KW_OFFSET]),
-            &i_jedec_ptr[DDIMM_SPD_BYTE_426], SVPD_SN_KW_SIZE);
+            l_SN, std::min( (static_cast<uint16_t>(sizeof(l_SN))), (static_cast<uint16_t>(SVPD_SN_KW_SIZE))));
 
         // Copy SZ keyword
         memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_SZ_KW_OFFSET]),l_sz_str,
@@ -1822,26 +1848,49 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
         memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_DR_KW_OFFSET]),l_dr_str,
             SVPD_JEDEC_DR_KW_SIZE);
 
-        /****************** Synthesize VSPD Block ******************/
+        // See src/usr/hdat/spd_ipz_template.dat for the mapping of data,
+        // 000000a0  50 44 23 49 00 10 00 00  00 00 00 00 00 00 00 00  |PD#I............|  <= #I size=0x1000 (4096)
+        // ^ offset                ^ little endian
+        // byte 160
+        //           #define SVPD_I_BLK_SZ_OFFSET 164
+        //           #define SVPD_I_BLK_OFFSET    166
 
-        /* Synthesize #I KW of VSPD Block       */
-        /* (Copy maximum 4096 bytes of VPD for DDIMM)   */
+        /* Synthesize #I KW of VSPD Block                        */
+        /* i_jedec_sz will be properly set, i.e. SPD::ENTIRE_SPD */
         memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_I_BLK_OFFSET]),
-            &i_jedec_ptr[0], i_jedec_sz);
+            &i_jedec_ptr[0],
+            std::min(template_I_sz, static_cast<uint16_t>(i_jedec_sz)));
 
-        /* Synthesize #A KW of VSPD Block */
-        /* (copy 640 - 1023 bytes of VPD for DDIMM) */
-        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_A_BLK_OFFSET]),
-            &i_jedec_ptr[DDIMM_SPD_EMP_OFFSET],DDIMM_SPD_EMP_SZ);
-
-        /* Synthesize #B KW of VSPD Block */
-        /* (copy 3072 - 4095 bytes of VPD for DDIMM) */
-        /* Data copy is only carried out if we get the fully supported*/
-        /* size of 4096 bytes, other wise value remains zero */
-        if (i_jedec_sz == DDIMM_SPD_SZ)
+        if (!isDimms) // ISDIMMs are only 512 bytes in total size
         {
-            memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_B_BLK_OFFSET]),
-                &i_jedec_ptr[DDIMM_SPD_EUP_OFFSET], DDIMM_SPD_EUP_SZ);
+            /****************** Synthesize VSPD Block ******************/
+
+            /* Synthesize #A (RBS, Redundant Bit Sterring) KW of VSPD Block */
+            /* (copy offset 640-1023, 384 bytes of VPD for DDIMM) */
+            memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_A_BLK_OFFSET]),
+                   &i_jedec_ptr[DDIMM_SPD_EMP_OFFSET],
+                   std::min(template_A_sz, static_cast<uint16_t>(DDIMM_SPD_EMP_SZ)));
+
+            /* Synthesize #B KW of VSPD Block */
+            /* (copy offset 3072-4095, 1024 bytes of VPD for DDIMM) */
+            /* Data copy is only carried out if we get the fully supported*/
+            /* size of 4096 bytes, other wise value remains zero */
+            if (i_jedec_sz == DDIMM_SPD_SZ)
+            {
+                memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_B_BLK_OFFSET]),
+                       &i_jedec_ptr[DDIMM_SPD_EUP_OFFSET],
+                       std::min(template_B_sz, static_cast<uint16_t>(DDIMM_SPD_EUP_SZ)));
+            }
+        }
+        else
+        {
+            /****************** Synthesize VSPD Block ******************/
+
+            /* Synthesize #A (RBS, Redundant Bit Sterring) KW of VSPD Block */
+            /* (copy offset 384-511, 128 bytes of VPD for ISDIMM) */
+            memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_A_BLK_OFFSET]),
+                &i_jedec_ptr[SVPD_DDR4_RBS_OFFSET],
+                std::min(template_A_sz, static_cast<uint16_t>(SVPD_DDR4_RBS_SZ)));
         }
 
       /********************  Done with Conversion ***********************/

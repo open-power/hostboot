@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -123,7 +123,7 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
         }
 
         o_errlHndl = hdatConvertRawSpdToIpzFormat(iv_fru.hdatResourceId,
-             o_rawKwdSize, o_rawKwd, o_fmtKwdSize, o_fmtKwd);
+             o_rawKwdSize, o_rawKwd, o_fmtKwdSize, o_fmtKwd, i_target);
         HDAT_INF("MS o_rawKwdSize = %d, o_fmtKwdSize = %d",
             o_rawKwdSize, o_fmtKwdSize);
         if( o_errlHndl )
