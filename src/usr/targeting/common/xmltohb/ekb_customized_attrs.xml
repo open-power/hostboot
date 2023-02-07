@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -974,6 +974,22 @@
          <!-- Support for HANA CAP -->
          <id>ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE</id>
          <writeable/>
+    </attribute>
+
+    <attribute>
+         <!-- Set by HB during each boot -->
+         <id>ATTR_SPPE_I2C_DEV_ADDR</id>
+         <writeable/>
+         <no_export/>
+         <persistency>volatile-zeroed</persistency>
+     </attribute>
+
+    <attribute>
+         <!-- Set by HB during each boot -->
+         <id>ATTR_SPPE_TARGET_STATE</id>
+         <writeable/>
+         <no_export/>
+         <persistency>volatile-zeroed</persistency>
      </attribute>
 
     <!-- =====================================================================
