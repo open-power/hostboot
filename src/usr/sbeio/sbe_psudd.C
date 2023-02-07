@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -454,6 +454,25 @@ void SbePsu::ignoreInterrupts(bool i_ignore)
 {
     SBE_TRACF("CXXTEST setting ignoreInterrupts=%d, look for a match to make sure in sync", i_ignore);
     iv_ignoreInterrupts = i_ignore;
+
+    if( i_ignore )
+    {
+        INTR::unRegisterMsgQ(INTR::ISN_PSU);
+    }
+    else
+    {
+        //Re-rRegister message queue with INTRP for Interrupts.
+        errlHndl_t l_err = INTR::registerMsgQ(iv_msgQ,
+                                              MSG_INTR,
+                                              INTR::ISN_PSU);
+        if( l_err )
+        {
+            SBE_TRACF("CXXTEST Error restoring interrupt handler");
+            l_err->collectTrace(SBEIO_COMP_NAME);
+            l_err->collectTrace(INTR_COMP_NAME, 256);
+            errlCommit(l_err, SBEIO_COMP_ID);
+        }
+    }
 }
 #endif //#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
 
