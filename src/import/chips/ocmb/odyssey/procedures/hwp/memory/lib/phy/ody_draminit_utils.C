@@ -7618,6 +7618,7 @@ fapi_try_exit:
 void display_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                        const _PMU_SMB_DDR5_1D_t& i_msg_block)
 {
+#ifndef __PPE__
     FAPI_INF("   _PMU_SMB_DDR5_1D_t   = { // " TARGTIDFORMAT, TARGTID);
     FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "AdvTrainOpt          ", i_msg_block.AdvTrainOpt, TARGTID);
     FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MsgMisc              ", i_msg_block.MsgMisc, TARGTID);
@@ -9527,7 +9528,7 @@ void display_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targe
     FAPI_INF("  .%s= 0x%04x; // " TARGTIDFORMAT, "PmuInternalRev0      ", i_msg_block.PmuInternalRev0, TARGTID);
     FAPI_INF("  .%s= 0x%04x; // " TARGTIDFORMAT, "PmuInternalRev1      ", i_msg_block.PmuInternalRev1, TARGTID);
     FAPI_INF("} // _PMU_SMB_DDR5_1D_t " TARGTIDFORMAT, TARGTID);
-
+#endif
 }
 
 ///
