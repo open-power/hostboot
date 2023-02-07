@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2022
+# Contributors Listed Below - COPYRIGHT 2021,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -22,14 +22,14 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-from collections import OrderedDict
 import glob
 import json
 import os
 import re
+from collections import OrderedDict
 
-import pel.prd.sigdata
 import pel.prd.regdata
+import pel.prd.sigdata
 
 
 class SignatureData:
@@ -47,14 +47,13 @@ class SignatureData:
 
         data_path = os.path.dirname(pel.prd.sigdata.__file__)
 
-        for data_file in glob.glob(os.path.join(data_path, '*.json')):
-            with open(data_file, 'r') as fp:
+        for data_file in glob.glob(os.path.join(data_path, "*.json")):
+            with open(data_file, "r") as fp:
                 data = json.load(fp)
 
             self._data[data["target_type"]] = data
 
     def parseSignature(self, chipId: str, chipSig: str) -> str:
-
         # convert the input chipId to int and back to a hex string to prevent
         # possible issues with preceding 0s in the string
         intId = int(chipId, 16)
@@ -70,24 +69,26 @@ class SignatureData:
 
         # Check for any special error codes that can be associated with any
         # FIR bit. These only take into account the last 16 bits (4 characters).
-        errCodeMap = {'dd00': 'Assert failed in PRD',
-                      'dd01': 'Invalid attention type passed to PRD',
-                      'dd02': 'No active error bits found',
-                      'dd03': 'Chip connection lookup failure',
-                      'dd05': 'Internal PRD code',
-                      'dd09': 'Fail to access attention data from registry',
-                      'dd11': 'SRC Access failure',
-                      'dd12': 'HWSV Access failure',
-                      'dd20': 'Config error - no domains in system',
-                      'dd21': 'No active attentions found',
-                      'dd23': 'Unknown chip raised attention',
-                      'dd24': 'PRD Model is not built',
-                      'dd28': 'PrdStartScrub failure',
-                      'dd29': 'PrdResoreRbs failure',
-                      'dd81': 'Multiple bits on in Error Register',
-                      'dd90': 'Scan comm access from Error Register failed',
-                      'dd91': 'SCOM access failed due to Power Fault',
-                      'ddff': 'Do not reset or mask FIR bits'}
+        errCodeMap = {
+            "dd00": "Assert failed in PRD",
+            "dd01": "Invalid attention type passed to PRD",
+            "dd02": "No active error bits found",
+            "dd03": "Chip connection lookup failure",
+            "dd05": "Internal PRD code",
+            "dd09": "Fail to access attention data from registry",
+            "dd11": "SRC Access failure",
+            "dd12": "HWSV Access failure",
+            "dd20": "Config error - no domains in system",
+            "dd21": "No active attentions found",
+            "dd23": "Unknown chip raised attention",
+            "dd24": "PRD Model is not built",
+            "dd28": "PrdStartScrub failure",
+            "dd29": "PrdResoreRbs failure",
+            "dd81": "Multiple bits on in Error Register",
+            "dd90": "Scan comm access from Error Register failed",
+            "dd91": "SCOM access failed due to Power Fault",
+            "ddff": "Do not reset or mask FIR bits",
+        }
         last4 = hexSig[-4:]
 
         if last4 in errCodeMap:
@@ -114,14 +115,13 @@ class RegisterData:
 
         data_path = os.path.dirname(pel.prd.regdata.__file__)
 
-        for data_file in glob.glob(os.path.join(data_path, '*.json')):
-            with open(data_file, 'r') as fp:
+        for data_file in glob.glob(os.path.join(data_path, "*.json")):
+            with open(data_file, "r") as fp:
                 data = json.load(fp)
 
             self._data[data["target_type"]] = data
 
     def parseRegister(self, chipId: str, regId: str) -> dict:
-
         # convert the input chipId to int and back to a hex string to prevent
         # possible issues with preceding 0s in the string
         intId = int(chipId, 16)
@@ -131,10 +131,9 @@ class RegisterData:
         # the preceding '0x' so add that here. Also, we will ensure we have
         # lower case hex strings
         chipType = hexId.lower()
-        hashReg = '0x' + regId.lower()
+        hashReg = "0x" + regId.lower()
 
-        register = {'name': 'Undefined Register Hash',
-                    'address': hashReg}
+        register = {"name": "Undefined Register Hash", "address": hashReg}
 
         if chipType in self._data:
             if hashReg in self._data[chipType]:

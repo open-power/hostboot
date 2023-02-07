@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2022
+# Contributors Listed Below - COPYRIGHT 2021,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -23,27 +23,30 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+import json
 import os
 import sys
-import json
 import unittest
-
 from collections import OrderedDict
 
 # autopep8: off
-sys.path.append(os.path.join(os.path.dirname(sys.path[0]), 'src/build/tools/ebmc/'))
+sys.path.append(
+    os.path.join(os.path.dirname(sys.path[0]), "src/build/tools/ebmc/")
+)
 import udparsers.be500.be500
+
 # autopep8: on
 
 
 class TestUserDataParser(unittest.TestCase):
-
     def testExtMruData1(self):
-        testData = bytearray.fromhex('8401440860000102060405090708030A0B0C0D0E'
-                                     '0F101112131415161718191A1B1C1D1E1F202122'
-                                     '232425262728292A2B2C2D2E2F30313233343536'
-                                     '3738393A3B3C3D3E3F404142434445464748494A'
-                                     '4B4C4D4E4F50')
+        testData = bytearray.fromhex(
+            "8401440860000102060405090708030A0B0C0D0E"
+            "0F101112131415161718191A1B1C1D1E1F202122"
+            "232425262728292A2B2C2D2E2F30313233343536"
+            "3738393A3B3C3D3E3F404142434445464748494A"
+            "4B4C4D4E4F50"
+        )
         mv = memoryview(testData)
 
         testStr = udparsers.be500.be500.parseUDToJson(62, 1, mv)
@@ -51,25 +54,27 @@ class TestUserDataParser(unittest.TestCase):
 
         print(json.dumps(jsonOut, indent=4))
 
-        emm = 'Extended Mem Mru'
-        self.assertEqual(jsonOut[emm]['Node Pos'], 0)
-        self.assertEqual(jsonOut[emm]['Proc Pos'], 0)
-        self.assertEqual(jsonOut[emm]['Component Pos'], 16)
-        self.assertEqual(jsonOut[emm]['Primary Rank'], 1)
-        self.assertEqual(jsonOut[emm]['Secondary Rank'], 0)
-        self.assertEqual(jsonOut[emm]['Symbol'], 68)
-        self.assertEqual(jsonOut[emm]['Pins'], 0)
-        self.assertEqual(jsonOut[emm]['Dram Spared'], 'No')
-        self.assertEqual(jsonOut[emm]['DQ'], 3)
-        self.assertEqual(jsonOut[emm]['isX4Dram'], 'Yes')
-        #self.assertRaises(KeyError, jsonOut[emm].get('Mem VPD Dq Mapping'))
+        emm = "Extended Mem Mru"
+        self.assertEqual(jsonOut[emm]["Node Pos"], 0)
+        self.assertEqual(jsonOut[emm]["Proc Pos"], 0)
+        self.assertEqual(jsonOut[emm]["Component Pos"], 16)
+        self.assertEqual(jsonOut[emm]["Primary Rank"], 1)
+        self.assertEqual(jsonOut[emm]["Secondary Rank"], 0)
+        self.assertEqual(jsonOut[emm]["Symbol"], 68)
+        self.assertEqual(jsonOut[emm]["Pins"], 0)
+        self.assertEqual(jsonOut[emm]["Dram Spared"], "No")
+        self.assertEqual(jsonOut[emm]["DQ"], 3)
+        self.assertEqual(jsonOut[emm]["isX4Dram"], "Yes")
+        # self.assertRaises(KeyError, jsonOut[emm].get('Mem VPD Dq Mapping'))
 
     def testExtMruData2(self):
-        testData = bytearray.fromhex('8401440860000102060405090708030A0B0C0D0E'
-                                     '0F101112131415161718191A1B1C1D1E1F202122'
-                                     '232425262728292A2B2C2D2E2F30313233343536'
-                                     '3738393A3B3C3D3E3F404142434445464748494A'
-                                     '4B4C4D4E4F50')
+        testData = bytearray.fromhex(
+            "8401440860000102060405090708030A0B0C0D0E"
+            "0F101112131415161718191A1B1C1D1E1F202122"
+            "232425262728292A2B2C2D2E2F30313233343536"
+            "3738393A3B3C3D3E3F404142434445464748494A"
+            "4B4C4D4E4F50"
+        )
         mv = memoryview(testData)
 
         testStr = udparsers.be500.be500.parseUDToJson(62, 2, mv)
@@ -77,27 +82,32 @@ class TestUserDataParser(unittest.TestCase):
 
         print(json.dumps(jsonOut, indent=4))
 
-        emm = 'Extended Mem Mru'
-        self.assertEqual(jsonOut[emm]['Node Pos'], 0)
-        self.assertEqual(jsonOut[emm]['Proc Pos'], 0)
-        self.assertEqual(jsonOut[emm]['Component Pos'], 16)
-        self.assertEqual(jsonOut[emm]['Primary Rank'], 1)
-        self.assertEqual(jsonOut[emm]['Secondary Rank'], 0)
-        self.assertEqual(jsonOut[emm]['Symbol'], 68)
-        self.assertEqual(jsonOut[emm]['Pins'], 0)
-        self.assertEqual(jsonOut[emm]['Dram Spared'], 'No')
-        self.assertEqual(jsonOut[emm]['DQ'], 9)
-        self.assertEqual(jsonOut[emm]['isX4Dram'], 'Yes')
-        self.assertEqual(jsonOut[emm]['Mem VPD Dq Mapping'], '0 1 2 6 4 5 9 7 '
-                         '8 3 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 '
-                         '30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 '
-                         '52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 '
-                         '74 75 76 77 78 79 ')
+        emm = "Extended Mem Mru"
+        self.assertEqual(jsonOut[emm]["Node Pos"], 0)
+        self.assertEqual(jsonOut[emm]["Proc Pos"], 0)
+        self.assertEqual(jsonOut[emm]["Component Pos"], 16)
+        self.assertEqual(jsonOut[emm]["Primary Rank"], 1)
+        self.assertEqual(jsonOut[emm]["Secondary Rank"], 0)
+        self.assertEqual(jsonOut[emm]["Symbol"], 68)
+        self.assertEqual(jsonOut[emm]["Pins"], 0)
+        self.assertEqual(jsonOut[emm]["Dram Spared"], "No")
+        self.assertEqual(jsonOut[emm]["DQ"], 9)
+        self.assertEqual(jsonOut[emm]["isX4Dram"], "Yes")
+        self.assertEqual(
+            jsonOut[emm]["Mem VPD Dq Mapping"],
+            (
+                "0 1 2 6 4 5 9 7 8 3 10 11 12 13 14 15 16 17 18 19 20 21 22 23"
+                " 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43"
+                " 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63"
+                " 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 "
+            ),
+        )
 
     def testPfaDataParser(self):
         testData = bytearray.fromhex(
-            '4D53202044554D5040000000004B0000000310018280006F00000000050500FC000000'
-            '018000470802040000000001004B0000FFFF001300')
+            "4D53202044554D5040000000004B0000000310018280006F00000000050500FC000000"
+            "018000470802040000000001004B0000FFFF001300"
+        )
         mv = memoryview(testData)
 
         testStr = udparsers.be500.be500.parseUDToJson(51, 1, mv)
@@ -106,53 +116,54 @@ class TestUserDataParser(unittest.TestCase):
 
         print(json.dumps(jsonOut, indent=4))
 
-        self.assertEqual(jsonOut['DUMP Content'], '0x40000000')
-        self.assertEqual(jsonOut['DUMP HUID'], '0x004b0000')
-        self.assertEqual(jsonOut['ERRL Actions'], '0x0003')
-        self.assertEqual(jsonOut['ERRL Severity'], 'RECOVERED')
-        self.assertEqual(jsonOut['Service Action Counter'], '0x01')
-        self.assertEqual(jsonOut['SDC Flags']['DUMP'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['UERE'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['SUE'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['AT_THRESHOLD'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['DEGRADED'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['SERVICE_CALL'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['TRACKIT'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['TERMINATE'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['LOGIT'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['MEM_CHNL_FAIL'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['PROC_CORE_CS'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['USING_SAVED_SDC'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['LAST_CORE_TERM'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['DEFER_DECONFIG'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['SECONDARY_ERROR'], 'False')
-        self.assertEqual(jsonOut['Error Count'], 0)
-        self.assertEqual(jsonOut['Error Threshold'], 0)
-        self.assertEqual(jsonOut['Primary Attn Type'], 'HOST_ATTN')
-        self.assertEqual(jsonOut['Secondary Attn Type'], 'HOST_ATTN')
-        self.assertEqual(jsonOut['PRD GARD Error Type'], 'NoGard')
-        self.assertEqual(jsonOut['PRD MRU List'], 1)
-        self.assertEqual(jsonOut['MRU #0']['Priority'], 'MED_A')
-        self.assertEqual(jsonOut['MRU #0']['Type'], 'MemoryMru')
-        self.assertEqual(jsonOut['MRU #0']['Gard State'], 'NoGard')
-        self.assertEqual(jsonOut['MRU #0']['Node Pos'], 0)
-        self.assertEqual(jsonOut['MRU #0']['Proc Pos'], 0)
-        self.assertEqual(jsonOut['MRU #0']['Component Pos'], 0)
-        self.assertEqual(jsonOut['MRU #0']['Primary Rank'], 0)
-        self.assertEqual(jsonOut['MRU #0']['Secondary Rank'], 0)
-        self.assertEqual(jsonOut['MRU #0']['Symbol'], 71)
-        self.assertEqual(jsonOut['MRU #0']['Pins'], 0)
-        self.assertEqual(jsonOut['MRU #0']['Dram Spared'], 'No')
-        self.assertEqual(jsonOut['MRU #0']['DQ'], 0)
-        msl = 'Multi-Signature List'
-        hexSig = '0x004b0000 0xffff0013'
-        self.assertEqual(jsonOut[msl]['Count'], 1)
-        self.assertEqual(jsonOut[msl][hexSig], 'Maintenance HARD CTE')
+        self.assertEqual(jsonOut["DUMP Content"], "0x40000000")
+        self.assertEqual(jsonOut["DUMP HUID"], "0x004b0000")
+        self.assertEqual(jsonOut["ERRL Actions"], "0x0003")
+        self.assertEqual(jsonOut["ERRL Severity"], "RECOVERED")
+        self.assertEqual(jsonOut["Service Action Counter"], "0x01")
+        self.assertEqual(jsonOut["SDC Flags"]["DUMP"], "True")
+        self.assertEqual(jsonOut["SDC Flags"]["UERE"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["SUE"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["AT_THRESHOLD"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["DEGRADED"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["SERVICE_CALL"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["TRACKIT"], "True")
+        self.assertEqual(jsonOut["SDC Flags"]["TERMINATE"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["LOGIT"], "True")
+        self.assertEqual(jsonOut["SDC Flags"]["MEM_CHNL_FAIL"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["PROC_CORE_CS"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["USING_SAVED_SDC"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["LAST_CORE_TERM"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["DEFER_DECONFIG"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["SECONDARY_ERROR"], "False")
+        self.assertEqual(jsonOut["Error Count"], 0)
+        self.assertEqual(jsonOut["Error Threshold"], 0)
+        self.assertEqual(jsonOut["Primary Attn Type"], "HOST_ATTN")
+        self.assertEqual(jsonOut["Secondary Attn Type"], "HOST_ATTN")
+        self.assertEqual(jsonOut["PRD GARD Error Type"], "NoGard")
+        self.assertEqual(jsonOut["PRD MRU List"], 1)
+        self.assertEqual(jsonOut["MRU #0"]["Priority"], "MED_A")
+        self.assertEqual(jsonOut["MRU #0"]["Type"], "MemoryMru")
+        self.assertEqual(jsonOut["MRU #0"]["Gard State"], "NoGard")
+        self.assertEqual(jsonOut["MRU #0"]["Node Pos"], 0)
+        self.assertEqual(jsonOut["MRU #0"]["Proc Pos"], 0)
+        self.assertEqual(jsonOut["MRU #0"]["Component Pos"], 0)
+        self.assertEqual(jsonOut["MRU #0"]["Primary Rank"], 0)
+        self.assertEqual(jsonOut["MRU #0"]["Secondary Rank"], 0)
+        self.assertEqual(jsonOut["MRU #0"]["Symbol"], 71)
+        self.assertEqual(jsonOut["MRU #0"]["Pins"], 0)
+        self.assertEqual(jsonOut["MRU #0"]["Dram Spared"], "No")
+        self.assertEqual(jsonOut["MRU #0"]["DQ"], 0)
+        msl = "Multi-Signature List"
+        hexSig = "0x004b0000 0xffff0013"
+        self.assertEqual(jsonOut[msl]["Count"], 1)
+        self.assertEqual(jsonOut[msl][hexSig], "Maintenance HARD CTE")
 
     def testPfaDataParser2(self):
         testData = bytearray.fromhex(
-            '4D53202044554D5040000000004B000000032009DEA1F4F0000100010202E680000000'
-            '01004B00000105E60000000000')
+            "4D53202044554D5040000000004B000000032009DEA1F4F0000100010202E680000000"
+            "01004B00000105E60000000000"
+        )
         mv = memoryview(testData)
 
         parser = udparsers.be500.be500.errludP_prdf()
@@ -162,85 +173,86 @@ class TestUserDataParser(unittest.TestCase):
 
         print(json.dumps(jsonOut, indent=4))
 
-        self.assertEqual(jsonOut['DUMP Content'], '0x40000000')
-        self.assertEqual(jsonOut['DUMP HUID'], '0x004b0000')
-        self.assertEqual(jsonOut['ERRL Actions'], '0x0003')
-        self.assertEqual(jsonOut['ERRL Severity'], 'PREDICTIVE')
-        self.assertEqual(jsonOut['Service Action Counter'], '0x09')
-        self.assertEqual(jsonOut['SDC Flags']['DUMP'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['UERE'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['SUE'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['AT_THRESHOLD'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['DEGRADED'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['SERVICE_CALL'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['TRACKIT'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['TERMINATE'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['LOGIT'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['MEM_CHNL_FAIL'], 'True')
-        self.assertEqual(jsonOut['SDC Flags']['PROC_CORE_CS'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['USING_SAVED_SDC'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['LAST_CORE_TERM'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['DEFER_DECONFIG'], 'False')
-        self.assertEqual(jsonOut['SDC Flags']['SECONDARY_ERROR'], 'True')
-        self.assertEqual(jsonOut['Error Count'], 1)
-        self.assertEqual(jsonOut['Error Threshold'], 1)
-        self.assertEqual(jsonOut['Primary Attn Type'], 'UNIT_CS')
-        self.assertEqual(jsonOut['Secondary Attn Type'], 'UNIT_CS')
-        self.assertEqual(jsonOut['PRD GARD Error Type'], 'Predictive')
-        self.assertEqual(jsonOut['PRD MRU List'], 1)
-        self.assertEqual(jsonOut['MRU #0']['Priority'], 'MED')
-        self.assertEqual(jsonOut['MRU #0']['Type'], 'HUID')
-        self.assertEqual(jsonOut['MRU #0']['Gard State'], 'Predictive')
-        self.assertEqual(jsonOut['MRU #0']['Mru Callout'], '0x004b0000')
+        self.assertEqual(jsonOut["DUMP Content"], "0x40000000")
+        self.assertEqual(jsonOut["DUMP HUID"], "0x004b0000")
+        self.assertEqual(jsonOut["ERRL Actions"], "0x0003")
+        self.assertEqual(jsonOut["ERRL Severity"], "PREDICTIVE")
+        self.assertEqual(jsonOut["Service Action Counter"], "0x09")
+        self.assertEqual(jsonOut["SDC Flags"]["DUMP"], "True")
+        self.assertEqual(jsonOut["SDC Flags"]["UERE"], "True")
+        self.assertEqual(jsonOut["SDC Flags"]["SUE"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["AT_THRESHOLD"], "True")
+        self.assertEqual(jsonOut["SDC Flags"]["DEGRADED"], "True")
+        self.assertEqual(jsonOut["SDC Flags"]["SERVICE_CALL"], "True")
+        self.assertEqual(jsonOut["SDC Flags"]["TRACKIT"], "True")
+        self.assertEqual(jsonOut["SDC Flags"]["TERMINATE"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["LOGIT"], "True")
+        self.assertEqual(jsonOut["SDC Flags"]["MEM_CHNL_FAIL"], "True")
+        self.assertEqual(jsonOut["SDC Flags"]["PROC_CORE_CS"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["USING_SAVED_SDC"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["LAST_CORE_TERM"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["DEFER_DECONFIG"], "False")
+        self.assertEqual(jsonOut["SDC Flags"]["SECONDARY_ERROR"], "True")
+        self.assertEqual(jsonOut["Error Count"], 1)
+        self.assertEqual(jsonOut["Error Threshold"], 1)
+        self.assertEqual(jsonOut["Primary Attn Type"], "UNIT_CS")
+        self.assertEqual(jsonOut["Secondary Attn Type"], "UNIT_CS")
+        self.assertEqual(jsonOut["PRD GARD Error Type"], "Predictive")
+        self.assertEqual(jsonOut["PRD MRU List"], 1)
+        self.assertEqual(jsonOut["MRU #0"]["Priority"], "MED")
+        self.assertEqual(jsonOut["MRU #0"]["Type"], "HUID")
+        self.assertEqual(jsonOut["MRU #0"]["Gard State"], "Predictive")
+        self.assertEqual(jsonOut["MRU #0"]["Mru Callout"], "0x004b0000")
 
     def testCaptureDataParser(self):
         testData = bytearray.fromhex(
-            '0000063C000500020000003034EB00080008000000000000CBED000800000000010000'
-            '009100000800EFF507FD0C7E0F7ADE0008FFFFFFFFFFFFFFFFE5BB00080000F0020000'
-            '0000F6510008F798F0FF07C061BCD42100080806000010080000D423000800610F00E8'
-            '379E40A6DB00081F6A30000000000058980008200000000000000059E0000800EFF3FF'
-            'FFFFFFFF1A2200080000021F80401E072D1100081017006302800000A30D0008008000'
-            '0000000000309C00083082107E40FF00001A7A00088F7C60003D000000874300080021'
-            '0107540D500058A40008200000000000000059E9000800EFF3FFFFFFFF07EE5100084C'
-            '400000000000005C5D00081581FC0000000000605D00081581FC0000000000645D0008'
-            '1581FC0000000000685D00081581FC00000000006C5D00081581FC0000000000705D00'
-            '081581FC0000000000745D00081581FC0000000000785D00081581FC0000000000EAB4'
-            '00081581000000000000EAB800081581FC0000000000EABC00081581FC0000000000EA'
-            'C000081581000000000000FEB400081581000000000000FEB800081581FC0000000000'
-            'FEBC00080501FC0000000000FEC0000815810000000000005C6E000800000010000000'
-            '00490C00083F0206F00000000026DE0008C028010000000000B9510008FFFFFFF00000'
-            '0000A6A50008200FE3FC07000000E1AC000818C0000000000000BFE500082000000000'
-            '000000BFF100082000000000000000BFFD00082000000000000000C009000820000000'
-            '000000001C1E00087A00000000000000B7C30008FC6000000000000000440008000000'
-            '074D7C0008200000000000000007AD00088400000000000000518B000800EFF3FFFFFF'
-            'FFFFBCC50008037E7600000000007E840008DF70000000000000A8410008801000001F'
-            '21FDFCD87B0008821000000F000000004900100000000BBCE500080200000001800000'
-            'FA43000811003C0067800000D8130008880CC30018000000D8150008CC2FC363980000'
-            '00D81700082200000000000000BD3A00080000000000018000FACB00080C8162418001'
-            '8000D89B0008F00000181FF87F98D89D0008F3000C1E7FFE7FB8FF0500080000000006'
-            '00000061DB00087F90006000600000004B002100000027575700086627FFE000000000'
-            '383D000804000000000000002DCD0008000000002001FE0099F000081F7FF49E7201FF'
-            'FE77C20008FFFFFFFFFFFFFFFF9C370008C1F00000000000000B1F00081A8000460000'
-            '0000F40100080020000000000000F55100088FD9F00000000000D32100080020000000'
-            '000000D323000840040000000000003E8600080090000800000000CDCB000800F80FFF'
-            'A0007FFFD7A90008FFC3700017E6000053FB00080007C01C00000000B9070008001000'
-            '0000000000E0E60008089FFFFFFFFFFFFFCAC40008376000000000000049F600080000'
-            '0000000000FF9B7B000838AA00000000000025370008FFF0000000000000706E0008FF'
-            'FFFFFF040001C05B73000800200000000000004675000800FFFFDFEC00000059690008'
-            '400000000000000075A5000851C000000000000017B1000800000000000000202BE900'
-            '0800800000000000622BF1000800000000020000003A75000800DF39A7E0000000CADA'
-            '0008000030000000000037470008000088808200434C59BD00088207400042063DCD65'
-            'E60008111000002708090A65E800080B0C050400030200752E0004900884021D95000C'
-            '2FFF004448FF44014448FF44FAAB00180000F000000000FF000000000100F000000000'
-            'FF000000001716012800000000000000000104000022BC4F182B0104000020402D0050'
-            '0100000001B4FFD00101040000203E3D986B0104000023F241D858010400002284D8D0'
-            '720100000003EBBE002D010400002354AE880201040000212647D80001000000005554'
-            '586C0100000002146DC0570104000000DE6D087701040000025849985C0104000000DD'
-            'D9986C010400000282DF504B0104000023BE50000801040000018AD6987F0104000003'
-            'DA9F882B01040000031FBE002501040000212B06102701040000228D0FD05701040000'
-            '200000000001040000008089186801040000000000000001040000008CD8183D010400'
-            '00012B0E08250104000003B7D7186B0104000003C8A9804B0104000003752F00430104'
-            '000002A04FD0000104000000E78F406B010400000198E49868')
+            "0000063C000500020000003034EB00080008000000000000CBED000800000000010000"
+            "009100000800EFF507FD0C7E0F7ADE0008FFFFFFFFFFFFFFFFE5BB00080000F0020000"
+            "0000F6510008F798F0FF07C061BCD42100080806000010080000D423000800610F00E8"
+            "379E40A6DB00081F6A30000000000058980008200000000000000059E0000800EFF3FF"
+            "FFFFFFFF1A2200080000021F80401E072D1100081017006302800000A30D0008008000"
+            "0000000000309C00083082107E40FF00001A7A00088F7C60003D000000874300080021"
+            "0107540D500058A40008200000000000000059E9000800EFF3FFFFFFFF07EE5100084C"
+            "400000000000005C5D00081581FC0000000000605D00081581FC0000000000645D0008"
+            "1581FC0000000000685D00081581FC00000000006C5D00081581FC0000000000705D00"
+            "081581FC0000000000745D00081581FC0000000000785D00081581FC0000000000EAB4"
+            "00081581000000000000EAB800081581FC0000000000EABC00081581FC0000000000EA"
+            "C000081581000000000000FEB400081581000000000000FEB800081581FC0000000000"
+            "FEBC00080501FC0000000000FEC0000815810000000000005C6E000800000010000000"
+            "00490C00083F0206F00000000026DE0008C028010000000000B9510008FFFFFFF00000"
+            "0000A6A50008200FE3FC07000000E1AC000818C0000000000000BFE500082000000000"
+            "000000BFF100082000000000000000BFFD00082000000000000000C009000820000000"
+            "000000001C1E00087A00000000000000B7C30008FC6000000000000000440008000000"
+            "074D7C0008200000000000000007AD00088400000000000000518B000800EFF3FFFFFF"
+            "FFFFBCC50008037E7600000000007E840008DF70000000000000A8410008801000001F"
+            "21FDFCD87B0008821000000F000000004900100000000BBCE500080200000001800000"
+            "FA43000811003C0067800000D8130008880CC30018000000D8150008CC2FC363980000"
+            "00D81700082200000000000000BD3A00080000000000018000FACB00080C8162418001"
+            "8000D89B0008F00000181FF87F98D89D0008F3000C1E7FFE7FB8FF0500080000000006"
+            "00000061DB00087F90006000600000004B002100000027575700086627FFE000000000"
+            "383D000804000000000000002DCD0008000000002001FE0099F000081F7FF49E7201FF"
+            "FE77C20008FFFFFFFFFFFFFFFF9C370008C1F00000000000000B1F00081A8000460000"
+            "0000F40100080020000000000000F55100088FD9F00000000000D32100080020000000"
+            "000000D323000840040000000000003E8600080090000800000000CDCB000800F80FFF"
+            "A0007FFFD7A90008FFC3700017E6000053FB00080007C01C00000000B9070008001000"
+            "0000000000E0E60008089FFFFFFFFFFFFFCAC40008376000000000000049F600080000"
+            "0000000000FF9B7B000838AA00000000000025370008FFF0000000000000706E0008FF"
+            "FFFFFF040001C05B73000800200000000000004675000800FFFFDFEC00000059690008"
+            "400000000000000075A5000851C000000000000017B1000800000000000000202BE900"
+            "0800800000000000622BF1000800000000020000003A75000800DF39A7E0000000CADA"
+            "0008000030000000000037470008000088808200434C59BD00088207400042063DCD65"
+            "E60008111000002708090A65E800080B0C050400030200752E0004900884021D95000C"
+            "2FFF004448FF44014448FF44FAAB00180000F000000000FF000000000100F000000000"
+            "FF000000001716012800000000000000000104000022BC4F182B0104000020402D0050"
+            "0100000001B4FFD00101040000203E3D986B0104000023F241D858010400002284D8D0"
+            "720100000003EBBE002D010400002354AE880201040000212647D80001000000005554"
+            "586C0100000002146DC0570104000000DE6D087701040000025849985C0104000000DD"
+            "D9986C010400000282DF504B0104000023BE50000801040000018AD6987F0104000003"
+            "DA9F882B01040000031FBE002501040000212B06102701040000228D0FD05701040000"
+            "200000000001040000008089186801040000000000000001040000008CD8183D010400"
+            "00012B0E08250104000003B7D7186B0104000003C8A9804B0104000003752F00430104"
+            "000002A04FD0000104000000E78F406B010400000198E49868"
+        )
         mv = memoryview(testData)
 
         testStr = udparsers.be500.be500.parseUDToJson(1, 1, mv)
@@ -249,137 +261,138 @@ class TestUserDataParser(unittest.TestCase):
 
         print(json.dumps(jsonOut, indent=4))
 
-        cd = 'Capture Data'
-        r = 'Registers'
-        huid = '0x00050002'
-        reg = 'PBAF_FIR_MASK'.ljust(25) + ' (0x0000000003011dc3)'
-        testData = '0x200fe3fc07000000'
+        cd = "Capture Data"
+        r = "Registers"
+        huid = "0x00050002"
+        reg = "PBAF_FIR_MASK".ljust(25) + " (0x0000000003011dc3)"
+        testData = "0x200fe3fc07000000"
         self.assertEqual(jsonOut[cd][r][huid][reg], testData)
 
-        huid = '0x00440008'
-        reg = 'MCFGP0'.ljust(25) + ' (0x000000000c010c0a)'
-        testData = '0x801000001f21fdfc'
+        huid = "0x00440008"
+        reg = "MCFGP0".ljust(25) + " (0x000000000c010c0a)"
+        testData = "0x801000001f21fdfc"
         self.assertEqual(jsonOut[cd][r][huid][reg], testData)
 
-        huid = '0x00490010'
-        reg = 'MC_USTL_FIR'.ljust(25) + ' (0x000000000c010e00)'
-        testData = '0x0000000000018000'
+        huid = "0x00490010"
+        reg = "MC_USTL_FIR".ljust(25) + " (0x000000000c010e00)"
+        testData = "0x0000000000018000"
         self.assertEqual(jsonOut[cd][r][huid][reg], testData)
 
-        huid = '0x004b0021'
-        reg = 'MCBMCAT'.ljust(25) + ' (0x00000000080118d7)'
-        testData = '0x00ffffdfec000000'
+        huid = "0x004b0021"
+        reg = "MCBMCAT".ljust(25) + " (0x00000000080118d7)"
+        testData = "0x00ffffdfec000000"
         self.assertEqual(jsonOut[cd][r][huid][reg], testData)
 
-        td = 'TDCTLR_STATE_DATA_START'
-        self.assertEqual(jsonOut[cd][td]['State'], 'RT')
-        self.assertEqual(jsonOut[cd][td]['Version'], 1)
-        self.assertEqual(jsonOut[cd][td]['Primary Rank'], 0)
-        self.assertEqual(jsonOut[cd][td]['Secondary Rank'], 0)
-        self.assertEqual(jsonOut[cd][td]['Phase'], 2)
-        self.assertEqual(jsonOut[cd][td]['TD Type'], 'TPS')
-        self.assertEqual(jsonOut[cd][td]['Entries in Queue'], 1)
-        self.assertEqual(jsonOut[cd][td]['0']['Primary Rank'], 0)
-        self.assertEqual(jsonOut[cd][td]['0']['Secondary Rank'], 0)
-        self.assertEqual(jsonOut[cd][td]['0']['TD Type'], 'TPS')
+        td = "TDCTLR_STATE_DATA_START"
+        self.assertEqual(jsonOut[cd][td]["State"], "RT")
+        self.assertEqual(jsonOut[cd][td]["Version"], 1)
+        self.assertEqual(jsonOut[cd][td]["Primary Rank"], 0)
+        self.assertEqual(jsonOut[cd][td]["Secondary Rank"], 0)
+        self.assertEqual(jsonOut[cd][td]["Phase"], 2)
+        self.assertEqual(jsonOut[cd][td]["TD Type"], "TPS")
+        self.assertEqual(jsonOut[cd][td]["Entries in Queue"], 1)
+        self.assertEqual(jsonOut[cd][td]["0"]["Primary Rank"], 0)
+        self.assertEqual(jsonOut[cd][td]["0"]["Secondary Rank"], 0)
+        self.assertEqual(jsonOut[cd][td]["0"]["TD Type"], "TPS")
 
-        drd = 'Dram Repairs Data'
-        self.assertEqual(jsonOut[cd][drd]['0']['Rank'], 0)
-        self.assertEqual(jsonOut[cd][drd]['0']['Chip Mark'], 68)
-        self.assertEqual(jsonOut[cd][drd]['0']['Symbol Mark'], '--')
-        self.assertEqual(jsonOut[cd][drd]['0']['Spare0'], '--')
-        self.assertEqual(jsonOut[cd][drd]['0']['Spare1'], 68)
-        self.assertEqual(jsonOut[cd][drd]['1']['Rank'], 1)
-        self.assertEqual(jsonOut[cd][drd]['1']['Chip Mark'], 68)
-        self.assertEqual(jsonOut[cd][drd]['1']['Symbol Mark'], '--')
-        self.assertEqual(jsonOut[cd][drd]['1']['Spare0'], '--')
-        self.assertEqual(jsonOut[cd][drd]['1']['Spare1'], 68)
+        drd = "Dram Repairs Data"
+        self.assertEqual(jsonOut[cd][drd]["0"]["Rank"], 0)
+        self.assertEqual(jsonOut[cd][drd]["0"]["Chip Mark"], 68)
+        self.assertEqual(jsonOut[cd][drd]["0"]["Symbol Mark"], "--")
+        self.assertEqual(jsonOut[cd][drd]["0"]["Spare0"], "--")
+        self.assertEqual(jsonOut[cd][drd]["0"]["Spare1"], 68)
+        self.assertEqual(jsonOut[cd][drd]["1"]["Rank"], 1)
+        self.assertEqual(jsonOut[cd][drd]["1"]["Chip Mark"], 68)
+        self.assertEqual(jsonOut[cd][drd]["1"]["Symbol Mark"], "--")
+        self.assertEqual(jsonOut[cd][drd]["1"]["Spare0"], "--")
+        self.assertEqual(jsonOut[cd][drd]["1"]["Spare1"], 68)
 
-        drv = 'Dram Repairs VPD'
-        bitmap = '0xf000000000ff00000000'
-        self.assertEqual(jsonOut[cd][drv]['0']['Rank'], 0)
-        self.assertEqual(jsonOut[cd][drv]['0']['Port'], 0)
-        self.assertEqual(jsonOut[cd][drv]['0']['Bitmap'], bitmap)
-        self.assertEqual(jsonOut[cd][drv]['1']['Rank'], 1)
-        self.assertEqual(jsonOut[cd][drv]['1']['Port'], 0)
-        self.assertEqual(jsonOut[cd][drv]['1']['Bitmap'], bitmap)
+        drv = "Dram Repairs VPD"
+        bitmap = "0xf000000000ff00000000"
+        self.assertEqual(jsonOut[cd][drv]["0"]["Rank"], 0)
+        self.assertEqual(jsonOut[cd][drv]["0"]["Port"], 0)
+        self.assertEqual(jsonOut[cd][drv]["0"]["Bitmap"], bitmap)
+        self.assertEqual(jsonOut[cd][drv]["1"]["Rank"], 1)
+        self.assertEqual(jsonOut[cd][drv]["1"]["Port"], 0)
+        self.assertEqual(jsonOut[cd][drv]["1"]["Bitmap"], bitmap)
 
-        cet = 'CE Table'
-        self.assertEqual(jsonOut[cd][cet]['0']['Count'], 1)
-        self.assertEqual(jsonOut[cd][cet]['0']['Primary Rank'], 1)
-        self.assertEqual(jsonOut[cd][cet]['0']['Secondary Rank'], 0)
-        self.assertEqual(jsonOut[cd][cet]['0']['Bank'], '0x3')
-        self.assertEqual(jsonOut[cd][cet]['0']['Column'], '0x2b')
-        self.assertEqual(jsonOut[cd][cet]['0']['Row'], '0x2bc4f')
-        self.assertEqual(jsonOut[cd][cet]['0']['Dram Pins'], '0x0')
-        self.assertEqual(jsonOut[cd][cet]['0']['Dram'], '0x0')
-        self.assertEqual(jsonOut[cd][cet]['0']['On Spare'], 'Yes')
-        self.assertEqual(jsonOut[cd][cet]['0']['Hard CE'], 'No')
-        self.assertEqual(jsonOut[cd][cet]['0']['Is Active'], 'No')
+        cet = "CE Table"
+        self.assertEqual(jsonOut[cd][cet]["0"]["Count"], 1)
+        self.assertEqual(jsonOut[cd][cet]["0"]["Primary Rank"], 1)
+        self.assertEqual(jsonOut[cd][cet]["0"]["Secondary Rank"], 0)
+        self.assertEqual(jsonOut[cd][cet]["0"]["Bank"], "0x3")
+        self.assertEqual(jsonOut[cd][cet]["0"]["Column"], "0x2b")
+        self.assertEqual(jsonOut[cd][cet]["0"]["Row"], "0x2bc4f")
+        self.assertEqual(jsonOut[cd][cet]["0"]["Dram Pins"], "0x0")
+        self.assertEqual(jsonOut[cd][cet]["0"]["Dram"], "0x0")
+        self.assertEqual(jsonOut[cd][cet]["0"]["On Spare"], "Yes")
+        self.assertEqual(jsonOut[cd][cet]["0"]["Hard CE"], "No")
+        self.assertEqual(jsonOut[cd][cet]["0"]["Is Active"], "No")
 
-        self.assertEqual(jsonOut[cd][cet]['17']['Count'], 1)
-        self.assertEqual(jsonOut[cd][cet]['17']['Primary Rank'], 0)
-        self.assertEqual(jsonOut[cd][cet]['17']['Secondary Rank'], 0)
-        self.assertEqual(jsonOut[cd][cet]['17']['Bank'], '0x11')
-        self.assertEqual(jsonOut[cd][cet]['17']['Column'], '0x2b')
-        self.assertEqual(jsonOut[cd][cet]['17']['Row'], '0x3da9f')
-        self.assertEqual(jsonOut[cd][cet]['17']['Dram Pins'], '0x0')
-        self.assertEqual(jsonOut[cd][cet]['17']['Dram'], '0x0')
-        self.assertEqual(jsonOut[cd][cet]['17']['On Spare'], 'Yes')
-        self.assertEqual(jsonOut[cd][cet]['17']['Hard CE'], 'No')
-        self.assertEqual(jsonOut[cd][cet]['17']['Is Active'], 'No')
+        self.assertEqual(jsonOut[cd][cet]["17"]["Count"], 1)
+        self.assertEqual(jsonOut[cd][cet]["17"]["Primary Rank"], 0)
+        self.assertEqual(jsonOut[cd][cet]["17"]["Secondary Rank"], 0)
+        self.assertEqual(jsonOut[cd][cet]["17"]["Bank"], "0x11")
+        self.assertEqual(jsonOut[cd][cet]["17"]["Column"], "0x2b")
+        self.assertEqual(jsonOut[cd][cet]["17"]["Row"], "0x3da9f")
+        self.assertEqual(jsonOut[cd][cet]["17"]["Dram Pins"], "0x0")
+        self.assertEqual(jsonOut[cd][cet]["17"]["Dram"], "0x0")
+        self.assertEqual(jsonOut[cd][cet]["17"]["On Spare"], "Yes")
+        self.assertEqual(jsonOut[cd][cet]["17"]["Hard CE"], "No")
+        self.assertEqual(jsonOut[cd][cet]["17"]["Is Active"], "No")
 
-        self.assertEqual(jsonOut[cd][cet]['31']['Count'], 1)
-        self.assertEqual(jsonOut[cd][cet]['31']['Primary Rank'], 0)
-        self.assertEqual(jsonOut[cd][cet]['31']['Secondary Rank'], 0)
-        self.assertEqual(jsonOut[cd][cet]['31']['Bank'], '0x13')
-        self.assertEqual(jsonOut[cd][cet]['31']['Column'], '0x68')
-        self.assertEqual(jsonOut[cd][cet]['31']['Row'], '0x198e4')
-        self.assertEqual(jsonOut[cd][cet]['31']['Dram Pins'], '0x0')
-        self.assertEqual(jsonOut[cd][cet]['31']['Dram'], '0x0')
-        self.assertEqual(jsonOut[cd][cet]['31']['On Spare'], 'Yes')
-        self.assertEqual(jsonOut[cd][cet]['31']['Hard CE'], 'No')
-        self.assertEqual(jsonOut[cd][cet]['31']['Is Active'], 'No')
+        self.assertEqual(jsonOut[cd][cet]["31"]["Count"], 1)
+        self.assertEqual(jsonOut[cd][cet]["31"]["Primary Rank"], 0)
+        self.assertEqual(jsonOut[cd][cet]["31"]["Secondary Rank"], 0)
+        self.assertEqual(jsonOut[cd][cet]["31"]["Bank"], "0x13")
+        self.assertEqual(jsonOut[cd][cet]["31"]["Column"], "0x68")
+        self.assertEqual(jsonOut[cd][cet]["31"]["Row"], "0x198e4")
+        self.assertEqual(jsonOut[cd][cet]["31"]["Dram Pins"], "0x0")
+        self.assertEqual(jsonOut[cd][cet]["31"]["Dram"], "0x0")
+        self.assertEqual(jsonOut[cd][cet]["31"]["On Spare"], "Yes")
+        self.assertEqual(jsonOut[cd][cet]["31"]["Hard CE"], "No")
+        self.assertEqual(jsonOut[cd][cet]["31"]["Is Active"], "No")
 
     def testCaptureDataParserUeTable(self):
         testData = bytearray.fromhex(
-            '00000494000500000000002E34EB00080004000000000000CBED000800000400'
-            '010000009100000800EFF507BD0C7E0F7ADE0008FFFFFFFFFFFFFFFFE5BB0008'
-            '0000F02000000000F6510008EF9CF0FF0010011CD423000810630F00FFEFFEE0'
-            'A6DB0008FFFFF0000000000058980008200000000000000059E0000800EFF3FF'
-            'FFFFFFFF1A2200080000021F80401E072D1100081017006302800000309C0008'
-            '3082107E40FF00008743000800210107540D500058A400082000000000000000'
-            '59E9000800EFF3FFFFFFFF07EE5100084C600000000000005C5D00081581FC00'
-            '00000000605D00081581FC0000000000645D00081581FC0000000000685D0008'
-            '1581FC00000000006C5D00081581FC0000000000705D00081581FC0000000000'
-            '745D00081581FC0000000000785D00081581FC0000000000EAB4000815810000'
-            '00000000EAB800081581FC0000000000EABC00081581FC0000000000EAC00008'
-            '1581000000000000FEB400081581000000000000FEB800081581FC0000000000'
-            'FEBC00081581FC0000000000FEC0000815810000000000005C6E000800000010'
-            '00000000490C00083F0206F00000000026DE0008C028010000000000B9510008'
-            'FFFFFFF000000000A6A50008FFFFFFFFFF000000E1AC000818C0000000000000'
-            'BFE500082000000000000000BFF100082000000000000000BFFD000820000000'
-            '00000000C009000820000000000000001C1E00087A00000000000000B7C30008'
-            'FC000000000000005D350008002000000000000000440001000000074D7C0008'
-            '200000000000000007AD00088400000000000000518B000800EFF3FFFFFFFFFF'
-            'BCC50008077E7700000000007E840008DF70000000000000A841000800000000'
-            '0001FDFCA8430008000000000001FDFC0049000200000007BCE5000820000000'
-            '00000000FA43000811003C0066000000D81500084423006380000000D8170008'
-            '2200000000000000FACB00080C81624180018000FF050008F000000006000000'
-            '61DB00087F90006000600000004B000400000023575700086627FFE000000000'
-            '383D000804000000000000002DCD0008000000002001FE0099F000081F7FF49F'
-            'F201FFFE77C20008FFFFFFFFFFFFFFFF9C370008C1F00000000000000B1F0008'
-            '1A84004600000000F40100088020000000000000F55100088FD9F00000000000'
-            'D32100080020000000000000D323000840040000000000003E86000800000001'
-            '00000000CDCB0008FFFFFFFFB7007FFFD7A900080000000048E6000053FB0008'
-            '0007C01C00000000B90700080010000000000000E0E600081A9FFFFFFFFFFFFF'
-            'CAC4000825600000000000002537000800000000000040002539000800100000'
-            '00000000887900080001010100000000706E0008FFFFFFFF040001C15B730008'
-            '00200000000000004675000800FFFF9FEC000000596900084000000000000000'
-            '75A30008CAC00000000000002BE9000800800000000000622BF1000800000000'
-            '0200000037470008000088808200434C6323000800CA00000000000059BD0008'
-            '820640003DE63DCD65E60008100F00002708090A65E800080B0C050400030200'
-            '752E00081004C400C000000071160008011003FFFED87F00')
+            "00000494000500000000002E34EB00080004000000000000CBED000800000400"
+            "010000009100000800EFF507BD0C7E0F7ADE0008FFFFFFFFFFFFFFFFE5BB0008"
+            "0000F02000000000F6510008EF9CF0FF0010011CD423000810630F00FFEFFEE0"
+            "A6DB0008FFFFF0000000000058980008200000000000000059E0000800EFF3FF"
+            "FFFFFFFF1A2200080000021F80401E072D1100081017006302800000309C0008"
+            "3082107E40FF00008743000800210107540D500058A400082000000000000000"
+            "59E9000800EFF3FFFFFFFF07EE5100084C600000000000005C5D00081581FC00"
+            "00000000605D00081581FC0000000000645D00081581FC0000000000685D0008"
+            "1581FC00000000006C5D00081581FC0000000000705D00081581FC0000000000"
+            "745D00081581FC0000000000785D00081581FC0000000000EAB4000815810000"
+            "00000000EAB800081581FC0000000000EABC00081581FC0000000000EAC00008"
+            "1581000000000000FEB400081581000000000000FEB800081581FC0000000000"
+            "FEBC00081581FC0000000000FEC0000815810000000000005C6E000800000010"
+            "00000000490C00083F0206F00000000026DE0008C028010000000000B9510008"
+            "FFFFFFF000000000A6A50008FFFFFFFFFF000000E1AC000818C0000000000000"
+            "BFE500082000000000000000BFF100082000000000000000BFFD000820000000"
+            "00000000C009000820000000000000001C1E00087A00000000000000B7C30008"
+            "FC000000000000005D350008002000000000000000440001000000074D7C0008"
+            "200000000000000007AD00088400000000000000518B000800EFF3FFFFFFFFFF"
+            "BCC50008077E7700000000007E840008DF70000000000000A841000800000000"
+            "0001FDFCA8430008000000000001FDFC0049000200000007BCE5000820000000"
+            "00000000FA43000811003C0066000000D81500084423006380000000D8170008"
+            "2200000000000000FACB00080C81624180018000FF050008F000000006000000"
+            "61DB00087F90006000600000004B000400000023575700086627FFE000000000"
+            "383D000804000000000000002DCD0008000000002001FE0099F000081F7FF49F"
+            "F201FFFE77C20008FFFFFFFFFFFFFFFF9C370008C1F00000000000000B1F0008"
+            "1A84004600000000F40100088020000000000000F55100088FD9F00000000000"
+            "D32100080020000000000000D323000840040000000000003E86000800000001"
+            "00000000CDCB0008FFFFFFFFB7007FFFD7A900080000000048E6000053FB0008"
+            "0007C01C00000000B90700080010000000000000E0E600081A9FFFFFFFFFFFFF"
+            "CAC4000825600000000000002537000800000000000040002539000800100000"
+            "00000000887900080001010100000000706E0008FFFFFFFF040001C15B730008"
+            "00200000000000004675000800FFFF9FEC000000596900084000000000000000"
+            "75A30008CAC00000000000002BE9000800800000000000622BF1000800000000"
+            "0200000037470008000088808200434C6323000800CA00000000000059BD0008"
+            "820640003DE63DCD65E60008100F00002708090A65E800080B0C050400030200"
+            "752E00081004C400C000000071160008011003FFFED87F00"
+        )
         mv = memoryview(testData)
 
         testStr = udparsers.be500.be500.parseUDToJson(1, 1, mv)
@@ -388,56 +401,57 @@ class TestUserDataParser(unittest.TestCase):
 
         print(json.dumps(jsonOut, indent=4))
 
-        cd = 'Capture Data'
-        uet = 'UE Table'
-        self.assertEqual(jsonOut[cd][uet]['0']['Count'], 1)
-        self.assertEqual(jsonOut[cd][uet]['0']['Type'], 'SCRUB_MPE')
-        self.assertEqual(jsonOut[cd][uet]['0']['Primary Rank'], '0x0')
-        self.assertEqual(jsonOut[cd][uet]['0']['Secondary Rank'], '0x0')
-        self.assertEqual(jsonOut[cd][uet]['0']['Bank'], '0x1b')
-        self.assertEqual(jsonOut[cd][uet]['0']['Column'], '0x7f')
-        self.assertEqual(jsonOut[cd][uet]['0']['Row'], '0x3fffe')
+        cd = "Capture Data"
+        uet = "UE Table"
+        self.assertEqual(jsonOut[cd][uet]["0"]["Count"], 1)
+        self.assertEqual(jsonOut[cd][uet]["0"]["Type"], "SCRUB_MPE")
+        self.assertEqual(jsonOut[cd][uet]["0"]["Primary Rank"], "0x0")
+        self.assertEqual(jsonOut[cd][uet]["0"]["Secondary Rank"], "0x0")
+        self.assertEqual(jsonOut[cd][uet]["0"]["Bank"], "0x1b")
+        self.assertEqual(jsonOut[cd][uet]["0"]["Column"], "0x7f")
+        self.assertEqual(jsonOut[cd][uet]["0"]["Row"], "0x3fffe")
 
     def testCaptureDataParserRowRepairData(self):
         testData = bytearray.fromhex(
-            '000004A0000500000000002E34EB00080004000000000000CBED000800000400'
-            '010000009100000800EFF507BD0C7E0F7ADE0008FFFFFFFFFFFFFFFFE5BB0008'
-            '0000F02000000000F6510008EF9CF0FF0010011CD423000810630F00FFEFFEE0'
-            'A6DB0008FFFFF0000000000058980008200000000000000059E0000800EFF3FF'
-            'FFFFFFFF1A2200080000021F80401E072D1100081017006302800000309C0008'
-            '3082107E40FF00008743000800210107540D500058A400082000000000000000'
-            '59E9000800EFF3FFFFFFFF07EE5100084C600000000000005C5D00081581FC00'
-            '00000000605D00081581FC0000000000645D00081581FC0000000000685D0008'
-            '1581FC00000000006C5D00081581FC0000000000705D00081581FC0000000000'
-            '745D00081581FC0000000000785D00081581FC0000000000EAB4000815810000'
-            '00000000EAB800081581FC0000000000EABC00081581FC0000000000EAC00008'
-            '1581000000000000FEB400081581000000000000FEB800081581FC0000000000'
-            'FEBC00081581FC0000000000FEC0000815810000000000005C6E000800000010'
-            '00000000490C00083F0206F00000000026DE0008C028010000000000B9510008'
-            'FFFFFFF000000000A6A50008FFFFFFFFFF000000E1AC000818C0000000000000'
-            'BFE500082000000000000000BFF100082000000000000000BFFD000820000000'
-            '00000000C009000820000000000000001C1E00087A00000000000000B7C30008'
-            'FC000000000000005D350008002000000000000000440001000000074D7C0008'
-            '200000000000000007AD00088400000000000000518B000800EFF3FFFFFFFFFF'
-            'BCC50008077E7700000000007E840008DF70000000000000A841000800000000'
-            '0001FDFCA8430008000000000001FDFC0049000200000007BCE5000820000000'
-            '00000000FA43000811003C0066000000D81500084423006380000000D8170008'
-            '2200000000000000FACB00080C81624180018000FF050008F000000006000000'
-            '61DB00087F90006000600000004B000400000024575700086627FFE000000000'
-            '383D000804000000000000002DCD0008000000002001FE0099F000081F7FF49F'
-            'F201FFFE77C20008FFFFFFFFFFFFFFFF9C370008C1F00000000000000B1F0008'
-            '1A84004600000000F40100088020000000000000F55100088FD9F00000000000'
-            'D32100080020000000000000D323000840040000000000003E86000800000001'
-            '00000000CDCB0008FFFFFFFFB7007FFFD7A900080000000048E6000053FB0008'
-            '0007C01C00000000B90700080010000000000000E0E600081A9FFFFFFFFFFFFF'
-            'CAC400082560000000000000253900080010000000000000706E0008FFFFF000'
-            '040000005B73000800200000000000004675000808FFFF9FEC00000059690008'
-            '800000000000000075A50008CAC00000000000002BE900080080000000000062'
-            '2BF10008000000000200000037470008000088808200434C6323000800CA2000'
-            '0000000059BD0008820640003DE63DCD65E60008100F00002708090A65E80008'
-            '0B0C050400030200186300080000000000000020752E00081208042000000000'
-            '1D9500081400012448FFFF0058C60008010008DBFFFF000071160008011023FF'
-            'FED87F0000')
+            "000004A0000500000000002E34EB00080004000000000000CBED000800000400"
+            "010000009100000800EFF507BD0C7E0F7ADE0008FFFFFFFFFFFFFFFFE5BB0008"
+            "0000F02000000000F6510008EF9CF0FF0010011CD423000810630F00FFEFFEE0"
+            "A6DB0008FFFFF0000000000058980008200000000000000059E0000800EFF3FF"
+            "FFFFFFFF1A2200080000021F80401E072D1100081017006302800000309C0008"
+            "3082107E40FF00008743000800210107540D500058A400082000000000000000"
+            "59E9000800EFF3FFFFFFFF07EE5100084C600000000000005C5D00081581FC00"
+            "00000000605D00081581FC0000000000645D00081581FC0000000000685D0008"
+            "1581FC00000000006C5D00081581FC0000000000705D00081581FC0000000000"
+            "745D00081581FC0000000000785D00081581FC0000000000EAB4000815810000"
+            "00000000EAB800081581FC0000000000EABC00081581FC0000000000EAC00008"
+            "1581000000000000FEB400081581000000000000FEB800081581FC0000000000"
+            "FEBC00081581FC0000000000FEC0000815810000000000005C6E000800000010"
+            "00000000490C00083F0206F00000000026DE0008C028010000000000B9510008"
+            "FFFFFFF000000000A6A50008FFFFFFFFFF000000E1AC000818C0000000000000"
+            "BFE500082000000000000000BFF100082000000000000000BFFD000820000000"
+            "00000000C009000820000000000000001C1E00087A00000000000000B7C30008"
+            "FC000000000000005D350008002000000000000000440001000000074D7C0008"
+            "200000000000000007AD00088400000000000000518B000800EFF3FFFFFFFFFF"
+            "BCC50008077E7700000000007E840008DF70000000000000A841000800000000"
+            "0001FDFCA8430008000000000001FDFC0049000200000007BCE5000820000000"
+            "00000000FA43000811003C0066000000D81500084423006380000000D8170008"
+            "2200000000000000FACB00080C81624180018000FF050008F000000006000000"
+            "61DB00087F90006000600000004B000400000024575700086627FFE000000000"
+            "383D000804000000000000002DCD0008000000002001FE0099F000081F7FF49F"
+            "F201FFFE77C20008FFFFFFFFFFFFFFFF9C370008C1F00000000000000B1F0008"
+            "1A84004600000000F40100088020000000000000F55100088FD9F00000000000"
+            "D32100080020000000000000D323000840040000000000003E86000800000001"
+            "00000000CDCB0008FFFFFFFFB7007FFFD7A900080000000048E6000053FB0008"
+            "0007C01C00000000B90700080010000000000000E0E600081A9FFFFFFFFFFFFF"
+            "CAC400082560000000000000253900080010000000000000706E0008FFFFF000"
+            "040000005B73000800200000000000004675000808FFFF9FEC00000059690008"
+            "800000000000000075A50008CAC00000000000002BE900080080000000000062"
+            "2BF10008000000000200000037470008000088808200434C6323000800CA2000"
+            "0000000059BD0008820640003DE63DCD65E60008100F00002708090A65E80008"
+            "0B0C050400030200186300080000000000000020752E00081208042000000000"
+            "1D9500081400012448FFFF0058C60008010008DBFFFF000071160008011023FF"
+            "FED87F0000"
+        )
         mv = memoryview(testData)
 
         testStr = udparsers.be500.be500.parseUDToJson(1, 1, mv)
@@ -446,54 +460,55 @@ class TestUserDataParser(unittest.TestCase):
 
         print(json.dumps(jsonOut, indent=4))
 
-        cd = 'Capture Data'
-        rrv = 'Row Repair VPD'
-        self.assertEqual(jsonOut[cd][rrv]['0']['Rank'], 1)
-        self.assertEqual(jsonOut[cd][rrv]['0']['Port'], 0)
-        self.assertEqual(jsonOut[cd][rrv]['0']['Repair'], '0x08dbffff')
+        cd = "Capture Data"
+        rrv = "Row Repair VPD"
+        self.assertEqual(jsonOut[cd][rrv]["0"]["Rank"], 1)
+        self.assertEqual(jsonOut[cd][rrv]["0"]["Port"], 0)
+        self.assertEqual(jsonOut[cd][rrv]["0"]["Repair"], "0x08dbffff")
 
     def testCaptureDataParserIueCounts(self):
         testData = bytearray.fromhex(
-            '000004F0000500000000002E34EB00080008000000000000CBED000800000400'
-            '010000009100000800EFF507BD0C7E0F7ADE0008FFFFFFFFFFFFFFFFE5BB0008'
-            '0000F00200000000F6510008EF98F0FF07C061BCD42100080006000010080000'
-            'D423000810610F00E8379E40A6DB00081F6A3000000000005898000820000000'
-            '0000000059E0000800EFF3FFFFFFFFFF1A2200080000021F80401E072D110008'
-            '1017006302800000309C00083082107E40FF00008743000800210107540D5000'
-            '58A40008200000000000000059E9000800EFF3FFFFFFFF07EE5100084C600000'
-            '000000005C5D00081581FC0000000000605D00081581FC0000000000645D0008'
-            '1581FC0000000000685D00081581FC00000000006C5D00081581FC0000000000'
-            '705D00081581FC0000000000745D00081581FC0000000000785D00081581FC00'
-            '00000000EAB400081581000000000000EAB800081581FC0000000000EABC0008'
-            '1581FC0000000000EAC000081581000000000000FEB400081581000000000000'
-            'FEB800081581FC0000000000FEBC00081581FC0000000000FEC0000815810000'
-            '000000005C6E00080800001000000000490C00083F0206F00000000026DE0008'
-            'C028010000000000B9510008FFFFFFF000000000A6A50008200FE3FC07000000'
-            'E1AC000818C0000000000000BFE500082000000000000000BFF1000820000000'
-            '00000000BFFD00082000000000000000C009000820000000000000001C1E0008'
-            '7B00000000000000B7C30008FC6000000000000000440000000000074D7C0008'
-            '200000000000000007AD00088400000000000000518B000800EFF3FFFFFFFFFF'
-            'BCC50008077E7500000000007E840008DF70000000000000A841000880004000'
-            '1F41FDFCA8430008800050001F21FDFC0049000000000008BCE5000820000000'
-            '00000000FA43000811003C0066000000D8130008880CC30018000000D8150008'
-            'CC2FC36398000000D81700082200000000000000FACB00080C81624180018000'
-            'FF050008000000000600000061DB00087F90006000600000004B000000000024'
-            '575700086627FFE000000000383D000804000000000000002DCD000800000000'
-            '3001FE0099F000081F7FF49FF201FFFE77C20008FFFFFFFFFFFFFFFF9C370008'
-            'C1F000000000000043BE000802800000000000000B1F00081A80004600000000'
-            '14FD0008A443050800000000F40100080020000000000000F55100088FD9F000'
-            '00000000D32100080020000000000000D323000840040000000000003E860008'
-            '0000000804000000CDCB000800F92FFFB6007FFFD7A90008FFC2500001E60000'
-            '53FB00080007C01C00000000B90700080010000000000000E0E600081A9FFFFF'
-            'FFFFFFFFCAC40008256000000000000049F6000800000000000000FF25370008'
-            '000000FFF0000000253900080000000000000010706E0008FFFFFFFF04000040'
-            '5B73000800200000000000004675000800FFFFDFEC0000005969000840000000'
-            '000000002BE9000800800000000000622BF10008000000000200000037470008'
-            '000088808200434C59BD00088207400042063DCD65E60008111000002708090A'
-            '65E800080B0C050400030200752E00089004840080000000C8A5000400010000'
-            '17160050000000000000000001008000001C45000301008000001C4508030100'
-            '8000001C45100301008000001C45180301008000001C45400301008000001C45'
-            '480301008000001C45500301008000001C455803')
+            "000004F0000500000000002E34EB00080008000000000000CBED000800000400"
+            "010000009100000800EFF507BD0C7E0F7ADE0008FFFFFFFFFFFFFFFFE5BB0008"
+            "0000F00200000000F6510008EF98F0FF07C061BCD42100080006000010080000"
+            "D423000810610F00E8379E40A6DB00081F6A3000000000005898000820000000"
+            "0000000059E0000800EFF3FFFFFFFFFF1A2200080000021F80401E072D110008"
+            "1017006302800000309C00083082107E40FF00008743000800210107540D5000"
+            "58A40008200000000000000059E9000800EFF3FFFFFFFF07EE5100084C600000"
+            "000000005C5D00081581FC0000000000605D00081581FC0000000000645D0008"
+            "1581FC0000000000685D00081581FC00000000006C5D00081581FC0000000000"
+            "705D00081581FC0000000000745D00081581FC0000000000785D00081581FC00"
+            "00000000EAB400081581000000000000EAB800081581FC0000000000EABC0008"
+            "1581FC0000000000EAC000081581000000000000FEB400081581000000000000"
+            "FEB800081581FC0000000000FEBC00081581FC0000000000FEC0000815810000"
+            "000000005C6E00080800001000000000490C00083F0206F00000000026DE0008"
+            "C028010000000000B9510008FFFFFFF000000000A6A50008200FE3FC07000000"
+            "E1AC000818C0000000000000BFE500082000000000000000BFF1000820000000"
+            "00000000BFFD00082000000000000000C009000820000000000000001C1E0008"
+            "7B00000000000000B7C30008FC6000000000000000440000000000074D7C0008"
+            "200000000000000007AD00088400000000000000518B000800EFF3FFFFFFFFFF"
+            "BCC50008077E7500000000007E840008DF70000000000000A841000880004000"
+            "1F41FDFCA8430008800050001F21FDFC0049000000000008BCE5000820000000"
+            "00000000FA43000811003C0066000000D8130008880CC30018000000D8150008"
+            "CC2FC36398000000D81700082200000000000000FACB00080C81624180018000"
+            "FF050008000000000600000061DB00087F90006000600000004B000000000024"
+            "575700086627FFE000000000383D000804000000000000002DCD000800000000"
+            "3001FE0099F000081F7FF49FF201FFFE77C20008FFFFFFFFFFFFFFFF9C370008"
+            "C1F000000000000043BE000802800000000000000B1F00081A80004600000000"
+            "14FD0008A443050800000000F40100080020000000000000F55100088FD9F000"
+            "00000000D32100080020000000000000D323000840040000000000003E860008"
+            "0000000804000000CDCB000800F92FFFB6007FFFD7A90008FFC2500001E60000"
+            "53FB00080007C01C00000000B90700080010000000000000E0E600081A9FFFFF"
+            "FFFFFFFFCAC40008256000000000000049F6000800000000000000FF25370008"
+            "000000FFF0000000253900080000000000000010706E0008FFFFFFFF04000040"
+            "5B73000800200000000000004675000800FFFFDFEC0000005969000840000000"
+            "000000002BE9000800800000000000622BF10008000000000200000037470008"
+            "000088808200434C59BD00088207400042063DCD65E60008111000002708090A"
+            "65E800080B0C050400030200752E00089004840080000000C8A5000400010000"
+            "17160050000000000000000001008000001C45000301008000001C4508030100"
+            "8000001C45100301008000001C45180301008000001C45400301008000001C45"
+            "480301008000001C45500301008000001C455803"
+        )
         mv = memoryview(testData)
 
         testStr = udparsers.be500.be500.parseUDToJson(1, 1, mv)
@@ -502,40 +517,41 @@ class TestUserDataParser(unittest.TestCase):
 
         print(json.dumps(jsonOut, indent=4))
 
-        cd = 'Capture Data'
-        iue = 'IUE Counts'
-        self.assertEqual(jsonOut[cd][iue]['0']['Count'], 1)
-        self.assertEqual(jsonOut[cd][iue]['0']['Rank'], 0)
+        cd = "Capture Data"
+        iue = "IUE Counts"
+        self.assertEqual(jsonOut[cd][iue]["0"]["Count"], 1)
+        self.assertEqual(jsonOut[cd][iue]["0"]["Rank"], 0)
 
     def testCaptureDataParserL3LDFFDC(self):
         testData = bytearray.fromhex(
-            '00000354000500030000002F411300080000000002000000CBED000800000000'
-            '810400009100000800EFF507BD0C7E0F7ADE0008FFFFFFFFFFFFFFFFE5BB0008'
-            '0000F00200000000F6510008FF98F0FF07C061BCD42100080006000010080000'
-            'D423000800610F00E8379E40A6DB00081F6A3000000000005898000820000000'
-            '0000000059E0000800EFF3FFFFFFFFFF1A2200080000021F80401E072D110008'
-            '1017006302800000309C00083082107E40FF00008743000800210107540D5000'
-            '58A40008200000000000000059E9000800EFF3FFFFFFFF07EE5100084C400000'
-            '000000005C5D00081581FC0000000000605D00081581FC0000000000645D0008'
-            '1581FC0000000000685D00081581FC00000000006C5D00081581FC0000000000'
-            '705D00081581FC0000000000745D00081581FC0000000000785D00081581FC00'
-            '00000000EAB400081581000000000000EAB800081581FC0000000000EABC0008'
-            '1581FC0000000000EAC000081581000000000000FEB400081581000000000000'
-            'FEB800081581FC0000000000FEBC00080501FC0000000000FEC0000815810000'
-            '000000005C6E00080000001000000000490C00083F0206F00000000026DE0008'
-            'C028010000000000B9510008FFFFFFF000000000A6A50008200FE3FC07000000'
-            'E1AC000818C0000000000000BFE500082000000000000000BFF1000820000000'
-            '00000000BFFD00082000000000000000C009000820000000000000001C1E0008'
-            'EA00000000000000B7C30008FC600000000000005D3500080100000000000000'
-            '0023001E00000009EE2400082000000000000000CC5300088000800000000000'
-            '62F4000804000000000000000A09000804E1700F00FFFFFFF3E70008FFFFFFFF'
-            'FFFFFFFF620500080000200000000000829000087E000400100000006B6E0008'
-            '80FEFBBB200000006C6E000881010040800000000007007B0000000D50740008'
-            '08001008000000003118000842493E29800000000EEA00083DB4410000000000'
-            '46DB00080201E3F8000000004D74000800000400000000002B1800083C200507'
-            'F700000008EA0008C29C7AB8080000006CAB00080221D81871A8F61A4A7B0008'
-            '148802428A0300404A7D0008BDDC26C5FE1300C4D72A0008AC10080000000000'
-            'C69200082222222200000000C6DA000800000061001120C3000000')
+            "00000354000500030000002F411300080000000002000000CBED000800000000"
+            "810400009100000800EFF507BD0C7E0F7ADE0008FFFFFFFFFFFFFFFFE5BB0008"
+            "0000F00200000000F6510008FF98F0FF07C061BCD42100080006000010080000"
+            "D423000800610F00E8379E40A6DB00081F6A3000000000005898000820000000"
+            "0000000059E0000800EFF3FFFFFFFFFF1A2200080000021F80401E072D110008"
+            "1017006302800000309C00083082107E40FF00008743000800210107540D5000"
+            "58A40008200000000000000059E9000800EFF3FFFFFFFF07EE5100084C400000"
+            "000000005C5D00081581FC0000000000605D00081581FC0000000000645D0008"
+            "1581FC0000000000685D00081581FC00000000006C5D00081581FC0000000000"
+            "705D00081581FC0000000000745D00081581FC0000000000785D00081581FC00"
+            "00000000EAB400081581000000000000EAB800081581FC0000000000EABC0008"
+            "1581FC0000000000EAC000081581000000000000FEB400081581000000000000"
+            "FEB800081581FC0000000000FEBC00080501FC0000000000FEC0000815810000"
+            "000000005C6E00080000001000000000490C00083F0206F00000000026DE0008"
+            "C028010000000000B9510008FFFFFFF000000000A6A50008200FE3FC07000000"
+            "E1AC000818C0000000000000BFE500082000000000000000BFF1000820000000"
+            "00000000BFFD00082000000000000000C009000820000000000000001C1E0008"
+            "EA00000000000000B7C30008FC600000000000005D3500080100000000000000"
+            "0023001E00000009EE2400082000000000000000CC5300088000800000000000"
+            "62F4000804000000000000000A09000804E1700F00FFFFFFF3E70008FFFFFFFF"
+            "FFFFFFFF620500080000200000000000829000087E000400100000006B6E0008"
+            "80FEFBBB200000006C6E000881010040800000000007007B0000000D50740008"
+            "08001008000000003118000842493E29800000000EEA00083DB4410000000000"
+            "46DB00080201E3F8000000004D74000800000400000000002B1800083C200507"
+            "F700000008EA0008C29C7AB8080000006CAB00080221D81871A8F61A4A7B0008"
+            "148802428A0300404A7D0008BDDC26C5FE1300C4D72A0008AC10080000000000"
+            "C69200082222222200000000C6DA000800000061001120C3000000"
+        )
         mv = memoryview(testData)
 
         testStr = udparsers.be500.be500.parseUDToJson(1, 1, mv)
@@ -544,66 +560,69 @@ class TestUserDataParser(unittest.TestCase):
 
         print(json.dumps(jsonOut, indent=4))
 
-        cd = 'Capture Data'
-        l3 = 'L3_LD_FFDC'
-        self.assertEqual(jsonOut[cd][l3]['L3 LD Counts'], 1)
-        self.assertEqual(jsonOut[cd][l3]['L3 LD Max Allowed'], 6)
+        cd = "Capture Data"
+        l3 = "L3_LD_FFDC"
+        self.assertEqual(jsonOut[cd][l3]["L3 LD Counts"], 1)
+        self.assertEqual(jsonOut[cd][l3]["L3 LD Max Allowed"], 6)
         self.assertEqual(
-            jsonOut[cd][l3]['L3 Error Member'], "0x03 (or possibly 0x0b)")
-        self.assertEqual(jsonOut[cd][l3]['L3 Error DW'], "0x00")
-        self.assertEqual(jsonOut[cd][l3]['L3 Error Bank'],
-                         "0x01 (or possibly 0x03)")
-        self.assertEqual(jsonOut[cd][l3]['L3 Error CL Half'], "unknown")
-        self.assertEqual(jsonOut[cd][l3]['L3 Error Syndrome Col'], "0x41")
-        self.assertEqual(jsonOut[cd][l3]['L3 Error Address'], "0x0022")
+            jsonOut[cd][l3]["L3 Error Member"], "0x03 (or possibly 0x0b)"
+        )
+        self.assertEqual(jsonOut[cd][l3]["L3 Error DW"], "0x00")
+        self.assertEqual(
+            jsonOut[cd][l3]["L3 Error Bank"], "0x01 (or possibly 0x03)"
+        )
+        self.assertEqual(jsonOut[cd][l3]["L3 Error CL Half"], "unknown")
+        self.assertEqual(jsonOut[cd][l3]["L3 Error Syndrome Col"], "0x41")
+        self.assertEqual(jsonOut[cd][l3]["L3 Error Address"], "0x0022")
 
     def testUncompressCaptureData(self):
-
         # test1
         compressedData = bytearray.fromhex(
-            '00000002E800050000000000002E34EB0008220008018200CBED040301900180'
-            '91000380EFF527FD003C7E0F7ADE0008FF11FFFFAF0D00FFE5BB040120F00201'
-            '81F6510008F70098F0FF07C061BCD4002100080806000010900440D423038061'
-            '0F00E800379E40A6DB00081F206A30018258980008208A04830059E00981F30E'
-            '01FF201A220401021F80401E00072D110008101700006302800000309C000008'
-            '3082107E40FF001000874303802101075705DD500058A41E88E921862407EE12'
-            '404C4004835C5D0500081581FC0182603948556439486839486C394870394853'
-            '743948783948EAB4398104832AEAB84E88BC4E88C05187FEA95148FE5448FE57'
-            '4005016184945A485C6E0402100181490C0200083F0206F0018126910C40C028'
-            '08010000B91240C80D006DC2A6A51E800FE3FC40070180E1AC000818C0920483'
-            'BFE51E87BFF17B88FD901E87C0091E871C1E000840D41F44B7C30008FC60A21F'
-            '44440182064D7C1E870711AD0008524400518B218701BCC50008037E74018202'
-            '7E840008DF700483A8C02D402940001F21FDFC004D4907C208BC7B4010C10129'
-            '4041FA2D4011003C0067294000D8130008880CC30040180180D8150008CC2F10'
-            'C36398AB4117000822801F44FACB00080C8162264180A500FF05040316400040'
-            '611B407F9000600060000000')
+            "00000002E800050000000000002E34EB0008220008018200CBED040301900180"
+            "91000380EFF527FD003C7E0F7ADE0008FF11FFFFAF0D00FFE5BB040120F00201"
+            "81F6510008F70098F0FF07C061BCD4002100080806000010900440D423038061"
+            "0F00E800379E40A6DB00081F206A30018258980008208A04830059E00981F30E"
+            "01FF201A220401021F80401E00072D110008101700006302800000309C000008"
+            "3082107E40FF001000874303802101075705DD500058A41E88E921862407EE12"
+            "404C4004835C5D0500081581FC0182603948556439486839486C394870394853"
+            "743948783948EAB4398104832AEAB84E88BC4E88C05187FEA95148FE5448FE57"
+            "4005016184945A485C6E0402100181490C0200083F0206F0018126910C40C028"
+            "08010000B91240C80D006DC2A6A51E800FE3FC40070180E1AC000818C0920483"
+            "BFE51E87BFF17B88FD901E87C0091E871C1E000840D41F44B7C30008FC60A21F"
+            "44440182064D7C1E870711AD0008524400518B218701BCC50008037E74018202"
+            "7E840008DF700483A8C02D402940001F21FDFC004D4907C208BC7B4010C10129"
+            "4041FA2D4011003C0067294000D8130008880CC30040180180D8150008CC2F10"
+            "C36398AB4117000822801F44FACB00080C8162264180A500FF05040316400040"
+            "611B407F9000600060000000"
+        )
         compressedMv = memoryview(compressedData)
 
         uncompressedData = bytearray.fromhex(
-            '000002E8000500000000002E34EB00080008000000000000CBED000800000000'
-            '010000009100000800EFF527FD3C7E0F7ADE0008FFFFFFAFFFFFFFFFE5BB0008'
-            '0000F00200000000F6510008F798F0FF07C061BCD42100080806000010080000'
-            'D423000800610F00E8379E40A6DB00081F6A3000000000005898000820000000'
-            '0000000059E0000800EFF3FFFFFFFFFF1A2200080000021F80401E072D110008'
-            '1017006302800000309C00083082107E40FF0000874300080021010757DD5000'
-            '58A40008200000000000000059E9000800EFF3FFFFFFFF07EE5100084C400000'
-            '000000005C5D00081581FC0000000000605D00081581FC0000000000645D0008'
-            '1581FC0000000000685D00081581FC00000000006C5D00081581FC0000000000'
-            '705D00081581FC0000000000745D00081581FC0000000000785D00081581FC00'
-            '00000000EAB400081581000000000000EAB800081581FC0000000000EABC0008'
-            '1581FC0000000000EAC000081581000000000000FEB400081581000000000000'
-            'FEB800081581FC0000000000FEBC00080501FC0000000000FEC0000815810000'
-            '000000005C6E00080000001000000000490C00083F0206F00000000026DE0008'
-            'C028010000000000B9510008FFFFFFF000000000A6A50008200FE3FC07000000'
-            'E1AC000818C0000000000000BFE500082000000000000000BFF1000820000000'
-            '00000000BFFD00082000000000000000C009000820000000000000001C1E0008'
-            'D400000000000000B7C30008FC6000000000000000440000000000064D7C0008'
-            '200000000000000007AD00088100000000000000518B000800EFF3FFFFFFFFFF'
-            'BCC50008037E7400000000007E840008DF70000000000000A843000880000000'
-            '1F21FDFC0049000100000008BCE500080200000001800000FA43000811003C00'
-            '67800000D8130008880CC30018000000D8150008CC2FC36398000000D8170008'
-            '2200000000000000FACB00080C81624180018000FF0500080000000006000000'
-            '61DB00087F90006000600000')
+            "000002E8000500000000002E34EB00080008000000000000CBED000800000000"
+            "010000009100000800EFF527FD3C7E0F7ADE0008FFFFFFAFFFFFFFFFE5BB0008"
+            "0000F00200000000F6510008F798F0FF07C061BCD42100080806000010080000"
+            "D423000800610F00E8379E40A6DB00081F6A3000000000005898000820000000"
+            "0000000059E0000800EFF3FFFFFFFFFF1A2200080000021F80401E072D110008"
+            "1017006302800000309C00083082107E40FF0000874300080021010757DD5000"
+            "58A40008200000000000000059E9000800EFF3FFFFFFFF07EE5100084C400000"
+            "000000005C5D00081581FC0000000000605D00081581FC0000000000645D0008"
+            "1581FC0000000000685D00081581FC00000000006C5D00081581FC0000000000"
+            "705D00081581FC0000000000745D00081581FC0000000000785D00081581FC00"
+            "00000000EAB400081581000000000000EAB800081581FC0000000000EABC0008"
+            "1581FC0000000000EAC000081581000000000000FEB400081581000000000000"
+            "FEB800081581FC0000000000FEBC00080501FC0000000000FEC0000815810000"
+            "000000005C6E00080000001000000000490C00083F0206F00000000026DE0008"
+            "C028010000000000B9510008FFFFFFF000000000A6A50008200FE3FC07000000"
+            "E1AC000818C0000000000000BFE500082000000000000000BFF1000820000000"
+            "00000000BFFD00082000000000000000C009000820000000000000001C1E0008"
+            "D400000000000000B7C30008FC6000000000000000440000000000064D7C0008"
+            "200000000000000007AD00088100000000000000518B000800EFF3FFFFFFFFFF"
+            "BCC50008037E7400000000007E840008DF70000000000000A843000880000000"
+            "1F21FDFC0049000100000008BCE500080200000001800000FA43000811003C00"
+            "67800000D8130008880CC30018000000D8150008CC2FC36398000000D8170008"
+            "2200000000000000FACB00080C81624180018000FF0500080000000006000000"
+            "61DB00087F90006000600000"
+        )
         uncompressedMv = memoryview(uncompressedData)
 
         testMv = udparsers.be500.be500.uncompressCdBuffer(compressedMv)
@@ -612,105 +631,107 @@ class TestUserDataParser(unittest.TestCase):
 
         # test2
         compressedData = bytearray.fromhex(
-            '0203020100020300c00342000000030202000040010002020102000301035d00'
-            '0441000080028006c002038002010303030101068201840e02030102010d4000'
-            '03ef0b8104c00284020a4211400c801200ff0ac207820f0008c3128012011ac1'
-            '1800fe08810f0011c100c015c00d4003c001ff10c104411ac310c01e41280012'
-            '802800ff058008801782114001000c8018c11843ff01c018811c011ac00d8201'
-            '401e013c42ff09c10300140100c02dc015c11f8202c1ff2dc11381114111c10a'
-            '40228107021100ff3bc12f413802368206001c8105010400ff1f414201040024'
-            'c21381584210820281ff56421b014ec1038157c217c210c02b41fd08813e8127'
-            '0006c11cc00a42003541ff460216431101628111810b4018813e41ff25c16cc1'
-            '4d8108c14643274165010e80ff31c22e41434217010c816d0016c209c4ff0182'
-            '4d8107010cc0128445c178023e02ff86426941824133813cc2754167020803ff'
-            '34012bc16702074137035c4174413302ff11814b82328371c3854384415a4522'
-            '01ff820324424fc234c241c19dc17ac46941ff97816b01194148034fc15f416a'
-            '415fc2ff57810bc21f41044193016802b7c25c03ff080103011081424189c28d'
-            '8277c24f01ff12813642be82194166818b81a8c268c3ff17427202be02298118'
-            '00664266827e83ff614121024f822681b54307001e022701ff59831002604134'
-            '426f02bec276816041ff318370c20182d281c1c247c161420c01ff450292c245'
-            '82044133017fc229c27a01ff69c3714179c132023cc11f806b82a402ff3f4109'
-            '407bc111c1c002e3038d428f01fff3c173c341015583600194811e0236c1ff89'
-            '0262c206c19b826241fa4457c10241ff43016642518150829982680216c15cc2'
-            'ff1e4239c159817c821c01cf035c014e82ff8b424e824502dd02c342ccc13981'
-            '62c1ff61c28bc24a4308018d428e82ab82b843ff44418f839b42274128c26ec3'
-            '3d0102c1ff8c81758292c2a2c2ee4263c266c23041ff9e42020285422cc162c3'
-            '168213c37942ff8dc12cc246020f818001e7c4b8c28fc5ff2a412d818ac25b41'
-            '1f813bc106822543ff44c139c178416441d881fdc363414bc2ff6cc183428e82'
-            '1d8238029e022642f3c3ffba8386c2e105224101432e8180c35481ff7bc27182'
-            '8fc223412383388190831301ff2e4148c1a1815a02dcc2a1c6a3c252c2ff3a42'
-            '19819701cec21002b202a8826781ff12c10142ecc395411281d70210410944ff'
-            '3781d40439c110821603f34231424102ff96428cc23a425b82a4440942a60370'
-            'c2ff00810601cbc341c109c11e017bc394c3ffb142f1422081d2025dc2044136'
-            '01d182ffd9c2d1c200018b010101bd427a45bb42c09c040b4101030a')
+            "0203020100020300c00342000000030202000040010002020102000301035d00"
+            "0441000080028006c002038002010303030101068201840e02030102010d4000"
+            "03ef0b8104c00284020a4211400c801200ff0ac207820f0008c3128012011ac1"
+            "1800fe08810f0011c100c015c00d4003c001ff10c104411ac310c01e41280012"
+            "802800ff058008801782114001000c8018c11843ff01c018811c011ac00d8201"
+            "401e013c42ff09c10300140100c02dc015c11f8202c1ff2dc11381114111c10a"
+            "40228107021100ff3bc12f413802368206001c8105010400ff1f414201040024"
+            "c21381584210820281ff56421b014ec1038157c217c210c02b41fd08813e8127"
+            "0006c11cc00a42003541ff460216431101628111810b4018813e41ff25c16cc1"
+            "4d8108c14643274165010e80ff31c22e41434217010c816d0016c209c4ff0182"
+            "4d8107010cc0128445c178023e02ff86426941824133813cc2754167020803ff"
+            "34012bc16702074137035c4174413302ff11814b82328371c3854384415a4522"
+            "01ff820324424fc234c241c19dc17ac46941ff97816b01194148034fc15f416a"
+            "415fc2ff57810bc21f41044193016802b7c25c03ff080103011081424189c28d"
+            "8277c24f01ff12813642be82194166818b81a8c268c3ff17427202be02298118"
+            "00664266827e83ff614121024f822681b54307001e022701ff59831002604134"
+            "426f02bec276816041ff318370c20182d281c1c247c161420c01ff450292c245"
+            "82044133017fc229c27a01ff69c3714179c132023cc11f806b82a402ff3f4109"
+            "407bc111c1c002e3038d428f01fff3c173c341015583600194811e0236c1ff89"
+            "0262c206c19b826241fa4457c10241ff43016642518150829982680216c15cc2"
+            "ff1e4239c159817c821c01cf035c014e82ff8b424e824502dd02c342ccc13981"
+            "62c1ff61c28bc24a4308018d428e82ab82b843ff44418f839b42274128c26ec3"
+            "3d0102c1ff8c81758292c2a2c2ee4263c266c23041ff9e42020285422cc162c3"
+            "168213c37942ff8dc12cc246020f818001e7c4b8c28fc5ff2a412d818ac25b41"
+            "1f813bc106822543ff44c139c178416441d881fdc363414bc2ff6cc183428e82"
+            "1d8238029e022642f3c3ffba8386c2e105224101432e8180c35481ff7bc27182"
+            "8fc223412383388190831301ff2e4148c1a1815a02dcc2a1c6a3c252c2ff3a42"
+            "19819701cec21002b202a8826781ff12c10142ecc395411281d70210410944ff"
+            "3781d40439c110821603f34231424102ff96428cc23a425b82a4440942a60370"
+            "c2ff00810601cbc341c109c11e017bc394c3ffb142f1422081d2025dc2044136"
+            "01d182ffd9c2d1c200018b010101bd427a45bb42c09c040b4101030a"
+        )
         compressedMv = memoryview(compressedData)
 
         uncompressedData = bytearray.fromhex(
-            '0302010002030002030300030201030202000201000102020102000301030000'
-            '0201000001000200030203010302030202010303030101000301030001030103'
-            '0001030102010101000003030202010100010003020103020202020301030201'
-            '0101030303000003010302030200000201000103010001000200030303020000'
-            '0303030200000101030000010001030101000003000203020202010100020200'
-            '0101020101000201000302000002010102010003030301010203030201010202'
-            '0201000001020101010301010102030003030303030000010303030000020303'
-            '0303030001000103030200010003010303000202000303000202000300030203'
-            '0201030001000300020301020302020202000003030303020103010203030101'
-            '0001010101000100000302030100010001010300000202010103030002010202'
-            '0203030300010300000203010200010301000001020202000202000003020301'
-            '0202000203000203020101000102000203000301020101000302010200000302'
-            '0200000200020102030202000102020002010101030301020102010102000001'
-            '0000030003000202030103000301000203010302000000010301030102030202'
-            '0301030202010101020001020101000002030203030300020003000202020102'
-            '0000000201010300010002030102030301020200010303010203000101010301'
-            '0103030201020202020001030201030303010000000301030201000302030103'
-            '0200020303000201010301030000030301030302020101000201030100000002'
-            '0102020003000100030203000202030001030203000303020003030003000200'
-            '0200000100020100000100030303030102010002000001000300000200020303'
-            '0303000301020302030301020300030101000001000101030101010203000102'
-            '0001020103010302010001000000010100010200020303000001020001030201'
-            '0000030002020203030303030000010002030100030000030102030301020002'
-            '0203020002000301000200000301000101010100020203030003020201030003'
-            '0202000002030102020202010303020000030002010002020300000003000302'
-            '0203020003000301020102010000020103020301020103010203010103010301'
-            '0002010302000000020201020203030202030300000202020103000000030101'
-            '0102000303010301030103020003000202030302010101020001020100030202'
-            '0102010003010103020101020001010200000001010103010201020300000101'
-            '0302020203030101000200000301020301030002000303030002020002030201'
-            '0100000103010200000200030303030002030202030201030003000202020000'
-            '0200010101030101020201010100020303000102020302020202010100010102'
-            '0102030201010003030101000103030003000302030100020301030302000103'
-            '0200020301020300030000000303000200030003000101030200020100030002'
-            '0002020100010203010203000200020203030100000303020302030001000201'
-            '0200030301010202030202010201030100010100000102030302030002020200'
-            '0201030002020201000103020202030203010203020003010202010000030103'
-            '0000030202010002020300000100020101000003010300030201000201010101'
-            '0100000002000200030301000303010000020301010300030000020101030303'
-            '0003030203010202000302030300030302020003010003020101030200020100'
-            '0100020002010202000102030101020300020201030103000203020301000303'
-            '0002030203020103030303000001030000010203030103010001000201000102'
-            '0200000102010001000301010100010102030001010302010003030203000001'
-            '0100020302020102020203030301000100000201030003030302010203010300'
-            '0201030000000202030201020301030301010100010003010201030102030100'
-            '0001000001030200010302000001030102000100000101030200000003020100'
-            '0301000000030101020301030101000301020302030001010101010003020002'
-            '0001030000000202030301000002000200030003000100010201010200020000'
-            '0303000303020103020303020103000103000003010000000101020103020102'
-            '0202010100030002020001030301000202000103000103010301030200000102'
-            '0202030301000103000202030002020202030102010100000203020203030002'
-            '0200010300020300010103010001030201000102010102000000020300030102'
-            '0302010301000302020203020002000102010300020100020102020101030300'
-            '0201030301020103010001010202020003010002020000030302010002000100'
-            '0100030303000200000001020203020100030302030001020202030003000000'
-            '0003030303020303020001000300010303010102010301030100000000000100'
-            '0000000302030300000000030002030303000200030303010303010300020300'
-            '0303030103020203030202030001030302010301000302030200020202010201'
-            '0102030000010303030103000302030103030203020102000100030301010102'
-            '0300020001010300030200020000030303010201020001030000030202000001'
-            '0003010100010103030201000200030102020200020300030003010203010303'
-            '0001000102010001030201010201020003000101000100000001020303010203'
-            '0202000003010203030300010003020303030103000103000301030203010101'
-            '0302020203000102030203000101030000000000020300010103030000000103'
-            '0a')
+            "0302010002030002030300030201030202000201000102020102000301030000"
+            "0201000001000200030203010302030202010303030101000301030001030103"
+            "0001030102010101000003030202010100010003020103020202020301030201"
+            "0101030303000003010302030200000201000103010001000200030303020000"
+            "0303030200000101030000010001030101000003000203020202010100020200"
+            "0101020101000201000302000002010102010003030301010203030201010202"
+            "0201000001020101010301010102030003030303030000010303030000020303"
+            "0303030001000103030200010003010303000202000303000202000300030203"
+            "0201030001000300020301020302020202000003030303020103010203030101"
+            "0001010101000100000302030100010001010300000202010103030002010202"
+            "0203030300010300000203010200010301000001020202000202000003020301"
+            "0202000203000203020101000102000203000301020101000302010200000302"
+            "0200000200020102030202000102020002010101030301020102010102000001"
+            "0000030003000202030103000301000203010302000000010301030102030202"
+            "0301030202010101020001020101000002030203030300020003000202020102"
+            "0000000201010300010002030102030301020200010303010203000101010301"
+            "0103030201020202020001030201030303010000000301030201000302030103"
+            "0200020303000201010301030000030301030302020101000201030100000002"
+            "0102020003000100030203000202030001030203000303020003030003000200"
+            "0200000100020100000100030303030102010002000001000300000200020303"
+            "0303000301020302030301020300030101000001000101030101010203000102"
+            "0001020103010302010001000000010100010200020303000001020001030201"
+            "0000030002020203030303030000010002030100030000030102030301020002"
+            "0203020002000301000200000301000101010100020203030003020201030003"
+            "0202000002030102020202010303020000030002010002020300000003000302"
+            "0203020003000301020102010000020103020301020103010203010103010301"
+            "0002010302000000020201020203030202030300000202020103000000030101"
+            "0102000303010301030103020003000202030302010101020001020100030202"
+            "0102010003010103020101020001010200000001010103010201020300000101"
+            "0302020203030101000200000301020301030002000303030002020002030201"
+            "0100000103010200000200030303030002030202030201030003000202020000"
+            "0200010101030101020201010100020303000102020302020202010100010102"
+            "0102030201010003030101000103030003000302030100020301030302000103"
+            "0200020301020300030000000303000200030003000101030200020100030002"
+            "0002020100010203010203000200020203030100000303020302030001000201"
+            "0200030301010202030202010201030100010100000102030302030002020200"
+            "0201030002020201000103020202030203010203020003010202010000030103"
+            "0000030202010002020300000100020101000003010300030201000201010101"
+            "0100000002000200030301000303010000020301010300030000020101030303"
+            "0003030203010202000302030300030302020003010003020101030200020100"
+            "0100020002010202000102030101020300020201030103000203020301000303"
+            "0002030203020103030303000001030000010203030103010001000201000102"
+            "0200000102010001000301010100010102030001010302010003030203000001"
+            "0100020302020102020203030301000100000201030003030302010203010300"
+            "0201030000000202030201020301030301010100010003010201030102030100"
+            "0001000001030200010302000001030102000100000101030200000003020100"
+            "0301000000030101020301030101000301020302030001010101010003020002"
+            "0001030000000202030301000002000200030003000100010201010200020000"
+            "0303000303020103020303020103000103000003010000000101020103020102"
+            "0202010100030002020001030301000202000103000103010301030200000102"
+            "0202030301000103000202030002020202030102010100000203020203030002"
+            "0200010300020300010103010001030201000102010102000000020300030102"
+            "0302010301000302020203020002000102010300020100020102020101030300"
+            "0201030301020103010001010202020003010002020000030302010002000100"
+            "0100030303000200000001020203020100030302030001020202030003000000"
+            "0003030303020303020001000300010303010102010301030100000000000100"
+            "0000000302030300000000030002030303000200030303010303010300020300"
+            "0303030103020203030202030001030302010301000302030200020202010201"
+            "0102030000010303030103000302030103030203020102000100030301010102"
+            "0300020001010300030200020000030303010201020001030000030202000001"
+            "0003010100010103030201000200030102020200020300030003010203010303"
+            "0001000102010001030201010201020003000101000100000001020303010203"
+            "0202000003010203030300010003020303030103000103000301030203010101"
+            "0302020203000102030203000101030000000000020300010103030000000103"
+            "0a"
+        )
         uncompressedMv = memoryview(uncompressedData)
 
         testMv = udparsers.be500.be500.uncompressCdBuffer(compressedMv)
@@ -719,22 +740,23 @@ class TestUserDataParser(unittest.TestCase):
 
     def testUncompressCaptureDataRegsParse(self):
         testData = bytearray.fromhex(
-            '00000002E800050000000000002E34EB0008220008018200CBED040301900180'
-            '91000380EFF527FD003C7E0F7ADE0008FF11FFFFAF0D00FFE5BB040120F00201'
-            '81F6510008F70098F0FF07C061BCD4002100080806000010900440D423038061'
-            '0F00E800379E40A6DB00081F206A30018258980008208A04830059E00981F30E'
-            '01FF201A220401021F80401E00072D110008101700006302800000309C000008'
-            '3082107E40FF001000874303802101075705DD500058A41E88E921862407EE12'
-            '404C4004835C5D0500081581FC0182603948556439486839486C394870394853'
-            '743948783948EAB4398104832AEAB84E88BC4E88C05187FEA95148FE5448FE57'
-            '4005016184945A485C6E0402100181490C0200083F0206F0018126910C40C028'
-            '08010000B91240C80D006DC2A6A51E800FE3FC40070180E1AC000818C0920483'
-            'BFE51E87BFF17B88FD901E87C0091E871C1E000840D41F44B7C30008FC60A21F'
-            '44440182064D7C1E870711AD0008524400518B218701BCC50008037E74018202'
-            '7E840008DF700483A8C02D402940001F21FDFC004D4907C208BC7B4010C10129'
-            '4041FA2D4011003C0067294000D8130008880CC30040180180D8150008CC2F10'
-            'C36398AB4117000822801F44FACB00080C8162264180A500FF05040316400040'
-            '611B407F9000600060000000')
+            "00000002E800050000000000002E34EB0008220008018200CBED040301900180"
+            "91000380EFF527FD003C7E0F7ADE0008FF11FFFFAF0D00FFE5BB040120F00201"
+            "81F6510008F70098F0FF07C061BCD4002100080806000010900440D423038061"
+            "0F00E800379E40A6DB00081F206A30018258980008208A04830059E00981F30E"
+            "01FF201A220401021F80401E00072D110008101700006302800000309C000008"
+            "3082107E40FF001000874303802101075705DD500058A41E88E921862407EE12"
+            "404C4004835C5D0500081581FC0182603948556439486839486C394870394853"
+            "743948783948EAB4398104832AEAB84E88BC4E88C05187FEA95148FE5448FE57"
+            "4005016184945A485C6E0402100181490C0200083F0206F0018126910C40C028"
+            "08010000B91240C80D006DC2A6A51E800FE3FC40070180E1AC000818C0920483"
+            "BFE51E87BFF17B88FD901E87C0091E871C1E000840D41F44B7C30008FC60A21F"
+            "44440182064D7C1E870711AD0008524400518B218701BCC50008037E74018202"
+            "7E840008DF700483A8C02D402940001F21FDFC004D4907C208BC7B4010C10129"
+            "4041FA2D4011003C0067294000D8130008880CC30040180180D8150008CC2F10"
+            "C36398AB4117000822801F44FACB00080C8162264180A500FF05040316400040"
+            "611B407F9000600060000000"
+        )
         mv = memoryview(testData)
 
         testStr = udparsers.be500.be500.parseUDToJson(1, 2, mv)
@@ -743,25 +765,25 @@ class TestUserDataParser(unittest.TestCase):
 
         print(json.dumps(jsonOut, indent=4))
 
-        cd = 'Capture Data'
-        r = 'Registers'
-        huid = '0x00050000'
-        reg = 'MCD_FIR_MASK'.ljust(25) + ' (0x0000000003010803)'
-        testData = '0x4c40000000000000'
+        cd = "Capture Data"
+        r = "Registers"
+        huid = "0x00050000"
+        reg = "MCD_FIR_MASK".ljust(25) + " (0x0000000003010803)"
+        testData = "0x4c40000000000000"
         self.assertEqual(jsonOut[cd][r][huid][reg], testData)
 
-        huid = '0x00440000'
-        reg = 'MC_CHIPLET_HA_FIR'.ljust(25) + ' (0x000000000c040004)'
-        testData = '0x8100000000000000'
+        huid = "0x00440000"
+        reg = "MC_CHIPLET_HA_FIR".ljust(25) + " (0x000000000c040004)"
+        testData = "0x8100000000000000"
         self.assertEqual(jsonOut[cd][r][huid][reg], testData)
 
-        huid = '0x00490001'
-        reg = 'MC_DSTL_FIR'.ljust(25) + ' (0x000000000c010d00)'
-        testData = '0x0200000001800000'
+        huid = "0x00490001"
+        reg = "MC_DSTL_FIR".ljust(25) + " (0x000000000c010d00)"
+        testData = "0x0200000001800000"
         self.assertEqual(jsonOut[cd][r][huid][reg], testData)
 
     def testUdL2LineDeleteFfdc(self):
-        testData = bytearray.fromhex('01030F000300060107000101DD02EE00')
+        testData = bytearray.fromhex("01030F000300060107000101DD02EE00")
         mv = memoryview(testData)
 
         testStr = udparsers.be500.be500.parseUDToJson(70, 1, mv)
@@ -770,7 +792,9 @@ class TestUserDataParser(unittest.TestCase):
 
         print(json.dumps(jsonOut, indent=4))
 
-        self.assertEqual(json.dumps(jsonOut, indent=4), """{
+        self.assertEqual(
+            json.dumps(jsonOut, indent=4),
+            """{
     "L2 Line Delete Data": {
         "Target": {
             "node": 1,
@@ -789,10 +813,11 @@ class TestUserDataParser(unittest.TestCase):
             "Address": "0x02ee"
         }
     }
-}""")
+}""",
+        )
 
     def testUdL3LineDeleteFfdc(self):
-        testData = bytearray.fromhex('01030F000300060009010301DD0EEE00')
+        testData = bytearray.fromhex("01030F000300060009010301DD0EEE00")
         mv = memoryview(testData)
 
         testStr = udparsers.be500.be500.parseUDToJson(71, 1, mv)
@@ -801,7 +826,9 @@ class TestUserDataParser(unittest.TestCase):
 
         print(json.dumps(jsonOut, indent=4))
 
-        self.assertEqual(json.dumps(jsonOut, indent=4), """{
+        self.assertEqual(
+            json.dumps(jsonOut, indent=4),
+            """{
     "L3 Line Delete Data": {
         "Target": {
             "node": 1,
@@ -820,10 +847,11 @@ class TestUserDataParser(unittest.TestCase):
             "Address": "0x0eee"
         }
     }
-}""")
+}""",
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test = TestUserDataParser()
     test.testExtMruData1()
     test.testExtMruData2()

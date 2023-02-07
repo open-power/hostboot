@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2022
+# Contributors Listed Below - COPYRIGHT 2021,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -22,10 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+import glob
+import json
 import os
 import sys
-import json
-import glob
 from collections import OrderedDict
 
 from pel.prd.parserdata import SignatureData
@@ -36,12 +36,13 @@ from pel.prd.parserdata import SignatureData
 
 
 def attnTypeToStr(i_type: str) -> str:
-
-    attnTypes = {"01": "SYSTEM_CS",
-                 "02": "UNIT_CS",
-                 "03": "RECOVERABLE",
-                 "04": "SPECIAL",
-                 "05": "HOST_ATTN"}
+    attnTypes = {
+        "01": "SYSTEM_CS",
+        "02": "UNIT_CS",
+        "03": "RECOVERABLE",
+        "04": "SPECIAL",
+        "05": "HOST_ATTN",
+    }
 
     attnTypeStr = "Unknown " + i_type
 
@@ -50,13 +51,13 @@ def attnTypeToStr(i_type: str) -> str:
 
     return attnTypeStr
 
+
 # ###################################################
 # Used to convert target types to readable string
 # ###################################################
 
 
 def huidToStr(huid: str) -> str:
-
     # HUID format (32 bits):
     # 4    4    8        16
     # SSSS NNNN TTTTTTTT iiiiiiiiiiiiiiii
@@ -69,26 +70,26 @@ def huidToStr(huid: str) -> str:
     target_inst = int(huid[4:8], 16)
 
     chips = {
-        0x05: 'proc',  # TYPE_PROC
-        0x4b: 'ocmb',  # TYPE_OCMB_CHIP
+        0x05: "proc",  # TYPE_PROC
+        0x4B: "ocmb",  # TYPE_OCMB_CHIP
     }
 
     if target_type in chips:
-        return f'node {node_inst} {chips[target_type]} {target_inst}'
+        return f"node {node_inst} {chips[target_type]} {target_inst}"
 
     proc_units = {
         # autopep8: off
-        0x07: ('core', 32),  # TYPE_CORE
-        0x23: ('eq'  ,  8),  # TYPE_EQ
-        0x2d: ('pec' ,  2),  # TYPE_PEC
-        0x2e: ('phb' ,  6),  # TYPE_PHB
-        0x44: ('mc'  ,  4),  # TYPE_MC
-        0x49: ('mcc' ,  8),  # TYPE_MCC
-        0x4a: ('omic',  8),  # TYPE_OMIC
-        0x4f: ('nmmu',  2),  # TYPE_NMMU
-        0x50: ('pau' ,  8),  # TYPE_PAU
-        0x51: ('iohs',  8),  # TYPE_IOHS
-        0x52: ('pauc',  4),  # TYPE_PAUC
+        0x07: ("core", 32),  # TYPE_CORE
+        0x23: ("eq", 8),  # TYPE_EQ
+        0x2D: ("pec", 2),  # TYPE_PEC
+        0x2E: ("phb", 6),  # TYPE_PHB
+        0x44: ("mc", 4),  # TYPE_MC
+        0x49: ("mcc", 8),  # TYPE_MCC
+        0x4A: ("omic", 8),  # TYPE_OMIC
+        0x4F: ("nmmu", 2),  # TYPE_NMMU
+        0x50: ("pau", 8),  # TYPE_PAU
+        0x51: ("iohs", 8),  # TYPE_IOHS
+        0x52: ("pauc", 4),  # TYPE_PAUC
         # autopep8: on
     }
 
@@ -96,15 +97,23 @@ def huidToStr(huid: str) -> str:
         unit_type, units_per_proc = proc_units[target_type]
         proc_inst = target_inst // units_per_proc
         unit_inst = target_inst % units_per_proc
-        return f'node {node_inst} proc {proc_inst} {unit_type} {unit_inst}'
+        return f"node {node_inst} proc {proc_inst} {unit_type} {unit_inst}"
 
     # Just in case we fail to parse the HUID.
-    return f'node {node_inst} type 0x{target_type:02x} inst {target_inst}'
+    return f"node {node_inst} type 0x{target_type:02x} inst {target_inst}"
 
 
-def parseSRCToJson(refcode: str,
-                   word2: str, word3: str, word4: str, word5: str,
-                   word6: str, word7: str, word8: str, word9: str) -> str:
+def parseSRCToJson(
+    refcode: str,
+    word2: str,
+    word3: str,
+    word4: str,
+    word5: str,
+    word6: str,
+    word7: str,
+    word8: str,
+    word9: str,
+) -> str:
     """
     SRC parser for Hostboot/HBRT PRD component.
     """

@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2022
+# Contributors Listed Below - COPYRIGHT 2021,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -23,19 +23,17 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+import json
 import os
 import sys
-import json
-import srcparsers.be500.be500
+import unittest
 from collections import OrderedDict
 
-import unittest
+import srcparsers.be500.be500
 
 
 class TestPrdSrcParsing(unittest.TestCase):
-
     def testOutput(self):
-
         refcode = "BC23E504"
         hex2 = "000000E0"
         hex3 = "00000B00"
@@ -46,8 +44,9 @@ class TestPrdSrcParsing(unittest.TestCase):
         hex8 = "83810008"
         hex9 = "A100C708"
 
-        testOut = srcparsers.be500.be500.parseSRCToJson(refcode, hex2, hex3,
-                                                        hex4, hex5, hex6, hex7, hex8, hex9)
+        testOut = srcparsers.be500.be500.parseSRCToJson(
+            refcode, hex2, hex3, hex4, hex5, hex6, hex7, hex8, hex9
+        )
 
         jsonOut = json.loads(testOut)
         # Print the output for manual testing
@@ -58,7 +57,6 @@ class TestPrdSrcParsing(unittest.TestCase):
         self.assertEqual(jsonOut["Attn Type"], "RECOVERABLE")
 
     def testCorefir(self):
-
         refcode = "BC13E504"
         hex2 = "000000E0"
         hex3 = "00000B00"
@@ -69,8 +67,9 @@ class TestPrdSrcParsing(unittest.TestCase):
         hex8 = "BB710008"
         hex9 = "00000000"
 
-        testOut = srcparsers.be500.be500.parseSRCToJson(refcode, hex2, hex3,
-                                                        hex4, hex5, hex6, hex7, hex8, hex9)
+        testOut = srcparsers.be500.be500.parseSRCToJson(
+            refcode, hex2, hex3, hex4, hex5, hex6, hex7, hex8, hex9
+        )
 
         jsonOut = json.loads(testOut)
         # Print the output for manual testing
@@ -82,7 +81,7 @@ class TestPrdSrcParsing(unittest.TestCase):
         self.assertEqual(jsonOut["Attn Type"], "RECOVERABLE")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     test = TestPrdSrcParsing()
     test.testOutput()
     test.testCorefir()
