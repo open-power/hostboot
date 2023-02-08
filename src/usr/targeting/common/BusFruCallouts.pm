@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021
+# Contributors Listed Below - COPYRIGHT 2021,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -238,7 +238,29 @@ sub setupBusWithParentTarget
 
                     if ($parent eq '')
                     {
-                        die "setupBusWithParentTarget: $conn->{$busPath} has no parent of type $targetType";
+                        # Look for the exception case of a valid OCMB target being on the planar.
+                        # In this excaption case the OCMB is on the planar and not on the DDIMM
+                        # itself; therefore, the OCMB won't have a parent of type DIMM.
+                        # TODO JIRA PFHB-409 the proper check for the exception case is that the
+                        # getTargetType is "chip-ocmb-planar", but for now use attribute
+                        # MEM_MRW_IS_PLANAR
+                        my $die = 1;
+                        my $conn_ocmb_target = $targetObj->findParentByType($conn->{$busPath}, "OCMB_CHIP", 0);
+                        if ($conn_ocmb_target ne '')
+                        {
+                            my $mem_mrw_is_planar = $targetObj->getAttribute($conn_ocmb_target,"MEM_MRW_IS_PLANAR");
+                            if  ($mem_mrw_is_planar eq "TRUE")
+                            {
+                                print "setupBusWithParentTarget: skipping connection to planar OCMB" if $targetObj->{debug};
+                                $die = 0;
+                            }
+                        }
+
+                        if ($die == 1)
+                        {
+                            die "setupBusWithParentTarget: $conn->{$busPath} has no parent of type $targetType (bt=$busType)\n";
+                        }
+
                     }
 
                     my $attributeHolderTarget = $parent;

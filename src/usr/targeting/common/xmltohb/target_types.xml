@@ -568,6 +568,10 @@
       <id>EEPROM_VPD_REDUNDANCY</id>
       <default>NOT_PRESENT</default>
     </attribute>
+    <attribute>
+      <id>MEM_MRW_IS_PLANAR</id>
+      <default>TRUE</default>
+    </attribute>
   </targetType>
 
   <targetType>
