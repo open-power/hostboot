@@ -63,6 +63,19 @@
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr50.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
 
+#ifdef __PPE__
+    #ifdef FAPI_INF
+        #undef FAPI_INF
+    #endif
+    #ifdef FAPI_DBG
+        #undef FAPI_DBG
+    #endif
+
+    #define FAPI_INF(_fmt_, _args_...)
+    #define FAPI_DBG(_fmt_, _args_...)
+
+#endif
+
 ///
 /// @brief Maps from drive strength in Ohms to the register value
 /// @param[in] DrvStren_ohm drive strength in ohms
@@ -1613,11 +1626,13 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     //##############################################################
     {
         int ATxImpedance     = i_user_input_advanced.ATxImpedance;
+#ifndef __PPE__
         int ADrvStrenP       = (ATxImpedance & csr_ADrvStrenP_MASK)       >> csr_ADrvStrenP_LSB;
         int ADrvStrenN       = (ATxImpedance & csr_ADrvStrenN_MASK)       >> csr_ADrvStrenN_LSB;
         int ATxReserved13x12 = (ATxImpedance & csr_ATxReserved13x12_MASK) >> csr_ATxReserved13x12_LSB;
         int ATxCalBaseN_a    = (ATxImpedance & csr_ATxCalBaseN_MASK)      >> csr_ATxCalBaseN_LSB;
         int ATxCalBaseP_a    = (ATxImpedance & csr_ATxCalBaseP_MASK)      >> csr_ATxCalBaseP_LSB;
+#endif
 
         FAPI_DBG (TARGTIDFORMAT
                   " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming ATxImpedance::ADrvStrenP to 0x%x",

@@ -22,9 +22,24 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- EKB-Mirror-To: hostboot -->
-
 <hwpErrors>
+
+  <hwpError>
+    <rc>RC_ODY_DRAMINIT_HARDCODE_UNSUPPORTED</rc>
+    <description>Ody draminit using hardcoded values is unsupported on the SBE.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
 
   <hwpError>
     <rc>RC_ODY_DRAMINIT_TRAINING_TIMEOUT</rc>

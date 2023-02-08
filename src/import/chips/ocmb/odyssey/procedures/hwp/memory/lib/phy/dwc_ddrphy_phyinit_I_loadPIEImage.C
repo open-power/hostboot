@@ -54,6 +54,19 @@
 #include <lib/phy/ody_ddrphy_csr_defines.H>
 #include <mss_odyssey_attribute_getters.H>
 
+#ifdef __PPE__
+    #ifdef FAPI_INF
+        #undef FAPI_INF
+    #endif
+    #ifdef FAPI_DBG
+        #undef FAPI_DBG
+    #endif
+
+    #define FAPI_INF(_fmt_, _args_...)
+    #define FAPI_DBG(_fmt_, _args_...)
+
+#endif
+
 ///
 /// @brief Translates from the Synopsys register information, does the scom, and adds delay
 /// @param[in] i_target - the memory port on which to operate

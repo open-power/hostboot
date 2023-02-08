@@ -71,16 +71,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Converts from a Synopsys register address to an IBM register address
-/// @param[in] i_synopsys_addr the Synopsys register address to convert
-/// @return The IBM register address converted from
-///
-uint64_t convert_synopsys_to_ibm_reg_addr( const uint64_t i_synopsys_addr)
-{
-    return static_cast<uint64_t>((i_synopsys_addr << 32) | 0x800000000801303f);
-}
-
-///
 /// @brief Loads two contiguous 8-bit fields into the DMEM register format
 /// @param[in] i_even_field field at the even byte offset
 /// @param[in] i_odd_field field at the odd byte offset
@@ -102,7 +92,7 @@ void load_dmem_8bit_fields( const uint8_t i_even_field, const uint8_t i_odd_fiel
 /// @param[out] o_odd_field field at the odd byte offset
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint64_t i_addr,
+fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint32_t i_addr,
                                    uint8_t& o_even_field, uint8_t& o_odd_field)
 {
     constexpr uint64_t ODD_DATA = 48;
@@ -111,7 +101,7 @@ fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     o_odd_field = 0;
 
     fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY(fapi2::getScom(i_target, i_addr, l_data));
+    FAPI_TRY(getScom_synopsys_addr_wrapper(i_target, i_addr, l_data));
 
     l_data.extractToRight<ODD_DATA, BITS_PER_BYTE>(o_odd_field)
     .extractToRight<EVEN_DATA, BITS_PER_BYTE>(o_even_field);
@@ -127,7 +117,7 @@ fapi_try_exit:
 /// @param[out] o_field the 16-bit field
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint64_t i_addr,
+fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint32_t i_addr,
                                    uint16_t& o_field)
 {
     constexpr uint64_t SYNOPSYS_DATA = 48;
@@ -135,7 +125,7 @@ fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     o_field = 0;
 
     fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY(fapi2::getScom(i_target, i_addr, l_data));
+    FAPI_TRY(getScom_synopsys_addr_wrapper(i_target, i_addr, l_data));
 
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
 
@@ -150,20 +140,19 @@ fapi_try_exit:
 /// @param[out] o_field the 32-bit field, read in from two registers
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint64_t i_addr,
+fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint32_t i_addr,
                                    uint32_t& o_field)
 {
-    constexpr uint64_t SYNOPSYS_ADDR_INCREMENT = 0x0000000100000000;
     constexpr uint64_t SYNOPSYS_DATA = 48;
     constexpr uint64_t DATA_16B_LEN = 16;
     o_field = 0;
 
     fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY(fapi2::getScom(i_target, i_addr, l_data));
+    FAPI_TRY(getScom_synopsys_addr_wrapper(i_target, i_addr, l_data));
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
     o_field <<= DATA_16B_LEN;
 
-    FAPI_TRY(fapi2::getScom(i_target, i_addr + SYNOPSYS_ADDR_INCREMENT, l_data));
+    FAPI_TRY(getScom_synopsys_addr_wrapper(i_target, i_addr + 1, l_data));
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
 
 fapi_try_exit:
@@ -177,28 +166,27 @@ fapi_try_exit:
 /// @param[out] o_field the 64-bit field, read in from four registers
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint64_t i_addr,
+fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint32_t i_addr,
                                    uint64_t& o_field)
 {
-    constexpr uint64_t SYNOPSYS_ADDR_INCREMENT = 0x0000000100000000;
     constexpr uint64_t SYNOPSYS_DATA = 48;
     constexpr uint64_t DATA_16B_LEN = 16;
     o_field = 0;
 
     fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY(fapi2::getScom(i_target, i_addr, l_data));
+    FAPI_TRY(getScom_synopsys_addr_wrapper(i_target, i_addr, l_data));
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
     o_field <<= DATA_16B_LEN;
 
-    FAPI_TRY(fapi2::getScom(i_target, i_addr + SYNOPSYS_ADDR_INCREMENT, l_data));
+    FAPI_TRY(getScom_synopsys_addr_wrapper(i_target, i_addr + 1, l_data));
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
     o_field <<= DATA_16B_LEN;
 
-    FAPI_TRY(fapi2::getScom(i_target, i_addr + 2 * SYNOPSYS_ADDR_INCREMENT, l_data));
+    FAPI_TRY(getScom_synopsys_addr_wrapper(i_target, i_addr + 2, l_data));
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
     o_field <<= DATA_16B_LEN;
 
-    FAPI_TRY(fapi2::getScom(i_target, i_addr + 3 * SYNOPSYS_ADDR_INCREMENT, l_data));
+    FAPI_TRY(getScom_synopsys_addr_wrapper(i_target, i_addr + 3, l_data));
     l_data.extractToRight<SYNOPSYS_DATA, DATA_16B_LEN>(o_field);
 
 fapi_try_exit:
@@ -326,6 +314,34 @@ fapi2::ReturnCode reset_dmem( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief fapi2::putScom wrapper to help decrease code size on the SBE using the Synopsys address perspective
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_addr the address on which to operate from the synopsys perspective
+/// @param[in] i_data the data to write to the chip
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode putScom_synopsys_addr_wrapper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint32_t i_addr,
+        const fapi2::buffer<uint64_t>& i_data)
+{
+    return fapi2::putScom(i_target, convert_synopsys_to_ibm_reg_addr(i_addr), i_data);
+}
+
+///
+/// @brief fapi2::getScom wrapper to help decrease code size on the SBE using the Synopsys address perspective
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_addr the address on which to operate from the synopsys perspective
+/// @param[out] o_data the data read from the chip
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode getScom_synopsys_addr_wrapper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint32_t i_addr,
+        fapi2::buffer<uint64_t>& o_data)
+{
+    return fapi2::getScom(i_target, convert_synopsys_to_ibm_reg_addr(i_addr), o_data);
 }
 
 } // namespace phy

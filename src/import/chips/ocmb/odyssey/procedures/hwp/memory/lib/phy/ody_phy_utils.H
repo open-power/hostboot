@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,10 @@ fapi2::ReturnCode configure_phy_scom_access(const fapi2::Target<fapi2::TARGET_TY
 /// @param[in] i_synopsys_addr the Synopsys register address to convert
 /// @return The IBM register address converted from
 ///
-uint64_t convert_synopsys_to_ibm_reg_addr( const uint64_t i_synopsys_addr);
+constexpr uint64_t convert_synopsys_to_ibm_reg_addr( const uint64_t i_synopsys_addr)
+{
+    return static_cast<uint64_t>((i_synopsys_addr << 32) | 0x800000000801303f);
+}
 
 ///
 /// @brief Loads two contiguous 8-bit fields into the DMEM register format
@@ -80,7 +83,7 @@ void load_dmem_8bit_fields( const uint8_t i_even_field, const uint8_t i_odd_fiel
 /// @param[out] o_odd_field field at the odd byte offset
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint64_t i_addr,
+fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint32_t i_addr,
                                    uint8_t& o_even_field, uint8_t& o_odd_field);
 
 ///
@@ -90,7 +93,7 @@ fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 /// @param[out] o_field the 16-bit field
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint64_t i_addr,
+fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint32_t i_addr,
                                    uint16_t& o_field);
 
 ///
@@ -100,7 +103,7 @@ fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 /// @param[out] o_field the 32-bit field, read in from two registers
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint64_t i_addr,
+fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint32_t i_addr,
                                    uint32_t& o_field);
 
 ///
@@ -110,7 +113,7 @@ fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 /// @param[out] o_field the 64-bit field, read in from four registers
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint64_t i_addr,
+fapi2::ReturnCode read_dmem_field( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint32_t i_addr,
                                    uint64_t& o_field);
 
 ///
@@ -155,6 +158,29 @@ fapi2::ReturnCode phy_mem_load_helper( const fapi2::Target<fapi2::TARGET_TYPE_ME
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode reset_dmem( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+///
+/// @brief fapi2::putScom wrapper to help decrease code size on the SBE using the Synopsys address perspective
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_addr the address on which to operate from the synopsys perspective
+/// @param[in] i_data the data to write to the chip
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode putScom_synopsys_addr_wrapper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint32_t i_addr,
+        const fapi2::buffer<uint64_t>& i_data);
+
+///
+/// @brief fapi2::getScom wrapper to help decrease code size on the SBE using the Synopsys address perspective
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_addr the address on which to operate from the synopsys perspective
+/// @param[out] o_data the data read from the chip
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode getScom_synopsys_addr_wrapper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint32_t i_addr,
+        fapi2::buffer<uint64_t>& o_data);
+
 
 } // namespace phy
 } // namespace ody

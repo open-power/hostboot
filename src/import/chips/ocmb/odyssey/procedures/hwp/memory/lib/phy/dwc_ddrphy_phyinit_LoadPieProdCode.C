@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -48,6 +48,19 @@
 #include <lib/phy/ody_ddrphy_phyinit_structs.H>
 #include <lib/phy/ody_ddrphy_phyinit_config.H>
 #include <lib/phy/ody_ddrphy_csr_defines.H>
+
+#ifdef __PPE__
+    #ifdef FAPI_INF
+        #undef FAPI_INF
+    #endif
+    #ifdef FAPI_DBG
+        #undef FAPI_DBG
+    #endif
+
+    #define FAPI_INF(_fmt_, _args_...)
+    #define FAPI_DBG(_fmt_, _args_...)
+
+#endif
 
 ///
 /// @brief Loads the PHY Initialization Engine (PIE) code
