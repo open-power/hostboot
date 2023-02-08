@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/common/common_io_omi_tdr.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/ody_io_ppe_common.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,45 +22,29 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 ///
-/// @file common_io_omi_tdr.H
-/// @brief OMI TDR procedure
+/// @file ody_io_ppe_common.H
+///
+/// @brief Odyssey IO PPE function/constant definitions for IO hwps
 ///
 /// *HWP HW Maintainer: Josh Chica <Josh.Chica@ibm.com>
 /// *HWP FW Maintainer:
 /// *HWP Consumed by: SBE
 ///
 
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
 #pragma once
+
 #include <fapi2.H>
 
-//------------------------------------------------------------------------------
-// Structure definitions
-//------------------------------------------------------------------------------
+#include <ody_io_ppe_regs.H>
+#include <io_ppe_lib.H>
 
-/// function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*common_io_omi_tdr_FP_t)(
-    const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP | fapi2::TARGET_TYPE_OMI > &,
-    const uint64_t&);
+const uint64_t PHY_PPE_WRAP0_ARB_CSAR = 0x8010C0Dull;
+const uint64_t PHY_PPE_WRAP0_ARB_CSDR = 0x8010C0Eull;
+const uint64_t PHY_PPE_WRAP0_XIXCR = 0x8010C10ull;
 
-//------------------------------------------------------------------------------
-// Function prototypes
-//------------------------------------------------------------------------------
-
-extern "C"
+namespace ody_io
 {
-
-    ///
-    /// @brief OMI TDR procedure
-    ///
-    /// @param[in] i_target       Reference to TARGET_TYPE_OCMB_CHIP target
-    /// @return fapi::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
-    ///
-    fapi2::ReturnCode common_io_omi_tdr(const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP | fapi2::TARGET_TYPE_OMI > &
-                                        i_target,
-                                        const uint64_t& i_base_addr);
-
-} // extern "C"
+#include <io_ppe_common.H>
+}

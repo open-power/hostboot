@@ -39,7 +39,6 @@
 #include <fapi2.H>
 #include <io_ppe_lib.H>
 #include <io_scom_lib.H>
-#include <ody_io_ppe_regs.H>
 
 enum IO_PPE_CONSTS
 {
