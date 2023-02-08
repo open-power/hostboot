@@ -73,9 +73,12 @@ struct TdrStruct
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*common_io_tdr_FP_t)(
     const GENERIC_FAPI_IO_TARGET&,
-    const std::vector<uint32_t>&,
-    std::vector<uint32_t>&,
-    std::vector<uint32_t>&);
+    const uint64_t&,
+    const uint32_t&,
+    const uint32_t&,
+    const uint32_t&,
+    TdrResult&,
+    uint32_t&);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -89,10 +92,12 @@ extern "C"
     /// @param[out] o_length_mm         Length from TX to open (in mm)
     /// @return FAPI_RC_SUCCESS if arguments are valid
     fapi2::ReturnCode common_io_tdr(
-        const GENERIC_FAPI_IO_TARGET& i_target, // TARGET_TYPE_IOLINK
+        const GENERIC_FAPI_IO_TARGET& i_target,
         const uint64_t& i_baseAddr,
-        const uint32_t& i_lanes,
+        const uint32_t& i_group,
+        const uint32_t& i_lane,
+        const uint32_t& i_freq,
         TdrResult& o_status,
-        uint32_t& o_length_mm);
+        uint32_t& o_length_ps);
 
 } // extern "C"
