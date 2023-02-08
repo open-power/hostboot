@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,8 @@
 #include <targeting/translateTarget.H>
 #include <sbeio/runtime/sbe_msg_passing.H>
 #include <sbeio/sbe_psudd.H>
+#include <vmmconst.h>
+#include <runtime/runtime.H>
 
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 12*KILOBYTE);
@@ -112,7 +114,14 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 return;
             }
 
-            void* imageArea = malloc(ALIGN_PAGE(imageSize));
+            void* imageArea = reinterpret_cast<void *>(VMM_VADDR_HBRT_TEST_AREA);
+            if (mm_alloc_block(nullptr, imageArea, ALIGN_PAGE(imageSize)) != 0)
+            {
+                TS_FAIL("Couldn't allocate virtual memory for HBRT");
+            }
+
+            mm_set_permission(imageArea, ALIGN_PAGE(imageSize), WRITABLE | ALLOCATE_FROM_ZERO );
+
             memcpy(imageArea, reinterpret_cast<void*>(runtimeSection.vaddr),
                    imageSize);
             mm_icache_invalidate(imageArea,
@@ -196,7 +205,10 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             } while(0);
 
             mm_set_permission(imageArea, imageSize, WRITABLE);
-            free(imageArea);
+            if (mm_remove_pages(RELEASE, imageArea, ALIGN_PAGE(imageSize)) != 0)
+            {
+                TS_FAIL("Couldn't remove pages for HBRT");
+            }
 
 #ifdef CONFIG_SECUREBOOT
             l_errl = unloadSecureSection(PNOR::HB_RUNTIME);

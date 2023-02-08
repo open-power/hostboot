@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,6 +107,8 @@
 #define VMM_VADDR_DEBUG_COMM ((3 * GIGABYTE) + (500 * MEGABYTE))
 #define VMM_DEBUG_COMM_SIZE (32 * KILOBYTE)
 #define VMM_VADDR_DEBUG_COMM_END (VMM_VADDR_DEBUG_COMM + VMM_DEBUG_COMM_SIZE)
+
+#define VMM_VADDR_HBRT_TEST_AREA (VMM_VADDR_DEBUG_COMM_END)
 
 /** Virtual address space for WOF Tables - 32GB for 50MB */
 #define VMM_VADDR_WOFDATA_LID  (32 * GIGABYTE)
