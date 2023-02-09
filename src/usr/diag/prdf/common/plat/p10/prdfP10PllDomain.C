@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2003,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2003,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,6 @@
 
 #include <prdfPllDomain.H>
 
-#include <CcAutoDeletePointer.h>
 #include <iipscr.h>
 #include <iipsdbug.h>
 #include <iipServiceDataCollector.h>

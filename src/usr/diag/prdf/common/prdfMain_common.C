@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,6 @@
 
 #include <prdfMain.H>
 
-#include <CcAutoDeletePointer.h>
 #include <prdfErrlUtil.H>
 #include <iipResolutionFactory.h>
 #include <iipSystem.h>
@@ -54,6 +53,8 @@
 #endif
 
 #include <prdfPlatConfigurator.H>
+
+#include <memory>
 
 using namespace TARGETING;
 
@@ -131,8 +132,11 @@ errlHndl_t noLock_initialize()
         // Perform platform specific initialization.
         initPlatSpecific();
 
-        CcAutoDeletePointer<Configurator> configuratorPtr
-                                          ( new PRDF::PlatConfigurator() );
+        // Note that the use of a pointer for the configurator is simply so that
+        // it is allocated on the heap and not in the stack. The configurator,
+        // not the system objects it creates, will be deleted as soon as it goes
+        // out of scope.
+        auto configuratorPtr = std::make_shared<PlatConfigurator>();
 
         errlHndl_t l_errBuild = configuratorPtr->build();//build object model
         if( nullptr != l_errBuild )

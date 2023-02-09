@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,6 @@
 #define iipResolution_C
 
 #include <iipconst.h>
-#include <CcAutoDeletePointer.h>
 #include <iipSystem.h>
 #include <prdfGlobal.H>
 #include <iipstep.h>
