@@ -110,20 +110,27 @@ class io_ppe_common
                                  const fapi2::buffer<uint64_t> i_pcie_mode,
                                  const fapi2::buffer<uint64_t> i_serdes_16_to_1);
 
-        fapi2::ReturnCode bist_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
-                                    const uint32_t&,
-                                    const uint8_t&);
+        fapi2::ReturnCode bist_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    const uint32_t& i_thread,
+                                    const uint8_t& i_bist_timer_sel);
 
-        fapi2::ReturnCode bist_init_rx(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
-                                       const uint64_t&,
-                                       const uint32_t&,
-                                       const uint8_t&,
-                                       const uint8_t&,
-                                       uint32_t);
+        fapi2::ReturnCode bist_init_rx(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       const uint64_t& i_baseAddr,
+                                       const uint32_t& i_thread,
+                                       const uint8_t& i_esdTest,
+                                       const uint8_t& i_dacTest,
+                                       uint32_t i_rx_mask);
 
-        fapi2::ReturnCode bist_init_tx(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
-                                       const uint32_t&,
-                                       uint32_t);
+        fapi2::ReturnCode bist_init_tx(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       const uint32_t& i_thread,
+                                       uint32_t i_tx_mask);
+
+        fapi2::ReturnCode bist_cleanup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       const fapi2::buffer<uint64_t> i_num_threads,
+                                       const uint32_t i_rx_lanes_0_31,
+                                       const uint32_t i_tx_lanes_0_31,
+                                       fapi2::buffer<uint64_t>& o_done,
+                                       fapi2::buffer<uint64_t>& o_fail);
 
         fapi2::ReturnCode ppe_init_threads(const fapi2::Target<K, M, V>& i_target,
                                            const fapi2::buffer<uint64_t> i_num_threads);
@@ -403,6 +410,30 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+// ===============================================================
+// BIST CLEANUP
+// ===============================================================
+template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
+fapi2::ReturnCode io_ppe_common<K, M, V>::bist_cleanup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const fapi2::buffer<uint64_t> i_num_threads,
+        const uint32_t i_rx_lanes_0_31,
+        const uint32_t i_tx_lanes_0_31,
+        fapi2::buffer<uint64_t>& o_done,
+        fapi2::buffer<uint64_t>& o_fail)
+{
+    const fapi2::buffer<uint64_t> l_ext_cmd = IORESET_PL;
+
+    FAPI_DBG("Starting BIST cleanup");
+    FAPI_TRY(ext_cmd_start(i_target, i_num_threads, i_rx_lanes_0_31, i_tx_lanes_0_31, l_ext_cmd));
+
+    FAPI_DBG("Polling for BIST cleanup done");
+    FAPI_TRY(ext_cmd_poll(i_target, i_num_threads, l_ext_cmd, o_done, o_fail));
+
+fapi_try_exit:
+    FAPI_DBG("End BIST cleanup");
+    return fapi2::current_err;
+}
 
 // ===============================================================
 // PPE_INIT
