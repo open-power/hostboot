@@ -97,12 +97,13 @@ posTraits<fapi2::TARGET_TYPE_TEMP_SENSOR>::pos_type
 relative_pos<mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>&
         i_target)
 {
-    // TODO:ZEN:MST-1814 Add support for relative_pos for TEMP_SENSOR to OCMB_CHIP
-    // Update to official code when platform support is added for TEMP_SENSOR pos attributes
-    // return pos(i_target) % ody::NUM_DTS;
+    uint8_t l_rel_pos = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_target, l_rel_pos));
+    return l_rel_pos;
 
-    // As the platform code is not working yet for pos of a TEMP_SENSOR, just returning 0 for now
-    // When the platform support is available, delete the return 0 and uncomment the above code
+fapi_try_exit:
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_ERR(TARGTIDFORMAT " Attribute access error!", TARGTID);
     return 0;
 }
 
