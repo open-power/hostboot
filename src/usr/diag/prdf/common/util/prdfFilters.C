@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,8 +36,6 @@
 
 #include <prdfBitKey.H>
 #include <prdfFilters.H>
-//#include <xspprdScanCommFilter.h>
-//#include <xspprdFilterLink.h>
 #include <iipstep.h>
 #include <iipServiceDataCollector.h>
 #undef iipFilters_C
