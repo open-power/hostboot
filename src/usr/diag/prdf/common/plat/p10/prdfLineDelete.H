@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2005,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2005,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,10 +31,11 @@
 #ifndef __PRDFLINEDELETE_H
 #define __PRDFLINEDELETE_H
 
-#include <UtilSMap.H>
 #include <prdfThresholdResolutions.H>
 #include <iipstep.h>
 #include <iipCaptureData.h>
+
+#include <map>
 
 namespace PRDF
 {
@@ -77,7 +78,7 @@ namespace LineDelete
     /** @typedef PrdfCacheAddressTable
      *  Maps Cache Addresses to hit counts.
      */
-    typedef UtilSMap<PrdfCacheAddress, uint32_t> PrdfCacheAddressTable;
+    typedef std::map<PrdfCacheAddress, uint32_t> PrdfCacheAddressTable;
 
     /** @class PrdfCacheCETable
      *  Used to store and threshold cache CE errors.
