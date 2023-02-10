@@ -49,6 +49,9 @@
 #include <lib/inband/ody_inband.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 
+namespace ody
+{
+
 ///
 /// @brief Verify we know how to talk to the connected device
 ///
@@ -661,6 +664,8 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+} // namespace ody
+
 ///
 /// @brief Initialize Odyssey OpenCAPI configuration
 ///
@@ -673,15 +678,15 @@ fapi2::ReturnCode ody_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     mss::display_git_commit_info("ody_omi_init");
 
     FAPI_DBG("Start");
-    FAPI_TRY(omiDeviceVerify(i_target));
-    FAPI_TRY(omiSetUpstreamTemplates(i_target));
-    FAPI_TRY(omiValidateDownstream(i_target));
-    FAPI_TRY(omiTLVersionShortBackOff(i_target));
-    FAPI_TRY(omiSetMMIOEnableBAR(i_target));
+    FAPI_TRY(ody::omiDeviceVerify(i_target));
+    FAPI_TRY(ody::omiSetUpstreamTemplates(i_target));
+    FAPI_TRY(ody::omiValidateDownstream(i_target));
+    FAPI_TRY(ody::omiTLVersionShortBackOff(i_target));
+    FAPI_TRY(ody::omiSetMMIOEnableBAR(i_target));
     FAPI_TRY(mss::omi::setup_obj_handles<mss::mc_type::ODYSSEY>(i_target));
     FAPI_TRY(mss::omi::setup_int_cmd_flags<mss::mc_type::ODYSSEY>(i_target));
-    FAPI_TRY(omiSetACTagPASIDMetaData(i_target));
-    FAPI_TRY(omiEnableAFU(i_target));
+    FAPI_TRY(ody::omiSetACTagPASIDMetaData(i_target));
+    FAPI_TRY(ody::omiEnableAFU(i_target));
 
     FAPI_TRY(mss::unmask::after_mc_omi_init<mss::mc_type::ODYSSEY>(i_target));
 
