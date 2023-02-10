@@ -590,7 +590,7 @@ fapi2::ReturnCode change_dfi_init_start( const fapi2::Target<T>& i_target, state
 {
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_DBG("Change rcd recovery disable to %s " TARGTIDFORMAT, (i_state == HIGH ? "high" : "low"), TARGTID);
+    FAPI_DBG("Change DFI init start to %s " TARGTIDFORMAT, (i_state == HIGH ? "high" : "low"), TARGTID);
     FAPI_TRY( fapi2::getScom(i_target, TT::FARB0Q_REG, l_data) );
     l_data.writeBit<TT::DFI_INIT_START>(i_state);
     FAPI_TRY( fapi2::putScom(i_target, TT::FARB0Q_REG, l_data) );

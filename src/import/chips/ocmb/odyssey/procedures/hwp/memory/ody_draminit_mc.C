@@ -78,9 +78,13 @@ extern "C"
         // FAPI_TRY( mss::change_iml_complete<mss::mc_type::ODYSSEY>(i_target, mss::HIGH), "%s Failed to set_ipm_complete",
         //           mss::c_str(i_target));
 
-        // Set DFI init start
+        // Set DFI init start. Toggle OFF then ON just in case we're re-running
+        FAPI_TRY( mss::change_dfi_init_start<mss::mc_type::ODYSSEY>(i_target, mss::OFF ),
+                  TARGTIDFORMAT " Failed to clear dfi_init_start",
+                  TARGTID );
+
         FAPI_TRY( mss::change_dfi_init_start<mss::mc_type::ODYSSEY>(i_target, mss::ON ),
-                  TARGTIDFORMAT " Failed to change_dfi_init_start",
+                  TARGTIDFORMAT " Failed to set dfi_init_start",
                   TARGTID );
 
         // Poll the DFI interface for completion
