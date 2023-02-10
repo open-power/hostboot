@@ -243,7 +243,7 @@
 <!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_FREQ_OMI_MHZ</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_OCMB_CHIP</targetType>
   <description>
     The frequency of the OMI channel.
   </description>
