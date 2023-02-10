@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -44,6 +44,7 @@
 #include <initservice/initserviceif.H>
 #include <fsi/fsiif.H>
 #include "../eeprom/eepromCache.H"
+#include <fapiwrap/fapiWrapif.H>
 
 #include "spd.H"
 
@@ -214,19 +215,66 @@ errlHndl_t dimmPresenceDetect( DeviceFW::OperationType i_opType,
         {
             TRACUCOMP( g_trac_spd, INFO_MRK"dimmPresenceDetect() "
                        "Dimm was found to be NOT present." );
+            break;
         }
-        else
+
+        // Note - Some of the below logic is duplicated in
+        //  HWAS::discoverOcmbDependentTargetsAndEnable() so any changes
+        //  could be relevant to both places.  The reason for the
+        //  semi-duplication is to keep some of the initial presence
+        //  detection tracing as accurate as possible.
+
+        // Now that we've established the physical part is present we
+        //  need to adjust for the logical nature of the DIMM target.
+        TARGETING::TargetHandleList l_memportParents;
+        TARGETING::getParentAffinityTargetsByState(
+                    l_memportParents,
+                    i_target,
+                    TARGETING::CLASS_NA,
+                    TARGETING::TYPE_MEM_PORT,
+                    TARGETING::UTIL_FILTER_ALL);
+        assert( l_memportParents.size()==1,
+                "Nonsensical MEM_PORT parent for DIMM %.8X",
+                TARGETING::get_huid(i_target) );
+        TARGETING::Target* l_memport = l_memportParents[0];
+
+        // The memport's position relative to its parent OCMB
+        auto l_mpNum = l_memport->getAttr<TARGETING::ATTR_REL_POS>();
+
+        // Parent OCMB chip to pull the SPD from
+        auto l_ocmbParent = TARGETING::getParentChip(l_memport);
+
+        // Get the SPD-derived state of the memport, the logical
+        //  dimm follows that
+        TARGETING::ATTR_HWAS_STATE_type l_state = {0};
+        err = FAPIWRAP::getMemportState( l_ocmbParent,
+                                         l_mpNum,
+                                         l_state );
+        if( err )
+        {
+            TRACFCOMP(g_trac_spd, ERR_MRK "dimmPresenceDetect() detect target HUID 0x%.08x could not determine the memport state",
+                TARGETING::get_huid(i_target));
+            present = false;
+            break;
+        }
+        present = l_state.present;
+
+        if( present )
         {
             TRACUCOMP( g_trac_spd, INFO_MRK"dimmPresenceDetect() "
                        "Dimm was found to be present." );
         }
-
-
-        // copy present value into output buffer so caller can read it
-        memcpy( io_buffer, &present, presentSz );
-        io_buflen = presentSz;
+        else
+        {
+            TRACUCOMP( g_trac_spd, INFO_MRK"dimmPresenceDetect() "
+                       "Dimm was found to be NOT present based on SPD." );
+        }
 
     } while( 0 );
+
+    // copy present value into output buffer so caller can read it
+    memcpy( io_buffer, &present, presentSz );
+    io_buflen = presentSz;
 
     TRACSSCOMP( g_trac_spd, EXIT_MRK"dimmPresenceDetect() = %d", present );
 

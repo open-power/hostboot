@@ -38,6 +38,7 @@
 #include <mds_i2c_addr_get.H>      // get_mds_i2c_addr
 #include <poweric_i2c_addr_get.H>    // get_poweric_i2c_addr
 #include <tempsensor_i2c_addr_get.H> // get_tempsensor_i2c_addr
+#include <memport_state.H>          // get_memport_state
 
 trace_desc_t* g_trac_fapiwrap;
 TRAC_INIT(&g_trac_fapiwrap, FAPIWRAP_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -327,7 +328,7 @@ namespace FAPIWRAP
         do{
             if (isGeminiChip(*i_ocmbChip))
             {
-                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_POWERIC_dev_addr() "
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_poweric_dev_addr() "
                            "OCMB target 0x%.8X is a Gemini Chip. No POWERICs associated "
                            "with the Gemini Chip therefore device address not "
                            "retrieved for POWERIC ID %d",
@@ -339,7 +340,7 @@ namespace FAPIWRAP
             l_errl = get_ddimm_spd_data(i_ocmbChip, nullptr, l_spdSize);
             if (l_errl)
             {
-                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_POWERIC_dev_addr() "
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_poweric_dev_addr() "
                            "Call 1 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
                            "device address not retrieved for POWERIC ID %d",
                            TARGETING::get_huid(i_ocmbChip), i_poweric_id );
@@ -350,7 +351,7 @@ namespace FAPIWRAP
             l_errl = get_ddimm_spd_data(i_ocmbChip, l_spdBlob, l_spdSize);
             if (l_errl)
             {
-                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_POWERIC_dev_addr() "
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"get_poweric_dev_addr() "
                            "Call 2 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
                            "device address not retrieved for POWERIC ID %d",
                            TARGETING::get_huid(i_ocmbChip), i_poweric_id );
@@ -361,6 +362,63 @@ namespace FAPIWRAP
                                    l_spdBlob,
                                    i_poweric_id);
         }while(0);
+        return l_errl;
+    }
+
+    // get_memport_state
+    errlHndl_t getMemportState( const TARGETING::Target* i_ocmbChip,
+                                const uint8_t i_memport_id,
+                                TARGETING::ATTR_HWAS_STATE_type& o_state)
+    {
+        errlHndl_t l_errl(nullptr);
+
+        // Default the out going parameter, to not present
+        o_state = {0};
+
+        do{
+            size_t  l_spdSize = 0;
+            l_errl = get_ddimm_spd_data(const_cast<TARGETING::Target*>(i_ocmbChip),
+                                        nullptr, l_spdSize);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"getMemportState() "
+                           "Call 1 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
+                           "state not retrieved for MEM_PORT ID %d",
+                           TARGETING::get_huid(i_ocmbChip), i_memport_id );
+                break;
+            }
+
+            uint8_t l_spdBlob[l_spdSize] = {};
+            l_errl = get_ddimm_spd_data(const_cast<TARGETING::Target*>(i_ocmbChip),
+                                        l_spdBlob, l_spdSize);
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_fapiwrap, ERR_MRK"getMemportState() "
+                           "Call 2 to get_ddimm_spd_data failed for OCMB target 0x%.8X, "
+                           "state not retrieved for MEM_PORT ID %d",
+                           TARGETING::get_huid(i_ocmbChip), i_memport_id );
+                break;
+            }
+
+            auto l_mpState = get_memport_state( l_spdBlob,
+                                                i_memport_id );
+
+            // Translate fapi state to targeting state
+            switch( l_mpState )
+            {
+                case(MEMPORT_FUNCTIONAL):
+                    o_state.functional = true;
+                    //deliberate fall-through to next case
+                case(MEMPORT_PRESENT_NOT_FUNCTIONAL):
+                    o_state.poweredOn = true;
+                    o_state.present = true;
+                    break;
+                case(MEMPORT_NOT_PRESENT):
+                    // same as default
+                    break;
+            }
+        }while(0);
+
         return l_errl;
     }
 

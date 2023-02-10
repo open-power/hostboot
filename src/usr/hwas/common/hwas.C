@@ -50,6 +50,7 @@
 #include <sbe/sbeif.H>
 #include <kernel/bltohbdatamgr.H> // CacheSize
 #include <util/misc.H>            // isSimicsRunning
+#include <fapiwrap/fapiWrapif.H>
 #endif
 
 
@@ -218,7 +219,8 @@ void enableHwasState(Target *i_target,
 
     // Only modify the reason/eid on the initial deconfig
     //  or if we're reverting what happened earlier
-    if( (i_functional == false)
+    // If the part isn't present, there shouldn't be any eid/reason
+    if( ((i_functional == false) && (i_present == true))
         || (DeconfigGard::CONFIGURED_BY_RESOURCE_RECOVERY == i_errlEid) )
     {   // record the EID as a reason that we're marking non-functional
         hwasState.deconfiguredByEid = i_errlEid;
@@ -422,7 +424,8 @@ errlHndl_t discoverOcmbDependentTargetsAndEnable(const Target &i_sysTarget)
 
     do
     {
-        // Loop through each of the OCMB-dependent types
+        // Loop through each of the OCMB-dependent types that are only
+        //  present or not
         TARGETING::TYPE l_types[] = {
             TARGETING::TYPE_PMIC,
             TARGETING::TYPE_GENERIC_I2C_DEVICE,
@@ -437,8 +440,11 @@ errlHndl_t discoverOcmbDependentTargetsAndEnable(const Target &i_sysTarget)
             TARGETING::PredicatePostfixExpr l_predExpr;
             l_predExpr.push(&l_pred);
             TargetHandleList l_pCheckPres;
-            targetService().getAssociated( l_pCheckPres, (&i_sysTarget),
-                                           TargetService::CHILD, TargetService::ALL, &l_predExpr);
+            targetService().getAssociated( l_pCheckPres,
+                                           (&i_sysTarget),
+                                           TargetService::CHILD,
+                                           TargetService::ALL,
+                                           &l_predExpr);
 
             // NOTE: this function will remove any non-present targets
             //       from l_pCheckPres
@@ -461,6 +467,76 @@ errlHndl_t discoverOcmbDependentTargetsAndEnable(const Target &i_sysTarget)
                 enableHwasState(pTarget, l_present, l_functional, l_errlEid);
             }
         }
+        if( l_err ) { break; }
+
+#ifdef __HOSTBOOT_MODULE
+        // The MEM_PORTs and downstream DIMMs could be forced non-present and
+        //  also non-functional depending on SPD
+
+        // Note - Some of the below logic is duplicated in
+        //  SPD::dimmPresenceDetect() so any changes could be relevant to
+        //  both places.  The reason for the  semi-duplication is to keep
+        //  some of the initial presence detection tracing as accurate as
+        //  possible.
+
+        // Grab all of the OCMBs and walk down to the MEM_PORTs and DIMMs
+        //  in an efficient way instead of handling each target in isolation.
+        TargetHandleList l_ocmbList;
+        getAllChips( l_ocmbList, TYPE_OCMB_CHIP, false /*all*/ );
+        for( auto cur_ocmb : l_ocmbList )
+        {
+            // Only look at OCMBs that we already detected as present
+            auto l_ocmbState = cur_ocmb->getAttr<ATTR_HWAS_STATE>();
+            if( !l_ocmbState.present )
+            {
+                continue;
+            }
+
+            // Walk through any MEM_PORT children
+            TargetHandleList l_portList;
+            getChildAffinityTargets(l_portList, cur_ocmb,
+                                    CLASS_UNIT, TYPE_MEM_PORT,
+                                    false /*all*/);
+            for( auto cur_port : l_portList )
+            {
+                auto l_mpNum = cur_port->getAttr<TARGETING::ATTR_REL_POS>();
+
+                // Get the SPD-derived state of the memport
+                TARGETING::ATTR_HWAS_STATE_type l_state = {0};
+                l_err = FAPIWRAP::getMemportState( cur_ocmb,
+                                                   l_mpNum,
+                                                   l_state );
+                if( l_err )
+                {
+                    HWAS_ERR( ERR_MRK "discoverOcmbDependentTargetsAndEnable() detect target HUID 0x%.08x could not determine the memport state",
+                              TARGETING::get_huid(cur_port));
+                    break;
+                }
+
+                // set HWAS state of the MEM_PORT
+                enableHwasState(cur_port,
+                                l_state.present, l_state.functional,
+                                DeconfigGard::DECONFIGURED_BY_NO_CHILD_DIMM);
+
+                // Walk through any (logical) DIMM children, their state will
+                //  mirror what the MEM_PORT has
+                TargetHandleList l_dimmList;
+                getChildAffinityTargets(l_dimmList, cur_port,
+                                        CLASS_NA, TYPE_DIMM,
+                                        false /*all*/);
+                for( auto cur_dimm : l_dimmList )
+                {
+                    // set HWAS state of the DIMM
+                    enableHwasState(cur_dimm,
+                                    l_state.present, l_state.functional,
+                                    DeconfigGard::DECONFIGURED_BY_NO_PARENT_MEM_PORT);
+                }
+            }
+            if( l_err ) { break; }
+        }
+        if( l_err ) { break; }
+#endif // #ifdef __HOSTBOOT_MODULE
+
     } while (0);
 
     HWAS_INF(EXIT_MRK"discoverOcmbDependentTargetsAndEnable exit with %s",

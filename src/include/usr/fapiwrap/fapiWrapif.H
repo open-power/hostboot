@@ -139,6 +139,23 @@ namespace FAPIWRAP
                                      const uint8_t i_poweric_id,
                                      uint8_t& o_poweric_devAddr);
 
+    /**
+     * @brief This function wraps around the FAPI2 HWP "get_memport_state" which
+     *        takes in a DDIMM's SPD data and a mem_ports's position relative to
+     *        its parent OCMB chip and returns the architected state of that MEM_PORT.
+     *        This wrapper will actually lookup the SPD of a given ocmb target so
+     *        the caller doesnt need to worry about it.
+     * @param[in] i_ocmbChip - Parent ocmb of the poweric we wish to find the device address of
+     * @param[in] i_memport_id  - poweric's position relative to parent OCMB
+     * @param[out] o_state - Target state
+     * @return errlHndl_t - nullptr if no error, otherwise contains error
+     *
+     * @pre i_ocmbChip is a valid pointer to an OCMB target
+     */
+    errlHndl_t getMemportState( const TARGETING::Target* i_ocmbChip,
+                                const uint8_t i_memport_id,
+                                TARGETING::ATTR_HWAS_STATE_type& o_state);
+
 }
 
 #endif

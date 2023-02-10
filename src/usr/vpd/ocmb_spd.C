@@ -202,8 +202,9 @@ errlHndl_t ocmbFetchData(T::TargetHandle_t    i_target,
 {
     errlHndl_t err = nullptr;
 
-    TRACSSCOMP(g_trac_spd, ENTER_MRK"ocmbFetchData() "
+    TRACSSCOMP(g_trac_spd, ENTER_MRK"ocmbFetchData() target=%.8X,"
                "i_byteAddr = 0x%X i_numBytes = %d i_eepromSource = 0x%X",
+               T::get_huid(i_target),
                i_byteAddr, i_numBytes, i_eepromSource);
 
     do
@@ -230,10 +231,14 @@ errlHndl_t ocmbFetchData(T::TargetHandle_t    i_target,
         else
         {
             // parent node
+            //  look for any parent regardless of state since there could be
+            //  a path that runs through here before all of the presence
+            //  detection is complete
             TARGETING::TargetHandleList targetListNode;
             TARGETING::getParentAffinityTargets(targetListNode,i_target,
                                                 TARGETING::CLASS_ENC,
-                                                TARGETING::TYPE_NODE);
+                                                TARGETING::TYPE_NODE,
+                                                false /*ignore state*/);
             TARGETING::Target* l_pNodeTarget = targetListNode[0];
 
             // read PSPD:#D (contains the planar SPD)
@@ -295,8 +300,8 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
     errlHndl_t errl = nullptr;
     const uint64_t keyword = va_arg(i_args, uint64_t);
 
-    TRACSSCOMP(g_trac_spd, ENTER_MRK" ocmbSPDPerformOP(), io_buflen: %d, keyword: 0x%04X",
-               io_buflen, keyword );
+    TRACSSCOMP(g_trac_spd, ENTER_MRK" ocmbSPDPerformOP() target: %.8X,, io_buflen: %d, keyword: 0x%04X",
+               T::get_huid(i_target), io_buflen, keyword );
 
     do
     {

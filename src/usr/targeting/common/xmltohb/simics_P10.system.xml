@@ -21987,8 +21987,8 @@
 
 <!-- ===================================================================== -->
 <!-- MEMPORT Units -->
-<!-- actual = 1 per OCMB_CHIP, a total of 16 -->
-<!-- reserved space = 2 per OCMB_CHIP, a total of 32 -->
+<!-- 2 per OCMB_CHIP, a total of 32 -->
+<!-- Only 1 will be present for Explorer -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0ocmb0memport0</id>
@@ -22020,6 +22020,39 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb0memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C0001</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p00:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -22057,6 +22090,39 @@
 </targetInstance>
 
 <targetInstance>
+    <id>sys0node0ocmb1memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C0003</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-1/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p01:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
     <id>sys0node0ocmb2memport0</id>
     <type>unit-mem_port</type>
     <attribute>
@@ -22086,6 +22152,39 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb2memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C0005</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-2/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p02:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -22123,6 +22222,39 @@
 </targetInstance>
 
 <targetInstance>
+    <id>sys0node0ocmb3memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C0007</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-3/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p03:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
     <id>sys0node0ocmb4memport0</id>
     <type>unit-mem_port</type>
     <attribute>
@@ -22152,6 +22284,39 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb4memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C0009</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-4/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p04:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -22189,6 +22354,39 @@
 </targetInstance>
 
 <targetInstance>
+    <id>sys0node0ocmb5memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C000B</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-5/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p05:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
     <id>sys0node0ocmb6memport0</id>
     <type>unit-mem_port</type>
     <attribute>
@@ -22218,6 +22416,39 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb6memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C000D</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-6/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p06:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -22255,6 +22486,39 @@
 </targetInstance>
 
 <targetInstance>
+    <id>sys0node0ocmb7memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C000F</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-7/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p07:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
     <id>sys0node0ocmb8memport0</id>
     <type>unit-mem_port</type>
     <attribute>
@@ -22284,6 +22548,39 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb8memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C0011</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-8/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p08:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -22321,6 +22618,39 @@
 </targetInstance>
 
 <targetInstance>
+    <id>sys0node0ocmb9memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C0013</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-9/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p09:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
     <id>sys0node0ocmb10memport0</id>
     <type>unit-mem_port</type>
     <attribute>
@@ -22350,6 +22680,39 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb10memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C0015</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-10/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p10:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>21</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -22387,6 +22750,39 @@
 </targetInstance>
 
 <targetInstance>
+    <id>sys0node0ocmb11memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C0017</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-11/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p11:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>23</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
     <id>sys0node0ocmb12memport0</id>
     <type>unit-mem_port</type>
     <attribute>
@@ -22416,6 +22812,39 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb12memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C0019</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-12/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p12:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -22453,6 +22882,39 @@
 </targetInstance>
 
 <targetInstance>
+    <id>sys0node0ocmb13memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C001B</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-13/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p13:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>27</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
     <id>sys0node0ocmb14memport0</id>
     <type>unit-mem_port</type>
     <attribute>
@@ -22482,6 +22944,39 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0ocmb14memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C001D</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-14/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p14:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
 </targetInstance>
 
@@ -22518,11 +23013,45 @@
     </attribute>
 </targetInstance>
 
+<targetInstance>
+    <id>sys0node0ocmb15memport1</id>
+    <type>unit-mem_port</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x004C001F</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/ocmb_chip-15/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-1</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>ocmb.mp:k0:n0:s0:p15:c01</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>31</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+</targetInstance>
+
 
 <!-- ===================================================================== -->
 <!-- DIMM Units -->
 <!-- actual = 1 per MEM_PORT, a total of 16 per proc -->
 <!-- reserved space = 2 per MEM_PORT, a total of 64 per proc -->
+<!-- valid = 1 per MEM_PORT for Explorer -->
 <!-- ===================================================================== -->
 <targetInstance>
     <id>sys0node0dimm0</id>
@@ -22604,11 +23133,86 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030004</default>
+        <default>0x00030002</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p02</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-1</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>0</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x04</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>writeCycleTime</id><value>0x05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM0</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm2</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00030004</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -22620,11 +23224,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-1</default>
+        <default>physical:sys-0/node-0/dimm-2</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>1</default>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -22675,7 +23279,82 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm2</id>
+    <id>sys0node0dimm3</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00030006</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p06</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-3</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>1</default>
+    </attribute>
+    <!--The eeprom associated w/ this target will have a valid entry in the EECACHE
+         that we preload in standalone simics. No cache updates should be needed -->
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM1</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm4</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -22683,7 +23362,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>2</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -22695,11 +23374,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-2</default>
+        <default>physical:sys-0/node-0/dimm-4</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>2</default>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -22748,7 +23427,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm3</id>
+    <id>sys0node0dimm5</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0003000A</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p10</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-5</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM2</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm6</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -22756,7 +23508,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>3</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -22768,11 +23520,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-3</default>
+        <default>physical:sys-0/node-0/dimm-6</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>3</default>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -22821,7 +23573,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm4</id>
+    <id>sys0node0dimm7</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0003000E</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p14</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-7</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM3</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm8</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -22829,7 +23654,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>4</default>
+        <default>8</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -22841,11 +23666,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-4</default>
+        <default>physical:sys-0/node-0/dimm-8</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>4</default>
+        <default>8</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -22894,7 +23719,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm5</id>
+    <id>sys0node0dimm9</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00030012</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p18</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-9</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM4</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm10</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -22902,7 +23800,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>5</default>
+        <default>10</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -22914,11 +23812,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-5</default>
+        <default>physical:sys-0/node-0/dimm-10</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>5</default>
+        <default>10</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -22967,7 +23865,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm6</id>
+    <id>sys0node0dimm11</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00030016</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p22</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>22</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-11</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM5</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm12</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -22975,7 +23946,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>6</default>
+        <default>12</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -22987,11 +23958,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-6</default>
+        <default>physical:sys-0/node-0/dimm-12</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>6</default>
+        <default>12</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -23040,7 +24011,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm7</id>
+    <id>sys0node0dimm13</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0003001A</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p26</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>26</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-13</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM6</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm14</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -23048,7 +24092,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>7</default>
+        <default>14</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23060,11 +24104,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-7</default>
+        <default>physical:sys-0/node-0/dimm-14</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>7</default>
+        <default>14</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -23113,7 +24157,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm8</id>
+    <id>sys0node0dimm15</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0003001E</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p30</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>30</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-15</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM7</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm16</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -23121,7 +24238,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>8</default>
+        <default>16</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23133,11 +24250,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-8</default>
+        <default>physical:sys-0/node-0/dimm-16</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>8</default>
+        <default>16</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -23186,7 +24303,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm9</id>
+    <id>sys0node0dimm17</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00030022</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p34</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>34</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-17</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>20</value></field>
+            <field><id>writePageSize</id><value>32</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM8</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm18</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -23194,7 +24384,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>9</default>
+        <default>18</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23206,11 +24396,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-9</default>
+        <default>physical:sys-0/node-0/dimm-18</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>9</default>
+        <default>18</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -23259,7 +24449,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm10</id>
+    <id>sys0node0dimm19</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00030026</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p38</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>38</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-19</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM9</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm20</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -23267,7 +24530,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>10</default>
+        <default>20</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23279,11 +24542,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-10</default>
+        <default>physical:sys-0/node-0/dimm-20</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>10</default>
+        <default>20</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -23332,7 +24595,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm11</id>
+    <id>sys0node0dimm21</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0003002A</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>21</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p42</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>42</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-21</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>21</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM10</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm22</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -23340,7 +24676,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>11</default>
+        <default>22</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23352,11 +24688,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-11</default>
+        <default>physical:sys-0/node-0/dimm-22</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>11</default>
+        <default>22</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -23405,7 +24741,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm12</id>
+    <id>sys0node0dimm23</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0003002E</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>23</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p46</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>46</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-23</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>23</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-2/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM11</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm24</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -23413,7 +24822,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>12</default>
+        <default>24</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23425,11 +24834,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-12</default>
+        <default>physical:sys-0/node-0/dimm-24</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>12</default>
+        <default>24</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -23478,7 +24887,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm13</id>
+    <id>sys0node0dimm25</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00030032</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p50</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>50</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-25</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>25</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM12</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm26</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -23486,7 +24968,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>13</default>
+        <default>26</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23498,11 +24980,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-13</default>
+        <default>physical:sys-0/node-0/dimm-26</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>13</default>
+        <default>26</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -23551,7 +25033,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm14</id>
+    <id>sys0node0dimm27</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00030036</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>27</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p54</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>54</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-27</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>27</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM13</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm28</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -23559,7 +25114,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>14</default>
+        <default>28</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23571,11 +25126,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-14</default>
+        <default>physical:sys-0/node-0/dimm-28</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>14</default>
+        <default>28</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -23624,7 +25179,80 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm15</id>
+    <id>sys0node0dimm29</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0003003A</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p58</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>58</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-29</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>29</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>14</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>14</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM14</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm30</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -23632,7 +25260,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>15</default>
+        <default>30</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23644,15 +25272,88 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-15</default>
+        <default>physical:sys-0/node-0/dimm-30</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>15</default>
+        <default>30</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>15</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>15</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM15</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm31</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0003003E</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>31</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p62</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>62</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-31</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>31</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-3/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -27120,7 +28821,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm16</id><!-- port2 -->
+    <id>sys0node0dimm32</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -27128,7 +28829,7 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>16</default>
+        <default>32</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -27140,15 +28841,84 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-16</default>
+        <default>physical:sys-0/node-0/dimm-32</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>16</default>
+        <default>32</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-0/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>2</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM16</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm33</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00030042</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>33</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p66</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>66</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-33</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>33</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -27885,7 +29655,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm17</id><!-- port8 -->
+    <id>sys0node0dimm34</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -27893,11 +29663,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>17</default>
+        <default>34</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p68</default>
+        <default>dimm:k0:n0:s0:p136</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -27905,11 +29675,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-17</default>
+        <default>physical:sys-0/node-0/dimm-34</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>17</default>
+        <default>34</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -27918,6 +29688,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM17</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm35</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0003008A</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>35</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p138</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>138</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-35</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>34</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -28650,7 +30489,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm18</id><!-- port12 -->
+    <id>sys0node0dimm36</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -28658,11 +30497,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>18</default>
+        <default>36</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p72</default>
+        <default>dimm:k0:n0:s0:p144</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -28670,11 +30509,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-18</default>
+        <default>physical:sys-0/node-0/dimm-36</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>18</default>
+        <default>36</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -28683,6 +30522,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>12</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM18</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm37</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00030092</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>37</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p146</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>146</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-37</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>36</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -29415,7 +31323,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm19</id><!-- port15 -->
+    <id>sys0node0dimm38</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -29423,11 +31331,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>19</default>
+        <default>38</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p76</default>
+        <default>dimm:k0:n0:s0:p152</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -29435,11 +31343,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-19</default>
+        <default>physical:sys-0/node-0/dimm-38</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>19</default>
+        <default>38</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -29448,6 +31356,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>15</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>15</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM19</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm39</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x0003009A</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>39</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p154</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>154</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-39</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>38</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-0/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -30180,7 +32157,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm20</id><!-- port13 -->
+    <id>sys0node0dimm40</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -30188,11 +32165,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>20</default>
+        <default>40</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p80</default>
+        <default>dimm:k0:n0:s0:p160</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -30200,11 +32177,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-20</default>
+        <default>physical:sys-0/node-0/dimm-40</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>20</default>
+        <default>40</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -30213,6 +32190,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>13</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM20</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm41</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x000300A2</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>41</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p162</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>162</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-41</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>40</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -30945,7 +32991,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm21</id><!-- port9 -->
+    <id>sys0node0dimm42</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -30953,11 +32999,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>21</default>
+        <default>42</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p84</default>
+        <default>dimm:k0:n0:s0:p168</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -30965,11 +33011,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-21</default>
+        <default>physical:sys-0/node-0/dimm-42</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>21</default>
+        <default>42</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -30978,6 +33024,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM21</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm43</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x000300AA</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>43</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p170</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>170</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-43</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>42</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -31710,7 +33825,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm22</id><!-- port3 -->
+    <id>sys0node0dimm44</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -31718,11 +33833,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>22</default>
+        <default>44</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p88</default>
+        <default>dimm:k0:n0:s0:p176</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -31730,11 +33845,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-22</default>
+        <default>physical:sys-0/node-0/dimm-44</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>22</default>
+        <default>44</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -31743,6 +33858,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>3</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM22</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm45</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x000300B2</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>45</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p178</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>178</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-45</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>44</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -32475,7 +34659,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm23</id><!-- port14 -->
+    <id>sys0node0dimm46</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -32483,11 +34667,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>23</default>
+        <default>46</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p92</default>
+        <default>dimm:k0:n0:s0:p184</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -32495,11 +34679,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-23</default>
+        <default>physical:sys-0/node-0/dimm-46</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>23</default>
+        <default>46</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -32508,6 +34692,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>14</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>14</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM23</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm47</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x000300BA</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>47</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p186</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>186</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-47</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>46</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-1/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -33240,7 +35493,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm24</id><!-- port0 -->
+    <id>sys0node0dimm48</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -33248,11 +35501,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>24</default>
+        <default>48</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p96</default>
+        <default>dimm:k0:n0:s0:p192</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -33260,11 +35513,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-24</default>
+        <default>physical:sys-0/node-0/dimm-48</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>24</default>
+        <default>48</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -33273,6 +35526,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>0</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM24</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm49</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x000300C2</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>49</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p194</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>194</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-49</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>48</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -33672,7 +35994,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm25</id><!-- port1 -->
+    <id>sys0node0dimm50</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -33680,11 +36002,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>25</default>
+        <default>50</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p100</default>
+        <default>dimm:k0:n0:s0:p200</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -33692,11 +36014,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-25</default>
+        <default>physical:sys-0/node-0/dimm-50</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>25</default>
+        <default>50</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -33705,6 +36027,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>1</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM25</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm51</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x000300CA</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>51</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p202</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>202</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-51</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>50</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -34105,7 +36496,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm26</id><!-- port4 -->
+    <id>sys0node0dimm52</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -34113,11 +36504,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>26</default>
+        <default>52</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p104</default>
+        <default>dimm:k0:n0:s0:p208</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -34125,11 +36516,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-26</default>
+        <default>physical:sys-0/node-0/dimm-52</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>26</default>
+        <default>52</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -34138,6 +36529,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>4</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM26</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm53</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x000300D2</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>53</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p210</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>210</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-53</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>52</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -34537,7 +36997,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm27</id><!-- port5 -->
+    <id>sys0node0dimm54</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -34545,11 +37005,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>27</default>
+        <default>54</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p108</default>
+        <default>dimm:k0:n0:s0:p216</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -34557,11 +37017,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-27</default>
+        <default>physical:sys-0/node-0/dimm-54</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>27</default>
+        <default>54</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -34570,6 +37030,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>5</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM27</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm55</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x000300DA</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>55</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p218</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>218</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-55</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>54</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-2/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -34971,7 +37500,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm28</id><!-- port6 -->
+    <id>sys0node0dimm56</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -34979,11 +37508,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>28</default>
+        <default>56</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p112</default>
+        <default>dimm:k0:n0:s0:p224</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -34991,11 +37520,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-28</default>
+        <default>physical:sys-0/node-0/dimm-56</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>28</default>
+        <default>56</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -35004,6 +37533,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>6</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM28</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm57</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x000300E2</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>57</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p226</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>226</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-57</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>56</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-0/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -35371,7 +37969,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm29</id><!-- port7 -->
+    <id>sys0node0dimm58</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -35379,11 +37977,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>29</default>
+        <default>58</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p116</default>
+        <default>dimm:k0:n0:s0:p232</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -35391,11 +37989,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-29</default>
+        <default>physical:sys-0/node-0/dimm-58</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>29</default>
+        <default>58</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -35404,6 +38002,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>7</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM29</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm59</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x000300EA</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>59</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p234</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>234</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-59</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>58</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-0/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -35804,7 +38471,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm30</id><!-- port10 -->
+    <id>sys0node0dimm60</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -35812,11 +38479,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>30</default>
+        <default>60</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p120</default>
+        <default>dimm:k0:n0:s0:p240</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -35824,11 +38491,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-30</default>
+        <default>physical:sys-0/node-0/dimm-60</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>30</default>
+        <default>60</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -35837,6 +38504,75 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM30</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm61</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x000300F2</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>61</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p242</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>242</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-61</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>60</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-1/omi-0/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -36237,7 +38973,7 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0node0dimm31</id><!-- port11 -->
+    <id>sys0node0dimm62</id>
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
@@ -36245,11 +38981,11 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
-        <default>31</default>
+        <default>62</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p124</default>
+        <default>dimm:k0:n0:s0:p248</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -36257,11 +38993,11 @@
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
-        <default>physical:sys-0/node-0/dimm-31</default>
+        <default>physical:sys-0/node-0/dimm-62</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>31</default>
+        <default>62</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -36270,6 +39006,79 @@
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_PRIMARY_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA0</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>EEPROM_VPD_BACKUP_INFO</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-1</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>byteAddrOffset</id><value>0x02</value></field>
+            <field><id>devAddr</id><value>0xA2</value></field>
+            <field><id>chipCount</id><value>0x01</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>maxMemorySizeKB</id><value>0x4</value></field>
+            <field><id>writeCycleTime</id><value>05</value></field>
+            <field><id>writePageSize</id><value>0x20</value></field>
+        </default>
+    </attribute>
+    <attribute>
+        <id>LOCATION_CODE</id>
+        <default>S0_N0_DIMM31</default>
+    </attribute>
+    <attribute>
+        <id>STATIC_ABS_LOCATION_CODE</id>
+        <default>DDIMM31</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0dimm63</id>
+    <type>lcard-dimm-ddimm</type>
+    <attribute>
+        <id>HUID</id>
+        <default>0x000300FA</default>
+    </attribute>
+    <attribute>
+        <id>POSITION</id>
+        <default>63</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>dimm:k0:n0:s0:p250</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>250</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/dimm-63</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>62</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/mc-3/mi-0/mcc-1/omi-1/ocmb_chip-0/mem_port-1/dimm-0</default>
+    </attribute>
+    <attribute>
+        <id>REL_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
