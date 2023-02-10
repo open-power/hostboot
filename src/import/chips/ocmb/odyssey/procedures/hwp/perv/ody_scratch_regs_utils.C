@@ -36,6 +36,8 @@
 #include <multicast_group_defs.H>
 #include <p10_frequency_buckets.H>
 
+// called from Host only -- uses knowledge of the Host MC frequency attributes
+// to derive the relevant bucket selection for Odyssey
 fapi2::ReturnCode ody_scratch_regs_get_pll_bucket(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     fapi2::ATTR_OCMB_PLL_BUCKET_Type& o_pll_bucket)
@@ -84,7 +86,7 @@ fapi2::ReturnCode ody_scratch_regs_get_pll_bucket(
         }
 
         FAPI_ASSERT(l_match_found,
-                    fapi2::ODY_SCRATCH_REGS_UTILS_LOOKUP_ERR()
+                    fapi2::ODY_SCRATCH_REGS_UTILS_BUCKET_LOOKUP_ERR()
                     .set_TARGET_CHIP(i_target)
                     .set_HOST_TARGET(l_host_target)
                     .set_HOST_FREQ_GRID_MHZ(l_attr_freq_mc_mhz),
@@ -97,6 +99,31 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+// called from Host/SPPE sides -- given fixed PLL bucket, return the associated
+// grid/link frequencies
+fapi2::ReturnCode ody_scratch_regs_get_pll_freqs(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const fapi2::ATTR_OCMB_PLL_BUCKET_Type i_pll_bucket,
+    uint32_t& o_freq_grid_mhz,
+    uint32_t& o_freq_link_mhz)
+{
+    FAPI_DBG("Start");
+
+    FAPI_ASSERT(i_pll_bucket < ODY_MAX_PLL_BUCKETS,
+                fapi2::ODY_SCRATCH_REGS_UTILS_BUCKET_OUT_OF_RANGE_ERR()
+                .set_TARGET_CHIP(i_target)
+                .set_BUCKET(i_pll_bucket),
+                "Ody PLL bucket (%d) index is out of range!",
+                i_pll_bucket);
+
+    o_freq_grid_mhz = ODY_PLL_BUCKETS[i_pll_bucket].freq_grid_mhz;
+    o_freq_link_mhz = ODY_PLL_BUCKETS[i_pll_bucket].freq_link_mhz;
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
 
 fapi2::ReturnCode ody_scratch_regs_setup_plat_multicast_attrs(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)

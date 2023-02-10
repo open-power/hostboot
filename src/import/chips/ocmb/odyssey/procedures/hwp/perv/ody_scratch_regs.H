@@ -58,6 +58,8 @@ enum ody_scratch_regs
     SCRATCH6_REG_VALID_BIT                          = 5,
     ATTR_OCMB_PLL_BUCKET_STARTBIT                   = 0,
     ATTR_OCMB_PLL_BUCKET_LENGTH                     = 4,
+    ATTR_OCMB_PLL_FREQ_STARTBIT                     = 16,
+    ATTR_OCMB_PLL_FREQ_LENGTH                       = 16,
 
     // Scratch_reg_7 (clockstop-on-checkstop setup)
     SCRATCH7_REG_VALID_BIT                          = 6,

@@ -52,7 +52,23 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_ODY_SCRATCH_REGS_UTILS_LOOKUP_ERR</rc>
+    <rc>RC_ODY_SPPE_ATTR_SETUP_GRID_FREQ_MISMATCH</rc>
+    <description>
+      Grid frequency posted in scratch register by cmdtable execution
+      does not match value expected based on PLL bucket request
+    </description>
+    <ffdc>TARGET_CHIP</ffdc>
+    <ffdc>FREQ_GRID_ACT</ffdc>
+    <ffdc>FREQ_GRID_EXP</ffdc>
+    <ffdc>PLL_BUCKET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_ODY_SCRATCH_REGS_UTILS_BUCKET_LOOKUP_ERR</rc>
     <description>
       Unable to match desired Odyssey freqeuncy with supported PLL bucket
       setting
@@ -60,6 +76,19 @@
     <ffdc>TARGET_CHIP</ffdc>
     <ffdc>HOST_TARGET</ffdc>
     <ffdc>HOST_FREQ_GRID_MHZ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_ODY_SCRATCH_REGS_UTILS_BUCKET_OUT_OF_RANGE_ERR</rc>
+    <description>
+      Specified PLL bucket is out of range
+    </description>
+    <ffdc>TARGET_CHIP</ffdc>
+    <ffdc>BUCKET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

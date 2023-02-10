@@ -331,7 +331,8 @@ ReturnCode mod_multicast_setup(
     }
 
     l_required_group_members = l_eligible_chiplets & i_chiplets;
-    FAPI_DBG("Required multicast group members : %#018lX", l_required_group_members);
+    FAPI_DBG("Required multicast group members : 0x%08X%08X",
+             l_required_group_members >> 32, l_required_group_members & 0xFFFFFFFF);
 
     // MC_GROUP_MEMBERSHIP_BITX_READ = 0x500F0001
     // This performs a multicast read with the BITX merge operation.
@@ -340,7 +341,8 @@ ReturnCode mod_multicast_setup(
     FAPI_INF("Determine current group members");
     FAPI_TRY(fapi2::getScom(i_target, MC_GROUP_MEMBERSHIP_BITX_READ | ((uint32_t)i_group_id << 24),
                             l_current_group_members));
-    FAPI_DBG("Current multicast group members : %#018lX", l_current_group_members);
+    FAPI_DBG("Current multicast group members : 0x%08X%08X",
+             l_current_group_members >> 32, l_current_group_members & 0xFFFFFFFF);
 
     FAPI_INF("Update group membership where needed");
 

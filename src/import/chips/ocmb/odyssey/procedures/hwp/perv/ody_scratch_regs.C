@@ -170,17 +170,41 @@ fapi2::ReturnCode ody_scratch_regs_update(
     {
         fapi2::buffer<uint32_t> l_scratch6_reg = 0;
         fapi2::ATTR_OCMB_PLL_BUCKET_Type l_ocmb_pll_bucket = 0;
+        uint32_t l_freq_grid_mhz = 0;
+        uint32_t l_freq_link_mhz = 0;
 
+        // Host call (ody_sppe_config_update) will always invoke this code block to fill the PLL bucket
+        // request.  DO NOT fill the PLL frequency field in the mailbox, this will be written by the SPPE side.
+        // Go ahead and init the host platform attribute state for the OCMB PLL bucket and OMI link frequency.
 #ifndef __PPE__
         {
             FAPI_TRY(ody_scratch_regs_get_pll_bucket(i_target, l_ocmb_pll_bucket));
+            FAPI_TRY(ody_scratch_regs_get_pll_freqs(i_target, l_ocmb_pll_bucket, l_freq_grid_mhz, l_freq_link_mhz));
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_OCMB_PLL_BUCKET, i_target, l_ocmb_pll_bucket));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_OMI_MHZ, i_target, l_freq_link_mhz));
         }
 #endif
+        // SPPE call (ody_sppe_attr_setup) will run this code ONLY if the host does not fill
+        // the mailbox (marking it valid).  We will additionally compute the PLL feedback in this case
+        // and fill the mailbox -- I don't think this code path can reliably used to boot Odyssey HW
+        // at an arbitrary frequency (from the last boot, say) since the scratch attributes are not written
+        // into the mailbox register until after the cmdtable HWPs run which consume them, but SPPE simics
+        // testing appears to rely on this.
         FAPI_DBG("Reading ATTR_OCMB_PLL_BUCKET");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_PLL_BUCKET, i_target, l_ocmb_pll_bucket));
-
         l_scratch6_reg.insertFromRight<ATTR_OCMB_PLL_BUCKET_STARTBIT, ATTR_OCMB_PLL_BUCKET_LENGTH>(l_ocmb_pll_bucket);
+
+        FAPI_DBG("Reading ATTR_FREQ_OMI_MHZ");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, i_target, l_freq_link_mhz));
+        l_scratch6_reg.insertFromRight<ATTR_OCMB_PLL_FREQ_STARTBIT, ATTR_OCMB_PLL_FREQ_LENGTH>(l_freq_link_mhz);
+
+#ifdef __PPE__
+        {
+            FAPI_DBG("Filling Grid frequency feedback");
+            FAPI_TRY(ody_scratch_regs_get_pll_freqs(i_target, l_ocmb_pll_bucket, l_freq_grid_mhz, l_freq_link_mhz));
+            l_scratch6_reg.insertFromRight<ATTR_OCMB_PLL_FREQ_STARTBIT, ATTR_OCMB_PLL_FREQ_LENGTH>(l_freq_grid_mhz);
+        }
+#endif
 
         FAPI_DBG("Setting up value of Scratch 6 mailbox register");
         FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER6, l_scratch6_reg));
@@ -255,7 +279,7 @@ fapi2::ReturnCode ody_scratch_regs_update(
         fapi2::ATTR_OCMB_BOOT_FLAGS_Type l_attr_ocmb_boot_flags;
 
         FAPI_DBG("Reading ATTR_OCMB_BOOT_FLAGS");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_BOOT_FLAGS, i_target, l_attr_ocmb_boot_flags),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_BOOT_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_attr_ocmb_boot_flags),
                  "Error from FAPI_ATTR_GET (ATTR_OCMB_BOOT_FLAGS)");
         l_scratch11_reg.insertFromRight<ATTR_OCMB_BOOT_FLAGS_STARTBIT, ATTR_OCMB_BOOT_FLAGS_LENGTH>(l_attr_ocmb_boot_flags);
 

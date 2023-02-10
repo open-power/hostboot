@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/perv/ody_scratch_regs_utils.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/perv/poz_sppe_check_for_ready.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2023                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,52 +23,72 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 //------------------------------------------------------------------------------
-/// @file  ody_scratch_regs_utils.H
-/// @brief Project specific utility functions to support Odyssey scratch
-///        register setup
+/// @file  poz_sppe_check_for_ready.H
+/// @brief Confirm that SPPE has reached expected state based on reset/boot type
 //------------------------------------------------------------------------------
-// *HWP HW Maintainer   : Anusha Reddy (anusrang@in.ibm.com)
+// *HWP HW Maintainer   : Sreekanth Reddy (skadapal@in.ibm.com)
 // *HWP FW Maintainer   : Raja Das (rajadas2@in.ibm.com)
 //------------------------------------------------------------------------------
 
-#pragma once
+#include <poz_sppe_check_for_ready.H>
+#include <poz_sppe_check_for_ready_regs.H>
 
-#include <fapi2.H>
-#ifndef __PPE__
-///
-/// @brief Read Host attribute/platform state to determine desired OCMB PLL bucket
-///
-/// @param[in]   i_target                  Reference to TARGET_TYPE_OCMB_CHIP
-/// @param[out]  o_pll_bucket              Target PLL bucket setting
-///
-/// @return fapi::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
-///
-fapi2::ReturnCode ody_scratch_regs_get_pll_bucket(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    fapi2::ATTR_OCMB_PLL_BUCKET_Type& o_pll_bucket);
-#endif
+using namespace fapi2;
 
-///
-/// @brief Lookup frequencies associated with a given PLL bucket
-///
-/// @param[in]   i_target                  Reference to TARGET_TYPE_OCMB_CHIP
-/// @param[in]   i_pll_bucket              PLL bucket setting
-/// @param[out]  o_freq_grid_mhz           Chip grid freqeuncy (MHz)
-/// @param[out]  o_freq_link_mhz           OMI link frequency (MHz)
-///
-/// @return fapi::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
-///
-fapi2::ReturnCode ody_scratch_regs_get_pll_freqs(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    const fapi2::ATTR_OCMB_PLL_BUCKET_Type i_pll_bucket,
-    uint32_t& o_freq_grid_mhz,
-    uint32_t& o_freq_link_mhz);
+typedef enum
+{
+    SPPE_RUNTIME = 4,
+    SPPE_PK_BOOTED  = 0,
+} poz_sppe_boot_type_t;
 
-/// @brief Set platform specific multicast setup attributes
-///
-/// @param[in]   i_target                  Reference to TARGET_TYPE_OCMB_CHIP
-///
-/// @return fapi::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
-///
-fapi2::ReturnCode ody_scratch_regs_setup_plat_multicast_attrs(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+ReturnCode poz_sppe_check_for_ready(
+    const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_target,
+    const poz_sppe_boot_parms i_boot_parms)
+{
+    FAPI_DBG("Entering ...");
+
+    SB_MSG_t SB_MSG;
+    uint32_t l_poll = 1;
+
+    // calculate expected state based on input flag
+    // attribute value
+    poz_sppe_boot_type_t l_boot_type = SPPE_PK_BOOTED;
+
+    if (!(i_boot_parms.boot_flags & 0xC0000000))
+    {
+        l_boot_type = SPPE_RUNTIME;
+    }
+
+    // loop until expected state is reached or we've
+    // waited for the prescribed timeout
+    while (1)
+    {
+        // delay before polling
+        FAPI_TRY(delay(i_boot_parms.poll_delay_ns,
+                       i_boot_parms.poll_delay_cycles));
+
+        // sample register, break if expected bit is set
+        FAPI_TRY(SB_MSG.getCfam(i_target));
+
+        if (SB_MSG.getBit(l_boot_type))
+        {
+            break;
+        }
+
+        // bump count
+        l_poll++;
+
+        // test for timeout
+        FAPI_ASSERT((l_poll <= i_boot_parms.max_polls),
+                    fapi2::POZ_SPPE_NOT_READY_ERR()
+                    .set_TARGET(i_target)
+                    .set_SB_MSG(SB_MSG())
+                    .set_BOOT_TYPE(l_boot_type),
+                    "SPPE did not reach expected state prior to timeout!");
+    }
+
+
+fapi_try_exit:
+    FAPI_DBG("Exiting ...");
+    return current_err;
+}
