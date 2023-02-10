@@ -103,6 +103,9 @@ enum sizes
 
     // Maximum number of external DTS sensors
     NUM_DTS = 4,
+
+    // Number of channels
+    NUM_CHANNELS = 2,
 };
 
 ///
@@ -110,7 +113,6 @@ enum sizes
 ///
 enum ffdc_codes : uint16_t
 {
-// Note: uncomment these when they get used in the HWP code
     EXP_I2C_GET_FIELD = 0x0000,
     EXP_I2C_SET_FIELD = 0x0001,
     READ_HOST_FW_RESPONSE_STRUCT = 0x0003,

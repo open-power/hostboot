@@ -70,8 +70,9 @@ use constant {
     # Special attributes which are multi-demensional but the second dimension doesn't represent the DIMM but
     # rather the data on the port
     PER_PORT_ATTRIBUTES => {
-        "ATTR_MSS_VPD_DQ_MAP" => 1,
-        "ATTR_MEM_VPD_DQ_MAP" => 1,
+        "ATTR_MSS_VPD_DQ_MAP"                 => 1,
+        "ATTR_MEM_VPD_DQ_MAP"                 => 1,
+        "ATTR_MEM_EFF_DDR5_CHANNEL_BUS_WIDTH" => 1,
     },
 
     # Special attributes which are multi-demensional but the second dimension doesn't represent the PORT but

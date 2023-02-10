@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <cstring>
 #include <fapi2.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <lib/shared/ody_consts.H>
 #include <generic/memory/lib/data_engine/data_engine_utils.H>
 #include <generic/memory/lib/spd/spd_fields_ddr5.H>
 #include <generic/memory/lib/spd/spd_utils_ddr5.H>
@@ -444,28 +445,29 @@ class base_0_0 : public mss::spd::base
         /// @param[in] i_spd SPD binary
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
         ///
-        virtual fapi2::ReturnCode set_channels_per_dimm(const std::vector<uint8_t>& i_spd) const
+        virtual fapi2::ReturnCode set_phy_per_ocmb(const std::vector<uint8_t>& i_spd) const
         {
+            uint8_t l_phy_en_per_ocmb = 0;
             uint8_t l_field = 0;
-            uint8_t l_channels_per_dimm = 0;
 
             // =========================================================
-            // Item JC-45-2260.01M
-            // Page 75
-            // DDR5 SPD Document Release 1.0
+            // Page 69
+            // DDR5 DDR5 SPD Document Release 1.10
             // Byte 235 (0x0EB): Memory Channel Bus Width
             // =========================================================
-            const std::vector<std::pair<uint8_t, uint8_t> > CHANNELS_PER_DIMM_MAP =
+            static const std::vector<std::pair<uint8_t, uint8_t> > PHY_PER_OCMB_EN_MAP =
             {
                 // {key byte, bus width (in bits)
-                {0b00, fapi2::ENUM_ATTR_MEM_EFF_CHANNELS_PER_DIMM_1_CHANNEL},
-                {0b01, fapi2::ENUM_ATTR_MEM_EFF_CHANNELS_PER_DIMM_2_CHANNELS},
-                // All others reserved
+                {0b00, fapi2::ENUM_ATTR_MEM_EFF_DDR5_MEM_PORT_ENABLE_NOT_EN},
+                {0b01, fapi2::ENUM_ATTR_MEM_EFF_DDR5_MEM_PORT_ENABLE_PORT0_EN},
+                {0b10, fapi2::ENUM_ATTR_MEM_EFF_DDR5_MEM_PORT_ENABLE_PORT1_EN},
+                {0b11, fapi2::ENUM_ATTR_MEM_EFF_DDR5_MEM_PORT_ENABLE_BOTH_EN},
             };
 
-            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::CHANNELS_PER_DIMM, i_spd, SET_CHANNELS_PER_DIMM, l_field));
-            FAPI_TRY(lookup_table_check(iv_dimm, CHANNELS_PER_DIMM_MAP, SET_CHANNELS_PER_DIMM, l_field, l_channels_per_dimm));
-            FAPI_TRY(mss::attr::set_channels_per_dimm(iv_dimm, l_channels_per_dimm));
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::ENABLED_PHY_CHANNELS, i_spd, SET_CHANNELS_PER_DIMM, l_field));
+            FAPI_TRY(lookup_table_check(iv_dimm, PHY_PER_OCMB_EN_MAP, SET_CHANNELS_PER_DIMM, l_field,
+                                        l_phy_en_per_ocmb));
+            FAPI_TRY(mss::attr::set_ddr5_mem_port_enable(iv_ocmb, l_phy_en_per_ocmb));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -477,30 +479,45 @@ class base_0_0 : public mss::spd::base
         /// @param[in] i_spd SPD binary
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
         ///
-        virtual fapi2::ReturnCode set_bus_width(const std::vector<uint8_t>& i_spd) const
+        virtual fapi2::ReturnCode set_channel_bus_width(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            uint8_t l_bus_width = 0;
+            uint8_t l_channel_bus_width[ody::NUM_CHANNELS] = {0};
+            uint8_t l_field_channel_a = 0;
+            uint8_t l_field_channel_b = 0;
+            const uint8_t ch_a_index = 0;
+            const uint8_t ch_b_index = 1;
 
             // =========================================================
-            // Item JC-45-2260.01M
-            // Page 75
-            // DDR5 SPD Document Release 1.0
+            // Page 69
+            // DDR5 DDIMM SPD Document Release 1.10
             // Byte 235 (0x0EB): Memory Channel Bus Width
             // =========================================================
-            const std::vector<std::pair<uint8_t, uint8_t> > BUS_WIDTH_MAP =
+            static const std::vector<std::pair<uint8_t, uint8_t> > CH_BUS_WIDTH_MAP =
             {
                 // {key byte, bus width (in bits)
-                {0, fapi2::ENUM_ATTR_MEM_EFF_PRIM_BUS_WIDTH_8_BITS},
-                {1, fapi2::ENUM_ATTR_MEM_EFF_PRIM_BUS_WIDTH_16_BITS},
-                {2, fapi2::ENUM_ATTR_MEM_EFF_PRIM_BUS_WIDTH_32_BITS},
-                {3, fapi2::ENUM_ATTR_MEM_EFF_PRIM_BUS_WIDTH_64_BITS},
+                {0, fapi2::ENUM_ATTR_MEM_EFF_DDR5_CHANNEL_BUS_WIDTH_NOT_USED},
+                {1, fapi2::ENUM_ATTR_MEM_EFF_DDR5_CHANNEL_BUS_WIDTH_32_BITS},
+                {2, fapi2::ENUM_ATTR_MEM_EFF_DDR5_CHANNEL_BUS_WIDTH_36_BITS},
+                {3, fapi2::ENUM_ATTR_MEM_EFF_DDR5_CHANNEL_BUS_WIDTH_40_BITS},
                 // All others reserved
             };
 
-            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::BUS_WIDTH, i_spd, SET_PRIM_BUS_WIDTH, l_field));
-            FAPI_TRY(lookup_table_check(iv_dimm, BUS_WIDTH_MAP, SET_PRIM_BUS_WIDTH, l_field, l_bus_width));
-            FAPI_TRY(mss::attr::set_prim_bus_width(iv_dimm, l_bus_width));
+            // Both ports have channel A and B, so we need to look at both fields for each port
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::BUS_WIDTH_CHA, i_spd, SET_PRIM_BUS_WIDTH, l_field_channel_a));
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::BUS_WIDTH_CHB, i_spd, SET_PRIM_BUS_WIDTH, l_field_channel_b));
+
+            // Channel A goes into index 0 of the attr
+            // Channel B goes into index 1 of the attr
+            l_channel_bus_width[ch_a_index] = l_field_channel_a;
+            l_channel_bus_width[ch_b_index] = l_field_channel_b;
+
+            FAPI_TRY(lookup_table_check(iv_dimm, CH_BUS_WIDTH_MAP, SET_PRIM_BUS_WIDTH, l_field_channel_a,
+                                        l_channel_bus_width[ch_a_index]));
+            FAPI_TRY(lookup_table_check(iv_dimm, CH_BUS_WIDTH_MAP, SET_PRIM_BUS_WIDTH, l_field_channel_b,
+                                        l_channel_bus_width[ch_b_index]));
+
+            FAPI_TRY(mss::attr::set_ddr5_channel_bus_width(iv_port, l_channel_bus_width));
+
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -940,10 +957,10 @@ class base_0_0 : public mss::spd::base
             FAPI_TRY(set_col_addr_bits(i_spd));
             FAPI_TRY(set_row_addr_bits(i_spd));
             FAPI_TRY(set_prim_stack_type(i_spd));
-            FAPI_TRY(set_channels_per_dimm(i_spd));
+            FAPI_TRY(set_phy_per_ocmb(i_spd));
             FAPI_TRY(set_prim_die_count(i_spd));
             FAPI_TRY(set_sdram_width(i_spd));
-            FAPI_TRY(set_bus_width(i_spd));
+            FAPI_TRY(set_channel_bus_width(i_spd));
             FAPI_TRY(set_supported_cas_latencies(i_spd));
 
             // TODO: Zen:MST-1427 Processing for DDR5 EFD module

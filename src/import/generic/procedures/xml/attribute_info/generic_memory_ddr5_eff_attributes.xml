@@ -249,4 +249,32 @@
         <mssAccessorName>ddr5_chb_active</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_MEM_EFF_DDR5_MEM_PORT_ENABLE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Byte 235 - Enabled Phys and channels is based on mem ports per ocmb target
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum>NOT_EN = 0, PORT0_EN = 1, PORT1_EN = 2, BOTH_EN = 3</enum>
+        <mssAccessorName>ddr5_mem_port_enable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DDR5_CHANNEL_BUS_WIDTH</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Byte 235 - Bus Width for Channels A and B
+            ARRAY[CHANNEL]
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum>NOT_USED = 0, 32_BITS = 32, 36_BITS = 36, 40_BITS = 40</enum>
+        <mssAccessorName>ddr5_channel_bus_width</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
 </attributes>

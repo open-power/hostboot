@@ -92,9 +92,9 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TRCD_MIN_MS
 //////////////////////////////////////
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::RANK_MIX;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::PACKAGE_RANKS_PER_CHANNEL;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BUS_WIDTH;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BUS_EXT_WIDTH;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::CHANNELS_PER_DIMM;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BUS_WIDTH_CHA;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BUS_WIDTH_CHB;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::ENABLED_PHY_CHANNELS;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::CONTINUATION_CODES;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::LAST_NON_ZERO_BYTE;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::DRAM_MFR_ID_CODE_LSB;

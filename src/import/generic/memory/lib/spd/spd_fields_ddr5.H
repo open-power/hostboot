@@ -151,12 +151,12 @@ class fields<DDR5, BASE_CNFG>
             PACKAGE_RANKS_PER_CHANNEL_LEN = 3,
 
             // Byte 235
-            CHANNELS_PER_DIMM_START = 1,
-            CHANNELS_PER_DIMM_LEN = 2,
-            BUS_EXT_WIDTH_START = 3,
-            BUS_EXT_WIDTH_LEN = 2,
-            BUS_WIDTH_START = 5,
-            BUS_WIDTH_LEN = 3,
+            ENABLED_PHY_CHANNELS_START = 0,
+            ENABLED_PHY_CHANNELS_LEN = 2,
+            BUS_WIDTH_CHA_START = 2,
+            BUS_WIDTH_CHA_LEN = 3,
+            BUS_WIDTH_CHB_START = 5,
+            BUS_WIDTH_CHB_LEN = 3,
 
             /////////////////////////////////////////////
             //// Bytes 512-637: manufacturing information
@@ -225,9 +225,9 @@ class fields<DDR5, BASE_CNFG>
         //////////////////////////////////////
         static constexpr mss::field_t<mss::endian::LITTLE> RANK_MIX{234, RANK_MIX_START, RANK_MIX_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> PACKAGE_RANKS_PER_CHANNEL{234, PACKAGE_RANKS_PER_CHANNEL_START, PACKAGE_RANKS_PER_CHANNEL_LEN};
-        static constexpr mss::field_t<mss::endian::LITTLE> BUS_WIDTH{235, BUS_WIDTH_START, BUS_WIDTH_LEN};
-        static constexpr mss::field_t<mss::endian::LITTLE> BUS_EXT_WIDTH{235, BUS_EXT_WIDTH_START, BUS_EXT_WIDTH_LEN};
-        static constexpr mss::field_t<mss::endian::LITTLE> CHANNELS_PER_DIMM{235, CHANNELS_PER_DIMM_START, CHANNELS_PER_DIMM_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> BUS_WIDTH_CHA{235, BUS_WIDTH_CHA_START, BUS_WIDTH_CHA_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> BUS_WIDTH_CHB{235, BUS_WIDTH_CHB_START, BUS_WIDTH_CHB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> ENABLED_PHY_CHANNELS{235, ENABLED_PHY_CHANNELS_START, ENABLED_PHY_CHANNELS_LEN};
 
         //////////////////////////////////////
         //// Bytes 512-513: module information
