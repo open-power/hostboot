@@ -219,14 +219,14 @@
         },
         {
             "attribute_name": "hb_memory_region_size",
-            "possible_values": ["128MB", "256MB"],
+            "possible_values": ["128MB", "256MB", "1024MB", "2048MB", "4096MB"],
             "default_values": ["256MB"],
             "helpText": "Specifies the size of the logical memory block the system uses to read memory, requires a reboot for a change to be applied.",
             "displayName": "Memory Region Size (pending)"
         },
         {
             "attribute_name": "hb_memory_region_size_current",
-            "possible_values": ["128MB", "256MB"],
+            "possible_values": ["128MB", "256MB", "1024MB", "2048MB", "4096MB"],
             "default_values": ["256MB"],
             "helpText": "Specifies the size of the logical memory block the system uses to read memory for the current IPL. Do not set this attribute directly; set hb_memory_region_size instead.",
             "displayName": "Memory Region Size (current)"
