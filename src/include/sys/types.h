@@ -1,12 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/limits.h $                                        */
+/* $Source: src/include/sys/types.h $                                     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
-/* [+] Google Inc.                                                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,21 +22,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __LIMITS_H
-#define __LIMITS_H
 
-#define KILOBYTE  (1024ul)            /**< 1 KB */
-#define MEGABYTE  (1024 * 1024ul)     /**< 1 MB */
-#define GIGABYTE  (MEGABYTE * 1024ul) /**< 1 GB */
-#define TERABYTE  (GIGABYTE * 1024ul) /**< 1 TB */
+/**
+ *  @file System type interfaces
+ *
+ *  @note: Introduced empty file for libpldm subtree to compile
+ */
 
-#define PAGESIZE  (4*KILOBYTE)  /**< 4 KB */
-#define PAGE_SIZE PAGESIZE
+#ifndef _SYS_TYPES_H_
+#define _SYS_TYPES_H_
 
-#define INT_MAX   __INT_MAX__
-#define SHRT_MAX  __SHRT_MAX__
-#define SSIZE_MAX __INT64_MAX__
-
-#define CHAR_BIT 8 // Number of bits in a char
-
-#endif
+#endif // _SYS_TYPES_H_
