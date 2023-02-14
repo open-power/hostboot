@@ -282,12 +282,12 @@ class mr5_data : public mr_base_data<MC>
             PD_DRV_IMP_LEN = 2,
         };
 
-        uint8_t iv_data_output_disable = 0; // Write only - will not be read
         uint8_t iv_pu_drv_imp[mr::ATTR_RANKS] = {};
+        uint8_t iv_pd_drv_imp[mr::ATTR_RANKS] = {};
+        uint8_t iv_data_output_disable = 0; // Write only - will not be read
         uint8_t iv_drv_test_mode_supported_read_only = 0; // Read only - will not be written
         uint8_t iv_tdqs_enable = 0;
         uint8_t iv_dm_enable = 0;
-        uint8_t iv_pd_drv_imp[mr::ATTR_RANKS] = {};
 
     private:
 
