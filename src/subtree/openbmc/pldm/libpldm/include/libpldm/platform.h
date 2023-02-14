@@ -393,7 +393,11 @@ enum pldm_occurrence_rate {
 	PLDM_RATE_UNIT_PER_MILLI_SECOND,
 	PLDM_RATE_UNIT_PER_SECOND,
 	PLDM_RATE_UNIT_PER_MINUTE,
-	PLDM_RATE_UNIT_PER_HOUR
+	PLDM_RATE_UNIT_PER_HOUR,
+	PLDM_RATE_UNIT_PER_DAY,
+	PLDM_RATE_UNIT_PER_WEEK,
+	PLDM_RATE_UNIT_PER_MONTH,
+	PLDM_RATE_UNIT_PER_YEAR
 };
 
 /** @brief PLDM respository state */
@@ -522,11 +526,11 @@ struct pldm_state_effecter_pdr {
 	uint8_t possible_states[1];
 } __attribute__((packed));
 
-/** @struct pldm_compact_nummeric_sensor_pdr
+/** @struct pldm_compact_numeric_sensor_pdr
  *
- *  Structure representing PLDM compact nummeric sensor PDR
+ *  Structure representing PLDM compact numeric sensor PDR
  */
-struct pldm_compact_nummeric_sensor_pdr {
+struct pldm_compact_numeric_sensor_pdr {
 	struct pldm_pdr_hdr hdr;
 	uint16_t terminus_handle;
 	uint16_t sensor_id;
@@ -1344,7 +1348,6 @@ int decode_get_pdr_resp(const struct pldm_msg *msg, size_t payload_length,
  *         field parameter as sizeof(set_effecter_state_field) *
  *         comp_effecter_count
  *  @param[out] msg - Message will be written to this
- *  @param[in] payload_length - Length of request message payload
  *  @return pldm_completion_codes
  *  @note  Caller is responsible for memory alloc and dealloc of param
  *         'msg.payload'
@@ -1354,8 +1357,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 					 uint16_t effecter_id,
 					 uint8_t comp_effecter_count,
 					 set_effecter_state_field *field,
-					 struct pldm_msg *msg,
-					 size_t payload_length);
+					 struct pldm_msg *msg);
 
 /** @brief Decode SetStateEffecterStates response data
  *

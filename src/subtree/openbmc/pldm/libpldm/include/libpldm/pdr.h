@@ -403,15 +403,6 @@ void pldm_entity_association_pdr_extract(const uint8_t *pdr, uint16_t pdr_len,
 					 size_t *num_entities,
 					 pldm_entity **entities);
 
-/** @brief Delete record using its record handle
- *
- *  @param[in] repo - opaque pointer acting as a PDR repo handle
- *  @param[in] record_handle - record handle of input PDR record
- *  @param[in] is_remote - if true, then the PDR is not from this terminus
- */
-void pldm_delete_by_record_handle(pldm_pdr *repo, uint32_t record_handle,
-				  bool is_remote);
-
 #ifdef __cplusplus
 }
 #endif
