@@ -3788,7 +3788,6 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     uint8_t l_attr_arr[mss::ody::MAX_DIMM_PER_PORT] = {};
     uint8_t l_attr_arr_rank[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
     uint16_t l_attr_data_16 = 0;
-    uint16_t l_attr_arr_rank_16[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
     uint8_t l_en_tracking[mss::ody::MAX_RANK_PER_DIMM] = {};
     uint16_t l_uppernibbletg[mss::ody::MAX_RANK_PER_PHY] = {};
 
@@ -3804,11 +3803,11 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     io_user_input_advanced.ExtCalResVal = l_attr_data;
 
     // ODTImpedance (set to DIMM0, rank0 value)
-    FAPI_TRY(mss::attr::get_si_mc_drv_imp_dq_dqs_pull_up(i_target, l_attr_arr_rank_16));
+    FAPI_TRY(mss::attr::get_si_mc_rcv_imp_dq_dqs(i_target, l_attr_arr_rank));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
-        io_user_input_advanced.ODTImpedance[l_pstate] = l_attr_arr_rank_16[0][0];
+        io_user_input_advanced.ODTImpedance[l_pstate] = l_attr_arr_rank[0][0];
     }
 
     // ATxImpedance (set to DIMM0, rank0 value)
