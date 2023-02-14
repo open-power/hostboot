@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2022
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -36,6 +36,8 @@ EXPLORER_PATH_OCMB = ${ROOTPATH}/src/import/chips/ocmb/explorer
 EXTRAINCDIR += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/
 EXTRAINCDIR += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/lib/
 EXTRAINCDIR += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/lib/utils/
+EXTRAINCDIR += ${COMMON_PATH_OCMB}/procedures/hwp/pmic_ddr5/
+EXTRAINCDIR += ${COMMON_PATH_OCMB}/procedures/hwp/pmic_ddr5/lib/utils/
 EXTRAINCDIR += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/lib/i2c/
 EXTRAINCDIR += ${COMMON_PATH_OCMB}/include/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv/
@@ -69,11 +71,13 @@ OBJS += pmic_enable.o
 OBJS += pmic_enable_utils.o
 OBJS += pmic_common_utils.o
 OBJS += mss_pmic_attribute_accessors_manual.o
+OBJS += pmic_enable_utils_ddr5.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/perv/
 VPATH += ${EXPLORER_PATH_OCMB}/procedures/hwp/memory/
 VPATH += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/
 VPATH += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/lib/utils/
 VPATH += ${COMMON_PATH_OCMB}/procedures/hwp/pmic/lib/
+VPATH += ${COMMON_PATH_OCMB}/procedures/hwp/pmic_ddr5/lib/utils/
 
 include ${ROOTPATH}/config.mk
