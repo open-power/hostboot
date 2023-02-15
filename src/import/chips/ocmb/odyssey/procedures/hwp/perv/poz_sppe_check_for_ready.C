@@ -35,12 +35,6 @@
 
 using namespace fapi2;
 
-typedef enum
-{
-    SPPE_RUNTIME = 4,
-    SPPE_PK_BOOTED  = 0,
-} poz_sppe_boot_type_t;
-
 ReturnCode poz_sppe_check_for_ready(
     const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_target,
     const poz_sppe_boot_parms i_boot_parms)
@@ -48,15 +42,20 @@ ReturnCode poz_sppe_check_for_ready(
     FAPI_DBG("Entering ...");
 
     SB_MSG_t SB_MSG;
+    CBS_CS_t CBS_CS;
     uint32_t l_poll = 1;
 
     // calculate expected state based on input flag
     // attribute value
-    poz_sppe_boot_type_t l_boot_type = SPPE_PK_BOOTED;
+    const bool l_check_for_runtime = !(i_boot_parms.boot_flags & 0xC0000000);
 
-    if (!(i_boot_parms.boot_flags & 0xC0000000))
+    // exit early if SPPE was not started
+    FAPI_TRY(CBS_CS.getCfam(i_target));
+
+    if (CBS_CS.get_OPTION_PREVENT_SBE_START())
     {
-        l_boot_type = SPPE_RUNTIME;
+        FAPI_DBG("Skipping ready check, SBE was not started");
+        goto fapi_try_exit;
     }
 
     // loop until expected state is reached or we've
@@ -70,7 +69,8 @@ ReturnCode poz_sppe_check_for_ready(
         // sample register, break if expected bit is set
         FAPI_TRY(SB_MSG.getCfam(i_target));
 
-        if (SB_MSG.getBit(l_boot_type))
+        if ((l_check_for_runtime and SB_MSG.getBits<8, 4>() == 3) or
+            (not l_check_for_runtime and SB_MSG.getBit<0>()))
         {
             break;
         }
@@ -83,7 +83,7 @@ ReturnCode poz_sppe_check_for_ready(
                     fapi2::POZ_SPPE_NOT_READY_ERR()
                     .set_TARGET(i_target)
                     .set_SB_MSG(SB_MSG())
-                    .set_BOOT_TYPE(l_boot_type),
+                    .set_BOOT_TYPE(l_check_for_runtime),
                     "SPPE did not reach expected state prior to timeout!");
     }
 
