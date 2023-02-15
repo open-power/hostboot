@@ -63,10 +63,9 @@ const std::vector< std::pair<uint8_t , uint8_t> > throttle_traits<mss::mc_type::
 
 const std::vector< std::pair<uint8_t , uint8_t> > throttle_traits<mss::mc_type::ODYSSEY>::DIMM_ATTACHED_MAP =
 {
-    {0, 0b00},
     {1, 0b01},
     {2, 0b10},
-    {ANY_ATTACHED, 0b11},
+    {ANY_ATTACHED, 0b00}
 };
 
 ///

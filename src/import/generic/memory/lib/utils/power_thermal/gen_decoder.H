@@ -178,9 +178,10 @@ struct is_match
     ///@param[in] i_safemode_throttles check dimm count only in the case of safemode throttles calculation
     ///
     is_match(const uint32_t i_gen_key, const uint8_t i_safemode_throttles) : iv_gen_key(i_gen_key),
-        iv_safemode_throttles(i_safemode_throttles)  {}
+        iv_safemode_throttles(i_safemode_throttles) {}
     const fapi2::buffer<uint32_t> iv_gen_key;
     const uint8_t iv_safemode_throttles;
+
 
     ///
     ///@brief Boolean compare used for find_if function
@@ -361,7 +362,6 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, const uint8_t i_
         l_mask.setBit<TT::DRAM_MFGID_START, TT::DRAM_MFGID_LEN>();
     }
 
-
     if (TT::MC_TARGET_TYPE == fapi2::TARGET_TYPE_MCS)
     {
         //NUM DROPS PER PORT wildcard
@@ -399,7 +399,6 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, const uint8_t i_
         {
             l_mask.setBit<TT::DIMM_ATTACHED_START, TT::DIMM_ATTACHED_LEN>();
         }
-
 
         // If reading safemode throttles, check for dimm count
         if (i_safemode_throttles)
@@ -607,6 +606,7 @@ fapi2::ReturnCode decoder<MC, TT>::generate_encoding(const uint8_t i_safemode_th
              "Failed to generate power thermal encoding for %s val %d on target: %s",
              "DIMM_ATTACHED", iv_kind.iv_attached_dimm_count, mss::c_str(iv_kind.iv_target) );
 
+
     if (TT::MC_TARGET_TYPE == fapi2::TARGET_TYPE_MCS)
     {
         //NUM DROPS PER PORT
@@ -655,7 +655,6 @@ fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uin
         OT& o_value)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-
     // Find iterator to matching key (if it exists)
     auto l_value_iterator  =  std::find_if(i_array.begin(),
                                            i_array.end(),

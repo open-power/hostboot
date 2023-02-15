@@ -593,7 +593,7 @@
     </description>
     <valueType>uint64</valueType>
     <mssUnits>cW</mssUnits>
-    <default>0xFFFFFC3009C40000</default>
+    <default>0xFFFFFC0009C40000</default>
     <array>25</array>
     <platInit/>
     <mssAccessorName>mrw_ocmb_thermal_memory_power_limit</mssAccessorName>
@@ -624,7 +624,7 @@
     </description>
     <valueType>uint64</valueType>
     <mssUnits>cW</mssUnits>
-    <default>0xFFFFFC3004620000</default>
+    <default>0xFFFFFC0004620000</default>
     <array>50</array>
     <platInit/>
     <mssAccessorName>mrw_ocmb_pwr_slope</mssAccessorName>
@@ -662,7 +662,7 @@
     </description>
     <valueType>uint64</valueType>
     <mssUnits>cW/utilization</mssUnits>
-    <default>0xFFFFFC3005260000</default>
+    <default>0xFFFFFC0005260000</default>
     <array>50</array>
     <platInit/>
     <mssAccessorName>mrw_ocmb_pwr_intercept</mssAccessorName>
@@ -700,7 +700,7 @@
     </description>
     <valueType>uint64</valueType>
     <mssUnits>dA, cA/utilization, cA</mssUnits>
-    <default>0xFFFFFC3064152094</default>
+    <default>0xFFFFFC0064152094</default>
     <array>25</array>
     <platInit/>
     <mssAccessorName>mrw_ocmb_current_curve_with_limit</mssAccessorName>
@@ -895,7 +895,7 @@
     <valueType>uint64</valueType>
     <platInit/>
     <array>50</array>
-    <default>0xFFFFFFF009C40000</default>
+    <default>0xFFFFFFC009C40000</default>
     <mssAccessorName>mrw_ocmb_safemode_util_array</mssAccessorName>
   </attribute>
 
