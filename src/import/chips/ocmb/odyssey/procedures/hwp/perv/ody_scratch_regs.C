@@ -174,7 +174,7 @@ fapi2::ReturnCode ody_scratch_regs_update(
         uint32_t l_freq_link_mhz = 0;
 
         // Host call (ody_sppe_config_update) will always invoke this code block to fill the PLL bucket
-        // request.  DO NOT fill the PLL frequency field in the mailbox, this will be written by the SPPE side.
+        // request.  DO NOT fill the PLL frequency field in the mailbox, this will be written by the SPPE (cmdtable).
         // Go ahead and init the host platform attribute state for the OCMB PLL bucket and OMI link frequency.
 #ifndef __PPE__
         {
@@ -186,17 +186,13 @@ fapi2::ReturnCode ody_scratch_regs_update(
 #endif
         // SPPE call (ody_sppe_attr_setup) will run this code ONLY if the host does not fill
         // the mailbox (marking it valid).  We will additionally compute the PLL feedback in this case
-        // and fill the mailbox -- I don't think this code path can reliably used to boot Odyssey HW
+        // and fill the mailbox -- I don't think this code path can reliably be used to boot Odyssey HW
         // at an arbitrary frequency (from the last boot, say) since the scratch attributes are not written
         // into the mailbox register until after the cmdtable HWPs run which consume them, but SPPE simics
         // testing appears to rely on this.
         FAPI_DBG("Reading ATTR_OCMB_PLL_BUCKET");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_PLL_BUCKET, i_target, l_ocmb_pll_bucket));
         l_scratch6_reg.insertFromRight<ATTR_OCMB_PLL_BUCKET_STARTBIT, ATTR_OCMB_PLL_BUCKET_LENGTH>(l_ocmb_pll_bucket);
-
-        FAPI_DBG("Reading ATTR_FREQ_OMI_MHZ");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, i_target, l_freq_link_mhz));
-        l_scratch6_reg.insertFromRight<ATTR_OCMB_PLL_FREQ_STARTBIT, ATTR_OCMB_PLL_FREQ_LENGTH>(l_freq_link_mhz);
 
 #ifdef __PPE__
         {
