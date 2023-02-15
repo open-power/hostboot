@@ -38,7 +38,6 @@
     <ffdc>TARGET_MC</ffdc>
     <ffdc>TIMEOUT</ffdc>
     <ffdc>DATA_REG</ffdc>
-    <ffdc>ERROR_REG</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_DTS_ERROR</id>
       <targetType>TARGET_TYPE_PERV</targetType>
