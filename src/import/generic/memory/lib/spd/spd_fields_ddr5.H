@@ -140,6 +140,117 @@ class fields<DDR5, BASE_CNFG>
             // Byte 33
             TRCD_MIN_MSB_START = 0,
             TRCD_MIN_MSB_LEN   = 8,
+            // Byte 34
+            TRP_MIN_LSB_START = 0,
+            TRP_MIN_LSB_LEN   = 8,
+            // Byte 35
+            TRP_MIN_MSB_START = 0,
+            TRP_MIN_MSB_LEN   = 8,
+            // Byte 36
+            TRAS_MIN_LSB_START = 0,
+            TRAS_MIN_LSB_LEN   = 8,
+            // Byte 37
+            TRAS_MIN_MSB_START = 0,
+            TRAS_MIN_MSB_LEN   = 8,
+            // Byte 38
+            TRC_MIN_LSB_START = 0,
+            TRC_MIN_LSB_LEN   = 8,
+            // Byte 39
+            TRC_MIN_MSB_START = 0,
+            TRC_MIN_MSB_LEN   = 8,
+            // Byte 40
+            TWR_MIN_LSB_START = 0,
+            TWR_MIN_LSB_LEN   = 8,
+            // Byte 41
+            TWR_MIN_MSB_START = 0,
+            TWR_MIN_MSB_LEN   = 8,
+            // Byte 42
+            TRFC_SLR_MIN_LSB_START = 0,
+            TRFC_SLR_MIN_LSB_LEN   = 8,
+            // Byte 43
+            TRFC_SLR_MIN_MSB_START = 0,
+            TRFC_SLR_MIN_MSB_LEN   = 8,
+            // Byte 44
+            TRFC_SLR2_MIN_LSB_START = 0,
+            TRFC_SLR2_MIN_LSB_LEN   = 8,
+            // Byte 45
+            TRFC_SLR2_MIN_MSB_START = 0,
+            TRFC_SLR2_MIN_MSB_LEN   = 8,
+            // Byte 48
+            TRFC_DLR_MIN_LSB_START = 0,
+            TRFC_DLR_MIN_LSB_LEN   = 8,
+            // Byte 49
+            TRFC_DLR_MIN_MSB_START = 0,
+            TRFC_DLR_MIN_MSB_LEN   = 8,
+            // Byte 50
+            TRFC_DLR2_MIN_LSB_START = 0,
+            TRFC_DLR2_MIN_LSB_LEN   = 8,
+            // Byte 51
+            TRFC_DLR2_MIN_MSB_START = 0,
+            TRFC_DLR2_MIN_MSB_LEN   = 8,
+            // Byte 70
+            TRRD_L_MIN_LSB_START   = 0,
+            TRRD_L_MIN_LSB_LEN     = 8,
+            // Byte 71
+            TRRD_L_MIN_MSB_START   = 0,
+            TRRD_L_MIN_MSB_LEN     = 8,
+            // Byte 72
+            TRRD_L_MIN_CLOCK_START = 0,
+            TRRD_L_MIN_CLOCK_LEN   = 8,
+            // Byte 73
+            TCCD_L_MIN_LSB_START   = 0,
+            TCCD_L_MIN_LSB_LEN     = 8,
+            // Byte 74
+            TCCD_L_MIN_MSB_START   = 0,
+            TCCD_L_MIN_MSB_LEN     = 8,
+            // Byte 75
+            TCCD_L_MIN_CLOCK_START = 0,
+            TCCD_L_MIN_CLOCK_LEN   = 8,
+            // Byte 76
+            TCCD_L_WR_MIN_LSB_START   = 0,
+            TCCD_L_WR_MIN_LSB_LEN     = 8,
+            // Byte 77
+            TCCD_L_WR_MIN_MSB_START   = 0,
+            TCCD_L_WR_MIN_MSB_LEN     = 8,
+            // Byte 78
+            TCCD_L_WR_MIN_CLOCK_START = 0,
+            TCCD_L_WR_MIN_CLOCK_LEN   = 8,
+            // Byte 82
+            TFAW_MIN_LSB_START   = 0,
+            TFAW_MIN_LSB_LEN     = 8,
+            // Byte 83
+            TFAW_MIN_MSB_START   = 0,
+            TFAW_MIN_MSB_LEN     = 8,
+            // Byte 84
+            TFAW_MIN_CLOCK_START = 0,
+            TFAW_MIN_CLOCK_LEN   = 8,
+            // Byte 85
+            TWTR_L_MIN_LSB_START   = 0,
+            TWTR_L_MIN_LSB_LEN     = 8,
+            // Byte 86
+            TWTR_L_MIN_MSB_START   = 0,
+            TWTR_L_MIN_MSB_LEN     = 8,
+            // Byte 87
+            TWTR_L_MIN_CLOCK_START = 0,
+            TWTR_L_MIN_CLOCK_LEN   = 8,
+            // Byte 88
+            TWTR_S_MIN_LSB_START   = 0,
+            TWTR_S_MIN_LSB_LEN     = 8,
+            // Byte 89
+            TWTR_S_MIN_MSB_START   = 0,
+            TWTR_S_MIN_MSB_LEN     = 8,
+            // Byte 90
+            TWTR_S_MIN_CLOCK_START = 0,
+            TWTR_S_MIN_CLOCK_LEN   = 8,
+            // Byte 91
+            TRTP_MIN_LSB_START   = 0,
+            TRTP_MIN_LSB_LEN     = 8,
+            // Byte 92
+            TRTP_MIN_MSB_START   = 0,
+            TRTP_MIN_MSB_LEN     = 8,
+            // Byte 93
+            TRTP_MIN_CLOCK_START = 0,
+            TRTP_MIN_CLOCK_LEN   = 8,
 
             //////////////////////////////////////
             //// Bytes 230-236: module information
@@ -219,6 +330,43 @@ class fields<DDR5, BASE_CNFG>
         static constexpr mss::field_t<mss::endian::LITTLE> TAA_MIN_MSB{31, TAA_MIN_MSB_START, TAA_MIN_MSB_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> TRCD_MIN_LSB{32, TRCD_MIN_LSB_START, TRCD_MIN_LSB_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> TRCD_MIN_MSB{33, TRCD_MIN_MSB_START, TRCD_MIN_MSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRP_MIN_LSB{34, TRP_MIN_LSB_START, TRP_MIN_LSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRP_MIN_MSB{35, TRP_MIN_MSB_START, TRP_MIN_MSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRAS_MIN_LSB{36, TRAS_MIN_LSB_START, TRAS_MIN_LSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRAS_MIN_MSB{37, TRAS_MIN_MSB_START, TRAS_MIN_MSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRC_MIN_LSB{38, TRC_MIN_LSB_START, TRC_MIN_LSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRC_MIN_MSB{39, TRC_MIN_MSB_START, TRC_MIN_MSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TWR_MIN_LSB{40, TWR_MIN_LSB_START, TWR_MIN_LSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TWR_MIN_MSB{41, TWR_MIN_MSB_START, TWR_MIN_MSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRFC_SLR_MIN_LSB{42, TRFC_SLR_MIN_LSB_START, TRFC_SLR_MIN_LSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRFC_SLR_MIN_MSB{43, TRFC_SLR_MIN_MSB_START, TRFC_SLR_MIN_MSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRFC_SLR2_MIN_LSB{44, TRFC_SLR_MIN_LSB_START, TRFC_SLR_MIN_LSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRFC_SLR2_MIN_MSB{45, TRFC_SLR_MIN_MSB_START, TRFC_SLR_MIN_MSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRFC_DLR_MIN_LSB{48, TRFC_DLR_MIN_LSB_START, TRFC_DLR_MIN_LSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRFC_DLR_MIN_MSB{49, TRFC_DLR_MIN_MSB_START, TRFC_DLR_MIN_MSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRFC_DLR2_MIN_LSB{50, TRFC_DLR_MIN_LSB_START, TRFC_DLR_MIN_LSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRFC_DLR2_MIN_MSB{51, TRFC_DLR_MIN_MSB_START, TRFC_DLR_MIN_MSB_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRRD_L_MIN_LSB{70, TRRD_L_MIN_LSB_START  , TRRD_L_MIN_LSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TRRD_L_MIN_MSB{71, TRRD_L_MIN_MSB_START  , TRRD_L_MIN_MSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TRRD_L_MIN_CLOCK{72, TRRD_L_MIN_CLOCK_START, TRRD_L_MIN_CLOCK_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TCCD_L_MIN_LSB{73, TCCD_L_MIN_LSB_START  , TCCD_L_MIN_LSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TCCD_L_MIN_MSB{74, TCCD_L_MIN_MSB_START  , TCCD_L_MIN_MSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TCCD_L_MIN_CLOCK{75, TCCD_L_MIN_CLOCK_START, TCCD_L_MIN_CLOCK_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TCCD_L_WR_MIN_LSB{76, TCCD_L_WR_MIN_LSB_START  , TCCD_L_WR_MIN_LSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TCCD_L_WR_MIN_MSB{77, TCCD_L_WR_MIN_MSB_START  , TCCD_L_WR_MIN_MSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TCCD_L_WR_MIN_CLOCK{78, TCCD_L_WR_MIN_CLOCK_START, TCCD_L_WR_MIN_CLOCK_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TFAW_MIN_LSB{82, TFAW_MIN_LSB_START  , TFAW_MIN_LSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TFAW_MIN_MSB{83, TFAW_MIN_MSB_START  , TFAW_MIN_MSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TFAW_MIN_CLOCK{84, TFAW_MIN_CLOCK_START, TFAW_MIN_CLOCK_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TWTR_L_MIN_LSB{85, TWTR_L_MIN_LSB_START  , TWTR_L_MIN_LSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TWTR_L_MIN_MSB{86, TWTR_L_MIN_MSB_START  , TWTR_L_MIN_MSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TWTR_L_MIN_CLOCK{87, TWTR_L_MIN_CLOCK_START, TWTR_L_MIN_CLOCK_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TWTR_S_MIN_LSB{88, TWTR_S_MIN_LSB_START  , TWTR_S_MIN_LSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TWTR_S_MIN_MSB{89, TWTR_S_MIN_MSB_START  , TWTR_S_MIN_MSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TWTR_S_MIN_CLOCK{90, TWTR_S_MIN_CLOCK_START, TWTR_S_MIN_CLOCK_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> TRTP_MIN_LSB{91, TRTP_MIN_LSB_START  , TRTP_MIN_LSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TRTP_MIN_MSB{92, TRTP_MIN_MSB_START  , TRTP_MIN_MSB_LEN  };
+        static constexpr mss::field_t<mss::endian::LITTLE> TRTP_MIN_CLOCK{93, TRTP_MIN_CLOCK_START, TRTP_MIN_CLOCK_LEN};
 
         //////////////////////////////////////
         //// Bytes 230-236: module information

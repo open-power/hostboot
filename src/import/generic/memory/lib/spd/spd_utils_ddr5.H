@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,8 @@
 #include <fapi2.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/num.H>
+#include <generic/memory/lib/utils/conversions.H>
+#include <mss_generic_attribute_getters.H>
 
 namespace mss
 {
@@ -286,6 +288,115 @@ fapi2::ReturnCode get_nck_with_lower_clock_limit(
     const uint64_t i_tck_in_ps,
     uint8_t& o_time_in_nck );
 
+///
+/// @brief A helper to facilitate processing two-byte SPD timing fields
+///
+/// @tparam T the type of the output variable to process
+/// @param[in] i_port port target
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
+/// @param[in] i_start_byte the starting SPD byte to process for this two byte field
+/// @param[in] i_ffdc the ffdc code for this byte
+/// @param[out] o_timing_ck the computed timing value in clock cycles
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+template<typename T>
+fapi2::ReturnCode process_two_byte_timing_nck( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+        const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+        const std::vector<uint8_t>& i_spd,
+        const uint64_t i_start_byte,
+        const generic_ffdc_codes i_ffdc,
+        T& o_timing_ck)
+{
+    o_timing_ck = 0;
+    uint64_t l_timing_in_ps = 0;
+
+    // First up, grab the value of tCK in picoseconds for this frequency
+    uint64_t l_freq = 0;
+    uint64_t l_tck_in_ps = 0;
+    FAPI_TRY(mss::attr::get_freq(i_port, l_freq));
+    FAPI_TRY(mss::freq_to_ps(l_freq, l_tck_in_ps));
+
+    // Now grab the timing value in picoseconds
+    FAPI_TRY(mss::spd::ddr5::get_timing(i_dimm, i_spd, i_start_byte, i_ffdc, l_timing_in_ps));
+
+    // Finally, convert the timing from picoseconds to clock cycles
+    FAPI_TRY(mss::spd::ddr5::calc_nck(i_ffdc, l_timing_in_ps, l_tck_in_ps, o_timing_ck));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief A helper to facilitate processing three-byte SPD timing fields
+///
+/// @tparam T the type of the output variable to process
+/// @param[in] i_port port target
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
+/// @param[in] i_start_byte the starting SPD byte to process for this two byte field
+/// @param[in] i_ffdc the ffdc code for this byte
+/// @param[out] o_timing_ck the computed timing value in clock cycles
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+template<typename T>
+fapi2::ReturnCode process_three_byte_timing_nck( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+        const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+        const std::vector<uint8_t>& i_spd,
+        const uint64_t i_start_byte,
+        const generic_ffdc_codes i_ffdc,
+        T& o_timing_ck)
+{
+    o_timing_ck = 0;
+
+    // First up, grab the value of tCK in picoseconds for this frequency
+    uint64_t l_freq = 0;
+    uint64_t l_tck_in_ps = 0;
+    FAPI_TRY(mss::attr::get_freq(i_port, l_freq));
+    FAPI_TRY(mss::freq_to_ps(l_freq, l_tck_in_ps));
+
+    // Finally, do the three byte calculation
+    FAPI_TRY(mss::spd::ddr5::get_nck_with_lower_clock_limit(i_dimm, i_spd, i_start_byte, i_ffdc, l_tck_in_ps,
+             o_timing_ck));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief A helper to process TRFC values, which depend upon the refresh mode
+///
+/// @param[in] i_port port target
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
+/// @param[in] i_start_byte the starting SPD byte to process for this two byte field
+/// @param[in] i_ffdc the ffdc code for this byte
+/// @param[in] i_refresh_mode the refresh mode for this system
+/// @param[out] o_timing_ck the computed timing value in clock cycles
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note This is largely for unit testing. the refresh mode is an MRW which cannot be changed
+///
+fapi2::ReturnCode process_trfc_nck( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                                    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                                    const std::vector<uint8_t>& i_spd,
+                                    const uint64_t i_start_byte,
+                                    const generic_ffdc_codes i_ffdc,
+                                    const uint8_t i_refresh_mode,
+                                    uint16_t& o_timing_ck);
+
+///
+/// @brief A helper to process TREFI values, which depend upon the refresh mode
+///
+/// @param[in] i_port port target
+/// @param[in] i_refresh_mode the refresh mode for this system
+/// @param[out] o_timing_ck the computed timing value in clock cycles
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note This is largely for unit testing. the refresh mode is an MRW which cannot be changed
+///
+fapi2::ReturnCode process_trefi_nck( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                                     const uint8_t i_refresh_mode,
+                                     uint16_t& o_timing_ck);
 }// ddr5
 
 }// spd

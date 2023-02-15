@@ -42,6 +42,7 @@
 #include <generic/memory/lib/spd/spd_field.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
 #include <generic/memory/lib/utils/find.H>
+#include <mss_generic_attribute_getters.H>
 
 namespace mss
 {
@@ -131,8 +132,8 @@ fapi2::ReturnCode get_timing(
                     set_VALUE(l_buffer).
                     set_FUNCTION(i_ffdc_codes).
                     set_DIMM_TARGET(i_target),
-                    "%s. timing is 0 in the SPD, which is invalid",
-                    spd::c_str(i_target));
+                    "%s. timing is 0 in the SPD for byte %u, which is invalid",
+                    spd::c_str(i_target), i_start_byte);
         o_time_in_ps = l_buffer;
     }
 
@@ -223,8 +224,8 @@ fapi2::ReturnCode get_nck_for_timing_helper(
                     set_VALUE(l_timing_byte).
                     set_FUNCTION(i_ffdc_codes).
                     set_DIMM_TARGET(i_target),
-                    "%s. timing is 0 in the SPD, which is invalid",
-                    spd::c_str(i_target));
+                    "%s. timing is 0 in the SPD for byte:%u, which is invalid",
+                    spd::c_str(i_target), l_timing_byte);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -265,7 +266,86 @@ fapi2::ReturnCode get_nck_with_lower_clock_limit(
     FAPI_TRY(get_nck_for_timing_helper(i_dimm, i_spd, i_start_byte, i_ffdc_codes, l_spd_nck ));
 
     // The timing is the worst case between the calculated timing in nCK and the lower clock limit value provided in the SPD
-    o_time_in_nck = std::min(l_calculated_nck, l_spd_nck);
+    o_time_in_nck = std::max(l_calculated_nck, l_spd_nck);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief A helper to process TRFC values, which depend upon the refresh mode
+///
+/// @param[in] i_port port target
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
+/// @param[in] i_start_byte the starting SPD byte to process for this two byte field
+/// @param[in] i_ffdc the ffdc code for this byte
+/// @param[in] i_refresh_mode the refresh mode for this system
+/// @param[out] o_timing_ck the computed timing value in clock cycles
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note This is largely for unit testing. the refresh mode is an MRW which cannot be changed
+///
+fapi2::ReturnCode process_trfc_nck( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                                    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                                    const std::vector<uint8_t>& i_spd,
+                                    const uint64_t i_start_byte,
+                                    const generic_ffdc_codes i_ffdc,
+                                    const uint8_t i_refresh_mode,
+                                    uint16_t& o_timing_ck)
+{
+    // The refresh modes are offset by 2 bytes for the fine refresh mode
+    constexpr uint64_t REFRESH_MODE_BYTE_OFFSET = 2;
+    const auto START_BYTE = i_refresh_mode == fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL ? i_start_byte :
+                            i_start_byte + REFRESH_MODE_BYTE_OFFSET;
+
+    o_timing_ck = 0;
+    uint64_t l_timing_in_ns = 0;
+    uint64_t l_timing_in_ps = 0;
+
+    // First up, grab the value of tCK in picoseconds for this frequency
+    uint64_t l_freq = 0;
+    uint64_t l_tck_in_ps = 0;
+    FAPI_TRY(mss::attr::get_freq(i_port, l_freq));
+    FAPI_TRY(mss::freq_to_ps(l_freq, l_tck_in_ps));
+
+    // Now grab the timing value in NANOseconds -> this is why we can't use the helper function
+    FAPI_TRY(mss::spd::ddr5::get_timing(i_dimm, i_spd, START_BYTE, i_ffdc, l_timing_in_ns));
+    l_timing_in_ps = l_timing_in_ns * CONVERT_PS_IN_A_NS;
+
+    // Finally, convert the timing from picoseconds to clock cycles
+    FAPI_TRY(mss::spd::ddr5::calc_nck(i_ffdc, l_timing_in_ps, l_tck_in_ps, o_timing_ck));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief A helper to process TREFI values, which depend upon the refresh mode
+///
+/// @param[in] i_port port target
+/// @param[in] i_refresh_mode the refresh mode for this system
+/// @param[out] o_timing_ck the computed timing value in clock cycles
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note This is largely for unit testing. the refresh mode is an MRW which cannot be changed
+///
+fapi2::ReturnCode process_trefi_nck( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                                     const uint8_t i_refresh_mode,
+                                     uint16_t& o_timing_ck)
+{
+    // Grab the appropriate TREFI based upon the refresh mode - taken from 4.13.5 in JEDEC spec rev 1.7.1
+    constexpr uint64_t TREFI1_PS = 3900000;
+    constexpr uint64_t TREFI2_PS = 1950000;
+    const auto TREFI_PS = i_refresh_mode == fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL ? TREFI1_PS :
+                          TREFI2_PS;
+
+    // Grab the value of tCK in picoseconds for this frequency
+    uint64_t l_freq = 0;
+    uint64_t l_tck_in_ps = 0;
+    FAPI_TRY(mss::attr::get_freq(i_port, l_freq));
+    FAPI_TRY(freq_to_ps(l_freq, l_tck_in_ps));
+
+    // Compute the value
+    FAPI_TRY(mss::spd::ddr5::calc_nck(generic_ffdc_codes::SET_DRAM_TREFI, TREFI_PS, l_tck_in_ps, o_timing_ck));
 
 fapi_try_exit:
     return fapi2::current_err;

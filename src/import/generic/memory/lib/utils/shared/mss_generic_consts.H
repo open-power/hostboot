@@ -273,6 +273,7 @@ enum generic_ffdc_codes : uint16_t
     SET_DRAM_TWTR_S = 0x1089,
     SET_DRAM_TFAW = 0x108A,
     SET_DRAM_TRCD = 0x108B,
+    SET_DRAM_TRC = TRCMIN,
     SET_DRAM_TRP = 0x108C,
     SET_DRAM_TRAS = 0x108D,
     SET_DRAM_TWR = 0x108E,
@@ -444,6 +445,8 @@ enum generic_ffdc_codes : uint16_t
 
     SET_DRAM_DFE_GAIN_BIAS = 0x1108,
     SET_DRAM_DFE_GAIN_BIAS_SIGN = 0x1109,
+
+    SET_DRAM_TCCD_L_WR = 0x10E3,
 
 };
 
