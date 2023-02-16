@@ -164,7 +164,7 @@ fapi2::ReturnCode ody_omi_hss_dccal_start(const fapi2::Target<fapi2::TARGET_TYPE
         FAPI_TRY(l_ppe_common.fast_mode(i_target, l_num_threads));
     }
 
-    FAPI_DBG("ody_omi_hss_dccal_start calling l_ppe.bist_start");
+    FAPI_DBG("ody_omi_hss_dccal_start calling l_ppe.ext_cmd_start");
     FAPI_TRY(l_ppe_common.ext_cmd_start(i_target, l_num_threads, l_rx_lanes, l_tx_lanes, l_cmd));
     FAPI_TRY(l_ppe_regs.flushCache(i_target));
 

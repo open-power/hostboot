@@ -40,8 +40,7 @@
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
-fapi2::ReturnCode ody_omi_hss_bist_poll(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                        fapi2::buffer<uint64_t> i_ext_cmd_override)
+fapi2::ReturnCode ody_omi_hss_bist_poll(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     FAPI_DBG("HWP Start: ody_omi_hss_bist_poll");
 
@@ -52,10 +51,11 @@ fapi2::ReturnCode ody_omi_hss_bist_poll(const fapi2::Target<fapi2::TARGET_TYPE_O
     ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
 
     const fapi2::buffer<uint64_t> l_num_threads = 1;
+    const fapi2::buffer<uint64_t> l_ext_cmd_override = 0;
     fapi2::buffer<uint64_t> l_done = 0;
     fapi2::buffer<uint64_t> l_fail = 0;
 
-    FAPI_TRY(l_ppe_common.bist_poll(i_target, l_num_threads, l_done, l_fail, i_ext_cmd_override));
+    FAPI_TRY(l_ppe_common.bist_poll(i_target, l_num_threads, l_done, l_fail, l_ext_cmd_override));
 
     FAPI_ASSERT(l_done && !l_fail,
                 fapi2::IO_PPE_DONE_POLL_FAILED()

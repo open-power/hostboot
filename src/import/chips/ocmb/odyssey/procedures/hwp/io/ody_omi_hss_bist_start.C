@@ -40,8 +40,7 @@
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
-fapi2::ReturnCode ody_omi_hss_bist_start(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        fapi2::buffer<uint64_t> i_ext_cmd_override)
+fapi2::ReturnCode ody_omi_hss_bist_start(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     FAPI_DBG("HWP Start: ody_omi_hss_bist_start");
 
@@ -54,11 +53,12 @@ fapi2::ReturnCode ody_omi_hss_bist_start(const fapi2::Target<fapi2::TARGET_TYPE_
     uint32_t l_rx_lanes = 0;
     uint32_t l_tx_lanes = 0;
     const fapi2::buffer<uint64_t> l_num_threads = 1;
+    const fapi2::buffer<uint64_t> l_ext_cmd_override = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LANES, i_target, l_rx_lanes));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_LANES, i_target, l_tx_lanes));
 
-    FAPI_TRY(l_ppe_common.bist_start(i_target, l_num_threads, l_rx_lanes, l_tx_lanes, i_ext_cmd_override));
+    FAPI_TRY(l_ppe_common.bist_start(i_target, l_num_threads, l_rx_lanes, l_tx_lanes, l_ext_cmd_override));
     FAPI_TRY(l_ppe_regs.flushCache(i_target));
 
 fapi_try_exit:
