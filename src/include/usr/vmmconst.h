@@ -108,7 +108,11 @@
 #define VMM_DEBUG_COMM_SIZE (32 * KILOBYTE)
 #define VMM_VADDR_DEBUG_COMM_END (VMM_VADDR_DEBUG_COMM + VMM_DEBUG_COMM_SIZE)
 
+/* HBRT Section size is defined by the pnor layout xml. Currently set to 12MB. Should that change, this size should
+   reflect those changes */
 #define VMM_VADDR_HBRT_TEST_AREA (VMM_VADDR_DEBUG_COMM_END)
+#define VMM_HBRT_TEST_SIZE (12 * MEGABYTE)
+#define VMM_VADDR_HBRT_TEST_AREA_END (VMM_VADDR_HBRT_TEST_AREA + VMM_HBRT_TEST_SIZE)
 
 /** Virtual address space for WOF Tables - 32GB for 50MB */
 #define VMM_VADDR_WOFDATA_LID  (32 * GIGABYTE)
