@@ -87,6 +87,11 @@ fapi2::ReturnCode ody_omi_hss_ppe_load(
     {
         l_invalid = true;
     }
+
+//TODO: Temporarily remove to expedite SBE code developments.
+//      Need to re-instate before merge.
+#if 0
+
     // IOPPE_BASE_IMAGE
     else if (i_type == IO_PPE_Image_Type_t::IOPPE_BASE_IMAGE)
     {
@@ -105,10 +110,11 @@ fapi2::ReturnCode ody_omi_hss_ppe_load(
         }
     }
 
+#endif
+
     FAPI_ASSERT( !l_invalid,
                  fapi2::ODY_IO_LOAD_PPE_IMG_ERROR()
                  .set_TARGET(i_target)
-                 .set_IMAGE_DATA(i_img_data)
                  .set_IMAGE_SIZE(i_img_size)
                  .set_OFFSET(i_offset)
                  .set_IMAGE_TYPE(i_type),
