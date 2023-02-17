@@ -305,6 +305,17 @@ inline mss::pmic::id get_relative_pmic_id(const fapi2::Target<fapi2::TARGET_TYPE
     return static_cast<mss::pmic::id>(mss::index(i_pmic_target) % CONSTS::NUM_PRIMARY_PMICS);
 }
 
+///
+/// @brief Check number of pmics received for 2U. If < 2, then throw an error
+///
+/// @param[in] i_ocmb_target OCMB target parent of PMICs
+/// @param[in] i_pmics_size number of PMIC received
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_number_pmics_received_2u(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const uint8_t i_pmics_size);
+
 namespace status
 {
 

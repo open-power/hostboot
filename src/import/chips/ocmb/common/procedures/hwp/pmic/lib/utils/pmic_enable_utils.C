@@ -1526,6 +1526,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
 ///
 /// @brief Enable PMIC for 1U/2U
 ///
@@ -1544,6 +1545,8 @@ fapi2::ReturnCode enable_1u_2u(
 
     // We're guaranteed to have at least one PMIC here due to the check in pmic_enable
     auto l_current_pmic = l_pmics[0];
+
+    FAPI_TRY(mss::pmic::check_number_pmics_received_2u(i_ocmb_target, l_pmics.size()));
 
     // Now the PMICs are in the right order of DIMM and the right order by their defined SPD sequence within each dimm
     // Let's kick off the enables

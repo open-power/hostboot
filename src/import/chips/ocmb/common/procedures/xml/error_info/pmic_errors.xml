@@ -460,6 +460,28 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_INVALID_2U_PMIC_TARGET_CONFIG</rc>
+    <description>
+       Expected to see 2 PMICs for 2U on the provided OCMB_TARGET in order to
+       properly perform pmic_enable.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>NUM_PMICS</ffdc>
+    <ffdc>EXPECTED_PMICS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_INVALID_PMIC_DT_DDR5_TARGET_CONFIG</rc>
     <description>
        Expected at least 3 PMICs and 3 DTs in order to properly perform DDR5 4U pmic_enable.
