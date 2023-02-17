@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -198,6 +198,32 @@ inline fapi2::ReturnCode swizzle( const uint64_t i_destination_start,
     // We subtract out an additonal 1 to account for bits being from 0 to N-1
     const auto l_source_data_start = get_bit_length<SB>() - (i_source_start + 1);
     return io_destination.insert(SB(l_tmp), i_destination_start, i_length, l_source_data_start);
+}
+
+/// @brief Extract a nibble from a buffer
+/// @tparam IT Input Type
+/// @tparam OT Output Type
+/// @param[in] i_buffer
+/// @param[in] i_start_bit the start bit to extract from
+/// @param[out] o_output the extracted nibble - right justified
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful, otherwise platform FFDC
+template<typename IT, typename OT>
+fapi2::ReturnCode extract_nibble(const fapi2::buffer<IT>& i_buffer, const size_t i_start_bit, OT& o_output)
+{
+    return i_buffer.extractToRight(o_output, i_start_bit, BITS_PER_NIBBLE);
+}
+
+/// @brief Extract a nibble from a buffer
+/// @tparam IT Input Type
+/// @tparam SB Start Bit
+/// @param[in] i_buffer the input buffer
+/// @return OT the extracted nibble - right justified
+template<size_t SB, typename IT>
+inline IT extract_nibble(const fapi2::buffer<IT>& i_buffer)
+{
+    IT l_output = 0;
+    i_buffer.extractToRight<SB, BITS_PER_NIBBLE>(l_output);
+    return l_output;
 }
 
 } // ns mss
