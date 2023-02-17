@@ -1001,9 +1001,23 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             break;
         }
 
+        // For the SPIRA there are two cases to consider. There is a Legacy SPIRA pointer and the SPIRA-H and SPIRA-S
+        // pair. It's valid to have one or the other. If this function is called to look for one that this system does
+        // not have then we should not try to verify that address because it won't exist and will just generate an
+        // error. The HDAT testcases need to look for both options to know what it's working with.
         if ((i_section == RUNTIME::SPIRA_L) && (iv_spiraL == nullptr) && (iv_spiraS != nullptr))
         {
+            // Called to look for Legacy SPIRA and we didn't find it but the SPIRA S/H pair exist. No reason to fail.
+            // Emit a trace and move on.
             TRACFCOMP ( g_trac_runtime, "getHostDataSection> SPIRA L not found, but SPIRA S is not null. "
+                       "Skip verifying hdat address.");
+        }
+        else if (((i_section == RUNTIME::SPIRA_S) && (iv_spiraS == nullptr) && (iv_spiraL != nullptr))
+                 || ((i_section == RUNTIME::SPIRA_H) && (iv_spiraH == nullptr) && (iv_spiraL != nullptr)))
+        {
+            // Called to look for SPIRA S/H pair and we didn't find it but the Legacy SPIRA exists. No reason to fail.
+            // Emit a trace and move on.
+            TRACFCOMP ( g_trac_runtime, "getHostDataSection> SPIRA S/H not found, but SPIRA L is not null. "
                        "Skip verifying hdat address.");
         }
         else
