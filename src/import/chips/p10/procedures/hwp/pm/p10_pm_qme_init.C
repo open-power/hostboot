@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -652,13 +652,17 @@ fapi2::ReturnCode init_topo_id_tables(
     }
 
     FAPI_TRY(PUT_QME_SCOM_PBTXTR0(eq, data));
+
     PREP_QME_SCOM_PBTXTR1(eq);
     FAPI_TRY(PUT_QME_SCOM_PBTXTR1(eq, topo_scoms[1]));
+
     PREP_QME_SCOM_PBTXTR2(eq);
     FAPI_TRY(PUT_QME_SCOM_PBTXTR2(eq, topo_scoms[2]));
+
     PREP_QME_SCOM_PBTXTR3(eq);
     FAPI_TRY(PUT_QME_SCOM_PBTXTR3(eq, topo_scoms[3]));
 
+    data = 0;
     FAPI_TRY( fapi2::getScom( eq, QME_PPEBAR, l_ppeBarRegVal ));
     l_ppeBarRegVal.extractToRight( data, ( QME_PPEBAR_BASE + TOPO_REGION_START_OFFSET ), TOPO_REGION_BIT_LEN );
     FAPI_INF( "PPE Bar b15-b19 0x%08x", data );
@@ -671,6 +675,7 @@ fapi2::ReturnCode init_topo_id_tables(
                  .set_TOPO_SCOM_REG( l_topoRegVal ),
                  "Topology Register Is Not Initialized Correctly b15-b19 0x%016lx", data );
 
+    data = 0;
     FAPI_TRY( fapi2::getScom( eq, QME_BCEBAR0, l_bceBarRegVal ));
     l_bceBarRegVal.extractToRight( data, ( QME_BCEBAR0_BASE + TOPO_REGION_START_OFFSET ), TOPO_REGION_BIT_LEN );
     FAPI_INF( "BCE Bar b15-b19 0x%08x", data );
@@ -683,6 +688,7 @@ fapi2::ReturnCode init_topo_id_tables(
                  .set_TOPO_SCOM_REG( l_topoRegVal ),
                  "Topology Register Is Not Initialized Correctly b15-b19 0x%016lx", data );
 
+    data = 0;
     FAPI_TRY( fapi2::getScom( eq, QME_BCEBAR1, l_bceBarRegVal ));
     l_bceBarRegVal.extractToRight( data, ( QME_BCEBAR1_BASE + TOPO_REGION_START_OFFSET ), TOPO_REGION_BIT_LEN );
 
