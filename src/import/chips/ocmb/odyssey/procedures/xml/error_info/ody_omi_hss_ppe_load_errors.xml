@@ -31,7 +31,6 @@
     Invalid PPE image input parameters passed to HWP
   </description>
   <ffdc>TARGET</ffdc>
-  <ffdc>IMAGE_DATA</ffdc>
   <ffdc>IMAGE_SIZE</ffdc>
   <ffdc>OFFSET</ffdc>
   <ffdc>IMAGE_TYPE</ffdc>
