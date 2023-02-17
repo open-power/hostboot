@@ -243,8 +243,8 @@
                 0 not active
                 1 active
         </description>
-        <initToZero></initToZero>
         <valueType>uint8</valueType>
+        <default>1</default>
         <writeable/>
         <mssAccessorName>ddr5_chb_active</mssAccessorName>
     </attribute>

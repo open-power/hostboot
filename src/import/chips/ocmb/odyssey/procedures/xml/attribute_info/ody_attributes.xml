@@ -342,7 +342,7 @@
             DISABLE = 0,
             ENABLE  = 1
         </enum>
-        <default>DISABLE</default>
+        <default>ENABLE</default>
         <writeable/>
         <array>4</array>
         <mssAccessorName>phy_en_tdqs2dq_tracking</mssAccessorName>
@@ -365,7 +365,7 @@
             4096_MEMCLK = 4096,
             8192_MEMCLK = 8192
         </enum>
-        <default>256_MEMCLK</default>
+        <default>2048_MEMCLK</default>
         <writeable/>
         <mssAccessorName>phy_dqs_osc_runtime_sel</mssAccessorName>
     </attribute>
@@ -620,7 +620,7 @@
             MsgMisc[7:0] in the message block structure.
         </description>
         <valueType>uint8</valueType>
-        <default>0</default>
+        <default>0x80</default>
         <writeable/>
         <mssAccessorName>phy_msg_misc</mssAccessorName>
     </attribute>
@@ -704,7 +704,7 @@
             PhyCfg in the message block structure.
         </description>
         <valueType>uint8</valueType>
-        <default>0x3D</default>
+        <default>0x2D</default>
         <writeable/>
         <mssAccessorName>phy_cfg</mssAccessorName>
     </attribute>

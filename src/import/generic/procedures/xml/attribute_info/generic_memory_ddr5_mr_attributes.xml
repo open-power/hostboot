@@ -62,9 +62,9 @@
     <description>
       DRAM Chip Select assertion mode for MPC commands
     </description>
-    <initToZero></initToZero>
     <valueType>uint8</valueType>
     <enum>MULTI_CYCLE = 0, SINGLE_CYCLE = 1</enum>
+    <default>SINGLE_CYCLE</default>
     <writeable/>
     <mssAccessorName>cs_assert_in_mpc</mssAccessorName>
   </attribute>
@@ -88,9 +88,9 @@
     <description>
       DRAM setting to enable or disable internal WR timing offsets
     </description>
-    <initToZero></initToZero>
     <valueType>uint8</valueType>
     <enum>DISABLE = 0, ENABLE = 1</enum>
+    <default>ENABLE</default>
     <writeable/>
     <mssAccessorName>internal_wr_timing_mode</mssAccessorName>
   </attribute>
@@ -119,9 +119,9 @@
     <description>
       Refresh rate indicator
     </description>
-    <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
+    <default>1</default>
     <mssAccessorName>ref_rate_indic</mssAccessorName>
   </attribute>
 
@@ -230,10 +230,10 @@
     <description>
       WR Preamble settings
     </description>
-    <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
     <enum>TCK2 = 1, TCK3 = 2, TCK4 = 3</enum>
+    <default>TCK2</default>
     <mssAccessorName>ddr5_dram_wr_preamble</mssAccessorName>
   </attribute>
 
