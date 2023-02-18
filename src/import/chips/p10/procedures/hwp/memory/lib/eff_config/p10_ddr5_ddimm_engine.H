@@ -752,6 +752,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                 // {key byte, MEM ALERT PULL UP VALUES (ohms)}
                 {0b0000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_DISABLE},
                 {0b0001, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_40},
+                {0b0010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_48},
                 {0b0011, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_60},
                 {0b0100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_80},
                 {0b0101, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_120},
