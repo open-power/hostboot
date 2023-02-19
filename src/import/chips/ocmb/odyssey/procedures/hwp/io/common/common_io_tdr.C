@@ -53,7 +53,8 @@ fapi2::ReturnCode common_io_tdr_sample_point(const GENERIC_FAPI_IO_TARGET&,
         const uint32_t,
         const uint32_t,
         int32_t&);
-fapi2::ReturnCode common_io_tdr_diagnose(const uint32_t&,
+
+fapi2::ReturnCode common_io_tdr_diagnose(const uint32_t,
         const uint32_t,
         uint32_t&);
 fapi2::ReturnCode common_io_tdr_find_horizontal_crossing(const GENERIC_FAPI_IO_TARGET&,

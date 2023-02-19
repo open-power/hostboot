@@ -813,7 +813,8 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-uint8_t get_num_lanes(uint32_t i_lane_mask)
+template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
+uint8_t io_ppe_common<K, M, V>::get_num_lanes(uint32_t i_lane_mask)
 {
     uint8_t count = 0;
 
