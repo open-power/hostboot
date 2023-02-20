@@ -4321,6 +4321,7 @@
                     "effecter_resolutioninit": 1,
                     "effecter_data_size": 0,
                     "range_field_format": 3,
+                    "max_settable": 3,
                     "dbus": {
                         "path": "/xyz/openbmc_project/state/host0",
                         "interface": "xyz.openbmc_project.Control.Boot.RebootAttempts",

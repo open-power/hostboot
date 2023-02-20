@@ -51,6 +51,7 @@
             "upper_bound": 65535,
             "scalar_increment": 1,
             "default_value": 0,
+            "readOnly": true,
             "helpText": "Specifies the number of huge pages available for memory management for the current IPL. Do not set this attribute directly; set hb_number_huge_pages instead.",
             "displayName": "Number Huge Pages (current)"
         },
@@ -69,6 +70,7 @@
             "upper_bound": 255,
             "scalar_increment": 1,
             "default_value": 0,
+            "readOnly": true,
             "helpText": "Specifies the size of huge pages, 0 = 16GB, for the current IPL. Do not set this attribute directly; set hb_huge_page_size instead.",
             "displayName": "Huge Page Size (current)"
         },
@@ -87,6 +89,7 @@
             "upper_bound": 255,
             "scalar_increment": 1,
             "default_value": 0,
+            "readOnly": true,
             "helpText": "The maximum number of cores to activate where 0 being to activate all available cores. Value applicable for the current IPL. Do not set this attribute directly; set hb_field_core_override instead.",
             "displayName": "Field Core Override (current)"
         },
@@ -179,6 +182,7 @@
             "upper_bound": 4294967295,
             "scalar_increment": 1,
             "default_value": 0,
+            "readOnly": true,
             "helpText": "Specifies the desired frequency across all chips in the system.  Do not set this attribute directly; set hb_cap_freq_mhz_request instead.",
             "displayName": "Requested Core Freq MHZ (current)"
         }

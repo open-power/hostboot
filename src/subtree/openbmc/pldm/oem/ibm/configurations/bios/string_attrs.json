@@ -124,7 +124,8 @@
             "default_string_length": 32,
             "default_string": "00000000000000000000000000000000",
             "helpText": "Specifies the configuration flags used by manufacturing for the current IPL. Do not set this attribute directly; set hb_mfg_flags instead.",
-            "displayName": "Manufacturing Flags (current)"
+            "displayName": "Manufacturing Flags (current)",
+            "readOnly": true
         },
         {
             "attribute_name": "hb_lid_ids",
