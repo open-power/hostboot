@@ -54,7 +54,7 @@ fapi2::ReturnCode common_io_tdr_sample_point(const GENERIC_FAPI_IO_TARGET&,
         const uint32_t,
         int32_t&);
 
-fapi2::ReturnCode common_io_tdr_diagnose(const uint32_t,
+fapi2::ReturnCode common_io_tdr_diagnose(const uint32_t&,
         const uint32_t,
         uint32_t&);
 fapi2::ReturnCode common_io_tdr_find_horizontal_crossing(const GENERIC_FAPI_IO_TARGET&,
@@ -743,7 +743,7 @@ fapi_try_exit:
 /// @param[in] i_bp2            base point 2
 /// @param[out] o_result        status of the net (OPEN, SHORT, GOOD)
 /// @return FAPI_RC_SUCCESS if arguments are valid
-fapi2::ReturnCode common_io_tdr_diagnose(const uint32_t i_bp1,
+fapi2::ReturnCode common_io_tdr_diagnose(const uint32_t& i_bp1,
         const uint32_t i_bp2,
         uint32_t& o_result)
 {

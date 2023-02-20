@@ -743,7 +743,6 @@ class msg_block_params
 
             io_msg_block.TX2D_DFE_Misc = l_buffer;
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -780,7 +779,6 @@ class msg_block_params
 
             io_msg_block.RX2D_TrainOpt = l_buffer;
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -817,7 +815,6 @@ class msg_block_params
 
             io_msg_block.TX2D_TrainOpt = l_buffer;
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -830,7 +827,6 @@ class msg_block_params
         {
             io_msg_block.Share2DVrefResult = iv_msg_block_vars.iv_Share2DVrefResult;
 
-        fapi_try_exit:
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -843,7 +839,6 @@ class msg_block_params
         {
             io_msg_block.MRE_MIN_PULSE = iv_msg_block_vars.iv_MRE_MIN_PULSE;
 
-        fapi_try_exit:
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -856,7 +851,6 @@ class msg_block_params
         {
             io_msg_block.DWL_MIN_PULSE = iv_msg_block_vars.iv_DWL_MIN_PULSE;
 
-        fapi_try_exit:
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -869,7 +863,6 @@ class msg_block_params
         {
             io_msg_block.PhyConfigOverride = iv_msg_block_vars.iv_PhyConfigOverride;
 
-        fapi_try_exit:
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -882,7 +875,6 @@ class msg_block_params
         {
             io_msg_block.EnabledDQsChA = iv_msg_block_vars.iv_EnabledDQsChA;
 
-        fapi_try_exit:
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -895,7 +887,6 @@ class msg_block_params
         {
             io_msg_block.EnabledDQsChB = iv_msg_block_vars.iv_EnabledDQsChB;
 
-        fapi_try_exit:
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -912,7 +903,6 @@ class msg_block_params
 
             io_msg_block.CsPresentChA = l_ranks_configed_buf;
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -929,7 +919,6 @@ class msg_block_params
 
             io_msg_block.CsPresentChB = l_ranks_configed_buf;
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -949,7 +938,6 @@ class msg_block_params
             io_msg_block.MR0_B2 = iv_msg_block_vars.iv_MR0[2];
             io_msg_block.MR0_B3 = iv_msg_block_vars.iv_MR0[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -969,7 +957,6 @@ class msg_block_params
             io_msg_block.MR2_B2 = iv_msg_block_vars.iv_MR2[2];
             io_msg_block.MR2_B3 = iv_msg_block_vars.iv_MR2[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -989,7 +976,6 @@ class msg_block_params
             io_msg_block.MR3_B2 = iv_msg_block_vars.iv_MR3[2][0];
             io_msg_block.MR3_B3 = iv_msg_block_vars.iv_MR3[3][0];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1009,7 +995,6 @@ class msg_block_params
             io_msg_block.MR4_B2 = iv_msg_block_vars.iv_MR4[2];
             io_msg_block.MR4_B3 = iv_msg_block_vars.iv_MR4[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1029,7 +1014,6 @@ class msg_block_params
             io_msg_block.MR5_B2 = iv_msg_block_vars.iv_MR5[2];
             io_msg_block.MR5_B3 = iv_msg_block_vars.iv_MR5[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1049,7 +1033,6 @@ class msg_block_params
             io_msg_block.MR6_B2 = iv_msg_block_vars.iv_MR6[2];
             io_msg_block.MR6_B3 = iv_msg_block_vars.iv_MR6[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1070,7 +1053,6 @@ class msg_block_params
             io_msg_block.MR32_B2_next = iv_msg_block_vars.iv_MR32[2];
             io_msg_block.MR32_B3_next = iv_msg_block_vars.iv_MR32[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1090,7 +1072,6 @@ class msg_block_params
             io_msg_block.MR8_B2 = iv_msg_block_vars.iv_MR8[2];
             io_msg_block.MR8_B3 = iv_msg_block_vars.iv_MR8[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1111,7 +1092,6 @@ class msg_block_params
             io_msg_block.MR32_ORG_B2_next = iv_msg_block_vars.iv_MR32_ORG[2];
             io_msg_block.MR32_ORG_B3_next = iv_msg_block_vars.iv_MR32_ORG[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1131,7 +1111,6 @@ class msg_block_params
             io_msg_block.MR10_B2 = iv_msg_block_vars.iv_MR10[2][0];
             io_msg_block.MR10_B3 = iv_msg_block_vars.iv_MR10[3][0];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1151,7 +1130,6 @@ class msg_block_params
             io_msg_block.MR11_B2 = iv_msg_block_vars.iv_MR11[2][0];
             io_msg_block.MR11_B3 = iv_msg_block_vars.iv_MR11[3][0];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1171,7 +1149,6 @@ class msg_block_params
             io_msg_block.MR12_B2 = iv_msg_block_vars.iv_MR12[2][0];
             io_msg_block.MR12_B3 = iv_msg_block_vars.iv_MR12[3][0];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1191,7 +1168,6 @@ class msg_block_params
             io_msg_block.MR13_B2 = iv_msg_block_vars.iv_MR13[2];
             io_msg_block.MR13_B3 = iv_msg_block_vars.iv_MR13[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1211,7 +1187,6 @@ class msg_block_params
             io_msg_block.MR14_B2 = iv_msg_block_vars.iv_MR14[2];
             io_msg_block.MR14_B3 = iv_msg_block_vars.iv_MR14[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1231,7 +1206,6 @@ class msg_block_params
             io_msg_block.MR15_B2 = iv_msg_block_vars.iv_MR15[2];
             io_msg_block.MR15_B3 = iv_msg_block_vars.iv_MR15[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1251,7 +1225,6 @@ class msg_block_params
             io_msg_block.MR111_B2 = iv_msg_block_vars.iv_MR111[2];
             io_msg_block.MR111_B3 = iv_msg_block_vars.iv_MR111[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1271,7 +1244,6 @@ class msg_block_params
             io_msg_block.MR32_B2 = iv_msg_block_vars.iv_MR32[2];
             io_msg_block.MR32_B3 = iv_msg_block_vars.iv_MR32[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1291,7 +1263,6 @@ class msg_block_params
             io_msg_block.MR33_B2 = iv_msg_block_vars.iv_MR33[2];
             io_msg_block.MR33_B3 = iv_msg_block_vars.iv_MR33[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1311,7 +1282,6 @@ class msg_block_params
             io_msg_block.MR34_B2 = iv_msg_block_vars.iv_MR34[2];
             io_msg_block.MR34_B3 = iv_msg_block_vars.iv_MR34[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1331,7 +1301,6 @@ class msg_block_params
             io_msg_block.MR35_B2 = iv_msg_block_vars.iv_MR35[2];
             io_msg_block.MR35_B3 = iv_msg_block_vars.iv_MR35[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1351,7 +1320,6 @@ class msg_block_params
             io_msg_block.MR32_ORG_B2 = iv_msg_block_vars.iv_MR32_ORG[2];
             io_msg_block.MR32_ORG_B3 = iv_msg_block_vars.iv_MR32_ORG[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1371,7 +1339,6 @@ class msg_block_params
             io_msg_block.MR37_B2 = iv_msg_block_vars.iv_MR37[2];
             io_msg_block.MR37_B3 = iv_msg_block_vars.iv_MR37[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1391,7 +1358,6 @@ class msg_block_params
             io_msg_block.MR38_B2 = iv_msg_block_vars.iv_MR38[2];
             io_msg_block.MR38_B3 = iv_msg_block_vars.iv_MR38[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1411,7 +1377,6 @@ class msg_block_params
             io_msg_block.MR39_B2 = iv_msg_block_vars.iv_MR39[2];
             io_msg_block.MR39_B3 = iv_msg_block_vars.iv_MR39[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1431,7 +1396,6 @@ class msg_block_params
             io_msg_block.MR33_ORG_B2 = iv_msg_block_vars.iv_MR33_ORG[2];
             io_msg_block.MR33_ORG_B3 = iv_msg_block_vars.iv_MR33_ORG[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1452,7 +1416,6 @@ class msg_block_params
             io_msg_block.MR11_B2_next = iv_msg_block_vars.iv_MR11[2][0];
             io_msg_block.MR11_B3_next = iv_msg_block_vars.iv_MR11[3][0];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1473,7 +1436,6 @@ class msg_block_params
             io_msg_block.MR12_B2_next = iv_msg_block_vars.iv_MR12[2][0];
             io_msg_block.MR12_B3_next = iv_msg_block_vars.iv_MR12[3][0];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1494,7 +1456,6 @@ class msg_block_params
             io_msg_block.MR13_B2_next = iv_msg_block_vars.iv_MR13[2];
             io_msg_block.MR13_B3_next = iv_msg_block_vars.iv_MR13[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1515,7 +1476,6 @@ class msg_block_params
             io_msg_block.MR33_ORG_B2_next = iv_msg_block_vars.iv_MR33_ORG[2];
             io_msg_block.MR33_ORG_B3_next = iv_msg_block_vars.iv_MR33_ORG[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1536,7 +1496,6 @@ class msg_block_params
             io_msg_block.MR33_B2_next = iv_msg_block_vars.iv_MR33[2];
             io_msg_block.MR33_B3_next = iv_msg_block_vars.iv_MR33[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1556,7 +1515,6 @@ class msg_block_params
             io_msg_block.MR50_B2 = iv_msg_block_vars.iv_MR50[2];
             io_msg_block.MR50_B3 = iv_msg_block_vars.iv_MR50[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1576,7 +1534,6 @@ class msg_block_params
             io_msg_block.MR51_B2 = iv_msg_block_vars.iv_MR51[2];
             io_msg_block.MR51_B3 = iv_msg_block_vars.iv_MR51[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1596,7 +1553,6 @@ class msg_block_params
             io_msg_block.MR52_B2 = iv_msg_block_vars.iv_MR52[2];
             io_msg_block.MR52_B3 = iv_msg_block_vars.iv_MR52[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1616,7 +1572,6 @@ class msg_block_params
             io_msg_block.DFE_GainBias_B2 = iv_msg_block_vars.iv_DFE_GainBias[2];
             io_msg_block.DFE_GainBias_B3 = iv_msg_block_vars.iv_DFE_GainBias[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 
@@ -1720,7 +1675,6 @@ class msg_block_params
             io_msg_block.WR_RD_RTT_PARK_B3 = (iv_msg_block_vars.iv_RD_RTT_PARK[3] << RD_SHIFT) |
                                              iv_msg_block_vars.iv_WR_RTT_PARK[3];
 
-        fapi_try_exit:
             return fapi2::current_err;
         }
 

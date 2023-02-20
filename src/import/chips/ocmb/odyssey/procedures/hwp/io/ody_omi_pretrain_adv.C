@@ -43,7 +43,6 @@ fapi2::ReturnCode ody_omi_pretrain_adv(const fapi2::Target<fapi2::TARGET_TYPE_OC
 {
     FAPI_DBG("Start");
 
-fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
 }

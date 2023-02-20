@@ -186,8 +186,6 @@ class mr14_data : public mr_base_data<MC>
             l_data. template extractToRight<CID, CID_LEN>(iv_ecs_reg_index);
 
             return fapi2::FAPI2_RC_SUCCESS;
-        fapi_try_exit:
-            return fapi2::current_err;
         }
 
         enum

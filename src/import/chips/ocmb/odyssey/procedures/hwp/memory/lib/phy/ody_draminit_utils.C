@@ -58,7 +58,7 @@
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr11.H>
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr12.H>
 
-#ifndef __PPE__
+#if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
     // Included for progress / time left reporting (Cronus only)
     #include <ctime>
 #endif
