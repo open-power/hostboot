@@ -39,6 +39,29 @@
 
 
   <hwpError>
+    <rc>RC_MSS_NEGATIVE_VPD_SIZE</rc>
+    <description>
+       A negative size was found while reading the VPD
+       This is probably due to a bad part or bad values accidentally burned to the VPD
+    </description>
+    <ffdc>SIZE</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_BAD_MR_PARAMETER</rc>
     <description>
        A bad parameter was passed to MR processing

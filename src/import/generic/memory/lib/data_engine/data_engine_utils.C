@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -236,6 +236,13 @@ fapi2::ReturnCode get_raw_data_planar(
 
     FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
               "%s failed getting VPD size from getVPD", spd::c_str(i_target) );
+
+    // If we have a negative SPD size, assert out
+    FAPI_ASSERT(l_vpd_info.iv_size < 0x80000,
+                fapi2::MSS_NEGATIVE_VPD_SIZE()
+                .set_OCMB_TARGET(i_target)
+                .set_SIZE(l_vpd_info.iv_size),
+                "%s has a negative VPD size of %i", spd::c_str(i_target), l_vpd_info.iv_size);
 
     // Reassign container size with the retrieved size
     // Arbitrarily set the data to zero since it will be overwritten
