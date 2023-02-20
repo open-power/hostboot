@@ -136,6 +136,19 @@ fapi2::ReturnCode init_phy_structs_hardcodes( const fapi2::Target<fapi2::TARGET_
         user_input_dram_config_t& io_user_input_dram_config);
 
 ///
+/// @brief Configures the PHY to be ready for DRAMINIT for the simulation environment
+/// @param[in] i_target - the memory port on which to operate
+/// @param[in] i_user_input_basic - Synopsys basic user input structure
+/// @param[in] i_user_input_advanced - Synopsys advanced user input structure
+/// @param[in] i_user_input_dram_config - DRAM configuration inputs needed for PHY init (MRS/RCW)
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode init_phy_config_sim( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                       const user_input_basic_t& i_user_input_basic,
+                                       const user_input_advanced_t& i_user_input_advanced,
+                                       const user_input_dram_config_t& i_user_input_dram_config);
+
+///
 /// @brief Runs PHY init on a specific port
 /// @param[in] i_target - the memory port on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
