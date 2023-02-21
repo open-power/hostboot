@@ -113,16 +113,32 @@ const p10_mc_pll_bucket_descriptor_t P10_MC_PLL_BUCKETS[P10_NUM_MC_PLL_BUCKETS] 
 
 // constants defining number of PLL frequency options ('buckets')
 // documented in bucket descriptor structure (currently used/max)
-const uint8_t ODY_NUM_PLL_BUCKETS = 3;
+const uint8_t ODY_NUM_PLL_BUCKETS = 16;
 const uint8_t ODY_MAX_PLL_BUCKETS = 16;
 
 // array of bucket descriptors (use existing p10 MC struct definition as the fields match 1:1),
 // index is bucket number
 const p10_mc_pll_bucket_descriptor_t ODY_PLL_BUCKETS[ODY_NUM_PLL_BUCKETS] =
 {
-    { REFCLOCK_FREQ_133, 1600, 25600 }, // bucket 0 DDR[45]-3200
-    { REFCLOCK_FREQ_133, 2000, 32000 }, // bucket 1 DDR5-4000
-    { REFCLOCK_FREQ_133, 2400, 38400 }, // bucket 2 DDR5-4800 (unsupported for P10 processor)
+    { REFCLOCK_FREQ_133, 1600, 25600 }, // bucket 0  DDR5-3200
+    { REFCLOCK_FREQ_133, 2000, 32000 }, // bucket 1  DDR5-4000
+    { REFCLOCK_FREQ_133, 2400, 38400 }, // bucket 2  DDR5-4800 (unsupported for P10 processor)
+    { REFCLOCK_FREQ_133, 2400, 14400 }, // bucket 3  Test-only (Ring Mode)
+
+    { REFCLOCK_FREQ_133, 0,    0     }, // bucket 4  Reserved
+    { REFCLOCK_FREQ_133, 0,    0     }, // bucket 5  Reserved
+    { REFCLOCK_FREQ_133, 0,    0     }, // bucket 6  Reserved
+    { REFCLOCK_FREQ_133, 0,    0     }, // bucket 7  Reserved
+
+    { REFCLOCK_FREQ_133, 0,    0     }, // bucket 8  Reserved
+    { REFCLOCK_FREQ_133, 0,    0     }, // bucket 9  Reserved
+    { REFCLOCK_FREQ_133, 0,    0     }, // bucket 10 Reserved
+    { REFCLOCK_FREQ_133, 0,    0     }, // bucket 11 Reserved
+
+    { REFCLOCK_FREQ_133, 0,    0,    }, // bucket 12 Reserved
+    { REFCLOCK_FREQ_133, 0,    0,    }, // bucket 13 Reserved
+    { REFCLOCK_FREQ_133, 1600, 25600 }, // bucket 14 Sim-only (VBU)
+    { REFCLOCK_FREQ_133, 2000, 32000 }, // bucket 15 Sim-only (DFT)
 };
 
 //
