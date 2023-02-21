@@ -53,6 +53,11 @@ enum POZ_PERV_MOD_MISC_Private_Constants
     PGOOD_REGIONS_STARTBIT = 4,
     PGOOD_REGIONS_LENGTH = 15,
     PGOOD_REGIONS_OFFSET = 12,
+
+    LFIR_MASK_DEFAULT = 0x80dfffffffffffff,
+    TP_LFIR_MASK_DEFAULT = 0x80c1c7fcf3fbffff,
+    XSTOP_MASK_ANY_ATTN_AND_DBG = 0x3000000000000000,
+    RECOV_MASK_LOCAL_XSTOP = 0x2000000000000000,
 };
 
 ReturnCode mod_cbs_start_prep(
@@ -487,6 +492,31 @@ ReturnCode mod_poz_tp_init_common(const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_targ
     CPLT_CTRL0.flush<0>();
     CPLT_CTRL0.set_FORCE_ALIGN(1);
     FAPI_TRY(CPLT_CTRL0.putScom_CLEAR(l_tpchiplet));
+
+    FAPI_DBG("Unmask pervasive FIRs");
+    FAPI_TRY(putScom(l_tpchiplet, EPS_MASK_RW_WCLEAR, ~TP_LFIR_MASK_DEFAULT));
+    FAPI_TRY(putScom(l_tpchiplet, XSTOP_MASK_RW, XSTOP_MASK_ANY_ATTN_AND_DBG));
+    FAPI_TRY(putScom(l_tpchiplet, RECOV_MASK_RW, RECOV_MASK_LOCAL_XSTOP));
+    FAPI_TRY(putScom(l_tpchiplet, ATTN_MASK_RW, 0));
+    FAPI_TRY(putScom(l_tpchiplet, LOCAL_XSTOP_MASK_RW, 0));
+
+fapi_try_exit:
+    FAPI_INF("Exiting ...");
+    return current_err;
+}
+
+ReturnCode mod_unmask_firs(const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_target)
+{
+    auto l_chiplets_mc = i_target.getMulticast<TARGET_TYPE_PERV>(MCGROUP_GOOD_NO_TP);
+
+    FAPI_INF("Entering ...");
+
+    FAPI_DBG("Unmask chiplet FIRs");
+    FAPI_TRY(putScom(l_chiplets_mc, EPS_MASK_RW_WCLEAR, ~LFIR_MASK_DEFAULT));
+    FAPI_TRY(putScom(l_chiplets_mc, XSTOP_MASK_RW, XSTOP_MASK_ANY_ATTN_AND_DBG));
+    FAPI_TRY(putScom(l_chiplets_mc, RECOV_MASK_RW, RECOV_MASK_LOCAL_XSTOP));
+    FAPI_TRY(putScom(l_chiplets_mc, ATTN_MASK_RW, 0));
+    FAPI_TRY(putScom(l_chiplets_mc, LOCAL_XSTOP_MASK_RW, 0));
 
 fapi_try_exit:
     FAPI_INF("Exiting ...");

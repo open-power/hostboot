@@ -50,7 +50,7 @@
   <writeable/>
   <initToZero/>
 </attribute>
-<!-- ********************************************************************** -->
+<!-- ******************************************************************** -->
 <attribute>
   <id>ATTR_OCMB_PLL_BUCKET</id>
   <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -58,8 +58,21 @@
     PLL bucket selection
   </description>
   <valueType>uint8</valueType>
+  <enum>TANK1600 = 0, TANK2000 = 1, TANK2400 = 2, RING2400 = 3, SIM0267 = 14, SIM2133 = 15</enum>
   <writeable/>
   <initToZero/>
+</attribute>
+<!-- ******************************************************************** -->
+<attribute>
+  <id>ATTR_OCMB_PLL_BUCKET_SIM</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+    Sim specific PLL bucket selection
+  </description>
+  <valueType>uint8</valueType>
+  <enum>TANK1600 = 0, TANK2000 = 1, TANK2400 = 2, RING2400 = 3, SIM0267 = 14, SIM2133 = 15</enum>
+  <writeable/>
+  <default>SIM0267</default>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>

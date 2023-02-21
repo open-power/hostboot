@@ -50,8 +50,9 @@ fapi2::ReturnCode ody_scratch_regs_get_pll_bucket(
 
     if (l_is_simulation)
     {
-        // sim setting reserved for VBU usage
-        o_pll_bucket = 14;
+        fapi2::ATTR_OCMB_PLL_BUCKET_SIM_Type l_ocmb_pll_bucket_sim;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_PLL_BUCKET_SIM, i_target, l_ocmb_pll_bucket_sim));
+        o_pll_bucket = l_ocmb_pll_bucket_sim;
     }
     else
     {
@@ -110,25 +111,15 @@ fapi2::ReturnCode ody_scratch_regs_get_pll_freqs(
 {
     FAPI_DBG("Start");
 
-    fapi2::ATTR_OCMB_PLL_BUCKET_Type l_pll_bucket = i_pll_bucket;
-    fapi2::ATTR_IS_SIMULATION_Type l_is_simulation;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_simulation));
-
-    if (l_is_simulation)
-    {
-        // sim setting reserved for VBU usage
-        l_pll_bucket = 0;
-    }
-
-    FAPI_ASSERT(l_pll_bucket < ODY_NUM_PLL_BUCKETS,
+    FAPI_ASSERT(i_pll_bucket < ODY_NUM_PLL_BUCKETS,
                 fapi2::ODY_SCRATCH_REGS_UTILS_BUCKET_OUT_OF_RANGE_ERR()
                 .set_TARGET_CHIP(i_target)
-                .set_BUCKET(l_pll_bucket),
+                .set_BUCKET(i_pll_bucket),
                 "Ody PLL bucket (%d) index is out of range!",
-                l_pll_bucket);
+                i_pll_bucket);
 
-    o_freq_grid_mhz = ODY_PLL_BUCKETS[l_pll_bucket].freq_grid_mhz;
-    o_freq_link_mhz = ODY_PLL_BUCKETS[l_pll_bucket].freq_link_mhz;
+    o_freq_grid_mhz = ODY_PLL_BUCKETS[i_pll_bucket].freq_grid_mhz;
+    o_freq_link_mhz = ODY_PLL_BUCKETS[i_pll_bucket].freq_link_mhz;
 
 fapi_try_exit:
     FAPI_DBG("End");
