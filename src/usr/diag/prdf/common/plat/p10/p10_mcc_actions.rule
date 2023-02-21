@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2021
+# Contributors Listed Below - COPYRIGHT 2018,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -161,6 +161,20 @@ actionclass chnl1_omi_bus_level2_L
     callout2ndLvlLow;
 };
 
+actionclass ocmb_dimms0
+{
+    funccall("calloutAttachedDimms_0");
+    callout(connected(TYPE_OCMB_CHIP,0), MRU_MED);
+    threshold1;
+};
+
+actionclass ocmb_dimms1
+{
+    funccall("calloutAttachedDimms_1");
+    callout(connected(TYPE_OCMB_CHIP,1), MRU_MED);
+    threshold1;
+};
+
 # Bits using these actions are CRC-related errors that are potential
 # side-effects of bits in the PAU_PHY_FIR. There is additional handling
 # to determine the callout if a root cause bit is found on as well.
@@ -191,26 +205,28 @@ actionclass chnl1_omi_bus_th_1_UERE     { SueSource; chnl1_omi_bus_th_1; };
 
 actionclass analyze_ocmb_chnl0
 {
-    funccall("analyzeConnectedOcmb_0"); # This needs to be called last
+    # Callout the OCMB and connected DIMMs if analysis fails.
+    # analyzeConnectedOcmb must be called last if analysis succeeds
+    try(funccall("analyzeConnectedOcmb_0"), ocmb_dimms0);
 };
 
 actionclass analyze_ocmb_chnl1
 {
-    funccall("analyzeConnectedOcmb_1"); # This needs to be called last
+    # Callout the OCMB and connected DIMMs if analysis fails.
+    # analyzeConnectedOcmb must be called last if analysis succeeds
+    try(funccall("analyzeConnectedOcmb_1"), ocmb_dimms1);
 };
 
 actionclass analyze_ocmb_chnl0_UERE
 {
     SueSource;
-    # Callout the bus if analysis of the UNIT_CS fails for some reason
-    try( analyze_ocmb_chnl0, chnl0_omi_bus_level2_L );
+    analyze_ocmb_chnl0;
 };
 
 actionclass analyze_ocmb_chnl1_UERE
 {
     SueSource;
-    # Callout the bus if analysis of the UNIT_CS fails for some reason
-    try( analyze_ocmb_chnl1, chnl1_omi_bus_level2_L );
+    analyze_ocmb_chnl1;
 };
 
 actionclass analyzeMC_DSTL_FIR
