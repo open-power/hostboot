@@ -50,8 +50,8 @@ namespace mss
 /// @param[in,out] i_data reference to the buffer
 /// @return reference to the input buffer (for chaining)
 ///
-template< uint64_t TB, uint64_t SB, typename T >
-inline fapi2::buffer<T>& swap( fapi2::buffer<T>& i_data )
+template <uint64_t TB, uint64_t SB, typename T>
+inline fapi2::buffer<T>& swap(fapi2::buffer<T>& i_data)
 {
     bool l_tb = i_data.template getBit<TB>();
     i_data.template writeBit<TB>(i_data.template getBit<SB>());
@@ -67,8 +67,8 @@ inline fapi2::buffer<T>& swap( fapi2::buffer<T>& i_data )
 /// @param[in,out] io_data reference to the buffer
 /// @return reference to the input buffer (for chaining)
 ///
-template< uint64_t TB, typename T >
-inline fapi2::buffer<T>& negate( fapi2::buffer<T>& i_data )
+template <uint64_t TB, typename T>
+inline fapi2::buffer<T>& negate(fapi2::buffer<T>& i_data)
 {
     // Use care when writeBit'ing a getBit as getBit returns a bool and writeBit
     // checks if the input != 0. Negating it (~ getBit) was causing havok. So
@@ -84,13 +84,13 @@ inline fapi2::buffer<T>& negate( fapi2::buffer<T>& i_data )
 //  @note from
 //   http://stackoverflow.com/questions/746171/best-algorithm-for-bit-reversal-from-msb-lsb-to-lsb-msb-in-c
 ///
-template< typename T >
-static inline void reverse( T& io_buffer )
+template <typename T>
+static inline void reverse(T& io_buffer)
 {
     T l_result = io_buffer;
     size_t l_s = sizeof(T) * 8 - 1;
 
-    for( io_buffer >>= 1; io_buffer; io_buffer >>= 1)
+    for (io_buffer >>= 1; io_buffer; io_buffer >>= 1)
     {
         l_result <<= 1;
         l_result |= io_buffer & 1;
@@ -109,7 +109,7 @@ static inline void reverse( T& io_buffer )
 /// @tparam T buffer type
 /// @param[in] io_buffer
 ///
-template<uint64_t S, uint64_t L, typename T>
+template <uint64_t S, uint64_t L, typename T>
 static inline void reverse_range(fapi2::buffer<T>& io_buffer)
 {
     const auto target_length = fapi2::parameterTraits<T>::bit_length();
@@ -139,8 +139,8 @@ static inline void reverse_range(fapi2::buffer<T>& io_buffer)
 /// @param[in,out] io_destination destination buffer - these bits will be incremented
 /// @return reference to the destination
 ///
-template<uint64_t DS, uint64_t L, uint64_t SS, typename SB, typename DB>
-inline fapi2::buffer<DB>& swizzle( const fapi2::buffer<SB>& i_source, fapi2::buffer<DB>& io_destination )
+template <uint64_t DS, uint64_t L, uint64_t SS, typename SB, typename DB>
+inline fapi2::buffer<DB>& swizzle(const fapi2::buffer<SB>& i_source, fapi2::buffer<DB>& io_destination)
 {
     // Steps for the swizzle
     // 1) Reverse the destination buffer
@@ -155,7 +155,7 @@ inline fapi2::buffer<DB>& swizzle( const fapi2::buffer<SB>& i_source, fapi2::buf
     // The data is right justified, so we want to get the data's length and subtract out the whole data length
     // We subtract out an additonal 1 to account for bits being from 0 to N-1
     constexpr auto l_source_data_start = get_bit_length<SB>() - (SS + 1);
-    io_destination.template insert < DS, L, l_source_data_start > (SB(l_tmp));
+    io_destination.template insert<DS, L, l_source_data_start>(SB(l_tmp));
 
 #ifdef SWIZZLE_TRACE
     // s: source, r: reverse, d: destination, ds: distination start, l: length, ss: source start
@@ -177,12 +177,12 @@ inline fapi2::buffer<DB>& swizzle( const fapi2::buffer<SB>& i_source, fapi2::buf
 /// @param[in,out] io_destination destination buffer - these bits will be incremented
 /// @return fapi2::ReturnCode SUCCESS iff the code is successful
 ///
-template<typename SB, typename DB>
-inline fapi2::ReturnCode swizzle( const uint64_t i_destination_start,
-                                  const uint64_t i_length,
-                                  const uint64_t i_source_start,
-                                  const fapi2::buffer<SB>& i_source,
-                                  fapi2::buffer<DB>& io_destination )
+template <typename SB, typename DB>
+inline fapi2::ReturnCode swizzle(const uint64_t i_destination_start,
+                                 const uint64_t i_length,
+                                 const uint64_t i_source_start,
+                                 const fapi2::buffer<SB>& i_source,
+                                 fapi2::buffer<DB>& io_destination)
 {
     // Steps for the swizzle
     // 1) Reverse the destination buffer
@@ -207,23 +207,21 @@ inline fapi2::ReturnCode swizzle( const uint64_t i_destination_start,
 /// @param[in] i_start_bit the start bit to extract from
 /// @param[out] o_output the extracted nibble - right justified
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful, otherwise platform FFDC
-template<typename IT, typename OT>
+template <typename IT, typename OT>
 fapi2::ReturnCode extract_nibble(const fapi2::buffer<IT>& i_buffer, const size_t i_start_bit, OT& o_output)
 {
     return i_buffer.extractToRight(o_output, i_start_bit, BITS_PER_NIBBLE);
 }
 
 /// @brief Extract a nibble from a buffer
-/// @tparam IT Input Type
+/// @tparam T Input Type
 /// @tparam SB Start Bit
 /// @param[in] i_buffer the input buffer
 /// @return OT the extracted nibble - right justified
-template<size_t SB, typename IT>
-inline IT extract_nibble(const fapi2::buffer<IT>& i_buffer)
+template <size_t SB, typename T>
+T extract_nibble(const fapi2::buffer<T>& i_buffer)
 {
-    IT l_output = 0;
-    i_buffer.extractToRight<SB, BITS_PER_NIBBLE>(l_output);
-    return l_output;
+    return i_buffer.template getBits<SB, BITS_PER_NIBBLE>();
 }
 
 } // ns mss
