@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,6 +141,7 @@ enum PositionBounds
 
     // TODO RTC 210072 - Support multiple ports
     MAX_PORT_PER_OCMB   = 1,
+    MAX_DIMM_PER_OCMB   = 1,
 
     INVALID_POSITION_BOUND = 0xffffffff,
 };
