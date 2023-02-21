@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,7 +106,7 @@ std::map<MulticastGroup, uint32_t> g_multicastGroupMap = {
 //------------------------------------------------------------------------------
 
 /// @brief Platform-level implementation called by getScom()
-ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
+ReturnCode platGetScom(const Target<TARGET_TYPE_ALL | TARGET_TYPE_MULTICAST>& i_target,
                        const uint64_t i_address,
                        buffer<uint64_t>& o_data)
 {
@@ -213,7 +213,7 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
 }
 
 /// @brief Platform-level implementation called by putScom()
-ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
+ReturnCode platPutScom(const Target<TARGET_TYPE_ALL | TARGET_TYPE_MULTICAST>& i_target,
                        const uint64_t i_address,
                        const buffer<uint64_t> i_data)
 {

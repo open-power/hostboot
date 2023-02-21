@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,7 @@ uint64_t platGetDDScanMode(const uint32_t i_ringMode);
 /// @param[out] o_data     Buffer that holds data read from HW target.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
+ReturnCode platGetScom(const Target<TARGET_TYPE_ALL | TARGET_TYPE_MULTICAST>& i_target,
                        const uint64_t i_address,
                        buffer<uint64_t>& o_data);
 
@@ -90,7 +90,7 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL>& i_target,
 /// @param[in] i_address    SCOM register address to write to.
 /// @param[in] i_data       Buffer that holds data to write into address.
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
+ReturnCode platPutScom(const Target<TARGET_TYPE_ALL | TARGET_TYPE_MULTICAST>& i_target,
                        const uint64_t i_address,
                        const buffer<uint64_t> i_data);
 

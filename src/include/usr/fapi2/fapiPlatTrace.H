@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,6 +70,9 @@ extern trace_desc_t* g_fapiMfgTd;
 
 // Debug traces
 #define FAPI_DBG(_fmt_, _args_...) TRACSCOMP_CHECKED(true, g_fapiDbgTd, TRACE_FILENAME _fmt_, ##_args_)
+
+// Lab traces
+#define FAPI_LAB(_fmt_, _args_...) TRACSCOMP_CHECKED(true, g_fapiDbgTd, TRACE_FILENAME _fmt_, ##_args_)
 
 // Scan traces
 #define FAPI_SCAN(_fmt_, _args_...) TRACSCOMP_CHECKED(true, g_fapiScanTd, _fmt_, ##_args_)

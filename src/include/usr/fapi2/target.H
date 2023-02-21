@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -275,15 +275,22 @@ namespace impl {
 ///                        relationship table
 /// @param[in] i_it        Iterator pointing to the current entry being check in the
 ///                        parent/child relationship table
-/// @param[in] i_begin     Iterator pointing to the end of the parent/child
+/// @param[in] i_end       Iterator pointing to the end of the parent/child
 ///                        relationship table
-/// @return                Whether or not i_child is a child of i_parent
+/// @param[in] i_cycle_detector A bitmask indicating what children have already been
+///                        visited when ascending the parent hierarchy. This is used
+///                        to detect cycles and avoid infinite loops.
+/// @return                The subset of i_child that matched a rule. (This subset
+///                        could be i_child itself.) TARGET_TYPE_NONE if no rules
+///                        matched (and therefore the given type is not a valid
+///                        child of the given parent type).
 template<typename It>
-constexpr bool isProperParent(const TargetType i_child,
-                              const TargetType i_parent,
-                              const It i_begin,
-                              const It i_it,
-                              const It i_end)
+constexpr TargetType isProperParent(const TargetType i_child,
+                                    const TargetType i_parent,
+                                    const It i_begin,
+                                    const It i_it,
+                                    const It i_end,
+                                    const TargetType i_cycle_detector = TARGET_TYPE_NONE)
 {
     /* Target A is a PROPER parent of target B if and only if:
      * 1) A is an IMMEDIATE parent of B, OR
@@ -292,34 +299,50 @@ constexpr bool isProperParent(const TargetType i_child,
      * targets having both PROC_CHIP and PERV parents.
      */
 
-    bool l_isParent = false;
+    TargetType childType = TARGET_TYPE_NONE;
 
-    if (i_it != i_end)
+    if (i_cycle_detector & i_child)
     {
+        // We detected a cycle, so stop searching (and return the
+        // default "no parent found" value).
+    }
+    else if (i_child & i_parent)
+    { // We allow a type to be converted to itself.
+        childType = i_child & i_parent;
+    }
+    else if (i_it != i_end)
+    {
+        const auto matching_types = i_it->children & i_child;
+
         // If this rule applies to the child type, then check the two cases
         // for parenthood listed above.
-        if (i_it->children & i_child)
+        if (matching_types)
         {
             if (// Condition (1) above,
                 (i_it->parent & i_parent)
-
                 // OR condition (2) above.
                 // Don't stop if this returns false because a child can have
                 // multiple parents.
-                || isProperParent(i_it->parent, i_parent, i_begin, i_begin, i_end))
+                || isProperParent(i_it->parent, i_parent, i_begin, i_begin, i_end,
+                                  i_cycle_detector | i_it->children) != TARGET_TYPE_NONE)
             {
-                l_isParent = true;
+                childType = matching_types;
             }
         }
-
         // If we already found the answer, stop. Otherwise, recur and check the
         // next parent/child relationship record.
-        l_isParent = l_isParent
-                  || isProperParent(i_child, i_parent, i_begin, i_it + 1, i_end);
+        if (childType == TARGET_TYPE_NONE)
+        {
+            childType = isProperParent(i_child, i_parent, i_begin, i_it + 1, i_end, i_cycle_detector);
+        }
     }
 
-    return l_isParent;
+    return childType;
 }
+
+// Represents a TargetType that doesn't have a valid parent. This
+// enumeration is used to make compiler errors clearer.
+enum TheseChildTypesDontHaveAValidParent : uint64_t { };
 
 ///
 /// @brief This function determines whether or not instances of a given target
@@ -329,8 +352,8 @@ constexpr bool isProperParent(const TargetType i_child,
 /// @param[in] i_parent    The parent type
 ///
 /// @returns   Whether or not i_child is a child of i_parent
-constexpr bool isProperParent(const TargetType i_child,
-                              const TargetType i_parent)
+constexpr TheseChildTypesDontHaveAValidParent isProperParent(TargetType i_child,
+                                                             TargetType i_parent)
 {
     struct
     {
@@ -379,7 +402,8 @@ constexpr bool isProperParent(const TargetType i_child,
         {   TARGET_TYPE_PHB       , TARGET_TYPE_PEC       },
         {   TARGET_TYPE_CORE      , TARGET_TYPE_FC        },
 
-        {   TARGET_TYPE_NMMU
+        {   TARGET_TYPE_PROC_CHIP
+          | TARGET_TYPE_NMMU
           | TARGET_TYPE_EQ
           | TARGET_TYPE_CORE
           | TARGET_TYPE_PEC
@@ -402,13 +426,153 @@ constexpr bool isProperParent(const TargetType i_child,
         {   TARGET_TYPE_MBA       , TARGET_TYPE_MEMBUF_CHIP },
     };
 
-    return isProperParent(i_child,
-                          i_parent,
-                          std::cbegin(parentInfo),
-                          std::cbegin(parentInfo),
-                          std::cend(parentInfo));
+    const TargetType ignore_types =
+        fapi2::TARGET_TYPE_EX |
+        fapi2::TARGET_TYPE_MCS |
+        fapi2::TARGET_TYPE_XBUS |
+        fapi2::TARGET_TYPE_MCA |
+        fapi2::TARGET_TYPE_MCBIST |
+        fapi2::TARGET_TYPE_CAPP |
+        fapi2::TARGET_TYPE_DMI |
+        fapi2::TARGET_TYPE_OBUS |
+        fapi2::TARGET_TYPE_OBUS_BRICK |
+        fapi2::TARGET_TYPE_SBE |
+        fapi2::TARGET_TYPE_PPE |
+        // Ignore the multicast bit
+        fapi2::TARGET_TYPE_MULTICAST;
+
+    if ((i_child & ignore_types) == i_child
+        || (i_parent & ignore_types) == i_parent)
+    {
+        return static_cast<TheseChildTypesDontHaveAValidParent>(TARGET_TYPE_NONE);
+    }
+
+    i_child = static_cast<TargetType>(i_child & ~ignore_types);
+    i_parent = static_cast<TargetType>(i_parent & ~ignore_types);
+
+    const auto childType = isProperParent(i_child,
+                                          i_parent,
+                                          std::cbegin(parentInfo),
+                                          std::cbegin(parentInfo),
+                                          std::cend(parentInfo));
+
+    if (childType == i_child)
+    {
+        return static_cast<TheseChildTypesDontHaveAValidParent>(TARGET_TYPE_NONE);
+    }
+
+    if (childType == TARGET_TYPE_NONE)
+    {
+        return static_cast<TheseChildTypesDontHaveAValidParent>(i_child);
+    }
+
+    return isProperParent(static_cast<TargetType>(i_child & ~childType), i_parent);
 }
 
+// Checks that a given target type is TARGET_TYPE_NONE. If not, halts
+// compilation. The verbose names were chosen to make compiler errors
+// clearer.
+template<TheseChildTypesDontHaveAValidParent T>
+struct check
+{
+    static constexpr bool value = true;
+    static constexpr TheseChildTypesDontHaveAValidParent fine
+        = static_cast<TheseChildTypesDontHaveAValidParent>(TARGET_TYPE_NONE);
+    static_assert(T == fine,
+                  "The given child type doesn't have a parent that appears in the parent type set. "
+                  "Look at the target type in the argument to the check<> structure to determine "
+                  " which child was an orphan.");
+};
+
+}
+
+/// @brief Iterate the bits in a given integer and call the given
+/// function with the mask for each bit. If the function returns
+/// false, stop iteration.
+template<typename F>
+void each_1bit_mask(uint64_t i, F&& func)
+{
+    while (i)
+    {
+        // Find the next bit in i
+        const int zero_count = __builtin_ctzl(i);
+        const uint64_t mask = (size_t)1 << zero_count;
+
+        // Invoke the function with the mask
+        if (!func(mask))
+        {
+            break;
+        }
+
+        // Delete the bit from i
+        i = i & ~mask;
+    }
+}
+
+inline const TARGETING::TargetHandleList
+get_single_parent(TARGETING::Target* const target,
+                  const TargetType unicast_parent_type,
+                  const TargetType real_self_type)
+{
+    TARGETING::TargetHandleList l_parentList;
+
+    assert(target != nullptr, "platform target handle is nullptr");
+
+    const TARGETING::TYPE
+        requiredPType = fapi2::convertFapi2TypeToTargeting(unicast_parent_type),
+        requiredCType = target->getAttr<TARGETING::ATTR_TYPE>();
+
+    if (unicast_parent_type == (real_self_type & ~TARGET_TYPE_MULTICAST))
+    { // We want to specifically allow the case where the
+        // requested parent type is the real type of the target.
+        l_parentList.push_back(target);
+    }
+    else if ((real_self_type & TARGET_TYPE_MULTICAST)
+             && requiredPType == TARGETING::TYPE_PROC
+             && requiredPType == requiredCType)
+    { // If a target proc chip is looking for its
+        // parent multicast proc chip, then the parent
+        // is the target itself.
+        l_parentList.push_back(target);
+    }
+    else if (unicast_parent_type == fapi2::TARGET_TYPE_PERV)
+    {
+        TARGETING::getParentPervasiveTargetsByState(
+                                                    l_parentList,
+                                                    target,
+                                                    TARGETING::CLASS_NA,
+                                                    requiredPType,
+                                                    TARGETING::UTIL_FILTER_ALL);
+    }
+    else if (unicast_parent_type == fapi2::TARGET_TYPE_OMIC)
+    {
+        TARGETING::getParentOmicTargetsByState(
+                                               l_parentList,
+                                               target,
+                                               TARGETING::CLASS_NA,
+                                               requiredPType,
+                                               TARGETING::UTIL_FILTER_ALL);
+    }
+    else if ((unicast_parent_type == fapi2::TARGET_TYPE_PAUC)
+             && (requiredCType == TARGETING::TYPE_OMIC))
+    {
+        TARGETING::getParentPaucTargetsByState(
+                                               l_parentList,
+                                               target,
+                                               TARGETING::CLASS_NA,
+                                               requiredPType,
+                                               TARGETING::UTIL_FILTER_ALL);
+    }
+    else
+    {
+        TARGETING::getParentAffinityTargetsByState(l_parentList,
+                                                   target,
+                                                   TARGETING::CLASS_NA,
+                                                   requiredPType,
+                                                   TARGETING::UTIL_FILTER_ALL);
+    }
+
+    return l_parentList;
 }
 
 ///
@@ -422,19 +586,25 @@ template<TargetType T_SELF, MulticastType M, typename V>
 template<TargetType K_PARENT>
 inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
 {
+    static_assert(impl::check<impl::isProperParent(T_SELF, K_PARENT)>::value);
 
     FAPI_DBG(ENTER_MRK "getParent. Type of parent 0x%08x", K_PARENT);
 
-    static_assert(impl::isProperParent(T_SELF, K_PARENT),
-                  "improper parent of fapi2::Target");
+    TARGETING::Target* const l_target = FAPI_TO_HBTARG(this);
+
+    const auto multicast_bit = T_SELF & TARGET_TYPE_MULTICAST;
+    const auto real_self_type
+        = (fapi2::convertTargetingTypeToFapi2(l_target->getAttr<TARGETING::ATTR_TYPE>())
+           | multicast_bit);
 
     TARGETING::TargetHandleList l_parentList;
-    TARGETING::TYPE requiredPType =
-        fapi2::convertFapi2TypeToTargeting(K_PARENT);
 
-    // Targets with multicast
+    // Handle targets with multicast
     if ((T_SELF & TARGET_TYPE_MULTICAST) != 0)
     {
+        const TARGETING::TYPE requiredPType =
+            fapi2::convertFapi2TypeToTargeting(K_PARENT);
+
         // When performing multicast getParent on a multicast CORE
         // match with an EQ target or a an EQ target with multicast.
         if ( ( (K_PARENT == fapi2::TARGET_TYPE_EQ)  ||
@@ -477,60 +647,33 @@ inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
     }
     else
     {
-        if(K_PARENT == fapi2::TARGET_TYPE_PERV)
+        // K_PARENT may be a set with multiple elements, so
+        // we try to convert to each parent and stop when one works.
+        each_1bit_mask(K_PARENT, [&](const uint64_t single_parent)
         {
-            TARGETING::getParentPervasiveTargetsByState(
-                l_parentList,
-                FAPI_TO_HBTARG(this),
-                TARGETING::CLASS_NA,
-                requiredPType,
-                TARGETING::UTIL_FILTER_ALL);
-        }
-        else if(K_PARENT == fapi2::TARGET_TYPE_OMIC)
-        {
-            TARGETING::getParentOmicTargetsByState(
-                l_parentList,
-                FAPI_TO_HBTARG(this),
-                TARGETING::CLASS_NA,
-                requiredPType,
-                TARGETING::UTIL_FILTER_ALL);
-        }
-        else if ((K_PARENT == fapi2::TARGET_TYPE_PAUC)
-                && (T_SELF == fapi2::TARGET_TYPE_OMIC))
-        {
-            TARGETING::getParentPaucTargetsByState(
-                l_parentList,
-                FAPI_TO_HBTARG(this),
-                TARGETING::CLASS_NA,
-                requiredPType,
-                TARGETING::UTIL_FILTER_ALL);
-        }
-        else
-        {
-            TARGETING::getParentAffinityTargetsByState(
-                l_parentList,
-                FAPI_TO_HBTARG(this),
-                TARGETING::CLASS_NA,
-                requiredPType,
-                TARGETING::UTIL_FILTER_ALL);
-        }
-    } // if ((T_SELF & TARGET_TYPE_MULTICAST) != 0) ... else ...
+            l_parentList = get_single_parent(l_target,
+                                             static_cast<TargetType>(single_parent),
+                                             real_self_type);
+            return l_parentList.empty();
+        });
+    }
+
     assert(l_parentList.size() == 1, "Found %d parents of the same type. Target HUID %x isMulticast %d,\
-        looking for parents of type %x", l_parentList.size(), TARGETING::get_huid(this->get()),
-        (((T_SELF & TARGET_TYPE_MULTICAST)==0)?0:1), requiredPType);
+        looking for parents of type(s) 0x%x", l_parentList.size(), TARGETING::get_huid(this->get()),
+        (((T_SELF & TARGET_TYPE_MULTICAST)==0)?0:1), K_PARENT);
 
     TARGETING::Target * l_parentTarget = l_parentList[0];
 
     assert(l_parentTarget != nullptr,
-        "No parent of type %x was found for the target of type %x, Found required parent plat type to be %x",
-        K_PARENT, T_SELF, requiredPType);
+        "No parent of type %x was found for the target of type %x, Found required parent plat type to be 0x%x",
+        K_PARENT, T_SELF, K_PARENT);
 
     Target<K_PARENT, M, V> outTarget(l_parentTarget);
 
     FAPI_DBG(EXIT_MRK "getParent");
+
     return outTarget;
 }
-
 
 ///
 /// @brief Get this target's children
@@ -551,7 +694,7 @@ inline std::vector<Target<K_CHILD, M, V> >
     FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", K_CHILD, i_state);
 
     // first check if multicast, if it is not multicast then it will evaluate isProperParent
-    static_assert((T_SELF & TARGET_TYPE_MULTICAST) || (impl::isProperParent(K_CHILD, T_SELF)),
+    static_assert((T_SELF & TARGET_TYPE_MULTICAST) || impl::check<impl::isProperParent(K_CHILD, T_SELF)>::value,
         "improper unicast child of fapi2::Target, isProperParent failed");
     // next check if it is multicast, then if multicast verify same by upcast K_CHILD
     static_assert(!(T_SELF & TARGET_TYPE_MULTICAST) || (T_SELF == (K_CHILD | TARGET_TYPE_MULTICAST)),
@@ -682,11 +825,14 @@ inline std::vector<Target<T, M, V> >
              TARGETING::get_huid(this->get()), i_filter,
              T_SELF, T, l_children.size());
 
-    // Limit to getting Pervasive children from proc_chip parent for now
+    // Limit to getting Pervasive children from proc_chip/ocmb_chip parent for now
     //@TODO RTC:155755 to track possible additional support
-    static_assert(((T == fapi2::TARGET_TYPE_PERV) &&
-                   (T_SELF == fapi2::TARGET_TYPE_PROC_CHIP)),
-                   "fapi2::getChildren-Filter only supports getting fapi2::TARGET_TYPE_PERV children on a fapi2::TARGET_TYPE_PROC_CHIP");
+    static_assert((T == fapi2::TARGET_TYPE_PERV),
+                  "fapi2::getChildren-Filter only supports getting fapi2::TARGET_TYPE_PERV children");
+
+    static_assert(((T_SELF == fapi2::TARGET_TYPE_PROC_CHIP)
+                   || T_SELF == fapi2::TARGET_TYPE_OCMB_CHIP),
+                  "fapi2::getChildren-Filter only supports getting children on a TARGET_TYPE_PROC_CHIP or TARGET_TYPE_OCMB_CHIP parent");
 
     for ( auto childIter =  l_children.begin();
                childIter != l_children.end();
@@ -754,10 +900,11 @@ Target<T_SELF, M, V>::getOtherEnd(fapi2::Target<T, M, V>& o_target,
     // Only supporting these relationships:
     //  IOHS <-> IOHS
     //  IOLINK <-> IOLINK
+    //  OMI <-> OCMB_CHIP
 
-    static_assert( T_SELF==T, "both ends must be of same fapi2::TARGET_TYPE");
-    static_assert ( (T_SELF==fapi2::TARGET_TYPE_IOHS) || (T_SELF==fapi2::TARGET_TYPE_IOLINK),
-                    "Only targets of type IOHS or IOLINK are supported");
+    static_assert (    (T_SELF==fapi2::TARGET_TYPE_IOHS || T_SELF==fapi2::TARGET_TYPE_IOLINK)
+                    || (T == fapi2::TARGET_TYPE_OMI && T_SELF == fapi2::TARGET_TYPE_OCMB_CHIP),
+                    "getOtherEnd: Unsupported target type supplied");
 
     // for the supported types above, only one option supported
     targetClass = TARGETING::CLASS_UNIT;
@@ -1127,7 +1274,8 @@ template< TargetType T, MulticastType O >
 inline Target<T | TARGET_TYPE_MULTICAST, O, V>
 Target<K, M, V>::getMulticast(const MulticastGroup i_group) const
 {
-    static_assert((K == TARGET_TYPE_PROC_CHIP), "Parent target must be the proc chip");
+    static_assert((K & TARGET_TYPE_ANY_POZ_CHIP) == K,
+                  "Parent target must be a chip type");
     static_assert((T & TARGET_TYPE_MULTICASTABLE) != 0,
                   "Requested target type must be part of TARGET_TYPE_MULTICASTABLE");
     static_assert(bitCount<T>::count == 1,
