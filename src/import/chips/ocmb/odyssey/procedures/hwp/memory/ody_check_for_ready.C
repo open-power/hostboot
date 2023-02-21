@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,7 +76,7 @@ extern "C"
 
             if (l_rc == fapi2::FAPI2_RC_SUCCESS)
             {
-                FAPI_INF("OCMB %s is active.", mss::c_str(i_target));
+                FAPI_INF(TARGTIDFORMAT "OCMB is active.", TARGTID);
                 break;
             }
 
@@ -86,7 +86,7 @@ extern "C"
         FAPI_ASSERT(!l_rc,
                     fapi2::ODYSSEY_I2C_ERROR()
                     .set_OCMB_TARGET(i_target),
-                    "Odyssey I2C is not active for target %s.", mss::c_str(i_target));
+                    "Odyssey I2C is not active for target " TARGTIDFORMAT, TARGTID);
 
     fapi_try_exit:
         FAPI_DBG("ody_check_for_ready: Exiting.");

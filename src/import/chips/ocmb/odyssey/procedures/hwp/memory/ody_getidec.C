@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,12 +54,12 @@ extern "C"
 
         // Reading CFAM chip id reg
         FAPI_TRY(CHIP_IDEC.getCfam(i_target),
-                 "Error reading CFAM chip IDEC reg for %s.",  mss::c_str(i_target));
+                 "Error reading CFAM chip IDEC reg for " TARGTIDFORMAT, TARGTID);
         CHIP_IDEC.extractToRight<mss::ody::idec_consts::MAJOR_EC_BIT_START,
                                  mss::ody::idec_consts::MAJOR_EC_BIT_LENGTH>(o_chipEc);
         CHIP_IDEC.extractToRight<mss::ody::idec_consts::CHIPID_BIT_START,
                                  mss::ody::idec_consts::CHIPID_BIT_LENGTH>(o_chipId);
-        FAPI_INF("Target %s: EC 0x%.02x   ChipId 0x%.04x", mss::c_str(i_target), o_chipEc, o_chipId);
+        FAPI_INF("Target " TARGTIDFORMAT ": EC 0x%.02x   ChipId 0x%.04x", TARGTID, o_chipEc, o_chipId);
 
     fapi_try_exit:
         FAPI_DBG("ody_getidec: Exiting.");
