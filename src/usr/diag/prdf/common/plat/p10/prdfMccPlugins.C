@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -256,6 +256,51 @@ PRDF_PLUGIN_DEFINE(p10_mcc, chnlTimeout_##POS);
 
 PLUGIN_CHNL_TIMEOUT(0);
 PLUGIN_CHNL_TIMEOUT(1);
+
+
+
+/**
+ * @brief  Calls out all dimms under an attached OCMB.
+ * @param  i_chip An MCC chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_pos  The OCMB pos (0:1)
+ * @return SUCCESS
+ */
+int32_t calloutAttachedDimms( ExtensibleChip* i_chip,
+                              STEP_CODE_DATA_STRUCT& io_sc, uint8_t i_pos )
+{
+    #define PRDF_FUNC "[p10_mcc::calloutAttachedDimms] "
+
+    TargetHandle_t ocmb = getConnectedChild( i_chip->getTrgt(), TYPE_OCMB_CHIP,
+                                             i_pos );
+    if ( nullptr == ocmb )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to get connected OCMB from MCC 0x%08x",
+                  getHuid(i_chip->getTrgt()) );
+        return PRD_UNRESOLVED_CHIP_CONNECTION;
+    }
+
+    for (const auto & dimm : getConnectedChildren(ocmb, TYPE_DIMM))
+    {
+        io_sc.service_data->SetCallout(dimm);
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+
+#define PLUGIN_DIMM_CALLOUT(POS) \
+int32_t calloutAttachedDimms_##POS(ExtensibleChip* i_chip, \
+                                   STEP_CODE_DATA_STRUCT& io_sc)\
+{ \
+    return calloutAttachedDimms(i_chip, io_sc, POS);\
+} \
+PRDF_PLUGIN_DEFINE(p10_mcc, calloutAttachedDimms_##POS);
+
+PLUGIN_DIMM_CALLOUT(0);
+PLUGIN_DIMM_CALLOUT(1);
 
 } // end namespace p10_mcc
 
