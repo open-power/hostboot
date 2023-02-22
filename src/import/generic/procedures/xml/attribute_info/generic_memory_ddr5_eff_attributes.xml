@@ -67,12 +67,14 @@
     <id>ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_AC</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
+      [Channel]
       Pull-up slew rate control for CAC transmitters.
       Valid values are 0-255
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
+    <array>2</array>
     <mssAccessorName>ddr5_tx_slew_rise_ac</mssAccessorName>
   </attribute>
 
@@ -80,12 +82,14 @@
     <id>ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_AC</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
+      [Channel]
       Pull-down slew rate control for CAC transmitters.
       Valid values are 0-255
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
+    <array>2</array>
     <mssAccessorName>ddr5_tx_slew_fall_ac</mssAccessorName>
   </attribute>
 
@@ -93,12 +97,14 @@
     <id>ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_CK</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
+      [Channel]
       Pull-up slew rate control for clock.
       Valid values are 0-255
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
+    <array>2</array>
     <mssAccessorName>ddr5_tx_slew_rise_ck</mssAccessorName>
   </attribute>
 

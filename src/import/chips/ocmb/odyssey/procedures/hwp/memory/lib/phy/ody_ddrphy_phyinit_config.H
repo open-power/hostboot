@@ -44,6 +44,7 @@
 
 #include <fapi2.H>
 
+#include <lib/shared/ody_consts.H>
 #include <generic/memory/lib/utils/num.H>
 #include <lib/phy/ody_ddrphy_phyinit_structs.H>
 ///
@@ -195,4 +196,52 @@ void print_structs(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                    const user_input_advanced_t& i_user_input_advanced,
                    const user_input_dram_config_t& i_user_input_dram_config);
 #endif
+
+///
+/// @brief Override SPD Assert checks for reserve bits/arr out of bounds on both channels for given attr
+/// @param[in] i_target - the memory port on which to operate
+/// @param[in] i_attr_data - value to decode from attr
+/// @param[in] i_csr_arr - Array of possible csr values
+/// @param[in] i_atximp_arr - Array of possible impedance values
+/// @param[in] i_ch - DIMM channel
+/// @param[in] i_attr_id - ID of Attribute values are being pulled from
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode override_assert_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t (&i_attr_data)[mss::ody::sizes::NUM_CHANNELS],
+        const uint8_t (&i_csr_arr)[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX],
+        const uint16_t (&i_atximp_arr)[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX],
+        const uint8_t i_ch,
+        const uint16_t i_attr_id);
+
+///
+/// @brief Post Phyinit override for TX_SLEW_RISE_AC
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ac(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+///
+/// @brief Post Phyinit override for TX_SLEW_FALL_AC
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode post_phyinit_override_tx_slew_fall_ac(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+///
+/// @brief Post Phyinit override for TX_SLEW_RISE_CK
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ck(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+///
+/// @brief Post Phyinit decode for TxSlew values
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode post_phyinit_overrides(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+
+
 #endif

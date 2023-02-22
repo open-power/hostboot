@@ -283,11 +283,32 @@
         <description>
           Array[DIMM][RANK]
           Memory Controller side Drive Impedance for Address, Bank Address, Bank Group and Activate Lines in Ohms.
+          DDR4 configs values are in Ohms.
+          DDR5 configs (SDR_ and DDR_) values are the possible SPD encoding for ATx impedance.
+          The CSR value is derived from the lookup table of byte 32 in DDR5 SPD spec in ody_ddrphy_phyinit
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <enum>DISABLE = 0, OHM_20 = 20, OHM_24 = 24, OHM_30 = 30, OHM_40 = 40, OHM_60 = 60, OHM_120 = 120</enum>
+        <enum>DISABLE = 0,
+              SDR_OHM_10 = 1,
+              SDR_OHM_15A = 2,
+              SDR_OHM_15B = 3,
+              SDR_OHM_20 = 4,
+              SDR_OHM_24 = 5,
+              SDR_OHM_30 = 7,
+              DDR_OHM_10 = 9,
+              DDR_OHM_15A = 10,
+              DDR_OHM_15B = 11,
+              DDR_OHM_20 = 12,
+              DDR_OHM_24 = 13,
+              DDR_OHM_30 = 14,
+              OHM_20 = 20,
+              OHM_24 = 24,
+              OHM_30 = 30,
+              OHM_40 = 40,
+              OHM_60 = 60,
+              OHM_120 = 120</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_cmd_addr</mssAccessorName>
         <array>2 4</array>

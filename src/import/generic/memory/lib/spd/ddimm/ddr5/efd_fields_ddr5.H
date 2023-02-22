@@ -241,7 +241,7 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             ATX_IMPEDANCE_START = 4,
             ATX_IMPEDANCE_LEN = 4,
 
-            // Byte 33-36: ATX Slew rise rate
+            // Byte 33-34: ATX Slew rise rate
             ATX_SLEW_RISE_RATE_BYTE0_BYTE = 33,
             ATX_SLEW_RISE_RATE_BYTE0_START = 0,
             ATX_SLEW_RISE_RATE_BYTE0_LEN = 8,
@@ -250,15 +250,7 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             ATX_SLEW_RISE_RATE_BYTE1_START = 0,
             ATX_SLEW_RISE_RATE_BYTE1_LEN = 8,
 
-            ATX_SLEW_RISE_RATE_BYTE2_BYTE = 35,
-            ATX_SLEW_RISE_RATE_BYTE2_START = 0,
-            ATX_SLEW_RISE_RATE_BYTE2_LEN = 8,
-
-            ATX_SLEW_RISE_RATE_BYTE3_BYTE = 36,
-            ATX_SLEW_RISE_RATE_BYTE3_START = 0,
-            ATX_SLEW_RISE_RATE_BYTE3_LEN = 8,
-
-            // Byte 37-40: ATX Slew rate fall
+            // Byte 37-38: ATX Slew rate fall
             ATX_SLEW_FALL_RATE_BYTE0_BYTE = 37,
             ATX_SLEW_FALL_RATE_BYTE0_START = 0,
             ATX_SLEW_FALL_RATE_BYTE0_LEN = 8,
@@ -267,15 +259,7 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             ATX_SLEW_FALL_RATE_BYTE1_START = 0,
             ATX_SLEW_FALL_RATE_BYTE1_LEN = 8,
 
-            ATX_SLEW_FALL_RATE_BYTE2_BYTE = 39,
-            ATX_SLEW_FALL_RATE_BYTE2_START = 0,
-            ATX_SLEW_FALL_RATE_BYTE2_LEN = 8,
-
-            ATX_SLEW_FALL_RATE_BYTE3_BYTE = 40,
-            ATX_SLEW_FALL_RATE_BYTE3_START = 0,
-            ATX_SLEW_FALL_RATE_BYTE3_LEN = 8,
-
-            // Byte 41-44: CK Slew rate rise
+            // Byte 41-42: CK Slew rate rise
             CK_SLEW_RATE_RISE_BYTE0_BYTE = 41,
             CK_SLEW_RATE_RISE_BYTE0_START = 0,
             CK_SLEW_RATE_RISE_BYTE0_LEN = 8,
@@ -283,31 +267,6 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             CK_SLEW_RATE_RISE_BYTE1_BYTE = 42,
             CK_SLEW_RATE_RISE_BYTE1_START = 0,
             CK_SLEW_RATE_RISE_BYTE1_LEN = 8,
-
-            CK_SLEW_RATE_RISE_BYTE2_BYTE = 43,
-            CK_SLEW_RATE_RISE_BYTE2_START = 0,
-            CK_SLEW_RATE_RISE_BYTE2_LEN = 8,
-
-            CK_SLEW_RATE_RISE_BYTE3_BYTE = 44,
-            CK_SLEW_RATE_RISE_BYTE3_START = 0,
-            CK_SLEW_RATE_RISE_BYTE3_LEN = 8,
-
-            // Byte 45-48: CK Slew rate fall
-            CK_SLEW_RATE_FALL_BYTE0_BYTE = 45,
-            CK_SLEW_RATE_FALL_BYTE0_START = 0,
-            CK_SLEW_RATE_FALL_BYTE0_LEN = 8,
-
-            CK_SLEW_RATE_FALL_BYTE1_BYTE = 46,
-            CK_SLEW_RATE_FALL_BYTE1_START = 0,
-            CK_SLEW_RATE_FALL_BYTE1_LEN = 8,
-
-            CK_SLEW_RATE_FALL_BYTE2_BYTE = 47,
-            CK_SLEW_RATE_FALL_BYTE2_START = 0,
-            CK_SLEW_RATE_FALL_BYTE2_LEN = 8,
-
-            CK_SLEW_RATE_FALL_BYTE3_BYTE = 48,
-            CK_SLEW_RATE_FALL_BYTE3_START = 0,
-            CK_SLEW_RATE_FALL_BYTE3_LEN = 8,
 
             // Byte 49-52: DQ Slew rate rise
             DQ_SLEW_RATE_RISE_BYTE0_BYTE = 49,
@@ -1675,29 +1634,17 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         // Byte 32: ATX impedance
         static constexpr field_t ATX_IMPEDANCE{ATX_IMPEDANCE_BYTE, ATX_IMPEDANCE_START, ATX_IMPEDANCE_LEN};
 
-        // Byte 33-36: ATX Slew rise rate
+        // Byte 33-34: ATX Slew rise rate
         static constexpr field_t ATX_SLEW_RISE_RATE_BYTE0{ATX_SLEW_RISE_RATE_BYTE0_BYTE, ATX_SLEW_RISE_RATE_BYTE0_START, ATX_SLEW_RISE_RATE_BYTE0_LEN};
         static constexpr field_t ATX_SLEW_RISE_RATE_BYTE1{ATX_SLEW_RISE_RATE_BYTE1_BYTE, ATX_SLEW_RISE_RATE_BYTE1_START, ATX_SLEW_RISE_RATE_BYTE1_LEN};
-        static constexpr field_t ATX_SLEW_RISE_RATE_BYTE2{ATX_SLEW_RISE_RATE_BYTE2_BYTE, ATX_SLEW_RISE_RATE_BYTE2_START, ATX_SLEW_RISE_RATE_BYTE2_LEN};
-        static constexpr field_t ATX_SLEW_RISE_RATE_BYTE3{ATX_SLEW_RISE_RATE_BYTE3_BYTE, ATX_SLEW_RISE_RATE_BYTE3_START, ATX_SLEW_RISE_RATE_BYTE3_LEN};
 
-        // Byte 37-40: ATX Slew fall rate
+        // Byte 37-38: ATX Slew fall rate
         static constexpr field_t ATX_SLEW_FALL_RATE_BYTE0{ATX_SLEW_FALL_RATE_BYTE0_BYTE, ATX_SLEW_FALL_RATE_BYTE0_START, ATX_SLEW_FALL_RATE_BYTE0_LEN};
         static constexpr field_t ATX_SLEW_FALL_RATE_BYTE1{ATX_SLEW_FALL_RATE_BYTE1_BYTE, ATX_SLEW_FALL_RATE_BYTE1_START, ATX_SLEW_FALL_RATE_BYTE1_LEN};
-        static constexpr field_t ATX_SLEW_FALL_RATE_BYTE2{ATX_SLEW_FALL_RATE_BYTE2_BYTE, ATX_SLEW_FALL_RATE_BYTE2_START, ATX_SLEW_FALL_RATE_BYTE2_LEN};
-        static constexpr field_t ATX_SLEW_FALL_RATE_BYTE3{ATX_SLEW_FALL_RATE_BYTE3_BYTE, ATX_SLEW_FALL_RATE_BYTE3_START, ATX_SLEW_FALL_RATE_BYTE3_LEN};
 
-        // Byte 41-44: CK Slew rise rate
+        // Byte 41-42: CK Slew rise rate
         static constexpr field_t CK_SLEW_RATE_RISE_BYTE0{CK_SLEW_RATE_RISE_BYTE0_BYTE, CK_SLEW_RATE_RISE_BYTE0_START, CK_SLEW_RATE_RISE_BYTE0_LEN};
         static constexpr field_t CK_SLEW_RATE_RISE_BYTE1{CK_SLEW_RATE_RISE_BYTE1_BYTE, CK_SLEW_RATE_RISE_BYTE1_START, CK_SLEW_RATE_RISE_BYTE1_LEN};
-        static constexpr field_t CK_SLEW_RATE_RISE_BYTE2{CK_SLEW_RATE_RISE_BYTE2_BYTE, CK_SLEW_RATE_RISE_BYTE2_START, CK_SLEW_RATE_RISE_BYTE2_LEN};
-        static constexpr field_t CK_SLEW_RATE_RISE_BYTE3{CK_SLEW_RATE_RISE_BYTE3_BYTE, CK_SLEW_RATE_RISE_BYTE3_START, CK_SLEW_RATE_RISE_BYTE3_LEN};
-
-        // Byte 45-48: CK Slew fall rate
-        static constexpr field_t CK_SLEW_RATE_FALL_BYTE0{CK_SLEW_RATE_FALL_BYTE0_BYTE, CK_SLEW_RATE_FALL_BYTE0_START, CK_SLEW_RATE_FALL_BYTE0_LEN};
-        static constexpr field_t CK_SLEW_RATE_FALL_BYTE1{CK_SLEW_RATE_FALL_BYTE1_BYTE, CK_SLEW_RATE_FALL_BYTE1_START, CK_SLEW_RATE_FALL_BYTE1_LEN};
-        static constexpr field_t CK_SLEW_RATE_FALL_BYTE2{CK_SLEW_RATE_FALL_BYTE2_BYTE, CK_SLEW_RATE_FALL_BYTE2_START, CK_SLEW_RATE_FALL_BYTE2_LEN};
-        static constexpr field_t CK_SLEW_RATE_FALL_BYTE3{CK_SLEW_RATE_FALL_BYTE3_BYTE, CK_SLEW_RATE_FALL_BYTE3_START, CK_SLEW_RATE_FALL_BYTE3_LEN};
 
         // Byte 49-52: DQ Slew rate rise
         static constexpr field_t DQ_SLEW_RATE_RISE_BYTE0{DQ_SLEW_RATE_RISE_BYTE0_BYTE, DQ_SLEW_RATE_RISE_BYTE0_START, DQ_SLEW_RATE_RISE_BYTE0_LEN};

@@ -1028,7 +1028,6 @@ class ddimm_0_0 : public mss::efd::base
         {
             uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
             uint8_t l_atx_impedance = 0;
-
             // =========================================================
             // EFD Byte 32: ATX Impedance
             // Attribute: ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR
@@ -1038,18 +1037,25 @@ class ddimm_0_0 : public mss::efd::base
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint8_t> > ATX_IMP_MAP =
             {
-                // {key byte, ATX IMP (ohm)}
+                // SDR {key byte, ATX IMP (ohm)}
                 {0b0000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_DISABLE},
-                {0b0001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_OHM_20},
-                {0b0010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_OHM_24},
-                {0b0011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_OHM_30},
-                {0b0100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_OHM_40},
-                {0b0101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_OHM_60},
-                {0b0110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_OHM_120},
+                {0b0001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_SDR_OHM_10},
+                {0b0010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_SDR_OHM_15A},
+                {0b0011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_SDR_OHM_15B},
+                {0b0100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_SDR_OHM_20},
+                {0b0101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_SDR_OHM_24},
+                {0b0110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_SDR_OHM_30},
+
+                // DDR {key byte, ATX IMP (ohm)}
+                {0b1001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_DDR_OHM_10},
+                {0b1010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_DDR_OHM_15A},
+                {0b1011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_DDR_OHM_15B},
+                {0b1100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_DDR_OHM_20},
+                {0b1101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_DDR_OHM_24},
+                {0b1110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR_DDR_OHM_30},
 
                 // All others reserved
             };
-
             FAPI_TRY(mss::attr::get_si_mc_drv_imp_cmd_addr(iv_dimm, l_field));
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_IMPEDANCE, i_efd, mss::SET_SI_MC_DRV_IMP_CMD_ADDR, l_atx_impedance));
 
@@ -1064,49 +1070,103 @@ class ddimm_0_0 : public mss::efd::base
         }
 
         ///
-        /// @brief Set the atx slew rate rise field for channel A0
+        /// @brief Set the atx slew rate rise field for channels A and B
         ///
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
-        /// @note: Coding this for channel A / Rank 0 only.
+        /// @note: Coding this for both channel A and channel B
         virtual fapi2::ReturnCode set_atx_slew_rate_rise_ac_a0(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field = 0;
-
+            uint8_t l_field[mss::ody::sizes::NUM_CHANNELS] = {0};
+            const std::vector<uint8_t> l_reserved_bits{0x00, 0x04};
             // =========================================================
-            // EFD Byte 33-36: ATX Slew Rate Rise
+            // EFD Byte 33-34: ATX Slew Rate Rise
             // Attribute: ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_AC
             // MODE REG: N/A
             // DDR5 DDIMM SPD Document Release 1.21
-            // Page 143-144
+            // Page 149-151
             // =========================================================
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_SLEW_RISE_RATE_BYTE0, i_efd, SET_SLEW_RATE_RISE, l_field));
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_SLEW_RISE_RATE_BYTE0, i_efd, mss::SET_SLEW_RATE_RISE,
+                                             l_field[mss::ody::sizes::CHANNEL_A]));
+
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_SLEW_RISE_RATE_BYTE1, i_efd, mss::SET_SLEW_RATE_RISE,
+                                             l_field[mss::ody::sizes::CHANNEL_B]));
+
+            FAPI_ASSERT(l_field[mss::ody::sizes::CHANNEL_A] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
+                        fapi2::MSS_INVALID_SPD_RESERVED_BITS()
+                        .set_FUNCTION_CODE(mss::SET_SLEW_RATE_RISE)
+                        .set_FAILING_VALUE(l_field[mss::ody::sizes::CHANNEL_A])
+                        .set_OCMB_TARGET(iv_ocmb),
+                        "Reserved bits seen on %s. Value seen:0x%02x",
+                        spd::c_str(iv_port), l_field[mss::ody::sizes::CHANNEL_A]);
+
+            FAPI_ASSERT(l_field[mss::ody::sizes::CHANNEL_B] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
+                        fapi2::MSS_INVALID_SPD_RESERVED_BITS()
+                        .set_FUNCTION_CODE(mss::SET_SLEW_RATE_RISE)
+                        .set_FAILING_VALUE(l_field[mss::ody::sizes::CHANNEL_B])
+                        .set_OCMB_TARGET(iv_ocmb),
+                        "Reserved bits seen on %s. Value seen:0x%02x",
+                        spd::c_str(iv_port), l_field[mss::ody::sizes::CHANNEL_B]);
+
+            FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_SLEW_RATE_RISE,
+                      l_field[mss::ody::sizes::CHANNEL_A]) );
+            FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_SLEW_RATE_RISE,
+                      l_field[mss::ody::sizes::CHANNEL_B]) );
+
             FAPI_TRY(mss::attr::set_ddr5_tx_slew_rise_ac(iv_port, l_field));
+
 
         fapi_try_exit:
             return fapi2::current_err;
         }
 
         ///
-        /// @brief Set the atx slew rate fall field for channel A0
+        /// @brief Set the atx slew rate fall field for channels A and B
         ///
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
-        /// @note: Coding this for channel A / Rank 0 only.
+        /// @note: Coding this for both channel A and channel B.
         virtual fapi2::ReturnCode set_atx_slew_rate_fall_ac_a0(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field = 0;
+            uint8_t l_field[mss::ody::sizes::NUM_CHANNELS] = {0};
+            const std::vector<uint8_t> l_reserved_bits{0x00, 0x04};
 
             // =========================================================
-            // EFD Byte 37-40: ATX Slew Rate Fall
+            // EFD Byte 37-38: ATX Slew Rate Fall
             // Attribute: ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_AC
             // MODE REG: N/A
             // DDR5 DDIMM SPD Document Release 1.21
-            // Page 144
+            // Page 151-152
             // =========================================================
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_SLEW_FALL_RATE_BYTE0, i_efd, SET_SLEW_RATE_FALL, l_field));
+
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_SLEW_FALL_RATE_BYTE0, i_efd, mss::SET_SLEW_RATE_FALL,
+                                             l_field[mss::ody::sizes::CHANNEL_A]));
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_SLEW_FALL_RATE_BYTE1, i_efd, mss::SET_SLEW_RATE_FALL,
+                                             l_field[mss::ody::sizes::CHANNEL_B]));
+
+            FAPI_ASSERT(l_field[mss::ody::sizes::CHANNEL_A] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
+                        fapi2::MSS_INVALID_SPD_RESERVED_BITS()
+                        .set_FUNCTION_CODE(mss::SET_SLEW_RATE_FALL)
+                        .set_FAILING_VALUE(l_field[mss::ody::sizes::CHANNEL_A])
+                        .set_OCMB_TARGET(iv_ocmb),
+                        "Reserved bits seen on %s. Value seen:0x%02x",
+                        spd::c_str(iv_port), l_field[mss::ody::sizes::CHANNEL_A]);
+
+            FAPI_ASSERT(l_field[mss::ody::sizes::CHANNEL_B] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
+                        fapi2::MSS_INVALID_SPD_RESERVED_BITS()
+                        .set_FUNCTION_CODE(mss::SET_SLEW_RATE_FALL)
+                        .set_FAILING_VALUE(l_field[mss::ody::sizes::CHANNEL_B])
+                        .set_OCMB_TARGET(iv_ocmb),
+                        "Reserved bits seen on %s. Value seen:0x%02x",
+                        spd::c_str(iv_port), l_field[mss::ody::sizes::CHANNEL_B]);
+
+            FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_SLEW_RATE_FALL,
+                      l_field[mss::ody::sizes::CHANNEL_A]) );
+            FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_SLEW_RATE_FALL,
+                      l_field[mss::ody::sizes::CHANNEL_B]) );
+
             FAPI_TRY(mss::attr::set_ddr5_tx_slew_fall_ac(iv_port, l_field));
 
         fapi_try_exit:
@@ -1114,50 +1174,51 @@ class ddimm_0_0 : public mss::efd::base
         }
 
         ///
-        /// @brief Set the ck slew rate rise field for channel A0
+        /// @brief Set the ck slew rate rise field for channels A and B
         ///
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
-        /// @note: Coding this for channel A / Rank 0 only.
+        /// @note: Coding this for both channel A and channel B
         virtual fapi2::ReturnCode set_tx_slew_rate_rise_ck_a0(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field = 0;
-
+            uint8_t l_field[mss::ody::sizes::NUM_CHANNELS] = {0};
+            std::vector<uint8_t> l_reserved_bits{0b0000, 0b0011, 0b0101};
             // =========================================================
-            // EFD Byte 41-44: CK Slew Rate Rise
+            // EFD Byte 41-42: CK Slew Rate Rise
             // Attribute: ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_CK
             // MODE REG: N/A
             // DDR5 DDIMM SPD Document Release 1.21
-            // Page 145
+            // Page 152-154
             // =========================================================
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CK_SLEW_RATE_RISE_BYTE0, i_efd, SET_CK_SLEW_RATE_RISE, l_field));
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CK_SLEW_RATE_RISE_BYTE0, i_efd, mss::SET_CK_SLEW_RATE_RISE,
+                                             l_field[mss::ody::sizes::CHANNEL_A]));
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CK_SLEW_RATE_RISE_BYTE1, i_efd, mss::SET_CK_SLEW_RATE_RISE,
+                                             l_field[mss::ody::sizes::CHANNEL_B]));
+
+            FAPI_ASSERT(l_field[mss::ody::sizes::CHANNEL_A] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
+                        fapi2::MSS_INVALID_SPD_RESERVED_BITS()
+                        .set_FUNCTION_CODE(mss::SET_CK_SLEW_RATE_RISE)
+                        .set_FAILING_VALUE(l_field[mss::ody::sizes::CHANNEL_A])
+                        .set_OCMB_TARGET(iv_ocmb),
+                        "Reserved bits seen on %s. Value seen:0x%02x",
+                        spd::c_str(iv_port), l_field[mss::ody::sizes::CHANNEL_A]);
+
+            FAPI_ASSERT(l_field[mss::ody::sizes::CHANNEL_B] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
+                        fapi2::MSS_INVALID_SPD_RESERVED_BITS()
+                        .set_FUNCTION_CODE(mss::SET_CK_SLEW_RATE_RISE)
+                        .set_FAILING_VALUE(l_field[mss::ody::sizes::CHANNEL_B])
+                        .set_OCMB_TARGET(iv_ocmb),
+                        "Reserved bits seen on %s. Value seen:0x%02x",
+                        spd::c_str(iv_port), l_field[mss::ody::sizes::CHANNEL_B]);
+
+            FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_CK_SLEW_RATE_RISE,
+                      l_field[mss::ody::sizes::CHANNEL_A]) );
+            FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_CK_SLEW_RATE_RISE,
+                      l_field[mss::ody::sizes::CHANNEL_B]) );
+
             FAPI_TRY(mss::attr::set_ddr5_tx_slew_rise_ck(iv_port, l_field));
 
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Set the atx slew rate fall field
-        ///
-        /// @param[in] i_efd EFD binary
-        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
-        ///
-        /// @note: Coding this for channel A / Rank 0 only.
-        virtual fapi2::ReturnCode set_tx_slew_rate_fall_ck_a0(const std::vector<uint8_t>& i_efd) const
-        {
-            uint8_t l_field = 0;
-
-            // =========================================================
-            // EFD Byte 45-48: CK Slew Rate Fall
-            // Attribute: ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_CK
-            // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.21
-            // Page 145-146
-            // =========================================================
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CK_SLEW_RATE_FALL_BYTE0, i_efd, SET_CK_SLEW_RATE_FALL, l_field));
-            FAPI_TRY(mss::attr::set_ddr5_tx_slew_fall_ck(iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -3834,7 +3895,6 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY(set_atx_slew_rate_rise_ac_a0(i_efd));
             FAPI_TRY(set_atx_slew_rate_fall_ac_a0(i_efd));
             FAPI_TRY(set_tx_slew_rate_rise_ck_a0(i_efd));
-            FAPI_TRY(set_tx_slew_rate_fall_ck_a0(i_efd));
             FAPI_TRY(set_tx_slew_rate_rise_dq_a0(i_efd));
             FAPI_TRY(set_tx_slew_rate_fall_dq_a0(i_efd));
             FAPI_TRY(set_dram_rtt_nom_wr(i_efd));

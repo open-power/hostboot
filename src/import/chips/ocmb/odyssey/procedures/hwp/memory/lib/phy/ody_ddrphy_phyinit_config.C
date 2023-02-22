@@ -46,6 +46,20 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/mss_math.H>
+#include <ody_scom_mp_anib0_b0.H>
+#include <ody_scom_mp_anib1_b0.H>
+#include <ody_scom_mp_anib2_b0.H>
+#include <ody_scom_mp_anib3_b0.H>
+#include <ody_scom_mp_anib4_b0.H>
+#include <ody_scom_mp_anib5_b0.H>
+#include <ody_scom_mp_anib6_b0.H>
+#include <ody_scom_mp_anib7_b0.H>
+#include <ody_scom_mp_anib8_b0.H>
+#include <ody_scom_mp_anib9_b0.H>
+#include <ody_scom_mp_anib10_b0.H>
+#include <ody_scom_mp_anib11_b0.H>
+#include <ody_scom_mp_anib12_b0.H>
+#include <ody_scom_mp_anib13_b0.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <lib/shared/ody_consts.H>
 #include <lib/dimm/ody_rank.H>
@@ -3669,6 +3683,10 @@ fapi2::ReturnCode run_phy_init( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>
                                  l_user_input_basic,
                                  l_user_input_advanced,
                                  l_user_input_dram_config), TARGTIDFORMAT "failed init_phy_config", TARGTID);
+
+        // Set up txslew configs after init
+        FAPI_TRY(post_phyinit_overrides(i_target),
+                 TARGTIDFORMAT " Failed post_phyinit_override", TARGTID);
     }
     // Otherwise, run the subset of registers that need to be updated for sim
     else
@@ -3816,6 +3834,31 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     uint8_t l_attr_arr_rank[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
     uint16_t l_attr_arr_rank_16[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
 
+    constexpr uint16_t ATxIMPCMD_Arr[mss::ody::sizes::SPD_ATXCMD_DECODE_MAX]
+    __attribute__ ((aligned (4))) =
+    {
+        // These values are pulled from the DDR5 DDIMM SPD doc rev.1.21 for EFD Bytes 32
+        0xC000, // 0b0000 High Impedance
+        // SDR Impedance Values
+        0xCFFF, // 0b0001 10 Ohms
+        0xCFBE, // 0b0010 15 Ohms A
+        0xCF7E, // 0b0011 15 Ohms B
+        0xC372, // 0b0100 20 Ohms
+        0xC249, // 0b0101 24 Ohms
+        0xCF3C, // 0b0110 30 Ohms
+        0x0000, // 0b0111 Reserved
+        0x0000, // 0b1000 Reserved
+
+        // DDR Impedance Values
+        0xCFFF, // 0b1001 10 Ohms
+        0xCFBE, // 0b1010 15 Ohms A
+        0xCF7E, // 0b1011 15 Ohms B
+        0xC372, // 0b1100 20 Ohms
+        0xC252, // 0b1101 24 Ohms
+        0xCF3C, // 0b1110 30 Ohms
+        // Rest are reserved
+    };
+
     // D4RxPreambleLength, D4TxPreambleLength (both are unused, so hardcode to '1')
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -3837,7 +3880,21 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
 
     // ATxImpedance (set to DIMM0, rank0 value)
     FAPI_TRY(mss::attr::get_si_mc_drv_imp_cmd_addr(i_target, l_attr_arr_rank));
-    io_user_input_advanced.ATxImpedance = l_attr_arr_rank[0][0];
+    FAPI_ASSERT(l_attr_arr_rank[0][0] < mss::ody::sizes::SPD_ATXCMD_DECODE_MAX,
+                fapi2::ODY_INVALID_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR()
+                .set_FAILING_VALUE(l_attr_arr_rank[0][0])
+                .set_PORT_TARGET(i_target),
+                TARGTIDFORMAT " Invalid attribute override value for ATxImpedance 0x%08x", TARGTID,
+                l_attr_arr_rank[0][0]);
+
+    FAPI_ASSERT(ATxIMPCMD_Arr[l_attr_arr_rank[0][0]] != 0x00,
+                fapi2::ODY_INVALID_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR()
+                .set_FAILING_VALUE(l_attr_arr_rank[0][0])
+                .set_PORT_TARGET(i_target),
+                TARGTIDFORMAT " Invalid attribute override value for ATxImpedance 0x%08x", TARGTID,
+                l_attr_arr_rank[0][0]);
+
+    io_user_input_advanced.ATxImpedance = ATxIMPCMD_Arr[l_attr_arr_rank[0][0]];
 
     // TxImpedance
     FAPI_TRY(mss::attr::get_si_phy_drv_imp_dq_dqs_pull_up(i_target, l_attr_data_16));
@@ -3949,25 +4006,21 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
         io_user_input_advanced.TxSlewFallDQ[l_pstate] = l_attr_data;
     }
 
-    // TxSlewRiseAC
-    FAPI_TRY(mss::attr::get_ddr5_tx_slew_rise_ac(i_target, l_attr_data));
-    io_user_input_advanced.TxSlewRiseAC = l_attr_data;
+    // TxSlewRiseAC init to 0 pulled from attr after phyinit
+    io_user_input_advanced.TxSlewRiseAC = 0x0;
 
-    // TxSlewFallAC
-    FAPI_TRY(mss::attr::get_ddr5_tx_slew_fall_ac(i_target, l_attr_data));
-    io_user_input_advanced.TxSlewFallAC = l_attr_data;
+    // TxSlewFallAC init to 0 pulled from attr after phyinit
+    io_user_input_advanced.TxSlewFallAC = 0x0;
 
     // IsHighVDD
     FAPI_TRY(mss::attr::get_phy_is_highvdd(i_target, l_attr_data));
     io_user_input_advanced.IsHighVDD = l_attr_data;
 
-    // TxSlewRiseCK
-    FAPI_TRY(mss::attr::get_ddr5_tx_slew_rise_ck(i_target, l_attr_data));
-    io_user_input_advanced.TxSlewRiseCK = l_attr_data;
+    // TxSlewRiseCK init to 0 pulled from attr after phyinit
+    io_user_input_advanced.TxSlewRiseCK = 0x0;
 
-    // TxSlewFallCK
-    FAPI_TRY(mss::attr::get_ddr5_tx_slew_fall_ck(i_target, l_attr_data));
-    io_user_input_advanced.TxSlewFallCK = l_attr_data;
+    // TxSlewFallCK reserved, hardcode to 0
+    io_user_input_advanced.TxSlewFallCK = 0x0;
 
     // NvAnibRcvSel, AnibRcvLaneSel, AnibRcvEn
     // NVDIMM is unsupported so these are all zero
@@ -4467,5 +4520,459 @@ void print_structs(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
              TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_B3);
 }
 #endif
+
+///
+/// @brief Override SPD Assert checks for reserve bits/arr out of bounds on both channels for given attr
+/// @param[in] i_target - the memory port on which to operate
+/// @param[in] i_attr_data - value to decode from attr
+/// @param[in] i_csr_arr - Array of possible csr values
+/// @param[in] i_atximp_arr - Array of possible impedance values
+/// @param[in] i_ch - DIMM channel
+/// @param[in] i_attr_id - ID of Attribute values are being pulled from
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode override_assert_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t (&i_attr_data)[mss::ody::sizes::NUM_CHANNELS],
+        const uint8_t (&i_csr_arr)[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX],
+        const uint16_t (&i_atximp_arr)[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX],
+        const uint8_t i_ch,
+        const uint16_t i_attr_id)
+{
+    // Out of bounds asserts
+    FAPI_ASSERT( i_attr_data[i_ch] < sizeof(i_csr_arr),
+                 fapi2::ODY_INVALID_ATX_OVERRIDE()
+                 .set_FAILING_VALUE(i_attr_data[i_ch])
+                 .set_FAILING_ATTR(i_attr_id)
+                 .set_FAILING_CHANNEL(i_ch)
+                 .set_PORT_TARGET(i_target),
+                 TARGTIDFORMAT
+                 " Invalid attribute override value for attribute id: 0x%08x CsrATxSrc CH %08x (A=0, B=1) 0x%08x (out of bounds)",
+                 TARGTID,
+                 i_attr_id,
+                 i_ch,
+                 i_attr_data[i_ch]);
+
+    FAPI_ASSERT( i_attr_data[i_ch] < (sizeof(i_atximp_arr) / 2),
+                 fapi2::ODY_INVALID_ATX_OVERRIDE()
+                 .set_FAILING_VALUE(i_attr_data[i_ch])
+                 .set_FAILING_ATTR(i_attr_id)
+                 .set_FAILING_CHANNEL(i_ch)
+                 .set_PORT_TARGET(i_target),
+                 TARGTIDFORMAT
+                 " Invalid attribute override value for attribute id: 0x%08x ATxImpedance CH %08x (A=0, B=1) 0x%08x (out of bounds)",
+                 TARGTID,
+                 i_attr_id,
+                 i_ch,
+                 i_attr_data[i_ch]);
+
+    // Reserve bits assert
+    FAPI_ASSERT( i_csr_arr[i_attr_data[i_ch]] != 0x00,
+                 fapi2::ODY_INVALID_ATX_OVERRIDE()
+                 .set_FAILING_VALUE(i_attr_data[i_ch])
+                 .set_FAILING_ATTR(i_attr_id)
+                 .set_FAILING_CHANNEL(i_ch)
+                 .set_PORT_TARGET(i_target),
+                 TARGTIDFORMAT " Invalid attribute override value for attribute id: 0x%08x CsrATxSrc CH %08x (A=0, B=1) 0x%08x", TARGTID,
+                 i_attr_id,
+                 i_ch,
+                 i_attr_data[i_ch]);
+
+    FAPI_ASSERT(i_atximp_arr[i_attr_data[i_ch]] != 0x00,
+                fapi2::ODY_INVALID_ATX_OVERRIDE()
+                .set_FAILING_VALUE(i_attr_data[i_ch])
+                .set_FAILING_ATTR(i_attr_id)
+                .set_FAILING_CHANNEL(i_ch)
+                .set_PORT_TARGET(i_target),
+                TARGTIDFORMAT " Invalid attribute override value for attribute id: 0x%08x ATxImpedance CH %08x (A=0, B=1) 0x%08x",
+                TARGTID,
+                i_attr_id,
+                i_ch,
+                i_attr_data[i_ch]);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Post Phyinit override for TX_SLEW_RISE_AC
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ac(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    uint8_t l_attr_arr[mss::ody::sizes::NUM_CHANNELS] = {};
+    fapi2::buffer<uint64_t> l_buffer;
+
+    // The following value arrays are pulled from the DDR5 DDIMM SPD doc rev.1.21 for EFD Bytes 33-34
+    constexpr uint8_t txslew_rise_ac_csr_atxsrc_arr[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX]
+    __attribute__ ((aligned (4))) =
+    {
+        0x00, // 0b0000 Reserved
+        0x85, // 0b0001 10 Ohm Slow/Moderate
+        0x70, // 0b0010 10 Ohm Fast
+        0x85, // 0b0011 15 Ohm Slow
+        0x00, // 0b0100 Reserved
+        0x45, // 0b0101 15 Ohm Moderate
+        0xB0, // 0b0110 15 Ohm Fast
+        0xB8, // 0b0111 20 Ohm Slow
+        0x78, // 0b1000 20 Ohm Moderate/Fast
+        0xB8, // 0b1001 24 Ohm
+        0xF0  // 0b1010 30 Ohm
+        // Rest are reserved
+    };
+
+    constexpr uint16_t txslew_rise_ac_atx_impcmd_arr[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX]
+    __attribute__ ((aligned (4))) =
+    {
+        0x000, // 0b0000 Reserved
+        0xFFF, // 0b0001 10 Ohm Slow/Moderate
+        0xFFF, // 0b0010 10 Ohm Fast
+        0xFBE, // 0b0010 10 Ohm Fast
+        0x000, // 0b0100 Reserved
+        0xFBE, // 0b0101 15 Ohm Moderate
+        0xFBD, // 0b0110 15 Ohm Fast
+        0xC8D, // 0b0111 20 Ohm Slow
+        0xC8D, // 0b1000 20 Ohm Moderate/Fast
+        0x49C, // 0b1001 24 Ohm
+        0xF3C  // 0b1010 30 Ohm
+        // Rest are reserved
+    };
+
+    //
+    // The drive strength settings are programmed into two fields in ATxImpedance register. The pull down
+    // impedance is set into bits 11:6, field ADrvStrenP and the pull up impedance is set into bits 5:0, field
+    // ADrvStrenN of ANIB register 0x43 for ANIBs 1,2,3,4, for A0/A1 (A sides of the PHY/Port) and ANIBs
+    // 9,10,11,12 for B0/B1 (the B sides of the PHY/Port). See the PHY data book section 4.1.5
+    //
+    static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR55[8] __attribute__ ((aligned (4))) =
+    {
+        // CH_A ANIB 1-4
+        {scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB2_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB3_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB4_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
+        // CH_B ANIB 9-12
+        {scomt::mp::DWC_DDRPHYA_ANIB9_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB10_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB11_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB12_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
+    };
+
+    static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR43[8] __attribute__ ((aligned (4))) =
+    {
+        // CH_A ANIB 1-4
+        {scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB2_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB3_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB4_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
+        // CH_B ANIB 9-12
+        {scomt::mp::DWC_DDRPHYA_ANIB9_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB10_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB11_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB12_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
+    };
+
+
+    FAPI_TRY(mss::attr::get_ddr5_tx_slew_rise_ac(i_target, l_attr_arr));
+
+    // Asserts to avoid bad/reserved values being passed in
+    for(uint8_t l_channel = 0; l_channel < mss::ody::sizes::NUM_CHANNELS; l_channel++)
+    {
+        FAPI_TRY(override_assert_helper(i_target,
+                                        l_attr_arr,
+                                        txslew_rise_ac_csr_atxsrc_arr,
+                                        txslew_rise_ac_atx_impcmd_arr,
+                                        l_channel,
+                                        mss::ody::ffdc_codes::DDRPHYINIT_TX_SLEW_RISE_AC_OVERRIDE
+                                       ));
+    }
+
+    // Read mod write to CSR 0x55
+    // Iterates across ANIB ADDR/CHANNEL pairs ANIBS 1-4/Channel A and ANIBS 9-12 Channel B
+    for (const auto& l_addr_pair : ADDR_CHANNEL_PAIR55)
+    {
+        // In this call, l_addr_pair.second refers to the channel index assocated with this ANIB l_addr_pair.first
+        // l_attr_arr[l_addr_pair.second] is then the SPD bits that is used as an index in the look up arr mapping
+        // table for the respective CSR Value which gets inserted to the repective ANIB/Channel
+        FAPI_TRY(getScom(i_target, l_addr_pair.first , l_buffer));
+        l_buffer.insertFromRight<scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXSLEWRATE_P0_CSRATXSRC,
+                                 scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXSLEWRATE_P0_CSRATXSRC_LEN>
+                                 (txslew_rise_ac_csr_atxsrc_arr[l_attr_arr[l_addr_pair.second]]);
+        FAPI_TRY(putScom(i_target, l_addr_pair.first, l_buffer));
+    }
+
+    // Read mod write to CSR 0x43
+    // Iterates across ANIB ADDR/CHANNEL pairs ANIBS 1-4/Channel A and ANIBS 9-12 Channel B
+    for (const auto& l_addr_pair : ADDR_CHANNEL_PAIR43)
+    {
+        // In this call, l_addr_pair.second refers to the channel index assocated with this ANIB l_addr_pair.first
+        // l_attr_arr[l_addr_pair.second] is then the SPD bits that is used as an index in the look up arr mapping
+        // table for the respective CSR Value which gets inserted to the repective ANIB/Channel
+        FAPI_TRY(getScom(i_target, l_addr_pair.first , l_buffer));
+        l_buffer.insertFromRight < scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXIMPEDANCE_ADRVSTRENN,
+                                 scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXIMPEDANCE_ADRVSTRENP_LEN +
+                                 scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXIMPEDANCE_ADRVSTRENN_LEN >
+                                 (txslew_rise_ac_atx_impcmd_arr[l_attr_arr[l_addr_pair.second]]);
+        FAPI_TRY(putScom(i_target, l_addr_pair.first, l_buffer));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Post Phyinit override for TX_SLEW_FALL_AC
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode post_phyinit_override_tx_slew_fall_ac(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    uint8_t l_attr_arr[mss::ody::sizes::NUM_CHANNELS] = {};
+    fapi2::buffer<uint64_t> l_buffer;
+
+    // The following value arr are pulled from the DDR5 DDIMM SPD doc rev.1.21 for EFD Bytes 36-37
+    constexpr uint8_t txslew_fall_ac_csr_atxsrc_arr[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX]
+    __attribute__ ((aligned (4))) =
+    {
+        0x00, // 0b0000 Reserved
+        0x85, // 0b0001 10 Ohm Slow/Moderate
+        0x70, // 0b0010 10 Ohm Fast
+        0x85, // 0b0011 15 Ohm Slow
+        0x00, // 0b0100 Reserved
+        0x45, // 0b0101 15 Ohm Moderate
+        0xB0, // 0b0110 15 Ohm Fast
+        0xB8, // 0b0111 20 Ohm Slow
+        0x78, // 0b1000 20 Ohm Moderate/Fast
+        0xB8, // 0b1001 24 Ohm
+        0xF0  // 0b1010 30 Ohm
+        // Rest are reserved
+    };
+
+    constexpr uint16_t txslew_fall_ac_atx_impcmd_arr[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX]
+    __attribute__ ((aligned (4))) =
+    {
+        0x000, // 0b0000 Reserved
+        0xFFF, // 0b0001 10 Ohm Slow/Moderate
+        0xFFF, // 0b0010 10 Ohm Fast
+        0xFBE, // 0b0010 10 Ohm Fast
+        0x000, // 0b0100 Reserved
+        0xFBE, // 0b0101 15 Ohm Moderate
+        0xFBD, // 0b0110 15 Ohm Fast
+        0xC8D, // 0b0111 20 Ohm Slow
+        0xC8D, // 0b1000 20 Ohm Moderate/Fast
+        0x49C, // 0b1001 24 Ohm
+        0xF3C  // 0b1010 30 Ohm
+        // Rest are reserved
+    };
+
+    //
+    // The drive strength settings are programmed into two fields in ATxImpedance register. The pull down
+    // impedance is set into bits 11:6, field ADrvStrenP and the pull up impedance is set into bits 5:0, field
+    // ADrvStrenN of ANIB register 0x43 for ANIBs 0 for A0/A1 (A sides of the PHY/Port) and ANIBs 13 for
+    // B0/B1 (the B sides of the PHY/Port). See the PHY data book section 4.1.5.
+    //
+    static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR55[2]   __attribute__ ((aligned (4))) =
+    {
+        // CH A ANIB 0
+        {scomt::mp::DWC_DDRPHYA_ANIB0_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
+        // CH B ANIB 13
+        {scomt::mp::DWC_DDRPHYA_ANIB13_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
+    };
+
+    static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR43[2]  __attribute__ ((aligned (4))) =
+    {
+        // CH A ANIB 0
+        {scomt::mp::DWC_DDRPHYA_ANIB0_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
+        // CH B ANIB 13
+        {scomt::mp::DWC_DDRPHYA_ANIB13_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
+    };
+
+    // TxSlewFallAC
+    FAPI_TRY(mss::attr::get_ddr5_tx_slew_fall_ac(i_target, l_attr_arr));
+
+    // Asserts to avoid bad/reserved values being passed in
+    for(uint8_t l_channel = 0; l_channel < mss::ody::sizes::NUM_CHANNELS; l_channel++)
+    {
+        FAPI_TRY(override_assert_helper(i_target,
+                                        l_attr_arr,
+                                        txslew_fall_ac_csr_atxsrc_arr,
+                                        txslew_fall_ac_atx_impcmd_arr,
+                                        l_channel,
+                                        mss::ody::ffdc_codes::DDRPHYINIT_TX_SLEW_FALL_AC_OVERRIDE
+                                       ));
+    }
+
+    // Read mod write to CSR 0x55
+    // Iterates across ANIB ADDR/CHANNEL pairs ANIBS 0/Channel A and ANIBS 13/Channel B
+    for (const auto& l_addr_pair : ADDR_CHANNEL_PAIR55)
+    {
+        // In this call, l_addr_pair.second refers to the channel index assocated with this ANIB l_addr_pair.first
+        // l_attr_arr[l_addr_pair.second] is then the SPD bits that is used as an index in the look up arr mapping
+        // table for the respective CSR Value which gets inserted to the repective ANIB/Channel
+        FAPI_TRY(getScom(i_target, l_addr_pair.first , l_buffer));
+        l_buffer.insertFromRight<scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXSLEWRATE_P0_CSRATXSRC,
+                                 scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXSLEWRATE_P0_CSRATXSRC_LEN>
+                                 (txslew_fall_ac_csr_atxsrc_arr[l_attr_arr[l_addr_pair.second]]);
+        FAPI_TRY(putScom(i_target, l_addr_pair.first, l_buffer));
+    }
+
+    // Read mod write to CSR 0x43
+    // Iterates across ANIB ADDR/CHANNEL pairs ANIBS 0/Channel A and ANIBS 13/Channel B
+    for (const auto& l_addr_pair : ADDR_CHANNEL_PAIR43)
+    {
+        // In this call, l_addr_pair.second refers to the channel index assocated with this ANIB l_addr_pair.first
+        // l_attr_arr[l_addr_pair.second] is then the SPD bits that is used as an index in the look up arr mapping
+        // table for the respective CSR Value which gets inserted to the repective ANIB/Channel
+        FAPI_TRY(getScom(i_target, l_addr_pair.first , l_buffer));
+        l_buffer.insertFromRight < scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXIMPEDANCE_ADRVSTRENN,
+                                 scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXIMPEDANCE_ADRVSTRENP_LEN +
+                                 scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXIMPEDANCE_ADRVSTRENN_LEN >
+                                 (txslew_fall_ac_atx_impcmd_arr[l_attr_arr[l_addr_pair.second]]);
+        FAPI_TRY(putScom(i_target, l_addr_pair.first, l_buffer));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Post Phyinit override for TX_SLEW_RISE_CK
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ck(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    uint8_t l_attr_arr[mss::ody::sizes::NUM_CHANNELS] = {0};
+    fapi2::buffer<uint64_t> l_buffer;
+
+    // The following value arr are pulled from the DDR5 DDIMM SPD doc rev.1.21 for EFD Bytes 41-42
+    constexpr uint8_t txslew_rise_ck_csr_atxsrc_arr[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX ]
+    __attribute__ ((aligned (4))) =
+    {
+        0x00, // 0b0000 Reserved
+        0x85, // 0b0001 10 Ohm Slow/Moderate
+        0x70, // 0b0010 10 Ohm Fast
+        0x00, // 0b0011 Reserved
+        0x8A, // 0b0100 15 Ohm Slow
+        0x00, // 0b0101 Reserved
+        0xB0, // 0b0110 15 Ohm Moderate/Fast
+        0xB8, // 0b0111 20 Ohm Slow
+        0x78, // 0b1000 20 Ohm Moderate/Fast
+        0xB8, // 0b1001 24 Ohm
+        0xF0  // 0b1010 30 Ohm
+        // Rest are reserved
+    };
+
+    //  TX Slew rise CK ATxImp arr
+    constexpr uint16_t txslew_rise_ck_atx_impcmd_arr[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX]
+    __attribute__ ((aligned (4))) =
+    {
+        0x000, // 0b0000 Reserved
+        0xFFF, // 0b0001 10 Ohm Slow/Moderate
+        0xFFF, // 0b0010 10 Ohm Fast
+        0x000, // 0b0000 Reserved
+        0xFBF, // 0b0100 15 Ohm Slow
+        0x000, // 0b0000 Reserved
+        0xFBD, // 0b0110 15 Ohm Moderate/Fast
+        0xC8D, // 0b0111 20 Ohm Slow
+        0xC8D, // 0b1000 20 Ohm Moderate/Fast
+        0x49C, // 0b1001 24 Ohm
+        0xF3C  // 0b1010 30 Ohm
+        // Rest are reserved
+    };
+
+    //
+    // The drive strength settings are programmed into two fields in ATxImpedance register. The pull down
+    // impedance is set into bits 11:6, field ADrvStrenP and the pull up impedance is set into bits 5:0, field
+    // ADrvStrenN of ANIB register 0x43 for ANIBs 5,7 for A0/A1 (A sides of the PHY/Port) and ANIBs 6,8 for
+    // B0/B1 (the B sides of the PHY/Port)
+    //
+
+    static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR55[4] __attribute__ ((aligned (4))) =
+    {
+        // CH A ANIB 5,6
+        {scomt::mp::DWC_DDRPHYA_ANIB5_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB6_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
+        // CH_B ANIB 7,8
+        {scomt::mp::DWC_DDRPHYA_ANIB7_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB8_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
+    };
+
+    static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR43[4] __attribute__ ((aligned (4))) =
+    {
+        // CH_A ANIB 5,6
+        {scomt::mp::DWC_DDRPHYA_ANIB5_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB6_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
+        // CH_B ANIB 7,8
+        {scomt::mp::DWC_DDRPHYA_ANIB7_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB8_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
+    };
+
+    // TxSlewRiseCK
+    FAPI_TRY(mss::attr::get_ddr5_tx_slew_rise_ck(i_target, l_attr_arr));
+
+    // Asserts to avoid bad/reserved values being passed in
+    for(uint8_t l_channel = 0; l_channel < mss::ody::sizes::NUM_CHANNELS; l_channel++)
+    {
+        FAPI_TRY(override_assert_helper(i_target,
+                                        l_attr_arr,
+                                        txslew_rise_ck_csr_atxsrc_arr,
+                                        txslew_rise_ck_atx_impcmd_arr,
+                                        l_channel,
+                                        mss::ody::ffdc_codes::DDRPHYINIT_TX_SLEW_RISE_CK_OVERRIDE
+                                       ));
+    }
+
+
+    // Read mod write to CSR 0x55
+    // Iterates across ANIB ADDR/CHANNEL pairs ANIBS 5,6/Channel A and ANIBS 7,8/Channel B
+    for (const auto& l_addr_pair : ADDR_CHANNEL_PAIR55)
+    {
+        // In this call, l_addr_pair.second refers to the channel index assocated with this ANIB l_addr_pair.first
+        // l_attr_arr[l_addr_pair.second] is then the SPD bits that is used as an index in the look up arr mapping
+        // table for the respective CSR Value which gets inserted to the repective ANIB/Channel
+        FAPI_TRY(getScom(i_target, l_addr_pair.first , l_buffer));
+        l_buffer.insertFromRight<scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXSLEWRATE_P0_CSRATXSRC,
+                                 scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXSLEWRATE_P0_CSRATXSRC_LEN>
+                                 (txslew_rise_ck_csr_atxsrc_arr[l_attr_arr[l_addr_pair.second]]);
+        FAPI_TRY(putScom(i_target, l_addr_pair.first, l_buffer));
+    }
+
+    // Read mod write to CSR 0x43
+    // Iterates across ANIB ADDR/CHANNEL pairs ANIBS 5,6/Channel A and ANIBS 7,8/Channel B
+    for (const auto& l_addr_pair : ADDR_CHANNEL_PAIR43)
+    {
+        // In this call, l_addr_pair.second refers to the channel index assocated with this ANIB l_addr_pair.first
+        // l_attr_arr[l_addr_pair.second] is then the SPD bits that is used as an index in the look up arr mapping
+        // table for the respective CSR Value which gets inserted to the repective ANIB/Channel
+        FAPI_TRY(getScom(i_target, l_addr_pair.first , l_buffer));
+        l_buffer.insertFromRight < scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXIMPEDANCE_ADRVSTRENN,
+                                 scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXIMPEDANCE_ADRVSTRENP_LEN +
+                                 scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXIMPEDANCE_ADRVSTRENN_LEN >
+                                 (txslew_rise_ck_atx_impcmd_arr[l_attr_arr[l_addr_pair.second]]);
+        FAPI_TRY(putScom(i_target, l_addr_pair.first, l_buffer));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Post Phyinit decode for TxSlew values
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode post_phyinit_overrides(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    FAPI_TRY(post_phyinit_override_tx_slew_rise_ac(i_target));
+    FAPI_TRY(post_phyinit_override_tx_slew_fall_ac(i_target));
+    FAPI_TRY(post_phyinit_override_tx_slew_rise_ck(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 /*! @} */

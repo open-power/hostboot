@@ -194,4 +194,47 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_ODY_INVALID_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR</rc>
+    <description>
+        Invalid value detected in ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR.
+        Likely due to an attribute override because SPD values are
+        checked in mss_eff_config step.
+    </description>
+    <ffdc>FAILING_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_INVALID_ATX_OVERRIDE</rc>
+    <description>
+        Invalid attribute value recieved in phyinit CSR override.
+        Failing attribute will be identified in error trace or ffdc.
+    </description>
+    <ffdc>FAILING_VALUE</ffdc>
+    <ffdc>FAILING_ATTR</ffdc>
+    <ffdc>FAILING_CHANNEL</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>
