@@ -49,6 +49,7 @@ enum valid_records : uint32_t
     VSYS = 0x56535953,
     LXR0 = 0x4C585230,
     PSPD = 0x50535044,
+    UTIL = 0x5554494C,
 };
 
 enum valid_special_keywords : uint16_t
@@ -101,6 +102,33 @@ const uint16_t valid_vsys_keywords[]
                   0x544E,  // TN
                   0x574E   // WN
                 };
+
+const uint16_t valid_util_keywords[]
+                 { 0xFFFF,  // invalid
+                   0xFFFF,  // invalid
+                   0x5254,  // RT
+                   0x4430,  // D0
+                   0x4431,  // D1
+                   0x4432,  // D2
+                   0x4433,  // D3
+                   0x4434,  // D4
+                   0x4435,  // D5
+                   0x4436,  // D6
+                   0x4437,  // D7
+                   0x4438,  // D8
+                   0x4439,  // D9
+                   0x4630,  // F0
+                   0x4631,  // F1
+                   0x4632,  // F2
+                   0x4633,  // F3
+                   0x4634,  // F4
+                   0x4635,  // F5
+                   0x4636,  // F6
+                   0x4637,  // F7
+                   0x4638,  // F8
+                   0x4639,  // F9
+                   0x5046,  // PF
+                  };
 
 // Must match valid_vsys_keywords and PLDM FRU IPZ Keyword Mapping Doc
 enum valid_vsys_keywords_values

@@ -60,6 +60,7 @@ namespace PVPD
         { VSYS, "VSYS" },
         { LXR0, "LXR0" },
         { PSPD, "PSPD" },
+        { UTIL, "UTIL" },
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!
         { PVPD_TEST_RECORD, "TEST" },
@@ -121,6 +122,8 @@ namespace PVPD
         { TN,  "TN" },
         { WN,  "WN" },
         { pdD, "#D" },
+        { F5,  "F5" },
+        { F6,  "F6" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!

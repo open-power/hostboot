@@ -84,6 +84,7 @@ const std::map<uint32_t, std::vector<uint16_t> > record_keyword_field_map {
   { VSYS, { std::begin(valid_vsys_keywords), std::end(valid_vsys_keywords) } },
   { LXR0, { std::begin(valid_lxr0_keywords), std::end(valid_lxr0_keywords) } },
   { PSPD, { std::begin(valid_pspd_keywords), std::end(valid_pspd_keywords) } },
+  { UTIL, { std::begin(valid_util_keywords), std::end(valid_util_keywords) } },
 };
 
 // Map to identify the list of pound keywords to ADD

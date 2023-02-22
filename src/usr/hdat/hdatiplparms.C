@@ -48,7 +48,8 @@
 #include <devicefw/userif.H>
 #include <targeting/common/util.H>
 #include <pldm/extended/pdr_manager.H>
-
+#include <targeting/targplatutil.H>
+#include <errl/errlmanager.H>
 
 using namespace TARGETING;
 
@@ -724,18 +725,97 @@ void HdatIplParms::hdatGetSystemParamters()
 
     this->iv_hdatIPLParams->iv_sysParms.hdatSplitCoreMode = 1;
 
-    TARGETING::ATTR_SYSTEM_BRAND_NAME_type l_systemBrandName = {0};
-    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SYSTEM_BRAND_NAME>
-                                                         (l_systemBrandName))
+    /* Read UTIL::F5 keyword (maxlen=16)*/
+    errlHndl_t l_err = nullptr;
+    size_t  dataSize = 0;
+    char    sysVendorname[sizeof(this->iv_hdatIPLParams->iv_sysParms.hdatSystemVendorName)]={0};
+    Target* node_tgt = UTIL::getCurrentNodeTarget();
+
+
+    l_err = deviceRead(node_tgt, nullptr, dataSize, DEVICE_PVPD_ADDRESS( PVPD::UTIL, PVPD::F5 ));
+
+    if (l_err)
     {
-        strcpy(reinterpret_cast<char*>
-                   (this->iv_hdatIPLParams->iv_sysParms.hdatSystemVendorName),
-                                                           l_systemBrandName);
+        errlCommit( l_err, HDAT_COMP_ID );
+        HDAT_ERR("Read UTIL::F5 length error");
     }
     else
     {
-        HDAT_ERR("Error in getting SYSTEM_BRAND_NAME");
+        char f5Buffer[dataSize+1]={0};   
+        l_err = deviceRead(node_tgt, f5Buffer, dataSize, DEVICE_PVPD_ADDRESS( PVPD::UTIL, PVPD::F5 ));
+        if (l_err)
+        {
+            errlCommit( l_err, HDAT_COMP_ID );
+            HDAT_ERR("Read UTIL::F5 data error");
+        }
+        else if((strlen(f5Buffer)+1) > sizeof(sysVendorname))
+        {
+            HDAT_ERR("Read UTIL::F5 string len override size: %d", strlen(f5Buffer));
+        }
+        else
+        {
+            HDAT_DBG("Read UTIL::F5 success len=%d str=%s", dataSize, f5Buffer);
+            if (strlen(f5Buffer))
+            {
+                strcat(sysVendorname, f5Buffer);
+            }
+        }
     }
+
+    /* Read UTIL::F6 keyword(maxlen=16) */
+    dataSize = 0;
+    l_err = deviceRead(node_tgt, nullptr, dataSize, DEVICE_PVPD_ADDRESS( PVPD::UTIL, PVPD::F6 ));
+
+    if (l_err)
+    {
+        errlCommit( l_err, HDAT_COMP_ID );
+        HDAT_ERR("Read UTIL::F6 length error...");
+    }
+    else
+    {
+        char f6Buffer[dataSize+1]={0};
+        l_err = deviceRead(node_tgt, f6Buffer, dataSize, DEVICE_PVPD_ADDRESS( PVPD::UTIL, PVPD::F6 ));
+        if (l_err)
+        {
+            errlCommit( l_err, HDAT_COMP_ID );
+            HDAT_ERR("Read UTIL::F6 data error");
+        }
+        else if((strlen(f6Buffer) + strlen(sysVendorname) + 1) > sizeof(sysVendorname))
+        {
+            HDAT_ERR("Read UTIL::F5+F6 string len override size: %d", strlen(f6Buffer) + strlen(sysVendorname));
+        }
+        else
+        {
+            HDAT_DBG("Read UTIL::F6 success len=%d str=%s", dataSize, f6Buffer);
+            if (strlen(f6Buffer))
+            {
+                strcat(sysVendorname, f6Buffer);
+            }
+        }
+    }
+
+    /* check vendor name from VPD */
+    if (strlen(sysVendorname))
+    {
+        strcpy(reinterpret_cast<char*>(this->iv_hdatIPLParams->iv_sysParms.hdatSystemVendorName), sysVendorname);
+    }
+    else
+    {
+        HDAT_DBG("UTIL::F5 F6 is empty, using ATTR_SYSTEM_BRAND_NAME");
+        TARGETING::ATTR_SYSTEM_BRAND_NAME_type l_systemBrandName = { 0 };
+        if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SYSTEM_BRAND_NAME>
+                                                             (l_systemBrandName))
+        {
+            strcpy(reinterpret_cast<char*>
+                       (this->iv_hdatIPLParams->iv_sysParms.hdatSystemVendorName),
+                                                               l_systemBrandName);
+        }
+        else
+        {
+            HDAT_ERR("Error in getting SYSTEM_BRAND_NAME");
+        }
+    }
+
     HDAT_DBG("after SYSTEM_BRAND_NAME");
 
     // The next 5 fields are set to their final values in a common handler
