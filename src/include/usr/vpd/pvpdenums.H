@@ -5,7 +5,8 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* [+] 867314078@qq.com                                                   */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +43,7 @@ namespace PVPD
         VSYS        = 0x01,
         LXR0        = 0x02,
         PSPD        = 0x03,
+        UTIL        = 0x04,
         // Last Record
         PVPD_LAST_RECORD,
         PVPD_TEST_RECORD,   // Test purposes ONLY!
@@ -100,6 +102,8 @@ namespace PVPD
         TN         = 0x28,
         WN         = 0x29,
         pdD        = 0x2A,
+        F5         = 0x2B,
+        F6         = 0x2C,
 
         // Last Keyword
         PVPD_LAST_KEYWORD,

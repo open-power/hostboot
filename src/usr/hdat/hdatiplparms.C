@@ -5,7 +5,8 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* [+] 867314078@qq.com                                                   */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +49,8 @@
 #include <devicefw/userif.H>
 #include <targeting/common/util.H>
 #include <pldm/extended/pdr_manager.H>
-
+#include <targeting/targplatutil.H>
+#include <errl/errlmanager.H>
 
 using namespace TARGETING;
 
@@ -559,6 +561,118 @@ static void hdatGetFeatureFlagInfo(
 }
 
 /**
+ * @brief Read the System Vendor Name from VPD
+ *
+ * @param[out] o_vendorName - Vendor string name
+ * @param[in] i_bufSize - Byte length of vendor string
+ *
+ * @return true=Data is present and valid;
+ *         false=VPD is empty or errors encountered
+ **/
+bool readVendorFromVPD( char* o_vendorName, size_t i_bufSize )
+{
+    /*** Pull the System Vendor Name from the VPD
+     The two keywords combine to create a single string, but there is no
+     specification about how that large string is split up.  For example
+     both of these are valid (* is /0):
+      F5=The Acme *******, F6=Corporation*****
+      F5=The Acme Corpora, F6=tion************
+     */
+    errlHndl_t l_err = nullptr;
+    size_t dataSize = 0;
+    Target* node_tgt = UTIL::getCurrentNodeTarget();
+    bool l_vendorFound = false;    
+
+    do {
+        o_vendorName[0] = '\0'; //blank out any previous data
+        char l_vendorName[i_bufSize]={0};
+
+        // There are levels of BMC that don't support the UTIL record so handle
+        // that gracefully
+        l_err = deviceRead(node_tgt, nullptr, dataSize,
+                           DEVICE_PVPD_ADDRESS( PVPD::UTIL, PVPD::FULL_RECORD ));
+        if( l_err )
+        {
+            HDAT_ERR("UTIL record is not supported, skipping Vendor reads");
+            delete l_err;
+            l_err = nullptr;
+            break;
+        }
+
+        /* Read UTIL::F5 keyword (maxlen=16)*/
+        dataSize = 0;
+        l_err = deviceRead(node_tgt, nullptr, dataSize,
+                           DEVICE_PVPD_ADDRESS( PVPD::UTIL, PVPD::F5 ));
+        if (l_err)
+        {
+            errlCommit( l_err, HDAT_COMP_ID );
+            HDAT_ERR("Read UTIL::F5 length error");
+            break;
+        }
+
+        char f5Buffer[dataSize+1]={0};
+        l_err = deviceRead(node_tgt, f5Buffer, dataSize,
+                           DEVICE_PVPD_ADDRESS( PVPD::UTIL, PVPD::F5 ));
+        if (l_err)
+        {
+            errlCommit( l_err, HDAT_COMP_ID );
+            HDAT_ERR("Read UTIL::F5 data error");
+            break;
+        }
+        else if((strlen(f5Buffer)+1) > sizeof(l_vendorName))
+        {
+            HDAT_ERR("Read UTIL::F5 string len override size: %d",
+                     strlen(f5Buffer));
+            break;
+        }
+        else
+        {
+            HDAT_DBG("Read UTIL::F5 success len=%d str=%s", dataSize, f5Buffer);
+            strcpy(l_vendorName, f5Buffer);
+        }
+
+        /* Read UTIL::F6 keyword(maxlen=16) */
+        dataSize = 0;
+        l_err = deviceRead(node_tgt, nullptr, dataSize,
+                           DEVICE_PVPD_ADDRESS( PVPD::UTIL, PVPD::F6 ));
+        if (l_err)
+        {
+            errlCommit( l_err, HDAT_COMP_ID );
+            HDAT_ERR("Read UTIL::F6 length error...");
+            break;
+        }
+
+        char f6Buffer[dataSize+1]={0};
+        l_err = deviceRead(node_tgt, f6Buffer, dataSize,
+                           DEVICE_PVPD_ADDRESS( PVPD::UTIL, PVPD::F6 ));
+        if (l_err)
+        {
+            errlCommit( l_err, HDAT_COMP_ID );
+            HDAT_ERR("Read UTIL::F6 data error");
+            break;
+        }
+        else if((strlen(f6Buffer) + strlen(l_vendorName) + 1) > sizeof(l_vendorName))
+        {
+            HDAT_ERR("Read UTIL::F5+F6 string len override size: %d", strlen(f6Buffer) + strlen(l_vendorName));
+            break;
+        }
+        else
+        {
+            HDAT_DBG("Read UTIL::F6 success len=%d str=%s", dataSize, f6Buffer);
+            if (strlen(f6Buffer))
+            {
+                strcat(l_vendorName, f6Buffer);
+            }
+        }
+
+        l_vendorFound = true;
+        memcpy( o_vendorName, l_vendorName, i_bufSize );
+    } while(0);
+
+    return l_vendorFound;
+}
+
+/**
  * @brief This routine gets the information for System Parameters
  *
  * @pre None
@@ -724,19 +838,38 @@ void HdatIplParms::hdatGetSystemParamters()
 
     this->iv_hdatIPLParams->iv_sysParms.hdatSplitCoreMode = 1;
 
-    TARGETING::ATTR_SYSTEM_BRAND_NAME_type l_systemBrandName = {0};
-    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SYSTEM_BRAND_NAME>
-                                                         (l_systemBrandName))
+    /*** Check vendor name from VPD */
+    constexpr size_t vendorSize = sizeof(iv_hdatIPLParams->iv_sysParms.hdatSystemVendorName);
+    char sysVendorName[vendorSize]={0};
+    if( readVendorFromVPD(sysVendorName,vendorSize) )
     {
         strcpy(reinterpret_cast<char*>
-                   (this->iv_hdatIPLParams->iv_sysParms.hdatSystemVendorName),
-                                                           l_systemBrandName);
+               (this->iv_hdatIPLParams->iv_sysParms.hdatSystemVendorName),
+               sysVendorName);
     }
     else
     {
-        HDAT_ERR("Error in getting SYSTEM_BRAND_NAME");
+        HDAT_DBG("UTIL::VPD is empty, using ATTR_SYSTEM_BRAND_NAME");
+        TARGETING::ATTR_SYSTEM_BRAND_NAME_type l_systemBrandName = { 0 };
+        if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_SYSTEM_BRAND_NAME>
+                                   (l_systemBrandName))
+        {
+            size_t strsize = std::min(sizeof(l_systemBrandName),
+              sizeof(iv_hdatIPLParams->iv_sysParms.hdatSystemVendorName));
+            strncpy(reinterpret_cast<char*>
+                    (iv_hdatIPLParams->iv_sysParms.hdatSystemVendorName),
+                    l_systemBrandName,
+                    strsize);
+        }
+        else
+        {
+            HDAT_ERR("Error in getting SYSTEM_BRAND_NAME");
+        }
     }
+
     HDAT_DBG("after SYSTEM_BRAND_NAME");
+    /*** End System Vendor Name **/
+
 
     // The next 5 fields are set to their final values in a common handler
     // in istep 21.1, to avoid trust issues when HDAT is initially populated
