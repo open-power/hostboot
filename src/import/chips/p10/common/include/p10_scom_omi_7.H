@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,6 +173,16 @@ static const uint32_t ERROR_MASK_02 = 61;
 static const uint32_t ERROR_MASK_01 = 62;
 static const uint32_t ERROR_MASK_00 = 63;
 //<< [ERROR_MASK]
+// omi/reg00014.H
+
+//>> [RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL]
+static const uint64_t RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL = 0x8003384010012c3full;
+
+static const uint32_t RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT = 48;
+static const uint32_t RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT_LEN = 4;
+static const uint32_t RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL_PHASE_STEP = 56;
+static const uint32_t RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL_PHASE_STEP_LEN = 7;
+//<< [RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL]
 // omi/reg00014.H
 
 //>>THE END<<

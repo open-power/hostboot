@@ -561,35 +561,116 @@ fapi2::ReturnCode p10_omi_train_prbs_helper2(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
 {
     uint8_t l_dl_x4_backoff_en = 0;
+    fapi2::buffer<uint64_t> l_data;
+    uint64_t l_pattern = 0;
+    uint64_t l_pattern2 = 0;
+    int i = 0;
 
     // Get BACKOFF_ENABLE CHIP_EC attribute
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE, i_ocmb, l_dl_x4_backoff_en),
              "Error getting ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE");
 
+    for (i = 0; i < 400; i++)
     {
-        fapi2::buffer<uint64_t> l_data;
-        uint64_t l_pattern_a = 0;
-        uint64_t l_pattern_b = 0;
-        int i = 0;
+        FAPI_TRY(fapi2::delay(mss::common_timings::DELAY_1MS, 10));
+        FAPI_TRY(scomt::omi::GET_TRAINING_STATUS(i_omi, l_data));
+        scomt::omi::GET_TRAINING_STATUS_RX_PATTERN_A(l_data, l_pattern);
+        scomt::omi::GET_TRAINING_STATUS_RX_PATTERN_B(l_data, l_pattern2);
 
-        for (; i < 400; i++)
+        if (l_pattern > 0 || l_pattern2 > 0)
         {
-            FAPI_TRY(fapi2::delay(mss::common_timings::DELAY_1MS, 10));
-
-            FAPI_TRY(scomt::omi::GET_TRAINING_STATUS(i_omi, l_data));
-            scomt::omi::GET_TRAINING_STATUS_RX_PATTERN_A(l_data, l_pattern_a);
-            scomt::omi::GET_TRAINING_STATUS_RX_PATTERN_B(l_data, l_pattern_b);
-
-            if (l_pattern_a > 0 || l_pattern_b)
-            {
-                break;
-            }
+            break;
         }
+    }
 
+    if (!(l_pattern > 0) && !(l_pattern2 > 0))
+    {
+        FAPI_ERR("%s ERROR: Pattern A|B(0x%08X%08X) Not Found", mss::c_str(i_omi), l_data >> 32, l_data);
+    }
+    else
+    {
         FAPI_DBG("%s Found Pattern A|B(0x%08X%08X) after %dms...", mss::c_str(i_omi), l_data >> 32, l_data, i);
     }
 
+    FAPI_TRY(fapi2::delay(10 * mss::common_timings::DELAY_1MS, 10));
+
+    FAPI_DBG("%s Moving host to state 2", mss::c_str(i_omi));
+    FAPI_TRY(mss::omi::setup_mc_config0(i_omi, mss::omi::train_mode::TX_PATTERN_B, l_dl_x4_backoff_en));
+
+    for (i = 0; i < 400; i++)
+    {
+        FAPI_TRY(fapi2::delay(mss::common_timings::DELAY_1MS, 10));
+        FAPI_TRY(scomt::omi::GET_TRAINING_STATUS(i_omi, l_data));
+        scomt::omi::GET_TRAINING_STATUS_RX_PATTERN_B(l_data, l_pattern);
+
+        if (l_pattern > 0)
+        {
+            break;
+        }
+    }
+
+    if (!(l_pattern > 0))
+    {
+        FAPI_ERR("%s ERROR: Pattern B(0x%08X%08X) Not Found", mss::c_str(i_omi), l_data >> 32, l_data);
+    }
+    else
+    {
+        FAPI_DBG("%s Found Pattern B(0x%08X%08X) after %dms...", mss::c_str(i_omi), l_data >> 32, l_data, i);
+    }
+
+    FAPI_TRY(fapi2::delay(10 * mss::common_timings::DELAY_1MS, 10));
+
+    for (i = 0; i < 400; i++)
+    {
+        FAPI_TRY(fapi2::delay(mss::common_timings::DELAY_1MS, 10));
+        FAPI_TRY(scomt::omi::GET_TRAINING_STATUS(i_omi, l_data));
+        scomt::omi::GET_TRAINING_STATUS_SYNC_PATTERN(l_data, l_pattern);
+
+        if (l_pattern > 0)
+        {
+            break;
+        }
+    }
+
+    if (!(l_pattern > 0))
+    {
+        FAPI_ERR("%s ERROR: Sync Pattern(0x%08X%08X) Not Found", mss::c_str(i_omi), l_data >> 32, l_data);
+    }
+    else
+    {
+        FAPI_DBG("%s Found Sync Pattern(0x%08X%08X) after %dms...", mss::c_str(i_omi), l_data >> 32, l_data, i);
+    }
+
+    FAPI_TRY(fapi2::delay(10 * mss::common_timings::DELAY_1MS, 10));
+
+    FAPI_DBG("%s Moving host to state 4", mss::c_str(i_omi));
+    FAPI_TRY(mss::omi::setup_mc_config0(i_omi, mss::omi::train_mode::TX_TRAINING_STATE1, l_dl_x4_backoff_en));
+
+    for (i = 0; i < 400; i++)
+    {
+        FAPI_TRY(fapi2::delay(mss::common_timings::DELAY_1MS, 10));
+        FAPI_TRY(scomt::omi::GET_TRAINING_STATUS(i_omi, l_data));
+        scomt::omi::GET_TRAINING_STATUS_RX_TS2(l_data, l_pattern);
+
+        if (l_pattern > 0)
+        {
+            break;
+        }
+    }
+
+    if (!(l_pattern > 0))
+    {
+        FAPI_ERR("%s ERROR: TS2 Pattern(0x%08X%08X) Not Found", mss::c_str(i_omi), l_data >> 32, l_data);
+    }
+    else
+    {
+        FAPI_DBG("%s Found TS2 Pattern(0x%08X%08X) after %dms...", mss::c_str(i_omi), l_data >> 32, l_data, i);
+    }
+
+    FAPI_TRY(fapi2::delay(10 * mss::common_timings::DELAY_1MS, 10));
+
     // Enable auto training
+    FAPI_DBG("%s Moving host to state 8", mss::c_str(i_omi));
     FAPI_TRY(mss::omi::setup_mc_config0(i_omi, mss::omi::train_mode::ENABLE_AUTO_TRAINING, l_dl_x4_backoff_en));
 
 fapi_try_exit:

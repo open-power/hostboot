@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,19 @@
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <p10_scom_omi.H>
+
+
+fapi2::ReturnCode exp_omi_train_check_unmask( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    fapi2::buffer<uint64_t> l_dl0_error_mask;
+
+    FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_ERROR_MASK, l_dl0_error_mask));
+    l_dl0_error_mask.clearBit<EXPLR_DLX_DL0_ERROR_MASK_33>();
+    FAPI_TRY(fapi2::putScom(i_target, EXPLR_DLX_DL0_ERROR_MASK, l_dl0_error_mask));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Check that the OCMB's omi state machine is in its expected state after OMI training
@@ -205,6 +218,8 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                  l_dl0_error_hold,
                  l_expected_dl0_error_hold);
     }
+
+    FAPI_TRY(exp_omi_train_check_unmask(i_target));
 
     FAPI_DBG("%s End exp_omi_train_check, expected state:%d/actual state:%d, DL0_STATUS:0x%016llx, DL0_TRAINING_STATUS:0x%016llx",
              mss::c_str(i_target),

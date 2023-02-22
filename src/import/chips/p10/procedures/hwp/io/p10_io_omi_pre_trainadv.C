@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,8 @@
 //------------------------------------------------------------------------------
 #include <p10_io_omi_pre_trainadv.H>
 #include <p10_omi_isolation.H>
+#include <p10_io_omi_prbs.H>
+#include <mss_generic_attribute_getters.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -121,10 +123,13 @@ fapi2::ReturnCode p10_io_omi_pre_trainadv(const fapi2::Target<fapi2::TARGET_TYPE
     std::vector<TdrStruct> l_data;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_IS_SIMICS_Type l_attr_is_simics;
+    uint8_t l_is_apollo = 0;
+
 
     FAPI_DBG("Entering ...");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMICS, FAPI_SYSTEM, l_attr_is_simics));
+    FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
 
     if (l_attr_is_simics)
     {
@@ -155,6 +160,15 @@ fapi2::ReturnCode p10_io_omi_pre_trainadv(const fapi2::Target<fapi2::TARGET_TYPE
             }
         }
     }
+
+    for (const auto& l_pauc_target : i_target.getChildren<fapi2::TARGET_TYPE_PAUC>())
+    {
+        for (const auto& l_omic_target : l_pauc_target.getChildren<fapi2::TARGET_TYPE_OMIC>())
+        {
+            FAPI_TRY(p10_io_omi_prbs(l_omic_target, true))
+        }
+    }
+
 
 
 fapi_try_exit:

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,20 @@ static const uint64_t TX_CTL_SM_REGS_CTLSM_CNTL13_PG = 0x800d244010012c3full;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL13_PG_TX_PSAVE_FORCE_REQ_0_15_1 = 48;
 static const uint32_t TX_CTL_SM_REGS_CTLSM_CNTL13_PG_TX_PSAVE_FORCE_REQ_0_15_1_LEN = 16;
 //<< [TX_CTL_SM_REGS_CTLSM_CNTL13_PG]
+// omic/reg00010.H
+
+//>> [CTL_REGS_TX_CNTL2_PG]
+static const uint64_t CTL_REGS_TX_CNTL2_PG = 0x800c4c4010012c3full;
+
+static const uint32_t CTL_REGS_TX_CNTL2_PG_A_FINE_SEL = 48;
+static const uint32_t CTL_REGS_TX_CNTL2_PG_A_FINE_SEL_LEN = 3;
+static const uint32_t CTL_REGS_TX_CNTL2_PG_A_COARSE_SEL = 51;
+static const uint32_t CTL_REGS_TX_CNTL2_PG_A_COARSE_SEL_LEN = 4;
+static const uint32_t CTL_REGS_TX_CNTL2_PG_A_BER_SEL = 55;
+static const uint32_t CTL_REGS_TX_CNTL2_PG_A_BER_SEL_LEN = 6;
+static const uint32_t CTL_REGS_TX_CNTL2_PG_ENABLE = 61;
+static const uint32_t CTL_REGS_TX_CNTL2_PG_CLOCK_ENABLE = 62;
+//<< [CTL_REGS_TX_CNTL2_PG]
 // omic/reg00010.H
 
 //>>THE END<<
