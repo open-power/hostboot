@@ -537,7 +537,11 @@ sub processTargets
     {
         foreach my $target (sort keys %{ $targetObj->getAllTargets() })
         {
+            # This represents what the ATTR_TYPE is set to for this target
             my $type = $targetObj->getType($target);
+
+            # This represents what is set in the <type> field for this target
+            my $xmlType = $targetObj->getTargetType($target);
 
             # If this is not the next target to work on, then skip it
             if ($type ne $targetTypeControl)
@@ -560,8 +564,8 @@ sub processTargets
             }
             # Look for DDIMMs (note the double "D")
             elsif ( ($type eq "DIMM")   &&
-                    (($targetObj->getTargetType($target) eq "lcard-dimm-ddimm") ||
-                     ($targetObj->getTargetType($target) eq "lcard-dimm-ddimm4u")) )
+                    (($xmlType eq "lcard-dimm-ddimm") ||
+                     ($xmlType eq "lcard-dimm-ddimm4u")) )
             {
                 # The P10 children that get processed are PMIC, OCMB, MEM_PORT,
                 # and GENERIC_I2C_DEVICE
@@ -569,26 +573,18 @@ sub processTargets
             }
             # Look for Industry Standard DIMMs (aka ISDIMMs)
             elsif ( ($type eq "DIMM") &&
-                    ($targetObj->getTargetType($target) eq "lcard-dimm-ddr4"))
+                    ($xmlType eq "lcard-dimm-ddr4"))
             {
                 # Currently no other P10 children are processed on the ISDIMM
                 processIsdimmAndChildren($targetObj, $target);
             }
-            elsif ( ($type eq "OCMB_CHIP") )
+            elsif ( ($type eq "OCMB_CHIP") &&
+                    ($xmlType eq "chip-ocmb-planar"))
             {
-                # If OCMB_CHIP is on a planar then it needs to be processed here; otherwise,
+                # If the OCMB_CHIP is on a planar then it needs to be processed here; otherwise,
                 # assume it was processed as a child of the DDIMM above
-                # TODO JIRA PFHB-409 the proper check is to also look for getTargetType to be
-                # "chip-ocmb-planar", but for now, use this check
-                my $mem_mrw_is_planar = $targetObj->getAttribute($target,"MEM_MRW_IS_PLANAR");
-                if ( $mem_mrw_is_planar eq "TRUE" )
-                {
-                    print "processTargets: $target has MEM_MRW_IS_PLANAR set " .
-                          "so calling processOcmbChipPlanarAndChildren\n" if $targetObj->{debug};
-
-                    # The only P10 child that gets processed here is MEM_PORT
-                    processOcmbChipPlanarAndChildren($targetObj, $target);
-                }
+                # The only P10 child that gets processed here is MEM_PORT
+                processOcmbChipPlanarAndChildren($targetObj, $target);
             }
             elsif ($type eq "BMC")
             {
@@ -1078,7 +1074,7 @@ sub processNode
 } # end sub processNode
 
 #--------------------------------------------------
-# @brief Process targets of type PROC and all it's children
+# @brief Process targets of type PROC and all its children
 #
 # @pre NODE targets need to be processed beforehand
 #
@@ -1186,7 +1182,7 @@ sub processProcessorAndChildren
 } # end sub processProcessorAndChildren
 
 #--------------------------------------------------
-# @brief Process targets of type DIMM and it's children,
+# @brief Process targets of type DIMM and its children,
 #        like PMIC, GENERIC_I2C_DEVICE, and OCMB
 #
 # @pre SYS, NODE and PROC targets need to be processed beforehand
@@ -1436,7 +1432,7 @@ sub processDdimmAndChildren
 
 
 ##--------------------------------------------------
-# @brief Process targets of type ISDIMM and it's children,
+# @brief Process targets of type ISDIMM and its children,
 #        but currently no children are supported
 #
 # @pre SYS, NODE and PROC targets need to be processed beforehand
@@ -1486,6 +1482,14 @@ sub processIsdimmAndChildren
 
     if ($conn_ddr4 ne "")
     {
+        my $number_of_ddr4_connections = @{$conn_ddr4->{CONN}};
+        if ($number_of_ddr4_connections != 1)
+        {
+            select()->flush(); # flush buffer before spewing out error message
+            die "processIsdimmAndChildren: Expected number of DDR4 connections for " .
+                "$target of type $type to be 1, but it was $number_of_ddr4_connections";
+        }
+
         # Use the DDR4 connection to get the OCMB_CHIP info (via MEM_PORT)
         foreach my $conn_ddr4_loop (@{$conn_ddr4->{CONN}})
         {
@@ -1493,8 +1497,6 @@ sub processIsdimmAndChildren
             print "processIsdimmAndChildren: DDR4 conn source=$source_ddr4\n" if $targetObj->{debug};
 
             # The DDR4 Conection returns a MEM_PORT, so get its OCMB parent
-            # NOTE: Going on the assumption that 1 OCMB per DDIMM with
-            #       1 MEM_PORT and 1 DIMM, but this may not always be case.
             my $ocmbParent = $targetObj->getTargetParent($source_ddr4);
 
             # Call helper function to get affinity and other information from OMI connection
@@ -1503,6 +1505,12 @@ sub processIsdimmAndChildren
 
         } # end of loop on each ddr4 connection
     } # end of ($conn_ddr4 ne "") check
+    else
+    {
+        select()->flush(); # flush buffer before spewing out error message
+        die "processIsdimmAndChildren: did not find any DDR4 connections for " .
+            "$target of type $type";
+    }
 
 
     # Make a temporary attribute to remember the logical position of the DIMM
@@ -1844,7 +1852,7 @@ sub processOcmbChipAndChildren
 
 #--------------------------------------------------
 # @brief Process targets of type OCMB_CHIP with target type of
-#        chip-ocmb-planar and it's child MEM_PORT
+#        chip-ocmb-planar and its child MEM_PORT
 #
 # @param[in] $targetObj  - The global target object blob
 # @param[in] $target     - The OCMB_CHIP target
@@ -1859,18 +1867,16 @@ sub processOcmbChipPlanarAndChildren
     print "processOcmbChipPlanarAndChildren($name,$path,target=$target)\n" if $targetObj->{debug};
 
     # Some sanity checks.  Make sure we are processing the correct target type
-    # and make sure the target's parent has been processed.
     my $type = targetTypeSanityCheck($targetObj, $target, "OCMB_CHIP");
 
     # For OCMBs on the planar the MEM_MRW_IS_PLANAR attribute must be set to TRUE
     my $mem_mrw_is_planar = $targetObj->getAttribute($target,"MEM_MRW_IS_PLANAR");
     if ( $mem_mrw_is_planar ne "TRUE" )
     {
-        # TODO JIRA PFHB-409 use "die" instead of "warn" and do not set the attr to true
-        warn "processOcmbChipPlanarAndChildren: $name does not have MEM_MRW_IS_PLANAR set " .
-             "(current value is $mem_mrw_is_planar) set. Setting to TRUE here.\n";
-        $mem_mrw_is_planar = "TRUE";
-        $targetObj->setAttribute($target, "MEM_MRW_IS_PLANAR",$mem_mrw_is_planar);
+        my $targetType = $targetObj->getTargetType($target);
+        select()->flush(); # flush buffer before spewing out error message
+        die "processOcmbChipPlanarAndChildren: $name does not have MEM_MRW_IS_PLANAR set " .
+            "(current value is $mem_mrw_is_planar), but is a planar $type of type $targetType";
     }
 
     my $ocmbAffinity = "ERR";
@@ -2619,6 +2625,7 @@ sub splitSmpLinkUnitNumber
     }
     else
     {
+        select()->flush(); # flush buffer before spewing out error message
         die "Can't parse instance name '$instanceName' for split SMP link unit number";
     }
 
@@ -3220,10 +3227,6 @@ sub setFapi2AttributeForDdimmI2cDevices
 #--------------------------------------------------
 # @brief Set the FAPI_I2C_CONTROL_INFO attribute for the given I2C device
 #
-# @detail The majority of the FAPI_I2C_CONTROL_INFO data is equivalent to the
-#         the DDIMM parent EEPROM_VPD_PRIMARY_INFO attribute, so copy the
-#         appropriate fields.
-#
 # @param[in] $targetObj - The global target object blob
 # @param[in] $target    - The I2C Device - currently only supports OCMB_CHIP target
 # @param[in] $type      - The type of the given I2C device
@@ -3261,23 +3264,22 @@ sub setFapi2AttributeForPlanarI2cDevices
             # Get I2C bus to this child
             my $conn_i2c = $targetObj->findConnectionsByDirection($target, "I2C", "", 1);
 
-                if ($conn_i2c ne "")
+            if ($conn_i2c ne "")
+            {
+                # Use the I2C connection to remaining I2C info
+                foreach my $conn_i2c_loop (@{$conn_i2c->{CONN}})
                 {
-                    # Use the I2C connection to remaining I2C info
-                    foreach my $conn_i2c_loop (@{$conn_i2c->{CONN}})
-                    {
-                        my $source_i2c = $conn_i2c_loop->{SOURCE};
-                        print "setFapi2AttributeForPlanarI2cDevices: I2C conn source=$source_i2c\n" if $targetObj->{debug};
+                    my $source_i2c = $conn_i2c_loop->{SOURCE};
+                    print "setFapi2AttributeForPlanarI2cDevices: I2C conn source=$source_i2c\n" if $targetObj->{debug};
 
-                        $engine = $targetObj->getAttribute($source_i2c, "I2C_ENGINE");
-                        $targetObj->setAttributeField($target, $fapi_i2c_info, "engine", $engine);
-                        $port = $targetObj->getAttribute($source_i2c, "I2C_PORT");
-                        $targetObj->setAttributeField($target, $fapi_i2c_info, "port", $port);
-                        $i2cMasterPath = $targetObj->getAttribute($conn_i2c_loop->{SOURCE_PARENT}, "PHYS_PATH");
-                        $targetObj->setAttributeField($target, $fapi_i2c_info, "i2cMasterPath", $i2cMasterPath);
-
-                    }
+                    $engine = $targetObj->getAttribute($source_i2c, "I2C_ENGINE");
+                    $targetObj->setAttributeField($target, $fapi_i2c_info, "engine", $engine);
+                    $port = $targetObj->getAttribute($source_i2c, "I2C_PORT");
+                    $targetObj->setAttributeField($target, $fapi_i2c_info, "port", $port);
+                    $i2cMasterPath = $targetObj->getAttribute($conn_i2c_loop->{SOURCE_PARENT}, "PHYS_PATH");
+                    $targetObj->setAttributeField($target, $fapi_i2c_info, "i2cMasterPath", $i2cMasterPath);
                 }
+            }
             last;
         }
     }
@@ -3557,13 +3559,13 @@ sub processMslChecks
 # @param[in] $targetObj              - The global target object blob
 # @param[in] $target                 - The target to set the OMI connection from
 # @param[in] $targetType             - The type of the target that the output information is set to
-#                                      - must be DIMM or OCMB_CBIP
+#                                      - must be DIMM or OCMB_CHIP
 #                                      - can be different than the $target's type
-#                                        - For instance, can pass in an OCMB_CBIP $target, but get
+#                                        - For instance, can pass in an OCMB_CHIP $target, but get
 #                                          info for the associated dimm
-# @param[out] $targetAffinity        - The affinity path deriveded from the OMI information
+# @param[out] $targetAffinity        - The affinity path derived from the OMI information
 # @param[out] $targetPosPerParent    - The target position per parent derived from the OMI info
-# @param[out] $procPosRelativeToNode - The proc position relative to the node dervied from the OMI info
+# @param[out] $procPosRelativeToNode - The proc position relative to the node derived from the OMI info
 # @param[out] $omiIdPerProc          - The specific OMI Id per processor from the OMI connection
 #--------------------------------------------------
 sub getDataFromOmiConnection
@@ -3583,6 +3585,7 @@ sub getDataFromOmiConnection
     if (($targetType ne "DIMM") &&
         ($targetType ne "OCMB_CHIP"))
     {
+        select()->flush(); # flush buffer before spewing out error message
         die "getDataFromOmiConnection does not support $targetType";
     }
 
@@ -3653,7 +3656,7 @@ sub getDataFromOmiConnection
 
             # The values for these are 0
             # NOTE: Going on the assumption that 1 OCMB per DDIMM with
-            #       1 MEM_PORT and 1 DIMM, but this may not always be case.
+            #       1 MEM_PORT and 1 DIMM, but this will change with DDR5 support
             my $ocmb_num = 0;
             my $mem_num  = 0;
             my $dimmPosPerParent = 0;
@@ -6482,20 +6485,17 @@ sub errorCheck
             last;
         }
 
-        if ($type eq "OCMB_CHIP")
+        if (($type eq "OCMB_CHIP") &&
+             ($targetObj->getTargetType($target) eq "chip-ocmb-planar"))
         {
-            my $is_planar = $targetObj->getAttribute($target, "MEM_MRW_IS_PLANAR");
-            if ($is_planar eq "TRUE")
-            {
-                # These are not the DIMMs you are looking for.  If the OCMB_CHIP
-                # target has its MEM_MRW_IS_PLANAR set to TRUE, then its VPD
-                # info will come from the Planar VPD.  Therefore, the
-                # EEPROM_VPD_PRIMARY_INFO attribute  is expected to be invalid.
-                # This check weeds out these OCMB_CHIP targets.
-                # This method only inspects one target at a time.  Therfore,
-                # considering that this target is not of interest, then exit loop.
-                last;
-            }
+            # These are not the DIMMs you are looking for.  If the OCMB_CHIP
+            # target is of type chip-ocmb-planar, then its VPD
+            # info will come from the Planar VPD.  Therefore, the
+            # EEPROM_VPD_PRIMARY_INFO attribute is expected to be invalid.
+            # This check weeds out these planar OCMB_CHIP targets.
+            # This method only inspects one target at a time.  Therefore,
+            # considering that this target is not of interest, then exit loop.
+            last;
         }
 
         my ($a,         $v)     = split(/\|/, $attr);
@@ -6899,6 +6899,7 @@ sub extractDimmData
     }
     else
     {
+        select()->flush(); # flush buffer before spewing out error message
         die "ERROR: Missing data format layout for system $systemName.\n";
     }
 
