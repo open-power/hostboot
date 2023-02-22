@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,8 +38,9 @@
 #include <lib/omi/p10_omi_utils.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/mss_git_data_helper.H>
-#include <p10_io_lib.H>
+#include <p10_io_omi_prbs.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
 #include <exp_omi_train.H>
 
 ///
@@ -50,11 +51,14 @@
 fapi2::ReturnCode p10_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target)
 {
     uint8_t l_sim = 0;
+    uint8_t l_is_apollo = 0;
     FAPI_INF("%s Start p10_omi_train", mss::c_str(i_target));
     mss::display_git_commit_info("p10_omi_train");
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     FAPI_TRY(mss::attr::get_is_simulation(l_sim));
+
+    FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
 
     if (l_sim)
     {
@@ -63,40 +67,33 @@ fapi2::ReturnCode p10_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    // Two OMIs per OMIC
+    // Start BOOTCONFIG1
     for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
     {
-        // Poll that P10 is done with its PHY training
-        // NOTE: need to do this here to not break parallelization of p10_omi_setup
-        fapi2::current_err = p10_io_omi_poll_init_done(l_omi);
-
-        if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+        for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
         {
-            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-            {
-                fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
-            }
-
-            l_rc = fapi2::current_err;
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            FAPI_TRY(exp_omi_train_internal(l_ocmb));
         }
-        else
+    }
+
+    // Enable DL Tx PATTERN A
+    for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
+    {
+        for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
         {
-            // One OCMB per OMI
-            // We only need to set up host side registers if there is an OCMB on the other side,
-            // otherwise, there's no need to train the link. So with no OCMB, we just skip
-            // the below step
-            for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
-            {
+            FAPI_TRY(mss::omi::p10_omi_train_prbs_helper1(l_omi, l_ocmb));
+        }
+    }
 
-                // Helper to perform upstream PRBS sequence if needed
-                FAPI_TRY(mss::omi::p10_omi_train_prbs_helper1(l_omi, l_ocmb));
+    // Disable PHY PRBS23 Pattern
+    FAPI_TRY(p10_io_omi_prbs(i_target, false));
 
-                FAPI_TRY(exp_omi_train_internal(l_ocmb));
-
-                // kick off ENABLE_AUTO_TRAINING
-                FAPI_TRY(mss::omi::p10_omi_train_prbs_helper2(l_omi, l_ocmb));
-            }
+    // Start Host DL Training Sequence
+    for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
+    {
+        for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
+        {
+            FAPI_TRY(mss::omi::p10_omi_train_prbs_helper2(l_omi, l_ocmb));
         }
     }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,18 +74,6 @@ fapi2::ReturnCode p10_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i
 
     FAPI_TRY(mss::omi::setup_mc_cmn_config(i_target));
 
-    // Add 120ms delay before PRBS
-    FAPI_TRY( fapi2::delay( 120 * mss::DELAY_1MS, 200) );
-
-    // Terminate downstream PRBS23 pattern
-    if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
-    {
-        for (const auto& l_omi_target : i_target.getChildren<fapi2::TARGET_TYPE_OMI>())
-        {
-            FAPI_TRY(p10_io_omi_prbs(mss::find_target<fapi2::TARGET_TYPE_OMI>(l_omi_target), false));
-        }
-    }
-
     // Two OMI per OMIC
     for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(i_target))
     {
@@ -93,16 +81,17 @@ fapi2::ReturnCode p10_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i
         // We only need to set up host side registers if there is an OCMB on the other side,
         // otherwise, there's no need to train the link. So with no OCMB, we just skip
         // the below steps
-        for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
-        {
-            FAPI_TRY(mss::omi::setup_mc_config1(l_omi));
-            FAPI_TRY(mss::omi::setup_mc_cya_bits(l_omi));
-            FAPI_TRY(mss::omi::setup_mc_error_action(l_omi));
-            // No setup needed for rc_rmt_config, as we leave at default (0) value
+        const auto& l_ocmbs = l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>(fapi2::TARGET_STATE_FUNCTIONAL);
 
-            // Perform PRBS workarounds if needed
-            FAPI_TRY(mss::omi::p10_omi_setup_prbs_helper(i_target, l_omi, l_ocmb));
+        if (l_ocmbs.empty())
+        {
+            continue;
         }
+
+        FAPI_TRY(mss::omi::setup_mc_config1(l_omi));
+        FAPI_TRY(mss::omi::setup_mc_cya_bits(l_omi));
+        FAPI_TRY(mss::omi::setup_mc_error_action(l_omi));
+        // No setup needed for rc_rmt_config, as we leave at default (0) value
     }
 
 

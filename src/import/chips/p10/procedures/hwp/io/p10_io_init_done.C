@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <p10_io_ppe_regs.H>
 #include <p10_scom_pauc.H>
 #include <p10_scom_iohs.H>
+#include <p10_scom_omi.H>
 #include <p10_io_init_start_ppe.H>
 #include <p10_io_lib.H>
 
@@ -301,6 +302,46 @@ fapi2::ReturnCode p10_io_done::p10_io_init_done_poff_check_thread_done(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+
+///
+/// @brief Update CDR BW
+///
+/// @param[in] i_target Chip target to start
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_omi_fix_cdr_bw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    using namespace scomt::omi;
+    int l_num_lanes = P10_IO_LIB_NUMBER_OF_OMI_LANES;
+    auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
+
+    for (auto l_pauc_target : l_pauc_targets)
+    {
+        auto l_omic_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_OMIC>();
+
+        for (auto l_omic_target : l_omic_targets)
+        {
+            auto l_omi_targets = l_omic_target.getChildren<fapi2::TARGET_TYPE_OMI>();
+
+            for (auto l_omi_target : l_omi_targets)
+            {
+                // Update CDR Bandwidth (rx_pr_phase_step)
+                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL,
+                                                RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL_PHASE_STEP,
+                                                RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL_PHASE_STEP_LEN,
+                                                l_num_lanes,
+                                                0x10));
+            }
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
 ///
 /// @brief Add fail information for any links that did not finish init
 ///
@@ -541,6 +582,9 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
 
         fapi2::delay(IO_INIT_DONE_NS_DELAY, IO_INIT_DONE_CYCLES);
     }
+
+    FAPI_TRY(p10_omi_fix_cdr_bw(i_target));
+
 
     // Avoid failing in Simics until the models get updated
     if( !l_done && (l_simics == fapi2::ENUM_ATTR_IS_SIMICS_SIMICS) )

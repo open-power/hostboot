@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,7 @@
 
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p10_io_omi_prbs_FP_t)(
-    const fapi2::Target<fapi2::TARGET_TYPE_OMI>&,
+    const fapi2::Target<fapi2::TARGET_TYPE_OMIC>&,
     const bool&);
 
 //------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ extern "C"
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode p10_io_omi_prbs(
-        const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
         const bool& i_on);
 
 } // extern "C"

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,10 +50,35 @@
 #include <mss_p10_attribute_getters.H>
 #include <mss_explorer_attribute_setters.H>
 #include <lib/i2c/exp_i2c_fields.H>
-#include <p10_io_omi_prbs.H>
 
 extern "C"
 {
+
+    ///
+    /// @brief Setup Explorer OMI Clock Synthesizer Unit
+    /// @param[in] i_target the OMIC target to operate on
+    /// @return FAPI2_RC_SUCCESS iff ok
+    ///
+    fapi2::ReturnCode exp_omi_setup_csu( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_explorer )
+    {
+        const uint32_t c_lanes = 8;
+        const uint32_t c_exp_csu_mode_addr = 0x002000A8;
+        uint32_t l_addr = 0x0;
+        fapi2::buffer<uint64_t> l_data;
+
+        for (uint32_t l_lane = 0; l_lane < c_lanes; l_lane++)
+        {
+            l_addr = c_exp_csu_mode_addr | l_lane << 12;
+            FAPI_TRY(fapi2::getScom(i_explorer, l_addr, l_data));
+            l_data.insertFromRight<40, 2>(0x2); // KVCO = 2 [23:22] LE
+            FAPI_TRY(fapi2::putScom(i_explorer, l_addr, l_data));
+        }
+
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
+
 
     ///
     /// @brief Setup the OCMB for enterprise and half-DIMM modes as desired
@@ -103,12 +128,6 @@ extern "C"
         FAPI_TRY(mss::attr::get_mnfg_edpl_time(l_mnfg_edpl_time));
         FAPI_TRY(mss::attr::get_mnfg_edpl_threshold(l_mnfg_edpl_threshold));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );
-
-        // Send downstream PRBS pattern from host
-        if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
-        {
-            FAPI_TRY(p10_io_omi_prbs(mss::find_target<fapi2::TARGET_TYPE_OMI>(i_target), true));
-        }
 
         // FFE Setup
         FAPI_TRY(mss::attr::get_omi_ffe_settings_command(i_target, l_enable_ffe_settings));
@@ -278,9 +297,22 @@ extern "C"
             FAPI_TRY(mss::exp::workarounds::omi::override_cdr_offset(i_target, l_cdr_offset, l_cdr_offset_lane_mask));
         }
 
-        // Start P10 PHY training by sending upstream PRBS pattern
-        // Train mode 6 (state 3)
-        FAPI_TRY(mss::exp::workarounds::omi::pre_training_prbs(i_target));
+        {
+            uint8_t l_dl_x4_backoff_en = 0;
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE, i_target, l_dl_x4_backoff_en),
+                     "Error getting ATTR_CHIP_EC_FEATURE_OMI_DL_X4_BACKOFF_ENABLE");
+
+            // Train mode 0 (ZEROS)
+            FAPI_TRY(mss::exp::omi::setup_omi_dl0_config0(i_target,
+                     mss::omi::train_mode::TX_ZEROS,
+                     l_dl_x4_backoff_en));
+        }
+
+
+        {
+            FAPI_TRY(exp_omi_setup_csu(i_target));
+        }
 
     fapi_try_exit:
         return fapi2::current_err;
