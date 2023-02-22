@@ -5,7 +5,8 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* [+] 867314078@qq.com                                                   */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +82,7 @@ const std::map<uint32_t, std::vector<uint16_t> > record_keyword_field_map {
   { VINI, { std::begin(valid_vini_keywords), std::end(valid_vini_keywords) } },
   { VSYS, { std::begin(valid_vsys_keywords), std::end(valid_vsys_keywords) } },
   { LXR0, { std::begin(valid_lxr0_keywords), std::end(valid_lxr0_keywords) } },
+  { UTIL, { std::begin(valid_util_keywords), std::end(valid_util_keywords) } },
 };
 
 /**
