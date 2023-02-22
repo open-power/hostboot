@@ -130,8 +130,8 @@ class info
             o_rc = fapi2::FAPI2_RC_SUCCESS;
 
             // Dimm Target
-            const uint8_t l_target_index = i_index / TT::RANK_INDEX_STEP;
-            const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_port_target);
+            const size_t l_target_index = i_index / TT::RANK_INDEX_STEP;
+            const auto& l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_port_target);
 
             // This assumes that the mc_type max # of dimms per port is correct
             FAPI_ASSERT( !l_dimms.empty(),
@@ -181,7 +181,7 @@ class info
                 // Ranks
                 iv_dimm_rank = i_index % TT::RANK_INDEX_STEP;
                 {
-                    const uint8_t l_dimm_index = i_index / TT::RANK_INDEX_STEP;
+                    const size_t l_dimm_index = i_index / TT::RANK_INDEX_STEP;
 
                     // Dimm index * 2 sets the center point at 2
                     // Add on the dimm rank
@@ -287,7 +287,7 @@ class info
         // 2 rank single dimm 0/1
         // 4 rank (quad encoded) 0-3.
         uint8_t iv_phy_rank;
-};
+} __attribute__ ((aligned (8)));
 
 ///
 /// @brief Obtains all DIMM ranks on a given port target
@@ -303,7 +303,7 @@ fapi2::ReturnCode ranks_on_port(const fapi2::Target<TT::MEM_PORT_TARGET_TYPE>& i
 {
     o_vect.clear();
 
-    uint8_t l_master_ranks_per_dimm[TT::MAX_DIMMS_PER_PORT] = {0};
+    uint8_t l_master_ranks_per_dimm[TT::MAX_DIMMS_PER_PORT] __attribute__ ((aligned (4))) = {0};
     FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_port_target, l_master_ranks_per_dimm));
 
     FAPI_ASSERT(((l_master_ranks_per_dimm[0] <= TT::MAX_RANKS_PER_DIMM) &&

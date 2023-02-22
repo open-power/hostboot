@@ -3785,11 +3785,11 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
 
     std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
     uint8_t l_attr_data = 0;
-    uint8_t l_attr_arr[mss::ody::MAX_DIMM_PER_PORT] = {};
-    uint8_t l_attr_arr_rank[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
     uint16_t l_attr_data_16 = 0;
+    uint8_t l_attr_arr[mss::ody::MAX_DIMM_PER_PORT] = {};
     uint8_t l_en_tracking[mss::ody::MAX_RANK_PER_DIMM] = {};
     uint16_t l_uppernibbletg[mss::ody::MAX_RANK_PER_PHY] = {};
+    uint8_t l_attr_arr_rank[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
 
     // D4RxPreambleLength, D4TxPreambleLength (both are unused, so hardcode to '1')
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
