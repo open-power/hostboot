@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/sbeio/sbe_getSBEFFDC.C $                              */
+/* $Source: src/usr/sbeio/sbe_iplControl.C $                              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2023                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,12 +23,15 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
-* @file sbe_getSBEFFDC.C
-* @brief Get SBE FFDC.
+* @file  sbe_iplControl.C
+* @brief Contains the IPL Control Messages for SBE FIFO
+*
 */
 
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
+#include <sbeio/sbeioif.H>
+#include <sbeio/sbe_utils.H>
 #include "sbe_fifodd.H"
 #include <sbeio/sbeioreasoncodes.H>
 #include <targeting/common/targetservice.H>
@@ -36,51 +39,74 @@
 extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_TRACD(printf_string,args...) \
-TRACDCOMP(g_trac_sbeio,"getFifoSBEFFDC: " printf_string,##args)
+TRACDCOMP(g_trac_sbeio,"IplControl: " printf_string,##args)
 
 #define SBE_TRACF(printf_string,args...) \
-TRACFCOMP(g_trac_sbeio,"getFifoSBEFFDC: " printf_string,##args)
+TRACFCOMP(g_trac_sbeio,"IplControl: " printf_string,##args)
+
 
 namespace SBEIO
 {
 
     /**
-    * @brief Get the SBE FFDC.  Request that SBE retrieve the SBE FFDC
+    * @brief @TODO JIRA PFHB-302
     *
-    * @param[in]     i_chipTarget    The chip from which to get the SBE FFDC
-    * @param[out]    o_pFifoResponse Pointer to response
-    * @param[in]     i_responseSize  Size of response in bytes
+    * @param[in] i_chipTarget The chip you would like to perform the chipop on
+    *                       NOTE: HB should only be sending this to non-boot procs or Odyssey chips
     *
     * @return errlHndl_t Error log handle on failure.
     *
     */
-    errlHndl_t getFifoSBEFFDC(TARGETING::Target *i_chipTarget,
-                              uint32_t *o_pFifoResponse,
-                              uint32_t &i_responseSize)
+    errlHndl_t sendIstepRequest(TARGETING::Target * i_chipTarget)
     {
-        errlHndl_t l_errl = NULL;
+        errlHndl_t errl = nullptr;
 
-        SBE_TRACF(ENTER_MRK "sending get SBE FFDC for chip %d, HUID 0x%.8X",
-                  i_chipTarget->getAttr<TARGETING::ATTR_POSITION>(),
-                  TARGETING::get_huid(i_chipTarget));
+        do
+        {
+            // Make sure the target is one of the supported types.
+            errl = sbeioInterfaceChecks(i_chipTarget);
+            if(errl)
+            {
+                break;
+            }
 
-        // Create FIFO request structure
-        SbeFifo::fifoGetSbeFfdcRequest l_fifoRequest;
+            SBE_TRACF(EXIT_MRK "Skipping unimplemented chipop sendIstepRequest");
 
-        // Fill in FIFO Request with Get SBE FFDC information
-        l_fifoRequest.commandClass = SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE;
-        l_fifoRequest.command = SbeFifo::SBE_FIFO_CMD_GET_SBE_FFDC;
+        }while(0);
 
-        // Call performFifoChipOp, tell SBE where to write FFDC and messages
-        l_errl =
-            SbeFifo::getTheInstance().performFifoChipOp(i_chipTarget,
-                                   reinterpret_cast<uint32_t *>(&l_fifoRequest),
-                                   o_pFifoResponse,
-                                   i_responseSize);
+        SBE_TRACD(EXIT_MRK "sendIstepRequest");
+        return errl;
+    };
 
-        SBE_TRACD(EXIT_MRK "sendGetSBEFFDC");
+    /**
+    * @brief @TODO JIRA PFHB-404
+    *
+    * @param[in] i_chipTarget The chip you would like to perform the chipop on
+    *                       NOTE: HB should only be sending this to non-boot procs or Odyssey chips
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t sendExecHWPRequest(TARGETING::Target * i_chipTarget)
+    {
+        errlHndl_t errl = nullptr;
 
-        return l_errl;
+        do
+        {
+            // Make sure the target is one of the supported types.
+            errl = sbeioInterfaceChecks(i_chipTarget);
+            if(errl)
+            {
+                break;
+            }
+
+            SBE_TRACF(EXIT_MRK "Skipping unimplemented chipop sendExecHWPRequest");
+
+        }while(0);
+
+        SBE_TRACD(EXIT_MRK "sendExecHWPRequest");
+        return errl;
     };
 
 } //end namespace SBEIO
+

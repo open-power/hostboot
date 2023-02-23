@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@ TRACFCOMP(g_trac_sbeio,"halt: " printf_string,##args)
 
 namespace SBEIO
 {
-    errlHndl_t sendSecondarySbeHaltRequest(TARGETING::Target * i_procChip)
+    errlHndl_t sendSecondarySbeHaltRequest(TARGETING::Target * i_chipTarget)
     {
         errlHndl_t errl = nullptr;
         // check for boot proc
@@ -57,37 +57,37 @@ namespace SBEIO
             errl = TARGETING::targetService().queryMasterProcChipTargetHandle(l_boot_proc);
             if (errl)
             {
-                SBE_TRACF(ERR_MRK"Unable to find boot processor target");
+                SBE_TRACF(ERR_MRK"Unable to find boot chip target");
                 break;
             }
 
             // look for NULL
-            if( nullptr == i_procChip ||
-                TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_procChip ||
-                i_procChip == l_boot_proc)
+            if( nullptr == i_chipTarget ||
+                TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_chipTarget ||
+                i_chipTarget == l_boot_proc)
             {
-                SBE_TRACF(ERR_MRK"Processor passed in (0x%08X) is either the boot processor or nullptr",
-                    TARGETING::get_huid(i_procChip));
+                SBE_TRACF(ERR_MRK" Chip passed in (0x%08X) is either the boot chip or nullptr",
+                    TARGETING::get_huid(i_chipTarget));
                 /*@
                 * @errortype
                 * @moduleid     SBEIO_FIFO_HALT
                 * @reasoncode   SBEIO_FIFO_MASTER_TARGET
-                * @userdata1    The processor chip HUID
-                * @devdesc      Attempted FIFO chip op on invalid processor
+                * @userdata1    The chip HUID
+                * @devdesc      Attempted FIFO chip op on invalid chip
                 * @custdesc     Internal firmware error
                 */
                 errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                           SBEIO_FIFO_HALT,
                                           SBEIO_FIFO_MASTER_TARGET,
-                                          TARGETING::get_huid(i_procChip),
+                                          TARGETING::get_huid(i_chipTarget),
                                           0,
                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 errl->collectTrace(SBEIO_COMP_NAME);
                 break;
             }
 
-            SBE_TRACF(ENTER_MRK "requesting halt on proc 0x%08X SBE  ",
-                    TARGETING::get_huid(i_procChip));
+            SBE_TRACF(ENTER_MRK "requesting halt on chip 0x%08X SBE  ",
+                    TARGETING::get_huid(i_chipTarget));
 
             SbeFifo::fifoHostCommandsRequest l_fifoRequest;
 
@@ -96,7 +96,7 @@ namespace SBEIO
 
             // Just run the command.  Halt command does not have a response
             errl = SbeFifo::getTheInstance().performFifoChipOp(
-                            i_procChip,
+                            i_chipTarget,
                             reinterpret_cast<uint32_t*>(&l_fifoRequest),
                             nullptr,
                             0 );

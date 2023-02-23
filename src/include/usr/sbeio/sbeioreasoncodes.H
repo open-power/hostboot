@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,6 +111,7 @@ enum sbeioReasonCode
 
     // SBE FIFO error codes (continued...)
     SBEIO_UNSUPPORTED_CAPABILITIES_VERSION = SBEIO_COMP_ID | 0x1C,
+    SBEIO_FIFO_NOT_ODYSSEY_OCMB        = SBEIO_COMP_ID | 0x1D,
 
     // SBEIO Runtime error codes
     SBEIO_RT_INVALID_COMMAND           = SBEIO_COMP_ID | 0x30,

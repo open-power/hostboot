@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,46 +51,46 @@ namespace SBEIO
     * @brief Set the system configuration on the SBE so it is aware of
     *        the other procs in the system
     *
-    * @param[in] i_procChip The proc you would like to request continueMPIPL to
-    *                       NOTE: HB should only be sending this to slave procs
+    * @param[in] i_chipTarget The chip you would like to request continueMPIPL to
+    *                       NOTE: HB should only be sending this to non-boot procs
     *
     * @return errlHndl_t Error log handle on failure.
     *
     */
 
-    errlHndl_t sendContinueMpiplRequest(TARGETING::Target * i_procChip)
+    errlHndl_t sendContinueMpiplRequest(TARGETING::Target * i_chipTarget)
     {
         errlHndl_t errl = nullptr;
-        // check for master proc
-        TARGETING::Target * l_master = nullptr;
-        (void)TARGETING::targetService().masterProcChipTargetHandle(l_master);
+        // check for boot proc
+        TARGETING::Target * l_boot = nullptr;
+        (void)TARGETING::targetService().masterProcChipTargetHandle(l_boot);
 
         do
         {
             // look for NULL
-            if( nullptr == i_procChip ||
-                TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_procChip ||
-                i_procChip == l_master)
+            if( nullptr == i_chipTarget ||
+                TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_chipTarget ||
+                i_chipTarget == l_boot)
             {
                 /*@
                 * @errortype
                 * @moduleid     SBEIO_FIFO_CONTINUE_MPIPL
                 * @reasoncode   SBEIO_FIFO_SENTINEL_TARGET
-                * @devdesc      Attempted FIFO chip op on Master Proc
-                * @custdesc     Firmware error communicating with boot device
+                * @devdesc      Attempted FIFO chip op on Boot Chip
+                * @custdesc     Firmware error communicating with boot chip
                 */
                 errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             SBEIO_FIFO_CONTINUE_MPIPL,
                                             SBEIO_FIFO_MASTER_TARGET,
                                             0,
                                             0,
-                                            true /*SW error*/);
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 errl->collectTrace(SBEIO_COMP_NAME);
                 break;
             }
 
             SBE_TRACD(ENTER_MRK "requesting continueMPIPL on proc %d HB -> SBE  ",
-                        i_procChip->getAttr<TARGETING::ATTR_POSITION>());
+                        i_chipTarget->getAttr<TARGETING::ATTR_POSITION>());
 
             SbeFifo::fifoContinueMpiplRequest   l_fifoRequest;
             SbeFifo::fifoContinueMpiplResponse  l_fifoResponse;
@@ -99,7 +99,7 @@ namespace SBEIO
             l_fifoRequest.command = SbeFifo::SBE_FIFO_CMD_CONTINUE_MPIPL;
 
 
-            errl = SbeFifo::getTheInstance().performFifoChipOp(i_procChip,
+            errl = SbeFifo::getTheInstance().performFifoChipOp(i_chipTarget,
                                     (uint32_t *)&l_fifoRequest,
                                     (uint32_t *)&l_fifoResponse,
                                     sizeof(SbeFifo::fifoContinueMpiplResponse));

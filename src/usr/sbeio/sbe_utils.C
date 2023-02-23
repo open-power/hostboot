@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,8 +27,10 @@
 * @brief SBE PSU device driver
 */
 
+#include <chipids.H>
 #include <sbeio/sbe_utils.H>
 #include <targeting/common/utilFilter.H>
+#include <sbeio/sbeioreasoncodes.H>
 extern trace_desc_t* g_trac_sbeio;
 
 #define VIRTUAL_CHIPLET_ID_BASE_MCS_TARGET_TYPE (0x80)
@@ -37,6 +39,117 @@ using namespace TARGETING;
 
 namespace SBEIO
 {
+
+    // Interface error checks
+    errlHndl_t sbeioInterfaceChecks(TARGETING::Target * i_target,
+                                    const uint64_t      i_addr)
+    {
+        errlHndl_t errl = NULL;
+        TRACDCOMP(g_trac_sbeio, ENTER_MRK"sbeioInterfaceChecks");
+
+        do
+        {
+            // look for NULL
+            if( NULL == i_target )
+            {
+                TRACFCOMP(g_trac_sbeio, ERR_MRK "sbeioInterfaceChecks: Target is NULL" );
+                /*@
+                 * @errortype
+                 * @moduleid     SBEIO_FIFO
+                 * @reasoncode   SBEIO_FIFO_NULL_TARGET
+                 * @userdata1    Request Address or unused
+                 * @devdesc      Null target passed
+                 * @custdesc     Firmware error communicating with a chip
+                 */
+                errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               SBEIO_FIFO,
+                                               SBEIO_FIFO_NULL_TARGET,
+                                               i_addr,
+                                               0,
+                                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH);
+                errl->collectTrace(SBEIO_COMP_NAME);
+                break;
+            }
+
+            // check target for sentinel
+            if( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target )
+            {
+                TRACFCOMP(g_trac_sbeio, ERR_MRK "sbeioInterfaceChecks: "
+                                  "Target is Primary Sentinel" );
+                /*@
+                 * @errortype
+                 * @moduleid     SBEIO_FIFO
+                 * @reasoncode   SBEIO_FIFO_SENTINEL_TARGET
+                 * @userdata1    Request Address or unused
+                 * @devdesc      Primary Sentinel target is not supported
+                 * @custdesc     Firmware error communicating with a chip
+                 */
+                errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               SBEIO_FIFO,
+                                               SBEIO_FIFO_SENTINEL_TARGET,
+                                               i_addr,
+                                               0,
+                                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                errl->collectTrace(SBEIO_COMP_NAME);
+                break;
+            }
+
+            // check for boot proc
+            TARGETING::Target * l_boot = NULL;
+            (void)TARGETING::targetService().masterProcChipTargetHandle(l_boot);
+            if( l_boot == i_target )
+            {
+                TRACFCOMP(g_trac_sbeio, ERR_MRK "sbeioInterfaceChecks: "
+                                  "Target is Primary Proc" );
+                /*@
+                 * @errortype
+                 * @moduleid     SBEIO_FIFO
+                 * @reasoncode   SBEIO_FIFO_MASTER_TARGET
+                 * @userdata1    Request Address or unused
+                 * @userdata2    HUID of boot proc
+                 * @devdesc      Primary Proc is not supported
+                 * @custdesc     Firmware error communicating with a chip
+                 */
+                errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               SBEIO_FIFO,
+                                               SBEIO_FIFO_MASTER_TARGET,
+                                               i_addr,
+                                               TARGETING::get_huid(i_target),
+                                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                errl->collectTrace(SBEIO_COMP_NAME);
+                break;
+            }
+            if ((i_target->getAttr<ATTR_TYPE>() == TYPE_OCMB_CHIP)
+                && (i_target->getAttr<ATTR_CHIP_ID>() != POWER_CHIPID::ODYSSEY_16))
+            {
+                    TRACFCOMP(g_trac_sbeio, ERR_MRK "sbeioInterfaceChecks: "
+                                      "Target is an OCMB but not an Odyssey OCMB." );
+                    /*@
+                     * @errortype
+                     * @moduleid     SBEIO_FIFO
+                     * @reasoncode   SBEIO_FIFO_NOT_ODYSSEY_OCMB
+                     * @userdata1    HUID of OCMB chip
+                     * @devdesc      non-Odyssey OCMB is not supported
+                     * @custdesc     Firmware error communicating with a chip
+                     */
+                    errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                   SBEIO_FIFO,
+                                                   SBEIO_FIFO_NOT_ODYSSEY_OCMB,
+                                                   TARGETING::get_huid(i_target),
+                                                   0,
+                                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                    errl->collectTrace(SBEIO_COMP_NAME);
+                    break;
+            }
+        } while (0);
+
+        TRACDCOMP(g_trac_sbeio, EXIT_MRK "sbeioInterfaceChecks");
+
+        return errl;
+    }
+
     Target* getChipForPsuOp(Target *i_target)
     {
         Target* chip_for_psu_op = nullptr;

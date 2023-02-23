@@ -121,6 +121,18 @@ namespace SBEIO
      *         if no associated processor is found this will be nullptr
      */
     TARGETING::Target* getChipForPsuOp(TARGETING::Target *i_target);
+
+    /**
+     * @brief Common function to check for interface usage errors. Checks if the boot proc, sentinel, nullptr, or
+     *        non-odyssey chip was passed into a chipop function.
+     *
+     * @param[in] i_target The target to test
+     *
+     * @param[in] i_addr  Optional. The address that was attempted to be accessed if one was used. Can be useful for
+     *                    context when doing SCOM chipops.
+     */
+    errlHndl_t sbeioInterfaceChecks(TARGETING::Target * i_target,
+                                    uint64_t            i_addr = 0);
 }
 
 #endif  // __SBE_UTILS_H

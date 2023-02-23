@@ -770,7 +770,6 @@ public:
 
     /**
      * @brief Struct for FIFO Dump request
-     * @TODO JIRA PFHB-263 Handling for variable length HDCT data in the response.
      */
     struct fifoGetDumpRequest
     {
@@ -802,7 +801,6 @@ public:
 
     /**
      * @brief Struct for FIFO Attribute Raw Dump request
-     * @TODO JIRA PFHB-263 Handling for variable length Attr Dump data in the response
      */
     struct fifoAttrRawDumpRequest
     {
@@ -822,7 +820,6 @@ public:
 
     /**
      * @brief Struct for FIFO Attribute List request
-     * @TODO JIRA PFHB-263 Attr List in response
      */
     struct fifoAttrListRequest
     {
@@ -843,7 +840,6 @@ public:
 
     /**
      * @brief Struct for FIFO Attribute Update request
-     * @TODO JIRA PFHB-263 Handling for variable length Attr Update data in the response
      */
     struct fifoAttrUpdateRequest
     {
@@ -886,7 +882,6 @@ public:
 
     /**
      * @brief Struct for FIFO Get Code Levels request
-     * @TODO JIRA PFHB-263 Handling for variable number of CLIPs in the response
      */
     struct fifoGetCodeLevelsRequest
     {

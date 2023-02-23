@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,15 +51,15 @@ namespace SBEIO
     *
     */
     errlHndl_t sendPsuSecurityListBinDumpRequest(const uint64_t i_addr,
-                                                 TARGETING::Target * i_procChip)
+                                                 TARGETING::Target * i_chipTarget)
     {
         errlHndl_t errl = nullptr;
 
-        assert(i_procChip != nullptr,
-               "SbePsu::SecurityBinlistDumpRequest: i_procChip is null");
+        assert(i_chipTarget != nullptr,
+               "SbePsu::SecurityBinlistDumpRequest: i_chipTarget is null");
 
         SBE_TRACD(ENTER_MRK "sending psu securityListBinaryDump request from HB"
-            " to SBE on proc %d", i_procChip->getAttr<TARGETING::ATTR_POSITION>());
+            " to SBE on chip %d", i_chipTarget->getAttr<TARGETING::ATTR_POSITION>());
 
         // set up PSU command message
         SbePsu::psuCommand   l_psuCommand(
@@ -72,7 +72,7 @@ namespace SBEIO
         l_psuCommand.cd7_securityListBinDump_addr = i_addr;
 
         errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(
-            i_procChip,
+            i_chipTarget,
             &l_psuCommand,
             &l_psuResponse,
             SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,

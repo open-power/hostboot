@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2022
+# Contributors Listed Below - COPYRIGHT 2018,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -34,6 +34,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 
 #Common Objects
 OBJS += sbe_attn.o

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,12 +51,12 @@ namespace SBEIO
     */
     errlHndl_t sendPsuStashKeyAddrRequest(const uint8_t i_key,
                                           const uint64_t i_value,
-                                          TARGETING::Target * i_procChip)
+                                          TARGETING::Target * i_chipTarget)
     {
         errlHndl_t errl = NULL;
 
-        SBE_TRACD(ENTER_MRK "sending psu stashKeyAddr request from HB to SBE on proc %d",
-                    i_procChip->getAttr<TARGETING::ATTR_POSITION>());
+        SBE_TRACD(ENTER_MRK "sending psu stashKeyAddr request from HB to SBE on chip %d",
+                    i_chipTarget->getAttr<TARGETING::ATTR_POSITION>());
 
         // set up PSU command message
         SbePsu::psuCommand   l_psuCommand(
@@ -70,7 +70,7 @@ namespace SBEIO
         l_psuCommand.cd7_stashKeyAddr_Value = i_value;
 
         errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(
-            i_procChip,
+            i_chipTarget,
             &l_psuCommand,
             &l_psuResponse,
             SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,

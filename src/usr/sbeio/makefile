@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2022
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -43,6 +43,9 @@ OBJS += sbe_scomAccess.o
 OBJS += sbe_scomAccessdd.o
 OBJS += sbe_setFFDCAddr.o
 OBJS += sbe_getSBEFFDC.o
+OBJS += sbe_attributeAccess.o
+OBJS += sbe_codeUpdate.o
+OBJS += sbe_iplControl.o
 OBJS += sbe_memRegionMgr.o
 OBJS += sbe_psuTPMExtendMode.o
 OBJS += sbe_fifo_buffer.o
