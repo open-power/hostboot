@@ -258,8 +258,10 @@ class fields<DDR5, BASE_CNFG>
             // Byte 234
             RANK_MIX_START = 1,
             RANK_MIX_LEN = 1,
-            PACKAGE_RANKS_PER_CHANNEL_START = 2,
-            PACKAGE_RANKS_PER_CHANNEL_LEN = 3,
+            PACKAGE_RANKS_ON_PORT1_START = 2,
+            PACKAGE_RANKS_ON_PORT1_LEN = 3,
+            PACKAGE_RANKS_ON_PORT0_START = 5,
+            PACKAGE_RANKS_ON_PORT0_LEN = 3,
 
             // Byte 235
             ENABLED_PHY_CHANNELS_START = 0,
@@ -372,7 +374,8 @@ class fields<DDR5, BASE_CNFG>
         //// Bytes 230-236: module information
         //////////////////////////////////////
         static constexpr mss::field_t<mss::endian::LITTLE> RANK_MIX{234, RANK_MIX_START, RANK_MIX_LEN};
-        static constexpr mss::field_t<mss::endian::LITTLE> PACKAGE_RANKS_PER_CHANNEL{234, PACKAGE_RANKS_PER_CHANNEL_START, PACKAGE_RANKS_PER_CHANNEL_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> PACKAGE_RANKS_PER_PORT0{234, PACKAGE_RANKS_ON_PORT0_START, PACKAGE_RANKS_ON_PORT0_LEN};
+        static constexpr mss::field_t<mss::endian::LITTLE> PACKAGE_RANKS_PER_PORT1{234, PACKAGE_RANKS_ON_PORT1_START, PACKAGE_RANKS_ON_PORT1_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> BUS_WIDTH_CHA{235, BUS_WIDTH_CHA_START, BUS_WIDTH_CHA_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> BUS_WIDTH_CHB{235, BUS_WIDTH_CHB_START, BUS_WIDTH_CHB_LEN};
         static constexpr mss::field_t<mss::endian::LITTLE> ENABLED_PHY_CHANNELS{235, ENABLED_PHY_CHANNELS_START, ENABLED_PHY_CHANNELS_LEN};
@@ -576,12 +579,10 @@ class fields<DDR5, DDIMM_MODULE>
 
             // Byte 234: DIMM Module Oranization
             DIMM_ORG_BYTE_BYTE = 234,
-            NUM_PACKAGE_RANKS_CHAN1_START = 0,
-            NUM_PACKAGE_RANKS_CHAN1_LEN = 3,
-            NUM_PACKAGE_RANKS_CHAN0_START = 3,
-            NUM_PACKAGE_RANKS_CHAN0_LEN = 3,
-            SDRAM_DATA_WID_CHAN_START = 6,
-            SDRAM_DATA_WID_CHAN_LEN = 2,
+            NUM_PACKAGE_RANKS_PORT1_START = 2,
+            NUM_PACKAGE_RANKS_PORT1_LEN = 3,
+            NUM_PACKAGE_RANKS_PORT0_START = 5,
+            NUM_PACKAGE_RANKS_PORT0_LEN = 3,
 
 
             // Byte 235: Memory Channel Bus Width
@@ -1653,9 +1654,8 @@ class fields<DDR5, DDIMM_MODULE>
         static constexpr field_t NUM_BUFFERS{DIMM_ATTR_BYTE, NUM_BUFFERS_START, NUM_BUFFERS_LEN};
 
         // Byte 234: DIMM Module Organization
-        static constexpr field_t NUM_PACKAGE_RANKS_CHAN1{DIMM_ORG_BYTE_BYTE, NUM_PACKAGE_RANKS_CHAN1_START, NUM_PACKAGE_RANKS_CHAN1_LEN};
-        static constexpr field_t NUM_PACKAGE_RANKS_CHAN0{DIMM_ORG_BYTE_BYTE, NUM_PACKAGE_RANKS_CHAN0_START, NUM_PACKAGE_RANKS_CHAN0_LEN};
-        static constexpr field_t DATA_WIDTH{DIMM_ORG_BYTE_BYTE, SDRAM_DATA_WID_CHAN_START, SDRAM_DATA_WID_CHAN_LEN};
+        static constexpr field_t NUM_PACKAGE_RANKS_PORT1{DIMM_ORG_BYTE_BYTE, NUM_PACKAGE_RANKS_PORT1_START, NUM_PACKAGE_RANKS_PORT1_LEN};
+        static constexpr field_t NUM_PACKAGE_RANKS_PORT0{DIMM_ORG_BYTE_BYTE, NUM_PACKAGE_RANKS_PORT0_START, NUM_PACKAGE_RANKS_PORT0_LEN};
 
         // Byte 235: Memory Channel Bus Width
         static constexpr field_t ENABLED_PHY_CH{BUS_WIDTH_BYTE, ENABLED_PHY_CHANNELS_START, ENABLED_PHY_CHANNELS_LEN};

@@ -688,7 +688,11 @@ class base_0_0 : public mss::spd::base
                 {1, fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_2R},
             };
 
-            FAPI_TRY( mss::spd::get_field_spd(iv_ocmb, FIELDS::PACKAGE_RANKS_PER_CHANNEL, i_spd, SET_MRANKS, l_field));
+            // Different fields based upon the port in question
+            const auto l_port_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(iv_port);
+            const auto FIELD = l_port_pos == 0 ? FIELDS::PACKAGE_RANKS_PER_PORT0 : FIELDS::PACKAGE_RANKS_PER_PORT1;
+
+            FAPI_TRY( mss::spd::get_field_spd(iv_ocmb, FIELD, i_spd, SET_MRANKS, l_field));
             FAPI_TRY( lookup_table_check(iv_dimm, NUM_PACKAGE_RANKS_MAP, SET_MRANKS, l_field, l_rpd),
                       "%s failed MASTER_RANKS lookup check", spd::c_str(iv_dimm) );
 

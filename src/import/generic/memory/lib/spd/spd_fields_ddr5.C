@@ -128,7 +128,8 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::TRTP_MIN_CL
 //// Bytes 230-236: module information
 //////////////////////////////////////
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::RANK_MIX;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::PACKAGE_RANKS_PER_CHANNEL;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::PACKAGE_RANKS_PER_PORT1;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::PACKAGE_RANKS_PER_PORT0;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BUS_WIDTH_CHA;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BUS_WIDTH_CHB;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::ENABLED_PHY_CHANNELS;
@@ -174,9 +175,8 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::DESIGN_R
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::DESIGN_REF_CARD;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::REGISTER_TYPE;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::NUM_BUFFERS;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::NUM_PACKAGE_RANKS_CHAN1;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::NUM_PACKAGE_RANKS_CHAN0;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::DATA_WIDTH;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::NUM_PACKAGE_RANKS_PORT1;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::NUM_PACKAGE_RANKS_PORT0;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::ENABLED_PHY_CH;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::BUS_WIDTH_CH_A;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::BUS_WIDTH_CH_B;
