@@ -53,17 +53,14 @@ namespace SBEIO
         uint16_t minorVersion;
         uint32_t commitId;
         char     releaseTag[SBE_RELEASE_TAG_MAX_CHARS];  // AKA build tag
-        uint32_t capabilities[SBE_MAX_CAPABILITIES];
-
+        uint32_t capabilities[];
         sbeCapabilities_t() :
               majorVersion(0),
               minorVersion(0),
               commitId(0),
-              releaseTag{ 0 },
-              capabilities{ 0 }
-        {
-        }
-    } PACKED;  // end struct sbeCapabilities_t
+              releaseTag{ 0 }
+        {}
+    } PACKED;
 
     struct sbeCapabilities2_t
     {
@@ -72,13 +69,12 @@ namespace SBEIO
         uint32_t commitId;
         char     releaseTag[SBE_RELEASE_TAG_MAX_CHARS];  // AKA build tag
         uint32_t capabilities[SBE_MAX_CAPABILITIES_2];
-
         sbeCapabilities2_t() :
-              majorVersion(0)
-            , minorVersion(0)
-            , commitId(0)
-            , releaseTag{ 0 }
-            , capabilities{ 0 }
+            majorVersion(0),
+            minorVersion(0),
+            commitId(0),
+            releaseTag{ 0 },
+            capabilities{ 0 }
         {
         }
     } PACKED;  // end struct sbeCapabilities2_t

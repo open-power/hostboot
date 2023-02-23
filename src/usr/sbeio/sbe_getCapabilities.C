@@ -46,7 +46,8 @@ using namespace TARGETING;
 using namespace ERRORLOG;
 
  /**
- * @brief Apply the SBE capabilities to the given target
+ * @brief Apply the SBE capabilities to the given target.
+ * @note ATTR_SBE_FIFO_CAPABILITIES is not set in this function.
  *
  * @param[in]  i_target Target to apply the SBE capabilities on
  *
@@ -54,7 +55,7 @@ using namespace ERRORLOG;
  *
  */
 void applySbeCapabilities(TargetHandle_t i_target,
-                          sbeCapabilities2_t &i_capabilities)
+                          sbeCapabilities_t &i_capabilities)
 {
     // Get the SBE Version from the SBE Capabilities and set the
     // attribute associated with SBE Version
@@ -62,15 +63,13 @@ void applySbeCapabilities(TargetHandle_t i_target,
                   TWO_UINT16_TO_UINT32(i_capabilities.majorVersion,
                                        i_capabilities.minorVersion);
     i_target->setAttr<ATTR_SBE_VERSION_INFO>(l_sbeVersionInfo);
-    TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
-              "Retrieved SBE Version: 0x%X", l_sbeVersionInfo);
+    TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: Retrieved SBE Version: 0x%X", l_sbeVersionInfo);
 
     // Get the SBE Commit ID from the SBE Capabilities and set the
     // attribute associated with SBE Commit ID
     ATTR_SBE_COMMIT_ID_type l_sbeCommitId = i_capabilities.commitId;
     i_target->setAttr<ATTR_SBE_COMMIT_ID>(l_sbeCommitId);
-    TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
-              "Retrieved SBE Commit ID: 0x%X", l_sbeCommitId);
+    TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: Retrieved SBE Commit ID: 0x%X", l_sbeCommitId);
 
     // Get the SBE Release Tag from the SBE Capabilities and set the
     // attribute associated with SBE Release Tag
@@ -78,50 +77,50 @@ void applySbeCapabilities(TargetHandle_t i_target,
 
     // Make sure the sizes are compatible.
     static_assert(SBE_RELEASE_TAG_MAX_CHARS <= ATTR_SBE_RELEASE_TAG_max_chars,
-    "Copy error - size of source is greater than size of destination.");
+        "Copy error - size of source is greater than size of destination.");
 
     // Copy the release tags over into a more compatible type and set
     // the SBE Release Tags attribute
-    strncpy(l_sbeReleaseTagString,
-            i_capabilities.releaseTag,
-            SBE_RELEASE_TAG_MAX_CHARS);
+    strncpy(l_sbeReleaseTagString, i_capabilities.releaseTag, SBE_RELEASE_TAG_MAX_CHARS);
+
     i_target->setAttr<ATTR_SBE_RELEASE_TAG>(l_sbeReleaseTagString);
-    TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
-              "Retrieved SBE Release Tag: %s", l_sbeReleaseTagString);
 
-    // SBE only supported accurate Hostboot requested halt reporting to FSP
-    // as of version 1.4 or later.
-    const uint8_t sbeSupportsHaltReporting =
-        (   (   (i_capabilities.majorVersion == 1)
-             && (i_capabilities.minorVersion >= 4))
-         || (   (i_capabilities.majorVersion >  1)));
+    TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: Retrieved SBE Release Tag: %s", l_sbeReleaseTagString);
 
-    i_target->setAttr<ATTR_SBE_SUPPORTS_HALT_STATUS>(sbeSupportsHaltReporting);
-    TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
-              "SBE supports Hostboot requested halt status reporting: %d",
-              sbeSupportsHaltReporting);
-
-    // Only interrogate the boot processor's SBE to determine if the current
-    // node is capable of having the boot processor's SBE perform the SMP
-    // stitching and TPM measurement extending.
-    if(i_target->getAttr<ATTR_PROC_MASTER_TYPE>() == PROC_MASTER_TYPE_ACTING_MASTER)
+    // Odyssey does not support SBE halting and TPMs do not apply to it.
+    if (i_target->getAttr<ATTR_TYPE>() == TYPE_PROC)
     {
-        // SBE support for TPM Extend Mode as of version 2.1 or later.
-        const uint8_t sbeSupportsTpmExtendMode =
-            (   (   (i_capabilities.majorVersion == 2)
-                 && (i_capabilities.minorVersion >= 1))
-             || (   (i_capabilities.majorVersion >  2)));
+        // SBE only supported accurate Hostboot requested halt reporting to FSP
+        // as of version 1.4 or later.
+        const uint8_t sbeSupportsHaltReporting = (((i_capabilities.majorVersion == 1)
+                                                    && (i_capabilities.minorVersion >= 4))
+                                                 || ((i_capabilities.majorVersion >  1)));
+
+        i_target->setAttr<ATTR_SBE_SUPPORTS_HALT_STATUS>(sbeSupportsHaltReporting);
+        TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: SBE supports Hostboot requested halt status reporting: %d",
+                sbeSupportsHaltReporting);
+
+        // Only interrogate the boot processor's SBE to determine if the current
+        // node is capable of having the boot processor's SBE perform the SMP
+        // stitching and TPM measurement extending.
+        if(i_target->getAttr<ATTR_PROC_MASTER_TYPE>() == PROC_MASTER_TYPE_ACTING_MASTER)
+        {
+            // SBE support for TPM Extend Mode as of version 2.1 or later.
+            const uint8_t sbeSupportsTpmExtendMode =
+                (   (   (i_capabilities.majorVersion == 2)
+                        && (i_capabilities.minorVersion >= 1))
+                    || (   (i_capabilities.majorVersion >  2)));
 
 #ifndef __HOSTBOOT_RUNTIME
-        TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
+            TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
 #else
-        TargetHandle_t l_nodeTarget = UTIL::assertGetMasterNodeTarget();
+            TargetHandle_t l_nodeTarget = UTIL::assertGetMasterNodeTarget();
 #endif
-        l_nodeTarget->
-            setAttr<ATTR_SBE_HANDLES_SMP_TPM_EXTEND>(sbeSupportsTpmExtendMode);
-        TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: "
-                  "SBE supports TPM Extend Mode: %d",
-                  sbeSupportsTpmExtendMode);
+            l_nodeTarget->
+                setAttr<ATTR_SBE_HANDLES_SMP_TPM_EXTEND>(sbeSupportsTpmExtendMode);
+            TRACFCOMP(g_trac_sbeio,"applySbeCapabilities: SBE supports TPM Extend Mode: %d",
+                    sbeSupportsTpmExtendMode);
+        }
     }
 }
 
@@ -276,7 +275,7 @@ errlHndl_t getPsuSbeCapabilities(TargetHandle_t i_target)
         // If data returned, retrieve it
         if (l_psuResponse.sbe_capabilities_size)
         {
-            applySbeCapabilities(i_target, l_sbeCapabilities);
+            applySbeCapabilities(i_target, *reinterpret_cast<sbeCapabilities_t *>(&l_sbeCapabilities));
         }
     } while (0);
 
@@ -301,15 +300,37 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
 
     do
     {
-        // Get the needed structures to make the FIFO call
-        // Create a FIFO request message. Default ctor initializes correctly
-        SbeFifo::fifoGetCapabilities2Request l_fifoRequest;
+        l_errl = sbeioInterfaceChecks(i_target);
+        if (l_errl)
+        {
+            break;
+        }
+        // update this based on version
+        uint8_t capabilities_array_size = 0;
 
-        // Create a FIFO response message.  No need to iniitilaize
-        SbeFifo::fifoGetCapabilities2ResponseEnd * l_fifoResponseEnd;
+        // Create a FIFO request message. Default ctor initializes for Odyssey but a couple fields need tweaking
+        // depending on context.
+        SbeFifo::fifoGetCapabilitiesRequest l_fifoRequest;
+
+        if (i_target->getAttr<ATTR_TYPE>() == TYPE_OCMB_CHIP)
+        {
+            // Odyssey uses getCapabilities. Presently, the chipId field is unused so leave it 0.
+            capabilities_array_size = SBEIO::SBE_MAX_CAPABILITIES;
+        }
+        else
+        {
+            // P10 uses getCapabilities2
+            capabilities_array_size = SBEIO::SBE_MAX_CAPABILITIES_2;
+            l_fifoRequest.command = SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES_2;
+        }
+
+        // Create a FIFO response message.  No need to initialize
+        SbeFifo::fifoStandardResponse * l_fifoResponseEnd;
 
         // create a large buffer for MAX response
-        uint8_t l_fifoResponseBuffer[sizeof(SBEIO::sbeCapabilities2_t) + sizeof(*l_fifoResponseEnd)] = {0};
+        uint8_t l_fifoResponseBuffer[sizeof(sbeCapabilities_t)
+                                    + (sizeof(uint32_t) * capabilities_array_size)
+                                    + sizeof(*l_fifoResponseEnd)] = {0};
 
         // Make the call to perform the FIFO Chip Operation
         l_errl = SbeFifo::getTheInstance().performFifoChipOp(
@@ -325,32 +346,21 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
             break;
         }
 
-        // Different versions change capabilites size
-        SBEIO::sbeCapabilities2_t * pSbeCapabilities =
-            reinterpret_cast<SBEIO::sbeCapabilities2_t *>(l_fifoResponseBuffer);
+        // Different versions change capabilities array size.
+        SBEIO::sbeCapabilities_t * pSbeCapabilities =
+            reinterpret_cast<SBEIO::sbeCapabilities_t *>(l_fifoResponseBuffer);
 
         // offset into l_fifoResponseBuffer for start of l_fifoResponseEnd
-        uint32_t rspEndOffset = 0;
+        uint32_t rspEndOffset = sizeof(SBEIO::sbeCapabilities_t)
+                              + (sizeof(pSbeCapabilities->capabilities[0]) * capabilities_array_size);
 
-        // update this based on version
-        uint8_t capabilities_array_size = SBEIO::SBE_MAX_CAPABILITIES_2;
-
-        // update response end pointer to after sbeCapabilities size
-        rspEndOffset = sizeof(pSbeCapabilities->majorVersion) +
-                       sizeof(pSbeCapabilities->minorVersion) +
-                           sizeof(pSbeCapabilities->commitId) +
-                         sizeof(pSbeCapabilities->releaseTag) +
-                   (sizeof(pSbeCapabilities->capabilities[0]) * capabilities_array_size);
-
-        l_fifoResponseEnd = reinterpret_cast<SbeFifo::fifoGetCapabilities2ResponseEnd *>
+        l_fifoResponseEnd = reinterpret_cast<SbeFifo::fifoStandardResponse *>
                                 (l_fifoResponseBuffer + rspEndOffset);
 
         // Sanity check - are HW and HB communications in sync?
         if ((SbeFifo::FIFO_STATUS_MAGIC != l_fifoResponseEnd->status.magic)  ||
-            (SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE !=
-                                      l_fifoResponseEnd->status.commandClass) ||
-            (SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES_2 !=
-                                      l_fifoResponseEnd->status.command))
+            (SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE != l_fifoResponseEnd->status.commandClass) ||
+            (l_fifoRequest.command != l_fifoResponseEnd->status.command))
         {
             TRACFCOMP(g_trac_sbeio,
                       "Call to performFifoChipOp returned an unexpected "
@@ -366,7 +376,7 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
                       l_fifoResponseEnd->status.commandClass,
                       SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
                       l_fifoResponseEnd->status.command,
-                      SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES_2);
+                      l_fifoRequest.command);
 
             /*@
              * @errortype
@@ -387,12 +397,11 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
                 get_huid(i_target),
                 TWO_UINT32_TO_UINT64(
                   TWO_UINT16_TO_UINT32(SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
-                                       SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES_2),
+                                       l_fifoRequest.command),
                   TWO_UINT16_TO_UINT32(l_fifoResponseEnd->status.commandClass,
                                        l_fifoResponseEnd->status.command) ));
 
             l_errl->collectTrace(SBEIO_COMP_NAME, 256);
-
             break;
         }
 
@@ -402,16 +411,20 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
                 pSbeCapabilities->majorVersion,pSbeCapabilities->minorVersion,
                 get_huid(i_target), capabilities_array_size);
         TRACDBIN(g_trac_sbeio,"SBE capabilities array",
-                pSbeCapabilities->capabilities,
-                (sizeof(pSbeCapabilities->capabilities[0]) * capabilities_array_size));
+                 pSbeCapabilities->capabilities,
+                 (sizeof(pSbeCapabilities->capabilities[0]) * capabilities_array_size));
 
         // Fill in ATTR_SBE_FIFO_CAPABILITIES for this processor's SBE
-        // verify attribute size large enough for all capabilites array
-        static_assert(
-             sizeof(ATTR_SBE_FIFO_CAPABILITIES_type) >= sizeof(pSbeCapabilities->capabilities),
-            "ATTR_SBE_FIFO_CAPABILITIES size out of sync with sbeCapabilities2_t capabilities field size" );
+        // verify attribute size large enough for all capabilities array
+        static_assert(sizeof(ATTR_SBE_FIFO_CAPABILITIES_type) >= sizeof(sbeCapabilities2_t::capabilities),
+                      "ATTR_SBE_FIFO_CAPABILITIES size out of sync with sbeCapabilities2_t capabilities field size" );
+
         TARGETING::ATTR_SBE_FIFO_CAPABILITIES_type l_fifo_capabilities = {};
-        memcpy(l_fifo_capabilities, pSbeCapabilities->capabilities, (sizeof(pSbeCapabilities->capabilities[0]) * capabilities_array_size));
+
+        memcpy(l_fifo_capabilities,
+               pSbeCapabilities->capabilities,
+               (sizeof(pSbeCapabilities->capabilities[0]) * capabilities_array_size));
+
         i_target->setAttr<TARGETING::ATTR_SBE_FIFO_CAPABILITIES>(l_fifo_capabilities);
 
     }

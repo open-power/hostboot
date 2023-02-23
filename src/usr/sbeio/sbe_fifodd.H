@@ -642,6 +642,9 @@ public:
      * @brief Struct for FIFO Get Capabilities Request including
      *        new additions.
      *
+     *        Struct for FIFO Get Capabilities response end uses fifoStandardResponse
+     *        A variation of sbeCapabilities2_t comes before that struct.
+     *
      * Complies with document FipS_SBE_Interface_Specification_v1.5b-1.pdf
      * @note Depricated as of POZ SBE FIFO spec v0.1
      */
@@ -658,26 +661,6 @@ public:
             , command(SBE_FIFO_CMD_GET_CAPABILITIES_2)
         {
         }
-    } PACKED;
-
-    /**
-     * @brief Struct for FIFO Get Capabilities response end
-     *        A variation of sbeCapabilities2_t comes before this
-     *        struct in the getCapabilities command response
-     *
-     * The actual number of returned words varies based on whether there was
-     * an error.
-     *
-     * Complies with document FipS_SBE_Interface_Specification_v1.5b-1.pdf
-     * @note Depricated as of POZ SBE FIFO spec v0.1
-     */
-    struct fifoGetCapabilities2ResponseEnd
-    {
-        statusHeader status;
-        struct       fapi2::ffdc_struct ffdc;  // ffdc data
-        uint32_t     status_distance; // distance to status
-        fifoGetCapabilities2ResponseEnd():
-            status_distance(0) {}
     } PACKED;
 
 
