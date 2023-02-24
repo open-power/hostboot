@@ -337,6 +337,99 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Helper function for setting the bytes per DRAM
+/// @param[in] i_target the DIMM target
+/// @param[in] i_field field parameter including byte, start, len
+/// @param[in] i_binary binary (SPD/EFD)
+/// @param[in] i_ffdc_code FFDC code for error traces
+/// @param[in] Current rank
+/// @param[in] Current pos/phy/port
+/// @param[out] o_bytes reference to std::vector of the arranged bytes
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode set_bytes_per_dram_helper_func(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const mss::field_t<mss::endian::LITTLE>& i_field,
+        const std::vector<uint8_t>& i_binary,
+        const uint16_t i_ffdc_code,
+        const uint8_t i_rank,
+        const uint8_t i_pos,
+        uint8_t (&o_bytes)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM])
+{
+    // Get the ocmb target
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
+    // Get the byte number
+    size_t l_start_byte_num = i_field.get_byte(i_binary);
+
+    // Manipulate the starting byte number based on rank and port
+    //  [POS][RANK][DRAM]  Byte Num Start Byte
+    //    0     0  [0-9]   0-9          0
+    //    0     0  [10-19] 20-29
+    //    0     1  [0-9]   10-19       10
+    //    0     1  [10-19] 30-39
+    //    1     0  [0-9]   40-49       40
+    //    1     0  [10-19] 60-69
+    //    1     1  [0-9]   50-59       50
+    //    1     1  [10-19] 70-79
+    // If we are in pos 0 and rank 0 the start byte is 0
+    // If we are in pos 0 and rank 1, add 10 to start byte
+    if(i_pos == 0 && i_rank == 1)
+    {
+        // Set the start byte as byte 10
+        l_start_byte_num = i_field.get_byte(i_binary) + 10;
+    }
+    // If we are in pos 1 and rank0, add 40 to start byte
+    else if(i_pos == 1 && i_rank == 0)
+    {
+        // Set the start byte as byte 40
+        l_start_byte_num = i_field.get_byte(i_binary) + 40;
+    }
+    // If we are in pos 1 and rank1, add 50 to start byte
+    else if(i_pos == 1 && i_rank == 1)
+    {
+        // Set the start byte as byte 50
+        l_start_byte_num = i_field.get_byte(i_binary) + 50;
+    }
+
+    // Create a new array of field_t for the port we are working on using the above start_byte_num
+    // Note: start byte and the length will not change for the particular field
+    mss::field_t<mss::endian::LITTLE>l_next_fields[mss::ddr5::mr::ATTR_DRAM] =
+    {
+        // DRAM[0]- DRAM[9]
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num,   i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 1, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 2, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 3, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 4, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 5, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 6, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 7, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 8, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 9, i_field.get_start(), i_field.get_length()),
+        // DRAM[10] - DRAM[19]
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 20, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 21, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 22, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 23, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 24, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 25, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 26, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 27, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 28, i_field.get_start(), i_field.get_length()),
+        mss::field_t<mss::endian::LITTLE>(l_start_byte_num + 29, i_field.get_start(), i_field.get_length()),
+    };
+
+    // Update the o_bytes with the fields
+    for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
+    {
+        FAPI_TRY(mss::spd::get_field_spd(l_ocmb, l_next_fields[l_dram], i_binary, i_ffdc_code, o_bytes[i_rank][l_dram]));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // ns spd
 
 namespace pmic

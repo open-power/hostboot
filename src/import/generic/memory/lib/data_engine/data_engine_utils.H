@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -338,6 +338,25 @@ fapi2::ReturnCode get_raw_data(
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     const uint8_t i_is_planar,
     std::vector<uint8_t>& o_spd);
+
+///
+/// @brief Helper function for setting the bytes per DRAM
+/// @param[in] i_target the DIMM target
+/// @param[in] i_field field parameter including byte, start, len
+/// @param[in] i_binary binary (SPD/EFD)
+/// @param[in] i_ffdc_code FFDC code for error traces
+/// @param[in] Current rank
+/// @param[in] Current pos/phy/port
+/// @param[out] o_bytes reference to std::vector of the arranged bytes
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode set_bytes_per_dram_helper_func(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+        const mss::field_t<mss::endian::LITTLE>& i_field,
+        const std::vector<uint8_t>& i_binary,
+        const uint16_t i_ffdc_code,
+        const uint8_t i_rank,
+        const uint8_t i_pos,
+        uint8_t (&o_bytes)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM]);
 
 }
 

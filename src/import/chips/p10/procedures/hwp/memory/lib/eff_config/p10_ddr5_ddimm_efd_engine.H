@@ -1342,17 +1342,18 @@ class ddimm_0_0 : public mss::efd::base
             return fapi2::current_err;
         }
 
-        /// Remove the #if once the TODO is done
-        /// TODO: MST-1946: Add decoding for MR11,12,32,33 in eff cnfg
-#if 0
         ///
         /// @brief Set the CK/CS ODT and CA Termination
         ///
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
+        /// @note: Decoding this for channel A
         virtual fapi2::ReturnCode set_ck_odt(const std::vector<uint8_t>& i_efd) const
         {
+            uint8_t l_ck_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
+            uint16_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
+
             // =========================================================
             // EFD Byte 82-97: CK/CS ODT and CA Termination
             // Attribute: ATTR_DDR5_DRAM_CK_ODT
@@ -1360,8 +1361,72 @@ class ddimm_0_0 : public mss::efd::base
             // DDR5 DDIMM SPD Document Release 1.10
             // Page 150-151
             // =========================================================
+            static const std::vector< std::pair<uint8_t, uint16_t> > CK_ODT_STRAP_MAP =
+            {
+                // {key byte, DRAM RTT PARK (ohm)}
+                {0b000, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_DISABLE},
+                {0b001, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_OHM480},
+                {0b010, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_OHM240},
+                {0b011, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_OHM120},
+                {0b100, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_OHM80},
+                {0b101, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_OHM60},
+                {0b111, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_OHM40},
 
-            return fapi2::FAPI2_RC_SUCCESS;
+                // All others reserved
+            };
+
+            // Get the attr so that only the bits that changed are written
+            // when we set the attr
+            FAPI_TRY(mss::attr::get_ddr5_dram_ck_odt(iv_dimm, l_field));
+
+            // [PORT][RANK][STRAP]
+            //  [0]   [0]    [0] = ODT_CA_GRPA_CK_BYTE0
+            //  [0]   [0]    [1] = ODT_CA_GRPB_CK_BYTE0
+            //  [0]   [1]    [0] = ODT_CA_GRPA_CK_BYTE1
+            //  [0]   [1]    [1] = ODT_CA_GRPB_CK_BYTE1
+            //  [1]   [0]    [0] = ODT_CA_GRPA_CK_BYTE4
+            //  [1]   [0]    [1] = ODT_CA_GRPB_CK_BYTE4
+            //  [1]   [1]    [0] = ODT_CA_GRPA_CK_BYTE5
+            //  [1]   [1]    [1] = ODT_CA_GRPB_CK_BYTE5
+            if (iv_port_rel_pos == 0) // Port 0
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPA_CK_BYTE0, i_efd, SET_ODT_CK_GRPA,
+                                                 l_ck_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPB_CK_BYTE0, i_efd, SET_ODT_CK_GRPB,
+                                                 l_ck_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPB]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPA_CK_BYTE1, i_efd, SET_ODT_CK_GRPA,
+                                                 l_ck_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPB_CK_BYTE1, i_efd, SET_ODT_CK_GRPB,
+                                                 l_ck_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPB]));
+
+            }
+            else // Port 1
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPA_CK_BYTE4, i_efd, SET_ODT_CK_GRPA,
+                                                 l_ck_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPB_CK_BYTE4, i_efd, SET_ODT_CK_GRPB,
+                                                 l_ck_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPB]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPA_CK_BYTE5, i_efd, SET_ODT_CK_GRPA,
+                                                 l_ck_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPB_CK_BYTE5, i_efd, SET_ODT_CK_GRPB,
+                                                 l_ck_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPB]));
+            }
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(iv_ocmb, CK_ODT_STRAP_MAP, SET_ODT_CK_GRPA,
+                                        l_ck_odt_byte[iv_dimm_rank][mss::ddr5::mr::STRAPA],
+                                        l_field[iv_dimm_rank][mss::ddr5::mr::STRAPA]));
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(iv_ocmb, CK_ODT_STRAP_MAP, SET_ODT_CK_GRPB,
+                                        l_ck_odt_byte[iv_dimm_rank][mss::ddr5::mr::STRAPB],
+                                        l_field[iv_dimm_rank][mss::ddr5::mr::STRAPB]));
+
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_dram_ck_odt(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -1372,6 +1437,9 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_cs_odt(const std::vector<uint8_t>& i_efd) const
         {
+            uint8_t l_cs_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
+            uint16_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
+
             // =========================================================
             // EFD Byte 82-97: CK/CS ODT and CA Termination
             // Attribute: ATTR_DDR5_DRAM_CS_ODT
@@ -1380,7 +1448,72 @@ class ddimm_0_0 : public mss::efd::base
             // Page 150-151
             // =========================================================
 
-            return fapi2::FAPI2_RC_SUCCESS;
+            static const std::vector< std::pair<uint8_t, uint16_t> > CS_ODT_STRAP_MAP =
+            {
+                // {key byte, DRAM RTT PARK (ohm)}
+                {0b000, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_DISABLE},
+                {0b001, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_OHM480},
+                {0b010, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_OHM240},
+                {0b011, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_OHM120},
+                {0b100, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_OHM80},
+                {0b101, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_OHM60},
+                {0b111, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_OHM40},
+
+                // All others reserved
+            };
+
+            // Get the attr so that only the bits that changed are written
+            // when we set the attr
+            FAPI_TRY(mss::attr::get_ddr5_dram_cs_odt(iv_dimm, l_field));
+
+            // [PORT][RANK][STRAP]
+            //  [0]   [0]    [0] = ODT_CA_GRPA_CS_BYTE0
+            //  [0]   [0]    [1] = ODT_CA_GRPB_CS_BYTE0
+            //  [0]   [1]    [0] = ODT_CA_GRPA_CS_BYTE1
+            //  [0]   [1]    [1] = ODT_CA_GRPB_CS_BYTE1
+            //  [1]   [0]    [0] = ODT_CA_GRPA_CS_BYTE4
+            //  [1]   [0]    [1] = ODT_CA_GRPB_CS_BYTE4
+            //  [1]   [1]    [0] = ODT_CA_GRPA_CS_BYTE5
+            //  [1]   [1]    [1] = ODT_CA_GRPB_CS_BYTE5
+            if (iv_port_rel_pos == 0) // Port 0
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPA_CS_BYTE0, i_efd, SET_ODT_CS_GRPA,
+                                                 l_cs_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPB_CS_BYTE0, i_efd, SET_ODT_CS_GRPB,
+                                                 l_cs_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPB]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPA_CS_BYTE1, i_efd, SET_ODT_CS_GRPA,
+                                                 l_cs_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPB_CS_BYTE1, i_efd, SET_ODT_CS_GRPB,
+                                                 l_cs_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPB]));
+
+            }
+            else // Port 1
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPA_CS_BYTE4, i_efd, SET_ODT_CS_GRPA,
+                                                 l_cs_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPB_CS_BYTE4, i_efd, SET_ODT_CS_GRPB,
+                                                 l_cs_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPB]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPA_CS_BYTE5, i_efd, SET_ODT_CS_GRPA,
+                                                 l_cs_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_CA_GRPB_CS_BYTE5, i_efd, SET_ODT_CS_GRPB,
+                                                 l_cs_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPB]));
+            }
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(iv_ocmb, CS_ODT_STRAP_MAP, SET_ODT_CS_GRPA,
+                                        l_cs_odt_byte[iv_dimm_rank][mss::ddr5::mr::STRAPA],
+                                        l_field[iv_dimm_rank][mss::ddr5::mr::STRAPA]));
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(iv_ocmb, CS_ODT_STRAP_MAP, SET_ODT_CS_GRPB,
+                                        l_cs_odt_byte[iv_dimm_rank][mss::ddr5::mr::STRAPB],
+                                        l_field[iv_dimm_rank][mss::ddr5::mr::STRAPB]));
+
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_dram_cs_odt(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -1391,6 +1524,9 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_ck_odt_per_dram(const std::vector<uint8_t>& i_efd) const
         {
+            uint8_t l_dram_ck_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint16_t l_dram_ck_odt[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+
             // =========================================================
             // EFD Byte 98-177: CK/CS ODT and CA Termination Per DRAM
             // Attribute: ATTR_DDR5_DRAM_CK_ODT_PER_DRAM
@@ -1398,8 +1534,35 @@ class ddimm_0_0 : public mss::efd::base
             // DDR5 DDIMM SPD Document Release 1.10
             // Page 152-153
             // =========================================================
+            static const std::vector< std::pair<uint8_t, uint16_t> > CK_ODT_DRAM_MAP =
+            {
+                // {key byte, DRAM RTT PARK (ohm)}
+                {0b000, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_PER_DRAM_DISABLE},
+                {0b001, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_PER_DRAM_OHM480},
+                {0b010, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_PER_DRAM_OHM240},
+                {0b011, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_PER_DRAM_OHM120},
+                {0b100, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_PER_DRAM_OHM80},
+                {0b101, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_PER_DRAM_OHM60},
+                {0b111, fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_PER_DRAM_OHM40},
 
-            return fapi2::FAPI2_RC_SUCCESS;
+                // All others reserved
+            };
+            FAPI_TRY(mss::attr::get_ddr5_dram_ck_odt_per_dram(iv_dimm, l_dram_ck_odt));
+            FAPI_TRY(mss::spd::set_bytes_per_dram_helper_func(iv_dimm, F::ODT_CA_CK_BYTE0, i_efd, SET_CK_ODT_DRAM, iv_dimm_rank,
+                     iv_port_rel_pos, l_dram_ck_odt_byte));
+
+            for(uint8_t l_dram = 0; l_dram < 20; l_dram++)
+            {
+                // Map SPD value to desired setting
+                FAPI_TRY(lookup_table_check(iv_ocmb, CK_ODT_DRAM_MAP, SET_CK_ODT_DRAM, l_dram_ck_odt_byte[iv_dimm_rank][l_dram],
+                                            l_dram_ck_odt[iv_dimm_rank][l_dram]));
+            }
+
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_dram_ck_odt_per_dram(iv_dimm, l_dram_ck_odt));
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -1410,6 +1573,9 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_cs_odt_per_dram(const std::vector<uint8_t>& i_efd) const
         {
+            uint8_t l_dram_cs_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint16_t l_dram_cs_odt[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+
             // =========================================================
             // EFD Byte 98-177: CK/CS ODT and CA Termination Per DRAM
             // Attribute: ATTR_DDR5_DRAM_CS_ODT_PER_DRAM
@@ -1417,8 +1583,35 @@ class ddimm_0_0 : public mss::efd::base
             // DDR5 DDIMM SPD Document Release 1.10
             // Page 152-153
             // =========================================================
+            static const std::vector< std::pair<uint8_t, uint16_t> > CS_ODT_DRAM_MAP =
+            {
+                // {key byte, DRAM RTT PARK (ohm)}
+                {0b000, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_PER_DRAM_DISABLE},
+                {0b001, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_PER_DRAM_OHM480},
+                {0b010, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_PER_DRAM_OHM240},
+                {0b011, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_PER_DRAM_OHM120},
+                {0b100, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_PER_DRAM_OHM80},
+                {0b101, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_PER_DRAM_OHM60},
+                {0b111, fapi2::ENUM_ATTR_DDR5_DRAM_CS_ODT_PER_DRAM_OHM40},
 
-            return fapi2::FAPI2_RC_SUCCESS;
+                // All others reserved
+            };
+            FAPI_TRY(mss::attr::get_ddr5_dram_cs_odt_per_dram(iv_dimm, l_dram_cs_odt));
+            FAPI_TRY(mss::spd::set_bytes_per_dram_helper_func(iv_dimm, F::ODT_CA_CS_BYTE0, i_efd, SET_CS_ODT_DRAM, iv_dimm_rank,
+                     iv_port_rel_pos, l_dram_cs_odt_byte));
+
+            for(uint8_t l_dram = 0; l_dram < 20; l_dram++)
+            {
+                // Map SPD value to desired setting
+                FAPI_TRY(lookup_table_check(iv_ocmb, CS_ODT_DRAM_MAP, SET_CS_ODT_DRAM, l_dram_cs_odt_byte[iv_dimm_rank][l_dram],
+                                            l_dram_cs_odt[iv_dimm_rank][l_dram]));
+            }
+
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_dram_cs_odt_per_dram(iv_dimm, l_dram_cs_odt));
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -1429,6 +1622,9 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_ca_odt(const std::vector<uint8_t>& i_efd) const
         {
+            uint8_t l_ca_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
+            uint16_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
+
             // =========================================================
             // EFD Byte 178-193: : CA ODT and DQS Park Termination
             //                     Group A Settings Per Rank
@@ -1437,8 +1633,72 @@ class ddimm_0_0 : public mss::efd::base
             // DDR5 DDIMM SPD Document Release 1.10
             // Page 153-154
             // =========================================================
+            static const std::vector< std::pair<uint8_t, uint16_t> > CA_ODT_STRAP_MAP =
+            {
+                // {key byte, DRAM RTT PARK (ohm)}
+                {0b000, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_DISABLE},
+                {0b001, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM480},
+                {0b010, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM240},
+                {0b011, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM120},
+                {0b100, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM80},
+                {0b101, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM60},
+                {0b111, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM40},
 
-            return fapi2::FAPI2_RC_SUCCESS;
+                // All others reserved
+            };
+
+            // Get the attr so that only the bits that changed are written
+            // when we set the attr
+            FAPI_TRY(mss::attr::get_ddr5_dram_ca_odt(iv_dimm, l_field));
+
+            // [PORT][RANK][STRAP]
+            //  [0]   [0]    [0] = CA_ODT_DQS_GRPA_BYTE0
+            //  [0]   [0]    [1] = CA_ODT_DQS_GRPB_BYTE0
+            //  [0]   [1]    [0] = CA_ODT_DQS_GRPA_BYTE1
+            //  [0]   [1]    [1] = CA_ODT_DQS_GRPB_BYTE1
+            //  [1]   [0]    [0] = CA_ODT_DQS_GRPA_BYTE4
+            //  [1]   [0]    [1] = CA_ODT_DQS_GRPB_BYTE4
+            //  [1]   [1]    [0] = CA_ODT_DQS_GRPA_BYTE5
+            //  [1]   [1]    [1] = CA_ODT_DQS_GRPB_BYTE5
+            if (iv_port_rel_pos == 0) // Port 0
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CA_ODT_DQS_GRPA_BYTE0, i_efd, SET_CA_ODT_GRPA,
+                                                 l_ca_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CA_ODT_DQS_GRPB_BYTE0, i_efd, SET_CA_ODT_GRPB,
+                                                 l_ca_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPB]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CA_ODT_DQS_GRPA_BYTE1, i_efd, SET_CA_ODT_GRPA,
+                                                 l_ca_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CA_ODT_DQS_GRPB_BYTE1, i_efd, SET_CA_ODT_GRPB,
+                                                 l_ca_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPB]));
+
+            }
+            else // Port 1
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CA_ODT_DQS_GRPA_BYTE4, i_efd, SET_CA_ODT_GRPA,
+                                                 l_ca_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CA_ODT_DQS_GRPB_BYTE4, i_efd, SET_CA_ODT_GRPB,
+                                                 l_ca_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPB]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CA_ODT_DQS_GRPA_BYTE5, i_efd, SET_CA_ODT_GRPA,
+                                                 l_ca_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CA_ODT_DQS_GRPB_BYTE5, i_efd, SET_CA_ODT_GRPB,
+                                                 l_ca_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPB]));
+            }
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(iv_ocmb, CA_ODT_STRAP_MAP, SET_CA_ODT_GRPA,
+                                        l_ca_odt_byte[iv_dimm_rank][mss::ddr5::mr::STRAPA],
+                                        l_field[iv_dimm_rank][mss::ddr5::mr::STRAPA]));
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(iv_ocmb, CA_ODT_STRAP_MAP, SET_CA_ODT_GRPB,
+                                        l_ca_odt_byte[iv_dimm_rank][mss::ddr5::mr::STRAPB],
+                                        l_field[iv_dimm_rank][mss::ddr5::mr::STRAPB]));
+
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_dram_ca_odt(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -1449,6 +1709,9 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_dqs_odt(const std::vector<uint8_t>& i_efd) const
         {
+            uint8_t l_dqs_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
+            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
+
             // =========================================================
             // EFD Byte 178-193: : CA ODT and DQS Park Termination
             //                     Group A Settings Per Rank
@@ -1457,8 +1720,72 @@ class ddimm_0_0 : public mss::efd::base
             // DDR5 DDIMM SPD Document Release 1.10
             // Page 153-154
             // =========================================================
+            static const std::vector< std::pair<uint8_t, uint8_t> > DQS_ODT_STRAP_MAP =
+            {
+                // {key byte, DRAM RTT PARK (ohm)}
+                {0b000, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_DISABLE},
+                {0b001, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM240},
+                {0b010, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM120},
+                {0b011, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM80},
+                {0b100, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM60},
+                {0b101, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM48},
+                {0b110, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM40},
+                {0b111, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM34},
 
-            return fapi2::FAPI2_RC_SUCCESS;
+                // All others reserved
+            };
+
+            // Get the attr so that only the bits that changed are written
+            // when we set the attr
+            FAPI_TRY(mss::attr::get_ddr5_dram_dqs_rtt_park(iv_dimm, l_field));
+
+            // [PORT][RANK][STRAP]
+            //  [0]   [0]    [0] = DQS_RTT_PARK_GRPA_BYTE0
+            //  [0]   [0]    [1] = DQS_RTT_PARK_GRPB_BYTE0
+            //  [0]   [1]    [0] = DQS_RTT_PARK_GRPA_BYTE1
+            //  [0]   [1]    [1] = DQS_RTT_PARK_GRPB_BYTE1
+            //  [1]   [0]    [0] = DQS_RTT_PARK_GRPA_BYTE4
+            //  [1]   [0]    [1] = DQS_RTT_PARK_GRPB_BYTE4
+            //  [1]   [1]    [0] = DQS_RTT_PARK_GRPA_BYTE5
+            //  [1]   [1]    [1] = DQS_RTT_PARK_GRPB_BYTE5
+            if (iv_port_rel_pos == 0) // Port 0
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DQS_RTT_PARK_GRPA_BYTE0, i_efd, SET_DQS_ODT_GRPA,
+                                                 l_dqs_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DQS_RTT_PARK_GRPB_BYTE0, i_efd, SET_DQS_ODT_GRPB,
+                                                 l_dqs_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPB]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DQS_RTT_PARK_GRPA_BYTE1, i_efd, SET_DQS_ODT_GRPA,
+                                                 l_dqs_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DQS_RTT_PARK_GRPB_BYTE1, i_efd, SET_DQS_ODT_GRPB,
+                                                 l_dqs_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPB]));
+            }
+            else // Port 1
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DQS_RTT_PARK_GRPA_BYTE4, i_efd, SET_DQS_ODT_GRPA,
+                                                 l_dqs_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DQS_RTT_PARK_GRPB_BYTE4, i_efd, SET_DQS_ODT_GRPB,
+                                                 l_dqs_odt_byte[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::STRAPB]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DQS_RTT_PARK_GRPA_BYTE5, i_efd, SET_DQS_ODT_GRPA,
+                                                 l_dqs_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPA]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DQS_RTT_PARK_GRPB_BYTE5, i_efd, SET_DQS_ODT_GRPB,
+                                                 l_dqs_odt_byte[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::STRAPB]));
+            }
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(iv_ocmb, DQS_ODT_STRAP_MAP, SET_DQS_ODT_GRPA,
+                                        l_dqs_odt_byte[iv_dimm_rank][mss::ddr5::mr::STRAPA],
+                                        l_field[iv_dimm_rank][mss::ddr5::mr::STRAPA]));
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(iv_ocmb, DQS_ODT_STRAP_MAP, SET_DQS_ODT_GRPB,
+                                        l_dqs_odt_byte[iv_dimm_rank][mss::ddr5::mr::STRAPB],
+                                        l_field[iv_dimm_rank][mss::ddr5::mr::STRAPB]));
+
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_dram_dqs_rtt_park(iv_dimm, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -1469,6 +1796,9 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_ca_odt_dram(const std::vector<uint8_t>& i_efd) const
         {
+            uint8_t l_dram_ca_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint16_t l_dram_ca_odt[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+
             // =========================================================
             // EFD Byte 194-273: : CA ODT and DQS Park Termination
             //                     Group A Settings Per DRAM
@@ -1477,8 +1807,38 @@ class ddimm_0_0 : public mss::efd::base
             // DDR5 DDIMM SPD Document Release 1.10
             // Page 154-155
             // =========================================================
+            static const std::vector< std::pair<uint8_t, uint16_t> > CA_ODT_DRAM_MAP =
+            {
+                // {key byte, DRAM RTT PARK (ohm)}
+                {0b000, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_PER_DRAM_DISABLE},
+                {0b001, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_PER_DRAM_OHM480},
+                {0b010, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_PER_DRAM_OHM240},
+                {0b011, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_PER_DRAM_OHM120},
+                {0b100, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_PER_DRAM_OHM80},
+                {0b101, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_PER_DRAM_OHM60},
+                {0b111, fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_PER_DRAM_OHM40},
 
-            return fapi2::FAPI2_RC_SUCCESS;
+                // All others reserved
+            };
+
+            // Get the attr so that only the bits that changed are written
+            // when we set the attr
+            FAPI_TRY(mss::attr::get_ddr5_dram_ca_odt_per_dram(iv_dimm, l_dram_ca_odt));
+            FAPI_TRY(mss::spd::set_bytes_per_dram_helper_func(iv_dimm, F::CA_ODT_BYTE0, i_efd, SET_CA_ODT_DRAM, iv_dimm_rank,
+                     iv_port_rel_pos, l_dram_ca_odt_byte));
+
+            for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
+            {
+                // Map SPD value to desired setting
+                FAPI_TRY(lookup_table_check(iv_ocmb, CA_ODT_DRAM_MAP, SET_CS_ODT_DRAM, l_dram_ca_odt_byte[iv_dimm_rank][l_dram],
+                                            l_dram_ca_odt[iv_dimm_rank][l_dram]));
+            }
+
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_dram_ca_odt_per_dram(iv_dimm, l_dram_ca_odt));
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -1489,6 +1849,9 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_dqs_odt_dram(const std::vector<uint8_t>& i_efd) const
         {
+            uint8_t l_dram_dqs_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint8_t l_dram_dqs_odt[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+
             // =========================================================
             // EFD Byte 194-273: : CA ODT and DQS Park Termination
             //                     Group A Settings Per DRAM
@@ -1497,10 +1860,36 @@ class ddimm_0_0 : public mss::efd::base
             // DDR5 DDIMM SPD Document Release 1.10
             // Page 154-155
             // =========================================================
+            static const std::vector< std::pair<uint8_t, uint8_t> > DQS_ODT_DRAM_MAP =
+            {
+                // {key byte, DRAM RTT PARK (ohm)}
+                {0b000, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_PER_DRAM_DISABLE},
+                {0b001, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_PER_DRAM_OHM240},
+                {0b010, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_PER_DRAM_OHM120},
+                {0b011, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_PER_DRAM_OHM80},
+                {0b100, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_PER_DRAM_OHM60},
+                {0b101, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_PER_DRAM_OHM48},
+                {0b110, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_PER_DRAM_OHM40},
+                {0b111, fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_PER_DRAM_OHM34},
+                // All others reserved
+            };
+            FAPI_TRY(mss::attr::get_ddr5_dram_dqs_rtt_park_per_dram(iv_dimm, l_dram_dqs_odt));
+            FAPI_TRY(mss::spd::set_bytes_per_dram_helper_func(iv_dimm, F::DQS_RTT_PARK_BYTE0, i_efd, SET_DQS_ODT_DRAM, iv_dimm_rank,
+                     iv_port_rel_pos, l_dram_dqs_odt_byte));
 
-            return fapi2::FAPI2_RC_SUCCESS;
+            for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
+            {
+                // Map SPD value to desired setting
+                FAPI_TRY(lookup_table_check(iv_ocmb, DQS_ODT_DRAM_MAP, SET_DQS_ODT_DRAM, l_dram_dqs_odt_byte[iv_dimm_rank][l_dram],
+                                            l_dram_dqs_odt[iv_dimm_rank][l_dram]));
+            }
+
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_dram_dqs_rtt_park_per_dram(iv_dimm, l_dram_dqs_odt));
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
-#endif
 
         ///
         /// @brief Set the ODTL ON WR
@@ -1783,9 +2172,6 @@ class ddimm_0_0 : public mss::efd::base
             return fapi2::current_err;
         }
 
-        /// Remove the #if once the TODO is done
-        /// TODO: MST-1946: Add decoding for MR11,12,32,33 in eff cnfg
-#if 0
         ///
         /// @brief Set the VREF CA field
         ///
@@ -1795,6 +2181,10 @@ class ddimm_0_0 : public mss::efd::base
         virtual fapi2::ReturnCode set_dram_vrefca(const std::vector<uint8_t>& i_efd) const
         {
 
+            uint8_t l_dram_vrefca_byte[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_byte_index = 0;
+            uint8_t l_vrefca[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+
             // =========================================================
             // EFD Byte 306-313: Base Vref CA Settings Per Rank
             // Attribute: ATTR_DDR5_DRAM_VREFCA
@@ -1802,8 +2192,59 @@ class ddimm_0_0 : public mss::efd::base
             // DDR5 DDIMM SPD Document Release 1.10
             // Page 157-158
             // =========================================================
+            // Get the attr so that only the bits that changed are written
+            // when we set the attr
+            FAPI_TRY(mss::attr::get_ddr5_dram_vrefca(iv_dimm, l_vrefca));
 
-            return fapi2::FAPI2_RC_SUCCESS;
+            // For Port 0 Channel 0
+            // A0 R0: Byte 0
+            // B0 R0: Byte 2
+            // A0 R1: Byte 1
+            // B0 R1: Byte 3
+            // For Port 0 Channel 1
+            // A1 R0: Byte 4
+            // B1 R0: Byte 5
+            // A1 R1: Byte 6
+            // B1 R1: Byte 7
+            // Same as above is repeated for Port 1 Channel 0 and Port 1 Channel 1
+            if (iv_port_rel_pos == 0) // Port 0
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE0, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE1, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[1]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE2, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[2]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE3, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[3]));
+            }
+            else // Port 1
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE4, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE5, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[1]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE6, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[2]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE7, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[3]));
+            }
+
+            // A0/A1 maps to the first 10 DRAMs
+            // B0/B1 maps to the other 10 DRAMs
+            l_byte_index = iv_dimm_rank % 2;
+
+            for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::HALF_ATTR_DRAM; l_dram++)
+            {
+                // Channel A goes to first 10 of the DRAM
+                // Byte index should be 0 for rank0 and 1 for rank1
+                l_vrefca[iv_dimm_rank][l_dram] = l_dram_vrefca_byte[l_byte_index];
+            }
+
+            for(uint8_t l_dram = mss::ddr5::mr::HALF_ATTR_DRAM; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
+            {
+                // Channel B goes to the second 10 of the DRAM
+                // Byte index should be 2 for rank0 and 3 for rank1
+                l_vrefca[iv_dimm_rank][l_dram] = l_dram_vrefca_byte[l_byte_index + 2];
+            }
+
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_dram_vrefca(iv_dimm, l_vrefca));
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -1815,6 +2256,10 @@ class ddimm_0_0 : public mss::efd::base
         virtual fapi2::ReturnCode set_dram_vrefcs(const std::vector<uint8_t>& i_efd) const
         {
 
+            uint8_t l_dram_vrefcs_byte[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_byte_index = 0;
+            uint8_t l_vrefcs[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+
             // =========================================================
             // EFD Byte 314-321: Base Vref CS Settings Per Rank
             // Attribute: ATTR_DDR5_DRAM_VREFCS
@@ -1822,11 +2267,60 @@ class ddimm_0_0 : public mss::efd::base
             // DDR5 DDIMM SPD Document Release 1.10
             // Page 158
             // =========================================================
+            // Get the attr so that only the bits that changed are written
+            // when we set the attr
+            FAPI_TRY(mss::attr::get_ddr5_dram_vrefcs(iv_dimm, l_vrefcs));
 
-            return fapi2::FAPI2_RC_SUCCESS;
+            // For Port 0 Channel 0
+            // A0 R0: Byte 0
+            // B0 R0: Byte 2
+            // A0 R1: Byte 1
+            // B0 R1: Byte 3
+            // For Port 0 Channel 1
+            // A1 R0: Byte 4
+            // B1 R0: Byte 5
+            // A1 R1: Byte 6
+            // B1 R1: Byte 7
+            // Same as above is repeated for Port 1 Channel 0 and Port 1 Channel 1
+            if (iv_port_rel_pos == 0) // Port 0
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE0, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE1, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[1]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE2, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[2]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE3, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[3]));
+            }
+            else // Port 1
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE4, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE5, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[1]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE6, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[2]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE7, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[3]));
+            }
+
+            // A0/A1 maps to the first 10 DRAMs
+            // B0/B1 maps to the other 10 DRAMs
+            l_byte_index = iv_dimm_rank % 2;
+
+            for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::HALF_ATTR_DRAM; l_dram++)
+            {
+                // Channel A goes to first 10 of the DRAM
+                // Byte index should be 0 for rank0 and 1 for rank1
+                l_vrefcs[iv_dimm_rank][l_dram] = l_dram_vrefcs_byte[l_byte_index];
+            }
+
+            for(uint8_t l_dram = mss::ddr5::mr::HALF_ATTR_DRAM; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
+            {
+                // Channel B goes to the second 10 of the DRAM
+                // Byte index should be 2 for rank0 and 3 for rank1
+                l_vrefcs[iv_dimm_rank][l_dram] = l_dram_vrefcs_byte[l_byte_index + 2];
+            }
+
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_dram_vrefcs(iv_dimm, l_vrefcs));
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
-
-#endif
 
         ///
         /// @brief Set the pmic0 swa volt off field
@@ -3030,6 +3524,14 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY(set_dram_dfe_tap4(i_efd));
             FAPI_TRY(set_dram_dfe_gain_bias(i_efd));
             FAPI_TRY(set_dram_dfe_gain_bias_sign_bit(i_efd));
+            FAPI_TRY(set_ck_odt(i_efd));
+            FAPI_TRY(set_cs_odt(i_efd));
+            FAPI_TRY(set_ck_odt_per_dram(i_efd));
+            FAPI_TRY(set_cs_odt_per_dram(i_efd));
+            FAPI_TRY(set_ca_odt(i_efd));
+            FAPI_TRY(set_dqs_odt(i_efd));
+            FAPI_TRY(set_ca_odt_dram(i_efd));
+            FAPI_TRY(set_dqs_odt_dram(i_efd));
             FAPI_TRY(set_atx_slew_rate_rise_ac_a0(i_efd));
             FAPI_TRY(set_atx_slew_rate_fall_ac_a0(i_efd));
             FAPI_TRY(set_tx_slew_rate_rise_ck_a0(i_efd));
@@ -3044,6 +3546,8 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY(set_odtloff_wr_nt(i_efd));
             FAPI_TRY(set_odtlon_rd_nt(i_efd));
             FAPI_TRY(set_odtloff_rd_nt(i_efd));
+            FAPI_TRY(set_dram_vrefca(i_efd));
+            FAPI_TRY(set_dram_vrefcs(i_efd));
 
             // PMIC EFD Fields do not change per rank, and only need to be run once
             if (iv_dimm_rank == 0)

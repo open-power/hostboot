@@ -630,62 +630,6 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             ODT_CA_BYTE0_EXP_GRP_START = 1,
             ODT_CA_BYTE0_EXP_GRP_LEN = 1,
 
-            ODT_CA_BYTE10_BYTE = 108,
-            ODT_CA_CK_BYTE10_START = 5,
-            ODT_CA_CK_BYTE10_LEN = 3,
-            ODT_CA_CS_BYTE10_START = 2,
-            ODT_CA_CS_BYTE10_LEN = 3,
-            ODT_CA_BYTE10_EXP_GRP_START = 1,
-            ODT_CA_BYTE10_EXP_GRP_LEN = 1,
-
-            ODT_CA_BYTE20_BYTE = 118,
-            ODT_CA_CK_BYTE20_START = 5,
-            ODT_CA_CK_BYTE20_LEN = 3,
-            ODT_CA_CS_BYTE20_START = 2,
-            ODT_CA_CS_BYTE20_LEN = 3,
-            ODT_CA_BYTE20_EXP_GRP_START = 1,
-            ODT_CA_BYTE20_EXP_GRP_LEN = 1,
-
-            ODT_CA_BYTE30_BYTE = 128,
-            ODT_CA_CK_BYTE30_START = 5,
-            ODT_CA_CK_BYTE30_LEN = 3,
-            ODT_CA_CS_BYTE30_START = 2,
-            ODT_CA_CS_BYTE30_LEN = 3,
-            ODT_CA_BYTE30_EXP_GRP_START = 1,
-            ODT_CA_BYTE30_EXP_GRP_LEN = 1,
-
-            ODT_CA_BYTE40_BYTE = 138,
-            ODT_CA_CK_BYTE40_START = 5,
-            ODT_CA_CK_BYTE40_LEN = 3,
-            ODT_CA_CS_BYTE40_START = 2,
-            ODT_CA_CS_BYTE40_LEN = 3,
-            ODT_CA_BYTE40_EXP_GRP_START = 1,
-            ODT_CA_BYTE40_EXP_GRP_LEN = 1,
-
-            ODT_CA_BYTE50_BYTE = 148,
-            ODT_CA_CK_BYTE50_START = 5,
-            ODT_CA_CK_BYTE50_LEN = 3,
-            ODT_CA_CS_BYTE50_START = 2,
-            ODT_CA_CS_BYTE50_LEN = 3,
-            ODT_CA_BYTE50_EXP_GRP_START = 1,
-            ODT_CA_BYTE50_EXP_GRP_LEN = 1,
-
-            ODT_CA_BYTE60_BYTE = 158,
-            ODT_CA_CK_BYTE60_START = 5,
-            ODT_CA_CK_BYTE60_LEN = 3,
-            ODT_CA_CS_BYTE60_START = 2,
-            ODT_CA_CS_BYTE60_LEN = 3,
-            ODT_CA_BYTE60_EXP_GRP_START = 1,
-            ODT_CA_BYTE60_EXP_GRP_LEN = 1,
-
-            ODT_CA_BYTE70_BYTE = 168,
-            ODT_CA_CK_BYTE70_START = 5,
-            ODT_CA_CK_BYTE70_LEN = 3,
-            ODT_CA_CS_BYTE70_START = 2,
-            ODT_CA_CS_BYTE70_LEN = 3,
-            ODT_CA_BYTE70_EXP_GRP_START = 1,
-            ODT_CA_BYTE70_EXP_GRP_LEN = 1,
-
             // Byte 178-185: CA ODT and DQS for GROUPA
             // BYTE0: A0 RANK0
             // BYTE1: A0 RANK1
@@ -814,48 +758,6 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             CA_ODT_BYTE0_LEN = 3,
             DQS_RTT_PARK_BYTE0_START = 2,
             DQS_RTT_PARK_BYTE0_LEN = 3,
-
-            CA_ODT_DQS_BYTE10_BYTE = 204,
-            CA_ODT_BYTE10_START = 5,
-            CA_ODT_BYTE10_LEN = 3,
-            DQS_RTT_PARK_BYTE10_START = 2,
-            DQS_RTT_PARK_BYTE10_LEN = 3,
-
-            CA_ODT_DQS_BYTE20_BYTE = 214,
-            CA_ODT_BYTE20_START = 5,
-            CA_ODT_BYTE20_LEN = 3,
-            DQS_RTT_PARK_BYTE20_START = 2,
-            DQS_RTT_PARK_BYTE20_LEN = 3,
-
-            CA_ODT_DQS_BYTE30_BYTE = 224,
-            CA_ODT_BYTE30_START = 5,
-            CA_ODT_BYTE30_LEN = 3,
-            DQS_RTT_PARK_BYTE30_START = 2,
-            DQS_RTT_PARK_BYTE30_LEN = 3,
-
-            CA_ODT_DQS_BYTE40_BYTE = 234,
-            CA_ODT_BYTE40_START = 5,
-            CA_ODT_BYTE40_LEN = 3,
-            DQS_RTT_PARK_BYTE40_START = 2,
-            DQS_RTT_PARK_BYTE40_LEN = 3,
-
-            CA_ODT_DQS_BYTE50_BYTE = 244,
-            CA_ODT_BYTE50_START = 5,
-            CA_ODT_BYTE50_LEN = 3,
-            DQS_RTT_PARK_BYTE50_START = 2,
-            DQS_RTT_PARK_BYTE50_LEN = 3,
-
-            CA_ODT_DQS_BYTE60_BYTE = 254,
-            CA_ODT_BYTE60_START = 5,
-            CA_ODT_BYTE60_LEN = 3,
-            DQS_RTT_PARK_BYTE60_START = 2,
-            DQS_RTT_PARK_BYTE60_LEN = 3,
-
-            CA_ODT_DQS_BYTE70_BYTE = 264,
-            CA_ODT_BYTE70_START = 5,
-            CA_ODT_BYTE70_LEN = 3,
-            DQS_RTT_PARK_BYTE70_START = 2,
-            DQS_RTT_PARK_BYTE70_LEN = 3,
 
             // Byte 274-281: ODTL Write Control Offset
             // BYTE0: A0 RANK0
@@ -1928,34 +1830,6 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t ODT_CA_CK_BYTE0{ODT_CA_BYTE0_BYTE, ODT_CA_CK_BYTE0_START, ODT_CA_CK_BYTE0_LEN};
         static constexpr field_t ODT_CA_CS_BYTE0{ODT_CA_BYTE0_BYTE, ODT_CA_CS_BYTE0_START, ODT_CA_CS_BYTE0_LEN};
         static constexpr field_t ODT_CA_BYTE0_EXP_GRP{ODT_CA_BYTE0_BYTE, ODT_CA_BYTE0_EXP_GRP_START, ODT_CA_BYTE0_EXP_GRP_LEN};
-        // BYTE9-BYTE19 : A0 RANK1
-        static constexpr field_t ODT_CA_CK_BYTE10{ODT_CA_BYTE10_BYTE, ODT_CA_CK_BYTE10_START, ODT_CA_CK_BYTE10_LEN};
-        static constexpr field_t ODT_CA_CS_BYTE10{ODT_CA_BYTE10_BYTE, ODT_CA_CS_BYTE10_START, ODT_CA_CS_BYTE10_LEN};
-        static constexpr field_t ODT_CA_BYTE10_EXP_GRP{ODT_CA_BYTE10_BYTE, ODT_CA_BYTE10_EXP_GRP_START, ODT_CA_BYTE10_EXP_GRP_LEN};
-        // BYTE20-BYTE29: B0 RANK0
-        static constexpr field_t ODT_CA_CK_BYTE20{ODT_CA_BYTE20_BYTE, ODT_CA_CK_BYTE20_START, ODT_CA_CK_BYTE20_LEN};
-        static constexpr field_t ODT_CA_CS_BYTE20{ODT_CA_BYTE20_BYTE, ODT_CA_CS_BYTE20_START, ODT_CA_CS_BYTE20_LEN};
-        static constexpr field_t ODT_CA_BYTE20_EXP_GRP{ODT_CA_BYTE20_BYTE, ODT_CA_BYTE20_EXP_GRP_START, ODT_CA_BYTE20_EXP_GRP_LEN};
-        // BYTE30-BYTE39: B0 RANK1
-        static constexpr field_t ODT_CA_CK_BYTE30{ODT_CA_BYTE30_BYTE, ODT_CA_CK_BYTE30_START, ODT_CA_CK_BYTE30_LEN};
-        static constexpr field_t ODT_CA_CS_BYTE30{ODT_CA_BYTE30_BYTE, ODT_CA_CS_BYTE30_START, ODT_CA_CS_BYTE30_LEN};
-        static constexpr field_t ODT_CA_BYTE30_EXP_GRP{ODT_CA_BYTE30_BYTE, ODT_CA_BYTE30_EXP_GRP_START, ODT_CA_BYTE30_EXP_GRP_LEN};
-        // BYTE40-BYTE49: A1 RANK0
-        static constexpr field_t ODT_CA_CK_BYTE40{ODT_CA_BYTE0_BYTE, ODT_CA_CK_BYTE0_START, ODT_CA_CK_BYTE0_LEN};
-        static constexpr field_t ODT_CA_CS_BYTE40{ODT_CA_BYTE0_BYTE, ODT_CA_CS_BYTE0_START, ODT_CA_CS_BYTE0_LEN};
-        static constexpr field_t ODT_CA_BYTE40_EXP_GRP{ODT_CA_BYTE0_BYTE, ODT_CA_BYTE0_EXP_GRP_START, ODT_CA_BYTE0_EXP_GRP_LEN};
-        // BYTE50-BYTE59: A1 RANK1
-        static constexpr field_t ODT_CA_CK_BYTE50{ODT_CA_BYTE50_BYTE, ODT_CA_CK_BYTE50_START, ODT_CA_CK_BYTE50_LEN};
-        static constexpr field_t ODT_CA_CS_BYTE50{ODT_CA_BYTE50_BYTE, ODT_CA_CS_BYTE50_START, ODT_CA_CS_BYTE50_LEN};
-        static constexpr field_t ODT_CA_BYTE50_EXP_GRP{ODT_CA_BYTE50_BYTE, ODT_CA_BYTE50_EXP_GRP_START, ODT_CA_BYTE50_EXP_GRP_LEN};
-        // BYTE60-BYTE69: B2 RANK0
-        static constexpr field_t ODT_CA_CK_BYTE60{ODT_CA_BYTE60_BYTE, ODT_CA_CK_BYTE60_START, ODT_CA_CK_BYTE60_LEN};
-        static constexpr field_t ODT_CA_CS_BYTE60{ODT_CA_BYTE60_BYTE, ODT_CA_CS_BYTE60_START, ODT_CA_CS_BYTE60_LEN};
-        static constexpr field_t ODT_CA_BYTE60_EXP_GRP{ODT_CA_BYTE60_BYTE, ODT_CA_BYTE60_EXP_GRP_START, ODT_CA_BYTE60_EXP_GRP_LEN};
-        // BYTE70-BYTE79: B2 RANK1
-        static constexpr field_t ODT_CA_CK_BYTE70{ODT_CA_BYTE70_BYTE, ODT_CA_CK_BYTE70_START, ODT_CA_CK_BYTE70_LEN};
-        static constexpr field_t ODT_CA_CS_BYTE70{ODT_CA_BYTE70_BYTE, ODT_CA_CS_BYTE70_START, ODT_CA_CS_BYTE70_LEN};
-        static constexpr field_t ODT_CA_BYTE70_EXP_GRP{ODT_CA_BYTE70_BYTE, ODT_CA_BYTE70_EXP_GRP_START, ODT_CA_BYTE70_EXP_GRP_LEN};
 
         // Byte 178-185: CA ODT and DQS for GROUPA
         // BYTE0: A0 RANK0
@@ -2013,27 +1887,6 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         // BYTE0-BYTE9  : A0 RANK0
         static constexpr field_t CA_ODT_BYTE0{CA_ODT_DQS_BYTE0_BYTE, CA_ODT_BYTE0_START, CA_ODT_BYTE0_LEN};
         static constexpr field_t DQS_RTT_PARK_BYTE0{CA_ODT_DQS_BYTE0_BYTE, DQS_RTT_PARK_BYTE0_START, DQS_RTT_PARK_BYTE0_LEN};
-        // BYTE10-BYTE19: A0 RANK1
-        static constexpr field_t CA_ODT_BYTE10{CA_ODT_DQS_BYTE10_BYTE, CA_ODT_BYTE10_START, CA_ODT_BYTE10_LEN};
-        static constexpr field_t DQS_RTT_PARK_BYTE10{CA_ODT_DQS_BYTE10_BYTE, DQS_RTT_PARK_BYTE10_START, DQS_RTT_PARK_BYTE10_LEN};
-        // BYTE20-BYTE29: B0 RANK0
-        static constexpr field_t CA_ODT_BYTE20{CA_ODT_DQS_BYTE20_BYTE, CA_ODT_BYTE20_START, CA_ODT_BYTE20_LEN};
-        static constexpr field_t DQS_RTT_PARK_BYTE20{CA_ODT_DQS_BYTE20_BYTE, DQS_RTT_PARK_BYTE20_START, DQS_RTT_PARK_BYTE20_LEN};
-        // BYTE30-BYTE39: B0 RANK1
-        static constexpr field_t CA_ODT_BYTE30{CA_ODT_DQS_BYTE30_BYTE, CA_ODT_BYTE30_START, CA_ODT_BYTE30_LEN};
-        static constexpr field_t DQS_RTT_PARK_BYTE30{CA_ODT_DQS_BYTE30_BYTE, DQS_RTT_PARK_BYTE30_START, DQS_RTT_PARK_BYTE30_LEN};
-        // BYTE40-BYTE49: A1 RANK0
-        static constexpr field_t CA_ODT_BYTE40{CA_ODT_DQS_BYTE40_BYTE, CA_ODT_BYTE40_START, CA_ODT_BYTE40_LEN};
-        static constexpr field_t DQS_RTT_PARK_BYTE40{CA_ODT_DQS_BYTE40_BYTE, DQS_RTT_PARK_BYTE40_START, DQS_RTT_PARK_BYTE40_LEN};
-        // BYTE50-BYTE59: A1 RANK1
-        static constexpr field_t CA_ODT_BYTE50{CA_ODT_DQS_BYTE50_BYTE, CA_ODT_BYTE50_START, CA_ODT_BYTE50_LEN};
-        static constexpr field_t DQS_RTT_PARK_BYTE50{CA_ODT_DQS_BYTE50_BYTE, DQS_RTT_PARK_BYTE50_START, DQS_RTT_PARK_BYTE50_LEN};
-        // BYTE60-BYTE69: B1 RANK0
-        static constexpr field_t CA_ODT_BYTE60{CA_ODT_DQS_BYTE60_BYTE, CA_ODT_BYTE60_START, CA_ODT_BYTE60_LEN};
-        static constexpr field_t DQS_RTT_PARK_BYTE60{CA_ODT_DQS_BYTE60_BYTE, DQS_RTT_PARK_BYTE60_START, DQS_RTT_PARK_BYTE60_LEN};
-        // BYTE70-BYTE79: B1 RANK1
-        static constexpr field_t CA_ODT_BYTE70{CA_ODT_DQS_BYTE70_BYTE, CA_ODT_BYTE70_START, CA_ODT_BYTE70_LEN};
-        static constexpr field_t DQS_RTT_PARK_BYTE70{CA_ODT_DQS_BYTE70_BYTE, DQS_RTT_PARK_BYTE70_START, DQS_RTT_PARK_BYTE70_LEN};
 
         // Byte 274-281: ODTL Write Control Offset
         // BYTE0: A0 RANK0
