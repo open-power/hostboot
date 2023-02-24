@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2022
+# Contributors Listed Below - COPYRIGHT 2021,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -112,7 +112,7 @@ function gerrit_refs ()
 function gerrit_pick ()
 {
     # $1 input is a commit or search string
-    git fetch gerrit $(gerrit_refs $1) && git cherry-pick FETCH_HEAD
+    git fetch gerrit $(gerrit_refs $1) && git cherry-pick --strategy=recursive -X theirs FETCH_HEAD
     if [ $? -ne 0 ]; then
         return $?
     fi
@@ -221,6 +221,13 @@ function main ()
     if [[ ! "$PROJECT_ROOT" ]] ; then
         echo "ERROR: Must be run from inside a workon"
         return 1
+    fi
+    machine=$(env | grep MACHINE | cut -d"=" -f2)
+
+    if [ "$machine" != "P10_STANDALONE" ]; then
+        echo "ERROR: This script currently only supports P10 standalone for patching hardware systems."
+        echo "       Please use MACHINE=P10_STANDALONE from a P10 based hostboot git repo."
+        return 1;
     fi
 
     ################################################
@@ -405,4 +412,5 @@ unset no_xml
 unset xml_only
 unset sys_type
 unset config
+unset machine
 unset OPTIND

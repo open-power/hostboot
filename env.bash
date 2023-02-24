@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2022
+# Contributors Listed Below - COPYRIGHT 2010,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -102,8 +102,6 @@ if [ -n "${SANDBOXROOT}" ]; then
         export SANDBOXBASE="${SANDBOXROOT}/${SANDBOXNAME}"
     fi
 fi
-
-export DEFAULT_MACHINE=NIMBUS
 
 ## Search and set gerrit host
 # Gerrit host name should be in .ssh/config file
