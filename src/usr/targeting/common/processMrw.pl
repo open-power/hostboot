@@ -1903,18 +1903,9 @@ sub processOcmbChipPlanarAndChildren
     # is the same as the omi  position-per-node
     my $ocmbPosPerNode = $omiPosPerNode;
 
-    # Get the instance name and extract the integral info from the name
-    # if it has one.  The integral info is the target instance position.
+    # Get the instance name and number (position)
     my $targetInstanceName = $targetObj->getInstanceName($target);
-    my $targetInstancePos = "";
-    # Extract the instance from the name which is a number appended to name
-    $targetInstancePos = chop($targetInstanceName);
-
-    # If there is no position associated with target, then default to 0.
-    if ("" == $targetInstancePos)
-    {
-        $targetInstancePos = 0;
-    }
+    my $targetInstancePos = $targetObj->getInstanceNum($target);
 
     # Do a quick sanity check.  Make sure the ocmb instance position is less
     # than the maximum allowed of 1 based on a 0-based instance position.
@@ -2345,11 +2336,11 @@ sub setCommonAttributesForTargetsAssociatedWithDdimm
     my $ddimmParent = $targetObj->findParentByType($target, "DIMM");
     my $omiPosPerNode = $targetObj->getAttribute($ddimmParent, "TEMP_DDIMM_OMI_POS_PER_NODE");
 
-    # Get the instance name and extract the integral info from the name
-    # if it has one.  The integral info is the target instance position.
+    # Get the instance name and number (position)
     my $targetInstanceName = $targetObj->getInstanceName($target);
-    my $targetInstancePos = "";
-    # Special condition for GENERIC_I2C_DEVICE
+    my $targetInstancePos = $targetObj->getInstanceNum($target);
+
+    # Manually set the position for GENERIC_I2C_DEVICE objects
     if ($targetInstanceName eq "PCA9554A")
     {
         $targetInstancePos = 2;
@@ -2358,17 +2349,6 @@ sub setCommonAttributesForTargetsAssociatedWithDdimm
     elsif ($targetInstanceName eq "PCA9554B")
     {
         $targetInstancePos = 3;
-    }
-    else
-    {
-        # Extract the instance from the name which is a number appended to name
-        $targetInstancePos = chop($targetInstanceName);
-
-        # If there is no position associated with target, then default to 0.
-        if ("" == $targetInstancePos)
-        {
-            $targetInstancePos = 0;
-        }
     }
 
     # Do a quick sanity check.  Make sure the target instance position is less
