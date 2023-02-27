@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2022
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -564,9 +564,6 @@ hb_startsimics()
         STARTSIMCMD+=(xive_gen=2)
         STARTSIMCMD+=(bmc_files=/host/genEecache:/usr/local/share/hostfw/running/81e00679.lid)
         STARTSIMCMD+=(eecacheEcc=1)
-
-        # Comment out the following line to switch from 4U to 2U DDIMMs
-        STARTSIMCMD+=(dimm_type=\"4U\")
 
         if [ -n "${STANDALONE_TEST_DD1+set}" ]; then
             STARTSIMCMD+=(dd_major_ver=1)
