@@ -2554,7 +2554,7 @@ fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
     uint32_t l_bytes_copied = 0;
     const uint8_t* l_curr_byte = i_data_start;
 
-#ifndef __PPE__
+#if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
     constexpr uint64_t SECONDS_PER_MINUTE = 60;
     uint32_t l_progress_pct = 0;
     // Passing in a nullptr gets us the current time
@@ -2589,7 +2589,7 @@ fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
         // Therefore, the address is incremented outside of the port loop
         l_curr_addr += 2;
 
-#ifndef __PPE__
+#if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
         {
             // Report progress at 1% intervals (only in Cronus)
             // Percentage of the number of bytes copied so far
