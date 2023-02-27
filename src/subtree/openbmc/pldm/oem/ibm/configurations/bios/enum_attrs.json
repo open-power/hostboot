@@ -452,6 +452,41 @@
             "helpText": "Specifies if the boot type is an IPL or a ReIPL. Set pvm_boot_type instead",
             "displayName": "Boot Type Indicator (current)",
             "readOnly": true
+        },
+        {
+            "attribute_name": "pvm_rpd_gard_policy",
+            "possible_values": ["Enabled", "Disabled"],
+            "default_values": ["Enabled"],
+            "helpText": "Controls whether or not a processor core will be de-configured on error.",
+            "displayName": "GARD on error"
+        },
+        {
+            "attribute_name": "pvm_rpd_policy",
+            "possible_values": ["Enabled", "Scheduled", "Disabled"],
+            "default_values": ["Enabled"],
+            "helpText": "Enabled (Run on each core once daily, at an equally spaced interval, to test each core every 24 hours. For example, on a 48-core system, the RPD would test one core every 30 minutes), Run Now (Run sequentially on each core starting immediately), Scheduled (Run sequentially on each core at the scheduled time each day), Disabled (No diagnostics or exercisers will be run).",
+            "displayName": "Runtime Processor Diagnostics Policy"
+        },
+        {
+            "attribute_name": "pvm_rpd_immediate_test",
+            "possible_values": ["Enabled", "Disabled"],
+            "default_values": ["Disabled"],
+            "helpText": "Enabled (Override the pvm_rpd_policy and start a diagnostic test run immediately. RPD will set pvm_rpd_immediate_test to “Disabled” when an immediate test run completes), Disabled (The pvm_rpd_policy is used).",
+            "displayName": "Immediate Test Requested"
+        },
+        {
+            "attribute_name": "pvm_rpd_feature",
+            "possible_values": ["Enabled", "Disabled", "Automatic"],
+            "default_values": ["Automatic"],
+            "helpText": "Controls whether or not the Runtime Processor Diagnostics (RPD) Feature will be configured on the system. Enabled ( The RPD feature will be configured regardless of the amount of installed memory), Automatic (The RPD feature will be configured on systems with at least 128GB of installed memory and not configured on systems with less than 128GB), Disabled (The RPD feature will not be configured).",
+            "displayName": "Runtime Processor Diagnostics Feature"
+        },
+        {
+            "attribute_name": "pvm_rpd_feature_current",
+            "possible_values": ["Enabled", "Disabled", "Automatic"],
+            "default_values": ["Automatic"],
+            "helpText": "Controls whether or not the Runtime Processor Diagnostics (RPD) Feature will be configured on the system. Enabled ( The RPD feature will be configured regardless of the amount of installed memory), Automatic (The RPD feature will be configured on systems with at least 128GB of installed memory and not configured on systems with less than 128GB), Disabled (The RPD feature will not be configured).",
+            "displayName": "Runtime Processor Diagnostics Feature"
         }
     ]
 }

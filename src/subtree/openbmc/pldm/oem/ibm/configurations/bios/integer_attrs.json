@@ -185,6 +185,15 @@
             "readOnly": true,
             "helpText": "Specifies the desired frequency across all chips in the system.  Do not set this attribute directly; set hb_cap_freq_mhz_request instead.",
             "displayName": "Requested Core Freq MHZ (current)"
+        },
+        {
+            "attribute_name": "pvm_rpd_scheduled_tod",
+            "lower_bound": 0,
+            "upper_bound": 86399,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "helpText": "Only used when pvm_rpd_policy is set to “Scheduled”. This value represents the time of day in seconds at which to run the processor diagnostics.",
+            "displayName": "RPD Scheduled Run Time of Day in Seconds"
         }
     ]
 }
