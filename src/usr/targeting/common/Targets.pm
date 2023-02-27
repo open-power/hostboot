@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2022
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -1414,6 +1414,20 @@ sub getInstanceName
     my $target     = shift;
     my $target_ptr = $self->getTarget($target);
     return $target_ptr->{TARGET}->{instance_name};
+}
+
+## returns target instance number
+sub getInstanceNum
+{
+    my $self       = shift;
+    my $target     = shift;
+    my $name       = $self->getInstanceName($target);
+    my $num;
+
+    ($num) = $name =~ /(\d+)$/;
+    if ("" eq $num) { $num = 0; }
+
+    return $num;
 }
 
 ## returns the parent target type
