@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,11 +90,12 @@ void testRsvdTraceBuffInit()
 
     // Create a buffer
     uint32_t l_bufferSize = 40;
-    char *l_buffer = reinterpret_cast<char*>(malloc(l_bufferSize));
-    memset(l_buffer, 0 , l_bufferSize);
+    std::unique_ptr<char,decltype(&free)> l_buffer = {
+        reinterpret_cast<char*>(malloc(l_bufferSize)),free};
+    memset(l_buffer.get(), 0 , l_bufferSize);
 
     // Get the address of buffer; just like we would get in "real life"
-    uintptr_t l_bufferAddr = reinterpret_cast<uintptr_t>(l_buffer);
+    uintptr_t l_bufferAddr = reinterpret_cast<uintptr_t>(l_buffer.get());
 
     // Get a pointer to where the HEAD needs to reside in the buffer
     uintptr_t *l_addressToHead = reinterpret_cast<uintptr_t *>(l_bufferAddr);

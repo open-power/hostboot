@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,11 +37,16 @@
 #include <usr/vmmconst.h>
 #include <targeting/common/util.H>
 #include <kernel/heapmgr.H>
+#include <util/impl/unique_ptr.H>
 
 class VmmBaseTest : public CxxTest::TestSuite
 {
     public:
         static msg_q_t iv_mq;
+
+        // Hold the memory for the writeOOB testcase until class goes out of scope
+        std::unique_ptr<uint32_t,decltype(&free)> iv_writeOobPtr = {
+                reinterpret_cast<uint32_t*>(malloc(HeapManager::MAX_BIG_ALLOC_SIZE+4)),free};
 
         void testNullAccess()
         {
@@ -99,7 +104,7 @@ class VmmBaseTest : public CxxTest::TestSuite
         {
             int status;
             printk("testWriteOOB> Expect to see uncaught Data Storage exception!\n");
-            tid_t child = task_create(writeOOB, NULL);
+            tid_t child = task_create(writeOOB, &iv_writeOobPtr);
 
             if ((child != task_wait_tid(child, &status, NULL)) ||
                 (status != TASK_STATUS_CRASHED))
@@ -341,12 +346,13 @@ class VmmBaseTest : public CxxTest::TestSuite
             return NULL;
         }
 
-        static void* writeOOB(void *unused)
+        static void* writeOOB(void *buffer)
         {
             size_t l_sz = HeapManager::MAX_BIG_ALLOC_SIZE+4;
             size_t pages = ALIGN_PAGE(l_sz)/PAGESIZE;
             printk("writeOOB> pages=%ld l_sz=%ld\n", pages, l_sz);
-            uint32_t* test1 = (uint32_t*)malloc(HeapManager::MAX_BIG_ALLOC_SIZE+4);
+            uint32_t* test1 = reinterpret_cast<decltype(iv_writeOobPtr)*>(buffer)->get();
+
             printk("writeOOB> HUGE malloc test1 ptr=%p\n", test1);
             test1[0] = 0x11223344;
             printk("writeOOB> Expecting 0x11223344, 0x%X\n", test1[0]);

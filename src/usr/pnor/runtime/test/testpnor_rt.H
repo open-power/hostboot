@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <devicefw/userif.H>
+#include <util/impl/unique_ptr.H>
 
 #include <pnor/pnorif.H>
 #include "../../pnor_common.H"
@@ -188,11 +189,12 @@ class PnorRtTest : public CxxTest::TestSuite
 
             size_t l_sizeBytes = (RtPnor::getInstance().iv_TOC[l_id].size) -
                                  l_offset;
-            void*  l_readData  = malloc (l_sizeBytes);
+            std::unique_ptr<void, decltype(&free)> l_readData{
+                malloc(l_sizeBytes),free};
 
             //read via hostInterfaces
             l_err = RtPnor::getInstance().readFromDevice(l_proc,l_id,l_offset,
-                                          l_sizeBytes,true,l_readData);
+                                          l_sizeBytes,true,l_readData.get());
             if(l_err)
             {
                 TS_FAIL("testPnorReadWrite: readFromDevice failed");
@@ -210,7 +212,7 @@ class PnorRtTest : public CxxTest::TestSuite
             void* l_gData = reinterpret_cast<void*> (l_info.vaddr);
 
             //verify that data is read correctly
-            if (0 != memcmp (l_readData, l_gData, l_sizeBytes))
+            if (0 != memcmp (l_readData.get(), l_gData, l_sizeBytes))
             {
                 TS_FAIL("testPnorReadWrite: read failed");
                 break;
@@ -235,14 +237,14 @@ class PnorRtTest : public CxxTest::TestSuite
             //calling read again to make sure data was written properly
             //using pnor_wirte
             l_err = RtPnor::getInstance().readFromDevice(l_proc,l_id,l_offset,
-                                                l_sizeBytes,true,l_readData);
+                                                l_sizeBytes,true,l_readData.get());
             if(l_err)
             {
                 TS_FAIL("testPnorReadWrite: readFromDevice failed");
                 break;
             }
 
-            if (0 != memcmp (l_readData, l_gData, l_sizeBytes))
+            if (0 != memcmp (l_readData.get(), l_gData, l_sizeBytes))
             {
                 TS_FAIL("testPnorReadWrite: flush failed");
                 break;
