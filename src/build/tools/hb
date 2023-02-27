@@ -565,6 +565,15 @@ hb_startsimics()
         STARTSIMCMD+=(bmc_files=/host/genEecache:/usr/local/share/hostfw/running/81e00679.lid)
         STARTSIMCMD+=(eecacheEcc=1)
 
+        STARTSIMCMD+=(dimm_card=\"4U\")
+        if [ -z "${HB_USE_ODYSSEY}" ]; then
+            echo "Using DDR4/Explorer DDIMMs"
+        else
+            echo "Using DDR5/Odyssey DDIMMs"
+            STARTSIMCMD+=(dimm_type=ody)
+        fi
+
+
         if [ -n "${STANDALONE_TEST_DD1+set}" ]; then
             STARTSIMCMD+=(dd_major_ver=1)
         fi
@@ -831,6 +840,7 @@ hb_flags()
     echo "= Simics Options ="
     echo "HB_BREAK_ON_ERROR : Halts simics if HB hits an exception"
     echo "HB_FORCE_1PROC : Force single-processor mode"
+    echo "HB_USE_ODYSSEY : Use DDR5/Odyssey DDIMMs"
     echo " "
 }
 

@@ -61,7 +61,13 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     START_SIMICS_CMD+=" sbe_script_to_run=${SBE_SCRIPT_TO_RUN}"
     START_SIMICS_CMD+=" sbe_scripts_path=${SBE_SCRIPTS_PATH}"
     START_SIMICS_CMD+=" enable_lpc_console=TRUE"
-    #START_SIMICS_CMD+=" dimm_type=4U"
+    START_SIMICS_CMD+=" dimm_card=4U"
+    if [ -z "${HB_USE_ODYSSEY}" ]; then
+        echo "Using DDR4/Explorer DDIMMs"
+    else
+        echo "Using DDR5/Odyssey DDIMMs"
+    START_SIMICS_CMD+=" dimm_type=ody"
+    fi
     START_SIMICS_CMD+=" fused_core=TRUE"
     START_SIMICS_CMD+=" xive_gen=2"
     START_SIMICS_CMD+=" bmc_files=/host/genEecache:/usr/local/share/hostfw/running/81e00679.lid"
