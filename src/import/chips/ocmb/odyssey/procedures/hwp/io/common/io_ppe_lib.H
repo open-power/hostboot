@@ -160,23 +160,32 @@ fapi2::ReturnCode io_ppe_regs<K, M, V>::getData(const fapi2::Target<K, M, V>& i_
     uint64_t l_addr = calcAddress(i_section_addr, i_address, i_thread, i_thread_size, i_lane);
     fapi2::buffer<uint64_t> l_data;
 
+    FAPI_DBG("io_ppe_regs::getData: calcAddress l_addr 0x%08X%08X",
+             (l_addr >> 32) & 0xFFFFFFFF, l_addr & 0xFFFFFFFF);
+
 #if IO_PPE_MAX_CACHE_SIZE > 0
 
     if (!cache.hasAddress(l_addr))
     {
 #endif
         FAPI_TRY(getData(i_target, l_addr, l_data));
+        FAPI_DBG("io_ppe_regs::getData: getData from HW l_data 0x%08X%08X",
+                 (l_data >> 32) & 0xFFFFFFFF, l_data & 0xFFFFFFFF);
 
 #if IO_PPE_MAX_CACHE_SIZE > 0
     }
     else
     {
         l_data = cache.getData(l_addr);
+        FAPI_DBG("io_ppe_regs::getData: getData from Cache l_data 0x%08X%08X",
+                 (l_data >> 32) & 0xFFFFFFFF, l_data & 0xFFFFFFFF);
     }
 
 #endif
 
     o_data = extractData(l_data, i_address, i_mask, i_shift);
+    FAPI_DBG("io_ppe_regs::getData: extractData - o_data 0x%08X%08X",
+             (o_data >> 32) & 0xFFFFFFFF, o_data & 0xFFFFFFFF);
 
 #if IO_PPE_MAX_CACHE_SIZE > 0
     FAPI_TRY(cacheData(i_target, l_addr, l_data, 0)); //Cache un-modified data

@@ -631,20 +631,26 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ext_cmd_check(const fapi2::Target<K, M
     fapi2::buffer<uint64_t> l_data = 0;
 
     FAPI_TRY(FW_REG_EXT_CMD_DONE_00_15_GET(iv_regs, i_target, i_thread, l_data));
-    FAPI_DBG("io_ppe_common::ext_cmd_check 00_15 done: %llx exp: %llx\n", l_data, (i_ext_cmd_req >> 16));
     o_done = ((l_data << 16) & (0xFFFF0000 & i_ext_cmd_req)) == (0xFFFF0000 & i_ext_cmd_req);
+    FAPI_DBG("io_ppe_common::ext_cmd_check FW_REG_EXT_CMD_DONE_00_15_GET: l_data 0x%08X%08X, exp: 0x%08X%08X\n",
+             (l_data >> 32) & 0xFFFFFFFF, l_data & 0xFFFFFFFF,
+             (i_ext_cmd_req >> 32) & 0xFFFFFFFF, i_ext_cmd_req & 0xFFFFFFFF);
 
     FAPI_TRY(FW_REG_EXT_CMD_DONE_16_31_GET(iv_regs, i_target, i_thread, l_data));
-    FAPI_DBG("io_ppe_common::ext_cmd_check 16_31 done: %llx exp: %llx\n", l_data, (i_ext_cmd_req & 0xFFFF));
     o_done = o_done && ((l_data & (0xFFFF & i_ext_cmd_req)) == (0xFFFF & i_ext_cmd_req));
+    FAPI_DBG("io_ppe_common::ext_cmd_check FW_REG_EXT_CMD_DONE_16_31_GET: l_data 0x%08X%08X, exp: 0x%08X%08X\n",
+             (l_data >> 32) & 0xFFFFFFFF, l_data & 0xFFFFFFFF,
+             (i_ext_cmd_req >> 32) & 0xFFFFFFFF, i_ext_cmd_req & 0xFFFFFFFF);
 
     FAPI_TRY(FW_REG_EXT_CMD_FAIL_00_15_GET(iv_regs, i_target, i_thread, l_data));
-    FAPI_DBG("io_ppe_common::ext_cmd_check 00_15 fail: %llx\n", l_data);
-    o_fail = l_data;
+    o_fail = (l_data << 16); ////Update to shift bits 00_15 left 16 bits before we do a bitwise or with the 16_31 bits
+    FAPI_DBG("io_ppe_common::ext_cmd_check FW_REG_EXT_CMD_FAIL_00_15_GET: l_data 0x%08X%08X\n",
+             (l_data >> 32) & 0xFFFFFFFF, l_data & 0xFFFFFFFF);
 
     FAPI_TRY(FW_REG_EXT_CMD_FAIL_16_31_GET(iv_regs, i_target, i_thread, l_data));
-    FAPI_DBG("io_ppe_common::ext_cmd_check 16_31 fail: %llx\n", l_data);
-    o_fail = o_fail || l_data;
+    o_fail = o_fail | l_data;
+    FAPI_DBG("io_ppe_common::ext_cmd_check FW_REG_EXT_CMD_FAIL_16_31_GET: l_data 0x%08X%08X\n",
+             (l_data >> 32) & 0xFFFFFFFF, l_data & 0xFFFFFFFF);
 
 fapi_try_exit:
     FAPI_DBG("Ending io_ppe_common::ext_cmd_check");
@@ -725,11 +731,7 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_poll(const fapi2::Target<fapi2::T
 
     fapi2::buffer<uint64_t> l_cmd;
     l_cmd = (!i_ext_cmd_override) ? BIST_START_CMD : i_ext_cmd_override;
-
-    fapi2::buffer<uint64_t> l_done = 0;
-    fapi2::buffer<uint64_t> l_fail = 0;
-
-    FAPI_TRY(ext_cmd_poll(i_target, i_num_threads, l_cmd, l_done, l_fail));
+    FAPI_TRY(ext_cmd_poll(i_target, i_num_threads, l_cmd, o_done, o_fail));
 
 fapi_try_exit:
     FAPI_DBG("Ending io_ppe_common::bist_poll");

@@ -117,8 +117,16 @@ bool io_ppe_cache::add(uint64_t i_addr, uint64_t i_data, uint8_t i_modified)
 
     iv_address[l_tail] = i_addr;
     iv_data[l_tail] = i_data;
-    FAPI_DBG("iv_data[l_tail]: %llx i_data: %llx i_addr: %llx", iv_data[l_tail], i_data, i_addr);
     iv_modified[l_tail] = i_modified;
+
+    FAPI_DBG("io_ppe_cache::add: iv_address[%d] 0x%08X%08X", l_tail,
+             (iv_address[l_tail] >> 32) & 0xFFFFFFFF,
+             iv_address[l_tail] & 0xFFFFFFFF);
+    FAPI_DBG("io_ppe_cache::add: iv_data[%d] 0x%08X%08X", l_tail,
+             (iv_data[l_tail] >> 32) & 0xFFFFFFFF,
+             iv_data[l_tail] & 0xFFFFFFFF);
+    FAPI_DBG("io_ppe_cache::add: iv_modified[%d] 0x%.2X", l_tail, iv_modified[l_tail]);
+
     iv_size++;
     return true;
 }
