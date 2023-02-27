@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,7 +84,7 @@ class HeapManager
             MAX_BIG_ALLOC_SIZE        = 20*PAGESIZE,
 
             // Constants for Huge Chunk support
-            HC_SLOT_SIZE   = 1*MEGABYTE,  //!< Max size of a single allocation
+            HC_SLOT_SIZE   = 3*MEGABYTE,  //!< Max size of a single allocation
             HC_NUM_SLOTS   = 20,  //!< Number of available allocations
             HC_TOTAL_SIZE  = (HC_SLOT_SIZE*HC_NUM_SLOTS),  //! Total size
         };
