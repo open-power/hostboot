@@ -53,9 +53,6 @@ public:
     {
         TS_INFO("enter test_addHbPdrs");
 
-        using repo_ptr = std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)>;
-        const repo_ptr repo { pldm_pdr_init(), pldm_pdr_destroy };
-
         PLDM::PdrManager pdrmgr;
 
         addHostbootPdrs(pdrmgr);
@@ -76,7 +73,6 @@ public:
         TS_INFO("enter test_fruRecordSetIdLookup");
 
         PLDM::PdrManager pdrmgr;
-
         addHostbootPdrs(pdrmgr);
 
         const auto dimm_rsids = pdrmgr.findFruRecordSetIdsByType(ENTITY_TYPE_DIMM);
