@@ -40,14 +40,14 @@
 
 fapi2::ReturnCode common_io_omi_tdr(
     const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP | fapi2::TARGET_TYPE_OMI > &i_target,
-    const uint64_t& i_base_addr)
+    const uint32_t i_freq,
+    const uint64_t i_base_addr)
 {
 
     constexpr uint32_t c_groupa_mask = 0xA5;
     constexpr uint32_t c_groupb_mask = 0x5A;
     uint32_t l_groupa = 0x0;
     uint32_t l_groupb = 0x0;
-    uint32_t l_freq = 0;
     // Leave l_sev comments for future development to pass severity to error checking
     // fapi2::errlSeverity_t l_sev;
     fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags = {0};
@@ -58,12 +58,11 @@ fapi2::ReturnCode common_io_omi_tdr(
     fapi2::toString(i_target, l_tgt_str, sizeof(l_tgt_str));
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mfg_flags));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>(), l_freq));
 
     for (uint8_t l_lane = 0; l_lane < 8; l_lane++)
     {
         // This will become an attribute in the next iteration of this procedure
-        FAPI_TRY(common_io_tdr(i_target, i_base_addr, l_groupa, l_lane, l_freq, l_status, l_length));
+        FAPI_TRY(common_io_tdr(i_target, i_base_addr, l_groupa, l_lane, i_freq, l_status, l_length));
 
         FAPI_DBG("Checking %s on lane %d with status %d.", l_tgt_str, l_lane, l_status);
 
@@ -89,6 +88,7 @@ fapi2::ReturnCode common_io_omi_tdr(
                                .set_DISTANCE(l_length),
                                "OMI Tx TDR Fail on %s :: lane(%d), status(0x%04X) length(%d)...",
                                l_tgt_str, l_lane, l_status, l_length);
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
             l_groupa |= (0x1 << l_lane) & c_groupa_mask;
             l_groupb |= (0x1 << l_lane) & c_groupb_mask;

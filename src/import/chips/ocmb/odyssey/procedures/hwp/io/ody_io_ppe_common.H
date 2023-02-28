@@ -43,8 +43,36 @@
 const uint64_t PHY_PPE_WRAP0_ARB_CSAR = 0x8010C0Dull;
 const uint64_t PHY_PPE_WRAP0_ARB_CSDR = 0x8010C0Eull;
 const uint64_t PHY_PPE_WRAP0_XIXCR = 0x8010C10ull;
+const uint64_t PHY_ODY_OMI_BASE = 0x08010C00ull;
+const uint32_t PHY_ODY_RX_LANES = 0xFF000000;
+const uint32_t PHY_ODY_TX_LANES = 0xFF000000;
+const uint8_t PHY_ODY_NUM_LANES = 8;
+const uint8_t PHY_ODY_NUM_THREADS = 1;
 
 namespace ody_io
 {
 #include <io_ppe_common.H>
+
+///
+/// @brief Checks the ATTR_MFG_FLAGS for manufacturing mode
+///
+/// @param[out] o_mfg_mode Indicates if the manufacturing mode flag is set
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+inline fapi2::ReturnCode get_functional_margin_mfg_mode(bool& o_mfg_mode)
+{
+    constexpr uint32_t MFG_FLAG = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_POLICY_FLAG_AVAIL_05;
+    constexpr size_t CELL_SIZE = 32;
+    const size_t l_index = MFG_FLAG / CELL_SIZE;
+    const size_t l_flag_pos = MFG_FLAG % CELL_SIZE;
+
+    uint32_t l_mfg_flags[4] = {};
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mfg_flags));
+
+    o_mfg_mode = (l_mfg_flags[l_index] & l_flag_pos) ? true : false;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 }

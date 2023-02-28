@@ -142,18 +142,33 @@ fapi2::ReturnCode ody_omi_hss_dccal_start(const fapi2::Target<fapi2::TARGET_TYPE
 
     io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSAR,
             PHY_PPE_WRAP0_ARB_CSDR,
-            PHY_PPE_WRAP0_XIXCR);
+            PHY_ODY_OMI_BASE);
 
     ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
 
-    const uint32_t l_rx_lanes = 0xFF000000;
-    const uint32_t l_tx_lanes = 0xFF000000;
-    const fapi2::buffer<uint64_t> l_num_threads = 1;
+    const uint8_t l_thread = 0;
+    uint32_t l_rx_lanes = 0;
+    uint32_t l_tx_lanes = 0;
+    uint8_t l_done = 0;
+    uint32_t l_fail = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LANES, i_target, l_rx_lanes));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_LANES, i_target, l_tx_lanes));
+
+    FAPI_TRY(l_ppe_common.ext_cmd_start(i_target, l_thread, l_rx_lanes, l_tx_lanes, ody_io::CLEAR))
+    FAPI_TRY(l_ppe_common.ext_cmd_poll(i_target, l_thread, ody_io::CLEAR, l_done, l_fail));
+
+    FAPI_ASSERT(l_done && !l_fail,
+                fapi2::IO_PPE_DONE_POLL_FAILED()
+                .set_FAIL(l_fail)
+                .set_DONE(l_done)
+                .set_TARGET(i_target),
+                "IO PPE done poll time-out or ext_cmd_fail seen!");
 
     //static fapi2::buffer<uint32_t> EXT_CMD = 0x9D80;
-    static fapi2::buffer<uint64_t> l_cmd = ody_io::HW_REG_INIT_PG | ody_io::DCCAL_PL |
-                                           ody_io::TX_ZCAL_PL | ody_io::TX_FFE_PL |
-                                           ody_io::POWER_ON_PL | ody_io::TX_FIFO_INIT_PL;
+    static uint32_t l_cmd = ody_io::HW_REG_INIT_PG | ody_io::DCCAL_PL |
+                            ody_io::TX_ZCAL_PL | ody_io::TX_FFE_PL |
+                            ody_io::POWER_ON_PL | ody_io::TX_FIFO_INIT_PL;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, l_sys, l_sim));
 
@@ -161,11 +176,11 @@ fapi2::ReturnCode ody_omi_hss_dccal_start(const fapi2::Target<fapi2::TARGET_TYPE
     {
         FAPI_DBG("ody_omi_hss_dccal_start calling ody_omi_sim_fast_mode");
         FAPI_TRY(ody_omi_sim_fast_mode(i_target));
-        FAPI_TRY(l_ppe_common.fast_mode(i_target, l_num_threads));
+        FAPI_TRY(l_ppe_common.fast_mode(i_target, l_thread));
     }
 
     FAPI_DBG("ody_omi_hss_dccal_start calling l_ppe.ext_cmd_start");
-    FAPI_TRY(l_ppe_common.ext_cmd_start(i_target, l_num_threads, l_rx_lanes, l_tx_lanes, l_cmd));
+    FAPI_TRY(l_ppe_common.ext_cmd_start(i_target, l_thread, l_rx_lanes, l_tx_lanes, l_cmd));
     FAPI_TRY(l_ppe_regs.flushCache(i_target));
 
 fapi_try_exit:

@@ -54,13 +54,12 @@ enum TdrResult
 
 enum TdrRegisters
 {
-    cntl3 = 0x444,
-    cntl4 = 0xC5C,
-    cntl5 = 0xC64,
-    cntl6 = 0xC6C,
-    cntlx1 = 0x360,
-    stat1 = 0x524,
-    mode1 = 0xC0C
+    tx_cntl3_pl = 0x088,
+    tx_ctl_cntl4_pg = 0x18B,
+    tx_ctl_cntl5_pg = 0x18C,
+    tx_ctl_cntl6_pg = 0x18D,
+    tx_stat1_pl = 0x0A4,
+    tx_ctl_mode1_pg = 0x181
 };
 
 struct TdrStruct

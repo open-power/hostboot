@@ -47,21 +47,24 @@ fapi2::ReturnCode ody_omi_hss_config(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
 
     io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(scomt::omi::PHY_PPE_WRAP0_ARB_CSAR,
             scomt::omi::PHY_PPE_WRAP0_ARB_CSDR,
-            scomt::omi::PHY_PPE_WRAP0_XIXCR);
+            PHY_ODY_OMI_BASE);
 
     ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
 
-    const fapi2::buffer<uint64_t> l_gcr_ids[] = { 0 };
-    const fapi2::buffer<uint64_t> l_rx_lanes[] = { 8 };
-    const fapi2::buffer<uint64_t> l_tx_lanes[] = { 8 };
-    FAPI_TRY(l_ppe_common.config(i_target,
-                                 1, //num_threads
-                                 l_gcr_ids,
-                                 l_rx_lanes,
-                                 l_tx_lanes,
-                                 0, // spread_en
-                                 0, // pcie_mode
-                                 1)); //serdes_16_to_1
+    const uint32_t l_vio_mv = 850;
+    const uint8_t l_gcr_id = 0;
+    const uint8_t l_thread = 0;
+
+    FAPI_TRY(l_ppe_common.config_ppe(i_target,
+                                     PHY_ODY_NUM_THREADS,
+                                     l_vio_mv));
+
+    // Odyssey only has 1 thread
+    FAPI_TRY(l_ppe_common.config_thread(i_target,
+                                        l_thread,
+                                        l_gcr_id,
+                                        PHY_ODY_NUM_LANES,
+                                        PHY_ODY_NUM_LANES));
 
 fapi_try_exit:
     FAPI_DBG("End");

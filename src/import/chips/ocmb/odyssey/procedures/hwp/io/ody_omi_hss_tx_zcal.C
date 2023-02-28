@@ -111,56 +111,56 @@ fapi2::ReturnCode forceZCalToDefault(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
 
     // Set P Pre1
     FAPI_DBG("Setting P Pre1 0x%x", c_preVal);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_PRE1]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_PRE1], 1);
     l_buffer.flush<0>();
     l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE1]>(c_preVal);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set P Pre2
     FAPI_DBG("Setting P Pre2 0x%x", c_preVal);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_PRE2]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_PRE2], 1);
     l_buffer.flush<0>();
     l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE2]>(c_preVal);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set P Post
     FAPI_DBG("Setting P Post 0x%x", c_postVal);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_POST]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_POST], 1);
     l_buffer.flush<0>();
     l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_POST]>(c_postVal);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set P Main
     FAPI_DBG("Setting P Main 0x%x", c_mainVal);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_MAIN]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[ODY_OMI_TX_ZCAL_MAIN], 1);
     l_buffer.flush<0>();
     l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_MAIN]>(c_mainVal);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set N Pre1
     FAPI_DBG("Setting N Pre1 0x%x", c_preVal);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_PRE1]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_PRE1], 1);
     l_buffer.flush<0>();
     l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE1]>(c_preVal);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set N Pre2
     FAPI_DBG("Setting N Pre2 0x%x", c_preVal);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_PRE2]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_PRE2], 1);
     l_buffer.flush<0>();
     l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_PRE2]>(c_preVal);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set N Post
     FAPI_DBG("Setting N Post 0x%x", c_postVal);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_POST]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_POST], 1);
     l_buffer.flush<0>();
     l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_POST]>(c_postVal);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
 
     // Set N Main
     FAPI_DBG("Setting N Main 0x%x", c_mainVal);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_MAIN]);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[ODY_OMI_TX_ZCAL_MAIN], 1);
     l_buffer.flush<0>();
     l_buffer.insertFromRight<c_startBit, segLens[ODY_OMI_TX_ZCAL_MAIN]>(c_mainVal);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer), "Error putscom to address 0x%08X.", l_addr);
@@ -191,7 +191,7 @@ fapi2::ReturnCode verifyZCal(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
     {
         l_data = 0;
         FAPI_DBG("Psegs Address 0x%08X, Group %d, Lane %d, Reg 0x%x", i_baseAddr, i_group, i_lane, pSegRegisters[l_index]);
-        l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[l_index]);
+        l_addr = buildAddr(i_baseAddr, i_group, i_lane, pSegRegisters[l_index], 1);
         FAPI_TRY(readIoHardwareReg(i_target, l_addr, c_segBit, segLens[l_index], l_data));
         l_totalPSegs += decodeSegs(l_data);
     }
@@ -203,7 +203,7 @@ fapi2::ReturnCode verifyZCal(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
     {
         l_data = 0;
         FAPI_DBG("Nsegs Address 0x%08X, Group %d, Lane %d, Reg 0x%x", i_baseAddr, i_group, i_lane, nSegRegisters[l_index]);
-        l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[l_index]);
+        l_addr = buildAddr(i_baseAddr, i_group, i_lane, nSegRegisters[l_index], 1);
         FAPI_TRY(readIoHardwareReg(i_target, l_addr, c_segBit, segLens[l_index], l_data));
         l_totalNSegs += decodeSegs(l_data);
     }
@@ -232,72 +232,34 @@ fapi2::ReturnCode ody_omi_hss_tx_zcal(const fapi2::Target<fapi2::TARGET_TYPE_OCM
 {
     FAPI_DBG("Start");
 
-    const uint32_t c_odyOmiBaseAddr = 0x0000000008010C00;
     const uint8_t l_numLanes  = 8;
-
+    uint32_t l_tx_lanes = 0;
     uint32_t l_lane = 0;
 
     // Simulation check
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys;
     uint8_t l_sim = 0;
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_LANES, i_target, l_tx_lanes));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, l_sys, l_sim));
 
-    if (l_sim)
+    for (l_lane = 0; l_lane < l_numLanes; l_lane++)
     {
-
-        for (l_lane = 0; l_lane < l_numLanes; l_lane++)
+        if ((0x80000000 >> l_lane) & l_tx_lanes)
         {
             FAPI_DBG("Lane %d", l_lane);
             // verify zCal & force it to be 25
-            verifyZCal(i_target, c_odyOmiBaseAddr, 0, l_lane);
+            verifyZCal(i_target, PHY_ODY_OMI_BASE, 0, l_lane);
         }
     }
-    else
+
+    if (!l_sim)
     {
-        io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(scomt::omi::PHY_PPE_WRAP0_ARB_CSAR,
-                scomt::omi::PHY_PPE_WRAP0_ARB_CSDR,
-                scomt::omi::PHY_PPE_WRAP0_XIXCR);
-
-        ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
-
-        const fapi2::buffer<uint64_t> l_num_threads = 1;
-        const uint32_t l_rx_lanes = 0x00000000; // 0 lanes
-        const uint32_t l_tx_lanes = 0xFF000000; // 8 lanes
-
-        fapi2::buffer<uint64_t> l_done = 0;
-        fapi2::buffer<uint64_t> l_fail = 0;
-
-        // Run zcal
-        FAPI_TRY(l_ppe_common.ext_cmd_start(i_target,
-                                            l_num_threads,
-                                            l_rx_lanes,
-                                            l_tx_lanes,
-                                            ody_io::TX_ZCAL_PL | ody_io::TX_FFE_PL));
-        FAPI_TRY(l_ppe_regs.flushCache(i_target));
-
-        // poll zcal ext cmd
-        while (!l_done)
-        {
-            FAPI_TRY(l_ppe_common.ext_cmd_poll(i_target,
-                                               l_num_threads,
-                                               ody_io::TX_ZCAL_PL | ody_io::TX_FFE_PL,
-                                               l_done,
-                                               l_fail));
-            FAPI_TRY(l_ppe_regs.flushCache(i_target));
-        }
-
-        // Verify Z Cal worked
-        for (l_lane = 0; l_lane < l_numLanes; l_lane++)
-        {
-            FAPI_DBG("Lane %d", l_lane)
-
-            // verify zcal output
-            verifyZCal(i_target, c_odyOmiBaseAddr, 0, l_lane);
-        }
+        fapi2::ATTR_FREQ_OMI_MHZ_Type l_freq;
 
         // Run TDR isolation
-        FAPI_TRY(common_io_omi_tdr(i_target, c_odyOmiBaseAddr),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, i_target, l_freq));
+        FAPI_TRY(common_io_omi_tdr(i_target, l_freq, PHY_ODY_OMI_BASE),
                  "Error on TDR isolation");
     }
 

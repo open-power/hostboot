@@ -66,10 +66,10 @@ class io_ppe_regs
     public:
         const uint64_t csar_scom_addr;
         const uint64_t csdr_scom_addr;
-        const uint64_t xcr;
+        const uint64_t base_addr;
 
-        io_ppe_regs(uint64_t i_csar, uint64_t i_csdr, uint64_t i_xcr) :
-            csar_scom_addr(i_csar), csdr_scom_addr(i_csdr), xcr(i_xcr)
+        io_ppe_regs(uint64_t i_csar, uint64_t i_csdr, uint64_t i_base_addr) :
+            csar_scom_addr(i_csar), csdr_scom_addr(i_csdr), base_addr(i_base_addr)
         {
 #if IO_PPE_MAX_CACHE_SIZE > 0
             FAPI_DBG("io_ppe_regs constructor");
@@ -99,10 +99,6 @@ class io_ppe_regs
                                   fapi2::buffer<uint64_t> i_data);
 
         fapi2::ReturnCode flushCache(const fapi2::Target<K, M, V>& i_target);
-
-        fapi2::ReturnCode hardReset(const fapi2::Target<K, M, V>& i_target);
-
-        fapi2::ReturnCode resume(const fapi2::Target<K, M, V>& i_target);
 
     private:
 
@@ -160,8 +156,8 @@ fapi2::ReturnCode io_ppe_regs<K, M, V>::getData(const fapi2::Target<K, M, V>& i_
     uint64_t l_addr = calcAddress(i_section_addr, i_address, i_thread, i_thread_size, i_lane);
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_DBG("io_ppe_regs::getData: calcAddress l_addr 0x%08X%08X",
-             (l_addr >> 32) & 0xFFFFFFFF, l_addr & 0xFFFFFFFF);
+    // FAPI_DBG("io_ppe_regs::getData: calcAddress l_addr 0x%08X%08X",
+    //          (l_addr >> 32) & 0xFFFFFFFF, l_addr & 0xFFFFFFFF);
 
 #if IO_PPE_MAX_CACHE_SIZE > 0
 
@@ -169,27 +165,24 @@ fapi2::ReturnCode io_ppe_regs<K, M, V>::getData(const fapi2::Target<K, M, V>& i_
     {
 #endif
         FAPI_TRY(getData(i_target, l_addr, l_data));
-        FAPI_DBG("io_ppe_regs::getData: getData from HW l_data 0x%08X%08X",
-                 (l_data >> 32) & 0xFFFFFFFF, l_data & 0xFFFFFFFF);
-
+        // FAPI_DBG("io_ppe_regs::getData: getData from HW l_data 0x%08X%08X",
+        //          (l_data >> 32) & 0xFFFFFFFF, l_data & 0xFFFFFFFF);
+        FAPI_TRY(cacheData(i_target, l_addr, l_data, 0)); //Cache un-modified data
 #if IO_PPE_MAX_CACHE_SIZE > 0
     }
     else
     {
         l_data = cache.getData(l_addr);
-        FAPI_DBG("io_ppe_regs::getData: getData from Cache l_data 0x%08X%08X",
-                 (l_data >> 32) & 0xFFFFFFFF, l_data & 0xFFFFFFFF);
+        // FAPI_DBG("io_ppe_regs::getData: getData from Cache l_data 0x%08X%08X",
+        //          (l_data >> 32) & 0xFFFFFFFF, l_data & 0xFFFFFFFF);
     }
 
 #endif
 
     o_data = extractData(l_data, i_address, i_mask, i_shift);
-    FAPI_DBG("io_ppe_regs::getData: extractData - o_data 0x%08X%08X",
-             (o_data >> 32) & 0xFFFFFFFF, o_data & 0xFFFFFFFF);
+    // FAPI_DBG("io_ppe_regs::getData: extractData - o_data 0x%08X%08X",
+    //          (o_data >> 32) & 0xFFFFFFFF, o_data & 0xFFFFFFFF);
 
-#if IO_PPE_MAX_CACHE_SIZE > 0
-    FAPI_TRY(cacheData(i_target, l_addr, l_data, 0)); //Cache un-modified data
-#endif
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -223,9 +216,9 @@ fapi2::ReturnCode io_ppe_regs<K, M, V>::putData(const fapi2::Target<K, M, V>& i_
     }
 
 #endif
-    FAPI_DBG(">>updateData l_data: %llx, i_data: %llx", l_data, i_data);
+    // FAPI_DBG(">>updateData l_data: %llx, i_data: %llx", l_data, i_data);
     l_data = updateData(l_data, i_data, i_address, i_mask, i_shift);
-    FAPI_DBG("<<updateData l_data: %llx, i_data: %llx", l_data, i_data);
+    // FAPI_DBG("<<updateData l_data: %llx, i_data: %llx", l_data, i_data);
 
 #if IO_PPE_MAX_CACHE_SIZE > 0
     FAPI_TRY(cacheData(i_target, l_addr, l_data, 1)); //Cache modified data
@@ -321,14 +314,14 @@ uint64_t io_ppe_regs<K, M, V>::updateData(const uint64_t i_8b_data,
 
     uint64_t l_wrt_mask = i_mask;
     l_wrt_mask <<= (3 - l_reg16) * 16;
-    FAPI_DBG("l_wrt_mask before invert: %llx", l_wrt_mask);
+    // FAPI_DBG("l_wrt_mask before invert: %llx", l_wrt_mask);
     l_wrt_mask = ~l_wrt_mask;
 
     uint64_t l_data = l_wrt_mask & i_8b_data;
     l_data |= l_update_8b;
-    FAPI_DBG("l_reg16: %llx l_update_8b: %llx l_wrt_mask: %llx i_8b_data: %llx", l_reg16,
-             l_update_8b, l_wrt_mask, i_8b_data);
-    FAPI_DBG(" l_data: %llx i_mask: %llx", l_data, i_mask);
+    // FAPI_DBG("l_reg16: %llx l_update_8b: %llx l_wrt_mask: %llx i_8b_data: %llx", l_reg16,
+    //          l_update_8b, l_wrt_mask, i_8b_data);
+    // FAPI_DBG(" l_data: %llx i_mask: %llx", l_data, i_mask);
     return l_data;
 }
 
@@ -352,6 +345,8 @@ uint64_t io_ppe_regs<K, M, V>::calcAddress(const uint32_t i_section_addr,
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_regs<K, M, V>::flushCache(const fapi2::Target<K, M, V>& i_target)
 {
+
+    // FAPI_DBG("Start flushCache");
 #if IO_PPE_MAX_CACHE_SIZE > 0
 
     uint64_t l_addr;
@@ -370,6 +365,8 @@ fapi2::ReturnCode io_ppe_regs<K, M, V>::flushCache(const fapi2::Target<K, M, V>&
 
     while (cache.pop(l_addr, l_data, l_modified))
     {
+        FAPI_DBG("cache.pop: l_addr: %X, l_data %X, l_modified: %d", l_addr, l_data, l_modified);
+
         if (l_modified)
         {
             FAPI_TRY(putData(i_target, l_addr, l_data));
@@ -378,23 +375,6 @@ fapi2::ReturnCode io_ppe_regs<K, M, V>::flushCache(const fapi2::Target<K, M, V>&
 
 fapi_try_exit:
 #endif
-    return fapi2::current_err;
-}
-
-template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
-fapi2::ReturnCode io_ppe_regs<K, M, V>::hardReset(const fapi2::Target<K, M, V>& i_target)
-{
-    fapi2::buffer<uint64_t> l_data = 0x6000000000000000ULL;
-    FAPI_TRY(fapi2::putScom(i_target, xcr, l_data));
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
-fapi2::ReturnCode io_ppe_regs<K, M, V>::resume(const fapi2::Target<K, M, V>& i_target)
-{
-    fapi2::buffer<uint64_t> l_data = 0x2000000000000000ULL;
-    FAPI_TRY(fapi2::putScom(i_target, xcr, l_data));
-fapi_try_exit:
+    // FAPI_DBG("End flushCache");
     return fapi2::current_err;
 }

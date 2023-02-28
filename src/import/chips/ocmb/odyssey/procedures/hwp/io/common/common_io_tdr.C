@@ -44,6 +44,12 @@ fapi2::ReturnCode common_io_tdr_initialize(const GENERIC_FAPI_IO_TARGET&,
         const uint32_t,
         const uint32_t,
         uint32_t);
+
+fapi2::ReturnCode common_io_tdr_cleanup(const GENERIC_FAPI_IO_TARGET& i_target,
+                                        const uint64_t i_baseAddr,
+                                        const uint32_t i_group,
+                                        const uint32_t i_lane);
+
 fapi2::ReturnCode common_io_tdr_get_tdr_offsets(const GENERIC_FAPI_IO_TARGET&,
         const uint32_t,
         uint32_t&);
@@ -141,7 +147,6 @@ fapi2::ReturnCode common_io_tdr(
     }
 
     bool loopExit = false;
-    fapi2::buffer<uint64_t> l_dl_status;
 
     char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
 
@@ -149,6 +154,12 @@ fapi2::ReturnCode common_io_tdr(
 
     switch (i_freq)
     {
+        case 38400:
+            {
+                c_fs_per_ui = 26041; // 38.4Gbps
+                break;
+            }
+
         case 32500:
             {
                 c_fs_per_ui = 30769; // 32.5Gbps
@@ -173,13 +184,19 @@ fapi2::ReturnCode common_io_tdr(
                 break;
             }
 
+        case 25600:
+            {
+                c_fs_per_ui = 39063; // 25.6Gbps
+                break;
+            }
+
         default:
             {
                 break;
             }
     }
 
-    FAPI_DBG("Your iohs freq: %d -- c_fs_per_ui: %d", i_freq, c_fs_per_ui);
+    FAPI_DBG("Your freq: %d -- c_fs_per_ui: %d", i_freq, c_fs_per_ui);
 
     FAPI_TRY(common_io_tdr_get_tdr_offsets(i_target, c_pulse_width, tdr_offset_width));
 
@@ -217,8 +234,8 @@ fapi2::ReturnCode common_io_tdr(
         }
 
         // The base points always return back the minimum value
-        FAPI_TRY(common_io_tdr_sample_point(i_target, i_baseAddr, i_group, min_offset, i_lane, base_point_y1));
-        FAPI_TRY(common_io_tdr_sample_point(i_target, i_baseAddr, i_group, max_offset, i_lane, base_point_y2));
+        FAPI_TRY(common_io_tdr_sample_point(i_target, i_baseAddr, i_group, i_lane, min_offset, base_point_y1));
+        FAPI_TRY(common_io_tdr_sample_point(i_target, i_baseAddr, i_group, i_lane, max_offset, base_point_y2));
 
         // Add an extra point of precision
         FAPI_DBG("TDR base1(%d) base2(%d)", base_point_y1, base_point_y2);
@@ -445,10 +462,42 @@ fapi2::ReturnCode common_io_tdr(
         o_length_ps = (o_length_ps + 500) / 1000;
     }
 
+    FAPI_TRY(common_io_tdr_cleanup(i_target, i_baseAddr, i_group, i_lane));
 fapi_try_exit:
+
     FAPI_DBG("End TDR Isolation");
     return fapi2::current_err;
 }
+
+fapi2::ReturnCode common_io_tdr_cleanup(const GENERIC_FAPI_IO_TARGET& i_target,
+                                        const uint64_t i_baseAddr,
+                                        const uint32_t i_group,
+                                        const uint32_t i_lane)
+{
+    const uint8_t c_tdrEnBit = 48;
+    const uint8_t c_phaseSelBit = 57;
+    const uint32_t c_pulseWidthBit = 48;
+    const uint32_t c_pulseWidthLen = 9;
+    fapi2::buffer<uint64_t> l_data_buf = 0;
+    uint64_t l_addr = 0;
+
+    // set TDR pulse width
+    l_addr = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_cntl6_pg, 1);
+    FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, 0, c_pulseWidthBit, c_pulseWidthLen));
+
+    // set TDR phase sel
+    l_addr = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_cntl4_pg, 1);
+    FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, 0, c_phaseSelBit, 1));
+
+    // TDR Enable
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::tx_cntl3_pl, 1);
+    FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, 0, c_tdrEnBit, 1));
+
+fapi_try_exit:
+    FAPI_DBG("End TDR Initialization");
+    return fapi2::current_err;
+}
+
 
 /// @brief Initialize the phy for TDR
 /// @param[in] i_target             Target to get thread id for
@@ -475,22 +524,23 @@ fapi2::ReturnCode common_io_tdr_initialize(const GENERIC_FAPI_IO_TARGET& i_targe
     uint32_t l_tdr_enable = 1;
 
     FAPI_DBG("Begin TDR Initialization");
-    // Set HS_BIST_EN to 0
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::mode1);
+    // Set tx_bist_hs_en to 0
+    l_addr = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_mode1_pg, 1);
     FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, 0, c_hsBistEnBit, 1),
              "Error on RMW to disable HS Bist to address %d", l_addr);
 
     // set TDR pulse width
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::cntl5);
+    l_addr = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_cntl6_pg, 1);
     FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, i_pw, c_pulseWidthBit, c_pulseWidthLen),
              "Error on RMW to set pulse width to %d to address %d", i_pw, l_addr);
 
     // set TDR phase sel
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::cntl4);
+    l_addr = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_cntl4_pg, 1);
     FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, i_phase, c_phaseSelBit, 1),
              "Error on RMW to set phase select to %d to address %d", i_phase, l_addr);
 
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::cntl3);
+    // TDR Enable
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::tx_cntl3_pl, 1);
     FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, l_tdr_enable, c_tdrEnBit, 1),
              "Error on RMW to set TDR Enable to %d at address %d", l_tdr_enable, l_addr);
 
@@ -508,9 +558,7 @@ fapi2::ReturnCode common_io_tdr_get_tdr_offsets(const GENERIC_FAPI_IO_TARGET& i_
         const uint32_t i_pw,
         uint32_t& o_tdr_width)
 {
-    uint32_t tx_mode = 16; // 16to1 mode is always set for Abus
-    fapi2::buffer<uint64_t> l_mode1_data = 0;
-
+    uint32_t tx_mode = 16; // 16to1 mode is always set
     o_tdr_width = 4 * tx_mode * i_pw;
     FAPI_DBG("TDR Offset width: %d", o_tdr_width);
 
@@ -536,42 +584,33 @@ fapi2::ReturnCode common_io_tdr_sample_point(const GENERIC_FAPI_IO_TARGET& i_tar
     const int32_t LOOP_MAX = 255;
     const int32_t DAC_MAX = 255; // The upper limit of the dac
     const int32_t DAC_MIN = 0;   // The lower limit of the dac
-    const uint32_t DIRECTION_CHANGE_MAX = 5;
+    const uint32_t DIRECTION_CHANGE_MAX = 2;
     const uint8_t c_dacBit = 48;
     const uint8_t c_dacLen = 8;
-    uint64_t l_addr = 0;
+    uint64_t l_tx_ctl_cntl4_pg = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_cntl4_pg, 1);
     uint32_t loop_count = 0;
     uint32_t direction_change_count = 0;
     int32_t direction[2] = {0, 0};
     uint32_t tdr_capt_data = 0;
-    int32_t step = 1;
+    const int32_t step = 1;
     int32_t prev_dac = 0;
+    fapi2::buffer<uint64_t> l_buffer;
 
     // set TDR pulse offset
     FAPI_DBG("Start TDR Sample Point");
     FAPI_DBG("setting pulse offset: %d", i_offset);
     FAPI_TRY(common_io_tdr_set_pulse_offset(i_target, i_baseAddr, i_group, i_lane, i_offset));
 
+    FAPI_TRY(getScom(i_target, l_tx_ctl_cntl4_pg, l_buffer));
+
     while (loop_count < LOOP_MAX)
     {
-        // If dac is outside of acceptable range assert error
-        FAPI_ASSERT((o_dac < DAC_MAX),
-                    fapi2::POZ_IO_TDR_DAC_RANGE_ERROR()
-                    .set_TARGET_CHIP(i_target),
-                    "The DAC calibrated above of the max DAC range");
-        // If dac is outside of acceptable range assert error
-        FAPI_ASSERT((o_dac > DAC_MIN),
-                    fapi2::POZ_IO_TDR_DAC_RANGE_ERROR()
-                    .set_TARGET_CHIP(i_target),
-                    "The DAC calibrated below of the min DAC range");
-
         direction[1] = direction[0];
 
         // set TDR dac value
         FAPI_DBG("Setting TDR Dac: %d", o_dac);
-        l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::cntl4);
-        FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, o_dac, c_dacBit, c_dacLen),
-                 "Error on RMW to set DAC value to %d at address %d", o_dac, l_addr);
+        l_buffer.insertFromRight(o_dac, c_dacBit, c_dacLen);
+        FAPI_TRY(putScom(i_target, l_tx_ctl_cntl4_pg, l_buffer));
 
         // read the TDR capture value for the selected lane
         FAPI_TRY(common_io_tdr_get_capt_val(i_target, i_baseAddr, i_group, i_lane, tdr_capt_data));
@@ -660,7 +699,7 @@ fapi2::ReturnCode common_io_tdr_find_limit(const fapi2::Target < fapi2::TARGET_T
 
     // set TDR dac value
     FAPI_DBG("Setting TDR Dac: %d", o_limit);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::cntl4);
+    l_addr = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_cntl4_pg, 1);
     FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, o_limit, c_dacBit, c_dacLen),
              "Error on RMW to set DAC value to %d at address %d", o_limit, l_addr);
 
@@ -676,7 +715,7 @@ fapi2::ReturnCode common_io_tdr_find_limit(const fapi2::Target < fapi2::TARGET_T
             if (l_prev_limit != o_limit)
             {
                 FAPI_DBG("Setting TDR Dac: %d", o_limit);
-                l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::cntl4);
+                l_addr = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_cntl4_pg, 1);
                 FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, o_limit, c_dacBit, c_dacLen),
                          "Error on RMW to set DAC value to %d at address %d", o_limit, l_addr);
                 l_prev_limit = o_limit;
@@ -816,10 +855,10 @@ fapi2::ReturnCode common_io_tdr_find_horizontal_crossing(const GENERIC_FAPI_IO_T
 
     // set TDR Dac and phase sel
     FAPI_DBG("Horizontal Crossing - Setting (TDR Dac/Phase): (%d / %d)", i_dac, i_phase);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::cntl4);
+    l_addr = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_cntl4_pg, 1);
     FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, i_dac, c_dacBit, c_dacLen),
              "Error on RMW to set DAC value to %d at address %d", i_dac, l_addr);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::cntl4);
+    l_addr = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_cntl4_pg, 1);
     FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, i_phase, c_phaseSelBit, 1),
              "Error on RMW to set phase select to %d at address %d", i_phase, l_addr);
 
@@ -913,10 +952,10 @@ fapi2::ReturnCode common_io_tdr_find_short_crossing(const GENERIC_FAPI_IO_TARGET
 
     // set TDR Dac and phase sel
     FAPI_DBG("Short Crossing - Setting (TDR Dac/Phase): (%d / %d)", i_dac, i_phase);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::cntl4);
+    l_addr = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_cntl4_pg, 1);
     FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, i_dac, c_dacBit, c_dacLen),
              "Error on RMW to set DAC value to %d at address %d", i_dac, l_addr);
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::cntl4);
+    l_addr = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_cntl4_pg, 1);
     FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, i_phase, c_phaseSelBit, 1),
              "Error on RMW to set phase select to %d at address %d", i_phase, l_addr);
 
@@ -960,20 +999,16 @@ fapi2::ReturnCode common_io_tdr_get_capt_val(const GENERIC_FAPI_IO_TARGET& i_tar
         const uint32_t i_lane,
         uint32_t& o_tdr_val)
 {
-    const uint64_t SCOM_LANE_SHIFT = 32;
-    const uint64_t SCOM_LANE_MASK = 0x0000001F00000000;
     const uint32_t TDR_NS_DELAY = 100000; // 100us
     const uint32_t TDR_SIM_CYCLES = 10;
-    const uint64_t c_regs_stat1 = 0x8005240008010C3F;
-    const uint8_t c_capt_val_sig_bit = 57;
+    const uint8_t c_capt_val_sig_bit = 63;
     fapi2::buffer<uint64_t> l_data = 0;
     uint64_t l_addr = 0x0;
 
     fapi2::delay(TDR_NS_DELAY, TDR_SIM_CYCLES);
 
     // read the TDR capture value for the selected lane
-    l_addr = c_regs_stat1 | ((static_cast<uint64_t>(i_lane) << SCOM_LANE_SHIFT) &
-                             SCOM_LANE_MASK);
+    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::tx_stat1_pl, 1);
     FAPI_TRY(fapi2::getScom(i_target, l_addr, l_data));
 
     FAPI_TRY(l_data.extractToRight(o_tdr_val, c_capt_val_sig_bit,
@@ -998,7 +1033,7 @@ fapi2::ReturnCode common_io_tdr_set_pulse_offset(const GENERIC_FAPI_IO_TARGET& i
     fapi2::buffer<uint64_t> l_cntl5_data = 0;
     uint64_t l_addr = 0;
 
-    l_addr = buildAddr(i_baseAddr, i_group, i_lane, TdrRegisters::cntl5);
+    l_addr = buildAddr(i_baseAddr, i_group, 0, TdrRegisters::tx_ctl_cntl5_pg, 1);
     FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, i_pulse_offset, c_pulseOffsetBit, c_pulseOffsetLen),
              "Error on RMW to set pulse offset to %d to address %d", i_pulse_offset, l_addr);
 

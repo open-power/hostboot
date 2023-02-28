@@ -44,7 +44,8 @@
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*common_io_omi_tdr_FP_t)(
     const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP | fapi2::TARGET_TYPE_OMI > &,
-    const uint64_t&);
+    const uint32_t,
+    const uint64_t);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -56,11 +57,14 @@ extern "C"
     ///
     /// @brief OMI TDR procedure
     ///
-    /// @param[in] i_target       Reference to TARGET_TYPE_OCMB_CHIP target
+    /// @param[in] i_target       Reference to compound target
+    /// @param[in] i_freq         OMI link frequency
+    /// @param[in] i_base_addr    Base address relative to i_target
     /// @return fapi::ReturnCode  FAPI2_RC_SUCCESS if success, else error code.
     ///
     fapi2::ReturnCode common_io_omi_tdr(const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP | fapi2::TARGET_TYPE_OMI > &
                                         i_target,
-                                        const uint64_t& i_base_addr);
+                                        const uint32_t i_freq,
+                                        const uint64_t i_base_addr);
 
 } // extern "C"

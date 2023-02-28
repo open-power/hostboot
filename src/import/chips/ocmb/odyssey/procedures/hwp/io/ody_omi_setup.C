@@ -40,29 +40,6 @@ SCOMT_OMI_USE_D_REG_DL0_CONFIG1
 SCOMT_OMI_USE_D_REG_DL0_CYA_BITS
 
 ///
-/// @brief Checks the ATTR_MFG_FLAGS for manufacturing mode
-///
-/// @param[out] o_mfg_mode Indicates if the manufacturing mode flag is set
-///
-/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-fapi2::ReturnCode ody_omi_setup_get_mfg_mode(bool& o_mfg_mode)
-{
-    constexpr uint32_t MFG_FLAG = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_POLICY_FLAG_AVAIL_05;
-    constexpr size_t CELL_SIZE = 32;
-    const size_t l_index = MFG_FLAG / CELL_SIZE;
-    const size_t l_flag_pos = MFG_FLAG % CELL_SIZE;
-
-    uint32_t l_mfg_flags[4] = {};
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mfg_flags));
-
-    o_mfg_mode = (l_mfg_flags[l_index] & l_flag_pos) ? true : false;
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-
-///
 /// @brief Setup OMI DL
 ///
 /// @param[in] i_target Chip target to start
@@ -81,7 +58,7 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
     bool l_mfg_mode = false;
 
-    FAPI_TRY(ody_omi_setup_get_mfg_mode(l_mfg_mode));
+    FAPI_TRY(ody_io::get_functional_margin_mfg_mode(l_mfg_mode));
 
     //Clear mask to all training done FIR
     FAPI_TRY(l_dl0_error_mask.getScom(i_target));
@@ -116,6 +93,7 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     FAPI_TRY(l_dl0_config1.putScom(i_target));
 
     FAPI_TRY(l_dl0_cya.getScom(i_target));
+    l_dl0_cya.set_DIS_SYNCTO(1); // Needed as the host may be running manual training (step by step)
     l_dl0_cya.set_FRBUF_FULL(1);
     FAPI_TRY(l_dl0_cya.putScom(i_target));
 

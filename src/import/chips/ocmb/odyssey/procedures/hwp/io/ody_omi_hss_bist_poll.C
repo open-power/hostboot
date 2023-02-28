@@ -46,19 +46,32 @@ fapi2::ReturnCode ody_omi_hss_bist_poll(const fapi2::Target<fapi2::TARGET_TYPE_O
 
     io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSAR,
             PHY_PPE_WRAP0_ARB_CSDR,
-            PHY_PPE_WRAP0_XIXCR);
+            PHY_ODY_OMI_BASE);
 
     ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
 
-    const fapi2::buffer<uint64_t> l_num_threads = 1;
-    const fapi2::buffer<uint64_t> l_ext_cmd_override = 0;
-    fapi2::buffer<uint64_t> l_done = 0;
-    fapi2::buffer<uint64_t> l_fail = 0;
+    const uint8_t l_thread = 0;
+    uint8_t l_done = 0;
+    uint32_t l_fail = 0;
+    uint32_t l_rx_lanes = 0;
+    uint32_t l_tx_lanes = 0;
+    uint32_t l_ext_cmd_override = 0;
 
-    FAPI_TRY(l_ppe_common.bist_poll(i_target, l_num_threads, l_done, l_fail, l_ext_cmd_override));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LANES, i_target, l_rx_lanes));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_LANES, i_target, l_tx_lanes));
+
+    FAPI_TRY(l_ppe_common.bist_poll(i_target, l_thread, l_done, l_fail, l_ext_cmd_override));
+
+    if (!l_done || l_fail)
+    {
+        FAPI_DBG("l_done: 0x%X l_fail: 0x%X", l_done, l_fail);
+        FAPI_TRY(l_ppe_common.debug_display(i_target, l_thread, l_rx_lanes, l_tx_lanes));
+    }
 
     FAPI_ASSERT(l_done && !l_fail,
                 fapi2::IO_PPE_DONE_POLL_FAILED()
+                .set_FAIL(l_fail)
+                .set_DONE(l_done)
                 .set_TARGET(i_target),
                 "IO PPE done poll time-out or ext_cmd_fail seen!");
 

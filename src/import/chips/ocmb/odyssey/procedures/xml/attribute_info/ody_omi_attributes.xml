@@ -33,9 +33,9 @@
         </description>
         <valueType>uint32</valueType>
         <enum>
-            X8 = 0xFF,
-            X4 = 0xA5,
-            X2 = 0x81
+            X8 = 0xFF000000,
+            X4 = 0xA5000000,
+            X2 = 0x81000000
         </enum>
         <default>X8</default>
         <platInit/>
@@ -49,9 +49,9 @@
         </description>
         <valueType>uint32</valueType>
         <enum>
-            X8 = 0xFF,
-            X4 = 0xA5,
-            X2 = 0x81
+            X8 = 0xFF000000,
+            X4 = 0xA5000000,
+            X2 = 0x81000000
         </enum>
         <default>X8</default>
         <platInit/>
@@ -95,6 +95,105 @@
         </description>
         <valueType>uint8</valueType>
         <default>5</default>
+        <platInit/>
+    </attribute>
+<!-- ********************************************************************** -->
+    <attribute>
+        <id>ATTR_OMI_CHANNEL_LENGTH</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Specifies the Channel Length in Mils
+        </description>
+        <valueType>uint32</valueType>
+        <default>0</default>
+        <platInit/>
+    </attribute>
+<!-- ********************************************************************** -->
+    <attribute>
+        <id>ATTR_OMI_RX_LTEG</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            OMI Rx LTE Gain
+        </description>
+        <valueType>int32</valueType>
+        <default>-1</default>
+        <platInit/>
+    </attribute>
+<!-- ********************************************************************** -->
+    <attribute>
+        <id>ATTR_OMI_RX_LTEZ</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            OMI Rx LTE Zero
+        </description>
+        <valueType>int32</valueType>
+        <default>-1</default>
+        <platInit/>
+    </attribute>
+<!-- ********************************************************************** -->
+    <attribute>
+        <id>ATTR_OMI_RX_PHASE_STEP</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            OMI Rx Phase Step (RX CDR Bandwidth)
+        </description>
+        <valueType>int32</valueType>
+        <default>-1</default>
+        <platInit/>
+    </attribute>
+<!-- ********************************************************************** -->
+    <attribute>
+        <id>ATTR_OMI_TX_PRE1</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            OMI Tx Pre1 Cursor
+        </description>
+        <valueType>uint8</valueType>
+        <default>0</default>
+        <platInit/>
+    </attribute>
+<!-- ********************************************************************** -->
+    <attribute>
+        <id>ATTR_OMI_TX_PRE2</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            OMI Tx Pre2 Cursor
+        </description>
+        <valueType>uint8</valueType>
+        <default>0</default>
+        <platInit/>
+    </attribute>
+<!-- ********************************************************************** -->
+    <attribute>
+        <id>ATTR_OMI_TX_POST</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            OMI Tx Post Cursor
+        </description>
+        <valueType>uint8</valueType>
+        <default>0</default>
+        <platInit/>
+    </attribute>
+<!-- ********************************************************************** -->
+    <attribute>
+        <id>ATTR_OMI_RX_VERT_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            OMI Rx Vertical Offset for Functional Margining
+        </description>
+        <valueType>uint8</valueType>
+        <default>0</default>
+        <platInit/>
+    </attribute>
+<!-- ********************************************************************** -->
+    <attribute>
+        <id>ATTR_OMI_RX_HORIZ_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            OMI Rx Horizontal Offset for Functional Margining
+        </description>
+        <valueType>uint8</valueType>
+        <default>0</default>
         <platInit/>
     </attribute>
 <!-- ********************************************************************** -->

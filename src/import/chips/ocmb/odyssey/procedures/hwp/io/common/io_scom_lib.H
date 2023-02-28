@@ -41,7 +41,7 @@ inline uint64_t buildAddr(const uint32_t& i_base_addr,
                           const uint8_t& i_group,
                           const uint8_t& i_lane,
                           const uint16_t& i_reg,
-                          const uint8_t& i_tx = 1)
+                          const uint8_t& i_tx = 0)
 {
     uint64_t r_addr = static_cast<uint64_t>(i_base_addr);
     r_addr |= static_cast<uint64_t>(0x3F);

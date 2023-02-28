@@ -46,32 +46,25 @@ fapi2::ReturnCode ody_omi_hss_bist_init(const fapi2::Target<fapi2::TARGET_TYPE_O
 
     io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSAR,
             PHY_PPE_WRAP0_ARB_CSDR,
-            PHY_PPE_WRAP0_XIXCR);
+            PHY_ODY_OMI_BASE);
 
     ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
 
-    const uint32_t c_odyOmiBaseAddr = 0x0000000008010C00;
-
-    uint32_t l_numTxLanes = 0;
-    uint32_t l_numRxLanes = 0;
     uint8_t l_dacTest = 0;
     uint8_t l_esdTest = 0;
     uint8_t l_bist_timer = 0;
+    uint32_t l_rx_mask = 0;
 
     // Get the necessary attributes
     FAPI_DBG("Getting attributes");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_LANES, i_target, l_numTxLanes));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LANES, i_target, l_numRxLanes));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LANES, i_target, l_rx_mask));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_BIST_DAC_TEST, i_target, l_dacTest));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_BIST_ESD_TEST, i_target, l_esdTest));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_BIST_TIMER, i_target, l_bist_timer));
+    l_rx_mask <<= 24;
 
-    FAPI_TRY(l_ppe_common.bist_init(i_target, 0, l_bist_timer),
+    FAPI_TRY(l_ppe_common.bist_init(i_target, 1, l_rx_mask, l_dacTest, l_esdTest, l_bist_timer),
              "Failed to run common HSS BIST init");
-    FAPI_TRY(l_ppe_common.bist_init_rx(i_target, c_odyOmiBaseAddr, 0, l_esdTest, l_dacTest, l_numRxLanes),
-             "Failed to run common HSS BIST Rx init");
-    FAPI_TRY(l_ppe_common.bist_init_tx(i_target, 0, l_numTxLanes),
-             "Failed to run common HSS BIST Tx init");
 
 fapi_try_exit:
     FAPI_DBG("End");

@@ -29,5 +29,7 @@
       <rc>RC_IO_PPE_DONE_POLL_FAILED</rc>
       <description>IO PPE done poll time-out</description>
       <ffdc>TARGET</ffdc>
+      <ffdc>DONE</ffdc>
+      <ffdc>FAIL</ffdc>
     </hwpError>
 </hwpErrors>
