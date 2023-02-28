@@ -268,7 +268,7 @@
       8_BITS = 8, 16_BITS = 16, 32_BITS = 32, 64_BITS = 64
     </enum>
     <writeable/>
-    <default>32</default>
+    <default>32,32</default>
     <array>2</array>
     <mssAccessorName>prim_bus_width</mssAccessorName>
   </attribute>
