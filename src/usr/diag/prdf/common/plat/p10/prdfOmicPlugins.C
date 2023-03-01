@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <UtilHash.H>
 
 // Platform includes
+#include <prdfMemExtraSig.H>
 #include <prdfMemUtils.H>
 #include <prdfPlatServices.H>
 
@@ -347,6 +348,94 @@ OMIC_PLUGIN(0);
 OMIC_PLUGIN(1);
 
 #undef OMIC_PLUGIN
+
+/**
+ * @brief  Check for the KVCO=2 fix for OMI degraded mode. Adjust the signature
+ *         if the fix has been applied.
+ * @param  i_chip An OMIC chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_dl   The DL relative to the OMIC.
+ * @return SUCCESS
+ */
+int32_t CheckKvcoFix( ExtensibleChip * i_chip,
+                      STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_dl )
+{
+    #define PRDF_FUNC "[p10_omic::CheckKvcoFix] "
+
+    TargetHandle_t omi = getConnectedChild(i_chip->getTrgt(), TYPE_OMI, i_dl);
+    if ( nullptr == omi )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to get connected OMI from parent OMIC "
+                  "0x%08x", i_chip->getHuid() );
+        return SUCCESS;
+    }
+
+    TargetHandle_t ocmb = getConnectedChild(omi, TYPE_OCMB_CHIP, 0);
+    if ( nullptr == ocmb )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to get connected OCMB from parent OMI "
+                  "0x%08x", getHuid(omi) );
+        return SUCCESS;
+    }
+
+    // Explorer only, so skip for Odyssey
+    if (isOdysseyOcmb(ocmb))
+    {
+        return SUCCESS;
+    }
+
+    ExtensibleChip * ocmbChip = (ExtensibleChip*)systemPtr->GetChip(ocmb);
+    if ( nullptr == ocmbChip )
+    {
+        PRDF_ERR( PRDF_FUNC "Failed to get OCMB ExtensibleChip for trgt "
+                "huid=0x%08x", getHuid(ocmb) );
+        return SUCCESS;
+    }
+
+    ocmbChip->CaptureErrorData( io_sc.service_data->GetCaptureData(),
+                                Util::hashString("kvco_fix") );
+
+    // To check that the KVCO=2 fix has been applied, we need to check that
+    // CSU_MODE_LANE0[23:22] = 0b10, i.e. bit 23 is set, and bit 22 is NOT set.
+    // NOTE: This is bit 23:22 assuming the bits are in descending order in the
+    // register. Bit ordering here is in ascending order so the equivalent bits
+    // to check would be bit 40 (set) and bit 41 (not set).
+
+    SCAN_COMM_REGISTER_CLASS * reg = ocmbChip->getRegister("CSU_MODE_LANE0");
+
+    if (SUCCESS == reg->Read() && reg->IsBitSet(40) && !reg->IsBitSet(41))
+    {
+        if (0 == i_dl)
+        {
+            io_sc.service_data->setSignature(i_chip->getHuid(),
+                                             PRDFSIG_OmiDegradeFix0);
+        }
+        else
+        {
+            io_sc.service_data->setSignature(i_chip->getHuid(),
+                                             PRDFSIG_OmiDegradeFix1);
+        }
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+#define CHECK_KVCO_PLUGIN(POS) \
+int32_t CheckKvcoFix_##POS(ExtensibleChip* i_chip, \
+                           STEP_CODE_DATA_STRUCT& io_sc) \
+{ \
+    return CheckKvcoFix(i_chip, io_sc, POS); \
+} \
+PRDF_PLUGIN_DEFINE(p10_omic, CheckKvcoFix_##POS);
+
+CHECK_KVCO_PLUGIN(0);
+CHECK_KVCO_PLUGIN(1);
+
+#undef CHECK_KVCO_PLUGIN
+
+
 
 } // end namespace p10_omic
 
