@@ -768,7 +768,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE( l_msg_block.PhyVref == 0x05 );
                     REQUIRE( l_msg_block.D5Misc == 0x06 );
                     REQUIRE( l_msg_block.WL_ADJ == 0x07 );
-                    REQUIRE( l_msg_block.SequenceCtrl == 0xBFFF );
+                    REQUIRE( l_msg_block.SequenceCtrl == 0x827F );
                     REQUIRE( l_msg_block.HdtCtrl == 0x08 );
                     REQUIRE( l_msg_block.PhyCfg == 0x09 );
                     REQUIRE( l_msg_block.DFIMRLMargin == 0x0A );
