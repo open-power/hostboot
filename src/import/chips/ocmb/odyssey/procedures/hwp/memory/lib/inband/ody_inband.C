@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,14 +90,14 @@ fapi2::ReturnCode getOCCfg(
     uint32_t l_rd = 0;
     std::vector<uint8_t> l_data(4);
     uint32_t l_idx = 0;
-    fapi2::ATTR_MSS_OCMB_ODY_OMI_CFG_ENDIAN_CTRL_Type l_endian;
+    fapi2::ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL_Type l_endian;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_ODY_OMI_CFG_ENDIAN_CTRL,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL,
                            FAPI_SYSTEM, l_endian));
 
     FAPI_TRY(fapi2::getMMIO(i_target, i_cfgAddr | ODY_IB_CONFIG_OFFSET, 4, l_data));
 
-    if (l_endian == fapi2::ENUM_ATTR_MSS_OCMB_ODY_OMI_CFG_ENDIAN_CTRL_LITTLE_ENDIAN)
+    if (l_endian == fapi2::ENUM_ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL_LITTLE_ENDIAN)
     {
         readLE(l_data, l_idx, l_rd);
     }
@@ -149,12 +149,12 @@ fapi2::ReturnCode putOCCfg(
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     uint32_t l_v = static_cast<uint32_t>(i_data);
     std::vector<uint8_t> l_wd;
-    fapi2::ATTR_MSS_OCMB_ODY_OMI_CFG_ENDIAN_CTRL_Type l_endian;
+    fapi2::ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL_Type l_endian;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_ODY_OMI_CFG_ENDIAN_CTRL,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL,
                            FAPI_SYSTEM, l_endian));
 
-    if (l_endian == fapi2::ENUM_ATTR_MSS_OCMB_ODY_OMI_CFG_ENDIAN_CTRL_LITTLE_ENDIAN)
+    if (l_endian == fapi2::ENUM_ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL_LITTLE_ENDIAN)
     {
         forceLE(l_v, l_wd);
     }
