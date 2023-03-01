@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -1000,7 +1000,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[37]
      *  LSU logic recoverable error
      */
-    (rEQ_CORE_FIR, bit(37)) ? self_th_5perHour;
+    (rEQ_CORE_FIR, bit(37)) ? lsu_multi_hit_error;
 
     /** EQ_CORE_FIR[38]
      *  LSU logic core checkstop
