@@ -554,6 +554,11 @@ class msg_block_params
         fapi2::ReturnCode setup_SequenceCtrl(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
             constexpr uint8_t RCD_CSCA = 1;
+            constexpr uint8_t LRDIMM_TESTS_START = 2;
+            constexpr uint8_t LRDIMM_TESTS_LEN = 4;
+            // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
+            constexpr uint8_t RFU8 = 7;
+            constexpr uint8_t RFU7 = 8;
 
             fapi2::buffer<uint16_t> l_buffer(iv_msg_block_vars.iv_SequenceCtrl);
             bool l_has_rcd = false;
@@ -564,6 +569,13 @@ class msg_block_params
             {
                 l_buffer.clearBit<RCD_CSCA>();
             }
+
+            // Force LRDIMM tests to be disabled
+            l_buffer.clearBit<LRDIMM_TESTS_START, LRDIMM_TESTS_LEN>();
+
+            // Force RFU tests to be disabled
+            l_buffer.clearBit<RFU8>();
+            l_buffer.clearBit<RFU7>();
 
             io_msg_block.SequenceCtrl = l_buffer;
 
