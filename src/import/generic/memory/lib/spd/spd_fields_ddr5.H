@@ -428,11 +428,6 @@ class fields<DDR5, DDIMM_MODULE>
             SPD_MANF_ID_SECOND_BYTE_START = 0,
             SPD_MANF_ID_SECOND_BYTE_LEN = 8,
 
-            // Byte 196: SPD Device Type
-            SPD_DEVICE_TYPE_BYTE = 196,
-            SPD_DEVICE_TYPE_START = 0,
-            SPD_DEVICE_TYPE_LEN = 8,
-
             // Byte 197: SPD Device Revision Number
             SPD_DEVICE_REV_NUM_BYTE = 197,
             SPD_DEVICE_REV_NUM_START = 0,
@@ -448,11 +443,6 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC0_MFG_CODE_SECOND_BYTE_START = 0,
             PMIC0_MFG_CODE_SECOND_BYTE_LEN = 8,
 
-            // Byte 200: PMIC0 Device Type
-            PMIC0_DEVICE_TYPE_BYTE = 200,
-            PMIC0_DEVICE_TYPE_START = 0,
-            PMIC0_DEVICE_TYPE_LEN = 8,
-
             // Byte 201: PMIC0 Device Revision Number
             PMIC0_DEVICE_REV_NUM_BYTE = 201,
             PMIC0_DEVICE_REV_NUM_START = 0,
@@ -467,11 +457,6 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC1_MFG_CODE_SECOND_BYTE = 203,
             PMIC1_MFG_CODE_SECOND_BYTE_START = 0,
             PMIC1_MFG_CODE_SECOND_BYTE_LEN = 8,
-
-            // Byte 204: PMIC1 Device Type
-            PMIC1_DEVICE_TYPE_BYTE = 204,
-            PMIC1_DEVICE_TYPE_START = 0,
-            PMIC1_DEVICE_TYPE_LEN = 8,
 
             // Byte 205: PMIC1 Device Revision Number
             PMIC1_DEVICE_REV_NUM_BYTE = 205,
@@ -507,11 +492,6 @@ class fields<DDR5, DDIMM_MODULE>
             THERMAL_SENSOR0_MANF_ID_CODE_SECOND_BYTE = 211,
             THERMAL_SENSOR0_MANF_ID_CODE_SECOND_START = 0,
             THERMAL_SENSOR0_MANF_ID_CODE_SECOND_LEN = 8,
-
-            // Byte 212: Thermal Sensor0 Device Type
-            THERMAL_SENSOR0_DEVICE_TYPE_BYTE = 212,
-            THERMAL_SENSOR0_DEVICE_TYPE_START = 0,
-            THERMAL_SENSOR0_DEVICE_TYPE_LEN = 8,
 
             // Byte 213: Thermal Sensor0 Revision Number
             THERMAL_SENSOR0_REV_NUM_BYTE = 213,
@@ -629,11 +609,6 @@ class fields<DDR5, DDIMM_MODULE>
             THERMAL_SENSOR1_MANF_ID_CODE_SECOND_START = 0,
             THERMAL_SENSOR1_MANF_ID_CODE_SECOND_LEN = 8,
 
-            // Byte 247: Thermal Sensor1 Device Type
-            THERMAL_SENSOR1_DEVICE_TYPE_BYTE = 247,
-            THERMAL_SENSOR1_DEVICE_TYPE_START = 0,
-            THERMAL_SENSOR1_DEVICE_TYPE_LEN = 8,
-
             // Byte 248: Thermal Sensor1 Revision Number
             THERMAL_SENSOR1_REV_NUM_BYTE = 248,
             THERMAL_SENSOR1_REV_NUM_START = 0,
@@ -654,11 +629,6 @@ class fields<DDR5, DDIMM_MODULE>
             THERMAL_SENSOR2_MANF_ID_CODE_SECOND_START = 0,
             THERMAL_SENSOR2_MANF_ID_CODE_SECOND_LEN = 8,
 
-            // Byte 252: Thermal Sensor2 Device Type
-            THERMAL_SENSOR2_DEVICE_TYPE_BYTE = 252,
-            THERMAL_SENSOR2_DEVICE_TYPE_START = 0,
-            THERMAL_SENSOR2_DEVICE_TYPE_LEN = 8,
-
             // Byte 253: Thermal Sensor2 Revision Number
             THERMAL_SENSOR2_REV_NUM_BYTE = 253,
             THERMAL_SENSOR2_REV_NUM_START = 0,
@@ -678,11 +648,6 @@ class fields<DDR5, DDIMM_MODULE>
             THERMAL_SENSOR3_MANF_ID_CODE_SECOND_BYTE = 256,
             THERMAL_SENSOR3_MANF_ID_CODE_SECOND_START = 0,
             THERMAL_SENSOR3_MANF_ID_CODE_SECOND_LEN = 8,
-
-            // Byte 257: Thermal Sensor3 Device Type
-            THERMAL_SENSOR3_DEVICE_TYPE_BYTE = 257,
-            THERMAL_SENSOR3_DEVICE_TYPE_START = 0,
-            THERMAL_SENSOR3_DEVICE_TYPE_LEN = 8,
 
             // Byte 258: Thermal Sensor3 Revision Number
             THERMAL_SENSOR3_REV_NUM_BYTE = 258,
@@ -1565,9 +1530,6 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 195: SPD MANF ID CODE, Second Byte
         static constexpr field_t SPD_MANF_ID_SECOND{SPD_MANF_ID_SECOND_BYTE, SPD_MANF_ID_SECOND_BYTE_START, SPD_MANF_ID_SECOND_BYTE_LEN};
 
-        // Byte 196: SPD Device Type
-        static constexpr field_t SPD_DEVICE_TYPE{SPD_DEVICE_TYPE_BYTE, SPD_DEVICE_TYPE_START, SPD_DEVICE_TYPE_LEN};
-
         // Byte 197: SPD Device Revision Number
         static constexpr field_t SPD_DEVICE_REV_NUM{SPD_DEVICE_REV_NUM_BYTE, SPD_DEVICE_REV_NUM_START, SPD_DEVICE_REV_NUM_LEN};
 
@@ -1576,9 +1538,6 @@ class fields<DDR5, DDIMM_MODULE>
 
         // Byte 199: PMIC0 Manfacture ID code 2nd byte
         static constexpr field_t PMIC0_MFG_CODE_SECOND{PMIC0_MFG_CODE_SECOND_BYTE, PMIC0_MFG_CODE_SECOND_BYTE_START, PMIC0_MFG_CODE_SECOND_BYTE_LEN};
-
-        // Byte 200: PMIC0 Device Type
-        static constexpr field_t PMIC0_DEVICE_TYPE{PMIC0_DEVICE_TYPE_BYTE, PMIC0_DEVICE_TYPE_START, PMIC0_DEVICE_TYPE_LEN};
 
         // Byte 201: PMIC0 Device Revision Number
         static constexpr field_t PMIC0_DEVICE_REV_NUM{PMIC0_DEVICE_REV_NUM_BYTE, PMIC0_DEVICE_REV_NUM_START, PMIC0_DEVICE_REV_NUM_LEN};
@@ -1589,9 +1548,6 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 203: PMIC1 Manfacture ID code 2nd byte
         static constexpr field_t PMIC1_MFG_CODE_SECOND{PMIC1_MFG_CODE_SECOND_BYTE, PMIC1_MFG_CODE_SECOND_BYTE_START, PMIC1_MFG_CODE_SECOND_BYTE_LEN};
 
-        // Byte 204: PMIC1 Device Type
-        static constexpr field_t PMIC1_DEVICE_TYPE{PMIC1_DEVICE_TYPE_BYTE, PMIC1_DEVICE_TYPE_START, PMIC1_DEVICE_TYPE_LEN};
-
         // Byte 205: PMIC1 Device Revision Number
         static constexpr field_t PMIC1_DEVICE_REV_NUM{PMIC1_DEVICE_REV_NUM_BYTE, PMIC1_DEVICE_REV_NUM_START, PMIC1_DEVICE_REV_NUM_LEN};
 
@@ -1601,9 +1557,6 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 207: PMIC2 Manfacture ID code 2nd byte
         static constexpr field_t PMIC2_MFG_CODE_SECOND{PMIC2_MFG_CODE_SECOND_BYTE, PMIC2_MFG_CODE_SECOND_START, PMIC2_MFG_CODE_SECOND_LEN};
 
-        // Byte 208: PMIC2 Device Type
-        static constexpr field_t PMIC2_DEVICE_TYPE{PMIC2_DEVICE_TYPE_BYTE, PMIC2_DEVICE_TYPE_START, PMIC2_DEVICE_TYPE_LEN};
-
         // Byte 209: PMIC2 Device Revision Number
         static constexpr field_t PMIC2_DEVICE_REV_NUM{PMIC2_DEVICE_REV_NUM_BYTE, PMIC2_DEVICE_REV_NUM_START, PMIC2_DEVICE_REV_NUM_LEN};
 
@@ -1612,9 +1565,6 @@ class fields<DDR5, DDIMM_MODULE>
 
         // Byte 211: Thermal Sensor0 Manufacturing ID Code, Second Byte
         static constexpr field_t THERMAL_SENSOR0_MANF_ID_CODE_SECOND{THERMAL_SENSOR0_MANF_ID_CODE_SECOND_BYTE, THERMAL_SENSOR0_MANF_ID_CODE_SECOND_START, THERMAL_SENSOR0_MANF_ID_CODE_SECOND_LEN};
-
-        // Byte 212: Thermal Sensor0 Device Type
-        static constexpr field_t THERMAL_SENSOR0_DEVICE_TYPE{ THERMAL_SENSOR0_DEVICE_TYPE_BYTE,  THERMAL_SENSOR0_DEVICE_TYPE_START,  THERMAL_SENSOR0_DEVICE_TYPE_LEN};
 
         // Byte 213: Thermal Sensor0 Revision Number
         static constexpr field_t THERMAL_SENSOR0_REV_NUM{THERMAL_SENSOR0_REV_NUM_BYTE, THERMAL_SENSOR0_REV_NUM_START, THERMAL_SENSOR0_REV_NUM_LEN};
@@ -1668,9 +1618,6 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 241: PMIC3 Manfacture ID code 2nd byte
         static constexpr field_t PMIC3_MFG_CODE_SECOND{PMIC3_MFG_CODE_SECOND_BYTE, PMIC3_MFG_CODE_SECOND_START, PMIC3_MFG_CODE_SECOND_LEN};
 
-        // Byte 242: PMIC3 Device Type
-        static constexpr field_t PMIC3_DEVICE_TYPE{PMIC3_DEVICE_TYPE_BYTE, PMIC3_DEVICE_TYPE_START, PMIC3_DEVICE_TYPE_LEN};
-
         // Byte 243: PMIC3 Device Revision Number
         static constexpr field_t PMIC3_DEVICE_REV_NUM{PMIC3_DEVICE_REV_NUM_BYTE, PMIC3_DEVICE_REV_NUM_START, PMIC3_DEVICE_REV_NUM_LEN};
 
@@ -1682,9 +1629,6 @@ class fields<DDR5, DDIMM_MODULE>
 
         // Byte 246: Thermal Sensor1 Manufacturing ID Code, Second Byte
         static constexpr field_t THERMAL_SENSOR1_MANF_ID_CODE_SECOND{THERMAL_SENSOR1_MANF_ID_CODE_SECOND_BYTE, THERMAL_SENSOR1_MANF_ID_CODE_SECOND_START, THERMAL_SENSOR1_MANF_ID_CODE_SECOND_LEN};
-
-        // Byte 247: Thermal Sensor1 Device Type
-        static constexpr field_t THERMAL_SENSOR1_DEVICE_TYPE{THERMAL_SENSOR1_DEVICE_TYPE_BYTE, THERMAL_SENSOR1_DEVICE_TYPE_START, THERMAL_SENSOR1_DEVICE_TYPE_LEN};
 
         // Byte 248: Thermal Sensor1 Revision Number
         static constexpr field_t THERMAL_SENSOR1_REV_NUM{THERMAL_SENSOR1_REV_NUM_BYTE, THERMAL_SENSOR1_REV_NUM_START, THERMAL_SENSOR1_REV_NUM_LEN};
@@ -1698,9 +1642,6 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 251: Thermal Sensor2 Manufacturing ID Code, Second Byte
         static constexpr field_t THERMAL_SENSOR2_MANF_ID_CODE_SECOND{THERMAL_SENSOR2_MANF_ID_CODE_SECOND_BYTE, THERMAL_SENSOR2_MANF_ID_CODE_SECOND_START, THERMAL_SENSOR2_MANF_ID_CODE_SECOND_LEN};
 
-        // Byte 252: Thermal Sensor2 Device Type
-        static constexpr field_t THERMAL_SENSOR2_DEVICE_TYPE{THERMAL_SENSOR2_DEVICE_TYPE_BYTE, THERMAL_SENSOR2_DEVICE_TYPE_START, THERMAL_SENSOR2_DEVICE_TYPE_LEN};
-
         // Byte 253: Thermal Sensor2 Revision Number
         static constexpr field_t THERMAL_SENSOR2_REV_NUM{THERMAL_SENSOR2_REV_NUM_BYTE, THERMAL_SENSOR2_REV_NUM_START, THERMAL_SENSOR2_REV_NUM_LEN};
 
@@ -1712,9 +1653,6 @@ class fields<DDR5, DDIMM_MODULE>
 
         // Byte 256: Thermal Sensor3 Manufacturing ID Code, Second Byte
         static constexpr field_t THERMAL_SENSOR3_MANF_ID_CODE_SECOND{THERMAL_SENSOR3_MANF_ID_CODE_SECOND_BYTE, THERMAL_SENSOR3_MANF_ID_CODE_SECOND_START, THERMAL_SENSOR3_MANF_ID_CODE_SECOND_LEN};
-
-        // Byte 257: Thermal Sensor3 Device Type
-        static constexpr field_t THERMAL_SENSOR3_DEVICE_TYPE{THERMAL_SENSOR3_DEVICE_TYPE_BYTE, THERMAL_SENSOR3_DEVICE_TYPE_START, THERMAL_SENSOR3_DEVICE_TYPE_LEN};
 
         // Byte 258: Thermal Sensor3 Revision Number
         static constexpr field_t THERMAL_SENSOR3_REV_NUM{THERMAL_SENSOR3_REV_NUM_BYTE, THERMAL_SENSOR3_REV_NUM_START, THERMAL_SENSOR3_REV_NUM_LEN};
