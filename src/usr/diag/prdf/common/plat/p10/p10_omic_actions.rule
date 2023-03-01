@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -153,6 +153,7 @@ actionclass threshold_and_mask_dl1_omi_bus
 # to determine the callout if a root cause bit is found on as well.
 actionclass dl0_omi_degraded_mode
 {
+    funccall("CheckKvcoFix_0");
     try( funccall("CrcSideEffect_0"), dl0_omi_bus );
     funccall("omiDegradeRetrainWorkaround_0");
     threshold1;
@@ -174,6 +175,7 @@ actionclass threshold_and_mask_dl0_omi_bus_CRC
 
 actionclass dl1_omi_degraded_mode
 {
+    funccall("CheckKvcoFix_1");
     try( funccall("CrcSideEffect_1"), dl1_omi_bus );
     funccall("omiDegradeRetrainWorkaround_1");
     threshold1;

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2022
+# Contributors Listed Below - COPYRIGHT 2018,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -287,6 +287,8 @@ actionclass threshold_and_mask_self_th1
 
 actionclass omi_degraded_mode
 {
+    capture(kvco_fix);
+    funccall("CheckKvcoFix");
     try( funccall("OmiRunningInDegradedMode"),
          try(funccall("CrcSideEffect_Ocmb"), omi_bus) );
     funccall("omiDegradeRetrainWorkaround");

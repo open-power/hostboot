@@ -369,8 +369,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         }
 
         static int rt_scom_read(uint64_t chipid,
-                                 uint64_t addr,
-                                 void* data)
+                                uint64_t addr,
+                                void* data)
         {
             int rc = 0;
 
@@ -416,6 +416,19 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 {
                     rc = HBRT_RC_PIBERR_100_INVALIDADDR;
                 }
+            }
+
+            // PHYP handles the 4-byte accesses to the OCMB differently
+            // than our native code does, need to rearrange the results.
+            if( ((chipid & HBRT_CHIPID_TYPE_MASK) == HBRT_OCMB_TYPE)
+                //input is mmio addr which is scom left-shifted by 3
+                && (((addr>>3) & 0x0F000000) != 0x08000000) ) //Not IBM scom
+            {
+                // HB has the data right-justified
+                // PHYP returns it left-justified
+                uint32_t* l_u32 = reinterpret_cast<uint32_t*>(data);
+                l_u32[0] = l_u32[1];
+                l_u32[1] = 0;
             }
 
             return rc;
