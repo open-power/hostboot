@@ -51,6 +51,14 @@ constexpr uint8_t DDR5_MEMPORT_MASK = 0xC0;
 constexpr uint8_t DDR5_MEMPORT0     = 0x40;
 constexpr uint8_t DDR5_MEMPORT1     = 0x80;
 
+// Present and functional state return values
+enum MemportState_t
+{
+    MEMPORT_NOT_PRESENT,
+    MEMPORT_PRESENT_NOT_FUNCTIONAL,
+    MEMPORT_FUNCTIONAL
+};
+
 ///
 /// @brief Get the functional state of the MEM_PORTs behind the OCMB
 ///        from the provided OCMB spd binary.
@@ -60,8 +68,8 @@ constexpr uint8_t DDR5_MEMPORT1     = 0x80;
 /// @return TargetState State of MEM_PORT and downstream DIMMs
 /// @note May need to be changed to support 4U SPD
 ///
-inline fapi2::TargetState get_memport_state(const uint8_t* i_spd,
-        const uint8_t i_memport_id)
+inline MemportState_t get_memport_state(const uint8_t* i_spd,
+                                        const uint8_t i_memport_id)
 {
     // Use the byte offsets appropriate to the dimm type
     if ( i_spd[DDIMM_SPD::DDR_BYTE] == DDIMM_SPD::MEM_DDR4 )
@@ -69,11 +77,11 @@ inline fapi2::TargetState get_memport_state(const uint8_t* i_spd,
         // DDR4 (Explorer) only supports a single memory port
         if( i_memport_id == 0 )
         {
-            return fapi2::TARGET_STATE_FUNCTIONAL;
+            return MEMPORT_FUNCTIONAL;
         }
         else
         {
-            return fapi2::TARGET_STATE_NOT_PRESENT;
+            return MEMPORT_NOT_PRESENT;
         }
     }
     else if ( i_spd[DDIMM_SPD::DDR_BYTE] == DDIMM_SPD::MEM_DDR5 )
@@ -83,20 +91,20 @@ inline fapi2::TargetState get_memport_state(const uint8_t* i_spd,
         if( ((i_memport_id == 0) && (l_ports & DDR5_MEMPORT0))
             || ((i_memport_id == 1) && (l_ports & DDR5_MEMPORT1)) )
         {
-            return fapi2::TARGET_STATE_FUNCTIONAL;
+            return MEMPORT_FUNCTIONAL;
         }
         else if( i_memport_id > 1 )
         {
-            return fapi2::TARGET_STATE_NOT_PRESENT;
+            return MEMPORT_NOT_PRESENT;
         }
         else
         {
-            return fapi2::TARGET_STATE_PRESENT;
+            return MEMPORT_PRESENT_NOT_FUNCTIONAL;
         }
     }
     else
     {
-        return fapi2::TARGET_STATE_NOT_PRESENT;
+        return MEMPORT_NOT_PRESENT;
     }
 }
 
