@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1198,9 +1198,11 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
         // callouts if there are any.
         if (sys)
         {
-            UTIL::tryGetAttributeInHierarchy<ATTR_RAW_MTM>(sys, mtm);
-            UTIL::tryGetAttributeInHierarchy<ATTR_FW_RELEASE_VERSION>(sys, release_version);
-            UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(sys, serial_number);
+            // Dealing with FRUs need the physical parent
+            bool is_physical = true;
+            UTIL::tryGetAttributeInHierarchy<ATTR_RAW_MTM>(sys, mtm, is_physical);
+            UTIL::tryGetAttributeInHierarchy<ATTR_FW_RELEASE_VERSION>(sys, release_version, is_physical);
+            UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(sys, serial_number, is_physical);
         }
 
 #ifdef CONFIG_BUILD_FULL_PEL
@@ -3637,7 +3639,9 @@ void ErrlEntry::addFruCalloutDataToSrc(const char*                  i_fru,
                 static_assert(ATTR_STATIC_ABS_LOCATION_CODE_max_chars < PEL_LOC_CODE_SIZE,
                             "ATTR_STATIC_ABS_LOCATION_CODE is too large to fit inside FRU callout location code section.");
 
-                UTIL::tryGetAttributeInHierarchy<ATTR_STATIC_ABS_LOCATION_CODE>(i_target, static_abs_location_code);
+                // Dealing with FRUs need the physical parent
+                bool is_physical = true;
+                UTIL::tryGetAttributeInHierarchy<ATTR_STATIC_ABS_LOCATION_CODE>(i_target, static_abs_location_code, is_physical);
             }
 
             full_location_code.insert(end(full_location_code),
@@ -3749,17 +3753,18 @@ void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target *          const i_targ
                                        fruIdentitySubstructFlags    const i_compType,
                                        epubProcedureID              const i_procedure_id)
 {
+    bool is_physical = true; // Dealing with FRUs need the physical parent
     // FRU Part Number
     ATTR_FRU_NUMBER_type l_partnum { };
-    UTIL::tryGetAttributeInHierarchy<ATTR_FRU_NUMBER>(i_target, l_partnum);
+    UTIL::tryGetAttributeInHierarchy<ATTR_FRU_NUMBER>(i_target, l_partnum, is_physical);
 
     // CCIN
     ATTR_FRU_CCIN_type l_ccin { };
-    UTIL::tryGetAttributeInHierarchy<ATTR_FRU_CCIN>(i_target, l_ccin);
+    UTIL::tryGetAttributeInHierarchy<ATTR_FRU_CCIN>(i_target, l_ccin, is_physical);
 
     // Serial Number
     ATTR_SERIAL_NUMBER_type l_serialnumber { };
-    UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(i_target, l_serialnumber);
+    UTIL::tryGetAttributeInHierarchy<ATTR_SERIAL_NUMBER>(i_target, l_serialnumber, is_physical);
 
     addFruCalloutDataToSrc(reinterpret_cast<const char*>(l_partnum),
                            reinterpret_cast<const char*>(&l_ccin),

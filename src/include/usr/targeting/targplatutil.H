@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -172,8 +172,8 @@ struct tryGetAttributes<>
     }
 };
 
-/* @brief Recursively search a target and its parents for the first occurrence
- *        of an attribute and retrieve its value.
+/* @brief Recursively search a target and its physical parents for the
+ *        first occurrence of an attribute and retrieve its value.
  *
  * @param[in] i_target Target to search
  * @param[in] o_value  Location to store the attribute value.
@@ -182,15 +182,25 @@ struct tryGetAttributes<>
  */
 template<ATTRIBUTE_ID Attr>
 bool tryGetAttributeInHierarchy(Target* const i_target,
-                                typename AttributeTraits<Attr>::Type& o_value)
+                                typename AttributeTraits<Attr>::Type& o_value,
+                                bool is_physical = false)
 {
     if (!i_target)
     {
         return false;
     }
 
-    return i_target->tryGetAttr<Attr>(o_value)
-        || tryGetAttributeInHierarchy<Attr>(getImmediateParentByAffinity(i_target), o_value);
+    // Dealing with FRUs need the physical parent
+    if (is_physical)
+    {
+        return i_target->tryGetAttr<Attr>(o_value)
+            || tryGetAttributeInHierarchy<Attr>(getImmediateParentByPhysical(i_target), o_value, is_physical);
+    }
+    else
+    {
+        return i_target->tryGetAttr<Attr>(o_value)
+            || tryGetAttributeInHierarchy<Attr>(getImmediateParentByAffinity(i_target), o_value);
+    }
 }
 
 /**

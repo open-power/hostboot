@@ -503,9 +503,18 @@ const Target * getParentChip( const Target * i_pChiplet );
 Target * getParent( const Target * i_unit , TARGETING::TYPE i_pType );
 
 /**
- * @brief return the immediate parent target of the specified input child
+ * @brief return the immediate physical parent target of the specified input child
  *
- * @parm[in]  i_child, unit target used for finding the parent target
+ * @parm[in]  i_child, unit target used for finding the physical parent target
+ *
+ * @return Parent target pointer or NULL if error
+ */
+Target * getImmediateParentByPhysical( const Target * i_child );
+
+/**
+ * @brief return the immediate affinity parent target of the specified input child
+ *
+ * @parm[in]  i_child, unit target used for finding the affinity parent target
  *
  * @return Parent target pointer or NULL if error
  */

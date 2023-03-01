@@ -633,6 +633,41 @@ const Target * getParentChip( const Target * i_pChiplet )
     return l_pChip;
 }
 
+Target * getImmediateParentByPhysical(const Target * i_child )
+{
+    Target * l_parent = NULL;
+
+    // Create a vector of TARGETING::Target pointers
+    TARGETING::TargetHandleList l_chipList;
+
+    // Get parent
+    TARGETING::targetService().getAssociated(l_chipList, i_child,
+                    TARGETING::TargetService::PARENT,
+                    TARGETING::TargetService::IMMEDIATE, NULL);
+
+    if (l_chipList.size() == 1)
+    {
+        l_parent = l_chipList[0];
+    }
+    else if (l_chipList.size() == 0)
+    {
+        TARG_ERR("Failed to find physical parent target for huid=%.8X",
+                TARGETING::get_huid(i_child));
+        auto l_ppath = i_child->getAttr<ATTR_PHYS_PATH>();
+        char* l_ppathstr = l_ppath.toString();
+        TARG_ERR("ATTR_PHYSICAL_PATH=%s", l_ppathstr);
+        free(l_ppathstr);
+    }
+    else
+    {
+        TARG_ERR("Found %d parent targets for huid=%.8X, only expected to find 1",
+                l_chipList.size(),
+                TARGETING::get_huid(i_child));
+    }
+
+    return l_parent;
+}
+
 Target * getImmediateParentByAffinity(const Target * i_child )
 {
     Target * l_parent = NULL;

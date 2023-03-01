@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1659,7 +1659,14 @@ const TARGETING::Target * getFRU_Target(const TARGETING::Target * i_target)
     TARGETING::TargetHandleList l_parentList;
     const TARGETING::Target * l_target = i_target;
     uint16_t level = 0; // just a basic parent level counter
-    bool foundFru = i_target->tryGetAttr<TARGETING::ATTR_FRU_ID>(l_fruid);
+    bool foundFru = false;
+    TARGETING::ATTR_MEM_MRW_IS_PLANAR_type isDimms = false;
+    if (!i_target->tryGetAttr<ATTR_MEM_MRW_IS_PLANAR>(isDimms))
+    {
+        // Only if this is NOT an OCMB on the backplane do we check if its the FRU
+        // OCMBs on the backplane need to look up the FRU parent, i.e. the backplane
+        foundFru = i_target->tryGetAttr<TARGETING::ATTR_FRU_ID>(l_fruid);
+    }
     while (!foundFru)
     {
         level++;
