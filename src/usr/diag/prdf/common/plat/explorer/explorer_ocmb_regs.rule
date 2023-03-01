@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2021
+# Contributors Listed Below - COPYRIGHT 2019,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -832,4 +832,11 @@
         name        "CSU PCBI Lane 7 reg";
         scomaddr    0x002070B0;
         capture     group foxhound_lane7;
+    };
+
+    register CSU_MODE_LANE0
+    {
+        name        "CSU Mode Lane 0 reg";
+        scomaddr    0x002000A8;
+        capture     group kvco_fix;
     };

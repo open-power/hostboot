@@ -521,6 +521,35 @@ int32_t OmiRunningInDegradedMode( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, OmiRunningInDegradedMode );
 
+/**
+ * @brief  Check for the KVCO=2 fix for OMI degraded mode. Adjust the signature
+ *         if the fix has been applied.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t CheckKvcoFix( ExtensibleChip * i_chip,
+                      STEP_CODE_DATA_STRUCT & io_sc )
+{
+    // To check that the KVCO=2 fix has been applied, we need to check that
+    // CSU_MODE_LANE0[23:22] = 0b10, i.e. bit 23 is set, and bit 22 is NOT set.
+    // NOTE: This is bit 23:22 assuming the bits are in descending order in the
+    // register. Bit ordering here is in ascending order so the equivalent bits
+    // to check would be bit 40 (set) and bit 41 (not set).
+
+    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister("CSU_MODE_LANE0");
+
+    if (SUCCESS == reg->Read() && reg->IsBitSet(40) && !reg->IsBitSet(41))
+    {
+        io_sc.service_data->setSignature(i_chip->getHuid(),
+                                         PRDFSIG_OmiDegradeFixOcmb);
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( explorer_ocmb, CheckKvcoFix );
+
+
 //##############################################################################
 //
 //                               RDFFIR

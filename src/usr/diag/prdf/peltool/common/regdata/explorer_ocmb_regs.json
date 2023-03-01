@@ -619,6 +619,11 @@
         "description": "Explorer chip OMIDLFIR MASK",
         "name": "OMIDLFIR_MASK"
     },
+    "0xf0de": {
+        "address": "0x00000000002000a8",
+        "description": "CSU Mode Lane 0 reg",
+        "name": "CSU_MODE_LANE0"
+    },
     "0xf401": {
         "address": "0x0000000008011800",
         "description": "Explorer chip MCBISTFIR",
