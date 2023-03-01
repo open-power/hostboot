@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2022
+# Contributors Listed Below - COPYRIGHT 2016,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -155,4 +155,12 @@ actionclass master_power_bus_chip_procedure
 {
     threshold1;
     funccall("calloutPbTokenManager");
+};
+
+# Workaround for spurious multi-hit errors, which will be logged as recoverable
+# if they occur. Otherwise, use the same recovery threshold as before.
+actionclass lsu_multi_hit_error
+{
+    calloutSelfMed; # Needed so that core is in the callout list regardless.
+    try(funccall("lsu_multi_hit_error"), self_th_5perHour);
 };

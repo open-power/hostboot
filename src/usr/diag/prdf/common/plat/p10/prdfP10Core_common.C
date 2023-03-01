@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -763,6 +763,28 @@ int32_t ignoreDD10(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
     return PRD_SCAN_COMM_REGISTER_ZERO; // So try statement will continue.
 }
 PRDF_PLUGIN_DEFINE(p10_core, ignoreDD10);
+
+/**
+ * @brief Workaround for spurious LSU multi-hit errors, which will be logged as
+ *        recoverable if they occur. Otherwise, use the same recovery threshold
+ *        as before.
+ */
+int32_t lsu_multi_hit_error(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc)
+{
+    auto reg = i_chip->getRegister("LSU_HOLD_OUT_REG7");
+    if (SUCCESS == reg->Read() && 0 != reg->GetBitFieldJustified(4,2))
+    {
+        // Don't threshold. Don't set as predictive. Just let the log get
+        // reported as recoverable.
+        PRDF_INF("LSU multi-hit error on 0x%08x", i_chip->getHuid());
+        return SUCCESS;
+    }
+
+    // Returning non-SUCCESS will make the try statement fall back to the
+    // default recovery thresholding and callouts.
+    return PRD_SCAN_COMM_REGISTER_ZERO;
+}
+PRDF_PLUGIN_DEFINE(p10_core, lsu_multi_hit_error);
 
 } // end namespace p10_core
 } // end namespace PRDF
