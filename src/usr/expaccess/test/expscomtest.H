@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -270,9 +270,10 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomI2c>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomI2c>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
+                            l_testEntry.addr,
                             get_huid(l_firstExpChip));
                 }
 
@@ -295,9 +296,10 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomI2c>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomI2c>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
+                            l_testEntry.addr,
                             get_huid(l_lastExpChip));
                 }
 
@@ -361,9 +363,10 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomI2c>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomI2c>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
+                            l_testEntry.addr,
                             get_huid(l_firstMemPort));
                 }
 
@@ -386,9 +389,10 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomI2c>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomI2c>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
+                            l_testEntry.addr,
                             get_huid(l_lastMemPort));
                 }
             }
@@ -521,9 +525,10 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                   l_fails++;
-                  TS_FAIL("testExpscomI2cPlatform>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                  TS_FAIL("testExpscomI2cPlatform>> Expected 0x%016lx but got 0x%016lx for scom %0x.8Xon target w/ huid 0x%08x",
                         l_testEntry.data,
                         l_scom_buffer(),
+                          l_testEntry.addr,
                         get_huid(l_firstExpChip));
                 }
 
@@ -547,9 +552,10 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                   l_fails++;
-                  TS_FAIL("testExpscomI2cPlatform>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                  TS_FAIL("testExpscomI2cPlatform>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
                           l_testEntry.data,
                           l_scom_buffer(),
+                          l_testEntry.addr,
                           get_huid(l_firstExpChip));
                 }
             }
@@ -692,12 +698,11 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                    l_fails++;
-                    TS_FAIL("testExpscomMmio>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                   TS_FAIL("testExpscomMmio>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
+                            l_testEntry.addr,
                             get_huid(l_firstExpChip));
-                    l_err = fapi2::rcToErrl(l_rc);
-                    errlCommit(l_err, CXXTEST_COMP_ID);
                 }
 
                 // Flush scom buffer so it doesnt mess up next test
@@ -723,12 +728,11 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomMmio>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomMmio>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
+                            l_testEntry.addr,
                             get_huid(l_lastExpChip));
-                    l_err = fapi2::rcToErrl(l_rc);
-                    errlCommit(l_err, CXXTEST_COMP_ID);
                 }
             }
             // Set ATTR_SCOM_SWITCHES back to their original values
@@ -873,9 +877,10 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomCombined>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomCombined>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
+                            l_testEntry.addr,
                             get_huid(l_firstExpChip));
                 }
 
@@ -913,9 +918,10 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomCombined>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomCombined>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
+                            l_testEntry.addr,
                             get_huid(l_lastExpChip));
                 }
             }
@@ -1068,9 +1074,10 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomSbe>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomSbe>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
+                            l_testEntry.addr,
                             get_huid(l_firstExpChip));
                 }
 
@@ -1095,9 +1102,10 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomSbe>> Expected 0x%016lx but got 0x%016lx on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomSbe>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
+                            l_testEntry.addr,
                             get_huid(l_lastExpChip));
                 }
             }
