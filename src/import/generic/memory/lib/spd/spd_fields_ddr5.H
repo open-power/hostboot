@@ -1464,36 +1464,6 @@ class fields<DDR5, DDIMM_MODULE>
             PHY_A1_B1_CAL_RESISTOR_START = 2,
             PHY_A1_B1_CAL_RESISTOR_LEN = 3,
 
-            // Byte 410: Doubletop Manufacturer Product ID
-            DOUBLETOP_MANF_PROD_ID_BYTE = 410,
-            DOUBLETOP_MANF_PROD_ID_START = 0,
-            DOUBLETOP_MANF_PROD_ID_LEN = 8,
-
-            // Byte 411: Doubletop Revision
-            DOUBLETOP_REVISION_BYTE = 411,
-            DOUBLETOP_REVISION_START = 0,
-            DOUBLETOP_REVISION_LEN = 8,
-
-            // Byte 412: Power Control 0 I2C Address
-            POWER_CNTL_0_I2C_ADDRESS_BYTE = 412,
-            POWER_CNTL_0_I2C_ADDRESS_START = 0,
-            POWER_CNTL_0_I2C_ADDRESS_LEN = 8,
-
-            // Byte 413:
-            POWER_CNTL_1_I2C_ADDRESS_BYTE = 413,
-            POWER_CNTL_1_I2C_ADDRESS_START = 0,
-            POWER_CNTL_1_I2C_ADDRESS_LEN = 8,
-
-            // Byte 414:
-            POWER_CNTL_2_I2C_ADDRESS_BYTE = 414,
-            POWER_CNTL_2_I2C_ADDRESS_START = 0,
-            POWER_CNTL_2_I2C_ADDRESS_LEN = 8,
-
-            // Byte 415:
-            POWER_CNTL_3_I2C_ADDRESS_BYTE = 415,
-            POWER_CNTL_3_I2C_ADDRESS_START = 0,
-            POWER_CNTL_3_I2C_ADDRESS_LEN = 8,
-
             // Byte 416-441
             SERIAL_NUMBER_FIELD_START = 0,
             SERIAL_NUMBER_FIELD_LEN = 8,
@@ -2117,24 +2087,6 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 378: External PHY Calibration Resistor Value
         static constexpr field_t PHY_A0_B0_CAL_RESISTOR{EXT_PHY_CAL_RESISTOR_VALUE_BYTE, PHY_A0_B0_CAL_RESISTOR_START, PHY_A0_B0_CAL_RESISTOR_LEN};
         static constexpr field_t PHY_A1_B1_CAL_RESISTOR{EXT_PHY_CAL_RESISTOR_VALUE_BYTE, PHY_A1_B1_CAL_RESISTOR_START, PHY_A1_B1_CAL_RESISTOR_LEN};
-
-        // Byte 410: Doubletop Manufacturer Product ID
-        static constexpr field_t DOUBLETOP_MANF_PROD_ID{DOUBLETOP_MANF_PROD_ID_BYTE, DOUBLETOP_MANF_PROD_ID_START, DOUBLETOP_MANF_PROD_ID_LEN};
-
-        // Byte 411: Doubletop Revision
-        static constexpr field_t DOUBLETOP_REVISION{DOUBLETOP_REVISION_BYTE, DOUBLETOP_REVISION_START, DOUBLETOP_REVISION_LEN};
-
-        // Byte 412: Power Control 0 I2C Address
-        static constexpr field_t POWER_CNTL_0_I2C_ADDRESS{POWER_CNTL_0_I2C_ADDRESS_BYTE, POWER_CNTL_0_I2C_ADDRESS_START, POWER_CNTL_0_I2C_ADDRESS_LEN};
-
-        // Byte 413: Power Control 0 I2C Address
-        static constexpr field_t POWER_CNTL_1_I2C_ADDRESS{POWER_CNTL_1_I2C_ADDRESS_BYTE, POWER_CNTL_1_I2C_ADDRESS_START, POWER_CNTL_1_I2C_ADDRESS_LEN};
-
-        // Byte 414: Power Control 0 I2C Address
-        static constexpr field_t POWER_CNTL_2_I2C_ADDRESS{POWER_CNTL_0_I2C_ADDRESS_BYTE, POWER_CNTL_2_I2C_ADDRESS_START, POWER_CNTL_2_I2C_ADDRESS_LEN};
-
-        // Byte 415: Power Control 0 I2C Address
-        static constexpr field_t POWER_CNTL_3_I2C_ADDRESS{POWER_CNTL_0_I2C_ADDRESS_BYTE, POWER_CNTL_3_I2C_ADDRESS_START, POWER_CNTL_3_I2C_ADDRESS_LEN};
 
         // MANF Section:
         // Section is not standardized across dimm types, so these fields will live in the

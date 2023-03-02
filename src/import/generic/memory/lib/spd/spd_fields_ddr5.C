@@ -419,12 +419,6 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::SPARE_DE
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::HI_DDR_SPEED_RATIO;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::PHY_A0_B0_CAL_RESISTOR;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::PHY_A1_B1_CAL_RESISTOR;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::DOUBLETOP_MANF_PROD_ID;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::DOUBLETOP_REVISION;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::POWER_CNTL_0_I2C_ADDRESS;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::POWER_CNTL_1_I2C_ADDRESS;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::POWER_CNTL_2_I2C_ADDRESS;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::POWER_CNTL_3_I2C_ADDRESS;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::SERIAL_NUMBER_LAST_BYTE;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::MODULE_MFG_ID_CODE_LSB;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::MODULE_MFG_ID_CODE_MSB;
