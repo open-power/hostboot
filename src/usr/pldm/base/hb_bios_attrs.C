@@ -2284,8 +2284,8 @@ errlHndl_t getPowerSupplyConfig(std::vector<uint8_t>& string_table,
                                 uint16_t &o_InputVoltPowerSupplies,
                                 uint16_t &o_CcinOfPowerSupplies )
 {
-    const std::vector<char> ps_model_failed({ 'F', 'F', 'F', 'F' });
-    std::vector<char> modelPowerSupplies = {};
+    const std::vector<char> ps_model_failed({ 'F', 'F', 'F', 'F', '\0' });
+    std::vector<char> modelPowerSupplies = ps_model_failed;
     o_NumberOfPowerSupplies = 0;
     o_InputVoltPowerSupplies = 0;
     o_CcinOfPowerSupplies = 0;
@@ -2392,8 +2392,9 @@ errlHndl_t getPowerSupplyConfig(std::vector<uint8_t>& string_table,
                 break;
             }
 
-            // New Find, need to store.
-            if (modelPowerSupplies.empty())
+            // Set to 'FFFF' means this is a New Find, need to store attr read.
+            if ( std::equal(modelPowerSupplies.begin(), modelPowerSupplies.end(),
+                                            ps_model_failed.begin() ) == 1 )
             {
                 modelPowerSupplies = PS_Model_string;
             }
