@@ -484,6 +484,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_channel_bus_width[ody::NUM_CHANNELS] = {0};
             uint8_t l_field_channel_a = 0;
             uint8_t l_field_channel_b = 0;
+            uint8_t l_num_channel = 0;
             const uint8_t ch_a_index = 0;
             const uint8_t ch_b_index = 1;
 
@@ -516,7 +517,11 @@ class base_0_0 : public mss::spd::base
             FAPI_TRY(lookup_table_check(iv_dimm, CH_BUS_WIDTH_MAP, SET_PRIM_BUS_WIDTH, l_field_channel_b,
                                         l_channel_bus_width[ch_b_index]));
 
+            l_num_channel += l_channel_bus_width[ch_a_index] == fapi2::ENUM_ATTR_MEM_EFF_DDR5_CHANNEL_BUS_WIDTH_NOT_USED ? 0 : 1;
+            l_num_channel += l_channel_bus_width[ch_b_index] == fapi2::ENUM_ATTR_MEM_EFF_DDR5_CHANNEL_BUS_WIDTH_NOT_USED ? 0 : 1;
+
             FAPI_TRY(mss::attr::set_ddr5_channel_bus_width(iv_port, l_channel_bus_width));
+            FAPI_TRY(mss::attr::set_channels_per_dimm(iv_dimm, l_num_channel));
 
 
         fapi_try_exit:
