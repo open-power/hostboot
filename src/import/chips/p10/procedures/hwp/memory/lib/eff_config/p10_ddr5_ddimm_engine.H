@@ -43,6 +43,7 @@
 #include <lib/shared/ody_consts.H>
 #include <generic/memory/lib/data_engine/data_engine_utils.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/bit_count.H>
 
 #include <lib/eff_config/p10_module_specific_engine.H>
 #include <lib/eff_config/p10_base_engine.H>
@@ -105,18 +106,6 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual uint8_t get_dimm_type() const
         {
             return fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM;
-        }
-
-
-        ///
-        /// @brief Traits for mod thermal sensor
-        ///
-        /// @param[in] i_field field value
-        /// @return true/false in specified range
-        ///
-        virtual bool check_mod_thermal_sensor(const uint8_t i_field) const
-        {
-            return (i_field <= 0x04);
         }
 
         ///
@@ -693,17 +682,13 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_mod_thermal_sensor(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::MOD_THERMAL_SENSOR, i_spd, ody::SET_MODULE_THERMAL_SENSORS, l_field));
+            uint8_t l_value = 0;
+            FAPI_TRY(get_field_spd(iv_ocmb, F::THERMAL_SENSORS_CFG_DEVICES, i_spd, ody::SET_MODULE_THERMAL_SENSORS, l_field));
 
-            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
-                                  iv_ocmb,
-                                  check_mod_thermal_sensor(l_field),
-                                  F::MOD_THERMAL_SENSOR.get_byte(i_spd),
-                                  l_field,
-                                  ody::SET_MODULE_THERMAL_SENSORS,
-                                  "Thermal Sensors"));
+            // Count the number of bits to get the number of configured devices
+            l_value = mss::bit_count(l_field);
 
-            FAPI_TRY(mss::attr::set_module_thermal_sensors(iv_ocmb, l_field));
+            FAPI_TRY(mss::attr::set_module_thermal_sensors(iv_ocmb, l_value));
 
         fapi_try_exit:
             return fapi2::current_err;

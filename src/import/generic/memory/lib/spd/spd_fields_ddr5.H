@@ -493,6 +493,11 @@ class fields<DDR5, DDIMM_MODULE>
             THERMAL_SENSOR0_MANF_ID_CODE_SECOND_START = 0,
             THERMAL_SENSOR0_MANF_ID_CODE_SECOND_LEN = 8,
 
+            // Byte 212: Thermal Sensors Device Type
+            THERMAL_SENSORS_DEVICE_TYPE_BYTE = 212,
+            THERMAL_SENSORS_CFG_DEVICES_START = 0,
+            THERMAL_SENSORS_CFG_DEVICES_LEN = 4,
+
             // Byte 213: Thermal Sensor0 Revision Number
             THERMAL_SENSOR0_REV_NUM_BYTE = 213,
             THERMAL_SENSOR0_REV_NUM_START = 0,
@@ -1359,11 +1364,6 @@ class fields<DDR5, DDIMM_MODULE>
             HEAT_SPREADER_CHAR_START = 1,
             HEAT_SPREADER_CHAR_LEN = 7,
 
-            // Byte 361: Module Thermal Sensors
-            THERMAL_SENSORS_BYTE = 361,
-            MOD_THERMAL_SENSOR_START = 0,
-            MOD_THERMAL_SENSOR_LEN = 3,
-
             // Byte 362: Host Interface Protocols
             PROTOCOL_SUPPORT_BYTE = 362,
             PROTOCOL_SUPPORT_START = 4,
@@ -1535,6 +1535,9 @@ class fields<DDR5, DDIMM_MODULE>
 
         // Byte 211: Thermal Sensor0 Manufacturing ID Code, Second Byte
         static constexpr field_t THERMAL_SENSOR0_MANF_ID_CODE_SECOND{THERMAL_SENSOR0_MANF_ID_CODE_SECOND_BYTE, THERMAL_SENSOR0_MANF_ID_CODE_SECOND_START, THERMAL_SENSOR0_MANF_ID_CODE_SECOND_LEN};
+
+        // Byte 212: Thermal Sensors Device Type
+        static constexpr field_t THERMAL_SENSORS_CFG_DEVICES{THERMAL_SENSORS_DEVICE_TYPE_BYTE, THERMAL_SENSORS_CFG_DEVICES_START, THERMAL_SENSORS_CFG_DEVICES_LEN};
 
         // Byte 213: Thermal Sensor0 Revision Number
         static constexpr field_t THERMAL_SENSOR0_REV_NUM{THERMAL_SENSOR0_REV_NUM_BYTE, THERMAL_SENSOR0_REV_NUM_START, THERMAL_SENSOR0_REV_NUM_LEN};
@@ -2028,9 +2031,6 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 360: Thermal Heat Spreader Solution
         static constexpr field_t HEAT_SPREADER_SOL{THERMAL_BYTE, HEAT_SPREADER_SOL_START, HEAT_SPREADER_SOL_LEN};
         static constexpr field_t HEAT_SPREADER_CHAR{THERMAL_BYTE, HEAT_SPREADER_CHAR_START, HEAT_SPREADER_CHAR_LEN};
-
-        // Byte 361: Module Thermal Sensors
-        static constexpr field_t MOD_THERMAL_SENSOR{THERMAL_SENSORS_BYTE, MOD_THERMAL_SENSOR_START, MOD_THERMAL_SENSOR_LEN};
 
         // Byte 362: Host Interface Protocols
         static constexpr field_t PROTOCOL_SUPPORT{PROTOCOL_SUPPORT_BYTE, PROTOCOL_SUPPORT_START, PROTOCOL_SUPPORT_LEN};

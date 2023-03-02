@@ -155,6 +155,7 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::PMIC2_MF
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::PMIC2_DEVICE_REV_NUM;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::THERMAL_SENSOR0_MANF_ID_CODE_FIRST;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::THERMAL_SENSOR0_MANF_ID_CODE_SECOND;
+constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::THERMAL_SENSORS_CFG_DEVICES;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::THERMAL_SENSOR0_REV_NUM;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::DRAM_SPEC_LEVEL;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::SPD_SPEC_LEVEL;
@@ -392,7 +393,6 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::VIN_BULK
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::VIN_BULK_ENDURANT;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::HEAT_SPREADER_SOL;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::HEAT_SPREADER_CHAR;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::MOD_THERMAL_SENSOR;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::PROTOCOL_SUPPORT;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::SPEED_SUPPORTED_LSB;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::PHY_A0_B0_MEM_ALERT_PULL_UP_VALUE;
