@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -495,24 +495,52 @@ class errludP_errl:
         return jsonStr
 
     def ErrlUserDetailsParserSysState(ver, data):
-        #***** Memory Layout *****
-        # 1 bytes  : Major Istep
-        # 1 bytes  : Minor Istep
+        if ver == 2:
+            #***** Memory Layout *****
+            # 1 bytes  : Major Istep
+            # 1 bytes  : Minor Istep
+            # 1 bytes  : IPL type
 
-        TOTAL_SIZE = 2
-        d = dict()
-        i = 0
-        if len(data) >= TOTAL_SIZE:
-            d['Current Major Istep']=data[i]
-            i += 1
-            d['Current Minor Istep']=data[i]
-            i += 1
-            if len(data) > TOTAL_SIZE:
-                d['Hex Dump']=hexDump(data, i, len(data))
-        else:
-            d['State Buffer Length']= hex(len(data))
-            d['Expected Length']= hex(TOTAL_SIZE)
-            d['Hex Dump']= hexDump(data, i, len(data))
+            TOTAL_SIZE = 3
+            IPL_TYPE_UNAVAILABLE = 0xFF
+
+            d = dict()
+            i = 0
+            if len(data) >= TOTAL_SIZE:
+                d['Current Major Istep']=data[i]
+                i += 1
+                d['Current Minor Istep']=data[i]
+                i += 1
+                if data[i] == IPL_TYPE_UNAVAILABLE:
+                    d['MPIPL mode?']='Unknown'
+                else:
+                    d['MPIPL mode?']=data[i]
+                i += 1
+                if len(data) > TOTAL_SIZE:
+                    d['Hex Dump']=hexDump(data, i, len(data))
+            else:
+                d['State Buffer Length']= hex(len(data))
+                d['Expected Length']= hex(TOTAL_SIZE)
+                d['Hex Dump']= hexDump(data, i, len(data))
+        else: # version 1
+            #***** Memory Layout *****
+            # 1 bytes  : Major Istep
+            # 1 bytes  : Minor Istep
+
+            TOTAL_SIZE = 2
+            d = dict()
+            i = 0
+            if len(data) >= TOTAL_SIZE:
+                d['Current Major Istep']=data[i]
+                i += 1
+                d['Current Minor Istep']=data[i]
+                i += 1
+                if len(data) > TOTAL_SIZE:
+                    d['Hex Dump']=hexDump(data, i, len(data))
+            else:
+                d['State Buffer Length']= hex(len(data))
+                d['Expected Length']= hex(TOTAL_SIZE)
+                d['Hex Dump']= hexDump(data, i, len(data))
 
         jsonStr = json.dumps(d)
         return jsonStr

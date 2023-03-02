@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,40 +65,84 @@ public:
      *  @param  i_pBuffer Pointer to buffer containing Istep state data
      *  @param  i_buflen  Length of the buffer
      */
-    virtual void parse(errlver_t i_version,
+    virtual void parse(const errlver_t i_version,
                        ErrlUsrParser & i_parser,
-                       void * i_pBuffer,
+                       void * const i_pBuffer,
                        const uint32_t i_buflen) const
     {
-        //***** Memory Layout *****
-        // 1 bytes  : Major Istep
-        // 1 bytes  : Minor Istep
-        const size_t TOTAL_SIZE = 2;
+        const uint8_t* const l_data = static_cast<uint8_t*>(i_pBuffer);
 
-        uint8_t* l_data = static_cast<uint8_t*>(i_pBuffer);
-
-        if( i_buflen >= TOTAL_SIZE )
+        if (i_version == 2)
         {
-            i_parser.PrintNumber("Current Major Istep", "%d",
-                                 l_data[0]);
-            i_parser.PrintNumber("Current Minor Istep", "%d",
-                                 l_data[1]);
+            //***** Memory Layout *****
+            // 1 bytes  : Major Istep
+            // 1 bytes  : Minor Istep
+            // 1 bytes  : IPL type
+            const size_t TOTAL_SIZE = 3;
+            const uint8_t IPL_TYPE_UNAVAILABLE = 0xFF;
 
-            if( i_buflen > TOTAL_SIZE )
+            if( i_buflen >= TOTAL_SIZE )
             {
-                // Print out extra data as hex so that an old parser will
-                //  still display new data that gets logged in the code
-                i_parser.PrintHexDump( (l_data+2), i_buflen-2 );
+                i_parser.PrintNumber("Current Major Istep", "%d",
+                                     l_data[0]);
+                i_parser.PrintNumber("Current Minor Istep", "%d",
+                                     l_data[1]);
+
+                if (l_data[2] == IPL_TYPE_UNAVAILABLE)
+                {
+                    i_parser.PrintString("MPIPL mode?", "Unknown");
+                }
+                else
+                {
+                    i_parser.PrintNumber("MPIPL mode?", "%d",
+                                         l_data[2]);
+                }
+
+                if( i_buflen > TOTAL_SIZE )
+                {
+                    // Print out extra data as hex so that an old parser will
+                    //  still display new data that gets logged in the code
+                    i_parser.PrintHexDump( (l_data+TOTAL_SIZE), i_buflen-TOTAL_SIZE );
+                }
+            }
+            else
+            {
+                // Just print out whatever we have if it is less than
+                //  the data size we are aware of
+                i_parser.PrintNumber("State Buffer length", "0x%X", i_buflen);
+                i_parser.PrintNumber("Expected length", "0x%X", TOTAL_SIZE);
+                i_parser.PrintHexDump(i_pBuffer, i_buflen);
             }
         }
-
-        else
+        else // version 1
         {
-            // Just print out whatever we have if it is less than
-            //  the data size we are aware of
-            i_parser.PrintNumber("State Buffer length", "0x%X", i_buflen);
-            i_parser.PrintNumber("Expected length", "0x%X", TOTAL_SIZE);
-            i_parser.PrintHexDump(i_pBuffer, i_buflen);
+            //***** Memory Layout *****
+            // 1 bytes  : Major Istep
+            // 1 bytes  : Minor Istep
+            const size_t TOTAL_SIZE = 2;
+
+            if( i_buflen >= TOTAL_SIZE )
+            {
+                i_parser.PrintNumber("Current Major Istep", "%d",
+                                     l_data[0]);
+                i_parser.PrintNumber("Current Minor Istep", "%d",
+                                     l_data[1]);
+
+                if( i_buflen > TOTAL_SIZE )
+                {
+                    // Print out extra data as hex so that an old parser will
+                    //  still display new data that gets logged in the code
+                    i_parser.PrintHexDump( (l_data+TOTAL_SIZE), i_buflen-TOTAL_SIZE );
+                }
+            }
+            else
+            {
+                // Just print out whatever we have if it is less than
+                //  the data size we are aware of
+                i_parser.PrintNumber("State Buffer length", "0x%X", i_buflen);
+                i_parser.PrintNumber("Expected length", "0x%X", TOTAL_SIZE);
+                i_parser.PrintHexDump(i_pBuffer, i_buflen);
+            }
         }
     }
 
