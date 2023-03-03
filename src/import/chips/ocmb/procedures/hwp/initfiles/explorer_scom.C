@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,7 @@ constexpr uint64_t literal_2668 = 2668;
 constexpr uint64_t literal_12 = 12;
 constexpr uint64_t literal_2934 = 2934;
 constexpr uint64_t literal_15 = 15;
+constexpr uint64_t literal_21 = 21;
 constexpr uint64_t literal_266 = 266;
 constexpr uint64_t literal_1866 = 1866;
 constexpr uint64_t literal_0x0 = 0x0;
@@ -124,6 +125,8 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         uint64_t l_def_IS_HW = (l_TGT2_ATTR_IS_SIMULATION == literal_0);
         fapi2::ATTR_MEM_DRAM_CWL_Type l_TGT1_ATTR_MEM_DRAM_CWL;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_DRAM_CWL, TGT1, l_TGT1_ATTR_MEM_DRAM_CWL));
+        fapi2::ATTR_MEM_MRW_IS_PLANAR_Type l_TGT0_ATTR_MEM_MRW_IS_PLANAR;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, TGT0, l_TGT0_ATTR_MEM_MRW_IS_PLANAR));
         fapi2::ATTR_MEM_EFF_DRAM_TCCD_L_Type l_TGT1_ATTR_MEM_EFF_DRAM_TCCD_L;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TCCD_L, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TCCD_L));
         fapi2::ATTR_MEM_EFF_FREQ_Type l_TGT1_ATTR_MEM_EFF_FREQ;
@@ -191,8 +194,6 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DRAM_2N_MODE, TGT2, l_TGT2_ATTR_MSS_MRW_DRAM_2N_MODE));
         fapi2::ATTR_MEM_2N_MODE_Type l_TGT0_ATTR_MEM_2N_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_2N_MODE, TGT0, l_TGT0_ATTR_MEM_2N_MODE));
-        fapi2::ATTR_MEM_MRW_IS_PLANAR_Type l_TGT0_ATTR_MEM_MRW_IS_PLANAR;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, TGT0, l_TGT0_ATTR_MEM_MRW_IS_PLANAR));
         uint64_t l_def_SLOT0_DENOMINATOR = ((l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0] == literal_0x0) |
                                             l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0]);
         uint64_t l_def_SLOT0_DRAM_STACK_HEIGHT = (l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0] /
@@ -357,7 +358,15 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x801140dull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_8 );
+            if ((l_TGT0_ATTR_MEM_MRW_IS_PLANAR == literal_1))
+            {
+                l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_14 );
+            }
+            else if ((l_TGT0_ATTR_MEM_MRW_IS_PLANAR == literal_0))
+            {
+                l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_8 );
+            }
+
             l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_4 );
             l_scom_buffer.insert<8, 4, 60, uint64_t>(literal_4 );
             l_scom_buffer.insert<12, 4, 60, uint64_t>(l_TGT1_ATTR_MEM_EFF_DRAM_TCCD_L );
@@ -366,17 +375,21 @@ fapi2::ReturnCode explorer_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             l_scom_buffer.insert<24, 4, 60, uint64_t>(literal_4 );
             l_scom_buffer.insert<28, 4, 60, uint64_t>(l_TGT1_ATTR_MEM_EFF_DRAM_TCCD_L );
 
-            if ((l_def_MEM_EFF_FREQ_EQ_2666 == literal_1))
+            if (((l_TGT0_ATTR_MEM_MRW_IS_PLANAR == literal_0) && (l_def_MEM_EFF_FREQ_EQ_2666 == literal_1)))
             {
                 l_scom_buffer.insert<32, 5, 59, uint64_t>(literal_12 );
             }
-            else if ((l_def_MEM_EFF_FREQ_EQ_2933 == literal_1))
+            else if (((l_TGT0_ATTR_MEM_MRW_IS_PLANAR == literal_0) && (l_def_MEM_EFF_FREQ_EQ_2933 == literal_1)))
             {
                 l_scom_buffer.insert<32, 5, 59, uint64_t>(literal_15 );
             }
-            else if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
+            else if (((l_TGT0_ATTR_MEM_MRW_IS_PLANAR == literal_0) && (l_def_MEM_EFF_FREQ_EQ_3200 == literal_1)))
             {
                 l_scom_buffer.insert<32, 5, 59, uint64_t>(literal_14 );
+            }
+            else if ((l_TGT0_ATTR_MEM_MRW_IS_PLANAR == literal_1))
+            {
+                l_scom_buffer.insert<32, 5, 59, uint64_t>(literal_21 );
             }
 
             if ((l_def_MEM_EFF_FREQ_EQ_2666 == literal_1))

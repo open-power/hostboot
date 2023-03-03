@@ -210,8 +210,9 @@ define def_RD_PREAMBLE       =  (MP.ATTR_MEM_SI_DRAM_PREAMBLE[0][0] & 0x10) >> 4
 # DRAM TIMING PARAMETERS #
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRDM_DLY [when=S] {      # BL/2+rank_switch
-  spyv;
-  8; # Update per performance testing as of 07-JUL-21
+  spyv, expr;
+  14,                                 (OCMB.ATTR_MEM_MRW_IS_PLANAR==1);
+  8,                                  (OCMB.ATTR_MEM_MRW_IS_PLANAR==0); # Update per performance testing as of 07-JUL-21
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRSMSR_DLY [when=S] {    # tccd_s
@@ -251,9 +252,10 @@ ispy  MB_SIM.SRQ.MBA_TMR0Q_WWOP_DLY [when=S] {      # tccd_l
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RWDM_DLY [when=S] {      # (RL+BL/2+turn_around)-WL
   spyv, expr;
-  12,                                 (def_MEM_EFF_FREQ_EQ_2666==1);
-  15,                                 (def_MEM_EFF_FREQ_EQ_2933==1);
-  14,                                 (def_MEM_EFF_FREQ_EQ_3200==1);
+  12,                                 (OCMB.ATTR_MEM_MRW_IS_PLANAR==0 && def_MEM_EFF_FREQ_EQ_2666==1);
+  15,                                 (OCMB.ATTR_MEM_MRW_IS_PLANAR==0 && def_MEM_EFF_FREQ_EQ_2933==1);
+  14,                                 (OCMB.ATTR_MEM_MRW_IS_PLANAR==0 && def_MEM_EFF_FREQ_EQ_3200==1);
+  21,                                 (OCMB.ATTR_MEM_MRW_IS_PLANAR==1);
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RWSMSR_DLY [when=S] {    # (RL+BL/2+turn_around)-WL
