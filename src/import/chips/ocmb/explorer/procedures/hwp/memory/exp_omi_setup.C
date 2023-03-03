@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,8 +64,6 @@ extern "C"
     {
         mss::display_git_commit_info("exp_omi_setup");
 
-        constexpr uint32_t MNFG_OMI_CRC_EDPL_SCREEN = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_POLICY_FLAG_AVAIL_05;
-
         fapi2::ReturnCode l_rc_bootconfig0(fapi2::FAPI2_RC_SUCCESS);
         fapi2::ReturnCode l_rc_bootconfig0_copy(fapi2::FAPI2_RC_SUCCESS);
         fapi2::ReturnCode l_rc_unmask(fapi2::FAPI2_RC_SUCCESS);
@@ -99,7 +97,8 @@ extern "C"
         }
 
         FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
-        FAPI_TRY(mss::check_mfg_flag(MNFG_OMI_CRC_EDPL_SCREEN, l_mnfg_screen_test));
+        FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_OMI_CRC_EDPL_SCREEN,
+                                     l_mnfg_screen_test));
         FAPI_TRY(mss::attr::get_mnfg_edpl_time(l_mnfg_edpl_time));
         FAPI_TRY(mss::attr::get_mnfg_edpl_threshold(l_mnfg_edpl_threshold));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );

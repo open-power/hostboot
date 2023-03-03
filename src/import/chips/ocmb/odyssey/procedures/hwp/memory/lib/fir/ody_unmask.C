@@ -211,8 +211,6 @@ fapi_try_exit:
 template<>
 fapi2::ReturnCode after_mc_omi_init<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-    constexpr uint32_t MNFG_OMI_CRC_EDPL_SCREEN = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_POLICY_FLAG_AVAIL_05;
-
     fapi2::buffer<uint64_t> l_reg_data;
 
     bool l_mfg_omi_crc_edpl_screen = false;
@@ -226,7 +224,7 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::ODYSSEY>(const fapi2::Target<f
     mss::fir::reg2<scomt::omi::D_REG_MC_OMI_FIR_RW_WCLEAR> l_mc_omi_fir_reg(i_target);
 
     // Check MNFG OMI_CRC_EDPL_SCREEN Policy flag
-    FAPI_TRY(mss::check_mfg_flag(MNFG_OMI_CRC_EDPL_SCREEN, l_mfg_omi_crc_edpl_screen));
+    FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_OMI_CRC_EDPL_SCREEN, l_mfg_omi_crc_edpl_screen));
 
     // Unmask MMIO_MFIR
     FAPI_TRY(l_mmio_mfir_reg.checkstop<scomt::ody::ODC_MMIO_MFIR_FSM_PERR>()

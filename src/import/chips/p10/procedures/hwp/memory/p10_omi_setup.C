@@ -120,7 +120,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 fapi2::ReturnCode p10_omi_setup_get_mfg_mode(bool& o_mfg_mode)
 {
-    constexpr uint32_t MFG_FLAG = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_POLICY_FLAG_AVAIL_05;
+    constexpr uint32_t MFG_FLAG = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_OMI_CRC_EDPL_SCREEN;
     constexpr size_t CELL_SIZE = 32;
     const size_t l_index = MFG_FLAG / CELL_SIZE;
     const size_t l_flag_pos = MFG_FLAG % CELL_SIZE;

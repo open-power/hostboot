@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -297,7 +297,8 @@ fapi2::ReturnCode setup_mc_config1(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& 
 
     FAPI_TRY(mss::attr::get_is_simulation(l_sim));
     FAPI_TRY(mss::attr::get_mss_omi_edpl_disable(l_edpl_disable));
-    FAPI_TRY(mss::check_mfg_flag(mss::p10::MNFG_OMI_CRC_EDPL_SCREEN, l_mnfg_screen_test));
+    FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_OMI_CRC_EDPL_SCREEN,
+                                 l_mnfg_screen_test));
     FAPI_TRY(mss::attr::get_mnfg_edpl_time(l_mnfg_edpl_time));
     FAPI_TRY(mss::attr::get_mnfg_edpl_threshold(l_mnfg_edpl_threshold));
 

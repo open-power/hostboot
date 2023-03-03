@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,9 +56,6 @@ enum ffdc_codes
 {
     CHANNEL_A_BEFORE_CHANNEL_B = 0x9000,
 };
-
-// This is a MFG_FLAG that was added in P10, but the enum was not added in the XML or in HWSV
-constexpr uint32_t MNFG_OMI_CRC_EDPL_SCREEN = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_POLICY_FLAG_AVAIL_05;
 
 } // p10
 } // mss

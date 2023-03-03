@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -272,7 +272,6 @@ template<>
 fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     constexpr uint8_t EXPLR_TLXT_TLX_ERR1_REPORTQ_TLXT_INTRP_REQ_FAILED = 38;
-    constexpr uint32_t MNFG_OMI_CRC_EDPL_SCREEN = fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_POLICY_FLAG_AVAIL_05;
 
     fapi2::ATTR_CHIP_EC_FEATURE_OMI_CRC_FIRS_Type l_omi_crc_dd1_mask = false;
     fapi2::ATTR_CHIP_EC_FEATURE_OMI_EDPL_FIRS_Type l_omi_edpl_dd1_mask = false;
@@ -311,7 +310,8 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
              mss::c_str(i_target));
 
     // check for mnfg OMI screen setting
-    FAPI_TRY(mss::check_mfg_flag(MNFG_OMI_CRC_EDPL_SCREEN, l_mnfg_screen_test));
+    FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_OMI_CRC_EDPL_SCREEN,
+                                 l_mnfg_screen_test));
 
     FAPI_TRY(mss::attr::get_exp_intr_mask_disable(i_target, l_intr_mask_disable));
 
