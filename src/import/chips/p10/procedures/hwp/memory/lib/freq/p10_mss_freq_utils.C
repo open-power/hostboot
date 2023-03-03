@@ -68,6 +68,7 @@ const std::vector< uint64_t > frequency_traits<mss::proc_type::PROC_P10>::SUPPOR
     mss::DIMM_SPEED_2933, // DDR4 ONLY
     mss::DIMM_SPEED_3200, // DDR4 max + DDR5 min
     mss::DIMM_SPEED_4000, // DDR5 ONLY -> p10's OMI limit is 32.0, so 4000 for DDR
+    mss::DIMM_SPEED_4800, // DDR5 ONLY -> test freq supported only on Apollo and wafer test
 };
 
 ///
@@ -209,6 +210,7 @@ fapi2::ReturnCode callout_bad_freq_calculated<mss::proc_type::PROC_P10>(
     const auto FREQ1 = TT::SUPPORTED_FREQ1;
     const auto FREQ2 = TT::SUPPORTED_FREQ2;
     const auto FREQ3 = TT::SUPPORTED_FREQ3;
+    const auto FREQ4 = TT::SUPPORTED_FREQ4;
 
     // If we don't find a valid frequency OR don't get a 0 (nothing configured on this clock domain), then error out
     FAPI_ASSERT( std::binary_search(TT::SUPPORTED_FREQS.begin(), TT::SUPPORTED_FREQS.end(), i_final_freq) ||
@@ -220,7 +222,8 @@ fapi2::ReturnCode callout_bad_freq_calculated<mss::proc_type::PROC_P10>(
                  .set_SUPPORTED_FREQ_0(FREQ0)
                  .set_SUPPORTED_FREQ_1(FREQ1)
                  .set_SUPPORTED_FREQ_2(FREQ2)
-                 .set_SUPPORTED_FREQ_3(FREQ3),
+                 .set_SUPPORTED_FREQ_3(FREQ3)
+                 .set_SUPPORTED_FREQ_4(FREQ4),
                  "%s: Calculated FREQ (%d) isn't supported",
                  mss::c_str(i_target),
                  i_final_freq);
@@ -376,6 +379,10 @@ fapi2::ReturnCode freq_support_bitmap_helper<mss::proc_type::PROC_P10>(
                     l_freq_bit = 3;
                     break;
 
+                case TT::SUPPORTED_FREQ4:
+                    l_freq_bit = 4;
+                    break;
+
                 default:
                     break;
             }
@@ -516,6 +523,7 @@ fapi2::ReturnCode callout_max_freq_empty_set<mss::proc_type::PROC_P10>(
                            .set_OMI_FREQ_1(fapi2::ENUM_ATTR_FREQ_OMI_MHZ_23460)
                            .set_OMI_FREQ_2(fapi2::ENUM_ATTR_FREQ_OMI_MHZ_25600)
                            .set_OMI_FREQ_3(fapi2::ENUM_ATTR_FREQ_OMI_MHZ_32000)
+                           .set_OMI_FREQ_4(fapi2::ENUM_ATTR_FREQ_OMI_MHZ_38400)
                            .set_PORT_TARGET(l_port),
                            "%s didn't find a supported frequency for any ports in this domain", mss::c_str(l_port));
     }
