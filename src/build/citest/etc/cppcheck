@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -24,4 +24,5 @@
 #
 # IBM_PROLOG_END_TAG
 
-export CPPCHECK_COMMIT="4939e0c3086151033bd491bb2df72f7728a4c037"
+# 2.10.3 tag
+export CPPCHECK_COMMIT="59030ef53dff61885c058583d2aef94f970ffdc8"

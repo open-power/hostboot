@@ -26,7 +26,7 @@
 
 export CITESTPATH=${PROJECT_ROOT}/src/build/citest
 export PATH=${CITESTPATH}:${PATH}
-export CXXPATH=/opt/rh/devtoolset-3/root/usr/bin
+export CXXPATH=/opt/rh/devtoolset-8/root/usr/bin
 
 # Determine backing build.
 export BACKING_BUILD=`cat ${CITESTPATH}/etc/bbuild`
