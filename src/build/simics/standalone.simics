@@ -2,7 +2,11 @@
 # $hb_masterproc : name of master proc chip object
 # $vpo_compile : VPO mode or not
 # $hb_multiproc : enable multiple processors
+# $hb_skip_eecache : skip preloading eecache into PNOR
 ##
+
+# Check for env var specifying profile mode
+@simenv.hostboot_profile = 'HOSTBOOT_PROFILE' in os.environ
 
 $hb_pnor = ""
 $hb_pnor = (get-master-pnors)[0]
@@ -32,11 +36,14 @@ echo "Master PNOR is: "+$hb_pnor
 #EEPROM Cache
 ###################################
 
+# Skip any preloading if directed
+if( $hb_skip_eecache == "1" ) {
+    echo "Skipping load of EECACHE (HB_SKIP_EECACHE)"
+
+} else if ($hostboot_profile == FALSE) {
 # Read initial EEPROM data directly from hardware when code coverage is active
 # to prevent mismatches between the SBE core scratch registers and what the
 # pre-canned EECACHE data reports
-@simenv.hostboot_profile = 'HOSTBOOT_PROFILE' in os.environ
-if ($hostboot_profile == FALSE) {
 
     # Look for a custom pre-built copy first
     $found_custom_eecache = 0
@@ -106,6 +113,7 @@ if ($hostboot_profile == FALSE) {
       # Read out the processor's measurement/mvpd/keystore SEEPROM (512Kb)
       (get-seeprom $dcm $procnum 2).save-file "meas_mvpd_ks_img.bin" 0 512*1024
 
+      echo "*** calling get_eq_pg_records"
       # Get a list of the PG records for EQ chiplets
       @simenv.eq_pg = get_eq_pg_records("meas_mvpd_ks_img.bin")
 

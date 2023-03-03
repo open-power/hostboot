@@ -72,12 +72,19 @@ try {
 } except { echo "ERROR: Failed to load Hostboot debug tools (hb-simdebug.py)" }
 
 
-# Build EECACHE
-if defined bmc_files {
-    if $bmc_files != NIL {
-        # load EECACHE creation tool
-        run-python-file (lookup-file -query ($hb_script_location + "/eecache-gen.py"))
+## Build EECACHE
 
+# Load EECACHE creation tool
+#   need to always do this because some of the functions are used elsewhere
+run-python-file (lookup-file -query ($hb_script_location + "/eecache-gen.py"))
+
+$hb_skip_eecache = "0"
+@if 'HB_SKIP_EECACHE' in os.environ: simenv.hb_skip_eecache = "1"
+
+if defined bmc_files {
+    if( $hb_skip_eecache == "1" ) {
+        echo "Skipping build and load of EECACHE"
+    } else if $bmc_files != NIL {
         #echo "Find eecache file name from: "+$bmc_files
         @simenv.eecache_file = find_eecache_file( simenv.bmc_files )
 

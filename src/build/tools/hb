@@ -840,6 +840,7 @@ hb_flags()
     echo "= Simics Options ="
     echo "HB_BREAK_ON_ERROR : Halts simics if HB hits an exception"
     echo "HB_FORCE_1PROC : Force single-processor mode"
+    echo "HB_SKIP_EECACHE : Do not preload PNOR with prebuilt eecache contents"
     echo "HB_USE_ODYSSEY : Use DDR5/Odyssey DDIMMs"
     echo " "
 }
