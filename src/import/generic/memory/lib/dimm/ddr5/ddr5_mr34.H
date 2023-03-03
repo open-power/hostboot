@@ -308,7 +308,7 @@ class mr34_data : public mr_base_data<MC>
 };
 
 template<mss::mc_type MC>
-constexpr const pair<uint8_t, uint8_t> mr34_data<MC>::RTT_TABLE[8] =
+const pair<uint8_t, uint8_t> mr34_data<MC>::RTT_TABLE[8] =
 {
     pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_DISABLE , 0b000),
     pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM34   , 0b111),
