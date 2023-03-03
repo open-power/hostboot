@@ -1024,7 +1024,7 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[9]
      *  FSI errors (OTP, I2C)
      */
-    (rTP_LOCAL_FIR, bit(9)) ? ocmb_M_info_only;
+    (rTP_LOCAL_FIR, bit(9)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[10]
      *  Trace00 - SCOM parity error
@@ -1059,7 +1059,7 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[18]
      *  Error reported from one or more PCB responder - PL
      */
-    (rTP_LOCAL_FIR, bit(18)) ? defaultMaskedError;
+    (rTP_LOCAL_FIR, bit(18)) ? TBDDefaultCallout;
 
     /** TP_LOCAL_FIR[19]
      *  SBE - PPE internal hardware error
@@ -1074,22 +1074,22 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[21]
      *  SBE - PPE code error
      */
-    (rTP_LOCAL_FIR, bit(21)) ? ocmb_M_th1;
+    (rTP_LOCAL_FIR, bit(21)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[22]
      *  SBE - PPE debug code breakpoint
      */
-    (rTP_LOCAL_FIR, bit(22)) ? level2_M_ocmb_L_th1;
+    (rTP_LOCAL_FIR, bit(22)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[23]
      *  SBE - PPE in halted state
      */
-    (rTP_LOCAL_FIR, bit(23)) ? ocmb_M_level2_L_th1;
+    (rTP_LOCAL_FIR, bit(23)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[24]
      *  SBE - PPE watchdog timeout
      */
-    (rTP_LOCAL_FIR, bit(24)) ? ocmb_M_level2_L_th1;
+    (rTP_LOCAL_FIR, bit(24)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[25:26]
      *  SBE - unused
@@ -1099,12 +1099,17 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[27]
      *  SBE - PPE triggers DBG
      */
-    (rTP_LOCAL_FIR, bit(27)) ? level2_M_ocmb_L_th1;
+    (rTP_LOCAL_FIR, bit(27)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[28:29]
      *  unused
      */
     (rTP_LOCAL_FIR, bit(28|29)) ? defaultMaskedError;
+
+    /** TP_LOCAL_FIR[30]
+     *  PCB controller - multicast group member count underrun
+     */
+    (rTP_LOCAL_FIR, bit(30)) ? level2_M_ocmb_L_th1;
 
     /** TP_LOCAL_FIR[31]
      *  PCB controller - parity error
@@ -1252,37 +1257,37 @@ group gMEM_LOCAL_FIR
     /** MEM_LOCAL_FIR[1]
      *  CPLT_CTRL - PCB access error
      */
-    (rMEM_LOCAL_FIR, bit(1)) ? defaultMaskedError;
+    (rMEM_LOCAL_FIR, bit(1)) ? ocmb_M_info_only;
 
     /** MEM_LOCAL_FIR[2]
      *  CC - PCB access error
      */
-    (rMEM_LOCAL_FIR, bit(2)) ? defaultMaskedError;
+    (rMEM_LOCAL_FIR, bit(2)) ? ocmb_M_info_only;
 
     /** MEM_LOCAL_FIR[3]
      *  CC - clock control error
      */
-    (rMEM_LOCAL_FIR, bit(3)) ? defaultMaskedError;
+    (rMEM_LOCAL_FIR, bit(3)) ? ocmb_M_info_only;
 
     /** MEM_LOCAL_FIR[4]
      *  PSC - PSCOM Access Error
      */
-    (rMEM_LOCAL_FIR, bit(4)) ? defaultMaskedError;
+    (rMEM_LOCAL_FIR, bit(4)) ? ocmb_M_info_only;
 
     /** MEM_LOCAL_FIR[5]
      *  PSC - internal or ring interface error
      */
-    (rMEM_LOCAL_FIR, bit(5)) ? defaultMaskedError;
+    (rMEM_LOCAL_FIR, bit(5)) ? ocmb_M_info_only;
 
     /** MEM_LOCAL_FIR[6]
      *  THERM - various errors
      */
-    (rMEM_LOCAL_FIR, bit(6)) ? defaultMaskedError;
+    (rMEM_LOCAL_FIR, bit(6)) ? ocmb_M_info_only;
 
     /** MEM_LOCAL_FIR[7]
      *  DBG - SCOM parity fail
      */
-    (rMEM_LOCAL_FIR, bit(7)) ? defaultMaskedError;
+    (rMEM_LOCAL_FIR, bit(7)) ? ocmb_M_info_only;
 
     /** MEM_LOCAL_FIR[8]
      *  unused
@@ -1297,7 +1302,7 @@ group gMEM_LOCAL_FIR
     /** MEM_LOCAL_FIR[10]
      *  Trace00 - SCOM parity error
      */
-    (rMEM_LOCAL_FIR, bit(10)) ? defaultMaskedError;
+    (rMEM_LOCAL_FIR, bit(10)) ? ocmb_M_info_only;
 
     /** MEM_LOCAL_FIR[11:62]
      *  unused

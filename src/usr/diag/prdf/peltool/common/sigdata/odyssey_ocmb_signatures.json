@@ -493,6 +493,7 @@
         "0xe297001b": "TP_LOCAL_FIR[27]: SBE - PPE triggers DBG",
         "0xe297001c": "TP_LOCAL_FIR[28:29]: unused",
         "0xe297001d": "TP_LOCAL_FIR[28:29]: unused",
+        "0xe297001e": "TP_LOCAL_FIR[30]: PCB controller - multicast group member count underrun",
         "0xe297001f": "TP_LOCAL_FIR[31]: PCB controller - parity error",
         "0xe2970020": "TP_LOCAL_FIR[32:35]: unused",
         "0xe2970021": "TP_LOCAL_FIR[32:35]: unused",
