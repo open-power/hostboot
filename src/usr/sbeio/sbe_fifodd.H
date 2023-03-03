@@ -82,8 +82,8 @@ public:
         SBE_FIFO_CLASS_DUMP_MESSAGES        = 0xAA,
         SBE_FIFO_CLASS_HOST_COMMANDS        = 0xAB,
         SBE_FIFO_CLASS_TELEMETRY_COMMANDS   = 0xAC,
-        SBE_FIFO_CLASS_ATTRIBUTE_MESSAGES   = 0xAD,
-        SBE_FIFO_CLASS_CODE_UPDATE_MESSAGES = 0xAE,
+        SBE_FIFO_CLASS_ATTRIBUTE_MESSAGES   = 0xAD, // Only supported on Odyssey chips
+        SBE_FIFO_CLASS_CODE_UPDATE_MESSAGES = 0xAE, // Only supported on Odyssey chips
     };
 
     /**
@@ -92,11 +92,11 @@ public:
     enum fifoIplControlMessages
     {
         SBE_FIFO_CMD_EXECUTE_ISTEP = 0x01,
-        SBE_FIFO_CMD_EXECUTE_HWP   = 0x04,
+        SBE_FIFO_CMD_EXECUTE_HWP   = 0x04, // Odyssey only
     };
 
     /*
-     * @brief enums for Execute Hardware Procedure Messages
+     * @brief enums for Execute Hardware Procedure Messages for Odyssey Chips
      */
     enum fifoExecuteHardwareProcedureClass
     {
@@ -105,7 +105,7 @@ public:
     };
 
     /*
-     * @brief enum for all valid IO class type messages for Execute Hardware Procedure
+     * @brief enum for all valid IO class type messages for Execute Hardware Procedure on Odyssey chips
      */
     enum fifoExecuteHardwareProcedureIo
     {
@@ -128,7 +128,7 @@ public:
     };
 
     /*
-     * @brief enum for all valid MEMORY class type messages for Execute Hardware Procedure
+     * @brief enum for all valid MEMORY class type messages for Execute Hardware Procedure on Odyssey chips
      */
     enum fifoExecuteHardwareProcedureMemory
     {
@@ -152,8 +152,8 @@ public:
     {
         SBE_FIFO_CMD_GET_SCOM            = 0x01,
         SBE_FIFO_CMD_PUT_SCOM            = 0x02,
-        SBE_FIFO_CMD_MODIFY_SCOM         = 0x03, // Deprecated
-        SBE_FIFO_CMD_PUT_SCOM_UNDER_MASK = 0x04, // Deprecated
+        SBE_FIFO_CMD_MODIFY_SCOM         = 0x03, // Deprecated for Odyssey
+        SBE_FIFO_CMD_PUT_SCOM_UNDER_MASK = 0x04, // Deprecated for Odyssey
     };
 
     /**
@@ -205,7 +205,7 @@ public:
     {
         SBE_FIFO_CMD_GET_SBE_FFDC        = 0x01,
         SBE_FIFO_CMD_GET_CAPABILITIES    = 0x02,
-        SBE_FIFO_CMD_GET_CAPABILITIES_2  = 0x07, // Deprecated
+        SBE_FIFO_CMD_GET_CAPABILITIES_2  = 0x07, // Deprecated for Odyssey
     };
 
     /**
@@ -318,7 +318,7 @@ public:
     {
         uint32_t wordCnt;
         uint8_t  reserved;
-        uint8_t  chipId;
+        uint8_t  chipId; // Odyssey only, reserved field for P10
         uint8_t  commandClass;
         uint8_t  command;
         uint8_t  reserved2;
@@ -339,6 +339,9 @@ public:
         }
     } PACKED;
 
+    /**
+     * @brief Struct for FIFO Execute Hardware Procedure. This message type is only supported on Odyssey chips.
+     */
     struct fifoExecuteHardwareProcedureRequest
     {
         uint32_t wordCnt;
@@ -376,7 +379,7 @@ public:
     {
         uint32_t wordCnt;
         uint8_t  reserved;
-        uint8_t  chipId;
+        uint8_t  chipId; // Odyssey only, reserved field for P10
         uint8_t  commandClass;
         uint8_t  command;
         uint64_t address;  // Register Address (0..31) + (32..63)
@@ -414,7 +417,7 @@ public:
     {
         uint32_t wordCnt;
         uint8_t  reserved;
-        uint8_t  chipId;
+        uint8_t  chipId; // Odyssey only, reserved field for P10
         uint8_t  commandClass;
         uint8_t  command;
         uint64_t address;     // Register Address (0..31) + (32..63)
@@ -446,9 +449,7 @@ public:
     } PACKED;
 
     /**
-     * @brief Struct for FIFO Put SCOM Under Mask request.
-     *
-     * @note Depricated as of POZ SBE FIFO spec v0.1
+     * @brief Struct for FIFO Put SCOM Under Mask request. This message type is not supported on Odyssey chips.
      *
      */
     struct fifoPutScomUnderMaskRequest
@@ -473,7 +474,7 @@ public:
     ///////////////////////////////////////////////////////////////////////
 
     /**
-     * @brief Struct for FIFO PutMem request
+     * @brief Struct for FIFO PutMem request. This message type is not supported on Odyssey chips.
      *
      */
     struct fifoPutMemRequest
@@ -487,8 +488,7 @@ public:
         // This is done so that HB doesn't invoke ADU SMP HWPs that access
         // black-listed registers as part of Secure boot work.
         uint32_t wordCnt;
-        uint8_t  reserved;
-        uint8_t  chipId;
+        uint16_t  reserved;
         uint8_t  commandClass;
         uint8_t  command;
         uint8_t  coreChipletId;
@@ -502,7 +502,6 @@ public:
         fifoPutMemRequest() :
             wordCnt(0),
             reserved(0),
-            chipId(0),
             commandClass(SBE_FIFO_CLASS_MEMORY_ACCESS),
             command(SBE_FIFO_CMD_PUTMEM),
             coreChipletId(0),
@@ -535,14 +534,13 @@ public:
     } PACKED;
 
     /**
-     * @brief Struct for FIFO PutSram request
+     * @brief Struct for FIFO PutSram request. This message type is not supported on Odyssey chips.
      *
      */
     struct fifoPutSramRequest
     {
         uint32_t wordCnt;
-        uint8_t  reserved;
-        uint8_t  chipId;
+        uint16_t  reserved;
         uint8_t  commandClass;
         uint8_t  command;
         uint16_t pervChipletId;
@@ -557,7 +555,6 @@ public:
         fifoPutSramRequest() :
             wordCnt(0),
             reserved(0),
-            chipId(0),
             commandClass(SBE_FIFO_CLASS_MEMORY_ACCESS),
             command(SBE_FIFO_CMD_PUTSRAM),
             pervChipletId(0),
@@ -600,7 +597,7 @@ public:
     {
         uint32_t wordCnt;
         uint8_t  reserved;
-        uint8_t  chipId;
+        uint8_t  chipId; // Odyssey only, reserved field for P10
         uint8_t  commandClass;
         uint8_t  command;
         fifoGetSbeFfdcRequest() :
@@ -615,7 +612,8 @@ public:
 
 
     /**
-     * @brief Struct for FIFO Get Capabilities Request
+     * @brief Struct for FIFO Get Capabilities Request. This message type is only supported for Odyssey chips. P10 chips
+     *        will continue to use fifoGetCapabilities2Request.
      *
      *        Struct for FIFO Get Capabilities response end uses fifoStandardResponse
      *        A variation of sbeCapabilities_t comes before that struct.
@@ -639,14 +637,13 @@ public:
     } PACKED;
 
     /**
-     * @brief Struct for FIFO Get Capabilities Request including
-     *        new additions.
+     * @brief Struct for FIFO Get Capabilities 2 Request including new additions. This message type is not supported for
+     *        Odyssey chips. Odyssey chips should use fifoGetCapabilitiesRequest (note the lack of the 2).
      *
      *        Struct for FIFO Get Capabilities response end uses fifoStandardResponse
      *        A variation of sbeCapabilities2_t comes before that struct.
      *
      * Complies with document FipS_SBE_Interface_Specification_v1.5b-1.pdf
-     * @note Depricated as of POZ SBE FIFO spec v0.1
      */
     struct fifoGetCapabilities2Request
     {
@@ -663,25 +660,22 @@ public:
         }
     } PACKED;
 
-
     ///////////////////////////////////////////////////////////////////////
     //                     MPIPL Messages
     ///////////////////////////////////////////////////////////////////////
     /**
-     * @brief Struct for FIFO Continue MPIPL request
+     * @brief Struct for FIFO Continue MPIPL request. This message type is not supported for Odyssey chips.
      *
      */
     struct fifoContinueMpiplRequest
     {
         uint32_t wordCnt;
-        uint8_t  reserved;
-        uint8_t  chipId;
+        uint16_t  reserved;
         uint8_t  commandClass;
         uint8_t  command;
         fifoContinueMpiplRequest() :
             wordCnt(2),
             reserved(0),
-            chipId(0),
             commandClass(SBE_FIFO_CLASS_MPIPL_COMMANDS),
             command(SBE_FIFO_CMD_CONTINUE_MPIPL)
         {
@@ -707,7 +701,7 @@ public:
     ///////////////////////////////////////////////////////////////////////
 
     /**
-     * @brief Struct for FIFO Host Commands request
+     * @brief Struct for FIFO Host Commands request. This message type is not supported for Odyssey chips
      *
      */
     struct fifoHostCommandsRequest
@@ -758,7 +752,7 @@ public:
     {
         uint32_t wordCnt;
         uint8_t  reserved;
-        uint8_t  chipId;
+        uint8_t  chipId; // Odyssey only, reserved field for P10
         uint8_t  commandClass;
         uint8_t  command;
         uint8_t  reserved2;
@@ -783,7 +777,7 @@ public:
     ///////////////////////////////////////////////////////////////////////
 
     /**
-     * @brief Struct for FIFO Attribute Raw Dump request
+     * @brief Struct for FIFO Attribute Raw Dump request. This message type is only supported on Odyssey chips.
      */
     struct fifoAttrRawDumpRequest
     {
@@ -802,7 +796,7 @@ public:
     } PACKED;
 
     /**
-     * @brief Struct for FIFO Attribute List request
+     * @brief Struct for FIFO Attribute List request. This message type is only supported on Odyssey chips.
      */
     struct fifoAttrListRequest
     {
@@ -822,7 +816,7 @@ public:
     } PACKED;
 
     /**
-     * @brief Struct for FIFO Attribute Update request
+     * @brief Struct for FIFO Attribute Update request. This message type is only supported on Odyssey chips.
      */
     struct fifoAttrUpdateRequest
     {
@@ -864,7 +858,7 @@ public:
     };
 
     /**
-     * @brief Struct for FIFO Get Code Levels request
+     * @brief Struct for FIFO Get Code Levels request. This message type is only supported on Odyssey chips.
      */
     struct fifoGetCodeLevelsRequest
     {
@@ -883,7 +877,8 @@ public:
     } PACKED;
 
     /**
-     * @brief Struct for FIFO Update Image request. Uses fifoStandardResponse
+     * @brief Struct for FIFO Update Image request. Uses fifoStandardResponse. This message type is only supported on
+     *        Odyssey chips.
      */
     struct fifoUpdateImageRequest
     {
@@ -911,7 +906,8 @@ public:
     } PACKED;
 
     /**
-     * @brief Struct for FIFO Sync Code Levels request. Uses fifoStandardResponse
+     * @brief Struct for FIFO Sync Code Levels request. Uses fifoStandardResponse. This message type is only supported
+     *        on Odyssey chips.
      */
     struct fifoSyncCodeLevelsRequest
     {
