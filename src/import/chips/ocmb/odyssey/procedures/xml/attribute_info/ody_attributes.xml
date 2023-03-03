@@ -53,6 +53,23 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_ODY_PHY_IMAGE_SELECT</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          Controls which PHY firmware image (ATE or production DRAM training)
+          the Odyssey SBE will load into the PHY during load_imem and load_dmem.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            TRAINING_IMAGE = 0,
+            ATE_IMAGE = 1
+        </enum>
+        <default>TRAINING_IMAGE</default>
+        <writeable/>
+        <mssAccessorName>ody_phy_image_select</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_ODY_MSG_BLOCK_DATA_SOURCE</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
