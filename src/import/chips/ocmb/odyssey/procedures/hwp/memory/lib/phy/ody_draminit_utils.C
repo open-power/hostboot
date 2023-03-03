@@ -2480,11 +2480,10 @@ fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Targe
     {
         // SBE does not support using the hardcodes as they are only for initial bringup/simulation
 #ifdef __PPE__
-        // TODO:ZEN:MST-1947 Reenable the below assert when SBE CI is passing
         // Skipping trace to reduce SBE code size
-        //FAPI_ASSERT(false,
-        //            fapi2::ODY_DRAMINIT_HARDCODE_UNSUPPORTED().set_PORT_TARGET(i_target),
-        //            "hardcoded attributes are unsupported by the SBE");
+        FAPI_ASSERT(false,
+                    fapi2::ODY_DRAMINIT_HARDCODE_UNSUPPORTED().set_PORT_TARGET(i_target),
+                    "hardcoded attributes are unsupported by the SBE");
 #else
         FAPI_TRY(configure_dram_train_message_block_hardcodes(i_target, io_msg_block));
 #endif
