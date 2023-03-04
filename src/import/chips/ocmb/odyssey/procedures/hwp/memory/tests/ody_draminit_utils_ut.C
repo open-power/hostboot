@@ -94,6 +94,45 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
         });
     }
 
+    GIVEN("Testing skip_this_step")
+    {
+        // Don't skip anything
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_IMEM, 0xFF));
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_DMEM, 0xFF));
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_MSG_BLOCK, 0xFF));
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_RUN_TRAINING, 0xFF));
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_PIE, 0xFF));
+
+        // Skip load_imem and load_msg_block
+        REQUIRE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_IMEM, 0x5F));
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_DMEM, 0x5F));
+        REQUIRE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_MSG_BLOCK, 0x5F));
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_RUN_TRAINING, 0x5F));
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_PIE, 0x5F));
+
+        // Skip load_dmem and run_training
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_IMEM, 0xAF));
+        REQUIRE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_DMEM, 0xAF));
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_MSG_BLOCK, 0xAF));
+        REQUIRE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_RUN_TRAINING, 0xAF));
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_PIE, 0xAF));
+
+        // Skip load_pie
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_IMEM, 0xF7));
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_DMEM, 0xF7));
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_MSG_BLOCK, 0xF7));
+        REQUIRE_FALSE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_RUN_TRAINING, 0xF7));
+        REQUIRE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_PIE, 0xF7));
+
+        // Skip all
+        REQUIRE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_IMEM, 0x00));
+        REQUIRE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_DMEM, 0x00));
+        REQUIRE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_MSG_BLOCK, 0x00));
+        REQUIRE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_RUN_TRAINING, 0x00));
+        REQUIRE(mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_PIE, 0x00));
+
+    }
+
     GIVEN("SMBus to RCW decoding")
     {
         const fapi2::buffer<uint64_t> l_data(0xffffffff12345678);
