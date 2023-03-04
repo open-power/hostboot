@@ -77,6 +77,27 @@ namespace mss
 {
 namespace ody
 {
+
+///
+/// @brief Check if we've selected to skip a step in a procedure using ATTR_ODY_DRAMINIT_STEP_ENABLE
+/// @param[in] i_hwp_step enum from ATTR_ODY_DRAMINIT_STEP_ENABLE for the bit we're checking
+/// @param[in] i_attr_val value of ATTR_ODY_DRAMINIT_STEP_ENABLE
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+inline bool skip_this_step(const uint8_t i_hwp_step,
+                           const uint8_t i_attr_val)
+{
+    // Sanity check that i_hwp_step doesn't overflow (just return false - don't skip)
+    if (i_hwp_step >= BITS_PER_BYTE)
+    {
+        return false;
+    }
+
+    const uint8_t l_step_mask = 0x80 >> i_hwp_step;
+
+    return ((i_attr_val & l_step_mask) == 0x00);
+}
+
 namespace phy
 {
 
@@ -3674,6 +3695,16 @@ fapi2::ReturnCode configure_dram_train_message_block_hardcodes(const fapi2::Targ
         i_target,
         PMU_SMB_DDR5U_1D_t& o_struct);
 #endif
+
+///
+/// @brief Configures the msg block on to snps phy
+/// @param[in] i_target the target on which to operate
+/// @param[in,out] io_msg_block the message block to configure and load
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block);
 
 ///
 /// @brief Configure and load the msg block on to snps phy

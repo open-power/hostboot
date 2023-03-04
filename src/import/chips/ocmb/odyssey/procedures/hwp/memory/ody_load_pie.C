@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -41,9 +41,11 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
+#include <mss_odyssey_attribute_getters.H>
 
 #include <generic/memory/mss_git_data_helper.H>
 #include <lib/phy/dwc_ddrphy_phyinit_I_loadPIEImage.H>
+#include <lib/phy/ody_draminit_utils.H>
 
 #include <lib/mc/ody_port.H>
 #include <lib/mc/ody_port_traits.H>
@@ -59,6 +61,16 @@ extern "C"
     fapi2::ReturnCode ody_load_pie( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
     {
         mss::display_git_commit_info("ody_load_pie");
+
+        uint8_t l_draminit_step_enable = 0;
+
+        FAPI_TRY(mss::attr::get_ody_draminit_step_enable(l_draminit_step_enable));
+
+        if (mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_PIE, l_draminit_step_enable))
+        {
+            FAPI_INF(TARGTIDFORMAT " ATTR_ODY_DRAMINIT_STEP_ENABLE set to skip ody_load_pie. Exiting...", TARGTID);
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 
         for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
         {

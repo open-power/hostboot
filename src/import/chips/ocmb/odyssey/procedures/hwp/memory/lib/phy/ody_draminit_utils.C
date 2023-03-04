@@ -2460,11 +2460,12 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Configure and load the msg block on to snps phy
+/// @brief Configures the msg block on to snps phy
 /// @param[in] i_target the target on which to operate
+/// @param[in,out] io_msg_block the message block to configure and load
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
         i_target,
         PMU_SMB_DDR5U_1D_t& io_msg_block)
 {
@@ -2492,6 +2493,23 @@ fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Targe
     {
         FAPI_TRY(configure_dram_train_message_block(i_target, l_sim, io_msg_block));
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Configure and load the msg block on to snps phy
+/// @param[in] i_target the target on which to operate
+/// @param[in,out] io_msg_block the message block to configure and load
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(configure_dram_train_message_block(i_target, io_msg_block));
 
     // Load the message block on to snps phy
     FAPI_TRY(load_msg_block(i_target, io_msg_block));

@@ -88,6 +88,31 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_ODY_DRAMINIT_STEP_ENABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            Bitmap to control which procedure steps get run during istep mss_draminit.
+            Bits numbered from left to right, set to '1' to enable each step:
+            0 = load_imem
+            1 = load_dmem
+            2 = load training message block
+            3 = run training
+            4 = load and execute PIE (PHY initialization engine)
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            LOAD_IMEM = 0,
+            LOAD_DMEM = 1,
+            LOAD_MSG_BLOCK = 2,
+            RUN_TRAINING = 3,
+            LOAD_PIE = 4
+        </enum>
+        <default>0xFF</default>
+        <writeable/>
+        <mssAccessorName>ody_draminit_step_enable</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_ODY_DRAMINIT_VERBOSITY</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>

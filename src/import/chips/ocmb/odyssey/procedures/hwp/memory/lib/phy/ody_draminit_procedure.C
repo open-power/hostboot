@@ -37,6 +37,7 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/c_str.H>
 
 #include <lib/phy/ody_draminit_utils.H>
 #include <lib/phy/ody_phy_utils.H>
@@ -65,9 +66,11 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     PMU_SMB_DDR5U_1D_t l_msg_block;
 
     uint64_t l_status = mss::ody::phy::mailbox_consts::FAILED_COMPLETION;
-
+    uint8_t l_draminit_step_enable = 0;
     fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT_Type l_poll_count;
+
     FAPI_TRY(mss::attr::get_draminit_training_timeout(i_target , l_poll_count));
+    FAPI_TRY(mss::attr::get_ody_draminit_step_enable(l_draminit_step_enable));
 
     // 1. Loads the IMEM Memory (instructions) onto Synopsys PHY
     // It is being done in ody_load_imem.C
@@ -81,27 +84,42 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     FAPI_TRY(mss::attr::set_ody_dmem_first_load(i_target, fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_NO));
 
     // 3. Configures and loads the message block onto Synopsys PHY
-    FAPI_TRY(mss::ody::phy::configure_and_load_dram_train_message_block(i_target, l_msg_block));
+    if (mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_MSG_BLOCK, l_draminit_step_enable))
+    {
+        FAPI_INF(TARGTIDFORMAT " ATTR_ODY_DRAMINIT_STEP_ENABLE set to skip message block loading...", TARGTID);
+        FAPI_TRY(mss::ody::phy::configure_dram_train_message_block(i_target, l_msg_block));
+    }
+    else
+    {
+        FAPI_TRY(mss::ody::phy::configure_and_load_dram_train_message_block(i_target, l_msg_block));
+    }
 
-    // 4. Initialize mailbox protocol and start training
-    FAPI_TRY(mss::ody::phy::init_mailbox_protocol(i_target));
-    FAPI_TRY(mss::ody::phy::start_training(i_target));
+    if (mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_RUN_TRAINING, l_draminit_step_enable))
+    {
+        FAPI_INF(TARGTIDFORMAT " ATTR_ODY_DRAMINIT_STEP_ENABLE set to skip running DRAM training...", TARGTID);
+    }
+    else
+    {
+        // 4. Initialize mailbox protocol and start training
+        FAPI_TRY(mss::ody::phy::init_mailbox_protocol(i_target));
+        FAPI_TRY(mss::ody::phy::start_training(i_target));
 
-    // 5. Processes and handles training messages (aka poll for completion)
-    FAPI_TRY (mss::ody::phy::poll_for_completion(i_target, l_poll_count, l_status, o_log_data));
+        // 5. Processes and handles training messages (aka poll for completion)
+        FAPI_TRY (mss::ody::phy::poll_for_completion(i_target, l_poll_count, l_status, o_log_data));
 
-    // 6. Cleans up after training
-    FAPI_TRY(mss::ody::phy::cleanup_training(i_target));
+        // 6. Cleans up after training
+        FAPI_TRY(mss::ody::phy::cleanup_training(i_target));
 
-    // 7a. Read the data from the message block structure
-    FAPI_TRY(mss::ody::phy::read_msg_block(i_target, l_msg_block));
-    mss::ody::phy::display_msg_block(i_target, l_msg_block);
+        // 7a. Read the data from the message block structure
+        FAPI_TRY(mss::ody::phy::read_msg_block(i_target, l_msg_block));
+        mss::ody::phy::display_msg_block(i_target, l_msg_block);
 
-    // 7b. Load attibutes with the message block contents
-    FAPI_TRY(mss::ody::phy::set_attributes(i_target, l_msg_block));
+        // 7b. Load attibutes with the message block contents
+        FAPI_TRY(mss::ody::phy::set_attributes(i_target, l_msg_block));
 
-    // 8. Error handling
-    FAPI_TRY(mss::ody::phy::check_training_result(i_target, l_status, l_msg_block));
+        // 8. Error handling
+        FAPI_TRY(mss::ody::phy::check_training_result(i_target, l_status, l_msg_block));
+    }
 
     // 9. Load PHY Initialization Engine image and set up mission mode settings
     // This is done in ody_load_pie.C
