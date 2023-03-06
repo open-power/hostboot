@@ -34,3 +34,12 @@
 
 	# We want this submodule to be cloned automatically when
 	# the Hostboot repo is recursively cloned.
+[submodule "src/build/tools/extern/sbe"]
+	path = src/build/tools/extern/sbe
+	url = ssh://hostboot.gerrit/hw/sbe
+    update = none
+
+    # Ignore any change done in the repo (except
+    # for changes to the head commit)
+    # such as files created with "make install."
+    ignore = dirty

@@ -52,6 +52,28 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     SBE_SCRIPTS_PATH=${STANDALONE_SIMICS}/targets/p10_standalone/sbeTest/
     SBE_SCRIPT_TO_RUN=${SBE_SCRIPTS_PATH}/sbe_startup.simics
 
+    SBE_DIR=${PROJECT_ROOT}/src/build/tools/extern/sbe
+
+    # Use default paths for Odyssey images if no custom ones are specified
+    if [ -z $ODYSSEY_SBE_IMAGES ]; then
+        ODYSSEY_SROM_IMG=${SBE_DIR}/simics/sbe/odyssey_standalone/images/odyssey_srom_DD1.bin
+        ODYSSEY_OTPROM_IMG=${SBE_DIR}/images/odyssey/onetime/otprom/odyssey_otprom_DD1.bin
+        ODYSSEY_PNOR_IMG=${SBE_DIR}/simics/sbe/odyssey_standalone/images/odyssey_nor_DD1.img.ecc
+    else
+        ODYSSEY_SROM_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_srom_DD1.bin
+        ODYSSEY_OTPROM_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_otprom_DD1.bin
+        ODYSSEY_PNOR_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_nor_DD1.img.ecc
+    fi
+
+    SPPE_SCRIPTS_PATH=/sbe/odyssey_standalone/sbeTest/
+    SPPE_SCRIPT_TO_RUN=${SBE_DIR}/simics/sbe/odyssey_standalone/sbestartupodystandalone.simics
+
+    # Set up some ENV vars that SBE simics scripts require
+    export SBEROOT=${SBE_DIR}
+    export PYTHON_USER_PACKAGE_PATH=$(python3 -m site --user-site)
+    export SBE_PLATFORM=odyssey
+    export SBE_IMAGE=pnor
+
     export START_SIMICS_CMD=" runsim -m ${MACHINE}"
     START_SIMICS_CMD+=" hb_script_to_run=${STARTUPSIMICS}"
     START_SIMICS_CMD+=" pnor_img=${STANDALONE}/pnor/P10.pnor"
@@ -66,7 +88,16 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         echo "Using DDR4/Explorer DDIMMs"
     else
         echo "Using DDR5/Odyssey DDIMMs"
-    START_SIMICS_CMD+=" dimm_type=ody"
+        START_SIMICS_CMD+=" dimm_type=ody"
+        # Odyssey params
+        START_SIMICS_CMD+=" odyssey_srom_img=${ODYSSEY_SROM_IMG}"
+        START_SIMICS_CMD+=" odyssey_otprom_img=${ODYSSEY_OTPROM_IMG}"
+        START_SIMICS_CMD+=" odyssey_pnor_img=${ODYSSEY_PNOR_IMG}"
+        START_SIMICS_CMD+=" run_till_boot=FALSE"
+        # TODO JIRA: PFHB-417: uncomment these params once simics has
+        # different param names for SPPE startup scripts
+        #START_SIMICS_CMD+=" sbe_script_to_run=${SPPE_SCRIPT_TO_RUN}"
+        #START_SIMICS_CMD+=" sbe_scripts_path=${SPPE_SCRIPTS_PATH}"
     fi
     START_SIMICS_CMD+=" fused_core=TRUE"
     START_SIMICS_CMD+=" xive_gen=2"

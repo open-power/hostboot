@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2021
+# Contributors Listed Below - COPYRIGHT 2012,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -325,6 +325,8 @@ if [[ $HB_STANDALONE -eq 1 ]] && [ $PNOR_LAYOUT_SELECTED != "FSP" ];then
     else
         echo "Skipping build of HCODE due to user override"
     fi
+
+    source standaloneHelper --generateSbeOdysseyImages
 
     cd ${PROJECT_ROOT}/standalone/pnor
 

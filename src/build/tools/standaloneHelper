@@ -42,6 +42,10 @@ assemble_setup()
     # PPE is tracked as a git module
     (cd ${PROJECT_ROOT} && make ppe $1)
 
+    # Clone SBE repo to ${PROJECT_ROOT}/src/build/tools/extern/sbe
+    # SBE is tracked as a git module
+    (cd ${PROJECT_ROOT} && make sbe $1)
+
 
     source ${PROJECT_ROOT}/src/build/citest/etc/sbe
     source ${PROJECT_ROOT}/src/build/citest/etc/hcode
@@ -130,6 +134,73 @@ hash_file ()
 {
     # sha1sum prints out the filename in the second column, which we don't want
     sha1sum "$1" 2>/dev/null | awk '{print $1}'
+}
+
+# This will generate SBE Odyssey images unless some are provided via
+# environment exports
+generate_sbe_odyssey_images()
+{
+    SBE_DIR=${PROJECT_ROOT}/src/build/tools/extern/sbe
+
+    # Use default paths for Odyssey images if no custom ones are specified
+    if [ -n "${ODYSSEY_SBE_IMAGES}" ]; then
+        ODYSSEY_SROM_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_srom_DD1.bin
+        ODYSSEY_OTPROM_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_otprom_DD1.bin
+        ODYSSEY_PNOR_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_nor_DD1.img.ecc
+    fi
+
+    # Use default paths for Odyssey images if no custom ones are specified
+    if [ -z $ODYSSEY_SROM_IMG ]; then
+        ODYSSEY_SROM_IMG=${SBE_DIR}/images/odyssey/onetime/srom/odyssey_srom_DD1.bin
+    fi
+
+    if [ -z $SPPE_SCRIPTS_PATH ]; then
+        SPPE_SCRIPTS_PATH=${SBE_DIR}/simics/sbe/odyssey_standalone/sbeTest
+    fi
+
+    if [ -z $ODYSSEY_OTPROM_IMG ]; then
+        ODYSSEY_OTPROM_IMG=${SBE_DIR}/images/odyssey/onetime/otprom/odyssey_otprom_DD1.bin
+    fi
+
+    if [ -z $ODYSSEY_PNOR_IMG ]; then
+        ODYSSEY_PNOR_IMG=${SBE_DIR}/simics/sbe/odyssey_standalone/images/odyssey_nor_DD1.img.ecc
+    fi
+
+    if [ -z $SPPE_SCRIPT_TO_RUN ]; then
+        SPPE_SCRIPT_TO_RUN=${SBE_DIR}/simics/sbe/odyssey_standalone/sbestartupodystandalone.simics
+    fi
+
+    # If any of the Odyssey images don't exist, re-generate all of them
+    if [ ! -f "$ODYSSEY_SROM_IMG" ] || \
+       [ ! -f "$ODYSSEY_OTPROM_IMG" ] || \
+       [ ! -f "$ODYSSEY_PNOR_IMG" ] || \
+       # Also rebuild if the SBE env scripts don't exist
+       [ ! -f "$SPPE_SCRIPT_TO_RUN" ] || \
+       [ ! -d "$SPPE_SCRIPTS_PATH" ] || \
+       [ $HB_FORCE_REBUILD_SBE ]
+    then
+        echo -e "\n\n Generating SBE Odyssey images..."
+
+        cd ${SBE_DIR}
+        # HB env setup scripts export SIGNING_BASE_DIR to perform image signature. When this
+        # path is set in SBE, however, it goes down the path we don't want for Odyssey standalone
+        # and tries to find keys that don't exist. We need to unset SIGNING_BASE_DIR var in the
+        # new shell that SBE workon spawns to prevent SBE going down the wrong signing path.
+        ./sbe workon odyssey pnor <<< 'unset SIGNING_BASE_DIR && ./sbe build && ./sbe prime && exit'
+        cd ${PROJECT_ROOT}
+    else
+        echo "\nSkipping generation of SBE Odyssey images\n"
+    fi
+
+    if [ ! -f "$ODYSSEY_SROM_IMG" ] || \
+       [ ! -f "$ODYSSEY_OTPROM_IMG" ] || \
+       [ ! -f "$ODYSSEY_PNOR_IMG" ]
+    then
+        echo "SBE Odyssey build did not create one or more artifacts"
+        echo "Check paths: $ODYSSEY_SROM_IMG; $ODYSSEY_OTPROM_IMG; $ODYSSEY_PNOR_IMG"
+        exit 1
+    fi
+
 }
 
 # Function that will take HB's bootloader image (hbbl.bin), copy it to the PPE
@@ -245,5 +316,8 @@ case ${FIRST_PARAM} in
     ;;
     "--generateHcodeImage")
         generate_hcode_image
+    ;;
+    "--generateSbeOdysseyImages")
+        generate_sbe_odyssey_images
     ;;
 esac

@@ -583,6 +583,61 @@ hb_startsimics()
             STARTSIMCMD+=(dd_major_ver=1)
         fi
 
+        # Odyssey params/images
+        SBE_ODY_DIR=${PROJECT_ROOT}/src/build/tools/extern/sbe/
+
+        if [ -n "${ODYSSEY_SBE_IMAGES}" ]; then
+            ODYSSEY_SROM_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_srom_DD1.bin
+            ODYSSEY_OTPROM_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_otprom_DD1.bin
+            ODYSSEY_PNOR_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_nor_DD1.img.ecc
+        fi
+
+        if [ -z $ODYSSEY_SROM_IMG ]; then
+            ODYSSEY_SROM_IMG=${SBE_ODY_DIR}/simics/sbe/odyssey_standalone/images/odyssey_srom_DD1.bin
+        fi
+        if [[ ! -f $ODYSSEY_SROM_IMG ]]; then
+            echo "File does not exist: " ${ODYSSEY_SROM_IMG}
+            echo "Please make sure to run \"hb prime\" to create it."
+            exit 1
+        fi
+
+        if [ -z $SPPE_SCRIPTS_PATH ]; then
+            SPPE_SCRIPTS_PATH=/sbe/odyssey_standalone/sbeTest/
+        fi
+
+        if [ -z $ODYSSEY_OTPROM_IMG ]; then
+            ODYSSEY_OTPROM_IMG=${SBE_ODY_DIR}/images/odyssey/onetime/otprom/odyssey_otprom_DD1.bin
+        fi
+        if [[ ! -f $ODYSSEY_OTPROM_IMG ]]; then
+            echo "File does not exist: " ${ODYSSEY_OTPROM_IMG}
+            echo "Please make sure to run \"hb prime\" to create it."
+            exit 1
+        fi
+
+        if [ -z $ODYSSEY_PNOR_IMG ]; then
+            ODYSSEY_PNOR_IMG=${SBE_ODY_DIR}/simics/sbe/odyssey_standalone/images/odyssey_nor_DD1.img.ecc
+        fi
+        if [[ ! -f $ODYSSEY_PNOR_IMG ]]; then
+            echo "File does not exist: " ${ODYSSEY_PNOR_IMG}
+            echo "Please make sure to run \"hb prime\" to create it."
+            exit 1
+        fi
+
+        if [ -z $SPPE_SCRIPT_TO_RUN ]; then
+            SPPE_SCRIPT_TO_RUN=${SBE_ODY_DIR}/simics/sbe/odyssey_standalone/sbestartupodystandalone.simics
+        fi
+        if [[ ! -f $SPPE_SCRIPT_TO_RUN ]]; then
+            echo "File does not exist: " ${SPPE_SCRIPT_TO_RUN}
+            echo "Please make sure to run \"hb prime\" to create it."
+            exit 1
+        fi
+
+        # Set up some ENV vars that SBE simics scripts require
+        export SBEROOT=${SBE_ODY_DIR}
+        export PYTHON_USER_PACKAGE_PATH=$(python3 -m site --user-site)
+        export SBE_PLATFORM=odyssey
+        export SBE_IMAGE=pnor
+
         # We don't want to run SBE in VPO mode; pass the SBE image to
         # simics in non-VPO mode
         if [ -z "${VPO_COMPILE}" ]; then
@@ -596,6 +651,17 @@ hb_startsimics()
             STARTSIMCMD+=(num_sockets=1)
             #@FIXME-RTC:254475-Remove once this works everywhere
             STARTSIMCMD+=(hb_ignoresmpfail=0)
+            if [ -n "${HB_USE_ODYSSEY}" ]; then
+                # TODO JIRA: PFHB-417 SBE and SPPE currently use the same runsim params,
+                # which does not work in this case. Uncomment the SPPE paths once there
+                # are different runsim params for SPPE.
+                #STARTSIMCMD+=(sbe_scripts_path=$SPPE_SCRIPTS_PATH)
+                #STARTSIMCMD+=(sbe_script_to_run=$SPPE_SCRIPT_TO_RUN)
+                STARTSIMCMD+=(odyssey_otprom_img=$ODYSSEY_OTPROM_IMG)
+                STARTSIMCMD+=(odyssey_pnor_img=$ODYSSEY_PNOR_IMG)
+                STARTSIMCMD+=(odyssey_srom_img=$ODYSSEY_SROM_IMG)
+                STARTSIMCMD+=(run_till_boot=FALSE)
+            fi
         else
             # This allows to not run SBE automatically
             STARTSIMCMD+=(sbe_boot_mem=pibmem)
@@ -841,6 +907,8 @@ hb_flags()
     echo "HB_SKIP_GEN_HCODE : Will not attempt to rebuild the ekb submodule (included in HB_FAST_PRIME)"
     echo "PARSE_RCDL_STRICT : Validates all obj/genfiles/HB_BCxxRcdl_* files with RcdlSniffer2Perl"
     echo "HB_FORCE_REBUILD_SBE : Force rebuild of sbe/ppe submodule regardless of existing images"
+    echo "ODYSSEY_SBE_IMAGES : Point the prime to a dir with pre-compiled SPPE Odyssey images. Required images:"
+    echo "                     odyssey_srom_DD1.bin, odyssey_otprom_DD1.bin, odyssey_nor_DD1.img.ecc"
     echo " "
     echo "= Simics Options ="
     echo "HB_BREAK_ON_ERROR : Halts simics if HB hits an exception"

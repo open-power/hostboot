@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2021
+# Contributors Listed Below - COPYRIGHT 2010,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -100,6 +100,7 @@ cppcheck:
 	${MAKE}
 
 PPE_PATH := $(ROOTPATH)/src/build/tools/extern/ppe
+SBE_PATH := $(ROOTPATH)/src/build/tools/extern/sbe
 
 .PHONY: ppe
 ppe: $(PPE_PATH)/Makefile
@@ -107,6 +108,13 @@ ppe: $(PPE_PATH)/Makefile
 .PHONY: $(PPE_PATH)/Makefile
 $(PPE_PATH)/Makefile:
 	git submodule update --init --checkout -- $(PPE_PATH)
+
+.PHONY: sbe
+sbe: $(SBE_PATH)/Makefile
+
+.PHONY: $(SBE_PATH)/Makefile
+$(SBE_PATH)/Makefile:
+	git submodule update --init --checkout -- $(SBE_PATH)
 
 EKB_PATH := $(ROOTPATH)/src/build/tools/extern/ekb
 
