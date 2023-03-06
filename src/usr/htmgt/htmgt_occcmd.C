@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,8 @@
 #include <console/consoleif.H>
 #include <variable_buffer.H>
 #include <fapi2.H>
+
+#define ASYNC_PHANTOM_INTERRUPT_BCE          0x00279636
 
 namespace HTMGT
 {
@@ -843,6 +845,17 @@ namespace HTMGT
                 {
                     TMGT_INF("handleOccException: truncating length to 4K");
                     exceptionLength = 4*KILOBYTE;
+                }
+
+                if ((exceptionType == OCC_RC_OCC_EXCEPTION) &&
+                    (exceptionLength >= 12))
+                {
+                    const uint32_t panicCode = UINT32_GET(&sramRspPtr[8]);
+                    if (panicCode == ASYNC_PHANTOM_INTERRUPT_BCE)
+                    {
+                        TMGT_ERR("handleOccException: ASYNC_PHANTOM_INTERRUPT_BCE detected"
+                                 " on OCC%d", iv_Occ->iv_instance);
+                    }
                 }
 
                 TMGT_BIN("OCC Exception Data (up to 64 bytes)",
