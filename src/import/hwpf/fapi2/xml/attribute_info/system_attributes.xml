@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -30,6 +30,7 @@
     <description>env: 1 = Awan/HWSimulator. 0 = Simics/RealHW.</description>
     <valueType>uint8</valueType>
     <platInit/>
+    <writeable/>
     <mssAccessorName>is_simulation</mssAccessorName>
   </attribute>
   <!-- ********************************************************************* -->
@@ -39,9 +40,9 @@
     <description>
        Returns the type of simics environment that the code is executing
        inside.
-         0 = RealHW/AWAN. 
-         1 = Simics. 
-         2 = SUET. 
+         0 = RealHW/AWAN.
+         1 = Simics.
+         2 = SUET.
     </description>
     <valueType>uint8</valueType>
     <enum>REALHW = 0x00, SIMICS = 0x01, SUET = 0x02</enum>
