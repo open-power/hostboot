@@ -53,6 +53,7 @@ namespace mss
 namespace power_thermal
 {
 
+#ifndef __PPE__
 ///
 /// @brief Combine the runtime throttle values for the port targets and set the final OCMB values
 /// @param[in] i_target the MC target
@@ -531,6 +532,8 @@ fapi_try_exit:
     FAPI_ERR("Error equalizing memory throttles on " GENTARGTIDFORMAT, GENTARGTID(l_current_mc));
     return fapi2::current_err;
 }
+
+#endif //endif for __PPE__
 
 ///
 /// @brief set the general N/M throttle register - Odyssey specialization

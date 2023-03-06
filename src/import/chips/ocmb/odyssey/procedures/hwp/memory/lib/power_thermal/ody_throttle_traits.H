@@ -189,9 +189,11 @@ class throttle_traits<mss::mc_type::ODYSSEY>
             DIMM_ATTACHED_LEN = 2,
         };
 
+#ifndef __PPE__
         // Definition is in chip folder
         static const std::vector< std::pair<uint8_t , uint8_t> > DIMM_TYPE_MAP;
         static const std::vector< std::pair<uint8_t , uint8_t> > DIMM_ATTACHED_MAP;
+#endif //endif for __PPE__
 
         // Throttle values
         // TODO Zenhub #1509: These values have been transferred from Explorer and

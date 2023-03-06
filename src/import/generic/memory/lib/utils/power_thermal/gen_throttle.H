@@ -46,7 +46,9 @@
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/mss_math.H>
 #include <generic/memory/lib/utils/pos.H>
-#include <generic/memory/lib/utils/dimm/kind.H>
+#ifndef __PPE__
+    #include <generic/memory/lib/utils/dimm/kind.H>
+#endif
 #include <generic/memory/lib/utils/mss_generic_check.H>
 
 namespace mss
@@ -95,6 +97,7 @@ inline uint32_t calc_n_from_dram_util(const T1 i_dram_util, const T2 i_throttle_
            );
 }
 
+#ifndef __PPE__
 ///
 /// @brief Calculate N (address operations) allowed within a window of M DRAM clocks
 /// @param[in] i_databus_util databus utilization percentage (e.g. 5% = 5)
@@ -1335,6 +1338,8 @@ fapi2::ReturnCode set_pwr_cntrl_reg(const fapi2::Target<T>& i_target);
 ///
 template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode set_str_reg(const fapi2::Target<T>& i_target);
+
+#endif //endif for __PPE__
 
 ///
 /// @brief set the general N/M throttle register
