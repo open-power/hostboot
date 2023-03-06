@@ -92,6 +92,7 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     else
     {
         FAPI_TRY(mss::ody::phy::configure_and_load_dram_train_message_block(i_target, l_msg_block));
+        mss::ody::phy::display_msg_block(i_target, l_msg_block);
     }
 
     if (mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_RUN_TRAINING, l_draminit_step_enable))
