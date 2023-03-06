@@ -272,12 +272,18 @@ fapi2::ReturnCode ody_scratch_regs_update(
     if (i_update_all || !l_scratch16_reg.getBit<SCRATCH11_REG_VALID_BIT>())
     {
         fapi2::buffer<uint32_t> l_scratch11_reg = 0;
+        fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         fapi2::ATTR_OCMB_BOOT_FLAGS_Type l_attr_ocmb_boot_flags;
+        fapi2::ATTR_IS_SIMULATION_Type l_attr_is_simulation;
 
         FAPI_DBG("Reading ATTR_OCMB_BOOT_FLAGS");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_BOOT_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_attr_ocmb_boot_flags),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_BOOT_FLAGS, FAPI_SYSTEM, l_attr_ocmb_boot_flags),
                  "Error from FAPI_ATTR_GET (ATTR_OCMB_BOOT_FLAGS)");
         l_scratch11_reg.insertFromRight<ATTR_OCMB_BOOT_FLAGS_STARTBIT, ATTR_OCMB_BOOT_FLAGS_LENGTH>(l_attr_ocmb_boot_flags);
+
+        FAPI_DBG("Reading ATTR_IS_SIMULATION");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, l_attr_is_simulation));
+        l_scratch11_reg.insertFromRight<ATTR_IS_SIMULATION_STARTBIT, ATTR_IS_SIMULATION_LENGTH>(l_attr_is_simulation);
 
         FAPI_DBG("Setting up value of Scratch 11 mailbox register");
         FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER11, l_scratch11_reg));

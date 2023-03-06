@@ -87,6 +87,9 @@ enum ody_scratch_regs
     ATTR_OCMB_BOOT_FLAGS_STARTBIT                   = 0,
     ATTR_OCMB_BOOT_FLAGS_LENGTH                     = 32,
 
+    ATTR_IS_SIMULATION_STARTBIT                     = 3,
+    ATTR_IS_SIMULATION_LENGTH                       = 1,
+
     // Scratch_reg_12 (RESERVED)
     SCRATCH12_REG_VALID_BIT                         = 11,
 

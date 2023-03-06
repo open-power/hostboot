@@ -106,7 +106,9 @@
 
     Bit 0      : Indicates istep IPL (0b1)
     Bit 1      : Indicates that SBE should go directly to runtime functionality (0b1)
-    Bits 2-4   : Reserved
+    Bit 2      : Reserved
+    Bit 3      : Conveys ATTR_IS_SIMULATION state (0=HW, 1=AWAN/MESA)
+    Bit 4      : Reserved
     Bit 5      : Indicates that the SBE should not send back internal FFDC on any ChipOp failure response
     Bit 6      : Disable security, if permitted
     Bit 7      : Allow ATTR overrides in secure system
