@@ -266,10 +266,10 @@ class fields<DDR5, BASE_CNFG>
             // Byte 235
             ENABLED_PHY_CHANNELS_START = 0,
             ENABLED_PHY_CHANNELS_LEN = 2,
-            BUS_WIDTH_CHA_START = 2,
-            BUS_WIDTH_CHA_LEN = 3,
-            BUS_WIDTH_CHB_START = 5,
+            BUS_WIDTH_CHB_START = 2,
             BUS_WIDTH_CHB_LEN = 3,
+            BUS_WIDTH_CHA_START = 5,
+            BUS_WIDTH_CHA_LEN = 3,
 
             /////////////////////////////////////////////
             //// Bytes 512-637: manufacturing information
@@ -568,16 +568,6 @@ class fields<DDR5, DDIMM_MODULE>
             NUM_PACKAGE_RANKS_PORT1_LEN = 3,
             NUM_PACKAGE_RANKS_PORT0_START = 5,
             NUM_PACKAGE_RANKS_PORT0_LEN = 3,
-
-
-            // Byte 235: Memory Channel Bus Width
-            BUS_WIDTH_BYTE = 235,
-            ENABLED_PHY_CHANNELS_START = 0,
-            ENABLED_PHY_CHANNELS_LEN = 2,
-            BUS_WIDTH_CHANNEL_A_START = 2,
-            BUS_WIDTH_CHANNEL_A_LEN = 3,
-            BUS_WIDTH_CHANNEL_B_START = 5,
-            BUS_WIDTH_CHANNEL_B_LEN = 3,
 
             // Byte 240: PMIC3 Manufacturing ID Code, First Byte
             PMIC3_MFG_CODE_FIRST_BYTE = 240,
@@ -1579,11 +1569,6 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 234: DIMM Module Organization
         static constexpr field_t NUM_PACKAGE_RANKS_PORT1{DIMM_ORG_BYTE_BYTE, NUM_PACKAGE_RANKS_PORT1_START, NUM_PACKAGE_RANKS_PORT1_LEN};
         static constexpr field_t NUM_PACKAGE_RANKS_PORT0{DIMM_ORG_BYTE_BYTE, NUM_PACKAGE_RANKS_PORT0_START, NUM_PACKAGE_RANKS_PORT0_LEN};
-
-        // Byte 235: Memory Channel Bus Width
-        static constexpr field_t ENABLED_PHY_CH{BUS_WIDTH_BYTE, ENABLED_PHY_CHANNELS_START, ENABLED_PHY_CHANNELS_LEN};
-        static constexpr field_t BUS_WIDTH_CH_A{BUS_WIDTH_BYTE, BUS_WIDTH_CHANNEL_A_START, BUS_WIDTH_CHANNEL_A_LEN};
-        static constexpr field_t BUS_WIDTH_CH_B{BUS_WIDTH_BYTE, BUS_WIDTH_CHANNEL_B_START, BUS_WIDTH_CHANNEL_B_LEN};
 
         // Byte 240: PMIC3 Manufacturing ID Code, 1st Byte
         static constexpr field_t PMIC3_MFG_CODE_FIRST{PMIC3_MFG_CODE_FIRST_BYTE, PMIC3_MFG_CODE_FIRST_START, PMIC3_MFG_CODE_FIRST_LEN};

@@ -173,9 +173,6 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::REGISTER
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::NUM_BUFFERS;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::NUM_PACKAGE_RANKS_PORT1;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::NUM_PACKAGE_RANKS_PORT0;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::ENABLED_PHY_CH;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::BUS_WIDTH_CH_A;
-constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::BUS_WIDTH_CH_B;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::PMIC3_MFG_CODE_FIRST;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::PMIC3_MFG_CODE_SECOND;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::PMIC3_DEVICE_REV_NUM;
