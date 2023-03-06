@@ -256,9 +256,12 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
         }
         FAPI_TRY_LAMBDA(fapi2::delay(mss::DELAY_1MS, 200));
 
+        return false;
+
     fapi_try_exit_lambda:
         FAPI_ERR("mss::poll() hit an error in mss::getScom");
-        return false;
+        // Exit the poll if we hit a fapi error
+        return true;
     });
     // following FAPI_TRY to preserve the scom failure in lambda.
     FAPI_TRY(fapi2::current_err);
