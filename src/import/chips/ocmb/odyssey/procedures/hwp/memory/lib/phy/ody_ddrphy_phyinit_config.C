@@ -1005,6 +1005,14 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
             PllCtrl1 = (PllCpPropCtrl << csr_PllCpPropCtrl_LSB) | (PllCpIntCtrl << csr_PllCpIntCtrl_LSB);
             PllCtrl4 = (PllCpPropGsCtrl << csr_PllCpPropGsCtrl_LSB) | (PllCpIntGsCtrl << csr_PllCpIntGsCtrl_LSB);
 
+            // TODO:ZEN:MST-1999 Add PLL settings to ody_ddrphyinit
+            // Remove these overrides when robust code is in place
+            // Overrides:
+            PllCtrl1 = 0x00000000000041;
+            PllCtrl2 = 0x00000000000019;
+            PllCtrl4 = 0x000000000000ff;
+            PllTestMode = 0x00000000000035;
+
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d,  Memclk=%dMHz",
                       TARGTID, pstate,  i_user_input_basic.Frequency[pstate]);
