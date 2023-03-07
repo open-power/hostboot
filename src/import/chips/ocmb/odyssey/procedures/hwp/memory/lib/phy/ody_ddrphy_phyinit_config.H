@@ -182,5 +182,17 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
 fapi2::ReturnCode setup_dram_input_struct(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         user_input_dram_config_t& io_user_input_dram_config);
 
-
+#ifndef __PPE__
+///
+/// @brief Prints the PHY config structures
+/// @param[in] i_target - the memory port on which to operate
+/// @param[in] i_user_input_basic - Synopsys basic user input structure
+/// @param[in] i_user_input_advanced - Synopsys advanced user input structure
+/// @param[in] i_user_input_dram_config - DRAM configuration inputs needed for PHY init (MRS/RCW)
+///
+void print_structs(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                   const user_input_basic_t& i_user_input_basic,
+                   const user_input_advanced_t& i_user_input_advanced,
+                   const user_input_dram_config_t& i_user_input_dram_config);
+#endif
 #endif
