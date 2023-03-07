@@ -28,6 +28,7 @@
 *
 */
 
+#include <chipids.H>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include <sbeio/sbeioif.H>
@@ -44,6 +45,7 @@ TRACDCOMP(g_trac_sbeio,"IplControl: " printf_string,##args)
 #define SBE_TRACF(printf_string,args...) \
 TRACFCOMP(g_trac_sbeio,"IplControl: " printf_string,##args)
 
+using namespace TARGETING;
 
 namespace SBEIO
 {
@@ -80,16 +82,59 @@ namespace SBEIO
         return errl;
     };
 
+
     /**
-    * @brief @TODO JIRA PFHB-404
-    *
-    * @param[in] i_chipTarget The chip you would like to perform the chipop on
-    *                       NOTE: HB should only be sending this to non-boot procs or Odyssey chips
-    *
-    * @return errlHndl_t Error log handle on failure.
-    *
-    */
-    errlHndl_t sendExecHWPRequest(TARGETING::Target * i_chipTarget)
+     * @Brief Send the IO or MEMORY HWP request to the SBE.  This function
+     *        is called by one of two wrapper functions which perform initial
+     *        checking of the parameters and then call this function to send
+     *        the HWP request.
+     *
+     * @param[in]  i_chipTarget The Odyssey chip to perform the chipop on
+     * @param[in]  i_hwpClass   The HWP class, either IO or MEM
+     * @param[in]  i_hwpNumber  The specific HWP number to execute
+     *
+     * @return errlHndl_t Error log handle on failure.
+     */
+    errlHndl_t sendExecHWPRequest(TARGETING::Target * i_chipTarget,
+                                  uint8_t i_hwpClass,
+                                  uint8_t i_hwpNumber)
+    {
+        errlHndl_t errl = nullptr;
+
+        do
+        {
+            // Input target / HWP class / HWP number have been
+            // verified by the preceding wrapper functions
+
+            // set up FIFO request message
+            SbeFifo::fifoExecuteHardwareProcedureRequest l_fifoRequest;
+            SbeFifo::fifoStandardResponse l_fifoResponse;
+            l_fifoRequest.hwpClass      = i_hwpClass;
+            l_fifoRequest.hwpNumber     = i_hwpNumber;
+
+            SBE_TRACD( "sendExecHWPRequest: "
+                       "target=%.8X, hwpClass=%X, hwpNumber=%X",
+                       TARGETING::get_huid(i_chipTarget),
+                       l_fifoRequest.hwpClass,
+                       l_fifoRequest.hwpNumber );
+
+            errl = SbeFifo::getTheInstance().performFifoChipOp(
+                                i_chipTarget,
+                                reinterpret_cast<uint32_t*>(&l_fifoRequest),
+                                reinterpret_cast<uint32_t*>(&l_fifoResponse),
+                                sizeof(SbeFifo::fifoStandardResponse));
+
+        }while(0);
+
+        SBE_TRACD(EXIT_MRK "sendExecHWPRequest");
+        return errl;
+    } // end sendExecHWPRequest
+
+
+    // Wrapper for an Odyssey IO HWP
+    // See sbeioif.H for definition
+    errlHndl_t sendExecHWPRequest(TARGETING::Target * i_chipTarget,
+                                  fifoExecuteHardwareProcedureIo i_hwpNumber)
     {
         errlHndl_t errl = nullptr;
 
@@ -104,13 +149,70 @@ namespace SBEIO
                 break;
             }
 
-            SBE_TRACF(EXIT_MRK "Skipping unimplemented chipop sendExecHWPRequest");
+            // Make sure the target is Odyssey
+            errl = sbeioOdysseyCheck(i_chipTarget,
+                                     SbeFifo::SBE_FIFO_CLASS_IPL_CONTROL,
+                                     SbeFifo::SBE_FIFO_CMD_EXECUTE_HWP);
+            if(errl)
+            {
+                break;
+            }
 
-        }while(0);
+            // Send the HWP request
+            errl = sendExecHWPRequest(i_chipTarget,
+                                      SBE_FIFO_EXEC_HWP_CLASS_IO,
+                                      i_hwpNumber);
+            if(errl)
+            {
+                break;
+            }
 
-        SBE_TRACD(EXIT_MRK "sendExecHWPRequest");
+        } while(0);
+
         return errl;
-    };
+    } // end sendExecHWPRequest for IO class
+
+
+    // Wrapper for an Odyssey MEMORY HWP
+    // See sbeioif.H for definition
+    errlHndl_t sendExecHWPRequest(TARGETING::Target * i_chipTarget,
+                                  fifoExecuteHardwareProcedureMemory i_hwpNumber)
+    {
+        errlHndl_t errl = nullptr;
+
+        do
+        {
+            // Make sure the target is one of the supported types.
+            errl = sbeioInterfaceChecks(i_chipTarget,
+                                        SbeFifo::SBE_FIFO_CLASS_IPL_CONTROL,
+                                        SbeFifo::SBE_FIFO_CMD_EXECUTE_HWP);
+            if(errl)
+            {
+                break;
+            }
+
+            // Make sure the target is Odyssey
+            errl = sbeioOdysseyCheck(i_chipTarget,
+                                     SbeFifo::SBE_FIFO_CLASS_IPL_CONTROL,
+                                     SbeFifo::SBE_FIFO_CMD_EXECUTE_HWP);
+            if(errl)
+            {
+                break;
+            }
+
+            // Send the HWP request
+            errl = sendExecHWPRequest(i_chipTarget,
+                                      SBE_FIFO_EXEC_HWP_CLASS_MEMORY,
+                                      i_hwpNumber);
+            if(errl)
+            {
+                break;
+            }
+
+        } while(0);
+
+        return errl;
+    } // end sendExecHWPRequest for MEMORY class
 
 } //end namespace SBEIO
 

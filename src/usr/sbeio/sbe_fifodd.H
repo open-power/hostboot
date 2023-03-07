@@ -95,56 +95,6 @@ public:
         SBE_FIFO_CMD_EXECUTE_HWP   = 0x04, // Odyssey only
     };
 
-    /*
-     * @brief enums for Execute Hardware Procedure Messages for Odyssey Chips
-     */
-    enum fifoExecuteHardwareProcedureClass
-    {
-        SBE_FIFO_EXEC_HWP_CLASS_IO     = 0x01,
-        SBE_FIFO_EXEC_HWP_CLASS_MEMORY = 0x02,
-    };
-
-    /*
-     * @brief enum for all valid IO class type messages for Execute Hardware Procedure on Odyssey chips
-     */
-    enum fifoExecuteHardwareProcedureIo
-    {
-        ODY_OMI_HSS_LOAD_PPE     = 0x01,
-        ODY_OMI_HSS_CONFIG       = 0x02,
-        ODY_OMI_HSS_START_PPE    = 0x03,
-        ODY_OMI_HSS_BIST_INIT    = 0x04,
-        ODY_OMI_HSS_BIST_START   = 0x05,
-        ODY_OMI_HSS_BIST_POLL    = 0x06,
-        ODY_OMI_HSS_BIST_CLEANUP = 0x07,
-        ODY_OMI_HSS_INIT         = 0x08,
-        ODY_OMI_HSS_DCCAL_START  = 0x09,
-        ODY_OMI_HSS_DCCAL_POLL   = 0x0A,
-        ODY_OMI_HSS_TX_ZCAL      = 0x0B,
-        ODY_OMI_PRETRAIN_ADV     = 0x0C,
-        ODY_OMI_SETUP            = 0x0D,
-        ODY_OMI_TRAIN            = 0x0E,
-        ODY_OMI_TRAIN_CHECK      = 0x0F,
-        ODY_OMI_POSTTRAIN_ADV    = 0x10,
-    };
-
-    /*
-     * @brief enum for all valid MEMORY class type messages for Execute Hardware Procedure on Odyssey chips
-     */
-    enum fifoExecuteHardwareProcedureMemory
-    {
-        ODY_SCOMINIT       = 0x01,
-        ODY_DDRPHYINIT     = 0x02,
-        ODY_DDRPHYINIT_ATE = 0x03,
-        ODY_LOAD_IMEM      = 0x04,
-        ODY_LOAD_DMEM      = 0x05,
-        ODY_SPPE_DRAMINIT  = 0x06,
-        ODY_ATE_FW         = 0x07,
-        ODY_LOAD_PIE       = 0x08,
-        ODY_DRAMINIT_MC    = 0x09,
-        ODY_ENABLE_ECC     = 0x0A,
-        ODY_THERMAL_INIT   = 0x0B,
-    };
-
     /**
      * @brief enums for FIFO SCOM Access Messages
      */
@@ -974,6 +924,7 @@ public:
      * @return errlHndl_t Error log handle on failure.
      */
     errlHndl_t performFifoReset(TARGETING::Target * i_target);
+
 
 protected:
 

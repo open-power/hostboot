@@ -33,6 +33,56 @@
 
 namespace SBEIO
 {
+    /**
+     * @brief enums for Execute Hardware Procedure Messages
+     */
+    enum fifoExecuteHardwareProcedureClass
+    {
+        SBE_FIFO_EXEC_HWP_CLASS_IO     = 0x01,
+        SBE_FIFO_EXEC_HWP_CLASS_MEMORY = 0x02,
+    };
+
+    /**
+     * @brief enum for all valid IO class type messages for Execute Hardware Procedure
+     */
+    enum fifoExecuteHardwareProcedureIo
+    {
+        IO_ODY_OMI_HSS_LOAD_PPE     = 0x01,
+        IO_ODY_OMI_HSS_CONFIG       = 0x02,
+        IO_ODY_OMI_HSS_START_PPE    = 0x03,
+        IO_ODY_OMI_HSS_BIST_INIT    = 0x04,
+        IO_ODY_OMI_HSS_BIST_START   = 0x05,
+        IO_ODY_OMI_HSS_BIST_POLL    = 0x06,
+        IO_ODY_OMI_HSS_BIST_CLEANUP = 0x07,
+        IO_ODY_OMI_HSS_INIT         = 0x08,
+        IO_ODY_OMI_HSS_DCCAL_START  = 0x09,
+        IO_ODY_OMI_HSS_DCCAL_POLL   = 0x0A,
+        IO_ODY_OMI_HSS_TX_ZCAL      = 0x0B,
+        IO_ODY_OMI_PRETRAIN_ADV     = 0x0C,
+        IO_ODY_OMI_SETUP            = 0x0D,
+        IO_ODY_OMI_TRAIN            = 0x0E,
+        IO_ODY_OMI_TRAIN_CHECK      = 0x0F,
+        IO_ODY_OMI_POSTTRAIN_ADV    = 0x10,
+    };
+
+    /**
+     * @brief enum for all valid MEMORY class type messages for Execute Hardware Procedure
+     */
+    enum fifoExecuteHardwareProcedureMemory
+    {
+        MEM_ODY_SCOMINIT       = 0x01,
+        MEM_ODY_DDRPHYINIT     = 0x02,
+        MEM_ODY_DDRPHYINIT_ATE = 0x03,
+        MEM_ODY_LOAD_IMEM      = 0x04,
+        MEM_ODY_LOAD_DMEM      = 0x05,
+        MEM_ODY_SPPE_DRAMINIT  = 0x06,
+        MEM_ODY_ATE_FW         = 0x07,
+        MEM_ODY_LOAD_PIE       = 0x08,
+        MEM_ODY_DRAMINIT_MC    = 0x09,
+        MEM_ODY_ENABLE_ECC     = 0x0A,
+        MEM_ODY_THERMAL_INIT   = 0x0B,
+    };
+
     enum KeyAddrStashKeys
     {
         RSV_MEM_ATTR_ADDR  = 0x01,  // Start at non-zero
@@ -554,6 +604,23 @@ namespace SBEIO
     * @return errlHndl_t Error log handle on failure.
     */
     errlHndl_t sendSecondarySbeHaltRequest(TARGETING::Target * i_procChip);
+
+
+    /**
+    * @brief Send the IO or MEMORY HWP request to the SBE.  These overloaded
+    *        wrapper functions perform initial checks and then call the local
+    *        function to send the HWP request.
+    *
+    * @param[in] i_chipTarget The Odyssey chip to perform the chipop on
+    * @param[in] i_hwpNumber The HWP number, differs depending on class
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t sendExecHWPRequest(TARGETING::Target * i_chipTarget,
+                                  fifoExecuteHardwareProcedureIo i_hwpNumber);
+    errlHndl_t sendExecHWPRequest(TARGETING::Target * i_chipTarget,
+                                  fifoExecuteHardwareProcedureMemory i_hwpNumber);
 
 
 } //end namespace SBEIO

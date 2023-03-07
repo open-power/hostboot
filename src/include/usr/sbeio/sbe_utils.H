@@ -138,6 +138,22 @@ namespace SBEIO
                                     uint8_t             i_commandClass,
                                     uint8_t             i_command,
                                     uint64_t            i_addr = 0);
+
+    /**
+     * @brief Specific function to check for Odyssey chip.
+     *
+     * @param[in] i_target The target to test
+     *
+     * @param[in] i_commandClass The command class for the SBE FIFO message being attempted. Provides context for the
+     *                           error.
+     *
+     * @param[in] i_command      The command for the SBE FIFO message being attempted. Provides context for the error.
+     *
+     * @return errlHndl_t an error or nullptr.
+     */
+    errlHndl_t sbeioOdysseyCheck(TARGETING::Target * i_target,
+                                 uint8_t             i_commandClass,
+                                 uint8_t             i_command);
 }
 
 #endif  // __SBE_UTILS_H
