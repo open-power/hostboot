@@ -128,10 +128,19 @@ namespace SBEIO
      *
      * @param[in] i_target The target to test
      *
+     * @param[in] i_commandClass The command class for the SBE FIFO message being attempted. Provides context for the
+     *                           error.
+     *
+     * @param[in] i_command      The command for the SBE FIFO message being attempted. Provides context for the error.
+     *
      * @param[in] i_addr  Optional. The address that was attempted to be accessed if one was used. Can be useful for
      *                    context when doing SCOM chipops.
+     *
+     * @return errlHndl_t an error or nullptr.
      */
     errlHndl_t sbeioInterfaceChecks(TARGETING::Target * i_target,
+                                    uint8_t             i_commandClass,
+                                    uint8_t             i_command,
                                     uint64_t            i_addr = 0);
 }
 

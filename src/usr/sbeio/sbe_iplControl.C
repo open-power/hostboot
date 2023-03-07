@@ -64,7 +64,9 @@ namespace SBEIO
         do
         {
             // Make sure the target is one of the supported types.
-            errl = sbeioInterfaceChecks(i_chipTarget);
+            errl = sbeioInterfaceChecks(i_chipTarget,
+                                        SbeFifo::SBE_FIFO_CLASS_IPL_CONTROL,
+                                        SbeFifo::SBE_FIFO_CMD_EXECUTE_ISTEP);
             if(errl)
             {
                 break;
@@ -94,7 +96,9 @@ namespace SBEIO
         do
         {
             // Make sure the target is one of the supported types.
-            errl = sbeioInterfaceChecks(i_chipTarget);
+            errl = sbeioInterfaceChecks(i_chipTarget,
+                                        SbeFifo::SBE_FIFO_CLASS_IPL_CONTROL,
+                                        SbeFifo::SBE_FIFO_CMD_EXECUTE_HWP);
             if(errl)
             {
                 break;

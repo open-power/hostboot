@@ -63,7 +63,9 @@ namespace SBEIO
         do
         {
             // Make sure the target is one of the supported types.
-            errl = sbeioInterfaceChecks(i_chipTarget);
+            errl = sbeioInterfaceChecks(i_chipTarget,
+                                        SbeFifo::SBE_FIFO_CLASS_CODE_UPDATE_MESSAGES,
+                                        SbeFifo::SBE_FIFO_CMD_GET_CODE_LEVELS);
             if(errl)
             {
                 break;
@@ -93,7 +95,9 @@ namespace SBEIO
         do
         {
             // Make sure the target is one of the supported types.
-            errl = sbeioInterfaceChecks(i_chipTarget);
+            errl = sbeioInterfaceChecks(i_chipTarget,
+                                        SbeFifo::SBE_FIFO_CLASS_CODE_UPDATE_MESSAGES,
+                                        SbeFifo::SBE_FIFO_CMD_UPDATE_IMAGE);
             if(errl)
             {
                 break;
@@ -123,7 +127,9 @@ namespace SBEIO
         do
         {
             // Make sure the target is one of the supported types.
-            errl = sbeioInterfaceChecks(i_chipTarget);
+            errl = sbeioInterfaceChecks(i_chipTarget,
+                                        SbeFifo::SBE_FIFO_CLASS_CODE_UPDATE_MESSAGES,
+                                        SbeFifo::SBE_FIFO_CMD_SYNC_CODE_LEVELS);
             if(errl)
             {
                 break;

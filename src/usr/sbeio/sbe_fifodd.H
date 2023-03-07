@@ -952,6 +952,22 @@ public:
     ///////////////////////////////////////////////////////////////////////
 
 
+    /**
+     * @brief SBE FIFO CFAM register addresses. These addresses will be translated at the FSI device driver layer
+     *        into their byte address equivalents which is what the SBE FIFO expects to receive.
+     */
+    enum fifoRegisterAddress
+    {
+        SBE_FIFO_UPFIFO_DATA_IN    = 0x00002420, // Byte Addr 2480
+        SBE_FIFO_UPFIFO_STATUS     = 0x00002421, // Byte Addr 2484
+        SBE_FIFO_UPFIFO_SIG_EOT    = 0x00002422, // Byte Addr 2488
+        SBE_FIFO_UPFIFO_REQ_RESET  = 0x00002423, // Byte Addr 248C
+        SBE_FIFO_DNFIFO_DATA_OUT   = 0x00002430, // Byte Addr 24C0
+        SBE_FIFO_DNFIFO_STATUS     = 0x00002431, // Byte Addr 24C4
+        SBE_FIFO_DNFIFO_RESET      = 0x00002434, // Byte Addr 24D0
+        SBE_FIFO_DNFIFO_ACK_EOT    = 0x00002435, // Byte Addr 24D4
+        SBE_FIFO_DNFIFO_MAX_TSFR   = 0x00002436, // Byte Addr 24D8
+    };
 
 
     /**
@@ -1091,23 +1107,6 @@ private:
     errlHndl_t writeCfam(TARGETING::Target * i_target,
             uint64_t   i_addr,
             uint32_t * i_pData);
-
-    /**
-     * @brief SBE FIFO CFAM register addresses. These addresses will be translated at the FSI device driver layer
-     *        into their byte address equivalents which is what the SBE FIFO expects to receive.
-     */
-    enum fifoRegisterAddress
-    {
-        SBE_FIFO_UPFIFO_DATA_IN    = 0x00002420, // Byte Addr 2480
-        SBE_FIFO_UPFIFO_STATUS     = 0x00002421, // Byte Addr 2484
-        SBE_FIFO_UPFIFO_SIG_EOT    = 0x00002422, // Byte Addr 2488
-        SBE_FIFO_UPFIFO_REQ_RESET  = 0x00002423, // Byte Addr 248C
-        SBE_FIFO_DNFIFO_DATA_OUT   = 0x00002430, // Byte Addr 24C0
-        SBE_FIFO_DNFIFO_STATUS     = 0x00002431, // Byte Addr 24C4
-        SBE_FIFO_DNFIFO_RESET      = 0x00002434, // Byte Addr 24D0
-        SBE_FIFO_DNFIFO_ACK_EOT    = 0x00002435, // Byte Addr 24D4
-        SBE_FIFO_DNFIFO_MAX_TSFR   = 0x00002436, // Byte Addr 24D8
-    };
 
     enum sbeFifoUpstreamStatus
     {

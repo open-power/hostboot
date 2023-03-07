@@ -62,7 +62,10 @@ errlHndl_t getFifoScom(TARGETING::Target * i_target,
     do
     {
         // error check input parameters
-        errl = sbeioInterfaceChecks(i_target,i_addr);
+        errl = sbeioInterfaceChecks(i_target,
+                                    SbeFifo::SBE_FIFO_CLASS_SCOM_ACCESS,
+                                    SbeFifo::SBE_FIFO_CMD_GET_SCOM,
+                                    i_addr);
         if (errl)
         {
             break;
@@ -103,7 +106,10 @@ errlHndl_t putFifoScom(TARGETING::Target * i_target,
     do
     {
         // error check input parameters
-        errl = sbeioInterfaceChecks(i_target,i_addr);
+        errl = sbeioInterfaceChecks(i_target,
+                                    SbeFifo::SBE_FIFO_CLASS_SCOM_ACCESS,
+                                    SbeFifo::SBE_FIFO_CMD_PUT_SCOM,
+                                    i_addr);
         if (errl)
         {
             break;
@@ -145,7 +151,10 @@ errlHndl_t putFifoScomUnderMask(TARGETING::Target * i_target,
     do
     {
         // error check input parameters
-        errl = sbeioInterfaceChecks(i_target,i_addr);
+        errl = sbeioInterfaceChecks(i_target,
+                                    SbeFifo::SBE_FIFO_CLASS_SCOM_ACCESS,
+                                    SbeFifo::SBE_FIFO_CMD_PUT_SCOM_UNDER_MASK,
+                                    i_addr);
         if (errl)
         {
             break;
@@ -186,7 +195,10 @@ errlHndl_t sendFifoReset(TARGETING::Target * i_target)
     do
     {
         // error check input parameters
-        errl = sbeioInterfaceChecks(i_target, 0x0);
+        errl = sbeioInterfaceChecks(i_target,
+                                    SbeFifo::SBE_FIFO_CLASS_SCOM_ACCESS,
+                                    SbeFifo::SBE_FIFO_CMD_PUT_SCOM,
+                                    SbeFifo::SBE_FIFO_DNFIFO_RESET);
         if (errl)
         {
             break;

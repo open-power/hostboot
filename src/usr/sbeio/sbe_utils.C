@@ -42,11 +42,15 @@ namespace SBEIO
 
     // Interface error checks
     errlHndl_t sbeioInterfaceChecks(TARGETING::Target * i_target,
+                                    const uint8_t       i_commandClass,
+                                    const uint8_t       i_command,
                                     const uint64_t      i_addr)
     {
         errlHndl_t errl = NULL;
         TRACDCOMP(g_trac_sbeio, ENTER_MRK"sbeioInterfaceChecks");
-
+        // Most of these errors have room leftover to add other useful data to the unused bits in userdata2
+        // Shifting the command and class to bits 0-15 and leaving the unused bits after.
+        uint64_t userdata2 = static_cast<uint64_t>(TWO_UINT8_TO_UINT16(i_commandClass, i_command)) << 48;
         do
         {
             // look for NULL
@@ -55,17 +59,19 @@ namespace SBEIO
                 TRACFCOMP(g_trac_sbeio, ERR_MRK "sbeioInterfaceChecks: Target is NULL" );
                 /*@
                  * @errortype
-                 * @moduleid     SBEIO_FIFO
-                 * @reasoncode   SBEIO_FIFO_NULL_TARGET
-                 * @userdata1    Request Address or unused
-                 * @devdesc      Null target passed
-                 * @custdesc     Firmware error communicating with a chip
+                 * @moduleid        SBEIO_FIFO
+                 * @reasoncode      SBEIO_FIFO_NULL_TARGET
+                 * @userdata1       Request Address or unused
+                 * @userdata2[0:7]  SBE FIFO Command Class
+                 * @userdata2[8:15] SBE FIFO Command
+                 * @devdesc         Null target passed
+                 * @custdesc        Firmware error communicating with a chip
                  */
                 errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                SBEIO_FIFO,
                                                SBEIO_FIFO_NULL_TARGET,
                                                i_addr,
-                                               0,
+                                               userdata2,
                                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH);
@@ -80,17 +86,19 @@ namespace SBEIO
                                   "Target is Primary Sentinel" );
                 /*@
                  * @errortype
-                 * @moduleid     SBEIO_FIFO
-                 * @reasoncode   SBEIO_FIFO_SENTINEL_TARGET
-                 * @userdata1    Request Address or unused
-                 * @devdesc      Primary Sentinel target is not supported
-                 * @custdesc     Firmware error communicating with a chip
+                 * @moduleid        SBEIO_FIFO
+                 * @reasoncode      SBEIO_FIFO_SENTINEL_TARGET
+                 * @userdata1       Request Address or unused
+                 * @userdata2[0:7]  SBE FIFO Command Class
+                 * @userdata2[8:15] SBE FIFO Command
+                 * @devdesc         Primary Sentinel target is not supported
+                 * @custdesc        Firmware error communicating with a chip
                  */
                 errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                SBEIO_FIFO,
                                                SBEIO_FIFO_SENTINEL_TARGET,
                                                i_addr,
-                                               0,
+                                               userdata2,
                                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 errl->collectTrace(SBEIO_COMP_NAME);
                 break;
@@ -105,18 +113,22 @@ namespace SBEIO
                                   "Target is Primary Proc" );
                 /*@
                  * @errortype
-                 * @moduleid     SBEIO_FIFO
-                 * @reasoncode   SBEIO_FIFO_MASTER_TARGET
-                 * @userdata1    Request Address or unused
-                 * @userdata2    HUID of boot proc
-                 * @devdesc      Primary Proc is not supported
-                 * @custdesc     Firmware error communicating with a chip
+                 * @moduleid         SBEIO_FIFO
+                 * @reasoncode       SBEIO_FIFO_MASTER_TARGET
+                 * @userdata1        Request Address or unused
+                 * @userdata2[0:31]  HUID of boot proc
+                 * @userdata2[32:39] SBE FIFO Command Class
+                 * @userdata2[40:47] SBE FIFO Command
+                 * @devdesc          Primary Proc is not supported
+                 * @custdesc         Firmware error communicating with a chip
                  */
                 errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                SBEIO_FIFO,
                                                SBEIO_FIFO_MASTER_TARGET,
                                                i_addr,
-                                               TARGETING::get_huid(i_target),
+                                               TWO_UINT32_TO_UINT64(TARGETING::get_huid(i_target),
+                                                   TWO_UINT16_TO_UINT32(TWO_UINT8_TO_UINT16(i_commandClass, i_command),
+                                                                        0)),
                                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 errl->collectTrace(SBEIO_COMP_NAME);
                 break;
@@ -131,6 +143,8 @@ namespace SBEIO
                      * @moduleid     SBEIO_FIFO
                      * @reasoncode   SBEIO_FIFO_NOT_ODYSSEY_OCMB
                      * @userdata1    HUID of OCMB chip
+                     * @userdata2[0:7]  SBE FIFO Command Class
+                     * @userdata2[8:15] SBE FIFO Command
                      * @devdesc      non-Odyssey OCMB is not supported
                      * @custdesc     Firmware error communicating with a chip
                      */
@@ -138,7 +152,7 @@ namespace SBEIO
                                                    SBEIO_FIFO,
                                                    SBEIO_FIFO_NOT_ODYSSEY_OCMB,
                                                    TARGETING::get_huid(i_target),
-                                                   0,
+                                                   userdata2,
                                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                     errl->collectTrace(SBEIO_COMP_NAME);
                     break;
