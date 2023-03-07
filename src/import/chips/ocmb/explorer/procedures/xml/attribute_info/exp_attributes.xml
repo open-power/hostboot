@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -104,39 +104,6 @@
         </enum>
         <writeable/>
         <mssAccessorName>ocmb_nonenterprise_mode_override</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_OCMB_HALF_DIMM_MODE</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-            Indicates whether the OCMB should be run in half DIMM mode or not
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>
-            FULL_DIMM = 0,
-            HALF_DIMM = 1
-        </enum>
-        <platInit/>
-        <mssAccessorName>ocmb_half_dimm_mode</mssAccessorName>
-    </attribute>
-
-    <attribute>
-        <id>ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-            An override that allows the user to control full or half DIMM mode
-        </description>
-        <initToZero></initToZero>
-        <valueType>uint8</valueType>
-        <enum>
-            NO_OVERRIDE = 0,
-            OVERRIDE_FULL_DIMM = 1,
-            OVERRIDE_HALF_DIMM = 2
-        </enum>
-        <writeable/>
-        <mssAccessorName>ocmb_half_dimm_mode_override</mssAccessorName>
     </attribute>
 
     <!-- user_input_msdg attribute overrides start -->
