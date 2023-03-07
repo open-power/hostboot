@@ -212,6 +212,7 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr size_t PORTS_PER_MCBIST = mss::ody::MAX_PORT_PER_OCMB;
         static constexpr size_t MAX_DIMM_PER_PORT = mss::ody::HW_MAX_DIMM_PER_PORT;
         static constexpr size_t MAX_PRIMARY_RANKS_PER_PORT = mss::ody::HW_MAX_RANK_PER_DIMM;
+        static constexpr size_t NUM_RANKS_IN_SYMBOL_COUNTS = 4;
         static constexpr size_t MAX_DQ_BITS = mss::ody::MAX_DQ_BITS_PER_PORT;
         static constexpr size_t MAX_DQ_NIBBLES = MAX_DQ_BITS / BITS_PER_NIBBLE;
         static constexpr size_t MAX_DRAMS_X8 = MAX_DQ_BITS / BITS_PER_BYTE;

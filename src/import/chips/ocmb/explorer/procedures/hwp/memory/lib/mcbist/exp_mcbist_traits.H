@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -208,6 +208,7 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr uint64_t EXPECTED_PATTERN_SIZE = 4;
 
         // Size
+        static constexpr size_t NUM_RANKS_IN_SYMBOL_COUNTS = 8;
         static constexpr size_t PORTS_PER_MCBIST = mss::exp::MAX_PORT_PER_OCMB;
         static constexpr size_t MAX_DIMM_PER_PORT = mss::exp::MAX_DIMM_PER_PORT;
         // Closest we've got to primary rank
