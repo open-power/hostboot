@@ -114,7 +114,14 @@ fapi2::ReturnCode getSPD(
                         // currently getSPD only supports the ENTIRE_SPD
                         // keyword. In the DDIMM case this include the EFD
                         // data so be sure to reflect that in the size we return.
-                        o_size = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
+                        if(SPD::DDR4_TYPE == l_memGen)
+                        {
+                            o_size = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
+                        }
+                        else
+                        {
+                            o_size = SPD::OCMB_SPD_EFD_COMBINED_SIZE_DDR5;
+                        }
                     }
                     else if( SPD::DDR4_TYPE == l_memGen )
                     {

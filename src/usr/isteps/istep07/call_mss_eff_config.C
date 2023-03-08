@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,7 @@
 // HWPs
 #include    <p10_mss_eff_config.H>
 #include    <exp_mss_eff_config_thermal.H>
+#include    <ody_mss_eff_config_thermal.H>
 #include    <p10_mss_eff_grouping.H>
 #include    <mss_check_ddimm_config.H>
 
@@ -78,6 +79,8 @@
 
 // isSimicsRunning
 #include    <util/misc.H>
+
+#include <chipids.H>
 
 namespace   ISTEP_07
 {
@@ -193,11 +196,12 @@ void* call_mss_eff_config (void *io_pArgs)
     TARGETING::TargetHandleList l_membufTargetList;
     TARGETING::TargetHandleList l_mcsTargetList;
     TARGETING::TargetHandleList l_memportTargetList;
+    TARGETING::ATTR_CHIP_ID_type l_ocmbChipType = POWER_CHIPID::EXPLORER_16;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>> l_fapi_ocmb_targets;
 
 
     do {
-        // Build up this list from memport parents, used in exp_mss_eff_config_thermal
+        // Build up this list from memport parents, used in exp/ody_mss_eff_config_thermal
         std::vector<fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>> l_fapi2_ocmb_targets;
 
         //----- p10_mss_eff_config
@@ -268,7 +272,10 @@ void* call_mss_eff_config (void *io_pArgs)
                            "call mss_check_ddimm_config HWP on OCMB 0x%08X",
                            get_huid(l_targOCMB));
 
+                // Pre-fetch the type of OCMB (Odyssey/Explorer) to use later.
+                l_ocmbChipType = l_targOCMB->getAttr<TARGETING::ATTR_CHIP_ID>();
                 FAPI_INVOKE_HWP(l_err, mss_check_ddimm_config, l_ocmb_target);
+
                 if (l_err)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -297,20 +304,29 @@ void* call_mss_eff_config (void *io_pArgs)
         }
 
 
-        //----- exp_mss_eff_config_thermal
+        //----- exp/ody_mss_eff_config_thermal
         // Consumes SPD/VPD and system policies to determine thermal properties
 
         if(l_fapi2_ocmb_targets.size() > 0)
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                      "call exp_mss_eff_config_thermal HWP on %d OCMB targets",
-                      l_fapi2_ocmb_targets.size());
-
-            FAPI_INVOKE_HWP(l_err, exp_mss_eff_config_thermal, l_fapi2_ocmb_targets);
+            if(l_ocmbChipType == POWER_CHIPID::ODYSSEY_16)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call ody_mss_eff_config_thermal HWP on %d OCMB targets",
+                          l_fapi2_ocmb_targets.size());
+                FAPI_INVOKE_HWP(l_err, ody_mss_eff_config_thermal, l_fapi2_ocmb_targets);
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call exp_mss_eff_config_thermal HWP on %d OCMB targets",
+                          l_fapi2_ocmb_targets.size());
+                FAPI_INVOKE_HWP(l_err, exp_mss_eff_config_thermal, l_fapi2_ocmb_targets);
+            }
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR in exp_mss_eff_config_thermal HWP. "
+                          "ERROR in exp/ody_mss_eff_config_thermal HWP. "
                           TRACE_ERR_FMT, TRACE_ERR_ARGS(l_err));
 
                 // Ensure istep error created and has same plid as this error
@@ -321,13 +337,13 @@ void* call_mss_eff_config (void *io_pArgs)
             else
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "SUCCESS :  exp_mss_eff_config_thermal HWP");
+                          "SUCCESS :  exp/ody_mss_eff_config_thermal HWP");
             }
         }
         else
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                      "No OCMB targets found, skipping exp_mss_eff_config_thermal HWP");
+                      "No OCMB targets found, skipping exp/ody_mss_eff_config_thermal HWP");
         }
 
         //----- p10_mss_eff_grouping

@@ -128,7 +128,9 @@ fapi2::ReturnCode platGetVPD(
             // 1st 512B is SPD info, and remaining 3.5KB is EFD info
             size_t l_spdBufferSize = (l_modType == SPD::PLANAR) ?
                                      SPD::PLANAR_OCMB_SPD_EFD_COMBINED_SIZE :
-                                     SPD::OCMB_SPD_EFD_COMBINED_SIZE;
+                                      (l_memType == SPD::DDR4_TYPE) ?
+                                        SPD::OCMB_SPD_EFD_COMBINED_SIZE :
+                                        SPD::OCMB_SPD_EFD_COMBINED_SIZE_DDR5;
 
             // Allocate buffer to hold SPD and init to 0
             l_spdBuffer = new uint8_t[l_spdBufferSize];

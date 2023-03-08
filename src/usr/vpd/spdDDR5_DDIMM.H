@@ -97,9 +97,9 @@ const KeywordData ddr5DDIMMData[] =
     { EXPLORER_FW_VERSION,              0x3c0,  0x40,   0x00,   0x00, false, true,  ALL },
     { SAFE_PARK_ZONE,                   0x800,  0x01,   0x00,   0x00, false, false, ALL },
     { DDIMM_MODULE_HEIGHT,              0xc1,   0x01,   0xFF,   0x00, false, false, ALL },
-    // Module Specific fields supported on DDR4 only
+    // Module Specific fields supported on DDR4/DDR5
     { ENTIRE_SPD_WITHOUT_EFD,           0x00,   0x280,  0x00,   0x00, false, false, ALL },
-    { ENTIRE_SPD,                       0x00,   0x800,  0x00,   0x00, false, false, ALL },
+    { ENTIRE_SPD,                       0x00,   0x1000,  0x00,   0x00, false, false, ALL },
     //---------------------------------------------------------------------------------------
 };
 
