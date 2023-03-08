@@ -32,15 +32,13 @@
 
 
 typedef fapi2::ReturnCode (*odyssey_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_MC>&);
+        const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
 
 extern "C"
 {
 
     fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& TGT0,
-                                   const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2,
-                                   const fapi2::Target<fapi2::TARGET_TYPE_MC>& TGT3);
+                                   const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2);
 
 }
 

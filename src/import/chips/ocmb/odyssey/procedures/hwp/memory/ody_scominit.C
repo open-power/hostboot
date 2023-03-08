@@ -77,11 +77,10 @@ extern "C"
 
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
         fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-        const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_MC>(i_target);
 
         // Assuming RDF0/1 are the same across all kind traits will need to add plug rule to confirm this
         FAPI_INF( TARGTIDFORMAT " running odyssey.scom.initfile", TARGTID);
-        FAPI_EXEC_HWP(l_rc, odyssey_scom, i_target, l_port_targets[0], FAPI_SYSTEM, l_mc);
+        FAPI_EXEC_HWP(l_rc, odyssey_scom, i_target, l_port_targets[0], FAPI_SYSTEM);
         FAPI_TRY(l_rc, TARGTIDFORMAT " error from odyssey.scom.initfile", TARGTID);
 
         for(const auto& l_port : l_port_targets)
