@@ -294,6 +294,19 @@ class msg_block_params
             FAPI_TRY(mss::attr::get_dimm_ranks_configed(i_target, iv_msg_block_vars.iv_CsPresentChA));
             FAPI_TRY(mss::attr::get_dimm_ranks_configed(i_target, iv_msg_block_vars.iv_CsPresentChB));
 
+            // Update the number of CS present based upon the number of DQ on each channel
+            if(iv_msg_block_vars.iv_EnabledDQsChA == 0)
+            {
+                iv_msg_block_vars.iv_CsPresentChA[0] = 0;
+                iv_msg_block_vars.iv_CsPresentChA[1] = 0;
+            }
+
+            if(iv_msg_block_vars.iv_EnabledDQsChB == 0)
+            {
+                iv_msg_block_vars.iv_CsPresentChB[0] = 0;
+                iv_msg_block_vars.iv_CsPresentChB[1] = 0;
+            }
+
             FAPI_TRY(mss::attr::get_dram_width(i_target, l_dram_width));
             FAPI_ASSERT((l_dram_width != 0),
                         fapi2::ODY_DRAMINIT_ZERO_DRAM_WIDTH()
