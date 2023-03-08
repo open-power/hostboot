@@ -601,7 +601,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE_RC_PASS(mss::attr::set_tx2d_train_opt(l_port, 0x84));
                     REQUIRE_RC_PASS(mss::attr::set_phy_config_override(l_port, 0x89AB));
                     REQUIRE_RC_PASS(mss::attr::set_phy_enabled_dq_cha(l_port, 0x0D));
-                    REQUIRE_RC_PASS(mss::attr::set_phy_enabled_dq_chb(l_port, 0x0E));
+                    REQUIRE_RC_PASS(mss::attr::set_phy_enabled_dq_chb(l_port, 0x00));
                     l_CsPresent_test[0] = 0x80;
                     REQUIRE_RC_PASS(mss::attr::set_dimm_ranks_configed(l_port, l_CsPresent_test));
                     REQUIRE_RC_PASS(mss::attr::set_dram_cl(l_port, 0x22));
@@ -785,9 +785,9 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE( l_msg_block.DWL_MIN_PULSE == 0x00 );
                     REQUIRE( l_msg_block.PhyConfigOverride == 0x89AB );
                     REQUIRE( l_msg_block.EnabledDQsChA == 0x0D );
-                    REQUIRE( l_msg_block.EnabledDQsChB == 0x0E );
+                    REQUIRE( l_msg_block.EnabledDQsChB == 0x00 );
                     REQUIRE( l_msg_block.CsPresentChA == 0x01 );
-                    REQUIRE( l_msg_block.CsPresentChB == 0x01 );
+                    REQUIRE( l_msg_block.CsPresentChB == 0x00 );  // Zero'ed out DQ for channel B zeroes out this field
                     REQUIRE( l_msg_block.MR0_A0 == 0x1A );
                     REQUIRE( l_msg_block.MR0_A1 == 0x1A );
                     REQUIRE( l_msg_block.MR0_A2 == 0x00 );
