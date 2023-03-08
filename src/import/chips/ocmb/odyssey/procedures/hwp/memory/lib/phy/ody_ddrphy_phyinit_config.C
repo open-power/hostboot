@@ -3717,19 +3717,28 @@ fapi2::ReturnCode setup_phy_basic_struct(const fapi2::Target<fapi2::TARGET_TYPE_
     // Hardcode to 10 DBYTEs (80 DQ bits) per port
     io_user_input_basic.NumDbyte = 10;
 
-    // NumActiveDbyteDfi0, NumActiveDbyteDfi1
-    // Hardcode to 5 DBYTEs (40 DQ bits) per DFI
-    io_user_input_basic.NumActiveDbyteDfi0 = 5;
-    io_user_input_basic.NumActiveDbyteDfi1 = 5;
+    // NumActiveDbyteDfi0 (enabled DQ / 8, and round up to support partial byte)
+    FAPI_TRY(mss::attr::get_phy_enabled_dq_cha(i_target, l_attr_data));
+    io_user_input_basic.NumActiveDbyteDfi0 = (l_attr_data / mss::BITS_PER_BYTE) +
+            ((l_attr_data % mss::BITS_PER_BYTE) ? 1 : 0);
+
+    // NumActiveDbyteDfi1 (enabled DQ / 8, and round up to support partial byte)
+    FAPI_TRY(mss::attr::get_phy_enabled_dq_chb(i_target, l_attr_data));
+    io_user_input_basic.NumActiveDbyteDfi1 = (l_attr_data / mss::BITS_PER_BYTE) +
+            ((l_attr_data % mss::BITS_PER_BYTE) ? 1 : 0);
 
     // NumAnib
     // Hardcode to 14 ANIB (ACX4) instances
     io_user_input_basic.NumAnib = 14;
 
-    // NumRank_dfi0, NumRank_dfi1
     FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_attr_arr));
-    io_user_input_basic.NumRank_dfi0 = l_attr_arr[0];
-    io_user_input_basic.NumRank_dfi1 = l_attr_arr[0];
+    // NumRank_dfi0 (mranks_per_dimm only if enabled DQs > 0 on CHA)
+    FAPI_TRY(mss::attr::get_phy_enabled_dq_cha(i_target, l_attr_data));
+    io_user_input_basic.NumRank_dfi0 = (l_attr_data > 0) ? l_attr_arr[0] : 0;
+
+    // NumRank_dfi1 (mranks_per_dimm only if enabled DQs > 0 on CHB)
+    FAPI_TRY(mss::attr::get_phy_enabled_dq_chb(i_target, l_attr_data));
+    io_user_input_basic.NumRank_dfi1 = (l_attr_data > 0) ? l_attr_arr[0] : 0;
 
     // DramDataWidth (program the same for all ranks)
     FAPI_TRY(mss::attr::get_dram_width(i_target, l_attr_arr));
