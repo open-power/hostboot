@@ -35,7 +35,7 @@
       Note: OTF in the enums stands for On The Fly. Acronym is used to correspond with JEDEC
     </description>
     <mssUnits> nck </mssUnits>
-    <initToZero></initToZero>
+    <default>BC8_OTF</default>
     <valueType>uint8</valueType>
     <enum>BL16 = 0, BC8_OTF = 1, BL32 = 2, BL32_OTF = 3</enum>
     <writeable/>
