@@ -39,6 +39,25 @@
 
 
   <hwpError>
+    <rc>RC_MSS_INVALID_DDR5_DRAM_WR_PREAMBLE</rc>
+    <description>
+       An invalid value was detected in ATTR_DDR5_DRAM_WR_PREAMBLE
+    </description>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_NEGATIVE_VPD_SIZE</rc>
     <description>
        A negative size was found while reading the VPD

@@ -2900,6 +2900,111 @@ class ddimm_0_0 : public mss::efd::base
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief Set the write leveling adjust start field
+        ///
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_wl_adj_start() const
+        {
+            // The Synopsys PHY has 128 fine steps per clock
+            constexpr uint16_t FINE_STEPS_PER_TCK_DIV_4 = 128 / 4;
+
+            uint16_t l_field = 0;
+            uint8_t l_wr_preamble = 0;
+
+            FAPI_TRY(mss::attr::get_ddr5_dram_wr_preamble(iv_port, l_wr_preamble));
+
+            // =========================================================
+            // Algorithm based on DDR5 spec JESD79-5B_v1-2
+            // Section 4.21.4 Write Leveling Internal Cycle Alignment Operation
+            // =========================================================
+            switch (l_wr_preamble)
+            {
+                case fapi2::ENUM_ATTR_DDR5_DRAM_WR_PREAMBLE_TCK2:
+                    // For tWPRE = 2tCK, WL_ADJ_START = -0.75 tCK
+                    // and the message block field is the absolute value
+                    l_field = 3 * FINE_STEPS_PER_TCK_DIV_4;
+                    break;
+
+                case fapi2::ENUM_ATTR_DDR5_DRAM_WR_PREAMBLE_TCK3:
+                    // For tWPRE = 3tCK, WL_ADJ_START = -1.25 tCK
+                    // and the message block field is the absolute value
+                    l_field = 5 * FINE_STEPS_PER_TCK_DIV_4;
+                    break;
+
+                case fapi2::ENUM_ATTR_DDR5_DRAM_WR_PREAMBLE_TCK4:
+                    // For tWPRE = 4tCK, WL_ADJ_START = -2.25 tCK
+                    // and the message block field is the absolute value
+                    l_field = 9 * FINE_STEPS_PER_TCK_DIV_4;
+                    break;
+
+                default:
+                    FAPI_ASSERT(false,
+                                fapi2::MSS_INVALID_DDR5_DRAM_WR_PREAMBLE().
+                                set_PORT_TARGET(iv_port).
+                                set_VALUE(l_wr_preamble),
+                                "%s Invalid value for ATTR_DDR5_DRAM_WR_PREAMBLE: %d (must be 1, 2, or 3)",
+                                spd::c_str(iv_port), l_wr_preamble);
+            }
+
+            FAPI_TRY(mss::attr::set_ddr5_wl_adj_start(iv_port, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the write leveling adjust end field
+        ///
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_wl_adj_end() const
+        {
+            // The Synopsys PHY has 128 fine steps per clock
+            constexpr uint16_t FINE_STEPS_PER_TCK_DIV_4 = 128 / 4;
+
+            uint16_t l_field = 0;
+            uint8_t l_wr_preamble = 0;
+
+            FAPI_TRY(mss::attr::get_ddr5_dram_wr_preamble(iv_port, l_wr_preamble));
+
+            // =========================================================
+            // Algorithm based on DDR5 spec JESD79-5B_v1-2
+            // Section 4.21.4 Write Leveling Internal Cycle Alignment Operation
+            // =========================================================
+            switch (l_wr_preamble)
+            {
+                case fapi2::ENUM_ATTR_DDR5_DRAM_WR_PREAMBLE_TCK2:
+                    // For tWPRE = 2tCK, WL_ADJ_START = 1.25 tCK
+                    l_field = 5 * FINE_STEPS_PER_TCK_DIV_4;
+                    break;
+
+                case fapi2::ENUM_ATTR_DDR5_DRAM_WR_PREAMBLE_TCK3:
+                    // For tWPRE = 3tCK, WL_ADJ_START = 1.75 tCK
+                    l_field = 7 * FINE_STEPS_PER_TCK_DIV_4;
+                    break;
+
+                case fapi2::ENUM_ATTR_DDR5_DRAM_WR_PREAMBLE_TCK4:
+                    // For tWPRE = 4tCK, WL_ADJ_START = 2.75 tCK
+                    l_field = 11 * FINE_STEPS_PER_TCK_DIV_4;
+                    break;
+
+                default:
+                    FAPI_ASSERT(false,
+                                fapi2::MSS_INVALID_DDR5_DRAM_WR_PREAMBLE().
+                                set_PORT_TARGET(iv_port).
+                                set_VALUE(l_wr_preamble),
+                                "%s Invalid value for ATTR_DDR5_DRAM_WR_PREAMBLE: %d (must be 1, 2, or 3)",
+                                spd::c_str(iv_port), l_wr_preamble);
+            }
+
+            FAPI_TRY(mss::attr::set_ddr5_wl_adj_end(iv_port, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
 
         /// @brief Process the fields for DDR5 DDIMM EFD
         ///
@@ -2985,6 +3090,10 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY(set_si_mc_drv_imp_cmd_addr(i_efd));
             FAPI_TRY(set_dram_rtt_park(i_efd));
             FAPI_TRY(set_dram_rtt_wr(i_efd));
+
+            // Derived from other values (need to be run last!)
+            FAPI_TRY(set_wl_adj_start());
+            FAPI_TRY(set_wl_adj_end());
 
         fapi_try_exit:
             return fapi2::current_err;

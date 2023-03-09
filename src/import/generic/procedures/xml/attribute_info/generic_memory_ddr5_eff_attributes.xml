@@ -153,7 +153,7 @@
       external WL, to be used as the starting point for internal WL.
     </description>
     <initToZero></initToZero>
-    <valueType>uint8</valueType>
+    <valueType>uint16</valueType>
     <writeable/>
     <mssAccessorName>ddr5_wl_adj_start</mssAccessorName>
   </attribute>
@@ -167,7 +167,7 @@
       internal WL, to be used as the final value.
     </description>
     <initToZero></initToZero>
-    <valueType>uint8</valueType>
+    <valueType>uint16</valueType>
     <writeable/>
     <mssAccessorName>ddr5_wl_adj_end</mssAccessorName>
   </attribute>

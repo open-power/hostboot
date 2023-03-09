@@ -161,8 +161,8 @@ struct msg_block_vars
     uint8_t iv_Reserved1E5 = 0;
     uint8_t iv_Reserved1E6 = 0;
     uint8_t iv_Reserved1E7 = 0;
-    uint8_t iv_WL_ADJ_START = 0;
-    uint8_t iv_WL_ADJ_END = 0;
+    uint16_t iv_WL_ADJ_START = 0;
+    uint16_t iv_WL_ADJ_END = 0;
     uint8_t iv_RCW[NUM_RCW] = {0};
     uint8_t iv_DisabledDB[mss::ody::MAX_BYTES_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
 };
