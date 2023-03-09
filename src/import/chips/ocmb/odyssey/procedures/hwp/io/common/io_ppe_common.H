@@ -108,50 +108,50 @@ class io_ppe_common
 
 
         fapi2::ReturnCode config_ppe(const fapi2::Target<K, M, V>& i_target,
-                                     const uint8_t& i_num_threads,
-                                     const uint32_t& i_vio_volts);
+                                     const uint8_t i_num_threads,
+                                     const uint32_t i_vio_volts);
 
         fapi2::ReturnCode config_thread(const fapi2::Target<K, M, V>& i_target,
-                                        const uint8_t& i_thread,
-                                        const uint8_t& i_gcr_id,
-                                        const uint8_t& i_num_rx_lanes,
-                                        const uint8_t& i_num_tx_lanes);
+                                        const uint8_t i_thread,
+                                        const uint8_t i_gcr_id,
+                                        const uint8_t i_num_rx_lanes,
+                                        const uint8_t i_num_tx_lanes);
 
         fapi2::ReturnCode bist_init_thread(const fapi2::Target<K, M, V>& i_target,
-                                           const uint8_t& i_thread,
-                                           const uint32_t& i_rx_mask,
-                                           const uint8_t& i_bist_timer_sel);
+                                           const uint8_t i_thread,
+                                           const uint32_t i_rx_mask,
+                                           const uint8_t i_bist_timer_sel);
 
         fapi2::ReturnCode bist_init(const fapi2::Target<K, M, V>& i_target,
-                                    const uint32_t& i_num_threads,
-                                    const uint32_t& i_rx_mask,
-                                    const uint8_t& i_dacTest,
-                                    const uint8_t& i_esdTest,
-                                    const uint8_t& i_bist_timer_sel);
+                                    const uint32_t i_num_threads,
+                                    const uint32_t i_rx_mask,
+                                    const uint8_t i_dacTest,
+                                    const uint8_t i_esdTest,
+                                    const uint8_t i_bist_timer_sel);
 
         fapi2::ReturnCode bist_cleanup(const fapi2::Target<K, M, V>& i_target,
-                                       const uint8_t& i_thread,
-                                       const uint32_t& i_rx_lanes_0_31,
-                                       const uint32_t& i_tx_lanes_0_31,
+                                       const uint8_t i_thread,
+                                       const uint32_t i_rx_lanes_0_31,
+                                       const uint32_t i_tx_lanes_0_31,
                                        uint8_t& o_done,
                                        uint32_t& o_fail);
 
         fapi2::ReturnCode hss_init(const fapi2::Target<K, M, V>& i_target,
-                                   const uint8_t& i_thread,
-                                   const uint32_t& i_data_rate,
-                                   const uint32_t& i_channel_length,
-                                   const uint8_t& i_spread_en,
-                                   const uint8_t& i_pcie_mode,
-                                   const uint32_t& i_auto_recal_mask);
+                                   const uint8_t i_thread,
+                                   const uint32_t i_data_rate,
+                                   const uint32_t i_channel_length,
+                                   const uint8_t i_spread_en,
+                                   const uint8_t i_pcie_mode,
+                                   const uint32_t i_auto_recal_mask);
         fapi2::ReturnCode hss_init_tx(const fapi2::Target<K, M, V>& i_target,
-                                      const uint8_t& i_thread,
-                                      const uint32_t& i_lane_mask,
-                                      const uint8_t& i_tx_pre1,
-                                      const uint8_t& i_tx_pre2,
-                                      const uint8_t& i_tx_post);
+                                      const uint8_t i_thread,
+                                      const uint32_t i_lane_mask,
+                                      const uint8_t i_tx_pre1,
+                                      const uint8_t i_tx_pre2,
+                                      const uint8_t i_tx_post);
         fapi2::ReturnCode hss_init_rx(const fapi2::Target<K, M, V>& i_target,
-                                      const uint8_t& i_thread,
-                                      const uint32_t& i_lane_mask,
+                                      const uint8_t i_thread,
+                                      const uint32_t i_lane_mask,
                                       const int32_t& i_rx_lte_g,
                                       const int32_t& i_rx_lte_z,
                                       const int32_t& i_rx_peak1,
@@ -159,32 +159,32 @@ class io_ppe_common
                                       const int32_t& i_rx_pr_phase_step);
 
         fapi2::ReturnCode setup_func_margin(const fapi2::Target<K, M, V>& i_target,
-                                            const uint8_t& i_thread,
-                                            const uint8_t& i_rx_vert_offset,
-                                            const uint8_t& i_rx_horiz_offset);
+                                            const uint8_t i_thread,
+                                            const uint8_t i_rx_vert_offset,
+                                            const uint8_t i_rx_horiz_offset);
 
         fapi2::ReturnCode ext_cmd_start(const fapi2::Target<K, M, V>& i_target,
-                                        const uint8_t& i_thread,
-                                        const uint32_t& i_rx_lanes_0_31,
-                                        const uint32_t& i_tx_lanes_0_31,
-                                        const uint32_t& i_ext_cmd_req);
+                                        const uint8_t i_thread,
+                                        const uint32_t i_rx_lanes_0_31,
+                                        const uint32_t i_tx_lanes_0_31,
+                                        const uint32_t i_ext_cmd_req);
 
         fapi2::ReturnCode ext_cmd_check(const fapi2::Target<K, M, V>& i_target,
-                                        const uint8_t& i_thread,
-                                        const uint32_t& i_ext_cmd_req,
+                                        const uint8_t i_thread,
+                                        const uint32_t i_ext_cmd_req,
                                         uint8_t& o_done,
                                         uint32_t& o_fail);
 
         fapi2::ReturnCode ext_cmd_poll(const fapi2::Target<K, M, V>& i_target,
-                                       const uint8_t& i_thread,
-                                       const uint32_t& i_ext_cmd_req,
+                                       const uint8_t i_thread,
+                                       const uint32_t i_ext_cmd_req,
                                        uint8_t& o_done,
                                        uint32_t& o_fail);
 
         fapi2::ReturnCode debug_display(const fapi2::Target<K, M, V>& i_target,
-                                        const uint8_t& i_thread,
-                                        const uint32_t& i_rx_lanes_0_31,
-                                        const uint32_t& i_tx_lanes_0_31);
+                                        const uint8_t i_thread,
+                                        const uint32_t i_rx_lanes_0_31,
+                                        const uint32_t i_tx_lanes_0_31);
 
         fapi2::ReturnCode enable_lanes(const fapi2::Target<K, M, V>& i_target,
                                        const fapi2::buffer<uint64_t> i_num_threads,
@@ -197,20 +197,20 @@ class io_ppe_common
                 fapi2::buffer<uint64_t>& o_fail);
 
         fapi2::ReturnCode bist_start(const fapi2::Target<K, M, V>& i_target,
-                                     const uint8_t& i_thread,
-                                     const uint32_t& i_rx_lanes_0_31,
-                                     const uint32_t& i_tx_lanes_0_31,
-                                     const uint32_t& i_ext_cmd_override);
+                                     const uint8_t i_thread,
+                                     const uint32_t i_rx_lanes_0_31,
+                                     const uint32_t i_tx_lanes_0_31,
+                                     const uint32_t i_ext_cmd_override);
 
 
         fapi2::ReturnCode bist_poll(const fapi2::Target<K, M, V>& i_target,
-                                    const uint8_t& i_num_threads,
+                                    const uint8_t i_num_threads,
                                     uint8_t& o_done,
                                     uint32_t& o_fail,
-                                    const uint32_t& i_ext_cmd_override);
+                                    const uint32_t i_ext_cmd_override);
 
         fapi2::ReturnCode fast_mode(const fapi2::Target<K, M, V>& i_target,
-                                    const uint8_t& i_thread);
+                                    const uint8_t i_thread);
 
         uint8_t get_num_lanes(uint32_t);
 };
@@ -222,8 +222,8 @@ class io_ppe_common
 
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::config_ppe(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_num_threads,
-        const uint32_t& i_vio_mv)
+        const uint8_t i_num_threads,
+        const uint32_t i_vio_mv)
 {
     FAPI_DBG("Start");
     uint8_t l_vio_volts = 0;
@@ -266,10 +266,10 @@ fapi_try_exit:
 
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::config_thread(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
-        const uint8_t& i_gcr_id,
-        const uint8_t& i_num_rx_lanes,
-        const uint8_t& i_num_tx_lanes)
+        const uint8_t i_thread,
+        const uint8_t i_gcr_id,
+        const uint8_t i_num_rx_lanes,
+        const uint8_t i_num_tx_lanes)
 {
     FAPI_DBG("Start");
     FAPI_TRY(FW_REG_FW_GCR_BUS_ID_PUT(iv_regs, i_target, i_thread, i_gcr_id));
@@ -288,9 +288,9 @@ fapi_try_exit:
 
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init_thread(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
-        const uint32_t& i_rx_mask,
-        const uint8_t& i_bist_timer_sel)
+        const uint8_t i_thread,
+        const uint32_t i_rx_mask,
+        const uint8_t i_bist_timer_sel)
 {
     FAPI_DBG("Start");
     uint32_t l_rx_mask = i_rx_mask;
@@ -333,11 +333,11 @@ fapi_try_exit:
 
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init(const fapi2::Target<K, M, V>& i_target,
-        const uint32_t& i_num_threads,
-        const uint32_t& i_rx_mask,
-        const uint8_t& i_dacTest,
-        const uint8_t& i_esdTest,
-        const uint8_t& i_bist_timer_sel)
+        const uint32_t i_num_threads,
+        const uint32_t i_rx_mask,
+        const uint8_t i_dacTest,
+        const uint8_t i_esdTest,
+        const uint8_t i_bist_timer_sel)
 {
     const uint16_t c_reg_rx_datasm_cnt22 = 0x146;
     const uint16_t c_reg_rx_ctl_cntl5 = 0x124;
@@ -427,9 +427,9 @@ fapi_try_exit:
 // ===============================================================
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::bist_cleanup(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
-        const uint32_t& i_rx_lanes_0_31,
-        const uint32_t& i_tx_lanes_0_31,
+        const uint8_t i_thread,
+        const uint32_t i_rx_lanes_0_31,
+        const uint32_t i_tx_lanes_0_31,
         uint8_t& o_done,
         uint32_t& o_fail)
 {
@@ -459,12 +459,12 @@ fapi_try_exit:
 // ===============================================================
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::hss_init(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
-        const uint32_t& i_data_rate,
-        const uint32_t& i_channel_length,
-        const uint8_t& i_spread_en,
-        const uint8_t& i_pcie_mode,
-        const uint32_t& i_auto_recal_mask)
+        const uint8_t i_thread,
+        const uint32_t i_data_rate,
+        const uint32_t i_channel_length,
+        const uint8_t i_spread_en,
+        const uint8_t i_pcie_mode,
+        const uint32_t i_auto_recal_mask)
 {
     FAPI_DBG("Starting io_ppe_common::hss_init");
     const uint32_t c_high_loss_channel = 8000; // 8000 mils or 8.000 inches
@@ -525,11 +525,11 @@ fapi_try_exit:
 }
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::hss_init_tx(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
-        const uint32_t& i_lane_mask,
-        const uint8_t& i_tx_pre1,
-        const uint8_t& i_tx_pre2,
-        const uint8_t& i_tx_post)
+        const uint8_t i_thread,
+        const uint32_t i_lane_mask,
+        const uint8_t i_tx_pre1,
+        const uint8_t i_tx_pre2,
+        const uint8_t i_tx_post)
 {
     FAPI_DBG("Starting io_ppe_common::hss_init_tx");
     MEM_REG_TX_FFE_PRE1_COEF_PUT(iv_regs, i_target, i_thread, i_tx_pre1);
@@ -542,8 +542,8 @@ fapi_try_exit:
 }
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::hss_init_rx(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
-        const uint32_t& i_lane_mask,
+        const uint8_t i_thread,
+        const uint32_t i_lane_mask,
         const int32_t& i_rx_lte_g,
         const int32_t& i_rx_lte_z,
         const int32_t& i_rx_peak1,
@@ -618,9 +618,9 @@ fapi_try_exit:
 
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::setup_func_margin(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
-        const uint8_t& i_rx_vert_offset,
-        const uint8_t& i_rx_horiz_offset)
+        const uint8_t i_thread,
+        const uint8_t i_rx_vert_offset,
+        const uint8_t i_rx_horiz_offset)
 {
     FAPI_DBG("Starting io_ppe_common::setup_func_margin");
     // FAPI_TRY(MEM_REG_PPE_OFFSET_MARGIN_MODE_PUT(iv_regs, i_target, i_thread, 3));
@@ -638,10 +638,10 @@ fapi_try_exit:
 // ===============================================================
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::ext_cmd_start(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
-        const uint32_t& i_rx_lanes_0_31,
-        const uint32_t& i_tx_lanes_0_31,
-        const uint32_t& i_ext_cmd_req)
+        const uint8_t i_thread,
+        const uint32_t i_rx_lanes_0_31,
+        const uint32_t i_tx_lanes_0_31,
+        const uint32_t i_ext_cmd_req)
 {
     FAPI_DBG("Starting io_ppe_common::ext_cmd_start_thread");
 
@@ -677,8 +677,8 @@ fapi_try_exit:
 
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::ext_cmd_check(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
-        const uint32_t& i_ext_cmd_req,
+        const uint8_t i_thread,
+        const uint32_t i_ext_cmd_req,
         uint8_t& o_done,
         uint32_t& o_fail)
 {
@@ -713,8 +713,8 @@ fapi_try_exit:
 
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::ext_cmd_poll(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
-        const uint32_t& i_ext_cmd_req,
+        const uint8_t i_thread,
+        const uint32_t i_ext_cmd_req,
         uint8_t& o_done,
         uint32_t& o_fail)
 {
@@ -749,9 +749,9 @@ fapi_try_exit:
 // ===============================================================
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::debug_display(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
-        const uint32_t& i_rx_lanes_0_31,
-        const uint32_t& i_tx_lanes_0_31)
+        const uint8_t i_thread,
+        const uint32_t i_rx_lanes_0_31,
+        const uint32_t i_tx_lanes_0_31)
 {
     FAPI_DBG("Start");
 
@@ -784,10 +784,10 @@ fapi_try_exit:
 // ===============================================================
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::bist_start(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
-        const uint32_t& i_rx_lanes_0_31,
-        const uint32_t& i_tx_lanes_0_31,
-        const uint32_t& i_ext_cmd_override)
+        const uint8_t i_thread,
+        const uint32_t i_rx_lanes_0_31,
+        const uint32_t i_tx_lanes_0_31,
+        const uint32_t i_ext_cmd_override)
 {
     FAPI_DBG("Starting io_ppe_common::bist_start");
 
@@ -803,10 +803,10 @@ fapi_try_exit:
 
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::bist_poll(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread,
+        const uint8_t i_thread,
         uint8_t& o_done,
         uint32_t& o_fail,
-        const uint32_t& i_ext_cmd_override)
+        const uint32_t i_ext_cmd_override)
 {
     FAPI_DBG("Starting io_ppe_common::bist_poll");
 
@@ -863,7 +863,7 @@ fapi_try_exit:
 // ===============================================================
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::fast_mode(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t& i_thread)
+        const uint8_t i_thread)
 {
     FAPI_DBG("Starting io_ppe_common::fast_mode");
 

@@ -72,10 +72,10 @@ struct TdrStruct
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*common_io_tdr_FP_t)(
     const GENERIC_FAPI_IO_TARGET&,
-    const uint64_t&,
-    const uint32_t&,
-    const uint32_t&,
-    const uint32_t&,
+    const uint64_t,
+    const uint32_t,
+    const uint32_t,
+    const uint32_t,
     TdrResult&,
     uint32_t&);
 
@@ -92,10 +92,10 @@ extern "C"
     /// @return FAPI_RC_SUCCESS if arguments are valid
     fapi2::ReturnCode common_io_tdr(
         const GENERIC_FAPI_IO_TARGET& i_target,
-        const uint64_t& i_baseAddr,
-        const uint32_t& i_group,
-        const uint32_t& i_lane,
-        const uint32_t& i_freq,
+        const uint64_t i_baseAddr,
+        const uint32_t i_group,
+        const uint32_t i_lane,
+        const uint32_t i_freq,
         TdrResult& o_status,
         uint32_t& o_length_ps);
 

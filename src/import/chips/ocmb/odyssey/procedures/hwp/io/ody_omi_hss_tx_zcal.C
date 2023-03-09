@@ -94,9 +94,9 @@ inline uint32_t decodeSegs(uint32_t i_segs)
 }
 
 fapi2::ReturnCode forceZCalToDefault(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                     const uint64_t& i_baseAddr,
-                                     const uint32_t& i_group,
-                                     const uint32_t& i_lane)
+                                     const uint64_t i_baseAddr,
+                                     const uint32_t i_group,
+                                     const uint32_t i_lane)
 {
     FAPI_DBG("Start - Setting Z Cal to Defaults");
 
@@ -171,9 +171,9 @@ fapi_try_exit:
 }
 
 fapi2::ReturnCode verifyZCal(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                             const uint64_t& i_baseAddr,
-                             const uint32_t& i_group,
-                             const uint32_t& i_lane)
+                             const uint64_t i_baseAddr,
+                             const uint32_t i_group,
+                             const uint32_t i_lane)
 {
     FAPI_DBG("Start - Verifying Z Cal");
 

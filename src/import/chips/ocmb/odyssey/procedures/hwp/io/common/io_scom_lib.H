@@ -37,11 +37,11 @@
 
 #include <fapi2.H>
 
-inline uint64_t buildAddr(const uint32_t& i_base_addr,
-                          const uint8_t& i_group,
-                          const uint8_t& i_lane,
-                          const uint16_t& i_reg,
-                          const uint8_t& i_tx = 0)
+inline uint64_t buildAddr(const uint32_t i_base_addr,
+                          const uint8_t i_group,
+                          const uint8_t i_lane,
+                          const uint16_t i_reg,
+                          const uint8_t i_tx = 0)
 {
     uint64_t r_addr = static_cast<uint64_t>(i_base_addr);
     r_addr |= static_cast<uint64_t>(0x3F);
@@ -55,13 +55,13 @@ inline uint64_t buildAddr(const uint32_t& i_base_addr,
 }
 
 fapi2::ReturnCode rmwIoHardwareReg(const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP | fapi2::TARGET_TYPE_OMI > &,
-                                   const uint64_t&,
-                                   const uint32_t&,
-                                   const uint32_t&,
-                                   const uint32_t&);
+                                   const uint64_t,
+                                   const uint32_t,
+                                   const uint32_t,
+                                   const uint32_t);
 
 fapi2::ReturnCode readIoHardwareReg(const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP | fapi2::TARGET_TYPE_OMI > &,
-                                    const uint64_t&,
-                                    const uint32_t&,
-                                    const uint32_t&,
+                                    const uint64_t,
+                                    const uint32_t,
+                                    const uint32_t,
                                     uint32_t&);
