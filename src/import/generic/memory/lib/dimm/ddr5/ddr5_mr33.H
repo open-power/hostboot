@@ -147,7 +147,7 @@ class mr33_data : public mr_base_data<MC>
                         .set_VALUE(i_value)
                         .set_STRAP(i_strap),
                         TARGTIDFORMAT " DDR5 MR33. Bad CA ODT impedance value on DIMM rank %u, strap%u. Value: %u", TARGTID,
-                        i_strap, i_dimm_rank, i_value);
+                        i_dimm_rank, i_strap, i_value);
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
@@ -178,7 +178,7 @@ class mr33_data : public mr_base_data<MC>
                         .set_FIELD(i_field)
                         .set_STRAP(i_strap),
                         TARGTIDFORMAT " DDR5 MR33. Bad CA ODT impedance field on DIMM rank %u, strap%u. Field value: %u", TARGTID,
-                        i_strap, i_dimm_rank, i_field);
+                        i_dimm_rank, i_strap, i_field);
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
@@ -209,7 +209,7 @@ class mr33_data : public mr_base_data<MC>
                         .set_VALUE(i_value)
                         .set_STRAP(i_strap),
                         TARGTIDFORMAT " DDR5 MR33. Bad DQS RTT park value on DIMM rank %u, strap%u. Value: %u", TARGTID,
-                        i_strap, i_dimm_rank, i_value);
+                        i_dimm_rank, i_strap, i_value);
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
@@ -240,7 +240,7 @@ class mr33_data : public mr_base_data<MC>
                         .set_FIELD(i_field)
                         .set_STRAP(i_strap),
                         TARGTIDFORMAT " DDR5 MR33. Bad DQS RTT park field on DIMM rank %u, strap%u. Field value: %u", TARGTID,
-                        i_strap, i_dimm_rank, i_field);
+                        i_dimm_rank, i_strap, i_field);
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
