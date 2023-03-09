@@ -307,11 +307,11 @@ fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TAR
             break;
 
         case END_OF_INITILIAZATION:
-            FAPI_INF(TARGTIDFORMAT" End of initiliazation, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
+            FAPI_INF(TARGTIDFORMAT" End of initialization, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_FINE_WRITE_LEVELING:
-            FAPI_INF(TARGTIDFORMAT" End of fine write training, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
+            FAPI_INF(TARGTIDFORMAT" End of fine write leveling, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_READ_ENABLE_TRAINING:
