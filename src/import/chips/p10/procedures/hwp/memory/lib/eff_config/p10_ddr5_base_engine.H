@@ -707,6 +707,22 @@ class base_0_0 : public mss::spd::base
         }
 
         ///
+        /// @brief Set the "P or Z" mode attribute
+        ///
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_poz_mode() const
+        {
+            uint8_t l_field = fapi2::ENUM_ATTR_MEM_EFF_Z_MODE_FALSE;
+
+            //FAPI_TRY(mss::attr::set_z_mode(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_Z_MODE, iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the dimm ranks cnfgd field
         ///
         /// @param[in] i_spd SPD binary
@@ -1255,6 +1271,7 @@ class base_0_0 : public mss::spd::base
         {
             // These fields need to be set first, as these are used for many
             // fields later on
+            FAPI_TRY(set_poz_mode());
             FAPI_TRY(set_dimm_ranks_cnfgd(i_spd));
             FAPI_TRY(set_host_to_ddr_speed_ratio(i_spd));
             FAPI_TRY(set_num_master_ranks_per_dimm(i_spd)); // AKA mranks

@@ -1044,4 +1044,20 @@
     <mssAccessorName>nibble_enables</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MEM_EFF_Z_MODE</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      Determines DDIMM memory controller P series versus Z series
+      specific settings.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <enum>
+      FALSE = 0,
+      TRUE = 1
+    </enum>
+    <writeable/>
+  </attribute>
+
 </attributes>
