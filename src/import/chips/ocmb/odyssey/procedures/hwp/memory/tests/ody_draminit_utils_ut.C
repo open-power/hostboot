@@ -439,8 +439,8 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     uint8_t l_dfe_gain_bias_test[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
                     uint8_t l_dfe_sign_bit_save[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
                     uint8_t l_dfe_sign_bit_test[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
-                    uint8_t l_wl_adj_start_save = 0;
-                    uint8_t l_wl_adj_end_save = 0;
+                    uint16_t l_wl_adj_start_save = 0;
+                    uint16_t l_wl_adj_end_save = 0;
                     uint8_t l_rtt_park_rd_save[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
                     uint8_t l_rtt_park_rd_test[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
                     uint8_t l_rtt_park_wr_save[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
@@ -739,8 +739,8 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     l_dfe_sign_bit_test[0][0] = 0x01;
                     l_dfe_sign_bit_test[0][1] = 0x00;
                     REQUIRE_RC_PASS(mss::attr::set_ddr5_dfe_sign_bit(l_port, l_dfe_sign_bit_test));
-                    REQUIRE_RC_PASS(mss::attr::set_ddr5_wl_adj_start(l_port, 0x60));
-                    REQUIRE_RC_PASS(mss::attr::set_ddr5_wl_adj_end(l_port, 0xA0));
+                    REQUIRE_RC_PASS(mss::attr::set_ddr5_wl_adj_start(l_port, 0x0060));
+                    REQUIRE_RC_PASS(mss::attr::set_ddr5_wl_adj_end(l_port, 0x00A0));
                     l_rtt_park_rd_test[0][0] = 0x03;
                     l_rtt_park_rd_test[0][1] = 0x04;
                     REQUIRE_RC_PASS(mss::attr::set_ddr5_rtt_park_rd(l_port, l_rtt_park_rd_test));
