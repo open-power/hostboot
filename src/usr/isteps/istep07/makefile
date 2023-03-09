@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2022
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -48,6 +48,13 @@ OBJS += p10_fbc_utils.o
 OBJS += p10_mss_eff_grouping.o
 OBJS += p10_sbe_scratch_regs.o
 OBJS += mss_check_ddimm_config.o
+OBJS += pmic_enable_utils_ddr5.o
+OBJS += pmic_common_utils.o
+OBJS += pmic_enable_utils.o
+OBJS += mss_pmic_attribute_accessors_manual.o
+OBJS += ody_mss_eff_config_thermal.o
+OBJS += ody_throttle.o
+OBJS += ody_decoder.o
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
@@ -71,6 +78,13 @@ EXTRAINCDIR += ${EXP_COMMON_PATH}/procedures/hwp/pmic/
 EXTRAINCDIR += ${EXP_COMMON_PATH}/procedures/hwp/pmic/lib/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic_ddr5/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic_ddr5/lib/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/i2c/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 EXTRAINCDIR += $(PROCEDURES_PATH)/hwp/perv
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/p10/procedures/hwp/memory/lib/
@@ -83,6 +97,11 @@ VPATH += $(PROCEDURES_PATH)/hwp/nest
 VPATH += ${HWP_PATH_PMIC}/lib/eff_config
 VPATH += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
 VPATH += $(PROCEDURES_PATH)/hwp/perv
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic_ddr5/lib/utils/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/utils/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/power_thermal/
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk

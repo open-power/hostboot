@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <mss_check_ddimm_config.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/pmic_enable_utils.H>
+#include <lib/utils/pmic_enable_utils_ddr5.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <mss_generic_attribute_getters.H>
@@ -61,10 +62,29 @@ extern "C"
         // Kick off the matching enable procedure
         if (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)
         {
+            uint8_t l_dram_gen = 0;
             fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
 
-            // Try to create our target info object
-            mss::pmic::target_info_redundancy l_target_info(i_ocmb_target, l_rc);
+            // We need to run mss_check_ddimm_config for ddr4 or ddr5 based on the DRAM gen attribute
+            // We just need get dram gen of 1 dimm
+            // This is ok because we do not allow mixing of DRAM generation
+            for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_ocmb_target))
+            {
+                FAPI_TRY(mss::attr::get_dram_gen(l_dimm, l_dram_gen));
+                break;
+            }
+
+            if (l_dram_gen == fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4)
+            {
+                // Try to create our target info object
+                mss::pmic::target_info_redundancy l_target_info(i_ocmb_target, l_rc);
+            }
+            else
+            {
+                // Try to create our target info object
+                mss::pmic::ddr5::target_info_redundancy_ddr5 l_target_info(i_ocmb_target, l_rc);
+            }
+
 
             // If platform did not provide a usable set of targets (4 GENERICI2CSLAVE, at least 2 PMICs),
             // Then we can't properly enable, this is asserted via this ReturnCode
