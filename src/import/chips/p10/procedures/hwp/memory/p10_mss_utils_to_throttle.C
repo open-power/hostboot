@@ -102,9 +102,7 @@ extern "C"
                 FAPI_TRY(mss::attr::get_safemode_dram_databus_util(l_port, l_safemode_util));
 
                 // TODO: Zen:MST-1818 Will need to call MC-specific version of this once BL16 is supported
-                l_safemode_throttle_per_port = mss::power_thermal::calc_n_from_dram_util(
-                                                   (static_cast<double>(l_safemode_util) / mss::power_thermal::throttle_const::PERCENT_CONVERSION),
-                                                   l_dram_clocks);
+                l_safemode_throttle_per_port = mss::power_thermal::calc_n_from_dram_util(l_safemode_util, l_dram_clocks);
 
                 // Util attribute set by OCC
                 FAPI_TRY( mss::attr::get_databus_util(l_port, l_input_databus_util) );

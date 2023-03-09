@@ -76,21 +76,22 @@ enum throttle_const : size_t
 ///
 /// @tparam T1  template parameter, type of input to be processed
 /// @tparam T2  template parameter, type of input to be processed
-/// @param[in]  i_dram_util     dram data bus utilization value
+/// @param[in]  i_dram_util    dram data bus utilization value in c%
 /// @param[in]  i_throttle_m   M throttle value in N/M throttling
 ///
-/// @return int32_t calculated N throttle value
+/// @return uint32_t calculated N throttle value
 ///
 template<typename T1, typename T2>
 inline uint32_t calc_n_from_dram_util(const T1 i_dram_util, const T2 i_throttle_m)
 {
     constexpr uint64_t CONVERT_ADDR_UTIL_TO_DATA_UTIL = 4;
 
-    return (static_cast<int>(static_cast<double>(i_dram_util)
-                             * (i_throttle_m)
-                             / (CONVERT_ADDR_UTIL_TO_DATA_UTIL)
-                             / (PERCENT_CONVERSION)
-                            )
+    const T1 l_numerator = i_dram_util * static_cast<T1>(i_throttle_m);
+    return (static_cast<uint32_t>(l_numerator
+                                  / (CONVERT_ADDR_UTIL_TO_DATA_UTIL)
+                                  / (PERCENT_CONVERSION)
+                                  / (PERCENT_CONVERSION)
+                                 )
            );
 }
 

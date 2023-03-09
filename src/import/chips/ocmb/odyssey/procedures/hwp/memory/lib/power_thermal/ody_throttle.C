@@ -609,9 +609,8 @@ fapi2::ReturnCode set_safemode_throttles<mss::mc_type::ODYSSEY>(const fapi2::Tar
 
     FAPI_TRY(fapi2::getScom(i_target, TT::FARB4Q_REG, l_data));
 
-    // l_util_per_port is in c%, so convert to % when calling calc_n_from_dram_util
-    l_throttle_per_port = calc_n_from_dram_util((static_cast<double>(l_util_per_port) / PERCENT_CONVERSION),
-                          l_throttle_denominator);
+    // l_util_per_port is in c%
+    l_throttle_per_port = calc_n_from_dram_util(l_util_per_port, l_throttle_denominator);
 
     l_data.insertFromRight<TT::EMERGENCY_M, TT::EMERGENCY_M_LEN>(l_throttle_denominator);
     l_data.insertFromRight<TT::EMERGENCY_N, TT::EMERGENCY_N_LEN>(l_throttle_per_port * l_port_count);
