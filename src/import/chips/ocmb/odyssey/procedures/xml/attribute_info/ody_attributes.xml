@@ -342,7 +342,7 @@
             NOT_0P9_VDD = 0,
             0P9_VDD     = 1
         </enum>
-        <default>0P9_VDD</default>
+        <default>NOT_0P9_VDD</default>
         <writeable/>
         <mssAccessorName>phy_is_highvdd</mssAccessorName>
     </attribute>
