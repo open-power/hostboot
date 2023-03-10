@@ -523,6 +523,13 @@ class base_0_0 : public mss::spd::base
             FAPI_TRY(mss::attr::set_ddr5_channel_bus_width(iv_port, l_channel_bus_width));
             FAPI_TRY(mss::attr::set_channels_per_dimm(iv_dimm, l_num_channel));
 
+            // Set the CHB_ACTIVE attr to 0 if bus width is not used
+            // @note: The default is set to 1 in the xml file
+            if(l_field_channel_b == fapi2::ENUM_ATTR_MEM_EFF_DDR5_CHANNEL_BUS_WIDTH_NOT_USED)
+            {
+                FAPI_TRY(mss::attr::set_ddr5_chb_active(iv_port, 0));
+            }
+
 
         fapi_try_exit:
             return fapi2::current_err;

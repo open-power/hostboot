@@ -216,20 +216,20 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             PHY_ODT_IMPEDANCE_START = 3,
             PHY_ODT_IMPEDANCE_LEN = 5,
 
-            // Byte 28: PHY Drive impedance pull up
-            PHY_DRIVE_IMPEDANCE_PULL_UP_BYTE = 28,
-            PHY_DRIVE_IMPEDANCE_PULL_UP_START = 2,
-            PHY_DRIVE_IMPEDANCE_PULL_UP_LEN = 6,
+            // Byte 28: PHY Drive impedance
+            PHY_DRIVE_IMPEDANCE_CTRL0_BYTE = 28,
+            PHY_DRIVE_IMPEDANCE_CTRL0_START = 3,
+            PHY_DRIVE_IMPEDANCE_CTRL0_LEN = 5,
 
-            // Byte 29: PHY Drive impedance pull down
-            PHY_DRIVE_IMPEDANCE_PULL_DOWN_BYTE = 29,
-            PHY_DRIVE_IMPEDANCE_PULL_DOWN_START = 2,
-            PHY_DRIVE_IMPEDANCE_PULL_DOWN_LEN = 6,
+            // Byte 29: PHY Drive impedance
+            PHY_DRIVE_IMPEDANCE_CTRL1_BYTE = 29,
+            PHY_DRIVE_IMPEDANCE_CTRL1_START = 3,
+            PHY_DRIVE_IMPEDANCE_CTRL1_LEN = 5,
 
             // Byte 30: PHY DRV impedance
-            PHY_DRIVE_IMPEDANCE_BYTE = 30,
-            PHY_DRIVE_IMPEDANCE_START = 2,
-            PHY_DRIVE_IMPEDANCE_LEN = 6,
+            PHY_DRIVE_IMPEDANCE_CTRL2_BYTE = 30,
+            PHY_DRIVE_IMPEDANCE_CTRL2_START = 3,
+            PHY_DRIVE_IMPEDANCE_CTRL2_LEN = 5,
 
             // Byte 31: PHY Slew Rate DQ_DQS
             PHY_SLEW_RATE_DQ_DQS_BYTE = 31,
@@ -355,8 +355,8 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
 
             // Byte 59: Alert ODT Impedance
             ALERT_ODT_IMPEDANCE_BYTE = 59,
-            ALERT_ODT_IMPEDANCE_START = 4,
-            ALERT_ODT_IMPEDANCE_LEN = 4,
+            ALERT_ODT_IMPEDANCE_START = 3,
+            ALERT_ODT_IMPEDANCE_LEN = 5,
 
             // Byte 60-67: RTT PARK and WR
             // BYTE0: A0 RANK0
@@ -482,14 +482,22 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
 
             // Byte 77: Non-Target ODT RD/WR
             NT_ODT_BYTE = 77,
-            NT_ODT_RD_A0_B0_START = 7,
-            NT_ODT_RD_A0_B0_LEN = 1,
-            NT_ODT_WR_A0_B0_START = 6,
-            NT_ODT_WR_A0_B0_LEN = 1,
-            NT_ODT_RD_A1_B1_START = 5,
-            NT_ODT_RD_A1_B1_LEN = 1,
-            NT_ODT_WR_A1_B1_START = 4,
-            NT_ODT_WR_A1_B1_LEN = 1,
+            NT_ODT_RD_A0_B0_RANK0_START = 7,
+            NT_ODT_RD_A0_B0_RANK0_LEN = 1,
+            NT_ODT_WR_A0_B0_RANK0_START = 6,
+            NT_ODT_WR_A0_B0_RANK0_LEN = 1,
+            NT_ODT_RD_A1_B1_RANK0_START = 5,
+            NT_ODT_RD_A1_B1_RANK0_LEN = 1,
+            NT_ODT_WR_A1_B1_RANK0_START = 4,
+            NT_ODT_WR_A1_B1_RANK0_LEN = 1,
+            NT_ODT_RD_A0_B0_RANK1_START = 3,
+            NT_ODT_RD_A0_B0_RANK1_LEN = 1,
+            NT_ODT_WR_A0_B0_RANK1_START = 2,
+            NT_ODT_WR_A0_B0_RANK1_LEN = 1,
+            NT_ODT_RD_A1_B1_RANK1_START = 1,
+            NT_ODT_RD_A1_B1_RANK1_LEN = 1,
+            NT_ODT_WR_A1_B1_RANK1_START = 0,
+            NT_ODT_WR_A1_B1_RANK1_LEN = 1,
 
             // Byte 78: DFI Max Read Latency
             DFI_MAX_RD_LATENCY_BYTE = 78,
@@ -1657,14 +1665,14 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         // Byte 27: PHY ODT Impedence
         static constexpr field_t PHY_ODT_IMPEDANCE{PHY_ODT_IMPEDANCE_BYTE, PHY_ODT_IMPEDANCE_START, PHY_ODT_IMPEDANCE_LEN};
 
-        // Byte 28: PHY Drive impedance pull up
-        static constexpr field_t PHY_DRIVE_IMPEDANCE_PULL_UP{PHY_DRIVE_IMPEDANCE_PULL_UP_BYTE, PHY_DRIVE_IMPEDANCE_PULL_UP_START, PHY_DRIVE_IMPEDANCE_PULL_UP_LEN};
+        // Byte 28: PHY Drive impedance
+        static constexpr field_t PHY_DRIVE_IMPEDANCE_CTRL0{PHY_DRIVE_IMPEDANCE_CTRL0_BYTE, PHY_DRIVE_IMPEDANCE_CTRL0_START, PHY_DRIVE_IMPEDANCE_CTRL0_LEN};
 
-        // Byte 29: PHY Drive impedance pull down
-        static constexpr field_t PHY_DRIVE_IMPEDANCE_PULL_DOWN{PHY_DRIVE_IMPEDANCE_PULL_DOWN_BYTE, PHY_DRIVE_IMPEDANCE_PULL_DOWN_START, PHY_DRIVE_IMPEDANCE_PULL_DOWN_LEN};
+        // Byte 29: PHY Drive impedance
+        static constexpr field_t PHY_DRIVE_IMPEDANCE_CTRL1{PHY_DRIVE_IMPEDANCE_CTRL1_BYTE, PHY_DRIVE_IMPEDANCE_CTRL1_START, PHY_DRIVE_IMPEDANCE_CTRL1_LEN};
 
         // Byte 30: PHY Drive impedance
-        static constexpr field_t PHY_DRIVE_IMPEDANCE{PHY_DRIVE_IMPEDANCE_BYTE, PHY_DRIVE_IMPEDANCE_START, PHY_DRIVE_IMPEDANCE_LEN};
+        static constexpr field_t PHY_DRIVE_IMPEDANCE_CTRL2{PHY_DRIVE_IMPEDANCE_CTRL2_BYTE, PHY_DRIVE_IMPEDANCE_CTRL2_START, PHY_DRIVE_IMPEDANCE_CTRL2_LEN};
 
         // Byte 31: PHY Slew Rate DQ_DQS
         static constexpr field_t PHY_SLEW_RATE_DQ_DQS{PHY_SLEW_RATE_DQ_DQS_BYTE, PHY_SLEW_RATE_DQ_DQS_START, PHY_SLEW_RATE_DQ_DQS_LEN};
@@ -1707,6 +1715,9 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t DQ_SLEW_RATE_FALL_BYTE1{DQ_SLEW_RATE_FALL_BYTE1_BYTE, DQ_SLEW_RATE_FALL_BYTE1_START, DQ_SLEW_RATE_FALL_BYTE1_LEN};
         static constexpr field_t DQ_SLEW_RATE_FALL_BYTE2{DQ_SLEW_RATE_FALL_BYTE2_BYTE, DQ_SLEW_RATE_FALL_BYTE2_START, DQ_SLEW_RATE_FALL_BYTE2_LEN};
         static constexpr field_t DQ_SLEW_RATE_FALL_BYTE3{DQ_SLEW_RATE_FALL_BYTE3_BYTE, DQ_SLEW_RATE_FALL_BYTE3_START, DQ_SLEW_RATE_FALL_BYTE3_LEN};
+
+        // Byte 59: Alert ODT Impedance
+        static constexpr field_t ALERT_ODT_IMPEDANCE{ALERT_ODT_IMPEDANCE_BYTE, ALERT_ODT_IMPEDANCE_START, ALERT_ODT_IMPEDANCE_LEN};
 
         // Byte 60-67: RTT PARK and WR
         // BYTE0: A0 RANK0
@@ -1765,10 +1776,14 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t PHY_EQUALIZATION_RDFE{PHY_EQUALIZATION_BYTE, PHY_EQUALIZATION_RDFE_START, PHY_EQUALIZATION_RDFE_LEN};
 
         // Byte 77: Non-Target ODT RD/WR
-        static constexpr field_t NT_ODT_RD_A0_B0{NT_ODT_BYTE, NT_ODT_RD_A0_B0_START, NT_ODT_RD_A0_B0_LEN};
-        static constexpr field_t NT_ODT_WR_A0_B0{NT_ODT_BYTE, NT_ODT_WR_A0_B0_START, NT_ODT_WR_A0_B0_LEN};
-        static constexpr field_t NT_ODT_RD_A1_B1{NT_ODT_BYTE, NT_ODT_RD_A1_B1_START, NT_ODT_RD_A1_B1_LEN};
-        static constexpr field_t NT_ODT_WR_A1_B1{NT_ODT_BYTE, NT_ODT_WR_A1_B1_START, NT_ODT_WR_A1_B1_LEN};
+        static constexpr field_t NT_ODT_RD_A0_B0_RANK0{NT_ODT_BYTE, NT_ODT_RD_A0_B0_RANK0_START, NT_ODT_RD_A0_B0_RANK0_LEN};
+        static constexpr field_t NT_ODT_WR_A0_B0_RANK0{NT_ODT_BYTE, NT_ODT_WR_A0_B0_RANK0_START, NT_ODT_WR_A0_B0_RANK0_LEN};
+        static constexpr field_t NT_ODT_RD_A1_B1_RANK0{NT_ODT_BYTE, NT_ODT_RD_A1_B1_RANK0_START, NT_ODT_RD_A1_B1_RANK0_LEN};
+        static constexpr field_t NT_ODT_WR_A1_B1_RANK0{NT_ODT_BYTE, NT_ODT_WR_A1_B1_RANK0_START, NT_ODT_WR_A1_B1_RANK0_LEN};
+        static constexpr field_t NT_ODT_RD_A0_B0_RANK1{NT_ODT_BYTE, NT_ODT_RD_A0_B0_RANK1_START, NT_ODT_RD_A0_B0_RANK1_LEN};
+        static constexpr field_t NT_ODT_WR_A0_B0_RANK1{NT_ODT_BYTE, NT_ODT_WR_A0_B0_RANK1_START, NT_ODT_WR_A0_B0_RANK1_LEN};
+        static constexpr field_t NT_ODT_RD_A1_B1_RANK1{NT_ODT_BYTE, NT_ODT_RD_A1_B1_RANK1_START, NT_ODT_RD_A1_B1_RANK1_LEN};
+        static constexpr field_t NT_ODT_WR_A1_B1_RANK1{NT_ODT_BYTE, NT_ODT_WR_A1_B1_RANK1_START, NT_ODT_WR_A1_B1_RANK1_LEN};
 
         // Byte 78: DFI Max Read Latency
         static constexpr field_t DFIMRL_DDRCLK{DFI_MAX_RD_LATENCY_BYTE, DFIMRL_DDRCLK_START, DFIMRL_DDRCLK_LEN};

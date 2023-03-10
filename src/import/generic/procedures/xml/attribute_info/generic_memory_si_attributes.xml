@@ -465,9 +465,13 @@
           Memory Controller side Receiver Impedance. Data and Data Strobe Lines in Ohms.
         </description>
         <initToZero></initToZero>
-        <valueType>uint8</valueType>
+        <valueType>uint16</valueType>
         <writeable/>
-        <enum>DISABLE = 0, OHM_40 = 40, OHM_48 = 48, OHM_60 = 60, OHM_80 = 80, OHM_120 = 120, OHM_240 = 240</enum>
+        <enum>DISABLE = 0, OHM_40 = 40, OHM_48 = 48, OHM_60 = 60, OHM_80 = 80, OHM_120 = 120, OHM_240 = 240,
+        <!-- Values supported by DDR5 only      -->
+        OHM_25 = 25, OHM_27 = 27, OHM_28 = 28, OHM_30 = 30, OHM_32 = 32, OHM_34 = 34, OHM_36 = 36, OHM_43 = 43,
+        OHM_53 = 53, OHM_68 = 68, OHM_96 = 96, OHM_160 = 160, OHM_480 = 480
+        </enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_rcv_imp_dq_dqs</mssAccessorName>
         <array>2 4</array>
@@ -656,8 +660,11 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <enum>HIGH_IMP = 0, OHM_40 = 40, OHM_60 = 60, OHM_80 = 80, OHM_120 = 120,
-              OHM_240 = 240</enum>
+        <enum>HIGH_IMP = 0, OHM_25 = 25, OHM_27 = 27, OHM_28 = 28, OHM_30 = 30, OHM_32 = 32,
+              OHM_34 = 34, OHM_36 = 36, OHM_40 = 40, OHM_43 = 43, OHM_48 = 48, OHM_53 = 53,
+              OHM_60 = 60, OHM_68 = 68, OHM_80 = 80, OHM_96 = 96, OHM_120 = 120, OHM_160 = 160,
+              OHM_240 = 240, OHM_480 = 480
+        </enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_phy_drv_imp_dq_dqs_pull_up</mssAccessorName>
     </attribute>

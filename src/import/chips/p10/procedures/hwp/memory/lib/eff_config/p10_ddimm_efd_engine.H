@@ -1781,13 +1781,13 @@ class ddimm_efd_0_3 : public base
         /// @return ODT_IMP map
         /// @note 0.3 revision version
         ///
-        virtual std::vector<std::pair<uint8_t, uint8_t>> get_si_mc_rcv_imp_dq_dqs_map() const
+        virtual std::vector<std::pair<uint8_t, uint16_t>> get_si_mc_rcv_imp_dq_dqs_map() const
         {
             // std::vector when returned will be std::move'd instead of copied, but HB likely will not
             // do this. So, we may need to revisit if the copy proves to be too slow/costly
 
             // Make this static so we don't have to rebuild it each time this is called
-            const std::vector< std::pair<uint8_t, uint8_t> > ODT_IMP_MAP_0_3 =
+            const std::vector< std::pair<uint8_t, uint16_t> > ODT_IMP_MAP_0_3 =
             {
                 // {key byte, PHY ODT IMP (ohms)}
                 {0b0000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_DISABLE},
@@ -1812,14 +1812,14 @@ class ddimm_efd_0_3 : public base
         ///
         virtual fapi2::ReturnCode set_si_mc_rcv_imp_dq_dqs(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field[mss::exp::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint16_t l_field[mss::exp::sizes::MAX_RANK_PER_DIMM] = {0};
             uint8_t l_odt_impedance = 0;
 
             FAPI_TRY(mss::attr::get_si_mc_rcv_imp_dq_dqs(iv_dimm, l_field));
 
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_ODT_IMPEDANCE, i_efd, mss::SET_SI_MC_RCV_IMP_DQ_DQS, l_odt_impedance));
-            FAPI_TRY(lookup_table_check(iv_ocmb, get_si_mc_rcv_imp_dq_dqs_map(), mss::SET_SI_MC_RCV_IMP_DQ_DQS, l_odt_impedance,
-                                        l_field[iv_dimm_rank]));
+            FAPI_TRY(lookup_table_check(iv_ocmb, get_si_mc_rcv_imp_dq_dqs_map(), mss::SET_SI_MC_RCV_IMP_DQ_DQS,
+                                        l_odt_impedance, l_field[iv_dimm_rank]));
 
             FAPI_TRY(mss::attr::set_si_mc_rcv_imp_dq_dqs(iv_dimm, l_field));
 
@@ -2930,13 +2930,13 @@ class ddimm_efd_0_4 : public ddimm_efd_0_3
         /// @return ODT_IMP map
         /// @note 0.4 revision version
         ///
-        virtual std::vector<std::pair<uint8_t, uint8_t>> get_si_mc_rcv_imp_dq_dqs_map() const override
+        virtual std::vector<std::pair<uint8_t, uint16_t>> get_si_mc_rcv_imp_dq_dqs_map() const override
         {
             // std::vector when returned will be std::move'd instead of copied, but HB likely will not
             // do this. So, we may need to revisit if the copy proves to be too slow/costly
 
             // Make this static so we don't have to rebuild it each time this is called
-            const std::vector< std::pair<uint8_t, uint8_t> > ODT_IMP_MAP_NEWER =
+            const std::vector< std::pair<uint8_t, uint16_t> > ODT_IMP_MAP_NEWER =
             {
                 // {key byte, PHY ODT IMP (ohms)}
                 {0b00000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_DISABLE},

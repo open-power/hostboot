@@ -469,6 +469,15 @@ enum generic_ffdc_codes : uint16_t
 
     SET_DRAM_TCCD_L_WR = 0x1208,
 
+    SET_ALERT_ODT_IMPEDANCE = 0x1209,
+
+    SET_NT_ODT_RD = 0x120A,
+    SET_NT_ODT_WR = 0x120B,
+
+    SET_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP = 0x120C,
+    SET_TX_IMP_CTRL1 = 0x120D,
+    SET_TX_IMP_CTRL2 = 0x120E,
+
 };
 
 ///

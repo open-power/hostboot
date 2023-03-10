@@ -42,6 +42,7 @@
 #include <lib/utils/pmic_consts.H>
 #include <lib/shared/ody_consts.H>
 #include <generic/memory/lib/data_engine/data_engine_utils.H>
+#include <generic/memory/lib/utils/bit_count.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/bit_count.H>
 
@@ -653,6 +654,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint8_t l_field = 0;
             uint8_t l_height = 0;
             const std::vector<uint8_t> l_reserved_bits{0b010, 0b011, 0b0101, 0b110, 0b111};
+            // =========================================================
+            // Byte 230: Module Height
+            // Attribute: ATTR_MEM_EFF_DRAM_MODULE_HEIGHT
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 68
+            // =========================================================
             const std::vector< std::pair<uint8_t, uint8_t> > BASE_MODULE_HEIGHT_MAP =
             {
                 //{key byte, dimm type}
@@ -706,6 +713,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint8_t l_mem_alert_a1_b1_en;
             uint8_t l_field = 0;
 
+            // =========================================================
+            // Byte 364: Mem Alert Enable and Pull-Up
+            // Attribute: ATTR_MEM_EFF_MEMALERTEN
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 96
+            // =========================================================
             FAPI_TRY(get_field_spd(iv_ocmb, F::PHY_A0_B0_MEM_ALERT, i_spd, ody::SET_MEM_ALERT_EN, l_mem_alert_a0_b0_en));
             FAPI_TRY(get_field_spd(iv_ocmb, F::PHY_A1_B1_MEM_ALERT, i_spd, ody::SET_MEM_ALERT_EN, l_mem_alert_a1_b1_en));
             l_field = l_mem_alert_a0_b0_en || l_mem_alert_a1_b1_en;
@@ -716,6 +729,8 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             return fapi2::current_err;
         }
 
+        // TODO: MST-1997: ATTR_MEM_SI_MC_RCV_IMP_ALERT_N need to be updated
+        //                 to read from either efd byte 59 or byte 364
         ///
         /// @brief Set the memory alert pull up field
         ///
@@ -732,6 +747,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint8_t l_memalert_pullup_val = 0;
             uint8_t l_memalert_pullup_attr = 0;
 
+            // =========================================================
+            // Byte 364: Mem Alert Enable and Pull-Up
+            // Attribute: ATTR_MEM_SI_MC_RCV_IMP_ALERT_N
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 96
+            // =========================================================
             const std::vector< std::pair<uint8_t, uint8_t> > MEM_ALERT_PULL_UP_MAP =
             {
                 // {key byte, MEM ALERT PULL UP VALUES (ohms)}
@@ -786,6 +807,13 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             const uint8_t l_rel_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(iv_port);
             uint8_t l_field = 0;
             uint8_t l_extcalres_val = 0;
+
+            // =========================================================
+            // Byte 378: External PHY Calibration Resistor Value
+            // Attribute: ATTR_MEM_EFF_EXTCALRESVAL
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 101
+            // =========================================================
             const std::vector< std::pair<uint8_t, uint8_t> > EXTCALRESVAL_MAP =
             {
                 // {key byte, EXT CALIBRATION RESISTOR VAL (ohms)}
@@ -847,6 +875,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint8_t l_mirror_cha_cs1 = 0;
             uint8_t l_mirror_chb_cs1 = 0;
 
+            // =========================================================
+            // Byte 365: Address Mirroring
+            // Attribute: ATTR_MEM_DRAM_ADDRESS_MIRRORING
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 96
+            // =========================================================
             FAPI_TRY(mss::attr::get_channels_per_dimm(iv_dimm, l_num_channel));
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::ADDRESS_MIRROR, i_spd, ody::SET_ODY_DRAM_ADDRESS_MIRRORING, l_mirroring));
@@ -913,6 +947,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint16_t l_field = 0;
             fapi2::buffer<uint16_t> l_buffer;
 
+            // =========================================================
+            // Bytes 366~367 Bytes Enables
+            // Attribute: ATTR_MEM_EFF_BYTE_ENABLES
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 97
+            // =========================================================
             FAPI_TRY(get_field_spd(iv_ocmb, F::BYTE_ENABLES_LSB, i_spd, ody::SET_BYTE_ENABLES, l_byte0));
             FAPI_TRY(get_field_spd(iv_ocmb, F::BYTE_ENABLES_MSB, i_spd, ody::SET_BYTE_ENABLES, l_byte1));
 
@@ -958,7 +998,18 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint8_t l_byte3 = 0;
             uint32_t l_field = 0;
             fapi2::buffer<uint32_t> l_buffer;
+            uint64_t l_nibble_cha_count = 0;
+            uint64_t l_nibble_chb_count = 0;
+            constexpr uint8_t CHA_NIBBLES_START = 22;
+            constexpr uint8_t CHB_NIBBLES_START = 12;
+            constexpr uint8_t CH_NIBBLE_LEN = 10;
 
+            // =========================================================
+            // Bytes 368~371 Nibble Enables
+            // Attribute: ATTR_MEM_EFF_NIBBLE_ENABLES
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 98
+            // =========================================================
             FAPI_TRY( (get_field_spd(iv_ocmb, F::NIBBLE_ENABLES_LSB0, i_spd, ody::SET_NIBBLE_ENABLES, l_byte0)) );
             FAPI_TRY( (get_field_spd(iv_ocmb, F::NIBBLE_ENABLES_MSB0, i_spd, ody::SET_NIBBLE_ENABLES, l_byte1)) );
             FAPI_TRY( (get_field_spd(iv_ocmb, F::NIBBLE_ENABLES_LSB1, i_spd, ody::SET_NIBBLE_ENABLES, l_byte2)) );
@@ -994,12 +1045,24 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                      spd::c_str(iv_dimm),
                      l_field);
 
+            // Set the nibble enables
             FAPI_TRY(mss::attr::set_nibble_enables(iv_dimm, l_field));
+
+            // Set the phy dq enables for ch A and ch B
+            // Get the number of nibbles enabled
+            l_nibble_cha_count = mss::bit_count<CHA_NIBBLES_START, CH_NIBBLE_LEN>(l_buffer);
+            // Each nibble is 4 bits, hence 4 times the count is put in the attr
+            FAPI_TRY(mss::attr::set_phy_enabled_dq_cha(iv_port, l_nibble_cha_count * mss::conversions::BITS_PER_NIBBLE));
+
+            // Get the number of nibbles enabled
+            l_nibble_chb_count = mss::bit_count<CHB_NIBBLES_START, CH_NIBBLE_LEN>(l_buffer);
+            // Each nibble is 4 bits, hence 4 times the count is put in the attr
+            FAPI_TRY(mss::attr::set_phy_enabled_dq_chb(iv_port, l_nibble_chb_count * mss::conversions::BITS_PER_NIBBLE));
+
 
         fapi_try_exit:
             return fapi2::current_err;
         }
-
 
         ///
         /// @brief Set the redundant chip select field for channel a0
@@ -1015,6 +1078,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint8_t l_redundant_cs_b1 = 0;
             uint8_t l_field = 0;
 
+            // =========================================================
+            // Bytes Byte 372: Memory Channel Enable
+            // Attribute: ATTR_MEM_EFF_REDUNDANT_CS_EN
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 98
+            // =========================================================
             FAPI_TRY(get_field_spd(iv_ocmb, F::REDUNDANT_CS_EN_CHA0, i_spd, ody::SET_REDUNDANT_CS_EN, l_redundant_cs_a0));
             FAPI_TRY(get_field_spd(iv_ocmb, F::REDUNDANT_CS_EN_CHB0, i_spd, ody::SET_REDUNDANT_CS_EN, l_redundant_cs_b0));
             FAPI_TRY(get_field_spd(iv_ocmb, F::REDUNDANT_CS_EN_CHA1, i_spd, ody::SET_REDUNDANT_CS_EN, l_redundant_cs_a1));
@@ -1042,6 +1111,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint8_t l_attr_enum_val = 0;
             const uint8_t CHAN0_NIBBLE_10 = 2;
 
+            // =========================================================
+            // Bytes 373~376: Spare Device Mapping
+            // Attribute: ATTR_MEM_EFF_DIMM_SPARE
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 99
+            // =========================================================
             // Update the values
             FAPI_TRY(get_field_spd(iv_ocmb, F::SPARE_DEVICE_MSB0, i_spd, SET_DIMM_SPARE, l_value));
 
@@ -1078,6 +1153,13 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_spd_content_revision(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
+
+            // =========================================================
+            // Byte 277: SPD Content Revision
+            // Attribute: ATTR_MEM_EFF_SPD_CONTENT_REVISION
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 78
+            // =========================================================
             FAPI_TRY(get_field_spd(iv_ocmb, F::SPD_CONTENT_REVISION, i_spd, SET_SPD_CONTENT_REVISION, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -1103,6 +1185,13 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_pmic0_sequence(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
+
+            // =========================================================
+            // Byte 294: PMIC0 Supply Voltage and Master Sequence Order
+            // Attribute: ATTR_MEM_EFF_PMIC0_SEQUENCE
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 82
+            // =========================================================
             FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_SEQUENCE, i_spd, pmic::SET_PMIC0_SEQUENCE, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -1132,6 +1221,12 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint16_t l_field = 0;
             fapi2::buffer<uint16_t> l_buffer;
 
+            // =========================================================
+            // Byte 198: MFG ID Code, First Byte
+            // Attribute: ATTR_MEM_EFF_PMIC0_MFG_ID
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 65
+            // =========================================================
             FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_MFG_CODE_FIRST, i_spd, pmic::SET_PMIC0_MFG_ID, l_byte0));
             FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_MFG_CODE_SECOND, i_spd, pmic::SET_PMIC0_MFG_ID, l_byte1));
 
@@ -1172,6 +1267,13 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual fapi2::ReturnCode set_pmic0_rev(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
+
+            // =========================================================
+            // Byte 198: MFG ID Code, First Byte
+            // Attribute: ATTR_MEM_EFF_PMIC0_MFG_ID
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 65
+            // =========================================================
             FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_DEVICE_REV_NUM, i_spd, pmic::SET_PMIC0_REVISION, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -4966,7 +5068,6 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             FAPI_TRY(set_module_mfg_id(i_spd));
             FAPI_TRY(set_dram_mfg_id(i_spd));
             FAPI_TRY(set_rcd_mfg_id(i_spd));
-            return fapi2::FAPI2_RC_SUCCESS;
 
         fapi_try_exit:
             return fapi2::current_err;

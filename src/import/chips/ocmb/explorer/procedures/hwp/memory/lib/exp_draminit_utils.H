@@ -680,7 +680,7 @@ struct user_input_msdg_attrs
     uint8_t iv_mdssupport;
     uint8_t iv_num_pstate[MAX_DIMM_PER_PORT];
     uint64_t iv_frequency;
-    uint8_t iv_odt_impedance[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
+    uint16_t iv_odt_impedance[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint16_t iv_drv_impedance_pu[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint16_t iv_drv_impedance_pd[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];
     uint8_t iv_slew_rate[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM];

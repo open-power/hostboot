@@ -3814,6 +3814,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     uint8_t l_en_tracking[mss::ody::MAX_RANK_PER_DIMM] = {};
     uint16_t l_uppernibbletg[mss::ody::MAX_RANK_PER_PHY] = {};
     uint8_t l_attr_arr_rank[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
+    uint16_t l_attr_arr_rank_16[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
 
     // D4RxPreambleLength, D4TxPreambleLength (both are unused, so hardcode to '1')
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
@@ -3827,11 +3828,11 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     io_user_input_advanced.ExtCalResVal = l_attr_data;
 
     // ODTImpedance (set to DIMM0, rank0 value)
-    FAPI_TRY(mss::attr::get_si_mc_rcv_imp_dq_dqs(i_target, l_attr_arr_rank));
+    FAPI_TRY(mss::attr::get_si_mc_rcv_imp_dq_dqs(i_target, l_attr_arr_rank_16));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
-        io_user_input_advanced.ODTImpedance[l_pstate] = l_attr_arr_rank[0][0];
+        io_user_input_advanced.ODTImpedance[l_pstate] = l_attr_arr_rank_16[0][0];
     }
 
     // ATxImpedance (set to DIMM0, rank0 value)
@@ -3847,19 +3848,19 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // TxImpedanceCtrl1
-    FAPI_TRY(mss::attr::get_ody_phy_tx_impedance_ctrl1(i_target, l_attr_data));
+    FAPI_TRY(mss::attr::get_ody_phy_tx_impedance_ctrl1(i_target, l_attr_data_16));
 
     for (auto p_state = 0; p_state < mss::ody::NUM_PSTATES; p_state++)
     {
-        io_user_input_advanced.TxImpedanceCtrl1[p_state] = l_attr_data;
+        io_user_input_advanced.TxImpedanceCtrl1[p_state] = l_attr_data_16;
     }
 
     // TxImpedanceCtrl2
-    FAPI_TRY(mss::attr::get_ody_phy_tx_impedance_ctrl2(i_target, l_attr_data));
+    FAPI_TRY(mss::attr::get_ody_phy_tx_impedance_ctrl2(i_target, l_attr_data_16));
 
     for (auto p_state = 0; p_state < mss::ody::NUM_PSTATES; p_state++)
     {
-        io_user_input_advanced.TxImpedanceCtrl2[p_state] = l_attr_data;
+        io_user_input_advanced.TxImpedanceCtrl2[p_state] = l_attr_data_16;
     }
 
     // MemAlertEn

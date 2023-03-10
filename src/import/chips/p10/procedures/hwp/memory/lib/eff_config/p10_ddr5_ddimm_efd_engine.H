@@ -192,7 +192,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 1: 2N Requirements
             // Attribute: ATTR_MEM_2N_MODE
             // MODE REG: MR2
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 137
             // =========================================================
             // The omi frequencies are 25600,32000,38400
@@ -234,7 +234,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 3-4: Initial Phy0 and PHY1 VRef Setting
             // Attribute: ATTR_MEM_EFF_DDR5_PHY_VREF_RD
             // MODE REG: MR5
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 138
             // =========================================================
 
@@ -269,7 +269,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 5: DRAM DIC
             // Attribute: ATTR_DRAM_PU_DRV_IMP
             // MODE REG: MR5
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 138
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_PU_DRV_IMP_MAP =
@@ -313,7 +313,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 5: DRAM DIC
             // Attribute: ATTR_DRAM_PD_DRV_IMP
             // MODE REG: MR5
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 138
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_PD_DRV_IMP_MAP =
@@ -357,7 +357,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 9: DRAM Preamble and Postamble Setting
             // Attribute: ATTR_DDR5_DRAM_RD_PREAMBLE
             // MODE REG: MR8
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 139
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_RD_PREAMBLE_MAP =
@@ -399,7 +399,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 9: DRAM Preamble and Postamble Setting
             // Attribute: ATTR_DDR5_DRAM_WR_PREAMBLE
             // MODE REG: MR8
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 139
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_WR_PREAMBLE_MAP =
@@ -438,7 +438,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 9: DRAM Preamble and Postamble Setting
             // Attribute: ATTR_DDR5_DRAM_RD_POSTAMBLE
             // MODE REG: MR8
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 139
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RD_POSTAMBLE, i_efd, SET_RD_POSTAMBLE, l_field));
@@ -464,7 +464,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 9: DRAM Preamble and Postamble Setting
             // Attribute: ATTR_DDR5_DRAM_RD_POSTAMBLE
             // MODE REG: MR8
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 139
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_WR_POSTAMBLE, i_efd, SET_WR_POSTAMBLE, l_field));
@@ -492,7 +492,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 10-17: Initial DRAM VRef Setting
             // Attribute: ATTR_DDR5_DRAM_WR_VREFDQ
             // MODE REG: MR10
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 139
             // =========================================================
             // Get the attr so that only the bits that changed are written
@@ -562,7 +562,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 18: DRAM DFE Setting
             // Attribute: ATTR_MEM_DDR5_GLOBAL_DFE_GAIN
             // MODE REG: MR111
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 140
             // =========================================================
 
@@ -591,7 +591,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 18: DRAM DFE Setting
             // Attribute: ATTR_MEM_DDR5_GLOBAL_DFE_TAP1
             // MODE REG: MR111
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 140
             // =========================================================
 
@@ -620,7 +620,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 18: DRAM DFE Setting
             // Attribute: ATTR_MEM_DDR5_GLOBAL_DFE_TAP2
             // MODE REG: MR111
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 140
             // =========================================================
 
@@ -648,7 +648,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 18: DRAM DFE Setting
             // Attribute: ATTR_MEM_DDR5_GLOBAL_DFE_TAP3
             // MODE REG: MR111
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 140
             // =========================================================
 
@@ -677,7 +677,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 18: DRAM DFE Setting
             // Attribute: ATTR_MEM_DDR5_GLOBAL_DFE_TAP4
             // MODE REG: MR111
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 140
             // =========================================================
 
@@ -707,7 +707,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 19-26: DRAM DFE Gain Bias
             // Attribute: ATTR_MEM_DDR5_DFE_GAIN_BIAS
             // MODE REG: MR112
-            // DDR5 DDIMM SPD Document Release 1.10 (Page 140)
+            // DDR5 DDIMM SPD Document Release 1.21 (Page 140)
             // DDR5 Published spec 10-2021 JESD79-5A (Page 112)
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint8_t> > GAIN_BIAS_MAP =
@@ -752,7 +752,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 19-26: DRAM DFE Gain Bias
             // Attribute: ATTR_MEM_DDR5_DFE_SIGN_BIT
             // MODE REG: MR112
-            // DDR5 DDIMM SPD Document Release 1.10 (Page 140)
+            // DDR5 DDIMM SPD Document Release 1.21 (Page 140)
             // DDR5 Published spec 10-2021 JESD79-5A (Page 112)
             // =========================================================
 
@@ -783,29 +783,42 @@ class ddimm_0_0 : public mss::efd::base
         virtual fapi2::ReturnCode set_phy_odt_imp(const std::vector<uint8_t>& i_efd) const
         {
             uint8_t l_phy_odt_imp = 0;
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint16_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
 
             // =========================================================
             // EFD Byte 27: PHY ODT Impedance
             // Attribute: ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 141
             // =========================================================
-            static const std::vector< std::pair<uint8_t, uint8_t> > PHY_ODT_MAP =
+            static const std::vector< std::pair<uint8_t, uint16_t> > PHY_ODT_MAP =
             {
                 // {key byte, PHY DRIVE IMP PULL UP VAL (ohms)}
-                {0b0000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_DISABLE},
-                {0b0001, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_40},
-                {0b0010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_48},
-                {0b0011, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_60},
-                {0b0100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_80},
-                {0b0101, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_120},
-                {0b0110, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_240},
-
+                {0b00000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_DISABLE},
+                {0b00001, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_25},
+                {0b00010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_27},
+                {0b00011, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_28},
+                {0b00100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_30},
+                {0b00101, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_32},
+                {0b00110, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_34},
+                {0b00111, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_36},
+                {0b01000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_40},
+                {0b01001, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_43},
+                {0b01010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_48},
+                {0b01011, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_53},
+                {0b01100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_60},
+                {0b01101, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_68},
+                {0b01110, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_80},
+                {0b01111, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_96},
+                {0b10000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_120},
+                {0b10001, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_160},
+                {0b10010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_240},
+                {0b10011, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_DQ_DQS_OHM_480},
                 // All others reserved/not used for DDR5
             };
 
+            // Get the attr to do read modify write
             FAPI_TRY(mss::attr::get_si_mc_rcv_imp_dq_dqs(iv_dimm, l_field));
 
             // Get the field value from i_efd into l_phy_drv_imp_pu
@@ -831,52 +844,55 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_si_phy_drv_imp_pull_up(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_phy_drv_imp_pu = 0;
-            uint16_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_phy_drv_imp = 0;
+            uint16_t l_field = 0;
 
             // =========================================================
-            // EFD Byte 28: PHY DRV Impedance PU
-            // Attribute: ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_PU
+            // EFD Byte 28: PHY DRV Impedance
+            // Attribute: ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 141
             // =========================================================
-            static const std::vector< std::pair<uint16_t, uint16_t> > PHY_DRV_IMP_PU_MAP =
+            static const std::vector< std::pair<uint8_t, uint16_t> > PHY_DRV_IMP_MAP =
             {
                 // {key byte, PHY DRIVE IMP PULL UP VAL (ohms)}
-                {0b000000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_DISABLE},
-                {0b000001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_28},
-                {0b000010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_30},
-                {0b000011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_32},
-                {0b000100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_34},
-                {0b000101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_36},
-                {0b000110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_40},
-                {0b000111, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_43},
-                {0b001000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_48},
-                {0b001001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_53},
-                {0b001010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_60},
-                {0b001011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_68},
-                {0b001100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_80},
-                {0b001101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_96},
-                {0b001110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_120},
-                {0b001111, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_160},
-                {0b010000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_240},
-                {0b010001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_UP_OHM_480},
+                {0b00000, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_HIGH_IMP},
+                {0b00001, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_25},
+                {0b00010, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_27},
+                {0b00011, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_28},
+                {0b00100, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_30},
+                {0b00101, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_32},
+                {0b00110, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_34},
+                {0b00111, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_36},
+                {0b01000, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_40},
+                {0b01001, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_43},
+                {0b01010, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_48},
+                {0b01011, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_53},
+                {0b01100, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_60},
+                {0b01101, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_68},
+                {0b01110, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_80},
+                {0b01111, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_96},
+                {0b10000, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_120},
+                {0b10001, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_160},
+                {0b10010, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_240},
+                {0b10011, fapi2::ENUM_ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP_OHM_480},
                 // All others reserved/not used for DDR5
             };
 
-            FAPI_TRY(mss::attr::get_si_mc_drv_imp_dq_dqs_pull_up(iv_dimm, l_field));
+            // Get the attr to do read modify write
+            FAPI_TRY(mss::attr::get_si_phy_drv_imp_dq_dqs_pull_up(iv_port, l_field));
 
             // Get the field value from i_efd into l_phy_drv_imp_pu
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_DRIVE_IMPEDANCE_PULL_UP, i_efd, mss::SET_SI_MC_DRV_IMP_DQ_DQS_PULL_UP,
-                                             l_phy_drv_imp_pu));
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_DRIVE_IMPEDANCE_CTRL0, i_efd,
+                                             mss::SET_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP, l_phy_drv_imp));
 
             // Map SPD value to desired setting
-            FAPI_TRY(lookup_table_check(iv_ocmb, PHY_DRV_IMP_PU_MAP, mss::SET_SI_MC_DRV_IMP_DQ_DQS_PULL_UP,
-                                        static_cast<uint16_t>(l_phy_drv_imp_pu), l_field[iv_dimm_rank]));
+            FAPI_TRY(lookup_table_check(iv_ocmb, PHY_DRV_IMP_MAP, mss::SET_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP,
+                                        l_phy_drv_imp, l_field));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_si_mc_drv_imp_dq_dqs_pull_up(iv_dimm, l_field));
+            FAPI_TRY(mss::attr::set_si_phy_drv_imp_dq_dqs_pull_up(iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -888,55 +904,55 @@ class ddimm_0_0 : public mss::efd::base
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
         ///
-        virtual fapi2::ReturnCode set_si_phy_drv_imp_pull_down(const std::vector<uint8_t>& i_efd) const
+        virtual fapi2::ReturnCode set_si_phy_drv_imp_tx_cntl1(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_phy_drv_imp_pd = 0;
-            uint16_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_phy_drv_imp = 0;
+            uint16_t l_field = 0;
 
             // =========================================================
-            // EFD Byte 29: PHY DRV Impedance PD
-            // Attribute: ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_PD
+            // EFD Byte 29: PHY DRV Impedance
+            // Attribute: ATTR_ODY_TX_IMPEDANCE_CTRL1
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 141-142
             // =========================================================
-            static const std::vector< std::pair<uint16_t, uint16_t> > PHY_DRV_IMP_PD_MAP =
+            static const std::vector< std::pair<uint8_t, uint16_t> > PHY_DRV_IMP_MAP =
             {
                 // {key byte, PHY DRIVE IMP PULL UP VAL (ohms)}
-                {0b000000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_DISABLE},
-                {0b000001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_28},
-                {0b000010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_30},
-                {0b000011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_32},
-                {0b000100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_34},
-                {0b000101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_36},
-                {0b000110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_40},
-                {0b000111, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_43},
-                {0b001000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_48},
-                {0b001001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_53},
-                {0b001010, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_60},
-                {0b001011, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_68},
-                {0b001100, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_80},
-                {0b001101, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_96},
-                {0b001110, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_120},
-                {0b001111, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_160},
-                {0b010000, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_240},
-                {0b010001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_480},
+                {0b00000, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_HIGH_IMP},
+                {0b00001, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_25},
+                {0b00010, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_27},
+                {0b00011, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_28},
+                {0b00100, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_30},
+                {0b00101, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_32},
+                {0b00110, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_34},
+                {0b00111, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_36},
+                {0b01000, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_40},
+                {0b01001, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_43},
+                {0b01010, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_48},
+                {0b01011, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_53},
+                {0b01100, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_60},
+                {0b01101, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_68},
+                {0b01110, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_80},
+                {0b01111, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_96},
+                {0b10000, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_120},
+                {0b10001, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_160},
+                {0b10010, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_240},
+                {0b10011, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL1_OHM_480},
                 // All others reserved/not used for DDR5
             };
 
-            FAPI_TRY(mss::attr::get_si_mc_drv_imp_dq_dqs_pull_down(iv_dimm, l_field));
-
-            // Get the field value from i_efd into l_phy_drv_imp_pu
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_DRIVE_IMPEDANCE_PULL_DOWN, i_efd,
-                                             mss::SET_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN,
-                                             l_phy_drv_imp_pd));
+            // Get the field value from i_efd into l_phy_drv_imp
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_DRIVE_IMPEDANCE_CTRL1, i_efd,
+                                             mss::SET_TX_IMP_CTRL1,
+                                             l_phy_drv_imp));
 
             // Map SPD value to desired setting
-            FAPI_TRY(lookup_table_check(iv_ocmb, PHY_DRV_IMP_PD_MAP, mss::SET_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN,
-                                        static_cast<uint16_t>(l_phy_drv_imp_pd), l_field[iv_dimm_rank]));
+            FAPI_TRY(lookup_table_check(iv_ocmb, PHY_DRV_IMP_MAP, mss::SET_TX_IMP_CTRL1,
+                                        l_phy_drv_imp, l_field));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_si_mc_drv_imp_dq_dqs_pull_down(iv_dimm, l_field));
+            FAPI_TRY(mss::attr::set_ody_phy_tx_impedance_ctrl1(iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -948,18 +964,58 @@ class ddimm_0_0 : public mss::efd::base
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
-        virtual fapi2::ReturnCode set_phy_drv_imp(const std::vector<uint8_t>& i_efd) const
+        virtual fapi2::ReturnCode set_si_phy_drv_imp_tx_cntl2(const std::vector<uint8_t>& i_efd) const
         {
+            uint8_t l_phy_drv_imp = 0;
+            uint16_t l_field = 0;
 
             // =========================================================
             // EFD Byte 30: PHY DRV Impedance
-            // Attribute: ATTR_ODY_TX_IMPEDANCE
+            // Attribute: ATTR_ODY_TX_IMPEDANCE_CTRL2
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 142
             // =========================================================
+            static const std::vector< std::pair<uint8_t, uint16_t> > PHY_DRV_IMP_MAP =
+            {
+                // {key byte, PHY DRIVE IMP PULL UP VAL (ohms)}
+                {0b00000, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_HIGH_IMP},
+                {0b00001, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_25},
+                {0b00010, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_27},
+                {0b00011, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_28},
+                {0b00100, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_30},
+                {0b00101, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_32},
+                {0b00110, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_34},
+                {0b00111, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_36},
+                {0b01000, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_40},
+                {0b01001, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_43},
+                {0b01010, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_48},
+                {0b01011, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_53},
+                {0b01100, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_60},
+                {0b01101, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_68},
+                {0b01110, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_80},
+                {0b01111, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_96},
+                {0b10000, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_120},
+                {0b10001, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_160},
+                {0b10010, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_240},
+                {0b10011, fapi2::ENUM_ATTR_ODY_TX_IMPEDANCE_CTRL2_OHM_480},
+                // All others reserved/not used for DDR5
+            };
 
-            return fapi2::FAPI2_RC_SUCCESS;
+            // Get the field value from i_efd into l_phy_drv_imp_pu
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_DRIVE_IMPEDANCE_CTRL2, i_efd,
+                                             mss::SET_TX_IMP_CTRL2,
+                                             l_phy_drv_imp));
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(iv_ocmb, PHY_DRV_IMP_MAP, mss::SET_TX_IMP_CTRL2,
+                                        l_phy_drv_imp, l_field));
+
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ody_phy_tx_impedance_ctrl2(iv_port, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
@@ -977,7 +1033,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 32: ATX Impedance
             // Attribute: ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 143
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint8_t> > ATX_IMP_MAP =
@@ -1022,7 +1078,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 33-36: ATX Slew Rate Rise
             // Attribute: ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_AC
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 143-144
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_SLEW_RISE_RATE_BYTE0, i_efd, SET_SLEW_RATE_RISE, l_field));
@@ -1047,7 +1103,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 37-40: ATX Slew Rate Fall
             // Attribute: ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_AC
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 144
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_SLEW_FALL_RATE_BYTE0, i_efd, SET_SLEW_RATE_FALL, l_field));
@@ -1072,7 +1128,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 41-44: CK Slew Rate Rise
             // Attribute: ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_CK
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 145
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CK_SLEW_RATE_RISE_BYTE0, i_efd, SET_CK_SLEW_RATE_RISE, l_field));
@@ -1097,7 +1153,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 45-48: CK Slew Rate Fall
             // Attribute: ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_CK
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 145-146
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CK_SLEW_RATE_FALL_BYTE0, i_efd, SET_CK_SLEW_RATE_FALL, l_field));
@@ -1123,7 +1179,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 49-52: DQ Slew Rate Rise
             // Attribute: ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_DQ
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 146
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DQ_SLEW_RATE_RISE_BYTE0, i_efd, SET_DQ_SLEW_RATE_RISE, l_field));
@@ -1148,7 +1204,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 53-56: DQ Slew Rate Fall
             // Attribute: ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_DQ
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 146-147
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DQ_SLEW_RATE_FALL_BYTE0, i_efd, SET_DQ_SLEW_RATE_FALL, l_field));
@@ -1157,6 +1213,55 @@ class ddimm_0_0 : public mss::efd::base
         fapi_try_exit:
             return fapi2::current_err;
         }
+
+#if 0
+        // TODO: MST-1997: ATTR_MEM_SI_MC_RCV_IMP_ALERT_N need to be updated
+        //                 to read from either efd byte 59 or byte 364
+        ///
+        /// @brief Set the alert odt impedance field
+        ///
+        /// @param[in] i_efd EFD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_alert_odt_imp(const std::vector<uint8_t>& i_efd) const
+        {
+            uint8_t l_field = 0;
+            uint8_t l_alert_odt_imp[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+
+            // =========================================================
+            // EFD Byte 59: Alert ODT Impedance
+            // Attribute: ATTR_MEM_SI_MC_RCV_IMP_ALERT_N
+            // MODE REG: N/A
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 150
+            // =========================================================
+            const std::vector< std::pair<uint8_t, uint8_t> > ALERT_ODT_IMP_MAP =
+            {
+                // {key byte, DRAM RTT PARK (ohm)}
+                {0b00000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_DISABLE},
+                {0b01000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_40},
+                {0b01010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_48},
+                {0b01100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_60},
+                {0b01110, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_80},
+                {0b10000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_120},
+                {0b10010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_240},
+
+                // All others reserved
+            };
+
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ALERT_ODT_IMPEDANCE, i_efd, SET_ALERT_ODT_IMPEDANCE, l_field));
+
+            // Map SPD value to desired setting
+            FAPI_TRY(lookup_table_check(iv_ocmb, ALERT_ODT_IMP_MAP, SET_ALERT_ODT_IMPEDANCE, l_field,
+                                        l_alert_odt_imp[iv_dimm_rank]));
+
+            FAPI_TRY(mss::attr::set_si_mc_rcv_imp_alert_n(iv_dimm, l_alert_odt_imp));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+#endif
+
 
         ///
         /// @brief Set the DRAM RTT PARK
@@ -1175,8 +1280,8 @@ class ddimm_0_0 : public mss::efd::base
             //                 Per Channel Per Rank
             // Attribute: ATTR_MEM_SI_DRAM_RTT_PARK
             // MODE REG: 34
-            // DDR5 DDIMM SPD Document Release 1.10
-            // Page 148
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 151
             // =========================================================
             const std::vector< std::pair<uint8_t, uint8_t> > DRAM_RTT_PARK_MAP =
             {
@@ -1223,7 +1328,7 @@ class ddimm_0_0 : public mss::efd::base
             //                 Per Channel Per Rank
             // Attribute: ATTR_MEM_SI_DRAM_RTT_WR
             // MODE REG: MR34
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 148
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_RTT_WR_MAP =
@@ -1270,7 +1375,7 @@ class ddimm_0_0 : public mss::efd::base
             //                 Per Channel Per Rank
             // Attribute: ATTR_DDR5_DRAM_RTT_NOM_WR
             // MODE REG: MR35
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 148
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_RTT_NOM_WR_MAP =
@@ -1368,7 +1473,7 @@ class ddimm_0_0 : public mss::efd::base
             //                 Per Channel Per Rank
             // Attribute: ATTR_DDR5_DRAM_RTT_NOM_RD
             // MODE REG: MR35
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 148
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_RTT_NOM_RD_MAP =
@@ -1441,6 +1546,62 @@ class ddimm_0_0 : public mss::efd::base
         }
 
         ///
+        /// @brief Set the Non-Target ODT RD/WR fields
+        ///
+        /// @param[in] i_efd EFD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_nt_odt_rd_wr(const std::vector<uint8_t>& i_efd) const
+        {
+            uint8_t l_nt_odt_rd[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_nt_odt_wr[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_field_wr[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_field_rd[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+
+
+            // =========================================================
+            // EFD Byte 77: Non-Target ODT Read and Write
+            // Attribute: ATTR_MEM_EFF_DDR5_RTT_PARK_RD
+            //            ATTR_MEM_EFF_DDR5_RTT_PARK_WR
+            // MODE REG: N/A
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 152
+            // =========================================================
+            // Read all the bits for port0
+            if(iv_port_rel_pos == 0)
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::NT_ODT_RD_A0_B0_RANK0, i_efd, mss::SET_NT_ODT_RD, l_field_rd[0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::NT_ODT_WR_A0_B0_RANK0, i_efd, mss::SET_NT_ODT_WR, l_field_wr[0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::NT_ODT_RD_A0_B0_RANK1, i_efd, mss::SET_NT_ODT_RD, l_field_rd[1]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::NT_ODT_WR_A0_B0_RANK1, i_efd, mss::SET_NT_ODT_WR, l_field_wr[1]));
+            }
+            else // Read all the bits for port1
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::NT_ODT_RD_A1_B1_RANK0, i_efd, mss::SET_NT_ODT_RD, l_field_rd[0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::NT_ODT_WR_A1_B1_RANK0, i_efd, mss::SET_NT_ODT_WR, l_field_wr[0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::NT_ODT_RD_A1_B1_RANK1, i_efd, mss::SET_NT_ODT_RD, l_field_rd[1]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::NT_ODT_WR_A1_B1_RANK1, i_efd, mss::SET_NT_ODT_WR, l_field_wr[1]));
+            }
+
+            // Read the attr before setting them to do read modify write
+            FAPI_TRY(mss::attr::get_ddr5_rtt_park_rd(iv_dimm, l_nt_odt_rd));
+            FAPI_TRY(mss::attr::get_ddr5_rtt_park_wr(iv_dimm, l_nt_odt_wr));
+
+            // RD is read into l_field[0] set the opposite in the attr
+            l_nt_odt_rd[iv_dimm_rank] = (l_field_rd[iv_dimm_rank] == 0) ? 0xf : 0x0;
+            // WR is read into l_field[1] set the opposite in the attr
+            l_nt_odt_wr[iv_dimm_rank] = (l_field_wr[iv_dimm_rank] == 0) ? 0xf : 0x0;
+
+            // Set the attributes
+            FAPI_TRY(mss::attr::set_ddr5_rtt_park_rd(iv_dimm, l_nt_odt_rd));
+            FAPI_TRY(mss::attr::set_ddr5_rtt_park_wr(iv_dimm, l_nt_odt_wr));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+
+        ///
         /// @brief Set the CK/CS ODT and CA Termination
         ///
         /// @param[in] i_efd EFD binary
@@ -1456,7 +1617,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 82-97: CK/CS ODT and CA Termination
             // Attribute: ATTR_DDR5_DRAM_CK_ODT
             // MODE REG: MR32
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 150-151
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint16_t> > CK_ODT_STRAP_MAP =
@@ -1542,7 +1703,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 82-97: CK/CS ODT and CA Termination
             // Attribute: ATTR_DDR5_DRAM_CS_ODT
             // MODE REG: MR32
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 150-151
             // =========================================================
 
@@ -1629,7 +1790,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 98-177: CK/CS ODT and CA Termination Per DRAM
             // Attribute: ATTR_DDR5_DRAM_CK_ODT_PER_DRAM
             // MODE REG: MR32
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 152-153
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint16_t> > CK_ODT_DRAM_MAP =
@@ -1678,7 +1839,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 98-177: CK/CS ODT and CA Termination Per DRAM
             // Attribute: ATTR_DDR5_DRAM_CS_ODT_PER_DRAM
             // MODE REG: MR32
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 152-153
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint16_t> > CS_ODT_DRAM_MAP =
@@ -1728,7 +1889,7 @@ class ddimm_0_0 : public mss::efd::base
             //                     Group A Settings Per Rank
             // Attribute: ATTR_DDR5_DRAM_CA_ODT
             // MODE REG: MR33
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 153-154
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint16_t> > CA_ODT_STRAP_MAP =
@@ -1815,7 +1976,7 @@ class ddimm_0_0 : public mss::efd::base
             //                     Group A Settings Per Rank
             // Attribute: ATTR_DDR5_DRAM_DQS_RTT_PARK
             // MODE REG: MR33
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 153-154
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint8_t> > DQS_ODT_STRAP_MAP =
@@ -1902,7 +2063,7 @@ class ddimm_0_0 : public mss::efd::base
             //                     Group A Settings Per DRAM
             // Attribute: ATTR_DDR5_DRAM_CA_ODT_PER_DRAM
             // MODE REG: MR33
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 154-155
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint16_t> > CA_ODT_DRAM_MAP =
@@ -1955,7 +2116,7 @@ class ddimm_0_0 : public mss::efd::base
             //                     Group A Settings Per DRAM
             // Attribute: ATTR_DDR5_DRAM_DQS_RTT_PARK_PER_DRAM
             // MODE REG: MR33
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 154-155
             // =========================================================
             static const std::vector< std::pair<uint8_t, uint8_t> > DQS_ODT_DRAM_MAP =
@@ -2007,7 +2168,7 @@ class ddimm_0_0 : public mss::efd::base
             //                 Per Channel Per Rank
             // Attribute: ATTR_DDR5_DRAM_ODTLON_WR
             // MODE REG: MR37
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 155-156
             // =========================================================
             static const std::vector< std::pair<uint8_t, int8_t> > ODTL_ON_WR_MAP =
@@ -2054,7 +2215,7 @@ class ddimm_0_0 : public mss::efd::base
             //                 Per Channel Per Rank
             // Attribute: ATTR_DDR5_DRAM_ODTLOFF_WR
             // MODE REG: MR37
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 155-156
             // =========================================================
             static const std::vector< std::pair<uint8_t, int8_t> > ODTL_OFF_WR_MAP =
@@ -2101,7 +2262,7 @@ class ddimm_0_0 : public mss::efd::base
             //                 Per Channel Per Rank
             // Attribute: ATTR_DDR5_DRAM_ODTLON_WR_NT
             // MODE REG: MR38
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 156
             // =========================================================
             static const std::vector< std::pair<uint8_t, int8_t> > ODTL_ON_WR_NT_MAP =
@@ -2149,7 +2310,7 @@ class ddimm_0_0 : public mss::efd::base
             //                 Per Channel Per Rank
             // Attribute: ATTR_DDR5_DRAM_ODTLOFF_WR_NT
             // MODE REG: MR38
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 156
             // =========================================================
             static const std::vector< std::pair<uint8_t, int8_t> > ODTL_OFF_WR_NT_MAP =
@@ -2197,7 +2358,7 @@ class ddimm_0_0 : public mss::efd::base
             //                 Per Channel Per Rank
             // Attribute: ATTR_DDR5_DRAM_ODTLON_RD_NT
             // MODE REG: MR39
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 156
             // =========================================================
             static const std::vector< std::pair<uint8_t, int8_t> > ODTL_ON_RD_NT_MAP =
@@ -2242,7 +2403,7 @@ class ddimm_0_0 : public mss::efd::base
             //                 Per Channel Per Rank
             // Attribute: ATTR_DDR5_DRAM_ODTLOFF_RD_NT
             // MODE REG: MR39
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 156
             // =========================================================
             static const std::vector< std::pair<uint8_t, int8_t> > ODTL_OFF_RD_NT_MAP =
@@ -2287,7 +2448,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 306-313: Base Vref CA Settings Per Rank
             // Attribute: ATTR_DDR5_DRAM_VREFCA
             // MODE REG: MR11
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 157-158
             // =========================================================
             // Get the attr so that only the bits that changed are written
@@ -2362,7 +2523,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 314-321: Base Vref CS Settings Per Rank
             // Attribute: ATTR_DDR5_DRAM_VREFCS
             // MODE REG: MR12
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 158
             // =========================================================
             // Get the attr so that only the bits that changed are written
@@ -2437,7 +2598,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 478: PMIC0 SWA Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC0_SWA_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC0_SWA_VOLT_OFF, i_efd, pmic::SET_PMIC0_SWA_VOLTAGE_OFFSET, l_offset));
@@ -2477,7 +2638,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 479: PMIC0 SWB Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC0_SWB_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC0_SWB_VOLT_OFF, i_efd, pmic::SET_PMIC0_SWB_VOLTAGE_OFFSET, l_offset));
@@ -2517,7 +2678,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 480: PMIC0 SWC Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC0_SWC_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC0_SWC_VOLT_OFF, i_efd, pmic::SET_PMIC0_SWC_VOLTAGE_OFFSET, l_offset));
@@ -2557,7 +2718,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 481: PMIC0 SWD Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC0_SWD_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC0_SWD_VOLT_OFF, i_efd, pmic::SET_PMIC0_SWD_VOLTAGE_OFFSET, l_offset));
@@ -2597,7 +2758,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 482: PMIC1 SWA Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC1_SWA_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC1_SWA_VOLT_OFF, i_efd, pmic::SET_PMIC1_SWA_VOLTAGE_OFFSET, l_offset));
@@ -2637,7 +2798,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 483: PMIC1 SWB Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC1_SWB_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC1_SWB_VOLT_OFF, i_efd, pmic::SET_PMIC1_SWB_VOLTAGE_OFFSET, l_offset));
@@ -2677,7 +2838,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 484: PMIC1 SWC Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC1_SWC_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC1_SWC_VOLT_OFF, i_efd, pmic::SET_PMIC1_SWC_VOLTAGE_OFFSET, l_offset));
@@ -2717,7 +2878,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 485: PMIC1 SWD Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC1_SWD_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC1_SWD_VOLT_OFF, i_efd, pmic::SET_PMIC1_SWD_VOLTAGE_OFFSET, l_offset));
@@ -2757,7 +2918,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 486: PMIC2 SWA Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC2_SWA_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC2_SWA_VOLT_OFF, i_efd, pmic::SET_PMIC2_SWA_VOLTAGE_OFFSET, l_offset));
@@ -2797,7 +2958,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 487: PMIC2 SWB Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC2_SWB_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC2_SWB_VOLT_OFF, i_efd, pmic::SET_PMIC2_SWB_VOLTAGE_OFFSET, l_offset));
@@ -2837,7 +2998,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 488: PMIC2 SWC Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC2_SWC_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC2_SWC_VOLT_OFF, i_efd, pmic::SET_PMIC2_SWC_VOLTAGE_OFFSET, l_offset));
@@ -2877,7 +3038,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 489: PMIC2 SWD Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC2_SWD_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC2_SWD_VOLT_OFF, i_efd, pmic::SET_PMIC2_SWD_VOLTAGE_OFFSET, l_offset));
@@ -2917,7 +3078,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 490: PMIC3 SWA Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC3_SWA_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC3_SWA_VOLT_OFF, i_efd, pmic::SET_PMIC3_SWA_VOLTAGE_OFFSET, l_offset));
@@ -2957,7 +3118,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 491: PMIC3 SWB Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC3_SWB_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC3_SWB_VOLT_OFF, i_efd, pmic::SET_PMIC3_SWB_VOLTAGE_OFFSET, l_offset));
@@ -2997,7 +3158,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 492: PMIC3 SWC Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC3_SWC_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC3_SWC_VOLT_OFF, i_efd, pmic::SET_PMIC3_SWC_VOLTAGE_OFFSET, l_offset));
@@ -3037,7 +3198,7 @@ class ddimm_0_0 : public mss::efd::base
             // EFD Byte 493: PMIC3 SWD Additional EFD Voltage Offset
             // Attribute: ATTR_MEM_EFF_EFD_PMIC3_SWD_VOLTAGE_OFFSET
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 169-170
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC3_SWD_VOLT_OFF, i_efd, pmic::SET_PMIC3_SWD_VOLTAGE_OFFSET, l_offset));
@@ -3075,7 +3236,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC0_SWA_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC0_SWA_CURRENT_WARNING, i_efd, SET_PMIC0_SWA_CURRENT_WARNING,
@@ -3102,7 +3263,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC0_SWB_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC0_SWB_CURRENT_WARNING, i_efd, SET_PMIC0_SWB_CURRENT_WARNING,
@@ -3129,7 +3290,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC0_SWC_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC0_SWC_CURRENT_WARNING, i_efd, SET_PMIC0_SWC_CURRENT_WARNING,
@@ -3156,7 +3317,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC0_SWD_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC0_SWD_CURRENT_WARNING, i_efd, SET_PMIC0_SWD_CURRENT_WARNING,
@@ -3183,7 +3344,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC1_SWA_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC1_SWA_CURRENT_WARNING, i_efd, SET_PMIC1_SWA_CURRENT_WARNING,
@@ -3210,7 +3371,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC1_SWB_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC1_SWB_CURRENT_WARNING, i_efd, SET_PMIC1_SWB_CURRENT_WARNING,
@@ -3237,7 +3398,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC1_SWC_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC1_SWC_CURRENT_WARNING, i_efd, SET_PMIC1_SWC_CURRENT_WARNING,
@@ -3264,7 +3425,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC1_SWD_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC1_SWD_CURRENT_WARNING, i_efd, SET_PMIC1_SWD_CURRENT_WARNING,
@@ -3291,7 +3452,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC2_SWA_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC2_SWA_CURRENT_WARNING, i_efd, SET_PMIC2_SWA_CURRENT_WARNING,
@@ -3318,7 +3479,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC2_SWB_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC2_SWB_CURRENT_WARNING, i_efd, SET_PMIC2_SWB_CURRENT_WARNING,
@@ -3345,7 +3506,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC2_SWC_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC2_SWC_CURRENT_WARNING, i_efd, SET_PMIC2_SWC_CURRENT_WARNING,
@@ -3372,7 +3533,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC2_SWD_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC2_SWD_CURRENT_WARNING, i_efd, SET_PMIC2_SWD_CURRENT_WARNING,
@@ -3399,7 +3560,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC3_SWA_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC3_SWA_CURRENT_WARNING, i_efd, SET_PMIC3_SWA_CURRENT_WARNING,
@@ -3426,7 +3587,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC3_SWB_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC3_SWB_CURRENT_WARNING, i_efd, SET_PMIC3_SWB_CURRENT_WARNING,
@@ -3453,7 +3614,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC3_SWC_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC3_SWC_CURRENT_WARNING, i_efd, SET_PMIC3_SWC_CURRENT_WARNING,
@@ -3480,7 +3641,7 @@ class ddimm_0_0 : public mss::efd::base
             //               Warning Threshold
             // Attribute: ATTR_MEM_EFF_PMIC3_SWD_CURRENT_WARNING
             // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.10
+            // DDR5 DDIMM SPD Document Release 1.21
             // Page 171-172
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PMIC3_SWD_CURRENT_WARNING, i_efd, SET_PMIC3_SWD_CURRENT_WARNING,
@@ -3638,6 +3799,7 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY(set_tx_slew_rate_fall_dq_a0(i_efd));
             FAPI_TRY(set_dram_rtt_nom_wr(i_efd));
             FAPI_TRY(set_dram_rtt_nom_rd(i_efd));
+            FAPI_TRY(set_nt_odt_rd_wr(i_efd));
             FAPI_TRY(set_odtlon_wr(i_efd));
             FAPI_TRY(set_odtloff_wr(i_efd));
             FAPI_TRY(set_odtlon_wr_nt(i_efd));
@@ -3688,8 +3850,15 @@ class ddimm_0_0 : public mss::efd::base
             // SI attrs
             FAPI_TRY(set_phy_odt_imp(i_efd));
             FAPI_TRY(set_si_phy_drv_imp_pull_up(i_efd));
-            FAPI_TRY(set_si_phy_drv_imp_pull_down(i_efd));
+            FAPI_TRY(set_si_phy_drv_imp_tx_cntl1(i_efd));
+            FAPI_TRY(set_si_phy_drv_imp_tx_cntl2(i_efd));
             FAPI_TRY(set_si_mc_drv_imp_cmd_addr(i_efd));
+
+#if 0
+            // TODO: MST-1997: ATTR_MEM_SI_MC_RCV_IMP_ALERT_N need to be updated
+            //                 to read from either efd byte 59 or byte 364
+            FAPI_TRY(set_alert_odt_imp(i_efd));
+#endif
             FAPI_TRY(set_dram_rtt_park(i_efd));
             FAPI_TRY(set_dram_rtt_wr(i_efd));
 

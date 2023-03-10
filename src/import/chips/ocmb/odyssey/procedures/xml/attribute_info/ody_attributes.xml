@@ -982,9 +982,14 @@
         <description>
             Tx impedance of DQ driver cells when equalization is disabled, per pstate
         </description>
-        <valueType>uint8</valueType>
+        <valueType>uint16</valueType>
         <default>0</default>
         <writeable/>
+        <enum>HIGH_IMP = 0, OHM_25 = 25, OHM_27 = 27, OHM_28 = 28, OHM_30 = 30, OHM_32 = 32,
+              OHM_34 = 34, OHM_36 = 36, OHM_40 = 40, OHM_43 = 43, OHM_48 = 48, OHM_53 = 53,
+              OHM_60 = 60, OHM_68 = 68, OHM_80 = 80, OHM_96 = 96, OHM_120 = 120, OHM_160 = 160,
+              OHM_240 = 240, OHM_480 = 480
+        </enum>
         <mssAccessorName>ody_phy_tx_impedance_ctrl1</mssAccessorName>
     </attribute>
 
@@ -994,9 +999,14 @@
         <description>
             Tx impedance of DQ driver cells when equalization is disabled, per pstate
         </description>
-        <valueType>uint8</valueType>
+        <valueType>uint16</valueType>
         <default>0</default>
         <writeable/>
+        <enum>HIGH_IMP = 0, OHM_25 = 25, OHM_27 = 27, OHM_28 = 28, OHM_30 = 30, OHM_32 = 32,
+              OHM_34 = 34, OHM_36 = 36, OHM_40 = 40, OHM_43 = 43, OHM_48 = 48, OHM_53 = 53,
+              OHM_60 = 60, OHM_68 = 68, OHM_80 = 80, OHM_96 = 96, OHM_120 = 120, OHM_160 = 160,
+              OHM_240 = 240, OHM_480 = 480
+        </enum>
         <mssAccessorName>ody_phy_tx_impedance_ctrl2</mssAccessorName>
     </attribute>
 
