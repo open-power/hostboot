@@ -289,6 +289,7 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
 
         // MCBIST Compare Masks, used to setup the ECC traps
         static constexpr uint64_t COMPARE_MASK = scomt::ody::ODC_RDF0_SCOM_MCBCM;
+        static constexpr uint64_t COMPARE_MASK2 = scomt::ody::ODC_RDF0_SCOM_MCBCM2;
 
         static constexpr uint64_t PATTERN_COUNT = 4;
 
