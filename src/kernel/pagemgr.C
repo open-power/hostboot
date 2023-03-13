@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,7 @@
 #include <kernel/cpumgr.H>
 #include <usr/vmmconst.h>
 #include <kernel/spte.H>
+#include <kernel/timemgr.H>
 
 size_t PageManager::cv_coalesce_count = 0;
 size_t PageManager::cv_low_page_count = -1;
@@ -195,19 +196,39 @@ void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
     // In non-kernel mode, make a system-call to allocate in kernel-mode.
     if (!KernelMisc::in_kernel_mode())
     {
-        size_t l_attempts = 0;
-        while (NULL == page)
+        page = _syscall1(Systemcalls::MM_ALLOC_PAGES,
+                         reinterpret_cast<void*>(n));
+        if (NULL == page)
         {
-            page = _syscall1(Systemcalls::MM_ALLOC_PAGES,
-                             reinterpret_cast<void*>(n));
+            // The alloc pages syscall failed, so loop and retry the syscall
+            // until success or until timeoutSecs.
+            // At every coalesceSecs, do a coalesce.
+            // At every evictSecs, do a forceMemoryPeriodic.
 
-            // Didn't successfully allocate, so yield in hopes that memory
-            // will eventually free up (ex. VMM flushes).
-            constexpr size_t MAX_ATTEMPTS = 10000;
-            if (NULL == page)
+            uint64_t timeoutSecs   = 180; // total seconds to retry
+            uint64_t coalesceSecs  = 5;   // interval to invoke a coalesce
+            uint64_t evictSecs     = 20;  // interval to invoke an evict
+            uint64_t curTicks      = 0;   // ticks taken at every loop iteration
+            uint64_t timeoutTicks  = 0;   // tick count when the timeout hits
+            uint64_t coalesceTicks = 0;   // tick count when a coalesce is invoked
+            uint64_t evictTicks    = 0;   // tick count when an evict is invoked
+
+            curTicks      = getTB();
+            timeoutTicks  = curTicks + TimeManager::convertSecToTicks(timeoutSecs,0);
+            coalesceTicks = curTicks + TimeManager::convertSecToTicks(coalesceSecs,0);
+            evictTicks    = curTicks + TimeManager::convertSecToTicks(evictSecs,0);
+
+            while (NULL == page)
             {
-                l_attempts++;
-                if( l_attempts == MAX_ATTEMPTS )
+                // Didn't successfully allocate, so yield in hopes that memory
+                // will eventually free up (ex. VMM flushes).
+                task_yield();
+
+                curTicks = getTB();
+
+                // TIMEOUT
+                // Check the maximum time allowed for retry
+                if (curTicks > timeoutTicks)
                 {
                     printk( "Cannot allocate %ld pages to %d!\n",
                             n, task_gettid() );
@@ -215,25 +236,28 @@ void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
                     KernelMisc::printkBacktrace(nullptr);
                     crit_assert(0);
                 }
-
-                task_yield();
-
-                // Force a defrag of the memory 10 times
-                if( l_attempts % (MAX_ATTEMPTS/10) == 0 )
+                // DEFRAG
+                // Check to force a defrag of the memory
+                if (curTicks > coalesceTicks)
                 {
                     printkd( "Forcing coalesce to allocate %ld pages to %d!\n",
                              n, task_gettid() );
                     coalesce();
                     ++PageManager::cv_alloc_coalesce_count;
+                    coalesceTicks += TimeManager::convertSecToTicks(coalesceSecs,0);
                 }
-
-                // Try to evict some pages once
-                if( l_attempts == MAX_ATTEMPTS/2 )
+                // EVICT
+                // Check to evict some pages
+                if (curTicks > evictTicks)
                 {
                     printkd( "Forcing periodics to allocate %ld pages to %d!\n",
                              n, task_gettid() );
                     CpuManager::forceMemoryPeriodic();
+                    evictTicks += TimeManager::convertSecToTicks(evictSecs,0);
                 }
+
+                page = _syscall1(Systemcalls::MM_ALLOC_PAGES,
+                                 reinterpret_cast<void*>(n));
             }
         }
     }
