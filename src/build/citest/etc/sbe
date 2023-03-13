@@ -1,2 +1,2 @@
-# SBE artifact ID of ECs used to assemble PNOR image
+# SBE artifact ID of ECs used to assemble PNOR image (currently unused)
 export SBE_ARTIFACT_ID=5750723c2eaa2c02d6cfc8bfb85b9be2f18cb363
