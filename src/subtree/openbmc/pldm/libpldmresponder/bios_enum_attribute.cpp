@@ -14,7 +14,6 @@ namespace responder
 {
 namespace bios
 {
-
 BIOSEnumAttribute::BIOSEnumAttribute(const Json& entry,
                                      DBusHandler* const dbusHandler) :
     BIOSAttribute(entry, dbusHandler)

@@ -16,7 +16,6 @@ namespace pldm
 {
 namespace host_effecters
 {
-
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
@@ -178,7 +177,8 @@ void HostEffecterParser::processHostEffecterChangeNotification(
     catch (const sdbusplus::exception_t& e)
     {
         std::cerr << "Error in getting current host state. Will still "
-                     "continue to set the host effecter \n";
+                     "continue to set the host effecter - "
+                  << e.what() << std::endl;
     }
     uint8_t newState{};
     try
