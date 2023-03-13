@@ -38,6 +38,8 @@
 #include <fapi2_subroutine_executor.H>
 #include <ody_scom_omi_ioo.H>
 #include <ody_putsram.H>
+#include <io_fir_lib.H>
+#include <ody_io_ppe_common.H>
 
 // Scomt definitions
 SCOMT_OMI_USE_PHY_PPE_WRAP0_XIXCR
@@ -76,6 +78,11 @@ fapi2::ReturnCode ody_omi_hss_ppe_load(
     ody_image_type i_type)
 {
     FAPI_DBG("Start");
+
+    io_ppe_firs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_firs(FIR_SCOM_LFIR_RW_WCLEAR_REG, FIR_DL0_ERROR_MASK,
+            FIR_DL0_ERROR_ACTION, FIR_MC_OMI_RW_WCLEAR_REG,
+            FIR_DL0_SKIT_CTL, FIR_TLX_RW_WCLEAR);
+    l_ppe_firs.ioppe_fir_set(i_target);
 
     PHY_PPE_WRAP0_XIXCR_t WRAP0_XIXCR;
     PHY_PPE_WRAP0_SCOM_CNTL_t WRAP0_SCOM_CNTL;

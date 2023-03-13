@@ -37,16 +37,29 @@
 
 #include <fapi2.H>
 
+/// @brief                      Builds address to access SCOMs
+/// @param i_base_addr          The chip's base address
+/// @param i_group              The group being accessed
+/// @param i_lane               The lane being accessed
+/// @param i_reg                The reg being accessed & tx direction. Specify register in hex then append 0 (Rx) or 1 (Tx)
+///                                         111111
+///                               0123456789012345
+///                               xxxRRRRRRRRRTxxx
+///
+///                             R : register address bits
+///                             T : TX bit
+///                             x : don't care
+/// @return                     Returns the address that's been built from the input parameters
 inline uint64_t buildAddr(const uint32_t i_base_addr,
                           const uint8_t i_group,
                           const uint8_t i_lane,
-                          const uint16_t i_reg,
-                          const uint8_t i_tx = 0)
+                          const uint16_t i_reg)
 {
     uint64_t r_addr = static_cast<uint64_t>(i_base_addr);
     r_addr |= static_cast<uint64_t>(0x3F);
-    r_addr |= static_cast<uint64_t>(i_reg & 0x1FF) << 43;   // 63-20=43
-    r_addr |= static_cast<uint64_t>(i_tx & 0x1) << 42;      // 63-21=42
+    r_addr |= static_cast<uint64_t>(i_reg & 0x1FF8) << 39;  // 63-21-3=39
+    // 21 is the starting location for Tx, but need to shift back another 3 bits so the
+    //  direction bit of the nibble is in the correct position
     r_addr |= static_cast<uint64_t>(i_lane & 0x1F) << 32;   // 63-31=32
     r_addr |= static_cast<uint64_t>(i_group & 0xF) << 37;   // 63-26=37
     r_addr |= static_cast<uint64_t>(0x1) << 63;
@@ -54,14 +67,46 @@ inline uint64_t buildAddr(const uint32_t i_base_addr,
     return r_addr;
 }
 
-fapi2::ReturnCode rmwIoHardwareReg(const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP | fapi2::TARGET_TYPE_OMI > &,
-                                   const uint64_t,
-                                   const uint32_t,
-                                   const uint32_t,
-                                   const uint32_t);
+template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
+fapi2::ReturnCode rmwIoHardwareReg(const fapi2::Target<K, M, V>& i_target,
+                                   const uint64_t i_addr,
+                                   const uint32_t i_data,
+                                   const uint32_t i_dataBit,
+                                   const uint32_t i_dataLen)
+{
+    FAPI_DBG("Start - RMW register at 0x%08X%08X, bit %d, for %d bits", (i_addr >> 32) & 0xFFFFFFFF, i_addr & 0xFFFFFFFF,
+             i_dataBit, i_dataLen);
 
-fapi2::ReturnCode readIoHardwareReg(const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP | fapi2::TARGET_TYPE_OMI > &,
-                                    const uint64_t,
-                                    const uint32_t,
-                                    const uint32_t,
-                                    uint32_t&);
+    fapi2::buffer<uint64_t> l_buffer;
+
+    FAPI_TRY(getScom(i_target, i_addr, l_buffer),
+             "Error getscom to address 0x%08X%08X.", (i_addr >> 32) & 0xFFFFFFFF, i_addr & 0xFFFFFFFF);
+    l_buffer.insertFromRight(i_data, i_dataBit, i_dataLen);
+    FAPI_TRY(putScom(i_target, i_addr, l_buffer),
+             "Error putscom to address 0x%08X%08X.", (i_addr >> 32) & 0xFFFFFFFF, i_addr & 0xFFFFFFFF);
+
+fapi_try_exit:
+    FAPI_DBG("End - RMW");
+    return fapi2::current_err;
+}
+
+template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
+fapi2::ReturnCode readIoHardwareReg(const fapi2::Target<K, M, V>& i_target,
+                                    const uint64_t i_addr,
+                                    const uint32_t i_dataBit,
+                                    const uint32_t i_dataLen,
+                                    uint32_t& o_data)
+{
+    FAPI_DBG("Start - Reading register at 0x%08X%08X, bit %d, for %d bits", (i_addr >> 32) & 0xFFFFFFFF,
+             i_addr & 0xFFFFFFFF, i_dataBit, i_dataLen);
+
+    fapi2::buffer<uint64_t> l_buffer;
+
+    FAPI_TRY(getScom(i_target, i_addr, l_buffer),
+             "Error getscom to address 0x%08X%08X.", (i_addr >> 32) & 0xFFFFFFFF, i_addr & 0xFFFFFFFF);
+    FAPI_TRY(l_buffer.extractToRight(o_data, i_dataBit, i_dataLen));
+
+fapi_try_exit:
+    FAPI_DBG("End - Read");
+    return fapi2::current_err;
+}

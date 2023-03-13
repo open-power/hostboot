@@ -116,7 +116,7 @@
             OMI Rx LTE Gain
         </description>
         <valueType>int32</valueType>
-        <default>-1</default>
+        <default>7</default>
         <platInit/>
     </attribute>
 <!-- ********************************************************************** -->
@@ -127,7 +127,7 @@
             OMI Rx LTE Zero
         </description>
         <valueType>int32</valueType>
-        <default>-1</default>
+        <default>0</default>
         <platInit/>
     </attribute>
 <!-- ********************************************************************** -->

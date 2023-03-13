@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/ody_omi_hss_ppe_start.C $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/ody_unload.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,41 +23,33 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///------------------------------------------------------------------------------
-/// @file ody_omi_hss_ppe_start.C
-/// @brief Odyssey HSS PPE start HWP
+/// @file ody_unload.C
+/// @brief Streams IO Data back in payload for report
 ///
 /// *HWP HW Maintainer : Josh Chica <josh.chica@ibm.com>
 /// *HWP FW Maintainer :
 /// *HWP Consumed by: SBE
 ///------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
-#include <ody_omi_hss_ppe_start.H>
-#include <fapi2_subroutine_executor.H>
-#include <ody_io_ppe_common.H>
-#include <ody_scom_omi_ioo.H>
+#include <ody_unload.H>
 
-//------------------------------------------------------------------------------
-// Function definitions
-//------------------------------------------------------------------------------
-fapi2::ReturnCode ody_omi_hss_ppe_start(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+///
+/// @brief Streams IO Data back in payload for report
+///
+/// @param[in] i_target Chip target to start
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode ody_unload(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                             const uint64_t i_chipunit_mask,
+                             unload_ostream& o_ostream)
 {
-    FAPI_DBG("Start - ODY PPE Start");
+    FAPI_DBG("Starting ody_unload");
 
-    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSCR,
-            PHY_PPE_WRAP0_ARB_CSDR,
-            PHY_ODY_OMI_BASE);
+    constexpr uint64_t c_rxtx_base_addr = 0x800000000001283F;
 
-    ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
+    common_unload(i_target, c_rxtx_base_addr, i_chipunit_mask, o_ostream);
 
-    FAPI_TRY(l_ppe_common.ppe_start(i_target,
-                                    scomt::omi::PHY_PPE_WRAP0_XIXCR,
-                                    scomt::omi::PHY_PPE_WRAP0_XIDBGPRO,
-                                    scomt::omi::PHY_SCOM_MAC0_LFIR_REG_RW_WCLEAR));
-
-fapi_try_exit :
-    FAPI_DBG("End");
+fapi_try_exit:
+    FAPI_DBG("End ody_unload");
     return fapi2::current_err;
 }

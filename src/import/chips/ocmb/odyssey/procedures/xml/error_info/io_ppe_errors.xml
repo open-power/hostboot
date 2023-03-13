@@ -32,4 +32,20 @@
       <ffdc>DONE</ffdc>
       <ffdc>FAIL</ffdc>
     </hwpError>
+  <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_IO_PPE_DONE_CLEANUP_FAILED</rc>
+      <description>IO PPE done BIST clenaup failed</description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>DONE</ffdc>
+      <ffdc>FAIL</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_IO_PPE_DONE_DCCAL_FAILED</rc>
+      <description>IO PPE done DCCAL poll failed</description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>DONE</ffdc>
+      <ffdc>FAIL</ffdc>
+    </hwpError>
 </hwpErrors>

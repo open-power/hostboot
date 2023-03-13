@@ -697,6 +697,14 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
             {
                 l_omi_data_rate = 1;
             }
+            else if (l_omi_freq == fapi2::ENUM_ATTR_FREQ_OMI_MHZ_32000)
+            {
+                l_omi_data_rate = 2;
+            }
+            else if (l_omi_freq > fapi2::ENUM_ATTR_FREQ_OMI_MHZ_32000)
+            {
+                l_omi_data_rate = 3;
+            }
 
             int l_num_lanes = P10_IO_LIB_NUMBER_OF_OMI_LANES;
             FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
@@ -728,23 +736,46 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                     l_ppe_channel_loss = 2;
                 }
 
-                // Peaking
-                FAPI_TRY(p10_io_ppe_ppe_ctle_peak1_disable[l_thread].putData(l_pauc_target, 0x1));
+                if (l_omi_freq < fapi2::ENUM_ATTR_FREQ_OMI_MHZ_32000)
+                {
+                    // Peaking
+                    FAPI_TRY(p10_io_ppe_ppe_ctle_peak1_disable[l_thread].putData(l_pauc_target, 0x1));
 
-                // RX A CTLE_PEAK1
-                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
-                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL,
-                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK1,
-                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK1_LEN,
-                                                l_num_lanes,
-                                                4));
-                // RX B CTLE_PEAK1
-                FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
-                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL,
-                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK1,
-                                                RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN,
-                                                l_num_lanes,
-                                                4));
+                    // RX A CTLE_PEAK1
+                    FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                    RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL,
+                                                    RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK1,
+                                                    RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK1_LEN,
+                                                    l_num_lanes,
+                                                    4));
+                    // RX B CTLE_PEAK1
+                    FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                    RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL,
+                                                    RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK1,
+                                                    RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN,
+                                                    l_num_lanes,
+                                                    4));
+                }
+                else
+                {
+                    // Peaking
+                    FAPI_TRY(p10_io_ppe_ppe_ctle_peak2_disable[l_thread].putData(l_pauc_target, 0x1));
+
+                    // RX A CTLE_PEAK1
+                    FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                    RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL,
+                                                    RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK2,
+                                                    RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK2_LEN,
+                                                    l_num_lanes,
+                                                    4));
+                    // RX B CTLE_PEAK1
+                    FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                    RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL,
+                                                    RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK2,
+                                                    RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN,
+                                                    l_num_lanes,
+                                                    4));
+                }
 
 
                 // LTE Gain

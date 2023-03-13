@@ -33,6 +33,7 @@
 #include <ody_omi_setup.H>
 #include <ody_io_ppe_common.H>
 #include <ody_scom_omi.H>
+#include <io_fir_lib.H>
 
 SCOMT_OMI_USE_D_REG_DL0_ERROR_MASK
 SCOMT_OMI_USE_D_REG_CMN_CONFIG
@@ -50,6 +51,10 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     FAPI_DBG("Starting ody_omi_setup");
 
     using namespace scomt::omi;
+
+    io_ppe_firs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_firs(FIR_SCOM_LFIR_RW_WCLEAR_REG, FIR_DL0_ERROR_MASK,
+            FIR_DL0_ERROR_ACTION, FIR_MC_OMI_RW_WCLEAR_REG,
+            FIR_DL0_SKIT_CTL, FIR_TLX_RW_WCLEAR);
 
     D_REG_DL0_ERROR_MASK_t l_dl0_error_mask;
     D_REG_CMN_CONFIG_t l_cmn_config;
@@ -73,6 +78,10 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     l_cmn_config.set_RECAL_TIMER(7);
     l_cmn_config.set_DBG_EN(0);
     l_cmn_config.set_DBG_SEL(0);
+    l_cmn_config.set_CNTR0_EN(0);
+    l_cmn_config.set_CNTR1_EN(0);
+    l_cmn_config.set_CNTR2_EN(0);
+    l_cmn_config.set_CNTR3_EN(0);
     FAPI_TRY(l_cmn_config.putScom(i_target));
 
     FAPI_TRY(l_dl0_config1.getScom(i_target));
@@ -80,12 +89,12 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
     if (l_mfg_mode)
     {
-        l_dl0_config1.set_EDPL_TIME(10); // 10: 512s
+        l_dl0_config1.set_EDPL_TIME(10);     // 10: 512s
         l_dl0_config1.set_EDPL_THRESHOLD(3); // 3: 8 Errors
     }
     else
     {
-        l_dl0_config1.set_EDPL_TIME(6); // 6: 128mS
+        l_dl0_config1.set_EDPL_TIME(6);      // 6: 128mS
         l_dl0_config1.set_EDPL_THRESHOLD(7); // 7: 128 Errors
     }
 
@@ -96,6 +105,9 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     l_dl0_cya.set_DIS_SYNCTO(1); // Needed as the host may be running manual training (step by step)
     l_dl0_cya.set_FRBUF_FULL(1);
     FAPI_TRY(l_dl0_cya.putScom(i_target));
+
+    l_ppe_firs.mc_omi_fir_set(i_target, l_mfg_mode);
+    l_ppe_firs.tlx_fir_set(i_target);
 
 fapi_try_exit:
     FAPI_DBG("End ody_omi_setup");

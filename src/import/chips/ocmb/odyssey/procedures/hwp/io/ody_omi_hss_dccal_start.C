@@ -140,7 +140,7 @@ fapi2::ReturnCode ody_omi_hss_dccal_start(const fapi2::Target<fapi2::TARGET_TYPE
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys;
     uint8_t l_sim = 0;
 
-    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSAR,
+    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSCR,
             PHY_PPE_WRAP0_ARB_CSDR,
             PHY_ODY_OMI_BASE);
 

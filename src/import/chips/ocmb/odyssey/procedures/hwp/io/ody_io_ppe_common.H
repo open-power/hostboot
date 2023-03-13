@@ -40,7 +40,7 @@
 #include <ody_io_ppe_regs.H>
 #include <io_ppe_lib.H>
 
-const uint64_t PHY_PPE_WRAP0_ARB_CSAR = 0x8010C0Dull;
+const uint64_t PHY_PPE_WRAP0_ARB_CSCR = 0x8010C0Cull;
 const uint64_t PHY_PPE_WRAP0_ARB_CSDR = 0x8010C0Eull;
 const uint64_t PHY_PPE_WRAP0_XIXCR = 0x8010C10ull;
 const uint64_t PHY_ODY_OMI_BASE = 0x08010C00ull;
@@ -48,6 +48,13 @@ const uint32_t PHY_ODY_RX_LANES = 0xFF000000;
 const uint32_t PHY_ODY_TX_LANES = 0xFF000000;
 const uint8_t PHY_ODY_NUM_LANES = 8;
 const uint8_t PHY_ODY_NUM_THREADS = 1;
+
+const uint64_t FIR_SCOM_LFIR_RW_WCLEAR_REG = 0x8010C00ull;
+const uint64_t FIR_DL0_ERROR_MASK = 0x8012412ull;
+const uint64_t FIR_DL0_ERROR_ACTION = 0x801241Dull;
+const uint64_t FIR_MC_OMI_RW_WCLEAR_REG = 0x8012400ull;
+const uint64_t FIR_DL0_SKIT_CTL = 0x801241Aull;
+const uint64_t FIR_TLX_RW_WCLEAR = 0x8012000ull;
 
 namespace ody_io
 {
@@ -68,8 +75,9 @@ inline fapi2::ReturnCode get_functional_margin_mfg_mode(bool& o_mfg_mode)
 
     uint32_t l_mfg_flags[4] = {};
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mfg_flags));
-
-    o_mfg_mode = (l_mfg_flags[l_index] & l_flag_pos) ? true : false;
+    o_mfg_mode = (l_mfg_flags[l_index] & (0x80000000 >> l_flag_pos)) ? true : false;
+    FAPI_DBG("ATTR_MFG_FLAGS[%d] = 0x%08X compared to mask of 0x%08X == %d", l_index, l_mfg_flags[l_index],
+             (0x80000000 >> l_flag_pos), o_mfg_mode);
 
 fapi_try_exit:
     return fapi2::current_err;

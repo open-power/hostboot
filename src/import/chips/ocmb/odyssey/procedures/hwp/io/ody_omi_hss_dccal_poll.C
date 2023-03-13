@@ -45,7 +45,7 @@ fapi2::ReturnCode ody_omi_hss_dccal_poll(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_DBG("Starting ody_omi_hss_dccal_poll");
     fapi2::buffer<uint64_t> l_data = 0;
 
-    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSAR,
+    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSCR,
             PHY_PPE_WRAP0_ARB_CSDR,
             PHY_ODY_OMI_BASE);
 
@@ -62,11 +62,12 @@ fapi2::ReturnCode ody_omi_hss_dccal_poll(const fapi2::Target<fapi2::TARGET_TYPE_
     l_ppe_regs.flushCache(i_target);
     FAPI_TRY(l_ppe_common.ext_cmd_poll(i_target, l_thread, l_cmd, l_done, l_fail));
 
-
     FAPI_ASSERT(l_done && !l_fail,
-                fapi2::IO_PPE_DONE_POLL_FAILED()
-                .set_TARGET(i_target),
-                "IO PPE done poll time-out" );
+                fapi2::IO_PPE_DONE_DCCAL_FAILED()
+                .set_TARGET(i_target)
+                .set_FAIL(l_fail)
+                .set_DONE(l_done),
+                "IO PPE done DCCAL poll failed");
 
 fapi_try_exit:
     FAPI_DBG("End ody_omi_hss_dccal_poll");

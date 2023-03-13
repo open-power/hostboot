@@ -142,9 +142,6 @@ OBJS += ody_inband.o
 OBJS += ody_putsram.o
 OBJS += ody_putsram_io_ppe.o
 OBJS += io_ppe_cache.o
-OBJS += common_io_omi_tdr.o
-OBJS += common_io_tdr.o
-OBJS += io_scom_lib.o
 
 
 include ${ROOTPATH}/config.mk

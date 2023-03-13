@@ -39,6 +39,17 @@
     </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+      <rc>RC_TX_ZCAL_WRONG_SEGS</rc>
+      <description>Tx zCal has the wrong number segments</description>
+      <ffdc>TARGET_CHIP</ffdc>
+      <ffdc>MIN_SEGS</ffdc>
+      <ffdc>MAX_SEGS</ffdc>
+      <ffdc>P_SEGS</ffdc>
+      <ffdc>N_SEGS</ffdc>
+      <ffdc>LANE</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
     <hwpError>
       <rc>RC_IO_PPE_TX_TDR_FAILED</rc>
       <description>Tx TDR Failure</description>
