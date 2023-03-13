@@ -1937,7 +1937,10 @@
 
   <enumerationType>
     <default>NA</default>
-    <description>Enumeration defining special FAPI_POS values</description>
+    <description>
+        Enumeration defining special FAPI_POS values. FAPI_POS is based on logical connections to processor
+        chips and is not guaranteed to be unique.
+    </description>
     <enumerator>
       <name>NA</name>
       <value>0xFFFFFFFF</value>
@@ -5938,7 +5941,11 @@
   </attribute>
 
   <attribute>
-    <description>Ordinal ID of a target</description>
+    <description>
+          Ordinal ID is a value which needs to be completely unique across the entire system for a given target
+          type. Typically, this value corresponds to the HUID instance ordering but it's not required to. This ID must
+          adhere to requirements PHYP imposes on Hostboot for the unit being represented.
+      </description>
     <id>ORDINAL_ID</id>
     <persistency>non-volatile</persistency>
     <readable/>
