@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2022
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -320,6 +320,91 @@ def run_hb_debug_framework(tool = "Printk", toolOpts = "",
         return fp.result
     return None
 
+hb_attr_writes = []
+
+def hb_writeAttribute(huid, attr, values):
+    hb_attr_writes.append((huid, attr, values))
+
+dce_enabled = False
+
+def hb_enableDCE():
+    global dce_enabled
+    dce_enabled = True
+    print('DCE enabled.')
+
+def hb_pauseIstepsAt(major, minor):
+    # Enable Istep pausing
+    hb_writeAttribute(0x10000,   # system target
+                      0x5171c01, # ATTR_ISTEP_PAUSE_ENABLE
+                      [ 1 ])     # value 1 = enable pause
+
+    # Set pause to the given istep
+    hb_writeAttribute(0x10000,   # system target
+                      0x2cf6852, # ATTR_ISTEP_PAUSE_CONFIG
+
+                      # pause infinitely at the given major/minor
+                      # istep. (these bytes are a istepPauseConfig_t
+                      # structure)
+                      [ major, minor, 0xff, 0, 0, 0, 0, 0 ])
+
+    print('Pausing isteps at {}.{}'.format(major, minor))
+
+def hb_simicsLPCConsole():
+    SIM_run_alone(run_command, '(get-lpc-console)[0].capture-stop')
+    SIM_run_alone(run_command, '(get-lpc-console)[0]->no_window=TRUE')
+    SIM_run_alone(run_command, '(get-lpc-console)[0]->quiet=FALSE')
+    print('Redirecting LPC console to SIMICS console.')
+
+dce_lid = None
+
+def hb_executeDCELid(lidname):
+    if not dce_enabled:
+        print("WARNING: Run hb-enableDCE before IPLing to use DCE "
+              "(ignore this message if you're loading a checkpoint "
+              "where DCE is already set up)")
+
+    print('Setting ', lidname, ' up for execution')
+    global dce_lid
+    dce_lid = open(lidname, 'rb')
+
+def register_python_tools():
+    new_command('hb-writeAttribute',
+                hb_writeAttribute,
+                args = [arg(int_t, "huid", "?", ""),
+                        arg(int_t, "attr", "?", ""),
+                        arg(int_t, "value", "+")],
+                type = ["hostboot-commands"],
+                short = "Requests that Hostboot set an attribute to the given "
+                        "value. The maximum attribute value length is 8 bytes. "
+                        "New attribute writes are performed at the beginning "
+                        "of each Istep.")
+
+    new_command('hb-pauseIstepsAt',
+                hb_pauseIstepsAt,
+                args = [arg(int_t, "major", "?", ""),
+                        arg(int_t, "minor", "?", "")],
+                type = ["hostboot-commands"],
+                short = "Pause Istep execution at the beginning of the given step.")
+
+    new_command('hb-enableDCE',
+                hb_enableDCE,
+                args = [],
+                type = ["hostboot-commands"],
+                short = "Enables DCE polling code. (Must be run before the "
+                        "simulator starts.)")
+
+    new_command('hb-executeDCELid',
+                hb_executeDCELid,
+                args = [arg(str_t, "lid", "?", "")],
+                type = ["hostboot-commands"],
+                short = "Execute a LID via DCE. (DCE polling code must be enabled "
+                        "prior to running this command via hb-enableDCE.)")
+
+    new_command('hb-simicsLPCConsole',
+                hb_simicsLPCConsole,
+                args = [],
+                type = ["hostboot-commands"],
+                short = "Redirect the LPC console to the SIMICS console.")
 
 # @fn register_hb_debug_framework_tools
 # @brief Create a simics command wrapper for each debug tool module.
@@ -360,6 +445,8 @@ def register_hb_debug_framework_tools():
                     short = "Runs the debug framework for tool " + tool,
                     doc = usage)
         print("Hostboot Debug Framework: Registered tool:", "hb-" + tool)
+
+    register_python_tools()
 
     # Do a quick file write test to make sure we can write files and set a
     # simics variable to let us know if we need to avoid file writes.
@@ -521,7 +608,17 @@ except:
 
 hb_attr_dump_file = open('hb_attr_dump.bin', 'wb')
 
+def simple_find_memory_object(addr):
+    res = None, None
 
+    latest_priority = 0xFFFFFFFF
+    mem_map_entries = (conf.system_cmp0.phys_mem).map
+    for base, name, _, _, size, mirror, priority, *_ in mem_map_entries:
+        if base <= addr and base + size > addr and priority < latest_priority:
+            latest_priority = priority
+            res = name, base
+
+    return res
 
 # MAGIC_INSTRUCTION hap handler
 # arg contains the integer parameter n passed to MAGIC_INSTRUCTION(n)
@@ -633,6 +730,53 @@ def magic_instruction_callback(user_arg, cpu, arg):
             othercpu.urmor = cpu.urmor
             othercpu.hrmor = cpu.hrmor
             othercpu.tb = cpu.tb
+
+    if arg == 7026: # MAGIC_ATTR_WRITE
+        if hb_attr_writes:
+            huid, attrid, bytesval = hb_attr_writes.pop(0)
+            cpu.r3 = (attrid << 32) | huid
+            cpu.r4 = len(bytesval)
+            cpu.r5 = int.from_bytes(bytesval, "big") << (64 - len(bytesval)*8)
+            print('Writing attribute 0x{:x} on target 0x{:x}'.format(attrid, huid))
+        else:
+            cpu.r3 = 0
+            cpu.r4 = 0
+            cpu.r5 = 0
+
+    if arg == 7027: # MAGIC_CHECK_DCE_ENABLED
+        global dce_enabled
+        cpu.r3 = dce_enabled and 1 or 0
+
+    if arg == 7028: # MAGIC_DCE_LOAD_PAGE
+        page = cpu.r4
+        offset = cpu.r5
+
+        global dce_lid
+
+        if page == 0:
+            cpu.r3 = dce_lid and 1 or 0
+        elif not dce_lid:
+            cpu.r3 = 0
+        else:
+            if dce_lid.tell() == 0:
+                print('DCE: begin payload transfer...')
+
+            data = dce_lid.read(4096)
+            cpu.r3 = len(data)
+
+            if len(data) < 4096:
+                print('DCE: payload transfer complete.')
+                dce_lid = None
+
+            if len(data) > 0:
+                mem_object, base = simple_find_memory_object(page)
+                if mem_object is None:
+                    print('DCE: Failed to find memory object for address 0x{:X}!'
+                          .format(page))
+                    return
+                image = mem_object.image
+                intf = SIM_c_get_interface(image, 'image')
+                intf.set(page - base, data)
 
     if arg == 7022:  # MAGIC_SET_LOG_LEVEL
         if( not 'ENABLE_HB_SIMICS_LOGS' in os.environ ):

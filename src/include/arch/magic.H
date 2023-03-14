@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,25 @@ inline void MAGIC_INSTRUCTION(int _n)
         "r"(r3));                               \
 }
 
+ALWAYS_INLINE
+inline void MAGIC_INSTRUCTION_3(int _n, uint64_t* o_1, uint64_t* o_2, uint64_t* o_3)
+{
+    register int n = _n;
+    isync();
+    long register r3 asm("r3");
+    long register r4 asm("r4");
+    long register r5 asm("r5");
+    asm volatile("rlwimi %3,%3,0,%4,%5"
+                 : "=r"(r3), "=r"(r4), "=r"(r5)
+                 : "i" (((n) >> 8) & 0x1f),
+                   "i" (((n) >> 4) & 0xf),
+                   "i" ((((n) >> 0) & 0xf) | 16),
+                   "r"(r3));
+    *o_1 = r3;
+    *o_2 = r4;
+    *o_3 = r5;
+}
+
 // Arguments to MAGIC_INSTRUCTION().
 // To ensure they do not conflict with haps from other groups (PHYP
 // for example), assign hap numbers in the range 7000..7999 (decimal).
@@ -112,6 +131,9 @@ enum
     MAGIC_TOGGLE_OUTPUT       =  7023, // Enable simic log capture
 
     MAGIC_SETUP_THREADS       =  7025, // Manually set thread regs pre-enable
+    MAGIC_ATTR_WRITE          =  7026, // Write attribute value in hostboot
+    MAGIC_CHECK_DCE_ENABLED   =  7027, // Check whether DCE should be enabled
+    MAGIC_DCE_LOAD_PAGE       =  7028, // Load a page from the active DCE script
 
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
     MAGIC_GCOV_MODULE_UNLOAD  =  7056, // extract gcov info
@@ -180,6 +202,13 @@ enum
     asm volatile("mr 4, %0; mr 5, %1" :: \
                  "r" (_first), "r" (_second) : "4", "5"); \
     MAGIC_INSTRUCTION(MAGIC_PRINT_TWO_REGS); \
+
+inline bool magic_check_dce_enabled()
+{
+    long register r3 asm("r3") = 0;
+    MAGIC_INSTRUCTION(MAGIC_CHECK_DCE_ENABLED);
+    return r3;
+}
 
 /**
  * @brief Notify simics that we are waiting for a FSP message
@@ -256,6 +285,40 @@ constexpr uint8_t LOG_LEVEL_MAX  = 4;
                  "r" (_smfEnabled) : \
                  "4"); \
     MAGIC_INSTRUCTION(MAGIC_SETUP_THREADS); \
+
+/**
+ * @brief A magic instruction to fetch attribute write data from the debug framework
+ *
+ * @param[in] _byteToWrite the data to write to console
+ */
+inline bool MAGIC_INST_GET_ATTR_WRITE(uint32_t& o_attrid,
+                                      uint32_t& o_huid,
+                                      uint32_t& o_attrsize,
+                                      uint64_t& o_attrval)
+{
+    uint64_t attrid_and_huid = 0, attrsize = 0;
+    MAGIC_INSTRUCTION_3(MAGIC_ATTR_WRITE, &attrid_and_huid, &attrsize, &o_attrval);
+
+    o_attrid = attrid_and_huid >> 32;
+    o_huid = attrid_and_huid & 0xFFFFFFFFu;
+    o_attrsize = attrsize;
+
+    return o_attrid != 0;
+}
+
+inline uint64_t magic_dce_load_page(const uint64_t phys_page, const uint64_t offset)
+{
+    long register r3 asm("r3") = 0;
+    asm volatile("mr 4, %0" ::
+                 "r" (phys_page) :
+                 "4");
+    asm volatile("mr 5, %0" ::
+                 "r" (offset) :
+                 "5");
+    MAGIC_INSTRUCTION(MAGIC_DCE_LOAD_PAGE);
+    asm volatile("" ::: "memory"); // the previous magic instruction writes memory
+    return r3;
+}
 
 /**
  * @brief Check if a specific feature is enabled

@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -44,12 +44,20 @@ infilename = sys.argv[1]
 ROOTPATH = os.environ['PROJECT_ROOT']
 
 debug = 'HB_DCE_PREPLIB_DEBUG' in os.environ
+test_image = 'HB_DCE_TEST_IMAGE' in os.environ
 
 infile = open(infilename, 'rb')
 tmpfile = open(infilename + '.tmp', 'w+b')
-hbicorefile = open(ROOTPATH + '/img/hbicore.bin', 'rb')
-hbicore_extendedfile = open(ROOTPATH + '/img/hbicore_extended.bin', 'rb')
-hbsyms = open(ROOTPATH + '/img/hbicore.syms.mangled', 'r').read()
+
+if test_image:
+    print('DCE: Linking with test images')
+    hbicorefile = open(ROOTPATH + '/img/hbicore_test.bin', 'rb')
+    hbicore_extendedfile = open(ROOTPATH + '/img/hbicore_test_extended.bin', 'rb')
+    hbsyms = open(ROOTPATH + '/img/hbicore_test.syms.mangled', 'r').read()
+else:
+    hbicorefile = open(ROOTPATH + '/img/hbicore.bin', 'rb')
+    hbicore_extendedfile = open(ROOTPATH + '/img/hbicore_extended.bin', 'rb')
+    hbsyms = open(ROOTPATH + '/img/hbicore.syms.mangled', 'r').read()
 
 # Copy the input file to the output file, and we'll fix up the output file in-place
 tmpfile.write(infile.read())
@@ -153,7 +161,7 @@ def get_data_segment_addr():
     return struct.pack('>Q', seg_addr)
 
 # These constants must match Hostboot's dynamic relocation code
-# Search for @DEP_ON_BL_TO_HB_SIZE
+# Search for @DEP_ON_DCE_LINKER_RELOC_TYPES
 RELOC_TYPE_DESCRIPTOR = 1
 RELOC_TYPE_ADDR64 = 2
 

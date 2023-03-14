@@ -4,15 +4,16 @@
 The Hostboot DCE Framework is a set of scripts and Hostboot code intended to make developing Hostboot code
 faster. Rather than building the entire Hostboot repository, patching a machine and re-IPLing for each new change,
 developers can IPL once, compile a standalone C or C++ file in a few seconds, and run their changes
-immediately. Using DCE, developers can even run code on a machine without building Hostboot at all.
+immediately. Using DCE, developers can even run new code on a machine without building Hostboot at all.
 
 Code compiled with DCE can define new functions, print to the console, and call any Hostboot function that would be
 callable from normal Hostboot code.
 
-When DCE code crashes, the most recent backtrace from the kernel's printk buffer is dumped to the SOL console,
-which aids debugging and speeds testing.
+When DCE code crashes, the most recent backtrace from the kernel's printk buffer is dumped to the SOL console and
+the user can rebuild or run again immediately with no downtime, which aids debugging and speeds testing.
 
-DCE supports eBMC-based machines (simulated or hardware). FSP-based machines are not supported.
+DCE supports eBMC-based machines (simulated or hardware), and standalone SIMICS. FSP-based machines are
+not supported.
 
 (Note: DCE cannot be used when secure mode is enabled.)
 
@@ -21,15 +22,17 @@ DCE supports eBMC-based machines (simulated or hardware). FSP-based machines are
 There are three steps to running custom C++ code on a BMC machine:
 
 1. Write your code and compile/link/package it into a LID file.
-2. Istep your machine past the PDR exchange (i.e. the end of istep 6).
-3. Copy the LID file to the BMC and run the executor script.
+2. Istep your machine or simulation to the point you want to run your code. (BMC-based hardware must pass the PDR
+   exchange at the end of istep 6).
+3. Execute the LID file (via SIMICS command for standalone simulation, or using the included executor script for
+   BMC systems after copying the file to the BMC).
 
 ### Step 1: Compiling and packaging
 
-In this example we will be working out of a Hostboot repository that has already been built (but not necessarily
-primed) and which has been used to patch a machine you want to run code on (i.e. the machine is using the same
-binaries as are in the Hostboot repository). For instructions on how to use DCE without building Hostboot yourself,
-see the section below titled "Running DCE without building Hostboot".
+In this example we will be running our code on a BMC machine and working out of a Hostboot repository that has already
+been built (but not necessarily primed) and which has been used to patch a machine you want to run code on (i.e. the
+machine is using the same binaries as are in the Hostboot repository). For instructions on how to use DCE without
+building Hostboot yourself, see the section below titled "Running DCE without building Hostboot".
 
 The default Hostboot Make scripts are capable of compiling and packaging code to be run with DCE.
 
@@ -91,10 +94,10 @@ automatically skip rebuilding the DCE code if it isn't necessary.
 
 ### Step 2: IPL the machine
 
-DCE code can be run at nearly any time that Hostboot IPL code can process PLDM requests, but it's convenient to
-pause the IPL at some point somehow (either by using the `istep` command or else by patching the machine to hang
-the IPL manually). The machine must be booted past the PDR exchange (i.e. near the end of istep 6) for the machine
-to respond to DCE requests. Make sure that secure mode is disabled before IPLing.
+DCE code on BMC machines can be run at nearly any time that Hostboot IPL code can process PLDM requests, but it's
+convenient to pause the IPL at some point somehow (either by using the `istep` command or else by patching the machine
+to hang the IPL manually). The machine must be booted past the PDR exchange (i.e. near the end of istep 6) for the
+machine to respond to DCE requests. Make sure that secure mode is disabled before IPLing.
 
 ### Step 3: Copy the LID to the BMC and run it
 
@@ -163,6 +166,20 @@ $ make /path/to/source/file/foo.dce.lid
 
 Then follow the instructions in the example above to copy your files to the BMC.
 
+## Standalone SIMICS example
+
+Using DCE with standalone SIMICS is similar to the above, but is a bit simpler:
+
+1. Build for standalone Hostboot as normal and prime your sandbox with the `--test` flag.
+2. Build your code with `make myfile.dce.test.lid`. (Note the suffix `dce.test.lid` instead of the usual `dce.lid`.)
+3. Launch SIMICS, and execute the `hb-pauseIstepsAt <major> <minor>` command to ask Hostboot to wait at the beginning
+   of the Istep where you want to run your code. (For example `hb-pauseIstepsAt 6 7` for Istep 6.7.)
+4. Optionally run `hb-simicsLPCConsole` to redirect the LPC console to the SIMICS console (to make it easier to see
+   the output of your DCE programs).
+5. Run SIMICS until it reaches your desired Istep and pauses.
+6. Run `hb-executeDCELid path/to/myfile.dce.test.lid` to execute your code. You can rebuild (step 2) and rerun as
+   desired without having to restart Hostboot.
+
 ## Extras
 
 ### Module include directories
@@ -190,20 +207,65 @@ exact addresses of the symbols in hbicore.bin and if they change then the DCE co
 
 ### Accessing private class data
 
-The distinction between private and public member variables is purely a compile-time concept. By telling the compiler
-that you actually do have access to the data, you can read it like any other data:
+By default, your DCE scripts won't be able to access the private or protected instance variables inside existing
+Hostboot classes, just like normal C++ code. However, the distinction between private and public member variables is
+purely a compile-time concept. By telling the compiler that you actually do have access to the data, you can read it
+like any other data:
 
     #define private public
+    #include <whatever.h>
+
+Now you can access all the private data inside classes declared in `whatever.h`.
+
+### Calling functions that aren't declared in a header
+
+Some functions in Hostboot are defined in C files and are not declared anywhere in any header file for you to
+include. You can still call these functions without copying and pasting them into your DCE source files by simply
+putting a forward declaration of the function in your DCE files (make sure to get it in the correct namespace).
+
+For example, if this function is defined in `src/usr/isteps/initservice/istepdispatcher.C`:
+
+```cpp
+namespace INITSERVICE
+{
+
+void foo() {
+    // do stuff here
+}
+
+}
+```
+
+You can add this to your DCE file:
+
+```cpp
+namespace INITSERVICE
+{
+
+void foo();
+
+}
+```
+
+And call `INITSERVICE::foo` as any other function.
+
+Note that if a function in a Hostboot implementation file is defined with internal linkage (i.e. it is declared as a
+`static` global function or in an anonymous namespace), that function cannot be called in any way from outside that
+file, even with a forward declaration. You will need to copy and paste the entire implementation into your DCE source
+file(s) to use such code. This is because the compiler does not emit symbol information for such functions, and indeed
+may not even emit a body for such functions at all if it decides to inline all its uses. (A hacky workaround is to
+`#include` the .C file as if it were a header file, which will do the equivalent of copying and pasting the
+implementation into your .C file.)
 
 ### Using multiple code files
 
-If you are developing code where you don't want all of it to be in the same file you can make multiple .c++ files to
-compile along with the main .c++ file which has the dce entrypoint function in it. To do this, simply create the
-separate code normally in any number of additional files with the extension .c++ then you can include the prototypes in
-.h++ files in main .c++ file.
+If you are developing code where you don't want all of it to be in the same file you can make multiple `.c++` files to
+compile along with the main `.c++` file which has the DCE entrypoint function in it. To do this, simply create the
+separate code normally in any number of additional files with the extension `.c++` then you can include the prototypes
+in `.h++` files in main `.c++` file.
 
-When you are ready to compile, either create a new env var named DCE_EXTRA_FILES with the list of the .c++ and h++ files
-you created or declare it on the command line along with the make invocation.
+When you are ready to compile, either create a new env var named `DCE_EXTRA_FILES` with the list of the `.c++` and
+`h++` files you created or declare it on the command line along with the make invocation.
 
 For example, here are the multiple files contents:
 
@@ -240,7 +302,7 @@ and on the command line, you would type:
 DCE_EXTRA_FILES="test.c++ test.h++" make foo.dce.lid
 ```
 
-You can now copy the resulting lid onto the system and invoke it with the script as normal.
+You can now copy the resulting LID onto the system and invoke it with the script as normal.
 
 Alternatively, if you place your extra files in src/build/tools/dce/dce-extra-files/ the dce_rc file in there can be
 sourced before compile and it will update your environment variables for you.
@@ -259,6 +321,28 @@ compile twice).
 There a few helpful env vars but DCE_EXTRA_FILES should be left alone. It's defaulted to populate itself with
 all additional files required for the main .c++ file. All you need to do is update DCE_EXTRA_FILES_LOCATION if you want
 to locate your files elsewhere from the default.
+
+## Checkpoints
+
+DCE is fully compatible with SIMICS checkpoints, and in particular with standalone SIMICS. Save a checkpoint with your
+machine waiting at the appropriate Istep, develop and execute DCE code, then reload your checkpoint later to pick up
+where you left off. For example
+
+```
+$ hb startsimics
+simics> hb-pauseIstepsAt 6 7 # Pause hostboot at the beginning of istep 6.7
+simics> hb-simicsLPCConsole # Redirect the LPC console to the simics console (so we can see it more easily)
+simics> c
+... simics boots to istep 6.7, hb pauses ...
+running> stop
+simics> write-configuration whatever.save # when we load this checkpoint, simics will resume at this point
+... do your work, quit simics ...
+$ HB_SIMICS_CHECKPOINT=whatever.sav hb startsimics
+... simics loads to standby at the point where you saved the checkpoint ...
+simics> hb-simicsLPCConsole # This doesn't get saved as part of the checkpoint
+simics> c
+... pick up where you left off ...
+```
 
 ## Restrictions
 
@@ -302,6 +386,12 @@ DCE does not yet support thread_local. This is due to be fixed in the future.
    at that time, or else using the VFS module loader directly:
 
        VFS::module_load("libsbeio.so");
+
+3. The DCE main function must have a return statement.
+
+   In normal C++ programs, it is legal to omit the return statement in the main function, and the compiler inserts
+   a return of 0 for you. With DCE, omitting the return statement from main may cause your code to crash. (You
+   will see a compiler warning if you accidentally forget.)
 
 ## Implementation details
 

@@ -292,3 +292,9 @@ $pervControlCopy0 = (read-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pi
 $pervControlCopy0 = ($pervControlCopy0  | 0x00000200_00000000)
 write-device-offset $hb_masterproc.cfam_cmp.fsi2host_mbox.pib_regs 0x11a<<4 $pervControlCopy0 8 -b
 }
+
+# Dynamic Code Execution is enabled by default in standalone
+hb-enableDCE
+
+# Save the output of the LPC console to a file.
+(get-lpc-console)[0].capture-start hb_console.txt -overwrite

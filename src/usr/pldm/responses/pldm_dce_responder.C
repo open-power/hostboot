@@ -30,6 +30,7 @@
  */
 
 // PLDM
+#include <pldm/pldm_trace.H>    // PLDM_INF
 #include <pldm/pldm_response.H> // send_cc_only_response
 #include <pldm/requests/pldm_fileio_requests.H>
 #include <pldm/responses/pldm_monitor_control_responders.H>
@@ -43,10 +44,21 @@
 #include <sys/task.h>
 #include <string.h>
 
+// Targeting
+#include <targeting/common/targetservice.H>
+
+// Miscellaneous
+#include <arch/magic.H>
+#include <util/misc.H>
+#include <util/align.H>
+#include <sys/time.h>
+
 extern char hbi_ImageId[];
 
 using namespace ERRORLOG;
 using namespace TARGETING;
+
+#define DCE_INF(...) CONSOLE::displayf(CONSOLE::DEFAULT, NULL, __VA_ARGS__)
 
 namespace PLDM
 {
@@ -58,7 +70,7 @@ namespace DCE
 {
 
 // These constants must match with the DCE preplib.py tool
-// Search for @DEP_ON_BL_TO_HB_SIZE
+// Search for @DEP_ON_DCE_LINKER_RELOC_TYPES
 const uint64_t RELOC_TYPE_DESCRIPTOR = 1;
 const uint64_t RELOC_TYPE_ADDR64 = 2;
 
@@ -125,21 +137,21 @@ uint8_t* perform_relocs(lid_header* const header)
         switch (relocs[i].reloc_type)
         {
         case RELOC_TYPE_DESCRIPTOR:
-            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "DCE: Performing descriptor relocation at %p from %p",
-                              dest_addr,
-                              src);
+            DCE_INF("DCE: Performing descriptor relocation at %p from %p",
+                    dest_addr,
+                    src);
 
             memcpy(dest_addr, src, sizeof(ppc_function_thunk_t));
             break;
         case RELOC_TYPE_ADDR64:
-            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "DCE: Performing addr64 relocation at %p from %p",
-                              dest_addr,
-                              src);
+            DCE_INF("DCE: Performing addr64 relocation at %p from %p",
+                    dest_addr,
+                    src);
 
             *reinterpret_cast<uint8_t**>(dest_addr) = src;
             break;
         default:
-            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "DCE: UNKNOWN RELOCATION TYPE %d", relocs[i].reloc_type);
+            DCE_INF("DCE: UNKNOWN RELOCATION TYPE %d", relocs[i].reloc_type);
             break;
         }
     }
@@ -171,11 +183,11 @@ void* dce_execute_task(void* vargs)
 {
     const auto args = static_cast<dce_execute_task_args*>(vargs);
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " > DCE task: Invoking function");
+    DCE_INF(" > DCE task: Invoking function");
 
     const auto ret = args->entrypoint();
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " > DCE task: function returned %d", ret);
+    DCE_INF(" > DCE task: function returned %d", ret);
 
     return nullptr;
 }
@@ -193,19 +205,28 @@ void print_last_printk_crash()
 
     if (last_exception)
     {
-        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "%s", last_exception);
+        DCE_INF("%s", last_exception);
     }
 }
 
+// Flags for handleInvokeDceRequest_task
+void* const USE_MAGIC_TRANSFER = reinterpret_cast<void*>(0);
+void* const USE_PLDM_TRANSFER = reinterpret_cast<void*>(1);
+
 /* @brief Task function to handle a DCE request.
  */
-void* handleInvokeDceRequest_task(void*)
+void* handleInvokeDceRequest_task(void* i_transfer_type)
 {
     const uint32_t DCE_LID_NUMBER = 0xdcec0de;
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "DCE: Fetching code...");
+    if (i_transfer_type != USE_MAGIC_TRANSFER)
+    { // The magic instruction transfer mode doesn't run multiple tasks
+      // concurrently, so to allow it to task_wait_tid on our task we don't
+      // detach.
+        task_detach();
+    }
 
-    task_detach();
+    DCE_INF("DCE: Fetching code...");
 
     const size_t READ_CHUNK_SIZE = 4096;
 
@@ -224,14 +245,36 @@ void* handleInvokeDceRequest_task(void*)
     {
         uint32_t bytes_read = READ_CHUNK_SIZE;
 
-        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Fetching %d bytes at offset %d", bytes_read, offset);
+        DCE_INF(" - DCE: Fetching %d bytes at offset %d", bytes_read, offset);
 
         bool eof = false;
-        errl = getLidFileFromOffset(DCE_LID_NUMBER,
-                                    offset,
-                                    bytes_read,
-                                    lid_contents.data() + offset,
-                                    &eof);
+
+        if (i_transfer_type == USE_PLDM_TRANSFER)
+        {
+            errl = getLidFileFromOffset(DCE_LID_NUMBER,
+                                        offset,
+                                        bytes_read,
+                                        lid_contents.data() + offset,
+                                        &eof);
+        }
+        else
+        {
+            std::vector<char> buffer(PAGE_SIZE*2); // we only use one page, but the extra
+                                                   // capacity allows us to align to a
+                                                   // page boundary to give the physical
+                                                   // address to the simics hook
+
+            const uint64_t page_aligned_buffer_int = ALIGN_PAGE(reinterpret_cast<uint64_t>(buffer.data()));
+            char* const page_aligned_buffer = reinterpret_cast<char*>(page_aligned_buffer_int);
+            bytes_read = magic_dce_load_page(mm_virt_to_phys(page_aligned_buffer), offset);
+            memcpy(lid_contents.data() + offset, page_aligned_buffer, bytes_read);
+
+            PLDM_INF("Read %d bytes at offset %d and phys address 0x%x (0x%x) via MAGIC",
+                     bytes_read, offset,
+                     mm_virt_to_phys(page_aligned_buffer),
+                     *page_aligned_buffer);
+            errl = nullptr;
+        }
 
         if (errl)
         {
@@ -242,10 +285,9 @@ void* handleInvokeDceRequest_task(void*)
                 break;
             }
 
-            CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
-                              "DCE: Failed to read LID from BMC: "
-                              TRACE_ERR_FMT,
-                              TRACE_ERR_ARGS(errl));
+            DCE_INF("DCE: Failed to read LID from BMC: "
+                    TRACE_ERR_FMT,
+                    TRACE_ERR_ARGS(errl));
             break;
         }
 
@@ -266,39 +308,38 @@ void* handleInvokeDceRequest_task(void*)
 
     /* Set it up to call */
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "   - DCE: Finished reading code, got %d bytes", offset);
+    DCE_INF("   - DCE: Finished reading code, got %d bytes", offset);
 
     const auto header = reinterpret_cast<lid_header*>(lid_contents.data());
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Checking binary compatibility");
+    DCE_INF(" - DCE: Checking binary compatibility");
 
     if (check_binary_compatibility(header))
     {
-        CONSOLE::displayf(CONSOLE::DEFAULT, NULL,
-                          " - DCE: Error: the given LID was built against HBI version %s, but the "
-                          "running version is %s. DCE code must be built against exactly the "
-                          "version of HBI that it will be executed with; otherwise, it will likely crash.",
-                          header->version, hbi_ImageId);
+        DCE_INF(" - DCE: Error: the given LID was built against HBI version %s, but the "
+                "running version is %s. DCE code must be built against exactly the "
+                "version of HBI that it will be executed with; otherwise, it will likely crash.",
+                header->version, hbi_ImageId);
         break;
     }
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Performing relocations");
+    DCE_INF(" - DCE: Performing relocations");
 
     uint8_t* const elf = perform_relocs(header);
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Setting code permissions");
+    DCE_INF(" - DCE: Setting code permissions");
 
     mm_set_permission(elf, header->data_segment_offset, EXECUTABLE);
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Flushing data cache");
+    DCE_INF(" - DCE: Flushing data cache");
 
     mm_icache_invalidate(lid_contents.data(), lid_contents.size() / 8);
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "   - DCE: Done flushing");
+    DCE_INF("   - DCE: Done flushing");
 
     const uint64_t physaddr = mm_virt_to_phys(lid_contents.data());
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Phys addr is %p", physaddr);
+    DCE_INF(" - DCE: Phys addr is %p", physaddr);
 
     // Create a fake function descriptor that we can call through a function pointer.
     ppc_function_thunk_t entrypoint_func_ptr =
@@ -313,7 +354,7 @@ void* handleInvokeDceRequest_task(void*)
         .entrypoint = reinterpret_cast<uint64_t(*)()>(&entrypoint_func_ptr)
     };
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Invoking code (.data() = %p, nip = %p, toc = %p, stackaddr = %p, elf = %p)",
+    DCE_INF(" - DCE: Invoking code (.data() = %p, nip = %p, toc = %p, stackaddr = %p, elf = %p)",
                       lid_contents.data(),
                       entrypoint_func_ptr.nip,
                       entrypoint_func_ptr.toc,
@@ -328,27 +369,51 @@ void* handleInvokeDceRequest_task(void*)
 
     if (status == TASK_STATUS_EXITED_CLEAN)
     {
-        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Code finished");
+        DCE_INF(" - DCE: Code finished");
     }
     else
     {
-        CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Code crashed! Latest exception from printk buffer:");
+        DCE_INF(" - DCE: Code crashed! Latest exception from printk buffer:");
 
         print_last_printk_crash();
     }
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, " - DCE: Setting permissions back to WRITABLE");
+    DCE_INF(" - DCE: Setting permissions back to WRITABLE");
 
     mm_set_permission(lid_contents.data(), lid_contents.size(), WRITABLE);
 
     } while (0);
 
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "DCE: Finished");
+    DCE_INF("DCE: Finished");
 
     delete errl;
     errl = nullptr;
 
     return nullptr;
+}
+
+void* magicInstructionPoll_task(void*)
+{
+    task_detach();
+
+    PLDM_INF("DCE: Starting simulation polling thread");
+
+    while (true)
+    {
+        // page=0 is a special argument that will cause the magic
+        // instruction handler to return true but not write anything,
+        // which tells us there's a DCE payload to execute.
+        if (magic_dce_load_page(0, 0))
+        {
+            PLDM_INF("Creating DCE handling task");
+            const auto tid = task_create(DCE::handleInvokeDceRequest_task,
+                                         USE_MAGIC_TRANSFER);
+            int status = 0;
+            task_wait_tid(tid, &status, nullptr);
+        }
+
+        nanosleep(0, 10 * NS_PER_MSEC);
+    }
 }
 
 }
@@ -357,18 +422,34 @@ void* handleInvokeDceRequest_task(void*)
 
 errlHndl_t handleInvokeDceRequest(const state_effecter_callback_args& i_args)
 {
-    CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "DCE: Responding to PLDM request");
+    DCE_INF("DCE: Responding to PLDM request");
     send_cc_only_response(i_args.i_msgQ, *i_args.i_msg, PLDM_SUCCESS);
 
 #ifndef __HOSTBOOT_RUNTIME
     if (SECUREBOOT::enabled() == false)
     { // DCE should not be enabled in secure mode.
-        // Create a task so that we don't block the whole PLDM stack.
-        task_create(DCE::handleInvokeDceRequest_task, nullptr);
+      // Create a task so that we don't block the whole PLDM stack.
+        task_create(DCE::handleInvokeDceRequest_task, DCE::USE_PLDM_TRANSFER);
     }
 #endif
 
     return nullptr;
 }
+
+#ifndef __HOSTBOOT_RUNTIME
+struct module_init
+{
+    module_init()
+    {
+        if (Util::isSimicsRunning() && magic_check_dce_enabled())
+        { // This method of execution is only used for simulation,
+          // don't start up the polling thread in hardware.
+            PLDM_INF("DCE: Launching SIMICS polling task");
+
+            task_create(DCE::magicInstructionPoll_task, nullptr);
+        }
+    }
+} dce_standalone_simics_task_initializer;
+#endif
 
 }

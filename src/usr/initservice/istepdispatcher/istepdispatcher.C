@@ -73,6 +73,7 @@
 #include <istep18/establish_system_smp.H>
 #include <arch/magic.H>
 #include <util/utiltime.H>
+#include <util/misc.H>
 
 #ifdef CONFIG_PLDM
 #include <pldm/requests/pldm_pdr_requests.H>
@@ -916,6 +917,63 @@ void IStepDispatcher::stop()
     }
 }
 
+void doMagicAttributeWrites()
+{
+    using namespace TARGETING;
+
+    if (Util::isSimicsRunning())
+    {
+        uint32_t attrid = 0, huid = 0, attrsize = 0;
+        uint64_t attrval = 0;
+        do
+        {
+            MAGIC_INST_GET_ATTR_WRITE(attrid, huid, attrsize, attrval);
+
+            if (attrid == 0)
+            {
+                TRACFCOMP(g_trac_initsvc,
+                          "IStepDispatcher: No simics-only attribute writes available");
+            }
+            else
+            {
+                TRACFCOMP(g_trac_initsvc,
+                          "IStepDispatcher: Read simics-only attribute write: "
+                          "HUID=0x%08x, attr=0x%08x, size=%d, value=0x%x",
+                          huid, attrid, attrsize, attrval);
+
+                Target* const target = Target::getTargetFromHuid(huid);
+
+                if (target)
+                {
+                    if (!target->unsafeTrySetAttr(static_cast<ATTRIBUTE_ID>(attrid),
+                                                  attrsize,
+                                                  &attrval))
+                    {
+                        TRACFCOMP(g_trac_initsvc,
+                                  "IStepDispatcher: Cannot apply magic attribute write "
+                                  "for attribute 0x%08x on target 0x%08x: set failed",
+                                  attrid, huid);
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_initsvc,
+                                  "IStepDispatcher: Performed simics-only attribute "
+                                  "write of attribute 0x%08x on target 0x%08x",
+                                  attrid, huid);
+                    }
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_initsvc,
+                              "IStepDispatcher: Cannot apply magic attribute write "
+                              "for attribute 0x%08x on target 0x%08x: no such target",
+                              attrid, huid);
+                }
+            }
+        } while (attrid);
+    }
+}
+
 // ----------------------------------------------------------------------------
 // IStepDispatcher::doIstep()
 // ----------------------------------------------------------------------------
@@ -928,6 +986,8 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
 
     INITSERVICE::ShadowIstepData( static_cast<uint8_t>(i_istep),
                                   static_cast<uint8_t>(i_substep) );
+
+    doMagicAttributeWrites();
 
     // Get the Task Info for this step
     const TaskInfo * theStep = findTaskInfo(i_istep, i_substep);
