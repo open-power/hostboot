@@ -487,6 +487,8 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     uint8_t l_rtt_park_wr_test[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
                     uint8_t l_ca_dfe_train_options_save = 0;
                     uint8_t l_debug_train_options_save = 0;
+                    uint32_t l_nibbles_enables_save[mss::ody::MAX_DIMM_PER_PORT] = {0};
+                    uint32_t l_nibbles_enables_test[mss::ody::MAX_DIMM_PER_PORT] = {0};
 
                     REQUIRE_RC_PASS(mss::attr::get_supported_rcd(l_port, l_supported_rcd_save));
                     REQUIRE_RC_PASS(mss::attr::get_supported_rcd(l_port, l_supported_rcd_test));
@@ -610,6 +612,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE_RC_PASS(mss::attr::get_ddr5_rtt_park_wr(l_port, l_rtt_park_wr_test));
                     REQUIRE_RC_PASS(mss::attr::get_ca_dfe_train_options(l_port, l_ca_dfe_train_options_save));
                     REQUIRE_RC_PASS(mss::attr::get_debug_train_options(l_port, l_debug_train_options_save));
+                    REQUIRE_RC_PASS(mss::attr::get_nibble_enables(l_port, l_nibbles_enables_save));
 
                     // Setup some attributes
                     l_supported_rcd_test[0] = fapi2::ENUM_ATTR_MEM_EFF_SUPPORTED_RCD_NO_RCD;
@@ -797,6 +800,9 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE_RC_PASS(mss::attr::set_ddr5_rtt_park_wr(l_port, l_rtt_park_wr_test));
                     REQUIRE_RC_PASS(mss::attr::set_ca_dfe_train_options(l_port, 0x30));
                     REQUIRE_RC_PASS(mss::attr::set_debug_train_options(l_port, 0x49));
+                    l_nibbles_enables_test[0] = 0x00000F00;
+                    l_nibbles_enables_test[1] = 0x0;
+                    REQUIRE_RC_PASS(mss::attr::set_nibble_enables(l_port, l_nibbles_enables_test));
 
 
                     // Test that the message block gets the correct values for sim mode
@@ -1166,6 +1172,16 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE( l_msg_block.VrefCAR1Nib4 == 0x2A );
                     REQUIRE( l_msg_block.VrefCAR1Nib8 == 0x2C );
                     REQUIRE( l_msg_block.VrefCAR1Nib12 == 0x2E );
+                    REQUIRE( l_msg_block.DisabledDB0LaneR0 == 0xFF );
+                    REQUIRE( l_msg_block.DisabledDB1LaneR0 == 0xFF );
+                    REQUIRE( l_msg_block.DisabledDB2LaneR0 == 0xFF );
+                    REQUIRE( l_msg_block.DisabledDB3LaneR0 == 0xFF );
+                    REQUIRE( l_msg_block.DisabledDB4LaneR0 == 0x00 );
+                    REQUIRE( l_msg_block.DisabledDB5LaneR0 == 0xFF );
+                    REQUIRE( l_msg_block.DisabledDB6LaneR0 == 0xFF );
+                    REQUIRE (l_msg_block.DisabledDB7LaneR0 == 0xFF );
+                    REQUIRE( l_msg_block.DisabledDB8LaneR0 == 0x00 );
+                    REQUIRE( l_msg_block.DisabledDB9LaneR0 == 0xFF );
 
                     constexpr uint8_t NON_SIM_MODE = 0;
                     REQUIRE_RC_PASS(mss::ody::phy::configure_dram_train_message_block(l_port, NON_SIM_MODE, l_msg_block));
@@ -1323,6 +1339,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE_RC_PASS(mss::attr::set_ddr5_rtt_park_wr(l_port, l_rtt_park_wr_save));
                     REQUIRE_RC_PASS(mss::attr::set_ca_dfe_train_options(l_port, l_ca_dfe_train_options_save));
                     REQUIRE_RC_PASS(mss::attr::set_debug_train_options(l_port, l_debug_train_options_save));
+                    REQUIRE_RC_PASS(mss::attr::set_nibble_enables(l_port, l_nibbles_enables_save));
                 }
             }
 
@@ -2202,6 +2219,29 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     }
                 }
             }
+
+            return 0;
+        });
+    }
+    GIVEN("Tests nibble_enable_db_disable")
+    {
+        // Loops over OCMB chip targets that were defined in the associated config
+        for_each_target([](const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+        {
+            fapi2::buffer<uint32_t> l_nibble_enables = 0x00000F00;
+            uint8_t l_byte_disables[10] = {};
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(l_nibble_enables, l_byte_disables));
+
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0x00 );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0x00 );
+            REQUIRE( l_byte_disables[9] == 0xFF );
 
             return 0;
         });
