@@ -38,6 +38,7 @@
 #define _MSS_ODY_UNMASK_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/fir/gen_mss_fir.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic_attribute_accessors_manual.H>
