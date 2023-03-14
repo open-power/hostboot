@@ -431,8 +431,8 @@ class base_0_0 : public mss::spd::base
             // DDR5 SPD Document Release 1
             // Byte 12 (0x00C) : SDRAM BL32 & Post Package Repair
             // =========================================================
-            // We are harcoding burst length to support 16 clks
-            constexpr uint8_t l_burst_length = fapi2::ENUM_ATTR_MEM_BURST_LENGTH_BL16;
+            // We are harcoding burst length to support Burst Chop 8 On The Fly
+            constexpr uint8_t l_burst_length = fapi2::ENUM_ATTR_MEM_BURST_LENGTH_BC8_OTF;
 
             FAPI_TRY(mss::attr::set_burst_length(iv_port, l_burst_length));
         fapi_try_exit:
