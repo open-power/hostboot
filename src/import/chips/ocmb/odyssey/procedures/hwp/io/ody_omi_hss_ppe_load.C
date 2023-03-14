@@ -73,7 +73,7 @@ fapi2::ReturnCode ody_omi_hss_ppe_load(
     uint8_t* const i_img_data,
     uint32_t const i_img_size,
     uint32_t const i_offset,
-    IO_PPE_Image_Type_t i_type)
+    ody_image_type i_type)
 {
     FAPI_DBG("Start");
 
@@ -93,7 +93,7 @@ fapi2::ReturnCode ody_omi_hss_ppe_load(
 #if 0
 
     // IOPPE_BASE_IMAGE
-    else if (i_type == IO_PPE_Image_Type_t::IOPPE_BASE_IMAGE)
+    else if (i_type == ody_image_type::IOPPE_BASE_IMAGE)
     {
         if ( (i_img_size != SIZE_32K_BYTES) ||
              ( (i_offset != OFFSET_0K) && (i_offset != OFFSET_32K) && (i_offset != OFFSET_64K) ) )
@@ -125,7 +125,7 @@ fapi2::ReturnCode ody_omi_hss_ppe_load(
              i_img_data, i_img_size, i_offset, i_type);
 
     // Loading IOPPE_BASE_IMAGE
-    if (i_type == IO_PPE_Image_Type_t::IOPPE_BASE_IMAGE)
+    if (i_type == ody_image_type::IOPPE_BASE_IMAGE)
     {
         // Setup HW if this call load first 32K IOPPE_BASE_IMAGE data at offset 0
         if (i_offset == OFFSET_0K)

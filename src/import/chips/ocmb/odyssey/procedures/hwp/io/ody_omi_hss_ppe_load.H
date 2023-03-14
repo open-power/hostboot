@@ -37,6 +37,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
+#include <ody_common_image_load.H>
 
 // Constants
 const uint32_t SIZE_32K_BYTES = 32768;
@@ -44,12 +45,6 @@ const uint32_t SIZE_1K_BYTES  = 1024;
 const uint32_t OFFSET_0K      = 0x00000000;
 const uint32_t OFFSET_32K     = 0x00008000;
 const uint32_t OFFSET_64K     = 0x00010000;
-
-typedef enum IO_PPE_image_types
-{
-    IOPPE_BASE_IMAGE,
-    IOPPE_MEMREGS_IMAGE
-} IO_PPE_Image_Type_t;
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -60,7 +55,7 @@ typedef fapi2::ReturnCode(*ody_omi_hss_ppe_load_FP_t) (
     uint8_t* const,
     uint32_t const,
     uint32_t const,
-    IO_PPE_Image_Type_t);
+    ody_image_type);
 
 //------------------------------------------------------------------------------
 // Function prototype
@@ -92,6 +87,8 @@ extern "C" {
         uint8_t* const i_img_data,
         uint32_t const i_img_size,
         uint32_t const i_offset,
-        IO_PPE_Image_Type_t i_type);
+        ody_image_type i_type);
 
 } //extern "C"
+
+ASSERT_ODY_COMMON_IMAGE_LOAD(ody_omi_hss_ppe_load);
