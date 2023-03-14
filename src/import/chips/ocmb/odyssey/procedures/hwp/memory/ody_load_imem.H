@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,16 +34,18 @@
 // *HWP Consumed by: FSP:HB
 
 
-#include <fapi2.H>
-
 #ifndef _ODY_LOAD_IMEM_H_
 #define _ODY_LOAD_IMEM_H_
+
+#include <fapi2.H>
+#include <ody_common_image_load.H>
 
 // Required for Cronus
 typedef fapi2::ReturnCode (*ody_load_imem_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
         uint8_t* const i_imem_data,
         const uint32_t i_imem_size,
-        const uint32_t i_imem_offset);
+        const uint32_t i_imem_offset,
+        ody_image_type i_image_type);
 
 extern "C"
 {
@@ -54,12 +56,16 @@ extern "C"
 /// @param[in] i_imem_data imem data image
 /// @param[in] i_imem_size size that needs to transferred at a time
 /// @param[in] i_imem_offset address offset of this chunk within the imem image(in bytes)
+/// @param[in] i_image_type type of image being loaded
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode ody_load_imem(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                     uint8_t* const i_imem_data,
                                     const uint32_t i_imem_size,
-                                    const uint32_t i_imem_offset);
+                                    const uint32_t i_imem_offset,
+                                    ody_image_type i_image_type);
 }
+
+ASSERT_ODY_COMMON_IMAGE_LOAD(ody_load_imem);
 
 #endif

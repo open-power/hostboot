@@ -55,7 +55,8 @@ extern "C"
     fapi2::ReturnCode ody_load_imem(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                     uint8_t* const i_imem_data,
                                     const uint32_t i_imem_size,
-                                    const uint32_t i_imem_offset)
+                                    const uint32_t i_imem_offset,
+                                    ody_image_type /*unused*/)
     {
         mss::display_git_commit_info("ody_load_imem");
 
