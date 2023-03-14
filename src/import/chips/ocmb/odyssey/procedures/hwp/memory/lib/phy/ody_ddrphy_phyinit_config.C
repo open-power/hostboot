@@ -3810,6 +3810,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     uint8_t l_attr_data = 0;
     uint16_t l_attr_data_16 = 0;
     uint8_t l_attr_arr[mss::ody::MAX_DIMM_PER_PORT] = {};
+    uint32_t l_attr_arr_32[mss::ody::MAX_DIMM_PER_PORT] = {};
     uint8_t l_en_tracking[mss::ody::MAX_RANK_PER_DIMM] = {};
     uint16_t l_uppernibbletg[mss::ody::MAX_RANK_PER_PHY] = {};
     uint8_t l_attr_arr_rank[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
@@ -4091,12 +4092,16 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     // VREGCtrl_LP2_PwrSavings_En (hardcode to disabled)
     io_user_input_advanced.VREGCtrl_LP2_PwrSavings_En = 0;
 
-    // Nibble_ECC (0x0F nibble ECC for UDIMM, 0x00 byte ECC for RDIMM and DDIMM)
+    // Nibble_ECC (0x0F nibble ECC, 0x00 byte ECC)
     {
+        // Nibbles 8/9 (MC perspective) are our ECC nibbles on a DDIMM
+        // The PHY also considers nibbles 18/19 as ECC, but our MC does not
+        // Thus if nibble 9 is not enabled we use NIBBLE_ECC, else we use BYTE_ECC
+        constexpr uint32_t ECC_NIBBLE1 = 0x00000200;
         constexpr uint8_t BYTE_ECC = 0x00;
         constexpr uint8_t NIBBLE_ECC = 0x0F;
-        FAPI_TRY(mss::attr::get_dimm_type(i_target, l_attr_arr));
-        io_user_input_advanced.Nibble_ECC = (l_attr_arr[0] == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_UDIMM) ?
+        FAPI_TRY(mss::attr::get_nibble_enables(i_target, l_attr_arr_32));
+        io_user_input_advanced.Nibble_ECC = ((l_attr_arr_32[0] & ECC_NIBBLE1) == 0) ?
                                             NIBBLE_ECC : BYTE_ECC;
     }
 
