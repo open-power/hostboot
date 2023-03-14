@@ -405,25 +405,53 @@ uint8_t addIsDimm(uint8_t* o_data,
 {
     uint8_t numSets = 0;
 
-    // TODO JIRA: PFES-6 - Hardcoded I2C Parms until available in MRW
-    uint8_t i2cEngine = 3; // PIB I2C master engine for DIMM (E = 3)
-    uint8_t i2cPort = 3 + i_ocmbNum;        // I2C port (0/1)
-    uint8_t i2cAddr = 0x30 + (i_ocmbNum*2); // sensor I2C Address
-    TMGT_INF("ocmbInit:       I2C Engine[%d] Port[%d] Address[0x%02X] (hardcoded)",
-             i2cEngine, i2cPort, i2cAddr);
+    uint8_t i2cEngine = 3;              // PIB I2C master engine for DIMM (E = 3)
+    uint8_t i2cPort = 0;                // I2C port
+    uint8_t i2cAddr = 0x30;             // sensor I2C Address
+    bool useHardcodes = true;
 
-#if 0
+    ATTR_TEMP_SENSOR_I2C_CONFIG_type tsData;
+    if(i_dimmTarget->tryGetAttr
+       <TARGETING::ATTR_TEMP_SENSOR_I2C_CONFIG >(tsData))
+    {
+        if ((tsData.engine != 0x80) ||
+            (tsData.port != 0x80) ||
+            (tsData.devAddr != 0x80))
+        {
+            i2cEngine = tsData.engine;
+            i2cPort = tsData.port;
+            i2cAddr = tsData.devAddr;
+            TMGT_INF("ocmbInit:       I2C Engine[%d] Port[%d] Address[0x%02X]",
+                     i2cEngine, i2cPort, i2cAddr);
+
+            useHardcodes = false;
+        }
+    }
+
+    if (useHardcodes)
+    {
+        // Hardcoded values from spec if fail to read from attributes
+        if (i_ocmbNum == 4) i2cPort = 10;
+        else if (i_ocmbNum == 5) i2cPort = 11;
+        else if (i_ocmbNum == 6) i2cPort = 8;
+        else if (i_ocmbNum == 7) i2cPort = 9;
+
+        TMGT_ERR("addIsDimm: Failed reading TEMP_SENSOR_I2C_CONFIG from DIMM HUID 0x%08X",
+                 get_huid(i_dimmTarget));
+        TMGT_INF("ocmbInit:       I2C Engine[%d] Port[%d] Address[0x%02X] (hardcoded)",
+                 i2cEngine, i2cPort, i2cAddr);
+    }
+
     writeMemConfigData(o_data,
-                       i_portTarget,
+                       i_dimmTarget,
                        SENSOR_NAME_DIMM_STATE,
                        SENSOR_NAME_DIMM_TEMP,
-                       OCC_MEM_TYPE_ISDIMM,
+                       OCC_MEM_TYPE_ISDIMM | i_ocmbNum,
                        i2cEngine,
                        i2cPort,
                        i2cAddr,
                        io_index );
     ++numSets;
-#endif
 
     return numSets;
 }
@@ -890,23 +918,24 @@ void getMemConfigMessageData(Occ *i_occ,
 
     //Byte 5:   Number of data sets.
     size_t numSetsOffset = index++; //Will fill in numSets at the end
-    uint8_t numSets = 0;
+    const uint32_t disabledSize = index; // config data size when monitoring disabled
+    // fill in details of the memory config
+    uint8_t numSets = ocmbInit(i_occ, o_data, index);
     if (!int_flags_set(FLAG_DISABLE_MEM_CONFIG))
     {
-        // fill in details of the memory config
-        numSets = ocmbInit(i_occ, o_data, index);
 
         TMGT_INF("getMemConfigMessageData: returning %d"
                  " memory sets for OCC%d",
                  numSets, i_occ->getInstance());
+        o_data[numSetsOffset] = numSets;
+        o_size = index;
     }
     else
     {
         TMGT_INF("getMemConfigMessageData: Mem monitoring is disabled");
+        o_data[numSetsOffset] = 0;
+        o_size = disabledSize;
     }
-    o_data[numSetsOffset] = numSets;
-
-    o_size = index;
 
 }
 
@@ -1078,7 +1107,8 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
             UINT16_PUT(&o_data[index+16], nps_oversub[port_rel_pos]);
             UINT16_PUT(&o_data[index+18], npp_oversub[port_rel_pos]);
             // reserved
-            memset(&o_data[index+20], 0, 2); // reserved
+            o_data[index+20] = 0x00;
+            o_data[index+21] = 0x00;
             index += 22;
             ++numSets ;
         }

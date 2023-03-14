@@ -306,6 +306,10 @@
         <id>USE_11S_SPD</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>HTMGT_INTERNAL_FLAGS</id>
+        <default>0x00000000</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14323,6 +14327,17 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DIMM0</default>
     </attribute>
+    <attribute>
+        <id>TEMP_SENSOR_I2C_CONFIG</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>10</value></field>
+            <field><id>devAddr</id><value>0x30</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14384,6 +14399,17 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DIMM1</default>
     </attribute>
+    <attribute>
+        <id>TEMP_SENSOR_I2C_CONFIG</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>11</value></field>
+            <field><id>devAddr</id><value>0x30</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14443,6 +14469,17 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DIMM2</default>
     </attribute>
+    <attribute>
+        <id>TEMP_SENSOR_I2C_CONFIG</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>8</value></field>
+            <field><id>devAddr</id><value>0x30</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+        </default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -14501,6 +14538,17 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DIMM3</default>
+    </attribute>
+    <attribute>
+        <id>TEMP_SENSOR_I2C_CONFIG</id>
+        <default>
+            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+            <field><id>engine</id><value>3</value></field>
+            <field><id>port</id><value>9</value></field>
+            <field><id>devAddr</id><value>0x30</value></field>
+            <field><id>i2cMuxBusSelector</id><value>0xFF</value></field>
+            <field><id>i2cMuxPath</id><value>physical:sys-0/node-0/proc-0</value></field>
+        </default>
     </attribute>
 </targetInstance>
 
