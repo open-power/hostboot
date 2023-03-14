@@ -39,6 +39,31 @@
 
 
   <hwpError>
+    <rc>RC_MSS_CHANNEL_MIRROR_SETTINGS_MISMATCH</rc>
+    <description>
+       Mirroring settings mismatch between channels in DDR5 SPD byte 365
+    </description>
+    <ffdc>VALUE_CHA_CS0</ffdc>
+    <ffdc>VALUE_CHB_CS0</ffdc>
+    <ffdc>VALUE_CHA_CS1</ffdc>
+    <ffdc>VALUE_CHB_CS1</ffdc>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_DDR5_DRAM_WR_PREAMBLE</rc>
     <description>
        An invalid value was detected in ATTR_DDR5_DRAM_WR_PREAMBLE

@@ -727,7 +727,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             // Get the memport relative position
             // The relative_pos() only returns 0 or 1 for this type of function
             // to decide whether to use port0 or port1
-            uint8_t l_rel_pos =  0;
+            const uint8_t l_rel_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(iv_port);
             uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
             uint8_t l_memalert_pullup_val = 0;
             uint8_t l_memalert_pullup_attr = 0;
@@ -745,9 +745,6 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                 // All others reserved/not used for DDR5
 
             };
-
-            // Get the relative position
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, iv_port, l_rel_pos));
 
             // Get the appropriate port's attribute value
             if (l_rel_pos == 0)
@@ -786,7 +783,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             // Get the memport relative position
             // The relative_pos() only returns 0 or 1 for this type of function
             // to decide whether to use port0 or port1
-            uint8_t l_rel_pos = 0;
+            const uint8_t l_rel_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(iv_port);
             uint8_t l_field = 0;
             uint8_t l_extcalres_val = 0;
             const std::vector< std::pair<uint8_t, uint8_t> > EXTCALRESVAL_MAP =
@@ -797,9 +794,6 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                 {0b0110, fapi2::ENUM_ATTR_MEM_EFF_EXTCALRESVAL_240_OHM},
                 // All others reserved/not used for DDR5
             };
-
-            // Get the relative position
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, iv_port, l_rel_pos));
 
             // Get the appropriate port's attribute value
             if (l_rel_pos == 0)
@@ -829,16 +823,76 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         ///
         virtual fapi2::ReturnCode set_address_mirror(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = 0;
-            FAPI_TRY(get_field_spd(iv_ocmb, F::ADDRESS_MIRROR, i_spd, ody::SET_ODY_DRAM_ADDRESS_MIRRORING, l_field));
+            // Bit positions within attribute
+            constexpr uint8_t ATTR_CS1 = 6;
+            constexpr uint8_t ATTR_CS0 = 7;
+
+            // Bit positions within SPD field
+            constexpr uint8_t SPD_B1_CS1 = 0;
+            constexpr uint8_t SPD_B1_CS0 = 1;
+            constexpr uint8_t SPD_A1_CS1 = 2;
+            constexpr uint8_t SPD_A1_CS0 = 3;
+            constexpr uint8_t SPD_B0_CS1 = 4;
+            constexpr uint8_t SPD_B0_CS0 = 5;
+            constexpr uint8_t SPD_A0_CS1 = 6;
+            constexpr uint8_t SPD_A0_CS0 = 7;
+
+            const uint8_t l_rel_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(iv_port);
+            uint8_t l_num_channel = 0;
+            uint8_t l_mirroring = 0;
+            fapi2::buffer<uint8_t> l_mirroring_buf;
+            fapi2::buffer<uint8_t> l_field;
+            uint8_t l_mirror_cha_cs0 = 0;
+            uint8_t l_mirror_chb_cs0 = 0;
+            uint8_t l_mirror_cha_cs1 = 0;
+            uint8_t l_mirror_chb_cs1 = 0;
+
+            FAPI_TRY(mss::attr::get_channels_per_dimm(iv_dimm, l_num_channel));
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::ADDRESS_MIRROR, i_spd, ody::SET_ODY_DRAM_ADDRESS_MIRRORING, l_mirroring));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
                                   iv_ocmb,
-                                  check_address_mirror(l_field),
+                                  check_address_mirror(l_mirroring),
                                   F::ADDRESS_MIRROR.get_byte(i_spd),
-                                  l_field,
+                                  l_mirroring,
                                   ody::SET_ODY_DRAM_ADDRESS_MIRRORING,
                                   "Address Mirror"));
+
+            l_mirroring_buf = l_mirroring;
+
+            // Get the bits from the SPD byte for the port in question
+            if (l_rel_pos == 0)
+            {
+                l_mirror_cha_cs0 = l_mirroring_buf.getBit<SPD_A0_CS0>();
+                l_mirror_chb_cs0 = l_mirroring_buf.getBit<SPD_B0_CS0>();
+                l_mirror_cha_cs1 = l_mirroring_buf.getBit<SPD_A0_CS1>();
+                l_mirror_chb_cs1 = l_mirroring_buf.getBit<SPD_B0_CS1>();
+            }
+            else
+            {
+                l_mirror_cha_cs0 = l_mirroring_buf.getBit<SPD_A1_CS0>();
+                l_mirror_chb_cs0 = l_mirroring_buf.getBit<SPD_B1_CS0>();
+                l_mirror_cha_cs1 = l_mirroring_buf.getBit<SPD_A1_CS1>();
+                l_mirror_chb_cs1 = l_mirroring_buf.getBit<SPD_B1_CS1>();
+            }
+
+            // First check that our mirroring setting matches between channels if both channels are enabled
+            FAPI_ASSERT((l_num_channel != mss::ddr5::ATTR_NUM_CHANNELS) ||
+                        ((l_mirror_cha_cs0 == l_mirror_chb_cs0) &&
+                         (l_mirror_cha_cs1 == l_mirror_chb_cs1)),
+                        fapi2::MSS_CHANNEL_MIRROR_SETTINGS_MISMATCH().
+                        set_PORT_TARGET(iv_port).
+                        set_VALUE_CHA_CS0(l_mirror_cha_cs0).
+                        set_VALUE_CHB_CS0(l_mirror_chb_cs0).
+                        set_VALUE_CHA_CS1(l_mirror_cha_cs1).
+                        set_VALUE_CHB_CS1(l_mirror_chb_cs1),
+                        "%s Mirroring settings mismatch between channels: rank0 CHA/B: %d/%d, rank1 CHA/B: %d/%d",
+                        spd::c_str(iv_port), l_mirror_cha_cs0, l_mirror_chb_cs0, l_mirror_cha_cs1, l_mirror_chb_cs1);
+
+            // Combine the settings between channels so the attribute is set up the same as on DDR4
+            l_field.writeBit<ATTR_CS0>(l_mirror_cha_cs0 | l_mirror_chb_cs0);
+            l_field.writeBit<ATTR_CS1>(l_mirror_cha_cs1 | l_mirror_chb_cs1);
 
             FAPI_TRY(mss::attr::set_dram_address_mirroring(iv_dimm, l_field));
 
