@@ -158,7 +158,7 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip TP_LOCAL_FIR";
         scomaddr    0x01040100;
-        reset       (|, 0x01040100);
+        reset       (^, 0x01040100);
         mask        (|, 0x01040103);
         capture     group default;
     };
@@ -273,7 +273,7 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip MEM_LOCAL_FIR";
         scomaddr    0x08040100;
-        reset       (|, 0x08040100);
+        reset       (^, 0x08040100);
         mask        (|, 0x08040103);
         capture     group default;
     };
@@ -328,7 +328,7 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip MMIO_FIR";
         scomaddr    0x08010870;
-        reset       (|, 0x08010870);
+        reset       (^, 0x08010870);
         mask        (|, 0x08010873);
         capture     group default;
     };
@@ -383,7 +383,7 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip OCMB_PHY_FIR";
         scomaddr    0x08010C00;
-        reset       (|, 0x08010C00);
+        reset       (^, 0x08010C00);
         mask        (|, 0x08010C03);
         capture     group default;
     };
@@ -438,7 +438,7 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip SRQ_FIR";
         scomaddr    0x08011000;
-        reset       (|, 0x08011000);
+        reset       (^, 0x08011000);
         mask        (|, 0x08011003);
         capture     group default;
     };
@@ -493,7 +493,7 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip MCBIST_FIR";
         scomaddr    0x08011400;
-        reset       (|, 0x08011400);
+        reset       (^, 0x08011400);
         mask        (|, 0x08011403);
         capture     group default;
     };
@@ -548,7 +548,7 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip RDF_FIR 0";
         scomaddr    0x08011800;
-        reset       (|, 0x08011800);
+        reset       (^, 0x08011800);
         mask        (|, 0x08011803);
         capture     group default;
     };
@@ -603,7 +603,7 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip RDF_FIR 1";
         scomaddr    0x08012800;
-        reset       (|, 0x08012800);
+        reset       (^, 0x08012800);
         mask        (|, 0x08012803);
         capture     group default;
     };
@@ -658,7 +658,7 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip TLX_FIR";
         scomaddr    0x08012000;
-        reset       (|, 0x08012000);
+        reset       (^, 0x08012000);
         mask        (|, 0x08012003);
         capture     group default;
     };
@@ -713,7 +713,7 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip DLX_FIR";
         scomaddr    0x08012400;
-        reset       (|, 0x08012400);
+        reset       (^, 0x08012400);
         mask        (|, 0x08012403);
         capture     group default;
     };
@@ -782,7 +782,7 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip ODP_FIR 0";
         scomaddr    0x08013000;
-        reset       (|, 0x08013000);
+        reset       (^, 0x08013000);
         mask        (|, 0x08013003);
         capture     group default;
     };
@@ -837,7 +837,7 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip ODP_FIR 1";
         scomaddr    0x08013400;
-        reset       (|, 0x08013400);
+        reset       (^, 0x08013400);
         mask        (|, 0x08013403);
         capture     group default;
     };

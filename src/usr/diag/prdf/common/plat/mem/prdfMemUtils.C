@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -535,6 +535,12 @@ bool __queryUcsOcmb( ExtensibleChip * i_ocmb )
     PRDF_ASSERT( nullptr != i_ocmb );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_ocmb->getType() );
 
+    // TODO: no odyssey support at the moment
+    if (isOdysseyOcmb(i_ocmb->getTrgt()))
+    {
+        return false;
+    }
+
     bool o_activeAttn = false;
 
     // If this OCMB has been marked as masked, skip it
@@ -765,6 +771,12 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
 
         TargetHandle_t ocmb = getConnectedChild(i_omi, TYPE_OCMB_CHIP, 0);
         ExtensibleChip * ocmbChip = (ExtensibleChip *)systemPtr->GetChip(ocmb);
+
+        // TODO: no odyssey support at the moment
+        if (isOdysseyOcmb(ocmb))
+        {
+            return;
+        }
 
         // Check if cleanup is still required or has already been done.
         if ( !getOcmbDataBundle(ocmbChip)->iv_doChnlFailCleanup ) break;
