@@ -2283,6 +2283,71 @@ fapi2::ReturnCode configure_dram_train_message_block_hardcodes(const fapi2::Targ
 #endif
 
 ///
+/// @brief SPD to PHY nibble swizzle is implemented in the getBits indexing
+/// @param[in] i_nibble_enables nibble enable attr value
+/// @param[out] o_byte_disables DQ byte disable bits
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode nibble_enable_db_disable(const fapi2::buffer<uint32_t>& i_nibble_enables,
+        uint8_t(&o_byte_disables)[10])
+{
+    fapi2::buffer<uint8_t> l_byte_disable;
+    constexpr uint8_t DB0 = 31;
+    constexpr uint8_t DB1 = 29;
+    constexpr uint8_t DB2 = 27;
+    constexpr uint8_t DB3 = 25;
+    constexpr uint8_t DB4 = 21;
+    constexpr uint8_t DB5 = 19;
+    constexpr uint8_t DB6 = 17;
+    constexpr uint8_t DB7 = 15;
+    constexpr uint8_t DB8 = 23;
+    constexpr uint8_t DB9 = 13;
+
+    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB0>());
+    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB0 - 1 > ());
+    o_byte_disables[0] = l_byte_disable;
+
+    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB1>());
+    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB1 - 1 > ());
+    o_byte_disables[1] = l_byte_disable;
+
+    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB2>());
+    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB2 - 1 > ());
+    o_byte_disables[2] = l_byte_disable;
+
+    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB3>());
+    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB3 - 1 > ());
+    o_byte_disables[3] = l_byte_disable;
+
+    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB4>());
+    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB4 - 1 > ());
+    o_byte_disables[4] = l_byte_disable;
+
+    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB5>());
+    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB5 - 1 > ());
+    o_byte_disables[5] = l_byte_disable;
+
+    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB6>());
+    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB6 - 1 > ());
+    o_byte_disables[6] = l_byte_disable;
+
+    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB7>());
+    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB7 - 1 > ());
+    o_byte_disables[7] = l_byte_disable;
+
+    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB8>());
+    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB8 - 1 > ());
+    o_byte_disables[8] = l_byte_disable;
+
+    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB9>());
+    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB9 - 1 > ());
+    o_byte_disables[9] = l_byte_disable;
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+}
+
+///
 /// @brief Configures the DRAM training message block using attributes
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_sim value of ATTR_IS_SIMULATION
@@ -9314,6 +9379,7 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 
 } // namespace phy
 } // namespace ody

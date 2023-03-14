@@ -101,6 +101,16 @@ inline bool skip_this_step(const uint8_t i_hwp_step,
 namespace phy
 {
 
+///
+/// @brief SPD to PHY nibble swizzle is implemented in the getBits indexing
+/// @param[in] i_nibble_enables nibble enable attr value
+/// @param[out] o_byte_disables DQ byte disable bits
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode nibble_enable_db_disable(const fapi2::buffer<uint32_t>& i_nibble_enables,
+        uint8_t(&o_byte_disables)[10]
+                                          );
+
 constexpr uint8_t NUM_RCW = 0x80;
 
 ///
@@ -185,7 +195,7 @@ struct msg_block_vars
     uint16_t iv_WL_ADJ_START = 0;
     uint16_t iv_WL_ADJ_END = 0;
     uint8_t iv_RCW[NUM_RCW] = {0};
-    uint8_t iv_DisabledDB[mss::ody::MAX_BYTES_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
+    uint32_t iv_nibbles_enables[mss::ody::MAX_DIMM_PER_PORT] = {0};
 };
 
 ///
@@ -301,6 +311,7 @@ class msg_block_params
             // D5Quickboot is always zero for Odyssey
             iv_msg_block_vars.iv_D5Quickboot = 0;
             FAPI_TRY(mss::attr::get_disabled_dbyte(i_target, iv_msg_block_vars.iv_DisabledDbyte));
+            FAPI_TRY(mss::attr::get_nibble_enables(i_target, iv_msg_block_vars.iv_nibbles_enables));
             FAPI_TRY(mss::attr::get_ca_train_options(i_target, iv_msg_block_vars.iv_CATrainOpt));
             FAPI_TRY(mss::attr::get_tx2d_dfe_misc(i_target, iv_msg_block_vars.iv_TX2D_DFE_Misc));
             FAPI_TRY(mss::attr::get_rx2d_train_opt(i_target, iv_msg_block_vars.iv_RX2D_TrainOpt));
@@ -3296,48 +3307,63 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_DisabledDB(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            io_msg_block.DisabledDB0LaneR0 = iv_msg_block_vars.iv_DisabledDB[0][0];
-            io_msg_block.DisabledDB0LaneR1 = iv_msg_block_vars.iv_DisabledDB[0][1];
-            io_msg_block.DisabledDB0LaneR2 = iv_msg_block_vars.iv_DisabledDB[0][2];
-            io_msg_block.DisabledDB0LaneR3 = iv_msg_block_vars.iv_DisabledDB[0][3];
-            io_msg_block.DisabledDB1LaneR0 = iv_msg_block_vars.iv_DisabledDB[1][0];
-            io_msg_block.DisabledDB1LaneR1 = iv_msg_block_vars.iv_DisabledDB[1][1];
-            io_msg_block.DisabledDB1LaneR2 = iv_msg_block_vars.iv_DisabledDB[1][2];
-            io_msg_block.DisabledDB1LaneR3 = iv_msg_block_vars.iv_DisabledDB[1][3];
-            io_msg_block.DisabledDB2LaneR0 = iv_msg_block_vars.iv_DisabledDB[2][0];
-            io_msg_block.DisabledDB2LaneR1 = iv_msg_block_vars.iv_DisabledDB[2][1];
-            io_msg_block.DisabledDB2LaneR2 = iv_msg_block_vars.iv_DisabledDB[2][2];
-            io_msg_block.DisabledDB2LaneR3 = iv_msg_block_vars.iv_DisabledDB[2][3];
-            io_msg_block.DisabledDB3LaneR0 = iv_msg_block_vars.iv_DisabledDB[3][0];
-            io_msg_block.DisabledDB3LaneR1 = iv_msg_block_vars.iv_DisabledDB[3][1];
-            io_msg_block.DisabledDB3LaneR2 = iv_msg_block_vars.iv_DisabledDB[3][2];
-            io_msg_block.DisabledDB3LaneR3 = iv_msg_block_vars.iv_DisabledDB[3][3];
-            io_msg_block.DisabledDB4LaneR0 = iv_msg_block_vars.iv_DisabledDB[4][0];
-            io_msg_block.DisabledDB4LaneR1 = iv_msg_block_vars.iv_DisabledDB[4][1];
-            io_msg_block.DisabledDB4LaneR2 = iv_msg_block_vars.iv_DisabledDB[4][2];
-            io_msg_block.DisabledDB4LaneR3 = iv_msg_block_vars.iv_DisabledDB[4][3];
-            io_msg_block.DisabledDB5LaneR0 = iv_msg_block_vars.iv_DisabledDB[5][0];
-            io_msg_block.DisabledDB5LaneR1 = iv_msg_block_vars.iv_DisabledDB[5][1];
-            io_msg_block.DisabledDB5LaneR2 = iv_msg_block_vars.iv_DisabledDB[5][2];
-            io_msg_block.DisabledDB5LaneR3 = iv_msg_block_vars.iv_DisabledDB[5][3];
-            io_msg_block.DisabledDB6LaneR0 = iv_msg_block_vars.iv_DisabledDB[6][0];
-            io_msg_block.DisabledDB6LaneR1 = iv_msg_block_vars.iv_DisabledDB[6][1];
-            io_msg_block.DisabledDB6LaneR2 = iv_msg_block_vars.iv_DisabledDB[6][2];
-            io_msg_block.DisabledDB6LaneR3 = iv_msg_block_vars.iv_DisabledDB[6][3];
-            io_msg_block.DisabledDB7LaneR0 = iv_msg_block_vars.iv_DisabledDB[7][0];
-            io_msg_block.DisabledDB7LaneR1 = iv_msg_block_vars.iv_DisabledDB[7][1];
-            io_msg_block.DisabledDB7LaneR2 = iv_msg_block_vars.iv_DisabledDB[7][2];
-            io_msg_block.DisabledDB7LaneR3 = iv_msg_block_vars.iv_DisabledDB[7][3];
-            io_msg_block.DisabledDB8LaneR0 = iv_msg_block_vars.iv_DisabledDB[8][0];
-            io_msg_block.DisabledDB8LaneR1 = iv_msg_block_vars.iv_DisabledDB[8][1];
-            io_msg_block.DisabledDB8LaneR2 = iv_msg_block_vars.iv_DisabledDB[8][2];
-            io_msg_block.DisabledDB8LaneR3 = iv_msg_block_vars.iv_DisabledDB[8][3];
-            io_msg_block.DisabledDB9LaneR0 = iv_msg_block_vars.iv_DisabledDB[9][0];
-            io_msg_block.DisabledDB9LaneR1 = iv_msg_block_vars.iv_DisabledDB[9][1];
-            io_msg_block.DisabledDB9LaneR2 = iv_msg_block_vars.iv_DisabledDB[9][2];
-            io_msg_block.DisabledDB9LaneR3 = iv_msg_block_vars.iv_DisabledDB[9][3];
+            fapi2::buffer<uint32_t> l_nibble_enables = iv_msg_block_vars.iv_nibbles_enables[0];
+            uint8_t l_byte_disables[10] = {};
+            FAPI_TRY(nibble_enable_db_disable(l_nibble_enables, l_byte_disables));
 
-            return fapi2::FAPI2_RC_SUCCESS;
+            // SPD to PHY nibble swizzle is implemented in the getBits indexing
+            io_msg_block.DisabledDB0LaneR0 = l_byte_disables[0];
+            io_msg_block.DisabledDB0LaneR1 = l_byte_disables[0];
+            io_msg_block.DisabledDB0LaneR2 = l_byte_disables[0];
+            io_msg_block.DisabledDB0LaneR3 = l_byte_disables[0];
+
+            io_msg_block.DisabledDB1LaneR0 = l_byte_disables[1];
+            io_msg_block.DisabledDB1LaneR1 = l_byte_disables[1];
+            io_msg_block.DisabledDB1LaneR2 = l_byte_disables[1];
+            io_msg_block.DisabledDB1LaneR3 = l_byte_disables[1];
+
+            io_msg_block.DisabledDB2LaneR0 = l_byte_disables[2];
+            io_msg_block.DisabledDB2LaneR1 = l_byte_disables[2];
+            io_msg_block.DisabledDB2LaneR2 = l_byte_disables[2];
+            io_msg_block.DisabledDB2LaneR3 = l_byte_disables[2];
+
+            io_msg_block.DisabledDB3LaneR0 = l_byte_disables[3];
+            io_msg_block.DisabledDB3LaneR1 = l_byte_disables[3];
+            io_msg_block.DisabledDB3LaneR2 = l_byte_disables[3];
+            io_msg_block.DisabledDB3LaneR3 = l_byte_disables[3];
+
+            io_msg_block.DisabledDB4LaneR0 = l_byte_disables[4];
+            io_msg_block.DisabledDB4LaneR1 = l_byte_disables[4];
+            io_msg_block.DisabledDB4LaneR2 = l_byte_disables[4];
+            io_msg_block.DisabledDB4LaneR3 = l_byte_disables[4];
+
+            io_msg_block.DisabledDB5LaneR0 = l_byte_disables[5];
+            io_msg_block.DisabledDB5LaneR1 = l_byte_disables[5];
+            io_msg_block.DisabledDB5LaneR2 = l_byte_disables[5];
+            io_msg_block.DisabledDB5LaneR3 = l_byte_disables[5];
+
+            io_msg_block.DisabledDB6LaneR0 = l_byte_disables[6];
+            io_msg_block.DisabledDB6LaneR1 = l_byte_disables[6];
+            io_msg_block.DisabledDB6LaneR2 = l_byte_disables[6];
+            io_msg_block.DisabledDB6LaneR3 = l_byte_disables[6];
+
+            io_msg_block.DisabledDB7LaneR0 = l_byte_disables[7];
+            io_msg_block.DisabledDB7LaneR1 = l_byte_disables[7];
+            io_msg_block.DisabledDB7LaneR2 = l_byte_disables[7];
+            io_msg_block.DisabledDB7LaneR3 = l_byte_disables[7];
+
+            io_msg_block.DisabledDB8LaneR0 = l_byte_disables[8];
+            io_msg_block.DisabledDB8LaneR1 = l_byte_disables[8];
+            io_msg_block.DisabledDB8LaneR2 = l_byte_disables[8];
+            io_msg_block.DisabledDB8LaneR3 = l_byte_disables[8];
+
+            io_msg_block.DisabledDB9LaneR0 = l_byte_disables[9];
+            io_msg_block.DisabledDB9LaneR1 = l_byte_disables[9];
+            io_msg_block.DisabledDB9LaneR2 = l_byte_disables[9];
+            io_msg_block.DisabledDB9LaneR3 = l_byte_disables[9];
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
