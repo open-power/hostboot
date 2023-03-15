@@ -194,7 +194,9 @@ errlHndl_t retrieve_pound_keyword(std::vector<uint8_t>& io_lid_content,
                              vpdParms& io_vpd_parms)
 {
     errlHndl_t errl = nullptr;
-    const size_t READ_CHUNK_SIZE = 4096;
+    // BMC's implementation for pound keyword requires passing in a value larger than the
+    // keyword size.  The returned size will be truncated to the actual size
+    const size_t READ_CHUNK_SIZE = 16384;
     io_lid_content.clear();
     io_lid_content.resize(READ_CHUNK_SIZE);
     uint32_t offset = 0;
