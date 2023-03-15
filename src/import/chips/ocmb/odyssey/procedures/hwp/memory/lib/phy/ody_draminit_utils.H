@@ -160,7 +160,7 @@ struct msg_block_vars
     uint8_t iv_MR33[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR33_ORG[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR34[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR35[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t iv_MR35[mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {0};
     uint8_t iv_MR37[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR38[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR39[mss::ody::MAX_RANK_PER_DIMM] = {0};
@@ -356,7 +356,10 @@ class msg_block_params
                 FAPI_TRY(l_mr33.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR33[l_phy_rank]));
                 FAPI_TRY(l_mr33.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR33_ORG[l_phy_rank], mss::ddr5::mr::STRAPB));
                 FAPI_TRY(l_mr34.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR34[l_phy_rank]));
-                FAPI_TRY(l_mr35.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR35[l_phy_rank]));
+                // Running on DRAM0 for Channel A and DRAM10 for Channel B
+                // Since these are the first DRAMS on each channel
+                FAPI_TRY(l_mr35.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR35[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_A], 0));
+                FAPI_TRY(l_mr35.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR35[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_B], 10));
                 FAPI_TRY(l_mr37.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR37[l_phy_rank]));
                 FAPI_TRY(l_mr38.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR38[l_phy_rank]));
                 FAPI_TRY(l_mr39.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR39[l_phy_rank]));
@@ -1356,14 +1359,14 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_MR35(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            io_msg_block.MR35_A0 = iv_msg_block_vars.iv_MR35[0];
-            io_msg_block.MR35_A1 = iv_msg_block_vars.iv_MR35[1];
-            io_msg_block.MR35_A2 = iv_msg_block_vars.iv_MR35[2];
-            io_msg_block.MR35_A3 = iv_msg_block_vars.iv_MR35[3];
-            io_msg_block.MR35_B0 = iv_msg_block_vars.iv_MR35[0];
-            io_msg_block.MR35_B1 = iv_msg_block_vars.iv_MR35[1];
-            io_msg_block.MR35_B2 = iv_msg_block_vars.iv_MR35[2];
-            io_msg_block.MR35_B3 = iv_msg_block_vars.iv_MR35[3];
+            io_msg_block.MR35_A0 = iv_msg_block_vars.iv_MR35[0][mss::ddr5::mr::ATTR_CHANNEL_A];
+            io_msg_block.MR35_A1 = iv_msg_block_vars.iv_MR35[1][mss::ddr5::mr::ATTR_CHANNEL_A];
+            io_msg_block.MR35_A2 = iv_msg_block_vars.iv_MR35[2][mss::ddr5::mr::ATTR_CHANNEL_A];
+            io_msg_block.MR35_A3 = iv_msg_block_vars.iv_MR35[3][mss::ddr5::mr::ATTR_CHANNEL_A];
+            io_msg_block.MR35_B0 = iv_msg_block_vars.iv_MR35[0][mss::ddr5::mr::ATTR_CHANNEL_B];
+            io_msg_block.MR35_B1 = iv_msg_block_vars.iv_MR35[1][mss::ddr5::mr::ATTR_CHANNEL_B];
+            io_msg_block.MR35_B2 = iv_msg_block_vars.iv_MR35[2][mss::ddr5::mr::ATTR_CHANNEL_B];
+            io_msg_block.MR35_B3 = iv_msg_block_vars.iv_MR35[3][mss::ddr5::mr::ATTR_CHANNEL_B];
 
             return fapi2::current_err;
         }

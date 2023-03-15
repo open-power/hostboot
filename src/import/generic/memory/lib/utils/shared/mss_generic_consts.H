@@ -1319,6 +1319,7 @@ namespace ddr5
 enum mr
 {
     ATTR_RANKS = 4,
+    ATTR_DRAM_HALF = 10,
     ATTR_DRAM  = 20,
     HALF_ATTR_DRAM = 10,
     ATTR_STRAP = 2,
@@ -1327,6 +1328,11 @@ enum mr
     // MR32 OP[6]
     STRAPA = 0,
     STRAPB = 1,
+
+    // Number of Channels
+    ATTR_NUM_CHANNELS = 2,
+    ATTR_CHANNEL_A = 0,
+    ATTR_CHANNEL_B = 1,
 };
 
 }

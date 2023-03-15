@@ -160,10 +160,10 @@ class mr35_data : public mr_base_data<MC>
                         .set_FIELD(i_field)
                         .set_IS_RTT_NOM_RD(i_is_read),
 #ifdef __PPE__
-                        TARGTIDFORMAT " DDR5 MR35. Bad RTT %u field on DIMM rank %u, strap%u. Field value: %u", TARGTID,
+                        TARGTIDFORMAT " DDR5 MR35. Bad RTT %u field on DIMM rank %u, Field value: %u", TARGTID,
                         i_is_read, i_dimm_rank, i_field);
 #else
-                        TARGTIDFORMAT " DDR5 MR35. Bad RTT %s field on DIMM rank %u, strap%u. Field value: %u", TARGTID,
+                        TARGTIDFORMAT " DDR5 MR35. Bad RTT %s field on DIMM rank %u, Field value: %u", TARGTID,
                         i_is_read ? "RD" : "WR", i_dimm_rank, i_field);
 #endif
 
@@ -188,18 +188,23 @@ class mr35_data : public mr_base_data<MC>
             uint8_t l_rtt_nom_wr_field = 0;
             uint8_t l_rtt_nom_rd_field = 0;
 
+            // Get the channel number from the dram_num
+            // Channel A goes to DRAM[0-9]
+            // Channel B goes to DRAM[10-19]
+            const uint8_t CHANNEL = (i_dram_number < mr::ATTR_DRAM_HALF) ? mr::ATTR_CHANNEL_A : mr::ATTR_CHANNEL_B;
+
             // Note: not checking DIMM rank as it was already checked by the rank info class
             const auto& l_dimm = i_rank_info.get_dimm_target();
             const auto l_dimm_rank = i_rank_info.get_dimm_rank();
             FAPI_TRY(check_and_convert_rtt_to_field(l_dimm,
                                                     l_dimm_rank,
                                                     false,
-                                                    iv_rtt_nom_wr[l_dimm_rank],
+                                                    iv_rtt_nom_wr[l_dimm_rank][CHANNEL],
                                                     l_rtt_nom_wr_field));
             FAPI_TRY(check_and_convert_rtt_to_field(l_dimm,
                                                     l_dimm_rank,
                                                     true,
-                                                    iv_rtt_nom_rd[l_dimm_rank],
+                                                    iv_rtt_nom_rd[l_dimm_rank][CHANNEL],
                                                     l_rtt_nom_rd_field));
 
             l_data. template insertFromRight<RTT_NOM_WR, RTT_NOM_WR_LEN>(l_rtt_nom_wr_field)
@@ -215,12 +220,12 @@ class mr35_data : public mr_base_data<MC>
         ///
         /// @brief Displays the information that makes up the MR
         /// @param[in] i_rank_info the rank on which to operate
-        /// @param[in] i_dram_number the DRAM on which to operate - not used for MR35 but included to keep the API common
+        /// @param[in] i_dram_number the DRAM on which to operate
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
-            this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank());
+            this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -228,7 +233,7 @@ class mr35_data : public mr_base_data<MC>
         /// @brief Reads in the MR information into this data class
         /// @param[in] i_rank_info the rank on which to operate - unused for MR35 but keeping to match existing API
         /// @param[in] i_mr_data the mode register OP data in [7:0] format
-        /// @param[in] i_dram_number the DRAM on which to operate - not used for MR35 but included to keep the API common
+        /// @param[in] i_dram_number the DRAM on which to operate
         /// @return FAPI2_RC_SUCCESS if and only if ok
         /// @note This can be used for decoding mode register reads
         ///
@@ -247,16 +252,21 @@ class mr35_data : public mr_base_data<MC>
             const auto& l_dimm = i_rank_info.get_dimm_target();
             const auto l_dimm_rank = i_rank_info.get_dimm_rank();
 
+            // Get the channel number from the dram_num
+            // Channel A goes to DRAM[0-9]
+            // Channel B goes to DRAM[10-19]
+            const uint8_t CHANNEL = (i_dram_number < mr::ATTR_DRAM_HALF) ? mr::ATTR_CHANNEL_A : mr::ATTR_CHANNEL_B;
+
             FAPI_TRY(check_and_convert_rtt_from_field(l_dimm,
                      l_dimm_rank,
                      false,
                      l_rtt_nom_wr_field,
-                     iv_rtt_nom_wr[l_dimm_rank]));
+                     iv_rtt_nom_wr[l_dimm_rank][CHANNEL]));
             FAPI_TRY(check_and_convert_rtt_from_field(l_dimm,
                      l_dimm_rank,
                      true,
                      l_rtt_nom_rd_field,
-                     iv_rtt_nom_rd[l_dimm_rank]));
+                     iv_rtt_nom_rd[l_dimm_rank][CHANNEL]));
 
 
             return fapi2::FAPI2_RC_SUCCESS;
@@ -289,8 +299,8 @@ class mr35_data : public mr_base_data<MC>
             RTT_NOM_RD_LEN = 3,
         };
 
-        uint8_t iv_rtt_nom_wr[mr::ATTR_RANKS] = {};
-        uint8_t iv_rtt_nom_rd[mr::ATTR_RANKS] = {};
+        uint8_t iv_rtt_nom_wr[mr::ATTR_RANKS][mr::ATTR_NUM_CHANNELS] = {};
+        uint8_t iv_rtt_nom_rd[mr::ATTR_RANKS][mr::ATTR_NUM_CHANNELS] = {};
 
     private:
 
@@ -298,12 +308,21 @@ class mr35_data : public mr_base_data<MC>
         /// @brief Displays the information that makes up the MR
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
         /// @param[in] i_dimm_rank the DIMM rank's value to print
+        /// @param[in] i_dram_num the dram number that is currently being executed
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_dimm_rank)  const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint64_t i_dimm_rank, const uint8_t i_dram_num)  const
         {
+            // Get the channel number from the dram_num
+            // Channel A goes to DRAM[0-9]
+            // Channel B goes to DRAM[10-19]
+            const uint8_t CHANNEL = (i_dram_num < mr::ATTR_DRAM_HALF) ? mr::ATTR_CHANNEL_A : mr::ATTR_CHANNEL_B;
+
             FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR35 rank%u. RTT NOM WR:%u. RTT NOM RD:%u.", TARGTID, i_dimm_rank, iv_rtt_nom_wr[i_dimm_rank],
-                     iv_rtt_nom_rd[i_dimm_rank]);
+                     " DDR5 MR35 rank%u. dram_num%u.", TARGTID, i_dimm_rank, i_dram_num);
+            FAPI_INF(" DDR5 MR35 RTT NOM WR:%u. RTT NOM RD:%u.",
+                     iv_rtt_nom_wr[i_dimm_rank][CHANNEL],
+                     iv_rtt_nom_rd[i_dimm_rank][CHANNEL]);
         }
 
 };

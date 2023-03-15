@@ -552,7 +552,7 @@
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
       DRAM RTT NOM for writes Termination Resistance in Ohms.
-      ARRAY[DIMM][RANK]
+      ARRAY[DIMM][RANK][CHANNEL]
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
@@ -560,7 +560,7 @@
     <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
     <mssUnits>ohm</mssUnits>
     <mssAccessorName>ddr5_dram_rtt_nom_wr</mssAccessorName>
-    <array>2 4</array>
+    <array>2 4 2</array>
   </attribute>
 
   <attribute>
@@ -568,7 +568,7 @@
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
       DRAM RTT NOM for reads Termination Resistance in Ohms.
-      ARRAY[DIMM][RANK]
+      ARRAY[DIMM][RANK][CHANNEL]
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
@@ -576,7 +576,7 @@
     <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
     <mssUnits>ohm</mssUnits>
     <mssAccessorName>ddr5_dram_rtt_nom_rd</mssAccessorName>
-    <array>2 4</array>
+    <array>2 4 2</array>
   </attribute>
 
 <!-- MR37 attributes -->

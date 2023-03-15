@@ -106,6 +106,9 @@ enum sizes
 
     // Number of channels
     NUM_CHANNELS = 2,
+    CHANNEL_A = 0,
+    CHANNEL_B = 1,
+
 };
 
 ///
