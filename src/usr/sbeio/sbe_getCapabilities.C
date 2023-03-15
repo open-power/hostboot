@@ -300,11 +300,6 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
 
     do
     {
-        l_errl = sbeioInterfaceChecks(i_target);
-        if (l_errl)
-        {
-            break;
-        }
         // update this based on version
         uint8_t capabilities_array_size = 0;
 
@@ -322,6 +317,14 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
             // P10 uses getCapabilities2
             capabilities_array_size = SBEIO::SBE_MAX_CAPABILITIES_2;
             l_fifoRequest.command = SbeFifo::SBE_FIFO_CMD_GET_CAPABILITIES_2;
+        }
+
+        l_errl = sbeioInterfaceChecks(i_target,
+                                      SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
+                                      l_fifoRequest.command);
+        if (l_errl)
+        {
+            break;
         }
 
         // Create a FIFO response message.  No need to initialize
