@@ -222,6 +222,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
         });
     }
 
+
     GIVEN("Tests register values for load_dmem_helper()")
     {
         FAPI_INF("Testing passing scenario for DMEM image data");
@@ -451,10 +452,10 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     uint8_t l_rtt_park_test[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
                     uint8_t l_rtt_wr_save[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
                     uint8_t l_rtt_wr_test[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
-                    uint8_t l_rtt_nom_wr_save[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
-                    uint8_t l_rtt_nom_wr_test[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
-                    uint8_t l_rtt_nom_rd_save[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
-                    uint8_t l_rtt_nom_rd_test[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
+                    uint8_t l_rtt_nom_wr_save[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {0};
+                    uint8_t l_rtt_nom_wr_test[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {0};
+                    uint8_t l_rtt_nom_rd_save[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {0};
+                    uint8_t l_rtt_nom_rd_test[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {0};
                     int8_t l_odtlon_wr_offset_save[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
                     int8_t l_odtlon_wr_offset_test[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
                     int8_t l_odtloff_wr_offset_save[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {0};
@@ -743,11 +744,15 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     l_rtt_wr_test[0][0] = 60;
                     l_rtt_wr_test[0][1] = 80;
                     REQUIRE_RC_PASS(mss::attr::set_si_dram_rtt_wr(l_port, l_rtt_wr_test));
-                    l_rtt_nom_wr_test[0][0] = 240;
-                    l_rtt_nom_wr_test[0][1] = 34;
+                    l_rtt_nom_wr_test[0][0][0] = 240;
+                    l_rtt_nom_wr_test[0][0][1] = 34;
+                    l_rtt_nom_wr_test[0][1][0] = 120;
+                    l_rtt_nom_wr_test[0][1][1] = 40;
                     REQUIRE_RC_PASS(mss::attr::set_ddr5_dram_rtt_nom_wr(l_port, l_rtt_nom_wr_test));
-                    l_rtt_nom_rd_test[0][0] = 48;
-                    l_rtt_nom_rd_test[0][1] = 120;
+                    l_rtt_nom_rd_test[0][0][0] = 48;
+                    l_rtt_nom_rd_test[0][0][1] = 60;
+                    l_rtt_nom_rd_test[0][1][0] = 120;
+                    l_rtt_nom_rd_test[0][1][1] = 80;
                     REQUIRE_RC_PASS(mss::attr::set_ddr5_dram_rtt_nom_rd(l_port, l_rtt_nom_rd_test));
                     l_odtlon_wr_offset_test[0][0] = -4;
                     l_odtlon_wr_offset_test[0][1] = 1;
@@ -980,11 +985,11 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE( l_msg_block.MR34_B2 == 0x00 );
                     REQUIRE( l_msg_block.MR34_B3 == 0x00 );
                     REQUIRE( l_msg_block.MR35_A0 == 0x29 );
-                    REQUIRE( l_msg_block.MR35_A1 == 0x17 );
+                    REQUIRE( l_msg_block.MR35_A1 == 0x12 );
                     REQUIRE( l_msg_block.MR35_A2 == 0x00 );
                     REQUIRE( l_msg_block.MR35_A3 == 0x00 );
-                    REQUIRE( l_msg_block.MR35_B0 == 0x29 );
-                    REQUIRE( l_msg_block.MR35_B1 == 0x17 );
+                    REQUIRE( l_msg_block.MR35_B0 == 0x27 );
+                    REQUIRE( l_msg_block.MR35_B1 == 0x1E );
                     REQUIRE( l_msg_block.MR35_B2 == 0x00 );
                     REQUIRE( l_msg_block.MR35_B3 == 0x00 );
                     REQUIRE( l_msg_block.MR32_ORG_A0 == 0x67 );
