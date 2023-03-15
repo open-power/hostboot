@@ -222,10 +222,14 @@ function main ()
         echo "ERROR: Must be run from inside a workon"
         return 1
     fi
-    machine=$(env | grep MACHINE | cut -d"=" -f2)
 
-    if [ "$machine" != "P10_STANDALONE" ]; then
-        echo "ERROR: This script currently only supports P10 standalone for patching hardware systems."
+    # Do a case insensitive compare of the selected MACHINE type.
+    # This script uses this var to select which .xml file it replaces when doing targeting changes. Presently, the
+    # script assumes simics_P10.system.xml is the file to overwrite when compiling targeting changes. So the MACHINE
+    # must be set to P10_STANDALONE, otherwise the prime will select another xml file which has not been overwritten for
+    # targeting changes.
+    if [ "${MACHINE^^}" != "P10_STANDALONE" ]; then
+        echo "ERROR: This script currently only supports P10 standalone for patching hardware systems and full-system simics."
         echo "       Please use MACHINE=P10_STANDALONE from a P10 based hostboot git repo."
         return 1;
     fi
@@ -414,5 +418,4 @@ unset no_xml
 unset xml_only
 unset sys_type
 unset config
-unset machine
 unset OPTIND
