@@ -634,7 +634,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE_RC_PASS(mss::attr::set_dfimrl_margin(l_port, 0x0A));
                     REQUIRE_RC_PASS(mss::attr::set_phy_use_broadcast_mr(l_port, 0x0B));
                     REQUIRE_RC_PASS(mss::attr::set_disabled_dbyte(l_port, 0x0C));
-                    REQUIRE_RC_PASS(mss::attr::set_ca_train_options(l_port, 0xF3));
+                    REQUIRE_RC_PASS(mss::attr::set_ca_train_options(l_port, 0xe3));
                     REQUIRE_RC_PASS(mss::attr::set_tx2d_dfe_misc(l_port, 0x03));
                     REQUIRE_RC_PASS(mss::attr::set_rx2d_train_opt(l_port, 0xF0));
                     REQUIRE_RC_PASS(mss::attr::set_tx2d_train_opt(l_port, 0x84));
@@ -815,7 +815,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE( l_msg_block.UseBroadcastMR == 0x0B );
                     REQUIRE( l_msg_block.D5Quickboot == 0x00 );
                     REQUIRE( l_msg_block.DisabledDbyte == 0x0C );
-                    REQUIRE( l_msg_block.CATrainOpt == 0x9C );
+                    REQUIRE( l_msg_block.CATrainOpt == 0x9C ); // CA13 skip is set
                     REQUIRE( l_msg_block.TX2D_DFE_Misc == 0xFC );
                     REQUIRE( l_msg_block.RX2D_TrainOpt == 0x7E );
                     REQUIRE( l_msg_block.TX2D_TrainOpt == 0x1E );
@@ -1158,14 +1158,66 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE( l_msg_block.VrefCAR1Nib8 == 0x2C );
                     REQUIRE( l_msg_block.VrefCAR1Nib12 == 0x2E );
 
-                    // Test that the message block gets the correct values for non-sim mode
                     constexpr uint8_t NON_SIM_MODE = 0;
                     REQUIRE_RC_PASS(mss::ody::phy::configure_dram_train_message_block(l_port, NON_SIM_MODE, l_msg_block));
-
                     REQUIRE( l_msg_block.CATrainOpt == 0x90 );
                     REQUIRE( l_msg_block.TX2D_DFE_Misc == 0x03 );
                     REQUIRE( l_msg_block.RX2D_TrainOpt == 0x70 );
                     REQUIRE( l_msg_block.TX2D_TrainOpt == 0x04 );
+
+                    // Explicitly tests CA 13 skip for attribute combinations
+                    {
+                        uint16_t l_stack_height_h4_inject[mss::ody::MAX_DIMM_PER_PORT] = {fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H4, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H4};
+                        uint8_t l_density_48gb_inject[mss::ody::MAX_DIMM_PER_PORT] = {fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_48G, fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_48G};
+                        uint16_t l_stack_height_h8_inject[mss::ody::MAX_DIMM_PER_PORT] = {fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H8, fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H8};
+                        uint8_t l_density_64gb_inject[mss::ody::MAX_DIMM_PER_PORT] = {fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_64G, fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_64G};
+
+                        uint8_t l_CATrainOpt_save = 0;
+                        uint16_t l_stack_height_saved[mss::ody::MAX_DIMM_PER_PORT] = {0};
+                        uint8_t l_density_saved[mss::ody::MAX_DIMM_PER_PORT] = {0};
+                        REQUIRE_RC_PASS(mss::attr::get_3ds_height(l_port, l_stack_height_saved));
+                        REQUIRE_RC_PASS(mss::attr::get_dram_density(l_port, l_density_saved));
+                        REQUIRE_RC_PASS(mss::attr::get_ca_train_options(l_port, l_CATrainOpt_save));
+                        REQUIRE_RC_PASS(mss::attr::set_ca_train_options(l_port, 0));
+
+                        l_msg_block.CATrainOpt = 0;
+                        REQUIRE_RC_PASS(mss::ody::phy::configure_dram_train_message_block(l_port, SIM_MODE, l_msg_block));
+
+                        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+                        mss::ody::phy::msg_block_params l_params(l_port, l_rc);
+                        REQUIRE_RC_PASS(l_rc);
+
+                        // 4H and 48Gb -> set skip
+                        l_msg_block.CATrainOpt = 0;
+                        REQUIRE_RC_PASS(mss::attr::set_3ds_height(l_port, l_stack_height_h4_inject));
+                        REQUIRE_RC_PASS(mss::attr::set_dram_density(l_port, l_density_48gb_inject));
+                        REQUIRE_RC_PASS(l_params.setup_CATrainOpt(SIM_MODE, l_msg_block));
+                        REQUIRE(l_msg_block.CATrainOpt == 0x1c);
+
+                        // 8H and 48Gb -> clear skip
+                        REQUIRE_RC_PASS(mss::attr::set_3ds_height(l_port, l_stack_height_h8_inject));
+                        REQUIRE_RC_PASS(mss::attr::set_dram_density(l_port, l_density_48gb_inject));
+                        REQUIRE_RC_PASS(l_params.setup_CATrainOpt(SIM_MODE, l_msg_block));
+                        REQUIRE(l_msg_block.CATrainOpt == 0x0c);
+
+                        // 8H and 64Gb -> clear skip
+                        l_msg_block.CATrainOpt = 0x10;
+                        REQUIRE_RC_PASS(mss::attr::set_3ds_height(l_port, l_stack_height_h8_inject));
+                        REQUIRE_RC_PASS(mss::attr::set_dram_density(l_port, l_density_64gb_inject));
+                        REQUIRE_RC_PASS(l_params.setup_CATrainOpt(SIM_MODE, l_msg_block));
+                        REQUIRE(l_msg_block.CATrainOpt == 0x0c);
+
+                        // 4H and 64Gb -> clear skip
+                        l_msg_block.CATrainOpt = 0x10;
+                        REQUIRE_RC_PASS(mss::attr::set_3ds_height(l_port, l_stack_height_h4_inject));
+                        REQUIRE_RC_PASS(mss::attr::set_dram_density(l_port, l_density_64gb_inject));
+                        REQUIRE_RC_PASS(l_params.setup_CATrainOpt(SIM_MODE, l_msg_block));
+                        REQUIRE(l_msg_block.CATrainOpt == 0x0c);
+
+                        REQUIRE_RC_PASS(mss::attr::set_3ds_height(l_port, l_stack_height_saved));
+                        REQUIRE_RC_PASS(mss::attr::set_dram_density(l_port, l_density_saved));
+                        REQUIRE_RC_PASS(mss::attr::set_ca_train_options(l_port, l_CATrainOpt_save));
+                    }
 
                     // Restore the attributes
                     REQUIRE_RC_PASS(mss::attr::set_supported_rcd(l_port, l_supported_rcd_save));
@@ -1263,7 +1315,6 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE_RC_PASS(mss::attr::set_ca_dfe_train_options(l_port, l_ca_dfe_train_options_save));
                     REQUIRE_RC_PASS(mss::attr::set_debug_train_options(l_port, l_debug_train_options_save));
                 }
-
             }
 
             return 0;
