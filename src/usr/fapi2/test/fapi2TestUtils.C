@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,10 +89,10 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
     RESET_EPATH_TO_MASTER
 
     // Setup MC, MI, MCC, OMI
-    GENERATE_TARGET(TYPE_MC,sys0node0proc0mc0,MY_MC,0)
-    GENERATE_TARGET(TYPE_MI,sys0node0proc0mc0mi0,MY_MI,0)
-    GENERATE_TARGET(TYPE_MCC,sys0node0proc0mc0mi0mcc0,MY_MCC,0)
-    GENERATE_TARGET(TYPE_OMI,sys0node0proc0mc0mi0mcc0omi0,MY_OMI,0)
+    GENERATE_TARGET(TYPE_MC,sys0node0proc0mc1,MY_MC,1)
+    GENERATE_TARGET(TYPE_MI,sys0node0proc0mc1mi0,MY_MI,0)
+    GENERATE_TARGET(TYPE_MCC,sys0node0proc0mc1mi0mcc0,MY_MCC,0)
+    GENERATE_TARGET(TYPE_OMI,sys0node0proc0mc1mi0mcc0omi0,MY_OMI,0)
 
     // Change epath type for both TYPE_OCMB_CHIP and TYPE_MEM_PORT
     // so that targeting service will lookup the paths as type AFFINITY_PATH
@@ -100,8 +100,8 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
     l_epath.setType(TARGETING::EntityPath::PATH_AFFINITY);
 
     // Setup OCMB_CHIP and MEM_PORT
-    GENERATE_TARGET(TYPE_OCMB_CHIP,sys0node0ocmb0,MY_OCMB,0)
-    GENERATE_TARGET(TYPE_MEM_PORT,sys0node0ocmb0memport0,MY_MEM_PORT,0)
+    GENERATE_TARGET(TYPE_OCMB_CHIP,sys0node0ocmb4,MY_OCMB,0)
+    GENERATE_TARGET(TYPE_MEM_PORT,sys0node0ocmb4memport0,MY_MEM_PORT,0)
 
     // Set l_epath's type back to PATH_PHYSICAL
     l_epath.setType(TARGETING::EntityPath::PATH_PHYSICAL);
@@ -112,19 +112,19 @@ void generateTargets(TARGETING::Target* i_pMasterProcChip,
     l_epath.removeLast();
 
     // Setup OMICs
-    GENERATE_TARGET(TYPE_OMIC,sys0node0proc0mc0omic0,MY_OMIC0,0)
+    GENERATE_TARGET(TYPE_OMIC,sys0node0proc0mc1omic0,MY_OMIC0,0)
     l_epath.removeLast();
-    GENERATE_TARGET(TYPE_OMIC,sys0node0proc0mc0omic1,MY_OMIC1,1)
+    GENERATE_TARGET(TYPE_OMIC,sys0node0proc0mc1omic1,MY_OMIC1,1)
 
     // Remove OMIC, MC
     l_epath.removeLast(); l_epath.removeLast();
 
     // Setup PAUC
-    GENERATE_TARGET(TYPE_PAUC,sys0node0proc0pauc0,MY_PAUC,0)
+    GENERATE_TARGET(TYPE_PAUC,sys0node0proc0pauc2,MY_PAUC,2)
     // Setup IOHS
-    GENERATE_TARGET(TYPE_IOHS,sys0node0proc0pauc0iohs0,MY_IOHS,0)
+    GENERATE_TARGET(TYPE_IOHS,sys0node0proc0pauc2iohs0,MY_IOHS,0)
     // Setup IOLINK
-    GENERATE_TARGET(TYPE_SMPGROUP,sys0node0proc0pauc0iohs0smpgroup0,MY_IOLINK,0)
+    GENERATE_TARGET(TYPE_SMPGROUP,sys0node0proc0pauc2iohs0smpgroup0,MY_IOLINK,0)
 
     // Remove IOLINK
     l_epath.removeLast();
