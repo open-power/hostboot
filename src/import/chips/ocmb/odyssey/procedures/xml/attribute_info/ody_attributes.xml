@@ -129,7 +129,7 @@
             ASSERTION      = 0xC9,
             FW_COMPLETE    = 0xFF
         </enum>
-        <default>DETAILED_DEBUG</default>
+        <default>COARSE_DEBUG</default>
         <writeable/>
         <mssAccessorName>ody_draminit_verbosity</mssAccessorName>
     </attribute>
@@ -662,7 +662,7 @@
             MsgMisc[7:0] in the message block structure.
         </description>
         <valueType>uint8</valueType>
-        <default>0x80</default>
+        <default>0x00</default>
         <writeable/>
         <mssAccessorName>phy_msg_misc</mssAccessorName>
     </attribute>
@@ -731,6 +731,8 @@
             SequenceCtrl in the message block structure.
             Note that RCD_CSCA is only valid for RDIMM and will
             be disabled by the procedures on a UDIMM.
+            Draminit code will disable invalid sequence control settings
+            based upon the DIMM type.
         </description>
         <valueType>uint16</valueType>
         <default>0xFFFF</default>
@@ -746,7 +748,7 @@
             PhyCfg in the message block structure.
         </description>
         <valueType>uint8</valueType>
-        <default>0x2D</default>
+        <default>0x2C</default>
         <writeable/>
         <mssAccessorName>phy_cfg</mssAccessorName>
     </attribute>

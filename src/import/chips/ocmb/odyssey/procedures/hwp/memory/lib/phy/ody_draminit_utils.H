@@ -611,6 +611,11 @@ class msg_block_params
             l_buffer.clearBit<RFU8>();
             l_buffer.clearBit<RFU7>();
 
+#ifndef __PPE__
+            FAPI_INF(TARGTIDFORMAT "Applying overrides to SequenceCtrl before:0x%04x after:0x%04x", GENTARGTID(iv_target),
+                     io_msg_block.SequenceCtrl, l_buffer);
+#endif
+
             io_msg_block.SequenceCtrl = l_buffer;
 
         fapi_try_exit:
@@ -721,6 +726,7 @@ class msg_block_params
             // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
             constexpr uint8_t RFU6 = 1;
             constexpr uint8_t CS_2D_TRAINING = 2;
+            constexpr uint8_t CA13_TRAIN_SKIP = 3;
             constexpr uint8_t CSCA_TRAINING_STEP_SIZE = 4;
             constexpr uint8_t CSCA_TRAINING_STEP_SIZE_LEN = 2;
             constexpr uint8_t CA_DFE_TRAINING = 6;
@@ -729,8 +735,12 @@ class msg_block_params
             fapi2::buffer<uint8_t> l_buffer(iv_msg_block_vars.iv_CATrainOpt);
 
             bool l_has_rcd = false;
+            uint16_t l_stack_height = 0;
+            uint8_t l_density = 0;
 
             FAPI_TRY(mss::has_rcd(iv_target, l_has_rcd));
+            FAPI_TRY(mss::attr::get_3ds_height(iv_dimm, l_stack_height));
+            FAPI_TRY(mss::attr::get_dram_density(iv_dimm, l_density));
 
             // Make sure RDIMM-only training options are disabled for UDIMM
             if (!l_has_rcd)
@@ -749,7 +759,15 @@ class msg_block_params
             // Disable the reserved bit
             l_buffer.clearBit<RFU6>();
 
-            // TODO Zen:MST-1771 Override bit 3 (Skip CA13 during CA training) if needed
+            // We want to run CA13 training if we're an 8H stack or greater OR if the DRAM density is 64Gb or greater
+            // Skip if we're less than an 8H stack and we're less than a 64Gb
+            l_buffer.writeBit<CA13_TRAIN_SKIP>(l_stack_height < fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H8
+                                               && l_density < fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_64G);
+
+#ifndef __PPE__
+            FAPI_INF(TARGTIDFORMAT "Applying overrides to CATrainOpt before:0x%04x after:0x%04x", GENTARGTID(iv_target),
+                     io_msg_block.CATrainOpt, l_buffer);
+#endif
 
             io_msg_block.CATrainOpt = l_buffer;
 
