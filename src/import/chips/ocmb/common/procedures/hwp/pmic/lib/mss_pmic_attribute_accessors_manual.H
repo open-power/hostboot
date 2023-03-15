@@ -59,6 +59,8 @@ static constexpr mfg_id_attr_ptr get_mfg_id[] =
 {
     mss::attr::get_pmic0_mfg_id,
     mss::attr::get_pmic1_mfg_id,
+    mss::attr::get_pmic2_mfg_id,
+    mss::attr::get_pmic3_mfg_id,
 };
 
 /// @brief pointer to PMIC attribute getters for OCMB parent target of pmic

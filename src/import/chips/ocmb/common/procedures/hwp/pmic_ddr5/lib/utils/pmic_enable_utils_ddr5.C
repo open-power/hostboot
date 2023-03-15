@@ -198,12 +198,34 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note There is no support for 1U in DDR5
 ///
-// TODO: ZEN:MST-1890 Implement pmic_enable() for 2U
 fapi2::ReturnCode power_down_sequence_2u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-    FAPI_ERR("Power down sequence for 2U not supported yet!!");
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::buffer<uint8_t> l_pmic_buffer;
+
+    auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_target);
+
+    // Next, sort them by the sequence attributes
+    FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_target, l_pmics));
+
+    for (const auto& l_pmic : l_pmics)
+    {
+        FAPI_TRY(mss::pmic::i2c::reg_write(l_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, CONSTS::PRE_CONFIG_ON_OFF));
+
+        // Disable VR Enable (0 --> Bit 7)
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
+        l_pmic_buffer.clearBit<FIELDS::R32_VR_ENABLE>();
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 
@@ -456,16 +478,75 @@ fapi_try_exit:
 /// @param[in] i_ocmb_target OCMB target parent of PMICs
 /// @param[in] i_mode manual/SPD enable mode
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-/// @note There is no 1U support for DDR5
+/// @note There is no 1U support for DDR5.
+/// @note The below values of PMIC regs are taken from the
+///       "Non-Redundant PoD5 - Functional Specification dated 20230228"
+///       document provided by the Power team
 ///
-// TODO: ZEN:MST-1890 Implement pmic_enable() for 2U
 fapi2::ReturnCode enable_2u(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::enable_mode i_mode)
 {
-    FAPI_ERR("PMIC enable for 2U not supported yet!!");
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    uint16_t l_vendor_id = 0;
+    fapi2::buffer<uint8_t> l_pmic_buffer;
+
+    FAPI_INF("Enabling PMICs on " GENTARGTIDFORMAT " with 2U mode", GENTARGTID(i_ocmb_target));
+
+    auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
+
+    // Check for number of pmics received
+    FAPI_TRY(mss::pmic::check_number_pmics_received_2u(i_ocmb_target, l_pmics.size()));
+
+    // Ensure the PMICs are in sorted order
+    FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, l_pmics));
+
+    for (const auto& l_pmic : l_pmics)
+    {
+        // Clear global status reg
+        FAPI_TRY(mss::pmic::i2c::reg_write(l_pmic, REGS::R14, 0x01));
+
+        // Disable write protection
+        FAPI_TRY(mss::pmic::i2c::reg_write(l_pmic, REGS::R2F, 0x06));
+
+        // Enable internal ADC and default to temp readings
+        FAPI_TRY(mss::pmic::i2c::reg_write(l_pmic, REGS::R30, 0xD0));
+
+        // Bias with SPD
+        // TODO: ZEN:MST-1964 Cross check SPD data with bias_with_spd_settings() values
+        //FAPI_TRY_LAMBDA(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic, i_ocmb_target));
+
+        // Get vendor ID
+        FAPI_TRY(mss::attr::get_mfg_id[get_relative_pmic_id(l_pmic)](i_ocmb_target, l_vendor_id));
+
+        // Enable TI PMIC
+        if (l_vendor_id == mss::pmic::vendor::TI)
+        {
+            // Start VR_ENABLE for TI. TI will be enabled by using the power good output
+            FAPI_INF("Executing VR_ENABLE for TI PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmic));
+            FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
+            // Start VR Enable (R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL) (1 --> Bit 7)
+            l_pmic_buffer.setBit<FIELDS::R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL>();
+            FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
+        }
+        // Enable IDT/Renesas PMIC
+        else if (l_vendor_id == mss::pmic::vendor::IDT)
+        {
+            // Start VR_ENABLE for IDT.
+            FAPI_INF("Executing VR_ENABLE for Renesas PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmic));
+            FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
+            // Start VR Enable (1 --> Bit 7)
+            l_pmic_buffer.setBit<FIELDS::R32_VR_ENABLE>();
+            FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
+        }
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 
