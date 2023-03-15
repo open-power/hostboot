@@ -151,8 +151,8 @@
         <default>0x00010000</default>
     </attribute>
     <attribute>
-        <id>IS_STANDALONE</id> <!-- @TODO JIRA PFHB-15 change to 1 -->
-        <default>0x0</default>
+        <id>IS_STANDALONE</id>
+        <default>0x1</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>

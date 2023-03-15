@@ -105,6 +105,7 @@ const uint8_t  SVPD_JEDEC_DR_KW_SIZE = 16;
 #define SVPD_JEDEC_RESERVED                 0x08
 #define SVPD_SPD_BYTE_TWO                   2
 #define SVPD_SPD_BYTE_THREE                 3
+#define SVPD_ISDIMM_MODULE_TYPE             0x01
 #define SVPD_DDIMM_MODULE_TYPE              0x0A
 #define SVPD_PLANAR_MODULE_TYPE             0x0C
 #define SVPD_DDR4_DEVICE_TYPE               0x0C

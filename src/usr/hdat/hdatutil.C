@@ -853,6 +853,16 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
         {
             theRecord = i_fetchVpd[curRec].record;
 
+            HDAT_DBG("hdatGetPvpdFullRecord : curRecord %d (%s), size = 0x%X (%d)",
+                      theRecord, i_fetchVpd[curRec].recordName, theSize[curRec], theSize[curRec]);
+
+            if (!(strcmp(i_fetchVpd[curRec].recordName, "PSPD")))
+            {
+                HDAT_DBG("hdatGetPvpdFullRecord : Skipping %s because of its size 0x%X (%d)",
+                          i_fetchVpd[curRec].recordName, theSize[curRec], theSize[curRec]);
+                continue;
+            }
+
             l_err = deviceRead( i_target,
                               NULL,
                               theSize[curRec],
@@ -1618,13 +1628,22 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
 
     do
     {
+        TARGETING::ATTR_MEM_MRW_IS_PLANAR_type isDimms = false;
+        if (!i_target->tryGetAttr<ATTR_MEM_MRW_IS_PLANAR>(isDimms))
+        {
+            isDimms = false;
+        }
+        HDAT_INF("hdatConvertRawSpdToIpzFormat HUID=0x%X isDimms=0x%X", TARGETING::get_huid(i_target), isDimms);
+
+
         // Below code probes for the DIMM module and DIMM type from the raw SPD
-        // data. As of now the only supported format is DDR4 module with DDIMM.
+        // data. DDR4 module is suppored for both DDIMM and ISDIMM.
         // So if its a DDR5 module (VPD format is unknown now) or any other
         // unknown types, we wont proceed further and return back.
         if((i_jedec_ptr[SVPD_SPD_BYTE_THREE] == SVPD_DDIMM_MODULE_TYPE) ||
-          (i_jedec_ptr[SVPD_SPD_BYTE_THREE] == SVPD_PLANAR_MODULE_TYPE))
+           (i_jedec_ptr[SVPD_SPD_BYTE_THREE] == SVPD_PLANAR_MODULE_TYPE))
         {
+            // DDIMM path
             if (i_jedec_ptr[SVPD_SPD_BYTE_TWO] == SVPD_DDR4_DEVICE_TYPE)
             {
                 HDAT_DBG("Detected DDR4");
@@ -1673,6 +1692,11 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
                 return l_err;
             }
         }
+        else if(i_jedec_ptr[SVPD_SPD_BYTE_THREE] == SVPD_ISDIMM_MODULE_TYPE)
+        {
+            HDAT_DBG("hdatConvertRawSpdToIpzFormat i_jedec_ptr[SVPD_SPD_BYTE_THREE]=0x%X HUID=0x%X isDimms=0x%X",
+                      i_jedec_ptr[SVPD_SPD_BYTE_THREE], TARGETING::get_huid(i_target), isDimms);
+        }
         else
         {
             HDAT_ERR( "Invalid Byte 3 value(0x%2X), Unable to "
@@ -1707,13 +1731,6 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
             i_jedec_ptr[SVPD_SPD_BYTE_TWO]);
         HDAT_DBG("i_jedec_ptr[SVPD_SPD_BYTE_THREE]=0x%x",
             i_jedec_ptr[SVPD_SPD_BYTE_THREE]);
-
-        TARGETING::ATTR_MEM_MRW_IS_PLANAR_type isDimms = false;
-        if (!i_target->tryGetAttr<ATTR_MEM_MRW_IS_PLANAR>(isDimms))
-        {
-            isDimms = false;
-        }
-        HDAT_INF("hdatConvertRawSpdToIpzFormat HUID=0x%X isDimms=0x%X", TARGETING::get_huid(i_target), isDimms);
 
         TARGETING::ATTR_SERIAL_NUMBER_type l_SN = {'0'};
         TARGETING::ATTR_PART_NUMBER_type l_PN = {'0'};
