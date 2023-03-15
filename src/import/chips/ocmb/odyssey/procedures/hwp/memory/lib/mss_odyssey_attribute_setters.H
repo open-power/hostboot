@@ -772,7 +772,8 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
 /// @note  Training step enables for DDR5 training. SequenceCtrl in the message block structure.
 /// Note that RCD_CSCA is only valid for RDIMM and will be disabled by the procedures
-/// on a UDIMM.
+/// on a UDIMM. Draminit code will disable invalid sequence control settings based upon
+/// the DIMM type.
 ///
 inline fapi2::ReturnCode set_phy_sequence_ctrl(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         uint16_t i_value)
