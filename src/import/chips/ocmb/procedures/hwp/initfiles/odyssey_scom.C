@@ -125,7 +125,7 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                                  || (l_TGT1_ATTR_MEM_EFF_DRAM_DENSITY[literal_0] == literal_32));
         fapi2::ATTR_MEM_EFF_DRAM_WIDTH_Type l_TGT1_ATTR_MEM_EFF_DRAM_WIDTH;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_WIDTH));
-        uint64_t l_def_C10_EN = (l_TGT1_ATTR_MEM_EFF_DRAM_WIDTH[literal_0] != literal_1);
+        uint64_t l_def_C10_EN = (l_TGT1_ATTR_MEM_EFF_DRAM_WIDTH[literal_0] != literal_8);
         fapi2::ATTR_MEM_3DS_HEIGHT_Type l_TGT1_ATTR_MEM_3DS_HEIGHT;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_3DS_HEIGHT, TGT1, l_TGT1_ATTR_MEM_3DS_HEIGHT));
         uint64_t l_def_S2_EN = (l_TGT1_ATTR_MEM_3DS_HEIGHT[literal_0] != literal_0);
