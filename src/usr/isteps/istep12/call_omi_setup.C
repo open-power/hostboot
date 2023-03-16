@@ -55,7 +55,6 @@
 #include    <exp_omi_setup.H>
 #include    <p10_omi_setup.H>
 #include    <ody_omi_setup.H>
-
 #include    <chipids.H>
 
 using   namespace   ISTEP;
@@ -252,8 +251,21 @@ void* call_omi_setup (void *io_pArgs)
     }
 
     // Set ATTR_ATTN_CHK_OCMBS to let ATTN know that we may now get attentions
-    // from the OCMB, but interrupts from the OCMB are not enabled yet.
-    sys->setAttr<ATTR_ATTN_CHK_OCMBS>(1);
+    // from Explorer, but interrupts from the OCMB are not enabled yet.
+    TargetHandleList l_allOCMBs;
+    getAllChips(l_allOCMBs, TYPE_OCMB_CHIP, true);
+    for (const auto & l_ocmb : l_allOCMBs)
+    {
+        uint32_t l_chipId = l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>();
+        if (l_chipId == POWER_CHIPID::EXPLORER_16)
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                      "Enable attention processing for Explorer OCMBs");
+            sys->setAttr<ATTR_ATTN_CHK_OCMBS>(1);
+        }
+        // There can be no mixing of OCMB types so only need to check one
+        break;
+    }
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_omi_setup ");
 

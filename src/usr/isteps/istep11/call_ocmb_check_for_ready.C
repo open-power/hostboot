@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,7 @@
 
 //  HWP call support
 #include <exp_check_for_ready.H>
+#include <chipids.H>
 
 // Explorer error logs
 #include <expscom/expscom_errlog.H>
@@ -303,6 +304,23 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                       get_huid(l_procTarget));
         }
     } // for (auto &l_procTarget: functionalProcChipList)
+
+    // Set ATTR_ATTN_CHK_OCMBS to let ATTN know that we may now get attentions
+    // from Odyssey, but interrupts from the OCMB are not enabled yet.
+    TargetHandleList l_allOCMBs;
+    getAllChips(l_allOCMBs, TYPE_OCMB_CHIP, true);
+    for (const auto & l_ocmb : l_allOCMBs)
+    {
+        uint32_t l_chipId = l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>();
+        if (l_chipId == POWER_CHIPID::ODYSSEY_16)
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                      "Enable attention processing for Odyssey OCMBs");
+            UTIL::assertGetToplevelTarget()->setAttr<ATTR_ATTN_CHK_OCMBS>(1);
+        }
+        // There can be no mixing of OCMB types so only need to check one
+        break;
+    }
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_ocmb_check_for_ready");
     return l_StepError.getErrorHandle();
