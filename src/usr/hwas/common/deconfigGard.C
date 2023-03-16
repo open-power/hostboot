@@ -677,8 +677,8 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
                 const auto iohs_config_mode = iohs_target->getAttr<ATTR_IOHS_CONFIG_MODE>();
 
-                const bool is_smp_link = ((iohs_config_mode == IOHS_CONFIG_MODE_SMPA)
-                                          || (iohs_config_mode == IOHS_CONFIG_MODE_SMPX));
+                // So only SKIP the OCAPI links, keeps the IOHS logic alive
+                const bool is_smp_link = (iohs_config_mode != IOHS_CONFIG_MODE_OCAPI);
 
                 // Deconfigure the target's IOHS parent if we're in SMP mode and
                 // the IOHS has no other functional child SMPGROUPs
