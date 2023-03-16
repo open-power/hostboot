@@ -559,6 +559,11 @@ hb_startsimics()
 
         # Run Simics
         STARTSIMCMD=(./runsim -m ${MACHINE})
+
+        if [ -n "${HB_SIMICS_CHECKPOINT}" ]; then
+            STARTSIMCMD+=( -c ${HB_SIMICS_CHECKPOINT} )
+        fi
+
         STARTSIMCMD+=(hb_script_to_run=${STANDALONE_SIMICS}/hbfw/startup.simics)
         STARTSIMCMD+=(pnor_img=${PROJECT_ROOT}/standalone/pnor/${PNOR_LAYOUT_SELECTED}.pnor)
         STARTSIMCMD+=(xive_gen=2)
