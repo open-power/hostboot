@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/i2cr/makefile $
+# $Source: src/usr/i2cr/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,14 +22,13 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
-MODULE = i2cr
+ROOTPATH = ../../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/
 EXTRAINCDIR += ${ROOTPATH}/src/import/ekb/public/common/utils/
 
-OBJS += i2cr.o
+MODULE = testi2cr
 
-SUBDIRS += test.d
+TESTS += i2crtest.H
 
 include ${ROOTPATH}/config.mk

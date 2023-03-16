@@ -46,6 +46,10 @@ namespace I2CR
         RC_INVALID_ACCESSTYPE        = I2CR_COMP_ID | 0x06,
         RC_INVALID_MASTER_TARGET     = I2CR_COMP_ID | 0x07,
         RC_ATTR_NOT_FOUND            = I2CR_COMP_ID | 0x08,
+        RC_STATUS_CONCURRENT         = I2CR_COMP_ID | 0x09,
+        RC_ERROR_SECURITY            = I2CR_COMP_ID | 0x0A,
+        RC_ERROR_PIBERR              = I2CR_COMP_ID | 0x0B,
+        RC_ERROR_GENERAL             = I2CR_COMP_ID | 0x0C,
     };
 };
 

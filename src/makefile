@@ -255,6 +255,7 @@ TESTCASE_MODULES += testsecureboot_ext
 TESTCASE_MODULES += testfsiscom
 TESTCASE_MODULES += testlpc
 TESTCASE_MODULES += $(if $(CONFIG_HTMGT),testhtmgt)
+TESTCASE_MODULES += testi2cr
 TESTCASE_MODULES += testinitservice
 TESTCASE_MODULES += testfsi
 TESTCASE_MODULES += testxscom

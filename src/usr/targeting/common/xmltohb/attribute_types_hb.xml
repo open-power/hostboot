@@ -784,6 +784,18 @@
   </attribute>
 
   <attribute>
+    <id>I2CR_MUTEX</id>
+    <description>Mutex for I2CR Operations</description>
+    <simpleType>
+      <hbrecursivemutex/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>I2C_ENGINE_MUTEX_0</id>
     <description>Mutex for I2C Master engine 0</description>
     <simpleType>

@@ -38,6 +38,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <errl/errludlogregister.H>
 #include <xscom/piberror.H>
 #include <i2cr/i2cr_reasoncodes.H>
 #include <scom/scomif.H>
@@ -48,9 +49,10 @@
 #include "i2cr.H"
 #include <arch/magic.H>
 #include <console/consoleif.H>
+#include <secureboot/service.H>
 
 
-//Globals/Constants
+// Globals/Constants
 
 // Trace definition
 trace_desc_t* g_trac_i2cr = NULL;
@@ -60,12 +62,16 @@ TRAC_INIT(&g_trac_i2cr, I2CR_COMP_NAME, 2*KILOBYTE); //2K
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
 
-using namespace I2C;
+
 using namespace TARGETING;
 using namespace POWER_CHIPID;
+using namespace SECUREBOOT;
 
 namespace I2CR
 {
+
+
+errlHndl_t i2crCheckErrors( Target* i_target, uint64_t i_addr, uint32_t i_shiftedAddr );
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -311,7 +317,7 @@ errlHndl_t i2cr_generic_read( uint32_t i_regaddr,
                                const ATTR_FAPI_I2C_CONTROL_INFO_type & i_i2cInfo)
  {
      constexpr uint8_t OFFSET_SIZE = 4;
-     errlHndl_t l_err = NULL;
+     errlHndl_t l_err = nullptr;
      uint32_t l_regaddr = 0;
      uint8_t l_regaddr8[sizeof(l_regaddr)] = {0};
 
@@ -320,8 +326,7 @@ errlHndl_t i2cr_generic_read( uint32_t i_regaddr,
      Target *l_i2crMaster = ts.toTarget(i_i2cInfo.i2cMasterPath);
 
      TRACUCOMP( g_trac_i2cr, ENTER_MRK"i2cr_generic_read> regaddr:0x%x, "
-                "target=0x%X (0x%.8X)",
-                i_regaddr, i_target, get_huid(i_target));
+                "target=0x%.8X", i_regaddr, get_huid(i_target));
 
      // Add the parity bit. The address is expected to be already shifted based on
      // the access type SCOM Vs CFAM.
@@ -352,7 +357,7 @@ errlHndl_t i2cr_generic_read( uint32_t i_regaddr,
 
          if( l_err )
          {
-             TRACFCOMP( g_trac_i2cr, "i2cr_generic_read> Read Error" );
+             TRACFCOMP( g_trac_i2cr, "i2cr_generic_read> Read Error: addr:0x%x", l_regaddr );
              l_err->addHwCallout(i_target, HWAS::SRCI_PRIORITY_HIGH,
                                  HWAS::NO_DECONFIG,HWAS::GARD_NULL);
              l_err->collectTrace(I2CR_COMP_NAME);
@@ -398,7 +403,7 @@ errlHndl_t i2cr_generic_read( uint32_t i_regaddr,
                                 const ATTR_FAPI_I2C_CONTROL_INFO_type & i_i2cInfo)
  {
      constexpr uint8_t OFFSET_SIZE = 4;
-     errlHndl_t l_err = NULL;
+     errlHndl_t l_err = nullptr;
      uint32_t l_regaddr = 0;
      uint8_t l_regaddr8[sizeof(l_regaddr)] = {0};
      uint8_t l_swapped[io_buflen] = {0};
@@ -407,9 +412,9 @@ errlHndl_t i2cr_generic_read( uint32_t i_regaddr,
      TargetService& ts = targetService();
      Target *l_i2crMaster = ts.toTarget(i_i2cInfo.i2cMasterPath);
 
-     TRACDCOMP( g_trac_i2cr, ENTER_MRK"i2cr_generic_write> Enter: "
+     TRACUCOMP( g_trac_i2cr, ENTER_MRK"i2cr_generic_write> Enter: "
                 "regaddr:0x%x, target=0x%X",
-                i_regaddr, i_target);
+                i_regaddr, get_huid(i_target));
      TRACDBIN(g_trac_i2cr, "io_buffer=", io_buffer, io_buflen);
 
      // Add the parity bit. In order to set the parity bit for a write operation,
@@ -449,7 +454,7 @@ errlHndl_t i2cr_generic_read( uint32_t i_regaddr,
                                                      &(i_i2cInfo.i2cMuxPath) ) );
          if( l_err )
          {
-             TRACFCOMP( g_trac_i2cr, "i2cr_generic_write> Write Error" );
+             TRACFCOMP( g_trac_i2cr, "i2cr_generic_write> Write Error @ 0x%x", l_regaddr );
              l_err->addHwCallout(i_target, HWAS::SRCI_PRIORITY_HIGH,
                                  HWAS::NO_DECONFIG,HWAS::GARD_NULL);
              l_err->collectTrace(I2CR_COMP_NAME);
@@ -458,6 +463,7 @@ errlHndl_t i2cr_generic_read( uint32_t i_regaddr,
 
      } while(0);
 
+     TRACDCOMP(g_trac_i2cr, EXIT_MRK"i2cr_generic_write> 0x%.8X", i_regaddr);
      return l_err;
 }
 
@@ -490,7 +496,9 @@ errlHndl_t i2crPerformOp(DeviceFW::OperationType i_opType,
     uint64_t l_i2crAddr = va_arg(i_args,uint64_t);
     uint32_t l_shiftedI2crAddr = 0;
     ATTR_FAPI_I2C_CONTROL_INFO_type l_i2cInfo;
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
+    errlHndl_t l_secondaryErr = nullptr;
+    bool l_unlock = false;
 
     TRACUCOMP( g_trac_i2cr, ENTER_MRK"i2crPerformOp> Addr=0x%.16x io_buflen=0x%x",
                l_i2crAddr, io_buflen );
@@ -501,7 +509,7 @@ errlHndl_t i2crPerformOp(DeviceFW::OperationType i_opType,
         if( (l_i2crAddr & 0xFFFFFFFF80000000) != 0)
         {
             TRACFCOMP( g_trac_i2cr, ERR_MRK "i2crPerformOp> Address "
-                       "contains more than 31 bits : l_i2crAddr=0x%.16X", l_i2crAddr );
+                       "contains more than 31 bits : l_i2crAddr=0x%.16llX", l_i2crAddr );
             /*@
              * @errortype
              * @moduleid     I2CR::MOD_I2CR_PERFORM_OP
@@ -628,6 +636,10 @@ errlHndl_t i2crPerformOp(DeviceFW::OperationType i_opType,
               break;
          }
 
+         // Grab the mutex before doing the i2cr operation
+         recursive_mutex_lock(i_target->getHbMutexAttr<TARGETING::ATTR_I2CR_MUTEX>());
+         l_unlock = true;
+
          // Handle the specified operation
          if(i_opType == DeviceFW::READ)
          {
@@ -635,7 +647,7 @@ errlHndl_t i2crPerformOp(DeviceFW::OperationType i_opType,
                         l_i2crAddr, l_shiftedI2crAddr);
 
              // All I2CR operations (both Scom & CFAM) are 8 bytes long.
-             // For CFAM access type, we may need to strip the extra 4 data bytes.
+             // For CFAM access type, we need to strip the extra 4 data bytes.
              if (((i_accessType == DeviceFW::I2CR_CFAM) ||
                  (i_accessType == DeviceFW::CFAM)) && (io_buflen == sizeof(uint32_t)))
              {
@@ -645,14 +657,40 @@ errlHndl_t i2crPerformOp(DeviceFW::OperationType i_opType,
                  // Read 8 bytes even though CFAM is typically 4 bytes long
                  l_err = i2cr_generic_read(l_shiftedI2crAddr, i_target, l_buf64, l_sz, l_i2cInfo);
 
+                 if (l_err)
+                 {
+                     break;
+                 }
                  // Just copy over the most significant 4 bytes.
                  memcpy(io_buffer, l_buf64, io_buflen);
+
+                 // Check if the value is all ones as that could indicate either a
+                 // valid response or an error. Explicitly check for errors and
+                 // handle them, if present.
+                 if ((*reinterpret_cast<uint32_t*>(io_buffer)) == ALL_32_ONES)
+                 {
+                     l_secondaryErr = I2CR::i2crCheckErrors(i_target, l_i2crAddr,
+                                                            l_shiftedI2crAddr);
+                 }
              }
              else
              {
                  l_err = i2cr_generic_read(l_shiftedI2crAddr, i_target,
                                            reinterpret_cast<uint8_t*>(io_buffer),
                                            io_buflen, l_i2cInfo);
+                 if (l_err)
+                 {
+                     break;
+                 }
+
+                 // Check if the value is all ones as that could indicate either a
+                 // valid response or an error. Explicitly check for errors and
+                 // handle them, if present.
+                 if ((*reinterpret_cast<uint64_t*>(io_buffer)) == ALL_64_ONES)
+                 {
+                     l_secondaryErr = I2CR::i2crCheckErrors(i_target, l_i2crAddr,
+                                                            l_shiftedI2crAddr);
+                 }
              }
              TRACDBIN(g_trac_i2cr, "io_buffer=", io_buffer, io_buflen);
          }
@@ -682,6 +720,17 @@ errlHndl_t i2crPerformOp(DeviceFW::OperationType i_opType,
                  l_err = i2cr_generic_write(l_shiftedI2crAddr, i_target,
                                             reinterpret_cast<uint8_t*>(io_buffer),
                                             io_buflen, l_i2cInfo);
+             }
+
+             // Always explicitly check for errors after a write operation as there
+             // is no passive indication of a problem. If we have an error,
+             // gather more info about the error and log it. Please note that the
+             // i2crCheckErrors will also reset the regs to recover from any errors.
+             l_secondaryErr = I2CR::i2crCheckErrors(i_target, l_i2crAddr, l_shiftedI2crAddr);
+
+             if (l_err || l_secondaryErr)
+             {
+                break;
              }
 
              TRACDCOMP( g_trac_i2cr, "i2crPerformOp> Final write out: Addr=0x%X",
@@ -720,10 +769,39 @@ errlHndl_t i2crPerformOp(DeviceFW::OperationType i_opType,
 
     if (l_err)
     {
-         l_err->collectTrace(I2CR_COMP_NAME);
+        if (l_secondaryErr)
+        {
+            // commit this error with same plid as l_err
+            l_secondaryErr->plid(l_err->plid());
+            TRACFCOMP( g_trac_i2cr, "Committing error eid=0x%X and new error eid=0x%X"
+                      " with plid 0x%X", l_err->eid(), l_secondaryErr->eid(), l_err->plid() );
+            l_secondaryErr->collectTrace(I2CR_COMP_NAME);
+            l_err->collectTrace(I2CR_COMP_NAME);
+
+            // Commit the l_secondaryErr, so we can return l_err to caller
+            l_secondaryErr->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            errlCommit( l_secondaryErr, I2CR_COMP_ID );
+        }
+        else
+        {
+            l_err->collectTrace(I2CR_COMP_NAME);
+        }
+    }
+    else if (l_secondaryErr)
+    {
+        l_secondaryErr->collectTrace(I2CR_COMP_NAME);
     }
 
-    return l_err;
+    if (l_unlock)
+    {
+         recursive_mutex_unlock(i_target->getHbMutexAttr<TARGETING::ATTR_I2CR_MUTEX>());
+         l_unlock = false;
+    }
+
+    TRACUCOMP( g_trac_i2cr, EXIT_MRK"i2crPerformOp> 0x%.8X l_err=0x%x l_secondaryErr=0x%x",
+               l_i2crAddr, l_err, l_secondaryErr );
+
+    return (l_err ? l_err : l_secondaryErr);
 }
 
 
@@ -753,17 +831,16 @@ errlHndl_t i2crCfamPerformOp(DeviceFW::OperationType i_opType,
 {
     // The input i2cr address is a CFAM(FSI) word address
     uint64_t l_i2crAddr = va_arg(i_args,uint64_t);
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     TARGETING::ATTR_CHIP_ID_type l_chipId = i_target->getAttr<ATTR_CHIP_ID>();
 
     TRACUCOMP( g_trac_i2cr, ENTER_MRK"i2crCfamPerformOp> Addr=0x%.16x io_buflen=0x%x chipId=%x",
                l_i2crAddr, io_buflen, l_chipId );
     do
     {
-        if (((l_chipId == POWER_CHIPID::ODYSSEY)   ||
-             (l_chipId == POWER_CHIPID::ODYSSEY_16))  &&
-            ((i_accessType == DeviceFW::I2CR_CFAM) ||
-             (i_accessType == DeviceFW::CFAM)))
+        if  ((l_chipId == POWER_CHIPID::ODYSSEY_16) &&
+             ((i_accessType == DeviceFW::I2CR_CFAM) ||
+              (i_accessType == DeviceFW::CFAM)))
         {
             l_err = i2crPerformOp(i_opType, i_target, io_buffer,
                                   io_buflen, i_accessType,
@@ -803,9 +880,411 @@ errlHndl_t i2crCfamPerformOp(DeviceFW::OperationType i_opType,
 
     } while(0);
 
+    TRACUCOMP( g_trac_i2cr, EXIT_MRK"i2crCfamPerformOp> Addr=0x%.16x ",
+               l_i2crAddr);
     return l_err;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ *
+ * @brief A function to clear the I2CR registers
+ *
+ * @param [in] i_target : Target OCMB chip
+ * @return rc : 0 indicates success/recovered and 1 failures
+ *
+ */
+uint32_t i2crClearErrors(  Target* i_target )
+{
+    uint32_t rc = I2CR_SUCCESS;
+    size_t l_numbytes = 8;
+    uint64_t l_value = 0ULL;
+    uint64_t l_addr = 0x0ULL;
+    uint32_t i2cr_regs[3] = {I2CR_STATUS_REG,
+                             I2CR_ERROR_REG,
+                             I2CR_FIRST_ERROR_LOG_REG};
+    errlHndl_t l_err = nullptr;
+
+    TRACFCOMP( g_trac_i2cr, ENTER_MRK"i2crClearErrors> target:0x%.8X",
+               get_huid(i_target));
+
+    do
+    {
+        for (const auto &reg : i2cr_regs)
+        {
+            l_addr = reg;
+            l_err = i2crPerformOp(DeviceFW::WRITE, i_target,
+                                  reinterpret_cast<uint8_t *>(&l_value),
+                                  l_numbytes, DeviceFW::I2CR_SCOM,
+                                  reinterpret_cast<char *>(&l_addr));
+            if (l_err)
+            {
+                // We are getting an error trying to reset one of the
+                // registers. We will delete the error log and not
+                // collect any traces.
+                TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crClearErrors> Error for 0x%x!"
+                           " Deleting the error log and not collecting traces as"
+                           " these are secondary errors!", l_addr );
+                delete(l_err);
+                l_err = nullptr;
+                rc = I2CR_ERROR;
+            }
+        } // end of for loop
+    } while (0);
+
+    TRACFCOMP( g_trac_i2cr, EXIT_MRK"i2crClearErrors> rc=%d", rc );
+    return rc;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+
+/**
+ *
+ * @brief A function to check for errors after an I2CR Scom/Cfam
+ *        R/W operation
+ *
+ * @param [in] i_target : Target OCMB chip
+ * @param [in] i_addr : i2cr register address (Scom/CFAM word addr)
+ * @param [in] i_sftAddr : Shifted i2cr register address (Scom/CFAM word addr)
+ * @return l_err : An error that is set in this routine
+ *
+ */
+errlHndl_t i2crCheckErrors( Target* i_target, uint64_t i_addr, uint32_t i_sftAddr )
+{
+    size_t l_numbytes = 8;
+    uint64_t l_reg = 0x0ULL;
+    uint32_t l_sftAddr = 0;
+    uint32_t l_status32 = 0;
+    uint32_t l_errorReg32 = 0;
+    uint64_t l_firstErrLog64 = 0x0ULL;
+    uint64_t l_config64 = 0x0ULL;
+    i2cr_status_reg_t l_status;
+    i2cr_error_reg_t l_errorReg;
+    i2cr_config_reg_t l_configReg;
+    i2cr_first_error_log_reg_t l_firstErrLogReg;
+    errlHndl_t l_err = nullptr;
+    errlHndl_t l_err_ignore = nullptr;
+    bool l_clearRegs = false;
+
+    TRACUCOMP( g_trac_i2cr, ENTER_MRK"i2crCheckErrors> Addr=0x%.16x target=0x%.8X",
+               i_addr, get_huid(i_target));
+
+    // This routine gets called by i2crPerformOp() on errors, which in turn
+    // will be called by this routine to read the status, error and log registers.
+    // If we are here because we had an issue reading one of these registers,
+    // we will bail out early as we would have already logged some errors.
+    if ((i_addr == I2CR_STATUS_REG) || (i_addr == I2CR_ERROR_REG) ||
+        (i_addr == I2CR_FIRST_ERROR_LOG_REG) || (i_addr == I2CR_CONFIG_REG))
+    {
+        TRACFCOMP( g_trac_i2cr, "i2crCheckErrors> Bailing as addr:0x%x!", i_addr );
+        return l_err;
+    }
+
+    // We are here to check for errors after an I2CR operation
+    do
+    {
+        l_reg = I2CR_STATUS_REG;
+        l_err = i2crPerformOp(DeviceFW::READ, i_target,
+                              reinterpret_cast<uint8_t *>(&l_status),
+                              l_numbytes, DeviceFW::I2CR_SCOM,
+                              reinterpret_cast<char *>(&l_reg));
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> Error reading "
+                       "status reg:0x%x (i2cr:0x%x)!", l_reg, i_addr );
+
+            // We may be in a bad state. Set the flag to reset the I2CR regs
+            l_clearRegs = true;
+            break;
+        }
+
+        // Got back status. Check if we had any errors.
+        if (l_status.anyerror == 0)
+        {
+            // There is no error as per the status.
+            TRACUCOMP( g_trac_i2cr, "i2crCheckErrors> Status shows no errors!"
+                       " Addr=0x%.16llx target=0x%.8X", i_addr, get_huid(i_target));
+            break;
+        }
+
+        // Looks like we have some error. Read the error and the first error regs.
+        // First, read the error register
+        l_reg = I2CR_ERROR_REG;
+        l_err = i2crPerformOp(DeviceFW::READ, i_target,
+                              reinterpret_cast<uint8_t *>(&l_errorReg),
+                              l_numbytes, DeviceFW::I2CR_SCOM,
+                              reinterpret_cast<char *>(&l_reg));
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> Error reading "
+                       "Error register: 0x%x (i2cr addr:0x%x)", l_reg, i_addr );
+
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,
+                                            "OCMBs I2CR SCOM/CFAM Target").addToLog(l_err);
+
+            // We may be in a bad state. Set the flag to reset the I2CR regs
+            l_clearRegs = true;
+            break;
+        }
+
+        TRACUCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> Error reg:0x%.16llX",
+                   reinterpret_cast<uint64_t *>(&l_errorReg) );
+
+        memcpy(&l_status32, reinterpret_cast<uint8_t *>(&l_status), sizeof(uint32_t));
+        memcpy(&l_errorReg32, reinterpret_cast<uint8_t *>(&l_errorReg), sizeof(uint32_t));
+
+        // Add the parity bit. The address is expected to be already shifted based on
+        // the access type SCOM Vs CFAM.
+        l_sftAddr = setOddParityBit(i_sftAddr);
+
+        TRACFCOMP( g_trac_i2cr, "i2crCheckErrors> Status=0x%.8x Error=0x%.8x Shifted Addr:0x%.8x",
+                   l_status32, l_errorReg32, l_sftAddr );
+
+
+        l_reg = I2CR_CONFIG_REG;
+        l_err_ignore = i2crPerformOp(DeviceFW::READ, i_target,
+                                     reinterpret_cast<uint8_t *>(&l_configReg),
+                                     l_numbytes, DeviceFW::I2CR_SCOM,
+                                     reinterpret_cast<char *>(&l_reg));
+        if (l_err_ignore)
+        {
+            TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> Error reading config register! "
+                       "Deleting the error trace!!"
+                       "0x%x (i2cr:0x%x)!", l_reg, i_addr );
+            delete(l_err_ignore);
+            l_err_ignore = nullptr;
+
+            // We may be in a bad state. Set the flag to reset the I2CR regs
+            l_clearRegs = true;
+        }
+        else
+        {
+            memcpy(&l_config64, reinterpret_cast<uint8_t *>(&l_configReg),
+                   sizeof(uint64_t));
+            TRACUCOMP( g_trac_i2cr, "i2crCheckErrors> l_configReg:0x%.16llX",
+                       l_config64 );
+        }
+
+        l_reg = I2CR_FIRST_ERROR_LOG_REG;
+        l_err_ignore = i2crPerformOp(DeviceFW::READ, i_target,
+                                     reinterpret_cast<uint8_t *>(&l_firstErrLogReg),
+                                     l_numbytes, DeviceFW::I2CR_SCOM,
+                                     reinterpret_cast<char *>(&l_reg));
+        if (l_err_ignore)
+        {
+            TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> Error reading log data! "
+                       "Deleting the error trace!!"
+                       "0x%x (i2cr:0x%x)!", l_reg, i_addr );
+            delete(l_err_ignore);
+            l_err_ignore = nullptr;
+
+            // We may be in a bad state. Set the flag to reset the I2CR regs
+            l_clearRegs = true;
+        }
+        else
+        {
+            memcpy(&l_firstErrLog64, reinterpret_cast<uint8_t *>(&l_firstErrLogReg),
+                   sizeof(uint64_t));
+            TRACUCOMP( g_trac_i2cr, "i2crCheckErrors> l_firstErrLogReg:0x%.16llX",
+                       l_firstErrLog64 );
+        }
+
+        // Make sure the error was for the address we just sent
+        // Also, check for a concurrent access error
+        if (((l_errorReg.badaddress) && (l_status.address != l_sftAddr)) ||
+            (l_status.inprogress))
+        {
+            // We are in some kind of concurrent access from another task
+            TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> Concurrent/Bad access error!"
+                       " status=0x%.8X! Addr=0x%x [0x%llX != 0x%llX] inprogress=%d anyerror=%d",
+                       l_status32, i_addr, l_status.address, l_sftAddr,
+                       l_status.inprogress, l_status.anyerror );
+            TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> Error Reg=0x%.8X piberr=%d badaddress=%d"
+                       " security=%d", l_errorReg32, l_errorReg.piberr,
+                       l_errorReg.badaddress, l_errorReg.security );
+
+            /*@
+             * @errortype
+             * @moduleid     I2CR::MOD_I2CR_PERFORM_OP
+             * @reasoncode   I2CR::RC_STATUS_CONCURRENT
+             * @userdata1[0:31]   Status Register Value
+             * @userdata1[32:63]  Error Register Value
+             * @userdata2    First Error Log Register Value
+             * @devdesc      i2crCheckErrors> Status indicates errors
+             * @custdesc     Unexpected memory subsystem firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            I2CR::MOD_I2CR_PERFORM_OP,
+                                            I2CR::RC_STATUS_CONCURRENT,
+                                            TWO_UINT32_TO_UINT64(l_status32, l_errorReg32),
+                                            l_firstErrLog64,
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsLogRegister l_regdata(i_target);
+            l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_status), sizeof(l_status),
+                                    DEVICE_I2CR_SCOM_ADDRESS(I2CR_STATUS_REG));
+            l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_errorReg), sizeof(l_errorReg),
+                                    DEVICE_I2CR_SCOM_ADDRESS(I2CR_ERROR_REG));
+            l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_firstErrLogReg),
+                                    sizeof(l_firstErrLogReg),
+                                    DEVICE_I2CR_SCOM_ADDRESS(I2CR_FIRST_ERROR_LOG_REG));
+            l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_configReg), sizeof(l_configReg),
+                                    DEVICE_I2CR_SCOM_ADDRESS(I2CR_FIRST_ERROR_LOG_REG));
+            l_regdata.addToLog(l_err);
+            break;
+        }
+
+        // Check for security error
+        if (l_errorReg.security)
+        {
+            // The I2CR operation had tried to access a blocked address
+            TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> Error Reg - security bit set!" );
+
+            /*@
+             * @errortype
+             * @moduleid     I2CR::MOD_I2CR_PERFORM_OP
+             * @reasoncode   I2CR::RC_ERROR_SECURITY
+             * @userdata1[0:31]   Status Register Value
+             * @userdata1[32:63]  Error Register Value
+             * @userdata2    First Error Log Register Value
+             * @devdesc      i2crCheckErrors> Status indicates security issue
+             * @custdesc     Unexpected memory subsystem firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            I2CR::MOD_I2CR_PERFORM_OP,
+                                            I2CR::RC_ERROR_SECURITY,
+                                            TWO_UINT32_TO_UINT64(l_status32, l_errorReg32),
+                                            l_firstErrLog64,
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsLogRegister l_regdata(i_target);
+            l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_status), sizeof(l_status),
+                                    DEVICE_I2CR_SCOM_ADDRESS(I2CR_STATUS_REG));
+            l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_errorReg), sizeof(l_errorReg),
+                                    DEVICE_I2CR_SCOM_ADDRESS(I2CR_ERROR_REG));
+            l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_firstErrLogReg),
+                                    sizeof(l_firstErrLogReg),
+                                    DEVICE_I2CR_SCOM_ADDRESS(I2CR_FIRST_ERROR_LOG_REG));
+            l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_configReg), sizeof(l_configReg),
+                                    DEVICE_I2CR_SCOM_ADDRESS(I2CR_FIRST_ERROR_LOG_REG));
+            l_regdata.addToLog(l_err);
+            SECUREBOOT::addSecureUserDetailsToErrlog(l_err);
+            break;
+        }
+
+        // Check for any PIB errors
+        if (l_errorReg.piberr != 0)
+        {
+            // got an indirect read error
+            TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> PIB errors!" );
+
+            /*@
+             * @errortype
+             * @moduleid     I2CR::MOD_I2CR_PERFORM_OP
+             * @reasoncode   I2CR::RC_ERROR_PIBERR
+             * @userdata1[0:31]   Status Register Value
+             * @userdata1[32:63]  Error Register Value
+             * @userdata2    First Error Log Register Value
+             * @devdesc      i2crCheckErrors> Error Register shows piberr
+             * @custdesc     Unexpected memory subsystem firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            I2CR::MOD_I2CR_PERFORM_OP,
+                                            I2CR::RC_ERROR_PIBERR,
+                                            TWO_UINT32_TO_UINT64(l_status32, l_errorReg32),
+                                            l_firstErrLog64,
+                                            ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+            PIB::addFruCallouts( i_target, l_errorReg.piberr, i_addr, l_err);
+
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsLogRegister l_regdata(i_target);
+            l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_status), sizeof(l_status),
+                                    DEVICE_I2CR_SCOM_ADDRESS(I2CR_STATUS_REG));
+            l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_errorReg), sizeof(l_errorReg),
+                                    DEVICE_I2CR_SCOM_ADDRESS(I2CR_ERROR_REG));
+            l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_firstErrLogReg),
+                                    sizeof(l_firstErrLogReg),
+                                    DEVICE_I2CR_SCOM_ADDRESS(I2CR_FIRST_ERROR_LOG_REG));
+            l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_configReg), sizeof(l_configReg),
+                                    DEVICE_I2CR_SCOM_ADDRESS(I2CR_FIRST_ERROR_LOG_REG));
+            l_regdata.addToLog(l_err);
+            break;
+        }
+
+        // We have the error bit set. If we are here implies it's none of the above cases.
+        // Log an error.
+        TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> Error bit set! Default case!" );
+
+        /*@
+         * @errortype
+         * @moduleid     I2CR::MOD_I2CR_PERFORM_OP
+         * @reasoncode   I2CR::RC_ERROR_GENERAL
+         * @userdata1[0:31]   Status Register Value
+         * @userdata1[32:63]  Error Register Value
+         * @userdata2    First Error Log Register Value
+         * @devdesc      i2crCheckErrors> Error Register indicates a problem but no specific
+         *               explanation was found
+         * @custdesc     Unexpected memory subsystem firmware error
+         */
+         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         I2CR::MOD_I2CR_PERFORM_OP,
+                                         I2CR::RC_ERROR_GENERAL,
+                                         TWO_UINT32_TO_UINT64(l_status32, l_errorReg32),
+                                         l_firstErrLog64,
+                                         ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+         l_err->addHwCallout( i_target, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG,
+                              HWAS::GARD_NULL );
+
+         //Add this target to the FFDC
+         ERRORLOG::ErrlUserDetailsLogRegister l_regdata(i_target);
+         l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_status), sizeof(l_status),
+                                 DEVICE_I2CR_SCOM_ADDRESS(I2CR_STATUS_REG));
+         l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_errorReg), sizeof(l_errorReg),
+                                 DEVICE_I2CR_SCOM_ADDRESS(I2CR_ERROR_REG));
+         l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_firstErrLogReg),
+                                 sizeof(l_firstErrLogReg),
+                                 DEVICE_I2CR_SCOM_ADDRESS(I2CR_FIRST_ERROR_LOG_REG));
+         l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_configReg), sizeof(l_configReg),
+                                 DEVICE_I2CR_SCOM_ADDRESS(I2CR_FIRST_ERROR_LOG_REG));
+         l_regdata.addToLog(l_err);
+
+    } while(0);
+
+    if (l_err || l_clearRegs)
+    {
+        // Log the Reg values
+        TRACFCOMP( g_trac_i2cr, "i2crCheckErrors> Status=0x%.8X"
+                   " inprogress:%d noack:%d anyerror:%d read:%d address:0x%x piberr:%d"
+                   " security:%d res=%d", l_status32,
+                   l_status.inprogress, l_status.noack, l_status.anyerror,
+                   l_status.read_not_write, l_status.address, l_status.piberr,
+                   l_status.securityblocked, l_status.reserved);
+        TRACFCOMP( g_trac_i2cr, "i2crCheckErrors> ErrorReg=0x%X", l_errorReg32 );
+        TRACFCOMP( g_trac_i2cr, "i2crCheckErrors> Config Reg=0x%llX", l_config64 );
+        TRACFCOMP( g_trac_i2cr, "i2crCheckErrors> LogData=0x%llX", l_firstErrLog64 );
+        ERRORLOG::ErrlUserDetailsTarget(i_target,
+                              "OCMBs I2CR SCOM/CFAM Target").addToLog(l_err);
+
+        // Clear all errors and recover
+        uint32_t rc = i2crClearErrors(i_target);
+        if ( rc )
+        {
+            TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> rc=%d "
+                       "from i2crClearErrors", rc );
+        }
+        l_err->collectTrace(I2CR_COMP_NAME);
+    }
+
+    TRACUCOMP( g_trac_i2cr, EXIT_MRK"i2crCheckErrors> Addr=0x%.16x", i_addr );
+    return l_err;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////

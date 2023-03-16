@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -241,6 +241,9 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
         }
         // three parameters
         case DeviceFW::I2C:         // driverif.H
+        case DeviceFW::I2CR_SCOM:   // driverif.H
+        case DeviceFW::I2CR_CFAM:   // driverif.H
+        case DeviceFW::CFAM:        // userif.H
         {
             numAddressArgs = 3;
             break;
