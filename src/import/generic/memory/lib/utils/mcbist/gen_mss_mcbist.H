@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3516,6 +3516,29 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const m
 }
 
 ///
+/// @brief Sets the RMW buffer's address into the buffer
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T
+/// @tparam MC the mc type of the T
+/// @param[in] i_addr the address to set in the RMW buffer
+/// @param[in,out] io_data the RMW buffer's data
+///
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+void set_rmw_address(const uint64_t i_addr, fapi2::buffer<uint64_t>& io_data);
+
+///
+/// @brief Loads the RMW buffer's control register mid loop if needed
+/// @tparam T, the fapi2::TargetType - derived
+/// @tparam TT, the mcbistTraits associated with T
+/// @tparam MC the mc type of the T
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_data the RMW buffer's data
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+fapi2::ReturnCode load_rmw_control_mid_loop(const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data);
+
+///
 /// @brief Load MCBIST maint pattern given a pattern
 /// @tparam T, the fapi2::TargetType - derived
 /// @tparam TT, the mcbistTraits associated with T
@@ -3529,9 +3552,6 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const m
 template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mss::mcbistTraits<MC, T> >
 fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pattern& i_pattern, const bool i_invert )
 {
-    // The scom registers are in the port target. PT: port traits
-    using PT = mcbistTraits<MC, TT::PORT_TYPE>;
-
     // Init the fapi2 return code
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
@@ -3539,27 +3559,26 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
     fapi2::buffer<uint64_t> l_aacr;
     // Array access data
     fapi2::buffer<uint64_t> l_aadr;
+    uint64_t l_current_addr = TT::MAINT_DATA_INDEX_START;
 
     // first we must setup the access control register
     // Setup the array address
     // enable the auto increment bit
     // set ecc mode bit on
-    // TODO:ZEN-MST1390 Add MCBIST data/address trap processing
     l_aacr
-    .template writeBit<PT::RMW_WRT_BUFFER_SEL>(mss::states::OFF)
-    .template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_START)
-    .template writeBit<PT::RMW_WRT_AUTOINC>(mss::states::ON)
-    .template writeBit<PT::RMW_WRT_ECCGEN>(mss::states::ON);
+    .template writeBit<TT::WDF_BUFFER_SEL>(mss::states::OFF)
+    .template writeBit<TT::WDF_AUTOINC>(TT::RMW_WTR_AUTOINC_SETTING)
+    .template writeBit<TT::WDF_ECCGEN>(mss::states::ON);
 
     // This loop will be run twice to write the pattern twice.  Once per 64B write.
     // When MCBIST maint mode is in 64B mode it will only use the first 64B when in 128B mode
     // MCBIST maint will use all 128B (it will perform two consecutive writes)
-    l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_START);
+    set_rmw_address<MC, T>(l_current_addr, l_aacr);
 
     for (auto l_num_writes = 0; l_num_writes < 2; ++l_num_writes)
     {
         FAPI_INF("Setting the array access control register for %s.", mss::c_str(i_target));
-        FAPI_TRY( fapi2::putScom(i_target, PT::RMW_WRT_BUF_CTL_REG, l_aacr) );
+        FAPI_TRY( fapi2::putScom(i_target, TT::WDF_BUF_CTL_REG, l_aacr) );
         uint64_t l_pattern_num = 0;
 
         for (const auto& l_cache_line : i_pattern)
@@ -3571,27 +3590,33 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
                 break;
             }
 
+            set_rmw_address<MC, T>(l_current_addr, l_aacr);
+            FAPI_TRY(load_rmw_control_mid_loop<MC>(i_target, l_aacr));
+
             fapi2::buffer<uint64_t> l_value_first  = i_invert ? ~l_cache_line.first : l_cache_line.first;
             fapi2::buffer<uint64_t> l_value_second = i_invert ? ~l_cache_line.second : l_cache_line.second;
             FAPI_INF("Loading cache line pattern:%u 0x%016lx 0x%016lx for %s", l_pattern_num++, l_value_first, l_value_second,
                      mss::c_str(i_target));
-            FAPI_TRY( fapi2::putScom(i_target, PT::RMW_WRT_BUF_DATA_REG, l_value_first));
+            FAPI_TRY( fapi2::putScom(i_target, TT::WDF_BUF_DATA_REG, l_value_first));
 
-            // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the MCA_AAER register
+            // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the AAER register
             // This register is used for the ECC, we will just write all zero to this register.  The ECC will be auto generated
-            // when the aacr MCA_WREITE_AACR_ECCGEN bit is set
-            FAPI_TRY( fapi2::putScom(i_target, PT::RMW_WRT_BUF_ECC_REG, 0) );
+            // when the aacr WRITE_AACR_ECCGEN bit is set
+            FAPI_TRY( fapi2::putScom(i_target, TT::WDF_BUF_ECC_REG, 0) );
 
-            // No need to increment the address because the logic does it automatically when MCA_WREITE_AACR_AUTOINC is set
-            FAPI_TRY( fapi2::putScom(i_target, PT::RMW_WRT_BUF_DATA_REG, l_value_second) );
+            // No need to increment the address because the logic does it automatically when WREITE_AACR_AUTOINC is set
+            FAPI_TRY( fapi2::putScom(i_target, TT::WDF_BUF_DATA_REG, l_value_second) );
 
-            // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the MCA_AAER register
+            // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the AAER register
             // This register is used for the ECC, we will just write all zero to this register.  The ECC will be auto generated
-            // when the aacr MCA_WREITE_AACR_ECCGEN bit is set
-            FAPI_TRY( fapi2::putScom(i_target, PT::RMW_WRT_BUF_ECC_REG, 0) );
+            // when the aacr WREITE_AACR_ECCGEN bit is set
+            FAPI_TRY( fapi2::putScom(i_target, TT::WDF_BUF_ECC_REG, 0) );
+
+            ++l_current_addr;
         }
 
-        l_aacr.template insertFromRight<PT::RMW_WRT_ADDRESS, PT::RMW_WRT_ADDRESS_LEN>(PT::MAINT_DATA_INDEX_END);
+        l_current_addr = TT::MAINT_DATA_INDEX_END;
+        set_rmw_address<MC, TT::PORT_TYPE>(TT::MAINT_DATA_INDEX_END, l_aacr);
     }
 
 fapi_try_exit:
@@ -3969,29 +3994,34 @@ fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
     o_ecc_data.clear();
 
     // Set the control register for the RMW array
-    l_control_value.template writeBit<TT::RMW_WRT_BUFFER_SEL>(TT::SELECT_RMW_BUFFER)
+    l_control_value.template writeBit<TT::WDF_BUFFER_SEL>(TT::SELECT_RMW_BUFFER)
     // set start address
-    .template insertFromRight<TT::RMW_WRT_ADDRESS, TT::RMW_WRT_ADDRESS_LEN>(l_array_addr)
     // enable the auto increment bit
-    .template setBit<TT::RMW_WRT_AUTOINC>()
+    .template writeBit<TT::WDF_AUTOINC>(TT::RMW_WTR_AUTOINC_SETTING)
     // set ecc mode bit off
-    .template clearBit<TT::RMW_WRT_ECCGEN>();
+    .template clearBit<TT::WDF_ECCGEN>();
+
+    set_rmw_address<MC, T>(l_array_addr, l_control_value);
 
     FAPI_INF("Setting the RMW array access control register for %s.", mss::c_str(i_target));
-    FAPI_TRY( fapi2::putScom(i_target, TT::RMW_WRT_BUF_CTL_REG, l_control_value) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::WDF_BUF_CTL_REG, l_control_value) );
 
     for (uint8_t l_index = 0; l_index < i_num_entries; ++l_index)
     {
+
+        set_rmw_address<MC, T>(l_array_addr, l_control_value);
+        FAPI_TRY(load_rmw_control_mid_loop<MC>(i_target, l_control_value));
+
         // Read info out of RMW array and put into output vector
         // Note that since we enabled AUTOINC above, reading ECC_REG will increment
         // the array pointer so the next DATA_REG read will read the next array entry
-        FAPI_TRY( fapi2::getScom(i_target, TT::RMW_WRT_BUF_DATA_REG, l_data) );
+        FAPI_TRY( fapi2::getScom(i_target, TT::WDF_BUF_DATA_REG, l_data) );
 
         FAPI_INF("RMW data index %d is: %016lx for %s", l_array_addr, l_data, mss::c_str(i_target));
         o_data.push_back(l_data);
 
         // Need to read ecc register to increment array index
-        FAPI_TRY( fapi2::getScom(i_target, TT::RMW_WRT_BUF_ECC_REG, l_data) );
+        FAPI_TRY( fapi2::getScom(i_target, TT::WDF_BUF_ECC_REG, l_data) );
         o_ecc_data.push_back(l_data);
         ++l_array_addr;
 
@@ -4002,9 +4032,9 @@ fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
         {
             FAPI_INF("Rolling over the RMW array access control register address from %d to %d for %s.", (i_start_addr + l_index),
                      0, mss::c_str(i_target));
-            l_control_value.clearBit<TT::RMW_WRT_ADDRESS, TT::RMW_WRT_ADDRESS_LEN>();
-            FAPI_TRY( fapi2::putScom(i_target, TT::RMW_WRT_BUF_CTL_REG, l_control_value) );
             l_array_addr = 0;
+            set_rmw_address<MC, T>(l_array_addr, l_control_value);
+            FAPI_TRY( fapi2::putScom(i_target, TT::WDF_BUF_CTL_REG, l_control_value) );
         }
     }
 

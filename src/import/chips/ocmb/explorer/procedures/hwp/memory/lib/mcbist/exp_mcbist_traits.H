@@ -218,6 +218,15 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr size_t MAX_DRAMS_X8 = MAX_DQ_BITS / BITS_PER_BYTE;
         static constexpr size_t MAX_DRAMS_X4 = MAX_DQ_BITS / BITS_PER_NIBBLE;
 
+        // WDF registers used for loading patterns and reading results
+        static constexpr uint64_t WDF_BUF_CTL_REG = EXPLR_WDF_AACR;
+        static constexpr uint64_t WDF_BUF_DATA_REG = EXPLR_WDF_AADR;
+        static constexpr uint64_t WDF_BUF_ECC_REG = EXPLR_WDF_AAER;
+
+        // Maintenance data location within the array
+        static constexpr uint64_t MAINT_DATA_INDEX_START = 0b000000000;
+        static constexpr uint64_t MAINT_DATA_INDEX_END   = 0b000001000;
+
         /// MCBIST "memory registers" - config for subtests.
         static constexpr uint64_t MCBMR0_REG = EXPLR_MCBIST_MCBMR0Q;
         static constexpr uint64_t MCBMR1_REG = EXPLR_MCBIST_MCBMR1Q;
@@ -294,6 +303,22 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
 
         enum
         {
+            // WDF maintenance buffer traits
+            WDF_BUFFER_SEL = EXPLR_WDF_AACR_BUFFER,
+            WDF_ADDRESS = EXPLR_WDF_AACR_ADDRESS,
+            WDF_ADDRESS_LEN = EXPLR_WDF_AACR_ADDRESS_LEN,
+            WDF_AUTOINC = EXPLR_WDF_AACR_AUTOINC,
+            WDF_ECCGEN = EXPLR_WDF_AACR_ECCGEN,
+            RMW_WTR_AUTOINC_SETTING = mss::states::ON,
+
+            // Constants used for field settings
+            SELECT_RMW_BUFFER = 0,
+            SELECT_WRT_BUFFER = 1,
+            // In compare mode, there is one "info" entry per 4 data (log) entries
+            // so compare mode only uses 16 info entries total in the rmw array
+            NUM_COMPARE_DATA_PER_INFO_LOG = 4,
+            NUM_COMPARE_INFO_ENTRIES = 16,
+
             // The start/end address config registers have common lengths and bits, just including 1 below
             MCB_ADDR_CONFIG = EXPLR_MCBIST_MCBEA0Q_CFG_END_ADDR_0,
             MCB_ADDR_CONFIG_LEN = EXPLR_MCBIST_MCBEA0Q_CFG_END_ADDR_0_LEN,
@@ -612,17 +637,10 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>
     public:
         // MCBIST error log related registers
         static constexpr uint64_t ERROR_LOG_PTR_REG = EXPLR_RDF_ELPR;
-        static constexpr uint64_t RMW_WRT_BUF_CTL_REG = EXPLR_WDF_AACR;
-        static constexpr uint64_t RMW_WRT_BUF_DATA_REG = EXPLR_WDF_AADR;
-        static constexpr uint64_t RMW_WRT_BUF_ECC_REG = EXPLR_WDF_AAER;
 
         static constexpr uint64_t XLTATE0 = EXPLR_MCBIST_MBXLT0Q;
         static constexpr uint64_t XLTATE1 = EXPLR_MCBIST_MBXLT1;
         static constexpr uint64_t XLTATE2 = EXPLR_MCBIST_MBXLT2;
-
-        // Maintenance data location within the array
-        static constexpr uint64_t MAINT_DATA_INDEX_START = 0b000000000;
-        static constexpr uint64_t MAINT_DATA_INDEX_END   = 0b000001000;
 
         enum
         {
@@ -630,11 +648,6 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>
             ERROR_LOG_PTR = EXPLR_RDF_ELPR_LOG_POINTER,
             ERROR_LOG_PTR_LEN = EXPLR_RDF_ELPR_LOG_POINTER_LEN,
             ERROR_LOG_FULL = EXPLR_RDF_ELPR_LOG_FULL,
-            RMW_WRT_BUFFER_SEL = EXPLR_WDF_AACR_BUFFER,
-            RMW_WRT_ADDRESS = EXPLR_WDF_AACR_ADDRESS,
-            RMW_WRT_ADDRESS_LEN = EXPLR_WDF_AACR_ADDRESS_LEN,
-            RMW_WRT_AUTOINC = EXPLR_WDF_AACR_AUTOINC,
-            RMW_WRT_ECCGEN = EXPLR_WDF_AACR_ECCGEN,
 
             XLTATE_SLOT0_VALID = EXPLR_MCBIST_MBXLT0Q_SLOT0_VALID,
             XLTATE_SLOT1_VALID = EXPLR_MCBIST_MBXLT0Q_SLOT1_VALID,

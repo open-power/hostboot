@@ -278,6 +278,15 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
 
         static constexpr uint64_t  MBSTRQ_CFG_PAUSE_ON_MPE = scomt::ody::ODC_MCBIST_SCOM_MBSTRQ_CFG_PAUSE_ON_MPE;
 
+        // WDF registers used for loading patterns and reading results
+        static constexpr uint64_t WDF_BUF_CTL_REG = scomt::ody::ODC_WDF_REGS_AACR;
+        static constexpr uint64_t WDF_BUF_DATA_REG = scomt::ody::ODC_WDF_REGS_AADR;
+        static constexpr uint64_t WDF_BUF_ECC_REG = scomt::ody::ODC_WDF_REGS_AAER;
+
+        // Maintenance data location within the array
+        static constexpr uint64_t MAINT_DATA_INDEX_START = 0b000000000;
+        static constexpr uint64_t MAINT_DATA_INDEX_END   = 0b000001000;
+
         // MCBIST Compare Masks, used to setup the ECC traps
         static constexpr uint64_t COMPARE_MASK = scomt::ody::ODC_RDF0_SCOM_MCBCM;
 
@@ -296,6 +305,23 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
 
         enum
         {
+            // WDF Maintenance buffer traits
+            WDF_BUFFER_SEL = scomt::ody::ODC_WDF_REGS_AACR_BUFFER,
+            WDF_ADDRESS = scomt::ody::ODC_WDF_REGS_AACR_ADDRESS,
+            WDF_ADDRESS_LEN = scomt::ody::ODC_WDF_REGS_AACR_ADDRESS_LEN,
+            WDF_AUTOINC = scomt::ody::ODC_WDF_REGS_AACR_AUTOINC,
+            WDF_ECCGEN = scomt::ody::ODC_WDF_REGS_AACR_ECCGEN,
+            RMW_WTR_AUTOINC_SETTING = mss::states::OFF,
+
+            // Constants used for field settings
+            SELECT_RMW_BUFFER = 0,
+            SELECT_WRT_BUFFER = 1,
+
+            // In compare mode, there is one "info" entry per 4 data (log) entries
+            // so compare mode only uses 16 info entries total in the rmw array
+            NUM_COMPARE_DATA_PER_INFO_LOG = 4,
+            NUM_COMPARE_INFO_ENTRIES = 16,
+
             // The start/end address config registers have common lengths and bits, just including 1 below
             MCB_ADDR_CONFIG = scomt::ody::ODC_MCBIST_SCOM_MCBEA0Q_MCBEA0Q_CFG_END_ADDR_0,
             MCB_ADDR_CONFIG_LEN = scomt::ody::ODC_MCBIST_SCOM_MCBEA0Q_MCBEA0Q_CFG_END_ADDR_0_LEN,
@@ -628,17 +654,10 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
         // MCBIST error log related registers
         // TODO:ZEN-MST1390 Add MCBIST data/address trap processing
         static constexpr uint64_t ERROR_LOG_PTR_REG = 0; // Has one reg per RDF, so needs API updates
-        static constexpr uint64_t RMW_WRT_BUF_CTL_REG = scomt::ody::ODC_WDF_REGS_AACR;
-        static constexpr uint64_t RMW_WRT_BUF_DATA_REG = scomt::ody::ODC_WDF_REGS_AADR;
-        static constexpr uint64_t RMW_WRT_BUF_ECC_REG = scomt::ody::ODC_WDF_REGS_AAER;
 
         static constexpr uint64_t XLTATE0 = scomt::ody::ODC_SRQ_MBXLT0;
         static constexpr uint64_t XLTATE1 = scomt::ody::ODC_SRQ_MBXLT1;
         static constexpr uint64_t XLTATE2 = scomt::ody::ODC_SRQ_MBXLT2;
-
-        // Maintenance data location within the array
-        static constexpr uint64_t MAINT_DATA_INDEX_START = 0b000000000;
-        static constexpr uint64_t MAINT_DATA_INDEX_END   = 0b000001000;
 
         enum
         {
@@ -647,12 +666,6 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
             ERROR_LOG_PTR = 0,
             ERROR_LOG_PTR_LEN = 0,
             ERROR_LOG_FULL = 0,
-            RMW_WRT_BUFFER_SEL = 0,
-            RMW_WRT_ADDRESS = 0,
-            // TODO:ZEN-MST1390 Add MCBIST data/address trap processing
-            RMW_WRT_ADDRESS_LEN = 1,
-            RMW_WRT_AUTOINC = 0,
-            RMW_WRT_ECCGEN = 0,
 
             // TODO:ZEN-MST1459 Create ody_lab_mcbist_wrap
             XLTATE_SLOT0_VALID = 0,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -613,6 +613,52 @@ void program<mss::mc_type::ODYSSEY>::change_bank_group2_bit( const uint64_t i_bi
     using TT = mcbistTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
     iv_addr_map0.insertFromRight<TT::CFG_AMAP_BANK_GROUP2, TT::CFG_AMAP_BANK_GROUP2_LEN>(i_bitmap);
     return;
+}
+
+///
+/// @brief Sets the RMW buffer's address into the buffer - Odyssey specialization
+/// @param[in] i_addr the address to set in the RMW buffer
+/// @param[in,out] io_data the RMW buffer's data
+///
+template<>
+void set_rmw_address<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(const uint64_t i_addr,
+        fapi2::buffer<uint64_t>& io_data)
+{
+    // Due to a chip bug, the 4-bit address field for the RMW buffer is split up over bits 3:5 and bit 9
+    constexpr uint64_t ADDR_FIELD2 = 9;
+    constexpr uint64_t ADDR_FIELD2_LEN = 1;
+    constexpr uint64_t ADDR_FIELD1 = 3;
+    constexpr uint64_t ADDR_FIELD1_LEN = 3;
+    constexpr uint64_t SOURCE_START = 60;
+
+    io_data.insertFromRight<ADDR_FIELD2, ADDR_FIELD2_LEN>(i_addr)
+    .insert<ADDR_FIELD1, ADDR_FIELD1_LEN, SOURCE_START>(i_addr);
+}
+
+///
+/// @brief Sets the RMW buffer's address into the buffer - Odyssey specialization
+/// @param[in] i_addr the address to set in the RMW buffer
+/// @param[in,out] io_data the RMW buffer's data
+///
+template<>
+void set_rmw_address<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>(const uint64_t i_addr,
+        fapi2::buffer<uint64_t>& io_data)
+{
+    set_rmw_address<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_addr, io_data);
+}
+
+///
+/// @brief Loads the RMW buffer's control register mid loop if needed - Odyssey specialization
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_data the RMW buffer's data
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template<>
+fapi2::ReturnCode load_rmw_control_mid_loop<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
+(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target, const fapi2::buffer<uint64_t>& i_data)
+{
+    using TT = mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
+    return fapi2::putScom(i_target, TT::WDF_BUF_CTL_REG, i_data);
 }
 
 } // namespace mcbist

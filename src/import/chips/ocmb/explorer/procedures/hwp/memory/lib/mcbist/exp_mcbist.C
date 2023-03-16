@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -691,6 +691,45 @@ template <>
 void program<mss::mc_type::EXPLORER>::change_bank_group2_bit( const uint64_t i_bitmap )
 {
     return;
+}
+
+///
+/// @brief Sets the RMW buffer's address into the buffer - Explorer specialization
+/// @param[in] i_addr the address to set in the RMW buffer
+/// @param[in,out] io_data the RMW buffer's data
+///
+template<>
+void set_rmw_address<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>(const uint64_t i_addr,
+        fapi2::buffer<uint64_t>& io_data)
+{
+    using TT = mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>;
+    io_data.insertFromRight<TT::WDF_ADDRESS, TT::WDF_ADDRESS_LEN>(i_addr);
+}
+
+///
+/// @brief Sets the RMW buffer's address into the buffer - Explorer specialization
+/// @param[in] i_addr the address to set in the RMW buffer
+/// @param[in,out] io_data the RMW buffer's data
+///
+template<>
+void set_rmw_address<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>(const uint64_t i_addr,
+        fapi2::buffer<uint64_t>& io_data)
+{
+    set_rmw_address<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>(i_addr, io_data);
+}
+
+///
+/// @brief Loads the RMW buffer's control register mid loop if needed - Explorer specialization
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_data the RMW buffer's data
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template<>
+fapi2::ReturnCode load_rmw_control_mid_loop<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
+(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target, const fapi2::buffer<uint64_t>& i_data)
+{
+    // Nothing to do here. Auto-increment has us covered
+    return fapi2::FAPI2_RC_SUCCESS;
 }
 
 } // namespace mcbist
