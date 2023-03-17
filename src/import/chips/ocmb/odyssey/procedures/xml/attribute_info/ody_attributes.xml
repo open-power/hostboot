@@ -81,8 +81,7 @@
             USE_ATTRIBUTES = 0x00,
             USE_HARDCODES  = 0x01
         </enum>
-<!-- TODO:Zen:MST-1813 Change this to USE_ATTRIBUTES once initial sim testing is complete -->
-        <default>USE_HARDCODES</default>
+        <default>USE_ATTRIBUTES</default>
         <writeable/>
         <mssAccessorName>ody_msg_block_data_source</mssAccessorName>
     </attribute>
