@@ -24,14 +24,14 @@
 # IBM_PROLOG_END_TAG
 
 
-%.dce.lid: %.c++ $(filter %.c++ %.h++, $(DCE_EXTRA_FILES)) $(PROJECT_ROOT)/img/hbicore.list.bz2
-	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE)" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.c++, $(DCE_EXTRA_FILES)) -o $@.intermediate $(INCFLAGS)
+%.dce.lid: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(PROJECT_ROOT)/img/hbicore.list.bz2
+	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE)" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@.intermediate $(INCFLAGS)
 	$(ROOTPATH)/src/build/tools/dce/preplib.py $@.intermediate
 	mv $@.intermediate.lid $@
 	@echo Copy $@ to the BMC
 
-%.dce.test.lid: %.c++ $(filter %.c++ %.h++, $(DCE_EXTRA_FILES)) $(PROJECT_ROOT)/img/hbicore_test.list.bz2
-	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE)" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.c++, $(DCE_EXTRA_FILES)) -o $@.intermediate $(INCFLAGS)
+%.dce.test.lid: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(PROJECT_ROOT)/img/hbicore_test.list.bz2
+	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE)" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@.intermediate $(INCFLAGS)
 	HB_DCE_TEST_IMAGE=1 $(ROOTPATH)/src/build/tools/dce/preplib.py $@.intermediate
 	mv $@.intermediate.lid $@
 	@echo Copy $@ to the BMC

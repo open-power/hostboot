@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/build/tools/dce/dce-extra-files/trace_defs.h++ $          */
+/* $Source: src/build/tools/dce/dce-extra-files/trace_defs.H $            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,26 +25,18 @@
 #ifndef TRACE_DEFS_H
 #define TRACE_DEFS_H
 
+/* @file trace_defs.H
+ *
+ *  The purpose of this file is to override the TRACFCOMP macro and redirect it to the console output for DCE. That way
+ *  users of DCE can get traces for their DCE scripts. Typically, only TRACFCOMP should need to be redirected but there
+ *  may be cases where trace macros need to be overridden, such as TRACDCOMP. They can be added here as well as needed.
+ */
+
 #include <console/consoleif.H>
 
 #define CONSOLE_TRACE(args...) CONSOLE::displayf(CONSOLE::DEFAULT, NULL, args)
 
 #undef TRACFCOMP
 #define TRACFCOMP(X, args...) CONSOLE_TRACE(args)
-
-#undef TS_INFO
-#define TS_INFO(args...) CONSOLE_TRACE(args)
-
-#undef TS_FAIL
-#define TS_FAIL(args...) CONSOLE_TRACE(args)
-
-#undef FAPI_INF
-#define FAPI_INF(args...) CONSOLE_TRACE(args)
-
-#undef FAPI_ERR
-#define FAPI_ERR(args...) CONSOLE_TRACE("ERROR!! " args)
-
-#undef FAPI_DBG
-#define FAPI_DBG(args...) CONSOLE_TRACE(args)
 
 #endif

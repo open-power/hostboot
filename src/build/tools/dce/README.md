@@ -36,7 +36,7 @@ building Hostboot yourself, see the section below titled "Running DCE without bu
 
 The default Hostboot Make scripts are capable of compiling and packaging code to be run with DCE.
 
-For this example, put this code into a file called `foo.c++` (the filename doesn't matter as long as it has the `.c++`
+For this example, put this code into a file called `foo.C` (the filename doesn't matter as long as it has the `.C`
 extension, but we will need to remember the filename for later):
 
 ```cpp
@@ -75,13 +75,13 @@ dump via PLDM.
 
 The entrypoint of every DCE program is a function with the signature `int main()`.
 
-Then run `make foo.dce.lid` (i.e. replace the '.c++' suffix with '.dce.lid') from the project root.
+Then run `make foo.dce.lid` (i.e. replace the '.C' suffix with '.dce.lid') from the project root.
 You will see output similar to this:
 
 ```bash
 $ make foo.dce.lid
-./src/build/tools/dce/dce-compile "foo.c++" -o foo.dce.lid.intermediate -I./src/include/ -I./src/subtree/ -I./obj/genfiles
-+ /opt/mcp/shared/powerpc64-gcc-20190822/bin/powerpc64le-buildroot-linux-gnu-g++ -D__HOSTBOOT_MODULE=DCE -DNO_INITIALIZER_LIST -DNO_PLAT_STD_STRING_SUPPORT -D__FAPI -include config.h -Os -nostdlib -nostdinc -g -mno-vsx -mno-altivec -Werror -Wall -mtraceback=no -pipe -ffunction-sections -fdata-sections -ffreestanding -mbig-endian -DFAPI2_ENABLE_PLATFORM_GET_TARGET -DCOMPILETIME_TRACEHASH -nostdinc++ -fno-rtti -fno-exceptions -Werror -Wall -fuse-cxa-atexit -std=gnu++14 -s -Os -nostdinc -nostdlib -nostartfiles -fPIC -Wl,-z,norelro -Wl,-z,max-page-size=1 -fno-zero-initialized-in-bss -mabi=elfv1 -I /esw/san5/zach/hostboot-dce-test/src/include -I /esw/san5/zach/hostboot-dce-test/src/include/usr -I /esw/san5/zach/hostboot-dce-test/src/subtree -I /esw/san5/zach/hostboot-dce-test/obj/genfiles -shared foo.c++ -o foo.dce.lid.intermediate -I./src/include/ -I./src/subtree/ -I./obj/genfiles -T /esw/san5/zach/hostboot-dce-test/src/build/tools/dce/dce.ld
+./src/build/tools/dce/dce-compile "foo.C" -o foo.dce.lid.intermediate -I./src/include/ -I./src/subtree/ -I./obj/genfiles
++ /opt/mcp/shared/powerpc64-gcc-20190822/bin/powerpc64le-buildroot-linux-gnu-g++ -D__HOSTBOOT_MODULE=DCE -DNO_INITIALIZER_LIST -DNO_PLAT_STD_STRING_SUPPORT -D__FAPI -include config.h -Os -nostdlib -nostdinc -g -mno-vsx -mno-altivec -Werror -Wall -mtraceback=no -pipe -ffunction-sections -fdata-sections -ffreestanding -mbig-endian -DFAPI2_ENABLE_PLATFORM_GET_TARGET -DCOMPILETIME_TRACEHASH -nostdinc++ -fno-rtti -fno-exceptions -Werror -Wall -fuse-cxa-atexit -std=gnu++14 -s -Os -nostdinc -nostdlib -nostartfiles -fPIC -Wl,-z,norelro -Wl,-z,max-page-size=1 -fno-zero-initialized-in-bss -mabi=elfv1 -I /esw/san5/zach/hostboot-dce-test/src/include -I /esw/san5/zach/hostboot-dce-test/src/include/usr -I /esw/san5/zach/hostboot-dce-test/src/subtree -I /esw/san5/zach/hostboot-dce-test/obj/genfiles -shared foo.C -o foo.dce.lid.intermediate -I./src/include/ -I./src/subtree/ -I./obj/genfiles -T /esw/san5/zach/hostboot-dce-test/src/build/tools/dce/dce.ld
 ./src/build/tools/dce/preplib.py foo.dce.lid.intermediate
 mv foo.dce.lid.intermediate.lid foo.dce.lid
 Copy foo.dce.lid to the BMC
@@ -142,7 +142,7 @@ $ cd /afs/rchland.ibm.com/projects/esw/oppp10ebmc/Builds/opp10.2299.20220118n/op
 Download the Hostboot config file for the machine type you want to run on (p10ebmc.config, for example) and put it
 anywhere in the filesystem.
 
-Additionally, put your source file (`foo.c++` as in the example above) anywhere in the filesystem.
+Additionally, put your source file (`foo.C` as in the example above) anywhere in the filesystem.
 
 Source the following script in your shell and replace the items in brackets as appropriate (this is essentially
 doing the work of customrc):
@@ -259,17 +259,17 @@ implementation into your .C file.)
 
 ### Using multiple code files
 
-If you are developing code where you don't want all of it to be in the same file you can make multiple `.c++` files to
-compile along with the main `.c++` file which has the DCE entrypoint function in it. To do this, simply create the
-separate code normally in any number of additional files with the extension `.c++` then you can include the prototypes
-in `.h++` files in main `.c++` file.
+If you are developing code where you don't want all of it to be in the same file you can make multiple .C files to
+compile along with the main .C file which has the dce entrypoint function in it. To do this, simply create the
+separate code normally in any number of additional files with the extension .C then you can include the prototypes in
+.H files in the  main .C file.
 
-When you are ready to compile, either create a new env var named `DCE_EXTRA_FILES` with the list of the `.c++` and
-`h++` files you created or declare it on the command line along with the make invocation.
+When you are ready to compile, either create a new env var named DCE_EXTRA_FILES with the list of the .C and H files
+you created or declare it on the command line along with the make invocation.
 
 For example, here are the multiple files contents:
 
-test.c++
+test.C
 ```cpp
 #include <console/consoleif.H>
 
@@ -280,16 +280,16 @@ void hey()
 }
 ```
 
-test.h++
+test.H
 ```cpp
 void hey(void);
 ```
 
-foo.c++
+foo.C
 ```cpp
-#include "test.h++"
+#include "test.H"
 
-extern "C" int _start()
+int main()
 {
     hey();
     return 0;
@@ -299,15 +299,14 @@ extern "C" int _start()
 and on the command line, you would type:
 
 ```bash
-DCE_EXTRA_FILES="test.c++ test.h++" make foo.dce.lid
+DCE_EXTRA_FILES="test.C test.H" make foo.dce.lid
 ```
 
-You can now copy the resulting LID onto the system and invoke it with the script as normal.
+You can now copy the resulting LID onto the system and invoke it with the script as normal. Alternatively, if you place
+your extra files in src/build/tools/dce/dce-extra-files/ the dce_rc file in there can be sourced before compile and it
+will update your environment variables for you.
 
-Alternatively, if you place your extra files in src/build/tools/dce/dce-extra-files/ the dce_rc file in there can be
-sourced before compile and it will update your environment variables for you.
-
-## dce_rc file
+### dce_rc file
 
 In src/build/tools/dce/dce-extra-files there is an rc file that can be updated and sourced before each compile of DCE as
 needed. This file is not automatically sourced, it must be manually sourced by the user. It is also .gitignored to avoid
@@ -319,8 +318,42 @@ DCE_EXTRA_FILES_LOCATION as this will cause compile issues. (multiple definition
 compile twice).
 
 There a few helpful env vars but DCE_EXTRA_FILES should be left alone. It's defaulted to populate itself with
-all additional files required for the main .c++ file. All you need to do is update DCE_EXTRA_FILES_LOCATION if you want
+all additional files required for the main .C file. All you need to do is update DCE_EXTRA_FILES_LOCATION if you want
 to locate your files elsewhere from the default.
+
+#### Symlinking hostboot code into DCE_EXTRA_FILES_LOCATION
+
+If desired, you can create symlinks to hostboot code you would like to test with instead of copying implementations into
+new files. This allows you to test your code in-place, gathering tracing exactly where you desire, and reduces overhead
+of getting your code ready to commit.
+
+To do this, simply make a symlink of the file in the DCE_EXTRA_FILES_LOCATION like so:
+    `ln -s $PROJECT_ROOT/file.C $DCE_EXTRA_FILES_LOCATION`
+
+As long as your include paths are correct and you've symlinked in the necessary headers as well, you will be able to
+compile your dce code as usual. Now you can add on to the existing file and when you're done just commit the .C/.H files
+as usual.
+
+Many pieces of hostboot already have testcases created for you to use. To use those in conjunction with your symlinked
+files all you need to do is symlink in the relevant testcases and in your main_dce.C file do the following
+
+```cpp
+#define MANUAL_CXXTEST
+#include "existing_cxxtest.H"
+
+int main()
+{
+    // Create testcase object found in existing_cxxtest.H
+    myTest t;
+    // Invoke a test
+    t.testMyCode();
+
+    return 0;
+}
+```
+
+This essentially allows you to isolation test existing hostboot code without having to recompile hostboot or make a
+duplicate DCE only implementation.
 
 ## Checkpoints
 
@@ -344,33 +377,16 @@ simics> c
 ... pick up where you left off ...
 ```
 
+## Traces
+
+In DCE scripts, all TRACFCOMP is redirected to the LPC/SOL console. This was done by redefining TRACFCOMP in trace_defs.H
+under src/build/tools/dce/dce-extra-files.
+
 ## Restrictions
 
 There are certain features of C++ and Hostboot that DCE code does not support:
 
-1. Traces
-
-   The `TRACFCOMP` macro itself works as normal in DCE code. However, the trace hash won't be known to the trace
-   decoder, so weave or similar tools will be unable to display the trace.
-
-   You can turn all traces in the file into SOL console messages by putting this code below all the header include
-   directives in your DCE source file:
-
-```cpp
-#undef TRACFCOMP
-#define TRACFCOMP(X, ...) CONSOLE::displayf(CONSOLE::DEFAULT, NULL, __VA_ARGS__);
-```
-
-    Alternatively, you can source the dce_rc file mentioned above and then add this include to your code file.
-
-```cpp
-#include <trace_defs.h++>
-```
-
-    You'll just want to make sure that it's the final include so that the #undef and re-define are the last
-    pre-processor macros to run in the source file you include it in to avoid redefinition compile errors.
-
-2. thread_local
+1. thread_local
 
 DCE does not yet support thread_local. This is due to be fixed in the future.
 
