@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -198,6 +198,7 @@ errlHndl_t IpVpdFacade::read ( TARGETING::Target * i_target,
                          io_buflen,
                          i_args.record,
                          i_args.keyword,
+                         i_args.eepromSource,
                          true ) // read
                        .addToLog(err);
     }
@@ -276,6 +277,7 @@ errlHndl_t IpVpdFacade::write ( TARGETING::Target * i_target,
                          io_buflen,
                          i_args.record,
                          i_args.keyword,
+                         i_args.eepromSource,
                          false ) // write
                        .addToLog(err);
     }
@@ -389,6 +391,14 @@ errlHndl_t IpVpdFacade::cmpEecacheToEeprom(TARGETING::Target * i_target,
         o_match = true;
 
     } while(0);
+
+    // In most cases the error originator will have added VPD traces, but
+    //  adding here wil give us more context for the error when we pass
+    //  it back up.
+    if ( l_err != nullptr )
+    {
+        l_err->collectTrace( VPD_COMP_NAME, 512 );
+    }
 
     TRACSSCOMP( g_trac_vpd, EXIT_MRK"cmpEecacheToEeprom()" );
 
@@ -2418,6 +2428,7 @@ IpVpdFacade::validateAllRecordEccData ( const TARGETING::TargetHandle_t  i_targe
                         TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateAllRecordEccData(): "
                                    "reloadMvpdEecacheFromNextSource failed to get the next MVPD "
                                    "source for target 0x%.8X",  l_targetHuid );
+                        l_mvpdSourceError->collectTrace(VPD_COMP_NAME);
                         errlCommit( l_mvpdSourceError, VPD_COMP_ID );
                     }
                 #endif
@@ -2793,8 +2804,8 @@ IpVpdFacade::validateVtocRecordEccData(
         {
             TRACFCOMP( g_trac_vpd, ERR_MRK"IpVpdFacade::validateVtocRecordEccData(): "
                        "vpdeccCheckData failed with error code %d for record %s "
-                       "on target 0x%.8X", l_returnCode, l_recordName,
-                       TARGETING::get_huid(i_target) );
+                       "on target 0x%.8X from source %d", l_returnCode, l_recordName,
+                       TARGETING::get_huid(i_target), i_args.eepromSource );
 
             // Get the 'force an ECC data update' flag
             auto l_forceEccUpdateFlag = TARGETING::UTIL::assertGetToplevelTarget()->
@@ -2852,8 +2863,9 @@ IpVpdFacade::validateVtocRecordEccData(
                 // Attempt to update and correct the record to be in sync with the ECC data
                 TRACFCOMP( g_trac_vpd, INFO_MRK"IpVpdFacade::validateVtocRecordEccData(): "
                            "Attempt to update and correct the record %s to be in sync with "
-                           "the ECC data on target 0x%.8X",
-                           VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target) );
+                           "the ECC data on target 0x%.8X on source %d",
+                           VPD_TABLE_OF_CONTENTS_RECORD_NAME, TARGETING::get_huid(i_target),
+                           i_args.eepromSource);
 
                 updateRecordData( l_err,        i_target,       VPD_TABLE_OF_CONTENTS_RECORD_NAME,
                                   l_recordData, l_recordOffset, l_recordLength  );

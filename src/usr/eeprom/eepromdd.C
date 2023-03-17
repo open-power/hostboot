@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -920,6 +920,7 @@ errlHndl_t reloadMvpdEecacheFromNextSource( TARGETING::Target* const i_target)
                            HWAS::GARD_NULL);
 
         errl->collectTrace(EEPROM_COMP_NAME);
+        errl->collectTrace(VPD_COMP_NAME);
     }
 
     TRACFCOMP(g_trac_eeprom, EXIT_MRK"reloadMvpdEecacheFromNextSource");

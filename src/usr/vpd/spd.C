@@ -408,6 +408,7 @@ errlHndl_t spdGetKeywordValue ( DeviceFW::OperationType i_opType,
                          io_buflen,
                          0,
                          keyword,
+                         (EEPROM::EEPROM_SOURCE)0xFFFF, //not relevant
                          true ) // read
                        .addToLog(err);
     }
@@ -508,6 +509,7 @@ errlHndl_t spdWriteKeywordValue ( DeviceFW::OperationType i_opType,
                          io_buflen,
                          0,
                          keyword,
+                         (EEPROM::EEPROM_SOURCE)0xFFFF, //not relevant
                          false ) // write
                        .addToLog(err);
     }
@@ -593,6 +595,19 @@ errlHndl_t spdWriteData ( uint64_t i_offset,
         }
 
     } while( 0 );
+
+    if( err )
+    {
+        // Add parameter info to log
+        VPD::UdVpdParms( i_target,
+                         i_numBytes,
+                         0xFFFF, // just a hint that keyword parm is offset
+                         i_offset,
+                         EEPROM::AUTOSELECT,
+                         false ) // write
+                       .addToLog(err);
+    }
+
 
     TRACSSCOMP( g_trac_spd,
                 EXIT_MRK"spdWriteData() returning %s errors",
@@ -734,6 +749,15 @@ errlHndl_t spdGetValue(VPD::vpdKeyword       i_keyword,
 
     if( err )
     {
+        // Add parameter info to log
+        VPD::UdVpdParms( i_target,
+                         io_buflen,
+                         0,
+                         i_keyword,
+                         i_eepromSource,
+                         true ) // read
+                       .addToLog(err);
+
         // Signal the caller that there was an error getting
         // data and that there is no valid data.
         io_buflen = 0;

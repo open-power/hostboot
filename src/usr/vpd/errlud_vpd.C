@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,12 +42,13 @@ UdVpdParms::UdVpdParms( TARGETING::Target * i_target,
                         uint64_t i_buflen,
                         uint64_t i_record,
                         uint64_t i_keyword,
-                        bool read_notWrite  )
-
+                        EEPROM::EEPROM_SOURCE i_source,
+                        bool i_readNotWrite )
+:ERRORLOG::ErrlUserDetails()
 {
     // Set up Ud instance variables
     iv_CompId =VPD_COMP_ID;
-    iv_Version = 1;
+    iv_Version = 2;
     iv_SubSection = VPD_UDT_PARAMETERS;
 
     //***** Memory Layout *****
@@ -56,16 +57,17 @@ UdVpdParms::UdVpdParms( TARGETING::Target * i_target,
     // 8 bytes  : Length of In/Out Buffer
     // 8 bytes  : Record
     // 8 bytes  : Keyword
+    // 4 bytes  : EEPROM Source
 
     char * l_pBuf = reinterpret_cast<char *>(
                           reallocUsrBuf(sizeof(uint8_t)
-                                        +sizeof(uint32_t)
+                                        +sizeof(uint32_t)*2
                                         +sizeof(uint64_t)*3));
     uint64_t tmp64 = 0;
     uint32_t tmp32 = 0;
     uint8_t tmp8 = 0;
 
-    tmp8 = read_notWrite;
+    tmp8 = i_readNotWrite;
     memcpy(l_pBuf, &tmp8, sizeof(tmp8));
     l_pBuf += sizeof(tmp8);
 
@@ -85,6 +87,10 @@ UdVpdParms::UdVpdParms( TARGETING::Target * i_target,
     memcpy(l_pBuf, &tmp64, sizeof(tmp64));
     l_pBuf += sizeof(tmp64);
 
+    tmp32 = i_source;
+    memcpy(l_pBuf, &tmp32, sizeof(tmp32));
+    l_pBuf += sizeof(tmp32);
+
 }
 
 //------------------------------------------------------------------------------
@@ -93,5 +99,18 @@ UdVpdParms::~UdVpdParms()
 
 }
 
+//------------------------------------------------------------------------------
+void UdVpdParms::addToLog(errlHndl_t i_errl)
+{
+    // Check for a previous version of this type before adding myself.
+    // There are a few code paths that could end up with duplicate calls.
+    // The assumption is that the first entry added will be the most
+    // accurate so that is the one we want to keep.
+    auto l_prevUD = i_errl->getUDSections(VPD_COMP_ID, VPD_UDT_PARAMETERS);
+    if( l_prevUD.empty() )
+    {
+        ERRORLOG::ErrlUserDetails::addToLog(i_errl);
+    }
+}
 
 }

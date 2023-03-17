@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,31 +85,54 @@ public:
         // 8 bytes  : Length of In/Out Buffer
         // 8 bytes  : Record
         // 8 bytes  : Keyword
+        // 4 bytes  : EEPROM Source  [V2 only]
 
-        uint8_t op = TO_UINT8(l_databuf);
-        l_databuf += sizeof(uint8_t);
-        if( op == 1 )
+        // Paranoid check for truncated data...
+        size_t l_expectedSize = 0;
+        if( i_version == 1 )
         {
-            i_parser.PrintHeading("VPD Read");
+            l_expectedSize = 29;
         }
-        else if( op == 0 )
+        else if( i_version == 2 )
         {
-            i_parser.PrintHeading("VPD Write");
+            l_expectedSize = 33;
+        }
+        if( i_buflen < l_expectedSize )
+        {
+            i_parser.PrintHexDump(l_databuf, i_buflen);
         }
         else
         {
-            i_parser.PrintHeading("Unknown VPD Operation");
-        }
+            uint8_t op = TO_UINT8(l_databuf);
+            l_databuf += sizeof(uint8_t);
+            if( op == 1 )
+            {
+                i_parser.PrintHeading("VPD Read");
+            }
+            else if( op == 0 )
+            {
+                i_parser.PrintHeading("VPD Write");
+            }
+            else
+            {
+                i_parser.PrintHeading("Unknown VPD Operation");
+            }
 
-        i_parser.PrintNumber("Target","%.8lX",TO_UINT32(l_databuf));
-        l_databuf += sizeof(uint32_t);
-        i_parser.PrintNumber("Length of I/O Buffer","%.16lX",
-                             TO_UINT64(l_databuf));
-        l_databuf += sizeof(uint64_t);
-        i_parser.PrintNumber("Record","%.16lX",TO_UINT64(l_databuf));
-        l_databuf += sizeof(uint64_t);
-        i_parser.PrintNumber("Keyword","%.16lX",TO_UINT64(l_databuf));
-        l_databuf += sizeof(uint64_t);
+            i_parser.PrintNumber("Target","%.8lX",TO_UINT32(l_databuf));
+            l_databuf += sizeof(uint32_t);
+            i_parser.PrintNumber("Length of I/O Buffer","%.16lX",
+                                 TO_UINT64(l_databuf));
+            l_databuf += sizeof(uint64_t);
+            i_parser.PrintNumber("Record","%.16lX",TO_UINT64(l_databuf));
+            l_databuf += sizeof(uint64_t);
+            i_parser.PrintNumber("Keyword","%.16lX",TO_UINT64(l_databuf));
+            l_databuf += sizeof(uint64_t);
+            if( i_version >= 2 )
+            {
+                i_parser.PrintNumber("EEPROM Source","%.8lX",TO_UINT32(l_databuf));
+                l_databuf += sizeof(uint32_t);
+            }
+        }
 
     }
 

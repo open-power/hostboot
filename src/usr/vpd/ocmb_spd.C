@@ -390,6 +390,7 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
                         io_buflen,
                         0,
                         keyword,
+                        EEPROM::AUTOSELECT,
                         true) // read
             .addToLog(errl);
     }

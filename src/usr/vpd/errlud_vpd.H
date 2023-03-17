@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,18 +52,30 @@ class UdVpdParms : public ERRORLOG::ErrlUserDetails
      *  @param i_buflen        Length of In/Out buffer
      *  @param i_record        Record
      *  @param i_keyword       Keyword
-     *  @param read_notWrite   Read/not-Write (read=true; write=false)
+     *  @param i_readNotWrite   Read/not-Write (read=true; write=false)
+     *  @param i_source        EEPROM Source
      */
     UdVpdParms( TARGETING::Target * i_target,
-           uint64_t i_buflen,
-           uint64_t i_record,
-           uint64_t i_keyword,
-           bool read_notWrite  );
+                uint64_t i_buflen,
+                uint64_t i_record,
+                uint64_t i_keyword,
+                EEPROM::EEPROM_SOURCE i_source,
+                bool i_readNotWrite );
 
     /**
      *  @brief Destructor
      */
     virtual ~UdVpdParms();
+
+    /**
+     *  @brief Adds user detail data to an error log
+     *
+     *  Adds the user detail data stored in the internal buffer to the error
+     *  log. Overridden here to check for duplicates.
+     *
+     *  @param  i_errl Error log handle to add detail data to.
+     */
+    virtual void addToLog(errlHndl_t i_errl);
 
   private:
     // Disabled

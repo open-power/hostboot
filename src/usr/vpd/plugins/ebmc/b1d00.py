@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -34,6 +34,8 @@ class errludP_vpd:
         # 8 bytes  : Length of In/Out Buffer
         # 8 bytes  : Record
         # 8 bytes  : Keyword
+        # 4 bytes  : EEPROM Source  [V2 only]
+
         d = dict()
         subd = dict()
         i = 0
@@ -54,6 +56,17 @@ class errludP_vpd:
         subd['Length of I/O Buffer'], i=memConcat(data, i, i+8)
         subd['Record'], i=memConcat(data, i, i+8)
         subd['Keyword'], i=memConcat(data, i, i+8)
+
+        if ver >= 2:
+            source, i = memConcat(data, i, i+4)
+            # Keep this in sync with eeprom_const.H
+            if source == '00000000':
+               source = 'AUTOSELECT'
+            elif source == '00000001':
+               source = 'CACHE'
+            elif source == '00000002':
+               source = 'HARDWARE'
+            subd['EEPROM Source'] = source
 
         d['VPD Parameters']=subd
 
