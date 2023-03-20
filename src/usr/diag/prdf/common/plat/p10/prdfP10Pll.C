@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -449,17 +449,71 @@ void __maskPllUnlock(ExtensibleChip* i_chip)
     // Mask PLL unlock attentions by setting xx_PCBSLV_CONFIG[12:19] to all
     // 1's using a read-modify-write.
 
-    FOR_EACH_REG_PAIR(i_chip)
+    // WORKAROUND:
+    // The test team was able to inject a PLL attention during istep 6 on an MC
+    // that either is, or will be, deconfigured. The first chance PRD has to
+    // analyze the attention is istep 9.1, at which point the MC unit is
+    // definitely deconfigured. However, the PLLs are still active for all
+    // chiplets. Normally, PRD will only iterate on functional targets, but that
+    // does not work in this scenario because the underlying PLL attention on
+    // the deconfigured MC won't be masked. Instead we will have to bypass the
+    // PRD framework and manually mask all PLLs.
+    //
+    // IMPORTANT:
+    // This workaround is only implemented for setting the mask registers. This
+    // is not needed for detection nor clearing because broadcast register is
+    // used to determine a PLL attention exists and also used to clear the
+    // attentions. Unfortunately, FFFC collection will only capture registers
+    // from functional units. There really isn't a way around that without
+    // creating PRD objects for non-functional chips, which would have rippling
+    // effects throughout all of PRD.
 
-        SCAN_COMM_REGISTER_CLASS* cfg = chip->getRegister(pair.first);
+    auto chipTrgt = i_chip->getTrgt();
 
-        if (SUCCESS != cfg->Read()) continue;
+    // The PCBSLV_CONFIG addresses TP/NEST chiplets on a chip.
+    const std::vector<uint32_t> addrList =
+    {
+        0x010F001E, 0x020F001E, 0x030F001E
+    };
 
-        cfg->SetBitFieldJustified(12, 8, 0xFF);
+    for (const auto& addr : addrList)
+    {
+        BitStringBuffer data{64};
+        if (SUCCESS == getScom(chipTrgt, data, addr))
+        {
+            data.setFieldJustify(12, 8, 0xff);
+            putScom(chipTrgt, data, addr);
+        }
+    }
 
-        cfg->Write();
+    // The 0th PCBSLV_CONFIG address for each unit within a chip.
+    const std::map<TARGETING::TYPE, uint32_t> addrMap =
+    {
+        { TYPE_PEC,  0x080F001E },
+        { TYPE_MC,   0x0C0F001E },
+        { TYPE_PAUC, 0x100F001E },
+        { TYPE_IOHS, 0x180F001E },
+        { TYPE_EQ,   0x020F001E },
+    };
 
-    END_FOR_EACH_REG_PAIR
+    for (const auto& typeAddr : addrMap)
+    {
+        // Need a list of units of this type, regardless of functional state.
+        TargetHandleList trgts;
+        PredicateCTM predType{CLASS_NA, typeAddr.first};
+        targetService().getAssociated(trgts, chipTrgt, TargetService::CHILD_BY_AFFINITY,
+                                      TargetService::ALL, &predType);
+        
+        for (const auto& trgt : trgts)
+        {
+            BitStringBuffer data{64};
+            if (SUCCESS == getScom(trgt, data, typeAddr.second))
+            {
+                data.setFieldJustify(12, 8, 0xff);
+                putScom(trgt, data, typeAddr.second);
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
