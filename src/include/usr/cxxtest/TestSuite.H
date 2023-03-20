@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,8 @@
  *
  *  Imported from FSP tree - /src/test/cxxtest/cxxtest/
  */
+#ifndef __CXXTEST_TESTSUITE_H
+#define __CXXTEST_TESTSUITE_H
 
 // Set by code that wants to manually execute a testcase outside of the
 // normal CxxTest framework
@@ -50,17 +52,17 @@ public:
 #define  TS_FAIL(...)  { TRACFCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__); }
 
 
-}; //namespace CxxTest 
+}; //namespace CxxTest
 
 using namespace CxxTest;
 
-#define __cxxtest__TestSuite_h__ //short-circuit the rest
+#define AUTO_CXXTEST //short-circuit the rest
 
 #endif // MANUAL_CXXTEST
 
 
-#ifndef __cxxtest__TestSuite_h__
-#define __cxxtest__TestSuite_h__
+#ifndef AUTO_CXXTEST
+#define AUTO_CXXTEST
 
 /******************************************************************************/
 // Includes
@@ -167,4 +169,6 @@ struct CxxTestStats
 
 } // namespace CxxTest
 
-#endif // __cxxtest__TestSuite_h__
+#endif // AUTO_CXXTEST
+
+#endif // __CXXTEST_TESTSUITE_H
