@@ -191,9 +191,11 @@ const size_t EFD_DDR4_FREQUENCY_ADDR = 0;
 // Offset to the DDR4's master rank data within an individual EFD
 // size is 1 byte: address 2
 const size_t EFD_DDR4_MRANK_ADDR = 2;
-// Offset to the DDR4's Channel supported data within an individual EFD
-// size is 1 byte: address 15
+// Offset to the DDR4's OMI Channel supported data within an individual EFD
+// size is 4 bytes: address 3 - 6
 // Only used on planar SPD
+// Note that we only use byte 3 on our current planar system because only
+// channels 4:7 are supported (or 0:3 for a Simics workaround)
 const size_t EFD_DDR4_CHANNEL_SUPPORT_ADDR = 3;
 // Offset to the DDR4's Dimms supported data within an individual EFD
 // size is 1 byte: address 7
@@ -1124,7 +1126,9 @@ extern "C"
             uint8_t l_slot_supp_flag = 0;
             FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_ocmbFapi2Target, l_ocmb_pos) );
 
-            // For planar EFD byte 15, processor slot supported is bit 0/1/2/3 = OCMB_CHIP position 7/6/5/4
+            // For planar EFD byte 3, OMI channel supported bits 0/1/2/3 map to OCMB_CHIP positions 7/6/5/4
+            // A future system could support more OMI channels, but we only need to support these four on
+            // our current planar system (and bits 4/5/6/7 for a Simics workaround to support positions 3/2/1/0)
             l_slot_supp_flag = 1 << l_ocmb_pos;
 
             // If the 'is implemented flag' is true for the EFD,
