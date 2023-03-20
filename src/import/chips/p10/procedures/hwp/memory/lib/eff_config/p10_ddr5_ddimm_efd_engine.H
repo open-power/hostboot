@@ -281,6 +281,8 @@ class ddimm_0_0 : public mss::efd::base
                 // All others reserved/not used for DDR5
             };
 
+            FAPI_TRY(mss::attr::get_dram_pu_drv_imp(iv_dimm, l_field));
+
             // Get the field value from i_efd into l_phy_drv_imp_pu
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_DIC_PULLUP, i_efd, mss::SET_DRAM_DRV_PU_DRV_IMP_PU,
                                              l_dram_pu_drv_imp));
@@ -322,6 +324,8 @@ class ddimm_0_0 : public mss::efd::base
                 {0b0011, fapi2::ENUM_ATTR_DRAM_PD_DRV_IMP_OHM_48},
                 // All others reserved/not used for DDR5
             };
+
+            FAPI_TRY(mss::attr::get_dram_pd_drv_imp(iv_dimm, l_field));
 
             // Get the field value from i_efd into l_phy_drv_imp_pu
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_DIC_PULLDOWN, i_efd, mss::SET_DRAM_DRV_PU_DRV_IMP_PD,
@@ -802,6 +806,8 @@ class ddimm_0_0 : public mss::efd::base
                 // All others reserved/not used for DDR5
             };
 
+            FAPI_TRY(mss::attr::get_si_mc_rcv_imp_dq_dqs(iv_dimm, l_field));
+
             // Get the field value from i_efd into l_phy_drv_imp_pu
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_ODT_IMPEDANCE, i_efd, mss::SET_SI_MC_RCV_IMP_DQ_DQS,
                                              l_phy_odt_imp));
@@ -859,6 +865,8 @@ class ddimm_0_0 : public mss::efd::base
                 // All others reserved/not used for DDR5
             };
 
+            FAPI_TRY(mss::attr::get_si_mc_drv_imp_dq_dqs_pull_up(iv_dimm, l_field));
+
             // Get the field value from i_efd into l_phy_drv_imp_pu
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_DRIVE_IMPEDANCE_PULL_UP, i_efd, mss::SET_SI_MC_DRV_IMP_DQ_DQS_PULL_UP,
                                              l_phy_drv_imp_pu));
@@ -915,6 +923,8 @@ class ddimm_0_0 : public mss::efd::base
                 {0b010001, fapi2::ENUM_ATTR_MEM_SI_MC_DRV_IMP_DQ_DQS_PULL_DOWN_OHM_480},
                 // All others reserved/not used for DDR5
             };
+
+            FAPI_TRY(mss::attr::get_si_mc_drv_imp_dq_dqs_pull_down(iv_dimm, l_field));
 
             // Get the field value from i_efd into l_phy_drv_imp_pu
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_DRIVE_IMPEDANCE_PULL_DOWN, i_efd,
