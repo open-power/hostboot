@@ -286,7 +286,7 @@
     </attribute>
     <attribute>
         <id>MSS_INTERLEAVE_ENABLE</id>
-        <default>0xAE</default><!-- Require pairs -->
+        <default>0xAF</default><!-- Allow single dimms  -->
     </attribute>
     <attribute>
         <id>PMIC_HEALTH_CHECK_TIMER</id>
