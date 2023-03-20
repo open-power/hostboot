@@ -141,6 +141,10 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         uint64_t l_def_MEM_EFF_FREQ_EQ_4000 = ((l_TGT1_ATTR_MEM_EFF_FREQ >= literal_3201)
                                                && (l_TGT1_ATTR_MEM_EFF_FREQ < literal_4001));
         uint64_t l_def_MEM_EFF_FREQ_EQ_4800 = (l_TGT1_ATTR_MEM_EFF_FREQ >= literal_4001);
+        fapi2::ATTR_MEM_EFF_DDR5_RTT_PARK_RD_Type l_TGT1_ATTR_MEM_EFF_DDR5_RTT_PARK_RD;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_RTT_PARK_RD, TGT1, l_TGT1_ATTR_MEM_EFF_DDR5_RTT_PARK_RD));
+        fapi2::ATTR_MEM_EFF_DDR5_RTT_PARK_WR_Type l_TGT1_ATTR_MEM_EFF_DDR5_RTT_PARK_WR;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_RTT_PARK_WR, TGT1, l_TGT1_ATTR_MEM_EFF_DDR5_RTT_PARK_WR));
         fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM_Type l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM, TGT1, l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM));
         uint64_t l_def_NUM_RANKS = l_TGT1_ATTR_MEM_EFF_LOGICAL_RANKS_PER_DIMM[literal_0];
@@ -658,6 +662,29 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 
             l_scom_buffer.insert<5, 5, 59, uint64_t>(literal_3 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011016ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8011017ull, l_scom_buffer ));
+
+            if ((l_TGT1_ATTR_MEM_EFF_DDR5_RTT_PARK_RD[literal_0][literal_0] == literal_0))
+            {
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            }
+            else if ((l_TGT1_ATTR_MEM_EFF_DDR5_RTT_PARK_RD[literal_0][literal_0] != literal_0))
+            {
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0 );
+            }
+
+            if ((l_TGT1_ATTR_MEM_EFF_DDR5_RTT_PARK_WR[literal_0][literal_0] == literal_0))
+            {
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(literal_1 );
+            }
+            else if ((l_TGT1_ATTR_MEM_EFF_DDR5_RTT_PARK_WR[literal_0][literal_0] != literal_0))
+            {
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(literal_0 );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8011017ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8011018ull, l_scom_buffer ));
