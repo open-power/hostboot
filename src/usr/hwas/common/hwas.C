@@ -502,10 +502,10 @@ errlHndl_t discoverOcmbDependentTargetsAndEnable(const Target &i_sysTarget)
                 auto l_mpNum = cur_port->getAttr<TARGETING::ATTR_REL_POS>();
 
                 // Get the SPD-derived state of the memport
-                TARGETING::ATTR_HWAS_STATE_type l_state = {0};
+                TARGETING::ATTR_HWAS_STATE_type l_mpState = {0};
                 l_err = FAPIWRAP::getMemportState( cur_ocmb,
                                                    l_mpNum,
-                                                   l_state );
+                                                   l_mpState );
                 if( l_err )
                 {
                     HWAS_ERR( ERR_MRK "discoverOcmbDependentTargetsAndEnable() detect target HUID 0x%.08x could not determine the memport state",
@@ -515,21 +515,39 @@ errlHndl_t discoverOcmbDependentTargetsAndEnable(const Target &i_sysTarget)
 
                 // set HWAS state of the MEM_PORT
                 enableHwasState(cur_port,
-                                l_state.present, l_state.functional,
+                                l_mpState.present, l_mpState.functional,
                                 DeconfigGard::DECONFIGURED_BY_NO_CHILD_DIMM);
 
-                // Walk through any (logical) DIMM children, their state will
-                //  mirror what the MEM_PORT has
+                // Walk through any (logical) DIMM children on a DDIMM,
+                //  their state will mirror what the MEM_PORT has.  Note
+                //  that we should only ever disable DIMMs at this point
+                //  so that we don't enable ISDIMMs that aren't actually
+                //  installed.
                 TargetHandleList l_dimmList;
                 getChildAffinityTargets(l_dimmList, cur_port,
                                         CLASS_NA, TYPE_DIMM,
                                         false /*all*/);
                 for( auto cur_dimm : l_dimmList )
                 {
-                    // set HWAS state of the DIMM
-                    enableHwasState(cur_dimm,
-                                    l_state.present, l_state.functional,
-                                    DeconfigGard::DECONFIGURED_BY_NO_PARENT_MEM_PORT);
+                    auto l_dimmState = cur_dimm->getAttr<ATTR_HWAS_STATE>();
+
+                    // downgrade HWAS state of the DIMM
+                    if( l_dimmState.present )
+                    {
+                        // Note that this junk is typically not needed
+                        // since targets start out as present+functional,
+                        // but there could in the future be a scenario
+                        // where the target is found to be present but
+                        // marked nonfunctional for some reason.  This
+                        // check will ensure that the functional state
+                        // is not restored in that case.
+                        bool l_func = l_mpState.functional
+                                      && l_dimmState.functional;
+                        enableHwasState(cur_dimm,
+                             l_mpState.present,
+                             l_func,
+                             DeconfigGard::DECONFIGURED_BY_NO_PARENT_MEM_PORT);
+                    }
                 }
             }
             if( l_err ) { break; }
