@@ -46,6 +46,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/mss_math.H>
+#include <generic/memory/lib/utils/mss_pair.H>
 #include <ody_scom_mp_anib0_b0.H>
 #include <ody_scom_mp_anib1_b0.H>
 #include <ody_scom_mp_anib2_b0.H>
@@ -60,6 +61,7 @@
 #include <ody_scom_mp_anib11_b0.H>
 #include <ody_scom_mp_anib12_b0.H>
 #include <ody_scom_mp_anib13_b0.H>
+#include <ody_scom_mp_mastr_b0.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <lib/shared/ody_consts.H>
 #include <lib/dimm/ody_rank.H>
@@ -1018,14 +1020,6 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
             PllCtrl2 = (PllFreqSel << csr_PllFreqSel_LSB);
             PllCtrl1 = (PllCpPropCtrl << csr_PllCpPropCtrl_LSB) | (PllCpIntCtrl << csr_PllCpIntCtrl_LSB);
             PllCtrl4 = (PllCpPropGsCtrl << csr_PllCpPropGsCtrl_LSB) | (PllCpIntGsCtrl << csr_PllCpIntGsCtrl_LSB);
-
-            // TODO:ZEN:MST-1999 Add PLL settings to ody_ddrphyinit
-            // Remove these overrides when robust code is in place
-            // Overrides:
-            PllCtrl1 = 0x00000000000041;
-            PllCtrl2 = 0x00000000000019;
-            PllCtrl4 = 0x000000000000ff;
-            PllTestMode = 0x00000000000035;
 
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d,  Memclk=%dMHz",
@@ -4960,6 +4954,83 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set up PLL CSR settings
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode post_phyinit_setup_pll(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    // PLL CSR settings derived from dwc_ddr54_phy_ss7hpp18_databook
+    // Section 2.7.1.1 Optimal PLL Settings
+    // Note: DIMM_SPEED/4 = pllin freq
+
+    // PllCtrl1
+    static const mss::pair<uint64_t, uint64_t> PLLCTRL1[3] __attribute__ ((aligned (4))) =
+    {
+        {mss::DIMM_SPEED_3200, 0x00000000000041},
+        {mss::DIMM_SPEED_4000, 0x00000000000041},
+        {mss::DIMM_SPEED_4800, 0x00000000000041},
+    };
+
+    // PllCtrl2
+    static const mss::pair<uint64_t, uint64_t> PLLCTRL2[3] __attribute__ ((aligned (4))) =
+    {
+        {mss::DIMM_SPEED_3200, 0x00000000000019},
+        {mss::DIMM_SPEED_4000, 0x00000000000018},
+        {mss::DIMM_SPEED_4800, 0x00000000000018},
+    };
+
+    // PllCtrl4
+    static const mss::pair<uint64_t, uint64_t> PLLCTRL4[3] __attribute__ ((aligned (4))) =
+    {
+        {mss::DIMM_SPEED_3200, 0x000000000000FF},
+        {mss::DIMM_SPEED_4000, 0x000000000000FF},
+        {mss::DIMM_SPEED_4800, 0x000000000000FF},
+    };
+
+    // PllTestMode
+    // Note: bit 14 (counting right-to-left) is not documented as '1' but needs to be set to '1'
+    static const mss::pair<uint64_t, uint64_t> PLLTESTMODE[3] __attribute__ ((aligned (4))) =
+    {
+        {mss::DIMM_SPEED_3200, 0x00000000004035},
+        {mss::DIMM_SPEED_4000, 0x00000000004015},
+        {mss::DIMM_SPEED_4800, 0x00000000004015},
+    };
+
+    uint64_t l_ddr_freq = 0;
+    uint64_t l_data = 0;
+
+    FAPI_TRY(mss::attr::get_freq(i_target, l_ddr_freq));
+
+    // Fail if we don't yet support the given frequency
+    FAPI_ASSERT(((l_ddr_freq == mss::DIMM_SPEED_3200) ||
+                 (l_ddr_freq == mss::DIMM_SPEED_4000) ||
+                 (l_ddr_freq == mss::DIMM_SPEED_4800)),
+                fapi2::ODY_PHYINIT_UNSUPPORTED_DDR_FREQ().
+                set_PORT_TARGET(i_target).
+                set_FREQ(l_ddr_freq),
+                TARGTIDFORMAT " unsupported DDR frequency %d (only 3200, 4000, and 4800 currently supported)",
+                TARGTID, l_ddr_freq);
+
+    // Since we passed the above check, we can ignore the return value from find_value_from_key
+    // and assume we found a matching value
+    mss::find_value_from_key(PLLCTRL1, l_ddr_freq, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PLLCTRL1_P0, l_data));
+
+    mss::find_value_from_key(PLLCTRL2, l_ddr_freq, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PLLCTRL2_P0, l_data));
+
+    mss::find_value_from_key(PLLCTRL4, l_ddr_freq, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PLLCTRL4_P0, l_data));
+
+    mss::find_value_from_key(PLLTESTMODE, l_ddr_freq, l_data);
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PLLTESTMODE_P0, l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Post Phyinit decode for TxSlew values
 /// @param[in] i_target - the memory port on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
@@ -4969,6 +5040,7 @@ fapi2::ReturnCode post_phyinit_overrides(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(post_phyinit_override_tx_slew_rise_ac(i_target));
     FAPI_TRY(post_phyinit_override_tx_slew_fall_ac(i_target));
     FAPI_TRY(post_phyinit_override_tx_slew_rise_ck(i_target));
+    FAPI_TRY(post_phyinit_setup_pll(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
