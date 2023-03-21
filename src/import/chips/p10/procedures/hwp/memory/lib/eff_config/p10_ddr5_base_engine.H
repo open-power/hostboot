@@ -722,8 +722,7 @@ class base_0_0 : public mss::spd::base
         {
             uint8_t l_field = fapi2::ENUM_ATTR_MEM_EFF_Z_MODE_FALSE;
 
-            //FAPI_TRY(mss::attr::set_z_mode(iv_ocmb, l_field));
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_Z_MODE, iv_ocmb, l_field));
+            FAPI_TRY(mss::attr::set_z_mode(iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;

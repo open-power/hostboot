@@ -1058,6 +1058,7 @@
       TRUE = 1
     </enum>
     <writeable/>
+    <mssAccessorName>z_mode</mssAccessorName>
   </attribute>
 
 </attributes>
