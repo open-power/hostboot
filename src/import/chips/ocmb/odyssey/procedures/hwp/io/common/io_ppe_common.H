@@ -733,7 +733,7 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ext_cmd_poll(const fapi2::Target<K, M,
 
         if (!o_done && !o_fail)
         {
-            fapi2::delay(1000000, 1000000); //ns, sim cycles. 1ms
+            fapi2::delay(2000000, 2000000); //ns, sim cycles. 1ms
         }
 
         l_loop_count++;
