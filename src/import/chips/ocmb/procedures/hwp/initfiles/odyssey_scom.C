@@ -42,11 +42,17 @@ constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_1 = 1;
+constexpr uint64_t literal_3201 = 3201;
+constexpr uint64_t literal_27 = 27;
+constexpr uint64_t literal_4001 = 4001;
+constexpr uint64_t literal_33 = 33;
+constexpr uint64_t literal_39 = 39;
+constexpr uint64_t literal_29 = 29;
+constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_0xFF = 0xFF;
 constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_18 = 18;
 constexpr uint64_t literal_12 = 12;
-constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_40 = 40;
 constexpr uint64_t literal_1023 = 1023;
 constexpr uint64_t literal_256 = 256;
@@ -58,8 +64,6 @@ constexpr uint64_t literal_19 = 19;
 constexpr uint64_t literal_9 = 9;
 constexpr uint64_t literal_11 = 11;
 constexpr uint64_t literal_5 = 5;
-constexpr uint64_t literal_3201 = 3201;
-constexpr uint64_t literal_4001 = 4001;
 constexpr uint64_t literal_0x0 = 0x0;
 constexpr uint64_t literal_512 = 512;
 constexpr uint64_t literal_640 = 640;
@@ -100,12 +104,12 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRCD, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRCD));
         fapi2::ATTR_MEM_EFF_DRAM_TRP_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRP;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRP, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRP));
-        fapi2::ATTR_MEM_EFF_DRAM_TRAS_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRAS;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRAS, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRAS));
-        fapi2::ATTR_MEM_EFF_DRAM_TWR_Type l_TGT1_ATTR_MEM_EFF_DRAM_TWR;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TWR, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TWR));
-        fapi2::ATTR_MEM_EFF_DRAM_TRTP_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRTP;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRTP, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRTP));
+        fapi2::ATTR_MEM_EFF_FREQ_Type l_TGT1_ATTR_MEM_EFF_FREQ;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, TGT1, l_TGT1_ATTR_MEM_EFF_FREQ));
+        uint64_t l_def_MEM_EFF_FREQ_EQ_3200 = (l_TGT1_ATTR_MEM_EFF_FREQ < literal_3201);
+        uint64_t l_def_MEM_EFF_FREQ_EQ_4000 = ((l_TGT1_ATTR_MEM_EFF_FREQ >= literal_3201)
+                                               && (l_TGT1_ATTR_MEM_EFF_FREQ < literal_4001));
+        uint64_t l_def_MEM_EFF_FREQ_EQ_4800 = (l_TGT1_ATTR_MEM_EFF_FREQ >= literal_4001);
         fapi2::ATTR_MEM_EFF_DRAM_TRRD_S_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRRD_S;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRRD_S, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRRD_S));
         fapi2::ATTR_MEM_EFF_DRAM_TRRD_L_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRRD_L;
@@ -135,12 +139,6 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_TYPE, TGT1, l_TGT1_ATTR_MEM_EFF_DIMM_TYPE));
         uint64_t l_def_72B_DIMM = ((l_TGT1_ATTR_MEM_EFF_DIMM_TYPE[literal_0] == literal_1)
                                    || (l_TGT1_ATTR_MEM_EFF_DIMM_TYPE[literal_0] == literal_2));
-        fapi2::ATTR_MEM_EFF_FREQ_Type l_TGT1_ATTR_MEM_EFF_FREQ;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, TGT1, l_TGT1_ATTR_MEM_EFF_FREQ));
-        uint64_t l_def_MEM_EFF_FREQ_EQ_3200 = (l_TGT1_ATTR_MEM_EFF_FREQ < literal_3201);
-        uint64_t l_def_MEM_EFF_FREQ_EQ_4000 = ((l_TGT1_ATTR_MEM_EFF_FREQ >= literal_3201)
-                                               && (l_TGT1_ATTR_MEM_EFF_FREQ < literal_4001));
-        uint64_t l_def_MEM_EFF_FREQ_EQ_4800 = (l_TGT1_ATTR_MEM_EFF_FREQ >= literal_4001);
         fapi2::ATTR_MEM_EFF_DDR5_RTT_PARK_RD_Type l_TGT1_ATTR_MEM_EFF_DDR5_RTT_PARK_RD;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_RTT_PARK_RD, TGT1, l_TGT1_ATTR_MEM_EFF_DDR5_RTT_PARK_RD));
         fapi2::ATTR_MEM_EFF_DDR5_RTT_PARK_WR_Type l_TGT1_ATTR_MEM_EFF_DDR5_RTT_PARK_WR;
@@ -203,10 +201,35 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                     literal_1) / literal_2) );
             l_scom_buffer.insert<16, 6, 58, uint64_t>((l_TGT1_ATTR_MEM_EFF_DRAM_TRCD / literal_2) );
             l_scom_buffer.insert<22, 6, 58, uint64_t>((l_TGT1_ATTR_MEM_EFF_DRAM_TRP / literal_2) );
-            l_scom_buffer.insert<28, 7, 57, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TRAS + literal_1) / literal_2) );
-            l_scom_buffer.insert<36, 8, 56, uint64_t>((((l_TGT1_ATTR_MEM_DRAM_CWL + l_TGT1_ATTR_MEM_EFF_DRAM_TWR) + literal_1) /
-                    literal_2) );
-            l_scom_buffer.insert<44, 8, 56, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TRTP + literal_1) / literal_2) );
+
+            if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
+            {
+                l_scom_buffer.insert<28, 7, 57, uint64_t>(literal_27 );
+            }
+            else if ((l_def_MEM_EFF_FREQ_EQ_4000 == literal_1))
+            {
+                l_scom_buffer.insert<28, 7, 57, uint64_t>(literal_33 );
+            }
+            else if ((l_def_MEM_EFF_FREQ_EQ_4800 == literal_1))
+            {
+                l_scom_buffer.insert<28, 7, 57, uint64_t>(literal_39 );
+            }
+
+            l_scom_buffer.insert<36, 8, 56, uint64_t>(((l_TGT1_ATTR_MEM_DRAM_CWL / literal_2) + literal_29) );
+
+            if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
+            {
+                l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_7 );
+            }
+            else if ((l_def_MEM_EFF_FREQ_EQ_4000 == literal_1))
+            {
+                l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_8 );
+            }
+            else if ((l_def_MEM_EFF_FREQ_EQ_4800 == literal_1))
+            {
+                l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_10 );
+            }
+
             l_scom_buffer.insert<52, 4, 60, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TRRD_S + literal_1) / literal_2) );
             l_scom_buffer.insert<56, 4, 60, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TRRD_L + literal_1) / literal_2) );
             l_scom_buffer.insert<10, 6, 58, uint64_t>((l_TGT1_ATTR_MEM_EFF_DRAM_TFAW / literal_2) );
