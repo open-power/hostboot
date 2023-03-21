@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -27,8 +27,8 @@ ROOTPATH = ../../../../..
 MODULE = testsecureboot
 TESTS = *.H
 
-BINARY_FILES = $(IMGDIR)/secureboot_signed_container:7cff7a85f0db014016a61eac856c3775cd266240
-BINARY_FILES += $(IMGDIR)/secureboot_hash_page_table_container:16ccaff1e3c94cf17c2858e3a917dd9d64528848
+BINARY_FILES = $(IMGDIR)/secureboot_signed_container:57b07e94333a0e84dafb2da905693da2d4d99e95
+BINARY_FILES += $(IMGDIR)/secureboot_hash_page_table_container:1415a1d2310f4391810c5f4b555fb665c27964fd
 
 include ${ROOTPATH}/config.mk
 
