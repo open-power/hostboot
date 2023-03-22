@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -764,19 +764,20 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
     auto l_sbeExtend =
         l_nodeTarget->getAttr<TARGETING::ATTR_SBE_HANDLES_SMP_TPM_EXTEND>();
 
-    if (!l_sbeExtend)
+    // get all the measurements/extend to TPM and check
+    //    Note: this uses XSCOM to do the readings
+    //    NOTE: if the SBE performs the extend, then don't have this function do
+    //          the SW log or the extend to TPM
+    retrieveAndExtendSecondaryMeasurements(l_bootProc,
+                                           l_secondaryProcsList,
+                                           !l_sbeExtend, // i_logToSwLog
+                                           !l_sbeExtend, // i_extendToTpm
+                                           false, // i_makeErrlInfo - want a fail with callout
+                                           l_istepError);
+    if (!l_istepError.isNull())
     {
-        // get all the measurements/extend to TPM and check
-        //    Note: this uses XSCOM to do the readings
-        retrieveAndExtendSecondaryMeasurements(l_bootProc,
-                                               l_secondaryProcsList,
-                                               true, // extendToTpm
-                                               l_istepError);
-        if (!l_istepError.isNull())
-        {
-            // break out on istep failure
-            break;
-        }
+        // break out on istep failure
+        break;
     }
 
     const bool isMpipl = TARGETING::UTIL::assertGetToplevelTarget()->

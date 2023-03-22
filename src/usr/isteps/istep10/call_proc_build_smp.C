@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,18 +87,30 @@ const uint64_t HOSTBOOT_PIB_MASTER_ID = 9;
  *
  * @param[in] i_primaryProc    - primary sentinal processor target
  * @param[in] i_secondaryProcs - secondary/alternate processor targets
- * @param[in] i_extendToTpm    - extend measurements to the TPM
+ * @param[in] i_logToSwLog     - log measurements to software log
+ * @param[in] i_extendToTpm    - if i_extendToTpm is true, then also extend measurements to the TPM
+ *                               iff i_logToSwLog is true; else do not extend to TPM
+ * @param[in] i_makeErrlInfo   - make any error logs created in this function informational
  * @param[in/out] io_StepError - istep failure errors will be added to this
  */
 
 void retrieveAndExtendSecondaryMeasurements(
                             const TargetHandle_t i_primaryProc,
                             const TargetHandleList& i_secondaryProcs,
+                            const bool i_logToSwLog,
                             const bool i_extendToTpm,
+                            const bool i_makeErrlInfo,
                             IStepError & io_StepError )
 {
     errlHndl_t  l_errl  =   nullptr;
     bool l_poison_tpm = false;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,ENTER_MRK
+               "retrieveAndExtendSecondaryMeasurements: primaryProc=0x%08X, %d secondary procs, "
+               "i_logToSwLog=%d, i_extendToTpm=%d, i_makeErrlInfo=%d",
+               get_huid(i_primaryProc), i_secondaryProcs.size(),
+               i_logToSwLog, i_extendToTpm, i_makeErrlInfo);
+
 
     // structure to report what mismatched
     typedef union {
@@ -227,20 +239,29 @@ void retrieveAndExtendSecondaryMeasurements(
              * @custdesc   Platform security problem detected
              */
             l_errl = new ErrlEntry(ERRL_SEV_PREDICTIVE,
-                                             MOD_RETRIEVE_EXTEND_SECONDARY_MEASUREMENTS,
-                                             RC_PCR6_MISMATCH_DETECTED,
-                                             get_huid(curproc),
-                                             l_mismatch.full_reason);
+                                   MOD_RETRIEVE_EXTEND_SECONDARY_MEASUREMENTS,
+                                   RC_PCR6_MISMATCH_DETECTED,
+                                   get_huid(curproc),
+                                   l_mismatch.full_reason);
+
             l_errl->addHwCallout( curproc,
                                   HWAS::SRCI_PRIORITY_HIGH,
                                   HWAS::NO_DECONFIG,
                                   HWAS::GARD_NULL );
             if (!SECUREBOOT::enabled())
             {
-              TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "retrieveAndExtendSecondaryMeasurements: security is off, "
-                  "so just log the PCR6 Mismatch (EID: 0x%08X) as informational",
-                  l_errl->eid() );
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "retrieveAndExtendSecondaryMeasurements: security is off, "
+                          "so just log the PCR6 Mismatch (EID: 0x%08X) as informational",
+                          l_errl->eid() );
+                l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            }
+            else if (i_makeErrlInfo == true)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "retrieveAndExtendSecondaryMeasurements: Caller set i_makeErrlInfo = %d, "
+                          "so just log the PCR6 Mismatch (EID: 0x%08X) as informational",
+                          i_makeErrlInfo, l_errl->eid() );
                 l_errl->setSev(ERRL_SEV_INFORMATIONAL);
             }
             poison_eid = l_errl->eid();
@@ -251,8 +272,9 @@ void retrieveAndExtendSecondaryMeasurements(
             errlCommit(l_errl, ISTEP_COMP_ID);
         }
 
-        // primaryTpm must be functional to log/extend measurements
-        if (l_tpmHwasState.functional)
+        // Only log (and possibly extend) the SBE Measurement Registers
+        // if i_logToSwLog is true and the primaryTpm is functional
+        if (i_logToSwLog && l_tpmHwasState.functional)
         {
             // log and extend measurements (good or mismatched ones)
             l_errl = TRUSTEDBOOT::logSbeMeasurementRegs(
@@ -264,8 +286,8 @@ void retrieveAndExtendSecondaryMeasurements(
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     ERR_MRK"retrieveAndExtendSecondaryMeasurements: "
-                    "log/extend measurements for 0x%08X processor SBE",
-                    get_huid(curproc));
+                    "log(%d)/extend(%d) measurements for 0x%08X processor SBE",
+                    i_logToSwLog, i_extendToTpm, get_huid(curproc));
                 forceProcDelayDeconfigCallout(curproc, l_errl);
                 captureError(l_errl, io_StepError, ISTEP_COMP_ID, curproc);
             }
@@ -289,6 +311,10 @@ void retrieveAndExtendSecondaryMeasurements(
     {
         poisonPrimaryTpm();
     }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,EXIT_MRK "retrieveAndExtendSecondaryMeasurements: "
+               TRACE_ERR_FMT "l_poison_tpm=%d",
+               TRACE_ERR_ARGS(l_errl), l_poison_tpm);
 }
 
 
@@ -1056,10 +1082,15 @@ void* call_proc_build_smp (void *io_pArgs)
         if (l_sbeExtend)
         {
             // get all the measurements (don't extend to TPM) and check
-            //    Note: this uses XSCOM to do the readings
+            // Note: this uses XSCOM to do the readings
+            // Note: have any logs created by this function marked as INFORMATIONAL to avoid
+            //       any PREDICTIVE/UNRECOVERABLE errors with HW callouts prior to running
+            //       SBE Update in the next istep (istep 10.2)
             retrieveAndExtendSecondaryMeasurements(l_bootProc,
                                                    l_secondaryProcsList,
-                                                   false, // !extendToTpm
+                                                   true,  // i_logToSwLog
+                                                   false, // i_extendToTpm
+                                                   true,  // i_makeErrlInfo
                                                    l_StepError);
             if (!l_StepError.isNull())
             {
