@@ -696,6 +696,12 @@
     </attribute>
 
     <attribute>
+          <id>ATTR_OCMB_BOOT_FLAGS</id>
+          <writeable/>
+          <persistency>volatile-zeroed</persistency>
+    </attribute>
+
+    <attribute>
           <id>ATTR_EC_GARD</id>
           <writeable/>
     </attribute>
