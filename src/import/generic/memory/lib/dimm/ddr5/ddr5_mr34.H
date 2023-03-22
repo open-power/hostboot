@@ -78,9 +78,9 @@ class mr34_data : public mr_base_data<MC>
                 return;
             }
 
-            FAPI_TRY( mss::attr::get_si_dram_rtt_park(i_target, iv_rtt_park),
+            FAPI_TRY( mss::attr::get_ddr5_dram_rtt_park(i_target, iv_rtt_park),
                       "Error in ddr5::mr34_data()" );
-            FAPI_TRY( mss::attr::get_si_dram_rtt_wr(i_target, iv_rtt_wr),
+            FAPI_TRY( mss::attr::get_ddr5_dram_rtt_wr(i_target, iv_rtt_wr),
                       "Error in ddr5::mr34_data()" );
 
             io_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -188,18 +188,23 @@ class mr34_data : public mr_base_data<MC>
             uint8_t l_rtt_park_field = 0;
             uint8_t l_rtt_wr_field = 0;
 
+            // Get the channel number from the dram_num
+            // Channel A goes to DRAM[0-9]
+            // Channel B goes to DRAM[10-19]
+            const uint8_t CHANNEL = mss::ddr5::get_channel_a_or_b(i_dram_number);
+
             // Note: not checking DIMM rank as it was already checked by the rank info class
             const auto& l_dimm = i_rank_info.get_dimm_target();
             const auto l_dimm_rank = i_rank_info.get_dimm_rank();
             FAPI_TRY(check_and_convert_rtt_to_field(l_dimm,
                                                     l_dimm_rank,
                                                     false,
-                                                    iv_rtt_park[l_dimm_rank],
+                                                    iv_rtt_park[l_dimm_rank][CHANNEL],
                                                     l_rtt_park_field));
             FAPI_TRY(check_and_convert_rtt_to_field(l_dimm,
                                                     l_dimm_rank,
                                                     true,
-                                                    iv_rtt_wr[l_dimm_rank],
+                                                    iv_rtt_wr[l_dimm_rank][CHANNEL],
                                                     l_rtt_wr_field));
 
             l_data. template insertFromRight<RTT_PARK, RTT_PARK_LEN>(l_rtt_park_field)
@@ -215,12 +220,12 @@ class mr34_data : public mr_base_data<MC>
         ///
         /// @brief Displays the information that makes up the MR
         /// @param[in] i_rank_info the rank on which to operate
-        /// @param[in] i_dram_number the DRAM on which to operate - not used for MR34 but included to keep the API common
+        /// @param[in] i_dram_number the DRAM on which to operate
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
-            this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank());
+            this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -228,7 +233,7 @@ class mr34_data : public mr_base_data<MC>
         /// @brief Reads in the MR information into this data class
         /// @param[in] i_rank_info the rank on which to operate - unused for MR34 but keeping to match existing API
         /// @param[in] i_mr_data the mode register OP data in [7:0] format
-        /// @param[in] i_dram_number the DRAM on which to operate - not used for MR34 but included to keep the API common
+        /// @param[in] i_dram_number the DRAM on which to operate
         /// @return FAPI2_RC_SUCCESS if and only if ok
         /// @note This can be used for decoding mode register reads
         ///
@@ -247,16 +252,21 @@ class mr34_data : public mr_base_data<MC>
             const auto& l_dimm = i_rank_info.get_dimm_target();
             const auto l_dimm_rank = i_rank_info.get_dimm_rank();
 
+            // Get the channel number from the dram_num
+            // Channel A goes to DRAM[0-9]
+            // Channel B goes to DRAM[10-19]
+            const uint8_t CHANNEL = mss::ddr5::get_channel_a_or_b(i_dram_number);
+
             FAPI_TRY(check_and_convert_rtt_from_field(l_dimm,
                      l_dimm_rank,
                      false,
                      l_rtt_park_field,
-                     iv_rtt_park[l_dimm_rank]));
+                     iv_rtt_park[l_dimm_rank][CHANNEL]));
             FAPI_TRY(check_and_convert_rtt_from_field(l_dimm,
                      l_dimm_rank,
                      true,
                      l_rtt_wr_field,
-                     iv_rtt_wr[l_dimm_rank]));
+                     iv_rtt_wr[l_dimm_rank][CHANNEL]));
 
 
             return fapi2::FAPI2_RC_SUCCESS;
@@ -271,9 +281,9 @@ class mr34_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
-            FAPI_TRY( mss::attr::set_si_dram_rtt_park(i_rank_info.get_dimm_target(), iv_rtt_park),
+            FAPI_TRY( mss::attr::set_ddr5_dram_rtt_park(i_rank_info.get_dimm_target(), iv_rtt_park),
                       "Unable to set attributes for ddr5::mr34_data()" );
-            FAPI_TRY( mss::attr::set_si_dram_rtt_wr(i_rank_info.get_dimm_target(), iv_rtt_wr),
+            FAPI_TRY( mss::attr::set_ddr5_dram_rtt_wr(i_rank_info.get_dimm_target(), iv_rtt_wr),
                       "Unable to set attributes for ddr5::mr34_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;
@@ -289,8 +299,8 @@ class mr34_data : public mr_base_data<MC>
             RTT_WR_LEN = 3,
         };
 
-        uint8_t iv_rtt_park[mr::ATTR_RANKS] = {};
-        uint8_t iv_rtt_wr[mr::ATTR_RANKS] = {};
+        uint8_t iv_rtt_park[mr::ATTR_RANKS][mr::ATTR_NUM_CHANNELS] = {};
+        uint8_t iv_rtt_wr[mr::ATTR_RANKS][mr::ATTR_NUM_CHANNELS] = {};
 
     private:
 
@@ -298,11 +308,21 @@ class mr34_data : public mr_base_data<MC>
         /// @brief Displays the information that makes up the MR
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
         /// @param[in] i_dimm_rank the DIMM rank's value to print
+        /// @param[in] i_dram_num the dram number that is currently being executed
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_dimm_rank) const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint64_t i_dimm_rank, const uint8_t i_dram_number = 0) const
         {
+            // Get the channel number from the dram_num
+            // Channel A goes to DRAM[0-9]
+            // Channel B goes to DRAM[10-19]
+            const uint8_t CHANNEL = mss::ddr5::get_channel_a_or_b(i_dram_number);
+
             FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR34 rank%u. RTT Park:%u. RTT WR:%u.", TARGTID, i_dimm_rank, iv_rtt_park[i_dimm_rank], iv_rtt_wr[i_dimm_rank]);
+                     " DDR5 MR34 rank%u. dram_num%u.", TARGTID, i_dimm_rank, i_dram_number);
+
+            FAPI_INF(TARGTIDFORMAT
+                     " DDR5 MR34 RTT Park:%u. RTT WR:%u.", TARGTID, iv_rtt_park[i_dimm_rank][CHANNEL], iv_rtt_wr[i_dimm_rank][CHANNEL]);
         }
 
 };
@@ -310,14 +330,14 @@ class mr34_data : public mr_base_data<MC>
 template<mss::mc_type MC>
 const pair<uint8_t, uint8_t> mr34_data<MC>::RTT_TABLE[8] =
 {
-    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_DISABLE , 0b000),
-    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM34   , 0b111),
-    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM40   , 0b110),
-    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM48   , 0b101),
-    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM60   , 0b100),
-    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM80   , 0b011),
-    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM120  , 0b010),
-    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM240  , 0b001),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RTT_WR_RTT_OFF,  0b000),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RTT_WR_OHM34,    0b111),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM40,  0b110),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM48,  0b101),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM60,  0b100),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM80,  0b011),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM120, 0b010),
+    pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM240, 0b001),
 };
 
 } // ns ddr5

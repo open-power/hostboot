@@ -1328,9 +1328,8 @@ namespace ddr5
 enum mr
 {
     ATTR_RANKS = 4,
-    ATTR_DRAM_HALF = 10,
     ATTR_DRAM  = 20,
-    HALF_ATTR_DRAM = 10,
+    ATTR_DRAM_HALF = 10,
     ATTR_STRAP = 2,
 
     // Defined in the DDR5 JEDEC Spec v1.7.1
@@ -1342,6 +1341,9 @@ enum mr
     ATTR_NUM_CHANNELS = 2,
     ATTR_CHANNEL_A = 0,
     ATTR_CHANNEL_B = 1,
+
+    ATTR_DRAM_CHA_SELECT = 0,
+    ATTR_DRAM_CHB_SELECT = 10,
 };
 
 }

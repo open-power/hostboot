@@ -123,8 +123,17 @@ class mr_base_data
         ///
         virtual fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) = 0;
 
-
 };
+
+///
+/// @brief Gets the channel number based on the dram number
+/// @param[in] i_dram_number the rank on which to operate
+/// @return Channel number that is calculated based on dram_number
+///
+inline const uint8_t get_channel_a_or_b(const uint8_t i_dram_number)
+{
+    return (i_dram_number < mr::ATTR_DRAM_HALF) ? mr::ATTR_CHANNEL_A : mr::ATTR_CHANNEL_B;
+}
 
 } // ns ddr5
 

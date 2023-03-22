@@ -1272,13 +1272,13 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for channel A / Rank 0 only.
         virtual fapi2::ReturnCode set_dram_rtt_park(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
-            uint8_t l_dram_rtt_park = 0;
+            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
+            uint8_t l_dram_rtt_park_bytes[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
 
             // =========================================================
             // EFD Byte 60-67: RTT PARK and RTT WR Termination Settings
             //                 Per Channel Per Rank
-            // Attribute: ATTR_MEM_SI_DRAM_RTT_PARK
+            // Attribute: ATTR_DDR5_DRAM_RTT_PARK
             // MODE REG: 34
             // DDR5 DDIMM SPD Document Release 1.21
             // Page 151
@@ -1286,26 +1286,74 @@ class ddimm_0_0 : public mss::efd::base
             const std::vector< std::pair<uint8_t, uint8_t> > DRAM_RTT_PARK_MAP =
             {
                 // {key byte, DRAM RTT PARK (ohm)}
-                {0b000, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_DISABLE},
-                {0b001, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM240},
-                {0b010, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM120},
-                {0b011, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM80},
-                {0b100, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM60},
-                {0b101, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM48},
-                {0b110, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM40},
-                {0b111, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_PARK_OHM34},
+                {0b000, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_RTT_OFF},
+                {0b001, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM240},
+                {0b010, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM120},
+                {0b011, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM80},
+                {0b100, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM60},
+                {0b101, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM48},
+                {0b110, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM40},
+                {0b111, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_PARK_OHM34},
 
                 // All others reserved
             };
 
-            FAPI_TRY(mss::attr::get_si_dram_rtt_park(iv_dimm, l_field));
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_PARK_BYTE0, i_efd, mss::SET_SI_DRAM_RTT_PARK, l_dram_rtt_park));
+            // Get the attr for read modify write
+            FAPI_TRY(mss::attr::get_ddr5_dram_rtt_park(iv_dimm, l_field));
+
+            // Get all the bytes into the array
+            // PORT | RANK | CHANNEL | BYTE NUMBER
+            // ====================================
+            //  0      0       0         60
+            //  0      0       1         62
+            //  0      1       0         61
+            //  0      1       1         63
+            if(iv_port_rel_pos == 0)
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_PARK_BYTE0, i_efd, mss::SET_SI_DRAM_RTT_PARK,
+                                                 l_dram_rtt_park_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_A]));
+
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_PARK_BYTE2, i_efd, mss::SET_SI_DRAM_RTT_PARK,
+                                                 l_dram_rtt_park_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_B]));
+
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_PARK_BYTE1, i_efd, mss::SET_SI_DRAM_RTT_PARK,
+                                                 l_dram_rtt_park_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_A]));
+
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_PARK_BYTE3, i_efd, mss::SET_SI_DRAM_RTT_PARK,
+                                                 l_dram_rtt_park_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_B]));
+
+            }
+            // PORT | RANK | CHANNEL | BYTE NUMBER
+            // ====================================
+            //  1      0       0         64
+            //  1      0       1         66
+            //  1      1       0         65
+            //  1      1       1         67
+            else
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_PARK_BYTE4, i_efd, mss::SET_SI_DRAM_RTT_PARK,
+                                                 l_dram_rtt_park_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_A]));
+
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_PARK_BYTE6, i_efd, mss::SET_SI_DRAM_RTT_PARK,
+                                                 l_dram_rtt_park_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_B]));
+
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_PARK_BYTE5, i_efd, mss::SET_SI_DRAM_RTT_PARK,
+                                                 l_dram_rtt_park_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_A]));
+
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_PARK_BYTE7, i_efd, mss::SET_SI_DRAM_RTT_PARK,
+                                                 l_dram_rtt_park_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_B]));
+            }
 
             // Map SPD value to desired setting
-            FAPI_TRY(lookup_table_check(iv_ocmb, DRAM_RTT_PARK_MAP, mss::SET_SI_DRAM_RTT_PARK, l_dram_rtt_park,
-                                        l_field[iv_dimm_rank]));
+            for(uint8_t l_channel = 0; l_channel < mss::ody::sizes::NUM_CHANNELS; l_channel++)
+            {
+                // Map SPD value to desired setting
+                FAPI_TRY(lookup_table_check(iv_ocmb, DRAM_RTT_PARK_MAP, mss::SET_SI_DRAM_RTT_PARK,
+                                            l_dram_rtt_park_bytes[iv_dimm_rank][l_channel],
+                                            l_field[iv_dimm_rank][l_channel]));
+            }
 
-            FAPI_TRY(mss::attr::set_si_dram_rtt_park(iv_dimm, l_field));
+            FAPI_TRY(mss::attr::set_ddr5_dram_rtt_park(iv_dimm, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1320,13 +1368,13 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for channel A / Rank 0 only.
         virtual fapi2::ReturnCode set_dram_rtt_wr(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
-            uint8_t l_dram_wr_park = 0;
+            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
+            uint8_t l_dram_wr_park_bytes[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
 
             // =========================================================
             // EFD Byte 60-67: RTT_PARK and RTT_WR Termination Settings
             //                 Per Channel Per Rank
-            // Attribute: ATTR_MEM_SI_DRAM_RTT_WR
+            // Attribute: ATTR_DDR5_DRAM_RTT_WR
             // MODE REG: MR34
             // DDR5 DDIMM SPD Document Release 1.21
             // Page 148
@@ -1334,26 +1382,67 @@ class ddimm_0_0 : public mss::efd::base
             static const std::vector< std::pair<uint8_t, uint8_t> > DRAM_RTT_WR_MAP =
             {
                 // {key byte, DRAM RTT WR (ohm)}
-                {0b000, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_DISABLE},
-                {0b001, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM240},
-                {0b010, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM120},
-                {0b011, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM80},
-                {0b100, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM60},
-                {0b101, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM48},
-                {0b110, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM40},
-                {0b111, fapi2::ENUM_ATTR_MEM_SI_DRAM_RTT_WR_OHM34},
+                {0b000, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_WR_RTT_OFF},
+                {0b001, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_WR_OHM240},
+                {0b010, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_WR_OHM120},
+                {0b011, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_WR_OHM80},
+                {0b100, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_WR_OHM60},
+                {0b101, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_WR_OHM48},
+                {0b110, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_WR_OHM40},
+                {0b111, fapi2::ENUM_ATTR_DDR5_DRAM_RTT_WR_OHM34},
 
                 // All others reserved
             };
 
-            FAPI_TRY(mss::attr::get_si_dram_rtt_wr(iv_dimm, l_field));
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_WR_BYTE0, i_efd, mss::SET_SI_DRAM_RTT_WR, l_dram_wr_park));
+            // Get the attr for read modify write
+            FAPI_TRY(mss::attr::get_ddr5_dram_rtt_wr(iv_dimm, l_field));
+
+            // Get all the bytes into the array
+            // PORT | RANK | CHANNEL | BYTE NUMBER
+            // ====================================
+            //  0      0       0         60
+            //  0      0       1         62
+            //  0      1       0         61
+            //  0      1       1         63
+            if(iv_port_rel_pos == 0)
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_WR_BYTE0, i_efd, mss::SET_SI_DRAM_RTT_WR,
+                                                 l_dram_wr_park_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_A]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_WR_BYTE2, i_efd, mss::SET_SI_DRAM_RTT_WR,
+                                                 l_dram_wr_park_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_B]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_WR_BYTE1, i_efd, mss::SET_SI_DRAM_RTT_WR,
+                                                 l_dram_wr_park_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_A]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_WR_BYTE3, i_efd, mss::SET_SI_DRAM_RTT_WR,
+                                                 l_dram_wr_park_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_B]));
+            }
+            // PORT | RANK | CHANNEL | BYTE NUMBER
+            // ====================================
+            //  1      0       0         64
+            //  1      0       1         66
+            //  1      1       0         65
+            //  1      1       1         67
+            else
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_WR_BYTE4, i_efd, mss::SET_SI_DRAM_RTT_WR,
+                                                 l_dram_wr_park_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_A]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_WR_BYTE6, i_efd, mss::SET_SI_DRAM_RTT_WR,
+                                                 l_dram_wr_park_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_B]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_WR_BYTE5, i_efd, mss::SET_SI_DRAM_RTT_WR,
+                                                 l_dram_wr_park_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_A]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_WR_BYTE7, i_efd, mss::SET_SI_DRAM_RTT_WR,
+                                                 l_dram_wr_park_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_B]));
+            }
 
             // Map SPD value to desired setting
-            FAPI_TRY(lookup_table_check(iv_ocmb, DRAM_RTT_WR_MAP, mss::SET_SI_DRAM_RTT_WR, l_dram_wr_park,
-                                        l_field[iv_dimm_rank]));
+            for(uint8_t l_channel = 0; l_channel < mss::ddr5::mr::ATTR_NUM_CHANNELS; l_channel++)
+            {
+                // Map SPD value to desired setting
+                FAPI_TRY(lookup_table_check(iv_ocmb, DRAM_RTT_WR_MAP, mss::SET_SI_DRAM_RTT_WR,
+                                            l_dram_wr_park_bytes[iv_dimm_rank][l_channel],
+                                            l_field[iv_dimm_rank][l_channel]));
+            }
 
-            FAPI_TRY(mss::attr::set_si_dram_rtt_wr(iv_dimm, l_field));
+            FAPI_TRY(mss::attr::set_ddr5_dram_rtt_wr(iv_dimm, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2485,14 +2574,14 @@ class ddimm_0_0 : public mss::efd::base
             // B0/B1 maps to the other 10 DRAMs
             l_byte_index = iv_dimm_rank % 2;
 
-            for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::HALF_ATTR_DRAM; l_dram++)
+            for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::ATTR_DRAM_HALF; l_dram++)
             {
                 // Channel A goes to first 10 of the DRAM
                 // Byte index should be 0 for rank0 and 1 for rank1
                 l_vrefca[iv_dimm_rank][l_dram] = l_dram_vrefca_byte[l_byte_index];
             }
 
-            for(uint8_t l_dram = mss::ddr5::mr::HALF_ATTR_DRAM; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
+            for(uint8_t l_dram = mss::ddr5::mr::ATTR_DRAM_HALF; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
             {
                 // Channel B goes to the second 10 of the DRAM
                 // Byte index should be 2 for rank0 and 3 for rank1
@@ -2560,14 +2649,14 @@ class ddimm_0_0 : public mss::efd::base
             // B0/B1 maps to the other 10 DRAMs
             l_byte_index = iv_dimm_rank % 2;
 
-            for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::HALF_ATTR_DRAM; l_dram++)
+            for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::ATTR_DRAM_HALF; l_dram++)
             {
                 // Channel A goes to first 10 of the DRAM
                 // Byte index should be 0 for rank0 and 1 for rank1
                 l_vrefcs[iv_dimm_rank][l_dram] = l_dram_vrefcs_byte[l_byte_index];
             }
 
-            for(uint8_t l_dram = mss::ddr5::mr::HALF_ATTR_DRAM; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
+            for(uint8_t l_dram = mss::ddr5::mr::ATTR_DRAM_HALF; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
             {
                 // Channel B goes to the second 10 of the DRAM
                 // Byte index should be 2 for rank0 and 3 for rank1
