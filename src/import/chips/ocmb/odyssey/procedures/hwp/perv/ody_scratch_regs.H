@@ -53,6 +53,8 @@ enum ody_scratch_regs
     SCRATCH5_REG_VALID_BIT                          = 4,
     ATTR_SPI_BUS_DIV_REF_STARTBIT                   = 0,
     ATTR_SPI_BUS_DIV_REF_LENGTH                     = 16,
+    MEMPORT_FUNCTIONAL_STATE_STARTBIT               = 16,
+    MEMPORT_FUNCTIONAL_STATE_LENGTH                 = 2,
 
     // Scratch_reg_6 (PLL bucket/frequency configuration)
     SCRATCH6_REG_VALID_BIT                          = 5,

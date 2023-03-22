@@ -159,6 +159,15 @@ fapi2::ReturnCode ody_scratch_regs_update(
 
         l_scratch5_reg.insertFromRight<ATTR_SPI_BUS_DIV_REF_STARTBIT, ATTR_SPI_BUS_DIV_REF_LENGTH>(l_attr_spi_bus_div_ref);
 
+        FAPI_DBG("Configurating MEMPORT target functional state");
+
+        for (auto l_mp_target : i_target.getChildren<fapi2::TARGET_TYPE_MEM_PORT>())
+        {
+            fapi2::ATTR_CHIP_UNIT_POS_Type l_chip_unit_pos = 0;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mp_target, l_chip_unit_pos));
+            FAPI_TRY(l_scratch5_reg.setBit(l_chip_unit_pos + MEMPORT_FUNCTIONAL_STATE_STARTBIT));
+        }
+
         FAPI_DBG("Setting up value of Scratch 5 mailbox register");
         FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER5, l_scratch5_reg));
 
