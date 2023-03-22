@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,13 +70,18 @@ void forceProcDelayDeconfigCallout(TargetHandle_t const i_proc,
  *
  * @param[in] i_primaryProc    - primary sentinal processor target
  * @param[in] i_secondaryProcs - secondary/alternate processor targets
- * @param[in] i_extendToTpm    - extend measurements to the TPM
+ * @param[in] i_logToSwLog     - log measurements to software log
+ * @param[in] i_extendToTpm    - if i_extendToTpm is true, then also extend measurements to the TPM
+ *                               iff i_logToSwLog is true; else do not extend to TPM
+ * @param[in] i_makeErrlInfo   - make any error logs created in this function informational
  * @param[in/out] io_StepError - istep failure errors will be added to this
  */
 void retrieveAndExtendSecondaryMeasurements(
                             const TargetHandle_t i_primaryProc,
                             const TargetHandleList& i_secondaryProcs,
+                            const bool i_logToSwLog,
                             const bool i_extendToTpm,
+                            const bool i_makeErrlInfo,
                             ISTEP_ERROR::IStepError & io_StepError );
 
 };

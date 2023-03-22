@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1389,7 +1389,7 @@ errlHndl_t logSbeMeasurementRegs(TpmTarget* i_tpm_target,
            "logSbeMeasurementRegs: BUG! Expected target to be of PROC type, but "
            "it was of type 0x%08X",i_proc_target->getAttr<TARGETING::ATTR_TYPE>());
 
-    TRACUCOMP(g_trac_trustedboot, ENTER_MRK "logSbeMeasurementRegs(): "
+    TRACFCOMP(g_trac_trustedboot, ENTER_MRK "logSbeMeasurementRegs(): "
               "tpm=0x%.8X, proc=0x%.8X, i_extendToTpm=%d",
               TARGETING::get_huid(i_tpm_target),
               TARGETING::get_huid(i_proc_target),
@@ -1446,7 +1446,7 @@ errlHndl_t logSbeMeasurementRegs(TpmTarget* i_tpm_target,
         l_msg = nullptr;
     }
 
-    TRACUCOMP(g_trac_trustedboot, EXIT_MRK "logSbeMeasurementRegs()");
+    TRACFCOMP(g_trac_trustedboot, EXIT_MRK "logSbeMeasurementRegs()");
 
 #endif
     return l_errl;
