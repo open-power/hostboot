@@ -183,7 +183,147 @@ fapi2::ReturnCode get_supported_cas_latencies(
 fapi_try_exit:
     return fapi2::current_err;
 }
+///
+/// @brief Performs vref calculations per dram
+/// @param[in] i_port MEM PORT target
+/// @param[in] i_dimm_rank DIMM rank
+/// @param[in] i_byte_index byte index of base vref value
+/// @param[in] i_dram DRAM to set calculated vref to
+/// @param[in] i_vref_byte Value for VREF pulled from SPD
+/// @param[in] i_vref_add_sub Bit that denotes wether we are adding or sub with offset
+/// @param[in] i_vref_multiplier Determines how many times to apply offset
+/// @param[in] i_vref_offset Offset value to apply to VREF
+/// @param[inout] io_vref Value of VREF to be written into attribute
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode calc_vref_offset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                                   const uint8_t& i_dimm_rank,
+                                   const uint8_t& i_byte_index,
+                                   const uint8_t& i_dram,
+                                   const uint8_t (&i_vref_byte)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR],
+                                   const uint8_t (&i_vref_add_sub)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM],
+                                   const uint8_t& i_vref_multiplier,
+                                   const uint8_t (&i_vref_offset)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM],
+                                   uint8_t (&io_vref)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM])
+{
+    // Checks vref_sub_add for operation
+    // Checks for over/underflow
+    // Applies Offset (EFD Bytes 324-403) * multiplier (EFD Byte 322) to Base Vref (EFD Byte 306-313)
+    // Stores in io_vref array to be written to attr
+    uint16_t l_calc_vref_step = i_vref_offset[i_dimm_rank][i_dram] * i_vref_multiplier;
 
+    if(i_vref_add_sub[i_dimm_rank][i_dram] == mss::ddr5::mr::VREF_ADD)
+    {
+        if((l_calc_vref_step + i_vref_byte[i_byte_index]) <=  mss::ddr5::mr::VREF_MAX )
+        {
+            io_vref[i_dimm_rank][i_dram] = i_vref_byte[i_byte_index] + l_calc_vref_step;
+        }
+        else
+        {
+            FAPI_INF("Port %s VREF Overflow detected on DRAM %u Rank %u (Offset w/ multiplier value %d)",
+                     spd::c_str(i_port),
+                     i_dram,
+                     i_dimm_rank,
+                     l_calc_vref_step);
+            FAPI_INF("Base Vref on that DRAM and RANK was %d, value set to 155",
+                     i_vref_byte[i_byte_index])
+
+            // Set to VREF_MAX if overflow detected
+            io_vref[i_dimm_rank][i_dram] = mss::ddr5::mr::VREF_MAX;
+        }
+    }
+    else
+    {
+        if(l_calc_vref_step <= i_vref_byte[i_byte_index])
+        {
+            io_vref[i_dimm_rank][i_dram] = i_vref_byte[i_byte_index] - l_calc_vref_step;
+        }
+        else
+        {
+            FAPI_INF("Port %s VREF Underflow detected on DRAM %u Rank %u (Offset w/ multiplier value %d)",
+                     spd::c_str(i_port),
+                     i_dram,
+                     i_dimm_rank,
+                     l_calc_vref_step);
+
+            FAPI_INF("Base Vref on that DRAM and RANK was %d, value set to 0",
+                     i_vref_byte[i_byte_index])
+
+            // Set to VREF_MIN if underflow detected
+            io_vref[i_dimm_rank][i_dram] = mss::ddr5::mr::VREF_MIN;
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Applies Bytes 322 and 324-403 to VREF CA/CS
+/// @param[in] i_port MEM PORT target
+/// @param[in] i_dimm_rank DIMM rank
+/// @param[in] i_ffdc_code FFDC code for error traces
+/// @param[in] i_vref_byte Value for VREF pulled from SPD
+/// @param[in] i_vref_add_sub Bit that denotes wether we are adding or sub with offset
+/// @param[in] i_vref_multiplier Determines how many times to apply offset
+/// @param[in] i_vref_offset Offset value to apply to VREF
+/// @param[inout] io_vref Value of VREF to be written into attribute
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode apply_vref_offset_mult(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+        const uint8_t& i_dimm_rank,
+        const uint16_t& i_ffdc_code,
+        const uint8_t (&i_vref_byte)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR],
+        const uint8_t (&i_vref_add_sub)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM],
+        const uint8_t& i_vref_multiplier,
+        const uint8_t (&i_vref_offset)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM],
+        uint8_t (&io_vref)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM])
+{
+    uint8_t l_byte_index = 0;
+    FAPI_ASSERT(i_dimm_rank < mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR,
+                fapi2::MSS_INVALID_RANK().
+                set_FUNCTION(i_ffdc_code).
+                set_RANK(i_dimm_rank).
+                set_PORT_TARGET(i_port),
+                "%s rank out of bounds rank %u", spd::c_str(i_port), i_dimm_rank);
+
+    // Multiplies offset by l_vref_mult then adds or subtracts from vrefca
+    //    Port  Rank  Dram   Byte
+    //    0       0    0-9   Byte 306 +/- bytes 324-333 * byte 322 A0
+    //    0       1    0-9   Byte 307 +/- bytes 334-343 * byte 322 A0
+    //    1       0    0-9   Byte 310 +/- bytes 364-373 * byte 322 A1
+    //    1       1    0-9   Byte 311 +/- bytes 374-383 * byte 322 A1
+    //    0       0   10-19  Byte 308 +/- bytes 344-353 * byte 322 B0
+    //    0       1   10-19  Byte 309 +/- bytes 354-363 * byte 322 B0
+    //    1       0   10-19  Byte 312 +/- bytes 384-393 * byte 322 B1
+    //    1       1   10-19  Byte 313 +/- bytes 394-403 * byte 322 B1
+
+    for(uint8_t l_dram = mss::ddr5::mr::ATTR_DRAM_CHA_SELECT; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
+    {
+        // Channel A DRAM 0-9
+        if(l_dram < mss::ddr5::mr::ATTR_DRAM_CHB_SELECT)
+        {
+            l_byte_index = i_dimm_rank % 2;
+        }
+        // Channel B DRAM 10-19
+        else
+        {
+            l_byte_index = (i_dimm_rank % 2) + 2;
+        }
+
+        FAPI_TRY(calc_vref_offset(i_port,
+                                  i_dimm_rank,
+                                  l_byte_index,
+                                  l_dram,
+                                  i_vref_byte,
+                                  i_vref_add_sub,
+                                  i_vref_multiplier,
+                                  i_vref_offset,
+                                  io_vref));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 } // ns ddr5
 
 } // ns gen

@@ -2540,10 +2540,22 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_dram_vrefca(const std::vector<uint8_t>& i_efd) const
         {
+            uint8_t l_dram_vrefca_byte[mss::ody::sizes::MAX_RANK_PER_DIMM] = {};
+            uint8_t l_dram_vrefca_offset_step[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint8_t l_dram_vrefca_offset_step_add_sub[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint8_t l_vref_mult = 0;
+            uint8_t l_dram_vrefca_offset_mult = 0;
+            uint8_t l_vrefca[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
 
-            uint8_t l_dram_vrefca_byte[mss::ddr5::mr::ATTR_RANKS] = {0};
-            uint8_t l_byte_index = 0;
-            uint8_t l_vrefca[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
+            constexpr uint8_t INDEX_A0R0 = 0;
+            constexpr uint8_t INDEX_A0R1 = 1;
+            constexpr uint8_t INDEX_B0R0 = 2;
+            constexpr uint8_t INDEX_B0R1 = 3;
+
+            constexpr uint8_t INDEX_A1R0 = 0;
+            constexpr uint8_t INDEX_A1R1 = 1;
+            constexpr uint8_t INDEX_B1R0 = 2;
+            constexpr uint8_t INDEX_B1R1 = 3;
 
             // =========================================================
             // EFD Byte 306-313: Base Vref CA Settings Per Rank
@@ -2569,37 +2581,62 @@ class ddimm_0_0 : public mss::efd::base
             // Same as above is repeated for Port 1 Channel 0 and Port 1 Channel 1
             if (iv_port_rel_pos == 0) // Port 0
             {
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE0, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[0]));
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE1, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[1]));
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE2, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[2]));
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE3, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[3]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE0, i_efd, SET_WR_VREFCA_DQ,
+                                                 l_dram_vrefca_byte[INDEX_A0R0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE1, i_efd, SET_WR_VREFCA_DQ,
+                                                 l_dram_vrefca_byte[INDEX_A0R1]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE2, i_efd, SET_WR_VREFCA_DQ,
+                                                 l_dram_vrefca_byte[INDEX_B0R0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE3, i_efd, SET_WR_VREFCA_DQ,
+                                                 l_dram_vrefca_byte[INDEX_B0R1]));
             }
             else // Port 1
             {
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE4, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[0]));
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE5, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[1]));
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE6, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[2]));
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE7, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_byte[3]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE4, i_efd, SET_WR_VREFCA_DQ,
+                                                 l_dram_vrefca_byte[INDEX_A1R0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE5, i_efd, SET_WR_VREFCA_DQ,
+                                                 l_dram_vrefca_byte[INDEX_A1R1]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE6, i_efd, SET_WR_VREFCA_DQ,
+                                                 l_dram_vrefca_byte[INDEX_B1R0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CA_BYTE7, i_efd, SET_WR_VREFCA_DQ,
+                                                 l_dram_vrefca_byte[INDEX_B1R1]));
+
             }
 
-            // A0/A1 maps to the first 10 DRAMs
-            // B0/B1 maps to the other 10 DRAMs
-            l_byte_index = iv_dimm_rank % 2;
+            // BYTE 324-403 Vref ca offset value and add sub
+            FAPI_TRY(mss::spd::set_bytes_per_dram_helper_func(iv_dimm, F::VREF_CA_OFFSET_STEP_BYTE0, i_efd, SET_WR_VREFCA_DQ,
+                     iv_dimm_rank,
+                     iv_port_rel_pos, l_dram_vrefca_offset_step));
 
-            for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::ATTR_DRAM_HALF; l_dram++)
+            FAPI_TRY(mss::spd::set_bytes_per_dram_helper_func(iv_dimm, F::VREF_CA_OFFSET_BYTE0_ADD_SUB, i_efd, SET_WR_VREFCA_DQ,
+                     iv_dimm_rank,
+                     iv_port_rel_pos, l_dram_vrefca_offset_step_add_sub));
+
+
+            // BYTE 322 Vrefca offset step multiplier
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::VREF_CA_OFFSET_MULT, i_efd, SET_WR_VREFCA_DQ, l_dram_vrefca_offset_mult));
+            static const std::vector< std::pair<uint8_t, uint8_t> > VREF_MULT_MAP =
             {
-                // Channel A goes to first 10 of the DRAM
-                // Byte index should be 0 for rank0 and 1 for rank1
-                l_vrefca[iv_dimm_rank][l_dram] = l_dram_vrefca_byte[l_byte_index];
-            }
+                // {key bits, multiplier}
+                {0b001,  1},
+                {0b010,  2},
+                {0b011,  3},
+                {0b100,  4},
+                // All others reserved
+            };
 
-            for(uint8_t l_dram = mss::ddr5::mr::ATTR_DRAM_HALF; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
-            {
-                // Channel B goes to the second 10 of the DRAM
-                // Byte index should be 2 for rank0 and 3 for rank1
-                l_vrefca[iv_dimm_rank][l_dram] = l_dram_vrefca_byte[l_byte_index + 2];
-            }
+            FAPI_TRY(lookup_table_check(iv_ocmb, VREF_MULT_MAP, SET_WR_VREFCA_DQ,
+                                        l_dram_vrefca_offset_mult, l_vref_mult));
 
+            // Apply offset using helper funct
+            FAPI_TRY(mss::gen::ddr5::apply_vref_offset_mult(iv_port,
+                     iv_dimm_rank,
+                     SET_WR_VREFCA_DQ,
+                     l_dram_vrefca_byte,
+                     l_dram_vrefca_offset_step_add_sub,
+                     l_vref_mult,
+                     l_dram_vrefca_offset_step,
+                     l_vrefca));
             // Set the attr
             FAPI_TRY(mss::attr::set_ddr5_dram_vrefca(iv_dimm, l_vrefca));
 
@@ -2615,10 +2652,22 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_dram_vrefcs(const std::vector<uint8_t>& i_efd) const
         {
+            uint8_t l_dram_vrefcs_byte[mss::ody::sizes::MAX_RANK_PER_DIMM] = {};
+            uint8_t l_dram_vrefcs_offset_step[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint8_t l_dram_vrefcs_offset_step_add_sub[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint8_t l_vref_mult = 0;
+            uint8_t l_dram_vrefcs_offset_mult = 0;
+            uint8_t l_vrefcs[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
 
-            uint8_t l_dram_vrefcs_byte[mss::ddr5::mr::ATTR_RANKS] = {0};
-            uint8_t l_byte_index = 0;
-            uint8_t l_vrefcs[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
+            constexpr uint8_t INDEX_A0R0 = 0;
+            constexpr uint8_t INDEX_A0R1 = 1;
+            constexpr uint8_t INDEX_B0R0 = 2;
+            constexpr uint8_t INDEX_B0R1 = 3;
+
+            constexpr uint8_t INDEX_A1R0 = 0;
+            constexpr uint8_t INDEX_A1R1 = 1;
+            constexpr uint8_t INDEX_B1R0 = 2;
+            constexpr uint8_t INDEX_B1R1 = 3;
 
             // =========================================================
             // EFD Byte 314-321: Base Vref CS Settings Per Rank
@@ -2644,36 +2693,61 @@ class ddimm_0_0 : public mss::efd::base
             // Same as above is repeated for Port 1 Channel 0 and Port 1 Channel 1
             if (iv_port_rel_pos == 0) // Port 0
             {
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE0, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[0]));
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE1, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[1]));
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE2, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[2]));
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE3, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[3]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE0, i_efd, SET_WR_VREFCS_DQ,
+                                                 l_dram_vrefcs_byte[INDEX_A0R0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE1, i_efd, SET_WR_VREFCS_DQ,
+                                                 l_dram_vrefcs_byte[INDEX_A0R1]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE2, i_efd, SET_WR_VREFCS_DQ,
+                                                 l_dram_vrefcs_byte[INDEX_B0R0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE3, i_efd, SET_WR_VREFCS_DQ,
+                                                 l_dram_vrefcs_byte[INDEX_B0R1]));
             }
             else // Port 1
             {
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE4, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[0]));
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE5, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[1]));
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE6, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[2]));
-                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE7, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_byte[3]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE4, i_efd, SET_WR_VREFCS_DQ,
+                                                 l_dram_vrefcs_byte[INDEX_A1R0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE5, i_efd, SET_WR_VREFCS_DQ,
+                                                 l_dram_vrefcs_byte[INDEX_A1R1]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE6, i_efd, SET_WR_VREFCS_DQ,
+                                                 l_dram_vrefcs_byte[INDEX_B1R0]));
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::BASE_VREF_CS_BYTE7, i_efd, SET_WR_VREFCS_DQ,
+                                                 l_dram_vrefcs_byte[INDEX_B1R1]));
             }
 
-            // A0/A1 maps to the first 10 DRAMs
-            // B0/B1 maps to the other 10 DRAMs
-            l_byte_index = iv_dimm_rank % 2;
+            // BYTE 324-403 Vref CS offset value and add sub
+            FAPI_TRY(mss::spd::set_bytes_per_dram_helper_func(iv_dimm, F::VREF_CS_OFFSET_STEP_BYTE0, i_efd, SET_WR_VREFCS_DQ,
+                     iv_dimm_rank,
+                     iv_port_rel_pos, l_dram_vrefcs_offset_step));
 
-            for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::ATTR_DRAM_HALF; l_dram++)
+            FAPI_TRY(mss::spd::set_bytes_per_dram_helper_func(iv_dimm, F::VREF_CS_OFFSET_BYTE0_ADD_SUB, i_efd, SET_WR_VREFCS_DQ,
+                     iv_dimm_rank,
+                     iv_port_rel_pos, l_dram_vrefcs_offset_step_add_sub));
+
+            // BYTE 322 Vrefca offset step multiplier
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::VREF_CS_OFFSET_MULT, i_efd, SET_WR_VREFCS_DQ, l_dram_vrefcs_offset_mult));
+
+            static const std::vector< std::pair<uint8_t, uint8_t> > VREF_MULT_MAP =
             {
-                // Channel A goes to first 10 of the DRAM
-                // Byte index should be 0 for rank0 and 1 for rank1
-                l_vrefcs[iv_dimm_rank][l_dram] = l_dram_vrefcs_byte[l_byte_index];
-            }
+                // {key byte, MULT}
+                {0b001,  1},
+                {0b010,  2},
+                {0b011,  3},
+                {0b100,  4},
+                // All others reserved
+            };
 
-            for(uint8_t l_dram = mss::ddr5::mr::ATTR_DRAM_HALF; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
-            {
-                // Channel B goes to the second 10 of the DRAM
-                // Byte index should be 2 for rank0 and 3 for rank1
-                l_vrefcs[iv_dimm_rank][l_dram] = l_dram_vrefcs_byte[l_byte_index + 2];
-            }
+            FAPI_TRY(lookup_table_check(iv_ocmb, VREF_MULT_MAP, SET_WR_VREFCS_DQ,
+                                        l_dram_vrefcs_offset_mult, l_vref_mult));
+
+            // Apply offset using helper funct
+            FAPI_TRY(mss::gen::ddr5::apply_vref_offset_mult(iv_port,
+                     iv_dimm_rank,
+                     SET_WR_VREFCS_DQ,
+                     l_dram_vrefcs_byte,
+                     l_dram_vrefcs_offset_step_add_sub,
+                     l_vref_mult,
+                     l_dram_vrefcs_offset_step,
+                     l_vrefcs));
 
             // Set the attr
             FAPI_TRY(mss::attr::set_ddr5_dram_vrefcs(iv_dimm, l_vrefcs));

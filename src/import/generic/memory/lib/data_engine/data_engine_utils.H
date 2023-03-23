@@ -47,6 +47,7 @@
 #include <generic/memory/lib/utils/buffer_ops.H>
 #include <generic/memory/lib/spd/spd_fields_ddr4.H>
 #include <generic/memory/lib/spd/spd_fields_ddr5.H>
+#include <generic/memory/lib/utils/mss_pair.H>
 #include <fapi2_spd_access.H>
 
 namespace mss
@@ -287,6 +288,50 @@ fapi2::ReturnCode get_supported_cas_latencies(
     const std::vector<uint8_t>& i_spd,
     const mss::spd::rev i_rev,
     uint64_t& o_field);
+
+///
+/// @brief Performs vref calculations per dram
+/// @param[in] i_port MEM PORT target
+/// @param[in] i_dimm_rank DIMM rank
+/// @param[in] i_byte_index byte index of base vref value
+/// @param[in] i_dram DRAM to set calculated vref to
+/// @param[in] i_vref_byte Value for VREF pulled from SPD
+/// @param[in] i_vref_add_sub Bit that denotes wether we are adding or sub with offset
+/// @param[in] i_vref_multiplier Determines how many times to apply offset
+/// @param[in] i_vref_offset Offset value to apply to VREF
+/// @param[inout] io_vref Value of VREF to be written into attribute
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode calc_vref_offset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                                   const uint8_t& i_dimm_rank,
+                                   const uint8_t& i_byte_index,
+                                   const uint8_t& i_dram,
+                                   const uint8_t (&i_vref_byte)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR],
+                                   const uint8_t (&i_vref_add_sub)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM],
+                                   const uint8_t& i_vref_multiplier,
+                                   const uint8_t (&i_vref_offset)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM],
+                                   uint8_t (&io_vref)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM]);
+
+///
+/// @brief Applies Bytes 322 and 324-403 to VREF CA/CS
+/// @param[in] i_port MEM PORT target
+/// @param[in] i_dimm_rank Dimm rank
+/// @param[in] i_ffdc_code FFDC code for error traces
+/// @param[in] i_vref_byte Value for VREF pulled from SPD
+/// @param[in] i_vref_add_sub Bit that denotes wether we are adding or sub with offset
+/// @param[in] i_vref_multiplier Determines how many times to apply offset
+/// @param[in] i_vref_offset Offset value to apply to VREF
+/// @param[in,out] io_vref Value of VREF to be written into attribute
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode apply_vref_offset_mult(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+        const uint8_t& i_dimm_rank,
+        const uint16_t& i_ffdc_code,
+        const uint8_t (&i_vref_byte)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR],
+        const uint8_t (&i_vref_add_sub)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM],
+        const uint8_t& i_vref_multiplier,
+        const uint8_t (&i_vref_offset)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM],
+        uint8_t (&io_vref)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM]);
 
 } // namespace ddr5
 

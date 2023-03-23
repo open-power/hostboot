@@ -1344,6 +1344,12 @@ enum mr
 
     ATTR_DRAM_CHA_SELECT = 0,
     ATTR_DRAM_CHB_SELECT = 10,
+
+    // Defined in DDR5 SPD SPEC for byte 324-403,
+    VREF_ADD = 0,
+    VREF_SUB = 1,
+    VREF_MAX = 155, // (7 bits from 306-313) 127 + (3 bits offset * 4 multiplier max max) 28
+    VREF_MIN = 0,
 };
 
 }
