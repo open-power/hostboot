@@ -1885,8 +1885,13 @@ fapi2::ReturnCode configure_dram_train_message_block_hardcodes(const fapi2::Targ
     o_struct.QCA_Dly_Margin_B2     = 0;
     o_struct.QCS_Dly_Margin_B3     = 0;
     o_struct.QCA_Dly_Margin_B3     = 0;
-    o_struct.PmuInternalRev0     = 0;
-    o_struct.PmuInternalRev1     = 0;
+    o_struct.PmuInternalRev0       = 0;
+    o_struct.PmuInternalRev1       = 0;
+
+    o_struct.VrefCS_Sweep_Min      = 0;
+    o_struct.VrefCS_Sweep_Max      = 0;
+    o_struct.VrefCA_Sweep_Min      = 0;
+    o_struct.VrefCA_Sweep_Max      = 0;
 
     // Initializes the MR values - splitting this off so it's easy to see
     {
@@ -2152,6 +2157,86 @@ fapi2::ReturnCode configure_dram_train_message_block_hardcodes(const fapi2::Targ
         o_struct.MR32_ORG_B1_next     = 0x00;
         o_struct.MR32_ORG_B2_next     = 0x00;
         o_struct.MR32_ORG_B3_next     = 0x00;
+        o_struct.MR32R0Nib0     = 0;
+        o_struct.MR32R0Nib1     = 0;
+        o_struct.MR32R0Nib10     = 0;
+        o_struct.MR32R0Nib11     = 0;
+        o_struct.MR32R0Nib12     = 0;
+        o_struct.MR32R0Nib13     = 0;
+        o_struct.MR32R0Nib14     = 0;
+        o_struct.MR32R0Nib15     = 0;
+        o_struct.MR32R0Nib16     = 0;
+        o_struct.MR32R0Nib17     = 0;
+        o_struct.MR32R0Nib18     = 0;
+        o_struct.MR32R0Nib19     = 0;
+        o_struct.MR32R0Nib2     = 0;
+        o_struct.MR32R0Nib3     = 0;
+        o_struct.MR32R0Nib4     = 0;
+        o_struct.MR32R0Nib5     = 0;
+        o_struct.MR32R0Nib6     = 0;
+        o_struct.MR32R0Nib7     = 0;
+        o_struct.MR32R0Nib8     = 0;
+        o_struct.MR32R0Nib9     = 0;
+        o_struct.MR32R1Nib0     = 0;
+        o_struct.MR32R1Nib1     = 0;
+        o_struct.MR32R1Nib10     = 0;
+        o_struct.MR32R1Nib11     = 0;
+        o_struct.MR32R1Nib12     = 0;
+        o_struct.MR32R1Nib13     = 0;
+        o_struct.MR32R1Nib14     = 0;
+        o_struct.MR32R1Nib15     = 0;
+        o_struct.MR32R1Nib16     = 0;
+        o_struct.MR32R1Nib17     = 0;
+        o_struct.MR32R1Nib18     = 0;
+        o_struct.MR32R1Nib19     = 0;
+        o_struct.MR32R1Nib2     = 0;
+        o_struct.MR32R1Nib3     = 0;
+        o_struct.MR32R1Nib4     = 0;
+        o_struct.MR32R1Nib5     = 0;
+        o_struct.MR32R1Nib6     = 0;
+        o_struct.MR32R1Nib7     = 0;
+        o_struct.MR32R1Nib8     = 0;
+        o_struct.MR32R1Nib9     = 0;
+        o_struct.MR32R2Nib0     = 0;
+        o_struct.MR32R2Nib1     = 0;
+        o_struct.MR32R2Nib10     = 0;
+        o_struct.MR32R2Nib11     = 0;
+        o_struct.MR32R2Nib12     = 0;
+        o_struct.MR32R2Nib13     = 0;
+        o_struct.MR32R2Nib14     = 0;
+        o_struct.MR32R2Nib15     = 0;
+        o_struct.MR32R2Nib16     = 0;
+        o_struct.MR32R2Nib17     = 0;
+        o_struct.MR32R2Nib18     = 0;
+        o_struct.MR32R2Nib19     = 0;
+        o_struct.MR32R2Nib2     = 0;
+        o_struct.MR32R2Nib3     = 0;
+        o_struct.MR32R2Nib4     = 0;
+        o_struct.MR32R2Nib5     = 0;
+        o_struct.MR32R2Nib6     = 0;
+        o_struct.MR32R2Nib7     = 0;
+        o_struct.MR32R2Nib8     = 0;
+        o_struct.MR32R2Nib9     = 0;
+        o_struct.MR32R3Nib0     = 0;
+        o_struct.MR32R3Nib1     = 0;
+        o_struct.MR32R3Nib10     = 0;
+        o_struct.MR32R3Nib11     = 0;
+        o_struct.MR32R3Nib12     = 0;
+        o_struct.MR32R3Nib13     = 0;
+        o_struct.MR32R3Nib14     = 0;
+        o_struct.MR32R3Nib15     = 0;
+        o_struct.MR32R3Nib16     = 0;
+        o_struct.MR32R3Nib17     = 0;
+        o_struct.MR32R3Nib18     = 0;
+        o_struct.MR32R3Nib19     = 0;
+        o_struct.MR32R3Nib2     = 0;
+        o_struct.MR32R3Nib3     = 0;
+        o_struct.MR32R3Nib4     = 0;
+        o_struct.MR32R3Nib5     = 0;
+        o_struct.MR32R3Nib6     = 0;
+        o_struct.MR32R3Nib7     = 0;
+        o_struct.MR32R3Nib8     = 0;
+        o_struct.MR32R3Nib9     = 0;
 
         // CA/DQS park disable -> going with default
         o_struct.MR33_A0     = 0x00;
@@ -2454,6 +2539,9 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
     FAPI_TRY(l_msg_block_config.setup_VrefCS(o_struct));
     FAPI_TRY(l_msg_block_config.setup_VrefCA(o_struct));
     FAPI_TRY(l_msg_block_config.setup_DisabledDB(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_vref_sweeps(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_MR32_per_dram(o_struct));
+    FAPI_TRY(l_msg_block_config.setup_reserved7(o_struct));
     FAPI_TRY(l_msg_block_config.setup_output_fields(o_struct));
 
 fapi_try_exit:
@@ -3031,6 +3119,7 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
         {0x580c5, 0x580c7},
         {0x580eb, 0x580ed},
         {0x580f5, 0x580fd},
+        {0x583b3, 0x583bd},
     };
 
     // Array to hold list of address that is needed for successful write operation as a even/odd pair of addresses.
@@ -4330,7 +4419,6 @@ fapi2::ReturnCode read_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 
     FAPI_TRY(read_dmem_field(i_target, 0x583bd, l_temp16));
     io_struct.PmuInternalRev1 = l_temp16; // uint16_t
-
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -6819,6 +6907,138 @@ void display_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targe
     FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "QCA_Dly_Margin_B3    ", i_msg_block.QCA_Dly_Margin_B3, TARGTID);
     FAPI_INF("  .%s= 0x%04x; // " TARGTIDFORMAT, "PmuInternalRev0      ", i_msg_block.PmuInternalRev0, TARGTID);
     FAPI_INF("  .%s= 0x%04x; // " TARGTIDFORMAT, "PmuInternalRev1      ", i_msg_block.PmuInternalRev1, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "VrefCS_Sweep_Min     ", i_msg_block.VrefCS_Sweep_Min, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "VrefCS_Sweep_Max     ", i_msg_block.VrefCS_Sweep_Max, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "VrefCA_Sweep_Min     ", i_msg_block.VrefCA_Sweep_Min, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "VrefCA_Sweep_Max     ", i_msg_block.VrefCA_Sweep_Max, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib0           ", i_msg_block.MR32R0Nib0, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib1           ", i_msg_block.MR32R0Nib1, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib2           ", i_msg_block.MR32R0Nib2, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib3           ", i_msg_block.MR32R0Nib3, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib4           ", i_msg_block.MR32R0Nib4, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib5           ", i_msg_block.MR32R0Nib5, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib6           ", i_msg_block.MR32R0Nib6, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib7           ", i_msg_block.MR32R0Nib7, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib8           ", i_msg_block.MR32R0Nib8, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib9           ", i_msg_block.MR32R0Nib9, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib10          ", i_msg_block.MR32R0Nib10, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib11          ", i_msg_block.MR32R0Nib11, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib12          ", i_msg_block.MR32R0Nib12, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib13          ", i_msg_block.MR32R0Nib13, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib14          ", i_msg_block.MR32R0Nib14, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib15          ", i_msg_block.MR32R0Nib15, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib16          ", i_msg_block.MR32R0Nib16, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib17          ", i_msg_block.MR32R0Nib17, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib18          ", i_msg_block.MR32R0Nib18, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R0Nib19          ", i_msg_block.MR32R0Nib19, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib0           ", i_msg_block.MR32R1Nib0, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib1           ", i_msg_block.MR32R1Nib1, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib2           ", i_msg_block.MR32R1Nib2, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib3           ", i_msg_block.MR32R1Nib3, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib4           ", i_msg_block.MR32R1Nib4, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib5           ", i_msg_block.MR32R1Nib5, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib6           ", i_msg_block.MR32R1Nib6, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib7           ", i_msg_block.MR32R1Nib7, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib8           ", i_msg_block.MR32R1Nib8, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib9           ", i_msg_block.MR32R1Nib9, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib10          ", i_msg_block.MR32R1Nib10, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib11          ", i_msg_block.MR32R1Nib11, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib12          ", i_msg_block.MR32R1Nib12, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib13          ", i_msg_block.MR32R1Nib13, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib14          ", i_msg_block.MR32R1Nib14, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib15          ", i_msg_block.MR32R1Nib15, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib16          ", i_msg_block.MR32R1Nib16, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib17          ", i_msg_block.MR32R1Nib17, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib18          ", i_msg_block.MR32R1Nib18, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R1Nib19          ", i_msg_block.MR32R1Nib19, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib0           ", i_msg_block.MR32R2Nib0, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib1           ", i_msg_block.MR32R2Nib1, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib2           ", i_msg_block.MR32R2Nib2, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib3           ", i_msg_block.MR32R2Nib3, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib4           ", i_msg_block.MR32R2Nib4, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib5           ", i_msg_block.MR32R2Nib5, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib6           ", i_msg_block.MR32R2Nib6, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib7           ", i_msg_block.MR32R2Nib7, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib8           ", i_msg_block.MR32R2Nib8, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib9           ", i_msg_block.MR32R2Nib9, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib10          ", i_msg_block.MR32R2Nib10, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib11          ", i_msg_block.MR32R2Nib11, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib12          ", i_msg_block.MR32R2Nib12, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib13          ", i_msg_block.MR32R2Nib13, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib14          ", i_msg_block.MR32R2Nib14, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib15          ", i_msg_block.MR32R2Nib15, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib16          ", i_msg_block.MR32R2Nib16, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib17          ", i_msg_block.MR32R2Nib17, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib18          ", i_msg_block.MR32R2Nib18, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R2Nib19          ", i_msg_block.MR32R2Nib19, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib0           ", i_msg_block.MR32R3Nib0, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib1           ", i_msg_block.MR32R3Nib1, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib2           ", i_msg_block.MR32R3Nib2, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib3           ", i_msg_block.MR32R3Nib3, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib4           ", i_msg_block.MR32R3Nib4, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib5           ", i_msg_block.MR32R3Nib5, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib6           ", i_msg_block.MR32R3Nib6, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib7           ", i_msg_block.MR32R3Nib7, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib8           ", i_msg_block.MR32R3Nib8, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib9           ", i_msg_block.MR32R3Nib9, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib10          ", i_msg_block.MR32R3Nib10, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib11          ", i_msg_block.MR32R3Nib11, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib12          ", i_msg_block.MR32R3Nib12, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib13          ", i_msg_block.MR32R3Nib13, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib14          ", i_msg_block.MR32R3Nib14, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib15          ", i_msg_block.MR32R3Nib15, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib16          ", i_msg_block.MR32R3Nib16, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib17          ", i_msg_block.MR32R3Nib17, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib18          ", i_msg_block.MR32R3Nib18, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "MR32R3Nib19          ", i_msg_block.MR32R3Nib19, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7D0          ", i_msg_block.Reserved7D0, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7D1          ", i_msg_block.Reserved7D1, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7D2          ", i_msg_block.Reserved7D2, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7D3          ", i_msg_block.Reserved7D3, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7D4          ", i_msg_block.Reserved7D4, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7D5          ", i_msg_block.Reserved7D5, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7D6          ", i_msg_block.Reserved7D6, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7D7          ", i_msg_block.Reserved7D7, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7D8          ", i_msg_block.Reserved7D8, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7D9          ", i_msg_block.Reserved7D9, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7DA          ", i_msg_block.Reserved7DA, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7DB          ", i_msg_block.Reserved7DB, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7DC          ", i_msg_block.Reserved7DC, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7DD          ", i_msg_block.Reserved7DD, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7DE          ", i_msg_block.Reserved7DE, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7DF          ", i_msg_block.Reserved7DF, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7E0          ", i_msg_block.Reserved7E0, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7E1          ", i_msg_block.Reserved7E1, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7E2          ", i_msg_block.Reserved7E2, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7E3          ", i_msg_block.Reserved7E3, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7E4          ", i_msg_block.Reserved7E4, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7E5          ", i_msg_block.Reserved7E5, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7E6          ", i_msg_block.Reserved7E6, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7E7          ", i_msg_block.Reserved7E7, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7E8          ", i_msg_block.Reserved7E8, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7E9          ", i_msg_block.Reserved7E9, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7EA          ", i_msg_block.Reserved7EA, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7EB          ", i_msg_block.Reserved7EB, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7EC          ", i_msg_block.Reserved7EC, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7ED          ", i_msg_block.Reserved7ED, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7EE          ", i_msg_block.Reserved7EE, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7EF          ", i_msg_block.Reserved7EF, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7F0          ", i_msg_block.Reserved7F0, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7F1          ", i_msg_block.Reserved7F1, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7F2          ", i_msg_block.Reserved7F2, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7F3          ", i_msg_block.Reserved7F3, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7F4          ", i_msg_block.Reserved7F4, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7F5          ", i_msg_block.Reserved7F5, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7F6          ", i_msg_block.Reserved7F6, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7F7          ", i_msg_block.Reserved7F7, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7F8          ", i_msg_block.Reserved7F8, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7F9          ", i_msg_block.Reserved7F9, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7FA          ", i_msg_block.Reserved7FA, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7FB          ", i_msg_block.Reserved7FB, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7FC          ", i_msg_block.Reserved7FC, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7FD          ", i_msg_block.Reserved7FD, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7FE          ", i_msg_block.Reserved7FE, TARGTID);
+    FAPI_INF("  .%s= 0x%02x; // " TARGTIDFORMAT, "Reserved7FF          ", i_msg_block.Reserved7FF, TARGTID);
     FAPI_INF("} // _PMU_SMB_DDR5_1D_t " TARGTIDFORMAT, TARGTID);
 #endif
 }

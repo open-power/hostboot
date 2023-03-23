@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -48,7 +48,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //
     // AdvTrainOpt[0]: Use same data sequence on all DQ during read training (MRR31 based)
     //     0 = Use different data sequence per DQ of a nibble (2 or 4 different sequences, depending on D5Misc[4])
-    //     1 = Use same data sequence for all DQ of a nibble
+    //     1 = Use same data sequenece for all DQ of a nibble
     //     Note: same sequence setting is applied to all nibbles
     //
     // AdvTrainOpt[2:1]: DQ odd sequence setting during read training (MRR31 based, don't care if either AdvTrainOpt[0] or D5Misc[4] is 1)
@@ -70,8 +70,8 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //     11: 8x burst length
     //
     // AdvTrainOpt[7] = Use RD/WR burst length twice shorter (Applicable only if MsgMisc[2] is 0, otherwise burst length is 128bits)
-    //       0 = Use default RD/WR burst length of 2048bits
-    //       1 = Use RD/WR burst length of 1024bits
+    //       0 = Use default RD/WR burst length of 2048bit
+    //       1 = Use RD/WR burst length of 1024bit
     uint8_t  MsgMisc;          // Byte offset 0x01, CSR Addr 0x58000, Direction=In
     // Contains various global options for training.
     //
@@ -89,7 +89,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     // MsgMisc[2] SimulationOnlyTraining
     //      0x1 = Verilog only simulation option to shorten the duration of the training steps by performing fewer iterations.
     //                Must never be set to 1 in silicon.  (read/write burst length during read/write/MRL training are 128bit)
-    //      0x0 = Use standard training duration. (read/write burst length during read/write/MRL training are 2048bit)
+    //      0x0 = Use standard training duration.  (read/write burst length during read/write/MRL training are 2048bit)
     //
     // MsgMisc[3] UsePerDeviceVrefDq
     //      0x1 = Program user characterized Vref DQ values per DDR5 DRAM device after Write Leveling. The message block VrefDqR*Nib* fields must be populated with the desired per device Vref DQs when using this option.
@@ -106,7 +106,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //      0x1 = Do not reset DRAM during devinit (only for pstate > 0)
     //      0x0 = Reset DRAM during devinit
     //
-    // MsgMisc[7] Link-Failure support option (If available, otherwise RFU, must be zero)
+    // MsgMisc[7] Link-Failure support option (If available, otherwise RFU, must be 0)
     //      0x1 = When training error occurred, try disabling faulty DQ/DQS links instead of failing
     //      0x0 = Default mode, fail at the first training error
     //
@@ -150,8 +150,8 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //     1 = delta 3 for TAP2, 1 for TAP3 and TAP4 (10 iterations for TAP2, 15 for TAP3, 7 for TAP4)
     //     2 = delta 5 for TAP2, 2 for TAP3 and TAP4 (7 iterations for TAP2, 8 for TAP3, 4 for TAP4)
     //     3 = delta 15 for TAP2, 7 for TAP3, 3 for TAP 4 (3 iterations per TAP, useful for simulation)
-    // [5:4] VStepSizeX: StepSize used for Voltage is the one configured from RX2D_TrainOpt multiplied by VStepSizeX+1
-    // [7:6] DStepSizeX: StepSize used for Delay is the one configured from RX2D_TrainOpt multiplied by DStepSizeX+1
+    // [5:4] VStepSizeX: StepSize used for Voltage is the one configured from RX2D_TrainOpt multiplied by (2^VStepSizeX)
+    // [7:6] DStepSizeX: StepSize used for Delay is the one configured from RX2D_TrainOpt multiplied by (2^DStepSizeX)
     uint8_t  PhyVref;          // Byte offset 0x0c, CSR Addr 0x58006, Direction=In
     // Must be programmed with the Vref level to be used by the PHY during reads
     //
@@ -174,19 +174,17 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //           the memory controller must drive dfi_reset_n=1'b1 prior to starting training
     //     0x1 = (Recommended) PHY internal registers control memreset during training, and also after training.
     //           dfi_reset_n cannot control the PHY BP_MEMRESET_L pin.
-    // D5Misc[1]: PartialRank option (if available, DDR5 UDIMM only, otherwise RFU, must be zero)
-    //      0x1 = Support ranks populated with a subset of byte, but where even-odd pairs of ranks support all the bytes
+    // D5Misc[1]: PartialRank option (if available, DDR5 UDIMM x4 only, otherwise RFU, must be zero)
+    //      0x1 = Support ranks populated with a subset of byte, but where even-odd pairs of ranks support all the bytes, even nibbles mapped on even rank of the pair while odd nibbles mapped on odd rank of the pair (CS0 and CS1 are paired together and must be populated together, idem for CS2 and CS3)
     //      0x0 = All ranks populated with all the bytes (typical configuration)
     // D5Misc[2]: Use_back2back_MRR
     //     0x0 = MRR read commands are spaced by 8 MCLK during read dqs training
     //     0x1 = Back-to-back MRR read commands are issued during read dqs training
-    // D5Misc[3]: RFU, must be zero
+    // D5Misc[3]: Backward compatibility option only for PUB version not supporting CSR field PhyConfigCX; must be set to 1 if and only if the value of DWC_DDRPHY_CAXBAR is defined in the RTL and PhyConfigCX is not supported (must be 0 instead). See details in training FW application note.
     // D5Misc[4]: Use DRAM LFSR0 only
     //     0x0 = Both LFSR are used to create, together with inversion, different patterns on each DQ of a nibble during MRR MR31
     //     0x1 = Only LFSR0 is used: this is required for x16 devices in case swizzle configuration is not the same between lower and upper byte
-    // D5Misc[5]: SinglePassRd2D
-    //     0x0 = Use multi-pass  Rx2D training (default, recommended)
-    //     0x1 = Use single-pass Rx2D training (assumes max DQ->DQS skew of half UI, and RxClkDly may be less optimal); this option cannot be used if RxDFE is enabled in a 4TAP DFE product
+    // D5Misc[5]: RFU, must be 0 (former SinglePassRd2D option is now obselete)
     // D5Misc[6]: Train also CK ANIB delay during CS/CA training
     //     0x0 = Do not change CK ANIB delay, only CS and CA ANIB delays will be set, with potential sub optimal results
     //     0x1 = CK ANIB delays will first be set to one UI, then will be adjusted to permit better optimization of CS and CA ANIB delays
@@ -237,10 +235,10 @@ typedef struct _PMU_SMB_DDR5_1D_t
     // Additional mode bits.
     //
     // Bit fields:
-    // PhyCfg[1:0] 2N mode CA setup/hold time setting w.r.t. CK capturing CS assertion (DDR5 UDIMM only). This setting is only applicable if D5Misc[6] is set to 1.
-    //     00 = 2UI setup time, 2UI hold time (CA stable 1UI before CS falling edge until 1UI after CS rising edge)
-    //     01 = 3UI setup time, 1UI hold time (similar to RCD SDR1 mode)
-    //     10 = 1UI setup time, 3UI hold time (similar to RCD SDR2 mode)
+    // PhyCfg[1:0] 2N/SDR mode CA setup/hold time setting w.r.t. CK capturing CS assertion at DRAM interface (This setting is only applicable if D5Misc[6] is set to 1, and in case of RDIMM/LRDIMM if SequenceCtrl[14] is set to 1)
+    //     00 = 2UI setup time, 2UI hold time (Recommended: CK rising edge center in CA eye)
+    //     01 = 3UI setup time, 1UI hold time (CK/CS/CA timing similar with RCD SDR1 mode)
+    //     10 = 1UI setup time, 3UI hold time (CK/CS/CA timing similar with RCD SDR2 mode)
     //     11 = Reserved
     // PhyCfg[2] Support channel Id during SMBus mailbox command (NOTE: Must be set to 1 for LRDIMM, or if RCD VrefCS/VrefCA training step enable)
     //     0 = No channel ID is provided in SMBus mailbox message, SMBus command must be sent for both channels of the DIMM, when applicable
@@ -253,7 +251,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     // PhyCfg[6] UseContinuousIDforPDA (see detail in training FW application note)
     //     1 = DRAM PDA ID correspons to DRAM position in the rank
     //     0 = DRAM PDA ID corresponds with its lower nibble ID
-    // PhyCfg[7] RFU, must be zero
+    // PhyCfg[7] Enable detection of byte swapping for x16 devices (to enable this feature, PhyCfg[3] must also be set to 1)
     uint16_t ResultAddrOffset; // Byte offset 0x14, CSR Addr 0x5800a, Direction=Out
     // Byte Offset in DCCM in which more output results are provided after training. Please refer to training FW application note on when this output is significant and the format of the information to read from DCCM.
     uint8_t  DFIMRLMargin;     // Byte offset 0x16, CSR Addr 0x5800b, Direction=In
@@ -300,17 +298,17 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  D5Quickboot;      // Byte offset 0x19, CSR Addr 0x5800c, Direction=In
     // Reserved, must be zero
     uint8_t  DisabledDbyte;    // Byte offset 0x1a, CSR Addr 0x5800d, Direction=In
-    // Bitmap to indicate which Dbytes are not connected (for DByte 0 to 7):
-    // Set DisabledDbyte[i] to 1 to specify that DByte i does not need to be trained (DByte 8 and 9 can be disabled via EnabledDQs setting)
+    // Bitmap to indicate which Dbytes are not connected (for Dbyte 0 to 7):
+    // If DisabledDbyte[i] is 1 then Dbyte i connection is disabled and does not need to be trained (Dbyte 8 and 9 can be disabled via EnabledDQs setting)
     uint8_t  CATrainOpt;       // Byte offset 0x1b, CSR Addr 0x5800d, Direction=In
     // CA training option bit field:
-    // [0] Enable RDIMM/LRDIMM 2D CA training (UDIMM: RFU, must be zero)
+    // [0] Enable 2D CA training
     // [1] Enable RDIMM/LRDIMM CA DFE training (UDIMM: RFU, must be zero)
     // [3:2] step size for CS and CA training: 0 -> 1, 1 -> 2, 2 -> 4, 3 -> 8
     // [4] Skip_CA13_during_CAtraining
     //     0x0 = Train CA13 during CA training
     //     0x1 = Skip CA13 during CA training
-    // [5] Enable RDIMM/LRDIMM 2D CS training (UDIMM: RFU, must be zero)
+    // [5] Enable 2D CS training
     // [6] RFU, must be zero
     // [7] Use multiple patterns during CA training
     uint8_t  TX2D_DFE_Misc;    // Byte offset 0x1c, CSR Addr 0x5800e, Direction=In
@@ -634,7 +632,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR8_A0;           // Byte offset 0x65, CSR Addr 0x58032, Direction=In
     // Value to be programmed in DRAM Mode Register 8 {Channel A, Rank 0}
     uint8_t  MR32_ORG_A0_next; // Byte offset 0x66, CSR Addr 0x58033, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 0} for other RTT group than the one specfied in MR32_A0_next[6]
+    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 0} for other RTT group than the one specified in MR32_A0_next[6]
     uint8_t  MR10_A0;          // Byte offset 0x67, CSR Addr 0x58033, Direction=In
     // Value to be programmed in DRAM Mode Register 10 {Channel A, Rank 0}
     uint8_t  MR11_A0;          // Byte offset 0x68, CSR Addr 0x58034, Direction=In
@@ -658,7 +656,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR35_A0;          // Byte offset 0x71, CSR Addr 0x58038, Direction=In
     // Value to be programmed in DRAM Mode Register 35 {Channel A, Rank 0}
     uint8_t  MR32_ORG_A0;      // Byte offset 0x72, CSR Addr 0x58039, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 {Channel A, Rank 0} for other RTT group than the one specfied in MR32_A0[6]
+    // Value to be programmed in DRAM Mode Register 32 {Channel A, Rank 0} for other RTT group than the one specified in MR32_A0[6]
     uint8_t  MR37_A0;          // Byte offset 0x73, CSR Addr 0x58039, Direction=In
     // Value to be programmed in DRAM Mode Register 37 {Channel A, Rank 0}
     uint8_t  MR38_A0;          // Byte offset 0x74, CSR Addr 0x5803a, Direction=In
@@ -666,7 +664,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR39_A0;          // Byte offset 0x75, CSR Addr 0x5803a, Direction=In
     // Value to be programmed in DRAM Mode Register 39 {Channel A, Rank 0}
     uint8_t  MR33_ORG_A0;      // Byte offset 0x76, CSR Addr 0x5803b, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel A, Rank 0} for other RTT group than the one specfied in MR32_A0[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel A, Rank 0} for other RTT group than the one specified in MR32_A0[6]
     uint8_t  MR11_A0_next;     // Byte offset 0x77, CSR Addr 0x5803b, Direction=In
     // Value to be programmed in DRAM Mode Register 11 before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 0}
     uint8_t  MR12_A0_next;     // Byte offset 0x78, CSR Addr 0x5803c, Direction=In
@@ -682,7 +680,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  CA_Vref_Margin_A0; // Byte offset 0x7d, CSR Addr 0x5803e, Direction=Out
     // Distance from the trained center to the closest failing region in Vref steps. This value is the minimum of all CA for channel A rank 0.
     uint8_t  MR33_ORG_A0_next; // Byte offset 0x7e, CSR Addr 0x5803f, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 0} for other RTT group than the one specfied in MR32_A0_next[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 0} for other RTT group than the one specified in MR32_A0_next[6]
     uint8_t  MR33_A0_next;     // Byte offset 0x7f, CSR Addr 0x5803f, Direction=In
     // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 0} for RTT group specified in MR32_A0_next[6]
     uint8_t  MR50_A0;          // Byte offset 0x80, CSR Addr 0x58040, Direction=In
@@ -710,7 +708,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR8_A1;           // Byte offset 0x8b, CSR Addr 0x58045, Direction=In
     // Value to be programmed in DRAM Mode Register 8 {Channel A, Rank 1}
     uint8_t  MR32_ORG_A1_next; // Byte offset 0x8c, CSR Addr 0x58046, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 1} for other RTT group than the one specfied in MR32_A1_next[6]
+    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 1} for other RTT group than the one specified in MR32_A1_next[6]
     uint8_t  MR10_A1;          // Byte offset 0x8d, CSR Addr 0x58046, Direction=In
     // Value to be programmed in DRAM Mode Register 10 {Channel A, Rank 1}
     uint8_t  MR11_A1;          // Byte offset 0x8e, CSR Addr 0x58047, Direction=In
@@ -734,7 +732,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR35_A1;          // Byte offset 0x97, CSR Addr 0x5804b, Direction=In
     // Value to be programmed in DRAM Mode Register 35 {Channel A, Rank 1}
     uint8_t  MR32_ORG_A1;      // Byte offset 0x98, CSR Addr 0x5804c, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 {Channel A, Rank 1} for other RTT group than the one specfied in MR32_A1[6]
+    // Value to be programmed in DRAM Mode Register 32 {Channel A, Rank 1} for other RTT group than the one specified in MR32_A1[6]
     uint8_t  MR37_A1;          // Byte offset 0x99, CSR Addr 0x5804c, Direction=In
     // Value to be programmed in DRAM Mode Register 37 {Channel A, Rank 1}
     uint8_t  MR38_A1;          // Byte offset 0x9a, CSR Addr 0x5804d, Direction=In
@@ -742,7 +740,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR39_A1;          // Byte offset 0x9b, CSR Addr 0x5804d, Direction=In
     // Value to be programmed in DRAM Mode Register 39 {Channel A, Rank 1}
     uint8_t  MR33_ORG_A1;      // Byte offset 0x9c, CSR Addr 0x5804e, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel A, Rank 1} for other RTT group than the one specfied in MR32_A1[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel A, Rank 1} for other RTT group than the one specified in MR32_A1[6]
     uint8_t  MR11_A1_next;     // Byte offset 0x9d, CSR Addr 0x5804e, Direction=In
     // Value to be programmed in DRAM Mode Register 11 before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 1}
     uint8_t  MR12_A1_next;     // Byte offset 0x9e, CSR Addr 0x5804f, Direction=In
@@ -758,7 +756,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  CA_Vref_Margin_A1; // Byte offset 0xa3, CSR Addr 0x58051, Direction=Out
     // Distance from the trained center to the closest failing region in Vref steps. This value is the minimum of all CA for channel A rank 1.
     uint8_t  MR33_ORG_A1_next; // Byte offset 0xa4, CSR Addr 0x58052, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 1} for other RTT group than the one specfied in MR32_A1_next[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 1} for other RTT group than the one specified in MR32_A1_next[6]
     uint8_t  MR33_A1_next;     // Byte offset 0xa5, CSR Addr 0x58052, Direction=In
     // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 1} for RTT group specified in MR32_A1_next[6]
     uint8_t  MR50_A1;          // Byte offset 0xa6, CSR Addr 0x58053, Direction=In
@@ -786,7 +784,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR8_A2;           // Byte offset 0xb1, CSR Addr 0x58058, Direction=In
     // Value to be programmed in DRAM Mode Register 8 {Channel A, Rank 2}
     uint8_t  MR32_ORG_A2_next; // Byte offset 0xb2, CSR Addr 0x58059, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 2} for other RTT group than the one specfied in MR32_A2_next[6]
+    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 2} for other RTT group than the one specified in MR32_A2_next[6]
     uint8_t  MR10_A2;          // Byte offset 0xb3, CSR Addr 0x58059, Direction=In
     // Value to be programmed in DRAM Mode Register 10 {Channel A, Rank 2}
     uint8_t  MR11_A2;          // Byte offset 0xb4, CSR Addr 0x5805a, Direction=In
@@ -810,7 +808,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR35_A2;          // Byte offset 0xbd, CSR Addr 0x5805e, Direction=In
     // Value to be programmed in DRAM Mode Register 35 {Channel A, Rank 2}
     uint8_t  MR32_ORG_A2;      // Byte offset 0xbe, CSR Addr 0x5805f, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 {Channel A, Rank 2} for other RTT group than the one specfied in MR32_A2[6]
+    // Value to be programmed in DRAM Mode Register 32 {Channel A, Rank 2} for other RTT group than the one specified in MR32_A2[6]
     uint8_t  MR37_A2;          // Byte offset 0xbf, CSR Addr 0x5805f, Direction=In
     // Value to be programmed in DRAM Mode Register 37 {Channel A, Rank 2}
     uint8_t  MR38_A2;          // Byte offset 0xc0, CSR Addr 0x58060, Direction=In
@@ -818,7 +816,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR39_A2;          // Byte offset 0xc1, CSR Addr 0x58060, Direction=In
     // Value to be programmed in DRAM Mode Register 39 {Channel A, Rank 2}
     uint8_t  MR33_ORG_A2;      // Byte offset 0xc2, CSR Addr 0x58061, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel A, Rank 2} for other RTT group than the one specfied in MR32_A2[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel A, Rank 2} for other RTT group than the one specified in MR32_A2[6]
     uint8_t  MR11_A2_next;     // Byte offset 0xc3, CSR Addr 0x58061, Direction=In
     // Value to be programmed in DRAM Mode Register 11 before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 2}
     uint8_t  MR12_A2_next;     // Byte offset 0xc4, CSR Addr 0x58062, Direction=In
@@ -834,7 +832,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  CA_Vref_Margin_A2; // Byte offset 0xc9, CSR Addr 0x58064, Direction=Out
     // Distance from the trained center to the closest failing region in Vref steps. This value is the minimum of all CA for channel A rank 2.
     uint8_t  MR33_ORG_A2_next; // Byte offset 0xca, CSR Addr 0x58065, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 2} for other RTT group than the one specfied in MR32_A2_next[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 2} for other RTT group than the one specified in MR32_A2_next[6]
     uint8_t  MR33_A2_next;     // Byte offset 0xcb, CSR Addr 0x58065, Direction=In
     // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 2} for RTT group specified in MR32_A2_next[6]
     uint8_t  MR50_A2;          // Byte offset 0xcc, CSR Addr 0x58066, Direction=In
@@ -862,7 +860,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR8_A3;           // Byte offset 0xd7, CSR Addr 0x5806b, Direction=In
     // Value to be programmed in DRAM Mode Register 8 {Channel A, Rank 3}
     uint8_t  MR32_ORG_A3_next; // Byte offset 0xd8, CSR Addr 0x5806c, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 3} for other RTT group than the one specfied in MR32_A3_next[6]
+    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 3} for other RTT group than the one specified in MR32_A3_next[6]
     uint8_t  MR10_A3;          // Byte offset 0xd9, CSR Addr 0x5806c, Direction=In
     // Value to be programmed in DRAM Mode Register 10 {Channel A, Rank 3}
     uint8_t  MR11_A3;          // Byte offset 0xda, CSR Addr 0x5806d, Direction=In
@@ -886,7 +884,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR35_A3;          // Byte offset 0xe3, CSR Addr 0x58071, Direction=In
     // Value to be programmed in DRAM Mode Register 35 {Channel A, Rank 3}
     uint8_t  MR32_ORG_A3;      // Byte offset 0xe4, CSR Addr 0x58072, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 {Channel A, Rank 3} for other RTT group than the one specfied in MR32_A3[6]
+    // Value to be programmed in DRAM Mode Register 32 {Channel A, Rank 3} for other RTT group than the one specified in MR32_A3[6]
     uint8_t  MR37_A3;          // Byte offset 0xe5, CSR Addr 0x58072, Direction=In
     // Value to be programmed in DRAM Mode Register 37 {Channel A, Rank 3}
     uint8_t  MR38_A3;          // Byte offset 0xe6, CSR Addr 0x58073, Direction=In
@@ -894,7 +892,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR39_A3;          // Byte offset 0xe7, CSR Addr 0x58073, Direction=In
     // Value to be programmed in DRAM Mode Register 39 {Channel A, Rank 3}
     uint8_t  MR33_ORG_A3;      // Byte offset 0xe8, CSR Addr 0x58074, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel A, Rank 3} for other RTT group than the one specfied in MR32_A3[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel A, Rank 3} for other RTT group than the one specified in MR32_A3[6]
     uint8_t  MR11_A3_next;     // Byte offset 0xe9, CSR Addr 0x58074, Direction=In
     // Value to be programmed in DRAM Mode Register 11 before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 3}
     uint8_t  MR12_A3_next;     // Byte offset 0xea, CSR Addr 0x58075, Direction=In
@@ -910,7 +908,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  CA_Vref_Margin_A3; // Byte offset 0xef, CSR Addr 0x58077, Direction=Out
     // Distance from the trained center to the closest failing region in Vref steps. This value is the minimum of all CA for channel A rank 3.
     uint8_t  MR33_ORG_A3_next; // Byte offset 0xf0, CSR Addr 0x58078, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 3} for other RTT group than the one specfied in MR32_A3_next[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 3} for other RTT group than the one specified in MR32_A3_next[6]
     uint8_t  MR33_A3_next;     // Byte offset 0xf1, CSR Addr 0x58078, Direction=In
     // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel A, Rank 3} for RTT group specified in MR32_A3_next[6]
     uint8_t  MR50_A3;          // Byte offset 0xf2, CSR Addr 0x58079, Direction=In
@@ -924,14 +922,16 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  ReservedF6;       // Byte offset 0xf6, CSR Addr 0x5807b, Direction=In
     // Some Advanced Rd2D options:
     // ReservedF6[3:0]: Post optimization of RxClkC delay when non zero (see detail in training FW application note)
-    // ReservedF6[6:4]: RFU, must be zero
-    // ReservedF6[7]: When 1, during final stage of DFE optimization, considered as outside the eye the combination for which a VrefDACx become saturated (see detail in training FW application note)
+    // ReservedF6[4]: RFU, must be zero
+    // ReservedF6[5]: When set to 1, VrefDAC values are explicitly swept for each delay position during rd2D training (otherwise, trainingCntr are used in place of VrefDAC)
+    // ReservedF6[6]: When set to 1, program user characterized CK/CS/CA ODT values per DDR5 DRAM device before DRAM CS/CA training. The message block MR32R*Nib* and MR3R*Nib* fields must be populated with the desired per device CK/CA/CA ODT values when using this option (MR3R*Nib* when used as input is for MR33 setting of CA ODT, but this option cannot be used with Quickboot FW)
+    // ReservedF6[7]: When 1, during final stage of rx DFE optimization, considered as outside the eye the combination for which a VrefDACx become saturated (see detail in training FW application note)
     uint8_t  ReservedF7;       // Byte offset 0xf7, CSR Addr 0x5807b, Direction=In
     // This field is reserved and must be programmed to 0x00.
     uint8_t  ReservedF8;       // Byte offset 0xf8, CSR Addr 0x5807c, Direction=In
     // This field is reserved and must be programmed to 0x00.
     uint8_t  ReservedF9;       // Byte offset 0xf9, CSR Addr 0x5807c, Direction=In
-
+    // This field is reserved and must be programmed to 0x00.
     uint8_t  BCW04_next;       // Byte offset 0xfa, CSR Addr 0x5807d, Direction=In
     // Fields to exploit DB multi-context feature, enabled only if RCW05_next[7] is set to 1.
     // BCW04_next[6:0] is the value to be set into DB BCW04 (RCD RCW84) before entering self-refresh at the end of training.
@@ -1243,7 +1243,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR8_B0;           // Byte offset 0x151, CSR Addr 0x580a8, Direction=In
     // Value to be programmed in DRAM Mode Register 8 {Channel B, Rank 0}
     uint8_t  MR32_ORG_B0_next; // Byte offset 0x152, CSR Addr 0x580a9, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 0} for other RTT group than the one specfied in MR32_B0_next[6]
+    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 0} for other RTT group than the one specified in MR32_B0_next[6]
     uint8_t  MR10_B0;          // Byte offset 0x153, CSR Addr 0x580a9, Direction=In
     // Value to be programmed in DRAM Mode Register 10 {Channel B, Rank 0}
     uint8_t  MR11_B0;          // Byte offset 0x154, CSR Addr 0x580aa, Direction=In
@@ -1267,7 +1267,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR35_B0;          // Byte offset 0x15d, CSR Addr 0x580ae, Direction=In
     // Value to be programmed in DRAM Mode Register 35 {Channel B, Rank 0}
     uint8_t  MR32_ORG_B0;      // Byte offset 0x15e, CSR Addr 0x580af, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 {Channel B, Rank 0} for other RTT group than the one specfied in MR32_B0[6]
+    // Value to be programmed in DRAM Mode Register 32 {Channel B, Rank 0} for other RTT group than the one specified in MR32_B0[6]
     uint8_t  MR37_B0;          // Byte offset 0x15f, CSR Addr 0x580af, Direction=In
     // Value to be programmed in DRAM Mode Register 37 {Channel B, Rank 0}
     uint8_t  MR38_B0;          // Byte offset 0x160, CSR Addr 0x580b0, Direction=In
@@ -1275,7 +1275,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR39_B0;          // Byte offset 0x161, CSR Addr 0x580b0, Direction=In
     // Value to be programmed in DRAM Mode Register 39 {Channel B, Rank 0}
     uint8_t  MR33_ORG_B0;      // Byte offset 0x162, CSR Addr 0x580b1, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel B, Rank 0} for other RTT group than the one specfied in MR32_B0[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel B, Rank 0} for other RTT group than the one specified in MR32_B0[6]
     uint8_t  MR11_B0_next;     // Byte offset 0x163, CSR Addr 0x580b1, Direction=In
     // Value to be programmed in DRAM Mode Register 11 before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 0}
     uint8_t  MR12_B0_next;     // Byte offset 0x164, CSR Addr 0x580b2, Direction=In
@@ -1291,7 +1291,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  CA_Vref_Margin_B0; // Byte offset 0x169, CSR Addr 0x580b4, Direction=Out
     // Distance from the trained center to the closest failing region in Vref steps. This value is the minimum of all CA for channel B rank 0.
     uint8_t  MR33_ORG_B0_next; // Byte offset 0x16a, CSR Addr 0x580b5, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 0} for other RTT group than the one specfied in MR32_B0_next[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 0} for other RTT group than the one specified in MR32_B0_next[6]
     uint8_t  MR33_B0_next;     // Byte offset 0x16b, CSR Addr 0x580b5, Direction=In
     // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 0} for RTT group specified in MR32_B0_next[6]
     uint8_t  MR50_B0;          // Byte offset 0x16c, CSR Addr 0x580b6, Direction=In
@@ -1319,7 +1319,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR8_B1;           // Byte offset 0x177, CSR Addr 0x580bb, Direction=In
     // Value to be programmed in DRAM Mode Register 8 {Channel B, Rank 1}
     uint8_t  MR32_ORG_B1_next; // Byte offset 0x178, CSR Addr 0x580bc, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 1} for other RTT group than the one specfied in MR32_B1_next[6]
+    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 1} for other RTT group than the one specified in MR32_B1_next[6]
     uint8_t  MR10_B1;          // Byte offset 0x179, CSR Addr 0x580bc, Direction=In
     // Value to be programmed in DRAM Mode Register 10 {Channel B, Rank 1}
     uint8_t  MR11_B1;          // Byte offset 0x17a, CSR Addr 0x580bd, Direction=In
@@ -1343,7 +1343,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR35_B1;          // Byte offset 0x183, CSR Addr 0x580c1, Direction=In
     // Value to be programmed in DRAM Mode Register 35 {Channel B, Rank 1}
     uint8_t  MR32_ORG_B1;      // Byte offset 0x184, CSR Addr 0x580c2, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 {Channel B, Rank 1} for other RTT group than the one specfied in MR32_B1[6]
+    // Value to be programmed in DRAM Mode Register 32 {Channel B, Rank 1} for other RTT group than the one specified in MR32_B1[6]
     uint8_t  MR37_B1;          // Byte offset 0x185, CSR Addr 0x580c2, Direction=In
     // Value to be programmed in DRAM Mode Register 37 {Channel B, Rank 1}
     uint8_t  MR38_B1;          // Byte offset 0x186, CSR Addr 0x580c3, Direction=In
@@ -1351,7 +1351,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR39_B1;          // Byte offset 0x187, CSR Addr 0x580c3, Direction=In
     // Value to be programmed in DRAM Mode Register 39 {Channel B, Rank 1}
     uint8_t  MR33_ORG_B1;      // Byte offset 0x188, CSR Addr 0x580c4, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel B, Rank 1} for other RTT group than the one specfied in MR32_B1[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel B, Rank 1} for other RTT group than the one specified in MR32_B1[6]
     uint8_t  MR11_B1_next;     // Byte offset 0x189, CSR Addr 0x580c4, Direction=In
     // Value to be programmed in DRAM Mode Register 11 before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 1}
     uint8_t  MR12_B1_next;     // Byte offset 0x18a, CSR Addr 0x580c5, Direction=In
@@ -1367,7 +1367,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  CA_Vref_Margin_B1; // Byte offset 0x18f, CSR Addr 0x580c7, Direction=Out
     // Distance from the trained center to the closest failing region in Vref steps. This value is the minimum of all CA for channel B rank 1.
     uint8_t  MR33_ORG_B1_next; // Byte offset 0x190, CSR Addr 0x580c8, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 1} for other RTT group than the one specfied in MR32_B1_next[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 1} for other RTT group than the one specified in MR32_B1_next[6]
     uint8_t  MR33_B1_next;     // Byte offset 0x191, CSR Addr 0x580c8, Direction=In
     // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 1} for RTT group specified in MR32_B1_next[6]
     uint8_t  MR50_B1;          // Byte offset 0x192, CSR Addr 0x580c9, Direction=In
@@ -1395,7 +1395,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR8_B2;           // Byte offset 0x19d, CSR Addr 0x580ce, Direction=In
     // Value to be programmed in DRAM Mode Register 8 {Channel B, Rank 2}
     uint8_t  MR32_ORG_B2_next; // Byte offset 0x19e, CSR Addr 0x580cf, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 2} for other RTT group than the one specfied in MR32_B2_next[6]
+    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 2} for other RTT group than the one specified in MR32_B2_next[6]
     uint8_t  MR10_B2;          // Byte offset 0x19f, CSR Addr 0x580cf, Direction=In
     // Value to be programmed in DRAM Mode Register 10 {Channel B, Rank 2}
     uint8_t  MR11_B2;          // Byte offset 0x1a0, CSR Addr 0x580d0, Direction=In
@@ -1419,7 +1419,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR35_B2;          // Byte offset 0x1a9, CSR Addr 0x580d4, Direction=In
     // Value to be programmed in DRAM Mode Register 35 {Channel B, Rank 2}
     uint8_t  MR32_ORG_B2;      // Byte offset 0x1aa, CSR Addr 0x580d5, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 {Channel B, Rank 2} for other RTT group than the one specfied in MR32_B2[6]
+    // Value to be programmed in DRAM Mode Register 32 {Channel B, Rank 2} for other RTT group than the one specified in MR32_B2[6]
     uint8_t  MR37_B2;          // Byte offset 0x1ab, CSR Addr 0x580d5, Direction=In
     // Value to be programmed in DRAM Mode Register 37 {Channel B, Rank 2}
     uint8_t  MR38_B2;          // Byte offset 0x1ac, CSR Addr 0x580d6, Direction=In
@@ -1427,7 +1427,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR39_B2;          // Byte offset 0x1ad, CSR Addr 0x580d6, Direction=In
     // Value to be programmed in DRAM Mode Register 39 {Channel B, Rank 2}
     uint8_t  MR33_ORG_B2;      // Byte offset 0x1ae, CSR Addr 0x580d7, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel B, Rank 2} for other RTT group than the one specfied in MR32_B2[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel B, Rank 2} for other RTT group than the one specified in MR32_B2[6]
     uint8_t  MR11_B2_next;     // Byte offset 0x1af, CSR Addr 0x580d7, Direction=In
     // Value to be programmed in DRAM Mode Register 11 before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 2}
     uint8_t  MR12_B2_next;     // Byte offset 0x1b0, CSR Addr 0x580d8, Direction=In
@@ -1443,7 +1443,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  CA_Vref_Margin_B2; // Byte offset 0x1b5, CSR Addr 0x580da, Direction=Out
     // Distance from the trained center to the closest failing region in Vref steps. This value is the minimum of all CA for channel B rank 2.
     uint8_t  MR33_ORG_B2_next; // Byte offset 0x1b6, CSR Addr 0x580db, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 2} for other RTT group than the one specfied in MR32_B2_next[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 2} for other RTT group than the one specified in MR32_B2_next[6]
     uint8_t  MR33_B2_next;     // Byte offset 0x1b7, CSR Addr 0x580db, Direction=In
     // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 2} for RTT group specified in MR32_B2_next[6]
     uint8_t  MR50_B2;          // Byte offset 0x1b8, CSR Addr 0x580dc, Direction=In
@@ -1471,7 +1471,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR8_B3;           // Byte offset 0x1c3, CSR Addr 0x580e1, Direction=In
     // Value to be programmed in DRAM Mode Register 8 {Channel B, Rank 3}
     uint8_t  MR32_ORG_B3_next; // Byte offset 0x1c4, CSR Addr 0x580e2, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 3} for other RTT group than the one specfied in MR32_B3_next[6]
+    // Value to be programmed in DRAM Mode Register 32 before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 3} for other RTT group than the one specified in MR32_B3_next[6]
     uint8_t  MR10_B3;          // Byte offset 0x1c5, CSR Addr 0x580e2, Direction=In
     // Value to be programmed in DRAM Mode Register 10 {Channel B, Rank 3}
     uint8_t  MR11_B3;          // Byte offset 0x1c6, CSR Addr 0x580e3, Direction=In
@@ -1495,7 +1495,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR35_B3;          // Byte offset 0x1cf, CSR Addr 0x580e7, Direction=In
     // Value to be programmed in DRAM Mode Register 35 {Channel B, Rank 3}
     uint8_t  MR32_ORG_B3;      // Byte offset 0x1d0, CSR Addr 0x580e8, Direction=In
-    // Value to be programmed in DRAM Mode Register 32 {Channel B, Rank 3} for other RTT group than the one specfied in MR32_B3[6]
+    // Value to be programmed in DRAM Mode Register 32 {Channel B, Rank 3} for other RTT group than the one specified in MR32_B3[6]
     uint8_t  MR37_B3;          // Byte offset 0x1d1, CSR Addr 0x580e8, Direction=In
     // Value to be programmed in DRAM Mode Register 37 {Channel B, Rank 3}
     uint8_t  MR38_B3;          // Byte offset 0x1d2, CSR Addr 0x580e9, Direction=In
@@ -1503,7 +1503,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  MR39_B3;          // Byte offset 0x1d3, CSR Addr 0x580e9, Direction=In
     // Value to be programmed in DRAM Mode Register 39 {Channel B, Rank 3}
     uint8_t  MR33_ORG_B3;      // Byte offset 0x1d4, CSR Addr 0x580ea, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel B, Rank 3} for other RTT group than the one specfied in MR32_B3[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT {Channel B, Rank 3} for other RTT group than the one specified in MR32_B3[6]
     uint8_t  MR11_B3_next;     // Byte offset 0x1d5, CSR Addr 0x580ea, Direction=In
     // Value to be programmed in DRAM Mode Register 11 before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 3}
     uint8_t  MR12_B3_next;     // Byte offset 0x1d6, CSR Addr 0x580eb, Direction=In
@@ -1519,7 +1519,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  CA_Vref_Margin_B3; // Byte offset 0x1db, CSR Addr 0x580ed, Direction=Out
     // Distance from the trained center to the closest failing region in Vref steps. This value is the minimum of all CA for channel B rank 3.
     uint8_t  MR33_ORG_B3_next; // Byte offset 0x1dc, CSR Addr 0x580ee, Direction=In
-    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 3} for other RTT group than the one specfied in MR32_B3_next[6]
+    // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 3} for other RTT group than the one specified in MR32_B3_next[6]
     uint8_t  MR33_B3_next;     // Byte offset 0x1dd, CSR Addr 0x580ee, Direction=In
     // Value to be programmed in DRAM Mode Register 33 CA_ODT before issuing self-refresh enter (SREF) command at the end of training  {Channel B, Rank 3} for RTT group specified in MR32_B3_next[6]
     uint8_t  MR50_B3;          // Byte offset 0x1de, CSR Addr 0x580ef, Direction=In
@@ -1545,7 +1545,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     //     3 = step size of 8
     // [6] TrainDFEGain: when set, train the DFE Gain Offset
     // [7] DFEVrefEnable: when set, DFE Vref circuitry will be enabled by firmware in RW31[1] during and after CA DFE training
-    uint8_t  Reserved1E3;  // Byte offset 0x1e3, CSR Addr 0x580f1, Direction=Out
+    uint8_t  Reserved1E3;      // Byte offset 0x1e3, CSR Addr 0x580f1, Direction=Out
     // Non zero if error detected during QCS/QCA training (RDIMM/LRDIMM only):
     //       Reserved1E3[0] == 1: Error during CS training Dimm 0 Chan A
     //       Reserved1E3[1] == 1: Error during CS training Dimm 1 Chan A
@@ -1569,7 +1569,7 @@ typedef struct _PMU_SMB_DDR5_1D_t
     // Width of delay passing region to be considered as empty during rd2D/wr2D; a non zero value can be used to filter out Vref position for which the passing delay region is too small. Same parameter used for Rd2D and Wr2D.
     uint8_t  Reserved1E6;      // Byte offset 0x1e6, CSR Addr 0x580f3, Direction=In
     // Width of Vref passing region to be considered as empty during rd2D/wr2D training; a non zero value can be used to filter out delay position for which the passing Vref region is too small. Same parameter used for Rd2D and Wr2D.
-    uint8_t  Reserved1E7;     // Byte offset 0x1e7, CSR Addr 0x580f3, Direction=In
+    uint8_t  Reserved1E7;      // Byte offset 0x1e7, CSR Addr 0x580f3, Direction=In
     // Extra debug information per Dbyte during Rd2D/Wr2D training (applicable only if HdtCtrl < 5):
     // Reserved[7:4]: Number of Dbyte for which extra debug information is provided (no extra debug when 0)
     // Reserved[3:0]: First Dbyte for which extra debug information is provided (last Dbyte is Reserved[3:0] + Reserved[7:4] - 1, no extra debug if last Dbyte is smaller than first Dbyte)
@@ -3830,169 +3830,249 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  VrefDqR3Nib17;    // Byte offset 0x64d, CSR Addr 0x58326, Direction=InOut
     // VrefDq for rank 3 nibble 17. Specifies MR10[6:0]. Identical to VrefDqR3Nib16 for x8 or x16 devices.
     uint8_t  VrefDqR3Nib18;    // Byte offset 0x64e, CSR Addr 0x58327, Direction=InOut
-    // VrefDq for rank 3 nibble 18. Specifies MR10[6:0]. Identical to VrefDqR3Nib16 for x16 devices.
+    // VrefDq for rank 3 nibble 18. Specifies MR10[6:0].
     uint8_t  VrefDqR3Nib19;    // Byte offset 0x64f, CSR Addr 0x58327, Direction=InOut
-    // VrefDq for rank 3 nibble 19. Specifies MR10[6:0]. Identical to VrefDqR3Nib16 for x16 devices, or VrefDqR3Nib18 for x8 devices.
+    // VrefDq for rank 3 nibble 19. Specifies MR10[6:0]. Identical to VrefDqR3Nib18 for x8 or x16 devices.
     uint8_t  MR3R0Nib0;        // Byte offset 0x650, CSR Addr 0x58328, Direction=InOut
-    // MR3 for rank 0 nibble 0 results from internal WL.
+    // Out: MR3 for rank 0 nibble 0 results from internal WL.
+    // In: MR33 CA ODT for rank 0 nibble 0.
     uint8_t  MR3R0Nib1;        // Byte offset 0x651, CSR Addr 0x58328, Direction=InOut
-    // MR3 for rank 0 nibble 1 results from internal WL.  Identical to MR3R0Nib0 for x8 or x16 devices.
+    // Out: MR3 for rank 0 nibble 1 results from internal WL.  Identical to MR3R0Nib0 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 0 nibble 1.
     uint8_t  MR3R0Nib2;        // Byte offset 0x652, CSR Addr 0x58329, Direction=InOut
-    // MR3 for rank 0 nibble 2 results from internal WL.  Identical to MR3R0Nib0 for x16 device.
+    // Out: MR3 for rank 0 nibble 2 results from internal WL.  Identical to MR3R0Nib0 for x16 device.
+    // In: MR33 CA ODT for rank 0 nibble 2.
     uint8_t  MR3R0Nib3;        // Byte offset 0x653, CSR Addr 0x58329, Direction=InOut
-    // MR3 for rank 0 nibble 3 results from internal WL.  Identical to MR3R0Nib0 for x16 device, or MR3R0Nib2 for x8 or x16 devices.
+    // Out: MR3 for rank 0 nibble 3 results from internal WL.  Identical to MR3R0Nib0 for x16 device, or MR3R0Nib2 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 0 nibble 3.
     uint8_t  MR3R0Nib4;        // Byte offset 0x654, CSR Addr 0x5832a, Direction=InOut
-    // MR3 for rank 0 nibble 4 results from internal WL.
+    // Out: MR3 for rank 0 nibble 4 results from internal WL.
+    // In: MR33 CA ODT for rank 0 nibble 4.
     uint8_t  MR3R0Nib5;        // Byte offset 0x655, CSR Addr 0x5832a, Direction=InOut
-    // MR3 for rank 0 nibble 5 results from internal WL.  Identical to MR3R0Nib4 for x8 or x16 devices.
+    // Out: MR3 for rank 0 nibble 5 results from internal WL.  Identical to MR3R0Nib4 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 0 nibble 5.
     uint8_t  MR3R0Nib6;        // Byte offset 0x656, CSR Addr 0x5832b, Direction=InOut
-    // MR3 for rank 0 nibble 6 results from internal WL.  Identical to MR3R0Nib4 for x16 device.
+    // Out: MR3 for rank 0 nibble 6 results from internal WL.  Identical to MR3R0Nib4 for x16 device.
+    // In: MR33 CA ODT for rank 0 nibble 6.
     uint8_t  MR3R0Nib7;        // Byte offset 0x657, CSR Addr 0x5832b, Direction=InOut
-    // MR3 for rank 0 nibble 7 results from internal WL.  Identical to MR3R0Nib4 for x16 device, or MR3R0Nib6 for x8 or x16 devices.
+    // Out: MR3 for rank 0 nibble 7 results from internal WL.  Identical to MR3R0Nib4 for x16 device, or MR3R0Nib6 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 0 nibble 7.
     uint8_t  MR3R0Nib8;        // Byte offset 0x658, CSR Addr 0x5832c, Direction=InOut
-    // MR3 for rank 0 nibble 8 results from internal WL.
+    // Out: MR3 for rank 0 nibble 8 results from internal WL.
+    // In: MR33 CA ODT for rank 0 nibble 8.
     uint8_t  MR3R0Nib9;        // Byte offset 0x659, CSR Addr 0x5832c, Direction=InOut
-    // MR3 for rank 0 nibble 9 results from internal WL.  Identical to MR3R0Nib8 for x8 or x16 devices.
+    // Out: MR3 for rank 0 nibble 9 results from internal WL.  Identical to MR3R0Nib8 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 0 nibble 9.
     uint8_t  MR3R0Nib10;       // Byte offset 0x65a, CSR Addr 0x5832d, Direction=InOut
-    // MR3 for rank 0 nibble 10 results from internal WL.  Identical to MR3R0Nib8 for x16 device.
+    // Out: MR3 for rank 0 nibble 10 results from internal WL.  Identical to MR3R0Nib8 for x16 device.
+    // In: MR33 CA ODT for rank 0 nibble 10.
     uint8_t  MR3R0Nib11;       // Byte offset 0x65b, CSR Addr 0x5832d, Direction=InOut
-    // MR3 for rank 0 nibble 11 results from internal WL.  Identical to MR3R0Nib8 for x16 device, or MR3R0Nib10 for x8 or x16 devices.
+    // Out: MR3 for rank 0 nibble 11 results from internal WL.  Identical to MR3R0Nib8 for x16 device, or MR3R0Nib10 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 0 nibble 11.
     uint8_t  MR3R0Nib12;       // Byte offset 0x65c, CSR Addr 0x5832e, Direction=InOut
-    // MR3 for rank 0 nibble 12 results from internal WL.
+    // Out: MR3 for rank 0 nibble 12 results from internal WL.
+    // In: MR33 CA ODT for rank 0 nibble 12.
     uint8_t  MR3R0Nib13;       // Byte offset 0x65d, CSR Addr 0x5832e, Direction=InOut
-    // MR3 for rank 0 nibble 13 results from internal WL.  Identical to MR3R0Nib12 for x8 or x16 devices.
+    // Out: MR3 for rank 0 nibble 13 results from internal WL.  Identical to MR3R0Nib12 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 0 nibble 13.
     uint8_t  MR3R0Nib14;       // Byte offset 0x65e, CSR Addr 0x5832f, Direction=InOut
-    // MR3 for rank 0 nibble 14 results from internal WL.  Identical to MR3R0Nib12 for x16 device.
+    // Out: MR3 for rank 0 nibble 14 results from internal WL.  Identical to MR3R0Nib12 for x16 device.
+    // In: MR33 CA ODT for rank 0 nibble 14.
     uint8_t  MR3R0Nib15;       // Byte offset 0x65f, CSR Addr 0x5832f, Direction=InOut
-    // MR3 for rank 0 nibble 15 results from internal WL.  Identical to MR3R0Nib12 for x16 device, or MR3R0Nib14 for x8 or x16 devices.
+    // Out: MR3 for rank 0 nibble 15 results from internal WL.  Identical to MR3R0Nib12 for x16 device, or MR3R0Nib14 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 0 nibble 15.
     uint8_t  MR3R0Nib16;       // Byte offset 0x660, CSR Addr 0x58330, Direction=InOut
-    // MR3 for rank 0 nibble 16 results from internal WL.
+    // Out: MR3 for rank 0 nibble 16 results from internal WL.
+    // In: MR33 CA ODT for rank 0 nibble 16.
     uint8_t  MR3R0Nib17;       // Byte offset 0x661, CSR Addr 0x58330, Direction=InOut
-    // MR3 for rank 0 nibble 17 results from internal WL.  Identical to MR3R0Nib16 for x8 or x16 devices.
+    // Out: MR3 for rank 0 nibble 17 results from internal WL.  Identical to MR3R0Nib16 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 0 nibble 17.
     uint8_t  MR3R0Nib18;       // Byte offset 0x662, CSR Addr 0x58331, Direction=InOut
-    // MR3 for rank 0 nibble 18 results from internal WL.  Identical to MR3R0Nib16 for x16 device.
+    // Out: MR3 for rank 0 nibble 18 results from internal WL.  Identical to MR3R0Nib16 for x16 device.
+    // In: MR33 CA ODT for rank 0 nibble 18.
     uint8_t  MR3R0Nib19;       // Byte offset 0x663, CSR Addr 0x58331, Direction=InOut
-    // MR3 for rank 0 nibble 19 results from internal WL.  Identical to MR3R0Nib16 for x16 device, or MR3R0Nib2 for x8 or x16 devices.
+    // Out: MR3 for rank 0 nibble 19 results from internal WL.  Identical to MR3R0Nib18 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 0 nibble 19.
     uint8_t  MR3R1Nib0;        // Byte offset 0x664, CSR Addr 0x58332, Direction=InOut
-    // MR3 for rank 1 nibble 0 results from internal WL.
+    // Out: MR3 for rank 1 nibble 0 results from internal WL.
+    // In: MR33 CA ODT for rank 1 nibble 0.
     uint8_t  MR3R1Nib1;        // Byte offset 0x665, CSR Addr 0x58332, Direction=InOut
-    // MR3 for rank 1 nibble 1 results from internal WL.  Identical to MR3R1Nib0 for x8 or x16 devices.
+    // Out: MR3 for rank 1 nibble 1 results from internal WL.  Identical to MR3R0Nib0 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 1 nibble 1.
     uint8_t  MR3R1Nib2;        // Byte offset 0x666, CSR Addr 0x58333, Direction=InOut
-    // MR3 for rank 1 nibble 2 results from internal WL.  Identical to MR3R1Nib0 for x16 device.
+    // Out: MR3 for rank 1 nibble 2 results from internal WL.  Identical to MR3R0Nib0 for x16 device.
+    // In: MR33 CA ODT for rank 1 nibble 2.
     uint8_t  MR3R1Nib3;        // Byte offset 0x667, CSR Addr 0x58333, Direction=InOut
-    // MR3 for rank 1 nibble 3 results from internal WL.  Identical to MR3R1Nib0 for x16 device, or MR3R1Nib2 for x8 or x16 devices.
+    // Out: MR3 for rank 1 nibble 3 results from internal WL.  Identical to MR3R0Nib0 for x16 device, or MR3R0Nib2 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 1 nibble 3.
     uint8_t  MR3R1Nib4;        // Byte offset 0x668, CSR Addr 0x58334, Direction=InOut
-    // MR3 for rank 1 nibble 4 results from internal WL.
+    // Out: MR3 for rank 1 nibble 4 results from internal WL.
+    // In: MR33 CA ODT for rank 1 nibble 4.
     uint8_t  MR3R1Nib5;        // Byte offset 0x669, CSR Addr 0x58334, Direction=InOut
-    // MR3 for rank 1 nibble 5 results from internal WL.  Identical to MR3R1Nib4 for x8 or x16 devices.
+    // Out: MR3 for rank 1 nibble 5 results from internal WL.  Identical to MR3R0Nib4 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 1 nibble 5.
     uint8_t  MR3R1Nib6;        // Byte offset 0x66a, CSR Addr 0x58335, Direction=InOut
-    // MR3 for rank 1 nibble 6 results from internal WL.  Identical to MR3R1Nib4 for x16 device.
+    // Out: MR3 for rank 1 nibble 6 results from internal WL.  Identical to MR3R0Nib4 for x16 device.
+    // In: MR33 CA ODT for rank 1 nibble 6.
     uint8_t  MR3R1Nib7;        // Byte offset 0x66b, CSR Addr 0x58335, Direction=InOut
-    // MR3 for rank 1 nibble 7 results from internal WL.  Identical to MR3R1Nib4 for x16 device, or MR3R1Nib6 for x8 or x16 devices.
+    // Out: MR3 for rank 1 nibble 7 results from internal WL.  Identical to MR3R0Nib4 for x16 device, or MR3R0Nib6 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 1 nibble 7.
     uint8_t  MR3R1Nib8;        // Byte offset 0x66c, CSR Addr 0x58336, Direction=InOut
-    // MR3 for rank 1 nibble 8 results from internal WL.
+    // Out: MR3 for rank 1 nibble 8 results from internal WL.
+    // In: MR33 CA ODT for rank 1 nibble 8.
     uint8_t  MR3R1Nib9;        // Byte offset 0x66d, CSR Addr 0x58336, Direction=InOut
-    // MR3 for rank 1 nibble 9 results from internal WL.  Identical to MR3R1Nib8 for x8 or x16 devices.
+    // Out: MR3 for rank 1 nibble 9 results from internal WL.  Identical to MR3R0Nib8 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 1 nibble 9.
     uint8_t  MR3R1Nib10;       // Byte offset 0x66e, CSR Addr 0x58337, Direction=InOut
-    // MR3 for rank 1 nibble 10 results from internal WL.  Identical to MR3R1Nib8 for x16 device.
+    // Out: MR3 for rank 1 nibble 10 results from internal WL.  Identical to MR3R0Nib8 for x16 device.
+    // In: MR33 CA ODT for rank 1 nibble 10.
     uint8_t  MR3R1Nib11;       // Byte offset 0x66f, CSR Addr 0x58337, Direction=InOut
-    // MR3 for rank 1 nibble 11 results from internal WL.  Identical to MR3R1Nib8 for x16 device, or MR3R1Nib10 for x8 or x16 devices.
+    // Out: MR3 for rank 1 nibble 11 results from internal WL.  Identical to MR3R0Nib8 for x16 device, or MR3R0Nib10 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 1 nibble 11.
     uint8_t  MR3R1Nib12;       // Byte offset 0x670, CSR Addr 0x58338, Direction=InOut
-    // MR3 for rank 1 nibble 12 results from internal WL.
+    // Out: MR3 for rank 1 nibble 12 results from internal WL.
+    // In: MR33 CA ODT for rank 1 nibble 12.
     uint8_t  MR3R1Nib13;       // Byte offset 0x671, CSR Addr 0x58338, Direction=InOut
-    // MR3 for rank 1 nibble 13 results from internal WL.  Identical to MR3R1Nib12 for x8 or x16 devices.
+    // Out: MR3 for rank 1 nibble 13 results from internal WL.  Identical to MR3R0Nib12 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 1 nibble 13.
     uint8_t  MR3R1Nib14;       // Byte offset 0x672, CSR Addr 0x58339, Direction=InOut
-    // MR3 for rank 1 nibble 14 results from internal WL.  Identical to MR3R1Nib12 for x16 device.
+    // Out: MR3 for rank 1 nibble 14 results from internal WL.  Identical to MR3R0Nib12 for x16 device.
+    // In: MR33 CA ODT for rank 1 nibble 14.
     uint8_t  MR3R1Nib15;       // Byte offset 0x673, CSR Addr 0x58339, Direction=InOut
-    // MR3 for rank 1 nibble 15 results from internal WL.  Identical to MR3R1Nib12 for x16 device, or MR3R1Nib14 for x8 or x16 devices.
+    // Out: MR3 for rank 1 nibble 15 results from internal WL.  Identical to MR3R0Nib12 for x16 device, or MR3R0Nib14 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 1 nibble 15.
     uint8_t  MR3R1Nib16;       // Byte offset 0x674, CSR Addr 0x5833a, Direction=InOut
-    // MR3 for rank 1 nibble 16 results from internal WL.
+    // Out: MR3 for rank 1 nibble 16 results from internal WL.
+    // In: MR33 CA ODT for rank 1 nibble 16.
     uint8_t  MR3R1Nib17;       // Byte offset 0x675, CSR Addr 0x5833a, Direction=InOut
-    // MR3 for rank 1 nibble 17 results from internal WL.  Identical to MR3R1Nib16 for x8 or x16 devices.
+    // Out: MR3 for rank 1 nibble 17 results from internal WL.  Identical to MR3R0Nib16 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 1 nibble 17.
     uint8_t  MR3R1Nib18;       // Byte offset 0x676, CSR Addr 0x5833b, Direction=InOut
-    // MR3 for rank 1 nibble 18 results from internal WL.  Identical to MR3R1Nib16 for x16 device.
+    // Out: MR3 for rank 1 nibble 18 results from internal WL.  Identical to MR3R0Nib16 for x16 device.
+    // In: MR33 CA ODT for rank 1 nibble 18.
     uint8_t  MR3R1Nib19;       // Byte offset 0x677, CSR Addr 0x5833b, Direction=InOut
-    // MR3 for rank 1 nibble 19 results from internal WL.  Identical to MR3R1Nib16 for x16 device, or MR3R1Nib2 for x8 or x16 devices.
+    // Out: MR3 for rank 1 nibble 19 results from internal WL.  Identical to MR3R0Nib18 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 1 nibble 19.
     uint8_t  MR3R2Nib0;        // Byte offset 0x678, CSR Addr 0x5833c, Direction=InOut
-    // MR3 for rank 2 nibble 0 results from internal WL.
+    // Out: MR3 for rank 2 nibble 0 results from internal WL.
+    // In: MR33 CA ODT for rank 2 nibble 0.
     uint8_t  MR3R2Nib1;        // Byte offset 0x679, CSR Addr 0x5833c, Direction=InOut
-    // MR3 for rank 2 nibble 1 results from internal WL.  Identical to MR3R2Nib0 for x8 or x16 devices.
+    // Out: MR3 for rank 2 nibble 1 results from internal WL.  Identical to MR3R0Nib0 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 2 nibble 1.
     uint8_t  MR3R2Nib2;        // Byte offset 0x67a, CSR Addr 0x5833d, Direction=InOut
-    // MR3 for rank 2 nibble 2 results from internal WL.  Identical to MR3R2Nib0 for x16 device.
+    // Out: MR3 for rank 2 nibble 2 results from internal WL.  Identical to MR3R0Nib0 for x16 device.
+    // In: MR33 CA ODT for rank 2 nibble 2.
     uint8_t  MR3R2Nib3;        // Byte offset 0x67b, CSR Addr 0x5833d, Direction=InOut
-    // MR3 for rank 2 nibble 3 results from internal WL.  Identical to MR3R2Nib0 for x16 device, or MR3R2Nib2 for x8 or x16 devices.
+    // Out: MR3 for rank 2 nibble 3 results from internal WL.  Identical to MR3R0Nib0 for x16 device, or MR3R0Nib2 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 2 nibble 3.
     uint8_t  MR3R2Nib4;        // Byte offset 0x67c, CSR Addr 0x5833e, Direction=InOut
-    // MR3 for rank 2 nibble 4 results from internal WL.
+    // Out: MR3 for rank 2 nibble 4 results from internal WL.
+    // In: MR33 CA ODT for rank 2 nibble 4.
     uint8_t  MR3R2Nib5;        // Byte offset 0x67d, CSR Addr 0x5833e, Direction=InOut
-    // MR3 for rank 2 nibble 5 results from internal WL.  Identical to MR3R2Nib4 for x8 or x16 devices.
+    // Out: MR3 for rank 2 nibble 5 results from internal WL.  Identical to MR3R0Nib4 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 2 nibble 5.
     uint8_t  MR3R2Nib6;        // Byte offset 0x67e, CSR Addr 0x5833f, Direction=InOut
-    // MR3 for rank 2 nibble 6 results from internal WL.  Identical to MR3R2Nib4 for x16 device.
+    // Out: MR3 for rank 2 nibble 6 results from internal WL.  Identical to MR3R0Nib4 for x16 device.
+    // In: MR33 CA ODT for rank 2 nibble 6.
     uint8_t  MR3R2Nib7;        // Byte offset 0x67f, CSR Addr 0x5833f, Direction=InOut
-    // MR3 for rank 2 nibble 7 results from internal WL.  Identical to MR3R2Nib4 for x16 device, or MR3R2Nib6 for x8 or x16 devices.
+    // Out: MR3 for rank 2 nibble 7 results from internal WL.  Identical to MR3R0Nib4 for x16 device, or MR3R0Nib6 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 2 nibble 7.
     uint8_t  MR3R2Nib8;        // Byte offset 0x680, CSR Addr 0x58340, Direction=InOut
-    // MR3 for rank 2 nibble 8 results from internal WL.
+    // Out: MR3 for rank 2 nibble 8 results from internal WL.
+    // In: MR33 CA ODT for rank 2 nibble 8.
     uint8_t  MR3R2Nib9;        // Byte offset 0x681, CSR Addr 0x58340, Direction=InOut
-    // MR3 for rank 2 nibble 9 results from internal WL.  Identical to MR3R2Nib8 for x8 or x16 devices.
+    // Out: MR3 for rank 2 nibble 9 results from internal WL.  Identical to MR3R0Nib8 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 2 nibble 9.
     uint8_t  MR3R2Nib10;       // Byte offset 0x682, CSR Addr 0x58341, Direction=InOut
-    // MR3 for rank 2 nibble 10 results from internal WL.  Identical to MR3R2Nib8 for x16 device.
+    // Out: MR3 for rank 2 nibble 10 results from internal WL.  Identical to MR3R0Nib8 for x16 device.
+    // In: MR33 CA ODT for rank 2 nibble 10.
     uint8_t  MR3R2Nib11;       // Byte offset 0x683, CSR Addr 0x58341, Direction=InOut
-    // MR3 for rank 2 nibble 11 results from internal WL.  Identical to MR3R2Nib8 for x16 device, or MR3R2Nib10 for x8 or x16 devices.
+    // Out: MR3 for rank 2 nibble 11 results from internal WL.  Identical to MR3R0Nib8 for x16 device, or MR3R0Nib10 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 2 nibble 11.
     uint8_t  MR3R2Nib12;       // Byte offset 0x684, CSR Addr 0x58342, Direction=InOut
-    // MR3 for rank 2 nibble 12 results from internal WL.
+    // Out: MR3 for rank 2 nibble 12 results from internal WL.
+    // In: MR33 CA ODT for rank 2 nibble 12.
     uint8_t  MR3R2Nib13;       // Byte offset 0x685, CSR Addr 0x58342, Direction=InOut
-    // MR3 for rank 2 nibble 13 results from internal WL.  Identical to MR3R2Nib12 for x8 or x16 devices.
+    // Out: MR3 for rank 2 nibble 13 results from internal WL.  Identical to MR3R0Nib12 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 2 nibble 13.
     uint8_t  MR3R2Nib14;       // Byte offset 0x686, CSR Addr 0x58343, Direction=InOut
-    // MR3 for rank 2 nibble 14 results from internal WL.  Identical to MR3R2Nib12 for x16 device.
+    // Out: MR3 for rank 2 nibble 14 results from internal WL.  Identical to MR3R0Nib12 for x16 device.
+    // In: MR33 CA ODT for rank 2 nibble 14.
     uint8_t  MR3R2Nib15;       // Byte offset 0x687, CSR Addr 0x58343, Direction=InOut
-    // MR3 for rank 2 nibble 15 results from internal WL.  Identical to MR3R2Nib12 for x16 device, or MR3R2Nib14 for x8 or x16 devices.
+    // Out: MR3 for rank 2 nibble 15 results from internal WL.  Identical to MR3R0Nib12 for x16 device, or MR3R0Nib14 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 2 nibble 15.
     uint8_t  MR3R2Nib16;       // Byte offset 0x688, CSR Addr 0x58344, Direction=InOut
-    // MR3 for rank 2 nibble 16 results from internal WL.
+    // Out: MR3 for rank 2 nibble 16 results from internal WL.
+    // In: MR33 CA ODT for rank 2 nibble 16.
     uint8_t  MR3R2Nib17;       // Byte offset 0x689, CSR Addr 0x58344, Direction=InOut
-    // MR3 for rank 2 nibble 17 results from internal WL.  Identical to MR3R2Nib16 for x8 or x16 devices.
+    // Out: MR3 for rank 2 nibble 17 results from internal WL.  Identical to MR3R0Nib16 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 2 nibble 17.
     uint8_t  MR3R2Nib18;       // Byte offset 0x68a, CSR Addr 0x58345, Direction=InOut
-    // MR3 for rank 2 nibble 18 results from internal WL.  Identical to MR3R2Nib16 for x16 device.
+    // Out: MR3 for rank 2 nibble 18 results from internal WL.  Identical to MR3R0Nib16 for x16 device.
+    // In: MR33 CA ODT for rank 2 nibble 18.
     uint8_t  MR3R2Nib19;       // Byte offset 0x68b, CSR Addr 0x58345, Direction=InOut
-    // MR3 for rank 2 nibble 19 results from internal WL.  Identical to MR3R2Nib16 for x16 device, or MR3R2Nib2 for x8 or x16 devices.
+    // Out: MR3 for rank 2 nibble 19 results from internal WL.  Identical to MR3R0Nib18 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 2 nibble 19.
     uint8_t  MR3R3Nib0;        // Byte offset 0x68c, CSR Addr 0x58346, Direction=InOut
-    // MR3 for rank 3 nibble 0 results from internal WL.
+    // Out: MR3 for rank 3 nibble 0 results from internal WL.
+    // In: MR33 CA ODT for rank 3 nibble 0.
     uint8_t  MR3R3Nib1;        // Byte offset 0x68d, CSR Addr 0x58346, Direction=InOut
-    // MR3 for rank 3 nibble 1 results from internal WL.  Identical to MR3R3Nib0 for x8 or x16 devices.
+    // Out: MR3 for rank 3 nibble 1 results from internal WL.  Identical to MR3R0Nib0 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 3 nibble 1.
     uint8_t  MR3R3Nib2;        // Byte offset 0x68e, CSR Addr 0x58347, Direction=InOut
-    // MR3 for rank 3 nibble 2 results from internal WL.  Identical to MR3R3Nib0 for x16 device.
+    // Out: MR3 for rank 3 nibble 2 results from internal WL.  Identical to MR3R0Nib0 for x16 device.
+    // In: MR33 CA ODT for rank 3 nibble 2.
     uint8_t  MR3R3Nib3;        // Byte offset 0x68f, CSR Addr 0x58347, Direction=InOut
-    // MR3 for rank 3 nibble 3 results from internal WL.  Identical to MR3R3Nib0 for x16 device, or MR3R3Nib2 for x8 or x16 devices.
+    // Out: MR3 for rank 3 nibble 3 results from internal WL.  Identical to MR3R0Nib0 for x16 device, or MR3R0Nib2 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 3 nibble 3.
     uint8_t  MR3R3Nib4;        // Byte offset 0x690, CSR Addr 0x58348, Direction=InOut
-    // MR3 for rank 3 nibble 4 results from internal WL.
+    // Out: MR3 for rank 3 nibble 4 results from internal WL.
+    // In: MR33 CA ODT for rank 3 nibble 4.
     uint8_t  MR3R3Nib5;        // Byte offset 0x691, CSR Addr 0x58348, Direction=InOut
-    // MR3 for rank 3 nibble 5 results from internal WL.  Identical to MR3R3Nib4 for x8 or x16 devices.
+    // Out: MR3 for rank 3 nibble 5 results from internal WL.  Identical to MR3R0Nib4 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 3 nibble 5.
     uint8_t  MR3R3Nib6;        // Byte offset 0x692, CSR Addr 0x58349, Direction=InOut
-    // MR3 for rank 3 nibble 6 results from internal WL.  Identical to MR3R3Nib4 for x16 device.
+    // Out: MR3 for rank 3 nibble 6 results from internal WL.  Identical to MR3R0Nib4 for x16 device.
+    // In: MR33 CA ODT for rank 3 nibble 6.
     uint8_t  MR3R3Nib7;        // Byte offset 0x693, CSR Addr 0x58349, Direction=InOut
-    // MR3 for rank 3 nibble 7 results from internal WL.  Identical to MR3R3Nib4 for x16 device, or MR3R3Nib6 for x8 or x16 devices.
+    // Out: MR3 for rank 3 nibble 7 results from internal WL.  Identical to MR3R0Nib4 for x16 device, or MR3R0Nib6 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 3 nibble 7.
     uint8_t  MR3R3Nib8;        // Byte offset 0x694, CSR Addr 0x5834a, Direction=InOut
-    // MR3 for rank 3 nibble 8 results from internal WL.
+    // Out: MR3 for rank 3 nibble 8 results from internal WL.
+    // In: MR33 CA ODT for rank 3 nibble 8.
     uint8_t  MR3R3Nib9;        // Byte offset 0x695, CSR Addr 0x5834a, Direction=InOut
-    // MR3 for rank 3 nibble 9 results from internal WL.  Identical to MR3R3Nib8 for x8 or x16 devices.
+    // Out: MR3 for rank 3 nibble 9 results from internal WL.  Identical to MR3R0Nib8 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 3 nibble 9.
     uint8_t  MR3R3Nib10;       // Byte offset 0x696, CSR Addr 0x5834b, Direction=InOut
-    // MR3 for rank 3 nibble 10 results from internal WL.  Identical to MR3R3Nib8 for x16 device.
+    // Out: MR3 for rank 3 nibble 10 results from internal WL.  Identical to MR3R0Nib8 for x16 device.
+    // In: MR33 CA ODT for rank 3 nibble 10.
     uint8_t  MR3R3Nib11;       // Byte offset 0x697, CSR Addr 0x5834b, Direction=InOut
-    // MR3 for rank 3 nibble 11 results from internal WL.  Identical to MR3R3Nib8 for x16 device, or MR3R3Nib10 for x8 or x16 devices.
+    // Out: MR3 for rank 3 nibble 11 results from internal WL.  Identical to MR3R0Nib8 for x16 device, or MR3R0Nib10 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 3 nibble 11.
     uint8_t  MR3R3Nib12;       // Byte offset 0x698, CSR Addr 0x5834c, Direction=InOut
-    // MR3 for rank 3 nibble 12 results from internal WL.
+    // Out: MR3 for rank 3 nibble 12 results from internal WL.
+    // In: MR33 CA ODT for rank 3 nibble 12.
     uint8_t  MR3R3Nib13;       // Byte offset 0x699, CSR Addr 0x5834c, Direction=InOut
-    // MR3 for rank 3 nibble 13 results from internal WL.  Identical to MR3R3Nib12 for x8 or x16 devices.
+    // Out: MR3 for rank 3 nibble 13 results from internal WL.  Identical to MR3R0Nib12 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 3 nibble 13.
     uint8_t  MR3R3Nib14;       // Byte offset 0x69a, CSR Addr 0x5834d, Direction=InOut
-    // MR3 for rank 3 nibble 14 results from internal WL.  Identical to MR3R3Nib12 for x16 device.
+    // Out: MR3 for rank 3 nibble 14 results from internal WL.  Identical to MR3R0Nib12 for x16 device.
+    // In: MR33 CA ODT for rank 3 nibble 14.
     uint8_t  MR3R3Nib15;       // Byte offset 0x69b, CSR Addr 0x5834d, Direction=InOut
-    // MR3 for rank 3 nibble 15 results from internal WL.  Identical to MR3R3Nib12 for x16 device, or MR3R3Nib14 for x8 or x16 devices.
+    // Out: MR3 for rank 3 nibble 15 results from internal WL.  Identical to MR3R0Nib12 for x16 device, or MR3R0Nib14 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 3 nibble 15.
     uint8_t  MR3R3Nib16;       // Byte offset 0x69c, CSR Addr 0x5834e, Direction=InOut
-    // MR3 for rank 3 nibble 16 results from internal WL.
+    // Out: MR3 for rank 3 nibble 16 results from internal WL.
+    // In: MR33 CA ODT for rank 3 nibble 16.
     uint8_t  MR3R3Nib17;       // Byte offset 0x69d, CSR Addr 0x5834e, Direction=InOut
-    // MR3 for rank 3 nibble 17 results from internal WL.  Identical to MR3R3Nib16 for x8 or x16 devices.
+    // Out: MR3 for rank 3 nibble 17 results from internal WL.  Identical to MR3R0Nib16 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 3 nibble 17.
     uint8_t  MR3R3Nib18;       // Byte offset 0x69e, CSR Addr 0x5834f, Direction=InOut
-    // MR3 for rank 3 nibble 18 results from internal WL.  Identical to MR3R3Nib16 for x16 device.
+    // Out: MR3 for rank 3 nibble 18 results from internal WL.  Identical to MR3R0Nib16 for x16 device.
+    // In: MR33 CA ODT for rank 3 nibble 18.
     uint8_t  MR3R3Nib19;       // Byte offset 0x69f, CSR Addr 0x5834f, Direction=InOut
-    // MR3 for rank 3 nibble 19 results from internal WL.  Identical to MR3R3Nib16 for x16 device, or MR3R3Nib2 for x8 or x16 devices.
+    // Out: MR3 for rank 3 nibble 19 results from internal WL.  Identical to MR3R0Nib18 for x8 or x16 devices.
+    // In: MR33 CA ODT for rank 3 nibble 19.
     uint8_t  VrefCSR0Nib0;     // Byte offset 0x6a0, CSR Addr 0x58350, Direction=InOut
     // VrefCS for rank 0 nibble 0 (only for setting, not trained).
     uint8_t  VrefCSR0Nib1;     // Byte offset 0x6a1, CSR Addr 0x58350, Direction=InOut
@@ -4314,85 +4394,85 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint8_t  VrefCAR3Nib19;    // Byte offset 0x73f, CSR Addr 0x5839f, Direction=InOut
     // VrefCA for rank 3 nibble 19 (only for setting, not trained). Do not care for x8 or x16 devices.
     uint8_t  DisabledDB0LaneR0; // Byte offset 0x740, CSR Addr 0x583a0, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 0 are not connected on rank 0 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 0 are not connected on rank 0:  If DisabledDB0LaneR0[i] is 1 then DQ i connection is disabled for Dbyte 0 on rank 0, i = 0 to 7.
     uint8_t  DisabledDB1LaneR0; // Byte offset 0x741, CSR Addr 0x583a0, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 1 are not connected on rank 0 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 1 are not connected on rank 0:  If DisabledDB1LaneR0[i] is 1 then DQ i connection is disabled for Dbyte 1 on rank 0, i = 0 to 7.
     uint8_t  DisabledDB2LaneR0; // Byte offset 0x742, CSR Addr 0x583a1, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 2 are not connected on rank 0 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 2 are not connected on rank 0:  If DisabledDB2LaneR0[i] is 1 then DQ i connection is disabled for Dbyte 2 on rank 0, i = 0 to 7.
     uint8_t  DisabledDB3LaneR0; // Byte offset 0x743, CSR Addr 0x583a1, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 3 are not connected on rank 0 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 3 are not connected on rank 0:  If DisabledDB3LaneR0[i] is 1 then DQ i connection is disabled for Dbyte 3 on rank 0, i = 0 to 7.
     uint8_t  DisabledDB4LaneR0; // Byte offset 0x744, CSR Addr 0x583a2, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 4 are not connected on rank 0 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 4 are not connected on rank 0:  If DisabledDB4LaneR0[i] is 1 then DQ i connection is disabled for Dbyte 4 on rank 0, i = 0 to 7.
     uint8_t  DisabledDB5LaneR0; // Byte offset 0x745, CSR Addr 0x583a2, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 5 are not connected on rank 0 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 5 are not connected on rank 0:  If DisabledDB5LaneR0[i] is 1 then DQ i connection is disabled for Dbyte 5 on rank 0, i = 0 to 7.
     uint8_t  DisabledDB6LaneR0; // Byte offset 0x746, CSR Addr 0x583a3, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 6 are not connected on rank 0 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 6 are not connected on rank 0:  If DisabledDB6LaneR0[i] is 1 then DQ i connection is disabled for Dbyte 6 on rank 0, i = 0 to 7.
     uint8_t  DisabledDB7LaneR0; // Byte offset 0x747, CSR Addr 0x583a3, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 7 are not connected on rank 0 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 7 are not connected on rank 0:  If DisabledDB7LaneR0[i] is 1 then DQ i connection is disabled for Dbyte 7 on rank 0, i = 0 to 7.
     uint8_t  DisabledDB8LaneR0; // Byte offset 0x748, CSR Addr 0x583a4, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 8 are not connected on rank 0 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 8 are not connected on rank 0:  If DisabledDB8LaneR0[i] is 1 then DQ i connection is disabled for Dbyte 8 on rank 0, i = 0 to 7.
     uint8_t  DisabledDB9LaneR0; // Byte offset 0x749, CSR Addr 0x583a4, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 9 are not connected on rank 0 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 9 are not connected on rank 0:  If DisabledDB9LaneR0[i] is 1 then DQ i connection is disabled for Dbyte 9 on rank 0, i = 0 to 7.
     uint8_t  DisabledDB0LaneR1; // Byte offset 0x74a, CSR Addr 0x583a5, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 0 are not connected on rank 1 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 0 are not connected on rank 1:  If DisabledDB0LaneR1[i] is 1 then DQ i connection is disabled for Dbyte 0 on rank 1, i = 0 to 7.
     uint8_t  DisabledDB1LaneR1; // Byte offset 0x74b, CSR Addr 0x583a5, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 1 are not connected on rank 1 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 1 are not connected on rank 1:  If DisabledDB1LaneR1[i] is 1 then DQ i connection is disabled for Dbyte 1 on rank 1, i = 0 to 7.
     uint8_t  DisabledDB2LaneR1; // Byte offset 0x74c, CSR Addr 0x583a6, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 2 are not connected on rank 1 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 2 are not connected on rank 1:  If DisabledDB2LaneR1[i] is 1 then DQ i connection is disabled for Dbyte 2 on rank 1, i = 0 to 7.
     uint8_t  DisabledDB3LaneR1; // Byte offset 0x74d, CSR Addr 0x583a6, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 3 are not connected on rank 1 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 3 are not connected on rank 1:  If DisabledDB3LaneR1[i] is 1 then DQ i connection is disabled for Dbyte 3 on rank 1, i = 0 to 7.
     uint8_t  DisabledDB4LaneR1; // Byte offset 0x74e, CSR Addr 0x583a7, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 4 are not connected on rank 1 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 4 are not connected on rank 1:  If DisabledDB4LaneR1[i] is 1 then DQ i connection is disabled for Dbyte 4 on rank 1, i = 0 to 7.
     uint8_t  DisabledDB5LaneR1; // Byte offset 0x74f, CSR Addr 0x583a7, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 5 are not connected on rank 1 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 5 are not connected on rank 1:  If DisabledDB5LaneR1[i] is 1 then DQ i connection is disabled for Dbyte 5 on rank 1, i = 0 to 7.
     uint8_t  DisabledDB6LaneR1; // Byte offset 0x750, CSR Addr 0x583a8, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 6 are not connected on rank 1 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 6 are not connected on rank 1:  If DisabledDB6LaneR1[i] is 1 then DQ i connection is disabled for Dbyte 6 on rank 1, i = 0 to 7.
     uint8_t  DisabledDB7LaneR1; // Byte offset 0x751, CSR Addr 0x583a8, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 7 are not connected on rank 1 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 7 are not connected on rank 1:  If DisabledDB7LaneR1[i] is 1 then DQ i connection is disabled for Dbyte 7 on rank 1, i = 0 to 7.
     uint8_t  DisabledDB8LaneR1; // Byte offset 0x752, CSR Addr 0x583a9, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 8 are not connected on rank 1 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 8 are not connected on rank 1:  If DisabledDB8LaneR1[i] is 1 then DQ i connection is disabled for Dbyte 8 on rank 1, i = 0 to 7.
     uint8_t  DisabledDB9LaneR1; // Byte offset 0x753, CSR Addr 0x583a9, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 9 are not connected on rank 1 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 9 are not connected on rank 1:  If DisabledDB9LaneR1[i] is 1 then DQ i connection is disabled for Dbyte 9 on rank 1, i = 0 to 7.
     uint8_t  DisabledDB0LaneR2; // Byte offset 0x754, CSR Addr 0x583aa, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 0 are not connected on rank 2 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 0 are not connected on rank 2:  If DisabledDB0LaneR2[i] is 1 then DQ i connection is disabled for Dbyte 0 on rank 2, i = 0 to 7.
     uint8_t  DisabledDB1LaneR2; // Byte offset 0x755, CSR Addr 0x583aa, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 1 are not connected on rank 2 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 1 are not connected on rank 2:  If DisabledDB1LaneR2[i] is 1 then DQ i connection is disabled for Dbyte 1 on rank 2, i = 0 to 7.
     uint8_t  DisabledDB2LaneR2; // Byte offset 0x756, CSR Addr 0x583ab, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 2 are not connected on rank 2 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 2 are not connected on rank 2:  If DisabledDB2LaneR2[i] is 1 then DQ i connection is disabled for Dbyte 2 on rank 2, i = 0 to 7.
     uint8_t  DisabledDB3LaneR2; // Byte offset 0x757, CSR Addr 0x583ab, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 3 are not connected on rank 2 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 3 are not connected on rank 2:  If DisabledDB3LaneR2[i] is 1 then DQ i connection is disabled for Dbyte 3 on rank 2, i = 0 to 7.
     uint8_t  DisabledDB4LaneR2; // Byte offset 0x758, CSR Addr 0x583ac, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 4 are not connected on rank 2 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 4 are not connected on rank 2:  If DisabledDB4LaneR2[i] is 1 then DQ i connection is disabled for Dbyte 4 on rank 2, i = 0 to 7.
     uint8_t  DisabledDB5LaneR2; // Byte offset 0x759, CSR Addr 0x583ac, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 5 are not connected on rank 2 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 5 are not connected on rank 2:  If DisabledDB5LaneR2[i] is 1 then DQ i connection is disabled for Dbyte 5 on rank 2, i = 0 to 7.
     uint8_t  DisabledDB6LaneR2; // Byte offset 0x75a, CSR Addr 0x583ad, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 6 are not connected on rank 2 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 6 are not connected on rank 2:  If DisabledDB6LaneR2[i] is 1 then DQ i connection is disabled for Dbyte 6 on rank 2, i = 0 to 7.
     uint8_t  DisabledDB7LaneR2; // Byte offset 0x75b, CSR Addr 0x583ad, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 7 are not connected on rank 2 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 7 are not connected on rank 2:  If DisabledDB7LaneR2[i] is 1 then DQ i connection is disabled for Dbyte 7 on rank 2, i = 0 to 7.
     uint8_t  DisabledDB8LaneR2; // Byte offset 0x75c, CSR Addr 0x583ae, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 8 are not connected on rank 2 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 8 are not connected on rank 2:  If DisabledDB8LaneR2[i] is 1 then DQ i connection is disabled for Dbyte 8 on rank 2, i = 0 to 7.
     uint8_t  DisabledDB9LaneR2; // Byte offset 0x75d, CSR Addr 0x583ae, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 9 are not connected on rank 2 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 9 are not connected on rank 2:  If DisabledDB9LaneR2[i] is 1 then DQ i connection is disabled for Dbyte 9 on rank 2, i = 0 to 7.
     uint8_t  DisabledDB0LaneR3; // Byte offset 0x75e, CSR Addr 0x583af, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 0 are not connected on rank 3 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 0 are not connected on rank 3:  If DisabledDB0LaneR3[i] is 1 then DQ i connection is disabled for Dbyte 0 on rank 3, i = 0 to 7.
     uint8_t  DisabledDB1LaneR3; // Byte offset 0x75f, CSR Addr 0x583af, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 1 are not connected on rank 3 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 1 are not connected on rank 3:  If DisabledDB1LaneR3[i] is 1 then DQ i connection is disabled for Dbyte 1 on rank 3, i = 0 to 7.
     uint8_t  DisabledDB2LaneR3; // Byte offset 0x760, CSR Addr 0x583b0, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 2 are not connected on rank 3 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 2 are not connected on rank 3:  If DisabledDB2LaneR3[i] is 1 then DQ i connection is disabled for Dbyte 2 on rank 3, i = 0 to 7.
     uint8_t  DisabledDB3LaneR3; // Byte offset 0x761, CSR Addr 0x583b0, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 3 are not connected on rank 3 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 3 are not connected on rank 3:  If DisabledDB3LaneR3[i] is 1 then DQ i connection is disabled for Dbyte 3 on rank 3, i = 0 to 7.
     uint8_t  DisabledDB4LaneR3; // Byte offset 0x762, CSR Addr 0x583b1, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 4 are not connected on rank 3 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 4 are not connected on rank 3:  If DisabledDB4LaneR3[i] is 1 then DQ i connection is disabled for Dbyte 4 on rank 3, i = 0 to 7.
     uint8_t  DisabledDB5LaneR3; // Byte offset 0x763, CSR Addr 0x583b1, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 5 are not connected on rank 3 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 5 are not connected on rank 3:  If DisabledDB5LaneR3[i] is 1 then DQ i connection is disabled for Dbyte 5 on rank 3, i = 0 to 7.
     uint8_t  DisabledDB6LaneR3; // Byte offset 0x764, CSR Addr 0x583b2, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 6 are not connected on rank 3 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 6 are not connected on rank 3:  If DisabledDB6LaneR3[i] is 1 then DQ i connection is disabled for Dbyte 6 on rank 3, i = 0 to 7.
     uint8_t  DisabledDB7LaneR3; // Byte offset 0x765, CSR Addr 0x583b2, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 7 are not connected on rank 3 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 7 are not connected on rank 3:  If DisabledDB7LaneR3[i] is 1 then DQ i connection is disabled for Dbyte 7 on rank 3, i = 0 to 7.
     uint8_t  DisabledDB8LaneR3; // Byte offset 0x766, CSR Addr 0x583b3, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 8 are not connected on rank 3 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 8 are not connected on rank 3:  If DisabledDB8LaneR3[i] is 1 then DQ i connection is disabled for Dbyte 8 on rank 3, i = 0 to 7.
     uint8_t  DisabledDB9LaneR3; // Byte offset 0x767, CSR Addr 0x583b3, Direction=InOut
-    // Bitmap to indicate which DQ lane of Dbytes 9 are not connected on rank 3 (for DQ 0 to 7)
+    // Bitmap to indicate which DQ lanes of Dbyte 9 are not connected on rank 3:  If DisabledDB9LaneR3[i] is 1 then DQ i connection is disabled for Dbyte 9 on rank 3, i = 0 to 7.
     uint8_t  QCS_Dly_Margin_A0; // Byte offset 0x768, CSR Addr 0x583b4, Direction=Out
     // Distance from the trained center to the closest failing region in 1/64 tCK steps, for CS channel A, rank 0 (both sides)
     uint8_t  QCA_Dly_Margin_A0; // Byte offset 0x769, CSR Addr 0x583b4, Direction=Out
@@ -4431,5 +4511,273 @@ typedef struct _PMU_SMB_DDR5_1D_t
     uint16_t PmuInternalRev1;  // Byte offset 0x77a, CSR Addr 0x583bd, Direction=Out
     // PMU firmware internal revision ID 1
     // After training is run, this address will contain the internal revision ID 1 of the firmware.
+    uint8_t  VrefCS_Sweep_Min; // Byte offset 0x77c, CSR Addr 0x583be, Direction=In
+    // Low bound of the Vref sweep range used during VrefCS training
+    // Note: Min corresponds to the lowest voltage setting (i.e. the highest valid VrefCS code).
+    uint8_t  VrefCS_Sweep_Max; // Byte offset 0x77d, CSR Addr 0x583be, Direction=In
+    // High bound of the Vref sweep range used during VrefCS training
+    // Note: the sweep range is [VrefCS_Sweep_Min, VrefCS_Sweep_Max[ (i.e. the max value is not included in the sweep). If left at 0, the max Vref will be used as high bound.
+    uint8_t  VrefCA_Sweep_Min; // Byte offset 0x77e, CSR Addr 0x583bf, Direction=In
+    // Low bound of the Vref sweep range used during VrefCA training
+    // Note: Min corresponds to the lowest voltage setting (i.e. the highest valid VrefCA code).
+    uint8_t  VrefCA_Sweep_Max; // Byte offset 0x77f, CSR Addr 0x583bf, Direction=In
+    // High bound of the Vref sweep range used during VrefCA training
+    // Note: the sweep range is [VrefCA_Sweep_Min, VrefCA_Sweep_Max[ (i.e. the max value is not included in the sweep). If left at 0, the max Vref will be used as high bound.
+    uint8_t  MR32R0Nib0;       // Byte offset 0x780, CSR Addr 0x583c0, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 0
+    uint8_t  MR32R0Nib1;       // Byte offset 0x781, CSR Addr 0x583c0, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 1
+    uint8_t  MR32R0Nib2;       // Byte offset 0x782, CSR Addr 0x583c1, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 2
+    uint8_t  MR32R0Nib3;       // Byte offset 0x783, CSR Addr 0x583c1, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 3
+    uint8_t  MR32R0Nib4;       // Byte offset 0x784, CSR Addr 0x583c2, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 4
+    uint8_t  MR32R0Nib5;       // Byte offset 0x785, CSR Addr 0x583c2, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 5
+    uint8_t  MR32R0Nib6;       // Byte offset 0x786, CSR Addr 0x583c3, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 6
+    uint8_t  MR32R0Nib7;       // Byte offset 0x787, CSR Addr 0x583c3, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 7
+    uint8_t  MR32R0Nib8;       // Byte offset 0x788, CSR Addr 0x583c4, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 8
+    uint8_t  MR32R0Nib9;       // Byte offset 0x789, CSR Addr 0x583c4, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 9
+    uint8_t  MR32R0Nib10;      // Byte offset 0x78a, CSR Addr 0x583c5, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 10
+    uint8_t  MR32R0Nib11;      // Byte offset 0x78b, CSR Addr 0x583c5, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 11
+    uint8_t  MR32R0Nib12;      // Byte offset 0x78c, CSR Addr 0x583c6, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 12
+    uint8_t  MR32R0Nib13;      // Byte offset 0x78d, CSR Addr 0x583c6, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 13
+    uint8_t  MR32R0Nib14;      // Byte offset 0x78e, CSR Addr 0x583c7, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 14
+    uint8_t  MR32R0Nib15;      // Byte offset 0x78f, CSR Addr 0x583c7, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 15
+    uint8_t  MR32R0Nib16;      // Byte offset 0x790, CSR Addr 0x583c8, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 16
+    uint8_t  MR32R0Nib17;      // Byte offset 0x791, CSR Addr 0x583c8, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 17
+    uint8_t  MR32R0Nib18;      // Byte offset 0x792, CSR Addr 0x583c9, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 18
+    uint8_t  MR32R0Nib19;      // Byte offset 0x793, CSR Addr 0x583c9, Direction=In
+    // MR32 CK/CS ODT for rank 0 nibble 19
+    uint8_t  MR32R1Nib0;       // Byte offset 0x794, CSR Addr 0x583ca, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 0
+    uint8_t  MR32R1Nib1;       // Byte offset 0x795, CSR Addr 0x583ca, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 1
+    uint8_t  MR32R1Nib2;       // Byte offset 0x796, CSR Addr 0x583cb, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 2
+    uint8_t  MR32R1Nib3;       // Byte offset 0x797, CSR Addr 0x583cb, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 3
+    uint8_t  MR32R1Nib4;       // Byte offset 0x798, CSR Addr 0x583cc, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 4
+    uint8_t  MR32R1Nib5;       // Byte offset 0x799, CSR Addr 0x583cc, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 5
+    uint8_t  MR32R1Nib6;       // Byte offset 0x79a, CSR Addr 0x583cd, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 6
+    uint8_t  MR32R1Nib7;       // Byte offset 0x79b, CSR Addr 0x583cd, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 7
+    uint8_t  MR32R1Nib8;       // Byte offset 0x79c, CSR Addr 0x583ce, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 8
+    uint8_t  MR32R1Nib9;       // Byte offset 0x79d, CSR Addr 0x583ce, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 9
+    uint8_t  MR32R1Nib10;      // Byte offset 0x79e, CSR Addr 0x583cf, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 10
+    uint8_t  MR32R1Nib11;      // Byte offset 0x79f, CSR Addr 0x583cf, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 11
+    uint8_t  MR32R1Nib12;      // Byte offset 0x7a0, CSR Addr 0x583d0, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 12
+    uint8_t  MR32R1Nib13;      // Byte offset 0x7a1, CSR Addr 0x583d0, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 13
+    uint8_t  MR32R1Nib14;      // Byte offset 0x7a2, CSR Addr 0x583d1, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 14
+    uint8_t  MR32R1Nib15;      // Byte offset 0x7a3, CSR Addr 0x583d1, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 15
+    uint8_t  MR32R1Nib16;      // Byte offset 0x7a4, CSR Addr 0x583d2, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 16
+    uint8_t  MR32R1Nib17;      // Byte offset 0x7a5, CSR Addr 0x583d2, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 17
+    uint8_t  MR32R1Nib18;      // Byte offset 0x7a6, CSR Addr 0x583d3, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 18
+    uint8_t  MR32R1Nib19;      // Byte offset 0x7a7, CSR Addr 0x583d3, Direction=In
+    // MR32 CK/CS ODT for rank 1 nibble 19
+    uint8_t  MR32R2Nib0;       // Byte offset 0x7a8, CSR Addr 0x583d4, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 0
+    uint8_t  MR32R2Nib1;       // Byte offset 0x7a9, CSR Addr 0x583d4, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 1
+    uint8_t  MR32R2Nib2;       // Byte offset 0x7aa, CSR Addr 0x583d5, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 2
+    uint8_t  MR32R2Nib3;       // Byte offset 0x7ab, CSR Addr 0x583d5, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 3
+    uint8_t  MR32R2Nib4;       // Byte offset 0x7ac, CSR Addr 0x583d6, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 4
+    uint8_t  MR32R2Nib5;       // Byte offset 0x7ad, CSR Addr 0x583d6, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 5
+    uint8_t  MR32R2Nib6;       // Byte offset 0x7ae, CSR Addr 0x583d7, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 6
+    uint8_t  MR32R2Nib7;       // Byte offset 0x7af, CSR Addr 0x583d7, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 7
+    uint8_t  MR32R2Nib8;       // Byte offset 0x7b0, CSR Addr 0x583d8, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 8
+    uint8_t  MR32R2Nib9;       // Byte offset 0x7b1, CSR Addr 0x583d8, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 9
+    uint8_t  MR32R2Nib10;      // Byte offset 0x7b2, CSR Addr 0x583d9, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 10
+    uint8_t  MR32R2Nib11;      // Byte offset 0x7b3, CSR Addr 0x583d9, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 11
+    uint8_t  MR32R2Nib12;      // Byte offset 0x7b4, CSR Addr 0x583da, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 12
+    uint8_t  MR32R2Nib13;      // Byte offset 0x7b5, CSR Addr 0x583da, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 13
+    uint8_t  MR32R2Nib14;      // Byte offset 0x7b6, CSR Addr 0x583db, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 14
+    uint8_t  MR32R2Nib15;      // Byte offset 0x7b7, CSR Addr 0x583db, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 15
+    uint8_t  MR32R2Nib16;      // Byte offset 0x7b8, CSR Addr 0x583dc, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 16
+    uint8_t  MR32R2Nib17;      // Byte offset 0x7b9, CSR Addr 0x583dc, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 17
+    uint8_t  MR32R2Nib18;      // Byte offset 0x7ba, CSR Addr 0x583dd, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 18
+    uint8_t  MR32R2Nib19;      // Byte offset 0x7bb, CSR Addr 0x583dd, Direction=In
+    // MR32 CK/CS ODT for rank 2 nibble 19
+    uint8_t  MR32R3Nib0;       // Byte offset 0x7bc, CSR Addr 0x583de, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 0
+    uint8_t  MR32R3Nib1;       // Byte offset 0x7bd, CSR Addr 0x583de, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 1
+    uint8_t  MR32R3Nib2;       // Byte offset 0x7be, CSR Addr 0x583df, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 2
+    uint8_t  MR32R3Nib3;       // Byte offset 0x7bf, CSR Addr 0x583df, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 3
+    uint8_t  MR32R3Nib4;       // Byte offset 0x7c0, CSR Addr 0x583e0, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 4
+    uint8_t  MR32R3Nib5;       // Byte offset 0x7c1, CSR Addr 0x583e0, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 5
+    uint8_t  MR32R3Nib6;       // Byte offset 0x7c2, CSR Addr 0x583e1, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 6
+    uint8_t  MR32R3Nib7;       // Byte offset 0x7c3, CSR Addr 0x583e1, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 7
+    uint8_t  MR32R3Nib8;       // Byte offset 0x7c4, CSR Addr 0x583e2, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 8
+    uint8_t  MR32R3Nib9;       // Byte offset 0x7c5, CSR Addr 0x583e2, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 9
+    uint8_t  MR32R3Nib10;      // Byte offset 0x7c6, CSR Addr 0x583e3, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 10
+    uint8_t  MR32R3Nib11;      // Byte offset 0x7c7, CSR Addr 0x583e3, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 11
+    uint8_t  MR32R3Nib12;      // Byte offset 0x7c8, CSR Addr 0x583e4, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 12
+    uint8_t  MR32R3Nib13;      // Byte offset 0x7c9, CSR Addr 0x583e4, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 13
+    uint8_t  MR32R3Nib14;      // Byte offset 0x7ca, CSR Addr 0x583e5, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 14
+    uint8_t  MR32R3Nib15;      // Byte offset 0x7cb, CSR Addr 0x583e5, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 15
+    uint8_t  MR32R3Nib16;      // Byte offset 0x7cc, CSR Addr 0x583e6, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 16
+    uint8_t  MR32R3Nib17;      // Byte offset 0x7cd, CSR Addr 0x583e6, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 17
+    uint8_t  MR32R3Nib18;      // Byte offset 0x7ce, CSR Addr 0x583e7, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 18
+    uint8_t  MR32R3Nib19;      // Byte offset 0x7cf, CSR Addr 0x583e7, Direction=In
+    // MR32 CK/CS ODT for rank 3 nibble 19
+    uint8_t  Reserved7D0;      // Byte offset 0x7d0, CSR Addr 0x583e8, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7D1;      // Byte offset 0x7d1, CSR Addr 0x583e8, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7D2;      // Byte offset 0x7d2, CSR Addr 0x583e9, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7D3;      // Byte offset 0x7d3, CSR Addr 0x583e9, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7D4;      // Byte offset 0x7d4, CSR Addr 0x583ea, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7D5;      // Byte offset 0x7d5, CSR Addr 0x583ea, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7D6;      // Byte offset 0x7d6, CSR Addr 0x583eb, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7D7;      // Byte offset 0x7d7, CSR Addr 0x583eb, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7D8;      // Byte offset 0x7d8, CSR Addr 0x583ec, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7D9;      // Byte offset 0x7d9, CSR Addr 0x583ec, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7DA;      // Byte offset 0x7da, CSR Addr 0x583ed, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7DB;      // Byte offset 0x7db, CSR Addr 0x583ed, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7DC;      // Byte offset 0x7dc, CSR Addr 0x583ee, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7DD;      // Byte offset 0x7dd, CSR Addr 0x583ee, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7DE;      // Byte offset 0x7de, CSR Addr 0x583ef, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7DF;      // Byte offset 0x7df, CSR Addr 0x583ef, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7E0;      // Byte offset 0x7e0, CSR Addr 0x583f0, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7E1;      // Byte offset 0x7e1, CSR Addr 0x583f0, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7E2;      // Byte offset 0x7e2, CSR Addr 0x583f1, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7E3;      // Byte offset 0x7e3, CSR Addr 0x583f1, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7E4;      // Byte offset 0x7e4, CSR Addr 0x583f2, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7E5;      // Byte offset 0x7e5, CSR Addr 0x583f2, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7E6;      // Byte offset 0x7e6, CSR Addr 0x583f3, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7E7;      // Byte offset 0x7e7, CSR Addr 0x583f3, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7E8;      // Byte offset 0x7e8, CSR Addr 0x583f4, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7E9;      // Byte offset 0x7e9, CSR Addr 0x583f4, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7EA;      // Byte offset 0x7ea, CSR Addr 0x583f5, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7EB;      // Byte offset 0x7eb, CSR Addr 0x583f5, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7EC;      // Byte offset 0x7ec, CSR Addr 0x583f6, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7ED;      // Byte offset 0x7ed, CSR Addr 0x583f6, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7EE;      // Byte offset 0x7ee, CSR Addr 0x583f7, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7EF;      // Byte offset 0x7ef, CSR Addr 0x583f7, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7F0;      // Byte offset 0x7f0, CSR Addr 0x583f8, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7F1;      // Byte offset 0x7f1, CSR Addr 0x583f8, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7F2;      // Byte offset 0x7f2, CSR Addr 0x583f9, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7F3;      // Byte offset 0x7f3, CSR Addr 0x583f9, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7F4;      // Byte offset 0x7f4, CSR Addr 0x583fa, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7F5;      // Byte offset 0x7f5, CSR Addr 0x583fa, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7F6;      // Byte offset 0x7f6, CSR Addr 0x583fb, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7F7;      // Byte offset 0x7f7, CSR Addr 0x583fb, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7F8;      // Byte offset 0x7f8, CSR Addr 0x583fc, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7F9;      // Byte offset 0x7f9, CSR Addr 0x583fc, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7FA;      // Byte offset 0x7fa, CSR Addr 0x583fd, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7FB;      // Byte offset 0x7fb, CSR Addr 0x583fd, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7FC;      // Byte offset 0x7fc, CSR Addr 0x583fe, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7FD;      // Byte offset 0x7fd, CSR Addr 0x583fe, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7FE;      // Byte offset 0x7fe, CSR Addr 0x583ff, Direction=In
+    // This field is reserved and must be programmed to 0x00.
+    uint8_t  Reserved7FF;      // Byte offset 0x7ff, CSR Addr 0x583ff, Direction=In
+    // This field is reserved and must be programmed to 0x00.
 } __attribute__ ((packed)) PMU_SMB_DDR5U_1D_t;
 #endif
