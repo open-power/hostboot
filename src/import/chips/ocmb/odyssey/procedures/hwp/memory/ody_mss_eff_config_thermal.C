@@ -67,13 +67,15 @@ extern "C"
         FAPI_INF("Start ody_mss_eff_config_thermal");
 
         // For regulator power/current throttling or thermal throttling
-        // Do thermal throttling last so the attributes end up representing a total power value for later usage
-        //   Need to have ATTR_ODY_TOTAL_PWR_SLOPE and ATTR_EXP_TOTAL_PWR_INTERCEPT with total DIMM power
-        //   (not regulator current values) after ody_mss_eff_config_thermal is run, so when OCC calls
-        //   ody_bulk_pwr_throttles at runtime the total DIMM power will be used for any memory bulk supply throttling
-        const std::vector<mss::throttle_type> throttle_types{ mss::throttle_type::POWER, mss::throttle_type::THERMAL};
+        // Do thermal throttling first since throttles are not optimized for thermal throttles and we want to
+        //   compare them against the MRW max utilization allowed runtime throttle values to see if they can be optimized
+        // Then do power throttling second so combine_runtime_port_throttles can decide if throttles can be optimized
+        // Then do thermal throttling third so that resets attributes to total DIMM power values (needed when OCC calls bulk_pwr_throttles)
+        //   do not recalcuate throttles as that may not provide correct throttle settings in the end with the optimizations that are done
+        const std::vector<mss::throttle_type> throttle_types{ mss::throttle_type::THERMAL, mss::throttle_type::POWER, mss::throttle_type::THERMAL};
 
         const uint64_t l_min_util = TT::MIN_UTIL;
+        uint8_t l_thermal_count = 0;
 
         for (const auto& l_ocmb : i_targets)
         {
@@ -85,10 +87,18 @@ extern "C"
 
         for ( const auto& l_ocmb : i_targets)
         {
-            //Restore runtime_throttles
+            // init ocmb throttles to zero to make sure they will be power throttle optimized
+            uint16_t l_ocmb_slot = 0;
+            uint16_t l_ocmb_port = 0;
+            FAPI_TRY(mss::attr::set_ody_mem_throttled_n_commands_per_slot(l_ocmb, l_ocmb_slot));
+            FAPI_TRY(mss::attr::set_ody_mem_throttled_n_commands_per_port(l_ocmb, l_ocmb_port));
+            FAPI_TRY(mss::attr::set_ody_runtime_mem_throttled_n_commands_per_slot(l_ocmb, l_ocmb_slot));
+            FAPI_TRY(mss::attr::set_ody_runtime_mem_throttled_n_commands_per_port(l_ocmb, l_ocmb_port));
+
+            //Restore runtime_throttles, using power optimized throttles
             //Sets throttles to max_databus_util value
-            FAPI_INF(GENTARGTIDFORMAT" Restoring throttles for ", GENTARGTID(l_ocmb) );
-            FAPI_TRY( mss::power_thermal::restore_runtime_throttles<mss::mc_type::ODYSSEY>(l_ocmb),
+            FAPI_INF(GENTARGTIDFORMAT " Restoring throttles", GENTARGTID(l_ocmb) );
+            FAPI_TRY( mss::power_thermal::restore_runtime_throttles<mss::mc_type::ODYSSEY>(l_ocmb, mss::throttle_type::POWER),
                       GENTARGTIDFORMAT " Fail encountered in restore runtime throttles", GENTARGTID(l_ocmb));
         }
 
@@ -101,7 +111,7 @@ extern "C"
                 //Not doing any work if there are no dimms installed
                 if ( l_dimm_count == 0)
                 {
-                    FAPI_INF(GENTARGTIDFORMAT "Skipping eff_config thermal because no dimms for ", GENTARGTID(l_ocmb));
+                    FAPI_INF(GENTARGTIDFORMAT " Skipping eff_config_thermal because no dimms found", GENTARGTID(l_ocmb));
                     continue;
                 }
 
@@ -169,7 +179,7 @@ extern "C"
                                  fapi2::MSS_MRW_SAFEMODE_UTIL_THROTTLE_NOT_SUPPORTED()
                                  .set_MRW_SAFEMODE_UTIL(l_safemode)
                                  .set_MIN_UTIL_VALUE(l_min_util),
-                                 GENTARGTIDFORMAT "MRW safemode util (%d centi percent) has less util than the min util allowed (%d centi percent) for ",
+                                 GENTARGTIDFORMAT " MRW safemode util (%d centi percent) has less util than the min util allowed (%d centi percent)",
                                  GENTARGTID(l_port),
                                  l_safemode, l_min_util );
 
@@ -178,31 +188,50 @@ extern "C"
                     for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port) )
                     {
                         const uint8_t l_dimm_pos = mss::index(l_dimm);
-                        FAPI_INF( GENTARGTIDFORMAT "DIMM (%d) slope is %d, intercept is %d, limit is %d for ", GENTARGTID(l_port),
+                        FAPI_INF( GENTARGTIDFORMAT " DIMM (%d) slope is %d, intercept is %d, limit is %d", GENTARGTID(l_port),
                                   l_dimm_pos, l_slope[l_dimm_pos], l_intercept[l_dimm_pos],
                                   l_limit[l_dimm_pos]);
                     }
                 }
 
-                FAPI_INF(GENTARGTIDFORMAT "Starting pwr_throttles(%s) for ",
-                         mss::throttle_type::POWER == l_throttle_type ? "POWER" : "THERMAL", GENTARGTID(l_ocmb));
-                //get the power limits, done per dimm and set to worst case for the slot and port throttles
-                FAPI_TRY(mss::power_thermal::pwr_throttles<mss::mc_type::ODYSSEY>(l_ocmb, l_throttle_type),
-                         GENTARGTIDFORMAT "Fail encountered in pwr_throttles for", GENTARGTID(l_ocmb));
+                // only do this one time for thermal throttling and do this for power throttling
+                // second time thermal throttling is done is for only resetting attributes so we don't want to recalculate
+                //   throttles again as that would not work correctly with the throttle optimization being done
+                if ((l_thermal_count == 0) || (l_throttle_type == mss::throttle_type::POWER))
+                {
+                    FAPI_INF(GENTARGTIDFORMAT " Starting pwr_throttles(%s)",
+                             GENTARGTID(l_ocmb), mss::throttle_type::POWER == l_throttle_type ? "POWER" : "THERMAL");
+                    //get the power limits, done per dimm and set to worst case for the slot and port throttles
+                    FAPI_TRY(mss::power_thermal::pwr_throttles<mss::mc_type::ODYSSEY>(l_ocmb, l_throttle_type),
+                             GENTARGTIDFORMAT " Fail encountered in pwr_throttles", GENTARGTID(l_ocmb));
+                }
             }
 
-            // Combines all port-based throttles for overall OCMB equivelents
-            // Then equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
-            FAPI_TRY(mss::power_thermal::equalize_throttles<mss::mc_type::ODYSSEY>(i_targets, l_throttle_type),
-                     "Fail encountered in equalize_throttles");
-
-            for ( const auto& l_ocmb : i_targets)
+            // only do this one time for thermal throttling and do this for power throttling
+            // second time thermal throttling is done is for only resetting attributes so we don't want to recalculate
+            //   throttles again as that would not work correctly with the throttle optimization being done
+            if ((l_thermal_count == 0) || (l_throttle_type == mss::throttle_type::POWER))
             {
+
                 // Combines all port-based throttles for overall OCMB equivelents
-                // Set runtime throttles to worst case between ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT
-                // and ATTR_EXP_MEM_RUNTIME_THROTTLED_N_COMMANDS_PER_SLOT and the _PORT equivalents also
-                FAPI_TRY( mss::power_thermal::update_runtime_throttle<mss::mc_type::ODYSSEY>(l_ocmb),
-                          GENTARGTIDFORMAT "Fail encountered in update_runtime_throttle for %s", GENTARGTID(l_ocmb));
+                // Then equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
+                FAPI_TRY(mss::power_thermal::equalize_throttles<mss::mc_type::ODYSSEY>(i_targets, l_throttle_type),
+                         "Fail encountered in equalize_throttles");
+
+                for ( const auto& l_ocmb : i_targets)
+                {
+                    // Combines all port-based throttles for overall OCMB equivelents
+                    // Set runtime throttles to worst case between ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT
+                    // and ATTR_EXP_MEM_RUNTIME_THROTTLED_N_COMMANDS_PER_SLOT and the _PORT equivalents also
+                    FAPI_TRY( mss::power_thermal::update_runtime_throttle<mss::mc_type::ODYSSEY>(l_ocmb, l_throttle_type),
+                              GENTARGTIDFORMAT " Fail encountered in update_runtime_throttle", GENTARGTID(l_ocmb));
+                }
+            }
+
+            // increment thermal count variable
+            if (l_throttle_type == mss::throttle_type::THERMAL)
+            {
+                l_thermal_count++;
             }
         }
 

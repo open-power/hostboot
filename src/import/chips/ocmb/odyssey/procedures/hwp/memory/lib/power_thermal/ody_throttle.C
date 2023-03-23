@@ -55,11 +55,93 @@ namespace power_thermal
 
 #ifndef __PPE__
 ///
+/// @brief Determine the optimized ocmb level throttle values
+/// @param[in]  i_target the MC target
+/// @param[in]  i_throttle_type thermal boolean to determine whether to calculate throttles based on the power regulator or thermal limits
+/// @param[in]  i_ocmb_port_count  number of ocmb ports configured
+/// @param[in]  i_port_min_slot    minimum port level slot throttle
+/// @param[out] o_ocmb_slot        ocmb level slot throttle to use (optimized or not)
+/// @param[out] o_ocmb_port        ocmb level port throttle to use (optimized or not)
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode get_optimized_ocmb_throttles(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const mss::throttle_type i_throttle_type,
+        const uint8_t i_ocmb_port_count,
+        const uint16_t i_port_min_slot,
+        uint16_t& o_ocmb_slot,
+        uint16_t& o_ocmb_port)
+{
+    bool l_throttle_optimize = false;
+    uint16_t l_runtime_ocmb_port = 0;
+    uint16_t l_runtime_ocmb_slot = 0;
+    constexpr uint32_t ONE_HUNDRED_CENTI_PERCENT = 10000;
+
+    // get ocmb level runtime throttles to help with calculations and limits
+    FAPI_TRY( mss::attr::get_ody_runtime_mem_throttled_n_commands_per_slot(i_target, l_runtime_ocmb_slot));
+    FAPI_TRY( mss::attr::get_ody_runtime_mem_throttled_n_commands_per_port(i_target, l_runtime_ocmb_port));
+
+    // determine if ocmb level throttles can be optimized when there is more than one port
+    // this is done to preserve any thermal throttles which are not optimized
+    if (i_ocmb_port_count > 1)
+    {
+        if (i_throttle_type == mss::throttle_type::POWER)
+        {
+            // power throttling:  ocmb runtime throttles are at initialized values of zero
+            //   will be used when restore_runtime_throttles is run in eff_config_thermal
+            if ((l_runtime_ocmb_slot == 0) || (l_runtime_ocmb_port == 0))
+            {
+                l_throttle_optimize = true;
+            }
+
+            // power throttling:  ocmb runtime slot = ocmb runtime port and non-zero (previously optimized)
+            // power throttling:  ocmb runtime slot < ocmb runtime port (optimize power throttles up to thermal throttle values)
+            if ((l_runtime_ocmb_slot <= l_runtime_ocmb_port) && (l_runtime_ocmb_slot > 0))
+            {
+                l_throttle_optimize = true;
+            }
+        }
+
+        if (i_throttle_type == mss::throttle_type::THERMAL)
+        {
+            uint32_t l_throttle_denominator = 0;
+            uint32_t l_unthrottled_n_per_port = 0;
+
+            FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_throttle_denominator));
+
+            // get N throttle value for 100% utilization (unthrottled)
+            l_unthrottled_n_per_port = calc_n_from_dram_util(ONE_HUNDRED_CENTI_PERCENT, l_throttle_denominator);
+
+            // thermal throttling:  the only time optimization for thermal throttling can be done would be
+            //   immediately after runtime throttles were initially setup based on MRW max util attribute
+            //   as long as we know that memory can be unthrottled at 100% utilization (no thermal throttles needed)
+            //   for this reason do thermal throttling first followed by power throttling in eff_config_thermal
+            if (i_port_min_slot == l_unthrottled_n_per_port)
+            {
+                l_throttle_optimize = true;
+            }
+        }
+    }
+
+    // calulate new ocmb throttles, optimizing slot, port is slot times number of ports
+    o_ocmb_slot = (l_throttle_optimize) ? i_port_min_slot * i_ocmb_port_count : i_port_min_slot;
+    o_ocmb_port = i_port_min_slot * i_ocmb_port_count;
+
+    // limit optimized throttle values to runtime throttle values
+    o_ocmb_slot = ((o_ocmb_slot > l_runtime_ocmb_slot) && (l_runtime_ocmb_slot > 0)) ? l_runtime_ocmb_slot : o_ocmb_slot;
+    o_ocmb_port = ((o_ocmb_port > l_runtime_ocmb_port) && (l_runtime_ocmb_port > 0)) ? l_runtime_ocmb_port : o_ocmb_port;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Combine the runtime throttle values for the port targets and set the final OCMB values
 /// @param[in] i_target the MC target
+/// @param[in] i_throttle_type thermal boolean to determine whether to calculate throttles based on the power regulator or thermal limits
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 ///
-fapi2::ReturnCode combine_runtime_port_throttles( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+fapi2::ReturnCode combine_runtime_port_throttles( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const mss::throttle_type i_throttle_type)
 {
     using TT = throttle_traits<mss::mc_type::ODYSSEY>;
 
@@ -86,8 +168,7 @@ fapi2::ReturnCode combine_runtime_port_throttles( const fapi2::Target<fapi2::TAR
         l_min_slot = std::min(l_slot, l_min_slot);
     }
 
-    l_ocmb_slot = l_min_slot;
-    l_ocmb_port = l_min_slot * l_port_count;
+    FAPI_TRY(get_optimized_ocmb_throttles(i_target, i_throttle_type, l_port_count, l_min_slot, l_ocmb_slot, l_ocmb_port));
 
     FAPI_INF("For OCMB target " GENTARGTIDFORMAT " throttle per slot is %d, throttle per port is %d",
              GENTARGTID(i_target), l_ocmb_slot, l_ocmb_port);
@@ -102,11 +183,13 @@ fapi_try_exit:
 ///
 /// @brief Perform thermal calculations as part of the effective configuration - Odyssey specialization
 /// @param[in] i_target the MC target in which the runtime throttles will be reset
+/// @param[in] i_throttle_type thermal boolean to determine whether to calculate throttles based on the power regulator or thermal limits
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode restore_runtime_throttles<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target )
+        i_target,
+        const mss::throttle_type i_throttle_type)
 {
     using TT = throttle_traits<mss::mc_type::ODYSSEY>;
 
@@ -130,7 +213,7 @@ fapi2::ReturnCode restore_runtime_throttles<mss::mc_type::ODYSSEY>( const fapi2:
         FAPI_TRY( mss::attr::set_runtime_mem_throttled_n_commands_per_slot(l_port, l_run_throttle) );
     }
 
-    FAPI_TRY(combine_runtime_port_throttles(i_target));
+    FAPI_TRY(combine_runtime_port_throttles(i_target, i_throttle_type));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -139,11 +222,13 @@ fapi_try_exit:
 ///
 /// @brief Update the runtime throttles to the worst case of the general throttle values and the runtime values - Odyssey specialization
 /// @param[in] i_target the MC target in which the runtime throttles will be set
+/// @param[in] i_throttle_type thermal boolean to determine whether to calculate throttles based on the power regulator or thermal limits
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode update_runtime_throttle<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_target)
+        i_target,
+        const mss::throttle_type i_throttle_type)
 {
     using TT = throttle_traits<mss::mc_type::ODYSSEY>;
 
@@ -180,7 +265,7 @@ fapi2::ReturnCode update_runtime_throttle<mss::mc_type::ODYSSEY>(const fapi2::Ta
         FAPI_TRY( mss::attr::set_runtime_mem_throttled_n_commands_per_slot(l_port, l_run_slot) );
     }
 
-    FAPI_TRY(combine_runtime_port_throttles(i_target));
+    FAPI_TRY(combine_runtime_port_throttles(i_target, i_throttle_type));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -290,8 +375,7 @@ fapi2::ReturnCode combine_port_throttles( const fapi2::Target<fapi2::TARGET_TYPE
         l_min_slot = std::min(l_slot, l_min_slot);
     }
 
-    l_ocmb_slot = (i_throttle_type == mss::throttle_type::POWER) ? l_min_slot * l_port_count : l_min_slot;
-    l_ocmb_port = l_min_slot * l_port_count;
+    FAPI_TRY(get_optimized_ocmb_throttles(i_target, i_throttle_type, l_port_count, l_min_slot, l_ocmb_slot, l_ocmb_port));
 
     FAPI_INF("For OCMB target " GENTARGTIDFORMAT " throttle per slot is %d, throttle per port is %d",
              GENTARGTID(i_target), l_ocmb_slot, l_ocmb_port);
@@ -407,27 +491,31 @@ fapi2::ReturnCode equalize_throttles_helper<mss::mc_type::ODYSSEY>(const
     {
         l_current_mc = l_mc;
 
-        uint16_t l_calc_slot = 0;
-        uint16_t l_calc_port = 0;
-        uint16_t l_run_slot = 0;
-        uint16_t l_run_port = 0;
-
-        if (mss::count_dimm(l_mc) == 0)
+        for (const auto& l_port : mss::find_targets<TT::PORT_TARGET_TYPE>(l_mc))
         {
-            FAPI_INF("Seeing no DIMMs on " GENTARGTIDFORMAT " -- skipping", GENTARGTID(l_mc));
-            continue;
+
+            uint16_t l_calc_slot = 0;
+            uint16_t l_calc_port = 0;
+            uint16_t l_run_slot = 0;
+            uint16_t l_run_port = 0;
+
+            if (mss::count_dimm(l_mc) == 0)
+            {
+                FAPI_INF("Seeing no DIMMs on " GENTARGTIDFORMAT " -- skipping", GENTARGTID(l_mc));
+                continue;
+            }
+
+            FAPI_TRY(mss::attr::get_mem_throttled_n_commands_per_slot(l_port, l_calc_slot));
+            FAPI_TRY(mss::attr::get_mem_throttled_n_commands_per_port(l_port, l_calc_port));
+            FAPI_TRY(mss::attr::get_runtime_mem_throttled_n_commands_per_slot(l_port, l_run_slot));
+            FAPI_TRY(mss::attr::get_runtime_mem_throttled_n_commands_per_port(l_port, l_run_port));
+
+            //Find the smaller of the three values (calculated slot, runtime slot, and min slot)
+            l_min_slot = (l_calc_slot != 0) ? std::min( std::min (l_calc_slot, l_run_slot),
+                         l_min_slot) : l_min_slot;
+            l_min_port = (l_calc_port != 0) ? std::min( std::min( l_calc_port, l_run_port),
+                         l_min_port) : l_min_port;
         }
-
-        FAPI_TRY(mss::attr::get_ody_mem_throttled_n_commands_per_slot(l_mc, l_calc_slot));
-        FAPI_TRY(mss::attr::get_ody_mem_throttled_n_commands_per_port(l_mc, l_calc_port));
-        FAPI_TRY(mss::attr::get_ody_runtime_mem_throttled_n_commands_per_slot(l_mc, l_run_slot));
-        FAPI_TRY(mss::attr::get_ody_runtime_mem_throttled_n_commands_per_port(l_mc, l_run_port));
-
-        //Find the smaller of the three values (calculated slot, runtime slot, and min slot)
-        l_min_slot = (l_calc_slot != 0) ? std::min( std::min (l_calc_slot, l_run_slot),
-                     l_min_slot) : l_min_slot;
-        l_min_port = (l_calc_port != 0) ? std::min( std::min( l_calc_port, l_run_port),
-                     l_min_port) : l_min_port;
     }
 
     FAPI_INF("Calculated min slot is %d, min port is %d for the system", l_min_slot, l_min_port);
@@ -509,7 +597,7 @@ fapi2::ReturnCode equalize_throttles_helper<mss::mc_type::ODYSSEY>(const
                     o_exceeded_power.push_back(l_port);
                 }
 
-                FAPI_INF(GENTARGTIDFORMAT " Final throttles values for slot %d, for port %d, power value %d",
+                FAPI_INF(GENTARGTIDFORMAT " Final throttle values for slot %d, for port %d, power value %d",
                          GENTARGTID(l_port),
                          l_fin_slot,
                          l_fin_port,

@@ -227,9 +227,21 @@ fapi2::ReturnCode get_power_attrs<mss::mc_type::ODYSSEY> (const mss::throttle_ty
         uint32_t& o_safemode)
 {
     using TT = throttle_traits<mss::mc_type::ODYSSEY>;
+    uint32_t l_dimm_size = 0;
+    uint8_t l_dimm_type = 0;
+    uint32_t l_ddimm_size = 0;
 
     // get number of ports on ocmb - used later to split the safemode utilization across all ports
     const uint8_t l_port_count = mss::count_mem_port(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_port));
+
+    // get effective DDIMM size to use for power/thermal decoder key for DDIMM with odyssey
+    for (const auto& l_dimm : find_targets <fapi2::TARGET_TYPE_DIMM>(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>
+            (i_port)))
+    {
+        FAPI_TRY(mss::attr::get_dimm_type(l_dimm, l_dimm_type));
+        FAPI_TRY(mss::attr::get_dimm_size(l_dimm, l_dimm_size));
+        l_ddimm_size = (l_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM) ? l_ddimm_size + l_dimm_size : l_ddimm_size;
+    }
 
     for (const auto& l_dimm : find_targets <fapi2::TARGET_TYPE_DIMM> (i_port))
     {
@@ -237,6 +249,12 @@ fapi2::ReturnCode get_power_attrs<mss::mc_type::ODYSSEY> (const mss::throttle_ty
         const auto l_dimm_pos = mss::index(l_dimm);
         mss::dimm::kind<mss::mc_type::ODYSSEY> l_kind(l_dimm, l_rc);
         FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(l_dimm));
+
+        // DDIMM DIMM size decoder key uses total DDIMM capacity/size so use that if this is a DDIMM
+        // Odyssey has 2 ports so this will be a sum of virtual DIMMs on the ports if a DDIMM
+        l_kind.iv_size = (l_ddimm_size > 0) ? l_ddimm_size : l_kind.iv_size;
+        FAPI_INF("In get_power_attrs:  %s DIMM size is %d", mss::c_str(l_dimm), l_kind.iv_size);
+
         mss::power_thermal::decoder<mss::mc_type::ODYSSEY> l_decoder(l_kind);
         fapi2::buffer<uint64_t> l_attr_value;
 

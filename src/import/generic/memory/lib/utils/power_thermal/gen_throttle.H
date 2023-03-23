@@ -125,7 +125,20 @@ inline uint32_t throttled_cmds(const uint32_t i_databus_util, const uint32_t i_n
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
-fapi2::ReturnCode restore_runtime_throttles( const fapi2::Target<T>& i_target );
+fapi2::ReturnCode restore_runtime_throttles(const fapi2::Target<T>& i_target );
+
+///
+/// @brief Perform thermal calculations as part of the effective configuration (with optimization)
+/// @tparam MC mss::mc_type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT throttle_traits throttle traits for the given mc_type
+/// @param[in] i_target the MCS target in which the runtime throttles will be reset
+/// @param[in] i_throttle_type denotes if this should be done for POWER or THERMAL throttles
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+fapi2::ReturnCode restore_runtime_throttles(const fapi2::Target<T>& i_target,
+        const mss::throttle_type i_throttle_type);
 
 ///
 /// @brief Update the runtime throttles to the worst case of the general throttle values and the runtime values
@@ -137,6 +150,19 @@ fapi2::ReturnCode restore_runtime_throttles( const fapi2::Target<T>& i_target );
 ///
 template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
 fapi2::ReturnCode update_runtime_throttle(const fapi2::Target<T>& i_target);
+
+///
+/// @brief Update the runtime throttles to the worst case of the general throttle values and the runtime values (with optimization)
+/// @tparam MC mss::mc_type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT throttle_traits throttle traits for the given mc_type
+/// @param[in] i_target the MCS target in which the runtime throttles will be set
+/// @param[in] i_throttle_type denotes if this should be done for POWER or THERMAL throttles
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+fapi2::ReturnCode update_runtime_throttle(const fapi2::Target<T>& i_target,
+        const mss::throttle_type i_throttle_type);
 
 ///
 /// @brief Update the runtime throttles to the worst case of the general throttle values and the runtime values
@@ -153,6 +179,29 @@ fapi2::ReturnCode update_runtime_throttles(const std::vector< fapi2::Target<T> >
     for (const auto& l_mc : i_targets)
     {
         FAPI_TRY(update_runtime_throttle(l_mc));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Update the runtime throttles to the worst case of the general throttle values and the runtime values (with optimization)
+/// @tparam MC mss::mc_type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT throttle_traits throttle traits for the given mc_type
+/// @param[in] i_target the MCS target in which the runtime throttles will be set
+/// @param[in] i_throttle_type denotes if this should be done for POWER or THERMAL throttles
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = throttle_traits<MC>>
+fapi2::ReturnCode update_runtime_throttles(const std::vector< fapi2::Target<T> >& i_targets,
+        const mss::throttle_type i_throttle_type)
+
+{
+    for (const auto& l_mc : i_targets)
+    {
+        FAPI_TRY(update_runtime_throttle(l_mc, i_throttle_type));
     }
 
 fapi_try_exit:

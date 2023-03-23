@@ -45,6 +45,8 @@
 #include <generic/memory/lib/utils/pos.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <ody_dts_read.H>
+#include <generic/memory/lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/power_thermal/gen_throttle.H>
 
 namespace mss
 {
@@ -242,15 +244,22 @@ namespace mc
 fapi2::ReturnCode setup_emergency_throttles(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     fapi2::buffer<uint64_t> l_data;
-    uint32_t l_n_safemode_throttle_value = 0;
+    uint32_t l_safemode_util_value = 0;
     uint32_t l_m_throttle_value = 0;
     uint16_t l_nslot_safe = 0;
     uint16_t l_nport_safe = 0;
+    uint16_t l_n_safemode_throttle_value = 0;
+
+    //  Since emergency mode throttles only use one N for both slot and port that is essentially
+    //  optimized so let's optimize the throttles in this funtion to align with that
+    bool l_optimize_nslot = true;
+
+    const auto l_port_count = mss::count_mem_port(i_target);
 
     // Get the required values from the attributes
     for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        FAPI_TRY(mss::attr::get_safemode_dram_databus_util(l_port, l_n_safemode_throttle_value),
+        FAPI_TRY(mss::attr::get_safemode_dram_databus_util(l_port, l_safemode_util_value),
                  "Error in setup_emergency_throttles" );
 
         break;
@@ -262,8 +271,10 @@ fapi2::ReturnCode setup_emergency_throttles(const fapi2::Target<fapi2::TARGET_TY
     FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB3Q, l_data), "Error in setup_emergency_throttles" );
 
     // Calculate Nslot and Nport throttles and set l_data
-    l_nslot_safe = (( l_n_safemode_throttle_value * l_m_throttle_value / 100 ) / 100 ) / 4;
-    l_nport_safe = l_nslot_safe;
+    // TODO: Zen:MST-1818 Will need to call MC-specific version of this once BL16 is supported
+    l_n_safemode_throttle_value = mss::power_thermal::calc_n_from_dram_util(l_safemode_util_value, l_m_throttle_value);
+    l_nslot_safe = (l_optimize_nslot) ? l_n_safemode_throttle_value * l_port_count : l_n_safemode_throttle_value;
+    l_nport_safe = l_n_safemode_throttle_value * l_port_count;
     l_data.insertFromRight<scomt::ody::ODC_SRQ_MBA_FARB3Q_CFG_NM_N_PER_SLOT, scomt::ody::ODC_SRQ_MBA_FARB3Q_CFG_NM_N_PER_SLOT_LEN>
     (l_nslot_safe);
     l_data.insertFromRight<scomt::ody::ODC_SRQ_MBA_FARB3Q_CFG_NM_N_PER_PORT, scomt::ody::ODC_SRQ_MBA_FARB3Q_CFG_NM_N_PER_PORT_LEN>

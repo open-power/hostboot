@@ -60,9 +60,11 @@ fapi2::ReturnCode combine_port_throttles( const fapi2::Target<fapi2::TARGET_TYPE
 ///
 /// @brief Combine the runtime throttle values for the port targets and set the final OCMB values
 /// @param[in] i_target the MC target
+/// @param[in] i_throttle_type thermal boolean to determine whether to calculate throttles based on the power regulator or thermal limits
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 ///
-fapi2::ReturnCode combine_runtime_port_throttles( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+fapi2::ReturnCode combine_runtime_port_throttles( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const mss::throttle_type i_throttle_type);
 
 }//namespace power_thermal
 }//namespace mss
