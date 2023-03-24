@@ -830,9 +830,8 @@ inline std::vector<Target<T, M, V> >
     static_assert((T == fapi2::TARGET_TYPE_PERV),
                   "fapi2::getChildren-Filter only supports getting fapi2::TARGET_TYPE_PERV children");
 
-    static_assert(((T_SELF == fapi2::TARGET_TYPE_PROC_CHIP)
-                   || T_SELF == fapi2::TARGET_TYPE_OCMB_CHIP),
-                  "fapi2::getChildren-Filter only supports getting children on a TARGET_TYPE_PROC_CHIP or TARGET_TYPE_OCMB_CHIP parent");
+    static_assert((T_SELF & ~fapi2::TARGET_TYPE_CHIPS) == 0,
+                   "fapi2::getChildren-Filter only supports getting children on a chip parent");
 
     for ( auto childIter =  l_children.begin();
                childIter != l_children.end();
@@ -1286,8 +1285,7 @@ template< TargetType T, MulticastType O >
 inline Target<T | TARGET_TYPE_MULTICAST, O, V>
 Target<K, M, V>::getMulticast(const MulticastGroup i_group) const
 {
-    static_assert((K & TARGET_TYPE_ANY_POZ_CHIP) == K,
-                  "Parent target must be a chip type");
+    static_assert((K & TARGET_TYPE_ANY_POZ_CHIP) == K, "Parent target must be a P or Z chip type");
     static_assert((T & TARGET_TYPE_MULTICASTABLE) != 0,
                   "Requested target type must be part of TARGET_TYPE_MULTICASTABLE");
     static_assert(bitCount<T>::count == 1,

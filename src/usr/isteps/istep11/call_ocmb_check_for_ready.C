@@ -60,6 +60,7 @@
 #include <exp_check_for_ready.H>
 #include <ody_check_for_ready.H>
 #include <ody_sppe_config_update.H>
+#include <ody_cbs_start.H>
 #include <chipids.H>
 
 // Explorer error logs
@@ -293,6 +294,13 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                     if(l_errl)
                     {
                         TRACFCOMP(g_trac_isteps_trace, "call_ocmb_check_for_ready: ody_sppe_config failed on OCMB 0x%x", get_huid(l_ocmb));
+                        captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
+                    }
+
+                    FAPI_INVOKE_HWP(l_errl, ody_cbs_start, l_fapi_ocmb_target);
+                    if(l_errl)
+                    {
+                        TRACFCOMP(g_trac_isteps_trace, "call_ocmb_check_for_ready: ody_cbs_start failed on OCMB 0x%x", get_huid(l_ocmb));
                         captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
                     }
                 }

@@ -79,6 +79,9 @@ OBJS += ody_check_for_ready.o
 OBJS += ody_sppe_config_update.o
 OBJS += ody_scratch_regs.o
 OBJS += ody_scratch_regs_utils.o
+OBJS += ody_cbs_start.o
+OBJS += poz_perv_mod_misc.o
+OBJS += poz_perv_utils.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/perv/
 VPATH += ${EXPLORER_PATH_OCMB}/procedures/hwp/memory/
