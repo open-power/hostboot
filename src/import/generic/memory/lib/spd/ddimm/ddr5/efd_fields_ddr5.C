@@ -117,7 +117,6 @@ constexpr field_t<mss::endian::LITTLE> FT::DQ_SLEW_RATE_FALL_BYTE0;
 constexpr field_t<mss::endian::LITTLE> FT::DQ_SLEW_RATE_FALL_BYTE1;
 constexpr field_t<mss::endian::LITTLE> FT::DQ_SLEW_RATE_FALL_BYTE2;
 constexpr field_t<mss::endian::LITTLE> FT::DQ_SLEW_RATE_FALL_BYTE3;
-constexpr field_t<mss::endian::LITTLE> FT::ALERT_ODT_IMPEDANCE;
 constexpr field_t<mss::endian::LITTLE> FT::DRAM_RTT_PARK_BYTE0;
 constexpr field_t<mss::endian::LITTLE> FT::DRAM_RTT_WR_BYTE0;
 constexpr field_t<mss::endian::LITTLE> FT::DRAM_RTT_PARK_BYTE1;

@@ -394,7 +394,7 @@ fapi2::ReturnCode set_bytes_per_dram_helper_func(const fapi2::Target<fapi2::TARG
 
     // Create a new array of field_t for the port we are working on using the above start_byte_num
     // Note: start byte and the length will not change for the particular field
-    mss::field_t<mss::endian::LITTLE>l_next_fields[mss::ddr5::mr::ATTR_DRAM] =
+    const mss::field_t<mss::endian::LITTLE>PER_DRAM_FIELDS[mss::ddr5::mr::ATTR_DRAM] =
     {
         // DRAM[0]- DRAM[9]
         mss::field_t<mss::endian::LITTLE>(l_start_byte_num,   i_field.get_start(), i_field.get_length()),
@@ -423,7 +423,7 @@ fapi2::ReturnCode set_bytes_per_dram_helper_func(const fapi2::Target<fapi2::TARG
     // Update the o_bytes with the fields
     for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
     {
-        FAPI_TRY(mss::spd::get_field_spd(l_ocmb, l_next_fields[l_dram], i_binary, i_ffdc_code, o_bytes[i_rank][l_dram]));
+        FAPI_TRY(mss::spd::get_field_spd(l_ocmb, PER_DRAM_FIELDS[l_dram], i_binary, i_ffdc_code, o_bytes[i_rank][l_dram]));
     }
 
 fapi_try_exit:

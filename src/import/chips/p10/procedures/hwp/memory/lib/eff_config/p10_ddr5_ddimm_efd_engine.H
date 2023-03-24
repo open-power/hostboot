@@ -1214,55 +1214,6 @@ class ddimm_0_0 : public mss::efd::base
             return fapi2::current_err;
         }
 
-#if 0
-        // TODO: MST-1997: ATTR_MEM_SI_MC_RCV_IMP_ALERT_N need to be updated
-        //                 to read from either efd byte 59 or byte 364
-        ///
-        /// @brief Set the alert odt impedance field
-        ///
-        /// @param[in] i_efd EFD binary
-        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
-        ///
-        virtual fapi2::ReturnCode set_alert_odt_imp(const std::vector<uint8_t>& i_efd) const
-        {
-            uint8_t l_field = 0;
-            uint8_t l_alert_odt_imp[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
-
-            // =========================================================
-            // EFD Byte 59: Alert ODT Impedance
-            // Attribute: ATTR_MEM_SI_MC_RCV_IMP_ALERT_N
-            // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.21
-            // Page 150
-            // =========================================================
-            const std::vector< std::pair<uint8_t, uint8_t> > ALERT_ODT_IMP_MAP =
-            {
-                // {key byte, DRAM RTT PARK (ohm)}
-                {0b00000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_DISABLE},
-                {0b01000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_40},
-                {0b01010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_48},
-                {0b01100, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_60},
-                {0b01110, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_80},
-                {0b10000, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_120},
-                {0b10010, fapi2::ENUM_ATTR_MEM_SI_MC_RCV_IMP_ALERT_N_OHM_240},
-
-                // All others reserved
-            };
-
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ALERT_ODT_IMPEDANCE, i_efd, SET_ALERT_ODT_IMPEDANCE, l_field));
-
-            // Map SPD value to desired setting
-            FAPI_TRY(lookup_table_check(iv_ocmb, ALERT_ODT_IMP_MAP, SET_ALERT_ODT_IMPEDANCE, l_field,
-                                        l_alert_odt_imp[iv_dimm_rank]));
-
-            FAPI_TRY(mss::attr::set_si_mc_rcv_imp_alert_n(iv_dimm, l_alert_odt_imp));
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-#endif
-
-
         ///
         /// @brief Set the DRAM RTT PARK
         ///
@@ -3942,12 +3893,6 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY(set_si_phy_drv_imp_tx_cntl1(i_efd));
             FAPI_TRY(set_si_phy_drv_imp_tx_cntl2(i_efd));
             FAPI_TRY(set_si_mc_drv_imp_cmd_addr(i_efd));
-
-#if 0
-            // TODO: MST-1997: ATTR_MEM_SI_MC_RCV_IMP_ALERT_N need to be updated
-            //                 to read from either efd byte 59 or byte 364
-            FAPI_TRY(set_alert_odt_imp(i_efd));
-#endif
             FAPI_TRY(set_dram_rtt_park(i_efd));
             FAPI_TRY(set_dram_rtt_wr(i_efd));
 

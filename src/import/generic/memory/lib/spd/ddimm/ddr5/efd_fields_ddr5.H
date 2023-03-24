@@ -353,11 +353,6 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             CK_SLEW_RATE_START = 4,
             CK_SLEW_RATE_LEN = 4,
 
-            // Byte 59: Alert ODT Impedance
-            ALERT_ODT_IMPEDANCE_BYTE = 59,
-            ALERT_ODT_IMPEDANCE_START = 3,
-            ALERT_ODT_IMPEDANCE_LEN = 5,
-
             // Byte 60-67: RTT PARK and WR
             // BYTE0: A0 RANK0
             // BYTE1: A0 RANK1
@@ -1715,9 +1710,6 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t DQ_SLEW_RATE_FALL_BYTE1{DQ_SLEW_RATE_FALL_BYTE1_BYTE, DQ_SLEW_RATE_FALL_BYTE1_START, DQ_SLEW_RATE_FALL_BYTE1_LEN};
         static constexpr field_t DQ_SLEW_RATE_FALL_BYTE2{DQ_SLEW_RATE_FALL_BYTE2_BYTE, DQ_SLEW_RATE_FALL_BYTE2_START, DQ_SLEW_RATE_FALL_BYTE2_LEN};
         static constexpr field_t DQ_SLEW_RATE_FALL_BYTE3{DQ_SLEW_RATE_FALL_BYTE3_BYTE, DQ_SLEW_RATE_FALL_BYTE3_START, DQ_SLEW_RATE_FALL_BYTE3_LEN};
-
-        // Byte 59: Alert ODT Impedance
-        static constexpr field_t ALERT_ODT_IMPEDANCE{ALERT_ODT_IMPEDANCE_BYTE, ALERT_ODT_IMPEDANCE_START, ALERT_ODT_IMPEDANCE_LEN};
 
         // Byte 60-67: RTT PARK and WR
         // BYTE0: A0 RANK0
