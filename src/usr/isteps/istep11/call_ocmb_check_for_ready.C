@@ -58,6 +58,7 @@
 
 //  HWP call support
 #include <exp_check_for_ready.H>
+#include <ody_check_for_ready.H>
 #include <chipids.H>
 
 // Explorer error logs
@@ -179,9 +180,18 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                     l_errl = nullptr;
                 }
 
-                FAPI_INVOKE_HWP(l_errl,
-                                exp_check_for_ready,
-                                l_fapi_ocmb_target);
+                if(l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
+                {
+                    FAPI_INVOKE_HWP(l_errl,
+                                    ody_check_for_ready,
+                                    l_fapi_ocmb_target);
+                }
+                else
+                {
+                    FAPI_INVOKE_HWP(l_errl,
+                                    exp_check_for_ready,
+                                    l_fapi_ocmb_target);
+                }
 
                 // On success, quit retrying.
                 if (!l_errl)

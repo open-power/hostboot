@@ -62,6 +62,20 @@ namespace FAPIWRAP
                                   uint8_t&  o_ec);
 
     /**
+     * @brief This function wraps around the FAPI2 HWP "ody_getidec" which
+     *        takes in an OCMB target and returns the associated chipId and
+     *        ec level.
+     *        Chip Ids can be found in src/import/chips/common/utils/chipids.H
+     * @param[in] i_ocmbChip - Odyssey OCMB target to lookup values on
+     * @param[out] o_chipId  - Power Chip Id associated with this OCMB
+     * @param[out] o_ec      - EC level of this chip
+     * @return errlHndl_t - nullptr if no error; otherwise contains error
+     */
+    errlHndl_t odyssey_getidec(TARGETING::Target* i_ocmbChip,
+                               uint16_t& o_chipId,
+                               uint8_t& o_ec);
+
+    /**
      * @brief This function wraps around the FAPI2 HWP "get_pmic_i2c_addr" which
      *        takes in a DDIMM's SPD data and a PMIC's position relative to
      *        its parent OCMB's chip and returns the device address of that pmic

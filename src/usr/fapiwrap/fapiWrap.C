@@ -32,6 +32,7 @@
 
 // Imported Includes
 #include <exp_getidec.H>           // exp_getidec
+#include <ody_getidec.H>           // ody_getidec
 #include <pmic_i2c_addr_get.H>     // get_pmic_i2c_addr
 #include <chipids.H>               // for GEMINI ID
 #include <gpio_adc_i2c_addr_get.H> // for get_gpio_adc_i2c_addr
@@ -61,6 +62,27 @@ namespace FAPIWRAP
 
         FAPI_INVOKE_HWP(l_errl,
                         exp_getidec,
+                        l_fapi_ocmb_target,
+                        o_chipId,
+                        o_ec);
+
+        return l_errl;
+    }
+
+    errlHndl_t odyssey_getidec(TARGETING::Target* i_ocmbChip,
+                               uint16_t& o_chipId,
+                               uint8_t& o_ec)
+    {
+        errlHndl_t l_errl = nullptr;
+
+        //assert type of i_ocmbChip == TARGETING::TYPE_OCMB_CHIP
+        assert(i_ocmbChip->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_OCMB_CHIP,
+               "odyssey_getidec_wrap: error; expected type is OCMB_CHIP");
+
+        fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(i_ocmbChip);
+
+        FAPI_INVOKE_HWP(l_errl,
+                        ody_getidec,
                         l_fapi_ocmb_target,
                         o_chipId,
                         o_ec);

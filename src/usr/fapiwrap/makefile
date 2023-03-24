@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -42,16 +42,20 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/spd_access/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
 
 
 # to get multicast_group_defs.H
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 # HWP objects
 OBJS += exp_getidec.o
+OBJS += ody_getidec.o
 
 OBJS += fapiWrap.o
 
 # Add HWP src directories to VPATH
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
 
 include ${ROOTPATH}/config.mk

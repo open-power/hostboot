@@ -661,11 +661,21 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
             // Call platform independent lookup for Explorer OCMBs
             l_errl = FAPIWRAP::explorer_getidec(i_target, l_id, l_ec);
 
-                        if (l_errl != nullptr)
+            if (l_errl != nullptr)
             {
                 HWAS_ERR("ocmbIdecPhase2> explorer OCMB 0x%08X - failed to read ID/EC",
                         TARGETING::get_huid(i_target));
 
+                break;
+            }
+        }
+        else if(l_chipIdFromSpd == POWER_CHIPID::ODYSSEY_16)
+        {
+            l_errl = FAPIWRAP::odyssey_getidec(i_target, l_id, l_ec);
+            if(l_errl != nullptr)
+            {
+                HWAS_ERR("ocmbIdecPhase2> Odyssey OCMB 0x%08X - failed to read ID/EC",
+                         TARGETING::get_huid(i_target));
                 break;
             }
         }
