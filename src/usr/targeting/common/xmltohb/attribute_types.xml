@@ -7788,6 +7788,20 @@
 
   <attribute>
     <description>
+        Indicates if ODYSSEY HWP are run from inside hostboot, rather than as a chipop.
+        This attribute is set via attribute override.
+    </description>
+    <id>RUN_ODY_HWP_FROM_HOST</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
             uint8_t attribute to be used for storing functional state of a target during
             test cases.
         </description>

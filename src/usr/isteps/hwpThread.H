@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,13 @@ class HwpWorkItem
     // Name of HWP being executed
     const char* iv_hwpName;
 
+    // @brief Mutex to prevent threads from adding details to the step
+    //        error log at the same time.
+    static mutex_t cv_stepErrorMutex;
+
   public:
+    static bool cv_encounteredHwpError;
+
     // @brief This is where all of the work is done
     void operator()();
 
@@ -87,7 +93,10 @@ class HwpWorkItem
      */
     virtual void run_after_failure( errlHndl_t& i_err )
     {
-        // Capture error
+        const auto lock = scoped_mutex_lock(cv_stepErrorMutex);
+
+        cv_encounteredHwpError = true;
+
         captureError(i_err, *iv_pStepError, ISTEP_COMP_ID, iv_pTarget);
     };
 
@@ -134,12 +143,6 @@ class HwpWorkItem
     HwpWorkItem& operator=(const HwpWorkItem& ) = delete;
     HwpWorkItem(HwpWorkItem&&) = delete;
     HwpWorkItem& operator=(HwpWorkItem&&) = delete;
-
-  private:
-    //
-    // @brief Mutex to prevent threads from adding details to the step
-    //        error log at the same time.
-    static mutex_t cv_stepErrorMutex;
 };
 
 }; //namespace ISTEP

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2022
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -25,6 +25,8 @@
 ROOTPATH = ../../../..
 MODULE = istep12
 
+OCMB_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/ocmb/procedures
+
 P10_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
 P10_IO_HWP_PATH     = $(P10_PROCEDURES_PATH)/hwp/io
 P10_NEST_HWP_PATH   = $(P10_PROCEDURES_PATH)/hwp/nest
@@ -33,6 +35,8 @@ P10_MEMORY_HWP_PATH = $(P10_PROCEDURES_PATH)/hwp/memory
 
 EXPLORER_HWP_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 EXPLORER_INC_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+ODYSSEY_HWP_PATH   = ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/
+ODYSSEY_INC_PATH   = ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
@@ -55,6 +59,12 @@ EXTRAINCDIR += ${P10_MEMORY_HWP_PATH}
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib
 EXTRAINCDIR += ${EXPLORER_INC_PATH}
+EXTRAINCDIR += ${OCMB_PROCEDURES_PATH}/hwp/initfiles
+EXTRAINCDIR += ${ODYSSEY_HWP_PATH}/memory
+EXTRAINCDIR += ${ODYSSEY_HWP_PATH}/memory/lib
+EXTRAINCDIR += ${ODYSSEY_HWP_PATH}/io
+EXTRAINCDIR += ${ODYSSEY_HWP_PATH}/io/common
+EXTRAINCDIR += ${ODYSSEY_INC_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 
@@ -80,6 +90,10 @@ include ${ROOTPATH}/procedure.rules.mk
 
 VPATH += ${EXPLORER_HWP_PATH}
 VPATH += ${EXPLORER_HWP_PATH}/lib/workarounds
+VPATH += ${ODYSSEY_HWP_PATH}/memory
+VPATH += ${ODYSSEY_HWP_PATH}/memory/lib/inband
+VPATH += ${ODYSSEY_HWP_PATH}/io
+VPATH += ${ODYSSEY_HWP_PATH}/io/common
 VPATH += ${P10_MEMORY_HWP_PATH}
 
 OBJS += exp_omi_setup.o
@@ -106,5 +120,31 @@ OBJS += p10_io_omi_prbs.o
 OBJS += p10_io_tdr.o
 OBJS += p10_omi_isolation.o
 OBJS += exp_process_image_status.o
+OBJS += ody_getecid.o
+OBJS += ody_omi_init.o
+OBJS += ody_host_draminit.o
+OBJS += ody_omi_hss_ppe_load.o
+OBJS += ody_omi_hss_config.o
+OBJS += ody_omi_hss_ppe_start.o
+OBJS += ody_omi_hss_bist_init.o
+OBJS += ody_omi_hss_bist_start.o
+OBJS += ody_omi_hss_bist_poll.o
+OBJS += ody_omi_hss_bist_cleanup.o
+OBJS += ody_omi_hss_init.o
+OBJS += ody_omi_hss_dccal_start.o
+OBJS += ody_omi_hss_dccal_poll.o
+OBJS += ody_omi_hss_tx_zcal.o
+OBJS += ody_omi_pretrain_adv.o
+OBJS += ody_omi_setup.o
+OBJS += ody_omi_train.o
+OBJS += ody_omi_train_check.o
+OBJS += ody_inband.o
+OBJS += ody_putsram.o
+OBJS += ody_putsram_io_ppe.o
+OBJS += io_ppe_cache.o
+OBJS += common_io_omi_tdr.o
+OBJS += common_io_tdr.o
+OBJS += io_scom_lib.o
+
 
 include ${ROOTPATH}/config.mk

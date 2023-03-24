@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,7 @@
 //HWP
 #include  <chipids.H>
 #include  <exp_getecid.H>
+#include  <ody_getecid.H>
 #include  <p10_scom_proc.H>
 #include  <p10_init_mem_encryption.H>
 
@@ -216,11 +217,14 @@ void* call_mss_getecid (void *io_pArgs)
 
     TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"call_mss_getecid entry" );
 
+    const auto l_runOdyHwpFromHost =
+      TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
+
     // Get all OCMB targets
     TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-    for (const auto & l_ocmb_target : l_ocmbTargetList)
+    for (const auto l_ocmb_target : l_ocmbTargetList)
     {
         fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP>
             l_fapi_ocmb_target(l_ocmb_target);
@@ -251,6 +255,41 @@ void* call_mss_getecid (void *io_pArgs)
                 TRACFCOMP( g_trac_isteps_trace,
                     "SUCCESS running %s_getecid HWP on target HUID 0x%.8X",
                     "exp", get_huid(l_ocmb_target) );
+            }
+        }
+        // check ODYSSEY
+        else if (chipId == POWER_CHIPID::ODYSSEY_16)
+        {
+            TRACFCOMP( g_trac_isteps_trace,
+                "Running ody_getecid HWP on target HUID 0x%.8X l_runOdyHwpFromHost:%d",
+                get_huid(l_ocmb_target), l_runOdyHwpFromHost);
+
+            if (l_runOdyHwpFromHost)
+            {
+                FAPI_INVOKE_HWP(l_err, ody_getecid, l_fapi_ocmb_target);
+            }
+            else
+            {
+                //@todo JIRA:PFHB-412 Istep12 Updates for Odyssey on P10
+            }
+
+            if ( l_err )
+            {
+                TRACFCOMP( g_trac_isteps_trace,
+                    "ERROR : call ody_getecid HWP(): failed on target 0x%08X. "
+                    TRACE_ERR_FMT,
+                    get_huid(l_ocmb_target),
+                    TRACE_ERR_ARGS(l_err));
+                l_componentId = HWPF_COMP_ID;
+
+                // Capture error and continue to the next chip
+                captureError(l_err, l_StepError, l_componentId, l_ocmb_target);
+            }
+            else
+            {
+                TRACFCOMP( g_trac_isteps_trace,
+                    "SUCCESS running ody_getecid HWP on target HUID 0x%.8X",
+                    get_huid(l_ocmb_target) );
             }
         }
         else // Not an Explorer, continue to the next chip.

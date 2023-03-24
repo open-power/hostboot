@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,8 +26,8 @@
 
 namespace ISTEP
 {
-
-mutex_t HwpWorkItem::cv_stepErrorMutex = MUTEX_INITIALIZER;
+mutex_t HwpWorkItem::cv_stepErrorMutex      = MUTEX_INITIALIZER;
+bool    HwpWorkItem::cv_encounteredHwpError = false;
 
 // Generically run a single HWP against the given target
 void HwpWorkItem::operator()()
@@ -55,14 +55,9 @@ void HwpWorkItem::operator()()
                   get_huid(iv_pTarget),
                   TRACE_ERR_ARGS(l_err));
 
-        // addErrorDetails may not be thread-safe.  Protect with mutex.
-        mutex_lock(&cv_stepErrorMutex);
-
         // Capture the error by default
         //  can be override by specific classes to do more
         run_after_failure(l_err);
-
-        mutex_unlock(&cv_stepErrorMutex);
     }
     else
     {
@@ -110,7 +105,7 @@ bool HwpWorkItem::start_threads( Util::ThreadPool<ISTEP::HwpWorkItem>& i_threadP
                                  ISTEP_ERROR::IStepError& i_istepError,
                                  size_t i_numTargets )
 {
-    bool l_error = false;
+    cv_encounteredHwpError = false;
 
     //Don't create more threads than we have targets
     auto l_numThreads = std::min(ISTEP::HwpWorkItem::getMaxThreads(),
@@ -137,9 +132,9 @@ bool HwpWorkItem::start_threads( Util::ThreadPool<ISTEP::HwpWorkItem>& i_threadP
 
         // Capture error
         captureError(l_err, i_istepError, ISTEP_COMP_ID, nullptr);
-        l_error = true;
+        cv_encounteredHwpError = true;
     }
-    return l_error;
+    return cv_encounteredHwpError;
 };
 
 }; //namespace ISTEP

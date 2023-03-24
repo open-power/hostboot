@@ -2692,6 +2692,9 @@
       <id>REDUNDANT_CLOCKS</id>
     </attribute>
     <attribute>
+      <id>RUN_ODY_HWP_FROM_HOST</id>
+    </attribute>
+    <attribute>
       <id>SBE_UPDATE_DISABLE</id>
     </attribute>
     <attribute>

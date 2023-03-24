@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,11 +78,9 @@ void* call_proc_omi_scominit (void *io_pArgs)
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_proc_omi_scominit "
         "entry. %d procs found", l_procTargetList.size());
 
-    // 12.3.a p10_omi_scominit.C is an empty place holder
-    // TODO: RTC 248244  Verify the EKB function is implemented
     TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ENTER_MRK"p10_omi_scominit");
 
-    for (const auto & l_proc_target : l_procTargetList)
+    for (const auto l_proc_target : l_procTargetList)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "p10_omi_scominit HWP target HUID %.8x",
@@ -118,7 +116,7 @@ void* call_proc_omi_scominit (void *io_pArgs)
     // 12.3.b p10_omi_setup_bars.C
     TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ENTER_MRK"p10_omi_setup_bars");
 
-    for (const auto & l_proc_target : l_procTargetList)
+    for (const auto l_proc_target : l_procTargetList)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "p10_omi_setup_bars HWP target HUID %.8x",

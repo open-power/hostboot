@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,12 +60,6 @@ void* call_omi_attr_update (void *io_pArgs)
     IStepError l_StepError;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_omi_attr_update entry" );
-
-    // 12.2.a p10_omi_attr_update.C (void)
-    //        - Currently empty
-    //        - Attribute targets: MCS/MemBuf
-    //        - Stub HWP for FW to override attributes programmatically
-    //        - TODO: RTC 248244
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_omi_attr_update exit" );
 

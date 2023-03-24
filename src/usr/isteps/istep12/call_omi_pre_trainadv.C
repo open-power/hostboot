@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,12 +39,15 @@
 
 #include    <initservice/isteps_trace.H>
 #include    <istepHelperFuncs.H>          // captureError
+#include    <hwpThread.H>
 
 #include    <fapi2/plat_hwp_invoker.H>
 
 //HWP
+#include    <chipids.H>
 #include    <p10_io_omi_pre_trainadv.H>
-
+#include    <ody_omi_hss_tx_zcal.H>
+#include    <ody_omi_pretrain_adv.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -54,17 +57,94 @@ using   namespace   TARGETING;
 namespace ISTEP_12
 {
 
+class WorkItem_ody_omi_hss_tx_zcal: public HwpWorkItem
+{
+  public:
+    WorkItem_ody_omi_hss_tx_zcal( IStepError& i_stepError,
+                                 const Target& i_ocmb )
+    : HwpWorkItem( i_stepError, i_ocmb, "ody_omi_hss_tx_zcal" ) {}
+
+    virtual errlHndl_t run_hwp( void ) override
+    {
+        errlHndl_t l_err = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
+        FAPI_INVOKE_HWP(l_err, ody_omi_hss_tx_zcal, l_fapi_target);
+        return l_err;
+    }
+};
+
+class WorkItem_ody_omi_pretrain_adv: public HwpWorkItem
+{
+  public:
+    WorkItem_ody_omi_pretrain_adv( IStepError& i_stepError,
+                                 const Target& i_ocmb )
+    : HwpWorkItem( i_stepError, i_ocmb, "ody_omi_pretrain_adv" ) {}
+
+    virtual errlHndl_t run_hwp( void ) override
+    {
+        errlHndl_t l_err = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
+        FAPI_INVOKE_HWP(l_err, ody_omi_pretrain_adv, l_fapi_target);
+        return l_err;
+    }
+};
+
 void* call_omi_pre_trainadv (void *io_pArgs)
 {
     IStepError l_StepError;
     errlHndl_t l_err = nullptr;
-
+    Util::ThreadPool<HwpWorkItem> threadpool;
     TargetHandleList l_procTargetList;
+
+    // get RUN_ODY_HWP_FROM_HOST
+    const auto l_runOdyHwpFromHost =
+       TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
+
+    TargetHandleList l_ocmbTargetList;
+    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
+
+    // 12.5.a ody_omi_hss_tx_zcal
+    for (const auto l_ocmb_target : l_ocmbTargetList)
+    {
+        //  call the HWP with each target
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
+            (l_ocmb_target);
+
+        uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
+
+        if (chipId == POWER_CHIPID::ODYSSEY_16)
+        {
+            if (l_runOdyHwpFromHost)
+            {
+                //  Create a new workitem from this ocmb and feed it to the
+                //  thread pool for processing.  Thread pool handles workitem
+                //  cleanup.
+                threadpool.insert(new WorkItem_ody_omi_hss_tx_zcal(l_StepError,
+                                                                  *l_ocmb_target));
+            }
+            else
+            {
+                //@todo JIRA:PFHB-412 Istep12 chipops for Odyssey on P10
+            }
+        }
+    }
+
+    HwpWorkItem::start_threads(threadpool, l_StepError, l_ocmbTargetList.size());
+
+    // Do not continue if an error was encountered
+    if(HwpWorkItem::cv_encounteredHwpError)
+    {
+        TRACFCOMP( g_trac_isteps_trace,
+            INFO_MRK "call_omi_pre_trainadv exited early because ody_omi_hss_tx_zcal "
+            "had failures");
+        goto ERROR_EXIT;
+    }
+
     getAllChips(l_procTargetList, TYPE_PROC);
     TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_omi_pre_trainadv. "
         "%d PROCs found", l_procTargetList.size());
 
-    // 12.5.a p10_io_omi_pre_trainadv.C
+    // 12.5.b p10_io_omi_pre_trainadv.C
     //        - Debug routine for IO characterization
     for (const auto & l_proc_target : l_procTargetList)
     {
@@ -87,15 +167,50 @@ void* call_omi_pre_trainadv (void *io_pArgs)
                 get_huid(l_proc_target),
                 TRACE_ERR_ARGS(l_err));
 
-            // Capture error
             captureError(l_err, l_StepError, HWPF_COMP_ID, l_proc_target);
+            goto ERROR_EXIT;
         }
-        else
+
+        TRACFCOMP(g_trac_isteps_trace,
+                INFO_MRK"SUCCESS : p10_io_omi_pre_trainadv HWP ");
+    }
+
+    // 12.5.c ody_omi_pretrain_adv
+    for (const auto l_ocmb_target : l_ocmbTargetList)
+    {
+        //  call the HWP with each target
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
+            (l_ocmb_target);
+
+        uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
+
+        if (chipId == POWER_CHIPID::ODYSSEY_16)
         {
-            TRACFCOMP(g_trac_isteps_trace,
-                     INFO_MRK"SUCCESS : p10_io_omi_pre_trainadv HWP ");
+            if (l_runOdyHwpFromHost)
+            {
+                //  Create a new workitem from this ocmb and feed it to the
+                //  thread pool for processing.  Thread pool handles workitem
+                //  cleanup.
+                threadpool.insert(new WorkItem_ody_omi_pretrain_adv(l_StepError,
+                                                                   *l_ocmb_target));
+            }
+            else
+            {
+                //@todo JIRA:PFHB-412 Istep12 chipops for Odyssey on P10
+            }
         }
     }
+
+    HwpWorkItem::start_threads(threadpool, l_StepError, l_ocmbTargetList.size());
+
+    if (HwpWorkItem::cv_encounteredHwpError)
+    {
+        TRACFCOMP(g_trac_isteps_trace,
+                  ERR_MRK"call_omi_pre_trainadv: ody_omi_pretrain_adv: error");
+        goto ERROR_EXIT;
+    }
+
+    ERROR_EXIT:
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_omi_pre_trainadv ");
 

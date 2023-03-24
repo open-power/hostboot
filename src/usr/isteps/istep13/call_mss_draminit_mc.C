@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,8 @@
 
 // Istep framework
 #include <istepHelperFuncs.H>
+#include <hwpThread.H>
+#include <hwpThreadHelper.H>
 
 // fapi2 HWP invoker
 #include  <fapi2.H>
@@ -46,6 +48,8 @@
 #include  <config.h>
 
 #include  <exp_draminit_mc.H>
+#include  <ody_draminit_mc.H>
+#include  <ody_enable_ecc.H>
 #include  <chipids.H> // for EXPLORER ID
 
 using namespace ERRORLOG;
@@ -54,65 +58,116 @@ using namespace ISTEP_ERROR;
 using namespace TARGETING;
 using namespace ISTEPS_TRACE;
 
+#define CONTEXT call_mss_draminit_mc
+
 namespace ISTEP_13
 {
+class WorkItem_exp_draminit_mc: public HwpWorkItem_OCMBUpdateCheck
+{
+  public:
+    WorkItem_exp_draminit_mc( IStepError& i_stepError,
+                            const Target& i_ocmb )
+    : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "exp_draminit_mc" ) {}
+
+    virtual errlHndl_t run_hwp( void ) override
+    {
+        errlHndl_t l_err = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
+        FAPI_INVOKE_HWP(l_err, exp_draminit_mc, l_fapi_target);
+        return l_err;
+    }
+};
+
+class WorkItem_ody_draminit_mc: public HwpWorkItem_OCMBUpdateCheck
+{
+  public:
+    WorkItem_ody_draminit_mc( IStepError& i_stepError,
+                                  const Target& i_ocmb )
+    : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "ody_draminit_mc" ) {}
+
+    virtual errlHndl_t run_hwp( void ) override
+    {
+        errlHndl_t l_err = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
+
+        RUN_SUB_HWP(CONTEXT, l_err, iv_pTarget, ody_draminit_mc, l_fapi_target);
+
+        /* @todo JIRA:PFHB-413 Istep13 Updates for Odyssey on P10
+         *
+        [HOST] ody_apply_row_repair
+
+        [HOST] ody_apply_sbe_attribute_data
+         *
+         */
+
+        RUN_SUB_HWP(CONTEXT, l_err, iv_pTarget, ody_enable_ecc, l_fapi_target);
+
+        ERROR_EXIT:   // label is required by RUN_SUB_HWP
+        return l_err;
+    }
+};
+
 void* call_mss_draminit_mc (void *io_pArgs)
 {
-    IStepError l_stepError;
-    errlHndl_t l_err = NULL;
+    IStepError l_StepError;
+    Util::ThreadPool<HwpWorkItem> threadpool;
 
     TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"call_mss_draminit_mc" );
+
+    // get RUN_ODY_HWP_FROM_HOST
+    const auto l_runOdyHwpFromHost =
+       TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
 
     // Get all functional OCMB targets
     TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-    for (const auto & l_ocmb : l_ocmbTargetList)
+    for (const auto l_ocmb_target : l_ocmbTargetList)
     {
-        // check EXPLORER first as this is most likely the configuration
-        uint32_t chipId = l_ocmb->getAttr< ATTR_CHIP_ID>();
+        //  call the HWP with each target
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmb_target);
+
+        uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
+
+        //  Create a new workitem from this ocmb and feed it to the
+        //  thread pool for processing.  Thread pool handles workitem
+        //  cleanup.
         if (chipId == POWER_CHIPID::EXPLORER_16)
         {
-            fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-                (l_ocmb);
-
-            // Dump current run on target
-            TRACFCOMP( g_trac_isteps_trace,
-                "Running exp_draminit_mc HWP on target HUID 0x%.8X",
-                get_huid(l_ocmb));
-
-            //  call the HWP with each fapi2::Target
-            FAPI_INVOKE_HWP(l_err, exp_draminit_mc, l_fapi_ocmb_target);
+            threadpool.insert(new WorkItem_exp_draminit_mc(l_StepError,
+                                                          *l_ocmb_target));
         }
-        else
+        else if (chipId == POWER_CHIPID::ODYSSEY_16)
         {
-            // Non-Explorer chip
-            TRACFCOMP( g_trac_isteps_trace,
-                "Skipping exp_draminit_mc HWP on target HUID 0x%.8X, chipId 0x%.4X",
-                get_huid(l_ocmb), chipId );
-            continue;
+            if (l_runOdyHwpFromHost)
+            {
+                threadpool.insert(new WorkItem_ody_draminit_mc(l_StepError,
+                                                              *l_ocmb_target));
+            }
+            else
+            {
+                // @todo JIRA:PFHB-413 Istep13 Updates for Odyssey on P10
+            }
         }
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                      "ERROR : exp_draminit_mc target 0x%.8X"
-                      TRACE_ERR_FMT,
-                      get_huid(l_ocmb),
-                      TRACE_ERR_ARGS(l_err));
-            // capture error and commit it
-            captureError(l_err, l_stepError, HWPF_COMP_ID, l_ocmb);
-            break;
-        }
-        else
+        else // continue to the next chip
         {
             TRACFCOMP( g_trac_isteps_trace,
-               "SUCCESS running exp_draminit_mc HWP on target HUID 0x%.8X",
-               get_huid(l_ocmb) );
+                "call_mss_draminit_mc: Unknown chip ID 0x%X on target HUID 0x%.8X",
+                chipId, get_huid(l_ocmb_target) );
         }
     }
+
+    HwpWorkItem::start_threads( threadpool, l_StepError, l_ocmbTargetList.size());
+
+    if (HwpWorkItem::cv_encounteredHwpError)
+    {
+        TRACFCOMP(g_trac_isteps_trace,
+                  ERR_MRK"call_mss_draminit_mc: *_draminit_mc error" );
+    }
+
     TRACFCOMP( g_trac_isteps_trace, EXIT_MRK"call_mss_draminit_mc" );
 
-    return l_stepError.getErrorHandle();
+    return l_StepError.getErrorHandle();
 }
 
 };
