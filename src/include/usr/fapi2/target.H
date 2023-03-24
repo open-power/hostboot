@@ -912,25 +912,37 @@ Target<T_SELF, M, V>::getOtherEnd(fapi2::Target<T, M, V>& o_target,
     TARGETING::PredicateCTM l_peerFilter(targetClass,
                                          fapi2::convertFapi2TypeToTargeting(T));
 
-    if(i_state == TARGET_STATE_FUNCTIONAL)
-    {
-        TARGETING::PredicateIsFunctional l_funcFilter;
-        TARGETING::PredicatePostfixExpr l_funcAndpeerFilter;
-        l_funcAndpeerFilter.push(&l_peerFilter).push(&l_funcFilter).And();
-        getPeerTargets( l_peerTargetList,    // list of targets on other end
-        FAPI_TO_HBTARG(this),//To this target
-        nullptr, // Don't need to filter peers
-        &l_funcAndpeerFilter);//filter results to be the right class & state
-    }
-    else if(i_state == TARGET_STATE_PRESENT)
-    {
-        TARGETING::PredicatePostfixExpr l_presAndpeerFilter;
-        l_presAndpeerFilter.push(&l_peerFilter);
+    TARGETING::Target* l_hbTarget = FAPI_TO_HBTARG(this);
 
-        getPeerTargets( l_peerTargetList,   // list of targets on other end
-        FAPI_TO_HBTARG(this), //to this target
-        nullptr,                               //No need to filter peers
-        &l_presAndpeerFilter);//filter results to be the right class & state
+    if(T == fapi2::TARGET_TYPE_OMI && T_SELF == fapi2::TARGET_TYPE_OCMB_CHIP)
+    {
+        // Special rule for OCMB - return its immediate parent by affinity.
+        // This was done to avoid adding extra PEER_TARGET attributes to all
+        // OCMB targets and making XML processing changes.
+        l_peerTargetList.push_back(getImmediateParentByAffinity(l_hbTarget));
+    }
+    else
+    {
+        if(i_state == TARGET_STATE_FUNCTIONAL)
+        {
+            TARGETING::PredicateIsFunctional l_funcFilter;
+            TARGETING::PredicatePostfixExpr l_funcAndpeerFilter;
+            l_funcAndpeerFilter.push(&l_peerFilter).push(&l_funcFilter).And();
+            getPeerTargets( l_peerTargetList,    // list of targets on other end
+            l_hbTarget,//To this target
+            nullptr, // Don't need to filter peers
+            &l_funcAndpeerFilter);//filter results to be the right class & state
+        }
+        else if(i_state == TARGET_STATE_PRESENT)
+        {
+            TARGETING::PredicatePostfixExpr l_presAndpeerFilter;
+            l_presAndpeerFilter.push(&l_peerFilter);
+
+            getPeerTargets( l_peerTargetList,   // list of targets on other end
+            l_hbTarget, //to this target
+            nullptr,                               //No need to filter peers
+            &l_presAndpeerFilter);//filter results to be the right class & state
+        }
     }
 
     fapi2::Target<T, M, V> fapi2_peerTarget(nullptr);

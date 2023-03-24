@@ -59,6 +59,7 @@
 //  HWP call support
 #include <exp_check_for_ready.H>
 #include <ody_check_for_ready.H>
+#include <ody_sppe_config_update.H>
 #include <chipids.H>
 
 // Explorer error logs
@@ -281,6 +282,21 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                     // Capture error and continue to next OCMB
                     captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
                 }
+
+                // Odyssey chips require a few more HWPs to run to start them up:
+                // ody_sppe_config_update writes the SPPE config
+                // ody_cbs_start starts SPPE
+                // ody_sppe_check_for_ready makes sure that SPPE booted correctly
+                if(l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
+                {
+                    FAPI_INVOKE_HWP(l_errl, ody_sppe_config_update, l_fapi_ocmb_target);
+                    if(l_errl)
+                    {
+                        TRACFCOMP(g_trac_isteps_trace, "call_ocmb_check_for_ready: ody_sppe_config failed on OCMB 0x%x", get_huid(l_ocmb));
+                        captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
+                    }
+                }
+
             } // End of if/else l_errl
 
         } // End of OCMB Loop
