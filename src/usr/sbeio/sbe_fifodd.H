@@ -205,8 +205,9 @@ public:
      */
     enum fifoMagic
     {
-        FIFO_STATUS_MAGIC = 0xC0DE,
-        FIFO_FFDC_MAGIC   = 0xFFDC,
+        FIFO_STATUS_MAGIC   = 0xC0DE,
+        FIFO_FFDC_MAGIC     = 0xFFDC,
+        FIFO_ODY_FFDC_MAGIC = 0xFBAD,
     };
 
     /**
@@ -955,12 +956,6 @@ private:
      * between SBE and HB
      */
     void * iv_ffdcPackageBuffer;
-
-    /**
-     * @brief FFDC package needs to be 3 pages
-     * @TODO JIRA PFHB-260 Re-evaluate this statement. May need to support more.
-     */
-    const uint8_t ffdcPackageSize = 3;
 
     /**
      * @brief zero out the FFDC package buffer

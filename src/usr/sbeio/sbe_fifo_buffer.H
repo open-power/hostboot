@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -268,8 +268,8 @@ public:
     // Class Constants
     //=========================
 
-    static const size_t MSG_BUFFER_SIZE_WORDS = 3072;
-    static const size_t INVALID_INDEX = size_t(-1);
+    static constexpr size_t MSG_BUFFER_SIZE_WORDS = (PAGE_SIZE * SBE_FFDC_MAX_PAGES) / sizeof(uint32_t);
+    static constexpr size_t INVALID_INDEX = size_t(-1);
 
 protected:
 

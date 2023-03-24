@@ -47,6 +47,11 @@ namespace SBEIO
     static constexpr uint8_t  SBE_CAPABILITY_HALT_OFFSET = 22;
     static constexpr uint32_t SBE_CMD_HALT_SUPPORTED = 0xAB000001;
 
+    // The maximum amount of pages hostboot will allow FFDC package buffers from SBE to be.
+    // This is chosen arbitrarily as a defense against cases where the End-of-Transmission (EOT) is not
+    // recieved from SBE.
+    static constexpr uint8_t SBE_FFDC_MAX_PAGES = 3;
+
     struct sbeCapabilities_t
     {
         uint16_t majorVersion;

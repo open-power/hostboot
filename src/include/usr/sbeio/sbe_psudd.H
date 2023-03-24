@@ -40,6 +40,8 @@
 #include <map>
 #include <arch/pirformat.H>
 
+#include <sbeio/sbe_utils.H>
+
 namespace SBEIO
 {
 //-----------------------------------------------------------------------------
@@ -1107,7 +1109,7 @@ class SbePsu
          */
         const size_t getSbeFFDCBufferSize(void)
         {
-            return (ffdcPackageSize * PAGESIZE);
+            return (SBE_FFDC_MAX_PAGES * PAGESIZE);
         }
 
         // Structure to give to performPsuChipOp to indicate how unsupported
@@ -1252,11 +1254,6 @@ class SbePsu
         bool                      iv_earlyErrorOccurred;
         uint32_t                  iv_earlyErrorEid;
         TARGETING::TargetHandle_t iv_earlyErrorTarget;
-
-        /**
-         * @brief FFDC package needs to be 2 pages
-         */
-        const uint8_t ffdcPackageSize = 2;
 
         /**
          * @brief Response buffer from SBE

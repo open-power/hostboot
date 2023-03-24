@@ -85,7 +85,7 @@ SbeFifo & SbeFifo::getTheInstance()
  */
 SbeFifo::SbeFifo()
 {
-    iv_ffdcPackageBuffer = PageManager::allocatePage(ffdcPackageSize, true);
+    iv_ffdcPackageBuffer = PageManager::allocatePage(SBE_FFDC_MAX_PAGES, true);
     initFFDCPackageBuffer();
 }
 
@@ -785,7 +785,7 @@ errlHndl_t SbeFifo::writeCfam(TARGETING::Target * i_target,
 
 void SbeFifo::initFFDCPackageBuffer()
 {
-    memset(iv_ffdcPackageBuffer, 0x00, PAGESIZE * ffdcPackageSize);
+    memset(iv_ffdcPackageBuffer, 0x00, PAGESIZE * SBE_FFDC_MAX_PAGES);
 }
 
 /**
@@ -794,7 +794,7 @@ void SbeFifo::initFFDCPackageBuffer()
  * @param[in]  i_len         data buffer len to copy
  */
 void SbeFifo::writeFFDCBuffer(const void * i_data, uint32_t i_len) {
-    if(i_len <= PAGESIZE * ffdcPackageSize)
+    if(i_len <= PAGESIZE * SBE_FFDC_MAX_PAGES)
     {
         initFFDCPackageBuffer();
         memcpy(iv_ffdcPackageBuffer, i_data, i_len);
