@@ -109,6 +109,12 @@ class StringTest : public CxxTest::TestSuite
             {
                 TS_FAIL("strcspn: span incorrect for . in string1.");
             }
+
+            span = strcspn(string1, "xyz");
+            if (span != strlen(string1))
+            {
+                TS_FAIL("strcspn: span incorrect for char not found in string1.");
+            }
         }
 
         /**
@@ -147,7 +153,7 @@ class StringTest : public CxxTest::TestSuite
             const char * decStr   = "1311768467463790320"; // 0x123456789ABCDEF0
             const char * hexExtra = "0x12ABSomething"; // hex partial
             const char * decExtra = "123456Something"; // dec partial 0x1E240
-            char * endptr;
+            char * endptr = nullptr;
 
             uint64_t result = 0;
 
