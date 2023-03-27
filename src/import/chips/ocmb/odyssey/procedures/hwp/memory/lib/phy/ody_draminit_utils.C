@@ -2302,45 +2302,47 @@ fapi2::ReturnCode nibble_enable_db_disable(const fapi2::buffer<uint32_t>& i_nibb
     constexpr uint8_t DB7 = 15;
     constexpr uint8_t DB8 = 23;
     constexpr uint8_t DB9 = 13;
+    constexpr uint8_t SYNOPSYS_NIBBLE0 = BITS_PER_NIBBLE;
+    constexpr uint8_t SYNOPSYS_NIBBLE1 = 0;
 
-    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB0>());
-    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB0 - 1 > ());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB0>());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE1, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB0 - 1 > ());
     o_byte_disables[0] = l_byte_disable;
 
-    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB1>());
-    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB1 - 1 > ());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB1>());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE1, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB1 - 1 > ());
     o_byte_disables[1] = l_byte_disable;
 
-    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB2>());
-    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB2 - 1 > ());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB2>());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE1, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB2 - 1 > ());
     o_byte_disables[2] = l_byte_disable;
 
-    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB3>());
-    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB3 - 1 > ());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB3>());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE1, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB3 - 1 > ());
     o_byte_disables[3] = l_byte_disable;
 
-    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB4>());
-    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB4 - 1 > ());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB4>());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE1, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB4 - 1 > ());
     o_byte_disables[4] = l_byte_disable;
 
-    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB5>());
-    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB5 - 1 > ());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB5>());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE1, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB5 - 1 > ());
     o_byte_disables[5] = l_byte_disable;
 
-    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB6>());
-    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB6 - 1 > ());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB6>());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE1, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB6 - 1 > ());
     o_byte_disables[6] = l_byte_disable;
 
-    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB7>());
-    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB7 - 1 > ());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB7>());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE1, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB7 - 1 > ());
     o_byte_disables[7] = l_byte_disable;
 
-    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB8>());
-    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB8 - 1 > ());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB8>());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE1, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB8 - 1 > ());
     o_byte_disables[8] = l_byte_disable;
 
-    l_byte_disable.writeBit<0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB9>());
-    l_byte_disable.writeBit<BITS_PER_NIBBLE, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB9 - 1 > ());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE0, BITS_PER_NIBBLE>(!i_nibble_enables.getBit<DB9>());
+    l_byte_disable.writeBit<SYNOPSYS_NIBBLE1, BITS_PER_NIBBLE>(!i_nibble_enables.getBit < DB9 - 1 > ());
     o_byte_disables[9] = l_byte_disable;
 
     return fapi2::FAPI2_RC_SUCCESS;
