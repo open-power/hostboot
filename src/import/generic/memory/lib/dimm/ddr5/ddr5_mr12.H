@@ -255,7 +255,7 @@ class mr12_data : public mr_base_data<MC>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
             FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR10. rank%u, DRAM%u VREFCS: 0x%02",
+                     " DDR5 MR10. rank%u, DRAM%u VREFCS: 0x%02lx",
                      TARGTID, i_rank, i_dram_number, iv_vrefcs_value[i_rank][i_dram_number]);
 #pragma GCC diagnostic pop
         }

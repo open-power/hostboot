@@ -81,7 +81,7 @@ class mr_generic_data : public mr_base_data<MC>
         {
             const uint64_t l_mr_number = mr_base_data<MC>::get_mr();
 
-            FAPI_INF(TARGTIDFORMAT " DDR5 Generic MR: %u , Dram Number: %u - OP_CODE: %u",
+            FAPI_INF(TARGTIDFORMAT " DDR5 Generic MR: %u , Dram Number: %u - OP_CODE: 0x%02lx",
                      GENTARGTID(i_rank_info.get_dimm_target()), l_mr_number,
                      i_dram_number,
                      iv_op_code);
