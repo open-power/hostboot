@@ -69,7 +69,7 @@ extern "C"
     /// @brief Determine if the provided SCOM address correlates to any chip units (if so creates a list of chipUnitPairing structures which correspond)
     /// @param[in] i_odysseyCU          Enumeration of the chip unit type
     /// @param[in] i_ecLevel            Chip EC level represented in HEX digit value.  Example: i_ecLevel = 0x12 --> EC level 1.2
-    /// @param[in] i_scomAddr SCOM address to be tested
+    /// @param[in] i_scomAddr           SCOM address to be tested
     /// @param[out] o_chipUnitRelated   Returns true if SCOM address is associated with any chip units
     /// @param[out] o_chipUnitPairing   Collection of chipUnitPairing enums
     /// @param[in] i_mode               Translation mode, specifying different addr translation methods.
@@ -80,6 +80,18 @@ extern "C"
             bool& o_chipUnitRelated,
             std::vector<odyssey_chipUnitPairing_t>& o_chipUnitPairing,
             const odysseyTranslationMode_t i_mode = ODYSSEY_DEFAULT_MODE);
+
+    /// @brief Qualify/screen indirect SCOM status data returned based on address requested
+    ///        In general, platform code expects both the user status (bits 36:39) and PCB status (bits 32:35) are zero for a successful transaction.
+    ///        This function is intended to permit per-address masking of the raw user status field to mask out benign status reporting bits that enter the
+    ///        user status field, before the platform check is conducted.
+    /// @param[in] i_ecLevel            Chip EC level represented in HEX digit value.  Example: i_ecLevel = 0x12 --> EC level 1.2
+    /// @param[in] i_scomAddr           Fully translated/physical address associated with indirect access
+    /// @param[in] i_indirectStatus     Raw indirect status data collected by platform
+    /// @retval uint64_t Filtered indirect status data for platform checking
+    uint64_t odyssey_scominfo_screenIndirectStatus(const uint8_t i_ecLevel,
+            const uint64_t i_scomAddr,
+            const uint64_t i_indirectStatus);
 
     /// @brief Alter the unit/unitnum of a target for spys where the clocks-on vs clocks-off targets are different.
     /// @param[in] i_odysseyCU            Target used for the spy request

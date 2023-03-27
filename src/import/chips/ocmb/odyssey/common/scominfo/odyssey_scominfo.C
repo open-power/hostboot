@@ -180,6 +180,27 @@ extern "C"
     }
 
     // See header file for function description
+    uint64_t odyssey_scominfo_screenIndirectStatus(const uint8_t i_ecLevel,
+            const uint64_t i_scomAddr,
+            const uint64_t i_indirectStatus)
+    {
+        uint64_t o_indirectStatus = i_indirectStatus;
+
+        // IOO/OMI satellite passes non-error information into bits 38:39 of the user status
+        // fields, filter them out:
+        // - 38 = Command Echo Bit - Indicates that the GCR command travelled around the ring and
+        //        returned to the GCR Main. Cleared on next write to this addr.
+        // - 39 = Valid/Done Bit - Indicates that read data is valid or that a write has completed.
+        //        Cleared on next write to this addr.
+        if ((i_scomAddr & 0x8000000008010C3FULL) == 0x8000000008010C3FULL)
+        {
+            o_indirectStatus &= 0xFFFFFFFFFCFFFFFFULL;
+        }
+
+        return o_indirectStatus;
+    }
+
+    // See header file for function description
     uint32_t odyssey_scominfo_fixChipUnitScomAddrOrTarget(const odysseyChipUnits_t i_odysseyCU,
             const uint8_t i_ecLevel,
             const uint32_t i_targetChipUnitNum,
