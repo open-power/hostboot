@@ -2228,10 +2228,8 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
         // Loops over OCMB chip targets that were defined in the associated config
         for_each_target([](const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
         {
-            fapi2::buffer<uint32_t> l_nibble_enables = 0x00000F00;
             uint8_t l_byte_disables[10] = {};
-            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(l_nibble_enables, l_byte_disables));
-
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000F00, l_byte_disables));
             REQUIRE( l_byte_disables[0] == 0xFF );
             REQUIRE( l_byte_disables[1] == 0xFF );
             REQUIRE( l_byte_disables[2] == 0xFF );
@@ -2242,6 +2240,247 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
             REQUIRE( l_byte_disables[7] == 0xFF );
             REQUIRE( l_byte_disables[8] == 0x00 );
             REQUIRE( l_byte_disables[9] == 0xFF );
+
+            // Walking 1's test
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000001, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xF0 );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000002, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0x0F );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000004, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xF0 );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000008, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0x0F );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000010, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xF0 );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000020, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0x0F );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000040, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xF0 );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000080, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0x0F );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000100, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xF0 );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000200, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0x0F );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000400, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xF0 );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00000800, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0x0F );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00001000, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xF0 );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00002000, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0x0F );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00004000, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xF0 );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00008000, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0x0F );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00010000, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xF0 );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00020000, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0x0F );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xFF );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00040000, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0xF0 );
+
+            REQUIRE_RC_PASS(mss::ody::phy::nibble_enable_db_disable(0x00080000, l_byte_disables));
+            REQUIRE( l_byte_disables[0] == 0xFF );
+            REQUIRE( l_byte_disables[1] == 0xFF );
+            REQUIRE( l_byte_disables[2] == 0xFF );
+            REQUIRE( l_byte_disables[3] == 0xFF );
+            REQUIRE( l_byte_disables[4] == 0xFF );
+            REQUIRE( l_byte_disables[5] == 0xFF );
+            REQUIRE( l_byte_disables[6] == 0xFF );
+            REQUIRE( l_byte_disables[7] == 0xFF );
+            REQUIRE( l_byte_disables[8] == 0xFF );
+            REQUIRE( l_byte_disables[9] == 0x0F );
 
             return 0;
         });
