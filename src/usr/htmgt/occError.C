@@ -382,6 +382,13 @@ namespace HTMGT
                                         i_length,
                                         1,  // version
                                         0); // subsection
+
+                    if (i_source != OCC_ERRSRC_405)
+                    {
+                        // Add OCC trace to PGPE/XGPE/QME errors
+                        addOccTrace(l_errlHndl);
+                    }
+
                     ERRORLOG::errlCommit(l_errlHndl, HTMGT_COMP_ID);
                 }
             }
