@@ -196,6 +196,10 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
         // Multi-ports, dimms
         static constexpr mss::states MULTI_PORTS = mss::states::NO;
 
+        // 128B mode defaults
+        static constexpr mcbist::mcb_128B_mode DEFAULT_128B_MODE_MCBIST = mcbist::mcb_128B_mode::DEFAULT_128B_MODE;
+        static constexpr mcbist::mcb_128B_mode DEFAULT_128B_MODE_MAINT = mcbist::mcb_128B_mode::DEFAULT_128B_MODE;
+
         // Subtest
         static constexpr size_t SUBTEST_PER_REG = 4;
         static constexpr size_t SUBTEST_PER_PROGRAM = 32;

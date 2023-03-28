@@ -285,6 +285,16 @@ inline void get_mcbist_wat_debug_attn_mask( const fapi2::buffer<uint64_t> i_data
 namespace mcbist
 {
 
+// Defines the 128B mode override values
+enum mcb_128B_mode
+{
+    NO_OVERRIDE,
+    DEFAULT_128B_MODE,
+    DEFAULT_64B_MODE,
+    OVERRIDE_128B_MODE,
+    OVERRIDE_64B_MODE,
+};
+
 ///
 /// @class subtest_t
 /// @tparam MC the mc type of the T
@@ -1952,6 +1962,27 @@ class program
         inline void change_len64( const mss::states i_state )
         {
             iv_config.writeBit<TT::CFG_MCB_LEN64>(i_state);
+            return;
+        }
+
+        ///
+        /// @brief Change the mcbist 64/128 byte control using mcb_128B_mode enum
+        /// @param[in] i_mode mcb_128B_mode enum for desired setting
+        /// @return void
+        ///
+        inline void change_len64( const mss::mcbist::mcb_128B_mode i_mode )
+        {
+            if ((i_mode == mcb_128B_mode::DEFAULT_64B_MODE) ||
+                (i_mode == mcb_128B_mode::OVERRIDE_64B_MODE))
+            {
+                iv_config.writeBit<TT::CFG_MCB_LEN64>(mss::ON);
+            }
+            else if ((i_mode == mcb_128B_mode::DEFAULT_128B_MODE) ||
+                     (i_mode == mcb_128B_mode::OVERRIDE_128B_MODE))
+            {
+                iv_config.writeBit<TT::CFG_MCB_LEN64>(mss::OFF);
+            }
+
             return;
         }
 
