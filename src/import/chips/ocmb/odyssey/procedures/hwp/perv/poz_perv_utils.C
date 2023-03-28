@@ -57,9 +57,9 @@ ReturnCode get_hotplug_mc_group(
     Target<TARGET_TYPE_SYSTEM> l_system_target;
     buffer<uint8_t> l_attr_hotplug;
     buffer<uint64_t> l_attr_sim_chiplet_mask;
-    FAPI_TRY(FAPI_ATTR_GET(ATTR_HOTPLUG, l_system_target, l_attr_hotplug),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_HOTPLUG, l_system_target, l_attr_hotplug),
              "Error from FAPI_ATTR_GET (ATTR_HOTPLUG)");
-    FAPI_TRY(FAPI_ATTR_GET(ATTR_SIM_CHIPLET_MASK, i_target, l_attr_sim_chiplet_mask),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SIM_CHIPLET_MASK, i_target, l_attr_sim_chiplet_mask),
              "Error from FAPI_ATTR_GET (ATTR_SIM_CHIPLET_MASK)");
 
     if (l_attr_hotplug)

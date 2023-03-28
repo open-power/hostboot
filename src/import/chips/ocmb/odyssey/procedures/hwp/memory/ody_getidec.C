@@ -22,7 +22,6 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
 ///
 /// @file ody_getidec.C
 /// @brief Contains function to lookup Chip ID and EC values of Odyssey Chip
@@ -34,6 +33,7 @@
 /// *HWP Consumed by: Hostboot / Cronus
 
 #include <fapi2.H>
+#include <chipids.H>
 #include <ody_scom_ody.H>
 #include <ody_getidec.H>
 #include <lib/shared/ody_consts.H>
@@ -55,10 +55,10 @@ extern "C"
         // Reading CFAM chip id reg
         FAPI_TRY(CHIP_IDEC.getCfam(i_target),
                  "Error reading CFAM chip IDEC reg for " TARGTIDFORMAT, TARGTID);
-        CHIP_IDEC.extractToRight<mss::ody::idec_consts::MAJOR_EC_BIT_START,
-                                 mss::ody::idec_consts::MAJOR_EC_BIT_LENGTH>(o_chipEc);
-        CHIP_IDEC.extractToRight<mss::ody::idec_consts::CHIPID_BIT_START,
-                                 mss::ody::idec_consts::CHIPID_BIT_LENGTH>(o_chipId);
+
+        o_chipId = POWER_CHIPID::extract_chipid16(CHIP_IDEC());
+        o_chipEc = POWER_CHIPID::extract_ddlevel(CHIP_IDEC());
+
         FAPI_INF("Target " TARGTIDFORMAT ": EC 0x%.02x   ChipId 0x%.04x", TARGTID, o_chipEc, o_chipId);
 
     fapi_try_exit:
