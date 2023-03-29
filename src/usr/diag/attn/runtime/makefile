@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2020
+# Contributors Listed Below - COPYRIGHT 2014,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -29,6 +29,7 @@ ROOTPATH = ../../../../..
 
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 CFLAGS += -iquote${ROOTPATH}/src/usr/diag/attn
 
 MODULE = attn_rt

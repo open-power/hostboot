@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include "common/attntarget.H"
 #include "attntrace.H"
 #include <targeting/common/utilFilter.H>
+#include <chipids.H>
 
 using namespace std;
 using namespace PRDF;
@@ -80,21 +81,34 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
                                    TARGETING::TargetService::CHILD_BY_AFFINITY,
                                    TARGETING::TargetService::ALL, &pred );
 
-    // Vector to denote the chiplet FIRs on the OCMB along with their respective
-    // masks and what attention type they check. NOTE: The order of the firList
-    // should be in order from highest to lowest priority attention to ensure
-    // the first attention we find is the highest priority one.
+    // Vector to denote the global or chiplet FIRs on the OCMB along with their
+    // respective masks if applicable and what attention type they check.
+    // NOTE: The order of the firList should be in order from highest to lowest
+    // priority attention to ensure the first attention we find is the highest
+    // priority one.
     struct firInfo
     {
         uint32_t firAddr;
         uint32_t firMask;
         ATTENTION_VALUE_TYPE attnType;
     };
-    static const std::vector<firInfo> firList
+    static const std::map<uint32_t, std::vector<firInfo>> firList
     {
-        { 0x08040000, 0x08040002, UNIT_CS     }, // OCMB_CHIPLET_CS_FIR
-        { 0x08040001, 0x08040002, RECOVERABLE }, // OCMB_CHIPLET_RE_FIR
-        { 0x08040004, 0x08040007, HOST_ATTN   }, // OCMB_CHIPLET_SPA_FIR
+        {POWER_CHIPID::EXPLORER_16,
+            {
+                { 0x08040000, 0x08040002, UNIT_CS     }, // OCMB_CHIPLET_CS_FIR
+                { 0x08040001, 0x08040002, RECOVERABLE }, // OCMB_CHIPLET_RE_FIR
+                { 0x08040004, 0x08040007, HOST_ATTN   }, // OCMB_CHIPLET_SPA_FIR
+            }
+        },
+        {POWER_CHIPID::ODYSSEY_16,
+            {
+                { 0x570F001C, 0x00000000, UNIT_CS     }, // GFIR_CS
+                { 0x570F001B, 0x00000000, RECOVERABLE }, // GFIR_RE
+                { 0x570F001A, 0x00000000, HOST_ATTN   }, // GFIR_SPA
+                { 0x570F002A, 0x00000000, UNIT_CS     }, // GFIR_UCS
+            }
+        },
     };
 
     bool attnFound = false;
@@ -119,9 +133,21 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
                 continue;
             }
         }
-        for ( const auto & fir : firList )
+
+        // Get the chip ID of the OCMB
+        uint32_t chipId = ocmb->getAttr<TARGETING::ATTR_CHIP_ID>();
+        auto firIt = firList.find(chipId);
+
+        // If the chip ID does not exist in the firList map, skip this OCMB
+        if ( firIt == firList.end() )
         {
-            // Get the data from the chiplet FIR
+            ATTN_SLOW( "MemOps::resolveOcmbs Invalid chip ID: 0x04%x", chipId );
+            continue;
+        }
+
+        for ( const auto & fir : firIt->second )
+        {
+            // Get the data from the chiplet/global FIR
             uint64_t firData = 0;
             errlHndl_t err = getScom( ocmb, fir.firAddr, firData );
             if ( err )
@@ -131,21 +157,25 @@ void MemOps::resolveOcmbs( const TargetHandle_t i_proc,
                 break;
             }
 
-            // Get the data from the chiplet FIR mask
+            // Get the data from the chiplet FIR mask (Explorer only)
             uint64_t firMaskData = 0;
-            err = getScom( ocmb, fir.firMask, firMaskData );
-            if ( err )
+            if ( POWER_CHIPID::EXPLORER_16 == chipId )
             {
-                ATTN_SLOW( "MemOps::resolveOcmbs mask getScom failed" );
-                errlCommit( err, ATTN_COMP_ID );
-                break;
+                err = getScom( ocmb, fir.firMask, firMaskData );
+                if ( err )
+                {
+                    ATTN_SLOW( "MemOps::resolveOcmbs mask getScom failed" );
+                    errlCommit( err, ATTN_COMP_ID );
+                    break;
+                }
+
+                // Account for recoverable bits shifting (Explorer only)
+                if ( RECOVERABLE == fir.attnType )
+                {
+                    firData = firData >> 2;
+                }
             }
 
-            // Account for recoverable bits shifting
-            if ( RECOVERABLE == fir.attnType )
-            {
-                firData = firData >> 2;
-            }
             // Check for any FIR bits on
             if ( firData & ~firMaskData )
             {
