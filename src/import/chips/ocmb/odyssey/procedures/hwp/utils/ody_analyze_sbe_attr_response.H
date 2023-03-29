@@ -34,8 +34,8 @@
 #ifndef _ODY_ANALYZE_SBE_ATTR_RESPONSE_
 #define _ODY_ANALYZE_SBE_ATTR_RESPONSE_
 
-#include "fapi2.H"
-#include "sbe_attribute_utils.H"
+#include <fapi2.H>
+#include <sbe_attribute_utils.H>
 
 // Required for Cronus
 typedef fapi2::ReturnCode (*ody_analyze_sbe_attr_response_FP_t) (

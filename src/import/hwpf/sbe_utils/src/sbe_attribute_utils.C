@@ -39,7 +39,7 @@
  *                                              |<- SbeAttrTargetSectionListRespParser
  *
  *         SbeAttributeFileHandler     <- SbeAttributeUpdateFileGenerator
- *                                     <- SbeAttributFileParser
+ *                                     <- SbeAttributeFileParser
  *                                              |
  *                                              |<- SbeAttributeUpdRespFileParser
  *                                              |<- SbeAttributeListRespFileParser
@@ -52,6 +52,7 @@ using namespace fapi2;
 
 namespace sbeutil
 {
+
 // ---------------------------- SbeAttrRowHandler ------------------------------
 SbeAttrRowHandler::~SbeAttrRowHandler()
 {
@@ -72,15 +73,24 @@ SbeAttrRowHandler::SbeAttrRowHandler(SbeAttrRowHandler&& i_src)
     i_src.iv_value_ptr = nullptr;
 }
 
+inline INVALID_ATTR_INDEX SbeAttrRowHandler::get_RC_INVALID_ATTR_INDEX()
+{
+    return fapi2::INVALID_ATTR_INDEX()
+           .set_ATTRIBUTEID(iv_attr_entry.iv_attrId)
+           .set_ROW(iv_attr_entry.iv_row)
+           .set_COL(iv_attr_entry.iv_col)
+           .set_HGT(iv_attr_entry.iv_hgt);
+}
+
 ReturnCode SbeAttrRowHandler::getAttrEntry(AttrEntry_t& o_attrEntry)
 {
     FAPI_DBG("AttributeId: 0x%08X", iv_attr_entry.iv_attrId);
 
-    FAPI_ASSERT(iv_attr_entry.iv_row == 0xFF, fapi2::INVALID_ATTR_FILE(),
+    FAPI_ASSERT(iv_attr_entry.iv_row == 0xFF, get_RC_INVALID_ATTR_INDEX(),
                 "l_attr_entry.iv_row (%d) is invalid", iv_attr_entry.iv_row);
-    FAPI_ASSERT(iv_attr_entry.iv_col == 0xFF, fapi2::INVALID_ATTR_FILE(),
+    FAPI_ASSERT(iv_attr_entry.iv_col == 0xFF, get_RC_INVALID_ATTR_INDEX(),
                 "l_attr_entry.iv_col (%d) is invalid", iv_attr_entry.iv_col);
-    FAPI_ASSERT(iv_attr_entry.iv_hgt == 0xFF, fapi2::INVALID_ATTR_FILE(),
+    FAPI_ASSERT(iv_attr_entry.iv_hgt == 0xFF, get_RC_INVALID_ATTR_INDEX(),
                 "l_attr_entry.iv_hgt (%d) is invalid", iv_attr_entry.iv_hgt);
     o_attrEntry = iv_attr_entry;
 
@@ -181,7 +191,7 @@ ReturnCode SbeAttributeUpdateFileGenerator::genOutput(
         l_header->iv_fmtMinor   = ATTR_FORMAT_MINOR_VER;
         l_header->iv_chipType   = iv_chip_type;
         l_header->iv_fileType   = iv_file_type;
-        l_header->iv_numTargets = htonl(iv_target_sections.size());
+        l_header->iv_numTargets = htobe32(iv_target_sections.size());
 
         uint8_t* l_cur_pointer = l_buf + sizeof(HeaderEntry_t);
 
@@ -227,7 +237,8 @@ void SbeAttrTargetSectionGen::genOutput(uint8_t** io_pointer)
     TargetEntry_t* l_targ_entry = reinterpret_cast<TargetEntry_t*>(*io_pointer);
     l_targ_entry->iv_logTgtType = iv_targ_type;
     l_targ_entry->iv_instance   = iv_targ_inst_num;
-    l_targ_entry->iv_numAttrs   = htons(iv_attr_rows.size());
+    l_targ_entry->iv_numAttrs   = htobe16(iv_attr_rows.size());
+    l_targ_entry->iv_magicWord  = htobe32(TARGET_ENTRY_MAGIC_WORD);
 
     *io_pointer += sizeof(TargetEntry_t);
 
@@ -255,8 +266,8 @@ void SbeAttrRowGen::accumulateOutputSize(uint16_t& io_size)
 void SbeAttrRowGen::genOutput(uint8_t** io_pointer)
 {
     AttrEntry_t* l_attr_entry = reinterpret_cast<AttrEntry_t*>(*io_pointer);
-    l_attr_entry->iv_attrId   = htonl(iv_attr_entry.iv_attrId);
-    l_attr_entry->iv_dataSize = htons(iv_attr_entry.iv_dataSize);
+    l_attr_entry->iv_attrId   = htobe32(iv_attr_entry.iv_attrId);
+    l_attr_entry->iv_dataSize = htobe16(iv_attr_entry.iv_dataSize);
     l_attr_entry->iv_row      = iv_attr_entry.iv_row;
     l_attr_entry->iv_col      = iv_attr_entry.iv_col;
     l_attr_entry->iv_hgt      = iv_attr_entry.iv_hgt;
@@ -272,13 +283,15 @@ ReturnCode SbeAttrRowParser::parse(uint8_t** io_buf, uint16_t* io_size)
     FAPI_DBG("SbeAttrRowParser::parse Entering ...");
 
     FAPI_ASSERT(*io_size >= sizeof(AttrEntry_t),
-                INVALID_ATTR_FILE(),
+                INSUFFICIENT_DATA_IN_BUFFER()
+                .set_ACTSIZE(*io_size)
+                .set_SIZE(sizeof(AttrEntry_t)),
                 "io_size (%d) is less than sizeof(AttrEntry_t)", *io_size);
 
-    iv_attr_entry.iv_attrId   = ntohl(reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_attrId);
+    iv_attr_entry.iv_attrId   = be32toh(reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_attrId);
     FAPI_DBG("iv_attr_entry.iv_attrId = 0x%08x", iv_attr_entry.iv_attrId);
 
-    iv_attr_entry.iv_dataSize = ntohs(reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_dataSize);
+    iv_attr_entry.iv_dataSize = be16toh(reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_dataSize);
     iv_attr_entry.iv_row      = reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_row;
     iv_attr_entry.iv_col      = reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_col;
     iv_attr_entry.iv_hgt      = reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_hgt;
@@ -289,7 +302,9 @@ ReturnCode SbeAttrRowParser::parse(uint8_t** io_buf, uint16_t* io_size)
     setAlignedSize();
 
     FAPI_ASSERT(*io_size >= iv_value_size_aligned,
-                INVALID_ATTR_FILE(),
+                INSUFFICIENT_DATA_IN_BUFFER()
+                .set_ACTSIZE(*io_size)
+                .set_SIZE(iv_value_size_aligned),
                 "io_size (%d) is less than iv_value_size_aligned(%d)",
                 *io_size, iv_value_size_aligned);
 
@@ -297,7 +312,7 @@ ReturnCode SbeAttrRowParser::parse(uint8_t** io_buf, uint16_t* io_size)
     memcpy(iv_value_ptr, *io_buf, iv_attr_entry.iv_dataSize);
 
     *io_buf += iv_value_size_aligned;
-    *io_size += iv_value_size_aligned;
+    *io_size -= iv_value_size_aligned;
 
 fapi_try_exit:
     return current_err;
@@ -309,16 +324,28 @@ ReturnCode SbeAttrTargetSectionParser::parse(uint8_t** io_buf, uint16_t* io_size
     FAPI_DBG("SbeAttrTargetSectionParser::parse Entering ...");
 
     FAPI_ASSERT(*io_size >= sizeof(TargetEntry_t),
-                INVALID_ATTR_FILE(),
+                INSUFFICIENT_DATA_IN_BUFFER()
+                .set_ACTSIZE(*io_size)
+                .set_SIZE(sizeof(TargetEntry_t)),
                 "io_size (%d) is less than sizeof(TargetEntry_t)", *io_size);
 
     {
         TargetEntry_t* l_targ_entry = reinterpret_cast<TargetEntry_t*>(*io_buf);
         iv_targ_type = l_targ_entry->iv_logTgtType;
         iv_targ_inst_num = l_targ_entry->iv_instance;
-        uint16_t l_num_attrs = ntohs(l_targ_entry->iv_numAttrs);
+        uint16_t l_num_attrs = be16toh(l_targ_entry->iv_numAttrs);
         FAPI_DBG("iv_targ_type = 0x%08x, iv_targ_inst_num = %d, l_num_attrs = %d",
                  iv_targ_type, iv_targ_inst_num, l_num_attrs);
+
+        uint32_t l_magicWord = be32toh(l_targ_entry->iv_magicWord);
+        FAPI_ASSERT(l_magicWord == TARGET_ENTRY_MAGIC_WORD,
+                    TARGET_ENTRY_MAGIC_WORD_MISMATCH()
+                    .set_TARGET_TYPE(iv_targ_type)
+                    .set_TARGET_INS_NUM(iv_targ_inst_num)
+                    .set_ACTUAL_MAGICWORD(l_magicWord)
+                    .set_EXPECTED_MAGICWORD(TARGET_ENTRY_MAGIC_WORD),
+                    "Magicword (%08X) does not match with expected 0x%08X",
+                    l_magicWord, TARGET_ENTRY_MAGIC_WORD);
 
         *io_buf += sizeof(TargetEntry_t);
         *io_size -= sizeof(TargetEntry_t);
@@ -354,26 +381,36 @@ ReturnCode SbeAttributFileParser::parseFile(uint8_t* i_buf, uint16_t i_size)
     FAPI_DBG("parseFile Entering ...");
 
     FAPI_ASSERT(i_size >= sizeof(HeaderEntry_t),
-                INVALID_ATTR_FILE(),
+                INSUFFICIENT_DATA_IN_BUFFER()
+                .set_ACTSIZE(i_size)
+                .set_SIZE(sizeof(HeaderEntry_t)),
                 "i_size (%d) is less than sizeof(HeaderEntry_t)", i_size);
 
     {
         HeaderEntry_t* l_header = reinterpret_cast<HeaderEntry_t*>(i_buf);
         FAPI_ASSERT((l_header->iv_fmtMajor == ATTR_FORMAT_MAJOR_VER) &&
                     (l_header->iv_fmtMinor == ATTR_FORMAT_MINOR_VER),
-                    INVALID_ATTR_FILE(),
+                    UNEXPECTED_ATTR_FORMAT_VER()
+                    .set_HEADER_MAJOR_VERSION(l_header->iv_fmtMajor)
+                    .set_HEADER_MINOR_VERSION(l_header->iv_fmtMinor)
+                    .set_HWP_MAJOR_VERSION(ATTR_FORMAT_MAJOR_VER)
+                    .set_HWP_MINOR_VERSION(ATTR_FORMAT_MINOR_VER),
                     "major version (%d) or minor version (%d) is not matching with parser",
                     l_header->iv_fmtMajor, l_header->iv_fmtMinor);
 
         FAPI_ASSERT((l_header->iv_chipType == iv_chip_type),
-                    INVALID_ATTR_FILE(),
+                    UNEXPECTED_ATTR_CHIP_TYPE()
+                    .set_HEADER_CHIP_TYPE(l_header->iv_chipType)
+                    .set_HWP_CHIP_TYPE(iv_chip_type),
                     "chip_type (%d) is not expected (%d)",
                     l_header->iv_chipType, iv_chip_type);
 
         FAPI_TRY(validateFileType(l_header->iv_fileType));
         {
-            uint32_t l_num_targs = ntohl(l_header->iv_numTargets);
+            uint32_t l_num_targs = be32toh(l_header->iv_numTargets);
             uint8_t* l_cur_ptr = i_buf + sizeof(HeaderEntry_t);
+
+            FAPI_DBG("Number of target sections : %d", l_num_targs);
 
             for(uint16_t i = 0; i < l_num_targs; i++)
             {
@@ -406,7 +443,9 @@ SbeAttributFileParser::getNextTargetSectionBase(SbeTarget& o_sbe_targ)
 ReturnCode SbeAttributFileParser::validateFileType(SbeAttributeFileTypes i_file_type)
 {
     FAPI_ASSERT(i_file_type == iv_file_type,
-                INVALID_ATTR_FILE(),
+                UNEXPECTED_ATTR_FILE_TYPE()
+                .set_HEADER_FILE_TYPE(i_file_type)
+                .set_PARSER_FILE_TYPE(iv_file_type),
                 "i_file_type (%d) is not iv_file_type(%d)",
                 i_file_type, iv_file_type);
 
@@ -415,14 +454,14 @@ fapi_try_exit:
 }
 
 // ---------------------- SbeAttrRowUpdResParser ------------------------------
-ReturnCode SbeAttrRowUpdResParser::getResponse(SbeAttributeUpdateRC& o_resp)
+ReturnCode SbeAttrRowUpdResParser::getResponse(SbeAttributeRC& o_resp)
 {
-    FAPI_ASSERT(iv_attr_entry.iv_dataSize == sizeof(SbeAttributeUpdateRC),
+    FAPI_ASSERT(iv_attr_entry.iv_dataSize == sizeof(SbeAttributeRC),
                 INVALID_ATTR_FILE(),
-                "iv_dataSize(%d) != sizeof(SbeAttributeUpdateRC)(%d)",
-                iv_attr_entry.iv_dataSize, sizeof(SbeAttributeUpdateRC));
+                "iv_dataSize(%d) != sizeof(SbeAttributeRC)(%d)",
+                iv_attr_entry.iv_dataSize, sizeof(SbeAttributeRC));
 
-    o_resp = *(reinterpret_cast<SbeAttributeUpdateRC*>(iv_value_ptr));
+    o_resp = *(reinterpret_cast<SbeAttributeRC*>(iv_value_ptr));
 
 fapi_try_exit:
     return current_err;
@@ -448,11 +487,18 @@ SbeAttributeUpdRespFileParser::getNextTargetSection(SbeTarget& o_sbe_targ)
 }
 
 // ---------------------- SbeAttrRowListResParser ------------------------------
+
+// The data type of an attribute will never be modified in the attribute
+// definition file. Hence, any data size mismatch error should be treated
+// as hard stop by the caller of this function.
 ReturnCode SbeAttrRowListResParser::getAttrValue(
     void* o_val, uint16_t i_size, uint8_t i_elem_size)
 {
     FAPI_ASSERT(iv_attr_entry.iv_dataSize == i_size,
-                INVALID_ATTR_FILE(),
+                UNEXPECTED_DATA_SIZE()
+                .set_ATTRIBUTEID(iv_attr_entry.iv_attrId)
+                .set_SIZE(iv_attr_entry.iv_dataSize)
+                .set_ACTSIZE(i_size),
                 "iv_dataSize(%d) != i_size(%d)",
                 iv_attr_entry.iv_dataSize, i_size);
 
@@ -465,17 +511,26 @@ ReturnCode SbeAttrRowListResParser::getAttrValue(
 
         case 2:
             sbeutil::copyArrayWithEndianessCorrection<uint16_t>(
-                (uint16_t*)o_val, (uint16_t*)iv_value_ptr, (i_size / i_elem_size), ntohs);
+                (uint16_t*)o_val, (uint16_t*)iv_value_ptr, (i_size / i_elem_size), be16toh_xlate);
             break;
 
         case 4:
             sbeutil::copyArrayWithEndianessCorrection<uint32_t>(
-                (uint32_t*)o_val, (uint32_t*)iv_value_ptr, (i_size / i_elem_size), ntohl);
+                (uint32_t*)o_val, (uint32_t*)iv_value_ptr, (i_size / i_elem_size), be32toh_xlate);
+            break;
+
+        case 8:
+            sbeutil::copyArrayWithEndianessCorrection<uint64_t>(
+                (uint64_t*)o_val, (uint64_t*)iv_value_ptr, (i_size / i_elem_size), be64toh_xlate);
             break;
 
         default:
-            FAPI_ASSERT(false, INVALID_ATTR_FILE(),
+            FAPI_ASSERT(false,
+                        INVALID_SIZE_FOR_ENDIANNESS_CORRECTION()
+                        .set_ATTRIBUTEID(iv_attr_entry.iv_attrId)
+                        .set_SIZE(i_elem_size),
                         "i_elem_size:%d not handled", i_elem_size);
+            break;
     }
 
 fapi_try_exit:
@@ -488,6 +543,34 @@ SbeAttrRowListResParser& SbeAttrTargetSectionListRespParser::getNextRow()
     return static_cast<SbeAttrRowListResParser&>(getNextRowBase());
 }
 
+ReturnCode SbeAttrTargetSectionListRespParser::addAttributesToError(const SbeAttributeRC i_rc,
+        std::vector<AttrError_t>& io_errors)
+{
+    FAPI_DBG("SbeAttrTargetSectionListRespParser::addAttributesToError Entering ...");
+
+    // This function is called after an error, and this function will help to continue
+    //    by storing the error in vector (io_errors). So we have to clear the current
+    //    error.
+    current_err = FAPI2_RC_SUCCESS;
+
+    AttrEntry_t l_attrEntry;
+
+    while (this->getRemainingRowCount())
+    {
+        FAPI_DBG("getRemainingRowCount() = %d", this->getRemainingRowCount());
+
+        SbeAttrRowListResParser& l_attr = this->getNextRow();
+        FAPI_TRY(l_attr.getAttrEntry(l_attrEntry), "getAttrEntry returned error");
+
+        io_errors.emplace_back(fapi2::TargetType(1ULL << this->iv_targ_type),
+                               this->iv_targ_inst_num,
+                               uint32_t(l_attrEntry.iv_attrId),
+                               i_rc);
+    }
+
+fapi_try_exit:
+    return current_err;
+}
 // ---------------------- SbeAttributeListRespFileParser ----------------------
 SbeAttributeListRespFileParser::SbeAttributeListRespFileParser()
 {

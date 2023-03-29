@@ -34,8 +34,8 @@
 #ifndef _ODY_APPLY_SBE_ATTRIBUTE_DATA_
 #define _ODY_APPLY_SBE_ATTRIBUTE_DATA_
 
-#include "fapi2.H"
-#include "sbe_attribute_utils.H"
+#include <fapi2.H>
+#include <sbe_attribute_utils.H>
 
 // Required for Cronus
 typedef fapi2::ReturnCode (*ody_apply_sbe_attribute_data_FP_t) (

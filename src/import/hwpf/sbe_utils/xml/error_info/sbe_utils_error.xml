@@ -47,4 +47,117 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_UNEXPECTED_ATTR_FORMAT_VER</rc>
+    <description>
+        The attribute data format does not match the version of the procedure.
+    </description>
+    <ffdc>HEADER_MAJOR_VERSION</ffdc>
+    <ffdc>HEADER_MINOR_VERSION</ffdc>
+    <ffdc>HWP_MAJOR_VERSION</ffdc>
+    <ffdc>HWP_MINOR_VERSION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_UNEXPECTED_ATTR_CHIP_TYPE</rc>
+    <description>
+        The attribute data chip type does not match the chip type passed to the procedure.
+    </description>
+    <ffdc>HEADER_CHIP_TYPE</ffdc>
+    <ffdc>HWP_CHIP_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_UNEXPECTED_ATTR_FILE_TYPE</rc>
+    <description>
+        The attribute data file type does not match the file type of the parser.
+    </description>
+    <ffdc>HEADER_FILE_TYPE</ffdc>
+    <ffdc>PARSER_FILE_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_INSUFFICIENT_DATA_IN_BUFFER</rc>
+    <description>
+        The buffer does not have enough data to process further.
+    </description>
+    <ffdc>ACTSIZE</ffdc>
+    <ffdc>SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_INVALID_ATTR_INDEX</rc>
+    <description>
+        The attribute index is expected to be row=0xff, col=0xff, and hgt=0xff. If they don't
+        match, then it may be due to data corruption, software bug, or due to data formatting
+        errors. So, this error is considered as a hard stop.
+    </description>
+    <ffdc>ATTRIBUTEID</ffdc>
+    <ffdc>ROW</ffdc>
+    <ffdc>COL</ffdc>
+    <ffdc>HGT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_UNEXPECTED_DATA_SIZE</rc>
+    <description>
+        The attribute size does not match with the size expected by the procedure.
+    </description>
+    <ffdc>ATTRIBUTEID</ffdc>
+    <ffdc>SIZE</ffdc>
+    <ffdc>ACTSIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_INVALID_SIZE_FOR_ENDIANNESS_CORRECTION</rc>
+    <description>
+        The endianness correction cannot be handled for this element size.
+    </description>
+    <ffdc>ATTRIBUTEID</ffdc>
+    <ffdc>SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_TARGET_ENTRY_MAGIC_WORD_MISMATCH</rc>
+    <description>
+        The magic word in the target section does not match with the procedure.
+    </description>
+    <ffdc>TARGET_TYPE</ffdc>
+    <ffdc>TARGET_INS_NUM</ffdc>
+    <ffdc>ACTUAL_MAGICWORD</ffdc>
+    <ffdc>EXPECTED_MAGICWORD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

@@ -145,33 +145,13 @@ fapi2::ReturnCode getChildByInstance(
 {
     bool l_target_found = false;
 
-    //Note: For the DIMM target, ATTR_CHIP_UNIT_POS is not supported and
-    //      the attribute ATTR_REL_POS is always relative to a target's
-    //      immediate parent, which is MEM_PORT here. Hence, to find the
-    //      given instance of DIMM target of OCMB chip target, the logic
-    //      is as follows:
-    //          - find the parent MEM_PORT target with CHIP_UNIT_POS = (i_inst_num / 2)
-    //          - for that MEM_PORT target, find the child DIMM target with
-    //            REL_POS = (i_inst_num % 2)
-
-    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> l_memport_child;
-    uint8_t l_memport_inst = i_inst_num / 2;
-
-    // Here, getChildByInstance() will call the generic implementation
-    // that compares instance number with ATTR_CHIP_UNIT_POS to find the
-    // MEM_PORT child of OCMB chip target
-
-    FAPI_TRY(getChildByInstance(i_parentChip, l_memport_child, l_memport_inst),
-             "getChildByInstance() for the MEM_PORT having instance number %d failed",
-             l_memport_inst);
-
     for(auto& l_dimm :
-        l_memport_child.getChildren<fapi2::TARGET_TYPE_DIMM>(fapi2::TARGET_STATE_PRESENT))
+        i_parentChip.getChildren<fapi2::TARGET_TYPE_DIMM>(fapi2::TARGET_STATE_PRESENT))
     {
-        fapi2::ATTR_REL_POS_Type l_rel_pos;
-        FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_dimm, l_rel_pos);
+        fapi2::ATTR_FAPI_POS_Type l_fapiPos;
+        FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, l_dimm, l_fapiPos);
 
-        if(l_rel_pos == (i_inst_num % 2))
+        if((l_fapiPos % 4) == i_inst_num)
         {
             o_child = l_dimm;
             l_target_found = true;
@@ -220,26 +200,10 @@ template<>
 fapi2::ReturnCode getInstNum(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
                              uint8_t& o_instNum)
 {
-    //Note: For the DIMM target, ATTR_CHIP_UNIT_POS is not supported and
-    //      the attribute ATTR_REL_POS is always relative to a target's
-    //      immediate parent, which is MEM_PORT here. There is no _POS
-    //      attribute that helps to uniquely identify a DIMM target.
-    //      identify the DIMM target instance, the logic
-    //      is as follows:
-    //         DIMM target instance number =
-    //          (Parent MEM_PORT target's CHIP_UNIT_POS * 2) +
-    //           REL_POS of the DIMM target itself
+    fapi2::ATTR_FAPI_POS_Type l_fapiPos;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_target, l_fapiPos));
 
-    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> l_memport_parent =
-        i_target.template getParent<fapi2::TARGET_TYPE_MEM_PORT>();
-
-    fapi2::ATTR_CHIP_UNIT_POS_Type l_chipUnitPos;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_memport_parent, l_chipUnitPos));
-
-    fapi2::ATTR_REL_POS_Type l_relPos;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_target, l_relPos));
-
-    o_instNum = (l_chipUnitPos * 2) + l_relPos;
+    o_instNum = (l_fapiPos % 4);
 
 fapi_try_exit:
     return fapi2::current_err;

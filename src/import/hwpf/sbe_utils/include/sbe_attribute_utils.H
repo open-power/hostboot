@@ -37,27 +37,57 @@
 
 #include "sbe_targets.H"
 #include <vector>
-#include <netinet/in.h>
+#include <endian.h>
 
 #define ATTR_FORMAT_MAJOR_VER 0
-#define ATTR_FORMAT_MINOR_VER 1
+#define ATTR_FORMAT_MINOR_VER 2
 
 namespace sbeutil
 {
+// wrap endian.h macros in callable functions, for use by
+// copyArrayWithEndianessCorrection
+static inline uint16_t htobe16_xlate(uint16_t in)
+{
+    return htobe16(in);
+}
+static inline uint32_t htobe32_xlate(uint32_t in)
+{
+    return htobe32(in);
+}
+static inline uint64_t htobe64_xlate(uint64_t in)
+{
+    return htobe64(in);
+}
+
+static inline uint16_t be16toh_xlate(uint16_t in)
+{
+    return be16toh(in);
+}
+static inline uint32_t be32toh_xlate(uint32_t in)
+{
+    return be32toh(in);
+}
+static inline uint64_t be64toh_xlate(uint64_t in)
+{
+    return be64toh(in);
+}
+
 /**
  * @brief  RCs which will be send as part of SBE_ATTRIBUTE_FILE_UPD_RESPONSE file,
  *         as a response to Attribute Update Chipop
  */
-enum SbeAttributeUpdateRC : uint32_t
+enum SbeAttributeRC : uint32_t
 {
-    SBE_ATTRIBUTE_UPDATE_RC_SUCCESS,
-    SBE_ATTRIBUTE_UPDATE_TGT_TYPE_NOT_FOUND,
-    SBE_ATTRIBUTE_UPDATE_RC_ATTR_NOT_FOUND,
-    SBE_ATTRIBUTE_UPDATE_RC_SIZE_NOT_MATCHING,
-    SBE_ATTRIBUTE_UPDATE_RC_TARGET_INST_OUT_RANGE,
-    SBE_ATTRIBUTE_UPDATE_RC_ARRAY_INDEX_OUT_RANGE,
-    SBE_ATTRIBUTE_UPDATE_RC_ATTR_NOT_ARRAY,
-    SBE_ATTRIBUTE_UPDATE_RC_OVRD_NOT_ALLOWED,
+    SBE_ATTRIBUTE_RC_SUCCESS,
+    SBE_ATTRIBUTE_RC_TGT_TYPE_NOT_FOUND,
+    SBE_ATTRIBUTE_RC_ATTR_NOT_FOUND,
+    SBE_ATTRIBUTE_RC_SIZE_NOT_MATCHING,
+    SBE_ATTRIBUTE_RC_TARGET_INST_OUT_RANGE,
+    SBE_ATTRIBUTE_RC_ARRAY_INDEX_OUT_RANGE,
+    SBE_ATTRIBUTE_RC_ATTR_NOT_ARRAY,
+    SBE_ATTRIBUTE_RC_OVRD_NOT_ALLOWED,
+    SBE_ATTRIBUTE_RC_SET_ATTR_FAILED,
+    SBE_ATTRIBUTE_RC_SBE_FAPI_TGT_CREATION_FAILED,
 };
 
 /**
@@ -84,12 +114,15 @@ struct __attribute__((packed)) HeaderEntry_t
     uint32_t              iv_numTargets;   //number of target sections
 };
 
+// MAGIC WORD is 'T' 'A' 'R' 'G'
+const uint32_t TARGET_ENTRY_MAGIC_WORD = 0x54415247;
+
 struct __attribute__((packed)) TargetEntry_t
 {
-    fapi2::LogTargetType    iv_logTgtType;   //LOG_TARGET_TYPE
-    uint8_t                 iv_instance;     //instance number; 0xFF - applicable for all instance
-    uint16_t                iv_numAttrs;     //number of attributes for this target type
-    uint32_t                iv_padding;
+    fapi2::LogTargetType    iv_logTgtType;  //LOG_TARGET_TYPE
+    uint8_t                 iv_instance;    //instance number; 0xFF - applicable for all instance
+    uint16_t                iv_numAttrs;    //number of attributes for this target type
+    uint32_t                iv_magicWord;   //ASCII characters 'T' 'A' 'R' 'G'
 };
 
 struct __attribute__((packed)) AttrEntry_t
@@ -152,21 +185,19 @@ void copyArrayWithEndianessCorrection(T* dest,
  */
 struct AttrError_t
 {
-    AttrError_t(fapi2::TargetType i_targetType,
-                uint8_t           i_instance,
-                uint32_t          i_attrId,
-                uint32_t          i_rc) :   iv_targetType(i_targetType),
+    AttrError_t(fapi2::TargetType       i_targetType,
+                uint8_t                 i_instance,
+                uint32_t                i_attrId,
+                SbeAttributeRC          i_rc) :   iv_targetType(i_targetType),
         iv_instance(i_instance),
         iv_attrId(i_attrId),
         iv_rc(i_rc)
     {};
 
-    fapi2::TargetType   iv_targetType;  // Failed attribute's fapi2::TargetType
-    uint8_t             iv_instance;    // The specific instance for which the
-    // update failed.
-    uint32_t            iv_attrId;      // The attributeId
-    uint32_t            iv_rc;          // The return code providing the reason
-    // for the failure.
+    fapi2::TargetType       iv_targetType;  // Failed attribute's fapi2::TargetType
+    uint8_t                 iv_instance;    // The specific instance for which apply failed.
+    uint32_t                iv_attrId;      // The attributeId
+    SbeAttributeRC          iv_rc;          // The return code providing the reason for failure.
 };
 
 // ---------------- Base Classes Common for Generator and Parser ---------------
@@ -197,6 +228,14 @@ class SbeAttrRowHandler
     protected:
         void setAlignedSize();
 
+        /**
+         * @brief  To get RC_INVALID_ATTR_INDEX rc with all internal variables
+         *         populated to FFDC.
+         *
+         * @return returns RC_INVALID_ATTR_INDEX
+         */
+        fapi2::INVALID_ATTR_INDEX get_RC_INVALID_ATTR_INDEX();
+
         AttrEntry_t iv_attr_entry;
         uint8_t*    iv_value_ptr;
         uint16_t    iv_value_size_aligned;
@@ -216,6 +255,11 @@ class SbeAttrTargetSectionHandler
         inline uint8_t getTargetType() const
         {
             return iv_targ_type;
+        }
+
+        inline uint8_t getInstNum() const
+        {
+            return iv_targ_inst_num;
         }
 
     protected:
@@ -338,18 +382,26 @@ class SbeAttributeUpdateFileGenerator : public SbeAttributeFileHandler
 
                 case 2:
                     sbeutil::copyArrayWithEndianessCorrection<uint16_t>(
-                        (uint16_t*)l_val, (uint16_t*)i_val, (i_size / i_elem_size), htons);
+                        (uint16_t*)l_val, (uint16_t*)i_val, (i_size / i_elem_size), htobe16_xlate);
                     break;
 
                 case 4:
                     sbeutil::copyArrayWithEndianessCorrection<uint32_t>(
-                        (uint32_t*)l_val, (uint32_t*)i_val, (i_size / i_elem_size), htonl);
+                        (uint32_t*)l_val, (uint32_t*)i_val, (i_size / i_elem_size), htobe32_xlate);
+                    break;
+
+                case 8:
+                    sbeutil::copyArrayWithEndianessCorrection<uint64_t>(
+                        (uint64_t*)l_val, (uint64_t*)i_val, (i_size / i_elem_size), htobe64_xlate);
                     break;
 
                 default:
-                    //As of now, SBE does not support attribute having 64-bit value
-                    FAPI_ASSERT(false, fapi2::SBE_TARGET_ERROR(),
+                    FAPI_ASSERT(false,
+                                fapi2::INVALID_SIZE_FOR_ENDIANNESS_CORRECTION()
+                                .set_ATTRIBUTEID(i_attr_id)
+                                .set_SIZE(i_elem_size),
                                 "i_elem_size:%d not handled", i_elem_size);
+                    break;
             }
 
             FAPI_TRY(_addAttribute(l_sbe_targ, l_attr_entry, l_val), "_addAttribute failed");
@@ -612,7 +664,7 @@ class SbeAttrRowUpdResParser : public SbeAttrRowParser
     public:
         SbeAttrRowUpdResParser() = default;
 
-        fapi2::ReturnCode getResponse(SbeAttributeUpdateRC& o_resp);
+        fapi2::ReturnCode getResponse(SbeAttributeRC& o_resp);
 };
 
 class SbeAttrTargetSectionUpdRespParser : public SbeAttrTargetSectionParser
@@ -668,6 +720,20 @@ class SbeAttrTargetSectionListRespParser : public SbeAttrTargetSectionParser
         SbeAttrTargetSectionListRespParser() = default;
 
         SbeAttrRowListResParser& getNextRow();
+
+        /**
+         * @brief Read the attributes from this target section and create an error
+         *        for each with the given RC and add it to the given vector
+         *
+         * @param[in]  i_rc            The error code to be used
+         *
+         * @param[o]   io_errors       The output vector which includes the attributes of this
+         *                             target section
+         *
+         * @return FAPI2_RC_SUCCESS if ok
+         */
+        fapi2::ReturnCode addAttributesToError(const SbeAttributeRC i_rc,
+                                               std::vector<AttrError_t>& io_errors);
 };
 
 class SbeAttributeListRespFileParser : public SbeAttributFileParser

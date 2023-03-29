@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include "ody_analyze_sbe_attr_response.H"
-#include "sbe_attribute_utils.H"
+#include <ody_analyze_sbe_attr_response.H>
+#include <sbe_attribute_utils.H>
 
 using namespace fapi2;
 using namespace sbeutil;

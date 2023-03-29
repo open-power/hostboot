@@ -1,0 +1,265 @@
+#!/usr/bin/env python3
+
+#standard library imports
+
+from argparse import ArgumentParser, ArgumentError
+import sys, os
+import pickle
+import re
+
+#attrtool library imports
+
+from attrdb import *
+from attrtank import *
+from attrtoolutils import *
+import attrmodule
+
+#special library imports :
+#For SBE usage,
+#   - the required speical libraries are listed in a file and then installed in the user's local
+#For ekb HWP generation,
+#   - the reqired special libraries are installed in a virtual environment
+
+import jinja2
+
+###############################################################
+# attrtool main
+#
+# SBE tool to parse attribute definition XML files and generating
+# source code for accessing attributes in the attribute tank. This
+# tool also provides an option to view and set the value of attributes
+# at build time and also during the runtime. Since this tool has all
+# information related to attributes, this tool has been extended to
+# generate the hardware procedure required for attribute update and
+# attribute list.
+#
+###############################################################
+def cmd_parse(args):
+
+    db = AttributeDB(args.targetlist)
+    for xml in args.attr_xml:
+        vprint("Parsing attribute definitions from " + xml)
+        db.load_xml(xml)
+
+    for filt_xml in args.sbe_attrs:
+        vprint("Parsing SBE attributes from " + filt_xml)
+        if filt_xml != '':
+            SBEAttributes(filt_xml).update_attrdb(db)
+
+    sbe_attr_tank = AttributeStructure(db)
+
+    vprint("Storing attribute database to " + args.dbfile[0])
+    pickle.dump(sbe_attr_tank, open(args.dbfile, "wb"))
+
+def cmd_gensrc(args):
+
+    sbe_attr_tank = pickle.load(open(args.dbfile, "rb"))
+    env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(sys.argv[0]), "templates")),
+        trim_blocks=True,
+        lstrip_blocks=True,
+        undefined=jinja2.StrictUndefined
+    )
+    env.globals = {
+        "toolname": "attrtool",
+        "attributes": sbe_attr_tank.field_list,
+        "target_types": sbe_attr_tank.target_types,
+        "virt_header": args.virtual_fn_header,
+    }
+    env.filters["hex"] =  lambda x: "0x%X" % x
+
+    def generate(fname):
+        with open(os.path.join(args.outdir, fname), "w") as f:
+            # templates named .t to prevent them from being code-formatted
+            f.write(env.get_template(fname + ".t").render())
+
+    generate("attribute_ids.H")
+    generate("attribute_properties.H")
+    generate("attribute.C")
+    generate("attribute.H")
+    generate("attribute_macros.H")
+    generate("fapi2_chip_ec_feature.H")
+    generate("attribute_override.C")
+
+def cmd_compile(args):
+
+    sbe_attr_tank = pickle.load(open(args.ipdbfile, "rb"))
+    # TODO: Add support to take sbe values from a new sbe_attr xml
+    #vprint("Parsing SBE attributes from " + args.sbe_attrs)
+    #SBEAttributes(args.sbe_attrs).update_attrdb(db)
+
+    vprint("Parsing symbols from " + args.symbols)
+    SymbolTable(args.symbols).update_attrdb(sbe_attr_tank)
+
+    vprint("Storing attribute database to " + args.opdbfile)
+    pickle.dump(sbe_attr_tank, open(args.opdbfile, "wb"))
+
+def cmd_setfixed(args):
+
+    sbe_attr_tank : AttributeStructure = pickle.load(open(args.dbfile, "rb"))
+
+    image = bytearray(open(args.image, "rb").read())
+    for attr in sbe_attr_tank.field_list:
+        if not isinstance(attr, RealAttrFieldInfo):
+            continue
+        attr.setfixed(image, sbe_attr_tank.image_base)
+    open(args.image, "wb").write(image)
+
+def utilOpen(filename:str)->bytes:
+    try:
+        return open(filename, "rb").read()
+    except FileNotFoundError:
+        print("ERR -- '{}' FILE NOT FOUND, \
+\nif in sbe environment clean and  build again".format(filename))
+        sys.exit(1)
+
+def cmd_setattr(args):
+
+    dbfile = pickle.loads(utilOpen(args.dbfile))
+    image = bytearray(utilOpen(args.image))
+    subscript = list()
+    if (args.index is not None):
+        subscript = [int(i) for i in re.split(',| ',args.index)]
+    try:
+        image = attrmodule.set_attr(dbfile, image, args.attr, args.value, \
+                                    args.target, subscript, args.instance)
+        open(args.image, "wb").write(image)
+    except Exception as e:
+        print(e)
+        sys.exit(1)
+
+def cmd_getattr(args):
+
+    dbfile = pickle.loads(utilOpen(args.dbfile))
+    image = bytearray(utilOpen(args.image))
+    try:
+        attribute = attrmodule.get_attr(dbfile, args.attr, image)
+        print(attribute)
+    except Exception as e:
+        print(e)
+        sys.exit(1)
+
+def cmd_dumpattr(args):
+    #Use the packages only if it is required. This way, for generating
+    #HWP for attribute override, there is no need to install all the
+    #packages
+    from tabulate import tabulate
+
+    dbfile = pickle.load(open(args.dbfile, "rb"))
+    image = open(args.image, "rb").read()
+    try:
+        attr_list = attrmodule.dump_attr(dbfile, image, args.raw)
+        headers=["Attribute Name", "Target", "Value Type", "Value"]
+        print(tabulate(attr_list, headers, tablefmt="pretty", stralign="left"))
+    except Exception as e:
+        print(e)
+        sys.exit(1)
+
+def cmd_genhwp(args):
+
+    db = AttributeDB(args.targetlist, args.chiptype)
+    for xml in args.attr_xml:
+        vprint("Parsing attribute definitions from " + xml)
+        db.load_xml(xml)
+    db.tabulateSyncAttributes()
+
+    env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(sys.argv[0]), "templates")),
+        trim_blocks=True,
+        lstrip_blocks=True,
+        undefined=jinja2.StrictUndefined
+    )
+    env.globals = {
+        "toolname": "attrtool",
+        "attr_data": db
+    }
+
+    def generate(fname):
+        with open(os.path.join(args.outdir, fname), "w") as f:
+            # templates named .t to prevent them from being code-formatted
+            f.write(env.get_template(fname + ".t").render())
+
+    generate("ody_sbe_attribute_data_size.H")
+    generate("ody_generate_attribute_generated.C")
+    generate("ody_apply_attribute_generated.C")
+
+def img_standard_parms(parser):
+    #parser.add_argument("-b", "--base", type=hexint, default=None, help="Base address (hex) of the image file, defaults to an autodetected value")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Increase verbosity")
+    parser.add_argument("dbfile", help="Name of the attribute database")
+    parser.add_argument("image", help="Image to be updated")
+
+if __name__ == "__main__":
+    parser = ArgumentParser(description="Tools to generate code and modify images according to attributes")
+    subparsers = parser.add_subparsers()
+
+    sub = subparsers.add_parser("parse", help="Parse attribute XML and generate attribute database")
+    sub.add_argument("attr_xml", nargs="+", help="Attribute definition XML files")
+    sub.add_argument("-s", "--sbe_attrs", nargs='+', help="Path to xmls which will filter the sbe required attributes")
+    sub.add_argument("-d", "--dbfile", help="Name of the database to be written")
+    sub.add_argument("-t", "--targetlist", help="path to json file defining supported targets")
+    sub.add_argument("-v", "--verbose", action="store_true", help="Increase verbosity")
+    sub.set_defaults(func=cmd_parse)
+
+    sub = subparsers.add_parser("gensrc", help="Generate attribute tank source code")
+    sub.add_argument("dbfile", help="Name of the attributes database")
+    sub.add_argument("outdir", help="Output directory for generated source")
+    sub.add_argument("--virtual_fn_header", "--vfh", default=None, help="The header file need to be included in attribute_macro.H. " +
+                     "This option can be used to pass header file containing virtual attribute get function")
+    sub.add_argument("-v", "--verbose", action="store_true", help="Increase verbosity")
+    sub.set_defaults(func=cmd_gensrc)
+
+    sub = subparsers.add_parser("compile", help="Parse attribute XML and an image's symbol file into an attribute database")
+    sub.add_argument("ipdbfile", help="Name of the database to be read")
+    sub.add_argument("symbols", help="Name of the symbol file")
+    # TODO: Insert below code to support another sbe attribute xmls.
+    # sub.add_argument("sbe_attrs", help="Path to sbe_attributes.xml")
+    sub.add_argument("opdbfile", help="Name of the database to be write")
+    sub.add_argument("-v", "--verbose", action="store_true", help="Increase verbosity")
+    sub.set_defaults(func=cmd_compile)
+
+    sub = subparsers.add_parser("getattr", help="Set an attribute value in a PPE image")
+    img_standard_parms(sub)
+    sub.add_argument("attr", help="Name of the attribute")
+    sub.set_defaults(func=cmd_getattr)
+
+    sub = subparsers.add_parser("setattr", help="Set an attribute value in a PPE image")
+    img_standard_parms(sub)
+    sub.add_argument("attr", help="Name of the attribute, with optional index for array attributes")
+    #TODO - need support for enum type
+    sub.add_argument("value", help="New value for the attribute; may be an integer value (prefix hex with 0x), an ENUM name, or a comma-separated list thereof", type = int)
+    sub.add_argument("target", help="Target for the attribute;")
+    sub.add_argument("--index", help="Index for the value in attribute values;")
+    sub.add_argument("--instance", help="Instance number of the target",type=int)
+    sub.set_defaults(func=cmd_setattr)
+
+    sub = subparsers.add_parser("dumpattr", help="Dump all attributes from a PPE image")
+    img_standard_parms(sub)
+    sub.add_argument('--raw', choices=('True','False'), help = "Raw attribute binary")
+    sub.set_defaults(func=cmd_dumpattr)
+
+    sub = subparsers.add_parser("setfixed", help="Set an image's attribute values based on the values in the SBE attribute file")
+    img_standard_parms(sub)
+    sub.set_defaults(func=cmd_setfixed)
+
+    CHIP_TYPE_CHOICES = ["p", "ody", "z"]
+    sub = subparsers.add_parser("genhwp", help="Generate ekb hardware procedure for attribute update and attribute list")
+    sub.add_argument("chiptype", help="Chiptype for which the HWP has to be generated.", choices=CHIP_TYPE_CHOICES)
+    sub.add_argument("targetlist", help="Path to json file defining supported targets")
+    sub.add_argument("attr_xml", nargs="+", help="Attribute definition XML files")
+    sub.add_argument("-o", "--outdir", help="Output directory for the generated source",required=True)
+    sub.add_argument("-v", "--verbose", action="store_true", help="Increase verbosity")
+    sub.set_defaults(func=cmd_genhwp)
+
+    args = parser.parse_args()
+    if not hasattr(args, "func"):
+        parser.print_help()
+        exit(1)
+
+    vprint.set_verbose(args.verbose)
+
+    try:
+        args.func(args)
+    except ArgumentError as e:
+        print("Invalid argument: " + str(e))
+        exit(1)
