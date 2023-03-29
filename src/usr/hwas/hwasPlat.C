@@ -475,21 +475,35 @@ errlHndl_t getOcmbIdecFromSpd(const TARGETING::TargetHandle_t& i_target,
         }
 
         // SPD IDEC info is in the following three bytes
-        const size_t SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET = 198;
-        const size_t SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET  = 199;
-        const size_t DMB_REV_OFFSET                       = 200;
+        const size_t SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET_DDR4 = 198;
+        const size_t SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET_DDR5 = 282;
+        const size_t SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET_DDR4  = 199;
+        const size_t SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET_DDR5  = 283;
+        const size_t DMB_REV_OFFSET_DDR4                       = 200;
+        const size_t DMB_REV_OFFSET_DDR5                       = 284;
+
+        size_t l_idLeastSigByteOffset = SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET_DDR4;
+        size_t l_idMostSigByteOffset = SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET_DDR4;
+        size_t l_dmbRevOffset = DMB_REV_OFFSET_DDR4;
+
+        if(l_spdDRAMInterfaceType == SPD::DDR5_TYPE)
+        {
+            l_idLeastSigByteOffset = SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET_DDR5;
+            l_idMostSigByteOffset = SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET_DDR5;
+            l_dmbRevOffset = DMB_REV_OFFSET_DDR5;
+        }
 
         // Get the ID from the SPD and verify that it matches what we read from
         // the IDEC register.
         uint16_t l_spdId = TWO_UINT8_TO_UINT16(
-                          *(i_spdBuffer + SPD_ID_LEAST_SIGNIFICANT_BYTE_OFFSET),
-                          *(i_spdBuffer + SPD_ID_MOST_SIGNIFICANT_BYTE_OFFSET));
+                          *(i_spdBuffer + l_idLeastSigByteOffset),
+                          *(i_spdBuffer + l_idMostSigByteOffset));
 
         // Bytes 200 of the SPD contains the DMB Revision, this is essentially the
         // OCMB manufacture's version of the chip. The manufacture can define any
         // format for this field and we must add special logic to convert the
         // manufacture's DMB_REV to the EC level IBM is familiar with.
-        uint8_t l_spdDmbRev = *(i_spdBuffer + DMB_REV_OFFSET);
+        uint8_t l_spdDmbRev = *(i_spdBuffer + l_dmbRevOffset);
 
         HWAS_INF("getOcmbIdecFromSpd> OCMB 0x%08X l_spdId = 0x%04X l_spdDmbRev = 0x%02X",
                  TARGETING::get_huid(i_target), l_spdId, l_spdDmbRev);

@@ -988,7 +988,7 @@
          <writeable/>
          <no_export/>
          <persistency>volatile-zeroed</persistency>
-     </attribute>
+    </attribute>
 
     <attribute>
          <!-- Set by HB during each boot -->
@@ -996,7 +996,7 @@
          <writeable/>
          <no_export/>
          <persistency>volatile-zeroed</persistency>
-     </attribute>
+    </attribute>
 
     <!-- =====================================================================
      End of customizations definitions

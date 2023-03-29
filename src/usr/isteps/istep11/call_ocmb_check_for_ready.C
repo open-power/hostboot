@@ -51,6 +51,7 @@
 //  Targeting support
 #include <attributeenums.H>                     // TYPE_PROC
 #include <targeting/common/utilFilter.H>        // getAllChips
+#include <targeting/common/targetservice.H>
 #include <sbeio/sbeioif.H>
 #include <util/misc.H>
 #include <sys/time.h>
@@ -304,6 +305,13 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                         TRACFCOMP(g_trac_isteps_trace, "call_ocmb_check_for_ready: ody_cbs_start failed on OCMB 0x%x", get_huid(l_ocmb));
                         captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
                     }
+
+                    // TODO JIRA: PFHB-411 do this the right way
+                    // Bits 0-1 are set. Currently SPPE doesn't support autoboot, so we need
+                    // to convince it that it's in istep mode and that it needs to go to runtime:
+                    // Bit 0      : Indicates istep IPL (0b1)
+                    // Bit 1      : Indicates that SBE should go directly to runtime functionality (0b1)
+                    UTIL::assertGetToplevelTarget()->setAttr<ATTR_OCMB_BOOT_FLAGS>(0xC0000000);
 
                     FAPI_INVOKE_HWP(l_errl, ody_sppe_check_for_ready, l_fapi_ocmb_target);
                     if(l_errl)
