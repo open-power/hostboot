@@ -100,4 +100,23 @@ namespace SCOM
     };
 };
 
+    //*****************************************************
+    // SRC Graveyard
+    // Contains error log descriptions for SRCs that were
+    // removed from the code but we need to still provide
+    // backward compatible parser logic for.
+
+    /*@
+    * @errortype        ERRL_SEV_INFORMATIONAL
+    * @moduleid         SCOM_CALL_WAKEUP_HWP
+    * @reasoncode       SCOM_UNEXPECTED_FORCE_WAKEUP
+    * @userdata1        Target HUID
+    * @userdata2[0:31]  Wakeup Enable
+    * @userdata2[32:63] Wakeup Count (ATTR_SPCWKUP_COUNT)
+    * @devdesc          Unexpectedly forcing wakeup off when the counter
+    *                   is non-zero, implies a bug in the code flow.
+    * @custdesc         Internal firmware error.
+    */
+
+
 #endif

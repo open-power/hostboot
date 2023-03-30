@@ -1862,6 +1862,7 @@ void getApssMessageData(uint8_t* o_data,
          * @subsys EPUB_FIRMWARE_SP
          * @moduleid HTMGT_MOD_APSS_DATA
          * @reasoncode HTMGT_RC_ATTRIBUTE_ERROR
+         * @userdata1  None
          * @devdesc Invalid APSS config data was found
          * @custdesc An internal firmware error occurred
          */
