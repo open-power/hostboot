@@ -98,4 +98,20 @@ namespace HTMGT
     };
 };
 
+    //*****************************************************
+    // SRC Graveyard
+    // Contains error log descriptions for SRCs that were
+    // removed from the code but we need to still provide
+    // backward compatible parser logic for.
+
+    /*@
+    * @errortype        ERRL_SEV_UNRECOVERABLE
+    * @moduleid         HTMGT_MOD_OCMB_INIT
+    * @reasoncode       HTMGT_RC_INVALID_MEM_SENSOR
+    * @userdata1        USAGE type
+    * @userdata2        OCMB HUID
+    * @devdesc          Unsupported ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE type
+    * @custdesc         Internal firmware error.
+    */
+
 #endif

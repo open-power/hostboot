@@ -205,4 +205,31 @@ namespace PLDM
         PLDM_UDT_FR_OUTBOUND_RESPONSES = 0x06, // Outbound HB->BMC response flight recorder log
     };
 }
+
+    //*****************************************************
+    // SRC Graveyard
+    // Contains error log descriptions for SRCs that were
+    // removed from the code but we need to still provide
+    // backward compatible parser logic for.
+
+    /*@
+    * @errortype   ERRL_SEV_PREDICTIVE
+    * @moduleid    MOD_ROUTE_MESSAGES
+    * @reasoncode  RC_SEND_FAIL
+    * @userdata1   rc from msg_send
+    * @userdata2   ptr to message as uint64_t
+    * @devdesc     Error sending message to PLDM message q
+    * @custdesc    A problem occurred during the IPL of the system
+    */
+
+    /*@
+    * @errortype   ERRL_SEV_UNRECOVERABLE
+    * @moduleid    MOD_PLDM_SEND_REQ_RETRY
+    * @reasoncode  RC_SENDRECV_FAIL
+    * @userdata1   Return code returned by msg_sendrecv
+    * @userdata2   Header of pldm request
+    * @devdesc     Software problem, failed msg_sendrecv
+    * @custdesc    A software error occurred during system boot
+    */
+
 #endif
