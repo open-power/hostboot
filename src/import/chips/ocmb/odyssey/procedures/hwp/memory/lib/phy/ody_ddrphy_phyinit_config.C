@@ -3709,6 +3709,7 @@ fapi2::ReturnCode setup_phy_basic_struct(const fapi2::Target<fapi2::TARGET_TYPE_
     uint8_t l_attr_arr[mss::ody::MAX_DIMM_PER_PORT] = {};
     uint64_t l_freq = 0;
     uint64_t l_half_freq = 0;
+    uint8_t l_redundant_cs = 0;
 
     // ARdPtrInitVal
     FAPI_TRY(mss::attr::get_ardptrinitval(i_target, l_attr_data));
@@ -3756,7 +3757,21 @@ fapi2::ReturnCode setup_phy_basic_struct(const fapi2::Target<fapi2::TARGET_TYPE_
     // Hardcode to 14 ANIB (ACX4) instances
     io_user_input_basic.NumAnib = 14;
 
+    FAPI_TRY(mss::attr::get_ddr5_redundant_cs_en(i_target, l_attr_arr));
+    l_redundant_cs = l_attr_arr[0];
+
+    // If redundant CS is enabled, the PHY needs two times the number of our ranks
+    // redundant CS means that half of the DRAM are hooked up to CS 0 and half to CS 1 for our port rank 0 in redundant mode
+    // likewise, CS2/3 are used for port rank 1 in redundant mode
+    // As such, the PHY needs to configure 2 * num_master_ranks
     FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_attr_arr));
+
+    if(l_redundant_cs == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_ENABLE)
+    {
+        constexpr uint8_t NUM_CS_PER_REDUNDANT_RANK = 2;
+        l_attr_arr[0] *= NUM_CS_PER_REDUNDANT_RANK;
+    }
+
     // NumRank_dfi0 (mranks_per_dimm only if enabled DQs > 0 on CHA)
     FAPI_TRY(mss::attr::get_phy_enabled_dq_cha(i_target, l_attr_data));
     io_user_input_basic.NumRank_dfi0 = (l_attr_data > 0) ? l_attr_arr[0] : 0;
