@@ -374,8 +374,10 @@ class msg_block_params
                                               mss::ddr5::mr::ATTR_DRAM_CHB_SELECT));
                 // Running on DRAM0 for Channel A and DRAM10 for Channel B
                 // Since these are the first DRAMS on each channel
-                FAPI_TRY(l_mr35.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR35[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_A], 0));
-                FAPI_TRY(l_mr35.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR35[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_B], 10));
+                FAPI_TRY(l_mr35.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR35[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_A],
+                                              mss::ddr5::mr::ATTR_DRAM_CHA_SELECT));
+                FAPI_TRY(l_mr35.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR35[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_B],
+                                              mss::ddr5::mr::ATTR_DRAM_CHB_SELECT));
                 FAPI_TRY(l_mr37.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR37[l_phy_rank]));
                 FAPI_TRY(l_mr38.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR38[l_phy_rank]));
                 FAPI_TRY(l_mr39.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR39[l_phy_rank]));
