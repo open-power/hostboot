@@ -172,8 +172,9 @@ struct tryGetAttributes<>
     }
 };
 
-/* @brief Recursively search a target and its physical parents for the
- *        first occurrence of an attribute and retrieve its value.
+/* @brief Recursively search a target and its physical or affinity parents
+ *        (affinity is the default) for the first occurrence of an attribute
+ *        and retrieve its value.
  *
  * @param[in] i_target Target to search
  * @param[in] o_value  Location to store the attribute value.

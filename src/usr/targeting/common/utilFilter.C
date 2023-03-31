@@ -635,21 +635,21 @@ const Target * getParentChip( const Target * i_pChiplet )
 
 Target * getImmediateParentByPhysical(const Target * i_child )
 {
-    Target * l_parent = NULL;
+    Target * l_parent = nullptr;
 
     // Create a vector of TARGETING::Target pointers
-    TARGETING::TargetHandleList l_chipList;
+    TARGETING::TargetHandleList l_List;
 
     // Get parent
-    TARGETING::targetService().getAssociated(l_chipList, i_child,
+    TARGETING::targetService().getAssociated(l_List, i_child,
                     TARGETING::TargetService::PARENT,
-                    TARGETING::TargetService::IMMEDIATE, NULL);
+                    TARGETING::TargetService::IMMEDIATE, nullptr);
 
-    if (l_chipList.size() == 1)
+    if (l_List.size() == 1)
     {
-        l_parent = l_chipList[0];
+        l_parent = l_List[0];
     }
-    else if (l_chipList.size() == 0)
+    else if (l_List.size() == 0)
     {
         TARG_ERR("Failed to find physical parent target for huid=%.8X",
                 TARGETING::get_huid(i_child));
@@ -657,11 +657,12 @@ Target * getImmediateParentByPhysical(const Target * i_child )
         char* l_ppathstr = l_ppath.toString();
         TARG_ERR("ATTR_PHYSICAL_PATH=%s", l_ppathstr);
         free(l_ppathstr);
+        l_ppathstr = nullptr;
     }
     else
     {
         TARG_ERR("Found %d parent targets for huid=%.8X, only expected to find 1",
-                l_chipList.size(),
+                l_List.size(),
                 TARGETING::get_huid(i_child));
     }
 
@@ -670,7 +671,7 @@ Target * getImmediateParentByPhysical(const Target * i_child )
 
 Target * getImmediateParentByAffinity(const Target * i_child )
 {
-    Target * l_parent = NULL;
+    Target * l_parent = nullptr;
 
     // Create a vector of TARGETING::Target pointers
     TARGETING::TargetHandleList l_chipList;
@@ -678,7 +679,7 @@ Target * getImmediateParentByAffinity(const Target * i_child )
     // Get parent
     TARGETING::targetService().getAssociated(l_chipList, i_child,
                     TARGETING::TargetService::PARENT_BY_AFFINITY,
-                    TARGETING::TargetService::IMMEDIATE, NULL);
+                    TARGETING::TargetService::IMMEDIATE, nullptr);
 
     if (l_chipList.size() == 1)
     {
@@ -692,6 +693,7 @@ Target * getImmediateParentByAffinity(const Target * i_child )
         char* l_apathstr = l_apath.toString();
         TARG_ERR("ATTR_AFFINITY_PATH=%s", l_apathstr);
         free(l_apathstr);
+        l_apathstr = nullptr;
     }
     else
     {

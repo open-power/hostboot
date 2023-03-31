@@ -1663,7 +1663,7 @@ const TARGETING::Target * getFRU_Target(const TARGETING::Target * i_target)
     TARGETING::ATTR_MEM_MRW_IS_PLANAR_type isDimms = false;
     if (!i_target->tryGetAttr<ATTR_MEM_MRW_IS_PLANAR>(isDimms))
     {
-        // Only if this is NOT an OCMB on the backplane do we check if its the FRU
+        // Only if this is NOT an OCMB on the backplane do we check if its the FRU.
         // OCMBs on the backplane need to look up the FRU parent, i.e. the backplane
         foundFru = i_target->tryGetAttr<TARGETING::ATTR_FRU_ID>(l_fruid);
     }
