@@ -1884,6 +1884,29 @@ ID for the sensor number returned with the elog. -->
   </attribute>
 
   <attribute>
+    <id>PDR_ENTITY_INSTANCE</id>
+    <description>
+        Defines the canonical instance number for this target
+        when cross-referencing with the BMC's inventory by way
+        of the PDRs.  This value must be unique for all PDR
+        Entity Instances but it is not unique for all targets.
+        For example, all components on the same FRU may share
+        the same instance number if there are not unique PDRs
+        for those subcomponents.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <!-- Zero is a good default for any part with only
+             a single instance -->
+        <default>0x00</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>PLDM_BIOS_ERROR_INFORMATIONAL</id>
     <description>
         0 = set BIOS attribute lookup error to PREDICTIVE

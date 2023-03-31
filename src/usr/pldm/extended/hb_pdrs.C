@@ -59,7 +59,6 @@
 // Misc
 #include <secureboot/service.H>
 
-
 using namespace TARGETING;
 using namespace PLDM;
 using namespace ERRORLOG;
@@ -141,6 +140,10 @@ pldm_entity_node* createEntityAssociationAndFruRecordSetPdrs(pldm_entity_associa
  */
 void updateConnectorInfoAttr(pldm_entity_node * i_connection_entity_node, const TargetHandle_t i_target )
 {
+    PLDM_DBG("updateConnectorInfoAttr> node=%p, targ=%.8X",
+             i_connection_entity_node,
+             get_huid(i_target));
+
     /*
      * Sets up entityType and containerId for these targets
      * This attribute will be overwritten with an updated ID
@@ -193,8 +196,20 @@ void createConnectorAssocPdrs(pldm_entity_association_tree *io_tree,
         if (targetList.empty() ||
             !(targetList[0]->tryGetAttr<TARGETING::ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO>(connector_entity_id)))
         {
+            PLDM_DBG("createConnectorAssocPdrs> Returning: i_type=%.2X, listsize=%d, connector_entity_id: type=%d, instance=%d, container=%d",
+                     i_type,
+                     targetList.size(),
+                     connector_entity_id.entityType,
+                     connector_entity_id.entityInstanceNumber,
+                     connector_entity_id.containerId);
             break;
         }
+        PLDM_DBG("createConnectorAssocPdrs> Running: i_type=%.2X, listsize=%d, connector_entity_id: type=%d, instance=%d, container=%d",
+                 i_type,
+                 targetList.size(),
+                 connector_entity_id.entityType,
+                 connector_entity_id.entityInstanceNumber,
+                 connector_entity_id.containerId);
 
         std::sort(begin(targetList), end(targetList),
                   [](const Target* const t1, const Target* const t2) {
@@ -206,6 +221,8 @@ void createConnectorAssocPdrs(pldm_entity_association_tree *io_tree,
 
         for (const auto & l_child : targetList)
         {
+            PLDM_DBG("createConnectorAssocPdrs> l_child=%.8X",
+                     TARGETING::get_huid(l_child));
             pldm_entity pldmEntity
             {
                 // The entity_instance_num and entity_container_id members of
@@ -218,6 +235,15 @@ void createConnectorAssocPdrs(pldm_entity_association_tree *io_tree,
             // Second processor in DCM pair found.  Both processors use same DCM socket connection
             if ((l_entityTypeOfChild == ENTITY_TYPE_PROCESSOR_MODULE) &&
                 (prev_requested_entity_instance_num == requested_entity_instance_num))
+            {
+                io_targetConnectionMap[l_child] = prevEntityNode;
+                updateConnectorInfoAttr(prevEntityNode, l_child);
+                continue;
+            }
+            // Second logical dimm on the DDIMM found.
+            // All logical DIMMs on the DDIMM use the same slot connection.
+            else if ((l_entityTypeOfChild == ENTITY_TYPE_DIMM) &&
+                     (prev_requested_entity_instance_num == requested_entity_instance_num))
             {
                 io_targetConnectionMap[l_child] = prevEntityNode;
                 updateConnectorInfoAttr(prevEntityNode, l_child);
@@ -370,9 +396,16 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
             if (!l_targetConnectionMap.empty())
             {
                 hasConnectorPdr = true;
+                for( auto const& l : l_targetConnectionMap )
+                {
+                    PLDM_DBG("Targ=%.8X, node=%p",
+                             get_huid(l.first),
+                             l.second);
+                }
             }
         }
 
+        PLDM_DBG("addEntityAssociationAndFruRecordSetPdrs> targets.size()=%d", targets.size());
         for (size_t i = 0; i < targets.size(); ++i)
         {
             if (hasConnectorPdr)
@@ -761,51 +794,36 @@ namespace PLDM
 uint16_t getEntityInstanceNumber(ConstTargetHandle_t i_target, uint16_t i_entity_type)
 {
     uint16_t entityInstanceNum = DEFAULT_TREE_ADD_ENTITY_INSTANCE_NUM;
+    TARGETING::ATTR_PDR_ENTITY_INSTANCE_type l_num = 0;
+    if( i_target->tryGetAttr<ATTR_PDR_ENTITY_INSTANCE>(l_num) )
+    {
+        entityInstanceNum = l_num;
+    }
 
     ///////////////////////////////////////////////////////////
     // How to determine Entity Instance Number
     // --------------------------------------------------------
-    // chip entity instance = chip's (ATTR_MRU_ID & 0xFFFF)
-    // core entity instance = core's ATTR_CHIP_UNIT
-    // module entity instance = group by proc chip location code and look up
-    //                          the ATTR_POSITION/2 from one of the chip's in
-    //                          each group
-    // dimm entity instance = dimm's ATTR_POSITION
+    // In general all targets have a valid ATTR_PDR_ENTITY_INSTANCE
+    //  value that should be used.
+    //
+    // Exception:
+    // - Processor chip = ATTR_MRU_ID & 0xFFFF
+    //   (The value in the PROC_CHIP's ATTR_PDR_ENTITY_INSTANCE
+    //    represents the Module.)
     ///////////////////////////////////////////////////////////
-    switch(i_target->getAttr<ATTR_TYPE>())
+    auto l_type = i_target->getAttr<ATTR_TYPE>();
+    if( (TYPE_PROC == l_type)
+        && (i_entity_type != ENTITY_TYPE_PROCESSOR_MODULE) )
     {
-        case TYPE_PROC:
-        {
-            if (i_entity_type == ENTITY_TYPE_PROCESSOR_MODULE)
-            {
-                // DCM
-                entityInstanceNum = (i_target->getAttr<ATTR_POSITION>())/2;
-            }
-            else
-            {
-                // Processor chip
-                entityInstanceNum = (i_target->getAttr<ATTR_MRU_ID>() & 0xFFFF);
-            }
-        }
-        break;
-
-        case TYPE_FC:
-        case TYPE_CORE:
-        {
-            entityInstanceNum = i_target->getAttr<ATTR_CHIP_UNIT>();
-        }
-        break;
-
-        case TYPE_DIMM:
-        {
-            entityInstanceNum = i_target->getAttr<ATTR_POSITION>();
-        }
-        break;
-
-        default:
-        // already defaulted
-        break;
+        // Processor chip
+        entityInstanceNum = (i_target->getAttr<ATTR_MRU_ID>() & 0xFFFF);
     }
+
+    PLDM_DBG("getEntityInstanceNumber(targ=%.8X,type=%d)=%d",
+             TARGETING::get_huid(i_target),
+             i_entity_type,
+             entityInstanceNum);
+
     return entityInstanceNum;
 }
 

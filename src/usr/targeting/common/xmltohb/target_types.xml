@@ -2106,11 +2106,6 @@
   </targetType>
 
   <targetType>
-    <id>lcard-dimm-ddr5</id>
-    <parent>lcard-dimm</parent>
-  </targetType>
-
-  <targetType>
     <!-- Standard JEDEC-compliant ISDIMM -->
     <id>lcard-dimm-jedec</id>
     <parent>lcard-dimm</parent>
@@ -2999,6 +2994,24 @@
     <!-- Processor Core : Represents a single SMT4 core -->
     <id>unit-core-power10</id>
     <parent>unit-core</parent>
+  </targetType>
+
+  <targetType>
+    <!-- Maps in MRW targets for DRAMs on the DDIMM -->
+    <id>unit-ddr</id>
+    <parent>lcard-dimm-ddimm</parent>
+  </targetType>
+
+  <targetType>
+    <!-- Maps in MRW targets for DRAMs on the DDIMM -->
+    <id>unit-ddr4-jedec</id>
+    <parent>lcard-dimm-ddimm</parent>
+  </targetType>
+
+  <targetType>
+    <!-- Maps in MRW targets for DRAMs on the DDIMM -->
+    <id>unit-ddr5-jedec</id>
+    <parent>lcard-dimm-ddimm</parent>
   </targetType>
 
   <targetType>

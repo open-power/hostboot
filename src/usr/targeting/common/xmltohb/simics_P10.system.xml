@@ -385,6 +385,10 @@
         <id>POSITION</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>0</default>
+    </attribute>
     <attribute><id>FSP_BASE_ADDR</id>
         <default>0x0006030100000000</default>
     </attribute>
@@ -474,6 +478,10 @@
     <attribute>
         <id>POSITION</id>
         <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>0</default>
     </attribute>
     <attribute><id>FSP_BASE_ADDR</id>
         <default>0x0006070100000000</default>
@@ -1492,6 +1500,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-0/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -1531,6 +1543,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-0/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -1574,6 +1590,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-1/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -1613,6 +1633,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-1/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -1656,6 +1680,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-2/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -1695,6 +1723,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-2/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -1738,6 +1770,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-3/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -1777,6 +1813,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-3/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -1820,6 +1860,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-4/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -1859,6 +1903,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-4/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>9</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -1902,6 +1950,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-5/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -1941,6 +1993,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-5/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>11</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -1984,6 +2040,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-6/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2023,6 +2083,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-6/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>13</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2066,6 +2130,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-7/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2105,6 +2173,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-7/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>15</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2148,6 +2220,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-0/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2187,6 +2263,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-0/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2230,6 +2310,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-1/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2269,6 +2353,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-1/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2312,6 +2400,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-2/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2351,6 +2443,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-2/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2394,6 +2490,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-3/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2433,6 +2533,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-3/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2476,6 +2580,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-4/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2515,6 +2623,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-4/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>9</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2558,6 +2670,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-5/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2597,6 +2713,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-5/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>11</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2640,6 +2760,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-6/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2679,6 +2803,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-6/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>13</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2722,6 +2850,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-7/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2761,6 +2893,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-7/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>15</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -23065,6 +23201,10 @@
         <default>0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p00</default>
     </attribute>
@@ -23140,6 +23280,10 @@
         <default>1</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p02</default>
     </attribute>
@@ -23153,7 +23297,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>0</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -23213,6 +23357,10 @@
     <attribute>
         <id>POSITION</id>
         <default>2</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23290,6 +23438,10 @@
         <default>3</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p06</default>
     </attribute>
@@ -23365,6 +23517,10 @@
         <default>4</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p08</default>
     </attribute>
@@ -23438,6 +23594,10 @@
         <default>5</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p10</default>
     </attribute>
@@ -23451,7 +23611,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>4</default>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -23509,6 +23669,10 @@
     <attribute>
         <id>POSITION</id>
         <default>6</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23584,6 +23748,10 @@
         <default>7</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p14</default>
     </attribute>
@@ -23655,6 +23823,10 @@
     <attribute>
         <id>POSITION</id>
         <default>8</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23730,6 +23902,10 @@
         <default>9</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p18</default>
     </attribute>
@@ -23801,6 +23977,10 @@
     <attribute>
         <id>POSITION</id>
         <default>10</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -23876,6 +24056,10 @@
         <default>11</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p22</default>
     </attribute>
@@ -23947,6 +24131,10 @@
     <attribute>
         <id>POSITION</id>
         <default>12</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -24022,6 +24210,10 @@
         <default>13</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p26</default>
     </attribute>
@@ -24093,6 +24285,10 @@
     <attribute>
         <id>POSITION</id>
         <default>14</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -24168,6 +24364,10 @@
         <default>15</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p30</default>
     </attribute>
@@ -24239,6 +24439,10 @@
     <attribute>
         <id>POSITION</id>
         <default>16</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>8</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -24314,6 +24518,10 @@
         <default>17</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p34</default>
     </attribute>
@@ -24385,6 +24593,10 @@
     <attribute>
         <id>POSITION</id>
         <default>18</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>9</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -24460,6 +24672,10 @@
         <default>19</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p38</default>
     </attribute>
@@ -24531,6 +24747,10 @@
     <attribute>
         <id>POSITION</id>
         <default>20</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>10</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -24606,6 +24826,10 @@
         <default>21</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p42</default>
     </attribute>
@@ -24677,6 +24901,10 @@
     <attribute>
         <id>POSITION</id>
         <default>22</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>11</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -24752,6 +24980,10 @@
         <default>23</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p46</default>
     </attribute>
@@ -24823,6 +25055,10 @@
     <attribute>
         <id>POSITION</id>
         <default>24</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>12</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -24898,6 +25134,10 @@
         <default>25</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p50</default>
     </attribute>
@@ -24969,6 +25209,10 @@
     <attribute>
         <id>POSITION</id>
         <default>26</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>13</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -25044,6 +25288,10 @@
         <default>27</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p54</default>
     </attribute>
@@ -25115,6 +25363,10 @@
     <attribute>
         <id>POSITION</id>
         <default>28</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>14</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -25190,6 +25442,10 @@
         <default>29</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p58</default>
     </attribute>
@@ -25263,6 +25519,10 @@
         <default>30</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p60</default>
     </attribute>
@@ -25334,6 +25594,10 @@
     <attribute>
         <id>POSITION</id>
         <default>31</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>15</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -28832,6 +29096,10 @@
         <default>32</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p64</default>
     </attribute>
@@ -28899,6 +29167,10 @@
     <attribute>
         <id>POSITION</id>
         <default>33</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>16</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -29666,8 +29938,12 @@
         <default>34</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p136</default>
+        <default>dimm:k0:n0:s0:p68</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -29728,19 +30004,23 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003008A</default>
+        <default>0x00030046</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
         <default>35</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>17</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p138</default>
+        <default>dimm:k0:n0:s0:p70</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>138</default>
+        <default>70</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -29748,7 +30028,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>34</default>
+        <default>35</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -29756,7 +30036,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -30500,8 +30780,12 @@
         <default>36</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p144</default>
+        <default>dimm:k0:n0:s0:p72</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -30562,19 +30846,23 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x00030092</default>
+        <default>0x0003004A</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
         <default>37</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>18</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p146</default>
+        <default>dimm:k0:n0:s0:p74</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>146</default>
+        <default>74</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -30582,7 +30870,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>36</default>
+        <default>37</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -30590,7 +30878,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -31334,8 +31622,12 @@
         <default>38</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p152</default>
+        <default>dimm:k0:n0:s0:p76</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -31396,19 +31688,23 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x0003009A</default>
+        <default>0x0003004E</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
         <default>39</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>19</default>
+    </attribute>
+    <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p154</default>
+        <default>dimm:k0:n0:s0:p78</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>154</default>
+        <default>78</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -31416,7 +31712,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>38</default>
+        <default>39</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -31424,7 +31720,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -32169,7 +32465,7 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p160</default>
+        <default>dimm:k0:n0:s0:p80</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -32223,6 +32519,10 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM20</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>20</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -32230,7 +32530,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x000300A2</default>
+        <default>0x00030052</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -32238,11 +32538,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p162</default>
+        <default>dimm:k0:n0:s0:p82</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>162</default>
+        <default>82</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -32250,7 +32550,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>40</default>
+        <default>41</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -32258,7 +32558,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -32291,6 +32591,10 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM20</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>20</default>
     </attribute>
 </targetInstance>
 
@@ -33003,7 +33307,7 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p168</default>
+        <default>dimm:k0:n0:s0:p84</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -33057,6 +33361,10 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM21</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>21</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -33064,7 +33372,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x000300AA</default>
+        <default>0x00030056</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -33072,11 +33380,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p170</default>
+        <default>dimm:k0:n0:s0:p86</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>170</default>
+        <default>86</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -33084,7 +33392,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>42</default>
+        <default>43</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -33092,7 +33400,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -33125,6 +33433,10 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM21</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>21</default>
     </attribute>
 </targetInstance>
 
@@ -33837,7 +34149,7 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p176</default>
+        <default>dimm:k0:n0:s0:p88</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -33891,6 +34203,10 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM22</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>22</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -33898,7 +34214,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x000300B2</default>
+        <default>0x0003005A</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -33906,11 +34222,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p178</default>
+        <default>dimm:k0:n0:s0:p90</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>178</default>
+        <default>90</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -33918,7 +34234,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>44</default>
+        <default>45</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -33926,7 +34242,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -33959,6 +34275,10 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM22</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>22</default>
     </attribute>
 </targetInstance>
 
@@ -34671,7 +34991,7 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p184</default>
+        <default>dimm:k0:n0:s0:p92</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -34725,6 +35045,10 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM23</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>23</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -34732,7 +35056,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x000300BA</default>
+        <default>0x0003005E</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -34740,11 +35064,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p186</default>
+        <default>dimm:k0:n0:s0:p94</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>186</default>
+        <default>94</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -34752,7 +35076,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>46</default>
+        <default>47</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -34760,7 +35084,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -34793,6 +35117,10 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM23</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>23</default>
     </attribute>
 </targetInstance>
 
@@ -35505,7 +35833,7 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p192</default>
+        <default>dimm:k0:n0:s0:p96</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -35559,6 +35887,10 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM24</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>24</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -35566,7 +35898,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x000300C2</default>
+        <default>0x00030062</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -35574,11 +35906,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p194</default>
+        <default>dimm:k0:n0:s0:p98</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>194</default>
+        <default>98</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -35586,7 +35918,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>48</default>
+        <default>49</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -35594,7 +35926,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -35627,6 +35959,10 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM24</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>24</default>
     </attribute>
 </targetInstance>
 <!-- DDIMM off of proc1 port1  (not connected) -->
@@ -36006,7 +36342,7 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p200</default>
+        <default>dimm:k0:n0:s0:p100</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -36060,6 +36396,10 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM25</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>25</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -36067,7 +36407,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x000300CA</default>
+        <default>0x00030066</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -36075,11 +36415,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p202</default>
+        <default>dimm:k0:n0:s0:p102</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>202</default>
+        <default>102</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -36087,7 +36427,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>50</default>
+        <default>51</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -36095,7 +36435,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -36128,6 +36468,10 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM25</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>25</default>
     </attribute>
 </targetInstance>
 
@@ -36508,7 +36852,7 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p208</default>
+        <default>dimm:k0:n0:s0:p104</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -36562,6 +36906,10 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM26</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>26</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -36569,7 +36917,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x000300D2</default>
+        <default>0x0003006A</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -36577,11 +36925,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p210</default>
+        <default>dimm:k0:n0:s0:p106</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>210</default>
+        <default>106</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -36589,7 +36937,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>52</default>
+        <default>53</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -36597,7 +36945,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -36630,6 +36978,10 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM26</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>26</default>
     </attribute>
 </targetInstance>
 
@@ -37009,7 +37361,7 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p216</default>
+        <default>dimm:k0:n0:s0:p108</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -37063,6 +37415,10 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM27</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>27</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -37070,7 +37426,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x000300DA</default>
+        <default>0x0003006E</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -37078,11 +37434,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p218</default>
+        <default>dimm:k0:n0:s0:p110</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>218</default>
+        <default>110</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -37090,7 +37446,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>54</default>
+        <default>55</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -37098,7 +37454,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -37131,6 +37487,10 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM27</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>27</default>
     </attribute>
 </targetInstance>
 
@@ -37512,7 +37872,7 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p224</default>
+        <default>dimm:k0:n0:s0:p112</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -37566,6 +37926,10 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM28</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>28</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -37573,7 +37937,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x000300E2</default>
+        <default>0x00030072</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -37581,11 +37945,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p226</default>
+        <default>dimm:k0:n0:s0:p114</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>226</default>
+        <default>114</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -37593,7 +37957,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>56</default>
+        <default>57</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -37601,7 +37965,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -37634,6 +37998,10 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM28</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>28</default>
     </attribute>
 </targetInstance>
 
@@ -37981,7 +38349,7 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p232</default>
+        <default>dimm:k0:n0:s0:p116</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -38035,6 +38403,10 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM29</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>29</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -38042,7 +38414,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x000300EA</default>
+        <default>0x00030076</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -38050,11 +38422,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p234</default>
+        <default>dimm:k0:n0:s0:p118</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>234</default>
+        <default>118</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -38062,7 +38434,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>58</default>
+        <default>59</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -38070,7 +38442,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -38103,6 +38475,10 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM29</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>29</default>
     </attribute>
 </targetInstance>
 
@@ -38483,7 +38859,7 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p240</default>
+        <default>dimm:k0:n0:s0:p120</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -38537,6 +38913,10 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM30</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>30</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -38544,7 +38924,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x000300F2</default>
+        <default>0x0003007A</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -38552,11 +38932,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p242</default>
+        <default>dimm:k0:n0:s0:p122</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>242</default>
+        <default>122</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -38564,7 +38944,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>60</default>
+        <default>61</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -38572,7 +38952,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -38605,6 +38985,10 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM30</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>30</default>
     </attribute>
 </targetInstance>
 
@@ -38985,7 +39369,7 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p248</default>
+        <default>dimm:k0:n0:s0:p124</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -39043,6 +39427,10 @@
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM31</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>31</default>
+    </attribute>
 </targetInstance>
 
 <targetInstance>
@@ -39050,7 +39438,7 @@
     <type>lcard-dimm-ddimm</type>
     <attribute>
         <id>HUID</id>
-        <default>0x000300FA</default>
+        <default>0x0003007E</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -39058,11 +39446,11 @@
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p250</default>
+        <default>dimm:k0:n0:s0:p126</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
-        <default>250</default>
+        <default>126</default>
     </attribute>
     <attribute>
         <id>PHYS_PATH</id>
@@ -39070,7 +39458,7 @@
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
-        <default>62</default>
+        <default>63</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -39078,7 +39466,7 @@
     </attribute>
     <attribute>
         <id>REL_POS</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
@@ -39115,6 +39503,10 @@
     <attribute>
         <id>STATIC_ABS_LOCATION_CODE</id>
         <default>DDIMM31</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>31</default>
     </attribute>
 </targetInstance>
 <!-- ==== DDIMMs off second processor ==================================== -->
