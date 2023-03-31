@@ -254,9 +254,9 @@ Layout Description
         <preserved/>
     </section>
     <section>
-        <description>Open CAPI Memory Buffer (OCMB) Firmware (300K)</description>
+        <description>Open CAPI Memory Buffer (OCMB) Firmware (2MB)</description>
         <eyeCatch>OCMBFW</eyeCatch>
-        <physicalRegionSize>0x4B000</physicalRegionSize>
+        <physicalRegionSize>0x200000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
         <readOnly/>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,13 +48,21 @@ constexpr uint32_t MAX_BIN_TRACE = 256;
  */
 enum OCMBFW_HEADER_CONSTS: uint32_t
 {
-    HEADER_VERSION_MAJOR = 1,
-    HEADER_VERSION_MINOR = 0,
+    // Explorer-only format, contains only a base header and one
+    // image.
+    V1_BASE_HEADER_VERSION_MAJOR = 1,
+    V1_BASE_HEADER_VERSION_MINOR = 0,
+
     HEADER_MAX_SIZE = 4096,
+
+    // Multi-OCMB format, contains base and extended header along with
+    // multiple images.
+    V2_BASE_HEADER_VERSION_MAJOR = 2,
+    V2_BASE_HEADER_VERSION_MINOR = 0,
 };
 
 /**
- * @brief Header for the OCMB flash image content
+ * @brief Base header for the OCMB flash image content
  */
 typedef struct ocmbFwHeader
 {
@@ -76,7 +84,7 @@ typedef struct ocmbFwHeader
 }ocmbFwHeader_t;
 
 /**
- * @brief Tag Id's for tagged triplets
+ * @brief Tag Id's for tagged triplets in the base header
  */
 enum TRIPLET_TAG_IDS: uint32_t
 {
@@ -93,7 +101,7 @@ enum TRIPLET_TAG_IDS: uint32_t
 };
 
 /**
- * @brief Tagged triplet data format
+ * @brief Tagged triplet data format for base header
  */
 typedef struct taggedTriplet
 {
@@ -105,6 +113,66 @@ typedef struct taggedTriplet
 
     // variable sized data starts here
 }taggedTriplet_t;
+
+/** OCMBFW extended PNOR partition structures **/
+
+/* @brief The type of image a given image_info structure refers to.
+ *        See the POZ SBE FIFO Interface specification for definitions of these constants. */
+enum image_type_t : uint64_t
+{
+    IMAGE_TYPE_BOOTLOADER = 1,
+    IMAGE_TYPE_RUNTIME = 2,
+};
+
+/* @brief The type of OCMB a given image_info structure is applicable
+ * to.
+ */
+enum ocmb_type_t : uint64_t
+{
+    OCMB_TYPE_ODYSSEY = 1,
+    OCMB_TYPE_EXPLORER = 2
+};
+
+enum compression_type_t : uint64_t
+{
+    COMPRESSION_TYPE_NONE = 0
+};
+
+/* @brief Storage for SHA3-512 hashes. */
+using ocmbfw_hash_t = uint8_t[64];
+
+/* @brief A structure describing a single firmware image within the
+ * OCMBFW PNOR partition.
+ * If this structure changes, pkgOcmbFw_ext.py must be updated.
+ */
+struct ocmbfw_ext_image_info
+{
+    ocmb_type_t ocmb_type; // Odyssey or Explorer
+    image_type_t image_type; // Type of image (bootloader, runtime)
+    uint32_t dd_level_major;
+    uint32_t dd_level_minor;
+    compression_type_t compression_type;
+    ocmbfw_hash_t image_hash; // Hash of image contents. How this is
+                              // calculated is dependent on the OCMB
+                              // and image types.
+    uint64_t image_offset; // byte offset from the V2 PNOR section header to image contents.
+    uint64_t image_size; // Size of image contents in bytes
+} PACKED;
+
+enum ocmbfw_ext_partition_version_t : uint64_t
+{
+    OCMBFW_EXT_PARTITION_VERSION_1 = 1
+};
+
+/* @brief The OCMBFW extended section header.
+ * If this structure changes, pkgOcmbFw_ext.py must be updated.
+ */
+struct ocmbfw_ext_pnor_section_header
+{
+    ocmbfw_ext_partition_version_t header_version; // subversion of V2 PNOR structure
+    uint64_t num_images; // count of subsequent images[] array
+    ocmbfw_ext_image_info images[1]; // any number of images
+} PACKED;
 
 } //namespace expupd
 

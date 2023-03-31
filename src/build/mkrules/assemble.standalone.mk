@@ -45,6 +45,7 @@ endef
 TOOLSDIR := ${PROJECT_ROOT}/src/build/tools
 BUILDPNOR := ${PROJECT_ROOT}/src/build/buildpnor
 BASEIMAGESDIR := ${PROJECT_ROOT}/img
+SBE_DIR := ${PROJECT_ROOT}/src/build/tools/extern/sbe
 PPE_DIR=${PROJECT_ROOT}/src/build/tools/extern/ppe
 SBE_SEEPROM_IMAGE_DD1 := ${PPE_DIR}/images/sbe_seeprom_DD1.bin
 STANDALONEDIR := ${PROJECT_ROOT}/standalone
@@ -63,7 +64,7 @@ export PATH:=${FFSTOOLS}/ecc/:${FFSTOOLS}/fcp/:${FFSTOOLS}/fpart/:$(PATH)
 ## Scripts
 
 IMAGE_EDIT_PROGRAM := ${TOOLSDIR}/editimgid
-PKG_OCMBFW_SCRIPT := ${BUILDPNOR}/pkgOcmbFw.pl
+PKG_OCMBFW_SCRIPT := ${BUILDPNOR}/pkgOcmbFw_ext.py
 PNOR_BUILD_SCRIPT := ${BUILDPNOR}/buildpnor.pl
 GEN_FAKE_HEADER_SCRIPT := ${BUILDPNOR}/genfakeheader.pl
 # Script to manipulate bin files to prepare for buildpnor
@@ -194,8 +195,8 @@ DEF_GEN_BIN_FILES := HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},\
 
 ifeq (${FAKEPNOR},)
 # Parameters passed to GEN_PNOR_IMAGE_SCRIPT.
-    _GEN_DEFAULT_BIN_FILES := ${DEF_GEN_BIN_FILES},EECACHE=EMPTY,\
-    	OCMBFW=${OCMBFW_IMG}
+    _GEN_DEFAULT_BIN_FILES := ${DEF_GEN_BIN_FILES},EECACHE=EMPTY, \
+        OCMBFW=${OCMBFW_IMG}
 # GEN_DEFAULT_BIN_FILES string is assembled with spaces that need to be removed
     GEN_DEFAULT_BIN_FILES := $(shell echo ${_GEN_DEFAULT_BIN_FILES} | sed 's/ //g')
     DEFAULT_PARAMS := --build-all --emit-eccless $(if ${TARGET_TEST},--test) \
@@ -250,7 +251,7 @@ else
     _GEN_DEFAULT_BIN_FILES := HBI=${HBI_IMG},HBEL=EMPTY,EECACHE=${EECACHE_IMG},HBD=${HBD_FAKE}
     GEN_DEFAULT_BIN_FILES := $(shell echo ${_GEN_DEFAULT_BIN_FILES} | sed 's/ //g')
     DEFAULT_PARAMS := --systemBinFiles ${GEN_DEFAULT_BIN_FILES}\
-    	--pnorLayout ${PNOR_LAYOUT} --editedLayoutLocation ${STAGINGDIR}
+        --pnorLayout ${PNOR_LAYOUT} --editedLayoutLocation ${STAGINGDIR}
 
 # Parameters passed to GEN_PNOR_IMAGE_SCRIPT.
     _GEN_BIN_FILES := HBD=${HBD_FAKE}
@@ -315,7 +316,7 @@ ifneq ($(strip ${SECUREBOOT_KEY_TRANSITION_MODE}),)
 # Location of CFM TEST artifacs to use in "update_image_id" rule
         CFM_ARTIFACT_LOCATION:=${HB_SIM_DEPS_PATH}/cfm/${CFM_TEST_ARTIFACT_ID}/
         FILE_CFM_TEST_IMAGES := \
-        	${call get_files_full_path, ${CFM_ARTIFACT_LOCATION}}
+            ${call get_files_full_path, ${CFM_ARTIFACT_LOCATION}}
     endif
 endif
 
@@ -352,14 +353,16 @@ gen_default_images: copy_hb_bins build_standalone_payload
 # Create 4k ocmbfw image for now (all zeroes)
 	dd if=/dev/zero of=${UNPKGD_OCMBFW_IMG} bs=1024 count=4
 
-# Add header to ocmbfw image
-	${PKG_OCMBFW_SCRIPT} --unpackagedBin ${UNPKGD_OCMBFW_IMG} --packagedBin \
-		${OCMBFW_IMG} --timestamp "$(shell date)" \
-		--vendorVersion "0.1" --vendorUrl "http://www.ibm.com"
+# Preprocess the OCMBFW layout file, creating a copy with the variables set
+	cpp "-DUNPKGD_EXP_FW_IMG=\"${UNPKGD_OCMBFW_IMG}\"" \
+	    "-DUNPKGD_ODY_BLDR_IMG=\"${SBE_DIR}/simics/sbe/odyssey_standalone/images/gen/final/boot.pak\"" \
+	    "-DUNPKGD_ODY_RT_IMG=\"${SBE_DIR}/simics/sbe/odyssey_standalone/images/gen/final/rt.pak\"" \
+	    ${BUILDPNOR}/ocmbfw-layout.json.template >ocmbfw-layout.json
 
-# verify header sha512 hash value matches value calculated against image
-# TODO RTC:195547 -- remove the skip when we have a good image packaged into the driver.
-	${PKG_OCMBFW_SCRIPT} --verify --packagedBin ${OCMBFW_IMG} --skipImageHashCheck
+# Package ocmbfw image
+	# PKG_OCMBFW_SCRIPT uses paktool from the SBE repo
+	PATH="$$PATH:${SBE_DIR}/public/src/import/public/common/utils/imageProcs/tools/" \
+	    ${PKG_OCMBFW_SCRIPT} --layout ocmbfw-layout.json --output ${OCMBFW_IMG}
 
 # Remove offset from start of Bootloader image for HBBL partition
 # Actual code is offset from HRMOR by 12k = 12 1k-blocks (space

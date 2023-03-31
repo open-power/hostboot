@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
  * @brief   Validate the OCMB firmware image from PNOR
  *
  */
+
 #include "ocmbFwImage.H"
 #include <expupd/ocmbFwImage_const.H>
 #include <expupd/expupd_reasoncodes.H>
@@ -307,6 +308,45 @@ errlHndl_t parseTaggedDataTriplet(const uint8_t* i_tripletPtr,
     return l_err;
 }
 
+/* @brief A wildcard for the find_ocmbfw_ext_image function */
+const uint32_t DD_LEVEL_ANY = 0xFFFFFFFFu;
+
+/* @brief Find an image within the OCMBFW extended PNOR partition.
+ *
+ * @param[in] i_hdr              The PNOR section header.
+ * @param[in] i_ocmb_type        The type of OCMB the image should apply to.
+ * @param[in] i_image_type       The type of image to search for.
+ * @param[in] i_dd_level_major   The major DD level to search for.
+ * @param[in] i_dd_level_minor   The minor DD level to search for.
+ * @return                       Pointer to the image in PNOR, or nullptr if not found.
+ */
+const ocmbfw_ext_image_info* find_ocmbfw_ext_image(const ocmbfw_ext_pnor_section_header* i_hdr,
+                                                   ocmb_type_t i_ocmb_type,
+                                                   image_type_t i_image_type,
+                                                   uint32_t i_dd_level_major = DD_LEVEL_ANY,
+                                                   uint32_t i_dd_level_minor = DD_LEVEL_ANY)
+{
+    const auto images_end = i_hdr->images + i_hdr->num_images;
+
+    const auto it = std::find_if(i_hdr->images, images_end,
+                                 [&](const auto& imginfo)
+                                 {
+                                     return (imginfo.ocmb_type == i_ocmb_type
+                                             && imginfo.image_type == i_image_type
+                                             && (i_dd_level_major == DD_LEVEL_ANY
+                                                 || imginfo.dd_level_major == i_dd_level_major)
+                                             && (i_dd_level_minor == DD_LEVEL_ANY
+                                                 || imginfo.dd_level_minor == i_dd_level_minor));
+                                 });
+
+    if (it == images_end)
+    {
+        return nullptr;
+    }
+
+    return it;
+}
+
 /**
  * @brief Validates OCMB firmware header of packaged image
  *
@@ -334,7 +374,11 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
 
     do
     {
-        // Refer to src/build/buildpnor/pkgOcmbFw.pl for FW image layout
+        /* Validate the base header, then if this PNOR partition
+         * contains an extended header, parse that as well, then find
+         * the explorer image from those. */
+
+        // Refer to src/build/buildpnor/pkgOcmbFw_ext.py for FW image layout
         const uint64_t l_minHeaderSize =
                           sizeof(ocmbFwHeader_t) +
                           sizeof(taggedTriplet_t) + HEADER_SHA512_SIZE;
@@ -397,9 +441,27 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
             break;
         }
 
+        /* Validate version and check whether there's an extended header present. */
+
+        const ocmbfw_ext_pnor_section_header* ext_header = nullptr;
+
         // Check header version
-        if((l_header->majorVersion != HEADER_VERSION_MAJOR) ||
-           (l_header->minorVersion != HEADER_VERSION_MINOR))
+        if((l_header->majorVersion == V1_BASE_HEADER_VERSION_MAJOR) &&
+           (l_header->minorVersion == V1_BASE_HEADER_VERSION_MINOR))
+        {
+            // Version 1 is supported and there is no extended header to parse.
+        }
+        else if ((l_header->majorVersion == V2_BASE_HEADER_VERSION_MAJOR) &&
+                 (l_header->minorVersion == V2_BASE_HEADER_VERSION_MINOR))
+        {
+            // Version 2 is supported and does have an extended header.
+
+            ext_header = reinterpret_cast<const ocmbfw_ext_pnor_section_header*>
+                (reinterpret_cast<const char*>(l_header + 1)
+                 + sizeof(taggedTriplet_t)
+                 + HEADER_SHA512_SIZE);
+        }
+        else
         {
             TRACFCOMP(g_trac_expupd, ERR_MRK
                       "ocmbFwValidateImage: Unsupported header version: %u.%u",
@@ -456,39 +518,109 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
                  l_header->headerSize,
                  l_header->numTriplets);
 
-        // Parse all tagged triplet data
-        const uint8_t* l_curTripletPtr = l_imageStartPtr + sizeof(*l_header);
-        const uint8_t* l_endDataPtr = l_imageStartPtr + l_header->headerSize;
-        for(uint32_t l_curTriplet = 0;
-            l_curTriplet < l_header->numTriplets;
-            l_curTriplet++)
+        if (ext_header)
         {
-            uint32_t l_numBytes = 0;
-
-            // This will set o_imageInfo.imageSHA512Ptr if SHA512 hash is found.
-            // If the firmware version string is found, o_imageInfo.fwVersionStrPtr and
-            // o_imageInfo.fwVersionStrSize will also be set.
-            l_err = parseTaggedDataTriplet(l_curTripletPtr,
-                                           l_endDataPtr,
-                                           o_imageInfo,
-                                           l_numBytes);
-            if(l_err)
+            if (ext_header->header_version != OCMBFW_EXT_PARTITION_VERSION_1)
             {
-                TRACFCOMP(g_trac_expupd, ERR_MRK
-                      "ocmbFwValidateImage: Failed parsing tagged data"
-                      " triplet %u of %u. "
-                      TRACE_ERR_FMT,
-                      l_curTriplet + 1, l_header->numTriplets,
-                      TRACE_ERR_ARGS(l_err));
+                TRACFCOMP(g_trac_expupd,
+                          ERR_MRK"ocmbFwValidateImage: Invalid OCMBFW extended header version %u",
+                          ext_header->header_version);
+
+                /*@
+                 *@errortype       ERRL_SEV_PREDICTIVE
+                 *@moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
+                 *@reasoncode      EXPUPD::OCMB_INVALID_EXT_HEADER_VERSION
+                 *@userdata1       OCMBFW extended header version
+                 *@userdata2       <unused>
+                 *@devdesc         Unsupported OCMBFW extended header version.
+                 *@custdesc        Error occurred during system boot.
+                 */
+                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                                EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
+                                                EXPUPD::OCMB_INVALID_EXT_HEADER_VERSION,
+                                                ext_header->header_version,
+                                                0,
+                                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_err->collectTrace(EXPUPD_COMP_NAME);
                 break;
             }
 
-            // Advance to next triplet
-            l_curTripletPtr += l_numBytes;
+            const auto imageinfo = find_ocmbfw_ext_image(ext_header, OCMB_TYPE_EXPLORER, IMAGE_TYPE_RUNTIME);
+
+            if (!imageinfo)
+            {
+                TRACFCOMP(g_trac_expupd,
+                          ERR_MRK"ocmbFwValidateImage: No Explorer firmware found in PNOR partition");
+
+                /*@
+                 *@errortype       ERRL_SEV_PREDICTIVE
+                 *@moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
+                 *@reasoncode      EXPUPD::EXPLORER_FW_IMAGE_MISSING
+                 *@userdata1       Number of images in OCMBFW PNOR partition
+                 *@userdata2       <unused>
+                 *@devdesc         Explorer firmware image not found in OCMB PNOR partition.
+                 *@custdesc        Error occurred during system boot.
+                 */
+                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                                EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
+                                                EXPUPD::EXPLORER_FW_IMAGE_MISSING,
+                                                ext_header->num_images,
+                                                0,
+                                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_err->collectTrace(EXPUPD_COMP_NAME);
+                break;
+            }
+
+            o_imageInfo.imagePtr = reinterpret_cast<const uint8_t*>(ext_header) + imageinfo->image_offset;
+            o_imageInfo.imageSize = imageinfo->image_size;
+            o_imageInfo.imageSHA512HashPtr = imageinfo->image_hash;
+            o_imageInfo.fwVersionStrPtr = reinterpret_cast<const uint8_t*>("http://www.ibm.com");
+            o_imageInfo.fwVersionStrSize = strlen(reinterpret_cast<const char*>(o_imageInfo.fwVersionStrPtr));
+
+            TRACFCOMP(g_trac_expupd,
+                      "ocmbFwValidateImage: Found Explorer firmware image: Pointer=%p, size=%d",
+                      o_imageInfo.imagePtr, o_imageInfo.imageSize);
         }
-        if(l_err)
+        else
         {
-            break;
+            // Set the image start address and size and we are done here.
+            o_imageInfo.imagePtr = l_imageStartPtr + l_header->headerSize;
+            o_imageInfo.imageSize = i_imageSize - l_header->headerSize;
+
+            // Parse all tagged triplet data
+            const uint8_t* l_curTripletPtr = l_imageStartPtr + sizeof(*l_header);
+            const uint8_t* l_endDataPtr = l_imageStartPtr + l_header->headerSize;
+            for(uint32_t l_curTriplet = 0;
+                l_curTriplet < l_header->numTriplets;
+                l_curTriplet++)
+            {
+                uint32_t l_numBytes = 0;
+
+                // This will set o_imageInfo.imageSHA512Ptr if SHA512 hash is found.
+                // If the firmware version string is found, o_imageInfo.fwVersionStrPtr and
+                // o_imageInfo.fwVersionStrSize will also be set.
+                l_err = parseTaggedDataTriplet(l_curTripletPtr,
+                                               l_endDataPtr,
+                                               o_imageInfo,
+                                               l_numBytes);
+                if(l_err)
+                {
+                    TRACFCOMP(g_trac_expupd, ERR_MRK
+                              "ocmbFwValidateImage: Failed parsing tagged data"
+                              " triplet %u of %u. "
+                              TRACE_ERR_FMT,
+                              l_curTriplet + 1, l_header->numTriplets,
+                              TRACE_ERR_ARGS(l_err));
+                    break;
+                }
+
+                // Advance to next triplet
+                l_curTripletPtr += l_numBytes;
+            }
+            if(l_err)
+            {
+                break;
+            }
         }
 
         // Check if we found a SHA512 hash in the header
@@ -519,10 +651,6 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
         TRACFBIN(g_trac_expupd, "OCMB FW IMAGE SHA512 HASH",
                  o_imageInfo.imageSHA512HashPtr, HEADER_SHA512_SIZE);
 
-        // Set the image start address and size and we are done here.
-        o_imageInfo.imagePtr = l_imageStartPtr + l_header->headerSize;
-        o_imageInfo.imageSize = i_imageSize - l_header->headerSize;
-
     }while(0);
 
     TRACFCOMP(g_trac_expupd, EXIT_MRK "ocmbFwValidateImage()");
@@ -530,4 +658,3 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
 }
 
 } //namespace expupd
-

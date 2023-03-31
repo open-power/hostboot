@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,8 @@ namespace EXPUPD
         MISSING_FW_VERSION                        = EXPUPD_COMP_ID | 0x09,
         UNSUPPORTED_NUMBER_OF_DIMMS               = EXPUPD_COMP_ID | 0x0a, // Deprecated
         DEVICE_READ_FAIL                          = EXPUPD_COMP_ID | 0x0b,
+        EXPLORER_FW_IMAGE_MISSING                 = EXPUPD_COMP_ID | 0x0c,
+        OCMB_INVALID_EXT_HEADER_VERSION           = EXPUPD_COMP_ID | 0x0d,
     };
 
 }; // namespace EXPUPD
