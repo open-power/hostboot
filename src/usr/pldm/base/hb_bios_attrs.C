@@ -1131,34 +1131,6 @@ errlHndl_t getHugePageCount(
     return errl;
 }
 
-errlHndl_t getHugePageSize(
-        std::vector<uint8_t>& io_string_table,
-        std::vector<uint8_t>& io_attr_table,
-        TARGETING::ATTR_HUGE_PAGE_SIZE_type &o_hugePageSize)
-{
-    errlHndl_t errl = nullptr;
-
-    do{
-
-        uint64_t l_attr_val = 0;
-        errl = systemIntAttrLookup(io_string_table,
-                                   io_attr_table,
-                                   PLDM_BIOS_HB_HUGE_PAGE_SIZE_STRING,
-                                   l_attr_val);
-        if(errl)
-        {
-            PLDM_ERR("getHugePageSize() Failed to lookup value for %s",
-                     PLDM_BIOS_HB_HUGE_PAGE_SIZE_STRING);
-            break;
-        }
-
-        o_hugePageSize = static_cast<TARGETING::ATTR_HUGE_PAGE_SIZE_type>(l_attr_val);
-
-    } while(0);
-
-    return errl;
-}
-
 errlHndl_t getLmbSize(
         std::vector<uint8_t>& io_string_table,
         std::vector<uint8_t>& io_attr_table,

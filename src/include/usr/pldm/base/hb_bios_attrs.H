@@ -118,17 +118,17 @@ namespace PLDM
                                  TARGETING::ATTR_PAYLOAD_KIND_type &o_payloadType);
 
     /** @brief Retrieve the current value of the hb_number_huge_pages
-    *          PLDM bios attribute and return the value converted
-    *          to a ATTR_HUGE_PAGE_COUNT_type.
-    *
-    * @param[in,out] io_string_table  See brief at the top of this file.
-    * @param[in,out] io_attr_table    See brief at the top of this file.
-    * @param[out]    o_hugePageCount  If no error occurred will contain the value
-    *                                 found for hb_number_huge_pages translated
-    *                                 to terms of ATTR_HUGE_PAGE_COUNT_type.
-    *
-    * @return Error if any, otherwise nullptr.
-    */
+     *          PLDM bios attribute and return the value converted
+     *          to a ATTR_HUGE_PAGE_COUNT_type.
+     *
+     * @param[in,out] io_string_table  See brief at the top of this file.
+     * @param[in,out] io_attr_table    See brief at the top of this file.
+     * @param[out]    o_hugePageCount  If no error occurred will contain the value
+     *                                 found for hb_number_huge_pages translated
+     *                                 to terms of ATTR_HUGE_PAGE_COUNT_type.
+     *
+     * @return Error if any, otherwise nullptr.
+     */
     errlHndl_t getHugePageCount(std::vector<uint8_t>& io_string_table,
                                 std::vector<uint8_t>& io_attr_table,
                                 TARGETING::ATTR_HUGE_PAGE_COUNT_type &o_hugePageCount);
@@ -163,23 +163,6 @@ namespace PLDM
     errlHndl_t getMirrorMemory(std::vector<uint8_t>& io_string_table,
                                std::vector<uint8_t>& io_attr_table,
                                TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM_type &o_mirror_mem);
-
-    /** @brief Retrieve the current value of the hb_huge_page_size
-    *          PLDM bios attribute and return the value converted
-    *          to a ATTR_HUGE_PAGE_SIZE_type.
-    *
-    * @param[in,out] io_string_table  See brief at the top of this file.
-    * @param[in,out] io_attr_table    See brief at the top of this file.
-    * @param[out]    o_hugePageSize   If no error occurred will contain the value
-    *                                 found for hb_huge_page_size
-    *                                 translated to terms of
-    *                                 ATTR_HUGE_PAGE_SIZE_type_type.
-    *
-    * @return Error if any, otherwise nullptr.
-    */
-    errlHndl_t getHugePageSize(std::vector<uint8_t>& io_string_table,
-                               std::vector<uint8_t>& io_attr_table,
-                               TARGETING::ATTR_HUGE_PAGE_SIZE_type &o_hugePageSize);
 
     /** @brief Retrieve the current value of the hb_memory_region_size
     *          PLDM bios attribute and return the value converted
