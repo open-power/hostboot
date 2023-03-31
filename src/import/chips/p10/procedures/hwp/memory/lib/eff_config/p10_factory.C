@@ -47,7 +47,7 @@ namespace efd
 /// @param[in] i_rev SPD revision
 /// @param[in] i_gen DRAM generation
 /// @param[in] i_planar planar config flag (from ATTR_MEM_MRW_IS_PLANAR)
-/// @param[in] i_phy_rank PHY rank to provide an EFD for
+/// @param[in] i_dimm_rank DIMM rank to provide an EFD for -> note will be decoded internally to the class constructor
 /// @param[out] o_efd_engine shared pointer to the EFD engine in question
 /// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
 ///
@@ -55,7 +55,7 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
                           const uint8_t i_rev,
                           const uint8_t i_gen,
                           const uint8_t i_planar,
-                          const uint16_t i_phy_rank,
+                          const uint16_t i_dimm_rank,
                           std::shared_ptr<mss::efd::ddimm_efd_base>& o_efd_engine)
 {
     // Poor man's fallback technique: if we receive a revision that's later than (or numerically
@@ -78,14 +78,14 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
                         case mss::spd::rev::V0_3:
                             {
 
-                                o_efd_engine = std::make_shared<mss::efd::ddimm_efd_0_3>(i_target, i_phy_rank, l_rc);
+                                o_efd_engine = std::make_shared<mss::efd::ddimm_efd_0_3>(i_target, i_dimm_rank, l_rc);
                                 return l_rc;
                                 break;
                             }
 
                         case mss::spd::rev::V0_4:
                             {
-                                o_efd_engine = std::make_shared<mss::efd::ddimm_efd_0_4>(i_target, i_phy_rank, l_rc);
+                                o_efd_engine = std::make_shared<mss::efd::ddimm_efd_0_4>(i_target, i_dimm_rank, l_rc);
                                 return l_rc;
                                 break;
                             }
@@ -110,7 +110,7 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
                     {
                         case mss::spd::rev::V0_4:
                             {
-                                o_efd_engine = std::make_shared<mss::efd::planar_rdimm_efd_0_4>(i_target, i_phy_rank, l_rc);
+                                o_efd_engine = std::make_shared<mss::efd::planar_rdimm_efd_0_4>(i_target, i_dimm_rank, l_rc);
                                 return l_rc;
                                 break;
                             }
@@ -135,7 +135,7 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
 
         case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5:
             {
-                o_efd_engine = std::make_shared<mss::efd::ddr5::ddimm_0_0>(i_target, i_phy_rank, l_rc);
+                o_efd_engine = std::make_shared<mss::efd::ddr5::ddimm_0_0>(i_target, i_dimm_rank, l_rc);
                 return l_rc;
                 break;
             }

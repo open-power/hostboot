@@ -59,6 +59,16 @@ template <mss::mc_type MC, fapi2::TargetType T>
 inline fapi2::ReturnCode phy_rank_swizzle_workaround(const fapi2::Target<T>& i_target, uint8_t& io_phy_rank);
 
 ///
+/// @brief Returns the value for the EFD rank from between the PHY rank and the port rank
+/// @tparam MC the memory controller type
+/// @param[in] i_port_rank
+/// @param[in] i_phy_rank
+/// @return the EFD rank. Depending upon the memory controller, it will either be the port rank or the PHY rank
+///
+template <mss::mc_type MC>
+inline uint8_t compute_efd_rank(const uint8_t i_port_rank, const uint8_t i_phy_rank);
+
+///
 /// @brief Rank traits class for variations depending on MC
 /// @tparam MC the memory controller type
 ///
@@ -95,6 +105,7 @@ class info
             iv_dimm_rank = 0;
             iv_port_rank = 0;
             iv_phy_rank = 0;
+            iv_efd_rank = 0;
 
             uint8_t l_master_ranks_per_dimm = 0;
             FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_dimm_target, l_master_ranks_per_dimm));
@@ -114,6 +125,7 @@ class info
             iv_port_rank = iv_dimm_rank + ((mss::index(i_dimm_target) * TT::RANK_INDEX_STEP));
             iv_phy_rank = iv_dimm_rank + ((mss::index(i_dimm_target) * TT::PHY_RANK_INDEX_STEP));
             FAPI_TRY(phy_rank_swizzle_workaround<MC>(i_dimm_target, iv_phy_rank));
+            iv_efd_rank = compute_efd_rank<MC>(iv_port_rank, iv_phy_rank);
 
         fapi_try_exit:
             o_rc = fapi2::current_err;
@@ -190,6 +202,7 @@ class info
                 }
                 FAPI_TRY(phy_rank_swizzle_workaround<MC>(i_port_target, iv_phy_rank));
                 iv_port_rank = i_index;
+                iv_efd_rank = compute_efd_rank<MC>(iv_port_rank, iv_phy_rank);
             }
 
         fapi_try_exit:
@@ -198,7 +211,7 @@ class info
 
         ///
         /// @brief Accessor for port rank
-        /// @return the number (0-7) of the rank within its port
+        /// @return the number (0-7) of the rank within its port from the memory controller perspective
         ///
         inline const uint8_t get_port_rank() const
         {
@@ -207,7 +220,7 @@ class info
 
         ///
         /// @brief Accessor for rank number of DIMM
-        /// @return the number (0-3) of the DIMM
+        /// @return the number (0-3) of the DIMM. Largely used for indexing attribute values
         ///
         inline const uint8_t get_dimm_rank() const
         {
@@ -218,10 +231,22 @@ class info
         /// @brief Accessor for phy rank
         /// @return the phy rank value
         /// @note in a hypothetical 2 4-rank dimm configuration (not possible), this value is not valid
+        /// This is used for interacting with the PHY. ex) access delay regs, configuring training, phy init, etc
         ///
         inline const uint8_t get_phy_rank() const
         {
             return iv_phy_rank;
+        }
+
+
+        ///
+        /// @brief Accessor for the EFD rank
+        /// @return the phy rank value
+        /// This is used for interacting with the EFD
+        ///
+        inline const uint8_t get_efd_rank() const
+        {
+            return iv_efd_rank;
         }
 
         ///
@@ -270,13 +295,25 @@ class info
                 return iv_dimm_rank < i_rhs.iv_dimm_rank;
             }
 
-            return iv_phy_rank < i_rhs.iv_phy_rank;
+
+            if(iv_phy_rank != i_rhs.iv_phy_rank)
+            {
+                return iv_phy_rank < i_rhs.iv_phy_rank;
+            }
+
+            return iv_efd_rank < i_rhs.iv_efd_rank;
         }
 
     private:
         fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_dimm_target;
         fapi2::Target<TT::MEM_PORT_TARGET_TYPE> iv_port_target;
+
+        // The rank within the DIMM:0-3
+        // Generally, used for indexing values of an attribute
         uint8_t iv_dimm_rank;
+
+        // The rank withink the port from the memory controller perspective: 0-7
+        // Used for displaying results and firmware callouts
         uint8_t iv_port_rank;
 
         // Note! a configuration of 2 4-rank dimms is not possible.
@@ -287,6 +324,11 @@ class info
         // 2 rank single dimm 0/1
         // 4 rank (quad encoded) 0-3.
         uint8_t iv_phy_rank;
+
+        // The rank indexing used for the EFD (a portion of the SPD) is unique per memory controller/DRAM generation
+        // For DDR4, it matches the PHY rank
+        // For DDR5, it matches the port rank
+        uint8_t iv_efd_rank;
 } __attribute__ ((aligned (8)));
 
 ///

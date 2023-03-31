@@ -66,18 +66,17 @@ class base
         fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> iv_port;
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> iv_ocmb;
         uint8_t iv_dimm_rank;
-        uint8_t iv_phy_rank;
+        uint8_t iv_efd_rank;
 
     public:
 
         ///
         /// @brief Construct a new DDIMM EFD base object
         /// @param[in] i_dimm DIMM target
-        /// @param[in] i_phy_rank the phy rank used to build rank info class
         /// @param[out] o_rc return code
         ///
         base(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-             const uint16_t i_phy_rank, fapi2::ReturnCode& o_rc) :
+             fapi2::ReturnCode& o_rc) :
             iv_dimm(i_dimm),
             iv_port(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_dimm)),
             iv_ocmb(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_dimm)) {}
@@ -130,17 +129,19 @@ class ddimm_efd_0_3 : public base
         ///
         /// @brief Construct a new DDIMM EFD rev 0.3 object
         /// @param[in] i_dimm DIMM target
-        /// @param[in] i_rank_info the current rank info class
+        /// @param[in] i_dimm_rank the current DIMM rank to create rank info class
+        /// @param[out] o_rc return code
         ///
         ddimm_efd_0_3(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-                      const uint16_t i_phy_rank, fapi2::ReturnCode& o_rc) :
-            base(i_dimm, i_phy_rank, o_rc)
+                      const uint16_t i_dimm_rank,
+                      fapi2::ReturnCode& o_rc) :
+            base(i_dimm, o_rc)
         {
             // Had to move this creating rank info here from
             // base class because it is used for DDR4 and DDR5
-            const mss::rank::info<mss::mc_type::EXPLORER> i_rank_info(i_dimm, i_phy_rank, o_rc);
+            const mss::rank::info<mss::mc_type::EXPLORER> i_rank_info(i_dimm, i_dimm_rank, o_rc);
             iv_dimm_rank = i_rank_info.get_dimm_rank();
-            iv_phy_rank = i_rank_info.get_phy_rank();
+            iv_efd_rank = i_rank_info.get_efd_rank();
         }
 
         ///
@@ -2151,8 +2152,8 @@ class ddimm_efd_0_3 : public base
 
             FAPI_TRY(mss::attr::get_si_dram_rtt_nom(iv_dimm, l_field));
 
-            // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
-            switch(iv_phy_rank)
+            // Switch on the EFD rank as our SI information is stored in terms of the PHY rank perspective
+            switch(iv_efd_rank)
             {
                 case 0:
                     FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_RANK0, i_efd, mss::SET_SI_DRAM_RTT_NOM, l_rtt_nom));
@@ -2174,12 +2175,12 @@ class ddimm_efd_0_3 : public base
                     FAPI_ASSERT(false,
                                 fapi2::MSS_INVALID_SPD_RANK().
                                 set_FUNCTION(SET_SI_DRAM_RTT_NOM).
-                                set_PHY_RANK(iv_phy_rank).
+                                set_PHY_RANK(iv_efd_rank).
                                 set_PORT_TARGET(iv_port).
                                 set_DIMM_TARGET(iv_dimm),
                                 "%s SPD decoder returned invalid PHY rank: %u in %s",
                                 spd::c_str(iv_dimm),
-                                iv_phy_rank,
+                                iv_efd_rank,
                                 "RTT_NOM");
                     break;
             };
@@ -2216,8 +2217,8 @@ class ddimm_efd_0_3 : public base
 
             FAPI_TRY(mss::attr::get_si_dram_rtt_wr(iv_dimm, l_field));
 
-            // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
-            switch(iv_phy_rank)
+            // Switch on the EFD rank as our SI information is stored in terms of the PHY rank perspective
+            switch(iv_efd_rank)
             {
                 case 0:
                     FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_WR_RANK0, i_efd, mss::SET_SI_DRAM_RTT_WR, l_rtt_wr));
@@ -2239,12 +2240,12 @@ class ddimm_efd_0_3 : public base
                     FAPI_ASSERT(false,
                                 fapi2::MSS_INVALID_SPD_RANK().
                                 set_FUNCTION(SET_SI_DRAM_RTT_WR).
-                                set_PHY_RANK(iv_phy_rank).
+                                set_PHY_RANK(iv_efd_rank).
                                 set_PORT_TARGET(iv_port).
                                 set_DIMM_TARGET(iv_dimm),
                                 "%s SPD decoder returned invalid PHY rank: %u in %s",
                                 spd::c_str(iv_dimm),
-                                iv_phy_rank,
+                                iv_efd_rank,
                                 "RTT_WR");
                     break;
             };
@@ -2286,8 +2287,8 @@ class ddimm_efd_0_3 : public base
 
             FAPI_TRY(mss::attr::get_si_dram_rtt_park(iv_dimm, l_field));
 
-            // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
-            switch(iv_phy_rank)
+            // Switch on the EFD rank as our SI information is stored in terms of the PHY rank perspective
+            switch(iv_efd_rank)
             {
                 case 0:
                     FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_PARK_RANK0, i_efd, mss::SET_SI_DRAM_RTT_PARK, l_rtt_park));
@@ -2309,12 +2310,12 @@ class ddimm_efd_0_3 : public base
                     FAPI_ASSERT(false,
                                 fapi2::MSS_INVALID_SPD_RANK().
                                 set_FUNCTION(SET_SI_DRAM_RTT_PARK).
-                                set_PHY_RANK(iv_phy_rank).
+                                set_PHY_RANK(iv_efd_rank).
                                 set_PORT_TARGET(iv_port).
                                 set_DIMM_TARGET(iv_dimm),
                                 "%s SPD decoder returned invalid PHY rank: %u in %s",
                                 spd::c_str(iv_dimm),
-                                iv_phy_rank,
+                                iv_efd_rank,
                                 "RTT_PARK");
                     break;
             };
@@ -2441,8 +2442,8 @@ class ddimm_efd_0_3 : public base
 
             FAPI_TRY(mss::attr::get_si_odt_wr(iv_dimm, l_field));
 
-            // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
-            switch(iv_phy_rank)
+            // Switch on the EFD rank as our SI information is stored in terms of the PHY rank perspective
+            switch(iv_efd_rank)
             {
                 case 0:
                     FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_WR_MAP_RANK0, i_efd, mss::SET_SI_ODT_WR, l_si_odt_wr));
@@ -2464,12 +2465,12 @@ class ddimm_efd_0_3 : public base
                     FAPI_ASSERT(false,
                                 fapi2::MSS_INVALID_SPD_RANK().
                                 set_FUNCTION(SET_SI_ODT_WR).
-                                set_PHY_RANK(iv_phy_rank).
+                                set_PHY_RANK(iv_efd_rank).
                                 set_PORT_TARGET(iv_port).
                                 set_DIMM_TARGET(iv_dimm),
                                 "%s SPD decoder returned invalid PHY rank: %u in %s",
                                 spd::c_str(iv_dimm),
-                                iv_phy_rank,
+                                iv_efd_rank,
                                 "ODT_WR");
                     break;
             };
@@ -2507,8 +2508,8 @@ class ddimm_efd_0_3 : public base
             uint8_t l_si_odt_rd = 0;
             FAPI_TRY(mss::attr::get_si_odt_rd(iv_dimm, l_field));
 
-            // Switch on the PHY rank as our SI information is stored in terms of the PHY rank perspective
-            switch(iv_phy_rank)
+            // Switch on the EFD rank as our SI information is stored in terms of the PHY rank perspective
+            switch(iv_efd_rank)
             {
                 case 0:
                     FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODT_RD_MAP_RANK0, i_efd, mss::SET_SI_ODT_RD, l_si_odt_rd));
@@ -2530,12 +2531,12 @@ class ddimm_efd_0_3 : public base
                     FAPI_ASSERT(false,
                                 fapi2::MSS_INVALID_SPD_RANK().
                                 set_FUNCTION(SET_SI_ODT_RD).
-                                set_PHY_RANK(iv_phy_rank).
+                                set_PHY_RANK(iv_efd_rank).
                                 set_PORT_TARGET(iv_port).
                                 set_DIMM_TARGET(iv_dimm),
                                 "%s SPD decoder returned invalid PHY rank: %u in %s",
                                 spd::c_str(iv_dimm),
-                                iv_phy_rank,
+                                iv_efd_rank,
                                 "ODT_RD");
                     break;
             };
@@ -2691,11 +2692,13 @@ class ddimm_efd_0_4 : public ddimm_efd_0_3
         /// @brief Construct a new ddimm efd rev 0.4 object
         ///
         /// @param[in] i_dimm DIMM target
-        /// @param[in] i_rank_info the current rank info class
+        /// @param[in] i_dimm_rank the current DIMM rank to create rank info class
+        /// @param[out] o_rc return code
         ///
         ddimm_efd_0_4(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-                      const uint16_t i_phy_rank, fapi2::ReturnCode& o_rc)
-            : ddimm_efd_0_3(i_dimm, i_phy_rank, o_rc)
+                      const uint16_t i_dimm_rank,
+                      fapi2::ReturnCode& o_rc)
+            : ddimm_efd_0_3(i_dimm, i_dimm_rank, o_rc)
         {
         }
 

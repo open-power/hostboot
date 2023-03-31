@@ -64,13 +64,14 @@ class planar_rdimm_efd_0_4 : public ddimm_efd_0_4
         /// @brief Construct a new planar rdimm efd rev 0.4 object
         ///
         /// @param[in] i_dimm DIMM target
-        /// @param[in] i_phy_rank PHY rank to provide an EFD for
+        /// @param[in] i_dimm_rank the current DIMM rank to create rank info class
         /// @param[out] o_rc return code
         ///
         ///
         planar_rdimm_efd_0_4(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-                             const uint16_t i_phy_rank, fapi2::ReturnCode& o_rc)
-            : ddimm_efd_0_4(i_dimm, i_phy_rank, o_rc)
+                             const uint16_t i_dimm_rank,
+                             fapi2::ReturnCode& o_rc)
+            : ddimm_efd_0_4(i_dimm, i_dimm_rank, o_rc)
         {
         }
 

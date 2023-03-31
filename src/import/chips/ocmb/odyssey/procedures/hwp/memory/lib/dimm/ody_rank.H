@@ -98,6 +98,18 @@ inline fapi2::ReturnCode phy_rank_swizzle_workaround<mss::mc_type::ODYSSEY>(cons
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
+///
+/// @brief Returns the value for the EFD rank from between the PHY rank and the port rank - Odyssey specialization
+/// @param[in] i_port_rank
+/// @param[in] i_phy_rank
+/// @return the EFD rank. For Odyssey, it's the port rank
+///
+template <>
+inline uint8_t compute_efd_rank<mss::mc_type::ODYSSEY>(const uint8_t i_port_rank, const uint8_t i_phy_rank)
+{
+    return i_port_rank;
+}
+
 } // namespace rank
 } // namespace mss
 #endif

@@ -70,8 +70,6 @@ class ddimm_0_0 : public mss::efd::base
         using F = mss::efd::fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>;
 
     protected:
-        uint8_t iv_dimm_rank;
-        uint8_t iv_phy_rank;
         uint8_t iv_port_rel_pos;
 
     public:
@@ -79,20 +77,20 @@ class ddimm_0_0 : public mss::efd::base
         ///
         /// @brief Construct a new DDR5 DDIMM EFD rev 0.0 object
         /// @param[in] i_dimm DIMM target
-        /// @param[in] i_phy_rank the current phy rank to create rank info class
+        /// @param[in] i_dimm_rank the current DIMM rank to create rank info class
         /// @param[out] o_rc return code
         ///
         ddimm_0_0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-                  const uint16_t i_phy_rank,
+                  const uint16_t i_dimm_rank,
                   fapi2::ReturnCode& o_rc) :
-            base(i_dimm, i_phy_rank, o_rc)
+            base(i_dimm, o_rc)
         {
 
             // Had to move this creating rank info here from
             // base class because it is used for DDR4 and DDR5
-            const mss::rank::info<mss::mc_type::ODYSSEY> l_rank_info(i_dimm, i_phy_rank, o_rc);
+            const mss::rank::info<mss::mc_type::ODYSSEY> l_rank_info(i_dimm, i_dimm_rank, o_rc);
             iv_dimm_rank = l_rank_info.get_dimm_rank();
-            iv_phy_rank = l_rank_info.get_phy_rank();
+            iv_efd_rank = l_rank_info.get_efd_rank();
             iv_port_rel_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(iv_port);
         }
 

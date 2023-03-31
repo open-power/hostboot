@@ -104,27 +104,27 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
         uint64_t l_freq = 0;
         uint32_t l_omi_freq = 0;
         uint8_t l_dram_gen = 0;
-        std::vector<uint8_t> l_phy_ranks;
+        std::vector<mss::spd::rank_data> l_efd_ranks;
 
         FAPI_TRY( mss::attr::get_freq(i_target, l_freq) );
         FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(i_target, l_freq, l_omi_freq));
         FAPI_TRY( mss::attr::get_dram_gen(l_dimm, l_dram_gen) );
 
-        // Make sure to run ranks_on_dimm()(that is run inside get_phy_ranks_helper())
+        // Make sure to run ranks_on_dimm()(that is run inside get_efd_ranks_helper())
         // AFTER the base and DDIMM module data has been processed!
         // This is so we handle the decoding of the ranks properly
         if(l_dram_gen == fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4)
         {
-            FAPI_TRY( mss::spd::get_phy_ranks_helper<mss::mc_type::EXPLORER>(l_dimm, l_phy_ranks));
+            FAPI_TRY( mss::spd::get_efd_ranks_helper<mss::mc_type::EXPLORER>(l_dimm, l_efd_ranks));
         }
         else
         {
-            FAPI_TRY( mss::spd::get_phy_ranks_helper<mss::mc_type::ODYSSEY>(l_dimm, l_phy_ranks));
+            FAPI_TRY( mss::spd::get_efd_ranks_helper<mss::mc_type::ODYSSEY>(l_dimm, l_efd_ranks));
         }
 
         FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_is_planar, l_raw_spd));
 
-        for (const auto& l_phy_rank : l_phy_ranks)
+        for (const auto& l_efd_rank : l_efd_ranks)
         {
             std::shared_ptr<mss::efd::ddimm_efd_base> l_ddimm_efd;
 
@@ -132,8 +132,8 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
             fapi2::MemVpdData_t l_vpd_type(fapi2::MemVpdData::EFD);
             fapi2::VPDInfo<fapi2::TARGET_TYPE_OCMB_CHIP> l_vpd_info(l_vpd_type);
 
-            // Our EFD is stored in terms of our PHY ranks (and DIMM config for planar)
-            l_vpd_info.iv_rank = l_phy_rank;
+            // Our EFD is stored in terms of our EFD ranks (and DIMM config for planar)
+            l_vpd_info.iv_rank = l_efd_rank.iv_efd_rank;
             l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
 
             // Add planar EFD lookup info if we need it
@@ -147,12 +147,15 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
 
             // Instantiate EFD engine
             {
-                // We pass in our rank information class - we need to know both the PHY perspective and IBM perspective ranks
-                // The EFD data is stored in terms of the PHY perspective
+                // We pass in our rank information class - we need to know both the EFD perspective and IBM perspective ranks
+                // The EFD data is stored in terms of the EFD perspective
+                // The EFD perspective corresponds to the IBM perspective for DDR5 and the PHY perspective for DDR4
                 // The attributes use the IBM perspective, which aligns to the DIMM rank
                 // Knowing both allows us to decode from the SPD and encode the data for the attributes
                 // The encode/decode is in accordance with fixes for JIRA355
-                FAPI_TRY(mss::efd::factory(l_dimm, l_spd_rev, l_dram_gen, l_is_planar, l_phy_rank, l_ddimm_efd));
+                // Note: the DIMM rank is passed into the factory as it is used internally to generate the required rank perspectives
+                // We would do that up above, but it requires different template parameters
+                FAPI_TRY(mss::efd::factory(l_dimm, l_spd_rev, l_dram_gen, l_is_planar, l_efd_rank.iv_dimm_rank, l_ddimm_efd));
                 FAPI_TRY(l_ddimm_efd->process(l_vpd_raw));
                 FAPI_TRY(l_ddimm_efd->process_overrides(l_raw_spd));
             }

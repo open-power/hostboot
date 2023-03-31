@@ -46,19 +46,29 @@ namespace mss
 {
 namespace spd
 {
+
+///
+/// @brief A lightweight structure to pass around the necessary rank information
+///
+struct rank_data
+{
+    uint8_t iv_efd_rank;
+    uint8_t iv_dimm_rank;
+};
+
 ///
 /// @brief Helper to to run ranks_on_dimm on the correct mc rank info using dram gen attr
 /// @tparam MC the memory controller type
 /// @param[in] i_dimm DIMM target
-/// @param[out] o_phy_ranks vector of phy ranks
+/// @param[out] o_ranks vector of ranks information
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::mc_type MC>
-fapi2::ReturnCode get_phy_ranks_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
-                                       std::vector<uint8_t>& o_phy_ranks)
+fapi2::ReturnCode get_efd_ranks_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                                       std::vector<rank_data>& o_efd_ranks)
 {
     // Clear the vector before using
-    o_phy_ranks.clear();
+    o_efd_ranks.clear();
 
     // Create l_rank_infos using the dram gen attr
     std::vector<mss::rank::info<MC>> l_rank_infos;
@@ -67,7 +77,8 @@ fapi2::ReturnCode get_phy_ranks_helper(const fapi2::Target<fapi2::TARGET_TYPE_DI
     // Loop through and assemble the ranks
     for(const auto& l_rank_info : l_rank_infos)
     {
-        o_phy_ranks.push_back(l_rank_info.get_phy_rank());
+        const rank_data l_rank_data = {l_rank_info.get_efd_rank(), l_rank_info.get_dimm_rank()};
+        o_efd_ranks.push_back(l_rank_data);
     }
 
 fapi_try_exit:

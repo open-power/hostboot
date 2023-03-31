@@ -58,7 +58,7 @@ namespace efd
 /// @param[in] i_rev SPD revision
 /// @param[in] i_gen DRAM generation
 /// @param[in] i_planar planar config flag (from ATTR_MEM_MRW_IS_PLANAR)
-/// @param[in] i_phy_rank PHY rank to provide an EFD for
+/// @param[in] i_dimm_rank DIMM rank to provide an EFD for -> note will be decoded internally to the class constructor
 /// @param[out] o_efd_engine shared pointer to the EFD engine in question
 /// @return fapi2::ReturnCode SUCCESS iff the procedure executes successfully
 ///
@@ -66,7 +66,7 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
                           const uint8_t i_rev,
                           const uint8_t i_gen,
                           const uint8_t i_planar,
-                          const uint16_t i_phy_rank,
+                          const uint16_t i_dimm_rank,
                           std::shared_ptr<mss::efd::ddimm_efd_base>& o_efd_engine);
 
 } // ns efd

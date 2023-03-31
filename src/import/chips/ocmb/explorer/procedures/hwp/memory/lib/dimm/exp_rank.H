@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,6 +150,18 @@ inline fapi2::ReturnCode phy_rank_swizzle_workaround<mss::mc_type::EXPLORER>(con
 fapi_try_exit:
     return fapi2::current_err;
 
+}
+
+///
+/// @brief Returns the value for the EFD rank from between the PHY rank and the port rank - Explorer specialization
+/// @param[in] i_port_rank
+/// @param[in] i_phy_rank
+/// @return the EFD rank. For Explorer, it's the PHY rank
+///
+template <>
+inline uint8_t compute_efd_rank<mss::mc_type::EXPLORER>(const uint8_t i_port_rank, const uint8_t i_phy_rank)
+{
+    return i_phy_rank;
 }
 
 } // namespace rank

@@ -121,7 +121,7 @@ fapi2::ReturnCode check_freq_support_vpd_p10(
             continue;
         }
 
-        l_vpd_info.iv_rank = l_rank.get_phy_rank();
+        l_vpd_info.iv_rank = l_rank.get_efd_rank();
 
         // Check if this VPD configuration is supported
         FAPI_TRY(is_vpd_config_supported<mss::proc_type::PROC_P10>(l_vpd_target, i_proposed_freq, l_vpd_info, o_is_supported),
