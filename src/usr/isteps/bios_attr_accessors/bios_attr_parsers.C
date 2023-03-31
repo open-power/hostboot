@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -331,35 +331,6 @@ void parse_hb_number_huge_pages(std::vector<uint8_t>& io_string_table,
             huge_page_count );
     const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
     l_sys->setAttr<ATTR_HUGE_PAGE_COUNT>(huge_page_count);
-
-    return;
-}
-
-void parse_hb_huge_page_size(std::vector<uint8_t>& io_string_table,
-                             std::vector<uint8_t>& io_attr_table,
-                             ISTEP_ERROR::IStepError & io_stepError)
-{
-    ATTR_HUGE_PAGE_SIZE_type huge_page_size = TARGETING::HUGE_PAGE_SIZE_PAGE_IS_16_GB;
-    errlHndl_t l_errl = PLDM::getHugePageSize(io_string_table,
-                                              io_attr_table,
-                                              huge_page_size);
-    if(l_errl)
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "parse_hb_huge_page_size: An error occurred getting Huge Page Size from the BMC, using default 0x%X",
-                TARGETING::HUGE_PAGE_SIZE_PAGE_IS_16_GB );
-
-        // Set size to default, commit the error and continue
-        huge_page_size = TARGETING::HUGE_PAGE_SIZE_PAGE_IS_16_GB;
-        l_errl->collectTrace("ISTEPS_TRACE",256);
-        errlCommit( l_errl, ISTEP_COMP_ID );
-    }
-
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "parse_hb_huge_page_size: Set ATTR_HUGE_PAGE_SIZE = 0x%X",
-            huge_page_size );
-    const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
-    l_sys->setAttr<ATTR_HUGE_PAGE_SIZE>(huge_page_size);
 
     return;
 }
