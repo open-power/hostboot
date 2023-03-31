@@ -5031,6 +5031,37 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Post Phyinit override for configuring redundant CS
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode post_phyinit_configure_redundant_cs(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+
+    // 0xa0 means that:
+    // 1. DFI rank0/1's timings will use timing group 0
+    // 2. DFI rank2/3's timings will use timing group 2
+    // Basically the appropriate timings will be tied to the required ranks for redundant CS to work
+    constexpr uint64_t REDUNDANT_CS_CONFIG = 0x00000000000000a0;
+
+    // This is only needed for redundant CS, so first grab the redundant CS mode
+    uint8_t l_redundant_cs[mss::ody::MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY(mss::attr::get_ddr5_redundant_cs_en(i_target, l_redundant_cs));
+
+    if(l_redundant_cs[0] == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_DISABLE)
+    {
+        FAPI_INF(TARGTIDFORMAT " has redundant CS mode disabled. Skipping configuration registers", TARGTID);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_DFIRDDATACSDESTMAP_P0, REDUNDANT_CS_CONFIG));
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_DFIWRDATACSDESTMAP_P0, REDUNDANT_CS_CONFIG));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Post Phyinit decode for TxSlew values
 /// @param[in] i_target - the memory port on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
@@ -5041,6 +5072,7 @@ fapi2::ReturnCode post_phyinit_overrides(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(post_phyinit_override_tx_slew_fall_ac(i_target));
     FAPI_TRY(post_phyinit_override_tx_slew_rise_ck(i_target));
     FAPI_TRY(post_phyinit_setup_pll(i_target));
+    FAPI_TRY(post_phyinit_configure_redundant_cs(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
