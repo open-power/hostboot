@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -233,7 +233,6 @@ void IStepDispatcher::parsePLDMBiosAttrs(ISTEP_ERROR::IStepError & io_stepError)
         ISTEP::parse_hb_memory_mirror_mode,
         ISTEP::parse_hb_key_clear_request,
         ISTEP::parse_hb_number_huge_pages,
-        ISTEP::parse_hb_huge_page_size,
         ISTEP::parse_hb_memory_region_size,
         ISTEP::parse_hb_mfg_flags,
         ISTEP::parse_hb_hyp_switch,

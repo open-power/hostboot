@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -153,21 +153,6 @@ void parse_hb_key_clear_request(std::vector<uint8_t>& io_string_table,
 void parse_hb_number_huge_pages(std::vector<uint8_t>& io_string_table,
                                 std::vector<uint8_t>& io_attr_table,
                                 ISTEP_ERROR::IStepError & io_stepError);
-
-/**
- * @brief Lookup hb_huge_page_size and set the system attribute ATTR_HUGE_PAGE_SIZE
- *        accordingly. If there is an error looking up the BIOS attribute, default
- *        ATTR_HUGE_PAGE_SIZE to 16 GB.
- *
- * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H
- * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H
- * @param[in,out] io_stepError      If an error occurs which require a TI it can be attached
- *                                  to this IstepError log.
- * @return void
- */
-void parse_hb_huge_page_size(std::vector<uint8_t>& io_string_table,
-                             std::vector<uint8_t>& io_attr_table,
-                             ISTEP_ERROR::IStepError & io_stepError);
 
 /**
  * @brief Lookup hb_memory_region_size and set the system attribute ATTR_LMB_SIZE
