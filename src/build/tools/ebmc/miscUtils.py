@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -52,6 +52,9 @@ lid_dict = {
     "81e00685.lid" : "hbotStringFile",
     "81e00686.lid" : "hbicore.syms",
     "81e0068a.lid" : "sbeStringFile",
+    "81e0068f.lid" : "QMESTRINGFILE",
+    "81e00690.lid" : "XGPESTRINGFILE",
+    "81e00691.lid" : "PGPESTRINGFILE",
 }
 
 """ Searches the directories in the list 'LID_SEARCH_DIRS' for the given
