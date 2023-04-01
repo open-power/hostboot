@@ -136,6 +136,59 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_ODY_PHYINIT_INVALID_EN_TX_DM_PREAMBLE_PATTERN</rc>
+    <description>Ody phyinit invalid EnTxDmPreamblePattern.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>PATTERN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_PHYINIT_INVALID_EN_TX_DQ_PREAMBLE_PATTERN_U0</rc>
+    <description>Ody phyinit invalid EnTxDqPreamblePatternU0.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>PATTERN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_PHYINIT_INVALID_EN_TX_DQ_PREAMBLE_PATTERN_U1</rc>
+    <description>Ody phyinit invalid EnTxDqPreamblePatternU1.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>PATTERN</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
 
 <!-- PHY Init step I/J errors -->
 

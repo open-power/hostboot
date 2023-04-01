@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -57,7 +57,7 @@
 #define csr_ForceClkDisable_ADDR 0x1
 #define csr_TsmByte0_ADDR 0x1
 #define csr_PreSequenceReg0b0s1_ADDR 0x1
-#define csr_Seq0BGPR1_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x201) : (0x301))) : (0x301))) : (0x201))) : (0x301))) : (0x301))
+#define csr_Seq0BGPR1_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x201) : (0x301))) : (0x301))) : (0x201))) : (0x201))) : (0x301))) : (0x301))) : (0x301))
 #define csr_SequenceReg0b72s0_ADDR 0x101
 #define csr_SequenceReg0b157s1_ADDR 0x201
 #define csr_AcsmSeq0x1_ADDR 0x1
@@ -67,7 +67,7 @@
 #define csr_ClockingCtrl_ADDR 0x2
 #define csr_TrainingParam_ADDR 0x2
 #define csr_PreSequenceReg0b0s2_ADDR 0x2
-#define csr_Seq0BGPR2_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x202) : (0x302))) : (0x302))) : (0x202))) : (0x302))) : (0x302))
+#define csr_Seq0BGPR2_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x202) : (0x302))) : (0x302))) : (0x202))) : (0x202))) : (0x302))) : (0x302))) : (0x302))
 #define csr_SequenceReg0b72s1_ADDR 0x102
 #define csr_SequenceReg0b157s2_ADDR 0x202
 #define csr_AcsmSeq0x2_ADDR 0x2
@@ -77,7 +77,7 @@
 #define csr_UseDqsEnReplica_ADDR 0x3
 #define csr_ForceInternalUpdate_ADDR 0x3
 #define csr_PreSequenceReg0b1s0_ADDR 0x3
-#define csr_Seq0BGPR3_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x203) : (0x303))) : (0x303))) : (0x203))) : (0x303))) : (0x303))
+#define csr_Seq0BGPR3_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x203) : (0x303))) : (0x303))) : (0x203))) : (0x203))) : (0x303))) : (0x303))) : (0x303))
 #define csr_SequenceReg0b72s2_ADDR 0x103
 #define csr_SequenceReg0b158s0_ADDR 0x203
 #define csr_AcsmSeq0x3_ADDR 0x3
@@ -87,7 +87,7 @@
 #define csr_PhyConfig_ADDR 0x4
 #define csr_TrainingParam1_ADDR 0x4
 #define csr_PreSequenceReg0b1s1_ADDR 0x4
-#define csr_Seq0BGPR4_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x204) : (0x304))) : (0x304))) : (0x204))) : (0x304))) : (0x304))
+#define csr_Seq0BGPR4_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x204) : (0x304))) : (0x304))) : (0x204))) : (0x204))) : (0x304))) : (0x304))) : (0x304))
 #define csr_SequenceReg0b73s0_ADDR 0x104
 #define csr_SequenceReg0b158s1_ADDR 0x204
 #define csr_AcsmSeq0x4_ADDR 0x4
@@ -98,7 +98,7 @@
 #define csr_PhyInterruptStatus_ADDR 0x104
 #define csr_PGCR_ADDR 0x5
 #define csr_PreSequenceReg0b1s2_ADDR 0x5
-#define csr_Seq0BGPR5_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x205) : (0x305))) : (0x305))) : (0x205))) : (0x305))) : (0x305))
+#define csr_Seq0BGPR5_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x205) : (0x305))) : (0x305))) : (0x205))) : (0x205))) : (0x305))) : (0x305))) : (0x305))
 #define csr_SequenceReg0b73s1_ADDR 0x105
 #define csr_SequenceReg0b158s2_ADDR 0x205
 #define csr_AcsmSeq0x5_ADDR 0x5
@@ -106,7 +106,7 @@
 #define csr_Dq5LnSelTg1_ADDR 0x505
 #define csr_MapCAA5toDfi_ADDR 0x205
 #define csr_PostSequenceReg0b0s0_ADDR 0x6
-#define csr_Seq0BGPR6_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x206) : (0x306))) : (0x306))) : (0x206))) : (0x306))) : (0x306))
+#define csr_Seq0BGPR6_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x206) : (0x306))) : (0x306))) : (0x206))) : (0x206))) : (0x306))) : (0x306))) : (0x306))
 #define csr_SequenceReg0b73s2_ADDR 0x106
 #define csr_SequenceReg0b159s0_ADDR 0x206
 #define csr_AcsmSeq0x6_ADDR 0x6
@@ -115,7 +115,7 @@
 #define csr_MapCAA6toDfi_ADDR 0x206
 #define csr_FreqFsp_ADDR 0x6
 #define csr_PostSequenceReg0b0s1_ADDR 0x7
-#define csr_Seq0BGPR7_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x207) : (0x307))) : (0x307))) : (0x207))) : (0x307))) : (0x307))
+#define csr_Seq0BGPR7_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x207) : (0x307))) : (0x307))) : (0x207))) : (0x207))) : (0x307))) : (0x307))) : (0x307))
 #define csr_SequenceReg0b74s0_ADDR 0x107
 #define csr_SequenceReg0b159s1_ADDR 0x207
 #define csr_TestBumpCntrl1_ADDR 0x7
@@ -124,7 +124,7 @@
 #define csr_MapCAA7toDfi_ADDR 0x207
 #define csr_PhyInterruptOverride_ADDR 0x107
 #define csr_PostSequenceReg0b0s2_ADDR 0x8
-#define csr_Seq0BGPR8_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x208) : (0x308))) : (0x308))) : (0x208))) : (0x308))) : (0x308))
+#define csr_Seq0BGPR8_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (0x208) : (0x308))) : (0x308))) : (0x208))) : (0x208))) : (0x308))) : (0x308))) : (0x308))
 #define csr_SequenceReg0b74s1_ADDR 0x108
 #define csr_SequenceReg0b159s2_ADDR 0x208
 #define csr_AcsmSeq0x8_ADDR 0x8
@@ -679,6 +679,7 @@
 #define csr_AcsmSeq2x19_ADDR 0x53
 #define csr_D5ACSM1RptCntOverride_ADDR 0x153
 #define csr_D5ACSMPtrXlat19_ADDR 0x253
+#define csr_VrefDACSelCtrl_ADDR 0x54
 #define csr_SequenceReg0b14s1_ADDR 0x54
 #define csr_SequenceReg0b99s2_ADDR 0x154
 #define csr_AcsmSeq2x20_ADDR 0x54
@@ -1440,7 +1441,7 @@
 #define csr_SequenceReg0b150s1_ADDR 0x1ec
 #define csr_DlyTestCntRingOscDblcdl7_ADDR 0xec
 #define csr_AcsmCtrl19_ADDR 0xec
-#define csr_CUSTPHYREV_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (0xed) : (0xec))) : (0xec))) : (0xec))) : (0xec))) : (0xec))) : (0xec))) : (0xec))
+#define csr_CUSTPHYREV_ADDR ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (0xed) : (0xec))) : (0xec))) : (0xec))) : (0xec))) : (0xec))) : (0xec))) : (0xec))) : (0xec))) : (0xec))
 #define csr_SequenceReg0b65s1_ADDR 0xed
 #define csr_SequenceReg0b150s2_ADDR 0x1ed
 #define csr_DlyTestCntRingOscDblcdl8_ADDR 0xed
@@ -2279,11 +2280,11 @@
 #define csr_PhyStickyUnlockClr_MSB  15
 #define csr_PhyStickyUnlockClr_LSB  15
 #define csr_PhyStickyUnlockClr_MASK 0x8000
-#define csr_PhyConfig_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (9:0) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))
-#define csr_PhyConfig_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (9:0) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))
-#define csr_PhyConfig_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (9) : (10))) : (10))) : (10))) : (10))) : (10))) : (10))) : (10))
+#define csr_PhyConfig_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (9:0) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))
+#define csr_PhyConfig_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (9:0) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))) : (10:0))
+#define csr_PhyConfig_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (9) : (10))) : (10))) : (10))) : (10))) : (10))) : (10))) : (10))) : (10))) : (10))
 #define csr_PhyConfig_LSB  0
-#define csr_PhyConfig_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (0x3ff) : (0x7ff))) : (0x7ff))) : (0x7ff))) : (0x7ff))) : (0x7ff))) : (0x7ff))) : (0x7ff))
+#define csr_PhyConfig_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (0x3ff) : (0x7ff))) : (0x7ff))) : (0x7ff))) : (0x7ff))) : (0x7ff))) : (0x7ff))) : (0x7ff))) : (0x7ff))) : (0x7ff))
 #define csr_PhyConfigAnibs_RANGE  3:0
 #define csr_PhyConfigAnibs_BITS   3:0
 #define csr_PhyConfigAnibs_MSB  3
@@ -2489,11 +2490,11 @@
 #define csr_PhyStickyUnlockErr_MSB  15
 #define csr_PhyStickyUnlockErr_LSB  15
 #define csr_PhyStickyUnlockErr_MASK 0x8000
-#define csr_PGCR_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (3:0) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))
-#define csr_PGCR_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (3:0) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))
-#define csr_PGCR_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (3) : (8))) : (8))) : (8))) : (8))) : (8))) : (8))) : (8))) : (8))) : (8))
+#define csr_PGCR_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (3:0) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))
+#define csr_PGCR_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (3:0) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))) : (8:0))
+#define csr_PGCR_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (3) : (8))) : (8))) : (8))) : (8))) : (8))) : (8))) : (8))) : (8))) : (8))) : (8))) : (8))
 #define csr_PGCR_LSB  0
-#define csr_PGCR_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (0xf) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))
+#define csr_PGCR_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (0xf) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))) : (0x1ff))
 #define csr_RxClkRiseFallMode_RANGE  0:0
 #define csr_RxClkRiseFallMode_BITS   0:0
 #define csr_RxClkRiseFallMode_MSB  0
@@ -3074,11 +3075,11 @@
 #define csr_SequenceReg0b160s1_MSB  15
 #define csr_SequenceReg0b160s1_LSB  0
 #define csr_SequenceReg0b160s1_MASK 0xffff
-#define csr_TestBumpCntrl_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (11:0) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))
-#define csr_TestBumpCntrl_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (11:0) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))
-#define csr_TestBumpCntrl_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (11) : (12))) : (12))) : (12))) : (12))) : (12))) : (12))) : (12))) : (12))) : (12))
+#define csr_TestBumpCntrl_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (11:0) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (15:0))) : (12:0))
+#define csr_TestBumpCntrl_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (11:0) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (12:0))) : (15:0))) : (12:0))
+#define csr_TestBumpCntrl_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (11) : (12))) : (12))) : (12))) : (12))) : (12))) : (12))) : (12))) : (12))) : (12))) : (15))) : (12))
 #define csr_TestBumpCntrl_LSB  0
-#define csr_TestBumpCntrl_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (0xfff) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0x1fff))
+#define csr_TestBumpCntrl_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (0xfff) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0x1fff))) : (0xffff))) : (0x1fff))
 #define csr_TestBumpEn_RANGE  1:0
 #define csr_TestBumpEn_BITS   1:0
 #define csr_TestBumpEn_MSB  1
@@ -3114,6 +3115,21 @@
 #define csr_EnableMalertDriverLoopback_MSB  12
 #define csr_EnableMalertDriverLoopback_LSB  12
 #define csr_EnableMalertDriverLoopback_MASK 0x1000
+#define csr_TestRxVrefDACSel_RANGE  13:13
+#define csr_TestRxVrefDACSel_BITS   0:0
+#define csr_TestRxVrefDACSel_MSB  13
+#define csr_TestRxVrefDACSel_LSB  13
+#define csr_TestRxVrefDACSel_MASK 0x2000
+#define csr_TestRxPowerdown_RANGE  14:14
+#define csr_TestRxPowerdown_BITS   0:0
+#define csr_TestRxPowerdown_MSB  14
+#define csr_TestRxPowerdown_LSB  14
+#define csr_TestRxPowerdown_MASK 0x4000
+#define csr_TestRxStandby_RANGE  15:15
+#define csr_TestRxStandby_BITS   0:0
+#define csr_TestRxStandby_MSB  15
+#define csr_TestRxStandby_LSB  15
+#define csr_TestRxStandby_MASK 0x8000
 #define csr_AcsmSeq0x10_RANGE  15:0
 #define csr_AcsmSeq0x10_BITS   15:0
 #define csr_AcsmSeq0x10_MSB  15
@@ -3529,11 +3545,11 @@
 #define csr_SequenceReg0b162s0_MSB  15
 #define csr_SequenceReg0b162s0_LSB  0
 #define csr_SequenceReg0b162s0_MASK 0xffff
-#define csr_PhyAlertStatus_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (1:0) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))
-#define csr_PhyAlertStatus_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (1:0) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))
-#define csr_PhyAlertStatus_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (1) : (0))) : (0))) : (0))) : (0))) : (0))) : (0))) : (0))) : (0))) : (0))
+#define csr_PhyAlertStatus_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (1:0) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))
+#define csr_PhyAlertStatus_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (1:0) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))) : (0:0))
+#define csr_PhyAlertStatus_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (1) : (0))) : (0))) : (0))) : (0))) : (0))) : (0))) : (0))) : (0))) : (0))) : (0))) : (0))
 #define csr_PhyAlertStatus_LSB  0
-#define csr_PhyAlertStatus_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (0x3) : (0x1))) : (0x1))) : (0x1))) : (0x1))) : (0x1))) : (0x1))) : (0x1))) : (0x1))) : (0x1))
+#define csr_PhyAlertStatus_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (0x3) : (0x1))) : (0x1))) : (0x1))) : (0x1))) : (0x1))) : (0x1))) : (0x1))) : (0x1))) : (0x1))) : (0x1))) : (0x1))
 #define csr_PhyAlert_RANGE  0:0
 #define csr_PhyAlert_BITS   0:0
 #define csr_PhyAlert_MSB  0
@@ -5269,11 +5285,11 @@
 #define csr_AcsmLp3Ca331_MSB  15
 #define csr_AcsmLp3Ca331_LSB  15
 #define csr_AcsmLp3Ca331_MASK 0x8000
-#define csr_D5ACSMMiscControl_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (1:0) : (3:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))
-#define csr_D5ACSMMiscControl_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (1:0) : (3:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))
-#define csr_D5ACSMMiscControl_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (1) : (3))) : (3))) : (3))) : (3))) : (3))) : (3))
+#define csr_D5ACSMMiscControl_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (1:0) : (3:0))) : (3:0))) : (3:0))) : (1:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))
+#define csr_D5ACSMMiscControl_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (1:0) : (3:0))) : (3:0))) : (3:0))) : (1:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))
+#define csr_D5ACSMMiscControl_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (1) : (3))) : (3))) : (3))) : (1))) : (3))) : (3))) : (3))) : (3))
 #define csr_D5ACSMMiscControl_LSB  0
-#define csr_D5ACSMMiscControl_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (0x3) : (0xf))) : (0xf))) : (0xf))) : (0xf))) : (0xf))) : (0xf))
+#define csr_D5ACSMMiscControl_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (0x3) : (0xf))) : (0xf))) : (0xf))) : (0x3))) : (0xf))) : (0xf))) : (0xf))) : (0xf))
 #define csr_D5ACSM1D4Mode_RANGE  0:0
 #define csr_D5ACSM1D4Mode_BITS   0:0
 #define csr_D5ACSM1D4Mode_MSB  0
@@ -6289,16 +6305,16 @@
 #define csr_TestBumpCntrl2_MSB  15
 #define csr_TestBumpCntrl2_LSB  0
 #define csr_TestBumpCntrl2_MASK 0xffff
-#define csr_TestVrefDAC0_RANGE  6:0
-#define csr_TestVrefDAC0_BITS   6:0
-#define csr_TestVrefDAC0_MSB  6
+#define csr_TestVrefDAC0_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_TestVrefDAC0_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_TestVrefDAC0_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6) : (7))) : (6))
 #define csr_TestVrefDAC0_LSB  0
-#define csr_TestVrefDAC0_MASK 0x7f
-#define csr_TestVrefDAC1_RANGE  13:7
-#define csr_TestVrefDAC1_BITS   6:0
-#define csr_TestVrefDAC1_MSB  13
-#define csr_TestVrefDAC1_LSB  7
-#define csr_TestVrefDAC1_MASK 0x3f80
+#define csr_TestVrefDAC0_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (0x7f) : (0xff))) : (0x7f))
+#define csr_TestVrefDAC1_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (13:7) : (15:8))) : (13:7))
+#define csr_TestVrefDAC1_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_TestVrefDAC1_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (13) : (15))) : (13))
+#define csr_TestVrefDAC1_LSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (7) : (8))) : (7))
+#define csr_TestVrefDAC1_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (0x3f80) : (0xff00))) : (0x3f80))
 #define csr_TestRxPowerdown_RANGE  14:14
 #define csr_TestRxPowerdown_BITS   0:0
 #define csr_TestRxPowerdown_MSB  14
@@ -6689,21 +6705,21 @@
 #define csr_SequenceReg0b172s2_MSB  8
 #define csr_SequenceReg0b172s2_LSB  0
 #define csr_SequenceReg0b172s2_MASK 0x1ff
-#define csr_TestBumpCntrl3_RANGE  13:0
-#define csr_TestBumpCntrl3_BITS   13:0
-#define csr_TestBumpCntrl3_MSB  13
+#define csr_TestBumpCntrl3_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (13:0) : (15:0))) : (13:0))
+#define csr_TestBumpCntrl3_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (13:0) : (15:0))) : (13:0))
+#define csr_TestBumpCntrl3_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (13) : (15))) : (13))
 #define csr_TestBumpCntrl3_LSB  0
-#define csr_TestBumpCntrl3_MASK 0x3fff
-#define csr_TestVrefDAC2_RANGE  6:0
-#define csr_TestVrefDAC2_BITS   6:0
-#define csr_TestVrefDAC2_MSB  6
+#define csr_TestBumpCntrl3_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (0x3fff) : (0xffff))) : (0x3fff))
+#define csr_TestVrefDAC2_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_TestVrefDAC2_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_TestVrefDAC2_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6) : (7))) : (6))
 #define csr_TestVrefDAC2_LSB  0
-#define csr_TestVrefDAC2_MASK 0x7f
-#define csr_TestVrefDAC3_RANGE  13:7
-#define csr_TestVrefDAC3_BITS   6:0
-#define csr_TestVrefDAC3_MSB  13
-#define csr_TestVrefDAC3_LSB  7
-#define csr_TestVrefDAC3_MASK 0x3f80
+#define csr_TestVrefDAC2_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (0x7f) : (0xff))) : (0x7f))
+#define csr_TestVrefDAC3_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (13:7) : (15:8))) : (13:7))
+#define csr_TestVrefDAC3_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_TestVrefDAC3_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (13) : (15))) : (13))
+#define csr_TestVrefDAC3_LSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (7) : (8))) : (7))
+#define csr_TestVrefDAC3_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (0x3f80) : (0xff00))) : (0x3f80))
 #define csr_AcsmSeq1x15_RANGE  15:0
 #define csr_AcsmSeq1x15_BITS   15:0
 #define csr_AcsmSeq1x15_MSB  15
@@ -6809,11 +6825,11 @@
 #define csr_AcsmDdrBnk16_MSB  15
 #define csr_AcsmDdrBnk16_LSB  12
 #define csr_AcsmDdrBnk16_MASK 0xf000
-#define csr_VrefDAC1_RANGE  6:0
-#define csr_VrefDAC1_BITS   6:0
-#define csr_VrefDAC1_MSB  6
+#define csr_VrefDAC1_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_VrefDAC1_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_VrefDAC1_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6) : (7))) : (6))
 #define csr_VrefDAC1_LSB  0
-#define csr_VrefDAC1_MASK 0x7f
+#define csr_VrefDAC1_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (0x7f) : (0xff))) : (0x7f))
 #define csr_DctWriteOnly_RANGE  15:0
 #define csr_DctWriteOnly_BITS   15:0
 #define csr_DctWriteOnly_MSB  15
@@ -7314,11 +7330,11 @@
 #define csr_AcsmDdrBnk23_MSB  15
 #define csr_AcsmDdrBnk23_LSB  12
 #define csr_AcsmDdrBnk23_MASK 0xf000
-#define csr_DfiCfgRdDataValidTicks_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (5:0) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))
-#define csr_DfiCfgRdDataValidTicks_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (5:0) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))
-#define csr_DfiCfgRdDataValidTicks_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (5) : (11))) : (11))) : (11))) : (11))) : (11))) : (11))) : (11))) : (11))) : (11))
+#define csr_DfiCfgRdDataValidTicks_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (5:0) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))
+#define csr_DfiCfgRdDataValidTicks_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (5:0) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))) : (11:0))
+#define csr_DfiCfgRdDataValidTicks_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (5) : (11))) : (11))) : (11))) : (11))) : (11))) : (11))) : (11))) : (11))) : (11))) : (11))) : (11))
 #define csr_DfiCfgRdDataValidTicks_LSB  0
-#define csr_DfiCfgRdDataValidTicks_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (0x3f) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))
+#define csr_DfiCfgRdDataValidTicks_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (((define_pubRev < 0x0310) ? (((define_pubRev < 0x0241) ? (0x3f) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0xfff))
 #define csr_DfiCfgRdDataValidTicksARC_RANGE  5:0
 #define csr_DfiCfgRdDataValidTicksARC_BITS   5:0
 #define csr_DfiCfgRdDataValidTicksARC_MSB  5
@@ -7814,11 +7830,11 @@
 #define csr_AcsmDdrAdrx15x0x0_MSB  15
 #define csr_AcsmDdrAdrx15x0x0_LSB  0
 #define csr_AcsmDdrAdrx15x0x0_MASK 0xffff
-#define csr_VrefDAC0_RANGE  6:0
-#define csr_VrefDAC0_BITS   6:0
-#define csr_VrefDAC0_MSB  6
+#define csr_VrefDAC0_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_VrefDAC0_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_VrefDAC0_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6) : (7))) : (6))
 #define csr_VrefDAC0_LSB  0
-#define csr_VrefDAC0_MASK 0x7f
+#define csr_VrefDAC0_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (0x7f) : (0xff))) : (0x7f))
 #define csr_ATxImpedanceCtrl1_RANGE  11:0
 #define csr_ATxImpedanceCtrl1_BITS   11:0
 #define csr_ATxImpedanceCtrl1_MSB  11
@@ -8079,16 +8095,16 @@
 #define csr_AODTStrenN_MSB  11
 #define csr_AODTStrenN_LSB  6
 #define csr_AODTStrenN_MASK 0xfc0
-#define csr_DqDqsRcvCntrl3_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (2:0) : (3:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))
-#define csr_DqDqsRcvCntrl3_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (2:0) : (3:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))
-#define csr_DqDqsRcvCntrl3_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (2) : (3))) : (3))) : (3))) : (3))) : (3))) : (3))
+#define csr_DqDqsRcvCntrl3_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (2:0) : (3:0))) : (3:0))) : (3:0))) : (2:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))
+#define csr_DqDqsRcvCntrl3_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (2:0) : (3:0))) : (3:0))) : (3:0))) : (2:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))
+#define csr_DqDqsRcvCntrl3_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (2) : (3))) : (3))) : (3))) : (2))) : (3))) : (3))) : (3))) : (3))
 #define csr_DqDqsRcvCntrl3_LSB  0
-#define csr_DqDqsRcvCntrl3_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (0x7) : (0xf))) : (0xf))) : (0xf))) : (0xf))) : (0xf))) : (0xf))
-#define csr_VilVihTestAmp_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (2:0) : (3:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))
-#define csr_VilVihTestAmp_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (2:0) : (3:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))
-#define csr_VilVihTestAmp_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (2) : (3))) : (3))) : (3))) : (3))) : (3))) : (3))
+#define csr_DqDqsRcvCntrl3_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (0x7) : (0xf))) : (0xf))) : (0xf))) : (0x7))) : (0xf))) : (0xf))) : (0xf))) : (0xf))
+#define csr_VilVihTestAmp_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (2:0) : (3:0))) : (3:0))) : (3:0))) : (2:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))
+#define csr_VilVihTestAmp_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (2:0) : (3:0))) : (3:0))) : (3:0))) : (2:0))) : (3:0))) : (3:0))) : (3:0))) : (3:0))
+#define csr_VilVihTestAmp_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (2) : (3))) : (3))) : (3))) : (2))) : (3))) : (3))) : (3))) : (3))
 #define csr_VilVihTestAmp_LSB  0
-#define csr_VilVihTestAmp_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (0x7) : (0xf))) : (0xf))) : (0xf))) : (0xf))) : (0xf))) : (0xf))
+#define csr_VilVihTestAmp_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (0x7) : (0xf))) : (0xf))) : (0xf))) : (0x7))) : (0xf))) : (0xf))) : (0xf))) : (0xf))
 #define csr_D5ACSM1TxEnPulse_RANGE  13:0
 #define csr_D5ACSM1TxEnPulse_BITS   13:0
 #define csr_D5ACSM1TxEnPulse_MSB  13
@@ -9034,11 +9050,11 @@
 #define csr_AcsmDdrAdrx15x0x16_MSB  15
 #define csr_AcsmDdrAdrx15x0x16_LSB  0
 #define csr_AcsmDdrAdrx15x0x16_MASK 0xffff
-#define csr_VrefDAC2_RANGE  6:0
-#define csr_VrefDAC2_BITS   6:0
-#define csr_VrefDAC2_MSB  6
+#define csr_VrefDAC2_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_VrefDAC2_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_VrefDAC2_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6) : (7))) : (6))
 #define csr_VrefDAC2_LSB  0
-#define csr_VrefDAC2_MASK 0x7f
+#define csr_VrefDAC2_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (0x7f) : (0xff))) : (0x7f))
 #define csr_CalDrvStr0_RANGE  11:0
 #define csr_CalDrvStr0_BITS   11:0
 #define csr_CalDrvStr0_MSB  11
@@ -9129,11 +9145,11 @@
 #define csr_D5ACSMStopAddrVal17_MSB  15
 #define csr_D5ACSMStopAddrVal17_LSB  8
 #define csr_D5ACSMStopAddrVal17_MASK 0xff00
-#define csr_PhyConfig2_RANGE  11:0
-#define csr_PhyConfig2_BITS   11:0
-#define csr_PhyConfig2_MSB  11
+#define csr_PhyConfig2_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (11:0) : (14:0))) : (11:0))) : (11:0))) : (11:0))) : (14:0))) : (14:0))
+#define csr_PhyConfig2_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (11:0) : (14:0))) : (11:0))) : (11:0))) : (11:0))) : (14:0))) : (14:0))
+#define csr_PhyConfig2_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (11) : (14))) : (11))) : (11))) : (11))) : (14))) : (14))
 #define csr_PhyConfig2_LSB  0
-#define csr_PhyConfig2_MASK 0xfff
+#define csr_PhyConfig2_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (0xfff) : (0x7fff))) : (0xfff))) : (0xfff))) : (0xfff))) : (0x7fff))) : (0x7fff))
 #define csr_PhyConfigMISC_RANGE  2:0
 #define csr_PhyConfigMISC_BITS   2:0
 #define csr_PhyConfigMISC_MSB  2
@@ -9164,6 +9180,11 @@
 #define csr_PhyConfig32_MSB  11
 #define csr_PhyConfig32_LSB  11
 #define csr_PhyConfig32_MASK 0x800
+#define csr_PhyConfigSIDEBAND_RANGE  14:12
+#define csr_PhyConfigSIDEBAND_BITS   2:0
+#define csr_PhyConfigSIDEBAND_MSB  14
+#define csr_PhyConfigSIDEBAND_LSB  12
+#define csr_PhyConfigSIDEBAND_MASK 0x7000
 #define csr_SequenceReg0b13s2_RANGE  8:0
 #define csr_SequenceReg0b13s2_BITS   8:0
 #define csr_SequenceReg0b13s2_MSB  8
@@ -9244,6 +9265,21 @@
 #define csr_D5ACSMStopAddrVal19_MSB  15
 #define csr_D5ACSMStopAddrVal19_LSB  8
 #define csr_D5ACSMStopAddrVal19_MASK 0xff00
+#define csr_VrefDACSelCtrl_RANGE  6:0
+#define csr_VrefDACSelCtrl_BITS   6:0
+#define csr_VrefDACSelCtrl_MSB  6
+#define csr_VrefDACSelCtrl_LSB  0
+#define csr_VrefDACSelCtrl_MASK 0x7f
+#define csr_DfiRdDataCs2VrefDACSel_RANGE  3:0
+#define csr_DfiRdDataCs2VrefDACSel_BITS   3:0
+#define csr_DfiRdDataCs2VrefDACSel_MSB  3
+#define csr_DfiRdDataCs2VrefDACSel_LSB  0
+#define csr_DfiRdDataCs2VrefDACSel_MASK 0xf
+#define csr_DfiPositionRxPhaseVrefDACSel_RANGE  6:4
+#define csr_DfiPositionRxPhaseVrefDACSel_BITS   2:0
+#define csr_DfiPositionRxPhaseVrefDACSel_MSB  6
+#define csr_DfiPositionRxPhaseVrefDACSel_LSB  4
+#define csr_DfiPositionRxPhaseVrefDACSel_MASK 0x70
 #define csr_SequenceReg0b14s1_RANGE  15:0
 #define csr_SequenceReg0b14s1_BITS   15:0
 #define csr_SequenceReg0b14s1_MSB  15
@@ -10039,11 +10075,11 @@
 #define csr_AcsmLongBubble0_MSB  15
 #define csr_AcsmLongBubble0_LSB  15
 #define csr_AcsmLongBubble0_MASK 0x8000
-#define csr_VrefDAC3_RANGE  6:0
-#define csr_VrefDAC3_BITS   6:0
-#define csr_VrefDAC3_MSB  6
+#define csr_VrefDAC3_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_VrefDAC3_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6:0) : (7:0))) : (6:0))
+#define csr_VrefDAC3_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (6) : (7))) : (6))
 #define csr_VrefDAC3_LSB  0
-#define csr_VrefDAC3_MASK 0x7f
+#define csr_VrefDAC3_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (0x7f) : (0xff))) : (0x7f))
 #define csr_D5ACSMPtrXlat32_RANGE  15:0
 #define csr_D5ACSMPtrXlat32_BITS   15:0
 #define csr_D5ACSMPtrXlat32_MSB  15
@@ -10709,11 +10745,11 @@
 #define csr_RxPBDlyTg1_MSB  6
 #define csr_RxPBDlyTg1_LSB  0
 #define csr_RxPBDlyTg1_MASK 0x7f
-#define csr_AcReceiveFilters_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (1:0) : (2:0))) : (2:0))) : (2:0))) : (2:0))) : (2:0))) : (2:0))
-#define csr_AcReceiveFilters_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (1:0) : (2:0))) : (2:0))) : (2:0))) : (2:0))) : (2:0))) : (2:0))
-#define csr_AcReceiveFilters_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (1) : (2))) : (2))) : (2))) : (2))) : (2))) : (2))
+#define csr_AcReceiveFilters_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (1:0) : (2:0))) : (2:0))) : (2:0))) : (1:0))) : (2:0))) : (2:0))) : (2:0))) : (2:0))
+#define csr_AcReceiveFilters_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (1:0) : (2:0))) : (2:0))) : (2:0))) : (1:0))) : (2:0))) : (2:0))) : (2:0))) : (2:0))
+#define csr_AcReceiveFilters_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (1) : (2))) : (2))) : (2))) : (1))) : (2))) : (2))) : (2))) : (2))
 #define csr_AcReceiveFilters_LSB  0
-#define csr_AcReceiveFilters_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (0x3) : (0x7))) : (0x7))) : (0x7))) : (0x7))) : (0x7))) : (0x7))
+#define csr_AcReceiveFilters_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (0x3) : (0x7))) : (0x7))) : (0x7))) : (0x3))) : (0x7))) : (0x7))) : (0x7))) : (0x7))
 #define csr_AnibRcvFilter_RANGE  0:0
 #define csr_AnibRcvFilter_BITS   0:0
 #define csr_AnibRcvFilter_MSB  0
@@ -13584,11 +13620,11 @@
 #define csr_ResetToMicro_MSB  3
 #define csr_ResetToMicro_LSB  3
 #define csr_ResetToMicro_MASK 0x8
-#define csr_DfiDataEnLatency_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (2:0) : (3:0))) : (4:0))) : (4:0))) : (4:0))) : (4:0))) : (4:0))) : (4:0))
-#define csr_DfiDataEnLatency_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (2:0) : (3:0))) : (4:0))) : (4:0))) : (4:0))) : (4:0))) : (4:0))) : (4:0))
-#define csr_DfiDataEnLatency_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (2) : (3))) : (4))) : (4))) : (4))) : (4))) : (4))) : (4))
+#define csr_DfiDataEnLatency_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (2:0) : (3:0))) : (4:0))) : (4:0))) : (4:0))) : (3:0))) : (4:0))) : (4:0))) : (4:0))) : (4:0))
+#define csr_DfiDataEnLatency_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (2:0) : (3:0))) : (4:0))) : (4:0))) : (4:0))) : (3:0))) : (4:0))) : (4:0))) : (4:0))) : (4:0))
+#define csr_DfiDataEnLatency_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (2) : (3))) : (4))) : (4))) : (4))) : (3))) : (4))) : (4))) : (4))) : (4))
 #define csr_DfiDataEnLatency_LSB  0
-#define csr_DfiDataEnLatency_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (0x7) : (0xf))) : (0x1f))) : (0x1f))) : (0x1f))) : (0x1f))) : (0x1f))) : (0x1f))
+#define csr_DfiDataEnLatency_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (((define_pubRev < 0x0360) ? (((define_pubRev < 0x0350) ? (((define_pubRev < 0x0340) ? (((define_pubRev < 0x0330) ? (0x7) : (0xf))) : (0x1f))) : (0x1f))) : (0x1f))) : (0xf))) : (0x1f))) : (0x1f))) : (0x1f))) : (0x1f))
 #define csr_WLm9_RANGE  0:0
 #define csr_WLm9_BITS   0:0
 #define csr_WLm9_MSB  0
@@ -14959,16 +14995,16 @@
 #define csr_SequenceReg0b137s1_MSB  15
 #define csr_SequenceReg0b137s1_LSB  0
 #define csr_SequenceReg0b137s1_MASK 0xffff
-#define csr_PllCtrl2_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (4:0) : (5:0))) : (5:0))) : (5:0))
-#define csr_PllCtrl2_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (4:0) : (5:0))) : (5:0))) : (5:0))
-#define csr_PllCtrl2_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (4) : (5))) : (5))) : (5))
+#define csr_PllCtrl2_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (4:0) : (5:0))) : (5:0))) : (5:0))) : (5:0))) : (5:0))
+#define csr_PllCtrl2_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (4:0) : (5:0))) : (5:0))) : (5:0))) : (5:0))) : (5:0))
+#define csr_PllCtrl2_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (4) : (5))) : (5))) : (5))) : (5))) : (5))
 #define csr_PllCtrl2_LSB  0
-#define csr_PllCtrl2_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (0x1f) : (0x3f))) : (0x3f))) : (0x3f))
-#define csr_PllFreqSel_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (4:0) : (5:0))) : (5:0))) : (5:0))
-#define csr_PllFreqSel_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (4:0) : (5:0))) : (5:0))) : (5:0))
-#define csr_PllFreqSel_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (4) : (5))) : (5))) : (5))
+#define csr_PllCtrl2_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (0x1f) : (0x3f))) : (0x3f))) : (0x3f))) : (0x3f))) : (0x3f))
+#define csr_PllFreqSel_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (4:0) : (5:0))) : (5:0))) : (5:0))) : (5:0))) : (5:0))
+#define csr_PllFreqSel_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (4:0) : (5:0))) : (5:0))) : (5:0))) : (5:0))) : (5:0))
+#define csr_PllFreqSel_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (4) : (5))) : (5))) : (5))) : (5))) : (5))
 #define csr_PllFreqSel_LSB  0
-#define csr_PllFreqSel_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (0x1f) : (0x3f))) : (0x3f))) : (0x3f))
+#define csr_PllFreqSel_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (0x1f) : (0x3f))) : (0x3f))) : (0x3f))) : (0x3f))) : (0x3f))
 #define csr_ChkData1_RANGE  15:0
 #define csr_ChkData1_BITS   15:0
 #define csr_ChkData1_MSB  15
@@ -15079,21 +15115,21 @@
 #define csr_SequenceReg0b138s0_MSB  15
 #define csr_SequenceReg0b138s0_LSB  0
 #define csr_SequenceReg0b138s0_MASK 0xffff
-#define csr_PllCtrl1_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (8:0) : (13:0))) : (13:0))) : (13:0))
-#define csr_PllCtrl1_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (8:0) : (13:0))) : (13:0))) : (13:0))
-#define csr_PllCtrl1_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (8) : (13))) : (13))) : (13))
+#define csr_PllCtrl1_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (8:0) : (13:0))) : (13:0))) : (13:0))) : (13:0))) : (13:0))
+#define csr_PllCtrl1_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (8:0) : (13:0))) : (13:0))) : (13:0))) : (13:0))) : (13:0))
+#define csr_PllCtrl1_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (8) : (13))) : (13))) : (13))) : (13))) : (13))
 #define csr_PllCtrl1_LSB  0
-#define csr_PllCtrl1_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (0x1ff) : (0x3fff))) : (0x3fff))) : (0x3fff))
-#define csr_PllCpIntCtrl_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (4:0) : (6:0))) : (6:0))) : (6:0))
-#define csr_PllCpIntCtrl_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (4:0) : (6:0))) : (6:0))) : (6:0))
-#define csr_PllCpIntCtrl_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (4) : (6))) : (6))) : (6))
+#define csr_PllCtrl1_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (0x1ff) : (0x3fff))) : (0x3fff))) : (0x3fff))) : (0x3fff))) : (0x3fff))
+#define csr_PllCpIntCtrl_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (4:0) : (6:0))) : (6:0))) : (6:0))) : (6:0))) : (6:0))
+#define csr_PllCpIntCtrl_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (4:0) : (6:0))) : (6:0))) : (6:0))) : (6:0))) : (6:0))
+#define csr_PllCpIntCtrl_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (4) : (6))) : (6))) : (6))) : (6))) : (6))
 #define csr_PllCpIntCtrl_LSB  0
-#define csr_PllCpIntCtrl_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (0x1f) : (0x7f))) : (0x7f))) : (0x7f))
-#define csr_PllCpPropCtrl_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (8:5) : (13:7))) : (13:7))) : (13:7))
-#define csr_PllCpPropCtrl_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (3:0) : (6:0))) : (6:0))) : (6:0))
-#define csr_PllCpPropCtrl_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (8) : (13))) : (13))) : (13))
-#define csr_PllCpPropCtrl_LSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (5) : (7))) : (7))) : (7))
-#define csr_PllCpPropCtrl_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (0x1e0) : (0x3f80))) : (0x3f80))) : (0x3f80))
+#define csr_PllCpIntCtrl_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (0x1f) : (0x7f))) : (0x7f))) : (0x7f))) : (0x7f))) : (0x7f))
+#define csr_PllCpPropCtrl_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (8:5) : (13:7))) : (13:7))) : (13:7))) : (13:7))) : (13:7))
+#define csr_PllCpPropCtrl_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (3:0) : (6:0))) : (6:0))) : (6:0))) : (6:0))) : (6:0))
+#define csr_PllCpPropCtrl_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (8) : (13))) : (13))) : (13))) : (13))) : (13))
+#define csr_PllCpPropCtrl_LSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (5) : (7))) : (7))) : (7))) : (7))) : (7))
+#define csr_PllCpPropCtrl_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (0x1e0) : (0x3f80))) : (0x3f80))) : (0x3f80))) : (0x3f80))) : (0x3f80))
 #define csr_ChkData3_RANGE  15:0
 #define csr_ChkData3_BITS   15:0
 #define csr_ChkData3_MSB  15
@@ -15254,21 +15290,21 @@
 #define csr_SequenceReg0b139s2_MSB  8
 #define csr_SequenceReg0b139s2_LSB  0
 #define csr_SequenceReg0b139s2_MASK 0x1ff
-#define csr_PllCtrl4_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (8:0) : (13:0))) : (13:0))) : (13:0))
-#define csr_PllCtrl4_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (8:0) : (13:0))) : (13:0))) : (13:0))
-#define csr_PllCtrl4_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (8) : (13))) : (13))) : (13))
+#define csr_PllCtrl4_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (8:0) : (13:0))) : (13:0))) : (13:0))) : (13:0))) : (13:0))
+#define csr_PllCtrl4_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (8:0) : (13:0))) : (13:0))) : (13:0))) : (13:0))) : (13:0))
+#define csr_PllCtrl4_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (8) : (13))) : (13))) : (13))) : (13))) : (13))
 #define csr_PllCtrl4_LSB  0
-#define csr_PllCtrl4_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (0x1ff) : (0x3fff))) : (0x3fff))) : (0x3fff))
-#define csr_PllCpIntGsCtrl_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (4:0) : (6:0))) : (6:0))) : (6:0))
-#define csr_PllCpIntGsCtrl_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (4:0) : (6:0))) : (6:0))) : (6:0))
-#define csr_PllCpIntGsCtrl_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (4) : (6))) : (6))) : (6))
+#define csr_PllCtrl4_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (0x1ff) : (0x3fff))) : (0x3fff))) : (0x3fff))) : (0x3fff))) : (0x3fff))
+#define csr_PllCpIntGsCtrl_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (4:0) : (6:0))) : (6:0))) : (6:0))) : (6:0))) : (6:0))
+#define csr_PllCpIntGsCtrl_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (4:0) : (6:0))) : (6:0))) : (6:0))) : (6:0))) : (6:0))
+#define csr_PllCpIntGsCtrl_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (4) : (6))) : (6))) : (6))) : (6))) : (6))
 #define csr_PllCpIntGsCtrl_LSB  0
-#define csr_PllCpIntGsCtrl_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (0x1f) : (0x7f))) : (0x7f))) : (0x7f))
-#define csr_PllCpPropGsCtrl_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (8:5) : (13:7))) : (13:7))) : (13:7))
-#define csr_PllCpPropGsCtrl_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (3:0) : (6:0))) : (6:0))) : (6:0))
-#define csr_PllCpPropGsCtrl_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (8) : (13))) : (13))) : (13))
-#define csr_PllCpPropGsCtrl_LSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (5) : (7))) : (7))) : (7))
-#define csr_PllCpPropGsCtrl_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (0x1e0) : (0x3f80))) : (0x3f80))) : (0x3f80))
+#define csr_PllCpIntGsCtrl_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (0x1f) : (0x7f))) : (0x7f))) : (0x7f))) : (0x7f))) : (0x7f))
+#define csr_PllCpPropGsCtrl_RANGE  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (8:5) : (13:7))) : (13:7))) : (13:7))) : (13:7))) : (13:7))
+#define csr_PllCpPropGsCtrl_BITS   ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (3:0) : (6:0))) : (6:0))) : (6:0))) : (6:0))) : (6:0))
+#define csr_PllCpPropGsCtrl_MSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (8) : (13))) : (13))) : (13))) : (13))) : (13))
+#define csr_PllCpPropGsCtrl_LSB  ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (5) : (7))) : (7))) : (7))) : (7))) : (7))
+#define csr_PllCpPropGsCtrl_MASK ((define_pubRev < 0x0430) ? (((define_pubRev < 0x0422) ? (((define_pubRev < 0x0420) ? (((define_pubRev < 0x0410) ? (((define_pubRev < 0x0400) ? (0x1e0) : (0x3f80))) : (0x3f80))) : (0x3f80))) : (0x3f80))) : (0x3f80))
 #define csr_Ppgc2ChkData0_RANGE  15:0
 #define csr_Ppgc2ChkData0_BITS   15:0
 #define csr_Ppgc2ChkData0_MSB  15

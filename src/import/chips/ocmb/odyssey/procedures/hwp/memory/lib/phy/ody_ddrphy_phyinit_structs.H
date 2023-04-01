@@ -65,31 +65,52 @@ typedef struct user_input_basic
 {
 
 
-// === Global variables  === //
-    int ARdPtrInitVal[4];       // making this a userInput variable so that it can be overriden if the ARdPtrInitValOvr is 1;
-    //ARdPtrInitVal[pstate];
-    int ARdPtrInitValOvr;   // set this to 1 if the ARdPtrInitVal should be overriden via userInput.  else,
-    // dwc_ddrphy_phyinit_C_initPhyConfig.c will program based on frequency values on a range of 0-3
+    // === Global variables  === //
+    //
+    // @brief Override the CSR ARdPtrInitVal, valid ONLY if user_input_basic_t->ARdPtrInitValOvr is set to 1.
+    // - Please see the Refer to the PHY Utility Block (PUB) Databook section of the CSR ARdPtrInitVal for supported values
+    // - Values:
+    //   ARdPtrInitVal  will be programmed to user_input_basic_t->ARdPtrInitVal
+    // - Default: 3
+    //
+    // ARdPtrInitVal[pstate];
+    //
+    int ARdPtrInitVal[4];
+
+    //
+    // @brief Enable the override of the CSR ARdPtrInitVal. If this field is set to one, the CSR ARdPtrInitVal
+    // - will be programed based on user_input_basic_t->ARdPtrInitVal. If not set
+    // - dwc_ddrphy_phyinit_C_initPhyConfig.c will program the CSR based on frequency with in the range of 0-3
+    // -
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //       0 | disables the override CSR ARdPtrInitVal through user_input_basic_t->ARdPtrInitVal
+    //       1 | enables the override CSR ARdPtrInitVal through user_input_basic_t->ARdPtrInitVal
+    // - Default: 0
+    //
+    int ARdPtrInitValOvr;
 
     //
     // @brief DDR protocol specification
     // - Choose the DDR protocol
+    // - This  field is kept for backward compatibility with F-2022.07 & older PhyInit releases.  This  field is not valid starting from F-2023.01 PhyInit release.
     // - Values:
     //   Value | Description
     //   ----- | -----
     //       0 | DDR4
-    //       4 | DDR5
-    // - Default: 4
+    //       1 | DDR5
+    // - Default: 1
     //
     DramType_t DramType;
 
 
     //
     // @brief Disables PtrInit from clearing the TxTrkState csr during skip retrain.
-    // - Default: 0
     //   Value | Description
     //       0 | It will not effect the TxTrkState
     //       1 | clears the TxTrkState csr
+    // - Default: 0
     //
     //   DisPtrInitClrTxTracking[pstate];
     //
@@ -98,6 +119,7 @@ typedef struct user_input_basic
     //
     // @brief DIMM type specification
     // - Choose the DIMM type
+    // - This  field is kept for backward compatibility with F-2022.07 & older PhyInit releases.  This  field is not valid starting from F-2023.01 PhyInit release.
     // - Values:
     //   Value | Description
     //   ----- | -----
@@ -112,15 +134,18 @@ typedef struct user_input_basic
 
     //
     // @brief Number of DBYTE Instances
-    // - Number of DBYTE instances
+    // - Total number of DBYTE instances
     // - Values: 2, 4, 5, 8, 9, 10
-    // - Default: 4
+    // - Default: 10
     //
     int NumDbyte;
 
     //
     // @brief Number of active DBYTEs to be controlled by DFI0
     // - Number of active DBYTEs to be controlled by DFI0.
+    // - DFI interface is associated with channel(s) of the PHY configuration.
+    // - The control of the DFI to channel number is defined by DfiMode as detailed
+    // - in the PUB data book, Section 12.4.25 DfiMode and Section 7.15.2 DFI Connections
     // - Values:
     //   Value | Description
     //   ----- | -----
@@ -136,6 +161,9 @@ typedef struct user_input_basic
 
     //
     // @brief Number of active DBYTEs to be controlled by DFI1 (DDR5 only)
+    // - DFI interface is associated with channel(s) of the PHY configuration.
+    // - The control of the DFI to channel number is defined by DfiMode as detailed
+    // - in the PUB data book, Section 12.4.25 DfiMode and Section 7.15.2 DFI Connections
     // - Number of active DBYTEs to be controlled by DFI1
     // - Values:
     //   Value | Description
@@ -144,7 +172,7 @@ typedef struct user_input_basic
     //       2 | 2 (16 DQ bits)
     //       4 | 4 (32 DQ bits)
     //       5 | 5 (40 DQ bits)
-    // - Default: 0
+    // - Default: 4
     //
     int NumActiveDbyteDfi1;
 
@@ -198,9 +226,9 @@ typedef struct user_input_basic
     // @brief Memclk frequency
     // - Memclk frequency in MHz -- round up to next highest integer.  Enter 334 for 333.333, etc.
     // - Values:
-    //   - Min: 25
-    //   - Max: 2600
-    // - Default: 800
+    // - Min: 25
+    // - Max: 3200 (depending on technology). Refer to the PHY Utility Block (PUB) Databook for the maximum frequency supported by the PHY.
+    // - Default: 1600
     //
     //  Frequency[pstate]
     //
@@ -294,7 +322,9 @@ typedef struct user_input_advanced
     // - Indicates value of impedance calibration pull-down resistor connected to BP_ZN pin of the PHY.
     // - Refer to the section titled "Impedance Calibrator" in the PHY Utility Block (PUB) Databook for more information.
     // - Values: 40, 120, 240
-    // - Default: 240
+    // - Default:
+    //    PUB 1.x, 3.x = 240
+    //    PUB 2.x, 4.x = 120
     //
     int ExtCalResVal;
 
@@ -311,7 +341,7 @@ typedef struct user_input_advanced
     //      80 | 80
     //     120 | 120
     //     240 | 240
-    // - Default: 240
+    // - Default: 60
     //
     //  ODTImpedance[pstate]
     //
@@ -405,16 +435,21 @@ typedef struct user_input_advanced
     // - In DDR4 (1T address/command timing), this feature works transparently, the PHY tristates A*,BA*,BG*,RAS_n,CAS_n,WE_n anytime all ranks are deselected.
     // - In DDR4 (2T address/command timing), this feature requires extra support from the controller, see the register TristateModeCA and "2T Timing, Geardown, 2N Mode, and RDIMM SDR Support" on for more information.
     // - In DDR5 Mode, Dynamic Address Tristating must be disabled. This feature is not useful in DDR5, as the Command Address bus is terminated to VDDQ.
-    // - Values: 0, 1
-    // - Default: 0
-    //
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //       0 | Dynamic Tristating enabled
+    //       1 | Dynamic Tristating disabled
+    // - Default: 1
     //  DisDynAdrTri[pstate]
     //
     int DisDynAdrTri[4];
 
     //
     // @brief Time between the end of one training and the start of the next
-    // - it is the max expected time from dfi_init_complete asserted to tdfi_phymstr_ack asserted
+    // - it is the max expected time from dfi_init_complete asserted to tdfi_phymstr_ack asserted.
+    // - This field must be programmed to zero (pUserInputAdvanced-> PhyMstrTrainInterval = 4'b0000) if
+    // - the controller uses dwc_ddrphy_snoop_en interface for tracking DDR5 DRAM Write-DQS Drift.
     // - Values:
     //   Value | Description
     //   ----- | -----
@@ -458,6 +493,8 @@ typedef struct user_input_advanced
     // @brief Phy Master Control Mode
     // - 1 : a PHY Master transaction is initiated only by a dfi_ctrlmsg transaction
     // - 0 : a PHY Master transaction is initiated only by timer function
+    // - This field is recommended to be programmed to zero (pUserInputAdvanced->PhyMstrCtrlMode=4'b0) if
+    // - the controller uses dwc_ddrphy_snoop_en interface for tracking DDR5 DRAM Write-DQS Drift.
     // - Values:
     //   Value | Description
     //   ----- | -----
@@ -468,14 +505,6 @@ typedef struct user_input_advanced
     //  PhyMstrCtrlMode[pstate]
     //
     int PhyMstrCtrlMode[4];
-
-    //
-    // @brief Enable Write DQS Extension
-    // Not applicable for DDR5 and DDR4
-    // - Values: 0, 1
-    // - Default: 0
-    //
-    int WDQSExt;
 
     //
     // @brief The interval between successive PHY impedance calibrations
@@ -513,27 +542,19 @@ typedef struct user_input_advanced
 
     //
     // @brief Swap PHY Byte to DRAM Byte connections
-    // - required only for x16, DramByteSwap[I] must be set if Dbyte 2*I and Dbyte 2*I + 1 are swapped at the DRAM device
+    // - required only for x16, DramByteSwap[tg] bit i, i = 0...3, must be set if Dbyte 2*I and Dbyte 2*I + 1 are
+    // - swapped at the DRAM device of timing group.
     // - PHY DBYTE 0 and 1 are partners, 2 and 3 are partners,4 and 5 are partners, 6 and 7 are partners.
     // - Other DBYTE pairings are not supported.
     // - This is per timing group.
     // - Values:
     //   - Min: 0
-    //   - Max: 0xff
+    //   - Max: 0xf
     // - Default: 0
     //
     //  DramByteSwap[tg]
     //
     int DramByteSwap[4];
-
-    //
-    // @brief The number of UI to be subtracted from the delay position of the RxEnDly-trained
-    // - dqs edge to position the RxEnDly in the middle of the preamble.
-    // - Not applicable for DDR5 and DDR4.
-    // - Values: 1, 2
-    // - Default: 1
-    //
-    int RxEnBackOff;
 
     //
     // @brief Firmware Training Sequence Control
@@ -572,7 +593,7 @@ typedef struct user_input_advanced
     //   Protocol specific values are provided under the DWC_TXRXDQ/rise_index column.
     // - Values:
     //   - Min: 0
-    //   - Max: 255
+    //   - Max: 3
     // - Default: 0
     //
     //  TxSlewRiseDQ[pstate]
@@ -587,7 +608,7 @@ typedef struct user_input_advanced
     // - WARNING: Vaule of this parameter is don't care if Pull-up slew rate control for DBYTE transmitter is set to 0. Refer to TxSlewRate descriptions in "Register Descriptions" of PHY Utility Block (PUB) Databook for more information.
     // - Values:
     //   - Min: 0
-    //   - Max: 255
+    //   - Max: 3
     // - Default: 0
     //
     //  TxSlewFallDQ[pstate]
@@ -601,8 +622,8 @@ typedef struct user_input_advanced
     //   Protocol specific values are provided under the DWC_TXRXCA/rise_index column.
     // - Values:
     //   - Min: 0
-    //   - Max: 255
-    // - Default: 0x66
+    //   - Max: 3
+    // - Default: 0x1
     //
     int TxSlewRiseAC;
 
@@ -614,16 +635,16 @@ typedef struct user_input_advanced
     // - WARNING: Vaule of this parameter is don't care if Pull-up slew rate control for ANIB(ACX4) transmitter is set to 0. Refer to ATxSlewRate descriptions in "Register Descriptions" of PHY Utility Block (PUB) Databook for more information.
     // - Values:
     //   - Min: 0
-    //   - Max: 255
-    // - Default: 0x26
+    //   - Max: 3
+    // - Default: 0x2
     //
     int TxSlewFallAC;
 
 
     //
     // @brief High VDD
-    // - When VDD=0.9V nominal, set this to 1'b1, otherwise set to 1'b0.
-    // - This input is used to program TxSlewRate[8] and ATxSlewRate[9].
+    // - When VDD=0.9V nominal, set to 1'b0.
+    // - This input is used to program TxSlewRate[8], TxSlewRate[6], ATxSlewRate[8] and ATxSlewRate[6].
     // - Values: 0, 1
     // - Default: 1
     //
@@ -634,7 +655,7 @@ typedef struct user_input_advanced
     // - Controls CalPreDriverOverride::CsrTxOvSrc High voltage
     // - Values:
     //   - Min: 0
-    //   - Max: 255
+    //   - Max: 3
     // - Default: 0x0
     //
     int TxSlewRiseCK;
@@ -644,7 +665,7 @@ typedef struct user_input_advanced
     // - Controls CalPreDriverOverride::CsrTxOvSrc Low voltage
     // - Values:
     //   - Min: 0
-    //   - Max: 255
+    //   - Max: 3
     // - Default: 0x0
     //
     int TxSlewFallCK;
@@ -751,17 +772,16 @@ typedef struct user_input_advanced
 
 
     //
-    // @brief Control the length and pattern of DDR5 write DQ and DM preamble
-    // - Control the length and pattern of DDR5 write DQ and DM preamble
-    // - Values:
-    //   Value | Description
-    //   ----- | -----
-    //       0 | 1 MemClk toggling preamble
-    //       1 | X MemClk preamble with pattern XXXX (TBD)
-    //       2 | XX MemClk preamble with pattern XXXX (TBD)
-    //       3 | XXX MemClk preamble with pattern XXXX (TBD)
-    //       4 | XXXX MemClk preamble with pattern XXXX (TBD)
-    // - Default: 1
+    // @brief kept for legacy purpose
+    // - following user inputs are used for controlling the length of DDR5 write DQ and DM preamble
+    //   - EnTxDqPreamblePatternU0[4]
+    //   - EnTxDqPreamblePatternU1[4]
+    //   - EnTxDmPreamblePattern[4]
+    // - following user inputs are used for controlling the pattern of DDR5 write DQ and DM preamble
+    //   - TxDqPreamblePatternU0[4]
+    //   - TxDqPreamblePatternU1[4]
+    //   - TxDmPreamblePattern[4]
+    // - Default: 0
     //
     //  D5TxDqPreambleCtrl[pstate]
     //
@@ -866,7 +886,7 @@ typedef struct user_input_advanced
 
     //
     // @brief Enable additional power savings during LP2 using csrPhyInLP2En
-    // - only applicable for PUB Versions having PhyInLP2En register.
+    // - only applicable for PUB REVISION greater than 0x420 except 0x421.
     // - Values:
     //   Value | Description
     //   ----- | -----
@@ -998,8 +1018,85 @@ typedef struct user_input_advanced
     int Num_Logical_Ranks;
 
     //
+    // @brief Control the length of DDR5 write DQ preamble
+    // - Values:
+    //   Value  | Description
+    //   ------ | ------
+    //      0x0 | no DQ preamble except as determined by tx equalization logic mode 2
+    //      0x1 | drive the 1 UI before the first payload UI with TxDqPreamblePatternU0[0]
+    //      0x3 | drive the 2 UI before the first payload UI with TxDqPreamblePatternU0[1:0]
+    //      0x7 | drive the 3 UI before the first payload UI with TxDqPreamblePatternU0[2:0]
+    //      0xf | drive the 4 UI before the first payload UI with TxDqPreamblePatternU0[3:0]
+    // - Default: 0x0
+    //  EnTxDqPreamblePatternU0[pstate]
+    //
+    int EnTxDqPreamblePatternU0[4];
+
+    //
+    // @brief Control the length of DDR5 write DQ preamble
+    // - Values:
+    //   Value  | Description
+    //   ------ | ------
+    //      0x0 | no DQ preamble except as determined by tx equalization logic mode 2
+    //      0x1 | drive the 1 UI before the first payload UI with TxDqPreamblePatternU1[0]
+    //      0x3 | drive the 2 UI before the first payload UI with TxDqPreamblePatternU1[1:0]
+    //      0x7 | drive the 3 UI before the first payload UI with TxDqPreamblePatternU1[2:0]
+    //      0xf | drive the 4 UI before the first payload UI with TxDqPreamblePatternU1[3:0]
+    // - Default: 0x0
+    //  EnTxDqPreamblePatternU1[pstate]
+    //
+    int EnTxDqPreamblePatternU1[4];
+
+    //
+    // @brief Control the pattern of DDR5 write DQ preamble
+    // - Values:
+    //   - Min: 0x0
+    //   - Max: 0xf
+    // - Default: 0x0
+    //  TxDqPreamblePatternU0[pstate]
+    //
+    int TxDqPreamblePatternU0[4];
+
+    //
+    // @brief Control the pattern of DDR5 write DQ preamble
+    // - Values:
+    //   - Min: 0x0
+    //   - Max: 0xf
+    // - Default: 0x0
+    //  TxDqPreamblePatternU1[pstate]
+    //
+    int TxDqPreamblePatternU1[4];
+
+    //
+    // @brief Control the length of DDR5 write DM preamble
+    // - Values:
+    //   Value  | Description
+    //   ------ | ------
+    //      0x0 | no DQ preamble except as determined by tx equalization logic mode 2
+    //      0x1 | drive the 1 UI before the first payload UI with TxDmPreamblePattern[0]
+    //      0x3 | drive the 2 UI before the first payload UI with TxDmPreamblePattern[1:0]
+    //      0x7 | drive the 3 UI before the first payload UI with TxDmPreamblePattern[2:0]
+    //      0xf | drive the 4 UI before the first payload UI with TxDmPreamblePattern[3:0]
+    // - Default: 0x0
+    //  EnTxDmPreamblePattern[pstate]
+    //
+    int EnTxDmPreamblePattern[4];
+
+    //
+    // @brief Control the pattern of DDR5 write DM preamble
+    // - Values:
+    //   - Min: 0x0
+    //   - Max: 0xf
+    // - Default: 0x0
+    //  TxDmPreamblePattern[pstate]
+    //
+    int TxDmPreamblePattern[4];
+
+    //
     // @brief It defines the interval between the end of a phyupdate transaction and a subsequent phyupdate request.
     // - DFIPHYUPDCNT must be chosen such that (pUserInputAdvanced->DFIPHYUPDCNT) > (pUserInputAdvanced->DFIPHYUPDRESP).
+    // - This field must be programmed to zero (pUserInputAdvanced->DFIPHYUPDCNT=4'b0000) if the controller uses dwc_ddrphy_snoop_en
+    // - interface for tracking DDR5 DRAM Write-DQS Drift.
     // - Values:
     //   Value   | Description
     //   ------  | ------
@@ -1030,6 +1127,163 @@ typedef struct user_input_advanced
     // - Default: 3'b000
     //
     int DFIPHYUPDRESP;
+
+    //
+    // @brief to power down the unused ANIBs.
+    // - used for powring down the ANIBs that are not being used.
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //   0x0001| to power down ANIB0
+    //   0x0002| to power down ANIB1
+    //   0x0003| to power down ANIB0 & ANIB1
+    //   0x0004| to power down ANIB2
+    //   ......| ....................
+    //   ......| ....................
+    //   0x3fff| to power down all 14 ANIBs
+    // - Default: 0x0000
+    //
+    int PowerDownANIBs;
+
+    //
+    // @brief to power down the unused DBYTEs.
+    // - used for powring down the DBYTEs that are not being used.
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //   0x0001| to power down DBYTE0
+    //   0x0002| to power down DBYTE1
+    //   0x0003| to power down DBYTE0 and DBYTE1
+    //   0x0004| to power down DBYTE2
+    //   ......| ....................
+    //   ......| ....................
+    //   0x03ff| to power down  all 10 DBYTEs
+    // - Default: 0x0000
+    //
+    int PowerDownDBYTEs;
+
+    // Enables the overriding the value of VshAnalog resgister during the LP2 duration. If set to 1,
+    // the VshAnalog register during LP2 will be programmed with value of
+    // UserInputAdvanced->VshAnalog_LP2_Override_Val. This feature is only available for
+    // (PUB REVISION >= 0x350 && PUB_REVISION <0x400) || PUB REVISION >=0x420
+    //
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //     0x0 | VshAnalog value during LP2 will be default value of 0x10.
+    //     0x1 | VshAnalog value during LP2 will be UserInputAdvanced->VshAnalog_LP2_Override_Val.
+    //- Default: 0x0
+    // Contact Synopsys before enabling the UserInput.
+    //
+    int VshAnalog_LP2_Override_En;
+
+    //
+    // This field is only valid when UserInputAdvanced->VshAnalog_LP2_Override_En is set.
+    // the VshAnalog register during LP2 will be programmed with value of field.
+    // This feature is only available for :-
+    // (PUB REVISION >= 0x350 && PUB_REVISION <0x400) || PUB REVISION >=0x420
+    // - Values:
+    //     Value | Description
+    //     ----- | -----
+    // 0x<value> | VshAnalog value during LP2.
+    //-   Default: 0x10
+    //
+    int VshAnalog_LP2_Override_Val;
+
+    //
+    // Enables the overriding the value of VshCurrentLoad resgister during the LP2 duration. If set to 1,
+    // the VshCurrentLoad register during LP2 will be programmed with value of
+    // UserInputAdvanced->VshCurrentLoad_LP2_Override_Val. This feature is only available for
+    // (PUB REVISION >= 0x350 && PUB_REVISION <0x400) || PUB REVISION >=0x420
+    //
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //     0x0 | VshCurrentLoad value during LP2 will be default value of 0x2.
+    //     0x1 | VshCurrentLoad value during LP2 will be UserInputAdvanced->VshCurrentLoad_LP2_Override_Val.
+    //- Default: 0x0
+    // Contact Synopsys before enabling the UserInput.
+    //
+    int VshCurrentLoad_LP2_Override_En;
+
+    //
+    // This field is only valid when UserInputAdvanced->VshCurrentLoad_LP2_Override_En is set.
+    // the VshCurrentLoad register during LP2 will be programmed with value of field.
+    // This feature is only available for :-
+    // (PUB REVISION >= 0x350 && PUB_REVISION <0x400) || PUB REVISION >=0x420
+    // - Values:
+    //     Value | Description
+    //     ----- | -----
+    // 0x<value> | VshCurrentLoad value during LP2.
+    //-   Default: 0x2
+    //
+    int VshCurrentLoad_LP2_Override_Val;
+
+    //
+    // @brief Enable additional Power savings during LP2
+    // This feature is only available for :-
+    // (PUB REVISION >= 0x350 && PUB_REVISION <0x400) || PUB REVISION >=0x420
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //       0 | Additional LP2 power savings disabled
+    //       1 | Additional LP2 power savings enabled
+    // - Default: 1
+    //
+    int LP2_PwrSavings_En;
+
+    //
+    // @brief configu re special offset value.
+    // - Values:
+    //          Value | Description
+    //          ----- | -----
+    //      0x<value> | special offset value
+    // - Default: 0x525
+    // - This is an internal offset value.
+    // - Contact Synopsys before changing the default value.
+    // - Recommended to use the default values.
+    int special_offset_value;
+
+    //
+    // @brief Enable the overriding of csrVrefDACSelCtrl::DfiPositionRxPhaseVrefDACSel resgister.
+    // If set to 1, VrefDACSelCtrl::DfiPositionRxPhaseVrefDACSel will be programmed to the
+    // value of UserInputAdvanced DfiPositionRxPhaseVrefDACSel_Override_Val.
+    // - - The feature is only applicable to PUB revision 0x422
+    // - Values:
+    //   Value | Description
+    //   ----- | -----
+    //     0x0 | Phyinit calculates the csrVrefDACSelCtrl::DfiPositionRxPhaseVrefDACSel.
+    //     0x1 | The csrVrefDACSelCtrl::DfiPositionRxPhaseVrefDACSel programmed to the value of UserInputAdvanced VrefDACSelCtrl_Override_Val.
+    // - Default: 0x0
+    // - Contact Synopsys before enabling the UserInput. Recommended to use the default values.
+    //
+    int DfiPositionRxPhaseVrefDACSel_Override_En;
+
+    //
+    // @brief Program csrVrefDACSelCtrl::DfiPositionRxPhaseVrefDACSel to a customized value.
+    // The UserInputAdvanced DfiPositionRxPhaseVrefDACSel_Override_En should be set to 1 for enabling this feature.
+    // - The feature is only applicable to PUB revision 0x422
+    // - Values:
+    //         Value | Description
+    //         ----- | -----
+    //     0x<value> |  csrVrefDACSelCtrl::DfiPositionRxPhaseVrefDACSel will be programmed to value of 0x<value>.
+    // - Default: 0x10
+    // - Contact Synopsys for the correct values. Recommended to use the default values.
+    // - DfiPositionRxPhaseVrefDACSel_Override_Val[pstate]
+    //
+    int DfiPositionRxPhaseVrefDACSel_Override_Val[4];
+
+    //
+    // @brief Programs csrVrefDACSelCtrl::DfiRdDataCs2VrefDACSel.
+    // - The feature is only applicable to PUB revision 0x422
+    // - Values:
+    //         Value | Description
+    //         ----- | -----
+    //     0x<value> | CSR csrVrefDACSelCtrl::DfiRdDataCs2VrefDACSel will be programmed to value of 0x<value>.
+    // - Default: 0x0
+    // - DfiRdDataCs2VrefDACSel[pstate]
+    //
+    int DfiRdDataCs2VrefDACSel[4];
 
 } user_input_advanced_t;
 

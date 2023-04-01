@@ -358,18 +358,32 @@ int dwc_ddrphy_phyinit_is2Ttiming(const user_input_dram_config_t& i_user_input_d
 ///
 /// @brief Helper function to compute the globalVrefInDAD
 /// @param[in] i_phy_vref the PHY vref from the data structure
+/// @param[in,out] io_phy_vref_sel value to use for GlobalVrefInSel
 /// @return the register setting for the global VREF DAC
 ///
-int compute_global_vref_in_dac(const uint8_t i_phy_vref)
+int compute_global_vref_in_dac(const uint8_t i_phy_vref,
+                               int& io_phy_vref_sel)
 {
     // Note: 1000 could work, but 10,000 should give the code more precision
     // This code has been converted over from floats to using ints as the SBE cannot support float
     constexpr int SCALING_FACTOR = 10000;
     constexpr int PERCENT_DIVISOR = 128;
+    constexpr int MAX_DAC_VALUE = 127;
     constexpr int START = 3450;
     constexpr int PERCENT_TO_DAC = 50;
     const int PhyVrefPrcnt = (SCALING_FACTOR * i_phy_vref) / PERCENT_DIVISOR;
-    const int GlobalVrefInDAC = (PhyVrefPrcnt - START) / PERCENT_TO_DAC;
+    int GlobalVrefInDAC = (PhyVrefPrcnt / PERCENT_TO_DAC) + 1;
+
+    if (GlobalVrefInDAC > MAX_DAC_VALUE)
+    {
+        io_phy_vref_sel = 0;
+        GlobalVrefInDAC = ((PhyVrefPrcnt - START) / PERCENT_TO_DAC);
+    }
+    else
+    {
+        io_phy_vref_sel = 4;
+    }
+
     return GlobalVrefInDAC;
 }
 
@@ -564,14 +578,41 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                 FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target,  (p_addr | tANIB | c_addr | csr_VREGCtrl1_ADDR),
                          VREGCtrl1));
             }
+        }
 
-            // Program CSR:
-            //    Seq0BGPR1: VREGCtrl1={VshDAC,VshCurrentLoad=0x1}
-            //    Seq0BGPR2: VREGCtrl1={VshDAC,VshCurrentLoad=0x0}
-            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target,  (p_addr | tINITENG | csr_Seq0BGPR1_ADDR),
-                     ((VshDAC << csr_VshDAC_LSB) | (0x1 << csr_VshCurrentLoad_LSB))));
-            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target,  (p_addr | tINITENG | csr_Seq0BGPR2_ADDR),
-                     ((VshDAC << csr_VshDAC_LSB) | (0x0 << csr_VshCurrentLoad_LSB))));
+        //###################################################################################
+        // Program Seq0BGPR1 and Seq0BGPR2
+        // - Storing the values of the VREGCtrl1 durig the LP2 duration in Seq0BGPR1.
+        // - VshCurrentLoad will be Programmed based on pUserInputAdvanced->VshCurrentLoad_LP2_Override_Val
+        //   and pUserInputAdvanced->VshCurrentLoad_LP2_Override_En.
+        // - All the slaves will have the same value of VREGctrl1 during LP2
+        // - Seq0BGPR1: VREGCtrl1={VshDAC,VshCurrentLoad=0x2/pUserInputAdvanced->VshCurrentLoad_LP2_Override_Val}
+        // - Seq0BGPR2: VREGCtrl1={VshDAC,VshCurrentLoad=0x0}
+        //###################################################################################
+
+        int VREGCtrl1_LP2;
+        int VshCurrentLoad_LP2  = 0x2;
+
+        if ( i_user_input_advanced.VshCurrentLoad_LP2_Override_En)
+        {
+            VshCurrentLoad_LP2 = i_user_input_advanced.VshCurrentLoad_LP2_Override_Val;
+        }
+
+        VREGCtrl1_LP2 = (VshDAC << csr_VshDAC_LSB) | (VshCurrentLoad_LP2 << csr_VshCurrentLoad_LSB);
+
+        for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
+        {
+            p_addr = pstate << 20;
+            FAPI_DBG (TARGTIDFORMAT
+                      " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming Seq0BGPR1 with VREGCtrl1 durig LP2 values of 0x%x",
+                      TARGTID,
+                      pstate,  i_user_input_basic.Frequency[pstate], VREGCtrl1_LP2);
+            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tINITENG | csr_Seq0BGPR1_ADDR), VREGCtrl1_LP2));
+            FAPI_DBG (TARGTIDFORMAT
+                      " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming Seq0BGPR2 with VREGCtrl1 for LP2 exit values of 0x%x",
+                      TARGTID,
+                      pstate,  i_user_input_basic.Frequency[pstate], VREGCtrl1);
+            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tINITENG | csr_Seq0BGPR2_ADDR), VREGCtrl1));
         }
     }
 
@@ -590,6 +631,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         int TxSlewRate;
         int CsrTxSrc;
         int TxPreDrvMode;
+        int DDR5_Mode = 0x1;
 
         for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
         {
@@ -608,7 +650,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                          (i_user_input_advanced.TxSlewRiseDQ[pstate]));
                 FAPI_DBG(TARGTIDFORMAT " Value check! %i", TARGTID,
                          (i_user_input_advanced.TxSlewFallDQ[pstate]));
-                CsrTxSrc = (i_user_input_advanced.IsHighVDD << 6) | (i_user_input_basic.DramType << 5) |
+                CsrTxSrc = (i_user_input_advanced.IsHighVDD << 6) | (DDR5_Mode << 5) |
                            (i_user_input_advanced.TxSlewRiseDQ[pstate] << 2) | (i_user_input_advanced.TxSlewFallDQ[pstate] << 0);
             }
 
@@ -1252,7 +1294,12 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     //                        ::PositionRxPhaseUpdate
     //
     // User input dependencies::
-    //      DramType
+    //      D4RxPreambleLength
+    //      D4TxPreambleLength
+    //
+    // MessageBlock dependencies::
+    //      mb_DDR5U_1D[pstate].MR4
+    //      mb_DDR5U_1D[pstate].MR8_A0
     //
     //##############################################################
     {
@@ -1314,6 +1361,116 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         }
     }
 
+// Commenting VrefDACSelCtrl section due to it only being valid for pubRev == 0x422 (we have 0x350)
+#if 0
+    //##############################################################
+    //
+    // Program VrefDACSelCtrl
+    //
+    // CSRs to program:
+    // VrefDACSelCtrl         ::DfiPositionRxPhaseVrefDACSel
+    //                        ::DfiRdDataCs2VrefDACSel
+    //
+    // User input dependencies::
+    //      D4RxPreambleLength
+    //      Frequency
+    //      special_offset_value
+    //      DfiRdDataCs2VrefDACSel
+    //      DfiPositionRxPhaseVrefDACSel_Override_Val
+    //      DfiPositionRxPhaseVrefDACSel_Override_En
+    //
+    // MessageBlock dependencies::
+    //      mb_DDR5U_1D[pstate].MR8_A0
+    //
+    //##############################################################
+    {
+        int DfiPositionRxPhaseVrefDACSel = 0;
+        int DfiRdDataCs2VrefDACSel = 0;
+        int VrefDACSelCtrl = 0;
+        int UI_pre = 0;
+        // TODO Zen:MST-2037 Remove floats in this code
+        float UI_ps = 0;
+        float UI_pre_ps = 0;
+
+        if (pubRev == 0x422)
+        {
+            for (pstate = 0; pstate < pUserInputBasic->NumPStates; pstate++)
+            {
+                p_addr = pstate << 20;
+
+                switch (i_user_input_dram_config.MR8_A0 & 0x7)
+                {
+                    case 0  :
+                        {
+                            UI_pre = 0x01;
+                            break;
+                        }
+
+                    case 1  :
+                        {
+                            UI_pre = 0x03;
+                            break;
+                        }
+
+                    case 2  :
+                        {
+                            UI_pre = 0x02;
+                            break;
+                        }
+
+                    case 3  :
+                        {
+                            UI_pre = 0x04;
+                            break;
+                        }
+
+                    case 4  :
+                        {
+                            UI_pre = 0x06;
+                            break;
+                        }
+
+                    default :
+                        {
+                            UI_pre = 0x01;
+                        }
+                }
+
+                if (i_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_En)
+                {
+                    DfiPositionRxPhaseVrefDACSel = i_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_Val[pstate];
+                }
+                else
+                {
+                    UI_ps = (1.0 / i_user_input_basic.Frequency[pstate]) * 1E6 * 0.5;
+                    UI_pre_ps = UI_ps * UI_pre;
+
+                    if ( (ceil((float) (i_user_input_advanced.special_offset_value - UI_pre_ps) / UI_ps)) > 2)
+                    {
+                        DfiPositionRxPhaseVrefDACSel = (ceil((float)((i_user_input_advanced.special_offset_value - UI_pre_ps) / UI_ps))) - 2;
+                    }
+                    else
+                    {
+                        DfiPositionRxPhaseVrefDACSel = 0;
+                    }
+                }
+
+                DfiRdDataCs2VrefDACSel = i_user_input_advanced.DfiRdDataCs2VrefDACSel[pstate];
+                VrefDACSelCtrl = (DfiPositionRxPhaseVrefDACSel << csr_DfiPositionRxPhaseVrefDACSel_LSB ) |
+                                 (DfiRdDataCs2VrefDACSel << csr_DfiRdDataCs2VrefDACSel_LSB);
+                FAPI_DBG (TARGTIDFORMAT
+                          " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VrefDACSelCtrl::DfiPositionRxPhaseVrefDACSel to 0x%x",
+                          TARGTID, pstate, i_user_input_basic.Frequency[pstate], DfiPositionRxPhaseVrefDACSel);
+                FAPI_DBG (TARGTIDFORMAT
+                          " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VrefDACSelCtrl::DfiRdDataCs2VrefDACSel to 0x%x",
+                          TARGTID, pstate, i_user_input_basic.Frequency[pstate], DfiRdDataCs2VrefDACSel);
+                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tMASTER | csr_VrefDACSelCtrl_ADDR),
+                         VrefDACSelCtrl));
+            }
+        }
+    }
+#endif
+
     //##############################################################
     //
     // For DDR5, program:
@@ -1338,10 +1495,6 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         int DmPreamblePattern;
         int DqPreamblePatternU0;
         int DqPreamblePatternU1;
-        // Note: needed to avoid a compile error
-        // All others are uninitialized to keep as close as possible to the original source
-        int EnTxDqPreamblePattern = 0;
-        int TxDqPreamblePattern = 0;
         int WrPre;
 
         for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
@@ -1381,8 +1534,8 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                                 TARGTID, pstate, WrPre, i_user_input_dram_config.MR8_A0);
             }
 
-            DqsPreamblePattern = (EnTxDqsPreamblePattern << csr_EnTxDqsPreamblePattern_LSB) | (TxDqsPreamblePattern <<
-                                 csr_TxDqsPreamblePattern_LSB);
+            DqsPreamblePattern = (EnTxDqsPreamblePattern << csr_EnTxDqsPreamblePattern_LSB) |
+                                 (TxDqsPreamblePattern << csr_TxDqsPreamblePattern_LSB);
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming DqsPreamblePattern::EnTxDqsPreamblePattern to 0x%x",
                       TARGTID, pstate, i_user_input_basic.Frequency[pstate], EnTxDqsPreamblePattern);
@@ -1443,50 +1596,56 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
             //############################################
             // DqPreamblePattern
             //############################################
-            switch (i_user_input_advanced.D5TxDqPreambleCtrl[pstate])
+            if (!((i_user_input_advanced.EnTxDmPreamblePattern[pstate] == 0x0) ||
+                  (i_user_input_advanced.EnTxDmPreamblePattern[pstate] == 0x1) ||
+                  (i_user_input_advanced.EnTxDmPreamblePattern[pstate] == 0x3) ||
+                  (i_user_input_advanced.EnTxDmPreamblePattern[pstate] == 0x7) ||
+                  (i_user_input_advanced.EnTxDmPreamblePattern[pstate] == 0xf)))
             {
-                case 0 :
-                    EnTxDqPreamblePattern = 0x0;
-                    TxDqPreamblePattern   = 0x0;
-                    break;
-
-                case 1 :
-                    EnTxDqPreamblePattern = 0xf;
-                    TxDqPreamblePattern   = 0x5;
-                    break;
-
-                case 2 :
-                    EnTxDqPreamblePattern = 0xf;
-                    TxDqPreamblePattern   = 0x5;
-                    break;
-
-                case 3 :
-                    EnTxDqPreamblePattern = 0xf;
-                    TxDqPreamblePattern   = 0x5;
-                    break;
-
-                case 4 :
-                    EnTxDqPreamblePattern = 0xf;
-                    TxDqPreamblePattern   = 0x5;
-                    break;
-
-                default:
-                    FAPI_ASSERT(false,
-                                fapi2::ODY_PHYINIT_INVALID_PREAMBLE_CTRL().
-                                set_PORT_TARGET(i_target).
-                                set_PREAMBLECTRL(i_user_input_advanced.D5TxDqPreambleCtrl[pstate]),
-                                TARGTIDFORMAT " Invalid value for userInputAdvanced.D5TxDqPreambleCtrl[%d] = %d. Valid range is 0 - 4.",
-                                TARGTID, pstate, i_user_input_advanced.D5TxDqPreambleCtrl[pstate]);
+                FAPI_ASSERT(false,
+                            fapi2::ODY_PHYINIT_INVALID_EN_TX_DM_PREAMBLE_PATTERN().
+                            set_PORT_TARGET(i_target).
+                            set_PATTERN(i_user_input_advanced.EnTxDmPreamblePattern[pstate]),
+                            TARGTIDFORMAT " Invalid value for userInputAdvanced.EnTxDmPreamblePattern[%d] = %d. Valid values 0,1,3,7,f.",
+                            TARGTID, pstate, i_user_input_advanced.EnTxDmPreamblePattern[pstate]);
             }
 
-            DmPreamblePattern = (EnTxDqPreamblePattern << csr_EnTxDmPreamblePattern_LSB) | (TxDqPreamblePattern <<
-                                csr_TxDmPreamblePattern_LSB);
+            if (!((i_user_input_advanced.EnTxDqPreamblePatternU0[pstate] == 0x0) ||
+                  (i_user_input_advanced.EnTxDqPreamblePatternU0[pstate] == 0x1) ||
+                  (i_user_input_advanced.EnTxDqPreamblePatternU0[pstate] == 0x3) ||
+                  (i_user_input_advanced.EnTxDqPreamblePatternU0[pstate] == 0x7) ||
+                  (i_user_input_advanced.EnTxDqPreamblePatternU0[pstate] == 0xf)))
+            {
+                FAPI_ASSERT(false,
+                            fapi2::ODY_PHYINIT_INVALID_EN_TX_DQ_PREAMBLE_PATTERN_U0().
+                            set_PORT_TARGET(i_target).
+                            set_PATTERN(i_user_input_advanced.EnTxDqPreamblePatternU0[pstate]),
+                            TARGTIDFORMAT " Invalid value for userInputAdvanced.EnTxDqPreamblePatternU0[%d] = %d. Valid values 0,1,3,7,f.",
+                            TARGTID, pstate, i_user_input_advanced.EnTxDqPreamblePatternU0[pstate]);
+            }
+
+            if (!((i_user_input_advanced.EnTxDqPreamblePatternU1[pstate] == 0x0) ||
+                  (i_user_input_advanced.EnTxDqPreamblePatternU1[pstate] == 0x1) ||
+                  (i_user_input_advanced.EnTxDqPreamblePatternU1[pstate] == 0x3) ||
+                  (i_user_input_advanced.EnTxDqPreamblePatternU1[pstate] == 0x7) ||
+                  (i_user_input_advanced.EnTxDqPreamblePatternU1[pstate] == 0xf)))
+            {
+                FAPI_ASSERT(false,
+                            fapi2::ODY_PHYINIT_INVALID_EN_TX_DQ_PREAMBLE_PATTERN_U1().
+                            set_PORT_TARGET(i_target).
+                            set_PATTERN(i_user_input_advanced.EnTxDqPreamblePatternU1[pstate]),
+                            TARGTIDFORMAT " Invalid value for userInputAdvanced.EnTxDqPreamblePatternU1[%d] = %d. Valid values 0,1,3,7,f.",
+                            TARGTID, pstate, i_user_input_advanced.EnTxDqPreamblePatternU1[pstate]);
+            }
+
+            DmPreamblePattern = (i_user_input_advanced.EnTxDmPreamblePattern[pstate] << csr_EnTxDmPreamblePattern_LSB) |
+                                (i_user_input_advanced.TxDmPreamblePattern[pstate] << csr_TxDmPreamblePattern_LSB);
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming DmPreamblePattern::EnTxDmPreamblePattern to 0x%x",
-                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], EnTxDqPreamblePattern);
+                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], i_user_input_advanced.EnTxDmPreamblePattern[pstate]);
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming DmPreamblePattern::TxDmPreamblePattern to 0x%x",
-                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], EnTxDqPreamblePattern);
+                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], i_user_input_advanced.TxDmPreamblePattern[pstate]);
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming DmPreamblePattern to 0x%x",
                       TARGTID, pstate,
@@ -1494,14 +1653,14 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
             FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tMASTER | csr_DmPreamblePattern_ADDR),
                      DmPreamblePattern));
 
-            DqPreamblePatternU0 = (EnTxDqPreamblePattern << csr_EnTxDqPreamblePatternU0_LSB) | (TxDqPreamblePattern <<
-                                  csr_TxDqPreamblePatternU0_LSB);
+            DqPreamblePatternU0 = (i_user_input_advanced.EnTxDqPreamblePatternU0[pstate] << csr_EnTxDqPreamblePatternU0_LSB) |
+                                  (i_user_input_advanced.TxDqPreamblePatternU0[pstate] << csr_TxDqPreamblePatternU0_LSB);
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming DqPreamblePatternU0::EnTxDqPreamblePatternU0 to 0x%x",
-                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], EnTxDqPreamblePattern);
+                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], i_user_input_advanced.EnTxDqPreamblePatternU0[pstate]);
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming DqPreamblePatternU0::TxDqPreamblePatternU0 to 0x%x",
-                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], EnTxDqPreamblePattern);
+                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], i_user_input_advanced.TxDqPreamblePatternU0[pstate]);
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming DqPreamblePatternU0 to 0x%x",
                       TARGTID, pstate,
@@ -1509,14 +1668,14 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
             FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tMASTER | csr_DqPreamblePatternU0_ADDR),
                      DqPreamblePatternU0));
 
-            DqPreamblePatternU1 = (EnTxDqPreamblePattern << csr_EnTxDqPreamblePatternU1_LSB) | (TxDqPreamblePattern <<
-                                  csr_TxDqPreamblePatternU1_LSB);
+            DqPreamblePatternU1 = (i_user_input_advanced.EnTxDqPreamblePatternU1[pstate] << csr_EnTxDqPreamblePatternU1_LSB) |
+                                  (i_user_input_advanced.TxDqPreamblePatternU1[pstate] << csr_TxDqPreamblePatternU1_LSB);
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming DqPreamblePatternU1::EnTxDqPreamblePatternU1 to 0x%x",
-                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], EnTxDqPreamblePattern);
+                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], i_user_input_advanced.EnTxDqPreamblePatternU1[pstate]);
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming DqPreamblePatternU1::TxDqPreamblePatternU1 to 0x%x",
-                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], EnTxDqPreamblePattern);
+                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], i_user_input_advanced.TxDqPreamblePatternU1[pstate]);
             FAPI_DBG (TARGTIDFORMAT
                       " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming DqPreamblePatternU1 to 0x%x",
                       TARGTID, pstate,
@@ -1957,6 +2116,50 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     // Program PhyUpdate CSRs based on user input
     //
     // CSRs to program:
+    //      PPTTrainSetup:: PhyMstrTrainInterval
+    //                   :: PhyMstrMaxReqToAck
+    //                   :: PhyMstrCtrlMode
+    //      PPTTrainSetup2
+    //
+    // User input dependencies::
+    //      PhyMstrTrainInterval
+    //      PhyMstrMaxReqToAck
+    //      PhyMstrCtrlMode
+    //
+    //##############################################################
+    {
+        int PPTTrainSetup[4];
+
+        for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
+        {
+            p_addr = pstate << 20;
+
+            FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Enabling Phy Master Interface for DRAM drift compensation",
+                      TARGTID);
+            PPTTrainSetup[pstate] = (i_user_input_advanced.PhyMstrTrainInterval[pstate] << csr_PhyMstrTrainInterval_LSB) |
+                                    (i_user_input_advanced.PhyMstrMaxReqToAck[pstate] << csr_PhyMstrMaxReqToAck_LSB) |
+                                    (i_user_input_advanced.PhyMstrCtrlMode[pstate] << csr_PhyMstrCtrlMode_LSB);
+
+            FAPI_DBG (TARGTIDFORMAT
+                      " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming PPTTrainSetup::PhyMstrTrainInterval to 0x%x",
+                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], i_user_input_advanced.PhyMstrTrainInterval[pstate]);
+            FAPI_DBG (TARGTIDFORMAT
+                      " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming PPTTrainSetup::PhyMstrMaxReqToAck to 0x%x",
+                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], i_user_input_advanced.PhyMstrMaxReqToAck[pstate]);
+            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_PPTTrainSetup_ADDR), PPTTrainSetup[pstate]));
+
+            FAPI_DBG (TARGTIDFORMAT
+                      " //// [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming PPTTrainSetup2::PhyMstrFreqOverride to 0x3",
+                      TARGTID, pstate, i_user_input_basic.Frequency[pstate]);
+            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_PPTTrainSetup2_ADDR), 0x0003));
+        }
+    }
+
+    //##############################################################
+    //
+    // Program PhyUpdate CSRs based on user input
+    //
+    // CSRs to program:
     //      DFIPHYUPD:: DFIPHYUPDCNT
     //               :: DFIPHYUPDRESP
     //
@@ -2005,13 +2208,13 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         int GlobalVrefInDAC = 0;
 
         // DDR5
-        GlobalVrefInSel = 0;
+        GlobalVrefInSel = 0x4;
 
         for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
         {
             p_addr = pstate << 20;
 
-            GlobalVrefInDAC = compute_global_vref_in_dac(i_user_input_dram_config.PhyVref );
+            GlobalVrefInDAC = compute_global_vref_in_dac(i_user_input_dram_config.PhyVref, GlobalVrefInSel);
 
             VrefInGlobal = (GlobalVrefInDAC << csr_GlobalVrefInDAC_LSB) | GlobalVrefInSel;
             FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Pstate=%d, Programming VrefInGlobal::GlobalVrefInSel to 0x%x.",
@@ -2154,6 +2357,9 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         int ATxOdtDrvStren = 0;
         int MALERTDisableVal_defval = 1;
 
+        MALERTPuStren = dwc_ddrphy_phyinit_mapDrvStren(i_user_input_advanced.MtestPUImp);
+        ATxOdtDrvStren = (MALERTPuStren << csr_AODTStrenP_LSB);
+
         if (i_user_input_advanced.MemAlertEn == 1)
         {
             MALERTRxEn = 1;
@@ -2164,10 +2370,6 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
             FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming MAlertControl to 0x%x", TARGTID, MAlertControl);
 
             FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_MAlertControl_ADDR), MAlertControl));
-
-            MALERTPuStren = dwc_ddrphy_phyinit_mapDrvStren(i_user_input_advanced.MtestPUImp);
-
-            ATxOdtDrvStren = (MALERTPuStren << csr_AODTStrenP_LSB);
 
             // Since MemAlert pin is BP_A5, ODT strength is enabled for ANIB_1 only
             FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Programming ATxOdtDrvStren::AODTStrenP (ANIB_1 only) to 0x%x",
@@ -2449,22 +2651,42 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                     FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Enabling DBYTE %d RxPadSandby to save power.", TARGTID, byte);
                     FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (c_addr | tDBYTE | csr_DqDqsRcvCntrl1_ADDR),
                              csr_RxPadStandbyEn_MASK));
-                }
+                } // X4 Devices
             } // not byte disabled
         } // for each dbyte
+
+        //#############################################################################
+        // powering down the DBYTEs based on the user input pUserInputAdvanced->PowerDownDBYTEs
+        //#############################################################################
+
+        for (byte = 0; byte < i_user_input_basic.NumDbyte; byte++)
+        {
+            c_addr = byte << 12;
+
+            if (((i_user_input_advanced.PowerDownDBYTEs >> byte) & 0x1))
+            {
+                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (c_addr | tDBYTE | csr_DbyteMiscMode_ADDR), regData));
+                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (c_addr | tDBYTE | csr_DqDqsRcvCntrl1_ADDR), regData1));
+                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (c_addr | tDBYTE | csr_DbPowerDownStatic_ADDR),
+                         csr_DbPowerDownStatic_MASK));
+                FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] Powering down DBYTE %d DbyteMiscMode=%x DqDqsRcvCntrl1=%x",
+                          TARGTID, byte, regData, regData1);
+                FAPI_DBG (TARGTIDFORMAT " //// [phyinit_C_initPhyConfig] DbPowerDownStatic=%x.",
+                          TARGTID, csr_DbPowerDownStatic_MASK);
+            }
+        }
     }
 
-
-    //##############################################################
+    //#############################################################################
     //
     // Program MasterX4Config::X4TG based on DramDataWidth
     //
     // CSRs to program:
     //   MasterX4Config::X4TG[3:0]
     //
-    // Note: PHY does not support mixed dram device data width
+    // Note: PHY supports mixed dram device data width combinations of 16 & 8 only
     //
-    //##############################################################
+    //#############################################################################
     {
         int X4TG = 0x0;
         int MasterX4Config;
@@ -2899,6 +3121,45 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         }
     }
 
+    //###################################################################################
+    // Program Seq0BGPR9
+    // - Storing the values of the VREGCtrl2 durig the LP2 duration in Seq0BGPR9.
+    // - VshAnalog will be Programmed based on pUserInputAdvanced->VshAnalog_LP2_Override_Val,
+    //  pUserInputAdvanced->VshAnalog_LP2_Override_En and pUserInputAdvanced->PhyInLP2En_Pwr_Saving
+    // - All the slaves will have the same value of VREGctrl2 during LP2
+    // - Seq0BGPR9: VREGCtrl2={VshMissionMode=0x0/csr_VshMissionMode_MASK,VshAnalog=0x2/0x10/pUserInputAdvanced->VshAnalog_LP2_Override_Val,VshPowerModes=0x0}
+    //###################################################################################
+    {
+        int VREGCtrl2_LP2;
+        int VshPowerModes_LP2  = 0x0;
+        int VshAnalog_LP2      = 0x10;
+        int VshMissionMode_LP2 = csr_VshMissionMode_MASK;
+
+        if ((pubRev >= 0x0350 && pubRev < 0x0400) || (pubRev >= 0x0420))
+        {
+            if (i_user_input_advanced.PhyInLP2En_Pwr_Saving)
+            {
+                VshMissionMode_LP2 = 0x0 << csr_VshMissionMode_LSB;
+            }
+
+            if (i_user_input_advanced.VshAnalog_LP2_Override_En)
+            {
+                VshAnalog_LP2 = i_user_input_advanced.VshAnalog_LP2_Override_Val;
+            }
+
+            VREGCtrl2_LP2 = VshMissionMode_LP2 | (VshAnalog_LP2 << csr_VshAnalog_LSB) | (VshPowerModes_LP2 <<
+                            csr_VshPowerModes_LSB);
+
+            for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
+            {
+                p_addr = pstate << 20;
+                FAPI_DBG (TARGTIDFORMAT
+                          " // [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming Seq0BGPR9 with VREGCtrl2 durig LP2 values of 0x%x",
+                          TARGTID, pstate, i_user_input_basic.Frequency[pstate], VREGCtrl2_LP2);
+                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tINITENG | csr_Seq0BGPR9_ADDR), VREGCtrl2_LP2));
+            }
+        }
+    }
 
     //##############################################################
     //
@@ -2942,24 +3203,10 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     //
     //##############################################################
     {
-        int VrefDAC0 = 0x3f;
-        int VrefDAC1 = 0x3f;
-
-        FAPI_DBG (TARGTIDFORMAT " // [phyinit_C_initPhyConfig] Programming VrefDAC0 to 0x%x for all DBYTEs and lanes", TARGTID,
-                  VrefDAC0);
-        FAPI_DBG (TARGTIDFORMAT " // [phyinit_C_initPhyConfig] Programming VrefDAC1 to 0x%x for all DBYTEs and lanes", TARGTID,
-                  VrefDAC1);
-
-        int VrefDAC2 = 0x3f;
-        int VrefDAC3 = 0x3f;
-
-        if (!f5200)
-        {
-            FAPI_DBG (TARGTIDFORMAT " // [phyinit_C_initPhyConfig] Programming VrefDAC2 to 0x%x for all DBYTEs and lanes", TARGTID,
-                      VrefDAC2);
-            FAPI_DBG (TARGTIDFORMAT " // [phyinit_C_initPhyConfig] Programming VrefDAC3 to 0x%x for all DBYTEs and lanes", TARGTID,
-                      VrefDAC3);
-        }
+        int VrefDAC0 = (pubRev == 0x0422) ? 0x7e : 0x3f;
+        int VrefDAC1 = (pubRev == 0x0422) ? 0x7e : 0x3f;
+        int VrefDAC2 = (pubRev == 0x0422) ? 0x7e : 0x3f;
+        int VrefDAC3 = (pubRev == 0x0422) ? 0x7e : 0x3f;
 
         for (byte = 0; byte < i_user_input_basic.NumDbyte; byte++)
         {
@@ -2972,18 +3219,47 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                 for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
                 {
                     p_addr = pstate << 20;
+                    FAPI_DBG (TARGTIDFORMAT
+                              " // [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VrefDAC0 to 0x%x for all DBYTEs and lanes",
+                              TARGTID, pstate, i_user_input_basic.Frequency[pstate], VrefDAC0);
                     FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target,  (p_addr | tDBYTE | c_addr | r_addr | csr_VrefDAC0_ADDR),
                              VrefDAC0));
 
                     if (f5200)
                     {
+                        FAPI_DBG (TARGTIDFORMAT
+                                  " // [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VrefDAC1 to 0x%x for all DBYTEs and lanes",
+                                  TARGTID, pstate, i_user_input_basic.Frequency[pstate], VrefDAC1);
                         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target,  (p_addr | tDBYTE | c_addr | r_addr | csr_VrefDAC1_ADDR),
                                  VrefDAC1));
+
+                        if (pubRev == 0x0422)
+                        {
+                            FAPI_DBG (TARGTIDFORMAT
+                                      " // [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VrefDAC2 to 0x%x for all DBYTEs and lanes",
+                                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], VrefDAC2);
+                            FAPI_DBG (TARGTIDFORMAT
+                                      " // [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VrefDAC3 to 0x%x for all DBYTEs and lanes",
+                                      TARGTID, pstate, i_user_input_basic.Frequency[pstate], VrefDAC3);
+                            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target,  (p_addr | tDBYTE | c_addr | r_addr | csr_VrefDAC2_ADDR),
+                                     VrefDAC2));
+                            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target,  (p_addr | tDBYTE | c_addr | r_addr | csr_VrefDAC3_ADDR),
+                                     VrefDAC3));
+                        }
                     }
                 }
 
                 if (!f5200)
                 {
+                    FAPI_DBG (TARGTIDFORMAT
+                              " // [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VrefDAC1 to 0x%x for all DBYTEs and lanes",
+                              TARGTID, pstate, i_user_input_basic.Frequency[pstate], VrefDAC1);
+                    FAPI_DBG (TARGTIDFORMAT
+                              " // [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VrefDAC2 to 0x%x for all DBYTEs and lanes",
+                              TARGTID, pstate, i_user_input_basic.Frequency[pstate], VrefDAC2);
+                    FAPI_DBG (TARGTIDFORMAT
+                              " // [phyinit_C_initPhyConfig] Pstate=%d, Memclk=%dMHz, Programming VrefDAC3 to 0x%x for all DBYTEs and lanes",
+                              TARGTID, pstate, i_user_input_basic.Frequency[pstate], VrefDAC3);
                     FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target,  (tDBYTE | c_addr | r_addr | csr_VrefDAC1_ADDR), VrefDAC1));
                     FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target,  (tDBYTE | c_addr | r_addr | csr_VrefDAC2_ADDR), VrefDAC2));
                     FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target,  (tDBYTE | c_addr | r_addr | csr_VrefDAC3_ADDR), VrefDAC3));
@@ -3015,13 +3291,13 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         }
     }
 
-    //##############################################################
+    //####################################################################################################
     //
     // Program PptCtlStatic::DOCByteSelTg0/1/2/3 for PPT based on DramDataWidth, DramByteSwap, X16Present
     // Program PptCtlStatic::NoX4onUpperNibbleTg0/1/2/3 based on Nibble_ECC, NumDbyte
     //
-    // Note: PHY supports mixed dram device data width combination of 16 & 8
-    //##############################################################
+    // Note: PHY supports mixed dram device data width combination of 16 & 8 only
+    //####################################################################################################
     {
         int PptCtlStatic;
         unsigned int DOCByteSelTg[4];
@@ -3124,17 +3400,35 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     }
 
     //##############################################################
-    //
-    // Program AcPowerDownStatic based on i_user_input_basic.Dfi1Exists && i_user_input_advanced.Dfi1Active
-    // Forces power down ANIB per lane regardless of low-power state
-    //
+    // powering down the ANIBs based on user input pUserInputAdvanced->PowerDownANIBs
     //##############################################################
     {
         int AcTxPowerDownStatic = 0xF;
         int AcRxPowerDownStatic = 0xF;
+        int AcPowerDownStatic   = (AcTxPowerDownStatic << csr_AcTxPowerDownStatic_LSB) |
+                                  (AcRxPowerDownStatic << csr_AcRxPowerDownStatic_LSB) ;
+
+        for (anib = 0; anib < i_user_input_basic.NumAnib; anib++)
+        {
+            c_addr = anib << 12;
+
+            if(((i_user_input_advanced.PowerDownANIBs >> anib) & 0x1))
+            {
+                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tANIB | c_addr | csr_AcPowerDownStatic_ADDR),
+                         AcPowerDownStatic));
+                FAPI_DBG (TARGTIDFORMAT
+                          " //// [phyinit_C_initPhyConfig] Powering down AcPowerDownStatic (ANIB=%d) to 0x%x\n", TARGTID, anib,
+                          AcPowerDownStatic);
+            }
+        }
+
+        //##############################################################
+        //
+        // Program AcPowerDownStatic based on i_user_input_basic.Dfi1Exists && i_user_input_advanced.Dfi1Active
+        // Forces power down ANIB per lane regardless of low-power state
+        //
+        //##############################################################
         int Ch1_ANIB = 0;
-        int AcPowerDownStatic = (AcTxPowerDownStatic << csr_AcTxPowerDownStatic_LSB) | (AcRxPowerDownStatic <<
-                                csr_AcRxPowerDownStatic_LSB) ;
 
         if ((i_user_input_basic.NumAnib >= 12) && (i_user_input_basic.Dfi1Exists == 1 && i_user_input_advanced.Dfi1Active == 0))
         {
@@ -3518,6 +3812,30 @@ fapi2::ReturnCode init_phy_structs_hardcodes( const fapi2::Target<fapi2::TARGET_
         io_user_input_advanced.D5TxDqPreambleCtrl[1]    = 0x0000;
         io_user_input_advanced.D5TxDqPreambleCtrl[2]    = 0x0000;
         io_user_input_advanced.D5TxDqPreambleCtrl[3]    = 0x0000;
+        io_user_input_advanced.EnTxDqPreamblePatternU0[0] = 0x0000;
+        io_user_input_advanced.EnTxDqPreamblePatternU0[1] = 0x0000;
+        io_user_input_advanced.EnTxDqPreamblePatternU0[2] = 0x0000;
+        io_user_input_advanced.EnTxDqPreamblePatternU0[3] = 0x0000;
+        io_user_input_advanced.EnTxDqPreamblePatternU1[0] = 0x0000;
+        io_user_input_advanced.EnTxDqPreamblePatternU1[1] = 0x0000;
+        io_user_input_advanced.EnTxDqPreamblePatternU1[2] = 0x0000;
+        io_user_input_advanced.EnTxDqPreamblePatternU1[3] = 0x0000;
+        io_user_input_advanced.TxDqPreamblePatternU0[0]   = 0x0000;
+        io_user_input_advanced.TxDqPreamblePatternU0[1]   = 0x0000;
+        io_user_input_advanced.TxDqPreamblePatternU0[2]   = 0x0000;
+        io_user_input_advanced.TxDqPreamblePatternU0[3]   = 0x0000;
+        io_user_input_advanced.TxDqPreamblePatternU1[0]   = 0x0000;
+        io_user_input_advanced.TxDqPreamblePatternU1[1]   = 0x0000;
+        io_user_input_advanced.TxDqPreamblePatternU1[2]   = 0x0000;
+        io_user_input_advanced.TxDqPreamblePatternU1[3]   = 0x0000;
+        io_user_input_advanced.EnTxDmPreamblePattern[0]   = 0x0000;
+        io_user_input_advanced.EnTxDmPreamblePattern[1]   = 0x0000;
+        io_user_input_advanced.EnTxDmPreamblePattern[2]   = 0x0000;
+        io_user_input_advanced.EnTxDmPreamblePattern[3]   = 0x0000;
+        io_user_input_advanced.TxDmPreamblePattern[0]     = 0x0000;
+        io_user_input_advanced.TxDmPreamblePattern[1]     = 0x0000;
+        io_user_input_advanced.TxDmPreamblePattern[2]     = 0x0000;
+        io_user_input_advanced.TxDmPreamblePattern[3]     = 0x0000;
 
         io_user_input_advanced.D5DisableRetraining      = 0x0000;
 
@@ -3533,6 +3851,24 @@ fapi2::ReturnCode init_phy_structs_hardcodes( const fapi2::Target<fapi2::TARGET_
         io_user_input_advanced.EnableMAlertAsync = 1; // Per the design team, we should be in Async mode
         io_user_input_advanced.Dfi1Active = 1; // DFI1 is active
         io_user_input_advanced.Num_Logical_Ranks = 0; // Appeares to be unused in the PHY init code and only needed for 3DS
+
+        io_user_input_advanced.PowerDownANIBs                               = 0x0000;
+        io_user_input_advanced.PowerDownDBYTEs                              = 0x0000;
+        io_user_input_advanced.VshAnalog_LP2_Override_En                    = 0x0000;
+        io_user_input_advanced.VshAnalog_LP2_Override_Val                   = 0x0000;
+        io_user_input_advanced.VshCurrentLoad_LP2_Override_En               = 0x0000;
+        io_user_input_advanced.VshCurrentLoad_LP2_Override_Val              = 0x0000;
+        io_user_input_advanced.LP2_PwrSavings_En                            = 0x0000;
+        io_user_input_advanced.special_offset_value                         = 0x0000;
+        io_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_En     = 0x0000;
+        io_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_Val[0] = 0x0000;
+        io_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_Val[1] = 0x0000;
+        io_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_Val[2] = 0x0000;
+        io_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_Val[3] = 0x0000;
+        io_user_input_advanced.DfiRdDataCs2VrefDACSel[0]                    = 0x0000;
+        io_user_input_advanced.DfiRdDataCs2VrefDACSel[1]                    = 0x0000;
+        io_user_input_advanced.DfiRdDataCs2VrefDACSel[2]                    = 0x0000;
+        io_user_input_advanced.DfiRdDataCs2VrefDACSel[3]                    = 0x0000;
     }
 
     // DRAM input structure
@@ -3837,11 +4173,14 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     uint8_t l_attr_data = 0;
     uint16_t l_attr_data_16 = 0;
     uint8_t l_attr_arr[mss::ody::MAX_DIMM_PER_PORT] = {};
+    uint16_t l_attr_arr_16[mss::ody::MAX_DIMM_PER_PORT] = {};
     uint32_t l_attr_arr_32[mss::ody::MAX_DIMM_PER_PORT] = {};
     uint8_t l_en_tracking[mss::ody::MAX_RANK_PER_DIMM] = {};
     uint16_t l_uppernibbletg[mss::ody::MAX_RANK_PER_PHY] = {};
     uint8_t l_attr_arr_rank[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
     uint16_t l_attr_arr_rank_16[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] __attribute__ ((aligned (4))) = {};
+    fapi2::buffer<uint16_t> l_buf_16;
+    fapi2::buffer<uint16_t> l_buf_16_swizzled;
 
     // D4RxPreambleLength, D4TxPreambleLength (both are unused, so hardcode to '1')
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
@@ -3968,9 +4307,6 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
         io_user_input_advanced.PhyMstrCtrlMode[l_pstate] = l_attr_data;
     }
 
-    // WDQSExt (unused, so hardcode to '0')
-    io_user_input_advanced.WDQSExt = 0;
-
     // CalInterval
     FAPI_TRY(mss::attr::get_phy_calinterval(i_target, l_attr_data));
     io_user_input_advanced.CalInterval = l_attr_data;
@@ -3984,9 +4320,6 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     {
         io_user_input_advanced.DramByteSwap[l_tg] = 0;
     }
-
-    // RxEnBackOff (hardcode to '1')
-    io_user_input_advanced.RxEnBackOff = 1;
 
     // TrainSequenceCtrl (unused, so hardcode to zero)
     io_user_input_advanced.TrainSequenceCtrl = 0;
@@ -4102,12 +4435,58 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
         io_user_input_advanced.EnRxDqsTracking[l_pstate] = l_attr_data;
     }
 
-    // D5TxDqPreambleCtrl
-    FAPI_TRY(mss::attr::get_ddr5_dram_wr_preamble(i_target, l_attr_data));
+    // D5TxDqPreambleCtrl (hardcode to 0)
+    for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
+    {
+        io_user_input_advanced.D5TxDqPreambleCtrl[l_pstate] = 0;
+    }
+
+    // EnTxDqPreamblePatternU0
+    FAPI_TRY(mss::attr::get_ddr5_en_tx_dq_preamble_pattern_u0(i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
-        io_user_input_advanced.D5TxDqPreambleCtrl[l_pstate] = l_attr_data;
+        io_user_input_advanced.EnTxDqPreamblePatternU0[l_pstate] = l_attr_data;
+    }
+
+    // EnTxDqPreamblePatternU1
+    FAPI_TRY(mss::attr::get_ddr5_en_tx_dq_preamble_pattern_u1(i_target, l_attr_data));
+
+    for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
+    {
+        io_user_input_advanced.EnTxDqPreamblePatternU1[l_pstate] = l_attr_data;
+    }
+
+    // TxDqPreamblePatternU0
+    FAPI_TRY(mss::attr::get_ddr5_tx_dq_preamble_pattern_u0(i_target, l_attr_data));
+
+    for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
+    {
+        io_user_input_advanced.TxDqPreamblePatternU0[l_pstate] = l_attr_data;
+    }
+
+    // TxDqPreamblePatternU1
+    FAPI_TRY(mss::attr::get_ddr5_tx_dq_preamble_pattern_u1(i_target, l_attr_data));
+
+    for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
+    {
+        io_user_input_advanced.TxDqPreamblePatternU1[l_pstate] = l_attr_data;
+    }
+
+    // EnTxDmPreamblePattern
+    FAPI_TRY(mss::attr::get_ddr5_en_tx_dm_preamble_pattern(i_target, l_attr_data));
+
+    for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
+    {
+        io_user_input_advanced.EnTxDmPreamblePattern[l_pstate] = l_attr_data;
+    }
+
+    // TxDmPreamblePattern
+    FAPI_TRY(mss::attr::get_ddr5_tx_dm_preamble_pattern(i_target, l_attr_data));
+
+    for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
+    {
+        io_user_input_advanced.TxDmPreamblePattern[l_pstate] = l_attr_data;
     }
 
     // D5DisableRetraining (needs to be hardcoded to "enable retraining" according to SolvNet ticket)
@@ -4215,6 +4594,60 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     // DFIPHYUPDRESP
     FAPI_TRY(mss::attr::get_dfiphyupdresp(i_target, l_attr_data));
     io_user_input_advanced.DFIPHYUPDRESP = l_attr_data;
+
+    // PowerDownANIBs
+    FAPI_TRY(mss::attr::get_powerdown_anibs(i_target, l_attr_data_16));
+    io_user_input_advanced.PowerDownANIBs = l_attr_data_16;
+
+    // PowerDownDBYTEs (ATTR_MEM_EFF_BYTE_ENABLES negated and swizzled to PHY perspective)
+    FAPI_TRY(mss::attr::get_byte_enables(i_target, l_attr_arr_16));
+    l_buf_16.insertFromRight<0, 16>(l_attr_arr_16[0]);
+    l_buf_16_swizzled.writeBit<15>(!l_buf_16.getBit<15>());
+    l_buf_16_swizzled.writeBit<14>(!l_buf_16.getBit<14>());
+    l_buf_16_swizzled.writeBit<13>(!l_buf_16.getBit<13>());
+    l_buf_16_swizzled.writeBit<12>(!l_buf_16.getBit<12>());
+    l_buf_16_swizzled.writeBit<11>(!l_buf_16.getBit<10>());
+    l_buf_16_swizzled.writeBit<10>(!l_buf_16.getBit<9>());
+    l_buf_16_swizzled.writeBit<9>(!l_buf_16.getBit<8>());
+    l_buf_16_swizzled.writeBit<8>(!l_buf_16.getBit<7>());
+    l_buf_16_swizzled.writeBit<7>(!l_buf_16.getBit<11>());
+    l_buf_16_swizzled.writeBit<6>(!l_buf_16.getBit<6>());
+    io_user_input_advanced.PowerDownDBYTEs = l_buf_16_swizzled;
+
+    // VshAnalog_LP2_Override_En (hardcode to 0)
+    io_user_input_advanced.VshAnalog_LP2_Override_En = 0;
+
+    // VshAnalog_LP2_Override_Val (hardcode to default from struct)
+    io_user_input_advanced.VshAnalog_LP2_Override_Val = 0x10;
+
+    // VshCurrentLoad_LP2_Override_En (hardcode to 0)
+    io_user_input_advanced.VshCurrentLoad_LP2_Override_En = 0;
+
+    // VshCurrentLoad_LP2_Override_Val (hardcode to default from struct)
+    io_user_input_advanced.VshCurrentLoad_LP2_Override_Val = 0x2;
+
+    // LP2_PwrSavings_En
+    FAPI_TRY(mss::attr::get_lp2_pwrsavings(i_target, l_attr_data));
+    io_user_input_advanced.LP2_PwrSavings_En = l_attr_data;
+
+    // special_offset_value
+    FAPI_TRY(mss::attr::get_special_offset_value(i_target, l_attr_data_16));
+    io_user_input_advanced.special_offset_value = l_attr_data_16;
+
+    // DfiPositionRxPhaseVrefDACSel_Override_En (hardcode to 0 - this is not supported by our pubRev)
+    io_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_En = 0;
+
+    // DfiPositionRxPhaseVrefDACSel_Override_Val (hardcode to struct default - this is not supported by our pubRev)
+    for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
+    {
+        io_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_Val[l_pstate] = 0x10;
+    }
+
+    // DfiRdDataCs2VrefDACSel (hardcode to struct default - this is not supported by our pubRev)
+    for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
+    {
+        io_user_input_advanced.DfiRdDataCs2VrefDACSel[l_pstate] = 0;
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -4403,8 +4836,6 @@ void print_structs(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
              TARGTID, i_user_input_advanced.PhyMstrMaxReqToAck[0]);
     FAPI_INF(TARGTIDFORMAT " user_input_advanced.PhyMstrCtrlMode: 0x%08x",
              TARGTID, i_user_input_advanced.PhyMstrCtrlMode[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.WDQSExt: 0x%08x",
-             TARGTID, i_user_input_advanced.WDQSExt);
     FAPI_INF(TARGTIDFORMAT " user_input_advanced.CalInterval: 0x%08x",
              TARGTID, i_user_input_advanced.CalInterval);
     FAPI_INF(TARGTIDFORMAT " user_input_advanced.CalOnce: 0x%08x",
@@ -4414,8 +4845,6 @@ void print_structs(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
              i_user_input_advanced.DramByteSwap[1],
              i_user_input_advanced.DramByteSwap[2],
              i_user_input_advanced.DramByteSwap[3]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.RxEnBackOff: 0x%08x",
-             TARGTID, i_user_input_advanced.RxEnBackOff);
     FAPI_INF(TARGTIDFORMAT " user_input_advanced.TrainSequenceCtrl: 0x%08x",
              TARGTID, i_user_input_advanced.TrainSequenceCtrl);
     FAPI_INF(TARGTIDFORMAT " user_input_advanced.SnpsUmctlOpt: 0x%08x",
@@ -4497,10 +4926,44 @@ void print_structs(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
              TARGTID, i_user_input_advanced.Dfi1Active);
     FAPI_INF(TARGTIDFORMAT " user_input_advanced.Num_Logical_Ranks: 0x%08x",
              TARGTID, i_user_input_advanced.Num_Logical_Ranks);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.EnTxDqPreamblePatternU0: 0x%08x",
+             TARGTID, i_user_input_advanced.EnTxDqPreamblePatternU0[0]);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.EnTxDqPreamblePatternU1: 0x%08x",
+             TARGTID, i_user_input_advanced.EnTxDqPreamblePatternU1[0]);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxDqPreamblePatternU0: 0x%08x",
+             TARGTID, i_user_input_advanced.TxDqPreamblePatternU0[0]);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxDqPreamblePatternU1: 0x%08x",
+             TARGTID, i_user_input_advanced.TxDqPreamblePatternU1[0]);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.EnTxDmPreamblePattern: 0x%08x",
+             TARGTID, i_user_input_advanced.EnTxDmPreamblePattern[0]);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxDmPreamblePattern: 0x%08x",
+             TARGTID, i_user_input_advanced.TxDmPreamblePattern[0]);
     FAPI_INF(TARGTIDFORMAT " user_input_advanced.DFIPHYUPDCNT: 0x%08x",
              TARGTID, i_user_input_advanced.DFIPHYUPDCNT);
     FAPI_INF(TARGTIDFORMAT " user_input_advanced.DFIPHYUPDRESP: 0x%08x",
              TARGTID, i_user_input_advanced.DFIPHYUPDRESP);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.PowerDownANIBs: 0x%08x",
+             TARGTID, i_user_input_advanced.PowerDownANIBs);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.PowerDownDBYTEs: 0x%08x",
+             TARGTID, i_user_input_advanced.PowerDownDBYTEs);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.VshAnalog_LP2_Override_En: 0x%08x",
+             TARGTID, i_user_input_advanced.VshAnalog_LP2_Override_En);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.VshAnalog_LP2_Override_Val: 0x%08x",
+             TARGTID, i_user_input_advanced.VshAnalog_LP2_Override_Val);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.VshCurrentLoad_LP2_Override_En: 0x%08x",
+             TARGTID, i_user_input_advanced.VshCurrentLoad_LP2_Override_En);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.VshCurrentLoad_LP2_Override_Val: 0x%08x",
+             TARGTID, i_user_input_advanced.VshCurrentLoad_LP2_Override_Val);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.LP2_PwrSavings_En: 0x%08x",
+             TARGTID, i_user_input_advanced.LP2_PwrSavings_En);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.special_offset_value: 0x%08x",
+             TARGTID, i_user_input_advanced.special_offset_value);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_En: 0x%08x",
+             TARGTID, i_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_En);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_Val: 0x%08x",
+             TARGTID, i_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_Val[0]);
+    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DfiRdDataCs2VrefDACSel: 0x%08x",
+             TARGTID, i_user_input_advanced.DfiRdDataCs2VrefDACSel[0]);
     FAPI_INF(TARGTIDFORMAT " user_input_dram_config.MR0_A0: 0x%08x",
              TARGTID, i_user_input_dram_config.MR0_A0);
     FAPI_INF(TARGTIDFORMAT " user_input_dram_config.MR2_A0: 0x%08x",

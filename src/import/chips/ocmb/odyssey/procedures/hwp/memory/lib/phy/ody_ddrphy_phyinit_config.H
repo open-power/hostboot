@@ -91,9 +91,11 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_userCustom_io_write16(const fapi2::Target<f
 ///
 /// @brief Helper function to compute the globalVrefInDAD
 /// @param[in] i_phy_vref the PHY vref from the data structure
+/// @param[in,out] io_phy_vref_sel value to use for GlobalVrefInSel
 /// @return the register setting for the global VREF DAC
 ///
-int compute_global_vref_in_dac(const uint8_t i_phy_vref);
+int compute_global_vref_in_dac(const uint8_t i_phy_vref,
+                               int& io_phy_vref_sel);
 
 ///
 /// @brief Computes the ps count of the passed in value at a given frequency
