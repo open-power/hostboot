@@ -536,7 +536,7 @@
             transaction and a subsequent phyupdate request.
         </description>
         <valueType>uint8</valueType>
-        <default>7</default>
+        <default>0</default>
         <writeable/>
         <mssAccessorName>dfiphyupdcnt</mssAccessorName>
     </attribute>
