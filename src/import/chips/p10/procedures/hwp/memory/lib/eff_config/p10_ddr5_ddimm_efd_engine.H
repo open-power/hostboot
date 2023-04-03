@@ -826,7 +826,6 @@ class ddimm_0_0 : public mss::efd::base
             // Map SPD value to desired setting
             FAPI_TRY(lookup_table_check(iv_ocmb, PHY_ODT_MAP, mss::SET_SI_MC_RCV_IMP_DQ_DQS,
                                         l_phy_odt_imp, l_field[iv_dimm_rank]));
-
             // Set the attr
             FAPI_TRY(mss::attr::set_si_mc_rcv_imp_dq_dqs(iv_dimm, l_field));
 
@@ -1217,57 +1216,6 @@ class ddimm_0_0 : public mss::efd::base
 
             FAPI_TRY(mss::attr::set_ddr5_tx_slew_rise_ck(iv_port, l_field));
 
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Set the dq slew rate rise field
-        ///
-        /// @param[in] i_efd EFD binary
-        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
-        ///
-        /// @note: Coding this for channel A / Rank 0 only.
-        virtual fapi2::ReturnCode set_tx_slew_rate_rise_dq_a0(const std::vector<uint8_t>& i_efd) const
-        {
-
-            uint8_t l_field = 0;
-
-            // =========================================================
-            // EFD Byte 49-52: DQ Slew Rate Rise
-            // Attribute: ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_DQ
-            // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.21
-            // Page 146
-            // =========================================================
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DQ_SLEW_RATE_RISE_BYTE0, i_efd, SET_DQ_SLEW_RATE_RISE, l_field));
-            FAPI_TRY(mss::attr::set_ddr5_tx_slew_rise_dq(iv_port, l_field));
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief Set the dq slew rate fall field
-        ///
-        /// @param[in] i_efd EFD binary
-        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
-        ///
-        /// @note: Coding this for channel A / Rank 0 only.
-        virtual fapi2::ReturnCode set_tx_slew_rate_fall_dq_a0(const std::vector<uint8_t>& i_efd) const
-        {
-            uint8_t l_field = 0;
-
-            // =========================================================
-            // EFD Byte 53-56: DQ Slew Rate Fall
-            // Attribute: ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_DQ
-            // MODE REG: N/A
-            // DDR5 DDIMM SPD Document Release 1.21
-            // Page 146-147
-            // =========================================================
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DQ_SLEW_RATE_FALL_BYTE0, i_efd, SET_DQ_SLEW_RATE_FALL, l_field));
-            FAPI_TRY(mss::attr::set_ddr5_tx_slew_fall_dq(iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1686,9 +1634,9 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY(mss::attr::get_ddr5_rtt_park_rd(iv_dimm, l_nt_odt_rd));
             FAPI_TRY(mss::attr::get_ddr5_rtt_park_wr(iv_dimm, l_nt_odt_wr));
 
-            // RD is read into l_field[0] set the opposite in the attr
+            // RD is read into l_field_rd[rank] set the opposite in the attr
             l_nt_odt_rd[iv_dimm_rank] = (l_field_rd[iv_dimm_rank] == 0) ? 0xf : 0x0;
-            // WR is read into l_field[1] set the opposite in the attr
+            // WR is read into l_field_wr[rank] set the opposite in the attr
             l_nt_odt_wr[iv_dimm_rank] = (l_field_wr[iv_dimm_rank] == 0) ? 0xf : 0x0;
 
             // Set the attributes
@@ -3967,8 +3915,6 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY(set_atx_slew_rate_rise_ac_a0(i_efd));
             FAPI_TRY(set_atx_slew_rate_fall_ac_a0(i_efd));
             FAPI_TRY(set_tx_slew_rate_rise_ck_a0(i_efd));
-            FAPI_TRY(set_tx_slew_rate_rise_dq_a0(i_efd));
-            FAPI_TRY(set_tx_slew_rate_fall_dq_a0(i_efd));
             FAPI_TRY(set_dram_rtt_nom_wr(i_efd));
             FAPI_TRY(set_dram_rtt_nom_rd(i_efd));
             FAPI_TRY(set_nt_odt_rd_wr(i_efd));

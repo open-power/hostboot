@@ -296,7 +296,7 @@
               SDR_OHM_15B = 3,
               SDR_OHM_20 = 4,
               SDR_OHM_24 = 5,
-              SDR_OHM_30 = 7,
+              SDR_OHM_30 = 6,
               DDR_OHM_10 = 9,
               DDR_OHM_15A = 10,
               DDR_OHM_15B = 11,
