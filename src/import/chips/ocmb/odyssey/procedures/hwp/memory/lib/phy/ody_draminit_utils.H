@@ -72,6 +72,7 @@
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr51.H>
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr52.H>
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr112.H>
+#include <lib/workarounds/ody_phy_workarounds.H>
 
 namespace mss
 {
@@ -396,6 +397,37 @@ class msg_block_params
                 }
             }
 
+            // Copies over ALL of the PHY ranks as needed
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR0));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR2));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR4));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR5));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR6));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR32));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR32_ORG));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR8));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR13));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR14));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR15));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR111));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR33));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR33_ORG));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR34));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR34));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR35));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR35));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR37));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR38));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR39));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR50));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR51));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR52));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_DFE_GainBias));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR3));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR10));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR11));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR12));
+
             // Reserved fields are always zero for Odyssey
             iv_msg_block_vars.iv_ReservedF6 = 0;
             iv_msg_block_vars.iv_ReservedF7 = 0;
@@ -414,6 +446,9 @@ class msg_block_params
                 iv_msg_block_vars.iv_RD_RTT_PARK[l_phy_rank] = iv_msg_block_vars.iv_RD_RTT_PARK_attr[l_port_rank];
                 iv_msg_block_vars.iv_WR_RTT_PARK[l_phy_rank] = iv_msg_block_vars.iv_WR_RTT_PARK_attr[l_port_rank];
             }
+
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_RD_RTT_PARK));
+            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_WR_RTT_PARK));
 
             FAPI_TRY(mss::attr::get_ca_dfe_train_options(i_target, iv_msg_block_vars.iv_Reserved1E2));
             // Reserved fields are always zero for Odyssey
