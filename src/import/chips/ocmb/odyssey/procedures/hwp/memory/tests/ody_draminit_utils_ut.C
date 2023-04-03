@@ -350,7 +350,11 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
             return 0;
         });
     }
+} // scenario
 
+SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests for message block",
+                "[draminit_utils_msg_block]")
+{
     SECTION("Test message block config")
     {
         // Loops over OCMB chip targets that were defined in the associated config
@@ -489,8 +493,10 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     uint8_t l_debug_train_options_save = 0;
                     uint32_t l_nibbles_enables_save[mss::ody::MAX_DIMM_PER_PORT] = {0};
                     uint32_t l_nibbles_enables_test[mss::ody::MAX_DIMM_PER_PORT] = {0};
-                    uint8_t l_redundant_cs_orig[mss::ody::MAX_DIMM_PER_PORT] = {};
-                    REQUIRE_RC_PASS(mss::attr::get_ddr5_redundant_cs_en(l_port, l_redundant_cs_orig));
+                    uint8_t l_master_ranks_save[mss::ody::MAX_DIMM_PER_PORT] = {};
+                    uint8_t l_redundant_cs_en_save[mss::ody::MAX_DIMM_PER_PORT] = {};
+                    REQUIRE_RC_PASS(mss::attr::get_num_master_ranks_per_dimm(l_port, l_master_ranks_save));
+                    REQUIRE_RC_PASS(mss::attr::get_ddr5_redundant_cs_en(l_port, l_redundant_cs_en_save));
 
                     REQUIRE_RC_PASS(mss::attr::get_supported_rcd(l_port, l_supported_rcd_save));
                     REQUIRE_RC_PASS(mss::attr::get_supported_rcd(l_port, l_supported_rcd_test));
@@ -813,6 +819,14 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     // Test that the message block gets the correct values for sim mode
                     constexpr uint8_t SIM_MODE = 1;
                     PMU_SMB_DDR5U_1D_t l_msg_block;
+
+                    uint8_t l_master_ranks_ovrd[mss::ody::MAX_DIMM_PER_PORT] = {2, 2};
+                    uint8_t l_redundant_cs_en_ovrd[mss::ody::MAX_DIMM_PER_PORT] = {fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_DISABLE, fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_DISABLE};
+
+                    // Override attr to test the rank1 values
+                    REQUIRE_RC_PASS(mss::attr::set_num_master_ranks_per_dimm(l_port, l_master_ranks_ovrd));
+                    REQUIRE_RC_PASS(mss::attr::set_ddr5_redundant_cs_en(l_port, l_redundant_cs_en_ovrd));
+
                     REQUIRE_RC_PASS(mss::ody::phy::configure_dram_train_message_block(l_port, SIM_MODE, l_msg_block));
 
                     REQUIRE( l_msg_block.AdvTrainOpt == 0x07 );
@@ -1188,6 +1202,10 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE( l_msg_block.DisabledDB8LaneR0 == 0x00 );
                     REQUIRE( l_msg_block.DisabledDB9LaneR0 == 0xFF );
 
+                    // Restore the original
+                    REQUIRE_RC_PASS(mss::attr::set_num_master_ranks_per_dimm(l_port, l_master_ranks_save));
+                    REQUIRE_RC_PASS(mss::attr::set_ddr5_redundant_cs_en(l_port, l_redundant_cs_en_save));
+
                     // Testing D5misc[1] enabling when redundant_cs is enabled
                     {
                         uint8_t l_redundant_cs_en_save[mss::ody::MAX_DIMM_PER_PORT] = {};
@@ -1287,6 +1305,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
 
                     // Tests redundant CS enable on -> retests ALL of the message block to be safe
                     {
+                        REQUIRE_RC_PASS(mss::attr::set_num_master_ranks_per_dimm(l_port, l_master_ranks_ovrd));
                         REQUIRE_RC_PASS(mss::attr::set_ddr5_redundant_cs_en(l_port, l_redundant_cs_enable));
                         constexpr uint8_t SIM_MODE = 1;
                         PMU_SMB_DDR5U_1D_t l_msg_block;
@@ -1795,7 +1814,8 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE_RC_PASS(mss::attr::set_ca_dfe_train_options(l_port, l_ca_dfe_train_options_save));
                     REQUIRE_RC_PASS(mss::attr::set_debug_train_options(l_port, l_debug_train_options_save));
                     REQUIRE_RC_PASS(mss::attr::set_nibble_enables(l_port, l_nibbles_enables_save));
-                    REQUIRE_RC_PASS(mss::attr::set_ddr5_redundant_cs_en(l_port, l_redundant_cs_orig));
+                    REQUIRE_RC_PASS(mss::attr::set_ddr5_redundant_cs_en(l_port, l_redundant_cs_en_save));
+                    REQUIRE_RC_PASS(mss::attr::set_num_master_ranks_per_dimm(l_port, l_master_ranks_save));
                 }
             }
 
@@ -1812,6 +1832,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
             {
                 // First, save off attributes
                 uint8_t l_orig_ranks[mss::ody::MAX_DIMM_PER_PORT] = {};
+                uint8_t l_orig_redundant_cs_en[mss::ody::MAX_DIMM_PER_PORT] = {};
                 uint8_t l_orig_wl_internal_cycle_alignment[mss::ody::MAX_DIMM_PER_PORT][mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM]
                     = {};
                 uint8_t l_orig_vrefdq[mss::ody::MAX_DIMM_PER_PORT][mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
@@ -1822,6 +1843,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                 uint16_t l_orig_internal_fw_rev1 = 0;
                 uint16_t l_orig_fw_data_addr = 0;
                 REQUIRE_RC_PASS(mss::attr::get_num_master_ranks_per_dimm(l_port, l_orig_ranks));
+                REQUIRE_RC_PASS(mss::attr::get_ddr5_redundant_cs_en(l_port, l_orig_redundant_cs_en));
                 REQUIRE_RC_PASS(mss::attr::get_wl_internal_cycle_alignment(l_port, l_orig_wl_internal_cycle_alignment));
                 REQUIRE_RC_PASS(mss::attr::get_ddr5_dram_wr_vrefdq(l_port, l_orig_vrefdq));
                 REQUIRE_RC_PASS(mss::attr::get_ddr5_dram_vrefca(l_port, l_orig_vrefca));
@@ -1833,8 +1855,9 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
 
                 // Sets up two ranks
                 uint8_t l_inject_ranks[mss::ody::MAX_DIMM_PER_PORT] = {2, 2};
+                uint8_t l_inject_redundant_cs_en[mss::ody::MAX_DIMM_PER_PORT] = {fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_DISABLE, fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_DISABLE};
                 REQUIRE_RC_PASS(mss::attr::set_num_master_ranks_per_dimm(l_port, l_inject_ranks));
-
+                REQUIRE_RC_PASS(mss::attr::set_ddr5_redundant_cs_en(l_port, l_inject_redundant_cs_en));
                 // Initialize the structure to use
                 _PMU_SMB_DDR5_1D_t l_struct;
                 REQUIRE_RC_PASS(mss::ody::phy::configure_dram_train_message_block_hardcodes(l_port, l_struct));
@@ -2405,6 +2428,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
 
                 // Restore attributes
                 REQUIRE_RC_PASS(mss::attr::set_num_master_ranks_per_dimm(l_port, l_orig_ranks));
+                REQUIRE_RC_PASS(mss::attr::set_ddr5_redundant_cs_en(l_port, l_orig_redundant_cs_en));
                 REQUIRE_RC_PASS(mss::attr::set_wl_internal_cycle_alignment(l_port, l_orig_wl_internal_cycle_alignment));
                 REQUIRE_RC_PASS(mss::attr::set_ddr5_dram_wr_vrefdq(l_port, l_orig_vrefdq));
                 REQUIRE_RC_PASS(mss::attr::set_ddr5_dram_vrefca(l_port, l_orig_vrefca));
@@ -2429,6 +2453,16 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                 _PMU_SMB_DDR5_1D_t l_struct;
                 uint64_t l_mail = 0;
                 uint8_t l_dq_bitmap_save[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
+
+                // Overriding attr to test for 2 ranks
+                uint8_t l_orig_ranks[mss::ody::MAX_DIMM_PER_PORT] = {};
+                uint8_t l_inject_ranks[mss::ody::MAX_DIMM_PER_PORT] = {2, 2};
+                uint8_t l_orig_redundant_cs_en[mss::ody::MAX_DIMM_PER_PORT] = {};
+                uint8_t l_inject_redundant_cs_en[mss::ody::MAX_DIMM_PER_PORT] = {fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_DISABLE, fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_DISABLE};
+
+                // First, save off attributes
+                REQUIRE_RC_PASS(mss::attr::get_num_master_ranks_per_dimm(l_port, l_orig_ranks));
+                REQUIRE_RC_PASS(mss::attr::get_ddr5_redundant_cs_en(l_port, l_orig_redundant_cs_en));
 
                 // Initialize some training lane fails in the message block
                 l_struct.DisabledDB0LaneR0 = 0x00;
@@ -2586,6 +2620,11 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                 // Test passing case
                 l_mail = 0x07;
                 l_struct.CsTestFail = 0x00;
+
+                // Overriding these attr to test for 2 ranks
+                REQUIRE_RC_PASS(mss::attr::set_num_master_ranks_per_dimm(l_port, l_inject_ranks));
+                REQUIRE_RC_PASS(mss::attr::set_ddr5_redundant_cs_en(l_port, l_inject_redundant_cs_en));
+
                 REQUIRE_RC_PASS(mss::ody::phy::check_training_result(l_port, l_mail, l_struct));
 
                 // Check the bad bits data in the attribute
@@ -2594,6 +2633,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     // Note we will only have data for ranks that are in our config here
                     uint8_t l_dq_bitmap[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
                     REQUIRE_RC_PASS( mss::attr::get_bad_dq_bitmap(l_dimm, l_dq_bitmap) );
+
                     REQUIRE(l_dq_bitmap[0][0] == 0x00);
                     REQUIRE(l_dq_bitmap[0][1] == 0x01);
                     REQUIRE(l_dq_bitmap[0][2] == 0x02);
@@ -2636,6 +2676,9 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE(l_dq_bitmap[3][9] == 0x00);
                 }
 
+                // Restore the originals
+                REQUIRE_RC_PASS(mss::attr::set_num_master_ranks_per_dimm(l_port, l_orig_ranks));
+                REQUIRE_RC_PASS(mss::attr::set_ddr5_redundant_cs_en(l_port, l_orig_redundant_cs_en));
 
                 // Restore the bad bits attribute
                 for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port))
