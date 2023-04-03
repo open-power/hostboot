@@ -107,11 +107,6 @@ enum sizes
     // Number of channels
     NUM_CHANNELS = 2,
 
-    // TODO: Zen:MST-2021 remove and update references to const in generic_constants when its merged
-    // Files affected: p10_ddr5_efd_engine, ody_ddryphy_phyinit_config
-    CHANNEL_A = 0,
-    CHANNEL_B = 1,
-
     // SPD max possible value for decode into csr's pulled from look-up tables in DDR5 SPD spec rev. 1.21
     SPD_TX_SLEW_DECODE_MAX = 0x0B,
     SPD_ATXCMD_DECODE_MAX = 0x0F,

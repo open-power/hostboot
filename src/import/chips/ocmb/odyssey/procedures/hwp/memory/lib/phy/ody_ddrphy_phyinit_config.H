@@ -45,6 +45,7 @@
 #include <fapi2.H>
 
 #include <lib/shared/ody_consts.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/num.H>
 #include <lib/phy/ody_ddrphy_phyinit_structs.H>
 ///

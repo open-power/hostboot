@@ -263,7 +263,7 @@ class ddimm_0_0 : public mss::efd::base
         virtual fapi2::ReturnCode set_dram_pu_drv_imp(const std::vector<uint8_t>& i_efd) const
         {
             uint8_t l_dram_pu_drv_imp = 0;
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
 
             // =========================================================
             // EFD Byte 5: DRAM DIC
@@ -307,7 +307,7 @@ class ddimm_0_0 : public mss::efd::base
         virtual fapi2::ReturnCode set_dram_pd_drv_imp(const std::vector<uint8_t>& i_efd) const
         {
             uint8_t l_dram_pd_drv_imp = 0;
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
 
             // =========================================================
             // EFD Byte 5: DRAM DIC
@@ -486,7 +486,7 @@ class ddimm_0_0 : public mss::efd::base
         {
             uint8_t l_dram_vref_byte[4] = {0};
             uint8_t l_byte_index = 0;
-            uint8_t l_vref_dq[mss::ody::sizes::MAX_RANK_PER_DIMM][20] = {};
+            uint8_t l_vref_dq[mss::ddr5::mr::ATTR_RANKS][20] = {};
 
             // =========================================================
             // EFD Byte 10-17: Initial DRAM VRef Setting
@@ -701,7 +701,7 @@ class ddimm_0_0 : public mss::efd::base
         virtual fapi2::ReturnCode set_dram_dfe_gain_bias(const std::vector<uint8_t>& i_efd) const
         {
             uint8_t l_dram_dfe_gain_bias = 0;
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
 
             // =========================================================
             // EFD Byte 19-26: DRAM DFE Gain Bias
@@ -746,7 +746,7 @@ class ddimm_0_0 : public mss::efd::base
         virtual fapi2::ReturnCode set_dram_dfe_gain_bias_sign_bit(const std::vector<uint8_t>& i_efd) const
         {
             uint8_t l_dram_dfe_gain_bias_sign_bit = 0;
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
 
             // =========================================================
             // EFD Byte 19-26: DRAM DFE Gain Bias
@@ -783,7 +783,7 @@ class ddimm_0_0 : public mss::efd::base
         virtual fapi2::ReturnCode set_phy_odt_imp(const std::vector<uint8_t>& i_efd) const
         {
             uint8_t l_phy_odt_imp = 0;
-            uint16_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint16_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
 
             // =========================================================
             // EFD Byte 27: PHY ODT Impedance
@@ -1026,7 +1026,7 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_si_mc_drv_imp_cmd_addr(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
             uint8_t l_atx_impedance = 0;
             // =========================================================
             // EFD Byte 32: ATX Impedance
@@ -1078,7 +1078,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for both channel A and channel B
         virtual fapi2::ReturnCode set_atx_slew_rate_rise_ac_a0(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field[mss::ody::sizes::NUM_CHANNELS] = {0};
+            uint8_t l_field[mss::ddr5::mr::ATTR_NUM_CHANNELS] = {0};
             const std::vector<uint8_t> l_reserved_bits{0x00, 0x04};
             // =========================================================
             // EFD Byte 33-34: ATX Slew Rate Rise
@@ -1088,31 +1088,31 @@ class ddimm_0_0 : public mss::efd::base
             // Page 149-151
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_SLEW_RISE_RATE_BYTE0, i_efd, mss::SET_SLEW_RATE_RISE,
-                                             l_field[mss::ody::sizes::CHANNEL_A]));
+                                             l_field[mss::ddr5::mr::ATTR_CHANNEL_A]));
 
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_SLEW_RISE_RATE_BYTE1, i_efd, mss::SET_SLEW_RATE_RISE,
-                                             l_field[mss::ody::sizes::CHANNEL_B]));
+                                             l_field[mss::ddr5::mr::ATTR_CHANNEL_B]));
 
-            FAPI_ASSERT(l_field[mss::ody::sizes::CHANNEL_A] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
+            FAPI_ASSERT(l_field[mss::ddr5::mr::ATTR_CHANNEL_A] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
                         fapi2::MSS_INVALID_SPD_RESERVED_BITS()
                         .set_FUNCTION_CODE(mss::SET_SLEW_RATE_RISE)
-                        .set_FAILING_VALUE(l_field[mss::ody::sizes::CHANNEL_A])
+                        .set_FAILING_VALUE(l_field[mss::ddr5::mr::ATTR_CHANNEL_A])
                         .set_OCMB_TARGET(iv_ocmb),
                         "Reserved bits seen on %s. Value seen:0x%02x",
-                        spd::c_str(iv_port), l_field[mss::ody::sizes::CHANNEL_A]);
+                        spd::c_str(iv_port), l_field[mss::ddr5::mr::ATTR_CHANNEL_A]);
 
-            FAPI_ASSERT(l_field[mss::ody::sizes::CHANNEL_B] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
+            FAPI_ASSERT(l_field[mss::ddr5::mr::ATTR_CHANNEL_B] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
                         fapi2::MSS_INVALID_SPD_RESERVED_BITS()
                         .set_FUNCTION_CODE(mss::SET_SLEW_RATE_RISE)
-                        .set_FAILING_VALUE(l_field[mss::ody::sizes::CHANNEL_B])
+                        .set_FAILING_VALUE(l_field[mss::ddr5::mr::ATTR_CHANNEL_B])
                         .set_OCMB_TARGET(iv_ocmb),
                         "Reserved bits seen on %s. Value seen:0x%02x",
-                        spd::c_str(iv_port), l_field[mss::ody::sizes::CHANNEL_B]);
+                        spd::c_str(iv_port), l_field[mss::ddr5::mr::ATTR_CHANNEL_B]);
 
             FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_SLEW_RATE_RISE,
-                      l_field[mss::ody::sizes::CHANNEL_A]) );
+                      l_field[mss::ddr5::mr::ATTR_CHANNEL_A]) );
             FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_SLEW_RATE_RISE,
-                      l_field[mss::ody::sizes::CHANNEL_B]) );
+                      l_field[mss::ddr5::mr::ATTR_CHANNEL_B]) );
 
             FAPI_TRY(mss::attr::set_ddr5_tx_slew_rise_ac(iv_port, l_field));
 
@@ -1130,7 +1130,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for both channel A and channel B.
         virtual fapi2::ReturnCode set_atx_slew_rate_fall_ac_a0(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field[mss::ody::sizes::NUM_CHANNELS] = {0};
+            uint8_t l_field[mss::ddr5::mr::ATTR_NUM_CHANNELS] = {0};
             const std::vector<uint8_t> l_reserved_bits{0x00, 0x04};
 
             // =========================================================
@@ -1142,30 +1142,30 @@ class ddimm_0_0 : public mss::efd::base
             // =========================================================
 
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_SLEW_FALL_RATE_BYTE0, i_efd, mss::SET_SLEW_RATE_FALL,
-                                             l_field[mss::ody::sizes::CHANNEL_A]));
+                                             l_field[mss::ddr5::mr::ATTR_CHANNEL_A]));
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ATX_SLEW_FALL_RATE_BYTE1, i_efd, mss::SET_SLEW_RATE_FALL,
-                                             l_field[mss::ody::sizes::CHANNEL_B]));
+                                             l_field[mss::ddr5::mr::ATTR_CHANNEL_B]));
 
-            FAPI_ASSERT(l_field[mss::ody::sizes::CHANNEL_A] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
+            FAPI_ASSERT(l_field[mss::ddr5::mr::ATTR_CHANNEL_A] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
                         fapi2::MSS_INVALID_SPD_RESERVED_BITS()
                         .set_FUNCTION_CODE(mss::SET_SLEW_RATE_FALL)
-                        .set_FAILING_VALUE(l_field[mss::ody::sizes::CHANNEL_A])
+                        .set_FAILING_VALUE(l_field[mss::ddr5::mr::ATTR_CHANNEL_A])
                         .set_OCMB_TARGET(iv_ocmb),
                         "Reserved bits seen on %s. Value seen:0x%02x",
-                        spd::c_str(iv_port), l_field[mss::ody::sizes::CHANNEL_A]);
+                        spd::c_str(iv_port), l_field[mss::ddr5::mr::ATTR_CHANNEL_A]);
 
-            FAPI_ASSERT(l_field[mss::ody::sizes::CHANNEL_B] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
+            FAPI_ASSERT(l_field[mss::ddr5::mr::ATTR_CHANNEL_B] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
                         fapi2::MSS_INVALID_SPD_RESERVED_BITS()
                         .set_FUNCTION_CODE(mss::SET_SLEW_RATE_FALL)
-                        .set_FAILING_VALUE(l_field[mss::ody::sizes::CHANNEL_B])
+                        .set_FAILING_VALUE(l_field[mss::ddr5::mr::ATTR_CHANNEL_B])
                         .set_OCMB_TARGET(iv_ocmb),
                         "Reserved bits seen on %s. Value seen:0x%02x",
-                        spd::c_str(iv_port), l_field[mss::ody::sizes::CHANNEL_B]);
+                        spd::c_str(iv_port), l_field[mss::ddr5::mr::ATTR_CHANNEL_B]);
 
             FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_SLEW_RATE_FALL,
-                      l_field[mss::ody::sizes::CHANNEL_A]) );
+                      l_field[mss::ddr5::mr::ATTR_CHANNEL_A]) );
             FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_SLEW_RATE_FALL,
-                      l_field[mss::ody::sizes::CHANNEL_B]) );
+                      l_field[mss::ddr5::mr::ATTR_CHANNEL_B]) );
 
             FAPI_TRY(mss::attr::set_ddr5_tx_slew_fall_ac(iv_port, l_field));
 
@@ -1182,7 +1182,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for both channel A and channel B
         virtual fapi2::ReturnCode set_tx_slew_rate_rise_ck_a0(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field[mss::ody::sizes::NUM_CHANNELS] = {0};
+            uint8_t l_field[mss::ddr5::mr::ATTR_NUM_CHANNELS] = {0};
             std::vector<uint8_t> l_reserved_bits{0b0000, 0b0011, 0b0101};
             // =========================================================
             // EFD Byte 41-42: CK Slew Rate Rise
@@ -1192,30 +1192,30 @@ class ddimm_0_0 : public mss::efd::base
             // Page 152-154
             // =========================================================
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CK_SLEW_RATE_RISE_BYTE0, i_efd, mss::SET_CK_SLEW_RATE_RISE,
-                                             l_field[mss::ody::sizes::CHANNEL_A]));
+                                             l_field[mss::ddr5::mr::ATTR_CHANNEL_A]));
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::CK_SLEW_RATE_RISE_BYTE1, i_efd, mss::SET_CK_SLEW_RATE_RISE,
-                                             l_field[mss::ody::sizes::CHANNEL_B]));
+                                             l_field[mss::ddr5::mr::ATTR_CHANNEL_B]));
 
-            FAPI_ASSERT(l_field[mss::ody::sizes::CHANNEL_A] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
+            FAPI_ASSERT(l_field[mss::ddr5::mr::ATTR_CHANNEL_A] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
                         fapi2::MSS_INVALID_SPD_RESERVED_BITS()
                         .set_FUNCTION_CODE(mss::SET_CK_SLEW_RATE_RISE)
-                        .set_FAILING_VALUE(l_field[mss::ody::sizes::CHANNEL_A])
+                        .set_FAILING_VALUE(l_field[mss::ddr5::mr::ATTR_CHANNEL_A])
                         .set_OCMB_TARGET(iv_ocmb),
                         "Reserved bits seen on %s. Value seen:0x%02x",
-                        spd::c_str(iv_port), l_field[mss::ody::sizes::CHANNEL_A]);
+                        spd::c_str(iv_port), l_field[mss::ddr5::mr::ATTR_CHANNEL_A]);
 
-            FAPI_ASSERT(l_field[mss::ody::sizes::CHANNEL_B] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
+            FAPI_ASSERT(l_field[mss::ddr5::mr::ATTR_CHANNEL_B] < mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX,
                         fapi2::MSS_INVALID_SPD_RESERVED_BITS()
                         .set_FUNCTION_CODE(mss::SET_CK_SLEW_RATE_RISE)
-                        .set_FAILING_VALUE(l_field[mss::ody::sizes::CHANNEL_B])
+                        .set_FAILING_VALUE(l_field[mss::ddr5::mr::ATTR_CHANNEL_B])
                         .set_OCMB_TARGET(iv_ocmb),
                         "Reserved bits seen on %s. Value seen:0x%02x",
-                        spd::c_str(iv_port), l_field[mss::ody::sizes::CHANNEL_B]);
+                        spd::c_str(iv_port), l_field[mss::ddr5::mr::ATTR_CHANNEL_B]);
 
             FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_CK_SLEW_RATE_RISE,
-                      l_field[mss::ody::sizes::CHANNEL_A]) );
+                      l_field[mss::ddr5::mr::ATTR_CHANNEL_A]) );
             FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_CK_SLEW_RATE_RISE,
-                      l_field[mss::ody::sizes::CHANNEL_B]) );
+                      l_field[mss::ddr5::mr::ATTR_CHANNEL_B]) );
 
             FAPI_TRY(mss::attr::set_ddr5_tx_slew_rise_ck(iv_port, l_field));
 
@@ -1284,8 +1284,8 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for channel A / Rank 0 only.
         virtual fapi2::ReturnCode set_dram_rtt_park(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
-            uint8_t l_dram_rtt_park_bytes[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
+            uint8_t l_field[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
+            uint8_t l_dram_rtt_park_bytes[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
 
             // =========================================================
             // EFD Byte 60-67: RTT PARK and RTT WR Termination Settings
@@ -1357,7 +1357,7 @@ class ddimm_0_0 : public mss::efd::base
             }
 
             // Map SPD value to desired setting
-            for(uint8_t l_channel = 0; l_channel < mss::ody::sizes::NUM_CHANNELS; l_channel++)
+            for(uint8_t l_channel = 0; l_channel < mss::ddr5::mr::ATTR_NUM_CHANNELS; l_channel++)
             {
                 // Map SPD value to desired setting
                 FAPI_TRY(lookup_table_check(iv_ocmb, DRAM_RTT_PARK_MAP, mss::SET_SI_DRAM_RTT_PARK,
@@ -1380,8 +1380,8 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for channel A / Rank 0 only.
         virtual fapi2::ReturnCode set_dram_rtt_wr(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
-            uint8_t l_dram_wr_park_bytes[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
+            uint8_t l_field[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
+            uint8_t l_dram_wr_park_bytes[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
 
             // =========================================================
             // EFD Byte 60-67: RTT_PARK and RTT_WR Termination Settings
@@ -1468,8 +1468,8 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_dram_rtt_nom_wr(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ody::sizes::NUM_CHANNELS] = {};
-            uint8_t l_dram_rtt_nom_wr_bytes[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ody::sizes::NUM_CHANNELS] = {};
+            uint8_t l_field[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
+            uint8_t l_dram_rtt_nom_wr_bytes[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
 
             // =========================================================
             // EFD Byte 68-75: RTT_NOM_WR and RTT_NOM_RD Termination Settings
@@ -1508,16 +1508,16 @@ class ddimm_0_0 : public mss::efd::base
             {
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE0_WR, i_efd,
                                                  mss::SET_DRAM_RTT_NOM_WR,
-                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK0][mss::ody::sizes::CHANNEL_A]));
+                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_A]));
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE2_WR, i_efd,
                                                  mss::SET_DRAM_RTT_NOM_WR,
-                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK0][mss::ody::sizes::CHANNEL_B]));
+                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_B]));
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE1_WR, i_efd,
                                                  mss::SET_DRAM_RTT_NOM_WR,
-                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK1][mss::ody::sizes::CHANNEL_A]));
+                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_A]));
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE3_WR, i_efd,
                                                  mss::SET_DRAM_RTT_NOM_WR,
-                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK1][mss::ody::sizes::CHANNEL_B]));
+                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_B]));
             }
             // PORT | RANK | CHANNEL | BYTE NUMBER
             // ====================================
@@ -1529,20 +1529,20 @@ class ddimm_0_0 : public mss::efd::base
             {
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE4_WR, i_efd,
                                                  mss::SET_DRAM_RTT_NOM_WR,
-                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK0][mss::ody::sizes::CHANNEL_A]));
+                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_A]));
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE6_WR, i_efd,
                                                  mss::SET_DRAM_RTT_NOM_WR,
-                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK0][mss::ody::sizes::CHANNEL_B]));
+                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_B]));
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE5_WR, i_efd,
                                                  mss::SET_DRAM_RTT_NOM_WR,
-                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK1][mss::ody::sizes::CHANNEL_A]));
+                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_A]));
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE7_WR, i_efd,
                                                  mss::SET_DRAM_RTT_NOM_WR,
-                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK1][mss::ody::sizes::CHANNEL_B]));
+                                                 l_dram_rtt_nom_wr_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_B]));
             }
 
             // Map SPD value to desired setting
-            for(uint8_t l_channel = 0; l_channel < mss::ody::sizes::NUM_CHANNELS; l_channel++)
+            for(uint8_t l_channel = 0; l_channel < mss::ddr5::mr::ATTR_NUM_CHANNELS; l_channel++)
             {
                 FAPI_TRY(lookup_table_check(iv_ocmb, DRAM_RTT_NOM_WR_MAP, mss::SET_DRAM_RTT_NOM_WR,
                                             l_dram_rtt_nom_wr_bytes[iv_dimm_rank][l_channel],
@@ -1566,8 +1566,8 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for channel A / Rank 0 only.
         virtual fapi2::ReturnCode set_dram_rtt_nom_rd(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ody::sizes::NUM_CHANNELS] = {};
-            uint8_t l_dram_rtt_nom_rd_bytes[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ody::sizes::NUM_CHANNELS] = {};
+            uint8_t l_field[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
+            uint8_t l_dram_rtt_nom_rd_bytes[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
 
             // =========================================================
             // EFD Byte 68-75: RTT_NOM_WR and RTT_NOM_RD Termination Settings
@@ -1605,13 +1605,13 @@ class ddimm_0_0 : public mss::efd::base
             if (iv_port_rel_pos == 0)
             {
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE0_RD, i_efd, mss::SET_DRAM_RTT_NOM_RD,
-                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK0][mss::ody::sizes::CHANNEL_A]));
+                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_A]));
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE2_RD, i_efd, mss::SET_DRAM_RTT_NOM_RD,
-                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK0][mss::ody::sizes::CHANNEL_B]));
+                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_B]));
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE1_RD, i_efd, mss::SET_DRAM_RTT_NOM_RD,
-                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK1][mss::ody::sizes::CHANNEL_A]));
+                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_A]));
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE3_RD, i_efd, mss::SET_DRAM_RTT_NOM_RD,
-                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK1][mss::ody::sizes::CHANNEL_B]));
+                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_B]));
             }
             // PORT | RANK | CHANNEL | BYTE NUMBER
             // ====================================
@@ -1622,17 +1622,17 @@ class ddimm_0_0 : public mss::efd::base
             else
             {
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE4_RD, i_efd, mss::SET_DRAM_RTT_NOM_RD,
-                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK0][mss::ody::sizes::CHANNEL_A]));
+                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_A]));
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE6_RD, i_efd, mss::SET_DRAM_RTT_NOM_RD,
-                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK0][mss::ody::sizes::CHANNEL_B]));
+                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK0][mss::ddr5::mr::ATTR_CHANNEL_B]));
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE5_RD, i_efd, mss::SET_DRAM_RTT_NOM_RD,
-                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK1][mss::ody::sizes::CHANNEL_A]));
+                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_A]));
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RTT_NOM_BYTE7_RD, i_efd, mss::SET_DRAM_RTT_NOM_RD,
-                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK1][mss::ody::sizes::CHANNEL_B]));
+                                                 l_dram_rtt_nom_rd_bytes[mss::common_consts::ATTR_RANK1][mss::ddr5::mr::ATTR_CHANNEL_B]));
             }
 
             // Map SPD value to desired setting
-            for(uint8_t l_channel = 0; l_channel < mss::ody::sizes::NUM_CHANNELS; l_channel++)
+            for(uint8_t l_channel = 0; l_channel < mss::ddr5::mr::ATTR_NUM_CHANNELS; l_channel++)
             {
                 FAPI_TRY(lookup_table_check(iv_ocmb, DRAM_RTT_NOM_RD_MAP, mss::SET_DRAM_RTT_NOM_RD,
                                             l_dram_rtt_nom_rd_bytes[iv_dimm_rank][l_channel],
@@ -1654,10 +1654,10 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_nt_odt_rd_wr(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_nt_odt_rd[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
-            uint8_t l_nt_odt_wr[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
-            uint8_t l_field_wr[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
-            uint8_t l_field_rd[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_nt_odt_rd[mss::ddr5::mr::ATTR_RANKS] = {0};
+            uint8_t l_nt_odt_wr[mss::ddr5::mr::ATTR_RANKS] = {0};
+            uint8_t l_field_wr[mss::ddr5::mr::ATTR_RANKS] = {0};
+            uint8_t l_field_rd[mss::ddr5::mr::ATTR_RANKS] = {0};
 
 
             // =========================================================
@@ -1711,8 +1711,8 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Decoding this for channel A
         virtual fapi2::ReturnCode set_ck_odt(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_ck_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
-            uint16_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
+            uint8_t l_ck_odt_byte[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_STRAP] = {};
+            uint16_t l_field[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_STRAP] = {};
 
             // =========================================================
             // EFD Byte 82-97: CK/CS ODT and CA Termination
@@ -1797,8 +1797,8 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_cs_odt(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_cs_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
-            uint16_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
+            uint8_t l_cs_odt_byte[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_STRAP] = {};
+            uint16_t l_field[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_STRAP] = {};
 
             // =========================================================
             // EFD Byte 82-97: CK/CS ODT and CA Termination
@@ -1884,8 +1884,8 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_ck_odt_per_dram(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_dram_ck_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
-            uint16_t l_dram_ck_odt[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint8_t l_dram_ck_odt_byte[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint16_t l_dram_ck_odt[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
 
             // =========================================================
             // EFD Byte 98-177: CK/CS ODT and CA Termination Per DRAM
@@ -1933,8 +1933,8 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_cs_odt_per_dram(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_dram_cs_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
-            uint16_t l_dram_cs_odt[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint8_t l_dram_cs_odt_byte[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint16_t l_dram_cs_odt[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
 
             // =========================================================
             // EFD Byte 98-177: CK/CS ODT and CA Termination Per DRAM
@@ -1982,8 +1982,8 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_ca_odt(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_ca_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
-            uint16_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
+            uint8_t l_ca_odt_byte[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_STRAP] = {};
+            uint16_t l_field[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_STRAP] = {};
 
             // =========================================================
             // EFD Byte 178-193: : CA ODT and DQS Park Termination
@@ -2069,8 +2069,8 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_dqs_odt(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_dqs_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
-            uint8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_STRAP] = {};
+            uint8_t l_dqs_odt_byte[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_STRAP] = {};
+            uint8_t l_field[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_STRAP] = {};
 
             // =========================================================
             // EFD Byte 178-193: : CA ODT and DQS Park Termination
@@ -2156,8 +2156,8 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_ca_odt_dram(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_dram_ca_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
-            uint16_t l_dram_ca_odt[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint8_t l_dram_ca_odt_byte[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint16_t l_dram_ca_odt[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
 
             // =========================================================
             // EFD Byte 194-273: : CA ODT and DQS Park Termination
@@ -2209,8 +2209,8 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_dqs_odt_dram(const std::vector<uint8_t>& i_efd) const
         {
-            uint8_t l_dram_dqs_odt_byte[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
-            uint8_t l_dram_dqs_odt[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint8_t l_dram_dqs_odt_byte[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint8_t l_dram_dqs_odt[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
 
             // =========================================================
             // EFD Byte 194-273: : CA ODT and DQS Park Termination
@@ -2260,7 +2260,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for channel A / Rank 0 only.
         virtual fapi2::ReturnCode set_odtlon_wr(const std::vector<uint8_t>& i_efd) const
         {
-            int8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            int8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
             uint8_t l_odtlon_wr = 0;
 
 
@@ -2308,7 +2308,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for channel A / Rank 0 only.
         virtual fapi2::ReturnCode set_odtloff_wr(const std::vector<uint8_t>& i_efd) const
         {
-            int8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            int8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
             uint8_t l_odtloff_wr = 0;
 
             // =========================================================
@@ -2355,7 +2355,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for channel A / Rank 0 only.
         virtual fapi2::ReturnCode set_odtlon_wr_nt(const std::vector<uint8_t>& i_efd) const
         {
-            int8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            int8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
             uint8_t l_odtlon_wr_nt = 0;
 
             // =========================================================
@@ -2403,7 +2403,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for channel A / Rank 0 only.
         virtual fapi2::ReturnCode set_odtloff_wr_nt(const std::vector<uint8_t>& i_efd) const
         {
-            int8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            int8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
             uint8_t l_odtloff_wr_nt = 0;
 
             // =========================================================
@@ -2451,7 +2451,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for channel A / Rank 0 only.
         virtual fapi2::ReturnCode set_odtlon_rd_nt(const std::vector<uint8_t>& i_efd) const
         {
-            int8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            int8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
             uint8_t l_odtlon_rd_nt = 0;
 
             // =========================================================
@@ -2496,7 +2496,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @note: Coding this for channel A / Rank 0 only.
         virtual fapi2::ReturnCode set_odtloff_rd_nt(const std::vector<uint8_t>& i_efd) const
         {
-            int8_t l_field[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            int8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
             uint8_t l_odtloff_rd_nt = 0;
 
             // =========================================================
@@ -2541,9 +2541,9 @@ class ddimm_0_0 : public mss::efd::base
         virtual fapi2::ReturnCode set_dram_vrefca(const std::vector<uint8_t>& i_efd) const
         {
 
-            uint8_t l_dram_vrefca_byte[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_dram_vrefca_byte[mss::ddr5::mr::ATTR_RANKS] = {0};
             uint8_t l_byte_index = 0;
-            uint8_t l_vrefca[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint8_t l_vrefca[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
 
             // =========================================================
             // EFD Byte 306-313: Base Vref CA Settings Per Rank
@@ -2616,9 +2616,9 @@ class ddimm_0_0 : public mss::efd::base
         virtual fapi2::ReturnCode set_dram_vrefcs(const std::vector<uint8_t>& i_efd) const
         {
 
-            uint8_t l_dram_vrefcs_byte[mss::ody::sizes::MAX_RANK_PER_DIMM] = {0};
+            uint8_t l_dram_vrefcs_byte[mss::ddr5::mr::ATTR_RANKS] = {0};
             uint8_t l_byte_index = 0;
-            uint8_t l_vrefcs[mss::ody::sizes::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_DRAM] = {};
+            uint8_t l_vrefcs[mss::ddr5::mr::ATTR_RANKS][mss::ddr5::mr::ATTR_DRAM] = {};
 
             // =========================================================
             // EFD Byte 314-321: Base Vref CS Settings Per Rank

@@ -63,7 +63,6 @@
 #include <ody_scom_mp_anib13_b0.H>
 #include <ody_scom_mp_mastr_b0.H>
 #include <lib/phy/ody_phy_utils.H>
-#include <lib/shared/ody_consts.H>
 #include <lib/dimm/ody_rank.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <lib/phy/ody_ddrphy_csr_defines.H>
@@ -4641,29 +4640,29 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ac(const fapi2::Target<fapi
     static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR55[8] __attribute__ ((aligned (4))) =
     {
         // CH_A ANIB 1-4
-        {scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
-        {scomt::mp::DWC_DDRPHYA_ANIB2_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
-        {scomt::mp::DWC_DDRPHYA_ANIB3_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
-        {scomt::mp::DWC_DDRPHYA_ANIB4_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB2_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB3_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB4_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_A},
         // CH_B ANIB 9-12
-        {scomt::mp::DWC_DDRPHYA_ANIB9_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
-        {scomt::mp::DWC_DDRPHYA_ANIB10_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
-        {scomt::mp::DWC_DDRPHYA_ANIB11_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
-        {scomt::mp::DWC_DDRPHYA_ANIB12_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB9_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB10_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB11_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB12_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_B},
     };
 
     static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR43[8] __attribute__ ((aligned (4))) =
     {
         // CH_A ANIB 1-4
-        {scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
-        {scomt::mp::DWC_DDRPHYA_ANIB2_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
-        {scomt::mp::DWC_DDRPHYA_ANIB3_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
-        {scomt::mp::DWC_DDRPHYA_ANIB4_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB1_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB2_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB3_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB4_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_A},
         // CH_B ANIB 9-12
-        {scomt::mp::DWC_DDRPHYA_ANIB9_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
-        {scomt::mp::DWC_DDRPHYA_ANIB10_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
-        {scomt::mp::DWC_DDRPHYA_ANIB11_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
-        {scomt::mp::DWC_DDRPHYA_ANIB12_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB9_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB10_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB11_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB12_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_B},
     };
 
 
@@ -4768,17 +4767,17 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_fall_ac(const fapi2::Target<fapi
     static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR55[2]   __attribute__ ((aligned (4))) =
     {
         // CH A ANIB 0
-        {scomt::mp::DWC_DDRPHYA_ANIB0_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB0_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_A},
         // CH B ANIB 13
-        {scomt::mp::DWC_DDRPHYA_ANIB13_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB13_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_B},
     };
 
     static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR43[2]  __attribute__ ((aligned (4))) =
     {
         // CH A ANIB 0
-        {scomt::mp::DWC_DDRPHYA_ANIB0_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB0_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_A},
         // CH B ANIB 13
-        {scomt::mp::DWC_DDRPHYA_ANIB13_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB13_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_B},
     };
 
     // TxSlewFallAC
@@ -4886,21 +4885,21 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ck(const fapi2::Target<fapi
     static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR55[4] __attribute__ ((aligned (4))) =
     {
         // CH A ANIB 5,6
-        {scomt::mp::DWC_DDRPHYA_ANIB5_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
-        {scomt::mp::DWC_DDRPHYA_ANIB6_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB5_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB6_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_A},
         // CH_B ANIB 7,8
-        {scomt::mp::DWC_DDRPHYA_ANIB7_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
-        {scomt::mp::DWC_DDRPHYA_ANIB8_BASE0_ATXSLEWRATE_P0, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB7_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB8_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_B},
     };
 
     static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR43[4] __attribute__ ((aligned (4))) =
     {
         // CH_A ANIB 5,6
-        {scomt::mp::DWC_DDRPHYA_ANIB5_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
-        {scomt::mp::DWC_DDRPHYA_ANIB6_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB5_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_A},
+        {scomt::mp::DWC_DDRPHYA_ANIB6_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_A},
         // CH_B ANIB 7,8
-        {scomt::mp::DWC_DDRPHYA_ANIB7_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
-        {scomt::mp::DWC_DDRPHYA_ANIB8_BASE0_ATXIMPEDANCE, mss::ody::sizes::CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB7_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_B},
+        {scomt::mp::DWC_DDRPHYA_ANIB8_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_B},
     };
 
     // TxSlewRiseCK
