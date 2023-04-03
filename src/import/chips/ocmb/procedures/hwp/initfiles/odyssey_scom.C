@@ -58,8 +58,8 @@ constexpr uint64_t literal_40 = 40;
 constexpr uint64_t literal_1023 = 1023;
 constexpr uint64_t literal_256 = 256;
 constexpr uint64_t literal_24 = 24;
-constexpr uint64_t literal_15 = 15;
 constexpr uint64_t literal_13 = 13;
+constexpr uint64_t literal_15 = 15;
 constexpr uint64_t literal_17 = 17;
 constexpr uint64_t literal_19 = 19;
 constexpr uint64_t literal_9 = 9;
@@ -130,10 +130,10 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         fapi2::ATTR_MEM_EFF_DRAM_WIDTH_Type l_TGT1_ATTR_MEM_EFF_DRAM_WIDTH;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_WIDTH));
         uint64_t l_def_C10_EN = (l_TGT1_ATTR_MEM_EFF_DRAM_WIDTH[literal_0] != literal_8);
+        uint64_t l_def_D_EN = (l_TGT0_ATTR_MEM_EFF_DDR5_MEM_PORT_ENABLE == literal_3);
         fapi2::ATTR_MEM_3DS_HEIGHT_Type l_TGT1_ATTR_MEM_3DS_HEIGHT;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_3DS_HEIGHT, TGT1, l_TGT1_ATTR_MEM_3DS_HEIGHT));
         uint64_t l_def_S2_EN = (l_TGT1_ATTR_MEM_3DS_HEIGHT[literal_0] != literal_0);
-        uint64_t l_def_D_EN = (l_TGT0_ATTR_MEM_EFF_DDR5_MEM_PORT_ENABLE == literal_3);
         uint64_t l_def_S1_EN = (l_TGT1_ATTR_MEM_3DS_HEIGHT[literal_0] == literal_4);
         fapi2::ATTR_MEM_EFF_DIMM_TYPE_Type l_TGT1_ATTR_MEM_EFF_DIMM_TYPE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_TYPE, TGT1, l_TGT1_ATTR_MEM_EFF_DIMM_TYPE));
@@ -389,11 +389,16 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             {
                 l_scom_buffer.insert<19, 5, 59, uint64_t>(literal_0 );
             }
-            else if (((l_def_M_EN == literal_1) && (l_def_C10_EN == literal_0)))
+            else if ((((l_def_M_EN == literal_1) && (l_def_D_EN == literal_0)) && (l_def_C10_EN == literal_0)))
+            {
+                l_scom_buffer.insert<19, 5, 59, uint64_t>(literal_13 );
+            }
+            else if (((((l_def_M_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_C10_EN == literal_0))
+                      || (((l_def_M_EN == literal_1) && (l_def_D_EN == literal_0)) && (l_def_C10_EN == literal_1))))
             {
                 l_scom_buffer.insert<19, 5, 59, uint64_t>(literal_14 );
             }
-            else if (((l_def_M_EN == literal_1) && (l_def_C10_EN == literal_1)))
+            else if ((((l_def_M_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_C10_EN == literal_1)))
             {
                 l_scom_buffer.insert<19, 5, 59, uint64_t>(literal_15 );
             }
@@ -403,36 +408,56 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             {
                 l_scom_buffer.insert<51, 5, 59, uint64_t>(literal_13 );
             }
-            else if (((((l_def_D_EN == literal_1) && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_0))
-                      && (l_def_C10_EN == literal_0)))
+            else if ((((((((l_def_D_EN == literal_1) && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_0))
+                         && (l_def_C10_EN == literal_0)) || (((((l_def_D_EN == literal_0) && (l_def_S2_EN == literal_1))
+                                 && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0)))
+                       || ((((l_def_D_EN == literal_0) && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_1))
+                           && (l_def_C10_EN == literal_0))) || ((((l_def_D_EN == literal_0) && (l_def_S2_EN == literal_0))
+                                   && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))))
             {
                 l_scom_buffer.insert<51, 5, 59, uint64_t>(literal_14 );
             }
-            else if (((((((l_def_S1_EN == literal_0) && (l_def_S2_EN == literal_1)) && (l_def_M_EN == literal_0))
-                        && (l_def_C10_EN == literal_0)) || ((((l_def_S1_EN == literal_0) && (l_def_S2_EN == literal_0))
-                                && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0))) || ((((l_def_S1_EN == literal_0)
-                                        && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))))
+            else if ((((((((((((l_def_D_EN == literal_1) && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_0))
+                             && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0)) || ((((l_def_D_EN == literal_1)
+                                     && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0)))
+                          || ((((l_def_D_EN == literal_1) && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_0))
+                              && (l_def_C10_EN == literal_1))) || (((((l_def_D_EN == literal_0) && (l_def_S2_EN == literal_1))
+                                      && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0)))
+                        || (((((l_def_D_EN == literal_0) && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_0))
+                             && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))) || ((((l_def_D_EN == literal_0)
+                                     && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1)))
+                      || (((((l_def_D_EN == literal_0) && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_1))
+                           && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0))))
             {
                 l_scom_buffer.insert<51, 5, 59, uint64_t>(literal_15 );
             }
-            else if ((((((((l_def_S1_EN == literal_1) && (l_def_S2_EN == literal_1)) && (l_def_M_EN == literal_0))
-                         && (l_def_C10_EN == literal_0)) || ((((l_def_S1_EN == literal_0) && (l_def_S2_EN == literal_1))
-                                 && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0))) || ((((l_def_S1_EN == literal_0)
-                                         && (l_def_S2_EN == literal_1)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1)))
-                      || ((((l_def_S1_EN == literal_0) && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_1))
-                          && (l_def_C10_EN == literal_1))))
+            else if ((((((((((((l_def_D_EN == literal_1) && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_1))
+                             && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0)) || (((((l_def_D_EN == literal_1)
+                                     && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_1))
+                                     && (l_def_C10_EN == literal_0))) || (((((l_def_D_EN == literal_1) && (l_def_S2_EN == literal_1))
+                                             && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1)))
+                         || (((((l_def_D_EN == literal_1) && (l_def_S2_EN == literal_0)) && (l_def_S1_EN == literal_0))
+                              && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1))) || (((((l_def_D_EN == literal_0)
+                                      && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_1))
+                                      && (l_def_C10_EN == literal_1))) || (((((l_def_D_EN == literal_0) && (l_def_S2_EN == literal_1))
+                                              && (l_def_S1_EN == literal_1)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0)))
+                      || (((((l_def_D_EN == literal_0) && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_1))
+                           && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))))
             {
                 l_scom_buffer.insert<51, 5, 59, uint64_t>(literal_16 );
             }
-            else if (((((((l_def_S1_EN == literal_1) && (l_def_S2_EN == literal_1)) && (l_def_M_EN == literal_1))
-                        && (l_def_C10_EN == literal_0)) || ((((l_def_S1_EN == literal_1) && (l_def_S2_EN == literal_1))
-                                && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))) || ((((l_def_S1_EN == literal_0)
-                                        && (l_def_S2_EN == literal_1)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1))))
+            else if (((((((((l_def_D_EN == literal_1) && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_1))
+                          && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0)) || (((((l_def_D_EN == literal_1)
+                                  && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_1)) && (l_def_M_EN == literal_0))
+                                  && (l_def_C10_EN == literal_1))) || (((((l_def_D_EN == literal_1) && (l_def_S2_EN == literal_1))
+                                          && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1)))
+                      || (((((l_def_D_EN == literal_0) && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_1))
+                           && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1))))
             {
                 l_scom_buffer.insert<51, 5, 59, uint64_t>(literal_17 );
             }
-            else if (((((l_def_S1_EN == literal_1) && (l_def_S2_EN == literal_1)) && (l_def_M_EN == literal_1))
-                      && (l_def_C10_EN == literal_1)))
+            else if ((((((l_def_D_EN == literal_1) && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_1))
+                       && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1)))
             {
                 l_scom_buffer.insert<51, 5, 59, uint64_t>(literal_18 );
             }
@@ -441,39 +466,67 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             {
                 l_scom_buffer.insert<43, 5, 59, uint64_t>(literal_0 );
             }
-            else if (((((l_def_R16_EN == literal_1) && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_0))
-                      && (l_def_C10_EN == literal_0)))
+            else if ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_0)) && (l_def_S2_EN == literal_0))
+                       && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0)))
+            {
+                l_scom_buffer.insert<43, 5, 59, uint64_t>(literal_14 );
+            }
+            else if (((((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_S2_EN == literal_0))
+                          && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0)) || ((((((l_def_R16_EN == literal_1)
+                                  && (l_def_D_EN == literal_0)) && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_0))
+                                  && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0))) || (((((l_def_R16_EN == literal_1)
+                                          && (l_def_D_EN == literal_0)) && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_1))
+                                          && (l_def_C10_EN == literal_0))) || (((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_0))
+                                                  && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))))
             {
                 l_scom_buffer.insert<43, 5, 59, uint64_t>(literal_15 );
             }
-            else if ((((((((l_def_R16_EN == literal_1) && (l_def_S1_EN == literal_0)) && (l_def_S2_EN == literal_1))
-                         && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0)) || (((((l_def_R16_EN == literal_1)
-                                 && (l_def_S1_EN == literal_0)) && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_1))
-                                 && (l_def_C10_EN == literal_0))) || (((((l_def_R16_EN == literal_1) && (l_def_S1_EN == literal_0))
-                                         && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))))
+            else if (((((((((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_S2_EN == literal_1))
+                              && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0))
+                           || (((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_S2_EN == literal_0))
+                                && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0))) || (((((l_def_R16_EN == literal_1)
+                                        && (l_def_D_EN == literal_1)) && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_0))
+                                        && (l_def_C10_EN == literal_1))) || ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_0))
+                                                && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_1))
+                                                && (l_def_C10_EN == literal_0))) || ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_0))
+                                                        && (l_def_S2_EN == literal_1)) && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_0))
+                                                        && (l_def_C10_EN == literal_1))) || (((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_0))
+                                                                && (l_def_S2_EN == literal_0)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1)))
+                      || ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_0)) && (l_def_S2_EN == literal_1))
+                            && (l_def_S1_EN == literal_1)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0))))
             {
                 l_scom_buffer.insert<43, 5, 59, uint64_t>(literal_16 );
             }
-            else if (((((((((l_def_R16_EN == literal_1) && (l_def_S1_EN == literal_1)) && (l_def_S2_EN == literal_1))
-                          && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0)) || (((((l_def_R16_EN == literal_1)
-                                  && (l_def_S1_EN == literal_0)) && (l_def_S2_EN == literal_1)) && (l_def_M_EN == literal_1))
-                                  && (l_def_C10_EN == literal_0))) || (((((l_def_R16_EN == literal_1) && (l_def_S1_EN == literal_0))
-                                          && (l_def_S2_EN == literal_1)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1)))
-                      || (((((l_def_R16_EN == literal_1) && (l_def_S1_EN == literal_0)) && (l_def_S2_EN == literal_0))
-                           && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1))))
+            else if (((((((((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_S2_EN == literal_1))
+                              && (l_def_S1_EN == literal_1)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0))
+                           || ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_S2_EN == literal_1))
+                                 && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0)))
+                          || ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_S2_EN == literal_1))
+                                && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1)))
+                         || ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_S2_EN == literal_0))
+                               && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1)))
+                        || ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_0)) && (l_def_S2_EN == literal_1))
+                              && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1)))
+                       || ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_0)) && (l_def_S2_EN == literal_1))
+                             && (l_def_S1_EN == literal_1)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0)))
+                      || ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_0)) && (l_def_S2_EN == literal_1))
+                            && (l_def_S1_EN == literal_1)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))))
             {
                 l_scom_buffer.insert<43, 5, 59, uint64_t>(literal_17 );
             }
-            else if ((((((((l_def_R16_EN == literal_1) && (l_def_S1_EN == literal_1)) && (l_def_S2_EN == literal_1))
-                         && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0)) || (((((l_def_R16_EN == literal_1)
-                                 && (l_def_S1_EN == literal_1)) && (l_def_S2_EN == literal_1)) && (l_def_M_EN == literal_0))
-                                 && (l_def_C10_EN == literal_1))) || (((((l_def_R16_EN == literal_1) && (l_def_S1_EN == literal_0))
-                                         && (l_def_S2_EN == literal_1)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1))))
+            else if ((((((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_S2_EN == literal_1))
+                           && (l_def_S1_EN == literal_1)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0))
+                        || ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_S2_EN == literal_1))
+                              && (l_def_S1_EN == literal_1)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1)))
+                       || ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_S2_EN == literal_1))
+                             && (l_def_S1_EN == literal_0)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1)))
+                      || ((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_0)) && (l_def_S2_EN == literal_1))
+                            && (l_def_S1_EN == literal_1)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1))))
             {
                 l_scom_buffer.insert<43, 5, 59, uint64_t>(literal_18 );
             }
-            else if ((((((l_def_R16_EN == literal_1) && (l_def_S1_EN == literal_1)) && (l_def_S2_EN == literal_1))
-                       && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1)))
+            else if (((((((l_def_R16_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_S2_EN == literal_1))
+                        && (l_def_S1_EN == literal_1)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1)))
             {
                 l_scom_buffer.insert<43, 5, 59, uint64_t>(literal_19 );
             }
@@ -531,16 +584,27 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             {
                 l_scom_buffer.insert<19, 5, 59, uint64_t>(literal_0 );
             }
-            else if ((((l_def_S2_EN == literal_1) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0)))
+            else if (((((l_def_S2_EN == literal_1) && (l_def_D_EN == literal_0)) && (l_def_M_EN == literal_0))
+                      && (l_def_C10_EN == literal_0)))
+            {
+                l_scom_buffer.insert<19, 5, 59, uint64_t>(literal_13 );
+            }
+            else if (((((((l_def_S2_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_M_EN == literal_0))
+                        && (l_def_C10_EN == literal_0)) || ((((l_def_S2_EN == literal_1) && (l_def_D_EN == literal_0))
+                                && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0))) || ((((l_def_S2_EN == literal_1)
+                                        && (l_def_D_EN == literal_0)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))))
             {
                 l_scom_buffer.insert<19, 5, 59, uint64_t>(literal_14 );
             }
-            else if (((((l_def_S2_EN == literal_1) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0))
-                      || (((l_def_S2_EN == literal_1) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))))
+            else if (((((((l_def_S2_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_M_EN == literal_1))
+                        && (l_def_C10_EN == literal_0)) || ((((l_def_S2_EN == literal_1) && (l_def_D_EN == literal_1))
+                                && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))) || ((((l_def_S2_EN == literal_1)
+                                        && (l_def_D_EN == literal_0)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1))))
             {
                 l_scom_buffer.insert<19, 5, 59, uint64_t>(literal_15 );
             }
-            else if ((((l_def_S2_EN == literal_1) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1)))
+            else if (((((l_def_S2_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_M_EN == literal_1))
+                      && (l_def_C10_EN == literal_1)))
             {
                 l_scom_buffer.insert<19, 5, 59, uint64_t>(literal_16 );
             }
@@ -549,16 +613,27 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             {
                 l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_0 );
             }
-            else if ((((l_def_S1_EN == literal_1) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_0)))
+            else if (((((l_def_S1_EN == literal_1) && (l_def_D_EN == literal_0)) && (l_def_M_EN == literal_0))
+                      && (l_def_C10_EN == literal_0)))
+            {
+                l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_14 );
+            }
+            else if (((((((l_def_S1_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_M_EN == literal_0))
+                        && (l_def_C10_EN == literal_0)) || ((((l_def_S1_EN == literal_1) && (l_def_D_EN == literal_0))
+                                && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0))) || ((((l_def_S1_EN == literal_1)
+                                        && (l_def_D_EN == literal_0)) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))))
             {
                 l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_15 );
             }
-            else if (((((l_def_S1_EN == literal_1) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_0))
-                      || (((l_def_S1_EN == literal_1) && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))))
+            else if (((((((l_def_S1_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_M_EN == literal_1))
+                        && (l_def_C10_EN == literal_0)) || ((((l_def_S1_EN == literal_1) && (l_def_D_EN == literal_1))
+                                && (l_def_M_EN == literal_0)) && (l_def_C10_EN == literal_1))) || ((((l_def_S1_EN == literal_1)
+                                        && (l_def_D_EN == literal_0)) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1))))
             {
                 l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_16 );
             }
-            else if ((((l_def_S1_EN == literal_1) && (l_def_M_EN == literal_1)) && (l_def_C10_EN == literal_1)))
+            else if (((((l_def_S1_EN == literal_1) && (l_def_D_EN == literal_1)) && (l_def_M_EN == literal_1))
+                      && (l_def_C10_EN == literal_1)))
             {
                 l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_17 );
             }
