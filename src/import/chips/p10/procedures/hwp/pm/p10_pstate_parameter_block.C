@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1188,7 +1188,16 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         //Compute dds slopes
         compute_dds_slopes(io_globalppb);
 
-        float pstatef = (float)(iv_attrs.attr_pstate0_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
+        float pstatef = 0;
+        if (iv_attrs.attr_extended_freq_mode)
+        {
+            pstatef = (float)(5050 * 1000) /(float)(iv_frequency_step_khz);
+        }
+        else
+        {
+            pstatef = (float)(iv_attrs.attr_pstate0_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
+        }
+
         io_globalppb->base.dpll_pstate0_value = revle32((Pstate)internal_round(pstatef));
 
         FAPI_INF("l_globalppb.dpll_pstate0_value %X (%d)",
@@ -1859,6 +1868,7 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR(ATTR_FREQ_BIAS,                            FAPI_SYSTEM,  attr_freq_bias);
     PPB_GET_ATTR(ATTR_FREQ_DPLL_REFCLOCK_KHZ,               FAPI_SYSTEM,  attr_freq_proc_refclock_khz);
     PPB_GET_ATTR(ATTR_HW543384_WAR_MODE,                    FAPI_SYSTEM,  attr_war_mode);
+    PPB_GET_ATTR(ATTR_EXTENDED_FREQ_MODE,                   FAPI_SYSTEM,  attr_extended_freq_mode);
 
 
     PPB_GET_ATTR(ATTR_SYSTEM_THROTTLE_PSTATE_NUMBER_LIMIT,  FAPI_SYSTEM,  attr_throttle_pstate_number_limit);

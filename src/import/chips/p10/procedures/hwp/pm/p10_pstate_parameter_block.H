@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -236,6 +236,8 @@ typedef struct
     int8_t attr_dds_trip_offset_adjust[NUM_OP_POINTS];
 
     uint32_t attr_dvfs_adjustment;
+
+    uint32_t attr_extended_freq_mode;
 
 } AttributeList;
 
