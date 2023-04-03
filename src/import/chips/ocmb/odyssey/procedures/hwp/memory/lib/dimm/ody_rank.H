@@ -38,6 +38,7 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/mss_rank.H>
+#include <mss_generic_attribute_getters.H>
 
 namespace mss
 {
@@ -80,8 +81,21 @@ template <>
 inline fapi2::ReturnCode phy_rank_swizzle_workaround<mss::mc_type::ODYSSEY>(const
         fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& io_phy_rank)
 {
-    // No workaround needed at this time
-    return fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_redundant_cs = 0;
+    FAPI_TRY(mss::attr::get_ddr5_redundant_cs_en(i_target, l_redundant_cs));
+
+    // If redundant CS is enabled, the PHY needs two times the number of our ranks
+    // redundant CS means that half of the DRAM are hooked up to CS 0 and half to CS 1 for our port rank 0 in redundant mode
+    // likewise, CS2/3 are used for port rank 1 in redundant mode
+    // As such, the PHY needs to configure 2 * num_master_ranks
+    if(l_redundant_cs == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_ENABLE)
+    {
+        constexpr uint8_t NUM_CS_PER_REDUNDANT_RANK = 2;
+        io_phy_rank *= NUM_CS_PER_REDUNDANT_RANK;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -94,8 +108,21 @@ template <>
 inline fapi2::ReturnCode phy_rank_swizzle_workaround<mss::mc_type::ODYSSEY>(const
         fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, uint8_t& io_phy_rank)
 {
-    // No workaround needed at this time
-    return fapi2::FAPI2_RC_SUCCESS;
+    uint8_t l_redundant_cs[2] = {0};
+    FAPI_TRY(mss::attr::get_ddr5_redundant_cs_en(i_target, l_redundant_cs));
+
+    // If redundant CS is enabled, the PHY needs two times the number of our ranks
+    // redundant CS means that half of the DRAM are hooked up to CS 0 and half to CS 1 for our port rank 0 in redundant mode
+    // likewise, CS2/3 are used for port rank 1 in redundant mode
+    // As such, the PHY needs to configure 2 * num_master_ranks
+    if(l_redundant_cs[0] == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_ENABLE)
+    {
+        constexpr uint8_t NUM_CS_PER_REDUNDANT_RANK = 2;
+        io_phy_rank *= NUM_CS_PER_REDUNDANT_RANK;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
