@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,7 @@
 #include <targeting/common/mfgFlagAccessors.H>
 #include <fapi2/plat_hw_access.H>
 #include <scom/scomif.H>
+#include <chipids.H>
 
 
 // Trace definition
@@ -1011,11 +1012,25 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
             else if(scomSetting.useI2cScom)
             {
                 //do I2CSCOM
-                l_err = deviceOp(i_opType,
-                                 i_target,
-                                 io_buffer,
-                                 io_buflen,
-                                 DEVICE_I2CSCOM_ADDRESS(i_addr));
+
+                // Route the SCOMs to Odyssey to the I2CR driver explicitly here.
+                if(i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_OCMB_CHIP &&
+                   i_target->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
+                {
+                    l_err = deviceOp(i_opType,
+                                     i_target,
+                                     io_buffer,
+                                     io_buflen,
+                                     DEVICE_I2CR_SCOM_ADDRESS(i_addr));
+                }
+                else
+                {
+                    l_err = deviceOp(i_opType,
+                                     i_target,
+                                     io_buffer,
+                                     io_buflen,
+                                     DEVICE_I2CSCOM_ADDRESS(i_addr));
+                }
                 if( l_err ) { break; }
 
             }
