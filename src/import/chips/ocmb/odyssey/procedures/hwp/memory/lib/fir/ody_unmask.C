@@ -455,7 +455,9 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::ODYSSEY>( const fapi2::Target<
                  .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_SCOM_PARITY_CLASS_UNRECOVERABLE>()
                  .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_ECC_CORRECTOR_INTERNAL_PARITY_ERROR>()
                  .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_ECC_RBUF_CE_DW0>()
+                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_ECC_RBUF_CE_DW1>()
                  .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_ECC_RBUF_UE_DW0>()
+                 .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_ECC_RBUF_UE_DW1>()
                  .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_TLXT_RDF_RBUF_PERR>()
                  .write(), "Failed to Write RDF FIR register " GENTARGTIDFORMAT, GENTARGTID(l_port));
     }
