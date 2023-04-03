@@ -23,15 +23,59 @@
 #
 # IBM_PROLOG_END_TAG
 
+bold=$(shell tput bold)
+normal=$(shell tput sgr0)
 
-%.dce.lid: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(PROJECT_ROOT)/img/hbicore.list.bz2
-	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE)" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@.intermediate $(INCFLAGS)
-	$(ROOTPATH)/src/build/tools/dce/preplib.py $@.intermediate
-	mv $@.intermediate.lid $@
-	@echo Copy $@ to the BMC
+ifdef DCE_NO_LISTING_FILE
+DCE_LISTING_FILE :=
+DCE_TEST_LISTING_FILE :=
+else
+DCE_LISTING_FILE := %.dce.lid.debug
+DCE_TEST_LISTING_FILE := %.dce.test.lid.debug
+endif
 
-%.dce.test.lid: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(PROJECT_ROOT)/img/hbicore_test.list.bz2
-	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE)" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@.intermediate $(INCFLAGS)
-	HB_DCE_TEST_IMAGE=1 $(ROOTPATH)/src/build/tools/dce/preplib.py $@.intermediate
-	mv $@.intermediate.lid $@
-	@echo Copy $@ to the BMC
+# Rules for creating the DCE lid and the debug listing file.
+
+.PRECIOUS: %.dce.lid.debug
+%.dce.lid.debug: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(PROJECT_ROOT)/img/hbicore.list.bz2
+	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -gz" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@ $(INCFLAGS) >/dev/null 2>&1
+	$(OBJDUMP) --source -d $@ > $@.list
+
+.PRECIOUS: %.dce.lid.intermediate
+%.dce.lid.intermediate: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(PROJECT_ROOT)/img/hbicore.list.bz2
+	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -s" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@ $(INCFLAGS)
+	$(ROOTPATH)/src/build/tools/dce/preplib.py $@
+
+%.dce.lid: %.dce.lid.intermediate $(DCE_LISTING_FILE)
+	cp $@.intermediate.lid $@
+	@echo "$(bold)Build complete.$(normal)"
+	@echo "$(bold)Copy $@ to the BMC to run it.$(normal)"
+	@if [[ "$(DCE_LISTING_FILE)" ]] ; then \
+	    echo "$(bold)Assembly listing file is at $@.debug.list for debugging crashes.$(normal)" ; \
+	fi
+	@if [[ ! "$(MAKEFLAGS)" =~ "-j" ]] ; then \
+	    echo "$(bold)Note: Try running make with -j to speed things up.$(normal)"; \
+	fi
+
+# Test image versions of the above rules, for standalone SIMICS.
+
+.PRECIOUS: %.dce.test.lid.debug
+%.dce.test.lid.debug: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(PROJECT_ROOT)/img/hbicore_test.list.bz2
+	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -gz" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@ $(INCFLAGS) >/dev/null 2>&1
+	$(OBJDUMP) --source -d $@ > $@.list
+
+.PRECIOUS: %.dce.test.lid.intermediate
+%.dce.test.lid.intermediate: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(PROJECT_ROOT)/img/hbicore_test.list.bz2
+	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -s" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@ $(INCFLAGS)
+	HB_DCE_TEST_IMAGE=1 $(ROOTPATH)/src/build/tools/dce/preplib.py $@
+
+%.dce.test.lid: %.dce.test.lid.intermediate $(DCE_TEST_LISTING_FILE)
+	cp $@.intermediate.lid $@
+	@echo "$(bold)Build complete.$(normal)"
+	@echo "$(bold)Run $@ with hb-executeDCELid SIMICS.$(normal)"
+	@if [[ "$(DCE_LISTING_FILE)" ]] ; then \
+	    echo "$(bold)Assembly listing file is at $@.debug.list for debugging crashes.$(normal)" ; \
+	fi
+	@if [[ ! "$(MAKEFLAGS)" =~ "-j" ]] ; then \
+	    echo "$(bold)Note: Try running make with -j to speed things up.$(normal)"; \
+	fi

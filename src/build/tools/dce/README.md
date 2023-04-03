@@ -75,11 +75,11 @@ dump via PLDM.
 
 The entrypoint of every DCE program is a function with the signature `int main()`.
 
-Then run `make foo.dce.lid` (i.e. replace the '.C' suffix with '.dce.lid') from the project root.
+Then run `make foo.dce.lid -j` (i.e. replace the '.C' suffix with '.dce.lid') from the project root.
 You will see output similar to this:
 
 ```bash
-$ make foo.dce.lid
+$ make foo.dce.lid -j
 ./src/build/tools/dce/dce-compile "foo.C" -o foo.dce.lid.intermediate -I./src/include/ -I./src/subtree/ -I./obj/genfiles
 + /opt/mcp/shared/powerpc64-gcc-20190822/bin/powerpc64le-buildroot-linux-gnu-g++ -D__HOSTBOOT_MODULE=DCE -DNO_INITIALIZER_LIST -DNO_PLAT_STD_STRING_SUPPORT -D__FAPI -include config.h -Os -nostdlib -nostdinc -g -mno-vsx -mno-altivec -Werror -Wall -mtraceback=no -pipe -ffunction-sections -fdata-sections -ffreestanding -mbig-endian -DFAPI2_ENABLE_PLATFORM_GET_TARGET -DCOMPILETIME_TRACEHASH -nostdinc++ -fno-rtti -fno-exceptions -Werror -Wall -fuse-cxa-atexit -std=gnu++14 -s -Os -nostdinc -nostdlib -nostartfiles -fPIC -Wl,-z,norelro -Wl,-z,max-page-size=1 -fno-zero-initialized-in-bss -mabi=elfv1 -I /esw/san5/zach/hostboot-dce-test/src/include -I /esw/san5/zach/hostboot-dce-test/src/include/usr -I /esw/san5/zach/hostboot-dce-test/src/subtree -I /esw/san5/zach/hostboot-dce-test/obj/genfiles -shared foo.C -o foo.dce.lid.intermediate -I./src/include/ -I./src/subtree/ -I./obj/genfiles -T /esw/san5/zach/hostboot-dce-test/src/build/tools/dce/dce.ld
 ./src/build/tools/dce/preplib.py foo.dce.lid.intermediate
@@ -104,10 +104,11 @@ machine to respond to DCE requests. Make sure that secure mode is disabled befor
 Copy the LID to the patch folder on the BMC and name it `dcec0de.lid`:
 
 ```bash
+# (Rsync is faster than scp in most circumstances if you can ues that instead.)
 $ scp foo.dce.lid root@hostname:/usr/local/share/hostfw/running/dcec0de.lid
 ```
 
-You can also copy the executor script to the BMC (skip this step if you already have the script on the BMC):
+Also copy the executor script to the BMC (skip this step if you already have the script on the BMC):
 
 ```bash
 $ scp dce-bmc-invoke.sh root@hostname:/tmp
@@ -161,7 +162,7 @@ Run `./hb workon` and then build the DCE LID with `make` as usual:
 
 ```bash
 $ ./hb workon
-$ make /path/to/source/file/foo.dce.lid
+$ make /path/to/source/file/foo.dce.lid -j
 ```
 
 Then follow the instructions in the example above to copy your files to the BMC.
@@ -171,7 +172,8 @@ Then follow the instructions in the example above to copy your files to the BMC.
 Using DCE with standalone SIMICS is similar to the above, but is a bit simpler:
 
 1. Build for standalone Hostboot as normal and prime your sandbox with the `--test` flag.
-2. Build your code with `make myfile.dce.test.lid`. (Note the suffix `dce.test.lid` instead of the usual `dce.lid`.)
+2. Build your code with `make myfile.dce.test.lid -j`. (Note the suffix `dce.test.lid` instead of the usual `dce.lid`,
+   which causes DCE to link your code with the "test" HB image.)
 3. Launch SIMICS, and execute the `hb-pauseIstepsAt <major> <minor>` command to ask Hostboot to wait at the beginning
    of the Istep where you want to run your code. (For example `hb-pauseIstepsAt 6 7` for Istep 6.7.)
 4. Optionally run `hb-simicsLPCConsole` to redirect the LPC console to the SIMICS console (to make it easier to see
@@ -180,7 +182,43 @@ Using DCE with standalone SIMICS is similar to the above, but is a bit simpler:
 6. Run `hb-executeDCELid path/to/myfile.dce.test.lid` to execute your code. You can rebuild (step 2) and rerun as
    desired without having to restart Hostboot.
 
+## DCE library functions
+
+DCE has a library of built-in functions to make iterative development and debugging easier.
+
+```cpp
+void dce_hexdump(const void* data, size_t size);
+```
+
+Dumps the given data out in hexdump format to the console.
+
 ## Extras
+
+### Assembly listing files
+
+By default, DCE compilation will produce an assembly listing file for your program. If your main file is called
+`code.C`, this listing file appears at `code.dce[.test].lid.debug.list`.
+
+To use this to debug crashes in your DCE code, locate a line that looks like this in your console output:
+
+```
+ - DCE: Invoking code (.data() = 0x400000000, nip = 0x400008208, toc = 0x40001ac00, stackaddr = 0x10120bcff00, elf = 0x400002000)
+```
+
+This shows that the base memory address of the ELF file is 0x400002000.
+
+Then, if your backtrace looks like this, for example:
+
+```
+<-0xE2E4<-0x122E8<-0x107F0<-0x166F4<-0x40000BF2C<-0x40000C1CC<-0x40000A000<-0x400007D84<-0x400008258<-0x40A6D644<-0x26E4
+```
+
+you can see that several of the stack frames such as 0x40000BF2C and 0x40000C1CC etc. are within your ELF file. (The
+other addresses like 0xE2E4 and 0x122E8 are in Hostboot proper.)
+
+To find these address in your DCE listing, subtract the ELF base address from the return address, and look up that
+address in your listing file. For example, the address 0x40000BF2C in memory corresponds to the address 0x40000BF2C -
+0x400002000 = 0x9F2C in your DCE listing file.
 
 ### Module include directories
 
@@ -190,7 +228,7 @@ will be working from and run `make` from there:
 
 ```bash
 $ cd src/usr/sbeio
-$ make $PROJECT_ROOT/foo.dce.lid
+$ make $PROJECT_ROOT/foo.dce.lid -j
 ```
 
 This will compile your code with the same include paths that are used for the library in that folder.
@@ -199,7 +237,7 @@ If you need to add include directories to the compiler's search path, you can pr
 to the makefile:
 
 ```bash
-$ INCDIR=$PROJECT_ROOT/src/subtree/openbmc/pldm/libpldm/include/libpldm  make foo.dce.lid
+$ INCDIR=$PROJECT_ROOT/src/subtree/openbmc/pldm/libpldm/include/libpldm  make foo.dce.lid -j
 ```
 
 Note: any time you rebuild hbicore.bin you have to rebuild the DCE code lid too, because the linker needs to know the
@@ -299,7 +337,7 @@ int main()
 and on the command line, you would type:
 
 ```bash
-DCE_EXTRA_FILES="test.C test.H" make foo.dce.lid
+DCE_EXTRA_FILES="test.C test.H" make foo.dce.lid -j
 ```
 
 You can now copy the resulting LID onto the system and invoke it with the script as normal. Alternatively, if you place
