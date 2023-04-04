@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,8 +54,7 @@ extern "C"
     fapi2::ReturnCode ody_scrub(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
         FAPI_INF("Start ody scrub for %s", mss::c_str(i_target));
-        // Initialize memory and set firs accordingly
-        FAPI_TRY(mss::memdiags::mss_initialize_memory<mss::mc_type::ODYSSEY>(i_target));
+
         // Kickoff background scrub and unmask firs
         FAPI_TRY(mss::memdiags::mss_background_scrub_helper<mss::mc_type::ODYSSEY>(i_target));
 
