@@ -243,7 +243,7 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
             FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tINITENG | csr_Seq0BDisableFlag6_ADDR), 0x8060));
         }
 
-        FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tINITENG | csr_Seq0BDisableFlag7_ADDR), 0x6152));
+        FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tINITENG | csr_Seq0BDisableFlag7_ADDR), 0x6052));
 
         // Enable Async MAlert
         if(i_user_input_advanced.EnableMAlertAsync == 0x1)
@@ -258,39 +258,11 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
             FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Enabling MAlert Async", TARGTID);
         }
 
-        int PPTTrainSetup[4];
-
-        for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
-        {
-            p_addr = pstate << 20;
-
-            if (skip_training == 0)
-            {
-                // Enable PMI if training firmware was run
-                FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Enabling Phy Master Interface for DRAM drift compensation",
-                          TARGTID);
-                PPTTrainSetup[pstate] = (i_user_input_advanced.PhyMstrTrainInterval[pstate] << csr_PhyMstrTrainInterval_LSB) |
-                                        (i_user_input_advanced.PhyMstrMaxReqToAck[pstate] << csr_PhyMstrMaxReqToAck_LSB) |
-                                        (i_user_input_advanced.PhyMstrCtrlMode[pstate] << csr_PhyMstrCtrlMode_LSB);
-
-                FAPI_DBG (TARGTIDFORMAT
-                          " // [phyinit_I_loadPIEImage] Pstate=%d, Memclk=%dMHz, Programming PPTTrainSetup::PhyMstrTrainInterval to 0x%x",
-                          TARGTID, pstate, i_user_input_basic.Frequency[pstate], i_user_input_advanced.PhyMstrTrainInterval[pstate]);
-                FAPI_DBG (TARGTIDFORMAT
-                          " // [phyinit_I_loadPIEImage] Pstate=%d, Memclk=%dMHz, Programming PPTTrainSetup::PhyMstrMaxReqToAck to 0x%x",
-                          TARGTID, pstate, i_user_input_basic.Frequency[pstate], i_user_input_advanced.PhyMstrMaxReqToAck[pstate]);
-                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tMASTER | csr_PPTTrainSetup_ADDR),
-                         PPTTrainSetup[pstate]));
-            }
-
-            FAPI_DBG (TARGTIDFORMAT
-                      " // [phyinit_I_loadPIEImage] Pstate=%d, Memclk=%dMHz, Programming PPTTrainSetup2::PhyMstrFreqOverride to 0x3",
-                      TARGTID, pstate, i_user_input_basic.Frequency[pstate]);
-
-            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tMASTER | csr_PPTTrainSetup2_ADDR), 0x0003));
-        }
-
-        // Setting D5ACSMXlatSelect to 1
+        //##############################################################
+        //
+        // Program D5ACSMXlatSelect to 0x1
+        //
+        //##############################################################
         FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming D5ACSMXlatSelect to 0x1", TARGTID);
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_D5ACSMXlatSelect_ADDR), 0x0001));
     }
@@ -465,28 +437,15 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
                         TARGTID, i_user_input_basic.NumRank_dfi1);
         }
 
-        // RDIMM only
-        if(i_user_input_basic.DimmType != UDIMM)
+        FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming GPR4 to 0x%x\n", TARGTID, MaskCs_dfi0);
+        FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming GPR5 to 0x%x\n", TARGTID, MaskCs_dfi1);
+
+        for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
         {
-            FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming GPR4 to 0x%x\n", TARGTID, MaskCs_dfi0);
-            FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming GPR5 to 0x%x\n", TARGTID, MaskCs_dfi1);
-
-            for (pstate = 0; pstate < i_user_input_basic.NumPStates; pstate++)
-            {
-                p_addr = pstate << 20;
-                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tINITENG | csr_Seq0BGPR4_ADDR), MaskCs_dfi0));
-                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tINITENG | csr_Seq0BGPR5_ADDR), MaskCs_dfi1));
-            }
-
-            MaskCs_dfi0 = 0;
-            MaskCs_dfi1 = 0;
+            p_addr = pstate << 20;
+            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tINITENG | csr_Seq0BGPR4_ADDR), MaskCs_dfi0));
+            FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (p_addr | tINITENG | csr_Seq0BGPR5_ADDR), MaskCs_dfi1));
         }
-
-        FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming D5ACSM0MaskCs to 0x%x", TARGTID, MaskCs_dfi0);
-        FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_D5ACSM0MaskCs_ADDR), MaskCs_dfi0 ));
-
-        FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming D5ACSM1MaskCs to 0x%x", TARGTID, MaskCs_dfi1);
-        FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tMASTER | csr_D5ACSM1MaskCs_ADDR), MaskCs_dfi1 ));
 
         //##############################################################
         // Program Seq0BGPR6/D5ACSM<0/1>OuterLoopRepeatCnt
@@ -942,7 +901,7 @@ fapi_try_exit:
 #define ENABLE_BITS_3DS_EN                                     (0x00000002) // pUserInputAdvanced->en_3DS
 #define ENABLE_BITS_RTT_REDUNDANTCS_EN                         (0x00000004) // pUserInputAdvanced->special_feature_1_en || pUserInputAdvanced->rtt_en
 #define ENABLE_BITS_ALERT_RECOVERY_EN_RSTRXTRKSTATE_EN         (0x00000008) // pubRev >= 0x0330 && phyctx->userInputAdvanced.AlertRecoveryEnable==1 && phyctx->userInputAdvanced.RstRxTrkState==1
-#define ENABLE_BITS_REDUNDANTCS_EN                             (0x00000010) // pUserInputAdvanced->special_feature_1_en
+#define ENABLE_BITS_REDUNDANTCS_EN_RTT_DIS                     (0x00000010) // pUserInputAdvanced.special_feature_1_en==1 && pUserInputAdvanced.rtt_term_en!=1
 #define ENABLE_BITS_REDUNDANTCS_3DS_8_LOGICAL_RANKS            (0x00000020) // pUserInputAdvanced->special_feature_1_en & pUserInputAdvanced->en_3DS & PUserInputAdvanced->Num_Logical_Ranks==8
 #define ENABLE_BITS_NOREDUNDANTCS_3DS_8_LOGICAL_RANKS          (0x00000040) // !pUserInputAdvanced->special_feature_1_en & pUserInputAdvanced->en_3DS & PUserInputAdvanced->Num_Logical_Ranks==8
 #define ENABLE_BITS_REDUNDANTCS_3DS_16_LOGICAL_RANKS           (0x00000080) // pUserInputAdvanced->special_feature_1_en & pUserInputAdvanced->en_3DS & PUserInputAdvanced->Num_Logical_Ranks==16
@@ -957,10 +916,13 @@ fapi_try_exit:
 #define ENABLE_BITS_NOREDUNDANTCS_3DS_4_LOGICAL_RANKS          (0x00010000) // !pUserInputAdvanced->special_feature_1_en & pUserInputAdvanced->en_3DS & PUserInputAdvanced->Num_Logical_Ranks==4
 #define ENABLE_BITS_REDUNDANTCS_3DS_EN                         (0x00020000) // pUserInputAdvanced->special_feature_1_en & pUserInputAdvanced->en_3DS
 #define ENABLE_BITS_NOREDUNDANTCS_3DS_EN                       (0x00040000) // !pUserInputAdvanced->special_feature_1_en & pUserInputAdvanced->en_3DS
+#define ENABLE_BITS_VSH_ANALOG_CURRENTLOAD_LP2PWRSAVINGS_EN    (0x00080000) // phyctx->userInputAdvanced.LP2_PwrSavings_En && ((pubRev >= 0x0350 && pubRev < 0x0400) || (pubRev >= 0x0420)) 
 
 #define ENABLE_BITS_TYPE_GENERAL            0
 #define ENABLE_BITS_TYPE_RTT_A              1
 #define ENABLE_BITS_TYPE_RTT_B              2
+#define ENABLE_BITS_TYPE_RTT_REDUNDANT_A    3
+#define ENABLE_BITS_TYPE_RTT_REDUNDANT_B    4
 
 ///
 /// @brief Set enable bits based on PUB revision
@@ -995,9 +957,9 @@ void initRuntimeConfigEnableBits(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
         enableBits |= ENABLE_BITS_ALERT_RECOVERY_EN_RSTRXTRKSTATE_EN;
     }
 
-    if (i_user_input_advanced.special_feature_1_en)
+    if ((i_user_input_advanced.special_feature_1_en == 1) && (i_user_input_advanced.rtt_term_en != 1))
     {
-        enableBits |= ENABLE_BITS_REDUNDANTCS_EN;
+        enableBits |= ENABLE_BITS_REDUNDANTCS_EN_RTT_DIS;
     }
 
     if ((i_user_input_advanced.special_feature_1_en == 1) && (i_user_input_advanced.Num_Logical_Ranks == 8)
@@ -1084,6 +1046,11 @@ void initRuntimeConfigEnableBits(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
         enableBits |= ENABLE_BITS_NOREDUNDANTCS_3DS_EN;
     }
 
+    if (i_user_input_advanced.LP2_PwrSavings_En && ((pubRev >= 0x0350 && pubRev < 0x0400) || (pubRev >= 0x0420)))
+    {
+        enableBits |= ENABLE_BITS_VSH_ANALOG_CURRENTLOAD_LP2PWRSAVINGS_EN;
+    }
+
     io_runtime_config.enableBits[ENABLE_BITS_TYPE_GENERAL] = enableBits;
     FAPI_DBG (TARGTIDFORMAT " // [initRuntimeConfigEnableBits] enableBits[%u] = 0x%08x", TARGTID, 0, enableBits);
 
@@ -1116,11 +1083,13 @@ void initRuntimeConfigEnableBits(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
         {
             unsigned wr_rd_rtt_park = l_array[chan][rank];
             unsigned rtt_required = ((wr_rd_rtt_park >> 4) & 0xfu) | rank_bit;
-            FAPI_DBG (TARGTIDFORMAT " // [initRuntimeConfigEnableBits] WR_RD_RTT_PARK_%c%u = 0x%08x, rtt_required = 0x%08x",
-                      TARGTID,
-                      chan == 0 ? 'A' : 'B', rank, wr_rd_rtt_park);
 
-            FAPI_DBG (TARGTIDFORMAT " // [initRuntimeConfigEnableBits] rtt_required = 0x%08x", TARGTID, rtt_required);
+            if (i_user_input_advanced.special_feature_1_en == 1)
+            {
+                //copying zeroth bit to first and second bit to third
+                rtt_required = (rank > 1) ? (((rtt_required << 1) & 0x2) | (rtt_required & 0x1) | (0xc))
+                               : (((rtt_required << 1) & 0x8) | (rtt_required & 0x4) | (0x3));
+            }
 
             for(unsigned rtt = 0; rtt < 16; ++rtt)
             {
@@ -1138,10 +1107,16 @@ void initRuntimeConfigEnableBits(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
             }
         }
 
-        int disable_rtt = (i_user_input_advanced.special_feature_1_en == 1) || (i_user_input_advanced.rtt_term_en == 0) ;
-        io_runtime_config.enableBits[ENABLE_BITS_TYPE_RTT_A + chan] = (disable_rtt) ? 0x0 : enableBits;
-        FAPI_DBG (TARGTIDFORMAT " // [initRuntimeConfigEnableBits] enableBits[%u] = 0x%08x", TARGTID,
-                  ENABLE_BITS_TYPE_RTT_A + chan, (disable_rtt) ? 0x0 : enableBits );
+        int disable_rtt = (i_user_input_advanced.rtt_term_en == 0) ;
+        int special_feature_1_enabled = (i_user_input_advanced.special_feature_1_en == 1);
+        io_runtime_config.enableBits[ENABLE_BITS_TYPE_RTT_A + chan] = (disable_rtt
+                || special_feature_1_enabled) ? 0x0 : enableBits;
+        io_runtime_config.enableBits[ENABLE_BITS_TYPE_RTT_REDUNDANT_A + chan] = (disable_rtt
+                || (!special_feature_1_enabled)) ? 0x0 : enableBits;
+        FAPI_DBG (TARGTIDFORMAT " // [initRuntimeConfigEnableBits] enableBits[%u] = 0x%08x",
+                  TARGTID, ENABLE_BITS_TYPE_RTT_A + chan, (disable_rtt || special_feature_1_enabled) ? 0x0 : enableBits);
+        FAPI_DBG (TARGTIDFORMAT " // [initRuntimeConfigEnableBits] enableBits[%u] = 0x%08x",
+                  TARGTID, ENABLE_BITS_TYPE_RTT_REDUNDANT_A + chan, (disable_rtt || (!special_feature_1_enabled)) ? 0x0 : enableBits);
     }
 
     FAPI_DBG (TARGTIDFORMAT " // [initRuntimeConfigEnableBits] End of initRuntimeConfigEnableBits()", TARGTID);
