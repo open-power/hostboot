@@ -220,13 +220,23 @@ enum
     TRRDS_FINE_OFFSET                = SPD_FIRST_NORM_KEYWORD | 0x53,
     TCKMAX_FINE_OFFSET               = SPD_FIRST_NORM_KEYWORD | 0x54,
     BASE_CONFIG_CRC                  = SPD_FIRST_NORM_KEYWORD | 0x55,
-    MODULE_REVISION_CODE_DDR4        = MODULE_REVISION_CODE,
+    MODULE_REVISION_CODE_DDR4        = SPD_FIRST_NORM_KEYWORD | 0x56,
     DRAM_STEPPING                    = SPD_FIRST_NORM_KEYWORD | 0x57,
     MANUFACTURING_SECTION_CRC        = SPD_FIRST_NORM_KEYWORD | 0x58,
     NVM_INIT_TIME                    = SPD_FIRST_NORM_KEYWORD | 0x59,
     RAW_MODULE_PRODUCT_ID            = SPD_FIRST_NORM_KEYWORD | 0x5a,
     RAW_MODULE_MANUFACTURER_ID       = SPD_FIRST_NORM_KEYWORD | 0x5b,
-    SPD_LAST_NORM_KEYWORD            = SPD_FIRST_NORM_KEYWORD | 0x5b,
+    SDRAM_ADDRESSING                 = SPD_FIRST_NORM_KEYWORD | 0x5c,
+    DRAM_PRI_PACKAGE_OFFSET          = SPD_FIRST_NORM_KEYWORD | 0x5d,
+    MODULE_ORGANIZATION              = SPD_FIRST_NORM_KEYWORD | 0x5e,
+    MODULE_SDRAM_DENSITY_BANK        = SPD_FIRST_NORM_KEYWORD | 0x5f,
+    MFG_ID_MSB                       = SPD_FIRST_NORM_KEYWORD | 0x60,
+    MFG_ID_LSB                       = SPD_FIRST_NORM_KEYWORD | 0x61,
+    SN_BYTE0                         = SPD_FIRST_NORM_KEYWORD | 0x62,
+    SN_BYTE1                         = SPD_FIRST_NORM_KEYWORD | 0x63,
+    SN_BYTE2                         = SPD_FIRST_NORM_KEYWORD | 0x64,
+    SN_BYTE3                         = SPD_FIRST_NORM_KEYWORD | 0x65,
+    SPD_LAST_NORM_KEYWORD            = SPD_FIRST_NORM_KEYWORD | 0x65,
 
     // ==============================================================
     // Module Specific Keywords (Available for both DDR3 and DDR4 DIMMs)
@@ -450,6 +460,15 @@ enum
     // according to ver3 and ver4 JEDEC specs
     JEDEC_VER3_LRDIMM_VAL      = 0x0b,
     JEDEC_VER4_LRDIMM_VAL      = 0x04,
+};
+
+// Following enums are used for composing the ISDIMM PN FN SN and CCIN
+enum
+{
+    IBM_11S_PN_SIZE   = 0x07,
+    IBM_11S_FN_SIZE   = 0x07, // today FN is same as PN
+    IBM_11S_SN_SIZE   = 0x0C,
+    IBM_11S_CCIN_SIZE = 0x04,
 };
 
 

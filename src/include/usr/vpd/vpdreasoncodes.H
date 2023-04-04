@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -200,6 +200,10 @@ enum vpdReasonCode
     VPD_UNSUPPORTED_EEPROM_TYPE         = VPD_COMP_ID | 0x50,
     VPD_SPD_INVALID_PRIMARY_VPD         = VPD_COMP_ID | 0x51,
     VPD_SPD_UNEXPECTED_DDIMM_HEIGHT     = VPD_COMP_ID | 0x52,
+    VPD_ISDIMM_UNSUPPORTED_PN_FOR_FN    = VPD_COMP_ID | 0x53,
+    VPD_ISDIMM_UNSUPPORTED_PN_FOR_CCIN  = VPD_COMP_ID | 0x54,
+    VPD_ISDIMM_PROBLEM_READING_SPD_SIZE = VPD_COMP_ID | 0x55,
+    VPD_ISDIMM_PROBLEM_READING_SPD      = VPD_COMP_ID | 0x56,
 };
 
 

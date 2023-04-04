@@ -267,6 +267,365 @@ EEPROM_CONTENT_TYPE getEepromType( Target* i_target )
     return eepromType;
 }
 
+/**
+ * @brief This function sets the DIMM target CCIN Attribute
+ *
+ * @param[in] i_target - DIMM target
+ *
+ * @param[in] i_ccinNumber - CCIN number to set in attribute
+ *
+ * @return void
+ */
+void setDDR4CCIN ( Target * i_target, const char * i_ccinNumber)
+{
+    ATTR_FRU_CCIN_type l_CCIN = {0};
+    static_assert (sizeof(ATTR_FRU_CCIN_type) >= SPD::IBM_11S_CCIN_SIZE);
+    memcpy(&l_CCIN, i_ccinNumber, SPD::IBM_11S_CCIN_SIZE);
+    i_target->trySetAttr<ATTR_FRU_CCIN>(l_CCIN);
+}
+
+/**
+ * @brief This function sets the DIMM target SN Attribute
+ *
+ * @param[in] i_target - DIMM target
+ *
+ * @param[in] i_serialNumber - Serial number to set in attribute
+ *
+ * @return void
+ */
+void setDDR4SN ( Target * i_target, const char * i_serialNumber)
+{
+    ATTR_SERIAL_NUMBER_type l_SN = {0};
+    static_assert (sizeof(ATTR_SERIAL_NUMBER_type) >= SPD::IBM_11S_SN_SIZE);
+    memcpy(l_SN, i_serialNumber, SPD::IBM_11S_SN_SIZE);
+    i_target->trySetAttr<ATTR_SERIAL_NUMBER>(l_SN);
+}
+
+/**
+ * @brief This function sets the DIMM target PN Attribute
+ *
+ * @param[in] i_target - DIMM target
+ *
+ * @param[in] i_partNumber - Part number to set in attribute
+ *
+ * @return void
+ */
+void setDDR4PN ( Target * i_target, const char * i_partNumber)
+{
+    ATTR_PART_NUMBER_type l_PN = {0};
+    static_assert (sizeof(ATTR_PART_NUMBER_type) >= SPD::IBM_11S_PN_SIZE);
+    memcpy(l_PN, i_partNumber, SPD::IBM_11S_PN_SIZE);
+    i_target->trySetAttr<ATTR_PART_NUMBER>(l_PN);
+}
+
+/**
+ * @brief This function sets the DIMM target FN Attribute
+ *
+ * @param[in] i_target - DIMM target
+ *
+ * @param[in] i_fruNumber - FRU number to set in attribute
+ *
+ * @return void
+ */
+void setDDR4FN ( Target * i_target, const char * i_fruNumber)
+{
+    ATTR_FRU_NUMBER_type l_FN = {0};
+    // FN is same size as PN
+    static_assert (sizeof(ATTR_FRU_NUMBER_type) >= SPD::IBM_11S_FN_SIZE);
+    memcpy(l_FN, i_fruNumber, SPD::IBM_11S_FN_SIZE);
+    i_target->trySetAttr<ATTR_FRU_NUMBER>(l_FN);
+}
+
+/**
+ * @brief This function builds the DIMM target CCIN Attribute
+ *        (based on the previously calculated PN as a lookup)
+ *
+ * @param[in] i_target - DIMM target
+ *
+ * @param[in] i_partNumber - Part Number to map to pull the CCIN
+ *
+ * @param[in/out] io_ccinNumber - CCIN
+ *
+ *                Caller has initialized the io_ccinNumber
+ *                to null bytes
+ *
+ * @return void
+ */
+void buildDDR4CCIN ( Target * i_target, const char * i_partNumber, char * io_ccinNumber)
+{
+    std::pair<const char*, const char*> pn_ccin[] =
+    {
+        { "8421000", "324D" },
+        { "8421008", "324E" },
+        { "8529000", "324E" },
+        { "8529008", "324F" },
+        { "8529928", "325A" },
+        { "8529B28", "324C" },
+        { "8631008", "32BB" },
+        { "8631928", "32BC" },
+    };
+    static_assert (SPD::IBM_11S_PN_SIZE == 7);   // Future check to catch if things change since this table is using 7 char PN
+    static_assert (SPD::IBM_11S_CCIN_SIZE == 4); // Future check to catch if things change since this table is using 4 char CCIN
+    bool missing = true;
+    errlHndl_t l_err = nullptr;
+    for (const auto [ pn, ccin ] : pn_ccin)
+    {
+        if (!strcmp(pn, i_partNumber))
+        {
+            // ONLY copy IBM_11S_FN_SIZE, preserve the NULL byte
+            strncpy(io_ccinNumber, ccin, SPD::IBM_11S_CCIN_SIZE);
+            missing = false;
+            break;
+        }
+    }
+
+    if (missing)
+    {
+        // If we did -NOT- find the PN in the composed PN means that something
+        // changed and the part/spd is -NOT- in the known set of supported hw/pn's
+        // This is intended to show up in manufacturing to be reconciled, versus
+        // having a null CCIN value.
+
+        /*@
+         * @reasoncode       VPD::VPD_ISDIMM_UNSUPPORTED_PN_FOR_CCIN
+         * @moduleid         VPD::VPD_SPD_PRESENCE_DETECT
+         * @userdata1        target huid
+         * @userdata2        partNumber
+         * @devdesc          Unsupported partNumber
+         * @custdesc         Unexpected partNumber
+         */
+         l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                          VPD::VPD_SPD_PRESENCE_DETECT,
+                                          VPD::VPD_ISDIMM_UNSUPPORTED_PN_FOR_CCIN,
+                                          get_huid(i_target),
+                                          strtoul(i_partNumber, nullptr, 16),
+                                          ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+         l_err->addPartCallout( i_target,
+                              HWAS::VPD_PART_TYPE,
+                              HWAS::SRCI_PRIORITY_HIGH );
+
+         l_err->addHwCallout( i_target,
+                            HWAS::SRCI_PRIORITY_MED,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL );
+         errlCommit(l_err, VPD_COMP_ID);
+    }
+
+    return;
+}
+
+/**
+ * @brief This function builds the DIMM target FN Attribute
+ *        (based on the previously calculated PN as a lookup)
+ *
+ * @param[in] i_target - DIMM target
+ *
+ * @param[in] i_partNumber - Part Number to map to pull the CCIN
+ *
+ * @param[in/out] io_fruNumber - CCIN
+ *
+ *                Caller has initialized the io_fruNumber
+ *                to null bytes
+ *
+ * @return void
+ */
+void buildDDR4FN ( Target * i_target, const char * i_partNumber, char * io_fruNumber)
+{
+    std::pair<const char*, const char*> pn_fn[] =
+    {
+        { "8421000", "78P4191" },
+        { "8421008", "78P4192" },
+        { "8529000", "78P4197" },
+        { "8529008", "78P4198" },
+        { "8529928", "78P4199" },
+        { "8529B28", "78P4200" },
+        { "8631008", "78P6815" },
+        { "8631928", "78P6925" },
+    };
+    // PN and FN have same sizes
+    static_assert (SPD::IBM_11S_PN_SIZE == 7); // Future check to catch if things change since this table is using 7 char PN and FN
+    static_assert (SPD::IBM_11S_FN_SIZE == 7); // Future check to catch if things change since this table is using 7 char PN and FN
+    bool missing = true;
+    errlHndl_t l_err = nullptr;
+
+    for (const auto [ pn, fn ] : pn_fn)
+    {
+        if (!strcmp(pn, i_partNumber))
+        {
+            // ONLY copy IBM_11S_FN_SIZE, preserve the NULL byte
+            strncpy(io_fruNumber, fn, SPD::IBM_11S_FN_SIZE);
+            missing = false;
+            break;
+        }
+    }
+
+    if (missing)
+    {
+        // If we did -NOT- find the PN in the composed PN means that something
+        // changed and the part/spd is -NOT- in the known set of supported hw/pn's
+        // This is intended to show up in manufacturing to be reconciled, versus
+        // having a null FN value.
+
+        /*@
+         * @reasoncode       VPD::VPD_ISDIMM_UNSUPPORTED_PN_FOR_FN
+         * @moduleid         VPD::VPD_SPD_PRESENCE_DETECT
+         * @userdata1        target huid
+         * @userdata2        partNumber
+         * @devdesc          Unsupported partNumber
+         * @custdesc         Unexpected partNumber
+         */
+         l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                          VPD::VPD_SPD_PRESENCE_DETECT,
+                                          VPD::VPD_ISDIMM_UNSUPPORTED_PN_FOR_FN,
+                                          get_huid(i_target),
+                                          strtoul(i_partNumber, nullptr, 16),
+                                          ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+         l_err->addPartCallout( i_target,
+                              HWAS::VPD_PART_TYPE,
+                              HWAS::SRCI_PRIORITY_HIGH );
+
+         l_err->addHwCallout( i_target,
+                            HWAS::SRCI_PRIORITY_MED,
+                            HWAS::NO_DECONFIG,
+                            HWAS::GARD_NULL );
+         errlCommit(l_err, VPD_COMP_ID);
+    }
+
+    return;
+}
+
+/**
+ * @brief This function builds the DIMM target SN Attribute
+ *
+ * @param[in] i_SPD - Caller has populated the i_SPD buffer
+ *                    with the ENTIRE_SPD data
+ *
+ * @param[in/out] io_string - String will be composed of the
+ *                calculated SN
+ *
+ *                Caller has initialized the io_string
+ *                to null bytes
+ *
+ * @return void
+ */
+void buildDDR4SN ( const uint8_t * i_SPD, char * io_string)
+{
+    // First calculate the number of nibbles by composing the desired string
+    size_t num_nibbles = snprintf(NULL, 0, "%02X%02X%02X%02X%02X%02X",
+                        i_SPD[SPD::ddr4Data[SPD::MFG_ID_MSB].offset],  // byte 321  SPD enum=0x60
+                        i_SPD[SPD::ddr4Data[SPD::MFG_ID_LSB].offset],  // byte 320  SPD enum=0x61
+                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE0].offset],    // byte 325  SPD enum=0x62
+                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE1].offset],    // byte 326  SPD enum=0x63
+                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE2].offset],    // byte 327  SPD enum=0x64
+                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE3].offset]);   // byte 328  SPD enum=0x65
+    // We can have 12 bytes in the SN, the composed SN is only using 6 bytes today
+    assert( num_nibbles <= (2* SPD::IBM_11S_SN_SIZE) );
+    // Now copy the desired string to its output destination
+    snprintf(io_string, SPD::IBM_11S_SN_SIZE+1, "%02X%02X%02X%02X%02X%02X",
+                        i_SPD[SPD::ddr4Data[SPD::MFG_ID_MSB].offset],  // byte 321  SPD enum=0x60
+                        i_SPD[SPD::ddr4Data[SPD::MFG_ID_LSB].offset],  // byte 320  SPD enum=0x61
+                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE0].offset],    // byte 325  SPD enum=0x62
+                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE1].offset],    // byte 326  SPD enum=0x63
+                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE2].offset],    // byte 327  SPD enum=0x64
+                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE3].offset]);   // byte 328  SPD enum=0x65
+    return;
+}
+
+/**
+ * @brief This function builds the DIMM target PN Attribute
+ *
+ * @param[in] i_SPD - Caller has populated the i_SPD buffer
+ *                    with the ENTIRE_SPD data
+ *
+ * @param[in/out] io_string - String will be composed of the
+ *                calculated PN
+ *
+ *                Caller has initialized the io_string
+ *                to null bytes
+ *
+ * @return void
+ */
+void buildDDR4PN ( const uint8_t * i_SPD, char * io_string)
+{
+    // First calculate the number of nibbles by composing the desired string
+    size_t num_nibbles = snprintf(NULL, 0, "%02X%02X%02X%X",
+                        i_SPD[SPD::ddr4Data[SPD::MODULE_SDRAM_DENSITY_BANK].offset],    // byte  4 SPD enum=0x04
+                        i_SPD[SPD::ddr4Data[SPD::SDRAM_ADDRESSING].offset],             // byte  5 SPD enum=0x05
+                        i_SPD[SPD::ddr4Data[SPD::DRAM_PRI_PACKAGE_OFFSET].offset],      // byte  6 SPD enum=0x06
+                        i_SPD[SPD::ddr4Data[SPD::MODULE_ORGANIZATION].offset] & 0x0F);  // byte 12 SPD enum=0x0c
+    // We can have 7 bytes in the PN, the composed PN is only using 3.5 bytes today (MODULE_ORGANIZATION one nibble)
+    assert( num_nibbles <= (2* SPD::IBM_11S_PN_SIZE) );
+    // Now copy the desired string to its output destination
+    snprintf(io_string, SPD::IBM_11S_PN_SIZE+1, "%02X%02X%02X%X",
+                        i_SPD[SPD::ddr4Data[SPD::MODULE_SDRAM_DENSITY_BANK].offset],    // byte  4 SPD enum=0x04
+                        i_SPD[SPD::ddr4Data[SPD::SDRAM_ADDRESSING].offset],             // byte  5 SPD enum=0x05
+                        i_SPD[SPD::ddr4Data[SPD::DRAM_PRI_PACKAGE_OFFSET].offset],      // byte  6 SPD enum=0x06
+                        i_SPD[SPD::ddr4Data[SPD::MODULE_ORGANIZATION].offset] & 0x0F);  // byte 12 SPD enum=0x0c
+    return;
+}
+
+/**
+ * @brief This function will populate the DIMM target attributes with a composed
+ *        PN FN SN and CCIN
+ *
+ * @param[in] i_target - The DIMM target to populate the attributes:
+ *                           ATTR_PART_NUMBER
+ *                           ATTR_FRU_NUMBER
+ *                           ATTR_SERIAL_NUMBER
+ *                           ATTR_FRU_CCIN
+ *
+ * @return errlHndl_t - NULL if successful, otherwise a pointer to the error log
+ */
+errlHndl_t composeIsDimmVPD ( Target * i_target)
+{
+    errlHndl_t l_err = nullptr;
+    do
+    {
+    // Read ENTIRE SPD
+    size_t l_size = 0;
+    l_err = deviceRead(i_target, NULL, l_size, DEVICE_SPD_ADDRESS( SPD::ENTIRE_SPD ));
+    if (l_err)
+    {
+         TRACFCOMP(g_trac_spd, ERR_MRK"composeIsDimmVPD - Problem reading ENTIRE SPD for ISDIMM size HUID=0x%X", get_huid(i_target));
+         break;
+    }
+    uint8_t l_SPD_Data[l_size] = {0};
+    l_err = deviceRead(i_target, l_SPD_Data, l_size, DEVICE_SPD_ADDRESS( SPD::ENTIRE_SPD ));
+    if (l_err)
+    {
+         TRACFCOMP(g_trac_spd, ERR_MRK"composeIsDimmVPD - Problem reading SPD for ISDIMM HUID=0x%X", get_huid(i_target));
+         break;
+    }
+
+    char tmpSN[SPD::IBM_11S_SN_SIZE + 1] = {'\0'};
+    char tmpPN[SPD::IBM_11S_PN_SIZE + 1] = {'\0'};
+    char tmpFN[SPD::IBM_11S_FN_SIZE + 1] = {'\0'};
+    char tmpCCIN[SPD::IBM_11S_CCIN_SIZE + 1] = {'\0'};
+
+    // If we have any errors we log the issue and we keep on
+    // trying to collect as much data as possible
+
+    // Build the composed SN PN FN and CCIN's
+    buildDDR4SN(l_SPD_Data, tmpSN);
+
+    //  We need the PN which is used in FN and CCIN calculation
+    //  If PN has a problem a PREDICTIVE log will be created,
+    //  but keep on collecting as much data as possible
+    buildDDR4PN(l_SPD_Data, tmpPN);
+    // Now calculate FN and CCIN since we now have the PN
+    buildDDR4FN(i_target, tmpPN, tmpFN);
+    buildDDR4CCIN(i_target, tmpPN, tmpCCIN);
+    // Set the attributes with composed values for SN PN FN and CCIN
+    setDDR4SN(i_target, tmpSN);
+    setDDR4PN(i_target, tmpPN);
+    setDDR4FN(i_target, tmpFN);
+    setDDR4CCIN(i_target, tmpCCIN);
+
+    } while( 0 );
+
+    return l_err;
+}
+
 // ------------------------------------------------------------------
 // isValidDimmType
 // ------------------------------------------------------------------
@@ -2286,6 +2645,25 @@ void setPartAndSerialNumberAttributes( Target * i_target )
             break;
         }
 
+        modSpecTypes_t l_modType = NA;
+        l_err = getModType(l_modType, i_target, l_memType);
+        if( l_err )
+        {
+            TRACFCOMP(g_trac_spd, ERR_MRK
+                      "spd.C::setPartAndSerialNumberAttributes(): Error after getModType");
+            break;
+        }
+        if (l_modType != DDIMM)
+        {
+            // Process ISDIMM special for composing the PN SN FN CCIN
+            l_err = composeIsDimmVPD(i_target);
+            if (l_err)
+            {
+                break;
+            }
+            break; // Done
+        }
+
         // Get the keyword sizes
         const KeywordData* entry = nullptr;
         l_err = getKeywordEntry( l_partKeyword,
@@ -2325,7 +2703,7 @@ void setPartAndSerialNumberAttributes( Target * i_target )
         }
 
         TRACDCOMP(g_trac_spd,
-                  "l_partDataSize=%d,l_serialDataSize=%d\n",
+                  "l_partDataSize=%d,l_serialDataSize=%d",
                   l_partDataSize,l_serialDataSize);
 
         //read the keywords from the EEPROM
@@ -2367,8 +2745,6 @@ void setPartAndSerialNumberAttributes( Target * i_target )
                 break;
             }
         }
-
-        TRACFCOMP(g_trac_spd, "setPartAndSerialNumberAttributes: HUID=0x%08X", get_huid(i_target));
 
         // Set the attributes
         ATTR_PART_NUMBER_type l_PN = {0};
@@ -2444,6 +2820,7 @@ void setPartAndSerialNumberAttributes( Target * i_target )
     }
 
     TRACSSCOMP(g_trac_spd, EXIT_MRK"spd.C::setPartAndSerialNumberAttributes()");
+
 }
 
 /*

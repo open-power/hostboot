@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,7 @@ const KeywordData ddr4Data[] =
     // ------------------------------------------------------------------------------------------
     //
     // Normal fields supported on both DDR3 and DDR4
+    { CRC_EXCLUDE,                      0x00,   0x01,   0x80,   0x07, false, false, ALL },
     { SPD_BYTES_TOTAL,                  0x00,   0x01,   0x70,   0x04, false, false, ALL },
     { SPD_BYTES_USED,                   0x00,   0x01,   0x0F,   0x00, false, false, ALL },
     { SPD_MAJOR_REVISION,               0x01,   0x01,   0xF0,   0x04, false, false, ALL },
@@ -95,6 +96,7 @@ const KeywordData ddr4Data[] =
     { SDRAM_THERMAL_REFRESH_OPTIONS,    0x08,   0x01,   0x00,   0x00, false, false, ALL },
     { MODULE_THERMAL_SENSOR,            0x0e,   0x01,   0x00,   0x00, false, false, ALL },
     { THERMAL_SENSOR_PRESENT,           0x0e,   0x01,   0x80,   0x07, false, false, ALL },
+    { THERMAL_SENSOR_ACCURACY,          0x20,   0x01,   0x7F,   0x00, false, false, ALL },
     { SDRAM_DEVICE_TYPE,                0x06,   0x01,   0x80,   0x07, false, false, ALL },
     { SDRAM_DIE_COUNT,                  0x06,   0x01,   0x70,   0x04, false, false, ALL },
     { SDRAM_DEVICE_TYPE_SIGNAL_LOADING, 0x06,   0x01,   0x03,   0x00, false, false, ALL },
@@ -113,6 +115,34 @@ const KeywordData ddr4Data[] =
     { DRAM_MANUFACTURER_ID,             0x15f,  0x02,   0x00,   0x00, true,  false, ALL },
     { MANUFACTURER_SPECIFIC_DATA,       0x161,  0x1d,   0x00,   0x00, false, false, ALL },
     { DIMM_BAD_DQ_DATA,                 0x180,  0x50,   0x00,   0x00, false, true,  ALL },
+
+    // BELOW DDR3 ONLY - ONLY HERE FOR TABLE INDEXING ENUM CALCULATIONS - spdenums.H
+    //                   We have to logically skip these to properly account for the
+    //                   DDR4 values which follow in the ENUM index order
+    // Normal fields supported on DDR3 only
+    { BANK_ADDRESS_BITS,                0x04,   0x01,   0x70,   0x04, false, false, ALL },
+    { MODULE_NOMINAL_VOLTAGE,           0x06,   0x01,   0x07,   0x00, false, false, ALL },
+    { FTB_DIVIDEND,                     0x09,   0x01,   0xF0,   0x04, false, false, ALL },
+    { FTB_DIVISOR,                      0x09,   0x01,   0x0F,   0x00, false, false, ALL },
+    { MTB_DIVIDEND,                     0x0a,   0x01,   0x00,   0x00, false, false, ALL },
+    { MTB_DIVISOR,                      0x0b,   0x01,   0x00,   0x00, false, false, ALL },
+    { CAS_LATENCIES_SUPPORTED,          0x0f,   0x02,   0x7F,   0x00, true,  false, ALL },
+    { TWR_MIN,                          0x11,   0x01,   0x00,   0x00, false, false, ALL },
+    { TRRD_MIN,                         0x13,   0x01,   0x00,   0x00, false, false, ALL },
+    { TRFC_MIN,                         0x19,   0x02,   0x00,   0x00, true,  false, ALL },
+    { TWTR_MIN,                         0x1a,   0x01,   0x00,   0x00, false, false, ALL },
+    { TRTP_MIN,                         0x1b,   0x01,   0x00,   0x00, false, false, ALL },
+    { DLL_OFF,                          0x1e,   0x01,   0x80,   0x07, false, false, ALL },
+    { RZQ_7,                            0x1e,   0x01,   0x02,   0x01, false, false, ALL },
+    { RZQ_6,                            0x1e,   0x01,   0x01,   0x00, false, false, ALL },
+    { PASR,                             0x1f,   0x01,   0x80,   0x07, false, false, ALL },
+    { ODTS,                             0x1f,   0x01,   0x08,   0x03, false, false, ALL },
+    { ASR,                              0x1f,   0x01,   0x04,   0x02, false, false, ALL },
+    { ETR_1X,                           0x1f,   0x01,   0x02,   0x01, false, false, ALL },
+    { ETR,                              0x1f,   0x01,   0x01,   0x00, false, false, ALL },
+    { MODULE_CRC,                       0x7f,   0x02,   0x00,   0x00, true,  false, ALL },
+    //   ABOVE DDR3 ONLY ^^ TABLE ENUM INDEX PLACEHOLDERS ONLY - DO NOT USE for DDR4
+
     { MODULE_REVISION_CODE,             0x15d,  0x01,   0x00,   0x00, false, false, ALL },
     // Normal fields supported on DDR4 only
     { BANK_GROUP_BITS,                  0x04,   0x01,   0xC0,   0x06, false, false, ALL },
@@ -134,11 +164,22 @@ const KeywordData ddr4Data[] =
     { TRRDS_FINE_OFFSET,                0x77,   0x01,   0x00,   0x00, false, false, ALL },
     { TCKMAX_FINE_OFFSET,               0x7c,   0x01,   0x00,   0x00, false, false, ALL },
     { BASE_CONFIG_CRC,                  0x7f,   0x02,   0x00,   0x00, true,  false, ALL },
+    { MODULE_REVISION_CODE_DDR4,        0x15d,  0x01,   0x00,   0x00, false, false, ALL },
     { DRAM_STEPPING,                    0x160,  0x01,   0x00,   0x00, false, false, ALL },
     { MANUFACTURING_SECTION_CRC,        0x17f,  0x02,   0x00,   0x00, true,  false, ALL },
     { NVM_INIT_TIME,                    0xCB,   0x01,   0x00,   0x00, false, false, ALL },
     { RAW_MODULE_PRODUCT_ID,            0xc0,   0x02,   0x00,   0x00, false, false, ALL },
     { RAW_MODULE_MANUFACTURER_ID,       0x140,  0x02,   0x00,   0x00, false, false, ALL },
+    { SDRAM_ADDRESSING,                 0x05,   0x01,   0x00,   0x00, false, false, ALL }, // 0x5c
+    { DRAM_PRI_PACKAGE_OFFSET,          0x06,   0x01,   0x00,   0x00, false, false, ALL }, // 0x5d
+    { MODULE_ORGANIZATION,              0x0c,   0x01,   0x00,   0x00, false, false, ALL }, // 0x5e
+    { MODULE_SDRAM_DENSITY_BANK,        0x04,   0x01,   0x00,   0x00, false, false, ALL }, // 0x5f
+    { MFG_ID_MSB,                       0x141,  0x01,   0x00,   0x00, false, false, ALL }, // 0x60
+    { MFG_ID_LSB,                       0x140,  0x01,   0x00,   0x00, false, false, ALL }, // 0x61
+    { SN_BYTE0,                         0x145,  0x01,   0x00,   0x00, false, false, ALL }, // 0x62
+    { SN_BYTE1,                         0x146,  0x01,   0x00,   0x00, false, false, ALL }, // 0x63
+    { SN_BYTE2,                         0x147,  0x01,   0x00,   0x00, false, false, ALL }, // 0x64
+    { SN_BYTE3,                         0x148,  0x01,   0x00,   0x00, false, false, ALL }, // 0x65
     // Module Specific fields supported on both DDR3 and DDR4
     { MODSPEC_COM_NOM_HEIGHT_MAX,       0x80,   0x01,   0x1f,   0x00, false, false, ALL },
     { MODSPEC_COM_MAX_THICK_BACK,       0x81,   0x01,   0xf0,   0x04, false, false, ALL },
