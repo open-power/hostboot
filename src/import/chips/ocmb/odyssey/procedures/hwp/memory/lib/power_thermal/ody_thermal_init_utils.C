@@ -283,8 +283,9 @@ fapi2::ReturnCode setup_emergency_throttles(const fapi2::Target<fapi2::TARGET_TY
     // Write it back using putScom
     FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB3Q, l_data), "Error in setup_emergency_throttles" );
 
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
-    FAPI_ERR("Error setting safemode throttles for target %s", mss::c_str(i_target));
+    FAPI_ERR("Error setting safemode throttles for target " TARGTIDFORMAT, TARGTID);
     return fapi2::current_err;
 }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,8 +50,12 @@ extern "C"
         // Polls the DTS for initial values
         FAPI_TRY(mss::ody::thermal::read_dts_sensors(i_target));
 
-        // Sets up throttling
+        // TODO:ZEN:MST-1893 Update hostboot only ifdef's to include PPE callers
+#ifdef __HOSTBOOT_MODULE
+        // Prior to starting OCC, we go into "safemode" throttling
+        // After OCC is started, they can change throttles however they want
         FAPI_TRY (mss::ody::thermal::mc::setup_emergency_throttles(i_target));
+#endif
 
         // Clear the emergency mode throttle bit
         FAPI_TRY (mss::ody::thermal::mc::disable_safe_mode_throttles(i_target));
