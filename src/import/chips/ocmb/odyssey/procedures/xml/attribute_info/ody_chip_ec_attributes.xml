@@ -41,4 +41,21 @@
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MULTICAST_SUPPORTED</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      OCMB supports multicast SCOM accesses.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_ODYSSEY</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
 </attributes>
