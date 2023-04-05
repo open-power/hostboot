@@ -386,6 +386,7 @@ class subtest_t
         /// @param[in] i_dimm the dimm desired to be enabled - int 0, 1
         /// @return void
         ///
+        // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
         inline void enable_dimm( const uint64_t i_dimm )
         {
             iv_mcbmr.template writeBit<TT::COMPL_3RD_CMD>(i_dimm);
@@ -397,6 +398,7 @@ class subtest_t
         /// @note The port number is relative to the MCBIST
         /// @return the port of the subtest
         ///
+        // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
         inline uint64_t get_port() const
         {
             uint64_t l_port = 0;

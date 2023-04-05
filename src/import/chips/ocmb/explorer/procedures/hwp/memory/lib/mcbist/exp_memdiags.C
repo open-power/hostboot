@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,18 @@ namespace mss
 
 namespace memdiags
 {
+
+///
+/// @brief memdiags multi-port init for specific chip - Explorer specialization
+/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+/// in subclassed constructors more easily.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template <>
+fapi2::ReturnCode operation<mss::mc_type::EXPLORER>::multi_port_init_internal()
+{
+    return single_port_init();
+}
 
 ///
 /// @brief Helper function to get the subtest to run continuous scrub for this memory controller type - Explorer specialization

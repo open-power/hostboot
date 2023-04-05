@@ -164,6 +164,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pa
                 mss::mcbist::subtest_t<MC> l_fw_subtest =
                     mss::mcbist::write_subtest<MC>();
 
+                // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
                 l_fw_subtest.enable_port(mss::relative_pos<MC, T>(p));
                 l_fw_subtest.change_addr_sel(l_rank_address_pair);
                 l_fw_subtest.enable_dimm(mss::rank::get_dimm_from_rank<MC>(*r));
@@ -179,6 +180,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pa
                 mss::mcbist::subtest_t<MC> l_fr_subtest =
                     mss::mcbist::read_subtest<MC>();
 
+                // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
                 l_fr_subtest.enable_port(mss::relative_pos<MC, T>(p));
                 l_fr_subtest.change_addr_sel(l_rank_address_pair);
                 l_fr_subtest.enable_dimm(mss::rank::get_dimm_from_rank<MC>(*r));
@@ -478,10 +480,7 @@ class operation
         /// in subclassed constructores more easily.
         /// @return FAPI2_RC_SUCCESS iff everything ok
         ///
-        fapi2::ReturnCode multi_port_init_internal()
-        {
-            return single_port_init();
-        }
+        fapi2::ReturnCode multi_port_init_internal();
 
 
         ///
@@ -604,6 +603,7 @@ inline fapi2::ReturnCode operation<MC, T, TT>::single_port_init()
     {
         mss::mcbist::subtest_t<MC> l_subtest = iv_subtest;
 
+        // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
         l_subtest.enable_port(l_relative_port_number);
         l_subtest.enable_dimm(l_dimm_number);
         iv_program.iv_subtests.push_back(l_subtest);
@@ -844,6 +844,7 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
             // Don't destroy the subtest passed in, copy it
             auto l_subtest = operation<MC>::iv_subtest;
 
+            // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
             l_subtest.enable_port(mss::relative_pos<MC, T>(p));
             l_subtest.enable_dimm(mss::index(d));
             operation<MC>::iv_program.iv_subtests.push_back(l_subtest);
@@ -887,6 +888,7 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
                   operation<MC>::iv_const.iv_end_address) );
 
         // We need to use this address range. We know it's ok to write to element 0 as we pushed it on above
+        // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
         l_subtest.change_addr_sel(1);
         l_subtest.enable_port(l_port);
         l_subtest.enable_dimm(l_dimm);

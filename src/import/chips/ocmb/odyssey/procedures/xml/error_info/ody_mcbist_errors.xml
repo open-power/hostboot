@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -287,6 +287,25 @@
     <gard>
         <target>MC_TARGET</target>
     </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_START_ADDR_BIGGER_THAN_END_ADDR</rc>
+    <description>A starting address larger than an ending address was passed into multi-port init</description>
+    <ffdc>START_ADDRESS</ffdc>
+    <ffdc>END_ADDRESS</ffdc>
+    <ffdc>MC_TARGET</ffdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
   </hwpError>
 
 </hwpErrors>
