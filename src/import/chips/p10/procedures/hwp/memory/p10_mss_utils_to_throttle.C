@@ -179,7 +179,12 @@ extern "C"
             // Combine our port throttles if we're DDR5
             if (l_dram_gen == fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5)
             {
-                FAPI_TRY(mss::power_thermal::combine_port_throttles(l_ocmb, mss::throttle_type::POWER));
+                // This HWP is used by OCC to determine throttle value to use for a memory over temperature condition
+                // For Odyssey (DDR5) call using THERMAL throttling so throttle values are not optimized
+                // OCC only uses Nslot to throttle due to over temperature, so its easier to have this HWP
+                //   provide unoptimized throttle values instead of getting OCC to use both Nslot and Nport
+                //   (if optimized ocmb throttle values are used) when over temperture throttling is needed
+                FAPI_TRY(mss::power_thermal::combine_port_throttles(l_ocmb, mss::throttle_type::THERMAL));
             }
 
         } // ocmbs
@@ -194,8 +199,13 @@ extern "C"
         }
         else
         {
+            // This HWP is used by OCC to determine throttle value to use for a memory over temperature condition
+            // For Odyssey (DDR5) call using THERMAL throttling so throttle values are not optimized
+            // OCC only uses Nslot to throttle due to over temperature, so its easier to have this HWP
+            //   provide unoptimized throttle values instead of getting OCC to use both Nslot and Nport
+            //   (if optimized ocmb throttle values are used) when over temperture throttling is needed
             FAPI_TRY(mss::power_thermal::equalize_throttles_helper<mss::mc_type::ODYSSEY>(i_targets,
-                     mss::throttle_type::POWER,
+                     mss::throttle_type::THERMAL,
                      l_exceeded_power));
         }
 
