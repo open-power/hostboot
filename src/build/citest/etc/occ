@@ -3,4 +3,4 @@
 # Need to create artifact directory (use occ build name) in:
 #     /gsa/rchgsa/projects/h/hostboot_rch/simbuild/dependencies/occ
 # and then build 81e00430.lid and copy to that new directory
-export OCC_ARTIFACT_ID=$HOSTBOOT_ENVIRONMENT/simbuild/dependencies/occ/occ1010_210422a/81e00430.lid
+export OCC_ARTIFACT_ID=$HOSTBOOT_ENVIRONMENT/simbuild/dependencies/occ/occ1050_230327a/81e00430.lid
