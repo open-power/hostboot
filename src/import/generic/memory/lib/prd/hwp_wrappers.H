@@ -37,6 +37,7 @@
 #define _HWP_WRAPPERS_H_
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/dimm/kind.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>

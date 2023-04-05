@@ -169,8 +169,8 @@ struct msg_block_vars
     uint8_t iv_MR111[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR33[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR33_ORG[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR34[mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {0};
-    uint8_t iv_MR35[mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {0};
+    uint8_t iv_MR34[mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
+    uint8_t iv_MR35[mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
     uint8_t iv_MR37[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR38[mss::ody::MAX_RANK_PER_DIMM] = {0};
     uint8_t iv_MR39[mss::ody::MAX_RANK_PER_DIMM] = {0};
