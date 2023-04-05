@@ -1384,7 +1384,8 @@ void SbeRetryHandler::sbe_get_ffdc_handler()
                     //call FAPI_SET_SBE_ERROR
                     fapi2::sbeFfdc_t * l_sbeFfdc = reinterpret_cast<sbeFfdc_t * >(l_package.ffdcPtr);
                     uint32_t l_pos = iv_proc->getAttr<TARGETING::ATTR_FAPI_POS>();
-                    FAPI_SET_SBE_ERROR(l_fapiRc, l_rc, l_sbeFfdc, l_pos);
+                    auto fapiTargetType = convertTargetingTypeToFapi2(iv_proc->getAttr<TARGETING::ATTR_TYPE>());
+                    FAPI_SET_SBE_ERROR(l_fapiRc, l_rc, l_sbeFfdc, l_pos, fapiTargetType);
 
                     errlHndl_t l_sbeHwpfErr = rcToErrl(l_fapiRc,
                                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,

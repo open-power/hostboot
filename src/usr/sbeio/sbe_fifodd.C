@@ -681,18 +681,21 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                  }
                  else
                  {
-                     fapi2::ReturnCode l_fapiRC;
+                     using namespace fapi2;
+                     ReturnCode l_fapiRC;
 
                      /*
                       * Put FFDC data into sbeFfdc_t struct and
                       * call FAPI_SET_SBE_ERROR
                       */
-                     fapi2::sbeFfdc_t * l_ffdcBuf = reinterpret_cast<fapi2::sbeFfdc_t * >(l_package.ffdcPtr);
+                     sbeFfdc_t * l_ffdcBuf = reinterpret_cast<sbeFfdc_t * >(l_package.ffdcPtr);
+                     auto fapiTargetType = convertTargetingTypeToFapi2(i_target->getAttr<TARGETING::ATTR_TYPE>());
 
                      FAPI_SET_SBE_ERROR(l_fapiRC,
                                 l_rc,
                                 l_ffdcBuf,
-                                i_target->getAttr<TARGETING::ATTR_FAPI_POS>());
+                                i_target->getAttr<TARGETING::ATTR_FAPI_POS>(),
+                                fapiTargetType);
 
                      errlHndl_t sbe_errl = fapi2::rcToErrl(l_fapiRC,
                                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
@@ -700,6 +703,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                      if( sbe_errl )
                      {
                          sbe_errl->plid(errl->plid());
+                         sbe_errl->collectTrace(FAPI_TRACE_NAME);
                          ERRORLOG::errlCommit( sbe_errl, SBEIO_COMP_ID );
                      }
                  }
