@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2022
+# Contributors Listed Below - COPYRIGHT 2010,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -29,6 +29,7 @@ VPATH += ${ROOTPATH}/src/sys/prof
 OBJS += string.o
 OBJS += string_ext.o
 OBJS += string_utils.o
+OBJS += cstring.o
 OBJS += stdlib.o
 OBJS += ctype.o
 OBJS += assert.o

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2024
+# Contributors Listed Below - COPYRIGHT 2010,2025
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -49,6 +49,7 @@ IMGS += securerom
 BASE_OBJECTS += string.o
 BASE_OBJECTS += string_ext.o
 BASE_OBJECTS += string_utils.o
+BASE_OBJECTS += cstring.o
 BASE_OBJECTS += ctype.o
 BASE_OBJECTS += math.o
 BASE_OBJECTS += builtins.o
