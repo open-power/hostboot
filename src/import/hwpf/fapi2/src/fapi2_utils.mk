@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -29,6 +29,7 @@ $(call ADD_MODULE_INCDIR,$(MODULE),$(FAPI2_PLAT_INCLUDE))
 $(call ADD_MODULE_INCDIR,$(MODULE),$(ROOTPATH)/chips/p9/common/include/)
 $(call ADD_MODULE_INCDIR,$(MODULE),$(ROOTPATH)/chips/centaur/common/include/)
 $(call ADD_MODULE_INCDIR,$(MODULE),$(ROOTPATH)/chips/common/utils/scomt/)
+
 $(call ADD_MODULE_OBJ,$(MODULE),fapi2_utils.o)
 $(call ADD_MODULE_OBJ,$(MODULE),fapi2_attribute_service.o)
 $(call ADD_MODULE_OBJ,$(MODULE),collect_reg_ffdc_regs.o)

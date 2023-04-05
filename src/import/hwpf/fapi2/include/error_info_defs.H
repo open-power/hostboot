@@ -205,6 +205,16 @@ enum maxTargetsPerProc : uint16_t
     INVALID_FAPI_POS     = INVALID_TARGET_COUNT,
 };
 
+enum maxTargetsPerOcmb : uint16_t
+{
+    MAX_MDS_CTLR_PER_OCMB           = 1,
+    MAX_PMIC_PER_OCMB               = 4,
+    MAX_POWER_IC_PER_OCMB           = 4,
+    MAX_GENERIC_I2C_DEVICE_PER_OCMB = 4,
+    MAX_TEMP_SENSOR_PER_OCMB        = 3,
+    MAX_MEM_PORT_PER_OCMB           = 2,
+};
+
 
 #ifndef MINIMUM_FFDC
 ///
@@ -321,21 +331,26 @@ enum GardType
 };
 }
 
-// @brief convert the processor relative sbe target instance into a fapi pos
+// @brief Convert the chip relative sbe target instance into a fapi pos
 //
-// @param[in] i_targType - type of target from SBE FFDC buffer
-// @param[in] i_proc     - current SBE processor number
-// @param[in] i_instance - instance of i_targType relitive to the processor
-//                         number i_proc.
+// @param[in] i_targType       - Type of target from SBE FFDC buffer
+// @param[in] i_instance       - Instance of i_targType relative to the sbe chip
+// @param[in] i_sbeChipType    - SBE chip target type
+// @param[in] i_sbeChipFapiPos - SBE chip's FAPI Position
+//
 //
 uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
-        fapi2::Target<TARGET_TYPE_PROC_CHIP>& i_proc, uint16_t i_instance);
+        uint16_t i_instance,
+        uint64_t i_sbeChipType,
+        uint16_t i_sbeChipFapiPos);
 
 // NOTE - this assumes no buffer_t or variable_buffers are passed
 //        data is converted to a uint64_t when placed into the sbe ffdc
 //        buffer
-inline fapi2::ffdc_t getFfdcData( sbeFfdc_t& i_sbeFfdc, uint8_t i_proc_instance,
-                                  bool& invalid_data )
+inline fapi2::ffdc_t getFfdcData(sbeFfdc_t& i_sbeFfdc,
+                                 uint8_t i_sbeChip_instance,
+                                 uint64_t i_sbeChipTargetType,
+                                 bool& invalid_data )
 {
     fapi2::ffdc_t l_ffdc;
 
@@ -344,36 +359,67 @@ inline fapi2::ffdc_t getFfdcData( sbeFfdc_t& i_sbeFfdc, uint8_t i_proc_instance,
     if(l_ffdc.size() == EI_FFDC_SIZE_TARGET)
     {
 #ifdef FAPI2_ENABLE_PLATFORM_GET_TARGET
-        // target data will be in format
-        // 0:47     = target type
-        // 48:63    = instance
 
         uint64_t targetData = i_sbeFfdc.data;
-        // get a fapi target for the passed in proc instance
-        auto l_proc =
-            getTarget<TARGET_TYPE_PROC_CHIP>(i_proc_instance);
 
-        fapi2::TargetType type = static_cast<fapi2::TargetType>(targetData >> 16);
-
-        // sbe returns the target instance based on processor scope,
-        // we will need to convert that number to system scope (FAPI_POS)
-        uint16_t instance = static_cast<uint16_t>(targetData & 0xFFFF);
-        uint16_t fapi_pos = convertSbeTargInstanceToFapiPos(type, l_proc, instance);
-
-        if( fapi_pos == INVALID_FAPI_POS )
+        // For P10, target data will be in format
+        // 0:47     = target type
+        // 48:63    = instance
+        if (i_sbeChipTargetType == TARGET_TYPE_PROC_CHIP)
         {
-            invalid_data = true;
-        }
-        else
-        {
-            // call hostboot to get the fapi2 target pointer
-            l_ffdc.ptr() = static_cast<void*>(getTarget<TARGET_TYPE_ALL>(type, fapi_pos));
+            fapi2::TargetType type = static_cast<fapi2::TargetType>(targetData >> 16);
 
-            if(l_ffdc.ptr() == nullptr )
+            // sbe returns the target instance based on processor scope,
+            // we will need to convert that number to system scope (FAPI_POS)
+            uint16_t instance = static_cast<uint16_t>(targetData & 0xFFFF);
+            uint16_t fapi_pos = convertSbeTargInstanceToFapiPos(type,
+                                instance,
+                                i_sbeChipTargetType,
+                                i_sbeChip_instance);
+
+            if( fapi_pos == INVALID_FAPI_POS )
             {
                 invalid_data = true;
             }
+            else
+            {
+                // call hostboot to get the fapi2 target pointer
+                l_ffdc.ptr() = static_cast<void*>(getTarget<TARGET_TYPE_ALL>(type, fapi_pos));
+
+                if(l_ffdc.ptr() == nullptr )
+                {
+                    invalid_data = true;
+                }
+            }
         }
+        // For Odyssey, target data will be in format:
+        // 0:7     = log target type
+        // 8:47    = reserved
+        // 48:63   = instance
+        else
+        {
+            // Pull log target type and instance out of the target data.
+            LogTargetType l_log_type = static_cast<fapi2::LogTargetType>(targetData >> 56);
+            uint16_t instance = static_cast<uint16_t>(targetData & 0xFFFF);
+            // Convert log target type to TargetType
+            TargetType l_type = logToTargetType(l_log_type);
+
+            uint16_t fapi_pos = convertSbeTargInstanceToFapiPos(l_type,
+                                instance,
+                                i_sbeChipTargetType,
+                                i_sbeChip_instance);
+
+            if( fapi_pos == INVALID_FAPI_POS )
+            {
+                invalid_data = true;
+            }
+            else
+            {
+                l_ffdc.ptr() = static_cast<void*>(getTarget<TARGET_TYPE_ALL>(l_type, fapi_pos));
+            }
+
+        }
+
 
 #endif
     }

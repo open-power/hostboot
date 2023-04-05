@@ -309,7 +309,7 @@ sub addFfdcMethod
             $method_body .= " fapi2::getErrorInfoFfdcSize(i_value);\n        return *this;\n    }\n\n";
             $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
             $methods->{$objectNumber}{localvar} =
-                "$ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],proc_instance,invalid_data);";
+                "$ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],chip_instance, chip_type, invalid_data);";
             $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
         }
         else
@@ -356,7 +356,7 @@ sub addFfdcMethod
         $method_body .= "    }\n\n";
         $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
         $methods->{$objectNumber}{localvar} =
-            "$buffer_ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],proc_instance,invalid_data);";
+            "$buffer_ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],chip_instance, chip_type, invalid_data);";
         $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
     }
 
@@ -393,7 +393,7 @@ sub addFfdcMethod
 
         $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
         $methods->{$objectNumber}{localvar} =
-            "$ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],proc_instance,invalid_data);";
+            "$ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],chip_instance, chip_type, invalid_data);";
         $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc=$ffdc_uc;";
     }
     elsif ( $type eq $scom_addr_type )
@@ -414,7 +414,7 @@ sub addFfdcMethod
             $method_body .= " return *this;}\n\n";
             $methods->{$key}{member} = "$type $ffdc_uc;";
             $methods->{$objectNumber}{localvar} =
-                "$type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],proc_instance,invalid_data);";
+                "$type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],chip_instance, chip_type, invalid_data);";
             $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
         }
         else
@@ -659,7 +659,7 @@ foreach my $argnum ( 0 .. $#ARGV )
         print SBFILE "#ifndef FAPI2_SETSBEERROR_H_\n";
         print SBFILE "#define FAPI2_SETSBEERROR_H_\n\n";
         print SBFILE "#include <set_sbe_error_funcs.H>\n\n";
-        print SBFILE "#define FAPI_SET_SBE_ERROR(RC,ERRVAL,FFDC_BUFFER,SBE_INSTANCE)\\\n";
+        print SBFILE "#define FAPI_SET_SBE_ERROR_IMPL(RC, ERRVAL, FFDC_BUFFER, SBE_INSTANCE, CHIP_TYPE)\\\n";
         print SBFILE "{\\\n";
         print SBFILE "bool invalid_data = false;\\\n";
         print SBFILE "switch (ERRVAL)\\\n";
@@ -1584,8 +1584,8 @@ foreach my $argnum ( 0 .. $#ARGV )
         # hwsv/hb and create a target in that context
         if ( exists $errors->{sbeTarget} && ( $arg_local_ffdc eq undef ) )
         {
-            $objectStr .= "        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>$errors->{sbeTarget}"
-                . " = fapi2::getTarget<fapi2::TARGET_TYPE_PROC_CHIP>(proc_instance); \n";
+            $objectStr .= "        fapi2::Target<fapi2::TARGET_TYPE_ANY_POZ_CHIP>$errors->{sbeTarget}"
+                . " = fapi2::getTarget<fapi2::TARGET_TYPE_ANY_POZ_CHIP>(chip_instance); \n";
             $objectStr .= "        l_obj.$errors->{sbeTarget}.ptr() = &$errors->{sbeTarget};\n";
             $objectStr .=
                 "        l_obj.$errors->{sbeTarget}.size() = fapi2::getErrorInfoFfdcSize($errors->{sbeTarget});\n";
@@ -1799,14 +1799,15 @@ foreach my $argnum ( 0 .. $#ARGV )
             print SBFILE "    case fapi2::$err->{rc}: \\\n";
             print SBFILE "    { \\\n";
             print SBFILE "       invalid_data = setSbeError(hwpRcToType<fapi2::$err->{rc}>(),\\\n";
-            print SBFILE "                      RC,FFDC_BUFFER,SBE_INSTANCE);\\\n";
+            print SBFILE "                      RC,FFDC_BUFFER,SBE_INSTANCE, CHIP_TYPE);\\\n";
 
             print SBFILE "       break;\\\n    }\\\n";
 
             # update the sbe set error functions file with the new template function
             # create a unique overloaded function for the return code value
             print SBFUNFILE "inline bool setSbeError(hwpRcToType<fapi2::$err->{rc}>,fapi2::ReturnCode&i_rc,\n";
-            print SBFUNFILE "                         fapi2::sbeFfdc_t* i_ebuf,uint8_t proc_instance)\n";
+            print SBFUNFILE
+                "                         fapi2::sbeFfdc_t* i_ebuf,uint8_t chip_instance, uint64_t chip_type)\n";
             print SBFUNFILE "    {\n    bool invalid_data = false;\n";
             print SBFUNFILE "       fapi2::$class_name l_obj(";
             print SBFUNFILE "fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,i_rc);\n";
@@ -1981,6 +1982,19 @@ print SBFILE "   fapi2::INVALID_SBE_FFDC_PACKET(fapi2::FAPI2_ERRL_SEV_UNRECOVERA
 print SBFILE "set_FFDC_BUFFER(l_buffer).set_INVALID_ERRVAL(ERRVAL).execute();\\\n";
 print SBFILE "}\\\n";
 print SBFILE "}\n\n";
+
+print SBFILE "#define FAPI_SET_SBE_ERROR_VA_NARGS_IMPL(_1, _2, _3, _4, _5, N, ...) N\n";
+print SBFILE "#define FAPI_SET_SBE_ERROR_VA_NARGS(...) FAPI_SET_SBE_ERROR_VA_NARGS_IMPL(__VA_ARGS__, 5, 4, 3, 2, 1)\n";
+
+print SBFILE "#define FAPI_SET_SBE_ERROR4(...) FAPI_SET_SBE_ERROR_IMPL(__VA_ARGS__, fapi2::TARGET_TYPE_PROC_CHIP)\n";
+print SBFILE "#define FAPI_SET_SBE_ERROR5(...) FAPI_SET_SBE_ERROR_IMPL(__VA_ARGS__)\n";
+
+print SBFILE "#define _FAPI_SET_SBE_ERROR_IMPL(count, ...) FAPI_SET_SBE_ERROR ## count (__VA_ARGS__)\n";
+print SBFILE "#define _FAPI_SET_SBE_ERROR(count, ...) _FAPI_SET_SBE_ERROR_IMPL(count, __VA_ARGS__)\n";
+
+print SBFILE
+    "#define FAPI_SET_SBE_ERROR(...) _FAPI_SET_SBE_ERROR(FAPI_SET_SBE_ERROR_VA_NARGS(__VA_ARGS__), __VA_ARGS__)\n\n";
+
 print SBFILE "#endif\n";
 
 #print SBFUNFILE "}\n";
