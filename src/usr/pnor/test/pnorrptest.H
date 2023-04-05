@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -74,7 +74,6 @@ class PnorRpTest : public CxxTest::TestSuite
             // Intentionally leaving HB_DATA_RW out of the tests
             // since its conditionally produced
             // PNOR::HB_DATA_RW,     /**< Hostboot Data RW */
-            PNOR::MODULE_VPD,     /**< Module VPD */
             PNOR::RINGOVD,        /**< Ring override data */
             PNOR::WOFDATA,        /**< WOF data */
         };
@@ -89,16 +88,6 @@ class PnorRpTest : public CxxTest::TestSuite
                  ( SECUREBOOT::enabled() ) )
             {
                 TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> Skipping RINGOVD since Security is enabled");
-                continue;
-            }
-
-            if(( testSections[idx] == PNOR::DIMM_JEDEC_VPD ||
-                 testSections[idx] == PNOR::MODULE_VPD) &&
-               ( TARGETING::MODEL_AXONE ==
-                 TARGETING::targetService().getProcessorModel() ))
-            {
-                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> "
-                          "Skipping non-existent MODULE_VPD and DIMM_JEDEC_VPD section for Axone");
                 continue;
             }
 

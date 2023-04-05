@@ -96,17 +96,18 @@ Layout Description
         <ecc/>
     </section>
     <section>
+        <!-- NOTE should be before images that are likely to change like HBI,
+        also must update standalone.simics if ATTR_TMP offset changes-->
+        <description>Attribute Overrides (32K)</description>
+        <eyeCatch>ATTR_TMP</eyeCatch>
+        <physicalOffset>0x22E000</physicalOffset>
+        <physicalRegionSize>0x8000</physicalRegionSize>
+        <side>sideless</side>
+    </section>
+    <section>
         <description>Guard Data (20K)</description>
         <eyeCatch>GUARD</eyeCatch>
         <physicalRegionSize>0x5000</physicalRegionSize>
-        <side>sideless</side>
-        <ecc/>
-    </section>
-    <section>
-        <description>Module VPD (576K)</description>
-        <eyeCatch>MVPD</eyeCatch>
-        <!--NOTE: MUST update standalone.simics if offset changes -->
-        <physicalRegionSize>0x90000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
     </section>

@@ -88,6 +88,28 @@ if( $hb_skip_eecache == "1" ) {
 ###################################
 
 ###################################
+#Attribute Overrides
+###################################
+
+# Look for a custom pre-built copy first
+$found_custom_eecache = 0
+try {
+    $attrOverride = (lookup-file "attribute_override.bin")
+    $found_attr_override = 1
+
+    # NOTE must change offset if PNOR layout changes EECACHE offsets
+    echo "    - Loading ATTR_TMP "+$attrOverride+" at 0x22E000 in PNOR"
+    try {
+        ($hb_pnor).load-file $attrOverride 0x22E000
+    } except {
+        echo "**** Unable to load "+$attrOverride+" - booting with blank ATTR_TMP ****"
+    }
+} except {
+    echo "    - No attribute overrides found"
+}
+###################################
+
+###################################
 # Update scratch register 0 to let the SBE know which cores are good
 ###################################
 
