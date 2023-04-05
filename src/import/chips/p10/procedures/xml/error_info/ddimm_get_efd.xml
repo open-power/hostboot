@@ -227,38 +227,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_DDIMM_GET_EFD_UNSUPPORTED_DMB_REVISION</rc>
-    <description>DMB revision is not the expected revision and
-                 therefore not supported.</description>
-    <ffdc>DMB_REVISION</ffdc>
-    <ffdc>OCMB_CHIP_TARGET</ffdc>
-    <ffdc>VPD_TYPE</ffdc>
-    <ffdc>DDR_TYPE</ffdc>
-    <!-- Most likely scenario is a new type of DDIMM got installed, so callout
-         the OCMB as the problem.  Deconfigure it so we can keep booting. -->
-    <callout>
-      <target>OCMB_CHIP_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>OCMB_CHIP_TARGET</target>
-    </deconfigure>
-    <!-- We could have down-level code installed. -->
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-    <!-- It could also be bogus SPD content -->
-    <callout>
-      <hw>
-        <hwid>VPD_PART</hwid>
-        <refTarget>OCMB_CHIP_TARGET</refTarget>
-      </hw>
-      <priority>LOW</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
     <rc>RC_DDIMM_UNSUPPORTED_FREQUENCY</rc>
     <description>Chosen frequency not supported by this DDIMM</description>
     <ffdc>UNSUPPORTED_FREQ</ffdc>

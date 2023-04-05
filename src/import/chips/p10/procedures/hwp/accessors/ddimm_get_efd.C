@@ -325,56 +325,6 @@ bool check_ddr5_valid_mfg_id(const uint16_t i_mfg_id)
 }
 
 ///
-/// @brief Gets the expected DMB revision of a particular DDR4 MFG ID
-///
-/// @param[in] i_mfg_id MFG ID
-/// @param[in] i_dmb_revision DMB revision
-/// @return expected DMB revision for ID
-///
-uint16_t check_ddr4_valid_dmb_revision(const uint16_t i_mfg_id, const uint8_t i_dmb_revision)
-{
-    if (i_mfg_id == SPD_DDR4_DMB_MFG_ID_IBM)
-    {
-        FAPI_DBG("ddr4_get_efd: SPD DMB revision = 0x%.2X, expected DMB revision = 0x%.2X",
-                 i_dmb_revision, SPD_DDR4_EXPECTED_DMB_REVISION_IBM);
-
-        return (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_IBM);
-    }
-    else // == SPD_DDR4_EXPECTED_DMB_REVISION_MICROCHIP
-    {
-        // We asserted earlier that we are either MCHP or IBM mfg ID
-        FAPI_DBG("ddr4_get_efd: SPD DMB revision = 0x%.2X, expected DMB revision = 0x%.2X or 0x%.2X or 0x%.2X  or 0x%.2X",
-                 i_dmb_revision,
-                 SPD_DDR4_EXPECTED_DMB_REVISION_0_MICROCHIP,
-                 SPD_DDR4_EXPECTED_DMB_REVISION_A0_MICROCHIP,
-                 SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP,
-                 SPD_DDR4_EXPECTED_DMB_REVISION_B0_MICROCHIP);
-
-        return ((i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_0_MICROCHIP) ||
-                (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_A0_MICROCHIP) ||
-                (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP) ||
-                (i_dmb_revision == SPD_DDR4_EXPECTED_DMB_REVISION_B0_MICROCHIP));
-    }
-}
-
-///
-/// @brief Gets the expected DMB revision of a particular DDR5 MFG ID
-///
-/// @param[in] i_mfg_id MFG ID
-/// @param[in] i_dmb_revision DMB revision
-/// @return expected DMB revision for ID
-///
-uint16_t check_ddr5_valid_dmb_revision(const uint16_t i_mfg_id, const uint8_t i_dmb_revision)
-{
-    // We asserted earlier that we are IBM mfg ID
-    FAPI_DBG("ddr5_get_efd: SPD DMB revision = 0x%.2X, expected DMB revision = 0x%.2X",
-             i_dmb_revision,
-             SPD_DDR5_EXPECTED_DMB_REVISION_0_IBM);
-
-    return (i_dmb_revision == SPD_DDR5_EXPECTED_DMB_REVISION_0_IBM);
-}
-
-///
 /// @brief Checks if the SPD is for a planar config
 ///
 /// @param[in] i_module_type Module Type (byte 3) from SPD
@@ -894,27 +844,6 @@ extern "C"
                    io_vpdInfo.iv_dmb_mfg_id);
 
         l_dmb_revision = *reinterpret_cast<const uint8_t*>(&i_spdBuffer[DMB_REVISION_ADDR]);
-
-        // Confirm that the DMB revision is what is expected
-        FAPI_ASSERT( ( (i_dram_gen == SPD_DDR4_TYPE) && check_ddr4_valid_dmb_revision(l_dmbMfgId, l_dmb_revision) ) ||
-                     ( (i_dram_gen == SPD_DDR5_TYPE) && check_ddr5_valid_dmb_revision(l_dmbMfgId, l_dmb_revision) ),
-                     fapi2::DDIMM_GET_EFD_UNSUPPORTED_DMB_REVISION().
-                     set_DMB_REVISION(static_cast<uint32_t>
-                                      (l_dmb_revision)).
-                     set_OCMB_CHIP_TARGET(i_ocmbFapi2Target).
-                     set_VPD_TYPE(io_vpdInfo.iv_vpd_type).
-                     set_DDR_TYPE(static_cast<uint32_t>
-                                  (i_spdBuffer[SPD_MEM_TYPE_ADDR])),
-                     "ddr4_ddr5_get_efd: SPD DMB revision 0x%.2X is not an expected revision: "
-                     "IBM expected: DDR4 0x%.2X, DDR5 0x%.2X "
-                     "MCHP expected: 0x%.2X or 0x%.2X or 0x%.2X or 0x%.2X",
-                     l_dmb_revision,
-                     SPD_DDR4_EXPECTED_DMB_REVISION_IBM,
-                     SPD_DDR5_EXPECTED_DMB_REVISION_0_IBM,
-                     SPD_DDR4_EXPECTED_DMB_REVISION_0_MICROCHIP,
-                     SPD_DDR4_EXPECTED_DMB_REVISION_A0_MICROCHIP,
-                     SPD_DDR4_EXPECTED_DMB_REVISION_A1_MICROCHIP,
-                     SPD_DDR4_EXPECTED_DMB_REVISION_B0_MICROCHIP);
 
         // Set the outgoing DMB revision
         io_vpdInfo.iv_dmb_revision = l_dmb_revision;
