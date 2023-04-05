@@ -321,28 +321,59 @@ void cleanupChnlAttns<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         const char * firMask; // FIR mask name
         uint8_t bitPos;       // Relevant bit pos in the DSTLFIR to set
     };
-    static const std::vector<firInfo> firList
+    static const std::map<uint32_t, std::vector<firInfo>> firList
     {
-        { "OCMB_CHIPLET_CS_FIR",  "OCMB_CHIPLET_FIR_MASK",     0 },
-        { "OCMB_CHIPLET_RE_FIR",  "OCMB_CHIPLET_FIR_MASK",     1 },
-        { "OCMB_CHIPLET_SPA_FIR", "OCMB_CHIPLET_SPA_FIR_MASK", 2 },
+        {POWER_CHIPID::EXPLORER_16,
+            {
+                { "OCMB_CHIPLET_CS_FIR",  "OCMB_CHIPLET_FIR_MASK",     0 },
+                { "OCMB_CHIPLET_RE_FIR",  "OCMB_CHIPLET_FIR_MASK",     1 },
+                { "OCMB_CHIPLET_SPA_FIR", "OCMB_CHIPLET_SPA_FIR_MASK", 2 },
+            }
+        },
+        {POWER_CHIPID::ODYSSEY_16,
+            {
+                { "GFIR_CS",  nullptr, 0 },
+                { "GFIR_RE",  nullptr, 1 },
+                { "GFIR_SPA", nullptr, 2 },
+                { "GFIR_UCS", nullptr, 3 },
+            }
+        },
     };
 
-    for ( const auto & fir : firList )
+    uint32_t chipId = ocmb->getAttr<TARGETING::ATTR_CHIP_ID>();
+    auto firIt = firList.find(chipId);
+
+    // If the chip ID does not exist in the firList map, return
+    if ( firIt == firList.end() )
     {
+        PRDF_ERR( PRDF_FUNC "Invalid chip ID: 0x04%x", chipId );
+        return;
+    }
+
+    for ( const auto & fir : firIt->second )
+    {
+        // Get the mask data only if there is a mask register
+        uint64_t mskData = 0;
+        if (nullptr != fir.firMask)
+        {
+            SCAN_COMM_REGISTER_CLASS * msk = i_chip->getRegister( fir.firMask );
+            if ( SUCCESS == msk->ForceRead() )
+            {
+                mskData = msk->GetBitFieldJustified(0,64);
+            }
+        }
+
         SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister( fir.firAddr );
-        SCAN_COMM_REGISTER_CLASS * msk = i_chip->getRegister( fir.firMask );
 
         // The attention on the OCMB had been cleared by the rule code. We must
         // do force reads to update the values stored in the register cache.
-        if ( SUCCESS == ( reg->ForceRead() | msk->ForceRead() ) )
+        if ( SUCCESS == reg->ForceRead() )
         {
             uint64_t regData = reg->GetBitFieldJustified(0,64);
-            uint64_t mskData = msk->GetBitFieldJustified(0,64);
 
-            if ( 1 == fir.bitPos )
+            // Shift recoverable FIR bits for Explorer only
+            if ( 1 == fir.bitPos && POWER_CHIPID::EXPLORER_16 == chipId )
             {
-                // Shift recoverable FIR bits
                 regData = regData >> 2;
             }
             if ( 0 != (regData & ~mskData) )
@@ -535,12 +566,6 @@ bool __queryUcsOcmb( ExtensibleChip * i_ocmb )
     PRDF_ASSERT( nullptr != i_ocmb );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_ocmb->getType() );
 
-    // TODO: no odyssey support at the moment
-    if (isOdysseyOcmb(i_ocmb->getTrgt()))
-    {
-        return false;
-    }
-
     bool o_activeAttn = false;
 
     // If this OCMB has been marked as masked, skip it
@@ -549,18 +574,32 @@ bool __queryUcsOcmb( ExtensibleChip * i_ocmb )
         return o_activeAttn;
     }
 
-    // Query the OCMB chiplet level FIR to determine if we have a UNIT_CS.
-    SCAN_COMM_REGISTER_CLASS * fir = i_ocmb->getRegister("OCMB_CHIPLET_CS_FIR");
-    SCAN_COMM_REGISTER_CLASS * mask =
-            i_ocmb->getRegister("OCMB_CHIPLET_FIR_MASK");
-
-    if ( SUCCESS == (fir->Read() | mask->Read()) )
+    // Check if the OCMB is an Odyssey
+    if (isOdysseyOcmb(i_ocmb->getTrgt()))
     {
-        if ( 0 != (   fir->GetBitFieldJustified(0,64) &
-                    ~mask->GetBitFieldJustified(0,64) &
-                    0x1fffffffffffffff ) )
+        SCAN_COMM_REGISTER_CLASS * fir = i_ocmb->getRegister("GFIR_CS");
+        if ( SUCCESS == fir->Read() && (0 != fir->GetBitFieldJustified(0,64)) )
         {
             o_activeAttn = true;
+        }
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        // Query the OCMB chiplet level FIR to determine if we have a UNIT_CS.
+        SCAN_COMM_REGISTER_CLASS * fir =
+            i_ocmb->getRegister("OCMB_CHIPLET_CS_FIR");
+        SCAN_COMM_REGISTER_CLASS * mask =
+                i_ocmb->getRegister("OCMB_CHIPLET_FIR_MASK");
+
+        if ( SUCCESS == (fir->Read() | mask->Read()) )
+        {
+            if ( 0 != (   fir->GetBitFieldJustified(0,64) &
+                        ~mask->GetBitFieldJustified(0,64) &
+                        0x1fffffffffffffff ) )
+            {
+                o_activeAttn = true;
+            }
         }
     }
 
@@ -771,12 +810,6 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
 
         TargetHandle_t ocmb = getConnectedChild(i_omi, TYPE_OCMB_CHIP, 0);
         ExtensibleChip * ocmbChip = (ExtensibleChip *)systemPtr->GetChip(ocmb);
-
-        // TODO: no odyssey support at the moment
-        if (isOdysseyOcmb(ocmb))
-        {
-            return;
-        }
 
         // Check if cleanup is still required or has already been done.
         if ( !getOcmbDataBundle(ocmbChip)->iv_doChnlFailCleanup ) break;

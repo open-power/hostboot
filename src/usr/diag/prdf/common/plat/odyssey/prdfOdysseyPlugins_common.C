@@ -48,6 +48,117 @@ using namespace PlatServices;
 namespace odyssey_ocmb
 {
 
+/**
+ * @brief  Plugin that initializes the data bundle.
+ * @param  i_chip An OCMB chip.
+ * @return SUCCESS
+ */
+int32_t Initialize( ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[odyssey_ocmb::Initialize] "
+
+    i_chip->getDataBundle() = new OcmbDataBundle( i_chip );
+
+    #ifdef __HOSTBOOT_RUNTIME
+    // Initialize the address configuration variable within the OcmbDataBundle
+    /* TODO: Addr translation register format has changed for odyssey
+    do
+    {
+        // Call getMcAddrTrans# to populate those instance variables with data
+        // in the MC_ADDR_TRANS registers
+        OcmbDataBundle * db = getOcmbDataBundle( i_chip );
+        BitStringBuffer temp(64);
+
+        if ( SUCCESS != db->iv_addrConfig.getMcAddrTrans0( temp ) )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to initialize mc_addr_trans0 in ocmb "
+                      "data bundle for 0x%08x", i_chip->getHuid() );
+            break;
+        }
+        if ( SUCCESS != db->iv_addrConfig.getMcAddrTrans1( temp ) )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to initialize mc_addr_trans1 in ocmb "
+                      "data bundle for 0x%08x", i_chip->getHuid() );
+            break;
+        }
+        if ( SUCCESS != db->iv_addrConfig.getMcAddrTrans2( temp ) )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to initialize mc_addr_trans2 in ocmb "
+                      "data bundle for 0x%08x", i_chip->getHuid() );
+            break;
+        }
+
+    } while(0);*/
+    #endif
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, Initialize );
+
+/**
+ * @brief  Analysis code that is called before the main analyze() function.
+ * @param  i_chip     An OCMB chip.
+ * @param  io_sc      The step code data struct.
+ * @param  o_analyzed True if analysis is done on this chip, false otherwise.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+int32_t PreAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
+                     bool & o_analyzed )
+{
+    // Check for a channel failure before analyzing this chip.
+    o_analyzed = MemUtils::analyzeChnlFail<TYPE_OCMB_CHIP>( i_chip, io_sc );
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, PreAnalysis );
+
+/**
+ * @brief  Plugin function called after analysis is complete but before PRD
+ *         exits.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @note   This is especially useful for any analysis that still needs to be
+ *         done after the framework clears the FIR bits that were at attention.
+ * @return SUCCESS.
+ */
+int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[odyssey_ocmb::PostAnalysis] "
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+    // If the IUE threshold in our data bundle has been reached, we trigger
+    // a channel fail. Once we trigger the channel fail, the system may crash
+    // right away. Since PRD is running in the hypervisor, it is possible we
+    // may not get the error log. To better our chances, we trigger the port
+    // fail here.
+    // TODO: need to verify IUE threshold handling and update triggerChnlFail
+    //if ( MemEcc::queryIueTh<TYPE_OCMB_CHIP>(i_chip, io_sc) )
+    //{
+    //    if ( SUCCESS != MemEcc::triggerChnlFail<TYPE_OCMB_CHIP>(i_chip) )
+    //    {
+    //        PRDF_ERR( PRDF_FUNC "triggerChnlFail(0x%08x) failed",
+    //        i_chip->getHuid() );
+    //    }
+    //}
+
+    #endif // __HOSTBOOT_RUNTIME
+
+    // If there was a channel failure some cleanup is required to ensure
+    // there are no more attentions from this channel.
+    MemUtils::cleanupChnlFail<TYPE_OCMB_CHIP>( i_chip, io_sc );
+
+    // Cleanup processor FIR bits on the other side of the channel.
+    MemUtils::cleanupChnlAttns<TYPE_OCMB_CHIP>( i_chip, io_sc );
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, PostAnalysis );
+
 //##############################################################################
 //
 //                             Special plugins
