@@ -58,6 +58,9 @@
       <id>SCOM_ACCESS_MUTEX</id>
     </attribute>
     <attribute>
+      <id>SCOM_IND_MUTEX</id>
+    </attribute>
+    <attribute>
       <id>VPD_SWITCHES</id>
     </attribute>
   </targetTypeExtension>
