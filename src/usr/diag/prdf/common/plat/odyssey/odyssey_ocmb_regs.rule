@@ -732,3 +732,445 @@
         scomaddr    0x0801241F;
         capture     group dlx_fir_regs;
     };
+
+    ############################################################################
+    # Odyssey chip ODP_FIR_0
+    ############################################################################
+
+    register PHY_INTERRUPT_STATUS_0
+    {
+        name        "SNPS Phy Interrupt Status 0";
+        scomaddr    0x800201040801303f;
+        capture     group odp_fir_0_regs;
+    };
+
+    register PHY_INTERRUPT_ENABLE_0
+    {
+        name        "SNPS Phy Interrupt Enable 0";
+        scomaddr    0x800201000801303f;
+        capture     group odp_fir_0_regs;
+    };
+
+    register DX_LCDL_STATUS0_0
+    {
+        name        "DX LCDL Status0 0";
+        scomaddr    0x800100e40801303f;
+        capture     group lcdl_status_0_regs;
+    };
+
+    register DX_LCDL_STATUS1_0
+    {
+        name        "DX LCDL Status1 0";
+        scomaddr    0x800110e40801303f;
+        capture     group lcdl_status_0_regs;
+    };
+
+    register DX_LCDL_STATUS2_0
+    {
+        name        "DX LCDL Status2 0";
+        scomaddr    0x800120e40801303f;
+        capture     group lcdl_status_0_regs;
+    };
+
+    register DX_LCDL_STATUS3_0
+    {
+        name        "DX LCDL Status3 0";
+        scomaddr    0x800130e40801303f;
+        capture     group lcdl_status_0_regs;
+    };
+
+    register DX_LCDL_STATUS4_0
+    {
+        name        "DX LCDL Status4 0";
+        scomaddr    0x800140e40801303f;
+        capture     group lcdl_status_0_regs;
+    };
+
+    register DX_LCDL_STATUS5_0
+    {
+        name        "DX LCDL Status5 0";
+        scomaddr    0x800150e40801303f;
+        capture     group lcdl_status_0_regs;
+    };
+
+    register DX_LCDL_STATUS6_0
+    {
+        name        "DX LCDL Status6 0";
+        scomaddr    0x800160e40801303f;
+        capture     group lcdl_status_0_regs;
+    };
+
+    register DX_LCDL_STATUS7_0
+    {
+        name        "DX LCDL Status7 0";
+        scomaddr    0x800170e40801343f;
+        capture     group lcdl_status_0_regs;
+    };
+
+    register DX_LCDL_STATUS8_0
+    {
+        name        "DX LCDL Status8 0";
+        scomaddr    0x800180e40801303f;
+        capture     group lcdl_status_0_regs;
+    };
+
+    register DX_LCDL_STATUS9_0
+    {
+        name        "DX LCDL Status9 0";
+        scomaddr    0x800190e40801303f;
+        capture     group lcdl_status_0_regs;
+    };
+
+    register AC_LCDL_STATUS_0
+    {
+        name        "AC LCDL Status 0";
+        scomaddr    0x800200e40801303f;
+        capture     group lcdl_status_0_regs;
+    };
+
+    register LCDL_DBG_CNTL3_0
+    {
+        name        "LCDL Debug Control3 0";
+        scomaddr    0x800200eb0801303f;
+        capture     group lcdl_status_0_regs;
+    };
+
+    register PPT_INF0_0
+    {
+        name        "Ppt Info0 0";
+        scomaddr    0x800100ac0801303f;
+        capture     group ppt_info_0_regs;
+    };
+
+    register PPT_INF1_0
+    {
+        name        "Ppt Info1 0";
+        scomaddr    0x800110ac0801343f;
+        capture     group ppt_info_0_regs;
+    };
+
+    register PPT_INF2_0
+    {
+        name        "Ppt Info2 0";
+        scomaddr    0x800120ac0801303f;
+        capture     group ppt_info_0_regs;
+    };
+
+    register PPT_INF3_0
+    {
+        name        "Ppt Info3 0";
+        scomaddr    0x800130ac0801303f;
+        capture     group ppt_info_0_regs;
+    };
+
+    register PPT_INF4_0
+    {
+        name        "Ppt Info4 0";
+        scomaddr    0x800140ac0801303f;
+        capture     group ppt_info_0_regs;
+    };
+
+    register PPT_INF5_0
+    {
+        name        "Ppt Info5 0";
+        scomaddr    0x800150ac0801303f;
+        capture     group ppt_info_0_regs;
+    };
+
+    register PPT_INF6_0
+    {
+        name        "Ppt Info6 0";
+        scomaddr    0x800160ac0801303f;
+        capture     group ppt_info_0_regs;
+    };
+
+    register PPT_INF7_0
+    {
+        name        "Ppt Info7 0";
+        scomaddr    0x800170ac0801303f;
+        capture     group ppt_info_0_regs;
+    };
+
+    register PPT_INF8_0
+    {
+        name        "Ppt Info8 0";
+        scomaddr    0x800180ac0801303f;
+        capture     group ppt_info_0_regs;
+    };
+
+    register PPT_INF9_0
+    {
+        name        "Ppt Info9 0";
+        scomaddr    0x800190ac0801303f;
+        capture     group ppt_info_0_regs;
+    };
+
+    register ARC_ECC_INDICATIONS_0
+    {
+        name        "Arc ECC Indications 0";
+        scomaddr    0x800c00820801303f;
+        capture     group arc_0_regs;
+    };
+
+    register ARC_PMU_ECC_CTL_0
+    {
+        name        "Arc PMU ECC Control 0";
+        scomaddr    0x800c00860801303f;
+        capture     group arc_0_regs;
+    };
+
+    register APB_ARC_ECC_CTRL_0
+    {
+        name        "APB Arc ECC Control 0";
+        scomaddr    0x800c008c0801303f;
+        capture     group arc_0_regs;
+    };
+
+    register APB_ARC_DB_ERR_0
+    {
+        name        "APB Arc DB Error 0";
+        scomaddr    0x800c008d0801303f;
+        capture     group arc_0_regs;
+    };
+
+    register ARC_SB_CTR_ENABLES_0
+    {
+        name        "Arc SB CTR Enables 0";
+        scomaddr    0x800c00850801303f;
+        capture     group arc_0_regs;
+    };
+
+    register ARC_DCCM_SB_ERR_CTR_0
+    {
+        name        "Arc DCCM SB Error CTR 0";
+        scomaddr    0x800c00840801303f;
+        capture     group arc_0_regs;
+    };
+
+    register ARC_ICCM_SB_ERR_CTR_0
+    {
+        name        "Arc ICCM SB Error CTR 0";
+        scomaddr    0x800c00830801303f;
+        capture     group arc_0_regs;
+    };
+
+    ############################################################################
+    # Odyssey chip ODP_FIR_1
+    ############################################################################
+
+    register PHY_INTERRUPT_STATUS_1
+    {
+        name        "SNPS Phy Interrupt Status 1";
+        scomaddr    0x800201040801343f;
+        capture     group odp_fir_1_regs;
+    };
+
+    register PHY_INTERRUPT_ENABLE_1
+    {
+        name        "SNPS Phy Interrupt Enable 1";
+        scomaddr    0x800201000801343f;
+        capture     group odp_fir_1_regs;
+    };
+
+    register DX_LCDL_STATUS0_1
+    {
+        name        "DX LCDL Status0 1";
+        scomaddr    0x800100e40801343f;
+        capture     group lcdl_status_1_regs;
+    };
+
+    register DX_LCDL_STATUS1_1
+    {
+        name        "DX LCDL Status1 1";
+        scomaddr    0x800110e40801343f;
+        capture     group lcdl_status_1_regs;
+    };
+
+    register DX_LCDL_STATUS2_1
+    {
+        name        "DX LCDL Status2 1";
+        scomaddr    0x800120e40801343f;
+        capture     group lcdl_status_1_regs;
+    };
+
+    register DX_LCDL_STATUS3_1
+    {
+        name        "DX LCDL Status3 1";
+        scomaddr    0x800130e40801343f;
+        capture     group lcdl_status_1_regs;
+    };
+
+    register DX_LCDL_STATUS4_1
+    {
+        name        "DX LCDL Status4 1";
+        scomaddr    0x800140e40801343f;
+        capture     group lcdl_status_1_regs;
+    };
+
+    register DX_LCDL_STATUS5_1
+    {
+        name        "DX LCDL Status5 1";
+        scomaddr    0x800150e40801343f;
+        capture     group lcdl_status_1_regs;
+    };
+
+    register DX_LCDL_STATUS6_1
+    {
+        name        "DX LCDL Status6 1";
+        scomaddr    0x800160e40801343f;
+        capture     group lcdl_status_1_regs;
+    };
+
+    register DX_LCDL_STATUS7_1
+    {
+        name        "DX LCDL Status7 1";
+        scomaddr    0x800170e40801343f;
+        capture     group lcdl_status_1_regs;
+    };
+
+    register DX_LCDL_STATUS8_1
+    {
+        name        "DX LCDL Status8 1";
+        scomaddr    0x800180e40801343f;
+        capture     group lcdl_status_1_regs;
+    };
+
+    register DX_LCDL_STATUS9_1
+    {
+        name        "DX LCDL Status9 1";
+        scomaddr    0x800190e40801343f;
+        capture     group lcdl_status_1_regs;
+    };
+
+    register AC_LCDL_STATUS_1
+    {
+        name        "AC LCDL Status 1";
+        scomaddr    0x800200e40801343f;
+        capture     group lcdl_status_1_regs;
+    };
+
+    register LCDL_DBG_CNTL3_1
+    {
+        name        "LCDL Debug Control3 1";
+        scomaddr    0x800200eb0801343f;
+        capture     group lcdl_status_1_regs;
+    };
+
+    register PPT_INF0_1
+    {
+        name        "Ppt Info0 1";
+        scomaddr    0x800100ac0801343f;
+        capture     group ppt_info_1_regs;
+    };
+
+    register PPT_INF1_1
+    {
+        name        "Ppt Info1 1";
+        scomaddr    0x800110ac0801343f;
+        capture     group ppt_info_1_regs;
+    };
+
+    register PPT_INF2_1
+    {
+        name        "Ppt Info2 1";
+        scomaddr    0x800120ac0801343f;
+        capture     group ppt_info_1_regs;
+    };
+
+    register PPT_INF3_1
+    {
+        name        "Ppt Info3 1";
+        scomaddr    0x800130ac0801343f;
+        capture     group ppt_info_1_regs;
+    };
+
+    register PPT_INF4_1
+    {
+        name        "Ppt Info4 1";
+        scomaddr    0x800140ac0801343f;
+        capture     group ppt_info_1_regs;
+    };
+
+    register PPT_INF5_1
+    {
+        name        "Ppt Info5 1";
+        scomaddr    0x800150ac0801343f;
+        capture     group ppt_info_1_regs;
+    };
+
+    register PPT_INF6_1
+    {
+        name        "Ppt Info6 1";
+        scomaddr    0x800160ac0801343f;
+        capture     group ppt_info_1_regs;
+    };
+
+    register PPT_INF7_1
+    {
+        name        "Ppt Info7 1";
+        scomaddr    0x800170ac0801343f;
+        capture     group ppt_info_1_regs;
+    };
+
+    register PPT_INF8_1
+    {
+        name        "Ppt Info8 1";
+        scomaddr    0x800180ac0801343f;
+        capture     group ppt_info_1_regs;
+    };
+
+    register PPT_INF9_1
+    {
+        name        "Ppt Info9 1";
+        scomaddr    0x800190ac0801343f;
+        capture     group ppt_info_1_regs;
+    };
+
+    register ARC_ECC_INDICATIONS_1
+    {
+        name        "Arc ECC Indications 1";
+        scomaddr    0x800c00820801343f;
+        capture     group arc_1_regs;
+    };
+
+    register ARC_PMU_ECC_CTL_1
+    {
+        name        "Arc PMU ECC Control 1";
+        scomaddr    0x800c00860801343f;
+        capture     group arc_1_regs;
+    };
+
+    register APB_ARC_ECC_CTRL_1
+    {
+        name        "APB Arc ECC Control 1";
+        scomaddr    0x800c008c0801343f;
+        capture     group arc_1_regs;
+    };
+
+    register APB_ARC_DB_ERR_1
+    {
+        name        "APB Arc DB Error 1";
+        scomaddr    0x800c008d0801343f;
+        capture     group arc_1_regs;
+    };
+
+    register ARC_SB_CTR_ENABLES_1
+    {
+        name        "Arc SB CTR Enables 1";
+        scomaddr    0x800c00850801343f;
+        capture     group arc_1_regs;
+    };
+
+    register ARC_DCCM_SB_ERR_CTR_1
+    {
+        name        "Arc DCCM SB Error CTR 1";
+        scomaddr    0x800c00840801343f;
+        capture     group arc_1_regs;
+    };
+
+    register ARC_ICCM_SB_ERR_CTR_1
+    {
+        name        "Arc ICCM SB Error CTR 1";
+        scomaddr    0x800c00830801343f;
+        capture     group arc_1_regs;
+    };

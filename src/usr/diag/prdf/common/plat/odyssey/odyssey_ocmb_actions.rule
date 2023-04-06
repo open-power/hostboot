@@ -719,6 +719,50 @@ actionclass srq_recov_parity_error
 };
 
 ################################################################################
+#                           ODP_FIR actions with FFDC                          #
+################################################################################
+
+# ODP_FIR[6]
+actionclass phyStickyUnlockErr_0
+{
+    capture(lcdl_status_0_regs);
+    mem_port0_M_th1;
+};
+
+actionclass phyStickyUnlockErr_1
+{
+    capture(lcdl_status_1_regs);
+    mem_port1_M_th1;
+};
+
+# ODP_FIR[12]
+actionclass phyRxTxPptErr_0
+{
+    capture(ppt_info_0_regs);
+    mem_port0_M_th1;
+};
+
+actionclass phyRxTxPptErr_1
+{
+    capture(ppt_info_1_regs);
+    mem_port1_M_th1;
+};
+
+# ODP_FIR[13]
+actionclass phyEccErrArcEccInt_0
+{
+    capture(arc_0_regs);
+    mem_port0_M_th1;
+};
+
+actionclass phyEccErrArcEccInt_1
+{
+    capture(arc_1_regs);
+    mem_port1_M_th1;
+};
+
+
+################################################################################
 # Analyze groups
 ################################################################################
 
@@ -756,6 +800,18 @@ actionclass analyzeTLX_FIR
 {
     capture(tlx_fir_regs);
     analyze(gTLX_FIR);
+};
+
+actionclass analyzeODP_FIR_0
+{
+    capture(odp_fir_0_regs);
+    analyze(gODP_FIR_0);
+};
+
+actionclass analyzeODP_FIR_1
+{
+    capture(odp_fir_1_regs);
+    analyze(gODP_FIR_1);
 };
 
 # TODO

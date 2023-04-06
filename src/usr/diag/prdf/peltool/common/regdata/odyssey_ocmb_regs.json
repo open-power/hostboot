@@ -14,6 +14,16 @@
         "description": "Odyssey chip MMIO_FIR Checkstop Config",
         "name": "MMIO_FIR_CFG_CS"
     },
+    "0x07a1": {
+        "address": "0x800c008c0801303f",
+        "description": "APB Arc ECC Control 0",
+        "name": "APB_ARC_ECC_CTRL_0"
+    },
+    "0x07a3": {
+        "address": "0x800c008c0801343f",
+        "description": "APB Arc ECC Control 1",
+        "name": "APB_ARC_ECC_CTRL_1"
+    },
     "0x08aa": {
         "address": "0x0000000008013008",
         "description": "Odyssey chip ODP_FIR WOF 0",
@@ -104,6 +114,16 @@
         "description": "Odyssey chip RDF_FIR 0 WOF",
         "name": "RDF_FIR_WOF_0"
     },
+    "0x22a5": {
+        "address": "0x800201000801303f",
+        "description": "SNPS Phy Interrupt Enable 0",
+        "name": "PHY_INTERRUPT_ENABLE_0"
+    },
+    "0x22a7": {
+        "address": "0x800201000801343f",
+        "description": "SNPS Phy Interrupt Enable 1",
+        "name": "PHY_INTERRUPT_ENABLE_1"
+    },
     "0x22aa": {
         "address": "0x0000000008012808",
         "description": "Odyssey chip RDF_FIR WOF 1",
@@ -169,35 +189,105 @@
         "description": "Odyssey chip MBA Error Mask1 Register",
         "name": "MBA_ERR_MASK_1"
     },
+    "0x2d4e": {
+        "address": "0x800c00840801303f",
+        "description": "Arc DCCM SB Error CTR 0",
+        "name": "ARC_DCCM_SB_ERR_CTR_0"
+    },
     "0x2d69": {
         "address": "0x0000000008012800",
         "description": "Odyssey chip RDF_FIR 1",
         "name": "RDF_FIR_1"
+    },
+    "0x2e4e": {
+        "address": "0x800c00840801343f",
+        "description": "Arc DCCM SB Error CTR 1",
+        "name": "ARC_DCCM_SB_ERR_CTR_1"
+    },
+    "0x3039": {
+        "address": "0x800130e40801343f",
+        "description": "DX LCDL Status3 1",
+        "name": "DX_LCDL_STATUS3_1"
     },
     "0x311d": {
         "address": "0x0000000008013006",
         "description": "Odyssey chip ODP_FIR Special Attention Config 0",
         "name": "ODP_FIR_CFG_SPA_0"
     },
+    "0x3139": {
+        "address": "0x800140e40801303f",
+        "description": "DX LCDL Status4 0",
+        "name": "DX_LCDL_STATUS4_0"
+    },
     "0x321d": {
         "address": "0x0000000008013406",
         "description": "Odyssey chip ODP_FIR Special Attention Config 1",
         "name": "ODP_FIR_CFG_SPA_1"
+    },
+    "0x3239": {
+        "address": "0x800140e40801343f",
+        "description": "DX LCDL Status4 1",
+        "name": "DX_LCDL_STATUS4_1"
+    },
+    "0x3339": {
+        "address": "0x800150e40801303f",
+        "description": "DX LCDL Status5 0",
+        "name": "DX_LCDL_STATUS5_0"
     },
     "0x337b": {
         "address": "0x0000000008040106",
         "description": "Odyssey chip Special Attention Config",
         "name": "MEM_LOCAL_FIR_CFG_SPA"
     },
+    "0x33f4": {
+        "address": "0x800c008d0801303f",
+        "description": "APB Arc DB Error 0",
+        "name": "APB_ARC_DB_ERR_0"
+    },
+    "0x33f6": {
+        "address": "0x800c008d0801343f",
+        "description": "APB Arc DB Error 1",
+        "name": "APB_ARC_DB_ERR_1"
+    },
+    "0x3439": {
+        "address": "0x800150e40801343f",
+        "description": "DX LCDL Status5 1",
+        "name": "DX_LCDL_STATUS5_1"
+    },
+    "0x3539": {
+        "address": "0x800160e40801303f",
+        "description": "DX LCDL Status6 0",
+        "name": "DX_LCDL_STATUS6_0"
+    },
     "0x35d3": {
         "address": "0x0000000008012419",
         "description": "Odyssey chip DLX Incoming Link Info Register",
         "name": "DLX_RMT_INFO"
     },
+    "0x3639": {
+        "address": "0x800160e40801343f",
+        "description": "DX LCDL Status6 1",
+        "name": "DX_LCDL_STATUS6_1"
+    },
+    "0x3739": {
+        "address": "0x800170e40801343f",
+        "description": "DX LCDL Status7 0",
+        "name": "DX_LCDL_STATUS7_0"
+    },
     "0x3821": {
         "address": "0x00000000570f001a",
         "description": "Global Special Attention FIR",
         "name": "GFIR_SPA"
+    },
+    "0x3839": {
+        "address": "0x800170e40801343f",
+        "description": "DX LCDL Status7 1",
+        "name": "DX_LCDL_STATUS7_1"
+    },
+    "0x3939": {
+        "address": "0x800180e40801303f",
+        "description": "DX LCDL Status8 0",
+        "name": "DX_LCDL_STATUS8_0"
     },
     "0x399e": {
         "address": "0x0000000008013005",
@@ -208,6 +298,31 @@
         "address": "0x0000000008013405",
         "description": "Odyssey chip ODP_FIR Recoverable Config 1",
         "name": "ODP_FIR_CFG_RE_1"
+    },
+    "0x3a39": {
+        "address": "0x800180e40801343f",
+        "description": "DX LCDL Status8 1",
+        "name": "DX_LCDL_STATUS8_1"
+    },
+    "0x3b1e": {
+        "address": "0x800200e40801303f",
+        "description": "AC LCDL Status 0",
+        "name": "AC_LCDL_STATUS_0"
+    },
+    "0x3b20": {
+        "address": "0x800200e40801343f",
+        "description": "AC LCDL Status 1",
+        "name": "AC_LCDL_STATUS_1"
+    },
+    "0x3b39": {
+        "address": "0x800190e40801303f",
+        "description": "DX LCDL Status9 0",
+        "name": "DX_LCDL_STATUS9_0"
+    },
+    "0x3c39": {
+        "address": "0x800190e40801343f",
+        "description": "DX LCDL Status9 1",
+        "name": "DX_LCDL_STATUS9_1"
     },
     "0x3ece": {
         "address": "0x0000000008040108",
@@ -239,10 +354,140 @@
         "description": "Odyssey chip TLX_FIR",
         "name": "TLX_FIR"
     },
+    "0x4939": {
+        "address": "0x800100e40801303f",
+        "description": "DX LCDL Status0 0",
+        "name": "DX_LCDL_STATUS0_0"
+    },
+    "0x4a39": {
+        "address": "0x800100e40801343f",
+        "description": "DX LCDL Status0 1",
+        "name": "DX_LCDL_STATUS0_1"
+    },
+    "0x4b39": {
+        "address": "0x800110e40801303f",
+        "description": "DX LCDL Status1 0",
+        "name": "DX_LCDL_STATUS1_0"
+    },
     "0x4b5b": {
         "address": "0x0000000008040100",
         "description": "Odyssey chip MEM_LOCAL_FIR",
         "name": "MEM_LOCAL_FIR"
+    },
+    "0x4c39": {
+        "address": "0x800110e40801343f",
+        "description": "DX LCDL Status1 1",
+        "name": "DX_LCDL_STATUS1_1"
+    },
+    "0x4d39": {
+        "address": "0x800120e40801303f",
+        "description": "DX LCDL Status2 0",
+        "name": "DX_LCDL_STATUS2_0"
+    },
+    "0x4de3": {
+        "address": "0x800100ac0801303f",
+        "description": "Ppt Info0 0",
+        "name": "PPT_INF0_0"
+    },
+    "0x4de5": {
+        "address": "0x800100ac0801343f",
+        "description": "Ppt Info0 1",
+        "name": "PPT_INF0_1"
+    },
+    "0x4de6": {
+        "address": "0x800110ac0801343f",
+        "description": "Ppt Info1 0",
+        "name": "PPT_INF1_0"
+    },
+    "0x4de8": {
+        "address": "0x800110ac0801343f",
+        "description": "Ppt Info1 1",
+        "name": "PPT_INF1_1"
+    },
+    "0x4de9": {
+        "address": "0x800120ac0801303f",
+        "description": "Ppt Info2 0",
+        "name": "PPT_INF2_0"
+    },
+    "0x4deb": {
+        "address": "0x800120ac0801343f",
+        "description": "Ppt Info2 1",
+        "name": "PPT_INF2_1"
+    },
+    "0x4dec": {
+        "address": "0x800130ac0801303f",
+        "description": "Ppt Info3 0",
+        "name": "PPT_INF3_0"
+    },
+    "0x4dee": {
+        "address": "0x800130ac0801343f",
+        "description": "Ppt Info3 1",
+        "name": "PPT_INF3_1"
+    },
+    "0x4def": {
+        "address": "0x800140ac0801303f",
+        "description": "Ppt Info4 0",
+        "name": "PPT_INF4_0"
+    },
+    "0x4df1": {
+        "address": "0x800140ac0801343f",
+        "description": "Ppt Info4 1",
+        "name": "PPT_INF4_1"
+    },
+    "0x4df2": {
+        "address": "0x800150ac0801303f",
+        "description": "Ppt Info5 0",
+        "name": "PPT_INF5_0"
+    },
+    "0x4df4": {
+        "address": "0x800150ac0801343f",
+        "description": "Ppt Info5 1",
+        "name": "PPT_INF5_1"
+    },
+    "0x4df5": {
+        "address": "0x800160ac0801303f",
+        "description": "Ppt Info6 0",
+        "name": "PPT_INF6_0"
+    },
+    "0x4df7": {
+        "address": "0x800160ac0801343f",
+        "description": "Ppt Info6 1",
+        "name": "PPT_INF6_1"
+    },
+    "0x4df8": {
+        "address": "0x800170ac0801303f",
+        "description": "Ppt Info7 0",
+        "name": "PPT_INF7_0"
+    },
+    "0x4dfa": {
+        "address": "0x800170ac0801343f",
+        "description": "Ppt Info7 1",
+        "name": "PPT_INF7_1"
+    },
+    "0x4dfb": {
+        "address": "0x800180ac0801303f",
+        "description": "Ppt Info8 0",
+        "name": "PPT_INF8_0"
+    },
+    "0x4dfd": {
+        "address": "0x800180ac0801343f",
+        "description": "Ppt Info8 1",
+        "name": "PPT_INF8_1"
+    },
+    "0x4dfe": {
+        "address": "0x800190ac0801303f",
+        "description": "Ppt Info9 0",
+        "name": "PPT_INF9_0"
+    },
+    "0x4e00": {
+        "address": "0x800190ac0801343f",
+        "description": "Ppt Info9 1",
+        "name": "PPT_INF9_1"
+    },
+    "0x4e39": {
+        "address": "0x800120e40801343f",
+        "description": "DX LCDL Status2 1",
+        "name": "DX_LCDL_STATUS2_1"
     },
     "0x4ee8": {
         "address": "0x0000000008010c08",
@@ -253,6 +498,11 @@
         "address": "0x0000000008040002",
         "description": "MEM Chiplet Special Attention FIR",
         "name": "CFIR_MEM_SPA"
+    },
+    "0x4f39": {
+        "address": "0x800130e40801303f",
+        "description": "DX LCDL Status3 0",
+        "name": "DX_LCDL_STATUS3_0"
     },
     "0x52bd": {
         "address": "0x0000000008012412",
@@ -364,6 +614,16 @@
         "description": "Odyssey chip SRQ_FIR",
         "name": "SRQ_FIR"
     },
+    "0x7050": {
+        "address": "0x800c00850801303f",
+        "description": "Arc SB CTR Enables 0",
+        "name": "ARC_SB_CTR_ENABLES_0"
+    },
+    "0x7052": {
+        "address": "0x800c00850801343f",
+        "description": "Arc SB CTR Enables 1",
+        "name": "ARC_SB_CTR_ENABLES_1"
+    },
     "0x7065": {
         "address": "0x0000000008040105",
         "description": "Odyssey chip Recoverable Config",
@@ -463,6 +723,16 @@
         "address": "0x0000000008011406",
         "description": "Odyssey chip MCBIST_FIR Special Attention Config",
         "name": "MCBIST_FIR_CFG_SPA"
+    },
+    "0x8b78": {
+        "address": "0x800c00820801303f",
+        "description": "Arc ECC Indications 0",
+        "name": "ARC_ECC_INDICATIONS_0"
+    },
+    "0x8c78": {
+        "address": "0x800c00820801343f",
+        "description": "Arc ECC Indications 1",
+        "name": "ARC_ECC_INDICATIONS_1"
     },
     "0x8cb2": {
         "address": "0x00000000570f001b",
@@ -624,6 +894,26 @@
         "description": "Odyssey chip TP_LOCAL_FIR",
         "name": "TP_LOCAL_FIR"
     },
+    "0xc1d9": {
+        "address": "0x800200eb0801303f",
+        "description": "LCDL Debug Control3 0",
+        "name": "LCDL_DBG_CNTL3_0"
+    },
+    "0xc1db": {
+        "address": "0x800200eb0801343f",
+        "description": "LCDL Debug Control3 1",
+        "name": "LCDL_DBG_CNTL3_1"
+    },
+    "0xc435": {
+        "address": "0x800201040801303f",
+        "description": "SNPS Phy Interrupt Status 0",
+        "name": "PHY_INTERRUPT_STATUS_0"
+    },
+    "0xc437": {
+        "address": "0x800201040801343f",
+        "description": "SNPS Phy Interrupt Status 1",
+        "name": "PHY_INTERRUPT_STATUS_1"
+    },
     "0xc537": {
         "address": "0x0000000008011455",
         "description": "Odyssey chip MBS Memory Scrub/Read Error Counter Reg 0",
@@ -758,6 +1048,16 @@
         "address": "0x0000000008010878",
         "description": "Odyssey chip MMIO_FIR WOF",
         "name": "MMIO_FIR_WOF"
+    },
+    "0xe3b4": {
+        "address": "0x800c00860801303f",
+        "description": "Arc PMU ECC Control 0",
+        "name": "ARC_PMU_ECC_CTL_0"
+    },
+    "0xe4b4": {
+        "address": "0x800c00860801343f",
+        "description": "Arc PMU ECC Control 1",
+        "name": "ARC_PMU_ECC_CTL_1"
     },
     "0xe4d7": {
         "address": "0x0000000008011818",
@@ -998,6 +1298,16 @@
         "address": "0x00000000080114e0",
         "description": "Odyssey chip MCBIST Configuration Register",
         "name": "MCBCFG"
+    },
+    "0xfa4e": {
+        "address": "0x800c00830801303f",
+        "description": "Arc ICCM SB Error CTR 0",
+        "name": "ARC_ICCM_SB_ERR_CTR_0"
+    },
+    "0xfb4e": {
+        "address": "0x800c00830801343f",
+        "description": "Arc ICCM SB Error CTR 1",
+        "name": "ARC_ICCM_SB_ERR_CTR_1"
     },
     "0xff88": {
         "address": "0x000000000801200c",

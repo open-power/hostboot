@@ -1215,12 +1215,12 @@ group gCFIR_MEM
     /** CFIR_MEM[12]
      *  Attention from ODP_FIR_0
      */
-    (rCFIR_MEM, bit(12)) ? analyze(gODP_FIR_0);
+    (rCFIR_MEM, bit(12)) ? analyzeODP_FIR_0;
 
     /** CFIR_MEM[13]
      *  Attention from ODP_FIR_1
      */
-    (rCFIR_MEM, bit(13)) ? analyze(gODP_FIR_1);
+    (rCFIR_MEM, bit(13)) ? analyzeODP_FIR_1;
 
     /** CFIR_MEM[14]
      *  Attention from OCMB_PHY_FIR
@@ -2956,7 +2956,7 @@ group gODP_FIR_0
     /** ODP_FIR_0[6]
      *  PHY Sticky Unlock Error
      */
-    (rODP_FIR_0, bit(6)) ? mem_port0_M_th1;
+    (rODP_FIR_0, bit(6)) ? phyStickyUnlockErr_0;
 
     /** ODP_FIR_0[7]
      *  Bsi Interrupt occurred
@@ -2986,12 +2986,12 @@ group gODP_FIR_0
     /** ODP_FIR_0[12]
      *  PHY RX TX PPT Error
      */
-    (rODP_FIR_0, bit(12)) ? mem_port0_M_th1;
+    (rODP_FIR_0, bit(12)) ? phyRxTxPptErr_0;
 
     /** ODP_FIR_0[13]
      *  PHY ECC Error ARC ECC Interrupt
      */
-    (rODP_FIR_0, bit(13)) ? mem_port0_M_th1;
+    (rODP_FIR_0, bit(13)) ? phyEccErrArcEccInt_0;
 
     /** ODP_FIR_0[14:18]
      *  Reserved Firmware Interrupt
@@ -3068,7 +3068,7 @@ group gODP_FIR_1
     /** ODP_FIR_1[6]
      *  PHY Sticky Unlock Error
      */
-    (rODP_FIR_1, bit(6)) ? mem_port1_M_th1;
+    (rODP_FIR_1, bit(6)) ? phyStickyUnlockErr_1;
 
     /** ODP_FIR_1[7]
      *  Bsi Interrupt occurred
@@ -3098,12 +3098,12 @@ group gODP_FIR_1
     /** ODP_FIR_1[12]
      *  PHY RX TX PPT Error
      */
-    (rODP_FIR_1, bit(12)) ? mem_port1_M_th1;
+    (rODP_FIR_1, bit(12)) ? phyRxTxPptErr_1;
 
     /** ODP_FIR_1[13]
      *  PHY ECC Error ARC ECC Interrupt
      */
-    (rODP_FIR_1, bit(13)) ? mem_port1_M_th1;
+    (rODP_FIR_1, bit(13)) ? phyEccErrArcEccInt_1;
 
     /** ODP_FIR_1[14:18]
      *  Reserved Firmware Interrupt
