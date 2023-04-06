@@ -32,11 +32,11 @@
     <ffdc>TARGET_CHIP</ffdc>
     <ffdc>IAR</ffdc>
     <callout>
-      <target>TARGET</target>
+      <target>TARGET_CHIP</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>TARGET_CHIP</target>
     </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
@@ -47,11 +47,11 @@
       <ffdc>LANE</ffdc>
       <ffdc>DISTANCE</ffdc>
       <callout>
-        <target>TARGET</target>
+        <target>TARGET_CHIP</target>
         <priority>HIGH</priority>
       </callout>
       <deconfigure>
-        <target>TARGET</target>
+        <target>TARGET_CHIP</target>
       </deconfigure>
     </hwpError>
   <!-- ******************************************************************** -->
@@ -63,11 +63,11 @@
       <ffdc>STATUS</ffdc>
       <ffdc>DISTANCE</ffdc>
       <callout>
-        <target>TARGET</target>
+        <target>TARGET_CHIP</target>
         <priority>HIGH</priority>
       </callout>
       <deconfigure>
-        <target>TARGET</target>
+        <target>TARGET_CHIP</target>
       </deconfigure>
     </hwpError>
   <!-- ******************************************************************** -->
@@ -78,11 +78,11 @@
       <ffdc>GROUPA</ffdc>
       <ffdc>GROUPB</ffdc>
       <callout>
-        <target>TARGET</target>
+        <target>TARGET_CHIP</target>
         <priority>HIGH</priority>
       </callout>
       <deconfigure>
-        <target>TARGET</target>
+        <target>TARGET_CHIP</target>
       </deconfigure>
     </hwpError>
   <!-- ******************************************************************** -->
@@ -91,11 +91,11 @@
       <description>Tx TDR Edges are the same</description>
       <ffdc>TARGET_CHIP</ffdc>
       <callout>
-        <target>TARGET</target>
+        <target>TARGET_CHIP</target>
         <priority>HIGH</priority>
       </callout>
       <deconfigure>
-        <target>TARGET</target>
+        <target>TARGET_CHIP</target>
       </deconfigure>
     </hwpError>
   <!-- ******************************************************************** -->
@@ -104,11 +104,11 @@
       <description>Tx TDR DAC is outside of accesible range</description>
       <ffdc>TARGET_CHIP</ffdc>
       <callout>
-        <target>TARGET</target>
+        <target>TARGET_CHIP</target>
         <priority>HIGH</priority>
       </callout>
       <deconfigure>
-        <target>TARGET</target>
+        <target>TARGET_CHIP</target>
       </deconfigure>
     </hwpError>
   <!-- ******************************************************************** -->
