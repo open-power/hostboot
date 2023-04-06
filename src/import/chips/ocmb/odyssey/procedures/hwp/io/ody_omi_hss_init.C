@@ -112,7 +112,8 @@ fapi2::ReturnCode ody_omi_hss_init_functional_margin(const fapi2::Target<fapi2::
     uint32_t l_rx_lane_mask = 0;
     const uint8_t c_thread = 0;
     fapi2::ATTR_OMI_RX_VERT_OFFSET_Type l_rx_vert_offset = 0;
-    fapi2::ATTR_OMI_RX_HORIZ_OFFSET_Type l_rx_horiz_offset = 0;
+    fapi2::ATTR_OMI_RX_HORIZ_DATA_OFFSET_Type l_rx_horiz_data_offset = 0;
+    fapi2::ATTR_OMI_RX_HORIZ_EDGE_OFFSET_Type l_rx_horiz_edge_offset = 0;
 
     bool l_mfg_mode = false;
 
@@ -122,12 +123,14 @@ fapi2::ReturnCode ody_omi_hss_init_functional_margin(const fapi2::Target<fapi2::
     {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LANES, i_target, l_rx_lane_mask));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_VERT_OFFSET, i_target, l_rx_vert_offset));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_HORIZ_OFFSET, i_target, l_rx_horiz_offset));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_HORIZ_DATA_OFFSET, i_target, l_rx_horiz_data_offset));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_HORIZ_EDGE_OFFSET, i_target, l_rx_horiz_edge_offset));
 
         FAPI_TRY(i_ppe_common.setup_func_margin(i_target,
                                                 c_thread,
                                                 l_rx_vert_offset,
-                                                l_rx_horiz_offset));
+                                                l_rx_horiz_data_offset,
+                                                l_rx_horiz_edge_offset));
     }
 
 fapi_try_exit:
@@ -153,7 +156,7 @@ fapi2::ReturnCode ody_omi_hss_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     const uint8_t l_ssc = 1;
     //fapi2::ATTR_OMI_SPREAD_SPECTRUM_Type l_ssc;
 
-    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSCR,
+    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSAR,
             PHY_PPE_WRAP0_ARB_CSDR,
             PHY_ODY_OMI_BASE);
 

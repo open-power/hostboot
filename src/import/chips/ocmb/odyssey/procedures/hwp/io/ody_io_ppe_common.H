@@ -40,7 +40,8 @@
 #include <ody_io_ppe_regs.H>
 #include <io_ppe_lib.H>
 
-const uint64_t PHY_PPE_WRAP0_ARB_CSCR = 0x8010C0Cull;
+const uint64_t PHY_PPE_WRAP0_ARB_CSCR_OR = 0x8010C0Cull;
+const uint64_t PHY_PPE_WRAP0_ARB_CSAR = 0x8010C0Dull;
 const uint64_t PHY_PPE_WRAP0_ARB_CSDR = 0x8010C0Eull;
 const uint64_t PHY_PPE_WRAP0_XIXCR = 0x8010C10ull;
 const uint64_t PHY_ODY_OMI_BASE = 0x08010C00ull;

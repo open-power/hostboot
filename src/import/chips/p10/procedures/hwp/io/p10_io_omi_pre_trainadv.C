@@ -124,6 +124,8 @@ fapi2::ReturnCode p10_io_omi_pre_trainadv(const fapi2::Target<fapi2::TARGET_TYPE
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_IS_SIMICS_Type l_attr_is_simics;
     uint8_t l_is_apollo = 0;
+    bool l_any_odyssey = false;
+    uint8_t l_ocmb_type = fapi2::ENUM_ATTR_NAME_NONE;
 
 
     FAPI_DBG("Entering ...");
@@ -165,7 +167,30 @@ fapi2::ReturnCode p10_io_omi_pre_trainadv(const fapi2::Target<fapi2::TARGET_TYPE
     {
         for (const auto& l_omic_target : l_pauc_target.getChildren<fapi2::TARGET_TYPE_OMIC>())
         {
-            FAPI_TRY(p10_io_omi_prbs(l_omic_target, true))
+            for (const auto& l_omi_target : l_omic_target.getChildren<fapi2::TARGET_TYPE_OMI>())
+            {
+                const auto& l_ocmbs = l_omi_target.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>();
+
+                // Sanity check for no empty vector
+                if (l_ocmbs.empty())
+                {
+                    continue;
+                }
+
+                const auto& l_ocmb = l_ocmbs[0];
+                FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, l_ocmb, l_ocmb_type));
+
+                if (l_ocmb_type == fapi2::ENUM_ATTR_NAME_ODYSSEY)
+                {
+                    l_any_odyssey = true;
+                    break;
+                }
+            }
+
+            if (!l_any_odyssey)
+            {
+                FAPI_TRY(p10_io_omi_prbs(l_omic_target, true));
+            }
         }
     }
 

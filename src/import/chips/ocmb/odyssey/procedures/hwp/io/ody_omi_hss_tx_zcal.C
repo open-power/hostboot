@@ -242,8 +242,8 @@ fapi2::ReturnCode verifyZCal(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
                            .set_P_SEGS(l_totalPSegs)
                            .set_N_SEGS(l_totalNSegs)
                            .set_LANE(i_lane),
-                           "Failed Z Cal - Number of segments is outisde of range (%d-%d) P(%d) | N(%d) on lane %d",
-                           c_minSegs, c_maxSegs, l_totalPSegs, l_totalNSegs, i_lane);
+                           "Failed Z Cal - Number of segments is outisde of range P(%d) | N(%d) on lane %d",
+                           l_totalPSegs, l_totalNSegs, i_lane);
         // Force value of 25 on leg
         FAPI_TRY(forceZCalToDefault(i_target, i_baseAddr, i_group, i_lane));
     }

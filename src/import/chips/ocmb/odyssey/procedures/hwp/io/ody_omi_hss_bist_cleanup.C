@@ -44,7 +44,7 @@ fapi2::ReturnCode ody_omi_hss_bist_cleanup(const fapi2::Target<fapi2::TARGET_TYP
 {
     FAPI_DBG("Start - BIST Cleanup");
 
-    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSCR,
+    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSAR,
             PHY_PPE_WRAP0_ARB_CSDR,
             PHY_ODY_OMI_BASE);
 

@@ -187,10 +187,21 @@
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
-        <id>ATTR_OMI_RX_HORIZ_OFFSET</id>
+        <id>ATTR_OMI_RX_HORIZ_DATA_OFFSET</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
-            OMI Rx Horizontal Offset for Functional Margining
+            OMI Rx Horizontal Data Offset for Functional Margining
+        </description>
+        <valueType>uint8</valueType>
+        <default>0</default>
+        <platInit/>
+    </attribute>
+<!-- ********************************************************************** -->
+    <attribute>
+        <id>ATTR_OMI_RX_HORIZ_EDGE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            OMI Rx Horizontal Edge Offset for Functional Margining
         </description>
         <valueType>uint8</valueType>
         <default>0</default>

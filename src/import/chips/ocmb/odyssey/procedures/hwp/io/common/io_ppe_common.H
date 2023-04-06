@@ -169,7 +169,8 @@ class io_ppe_common
         fapi2::ReturnCode setup_func_margin(const fapi2::Target<K, M, V>& i_target,
                                             const uint8_t i_thread,
                                             const uint8_t i_rx_vert_offset,
-                                            const uint8_t i_rx_horiz_offset);
+                                            const uint8_t i_rx_horiz_data_offset,
+                                            const uint8_t i_rx_horiz_edge_offset);
 
         fapi2::ReturnCode ext_cmd_start(const fapi2::Target<K, M, V>& i_target,
                                         const uint8_t i_thread,
@@ -310,11 +311,10 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
     fapi2::buffer<uint64_t> l_buffer = 0;
     uint32_t l_iar = 0;
 
-    // SRAM Scrub
+    // SRAM Scrub, set via Write-OR to CSCR
     FAPI_DBG("SRAM Scrub");
-    // FAPI_TRY(fapi2::getScom(i_target, iv_regs->cscr_scom_addr, l_buffer));
     l_buffer.setBit<c_sram_scrub_enable_bit>();
-    FAPI_TRY(fapi2::putScom(i_target, iv_regs->cscr_scom_addr, l_buffer));
+    FAPI_TRY(fapi2::putScom(i_target, (iv_regs->base_addr + 0xC), l_buffer));
     l_buffer.flush<0>();
 
     // Hard reset PPE
@@ -715,7 +715,8 @@ template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::setup_func_margin(const fapi2::Target<K, M, V>& i_target,
         const uint8_t i_thread,
         const uint8_t i_rx_vert_offset,
-        const uint8_t i_rx_horiz_offset)
+        const uint8_t i_rx_horiz_data_offset,
+        const uint8_t i_rx_horiz_edge_offset)
 {
     FAPI_DBG("Starting io_ppe_common::setup_func_margin");
     FAPI_TRY(MEM_REG_PPE_OFFSET_MARGIN_MODE_PUT(iv_regs, i_target, i_thread, 3));
@@ -723,7 +724,8 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::setup_func_margin(const fapi2::Target<
     FAPI_TRY(MEM_REG_PPE_LOFF_OFFSET_D_OVERRIDE_PUT(iv_regs, i_target, i_thread, i_rx_vert_offset));
     FAPI_TRY(MEM_REG_PPE_LOFF_OFFSET_PAUSE_PUT(iv_regs, i_target, i_thread, 0));
 
-    FAPI_TRY(MEM_REG_PPE_PR_OFFSET_D_OVERRIDE_PUT(iv_regs, i_target, i_thread, i_rx_horiz_offset));
+    FAPI_TRY(MEM_REG_PPE_PR_OFFSET_D_OVERRIDE_PUT(iv_regs, i_target, i_thread, i_rx_horiz_data_offset));
+    FAPI_TRY(MEM_REG_PPE_PR_OFFSET_E_OVERRIDE_PUT(iv_regs, i_target, i_thread, i_rx_horiz_edge_offset));
     FAPI_TRY(MEM_REG_PPE_PR_OFFSET_PAUSE_PUT(iv_regs, i_target, i_thread, 0));
 
     FAPI_TRY(iv_regs->flushCache(i_target));
@@ -825,13 +827,13 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ext_cmd_poll(const fapi2::Target<K, M,
     int l_timeout = 1000;
     int l_loop_count = 0;
 
-    while (!o_done && !o_fail && (l_loop_count < l_timeout))
+    while (!o_done && (l_loop_count < l_timeout))
     {
         FAPI_DBG("ext_cmd_poll: thread: %d", i_thread);
         FAPI_TRY(iv_regs->flushCache(i_target));
         FAPI_TRY(ext_cmd_check(i_target, i_thread, i_ext_cmd_req, o_done, o_fail));
 
-        if (!o_done && !o_fail)
+        if (!o_done)
         {
             fapi2::delay(2000000, 2000000); //ns, sim cycles. 1ms
         }

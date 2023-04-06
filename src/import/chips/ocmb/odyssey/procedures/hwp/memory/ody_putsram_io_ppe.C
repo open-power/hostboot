@@ -100,7 +100,6 @@ fapi2::ReturnCode ody_putsram_io_ppe(
             }
         }
 
-        FAPI_DBG("Write data: l_dataPtr %p, l_data64 = 0x%.16llX", l_dataPtr - 1, l_data64);
         WRAP0_ARB_CSDR.set_CSDR_SRAM_DATA(l_data64);
         FAPI_TRY(WRAP0_ARB_CSDR.putScom(i_target),
                  "Error putscom to WRAP0_ARB_CSDR.");
