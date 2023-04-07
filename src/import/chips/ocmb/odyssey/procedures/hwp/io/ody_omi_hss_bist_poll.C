@@ -73,8 +73,8 @@ fapi2::ReturnCode ody_omi_hss_bist_poll(const fapi2::Target<fapi2::TARGET_TYPE_O
                 .set_FAIL(l_fail)
                 .set_DONE(l_done)
                 .set_TARGET(i_target),
-                "IO PPE done poll time-out or ext_cmd_fail seen!");
-
+                "IO PPE Bist Done Fail :: Done(%d), Fail(0x%04X)",
+                l_done, l_fail);
 
 fapi_try_exit:
     FAPI_DBG("HWP End: ody_omi_hss_bist_poll");

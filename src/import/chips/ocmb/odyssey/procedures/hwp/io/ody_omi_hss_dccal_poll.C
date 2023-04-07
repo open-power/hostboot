@@ -67,7 +67,8 @@ fapi2::ReturnCode ody_omi_hss_dccal_poll(const fapi2::Target<fapi2::TARGET_TYPE_
                 .set_TARGET(i_target)
                 .set_FAIL(l_fail)
                 .set_DONE(l_done),
-                "IO PPE done DCCAL poll failed");
+                "IO PPE Dccal Done Fail :: Done(%d), Fail(0x%04X)",
+                l_done, l_fail);
 
 fapi_try_exit:
     FAPI_DBG("End ody_omi_hss_dccal_poll");

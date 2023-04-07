@@ -112,10 +112,7 @@ class io_ppe_common
 
         uint32_t calc_ppe_data_rate(const uint32_t i_data_rate);
 
-        fapi2::ReturnCode ppe_start(const fapi2::Target<K, M, V>& i_target,
-                                    const uint64_t& i_xixcr,
-                                    const uint64_t& i_xidbgpro,
-                                    const uint64_t& i_lfir);
+        fapi2::ReturnCode ppe_start(const fapi2::Target<K, M, V>& i_target);
 
         fapi2::ReturnCode config_ppe(const fapi2::Target<K, M, V>& i_target,
                                      const uint8_t i_num_threads,
@@ -337,11 +334,13 @@ fapi_try_exit:
 // ===============================================================
 
 template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
-fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>& i_target,
-        const uint64_t& i_xixcr,
-        const uint64_t& i_xidbgpro,
-        const uint64_t& i_lfir)
+fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>& i_target)
 {
+    const uint64_t c_lfir_wclear = (iv_regs->base_addr + 0x0);
+    const uint64_t c_cscr        = (iv_regs->base_addr + 0xC);
+    const uint64_t c_xixcr       = (iv_regs->base_addr + 0x10);
+    const uint64_t c_xidbgpro    = (iv_regs->base_addr + 0x15);
+
     const uint64_t c_ppe_start_reset_iar = 0xfffe0040 >> 2;
     const uint8_t c_sram_scrub_enable_bit = 1;
     const uint8_t c_xidbgpro_bit = 32;
@@ -355,18 +354,18 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
     // SRAM Scrub, set via Write-OR to CSCR
     FAPI_DBG("SRAM Scrub");
     l_buffer.setBit<c_sram_scrub_enable_bit>();
-    FAPI_TRY(fapi2::putScom(i_target, (iv_regs->base_addr + 0xC), l_buffer));
+    FAPI_TRY(fapi2::putScom(i_target, c_cscr, l_buffer));
     l_buffer.flush<0>();
 
     // Hard reset PPE
     FAPI_DBG("IO hard reset.");
     l_buffer = 0x6000000000000000ULL;
-    FAPI_TRY(fapi2::putScom(i_target, i_xixcr, l_buffer));
+    FAPI_TRY(fapi2::putScom(i_target, c_xixcr, l_buffer));
     fapi2::delay(IO_PPE_HARD_RESET_DELAY_NS, IO_PPE_HARD_RESET_DELAY_SIM_CYCLES);
 
     // Verify IAR @ reset vector loc
     FAPI_DBG("Verify IAR reset.");
-    FAPI_TRY(fapi2::getScom(i_target, i_xidbgpro, l_buffer));
+    FAPI_TRY(fapi2::getScom(i_target, c_xidbgpro, l_buffer));
     l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(l_iar);
     FAPI_ASSERT(
         l_iar == c_ppe_start_reset_iar,
@@ -379,11 +378,11 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
     // Resume PPE
     FAPI_DBG("IO resume");
     l_buffer = 0x2000000000000000ULL;
-    FAPI_TRY(fapi2::putScom(i_target, i_xixcr, l_buffer));
+    FAPI_TRY(fapi2::putScom(i_target, c_xixcr, l_buffer));
     fapi2::delay(IO_PPE_RESUME_DELAY_NS, IO_PPE_RESUME_DELAY_SIM_CYCLES);
 
     FAPI_DBG("Verify IAR cleared.");
-    FAPI_TRY(fapi2::getScom(i_target, i_xidbgpro, l_buffer));
+    FAPI_TRY(fapi2::getScom(i_target, c_xidbgpro, l_buffer));
     l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(l_iar);
     FAPI_ASSERT(
         l_iar != c_ppe_start_reset_iar,
@@ -391,17 +390,14 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
         .set_TARGET_CHIP(i_target)
         .set_IAR(l_iar),
         "IAR (0x%8x) did not resume.", l_iar);
-    l_buffer.flush<0>();
 
     // Clear Halted FIR Bit
     // Reg is RW_CLEAR
     FAPI_DBG("Clear halted FIR.");
-    FAPI_TRY(fapi2::getScom(i_target, i_lfir, l_buffer),
-             "Error getscom to MAC0_LFIR_REG.");
-    l_buffer.setBit<c_ppe_halted_bit>();
-    FAPI_TRY(fapi2::putScom(i_target, i_lfir, l_buffer),
-             "Error putscom to MAC0_LFIR_REG (clear halt).");
     l_buffer.flush<0>();
+    l_buffer.setBit<c_ppe_halted_bit>();
+    FAPI_TRY(fapi2::putScom(i_target, c_lfir_wclear, l_buffer),
+             "Error putscom to MAC0_LFIR_REG (clear halt).");
 
 fapi_try_exit:
     FAPI_DBG("End");

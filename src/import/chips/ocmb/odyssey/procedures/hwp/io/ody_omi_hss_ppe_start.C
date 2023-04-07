@@ -52,10 +52,7 @@ fapi2::ReturnCode ody_omi_hss_ppe_start(const fapi2::Target<fapi2::TARGET_TYPE_O
 
     ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
 
-    FAPI_TRY(l_ppe_common.ppe_start(i_target,
-                                    scomt::omi::PHY_PPE_WRAP0_XIXCR,
-                                    scomt::omi::PHY_PPE_WRAP0_XIDBGPRO,
-                                    scomt::omi::PHY_SCOM_MAC0_LFIR_REG_RW_WCLEAR));
+    FAPI_TRY(l_ppe_common.ppe_start(i_target));
 
 fapi_try_exit :
     FAPI_DBG("End");

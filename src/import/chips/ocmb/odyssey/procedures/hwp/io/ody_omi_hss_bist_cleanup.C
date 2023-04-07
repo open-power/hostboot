@@ -67,7 +67,8 @@ fapi2::ReturnCode ody_omi_hss_bist_cleanup(const fapi2::Target<fapi2::TARGET_TYP
                 .set_FAIL(l_fail)
                 .set_DONE(l_done)
                 .set_TARGET(i_target),
-                "IO PPE Ext Cmd Clear Timeout/Fail in Bist Cleanup.");
+                "IO PPE Ext Cmd Clear Done Fail :: Done(%d), Fail(0x%04X)",
+                l_done, l_fail);
 
     FAPI_TRY(l_ppe_common.bist_cleanup(i_target, l_thread, l_rx_lanes, l_tx_lanes, l_done, l_fail),
              "Failed to run common HSS BIST cleanup");
@@ -77,7 +78,8 @@ fapi2::ReturnCode ody_omi_hss_bist_cleanup(const fapi2::Target<fapi2::TARGET_TYP
                 .set_FAIL(l_fail)
                 .set_DONE(l_done)
                 .set_TARGET(i_target),
-                "IO PPE Bist Cleanup Failure.");
+                "IO PPE Bist Cleanup Done Fail :: Done(%d), Fail(0x%04X)",
+                l_done, l_fail);
 
 fapi_try_exit:
     FAPI_DBG("End");

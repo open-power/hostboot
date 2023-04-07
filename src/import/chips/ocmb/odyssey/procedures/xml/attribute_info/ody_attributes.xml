@@ -35,7 +35,7 @@
 <!-- -->
 
 
-<attributes>
+<attributes>   
     <attribute>
         <id>ATTR_MSS_OCMB_ODY_OMI_CFG_ENDIAN_CTRL</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
