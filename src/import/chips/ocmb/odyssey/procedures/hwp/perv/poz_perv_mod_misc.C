@@ -301,6 +301,7 @@ ReturnCode mod_multicast_setup(
     uint64_t i_chiplets,
     TargetState i_pgood_policy)
 {
+    uint8_t l_group_id = i_group_id;
     fapi2::buffer<uint64_t> l_eligible_chiplets = 0;
     fapi2::buffer<uint64_t> l_required_group_members;
     fapi2::buffer<uint64_t> l_current_group_members;
@@ -312,6 +313,8 @@ ReturnCode mod_multicast_setup(
                 .set_GROUP_ID_VALUE(i_group_id)
                 .set_PROC_TARGET(i_target),
                 "ERROR: INVALID group id passed to module multicast setup.");
+
+    FAPI_TRY(mod_multicast_setup_plat_remap(i_group_id, l_group_id));
 
     FAPI_INF("Determine required group members.");
 
@@ -329,7 +332,7 @@ ReturnCode mod_multicast_setup(
     // It reads a register that has bit 0 tied to 1, so the return value
     // will have a 1 for each chiplet that is a member of the targeted group.
     FAPI_INF("Determine current group members");
-    FAPI_TRY(fapi2::getScom(i_target, MC_GROUP_MEMBERSHIP_BITX_READ | ((uint32_t)i_group_id << 24),
+    FAPI_TRY(fapi2::getScom(i_target, MC_GROUP_MEMBERSHIP_BITX_READ | ((uint32_t)l_group_id << 24),
                             l_current_group_members));
     FAPI_DBG("Current multicast group members : 0x%08X%08X",
              l_current_group_members >> 32, l_current_group_members & 0xFFFFFFFF);
@@ -346,9 +349,9 @@ ReturnCode mod_multicast_setup(
             continue;
         }
 
-        const uint64_t prev_group = have ? i_group_id : 7;
-        const uint64_t new_group  = want ? i_group_id : 7;
-        FAPI_TRY(fapi2::putScom(i_target, (PCB_RESPONDER_MCAST_GROUP_1 + i_group_id) | (i << 24),
+        const uint64_t prev_group = have ? l_group_id : 7;
+        const uint64_t new_group  = want ? l_group_id : 7;
+        FAPI_TRY(fapi2::putScom(i_target, (PCB_RESPONDER_MCAST_GROUP_1 + l_group_id) | (i << 24),
                                 (new_group << 58) | (prev_group << 42)));
     }
 

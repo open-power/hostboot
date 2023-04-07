@@ -131,30 +131,25 @@ fapi2::ReturnCode ody_scratch_regs_setup_plat_multicast_attrs(
 {
 #if !defined(__HOSTBOOT_MODULE) && !defined(__PPE__)
     std::vector<fapi2::MulticastGroupMapping> l_group_map;
-    l_group_map.push_back((fapi2::MulticastGroupMapping)
+    std::vector<fapi2::MulticastGroup> l_group_inputs =
     {
-        fapi2::MCGROUP_1,   1
-    } );
-    l_group_map.push_back((fapi2::MulticastGroupMapping)
+        fapi2::MCGROUP_GOOD,
+        fapi2::MCGROUP_GOOD_NO_TP,
+        fapi2::MCGROUP_5,
+        fapi2::MCGROUP_6,
+        fapi2::MCGROUP_ALL
+    };
+
+    for (auto l_group_input : l_group_inputs)
     {
-        fapi2::MCGROUP_2,   2
-    } );
-    l_group_map.push_back((fapi2::MulticastGroupMapping)
-    {
-        fapi2::MCGROUP_4,   4
-    } );
-    l_group_map.push_back((fapi2::MulticastGroupMapping)
-    {
-        fapi2::MCGROUP_5,   5
-    } );
-    l_group_map.push_back((fapi2::MulticastGroupMapping)
-    {
-        fapi2::MCGROUP_6,   6
-    } );
-    l_group_map.push_back((fapi2::MulticastGroupMapping)
-    {
-        fapi2::MCGROUP_ALL, 7
-    } );
+        uint8_t l_group_id = 0;
+        FAPI_TRY(mod_multicast_setup_plat_remap(l_group_input, l_group_id));
+        l_group_map.push_back((fapi2::MulticastGroupMapping)
+        {
+            l_group_input, l_group_id
+        });
+    }
+
     FAPI_TRY(fapi2::setMulticastGroupMap(i_target, l_group_map));
 fapi_try_exit:
 #endif

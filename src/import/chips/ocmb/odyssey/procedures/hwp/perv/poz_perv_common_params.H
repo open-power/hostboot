@@ -35,14 +35,57 @@
 #include <multicast_group_defs.H>
 #include <target_filters.H>
 
+
+// do not change existing MulticastGroup enums used for P10 support in this
+// branch.  alias enums added for common POZ code usage w/ Odyssey and needed
+// to permit code compliation here to existing enum values
 namespace fapi2
 {
-static const MulticastGroup MCGROUP_1 = MCGROUP_GOOD;
-static const MulticastGroup MCGROUP_2 = MCGROUP_GOOD_NO_TP;
-static const MulticastGroup MCGROUP_4 = MCGROUP_GOOD_IOHS;
 static const MulticastGroup MCGROUP_5 = MCGROUP_GOOD_PAU;
 static const MulticastGroup MCGROUP_6 = MCGROUP_GOOD_PCI;
 }
+
+// create branch specific function to allow swizzling / remap of the actual
+// HW multicast group IDs used based on the existing set of
+// MulticastGroup enum values in this branch
+//
+// practically this is being used in order to ensure that Cronus-based
+// execution of the Odyssey HWP code in the p10 code branches aligns with
+// the SPPE-based execution (where the MulticastGroup enum values have
+// changed/evolved to support other POZ usecases)
+inline
+fapi2::ReturnCode mod_multicast_setup_plat_remap(const uint8_t i_group_id,
+        uint8_t& o_group_id)
+{
+    switch (i_group_id)
+    {
+        case (static_cast<uint8_t>(fapi2::MCGROUP_GOOD)):
+        case (static_cast<uint8_t>(fapi2::MCGROUP_GOOD_NO_TP)):
+            o_group_id = i_group_id - 1;
+            break;
+
+        case (static_cast<uint8_t>(fapi2::MCGROUP_ALL)):
+            o_group_id = 7;
+            break;
+
+        case (static_cast<uint8_t>(fapi2::MCGROUP_5)):
+        case (static_cast<uint8_t>(fapi2::MCGROUP_6)):
+            o_group_id = i_group_id;
+            break;
+
+        default:
+            FAPI_ASSERT(false,
+                        fapi2::MOD_MULTICAST_SETUP_PLAT_REMAP_ERR()
+                        .set_GROUP_ID(i_group_id),
+                        "Unable to remap input multicast group (%d)!",
+                        i_group_id);
+            break;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 namespace fapi2
 {
