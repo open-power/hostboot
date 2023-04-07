@@ -304,4 +304,11 @@ errlHndl_t routeIbScom(DeviceFW::OperationType i_opType,
     return l_errhdl;
 }
 
+// Connect up the driver
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                      DeviceFW::IBSCOM_ODY,
+                      TYPE_OCMB_CHIP,
+                      routeIbScom);
+  
+
 }; // End MMIOODY namespace
