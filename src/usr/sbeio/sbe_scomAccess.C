@@ -34,6 +34,8 @@
 #include <sbeio/sbe_utils.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include "sbe_fifodd.H"
+#include <targeting/odyutil.H>
+
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -77,6 +79,14 @@ errlHndl_t getFifoScom(TARGETING::Target * i_target,
         l_fifoRequest.commandClass = SbeFifo::SBE_FIFO_CLASS_SCOM_ACCESS;
         l_fifoRequest.command = SbeFifo::SBE_FIFO_CMD_GET_SCOM;
         l_fifoRequest.address = i_addr;
+
+        if(TARGETING::UTIL::isOdysseyChip(i_target))
+        {
+            // The Chip IDs that we care about are:
+            // 0x01 (Memory Buffer 0) ... 0x20 (Memory Buffer 31)
+            // Add 1 to the POSITION attribute to get the right Chip ID
+            l_fifoRequest.chipId = i_target->getAttr<TARGETING::ATTR_POSITION>()+1;
+        }
 
         SBE_TRACU("getFifoScom: i_addr=%llX, target=%.8X",
                   i_addr, TARGETING::get_huid(i_target));
@@ -122,6 +132,14 @@ errlHndl_t putFifoScom(TARGETING::Target * i_target,
         l_fifoRequest.command = SbeFifo::SBE_FIFO_CMD_PUT_SCOM;
         l_fifoRequest.address = i_addr;
         l_fifoRequest.data    = i_data;
+
+         if(TARGETING::UTIL::isOdysseyChip(i_target))
+         {
+             // The Chip IDs that we care about are:
+             // 0x01 (Memory Buffer 0) ... 0x20 (Memory Buffer 31)
+             // Add 1 to the POSITION attribute to get the right Chip ID
+             l_fifoRequest.chipId = i_target->getAttr<TARGETING::ATTR_POSITION>()+1;
+         }
 
         SBE_TRACU("putFifoScom: i_addr=%llX, target=%.8X",
                   i_addr, TARGETING::get_huid(i_target));
@@ -194,11 +212,12 @@ errlHndl_t sendFifoReset(TARGETING::Target * i_target)
 
     do
     {
+        uint32_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SbeFifo::SPPE_FIFO_DNFIFO_RESET : SbeFifo::SBE_FIFO_DNFIFO_RESET;
         // error check input parameters
         errl = sbeioInterfaceChecks(i_target,
                                     SbeFifo::SBE_FIFO_CLASS_SCOM_ACCESS,
                                     SbeFifo::SBE_FIFO_CMD_PUT_SCOM,
-                                    SbeFifo::SBE_FIFO_DNFIFO_RESET);
+                                    l_addr);
         if (errl)
         {
             break;

@@ -888,6 +888,7 @@ public:
      */
     enum fifoRegisterAddress
     {
+        // SBE_FIFO_* are the constants for Secure Host FIFO
         SBE_FIFO_UPFIFO_DATA_IN    = 0x00002420, // Byte Addr 2480
         SBE_FIFO_UPFIFO_STATUS     = 0x00002421, // Byte Addr 2484
         SBE_FIFO_UPFIFO_SIG_EOT    = 0x00002422, // Byte Addr 2488
@@ -897,6 +898,18 @@ public:
         SBE_FIFO_DNFIFO_RESET      = 0x00002434, // Byte Addr 24D0
         SBE_FIFO_DNFIFO_ACK_EOT    = 0x00002435, // Byte Addr 24D4
         SBE_FIFO_DNFIFO_MAX_TSFR   = 0x00002436, // Byte Addr 24D8
+
+        // SPPE_FIFO_* are the constants for the standard CFAM
+        // FIFO that is used for Odyssey chip ops.
+        SPPE_FIFO_UPFIFO_DATA_IN    = 0x00002400,
+        SPPE_FIFO_UPFIFO_STATUS     = 0x00002401,
+        SPPE_FIFO_UPFIFO_SIG_EOT    = 0x00002402,
+        SPPE_FIFO_UPFIFO_REQ_RESET  = 0x00002403,
+        SPPE_FIFO_DNFIFO_DATA_OUT   = 0x00002410,
+        SPPE_FIFO_DNFIFO_STATUS     = 0x00002411,
+        SPPE_FIFO_DNFIFO_RESET      = 0x00002414,
+        SPPE_FIFO_DNFIFO_ACK_EOT    = 0x00002415,
+        SPPE_FIFO_DNFIFO_MAX_TSFR   = 0x00002416,
     };
 
 

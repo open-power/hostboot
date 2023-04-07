@@ -920,6 +920,18 @@ Target<T_SELF, M, V>::getOtherEnd(fapi2::Target<T, M, V>& o_target,
         // OCMB targets and making XML processing changes.
         l_peerTargetList.push_back(getImmediateParentByAffinity(l_hbTarget));
     }
+    else if(T == fapi2::TARGET_TYPE_OCMB_CHIP && T_SELF == fapi2::TARGET_TYPE_OMI)
+    {
+        // Special rule for OMI - return its OCMB children by affinity.
+        // This was done to avoid adding extra PEER_TARGET attributes to all
+        // OMI targets and making XML processing changes.
+        getChildAffinityTargets(l_peerTargetList,
+                                l_hbTarget,
+                                TARGETING::CLASS_NA,
+                                TARGETING::TYPE_OCMB_CHIP,
+                                i_state == TARGET_STATE_FUNCTIONAL ? true :  // Functional only
+                                                                     false); // All present
+    }
     else
     {
         if(i_state == TARGET_STATE_FUNCTIONAL)

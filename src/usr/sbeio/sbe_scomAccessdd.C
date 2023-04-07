@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <sbeio/sbeioif.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include "sbe_fifodd.H"
+#include <targeting/odyutil.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -226,6 +227,51 @@ errlHndl_t ddPsuScomChipOp(DeviceFW::OperationType i_opType,
     return errl;
 }
 
+/**
+* @brief Performs a SCOM operation on an OCMB. If the passed chip is an
+*        Odyssey, then we use FIFO; otherwise use PSU chip op.
+*
+* @param[in]     i_opType      Operation type, see DeviceFW::OperationType
+* @param[in]     i_target      Target
+* @param[in/out] io_pBuffer    Read: Pointer to output data storage
+* @param[in/out] io_buflen     Input: size must be 8 bytes
+*                              Output: Success = input value, Failure = 0
+* @param[in]     i_accessType  DeviceFW::AccessType enum
+* @param[in]     i_args        This is an argument list for DD framework.
+*                              In this function, there's only one argument,
+*                              containing the address
+* @return  errlHndl_t
+*/
+errlHndl_t ddOcmbScomChipOp(DeviceFW::OperationType i_opType,
+                            TARGETING::Target* i_target,
+                            void   * io_pBuffer,
+                            size_t & io_buflen,
+                            int64_t  i_accessType,
+                            va_list  i_args)
+{
+    errlHndl_t l_errl = nullptr;
+    if(TARGETING::UTIL::isOdysseyChip(i_target))
+    {
+        l_errl = ddFifoScomChipOp(i_opType,
+                                  i_target,
+                                  io_pBuffer,
+                                  io_buflen,
+                                  i_accessType,
+                                  i_args);
+    }
+    else
+    {
+        l_errl = ddPsuScomChipOp(i_opType,
+                                 i_target,
+                                 io_pBuffer,
+                                 io_buflen,
+                                 i_accessType,
+                                 i_args);
+    }
+    return l_errl;
+}
+
+
 // Register fsidd access functions to DD framework
 DEVICE_REGISTER_ROUTE(DeviceFW::READ,
                       DeviceFW::SBESCOM,
@@ -242,7 +288,7 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WRITE,
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::SBESCOM,
                       TARGETING::TYPE_OCMB_CHIP,
-                      ddPsuScomChipOp);
+                      ddOcmbScomChipOp);
 
 } //end namespace SBEIO
 

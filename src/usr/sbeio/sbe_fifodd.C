@@ -48,6 +48,7 @@
 #include <xscom/piberror.H>
 #include <sbeio/sbe_retry_handler.H>
 #include <initservice/initserviceif.H>
+#include <targeting/odyutil.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -161,7 +162,8 @@ errlHndl_t SbeFifo::performFifoReset(TARGETING::Target * i_target)
 
     // Perform a write to the DNFIFO Reset to cleanup the fifo
     uint32_t l_dummy = 0xDEAD;
-    errl = writeCfam(i_target,SBE_FIFO_DNFIFO_RESET,&l_dummy);
+    uint32_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_DNFIFO_RESET : SBE_FIFO_DNFIFO_RESET;
+    errl = writeCfam(i_target,l_addr,&l_dummy);
 
     mutex_unlock(&l_pubFifoOpMux);
 
@@ -184,13 +186,13 @@ errlHndl_t SbeFifo::writeRequest(TARGETING::Target * i_target,
         // Ensure Downstream Max Transfer Counter is 0 since
         // hostboot has no need for it (non-0 can cause
         // protocol issues)
-        uint64_t l_addr       = SBE_FIFO_DNFIFO_MAX_TSFR;
+        uint64_t l_addr       = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_DNFIFO_MAX_TSFR : SBE_FIFO_DNFIFO_MAX_TSFR;
         uint32_t l_data       = 0;
         errl = writeCfam(i_target,l_addr,&l_data);
         if (errl) break;
 
         //The first uint32_t has the number of uint32_t words in the request
-        l_addr                = SBE_FIFO_UPFIFO_DATA_IN;
+        l_addr                = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_UPFIFO_DATA_IN : SBE_FIFO_UPFIFO_DATA_IN;
         uint32_t * l_pSent    = i_pFifoRequest; //advance as words sent
         uint32_t   l_cnt      = *l_pSent;
         SBE_TRACDBIN("Write Request in SBEIO",i_pFifoRequest,
@@ -214,7 +216,7 @@ errlHndl_t SbeFifo::writeRequest(TARGETING::Target * i_target,
         errl = waitUpFifoReady(i_target);
         if (errl) break;
 
-        l_addr = SBE_FIFO_UPFIFO_SIG_EOT;
+        l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_UPFIFO_SIG_EOT : SBE_FIFO_UPFIFO_SIG_EOT;
         l_data = FSB_UPFIFO_SIG_EOT;
         errl = writeCfam(i_target,l_addr,&l_data);
         if (errl) break;
@@ -237,7 +239,7 @@ errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
     SBE_TRACD(ENTER_MRK "waitUpFifoReady");
 
     uint64_t l_elapsed_time_ns = 0;
-    uint64_t l_addr = SBE_FIFO_UPFIFO_STATUS;
+    uint64_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_UPFIFO_STATUS : SBE_FIFO_UPFIFO_STATUS;
     uint32_t l_data = 0;
 
     do
@@ -348,8 +350,9 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
             else
             {
                 uint32_t l_data{};
+                uint32_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_DNFIFO_DATA_OUT : SBE_FIFO_DNFIFO_DATA_OUT;
                 // read next word
-                errl = readCfam(i_target,SBE_FIFO_DNFIFO_DATA_OUT,&l_data);
+                errl = readCfam(i_target,l_addr,&l_data);
                 if (errl) break;
 
                 l_fifoBuffer.append(l_data);
@@ -391,7 +394,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
 
         //notify that EOT has been received
         uint32_t l_eotSig = FSB_UPFIFO_SIG_EOT;
-        errl = writeCfam(i_target,SBE_FIFO_DNFIFO_ACK_EOT,&l_eotSig);
+        uint32_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_DNFIFO_ACK_EOT : SBE_FIFO_DNFIFO_ACK_EOT;
+        errl = writeCfam(i_target,l_addr,&l_eotSig);
         if (errl) break;
 
         //Determine if successful.
@@ -624,7 +628,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
     SBE_TRACD(ENTER_MRK "waitDnFifoReady");
 
     uint64_t l_elapsed_time_ns = 0;
-    uint64_t l_addr = SBE_FIFO_DNFIFO_STATUS;
+    uint64_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_DNFIFO_STATUS : SBE_FIFO_DNFIFO_STATUS;
 
     do
     {
@@ -636,12 +640,12 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
         if (  (!(o_status & DNFIFO_STATUS_FIFO_EMPTY)) ||
               (o_status & DNFIFO_STATUS_DEQUEUED_EOT_FLAG) )
         {
-            SBE_TRACD("Read a word from status register: 0x%.8X",o_status);
+            SBE_TRACD("waitDnFifoReady: Read a word from status register: 0x%.8X",o_status);
             break;
         }
         else
         {
-            SBE_TRACD("SBE status reg returned fifo empty or "
+            SBE_TRACD("waitDnFifoReady: SBE status reg returned fifo empty or "
                       "dequeued eot flag 0x%.8X",
                       o_status);
         }
