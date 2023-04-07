@@ -197,11 +197,14 @@ fapi_try_exit:
 /// @param[in] i_target OCMB target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note There is no support for 1U in DDR5
+/// @note There is no 1U support for DDR5.
+/// @note The below values of PMIC regs are taken from the
+///       "Non-Redundant PoD5 - Functional Specification dated 20230403"
+///       document provided by the Power team
 ///
 fapi2::ReturnCode power_down_sequence_2u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
-    using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
 
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -214,8 +217,6 @@ fapi2::ReturnCode power_down_sequence_2u(const fapi2::Target<fapi2::TARGET_TYPE_
 
     for (const auto& l_pmic : l_pmics)
     {
-        FAPI_TRY(mss::pmic::i2c::reg_write(l_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, CONSTS::PRE_CONFIG_ON_OFF));
-
         // Disable VR Enable (0 --> Bit 7)
         FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
         l_pmic_buffer.clearBit<FIELDS::R32_VR_ENABLE>();
@@ -480,7 +481,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note There is no 1U support for DDR5.
 /// @note The below values of PMIC regs are taken from the
-///       "Non-Redundant PoD5 - Functional Specification dated 20230228"
+///       "Non-Redundant PoD5 - Functional Specification dated 20230403"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode enable_2u(
@@ -489,6 +490,9 @@ fapi2::ReturnCode enable_2u(
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    static constexpr uint8_t PMIC0 = 0;
+    static constexpr uint8_t PMIC1 = 1;
 
     uint16_t l_vendor_id = 0;
     fapi2::buffer<uint8_t> l_pmic_buffer;
@@ -502,6 +506,9 @@ fapi2::ReturnCode enable_2u(
 
     // Ensure the PMICs are in sorted order
     FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, l_pmics));
+
+    // Get vendor ID. We just need vendor ID from 1 PMIC as both PMICs will be from the same vendor
+    FAPI_TRY(mss::attr::get_mfg_id[get_relative_pmic_id(l_pmics[PMIC0])](i_ocmb_target, l_vendor_id));
 
     for (const auto& l_pmic : l_pmics)
     {
@@ -517,31 +524,60 @@ fapi2::ReturnCode enable_2u(
         // Bias with SPD
         // TODO: ZEN:MST-1964 Cross check SPD data with bias_with_spd_settings() values
         //FAPI_TRY_LAMBDA(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic, i_ocmb_target));
-
-        // Get vendor ID
-        FAPI_TRY(mss::attr::get_mfg_id[get_relative_pmic_id(l_pmic)](i_ocmb_target, l_vendor_id));
-
-        // Enable TI PMIC
-        if (l_vendor_id == mss::pmic::vendor::TI)
-        {
-            // Start VR_ENABLE for TI. TI will be enabled by using the power good output
-            FAPI_INF("Executing VR_ENABLE for TI PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmic));
-            FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
-            // Start VR Enable (R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL) (1 --> Bit 7)
-            l_pmic_buffer.setBit<FIELDS::R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL>();
-            FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
-        }
-        // Enable IDT/Renesas PMIC
-        else if (l_vendor_id == mss::pmic::vendor::IDT)
-        {
-            // Start VR_ENABLE for IDT.
-            FAPI_INF("Executing VR_ENABLE for Renesas PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmic));
-            FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
-            // Start VR Enable (1 --> Bit 7)
-            l_pmic_buffer.setBit<FIELDS::R32_VR_ENABLE>();
-            FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
-        }
     }
+
+    FAPI_INF("Executing VR_ENABLE for PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC0]));
+    // Start VR Enable (1 --> Bit 7)
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
+    l_pmic_buffer.setBit<FIELDS::R32_VR_ENABLE>();
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
+
+    FAPI_INF("Executing VR_ENABLE for PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC1]));
+    // Start VR Enable (1 --> Bit 7)
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC1], REGS::R32, l_pmic_buffer));
+    l_pmic_buffer.setBit<FIELDS::R32_VR_ENABLE>();
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmics[PMIC1], REGS::R32, l_pmic_buffer));
+
+    // Enable TI PMIC
+    if (l_vendor_id == mss::pmic::vendor::TI)
+    {
+        // TI will be enabled by releasing the CAMP control first and then re-instatng it
+        FAPI_INF("Executing CAMP control release for TI PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC0]));
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
+        // Release CAMP control (R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL) (1 --> Bit 3)
+        l_pmic_buffer.setBit<FIELDS::R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL>();
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
+
+        FAPI_INF("Executing CAMP control release for TI PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC1]));
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC1], REGS::R32, l_pmic_buffer));
+        // Release CAMP control (R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL) (1 --> Bit 3)
+        l_pmic_buffer.setBit<FIELDS::R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL>();
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmics[PMIC1], REGS::R32, l_pmic_buffer));
+
+        // Delay 40mS
+        fapi2::delay(40 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+        // Re-instate CAMP control
+        FAPI_INF("Re-instating CAMP control for TI PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC0]));
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
+        // Re-instate CAMP control (R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL) (0 --> Bit 3)
+        l_pmic_buffer.clearBit<FIELDS::R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL>();
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
+
+        FAPI_INF("Re-instating CAMP control for TI PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC1]));
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC1], REGS::R32, l_pmic_buffer));
+        // Re-instate CAMP control (R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL) (0 --> Bit 3)
+        l_pmic_buffer.clearBit<FIELDS::R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL>();
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmics[PMIC1], REGS::R32, l_pmic_buffer));
+    }
+    // Enable IDT/Renesas PMIC
+    else if (l_vendor_id == mss::pmic::vendor::IDT)
+    {
+        FAPI_ERR("Renesas not yet supported");
+    }
+
+
+    FAPI_INF("Successfully enabled PMICs on" GENTARGTIDFORMAT " with 2U mode", GENTARGTID(i_ocmb_target));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
