@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -3577,7 +3577,7 @@
      specification.
     </description>
     <valueType>uint64</valueType>
-    <platInit/>l
+    <platInit/>
     <initToZero/>
     <overrideOnly/>
   </attribute>
@@ -3593,9 +3593,22 @@
      STATIC  = 0,
      DYNAMIC = 1
      </enum>
-    <overrideOnly/>
     <default>STATIC</default>
     <platInit/>
+  </attribute>
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_EXTENDED_FREQ_MODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Indicates whether to consider pstate to freq offset for p10 vs pnext systems
+    Producer: MRWB
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wof</group>
   </attribute>
   <!-- *********************************************************************-->
   <attribute>
