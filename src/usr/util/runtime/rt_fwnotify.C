@@ -963,7 +963,6 @@ void handleMctpAvailable(void)
 }
 #endif
 
-#ifndef CONFIG_FSP_BUILD
 
 /**
  *  @brief Create the callback into HBRT for the PMIC health check
@@ -1141,6 +1140,8 @@ void setupPmicHealthCheck()
         errlCommit(l_err, RUNTIME_COMP_ID);
     }
 }
+
+#ifndef CONFIG_FSP_BUILD
 
 /**
  *  @brief Create the callback into HBRT for the Power Management Complex (PMC)
@@ -1402,7 +1403,7 @@ void firmware_notify( uint64_t i_len, void *i_data )
             }// END case hostInterfaces::HBRT_FW_MSG_TYPE_MCTP_AVAILABLE:
             break;
 #endif
-#ifndef CONFIG_FSP_BUILD
+
             case hostInterfaces::HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK:
             {
                 TRACFCOMP(g_trac_runtime,
@@ -1412,6 +1413,7 @@ void firmware_notify( uint64_t i_len, void *i_data )
             }
             break;
 
+#ifndef CONFIG_FSP_BUILD
             case hostInterfaces::HBRT_FW_MSG_TYPE_DEALLOCATE:
             {
                 TRACFCOMP(g_trac_runtime,
@@ -1516,8 +1518,8 @@ struct registerFwNotify
         getRuntimeInterfaces()->firmware_notify = &firmware_notify;
 
         postInitCalls_t* rt_postInits = getPostInitCalls();
-#ifndef CONFIG_FSP_BUILD
         rt_postInits->callSetupPmicHealthCheck = &setupPmicHealthCheck;
+#ifndef CONFIG_FSP_BUILD
         rt_postInits->callSetupPMCLoadStartCallback = &setupPMCLoadStartCallback;
 #endif
         rt_postInits->callLastPostInit = &lastPostInit;

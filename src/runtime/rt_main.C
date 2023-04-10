@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,10 +188,9 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
 #ifndef CONFIG_FSP_BUILD
     // set up the Power Management Complex (PMC) load and start callback to HBRT
     rtPost->callSetupPMCLoadStartCallback();
-
+#endif
     // set up PHYP callback to HBRT
     rtPost->callSetupPmicHealthCheck();
-#endif
 
     // check for possible missed in-flight messages/interrupts
     if (rtPost->callClearPendingOccMsgs != nullptr )

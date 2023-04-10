@@ -6757,6 +6757,22 @@
   </attribute>
 
   <attribute>
+    <id>PMIC_HEALTH_CHECK_TIMER</id>
+    <description>
+        Time to wait before PHYP makes HBRT callback to handle the
+        call to do the PMIC health check, time in milliseconds,
+        default to 24 hours, MS_PER_SEC * 60 * 60 * 24, 0xFFFFFFFF = disabled
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>86400000</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <description>Save state of the sfc driver flash workarounds for runtime</description>
     <id>PNOR_FLASH_WORKAROUNDS</id>
     <persistency>volatile-zeroed</persistency>
