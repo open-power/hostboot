@@ -29,7 +29,7 @@ typedef enum pldm_requester_error_codes {
  *
  * @return fd on success, pldm_requester_rc_t on error (errno may be set)
  */
-pldm_requester_rc_t pldm_open();
+pldm_requester_rc_t pldm_open(void);
 
 /**
  * @brief Send a PLDM request message. Wait for corresponding response message,

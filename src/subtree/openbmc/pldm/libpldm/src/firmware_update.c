@@ -242,11 +242,9 @@ static bool is_aux_state_status_valid(uint8_t aux_state_status)
 {
 	if (aux_state_status == PLDM_FD_AUX_STATE_IN_PROGRESS_OR_SUCCESS ||
 	    aux_state_status == PLDM_FD_TIMEOUT ||
-	    aux_state_status == PLDM_FD_GENERIC_ERROR) {
-		return true;
-	} else if (aux_state_status >=
-		       PLDM_FD_VENDOR_DEFINED_STATUS_CODE_START &&
-		   aux_state_status <= PLDM_FD_VENDOR_DEFINED_STATUS_CODE_END) {
+	    aux_state_status == PLDM_FD_GENERIC_ERROR ||
+	    (aux_state_status >= PLDM_FD_VENDOR_DEFINED_STATUS_CODE_START &&
+	     aux_state_status <= PLDM_FD_VENDOR_DEFINED_STATUS_CODE_END)) {
 		return true;
 	}
 

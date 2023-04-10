@@ -1,8 +1,8 @@
 #include <endian.h>
-#include <stdint.h>
-#include <string.h>
 
 #include <array>
+#include <cstdint>
+#include <cstring>
 #include <memory>
 
 #include "libpldm/base.h"

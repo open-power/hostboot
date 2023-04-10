@@ -85,8 +85,8 @@ int encode_state_sensor_pdr(
 	size_t calculated_possible_states_size = 0;
 
 	{
-		char *states_ptr = (char *)possible_states,
-		     *const begin_states_ptr = states_ptr;
+		char *states_ptr = (char *)possible_states;
+		char *const begin_states_ptr = states_ptr;
 
 		for (int i = 0; i < sensor->composite_sensor_count; ++i) {
 			struct state_sensor_possible_states *states =
@@ -168,8 +168,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 					 uint16_t effecter_id,
 					 uint8_t comp_effecter_count,
 					 set_effecter_state_field *field,
-					 struct pldm_msg *msg,
-                                         size_t payload_length)
+					 struct pldm_msg *msg)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -178,10 +177,6 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 	if (comp_effecter_count < 0x1 || comp_effecter_count > 0x8 ||
 	    field == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
-	}
-
-	if (payload_length < PLDM_SET_STATE_EFFECTER_STATES_REQ_BYTES ) {
-		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
 	struct pldm_header_info header = {0};
@@ -596,7 +591,7 @@ int encode_set_numeric_effecter_value_resp(uint8_t instance_id,
 
 int encode_set_numeric_effecter_value_req(
     uint8_t instance_id, uint16_t effecter_id, uint8_t effecter_data_size,
-    uint8_t *effecter_value, struct pldm_msg *msg, size_t payload_length)
+    const uint8_t *effecter_value, struct pldm_msg *msg, size_t payload_length)
 {
 	if (msg == NULL || effecter_value == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -1268,8 +1263,8 @@ int encode_get_numeric_effecter_value_req(uint8_t instance_id,
 
 int encode_get_numeric_effecter_value_resp(
     uint8_t instance_id, uint8_t completion_code, uint8_t effecter_data_size,
-    uint8_t effecter_oper_state, uint8_t *pending_value, uint8_t *present_value,
-    struct pldm_msg *msg, size_t payload_length)
+    uint8_t effecter_oper_state, const uint8_t *pending_value,
+    const uint8_t *present_value, struct pldm_msg *msg, size_t payload_length)
 {
 	if (msg == NULL || pending_value == NULL || present_value == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -1666,7 +1661,7 @@ int encode_get_sensor_reading_resp(
     uint8_t instance_id, uint8_t completion_code, uint8_t sensor_data_size,
     uint8_t sensor_operational_state, uint8_t sensor_event_message_enable,
     uint8_t present_state, uint8_t previous_state, uint8_t event_state,
-    uint8_t *present_reading, struct pldm_msg *msg, size_t payload_length)
+    const uint8_t *present_reading, struct pldm_msg *msg, size_t payload_length)
 {
 	if (msg == NULL || present_reading == NULL) {
 		return PLDM_ERROR_INVALID_DATA;

@@ -32,7 +32,7 @@ typedef struct pldm_pdr_record pldm_pdr_record;
  *  for PDRs received by other entities) and can associate the returned handle
  *  to a PLDM terminus id.
  */
-pldm_pdr *pldm_pdr_init();
+pldm_pdr *pldm_pdr_init(void);
 
 /** @brief Destroy a PDR repository (and free up associated resources)
  *
@@ -158,13 +158,14 @@ void pldm_pdr_remove_pdrs_by_terminus_handle(pldm_pdr *repo,
  * whether the valid bit is set or not as per the spec DSP0248
  *
  * @param[in] repo - opaque pointer acting as a PDR repo handle
- * @param[in] terminusHandle - PLDM terminus handle
+ * @param[in] terminus_handle - PLDM terminus handle
  * @param[in] tid - Terminus ID
- * @param[in] tlEid - MCTP endpoint EID
+ * @param[in] tl_eid - MCTP endpoint EID
  * @param[in] valid - validity bit of TLPDR
  */
-void pldm_pdr_update_TL_pdr(const pldm_pdr *repo, uint16_t terminusHandle,
-			    uint8_t tid, uint8_t tlEid, bool valid);
+/* NOLINTNEXTLINE(readability-identifier-naming) */
+void pldm_pdr_update_TL_pdr(const pldm_pdr *repo, uint16_t terminus_handle,
+			    uint8_t tid, uint8_t tl_eid, bool valid);
 
 /* ======================= */
 /* FRU Record Set PDR APIs */
@@ -239,7 +240,7 @@ typedef struct pldm_entity_node pldm_entity_node;
  *  @return opaque pointer that acts as a handle to the tree; NULL if no
  *  tree could be created
  */
-pldm_entity_association_tree *pldm_entity_association_tree_init();
+pldm_entity_association_tree *pldm_entity_association_tree_init(void);
 
 /** @brief Add an entity into the entity association tree
  *
@@ -402,15 +403,6 @@ bool pldm_is_empty_entity_assoc_tree(pldm_entity_association_tree *tree);
 void pldm_entity_association_pdr_extract(const uint8_t *pdr, uint16_t pdr_len,
 					 size_t *num_entities,
 					 pldm_entity **entities);
-
-/** @brief Delete record using its record handle
- *
- *  @param[in] repo - opaque pointer acting as a PDR repo handle
- *  @param[in] record_handle - record handle of input PDR record
- *  @param[in] is_remote - if true, then the PDR is not from this terminus
- */
-void pldm_delete_by_record_handle(pldm_pdr *repo, uint32_t record_handle,
-				  bool is_remote);
 
 #ifdef __cplusplus
 }

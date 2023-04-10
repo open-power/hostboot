@@ -406,7 +406,9 @@ TEST(AttrTable, integerEntryDecodeTest)
         3,  0, 0, 0, 0, 0, 0, 0, /* defaut value */
     };
 
-    uint64_t lower, upper, def;
+    uint64_t lower;
+    uint64_t upper;
+    uint64_t def;
     uint32_t scalar;
     auto entry = reinterpret_cast<struct pldm_bios_attr_table_entry*>(
         integerEntry.data());

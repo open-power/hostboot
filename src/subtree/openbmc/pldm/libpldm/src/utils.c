@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "base.h"
+#include <limits.h>
 #include <stdio.h>
 
 /** CRC32 code derived from work by Gary S. Brown.
@@ -84,8 +85,9 @@ uint32_t crc32(const void *data, size_t size)
 {
 	const uint8_t *p = data;
 	uint32_t crc = ~0U;
-	while (size--)
+	while (size--) {
 		crc = crc32_tab[(crc ^ *p++) & 0xff] ^ (crc >> 8);
+	}
 	return crc ^ ~0U;
 }
 
@@ -93,67 +95,75 @@ uint8_t crc8(const void *data, size_t size)
 {
 	const uint8_t *p = data;
 	uint8_t crc = 0x00;
-	while (size--)
+	while (size--) {
 		crc = crc8_table[crc ^ *p++];
+	}
 	return crc;
 }
 
-static int print_version_field(uint8_t bcd, char *buffer, size_t buffer_size)
+#define BCD_H(v) (((v) >> 4) & 0xf)
+#define BCD_L(v) ((v)&0xf)
+#define AS_CHAR(digit) ((digit) + '0')
+#define INSERT_CHAR(c, b, n)                                                   \
+	{                                                                      \
+		if ((n) > 1) {                                                 \
+			*(b)++ = (c);                                          \
+			(n)--;                                                 \
+		}                                                              \
+	}
+#define INSERT_INT(i, b, n) INSERT_CHAR(AS_CHAR(i), (b), (n))
+ssize_t ver2str(const ver32_t *version, char *buffer, size_t buffer_size)
 {
-	int v;
-	if (bcd == 0xff)
-		return 0;
-	if ((bcd & 0xf0) == 0xf0) {
-		v = bcd & 0x0f;
-		return snprintf(buffer, buffer_size, "%d", v);
-	}
-	v = ((bcd >> 4) * 10) + (bcd & 0x0f);
-	return snprintf(buffer, buffer_size, "%02d", v);
-}
+	ssize_t remaining;
+	char *cursor;
 
-#define POINTER_MOVE(rc, buffer, buffer_size, original_size)                   \
-	do {                                                                   \
-		if (rc < 0)                                                    \
-			return rc;                                             \
-		if ((size_t)rc >= buffer_size)                                 \
-			return original_size - 1;                              \
-		buffer += rc;                                                  \
-		buffer_size -= rc;                                             \
-	} while (0)
+	if (!version || !buffer) {
+		return -1;
+	}
 
-int ver2str(const ver32_t *version, char *buffer, size_t buffer_size)
-{
-	int rc;
-	size_t original_size = buffer_size;
-	rc = print_version_field(version->major, buffer, buffer_size);
-	POINTER_MOVE(rc, buffer, buffer_size, original_size);
-	rc = snprintf(buffer, buffer_size, ".");
-	POINTER_MOVE(rc, buffer, buffer_size, original_size);
-	rc = print_version_field(version->minor, buffer, buffer_size);
-	POINTER_MOVE(rc, buffer, buffer_size, original_size);
-	if (version->update != 0xff) {
-		rc = snprintf(buffer, buffer_size, ".");
-		POINTER_MOVE(rc, buffer, buffer_size, original_size);
-		rc = print_version_field(version->update, buffer, buffer_size);
-		POINTER_MOVE(rc, buffer, buffer_size, original_size);
+	if (!buffer_size) {
+		return -1;
 	}
-	if (version->alpha != 0) {
-		rc = snprintf(buffer, buffer_size, "%c", version->alpha);
-		POINTER_MOVE(rc, buffer, buffer_size, original_size);
+
+	if (buffer_size > SSIZE_MAX) {
+		return -1;
 	}
-	return original_size - buffer_size;
+
+	cursor = buffer;
+	remaining = (ssize_t)buffer_size;
+
+	if (version->major < 0xf0)
+		INSERT_INT(BCD_H(version->major), cursor, remaining)
+	INSERT_INT(BCD_L(version->major), cursor, remaining);
+	INSERT_CHAR('.', cursor, remaining);
+
+	if (version->minor < 0xf0)
+		INSERT_INT(BCD_H(version->minor), cursor, remaining);
+	INSERT_INT(BCD_L(version->minor), cursor, remaining);
+
+	if (version->update < 0xff) {
+		INSERT_CHAR('.', cursor, remaining);
+		if (version->update < 0xf0)
+			INSERT_INT(BCD_H(version->update), cursor, remaining);
+		INSERT_INT(BCD_L(version->update), cursor, remaining);
+	}
+
+	if (version->alpha)
+		INSERT_CHAR(version->alpha, cursor, remaining);
+
+	*cursor = '\0';
+
+	return (ssize_t)buffer_size - remaining;
 }
 
 uint8_t bcd2dec8(uint8_t bcd)
 {
-	uint8_t dec = (bcd >> 4) * 10 + (bcd & 0x0f);
-	return dec;
+	return (bcd >> 4) * 10 + (bcd & 0x0f);
 }
 
 uint8_t dec2bcd8(uint8_t dec)
 {
-	uint8_t bcd = (dec % 10) | (dec / 10) << 4;
-	return bcd;
+	return ((dec / 10) << 4) + (dec % 10);
 }
 
 uint16_t bcd2dec16(uint16_t bcd)

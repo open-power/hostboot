@@ -52,30 +52,9 @@ static void add_record(pldm_pdr *repo, pldm_pdr_record *record)
 
 static inline uint32_t get_new_record_handle(const pldm_pdr *repo)
 {
-	static const uint32_t HB_PDR_OFFSET = 0x01000000;
-	static uint32_t current_hb_handle = HB_PDR_OFFSET;
 	assert(repo != NULL);
-	uint32_t last_used_hdl = 0;
-	if(repo->last != NULL)
-	{
-		if(repo->last->record_handle >= HB_PDR_OFFSET) // It's an HB PDR
-		{
-			last_used_hdl = repo->last->record_handle;
-			current_hb_handle = last_used_hdl + 1;
-		}
-		else // It's a BMC PDR
-		{
-			// We don't want to continue counting from the BMC PDR's
-			// handle, nor do we want to restart, so continue where
-			// we left off.
-			last_used_hdl = current_hb_handle++;
-		}
-	}
-	else
-	{
-		last_used_hdl = HB_PDR_OFFSET;
-		current_hb_handle = last_used_hdl + 1;
-	}
+	uint32_t last_used_hdl =
+	    repo->last != NULL ? repo->last->record_handle : 0;
 	assert(last_used_hdl != UINT32_MAX);
 
 	return last_used_hdl + 1;
@@ -131,7 +110,7 @@ uint32_t pldm_pdr_add(pldm_pdr *repo, const uint8_t *data, uint32_t size,
 	return record->record_handle;
 }
 
-pldm_pdr *pldm_pdr_init()
+pldm_pdr *pldm_pdr_init(void)
 {
 	pldm_pdr *repo = malloc(sizeof(pldm_pdr));
 	assert(repo != NULL);
@@ -341,30 +320,31 @@ const pldm_pdr_record *pldm_pdr_fru_record_set_find_by_rsi(
 	return NULL;
 }
 
-void pldm_pdr_update_TL_pdr(const pldm_pdr *repo, uint16_t terminusHandle,
-			    uint8_t tid, uint8_t tlEid, bool validBit)
+/* NOLINTNEXTLINE(readability-identifier-naming) */
+void pldm_pdr_update_TL_pdr(const pldm_pdr *repo, uint16_t terminus_handle,
+			    uint8_t tid, uint8_t tl_eid, bool valid_bit)
 {
-	uint8_t *outData = NULL;
+	uint8_t *out_data = NULL;
 	uint32_t size = 0;
 	const pldm_pdr_record *record;
 	record = pldm_pdr_find_record_by_type(repo, PLDM_TERMINUS_LOCATOR_PDR,
-					      NULL, &outData, &size);
+					      NULL, &out_data, &size);
 
 	do {
 		if (record != NULL) {
 			struct pldm_terminus_locator_pdr *pdr =
-			    (struct pldm_terminus_locator_pdr *)outData;
+			    (struct pldm_terminus_locator_pdr *)out_data;
 			struct pldm_terminus_locator_type_mctp_eid *value =
 			    (struct pldm_terminus_locator_type_mctp_eid *)
 				pdr->terminus_locator_value;
-			if (pdr->terminus_handle == terminusHandle &&
-			    pdr->tid == tid && value->eid == tlEid) {
-				pdr->validity = validBit;
+			if (pdr->terminus_handle == terminus_handle &&
+			    pdr->tid == tid && value->eid == tl_eid) {
+				pdr->validity = valid_bit;
 				break;
 			}
 		}
 		record = pldm_pdr_find_record_by_type(
-		    repo, PLDM_TERMINUS_LOCATOR_PDR, record, &outData, &size);
+		    repo, PLDM_TERMINUS_LOCATOR_PDR, record, &out_data, &size);
 	} while (record);
 }
 
@@ -396,7 +376,7 @@ pldm_entity pldm_entity_extract(pldm_entity_node *node)
 	return node->entity;
 }
 
-pldm_entity_association_tree *pldm_entity_association_tree_init()
+pldm_entity_association_tree *pldm_entity_association_tree_init(void)
 {
 	pldm_entity_association_tree *tree =
 	    malloc(sizeof(pldm_entity_association_tree));
@@ -623,12 +603,12 @@ bool pldm_is_current_parent_child(pldm_entity_node *parent, pldm_entity *node)
 	return false;
 }
 
-static void _entity_association_pdr_add_entry(pldm_entity_node *curr,
-					      pldm_pdr *repo, uint16_t size,
-					      uint8_t contained_count,
-					      uint8_t association_type,
-					      bool is_remote,
-					      uint16_t terminus_handle)
+static void entity_association_pdr_add_children(pldm_entity_node *curr,
+						pldm_pdr *repo, uint16_t size,
+						uint8_t contained_count,
+						uint8_t association_type,
+						bool is_remote,
+						uint16_t terminus_handle)
 {
 	uint8_t pdr[size];
 	uint8_t *start = pdr;
@@ -687,7 +667,7 @@ static void entity_association_pdr_add_entry(pldm_entity_node *curr,
 		    sizeof(struct pldm_pdr_hdr) + sizeof(uint16_t) +
 		    sizeof(uint8_t) + sizeof(pldm_entity) + sizeof(uint8_t) +
 		    (num_logical_children * sizeof(pldm_entity));
-		_entity_association_pdr_add_entry(
+		entity_association_pdr_add_children(
 		    curr, repo, logical_pdr_size, num_logical_children,
 		    PLDM_ENTITY_ASSOCIAION_LOGICAL, is_remote, terminus_handle);
 	}
@@ -697,7 +677,7 @@ static void entity_association_pdr_add_entry(pldm_entity_node *curr,
 		    sizeof(struct pldm_pdr_hdr) + sizeof(uint16_t) +
 		    sizeof(uint8_t) + sizeof(pldm_entity) + sizeof(uint8_t) +
 		    (num_physical_children * sizeof(pldm_entity));
-		_entity_association_pdr_add_entry(
+		entity_association_pdr_add_children(
 		    curr, repo, physical_pdr_size, num_physical_children,
 		    PLDM_ENTITY_ASSOCIAION_PHYSICAL, is_remote,
 		    terminus_handle);
@@ -989,39 +969,5 @@ void pldm_entity_association_pdr_extract(const uint8_t *pdr, uint16_t pdr_len,
 		    le16toh(curr_entity->entity_container_id);
 		++curr_entity;
 		++i;
-	}
-}
-
-void pldm_delete_by_record_handle(pldm_pdr *repo, uint32_t record_handle,
-				  bool is_remote)
-{
-	assert(repo != NULL);
-
-	pldm_pdr_record *record = repo->first;
-	pldm_pdr_record *prev = NULL;
-	while (record != NULL) {
-		pldm_pdr_record *next = record->next;
-		struct pldm_pdr_hdr *hdr = (struct pldm_pdr_hdr *)record->data;
-		if ((record->is_remote == is_remote) &&
-		    (hdr->record_handle == record_handle)) {
-			if (repo->first == record) {
-				repo->first = next;
-			} else {
-				prev->next = next;
-			}
-			if (repo->last == record) {
-				repo->last = prev;
-			}
-			if (record->data) {
-				free(record->data);
-			}
-			--repo->record_count;
-			repo->size -= record->size;
-			free(record);
-			break;
-		} else {
-			prev = record;
-		}
-		record = next;
 	}
 }

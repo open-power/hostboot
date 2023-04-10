@@ -1,9 +1,9 @@
 #include <endian.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include <array>
 #include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <vector>
 
 #include "libpldm/pdr.h"
@@ -992,7 +992,6 @@ TEST(EntityAssociationPDR, testPDR)
     EXPECT_EQ(le16toh(entity->entity_type), 3u);
     EXPECT_EQ(le16toh(entity->entity_instance_num), 2u);
     EXPECT_EQ(le16toh(entity->entity_container_id), 1u);
-    start += sizeof(pldm_entity);
 
     currRecHandle = nextRecHandle;
 
@@ -1028,7 +1027,6 @@ TEST(EntityAssociationPDR, testPDR)
     EXPECT_EQ(le16toh(entity->entity_type), 2u);
     EXPECT_EQ(le16toh(entity->entity_instance_num), 2u);
     EXPECT_EQ(le16toh(entity->entity_container_id), 1u);
-    start += sizeof(pldm_entity);
 
     currRecHandle = nextRecHandle;
 
@@ -1064,7 +1062,6 @@ TEST(EntityAssociationPDR, testPDR)
     EXPECT_EQ(le16toh(entity->entity_type), 5u);
     EXPECT_EQ(le16toh(entity->entity_instance_num), 3u);
     EXPECT_EQ(le16toh(entity->entity_container_id), 2u);
-    start += sizeof(pldm_entity);
 
     currRecHandle = nextRecHandle;
 
@@ -1100,7 +1097,6 @@ TEST(EntityAssociationPDR, testPDR)
     EXPECT_EQ(le16toh(entity->entity_type), 5u);
     EXPECT_EQ(le16toh(entity->entity_instance_num), 1u);
     EXPECT_EQ(le16toh(entity->entity_container_id), 2u);
-    start += sizeof(pldm_entity);
 
     currRecHandle = nextRecHandle;
 
@@ -1131,7 +1127,6 @@ TEST(EntityAssociationPDR, testPDR)
     EXPECT_EQ(le16toh(entity->entity_type), 6u);
     EXPECT_EQ(le16toh(entity->entity_instance_num), 1u);
     EXPECT_EQ(le16toh(entity->entity_container_id), 3u);
-    start += sizeof(pldm_entity);
 
     currRecHandle = nextRecHandle;
 

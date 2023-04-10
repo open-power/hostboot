@@ -1,8 +1,8 @@
 #include <endian.h>
-#include <string.h>
 
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <vector>
 
 #include "base.h"
