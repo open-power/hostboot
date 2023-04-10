@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,7 +155,15 @@ namespace TRACE
 
     bool isDebugEnabled(ComponentDesc * i_td)
     {
-        return i_td->iv_debugEnabled;
+        return i_td->isDebugEnabled();
+    }
+
+    void enableDebug(const char* i_comp,
+                     bool i_enable)
+    {
+        ComponentDesc* l_comp =
+            Singleton<ComponentList>::instance().getDescriptor(i_comp, 0);
+        l_comp->enableDebug(i_enable);
     }
 
 };

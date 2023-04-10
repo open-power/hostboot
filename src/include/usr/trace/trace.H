@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -207,6 +207,7 @@ namespace TRACE
      */
     void disableContinousTrace();
 #endif
+
     /**
      *  @brief Return if debug trace is enabled for input trace descriptor
      *
@@ -225,6 +226,15 @@ namespace TRACE
      *  @return true for enabled, false for disabled
      */
     bool getTraceLite();
+
+    /**
+     *  @brief Enable/disable debug traces 
+     *
+     *  @param [in] i_comp String name of trace descriptor
+     *  @param [in] i_enable true=enable, false=disable
+     */
+    void enableDebug(const char* i_comp,
+                     bool i_enable = true);
 
 };
 

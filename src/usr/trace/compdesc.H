@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,16 @@ namespace TRACE
             friend class Buffer;
             friend class TRACEDAEMON::Daemon;
 
+            bool isDebugEnabled()
+            {
+                return iv_debugEnabled;
+            };
+
+            void enableDebug(bool i_enable)
+            {
+                iv_debugEnabled = i_enable;
+            };
+
         private:
             /** Constructor
              *
@@ -82,8 +92,6 @@ namespace TRACE
 
             Entry* iv_first;    //< First (newest) trace entry.
             Entry* iv_last;     //< Last (oldest) trace entry.
-
-            friend bool TRACE::isDebugEnabled(ComponentDesc * i_td);
 
     };
 
