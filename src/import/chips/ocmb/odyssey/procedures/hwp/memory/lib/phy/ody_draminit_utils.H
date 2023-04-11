@@ -619,9 +619,21 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_D5Misc(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            io_msg_block.D5Misc = iv_msg_block_vars.iv_D5Misc;
+            fapi2::buffer<uint8_t> l_buffer(iv_msg_block_vars.iv_D5Misc);
+            uint8_t l_redundant_cs_en = 0;
+            constexpr uint8_t PARTIAL_RANK_OPTION = 6;
 
-            return fapi2::FAPI2_RC_SUCCESS;
+            // Get the attr
+            FAPI_TRY(mss::attr::get_ddr5_redundant_cs_en(iv_dimm, l_redundant_cs_en))
+
+            // Update D5Misc[1] depending on redundant CS mode
+            l_buffer.writeBit<PARTIAL_RANK_OPTION>(l_redundant_cs_en == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_ENABLE);
+            io_msg_block.D5Misc = l_buffer;
+            FAPI_INF(TARGTIDFORMAT " D5Misc before:0x%02x, D5Misc after:0x%02x", GENTARGTID(iv_target),
+                     iv_msg_block_vars.iv_D5Misc, io_msg_block.D5Misc);
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
