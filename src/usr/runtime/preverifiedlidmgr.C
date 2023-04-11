@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -351,6 +351,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(
     cv_addFakeHdrs = false;
 
     errlHndl_t l_errl = nullptr;
+    o_resvMemAddr = 0; //initialize
 
     // Switch to Different Memory Info for PHYP component
     // Exception: put the PHyp signature LID in the normal reserved memory area
@@ -369,18 +370,20 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(
         continue;
     }
 
-    // Get next available HB reserved memory address
-    cv_pResvMemInfo->curAddr = getNextAddress(i_size);
-
-    // Return the address the lid was loaded to the caller
-    o_resvMemAddr = cv_pResvMemInfo->curAddr;
-
     if(cv_payloadKind == TARGETING::PAYLOAD_KIND_PHYP)
     {
-        // Verified Lid
-        char l_lidStr[Util::lidIdStrLength] {};
-        snprintf (l_lidStr, Util::lidIdStrLength, "%08X",i_lidId);
-        l_errl = RUNTIME::setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
+        // For ALL but the POWERVM component of the PHYP payload
+        // populate HB reserved memory
+        if (!i_isPhypComp)
+        {
+            // Get next available HB reserved memory address
+            cv_pResvMemInfo->curAddr = getNextAddress(i_size);
+            // Return the address the lid was loaded to the caller
+            o_resvMemAddr = cv_pResvMemInfo->curAddr;
+            // Verified Lid
+            char l_lidStr[Util::lidIdStrLength] {};
+            snprintf (l_lidStr, Util::lidIdStrLength, "%08X",i_lidId);
+            l_errl = RUNTIME::setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
                                                cv_pResvMemInfo->rangeId,
                                                cv_pResvMemInfo->curAddr,
                                                i_size,
@@ -389,42 +392,22 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(
                                                // Memory limit everything that
                                                // is not a PHYP component
                                                !(i_isPhypComp));
-        if(l_errl)
-        {
-            TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromMCL - setNextHbRsvMemEntry Lid content failed");
-            break;
-        }
+            if(l_errl)
+            {
+                TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromMCL - setNextHbRsvMemEntry Lid content failed");
+                break;
+            }
 
-        // Phyp component has already been loaded and verified before MCL mgr
-        // Simply update HB reserved prev size in Phyp component case
-        // Special case: If it's the PHyp signature LID, handle below
-        if (i_isPhypComp && !i_firstLid)
-        {
-            // align previous size to page size to ensure starting addresses
-            // are page aligned.
-            cv_pResvMemInfo->prevSize = ALIGN_PAGE(i_size);
-        }
-        else
-        {
-            // Load image into HB reserved memory
-            // Special case: If it's the PHyp signature LID, pull the
-            // data from the cached PHyp header, instead of the
-            // scratch area
-            uint64_t addr = (i_isPhypComp && i_firstLid) ?
-                reinterpret_cast<uint64_t>(
-                    const_cast<uint8_t*>(
-                        ::MCL::MasterContainerLidMgr::getPhypHeader()))
-                : i_addr;
-            l_errl = loadImage(addr, i_size);
+            l_errl = loadImage(i_addr, i_size);
             if(l_errl)
             {
                 TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromMCL - Load Image failed");
                 break;
             }
-        }
 
-        // Indicate the lid has been loaded
-        cv_lidsLoaded.insert(std::make_pair(i_lidId, true));
+            // Indicate the lid has been loaded
+            cv_lidsLoaded.insert(std::make_pair(i_lidId, true));
+        }
     }
 
     } while (0);

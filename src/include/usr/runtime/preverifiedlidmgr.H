@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,14 +69,19 @@ class PreVerifiedLidMgr
     /**
      * @brief Load LID into HB reserved memory
      *
-     * @param[in] i_lidId ID of LID to load
-     * @param[in] i_addr Virtual address of LID data
-     * @param[in] i_size Size of LID data
-     * @param[in] i_isPhypComp Whether LID is part of the PHyp component
-     *     NOTE: PHYP LIDs (other than signature LID) will be loaded to
-     *     an area anchored at PHyp's HRMOR
-     * @param[in] i_firstLid Whether this is the first LID of a component
+     * @param[in] i_lidId        ID of LID to load
+     * @param[in] i_addr         Virtual address of LID data
+     * @param[in] i_size         Size of LID data
+     * @param[in] i_isPhypComp   Whether LID is part of the PHyp component
+     *     NOTE: POWERVM component LIDs are directly loaded to PHYP's HRMOR
+     *     (if compressed lids, the decompression is done directly to
+     *      PHYP HRMOR).
+     *     POWERVM component LIDs are -NOT- registerd in the HB
+     *     Reserved Memory area
+     * @param[in] i_firstLid     Whether this is the first LID of a component
      * @param[out] o_resvMemAddr Mainstore address LID was loaded to
+     *                or set to zero if LID is -NOT- registered
+     *                in HB Reserved Memory
      *
      * @return errlHndl_t Error log handle on failure, else nullptr
      */
@@ -164,7 +169,7 @@ class PreVerifiedLidMgr
         size_t prevSize;
     };
 
-    // Pointer to either Deafult or PHYP Reserved Memory Info
+    // Pointer to either Default or PHYP Reserved Memory Info
     static ResvMemInfo* cv_pResvMemInfo;
 
     // Collection of data needed for Hostboot Reserved Memory

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -812,13 +812,19 @@ errlHndl_t MasterContainerLidMgr::processComponent(
             {
                 break;
             }
-            // Increment tmp address by lid size
-            l_curAddr += lidInfo.size;
+
+            // ONLY if we loaded something should we bump HB reserved memory locations
+            if (l_addr != 0)
+            {
+                // Increment tmp address by lid size
+                l_curAddr += lidInfo.size;
+            }
 
             // Save starting address of entire component, not each lid
             if (l_firstLid)
             {
                 // Set mainstore memory address in cache
+                // When PHYP COMPONENT gets SKIPPED, l_addr will be ZERO
                 io_compInfo.mainstoreAddr = l_addr;
                 l_firstLid = false;
             }
