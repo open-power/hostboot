@@ -737,18 +737,29 @@ class base_0_0 : public mss::spd::base
         virtual fapi2::ReturnCode set_dimm_ranks_cnfgd(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
+            uint8_t l_redundant_cs = 0;
 
             // Set configed ranks. Set the bit representing the master rank configured (0 being left most.) So,
             // a 4R DIMM would be 0b11110000 (0xF0). This is used by PRD.
+            // If REDUNDANT CS EN mode is enabled, bits are doubled
             fapi2::buffer<uint8_t> l_ranks_configed;
 
             // Make sure the number of master ranks is setup
             uint8_t l_master_ranks = 0;
             FAPI_TRY(set_num_master_ranks_per_dimm(i_spd));
             FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(iv_dimm, l_master_ranks));
+            FAPI_TRY(mss::attr::get_ddr5_redundant_cs_en(iv_dimm, l_redundant_cs));
 
-            FAPI_TRY(l_ranks_configed.setBit(0, l_master_ranks),
-                     "%s. Failed to setBit", spd::c_str(iv_dimm));
+            if(l_redundant_cs == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_ENABLE)
+            {
+                FAPI_TRY(l_ranks_configed.setBit(0, l_master_ranks * 2),
+                         "%s. Failed to setBit", spd::c_str(iv_dimm));
+            }
+            else if(l_redundant_cs == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_DISABLE)
+            {
+                FAPI_TRY(l_ranks_configed.setBit(0, l_master_ranks),
+                         "%s. Failed to setBit", spd::c_str(iv_dimm));
+            }
 
             l_field = l_ranks_configed;
 
@@ -1278,7 +1289,6 @@ class base_0_0 : public mss::spd::base
             // These fields need to be set first, as these are used for many
             // fields later on
             FAPI_TRY(set_poz_mode());
-            FAPI_TRY(set_dimm_ranks_cnfgd(i_spd));
             FAPI_TRY(set_host_to_ddr_speed_ratio(i_spd));
             FAPI_TRY(set_num_master_ranks_per_dimm(i_spd)); // AKA mranks
             FAPI_TRY(set_hybrid(i_spd));
@@ -1358,6 +1368,7 @@ class base_0_0 : public mss::spd::base
             FAPI_TRY(set_height_3ds(i_spd));
             FAPI_TRY(set_mem_dimm_size(i_spd));
             FAPI_TRY(set_trfc_dlr(i_spd));
+            FAPI_TRY(set_dimm_ranks_cnfgd(i_spd));
 
         fapi_try_exit:
             return fapi2::current_err;
