@@ -3,10 +3,10 @@
 # compile so that the extra files vars are kept up to date automatically as you work. This file is NOT sourced
 # automatically
 
-# Can be pointed to any dir and DCE_EXTRA_FILES will populate with any .c++ .h++ files at the location.
+# Can be pointed to any dir and DCE_EXTRA_FILES will populate with any files at this location.
 export DCE_EXTRA_FILES_LOCATION=$PROJECT_ROOT/src/build/tools/dce/dce-extra-files
-# Will automatically gather all files in extra file location. Compiler will filter out non .c++ h++ files so that
-# non-code files aren't made dependencies
+# Will automatically gather all files in extra file location as a space-separated list. Compiler will filter out files
+# that do not have .C or .H suffixes so that non-code files aren't made dependencies.
 export DCE_EXTRA_FILES=$(ls $DCE_EXTRA_FILES_LOCATION | awk -v var="$DCE_EXTRA_FILES_LOCATION/" '{printf "%s ", var $0 }')
 # If you need extra CXXFLAGS, space separated.
 export CXXFLAGS_DCE="-D__HOSTBOOT_MODULE=DCE"
