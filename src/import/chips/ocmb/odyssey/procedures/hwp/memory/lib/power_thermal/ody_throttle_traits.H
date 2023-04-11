@@ -73,8 +73,9 @@ class throttle_traits<mss::mc_type::ODYSSEY>
         static const uint64_t IDLE_UTIL = 0;
         // Minimum throttle allowed for the port and or slot. If we set to 0, we brick the port
         static const uint64_t  MIN_THROTTLE = 1;
-        // Multiplication factor to convert addr util to data util (BL16/2), BL = burst length
-        static const uint8_t CONVERT_ADDR_UTIL_TO_DATA_UTIL = 8;
+        // Multiplication factor to convert addr util to data util
+        // For odyssey, each BL16 access takes 4 2:1 clocks, so use 4 here
+        static const uint8_t CONVERT_ADDR_UTIL_TO_DATA_UTIL = 4;
 
         enum size_of_attrs : size_t
         {
