@@ -35,6 +35,7 @@
 #include <fapi2.H>
 #include <plat_hwp_invoker.H>
 #include <initservice/isteps_trace.H>
+#include <chips/common/utils/chipids.H>
 
 // Memory Hardware Procedures:
 #include <p10_mss_utils_to_throttle.H>
@@ -50,7 +51,6 @@ using namespace TARGETING;
  *   ATTR_REGULATOR_EFFICIENCY_FACTOR    - Power supply efficiency
  *   ATTR_N_MAX_MEM_POWER_WATTS          - Max memory power for N
  *   ATTR_N_PLUS_ONE_MAX_MEM_POWER_WATTS - Max memory power for N+1
- *   ATTR_MIN_MEM_UTILIZATION_THROTTLING - Min memory utilization
  *
  * Calculates the memory throttling numerator values/power for:
  * - OT  : System in over-temperature condition
@@ -76,6 +76,7 @@ errlHndl_t calcMemThrottles();
 namespace HTMGT
 {
     trace_desc_t* g_trac_htmgt_mem = nullptr;
+    uint8_t g_max_ports_per_ocmb = 0;
 
 /**
  * Function: call_utils_to_throttle()
@@ -205,7 +206,7 @@ errlHndl_t memPowerThrottleOT(
                     TMGT_ERR("memPowerThrottleOT: failed to read CHIP_UNIT");
                     attr_failure = true;
                 }
-                if (l_port_unit >= HTMGT_MAX_PORT_PER_OCMB_CHIP)
+                if (l_port_unit >= g_max_ports_per_ocmb)
                 {
                     TMGT_ERR("memPowerThrottleOT: Invalid CHIP_UNIT %d for MEM_PORT",
                              l_port_unit);
@@ -628,7 +629,7 @@ errlHndl_t memPowerThrottleRedPower(
                     TMGT_ERR("memPowerThrottleRedPower: failed to read CHIP_UNIT");
                     attr_failure = true;
                 }
-                if (l_port_unit >= HTMGT_MAX_PORT_PER_OCMB_CHIP)
+                if (l_port_unit >= g_max_ports_per_ocmb)
                 {
                     TMGT_ERR("memPowerThrottleRedPower: Invalid CHIP_UNIT "
                              "%d for MEM_PORT", l_port_unit);
@@ -854,7 +855,7 @@ errlHndl_t memPowerThrottleOversub(
                     TMGT_ERR("memPowerThrottleOversub: failed to read CHIP_UNIT");
                     attr_failure = true;
                 }
-                if (l_port_unit >= HTMGT_MAX_PORT_PER_OCMB_CHIP)
+                if (l_port_unit >= g_max_ports_per_ocmb)
                 {
                     TMGT_ERR("memPowerThrottleOversub: Invalid CHIP_UNIT "
                              "%d for MEM_PORT", l_port_unit);
@@ -1072,6 +1073,17 @@ errlHndl_t calcMemThrottles()
             {
                 TMGT_ERR("calcMemThrottles: Unable to find OCMB's parent for HUID 0x%08X",
                          ocmb_huid);
+            }
+
+            if (g_max_ports_per_ocmb == 0)
+            {
+                // Determine max number of ports
+                const uint32_t chipId = ocmb_target->getAttr<ATTR_CHIP_ID>();
+                g_max_ports_per_ocmb = HTMGT_MAX_PORT_PER_OCMB_CHIP;
+                if (chipId != POWER_CHIPID::EXPLORER_16)
+                {
+                    g_max_ports_per_ocmb = HTMGT_MAX_PORT_PER_OCMB_CHIP_ODYSSEY;
+                }
             }
 
             // Convert to FAPI target and add to list

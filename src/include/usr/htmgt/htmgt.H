@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,11 +34,11 @@
 // Each EXPLORER OCMB chip has 1 port
 // Each port has 2 slots for DDR4 DIMMs
 const uint8_t HTMGT_MAX_PORT_PER_OCMB_CHIP = 1;
+const uint8_t HTMGT_MAX_PORT_PER_OCMB_CHIP_ODYSSEY = 2;
 const uint8_t HTMGT_MAX_SLOT_PER_OCMB_PORT = 2;
 const uint8_t HTMGT_NUM_DTS_PER_OCMB = 2;
 const uint8_t HTMGT_NUM_DTS_PER_OCMB_ODYSSEY = 4;
-const uint8_t HTMGT_MAX_DIMM_PER_OCMB_CHIP =
-HTMGT_MAX_SLOT_PER_OCMB_PORT * HTMGT_MAX_PORT_PER_OCMB_CHIP;
+// MAX_DIMM_PER_OCMB_CHIP = MAX_SLOT_PER_OCMB_PORT * MAX_PORT_PER_OCMB_CHIP;
 
 
 namespace HTMGT

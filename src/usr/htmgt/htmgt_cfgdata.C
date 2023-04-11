@@ -1057,6 +1057,12 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
             continue;
         }
 
+        uint8_t max_ports_per_ocmb = HTMGT_MAX_PORT_PER_OCMB_CHIP;
+        if (G_memory_type == OCC_MEM_TYPE_ODYSSEY)
+        {
+            max_ports_per_ocmb = HTMGT_MAX_PORT_PER_OCMB_CHIP_ODYSSEY;
+        }
+
         // Query the functional Ports for this OCMB
         TARGETING::TargetHandleList port_list;
         getChildAffinityTargetsByState(port_list, ocmb_target, CLASS_UNIT,
@@ -1080,7 +1086,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
                          nps_oversub[port_rel_pos]);
                 continue;
             }
-            if (port_rel_pos >= HTMGT_MAX_PORT_PER_OCMB_CHIP)
+            if (port_rel_pos >= max_ports_per_ocmb)
             {
                 TMGT_ERR("getMemThrottleMessageData: OCMB%d / Port%d"
                          " - Ignored due invalid Port position: %d",
