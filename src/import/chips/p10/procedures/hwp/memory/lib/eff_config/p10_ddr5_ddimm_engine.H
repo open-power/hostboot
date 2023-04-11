@@ -998,8 +998,6 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             uint8_t l_byte3 = 0;
             uint32_t l_field = 0;
             fapi2::buffer<uint32_t> l_buffer;
-            uint64_t l_nibble_cha_count = 0;
-            uint64_t l_nibble_chb_count = 0;
             constexpr uint8_t CHA_NIBBLES_START = 22;
             constexpr uint8_t CHB_NIBBLES_START = 12;
             constexpr uint8_t CH_NIBBLE_LEN = 10;
@@ -1048,17 +1046,38 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             // Set the nibble enables
             FAPI_TRY(mss::attr::set_nibble_enables(iv_dimm, l_field));
 
-            // Set the phy dq enables for ch A and ch B
-            // Get the number of nibbles enabled
-            l_nibble_cha_count = mss::bit_count<CHA_NIBBLES_START, CH_NIBBLE_LEN>(l_buffer);
-            // Each nibble is 4 bits, hence 4 times the count is put in the attr
-            FAPI_TRY(mss::attr::set_phy_enabled_dq_cha(iv_port, l_nibble_cha_count * mss::conversions::BITS_PER_NIBBLE));
+            // The PHY handles the nibble enables and number of DQ per channel in an odd way
+            // The number of DQ enabled per channel deconfigures the largest DBYTE on the channel
+            // The nibble enables disable a specific dbyte
+            // For example if a channel has the following nibble enables 0x3fc and 32 bits on the channel,
+            //    then two DBYTE's will be disabled: dbyte 0 (missing bits on the right) and the MSB dbyte due to missing 8 bits
+            // As such, we only want to decrease DQ on a specific channel for the most significant missing nibbles
 
-            // Get the number of nibbles enabled
-            l_nibble_chb_count = mss::bit_count<CHB_NIBBLES_START, CH_NIBBLE_LEN>(l_buffer);
-            // Each nibble is 4 bits, hence 4 times the count is put in the attr
-            FAPI_TRY(mss::attr::set_phy_enabled_dq_chb(iv_port, l_nibble_chb_count * mss::conversions::BITS_PER_NIBBLE));
+            // Set the phy dq enables for ch A
+            {
+                // Gets the first present nibble
+                const auto l_first_nibble_pos = mss::first_bit_set(l_field, CHA_NIBBLES_START);
 
+                // Decreases the number of nibbles on the channel for each deconfigured nibble
+                const auto l_num_nibbles = CH_NIBBLE_LEN - (l_first_nibble_pos - CHA_NIBBLES_START);
+                const auto l_num_dq = l_num_nibbles * mss::conversions::BITS_PER_NIBBLE;
+
+                // Each nibble is 4 bits, hence 4 times the count is put in the attr
+                FAPI_TRY(mss::attr::set_phy_enabled_dq_cha(iv_port, l_num_dq));
+            }
+
+            // Set the phy dq enables for ch A
+            {
+                // Gets the first present nibble
+                const auto l_first_nibble_pos = mss::first_bit_set(l_field, CHB_NIBBLES_START);
+
+                // Decreases the number of nibbles on the channel for each deconfigured nibble
+                const auto l_num_nibbles = CH_NIBBLE_LEN - (l_first_nibble_pos - CHB_NIBBLES_START);
+                const auto l_num_dq = l_num_nibbles * mss::conversions::BITS_PER_NIBBLE;
+
+                // Each nibble is 4 bits, hence 4 times the count is put in the attr
+                FAPI_TRY(mss::attr::set_phy_enabled_dq_chb(iv_port, l_num_dq));
+            }
 
         fapi_try_exit:
             return fapi2::current_err;
