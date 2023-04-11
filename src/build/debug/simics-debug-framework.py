@@ -1086,7 +1086,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
                     pel_filename,\
                     pel_phys_addr,\
                     pel_size)
-        print( "cmd1=%s\n"%(cmd1))
+        #print( "cmd1=%s\n"%(cmd1))
 
         try:
             if (simenv.fileSystemOk == 1):
