@@ -825,7 +825,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE( l_msg_block.RXEN_ADJ == 0x03 );
                     REQUIRE( l_msg_block.RX2D_DFE_Misc == 0x04 );
                     REQUIRE( l_msg_block.PhyVref == 0x05 );
-                    REQUIRE( l_msg_block.D5Misc == 0x06 );
+                    REQUIRE( l_msg_block.D5Misc == 0x04 );
                     REQUIRE( l_msg_block.WL_ADJ == 0x07 );
                     REQUIRE( l_msg_block.SequenceCtrl == 0x827F );
                     REQUIRE( l_msg_block.HdtCtrl == 0x08 );
@@ -1187,6 +1187,42 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
                     REQUIRE (l_msg_block.DisabledDB7LaneR0 == 0xFF );
                     REQUIRE( l_msg_block.DisabledDB8LaneR0 == 0x00 );
                     REQUIRE( l_msg_block.DisabledDB9LaneR0 == 0xFF );
+
+                    // Testing D5misc[1] enabling when redundant_cs is enabled
+                    {
+                        uint8_t l_redundant_cs_en_save[mss::ody::MAX_DIMM_PER_PORT] = {};
+                        uint8_t l_redundant_cs_en_test[mss::ody::MAX_DIMM_PER_PORT] = {fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_ENABLE, fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_ENABLE};
+                        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+                        mss::ody::phy::msg_block_params l_params(l_port, l_rc);
+                        REQUIRE_RC_PASS(l_rc);
+
+                        l_msg_block.D5Misc = 0;
+
+                        // Save the original
+                        REQUIRE_RC_PASS(mss::attr::get_ddr5_redundant_cs_en(l_port, l_redundant_cs_en_save));
+
+                        // Overriding redundant attr to be enabled
+                        REQUIRE_RC_PASS(mss::attr::set_ddr5_redundant_cs_en(l_port, l_redundant_cs_en_test));
+
+                        // Run the setup for D5_Misc
+                        REQUIRE_RC_PASS(l_params.setup_D5Misc(l_msg_block));
+                        REQUIRE( l_msg_block.D5Misc == 0x6 );
+
+                        l_redundant_cs_en_test[0] = {fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_DISABLE};
+                        l_redundant_cs_en_test[1] = {fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_DISABLE};
+
+                        // Overriding redundant attr to be disabled
+                        REQUIRE_RC_PASS(mss::attr::set_ddr5_redundant_cs_en(l_port, l_redundant_cs_en_test));
+
+                        // Run the setup for D5_Misc
+                        REQUIRE_RC_PASS(l_params.setup_D5Misc(l_msg_block));
+                        REQUIRE( l_msg_block.D5Misc == 0x4 );
+
+
+                        // Restore the original
+                        REQUIRE_RC_PASS(mss::attr::set_ddr5_redundant_cs_en(l_port, l_redundant_cs_en_save));
+
+                    }
 
                     constexpr uint8_t NON_SIM_MODE = 0;
                     REQUIRE_RC_PASS(mss::ody::phy::configure_dram_train_message_block(l_port, NON_SIM_MODE, l_msg_block));
