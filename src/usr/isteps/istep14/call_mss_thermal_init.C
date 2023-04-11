@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,8 @@
 #include <exp_mss_thermal_init.H>        // exp_mss_thermal_init
 #include <p10_throttle_sync.H>           // p10_throttle_sync
 
+#include <sbeio/sbeioif.H>
+
 // Misc
 #include <chipids.H>                     // POWER_CHIPID::EXPLORER_16
 
@@ -68,11 +70,12 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
-
+using   namespace   SBEIO;
 
 namespace ISTEP_14
 {
 // Forward declare these methods
+void ody_enable_periodic_sensor_poll(IStepError & io_iStepError);
 void p10_call_mss_thermal_init(IStepError & io_iStepError);
 void run_proc_throttle_sync(IStepError & io_iStepError);
 
@@ -100,21 +103,93 @@ void* call_mss_thermal_init (void*)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
                    "ERROR: call_mss_thermal_init exited early because "
                    "p10_call_mss_thermal_init had failures" );
+        goto ERROR_EXIT;
     }
-    else
+
+    ody_enable_periodic_sensor_poll(l_iStepError);
+
+    // Do not continue if the HWP call to p10_call_istep14_2b encounters an
+    // error. Breaking out here will facilitate in the efficiency of the
+    // reconfig loop and not cause confusion for the next HWP call.
+    if ( !l_iStepError.isNull() )
     {
-        // If no prior error, then call HWP to processor throttle
-        // synchronization on a list of PROC chips
-        run_proc_throttle_sync(l_iStepError);
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                   "ERROR: call_mss_thermal_init exited early because "
+                   "ody_enable_periodic_sensor_poll had failures" );
+        goto ERROR_EXIT;
     }
+
+    // If no prior error, then call HWP to processor throttle
+    // synchronization on a list of PROC chips
+    run_proc_throttle_sync(l_iStepError);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                EXIT_MRK"call_mss_thermal_init, returning %s",
                (l_iStepError.isNull()? "success" : "failure") );
 
+    ERROR_EXIT:
     // end task, returning any errorlogs to IStepDisp
     return l_iStepError.getErrorHandle();
 } // call_mss_thermal_init
+
+/**
+ * @brief Run istep 14.2b on a list of Odyssey OCMB chips
+ *
+ * param[in/out] io_iStepError - Container for errors if an error occurs
+ */
+void ody_enable_periodic_sensor_poll(IStepError & io_iStepError)
+{
+    errlHndl_t l_err(nullptr);
+
+    TARGETING::TargetHandleList l_ocmbTargetList;
+    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
+
+    for (auto l_ocmbTarget : l_ocmbTargetList)
+    {
+        uint32_t l_chipId = l_ocmbTarget->getAttr<TARGETING::ATTR_CHIP_ID>();
+
+        if (l_chipId == POWER_CHIPID::ODYSSEY_16)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                       "Running istep14_2b HWP call on Odyssey "
+                       "chip, target HUID 0x%.8X, chipId 0x%.8X",
+                       TARGETING::get_huid(l_ocmbTarget),
+                       l_chipId );
+
+            /* @todo JIRA:PFHB-258 JIRA:PFHB-236
+             *
+             * 14.2b
+             *  ody_read_dts            [OSBE]
+             *  ody_read_dimm_sensors   [OSBE]
+             *  ody_update_sensor_cache [OSBE]
+
+            l_err = sendExecHWPRequest(l_ocmbTarget, );
+             */
+
+            if (l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                           "ERROR: istep14_2b HWP call on Odyssey "
+                           "chip, target HUID 0x%08x, chipId 0x%.8X failed."
+                           TRACE_ERR_FMT,
+                           get_huid(l_ocmbTarget),
+                           l_chipId,
+                           TRACE_ERR_ARGS(l_err) );
+
+                // We don't want to fail the IPL, so just commit the log here.
+                errlCommit(l_err, ISTEP_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                           "SUCCESS: istep14_2b HWP on Odyssey "
+                           "chip, target HUID 0x%.8X, chipId 0x%.8X",
+                           TARGETING::get_huid(l_ocmbTarget),
+                           l_chipId );
+            }
+        }
+    }
+}
 
 /**
  * @brief Run Thermal Sensor Initialization on a list Explorer OCMB chips
@@ -125,22 +200,24 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
 {
     errlHndl_t l_err(nullptr);
 
+    // get RUN_ODY_HWP_FROM_HOST
+    const auto l_runOdyHwpFromHost =
+       TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
+
     // Get a list of all OCMB chips to run Thermal Sensor Initialization on
     TARGETING::TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-    for (const auto & l_ocmbTarget : l_ocmbTargetList)
+    for (auto l_ocmbTarget : l_ocmbTargetList)
     {
-        // Only run Thermal Sensor Initialization (exp_mss_thermal_init)
-        // on Explorer OCMBs.
-        uint32_t l_chipId = l_ocmbTarget->getAttr<TARGETING::ATTR_CHIP_ID>();
+        uint32_t l_chipId = l_ocmbTarget->getAttr<ATTR_CHIP_ID>();
+
+        // Convert the TARGETING::Target into a fapi2::Target by passing
+        // l_ocmbTarget into the fapi2::Target constructor
+        fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP>l_fapiOcmbTarget(l_ocmbTarget);
+
         if (l_chipId == POWER_CHIPID::EXPLORER_16)
         {
-            // Convert the TARGETING::Target into a fapi2::Target by passing
-            // l_ocmbTarget into the fapi2::Target constructor
-            fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP>
-                                             l_fapiOcmbTarget ( l_ocmbTarget );
-
             // Calling exp_mss_thermal_init HWP on Explorer chip,
             // trace out stating so
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
@@ -175,19 +252,62 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
                            TARGETING::get_huid(l_ocmbTarget),
                            l_chipId );
             }
-        } // end if (l_chipId == POWER_CHIPID::EXPLORER_16)
+        }
+        else if (l_chipId == POWER_CHIPID::ODYSSEY_16)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                       "Running ody_mss_thermal_init HWP call on Odyssey "
+                       "chip, target HUID 0x%.8X, chipId 0x%.8X",
+                       TARGETING::get_huid(l_ocmbTarget),
+                       l_chipId );
+
+            if (l_runOdyHwpFromHost)
+            {
+                /* @todo JIRA:PFHB-236 - for ody_mss_thermal_init
+                 *
+                FAPI_INVOKE_HWP(l_err, ody_mss_thermal_init, l_fapiOcmbTarget);
+                 */
+            }
+            else
+            {
+                l_err = sendExecHWPRequest(l_ocmbTarget, MEM_ODY_THERMAL_INIT);
+            }
+
+            if (l_err)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                           "ERROR: ody_mss_thermal_init HWP call on Odyssey "
+                           "chip, target HUID 0x%08x, chipId 0x%.8X failed."
+                           TRACE_ERR_FMT,
+                           get_huid(l_ocmbTarget),
+                           l_chipId,
+                           TRACE_ERR_ARGS(l_err) );
+
+                // We don't want to fail the IPL due to problems setting
+                //  up the temperature sensors on the DIMM, so just commit
+                //  the log here.
+                errlCommit(l_err, ISTEP_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                           "SUCCESS: ody_mss_thermal_init HWP on Odyssey "
+                           "chip, target HUID 0x%.8X, chipId 0x%.8X",
+                           TARGETING::get_huid(l_ocmbTarget),
+                           l_chipId );
+            }
+        } // end if (l_chipId == POWER_CHIPID::ODYSSEY_16)
         else
         {
-            // Non-Explorer chip, a NOOP operation, trace out stating so
+            // Non-Explorer/Odyssey chip, a NOOP operation, trace out stating so
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                       "Skipping call to exp_mss_thermal_init HWP on target "
-                       "HUID 0x%.8X, chipId 0x%.8X is not an Explorer OCMB",
+                       "Skipping call to *_mss_thermal_init HWP on target "
+                       "HUID 0x%.8X, chipId 0x%.8X is not an Explorer/Odyssey OCMB",
                        TARGETING::get_huid(l_ocmbTarget),
                        l_chipId );
         }
-    } // end for (const auto & l_ocmbTarget : l_ocmbTargetList)
+    } // end for (auto l_ocmbTarget : l_ocmbTargetList)
 } // p10_call_mss_thermal_init
-
 
 /**
  * @brief Run Processor Throttle Synchronization on all functional
@@ -204,7 +324,7 @@ void run_proc_throttle_sync(IStepError & io_iStepError)
     TARGETING::TargetHandleList l_procChips;
     getAllChips( l_procChips, TARGETING::TYPE_PROC );
 
-    for (const auto & l_procChip: l_procChips)
+    for (auto l_procChip: l_procChips)
     {
         // Convert the TARGETING::Target into a fapi2::Target by passing
         // l_procChip into the fapi2::Target constructor

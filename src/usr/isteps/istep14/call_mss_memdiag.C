@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,7 +129,7 @@ void __runMemDiags( TargetHandleList i_targetList, IStepError &o_iStepError )
 } // __runMemDiags
 
 /**
- * @brief Run Memory Diagnostics on a list Explorer OCMB chips
+ * @brief Run Memory Diagnostics on a list Explorer/Odyssey OCMB chips
  *
  * @return nullptr if success, else a handle to an error log
  */
@@ -147,11 +147,11 @@ void* call_mss_memdiag (void*)
         TargetHandleList l_ocmbTargetList;
         getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-        // Run Memory Diagnostics on Explorer chip list, if not in SIMICS
+        // Run Memory Diagnostics on Explorer/Odyssey chip list, if not in SIMICS
         if ( Util::isSimicsRunning() == false )
         {
-            // Only run Memory Diagnostics (memdiags) on Explorer OCMBs
-            TargetHandleList l_explorerChipList;
+            // Only run Memory Diagnostics (memdiags) on Explorer/Odyssey OCMBs
+            TargetHandleList l_memChipList;
             for ( const auto & l_ocmbTarget : l_ocmbTargetList )
             {
                 uint32_t l_chipId = l_ocmbTarget->getAttr<ATTR_CHIP_ID>();
@@ -164,37 +164,48 @@ void* call_mss_memdiag (void*)
                          TARGETING::get_huid(l_ocmbTarget),
                          l_chipId );
 
-                    l_explorerChipList.push_back(l_ocmbTarget);
+                    l_memChipList.push_back(l_ocmbTarget);
+                }
+                else if ( l_chipId == POWER_CHIPID::ODYSSEY_16 )
+                {
+                    // Odyssey chip found, trace out stating so
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                         "Adding Odyssey OCMB, HUID 0x%.8X, chipId 0x%.8X, to "
+                         "list of odyssey chips to run memory diagnostics on.",
+                         TARGETING::get_huid(l_ocmbTarget),
+                         l_chipId );
+
+                    l_memChipList.push_back(l_ocmbTarget);
                 }
                 else
                 {
-                    // Non-Explorer chip, a NOOP operation, trace out stating so
+                    // Non-Explorer/Odyssey chip, a NOOP operation, trace out stating so
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
                          "Skipping call to run memory diagnostics on target "
-                         "HUID 0x%.8X, chipId 0x%.8X is not an Explorer OCMB.",
+                         "HUID 0x%.8X, chipId 0x%.8X is not an Explorer/Odyssey OCMB.",
                          TARGETING::get_huid(l_ocmbTarget),
                          l_chipId );
                }
             } // end for for ( const auto & l_ocmbTarget : l_ocmbTargetList )
 
-            if ( l_explorerChipList.size() )
+            if ( l_memChipList.size() )
             {
                 // Start Memory Diagnostics.
-                __runMemDiags( l_explorerChipList, l_iStepError );
+                __runMemDiags( l_memChipList, l_iStepError );
                 if ( !l_iStepError.isNull() )
                 {
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
                                "ERROR: Call to run memory diagnostics on "
-                               "list of Explorer chips failed." );
+                               "list of Explorer/Odyssey chips failed." );
                     break;
                 }
             }
             else
             {
-                // Non-Explorer chip, trace out stating so
+                // Non-Explorer/Odyssey chip, trace out stating so
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, WARN_MRK
                            "Call to run memory diagnostics has been completely "
-                           "skipped, no Explorer OCMB chips found." );
+                           "skipped, no Explorer/Odyssey OCMB chips found." );
             }
         }
 
