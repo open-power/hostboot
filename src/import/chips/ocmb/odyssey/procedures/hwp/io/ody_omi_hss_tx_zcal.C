@@ -264,11 +264,13 @@ fapi2::ReturnCode ody_omi_hss_tx_zcal(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     const uint8_t l_numLanes = 8;
     fapi2::ATTR_OMI_TX_LANES_Type l_tx_lanes = 0;
     fapi2::ATTR_IS_SIMULATION_Type l_sim = 0;
+    fapi2::ATTR_IS_SIMICS_Type l_simics = fapi2::ENUM_ATTR_IS_SIMICS_REALHW;
     fapi2::ATTR_MSS_IS_APOLLO_Type l_is_apollo;
     uint32_t l_lane = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_LANES, i_target, l_tx_lanes));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, l_sys, l_sim));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMICS, l_sys, l_simics));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_IS_APOLLO, l_sys, l_is_apollo));
 
     for (l_lane = 0; l_lane < l_numLanes; l_lane++)
@@ -281,7 +283,7 @@ fapi2::ReturnCode ody_omi_hss_tx_zcal(const fapi2::Target<fapi2::TARGET_TYPE_OCM
         }
     }
 
-    if (!l_sim && !l_is_apollo)
+    if (!l_sim && !l_is_apollo && !(l_simics == fapi2::ENUM_ATTR_IS_SIMICS_SIMICS))
     {
         fapi2::ATTR_FREQ_OMI_MHZ_Type l_freq;
 
