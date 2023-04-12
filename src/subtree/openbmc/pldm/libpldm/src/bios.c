@@ -242,13 +242,17 @@ int encode_get_bios_table_resp(uint8_t instance_id, uint8_t completion_code,
 
 int encode_get_bios_table_req(uint8_t instance_id, uint32_t transfer_handle,
 			      uint8_t transfer_op_flag, uint8_t table_type,
-			      struct pldm_msg *msg)
+			      struct pldm_msg *msg, size_t payload_length)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+        if(payload_length != PLDM_GET_BIOS_TABLE_REQ_BYTES) {
+            return PLDM_ERROR_INVALID_LENGTH;
+        }
+
+        struct pldm_header_info header = {0};
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_BIOS;
@@ -326,13 +330,18 @@ int decode_get_bios_table_resp(const struct pldm_msg *msg,
 
 int encode_get_bios_attribute_current_value_by_handle_req(
     uint8_t instance_id, uint32_t transfer_handle, uint8_t transfer_op_flag,
-    uint16_t attribute_handle, struct pldm_msg *msg)
+    uint16_t attribute_handle, struct pldm_msg *msg, size_t payload_length)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	if(payload_length != PLDM_GET_BIOS_ATTR_CURR_VAL_BY_HANDLE_REQ_BYTES) {
+            return PLDM_ERROR_INVALID_LENGTH;
+        }
+
+        struct pldm_header_info header = {0};
+
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_BIOS;
