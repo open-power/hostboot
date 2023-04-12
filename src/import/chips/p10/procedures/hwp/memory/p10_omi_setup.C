@@ -55,6 +55,7 @@ fapi2::ReturnCode p10_omi_setup_explorer( const fapi2::Target<fapi2::TARGET_TYPE
 {
     uint8_t l_sim = 0;
     uint8_t l_is_apollo = 0;
+    fapi2::buffer<uint64_t> l_val;
 
     mss::display_git_commit_info("p10_omi_setup");
     FAPI_INF("%s Start p10_omi_setup_explorer", mss::c_str(i_target));
@@ -93,6 +94,12 @@ fapi2::ReturnCode p10_omi_setup_explorer( const fapi2::Target<fapi2::TARGET_TYPE
         FAPI_TRY(mss::omi::setup_mc_cya_bits(l_omi));
         FAPI_TRY(mss::omi::setup_mc_error_action(l_omi));
         // No setup needed for rc_rmt_config, as we leave at default (0) value
+
+        {
+            FAPI_TRY(scomt::omi::GET_ERROR_MASK(l_omi, l_val));
+            scomt::omi::SET_ERROR_MASK_33(l_val);
+            FAPI_TRY(scomt::omi::PUT_ERROR_MASK(l_omi, l_val));
+        }
     }
 
 

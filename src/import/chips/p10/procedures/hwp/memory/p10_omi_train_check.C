@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,7 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     fapi2::buffer<uint64_t> l_exp_dl0_edpl_max_count;
     fapi2::buffer<uint64_t> l_exp_dl0_status;
     fapi2::buffer<uint64_t> l_exp_dl0_training_status;
+    fapi2::buffer<uint64_t> l_val;
     uint64_t l_state_machine_state = 0;
     uint8_t l_tries = 0;
     uint32_t l_omi_freq = 0;
@@ -148,6 +149,12 @@ fapi2::ReturnCode p10_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OMI
              l_omi_training_status);
 
     FAPI_TRY(mss::unmask::after_p10_omi_train_check(mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target)));
+
+    {
+        FAPI_TRY(scomt::omi::GET_ERROR_MASK(i_target, l_val));
+        scomt::omi::CLEAR_ERROR_MASK_33(l_val);
+        FAPI_TRY(scomt::omi::PUT_ERROR_MASK(i_target, l_val));
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
 
