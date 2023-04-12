@@ -62,8 +62,21 @@ extern "C" {
 #define PLDM_PDR_REPOSITORY_CHG_EVENT_MIN_LENGTH 2
 #define PLDM_PDR_REPOSITORY_CHANGE_RECORD_MIN_LENGTH 2
 
+/* Minimum length of numeric sensor PDR */
+#define PLDM_PDR_NUMERIC_SENSOR_PDR_FIXED_LENGTH 57
+#define PLDM_PDR_NUMERIC_SENSOR_PDR_VARIED_SENSOR_DATA_SIZE_MIN_LENGTH 3
+#define PLDM_PDR_NUMERIC_SENSOR_PDR_VARIED_RANGE_FIELD_MIN_LENGTH 9
+#define PLDM_PDR_NUMERIC_SENSOR_PDR_MIN_LENGTH                                 \
+	(PLDM_PDR_NUMERIC_SENSOR_PDR_FIXED_LENGTH +                            \
+	 PLDM_PDR_NUMERIC_SENSOR_PDR_VARIED_SENSOR_DATA_SIZE_MIN_LENGTH +      \
+	 PLDM_PDR_NUMERIC_SENSOR_PDR_VARIED_RANGE_FIELD_MIN_LENGTH)
+
 #define PLDM_INVALID_EFFECTER_ID 0xFFFF
 #define PLDM_TID_RESERVED 0xFF
+
+/* DSP0248 Table1 PLDM monitoring and control data types */
+#define PLDM_STR_UTF_8_MAX_LEN 256
+#define PLDM_STR_UTF_16_MAX_LEN 256
 
 enum pldm_effecter_data_size {
 	PLDM_EFFECTER_DATA_SIZE_UINT8,
@@ -83,6 +96,7 @@ enum pldm_range_field_format {
 	PLDM_RANGE_FIELD_FORMAT_SINT32,
 	PLDM_RANGE_FIELD_FORMAT_REAL32
 };
+#define PLDM_RANGE_FIELD_FORMAT_MAX PLDM_RANGE_FIELD_FORMAT_REAL32
 
 enum set_request { PLDM_NO_CHANGE = 0x00, PLDM_REQUEST_SET = 0x01 };
 
@@ -256,6 +270,7 @@ enum pldm_sensor_readings_data_type {
 	PLDM_SENSOR_DATA_SIZE_UINT32,
 	PLDM_SENSOR_DATA_SIZE_SINT32
 };
+#define PLDM_SENSOR_DATA_SIZE_MAX PLDM_SENSOR_DATA_SIZE_SINT32
 
 /** @brief PLDM PlatformEventMessage response status
  */
@@ -446,6 +461,18 @@ struct pldm_terminus_locator_pdr {
 	uint8_t terminus_locator_type;
 	uint8_t terminus_locator_value_size;
 	uint8_t terminus_locator_value[1];
+} __attribute__((packed));
+
+/** @struct pldm_sensor_auxiliary_names_pdr
+ *
+ *  Structure representing PLDM Sensor Auxiliary Names PDR
+ */
+struct pldm_sensor_auxiliary_names_pdr {
+	struct pldm_pdr_hdr hdr;
+	uint16_t terminus_handle;
+	uint16_t sensor_id;
+	uint8_t sensor_count;
+	uint8_t names[1];
 } __attribute__((packed));
 
 /** @struct pldm_terminus_locator_type_mctp_eid
@@ -646,6 +673,84 @@ struct pldm_numeric_effecter_value_pdr {
 	union_range_field_format rated_max;
 	union_range_field_format rated_min;
 } __attribute__((packed));
+
+/** @union union_sensor_data_size
+ *
+ *  The bit width and format of reading and threshold values that the sensor
+ *  returns.
+ *  Refer to: DSP0248_1.2.0: 28.4 Table 78
+ */
+typedef union {
+	uint8_t value_u8;
+	int8_t value_s8;
+	uint16_t value_u16;
+	int16_t value_s16;
+	uint32_t value_u32;
+	int32_t value_s32;
+} union_sensor_data_size;
+
+/** @struct pldm_value_pdr_hdr
+ *
+ *  Structure representing PLDM PDR header for unpacked value
+ *  Refer to: DSP0248_1.2.0: 28.1 Table 75
+ */
+struct pldm_value_pdr_hdr {
+	uint32_t record_handle;
+	uint8_t version;
+	uint8_t type;
+	uint16_t record_change_num;
+	uint16_t length;
+};
+
+/** @struct pldm_numeric_sensor_value_pdr
+ *
+ *  Structure representing PLDM Numeric Sensor PDR for unpacked value
+ *  Refer to: DSP0248_1.2.0: 28.4 Table 78
+ */
+struct pldm_numeric_sensor_value_pdr {
+	struct pldm_value_pdr_hdr hdr;
+	uint16_t terminus_handle;
+	uint16_t sensor_id;
+	uint16_t entity_type;
+	uint16_t entity_instance_num;
+	uint16_t container_id;
+	uint8_t sensor_init;
+	bool8_t sensor_auxiliary_names_pdr;
+	uint8_t base_unit;
+	int8_t unit_modifier;
+	uint8_t rate_unit;
+	uint8_t base_oem_unit_handle;
+	uint8_t aux_unit;
+	int8_t aux_unit_modifier;
+	uint8_t aux_rate_unit;
+	uint8_t rel;
+	uint8_t aux_oem_unit_handle;
+	bool8_t is_linear;
+	uint8_t sensor_data_size;
+	real32_t resolution;
+	real32_t offset;
+	uint16_t accuracy;
+	uint8_t plus_tolerance;
+	uint8_t minus_tolerance;
+	union_sensor_data_size hysteresis;
+	bitfield8_t supported_thresholds;
+	bitfield8_t threshold_and_hysteresis_volatility;
+	real32_t state_transition_interval;
+	real32_t update_interval;
+	union_sensor_data_size max_readable;
+	union_sensor_data_size min_readable;
+	uint8_t range_field_format;
+	bitfield8_t range_field_support;
+	union_range_field_format nominal_value;
+	union_range_field_format normal_max;
+	union_range_field_format normal_min;
+	union_range_field_format warning_high;
+	union_range_field_format warning_low;
+	union_range_field_format critical_high;
+	union_range_field_format critical_low;
+	union_range_field_format fatal_high;
+	union_range_field_format fatal_low;
+};
 
 /** @struct state_effecter_possible_states
  *
@@ -1351,7 +1456,6 @@ int decode_get_pdr_resp(const struct pldm_msg *msg, size_t payload_length,
  *         field parameter as sizeof(set_effecter_state_field) *
  *         comp_effecter_count
  *  @param[out] msg - Message will be written to this
- *  @param[in] payload_length - Length of request message payload
  *  @return pldm_completion_codes
  *  @note  Caller is responsible for memory alloc and dealloc of param
  *         'msg.payload'
@@ -1361,8 +1465,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 					 uint16_t effecter_id,
 					 uint8_t comp_effecter_count,
 					 set_effecter_state_field *field,
-					 struct pldm_msg *msg,
-					 size_t payload_length);
+					 struct pldm_msg *msg);
 
 /** @brief Decode SetStateEffecterStates response data
  *
@@ -1647,6 +1750,16 @@ int decode_numeric_sensor_data(const uint8_t *sensor_data,
 			       uint8_t *previous_event_state,
 			       uint8_t *sensor_data_size,
 			       uint32_t *present_reading);
+
+/** @brief Decode Numeric Sensor Pdr data
+ *
+ *  @param[in] pdr_data - pdr data for numeric sensor
+ *  @param[in] pdr_data_length - Length of pdr data
+ *  @param[out] pdr_value - unpacked numeric sensor PDR struct
+ */
+int decode_numeric_sensor_pdr_data(
+    const void *pdr_data, size_t pdr_data_length,
+    struct pldm_numeric_sensor_value_pdr *pdr_value);
 
 /* GetNumericEffecterValue */
 

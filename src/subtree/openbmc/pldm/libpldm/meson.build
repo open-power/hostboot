@@ -16,7 +16,7 @@ add_project_arguments('-D_DEFAULT_SOURCE',language:['c'])
 libpldm_sources = files()
 subdir('src')
 
-libpldm_include_dir = ['include']
+libpldm_include_dir = ['include', 'src']
 libpldm_headers = files()
 
 subdir('include/libpldm')

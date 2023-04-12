@@ -21,7 +21,8 @@ tests = [
   'libpldm_fru_test',
   'libpldm_utils_test',
   'libpldm_pdr_test',
-  'libpldm_firmware_update_test'
+  'libpldm_firmware_update_test',
+  'msgbuf',
 ]
 
 if get_option('oem-ibm').enabled()
@@ -31,9 +32,12 @@ if get_option('oem-ibm').enabled()
   ]
 endif
 
+src_includes = include_directories('..' / 'src', '..' / 'include' / 'libpldm')
+
 foreach t : tests
   test(t, executable(t.underscorify(), t + '.cpp',
                      implicit_include_directories: false,
+                     include_directories: src_includes,
                      dependencies: [
                          libpldm_dep,
                          gtest_dep,
@@ -41,3 +45,7 @@ foreach t : tests
        workdir: meson.current_source_dir())
 endforeach
 
+test('msgbuf_generic', executable('msgbuf_generic',
+                                  'msgbuf_generic.c',
+                                  implicit_include_directories: false,
+                                  include_directories: src_includes))
