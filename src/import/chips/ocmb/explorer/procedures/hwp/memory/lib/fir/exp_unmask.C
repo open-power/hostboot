@@ -588,7 +588,7 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
     .setBit<EXPLR_DLX_DL0_ERROR_MASK_38>()
     .clearBit<EXPLR_DLX_DL0_ERROR_MASK_37>()
     .setBit<EXPLR_DLX_DL0_ERROR_MASK_36>()
-    .clearBit<EXPLR_DLX_DL0_ERROR_MASK_33>()
+    .setBit<EXPLR_DLX_DL0_ERROR_MASK_33>() // Mask Lost Block Lock
     .setBit<EXPLR_DLX_DL0_ERROR_MASK_32>()
     .setBit<EXPLR_DLX_DL0_ERROR_MASK_18>()
     .clearBit<EXPLR_DLX_DL0_ERROR_MASK_17>()

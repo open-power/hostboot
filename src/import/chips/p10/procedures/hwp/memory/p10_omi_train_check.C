@@ -131,6 +131,7 @@ fapi2::ReturnCode p10_omi_train_check_common(const fapi2::Target<fapi2::TARGET_T
 {
     // Declares variables
     fapi2::buffer<uint64_t> l_omi_status;
+    fapi2::buffer<uint64_t> l_val;
     uint64_t l_state_machine_state = 0;
     uint8_t l_tries = 0;
 
@@ -152,6 +153,12 @@ fapi2::ReturnCode p10_omi_train_check_common(const fapi2::Target<fapi2::TARGET_T
     if (l_state_machine_state != P10_OMI_TRAINING_COMPLETE_STATE)
     {
         FAPI_TRY(p10_omi_train_check_create_training_fail(i_omi, i_ocmb));
+    }
+
+    {
+        FAPI_TRY(scomt::omi::GET_ERROR_MASK(i_omi, l_val));
+        scomt::omi::CLEAR_ERROR_MASK_33(l_val);
+        FAPI_TRY(scomt::omi::PUT_ERROR_MASK(i_omi, l_val));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
