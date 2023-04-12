@@ -96,7 +96,6 @@ OBJS += ody_ddrphy_phyinit_config.o
 OBJS += dwc_ddrphy_phyinit_I_loadPIEImage.o
 OBJS += dwc_ddrphy_phyinit_LoadPieProdCode_rdimm.o
 OBJS += dwc_ddrphy_phyinit_LoadPieProdCode.o
-OBJS += ody_scominit_phy_check_workaround.o
 
 
 include ${ROOTPATH}/config.mk

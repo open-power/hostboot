@@ -51,7 +51,6 @@
 #include <ody_scominit.H>
 #include <lib/mc/ody_port_traits.H>
 #include <lib/power_thermal/ody_throttle_traits.H>
-#include <lib/workarounds/ody_scominit_phy_check_workaround.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle.H>
 
 extern "C"
@@ -92,9 +91,6 @@ extern "C"
             FAPI_TRY(l_rc, GENTARGTIDFORMAT " error from odyssey.mp.scom.initfile", GENTARGTID(l_port));
 
         }
-
-        // Helper funct to set MBXLT0 bits if 2 phy/ports found
-        FAPI_TRY(mss::ody::workarounds::mbxlt0_helper(i_target, l_port_targets.size()));
 
         // Write power controls and emergency throttle settings
         FAPI_TRY(mss::power_thermal::thermal_throttle_scominit<mss::mc_type::ODYSSEY>(i_target));
