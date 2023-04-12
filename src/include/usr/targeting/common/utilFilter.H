@@ -734,6 +734,30 @@ void getPeerTargets(
 Target * getPositionPairedTarget(const Target * i_source_tgt,
                                  TYPE i_paired_type);
 
+#if __cplusplus >= 201300
+
+/* @brief Wrap the given utility filter function such that it can be called with
+ * its normal arguments except the vector in the first position. That wrapper
+ * will create that vector itself and return it, making the targeting filter
+ * functions composable
+ *
+ * @param[in] i_functor      The function to call.
+ * @return                   A wrapper which will call the original function
+ *                           and return the first argument vector as a result.
+ */
+template<typename F>
+auto composable(F&& i_functor)
+{
+    return [functor = std::move(i_functor)](auto&&... args)
+    {
+        TargetHandleList result;
+        functor(result, std::forward<decltype(args)>(args)...);
+        return result;
+    };
+}
+
+#endif
+
 }
 
 #endif // __TARGETING_COMMON_UTIL_H
