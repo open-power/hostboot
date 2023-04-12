@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,7 +82,7 @@ extern "C"
         FAPI_INF(TARGTIDFORMAT " ody_getecid : Exiting ...", TARGTID);
 
     fapi_try_exit:
-        return fapi2::FAPI2_RC_SUCCESS;
+        return fapi2::current_err;
     }
 
 } // extern "C"
