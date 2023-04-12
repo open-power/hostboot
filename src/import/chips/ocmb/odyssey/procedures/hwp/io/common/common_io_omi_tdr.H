@@ -60,6 +60,7 @@ fapi2::ReturnCode common_io_omi_tdr(
     uint32_t l_groupa = 0x0;
     uint32_t l_groupb = 0x0;
     // Leave l_sev comments for future development to pass severity to error checking
+    //  SBE doesn't handle severity passing
     //  Passing severity to FAPI_ASSERT_NOEXIT is not supported by SBE
     // fapi2::errlSeverity_t l_sev;
     fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags = {0};
@@ -79,7 +80,7 @@ fapi2::ReturnCode common_io_omi_tdr(
 
         FAPI_DBG("Checking %s on lane %d with status %d.", l_tgt_str, l_lane, l_status);
 
-        if (l_status != TdrResult::Good)
+        if (l_status != TdrResult::NoIssues)
         {
             // if (l_mfg_flags[fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS / 32] & (1 << (31 -
             //         (fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS % 32))))
@@ -93,6 +94,8 @@ fapi2::ReturnCode common_io_omi_tdr(
 
             // note - FAPI_ASSERT_NOEXIT clears current_err on return
             FAPI_ASSERT_NOEXIT(false,
+                               // This is being left in for future-proofing.
+                               //  The intent is to get this ability working in SBE.
                                //    fapi2::POZ_IO_TX_TDR_ERROR(l_sev)
                                fapi2::POZ_IO_TX_TDR_ERROR()
                                .set_TARGET_CHIP(i_target)

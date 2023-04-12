@@ -40,15 +40,15 @@
 //------------------------------------------------------------------------------
 enum TdrResult
 {
-    None = 0x0000,
-    Good = 0x0010,
-    Open = 0x0020,
+    None = 0x00,
+    NoIssues = 0x10,
+    Open = 0x20,
     Short = 0x0030,
-    ShortToGnd = 0x0001 | Short,
-    ShortToVdd = 0x0002 | Short,
-    DidNotRun = 0x2000,
-    NotSupported = 0x4000,
-    UnableToDetermine = 0x8000
+    ShortToGnd = 0x01 | Short,
+    ShortToVdd = 0x02 | Short,
+    DidNotRun = 0x40,
+    NotSupported = 0x50,
+    UnableToDetermine = 0x60
 };
 
 enum TdrRegisters
@@ -432,7 +432,7 @@ fapi2::ReturnCode common_io_tdr(
                     break;
                 }
 
-            case TdrResult::Good:
+            case TdrResult::NoIssues:
                 {
                     FAPI_DBG("TDR Found a good net for Lane(%d) and Phase(%d)", i_lane, l_phase);
                 }
@@ -448,9 +448,9 @@ fapi2::ReturnCode common_io_tdr(
     FAPI_DBG("N-leg length: %d     P-leg length: %d", l_length_ui[0], l_length_ui[1]);
 
     // Set length and status based on both phases
-    if ((l_status[0] == TdrResult::Good) && (l_status[1] == TdrResult::Good))
+    if ((l_status[0] == TdrResult::NoIssues) && (l_status[1] == TdrResult::NoIssues))
     {
-        o_status = TdrResult::Good;
+        o_status = TdrResult::NoIssues;
         o_length_ui = 0;
     }
     else if (l_status[0] == TdrResult::Open)
@@ -495,7 +495,7 @@ fapi2::ReturnCode common_io_tdr(
         o_length_ui = 0;
     }
 
-    if ((o_status == TdrResult::Good) || (o_status == TdrResult::UnableToDetermine))
+    if ((o_status == TdrResult::NoIssues) || (o_status == TdrResult::UnableToDetermine))
     {
         o_length_ps = 0;
     }
@@ -854,7 +854,7 @@ fapi2::ReturnCode common_io_tdr_diagnose(const uint32_t& i_bp1,
     }
     else if (diff > SHORT_THRESHOLD)
     {
-        o_result = TdrResult::Good;
+        o_result = TdrResult::NoIssues;
     }
     else if (i_bp1 < C_EXPECTED_LOWER)
     {
