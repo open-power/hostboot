@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -991,6 +991,11 @@ class HdatMsVpd : public HdatHdif
 
     private:
 
+        /* @brief A helper function for hdatLoadMsData which walks through all procs and memory to build up mainstore.
+         *
+         * @return  errlHndl_t  nullptr on success, otherwise an error.
+         */
+        errlHndl_t loadMsDataAllProcs();
 
         /** Object Instance Data
          *
