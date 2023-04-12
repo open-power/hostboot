@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -776,13 +776,13 @@ fapi2::ReturnCode trrd_l( const fapi2::Target<T>& i_target,
 {
     switch(i_dram_width)
     {
-        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4:
-        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8:
+        case fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4:
+        case fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X8:
             FAPI_TRY( trrd_l_half_and_1kb_page_helper(i_target, i_freq, o_tRRD_L),
                       "Error calculating trrd l for half and 1kb page" );
             break;
 
-        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X16:
+        case fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X16:
             FAPI_TRY( trrd_l_2kb_page_helper(i_target, i_freq, o_tRRD_L) );
             break;
 
@@ -952,13 +952,13 @@ fapi2::ReturnCode trrd_s( const fapi2::Target<T>& i_target,
 {
     switch(i_dram_width)
     {
-        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4:
-        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8:
+        case fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4:
+        case fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X8:
             FAPI_TRY( trrd_s_half_and_1kb_page_helper(i_target, i_freq, o_tRRD_S),
                       "Error calculating trrd_s for half and 1kb page" );
             break;
 
-        case fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X16:
+        case fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X16:
             FAPI_TRY( trrd_s_2kb_page_helper(i_target, i_freq, o_tRRD_S) );
             break;
 

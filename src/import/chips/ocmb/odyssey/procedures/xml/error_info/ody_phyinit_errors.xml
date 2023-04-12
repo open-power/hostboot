@@ -221,6 +221,7 @@
         checked in mss_eff_config step.
     </description>
     <ffdc>FAILING_VALUE</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -243,6 +244,7 @@
     <ffdc>FAILING_VALUE</ffdc>
     <ffdc>FAILING_ATTR</ffdc>
     <ffdc>FAILING_CHANNEL</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

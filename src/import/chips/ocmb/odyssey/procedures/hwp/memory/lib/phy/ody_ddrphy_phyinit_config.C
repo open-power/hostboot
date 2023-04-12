@@ -3841,32 +3841,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     uint8_t l_en_tracking[mss::ody::MAX_RANK_PER_DIMM] = {};
     uint16_t l_uppernibbletg[mss::ody::MAX_RANK_PER_PHY] = {};
     uint8_t l_attr_arr_rank[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
-    uint16_t l_attr_arr_rank_16[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
-
-    constexpr uint16_t ATxIMPCMD_Arr[mss::ody::sizes::SPD_ATXCMD_DECODE_MAX]
-    __attribute__ ((aligned (4))) =
-    {
-        // These values are pulled from the DDR5 DDIMM SPD doc rev.1.21 for EFD Bytes 32
-        0xC000, // 0b0000 High Impedance
-        // SDR Impedance Values
-        0xCFFF, // 0b0001 10 Ohms
-        0xCFBE, // 0b0010 15 Ohms A
-        0xCF7E, // 0b0011 15 Ohms B
-        0xC372, // 0b0100 20 Ohms
-        0xC249, // 0b0101 24 Ohms
-        0xCF3C, // 0b0110 30 Ohms
-        0x0000, // 0b0111 Reserved
-        0x0000, // 0b1000 Reserved
-
-        // DDR Impedance Values
-        0xCFFF, // 0b1001 10 Ohms
-        0xCFBE, // 0b1010 15 Ohms A
-        0xCF7E, // 0b1011 15 Ohms B
-        0xC372, // 0b1100 20 Ohms
-        0xC252, // 0b1101 24 Ohms
-        0xCF3C, // 0b1110 30 Ohms
-        // Rest are reserved
-    };
+    uint16_t l_attr_arr_rank_16[mss::ody::MAX_DIMM_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] __attribute__ ((aligned (4))) = {};
 
     // D4RxPreambleLength, D4TxPreambleLength (both are unused, so hardcode to '1')
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
@@ -3888,22 +3863,48 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // ATxImpedance (set to DIMM0, rank0 value)
-    FAPI_TRY(mss::attr::get_si_mc_drv_imp_cmd_addr(i_target, l_attr_arr_rank));
-    FAPI_ASSERT(l_attr_arr_rank[0][0] < mss::ody::sizes::SPD_ATXCMD_DECODE_MAX,
-                fapi2::ODY_INVALID_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR()
-                .set_FAILING_VALUE(l_attr_arr_rank[0][0])
-                .set_PORT_TARGET(i_target),
-                TARGTIDFORMAT " Invalid attribute override value for ATxImpedance 0x%08x", TARGTID,
-                l_attr_arr_rank[0][0]);
+    {
+        constexpr uint16_t ATxIMPCMD_Arr[mss::ody::sizes::SPD_ATXCMD_DECODE_MAX]
+        __attribute__ ((aligned (8))) =
+        {
+            // These values are pulled from the DDR5 DDIMM SPD doc rev.1.21 for EFD Bytes 32
+            0xC000, // 0b0000 High Impedance
+            // SDR Impedance Values
+            0xCFFF, // 0b0001 10 Ohms
+            0xCFBE, // 0b0010 15 Ohms A
+            0xCF7E, // 0b0011 15 Ohms B
+            0xC372, // 0b0100 20 Ohms
+            0xC249, // 0b0101 24 Ohms
+            0xCF3C, // 0b0110 30 Ohms
+            0x0000, // 0b0111 Reserved
+            0x0000, // 0b1000 Reserved
 
-    FAPI_ASSERT(ATxIMPCMD_Arr[l_attr_arr_rank[0][0]] != 0x00,
-                fapi2::ODY_INVALID_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR()
-                .set_FAILING_VALUE(l_attr_arr_rank[0][0])
-                .set_PORT_TARGET(i_target),
-                TARGTIDFORMAT " Invalid attribute override value for ATxImpedance 0x%08x", TARGTID,
-                l_attr_arr_rank[0][0]);
+            // DDR Impedance Values
+            0xCFFF, // 0b1001 10 Ohms
+            0xCFBE, // 0b1010 15 Ohms A
+            0xCF7E, // 0b1011 15 Ohms B
+            0xC372, // 0b1100 20 Ohms
+            0xC252, // 0b1101 24 Ohms
+            0xCF3C, // 0b1110 30 Ohms
+            // Rest are reserved
+        };
+        FAPI_TRY(mss::attr::get_si_mc_drv_imp_cmd_addr(i_target, l_attr_arr_rank));
+        FAPI_ASSERT(l_attr_arr_rank[0][0] < mss::ody::sizes::SPD_ATXCMD_DECODE_MAX,
+                    fapi2::ODY_INVALID_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR()
+                    .set_FAILING_VALUE(l_attr_arr_rank[0][0])
+                    .set_PORT_TARGET(i_target),
+                    TARGTIDFORMAT " Invalid attribute override value for ATxImpedance 0x%08x", TARGTID,
+                    l_attr_arr_rank[0][0]);
 
-    io_user_input_advanced.ATxImpedance = ATxIMPCMD_Arr[l_attr_arr_rank[0][0]];
+        FAPI_ASSERT(ATxIMPCMD_Arr[l_attr_arr_rank[0][0]] != 0x00,
+                    fapi2::ODY_INVALID_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR()
+                    .set_FAILING_VALUE(l_attr_arr_rank[0][0])
+                    .set_PORT_TARGET(i_target),
+                    TARGTIDFORMAT " Invalid attribute override value for ATxImpedance 0x%08x", TARGTID,
+                    l_attr_arr_rank[0][0]);
+
+        io_user_input_advanced.ATxImpedance = ATxIMPCMD_Arr[l_attr_arr_rank[0][0]];
+    }
 
     // TxImpedance
     FAPI_TRY(mss::attr::get_si_phy_drv_imp_dq_dqs_pull_up(i_target, l_attr_data_16));
@@ -4623,7 +4624,7 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ac(const fapi2::Target<fapi
 
     // The following value arrays are pulled from the DDR5 DDIMM SPD doc rev.1.21 for EFD Bytes 33-34
     constexpr uint8_t txslew_rise_ac_csr_atxsrc_arr[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX]
-    __attribute__ ((aligned (4))) =
+    __attribute__ ((aligned (8))) =
     {
         0x00, // 0b0000 Reserved
         0x85, // 0b0001 10 Ohm Slow/Moderate
@@ -4789,7 +4790,7 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_fall_ac(const fapi2::Target<fapi
     // ADrvStrenN of ANIB register 0x43 for ANIBs 0 for A0/A1 (A sides of the PHY/Port) and ANIBs 13 for
     // B0/B1 (the B sides of the PHY/Port). See the PHY data book section 4.1.5.
     //
-    static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR55[2]   __attribute__ ((aligned (4))) =
+    static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR55[2]   __attribute__ ((aligned (8))) =
     {
         // CH A ANIB 0
         {scomt::mp::DWC_DDRPHYA_ANIB0_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_A},
@@ -4797,7 +4798,7 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_fall_ac(const fapi2::Target<fapi
         {scomt::mp::DWC_DDRPHYA_ANIB13_BASE0_ATXSLEWRATE_P0, mss::ddr5::mr::ATTR_CHANNEL_B},
     };
 
-    static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR43[2]  __attribute__ ((aligned (4))) =
+    static const mss::pair<uint64_t, uint64_t> ADDR_CHANNEL_PAIR43[2]  __attribute__ ((aligned (8))) =
     {
         // CH A ANIB 0
         {scomt::mp::DWC_DDRPHYA_ANIB0_BASE0_ATXIMPEDANCE, mss::ddr5::mr::ATTR_CHANNEL_A},
@@ -4866,7 +4867,7 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ck(const fapi2::Target<fapi
 
     // The following value arr are pulled from the DDR5 DDIMM SPD doc rev.1.21 for EFD Bytes 41-42
     constexpr uint8_t txslew_rise_ck_csr_atxsrc_arr[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX ]
-    __attribute__ ((aligned (4))) =
+    __attribute__ ((aligned (8))) =
     {
         0x00, // 0b0000 Reserved
         0x85, // 0b0001 10 Ohm Slow/Moderate
@@ -4884,7 +4885,7 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ck(const fapi2::Target<fapi
 
     //  TX Slew rise CK ATxImp arr
     constexpr uint16_t txslew_rise_ck_atx_impcmd_arr[mss::ody::sizes::SPD_TX_SLEW_DECODE_MAX]
-    __attribute__ ((aligned (4))) =
+    __attribute__ ((aligned (8))) =
     {
         0x000, // 0b0000 Reserved
         0xFFF, // 0b0001 10 Ohm Slow/Moderate
@@ -4989,7 +4990,7 @@ fapi2::ReturnCode post_phyinit_setup_pll(const fapi2::Target<fapi2::TARGET_TYPE_
     // Note: DIMM_SPEED/4 = pllin freq
 
     // PllCtrl1
-    static const mss::pair<uint64_t, uint64_t> PLLCTRL1[3] __attribute__ ((aligned (4))) =
+    static const mss::pair<uint64_t, uint64_t> PLLCTRL1[3] __attribute__ ((aligned (8))) =
     {
         {mss::DIMM_SPEED_3200, 0x00000000000041},
         {mss::DIMM_SPEED_4000, 0x00000000000041},
@@ -4997,7 +4998,7 @@ fapi2::ReturnCode post_phyinit_setup_pll(const fapi2::Target<fapi2::TARGET_TYPE_
     };
 
     // PllCtrl2
-    static const mss::pair<uint64_t, uint64_t> PLLCTRL2[3] __attribute__ ((aligned (4))) =
+    static const mss::pair<uint64_t, uint64_t> PLLCTRL2[3] __attribute__ ((aligned (8))) =
     {
         {mss::DIMM_SPEED_3200, 0x00000000000019},
         {mss::DIMM_SPEED_4000, 0x00000000000018},
@@ -5005,7 +5006,7 @@ fapi2::ReturnCode post_phyinit_setup_pll(const fapi2::Target<fapi2::TARGET_TYPE_
     };
 
     // PllCtrl4
-    static const mss::pair<uint64_t, uint64_t> PLLCTRL4[3] __attribute__ ((aligned (4))) =
+    static const mss::pair<uint64_t, uint64_t> PLLCTRL4[3] __attribute__ ((aligned (8))) =
     {
         {mss::DIMM_SPEED_3200, 0x000000000000FF},
         {mss::DIMM_SPEED_4000, 0x000000000000FF},
@@ -5014,7 +5015,7 @@ fapi2::ReturnCode post_phyinit_setup_pll(const fapi2::Target<fapi2::TARGET_TYPE_
 
     // PllTestMode
     // Note: bit 14 (counting right-to-left) is not documented as '1' but needs to be set to '1'
-    static const mss::pair<uint64_t, uint64_t> PLLTESTMODE[3] __attribute__ ((aligned (4))) =
+    static const mss::pair<uint64_t, uint64_t> PLLTESTMODE[3] __attribute__ ((aligned (8))) =
     {
         {mss::DIMM_SPEED_3200, 0x00000000004035},
         {mss::DIMM_SPEED_4000, 0x00000000004015},
@@ -5069,7 +5070,7 @@ fapi2::ReturnCode post_phyinit_configure_redundant_cs(const fapi2::Target<fapi2:
     constexpr uint64_t REDUNDANT_CS_CONFIG = 0x00000000000000a0;
 
     // This is only needed for redundant CS, so first grab the redundant CS mode
-    uint8_t l_redundant_cs[mss::ody::MAX_DIMM_PER_PORT] = {};
+    uint8_t l_redundant_cs[mss::ody::MAX_DIMM_PER_PORT] __attribute__ ((aligned (4))) = {};
     FAPI_TRY(mss::attr::get_ddr5_redundant_cs_en(i_target, l_redundant_cs));
 
     if(l_redundant_cs[0] == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_DISABLE)
