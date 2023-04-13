@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@ namespace std
 
             T1 first;
             T2 second;
-            constexpr pair() : first(T1()), second(T2()) {}
+            constexpr pair() : first(), second() {}
             constexpr pair(const T1 & x, const T2 & y) : first(x), second(y) {}
 
             template <typename U, typename V>

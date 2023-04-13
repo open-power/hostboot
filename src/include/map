@@ -82,10 +82,12 @@ namespace std
 
 #undef __STLMAP_INHERIT_TYPEDEF
 
+            map() : submap(key_compare{}) { }
+
             /**
              * Default constructor
              */
-            explicit map(const key_compare& c = Compare()) : submap(c) {}
+            explicit map(const key_compare& c) : submap(c) {}
 
             /**
              * Range-Insert Constructor

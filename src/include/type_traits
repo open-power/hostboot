@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+#ifndef _TYPE_TRAITS_H__
+#define _TYPE_TRAITS_H__
+
 #include <util/impl/integral.H>
 #include <util/impl/type_remove.H>
 #include <util/impl/type_add.H>
@@ -30,5 +34,18 @@
 #include <util/impl/is_ptr.H>
 #include <util/impl/enable_if.H>
 #include <util/impl/is_array.H>
+
+namespace std
+{
+
+template<typename T>
+struct underlying_type
+{
+    using type = __underlying_type(T);
+};
+
+}
+
+#endif
 
 /* vim: set filetype=cpp : */

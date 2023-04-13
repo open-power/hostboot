@@ -343,7 +343,7 @@ namespace Util
 
                 T& operator[] (const key_type& k)
                 {
-                    std::pair<iterator,bool> result = insert(value_type(k,T()));
+                    std::pair<iterator,bool> result = insert(value_type(k,{}));
                     return (result.first)->second;
                 }
 
