@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,6 @@
 #include <UtilHash.H>
 
 // Platform includes
-#include <prdfMemAddress.H>
 #include <prdfMemCaptureData.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemExtraSig.H>
@@ -49,8 +48,17 @@ using namespace PlatServices;
 
 //------------------------------------------------------------------------------
 
+// This is a forward reference to a function that is locally defined in
+// prdfMemTdCtlr_ipl.C and prdfMemTdCtlr_rt.C.
 template<TARGETING::TYPE T>
-TdRankListEntry __getStopRank( ExtensibleChip * i_chip, const MemAddr & i_addr )
+uint32_t __checkEcc( ExtensibleChip * i_chip,
+                     const MemAddr & i_addr, bool & o_errorsFound,
+                     STEP_CODE_DATA_STRUCT & io_sc );
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+TdRankListEntry MemTdCtlr<T>::getStopRank( const MemAddr & i_addr )
 {
     MemRank stopRank = i_addr.getRank();
 
@@ -68,14 +76,14 @@ TdRankListEntry __getStopRank( ExtensibleChip * i_chip, const MemAddr & i_addr )
     if ( ::Util::isSimicsRunning() )
     {
         std::vector<MemRank> list;
-        getSlaveRanks<T>( i_chip->getTrgt(), list );
+        getSlaveRanks<T>( iv_chip->getTrgt(), list );
         PRDF_ASSERT( !list.empty() ); // func target with no config ranks
 
         stopRank = list.back(); // Get the last configured rank.
     }
     // #####################################################################
 
-    return TdRankListEntry( i_chip, stopRank );
+    return TdRankListEntry( iv_chip, stopRank );
 }
 
 //------------------------------------------------------------------------------
@@ -121,13 +129,20 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
-        // If PRD started a super fast command, this will do the cleanup for the
-        // super fast command.
-        o_rc = cleanupSfRead<T>( iv_chip );
-        if ( SUCCESS != o_rc )
+        // TODO - just assume we complete for odyssey right now
+        if (isOdysseyOcmb(iv_chip->getTrgt()))
         {
-            PRDF_ERR( PRDF_FUNC "cleanupSfRead(0x%08x) failed",
-                      iv_chip->getHuid() );
+            PRDF_TRAC( PRDF_FUNC "Odyssey cmd complete on 0x%08x",
+                       iv_chip->getHuid() );
+            // The command reached the end of memory. Send a message to MDIA.
+            o_rc = mdiaSendEventMsg(iv_chip->getTrgt(), MDIA::COMMAND_COMPLETE);
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(0x%08x,COMMAND_COMPLETE) "
+                          "failed", iv_chip->getHuid() );
+                break;
+            }
+            io_sc.service_data->setDontCommitErrl();
             break;
         }
 
@@ -139,15 +154,62 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         {
             // There are no TD procedures currently in progress.
 
-            // Check for ECC errors, if they exist.
-            bool errorsFound = false;
-            o_rc = analyzeCmdComplete( errorsFound, io_sc );
+            // First, get the address in which the command stopped.
+            MemAddr addr;
+            o_rc = getMemMaintAddr<T>( iv_chip, addr );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "analyzeCmdComplete(0x%08x) failed",
+                PRDF_ERR( PRDF_FUNC "getMemMaintAddr<T>(0x%08x) failed",
                           iv_chip->getHuid() );
                 break;
             }
+
+            // Update iv_stoppedRank.
+            iv_stoppedRank = getStopRank(addr);
+
+            // Check for ECC errors. This will add TD procedures to iv_queue in
+            // some cases.
+            bool errorsFound;
+            o_rc = __checkEcc<T>(iv_chip, addr, errorsFound, io_sc);
+            if (SUCCESS != o_rc)
+            {
+                PRDF_ERR(PRDF_FUNC "__checkEcc<T>(0x%08x) failed",
+                         iv_chip->getHuid());
+                break;
+            }
+
+            #ifdef __HOSTBOOT_RUNTIME
+
+            if ( iv_queue.empty() )
+            {
+                // The queue is empty so it is possible that background scrubbing
+                // only stopped for FFDC. If possible, simply resume the command
+                // instead of starting a new one. This must be checked here instead
+                // of in defaultStep() because a TD procedure could have been run
+                // before defaultStep() and it is possible that canResumeBgScrub()
+                // could give as a false positive in that case.
+                o_rc = canResumeBgScrub( iv_resumeBgScrub, io_sc );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "canResumeBgScrub(0x%08x) failed",
+                              iv_chip->getHuid() );
+                    break;
+                }
+            }
+            else
+            {
+                // At this point, there are new TD procedures in the queue so we
+                // want to mask certain fetch attentions to avoid the complication
+                // of handling the attentions during the TD procedures.
+                o_rc = maskEccAttns();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "maskEccAttns() failed" );
+                    break;
+                }
+            }
+
+            #endif
 
             // If the command completed successfully with no error, the error
             // log will not have any useful information. Therefore, do not
@@ -205,136 +267,6 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
         #endif
     }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-// This is a forward reference to a function that is locally defined in
-// prdfMemTdCtlr_ipl.C and prdfMemTdCtlr_rt.C.
-template<TARGETING::TYPE T>
-uint32_t __checkEcc( ExtensibleChip * i_chip,
-                     const MemAddr & i_addr, bool & o_errorsFound,
-                     STEP_CODE_DATA_STRUCT & io_sc );
-
-//------------------------------------------------------------------------------
-
-template<TARGETING::TYPE T>
-uint32_t __analyzeCmdComplete( ExtensibleChip * i_chip,
-                               TdRankListEntry & o_stoppedRank,
-                               const MemAddr & i_addr,
-                               bool & o_errorsFound,
-                               STEP_CODE_DATA_STRUCT & io_sc );
-
-template<>
-uint32_t __analyzeCmdComplete<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                               TdRankListEntry & o_stoppedRank,
-                                               const MemAddr & i_addr,
-                                               bool & o_errorsFound,
-                                               STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[__analyzeCmdComplete] "
-
-    uint32_t o_rc = SUCCESS;
-
-    o_errorsFound = false;
-
-    do
-    {
-        // Update iv_stoppedRank.
-        o_stoppedRank = __getStopRank<TYPE_OCMB_CHIP>( i_chip, i_addr );
-
-        // Check the OCMB for ECC errors.
-        bool errorsFound;
-        o_rc = __checkEcc<TYPE_OCMB_CHIP>( i_chip, i_addr, errorsFound, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "__checkEcc<TYPE_OCMB_CHIP>(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        if ( errorsFound ) o_errorsFound = true;
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<TARGETING::TYPE T>
-uint32_t MemTdCtlr<T>::analyzeCmdComplete( bool & o_errorsFound,
-                                           STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[MemTdCtlr::analyzeCmdComplete] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // First, get the address in which the command stopped.
-        MemAddr addr;
-        o_rc = getMemMaintAddr<T>( iv_chip, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemMaintAddr<T>(0x%08x) failed",
-                      iv_chip->getHuid() );
-            break;
-        }
-
-        // Then, check for ECC errors, if they exist.
-        o_rc = __analyzeCmdComplete<T>( iv_chip, iv_stoppedRank,
-                                        addr, o_errorsFound, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "__analyzeCmdComplete<T>(0x%08x) failed",
-                      iv_chip->getHuid() );
-            break;
-        }
-
-        #ifdef __HOSTBOOT_RUNTIME
-
-        if ( iv_queue.empty() )
-        {
-            // The queue is empty so it is possible that background scrubbing
-            // only stopped for FFDC. If possible, simply resume the command
-            // instead of starting a new one. This must be checked here instead
-            // of in defaultStep() because a TD procedure could have been run
-            // before defaultStep() and it is possible that canResumeBgScrub()
-            // could give as a false positive in that case.
-            o_rc = canResumeBgScrub( iv_resumeBgScrub, io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "canResumeBgScrub(0x%08x) failed",
-                          iv_chip->getHuid() );
-                break;
-            }
-        }
-        else
-        {
-            // The analyzeCmdComplete() function is only called if there was a
-            // command complete attention and there were no TD procedures
-            // currently in progress. At this point, there are new TD procedures
-            // in the queue so we want to mask certain fetch attentions to avoid
-            // the complication of handling the attentions during the TD
-            // procedures.
-            o_rc = maskEccAttns();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "maskEccAttns() failed" );
-                break;
-            }
-        }
-
-        #endif
-
-    } while (0);
 
     return o_rc;
 
@@ -490,7 +422,7 @@ uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
-        iv_stoppedRank = __getStopRank<T>( iv_chip, addr );
+        iv_stoppedRank = getStopRank( addr );
 
         // At this point, there are new TD procedures in the queue so we
         // want to mask certain fetch attentions to avoid the complication

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,15 +109,6 @@ bool isBroadcastModeCapable( ExtensibleChip * i_chip );
  */
 template<TARGETING::TYPE T>
 uint32_t startSfRead( ExtensibleChip * i_chip, const MemRank & i_rank );
-
-/**
- * @brief  If necessary, this will do the necessary cleanup for the superfast
- *         command when the command is complete.
- * @param  i_chip MCBIST, MBA, or OCMB chip.
- * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
- */
-template<TARGETING::TYPE T>
-uint32_t cleanupSfRead( ExtensibleChip * i_chip );
 
 } // end namespace PlatServices
 

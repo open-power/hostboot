@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 #include <iipServiceDataCollector.h>
 
 // Platform includes
+#include <prdfMemAddress.H>
 #include <prdfMemTdQueue.H>
 #include <prdfMemTdRankList.H>
 #include <prdfPlatServices.H>
@@ -265,18 +266,6 @@ class MemTdCtlr
     }
 
     /**
-     * @brief  This is called when handling a command complete attention for a
-     *         non-TD command to initialize iv_stoppedRank then check for any
-     *         ECC errors.
-     * @param  o_errorsFound True if errors where found and handled. False
-     *                       otherwise.
-     * @param  io_sc         The step code data struct.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    uint32_t analyzeCmdComplete( bool & o_errorsFound,
-                                 STEP_CODE_DATA_STRUCT & io_sc );
-
-    /**
      * @brief Adds the TD controller state to the  capture data.
      * @param io_sc      The step code data struct.
      * @param i_startEnd Description tag for the capture data. Used to
@@ -292,6 +281,15 @@ class MemTdCtlr
      * @param  io_sc The step code data struct.
      */
     void recaptureRegs(STEP_CODE_DATA_STRUCT & io_sc);
+
+    /**
+     * @brief  Returns the rank of the address that the command stopped on. In
+     *         simics will just return the last configured rank.
+     * @param  i_addr The address the command stopped on.
+     * @return The rank of the address that the command stopped on.
+     */
+    TdRankListEntry getStopRank(const MemAddr & i_addr);
+
 
     #ifdef __HOSTBOOT_RUNTIME
 

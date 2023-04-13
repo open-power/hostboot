@@ -188,6 +188,55 @@ int32_t returnNoClearFirBits( ExtensibleChip* i_chip,
 }
 PRDF_PLUGIN_DEFINE( odyssey_ocmb, returnNoClearFirBits );
 
+//##############################################################################
+//
+//                             MCBIST_FIR
+//
+//##############################################################################
+
+/**
+ * @brief  MCBISTFIR[10] - MCBIST Command Complete.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t McbistCmdComplete( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[odyssey_ocmb::McbistCmdComplete] "
+
+    // TODO - split between HB and FSP files if needed
+    #ifdef __HOSTBOOT_MODULE
+
+    // Tell the TD controller there was a command complete attention.
+    OcmbDataBundle * db = getOcmbDataBundle( i_chip );
+    if ( SUCCESS != db->getTdCtlr()->handleCmdComplete(io_sc) )
+    {
+        // Something failed. It is possible the command complete attention has
+        // not been cleared. Make the rule code do it.
+        return SUCCESS;
+    }
+    else
+    {
+        // Everything was successful. Whether we started a new command or told
+        // MDIA to do it, the command complete bit has already been cleared.
+        // Don't do it again.
+        return PRD_NO_CLEAR_FIR_BITS;
+    }
+
+    #else
+
+    PRDF_ERR( PRDF_FUNC "not supported on FSP" );
+    PRDF_ASSERT(false); // This is definitely a code bug.
+
+    return SUCCESS;
+
+    #endif
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, McbistCmdComplete );
+
 
 } // end namespace explorer_ocmb
 

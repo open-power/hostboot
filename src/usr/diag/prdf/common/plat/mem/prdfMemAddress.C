@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,6 +104,8 @@ uint64_t MemAddr::toMaintAddr<TYPE_OCMB_CHIP>() const;
 template<TARGETING::TYPE T>
 uint64_t MemAddr::incRowAddr( ExtensibleChip * i_chip ) const
 {
+    // TODO: This format has changed for Odyssey, bits 0:1 are unused and
+    //       bit 2 is actually the port select.
     // Format of mss::mcbist::address, bits in ascending order
     // 0:1   port select
     // 2     dimm select

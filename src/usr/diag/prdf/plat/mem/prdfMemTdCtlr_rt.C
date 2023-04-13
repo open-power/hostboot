@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,168 +50,6 @@ namespace PRDF
 {
 
 using namespace PlatServices;
-
-//------------------------------------------------------------------------------
-
-template <TARGETING::TYPE T>
-uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[MemTdCtlr::handleTdEvent] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Make sure the TD controller is initialized.
-        o_rc = initialize();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "initialize() failed on 0x%08x",
-                      iv_chip->getHuid() );
-            break;
-        }
-
-        // Don't interrupt a TD procedure if one is already in progress.
-        if ( nullptr != iv_curProcedure ) break;
-
-        // If the queue is empty, there is nothing to do. So there is no point
-        // to stopping background scrub. This could have happen if TPS was
-        // banned on a rank and the TPS request was never added to the queue. In
-        // that case, mask fetch attentions temporarily to prevent flooding.
-        if ( iv_queue.empty() )
-        {
-            o_rc = maskEccAttns();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "maskEccAttns() failed" );
-                break;
-            }
-
-            break; // Don't stop background scrub.
-        }
-
-        // Stop background scrubbing.
-        o_rc = stopBgScrub<T>( iv_chip );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "stopBgScrub<T>(0x%08x) failed",
-                      iv_chip->getHuid() );
-            break;
-        }
-
-        // Since we had to manually stop the maintenance command, refresh all
-        // relevant registers that may have changed since the initial capture.
-        recaptureRegs( io_sc );
-
-        collectStateCaptureData( io_sc, TD_CTLR_DATA::START );
-
-        // It is possible that background scrub could have found an ECC error
-        // before we had a chance to stop the command. Therefore, we need to
-        // call analyzeCmdComplete() first so that any ECC errors found can be
-        // handled. Also, analyzeCmdComplete() will initialize the variables
-        // needed so we know where to restart background scrubbing.
-        bool junk = false;
-        o_rc = analyzeCmdComplete( junk, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "analyzeCmdComplete(0x%08x) failed",
-                      iv_chip->getHuid() );
-            break;
-        }
-
-        // Move onto the next step in the state machine.
-        o_rc = nextStep( io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "nextStep() failed on 0x%08x",
-                      iv_chip->getHuid() );
-            break;
-        }
-
-    } while (0);
-
-    // Gather capture data even if something failed above.
-    collectStateCaptureData( io_sc, TD_CTLR_DATA::END );
-
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Failed on 0x%08x", iv_chip->getHuid() );
-
-        // Change signature indicating there was an error in analysis.
-        io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                          PRDFSIG_CmdComplete_ERROR );
-
-        // Something definitely failed, so callout 2nd level support.
-        io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH );
-        io_sc.service_data->setServiceCall();
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template <TARGETING::TYPE T>
-uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[MemTdCtlr::defaultStep] "
-
-    uint32_t o_rc = SUCCESS;
-
-    if ( iv_resumeBgScrub )
-    {
-        // Background scrubbing paused for FFDC collection only. Resume the
-        // current command.
-
-        iv_resumeBgScrub = false;
-
-        PRDF_TRAC( PRDF_FUNC "Calling resumeBgScrub<T>(0x%08x)",
-                   iv_chip->getHuid() );
-
-        o_rc = resumeBgScrub<T>( iv_chip, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "resumeBgScrub<T>(0x%08x) failed",
-                      iv_chip->getHuid() );
-        }
-    }
-    else
-    {
-
-        // Unmask the ECC attentions that were explicitly masked during the
-        // TD procedure.
-        o_rc = unmaskEccAttns();
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "unmaskEccAttns() failed" );
-        }
-
-        // A TD procedure has completed. Restart background scrubbing on the
-        // next rank.
-
-        TdRankListEntry nextRank = iv_rankList.getNext( iv_stoppedRank );
-
-        PRDF_TRAC( PRDF_FUNC "Calling startBgScrub<T>(0x%08x, m%ds%d)",
-                   nextRank.getChip()->getHuid(),
-                   nextRank.getRank().getMaster(),
-                   nextRank.getRank().getSlave() );
-
-        o_rc = startBgScrub<T>( nextRank.getChip(), nextRank.getRank() );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "startBgScrub<T>(0x%08x,m%ds%d) failed",
-                      nextRank.getChip()->getHuid(),
-                      nextRank.getRank().getMaster(),
-                      nextRank.getRank().getSlave() );
-        }
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
 
 //------------------------------------------------------------------------------
 
@@ -551,6 +389,214 @@ uint32_t __checkEcc<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                      const MemAddr & i_addr,
                                      bool & o_errorsFound,
                                      STEP_CODE_DATA_STRUCT & io_sc );
+
+//------------------------------------------------------------------------------
+
+template <TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemTdCtlr::handleTdEvent] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Make sure the TD controller is initialized.
+        o_rc = initialize();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "initialize() failed on 0x%08x",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // Don't interrupt a TD procedure if one is already in progress.
+        if ( nullptr != iv_curProcedure ) break;
+
+        // If the queue is empty, there is nothing to do. So there is no point
+        // to stopping background scrub. This could have happen if TPS was
+        // banned on a rank and the TPS request was never added to the queue. In
+        // that case, mask fetch attentions temporarily to prevent flooding.
+        if ( iv_queue.empty() )
+        {
+            o_rc = maskEccAttns();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "maskEccAttns() failed" );
+                break;
+            }
+
+            break; // Don't stop background scrub.
+        }
+
+        // Stop background scrubbing.
+        o_rc = stopBgScrub<T>( iv_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "stopBgScrub<T>(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // Since we had to manually stop the maintenance command, refresh all
+        // relevant registers that may have changed since the initial capture.
+        recaptureRegs( io_sc );
+
+        collectStateCaptureData( io_sc, TD_CTLR_DATA::START );
+
+        // It is possible that background scrub could have found an ECC error
+        // before we had a chance to stop the command. Therefore, we need to
+        // check for any ECC errors that can be handled. Also, initialize the
+        // variables needed so we know where to restart background scrubbing.
+        // First, get the address in which the command stopped.
+        MemAddr addr;
+        o_rc = getMemMaintAddr<T>( iv_chip, addr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemMaintAddr<T>(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+        // Update iv_stoppedRank.
+        iv_stoppedRank = getStopRank(addr);
+
+        // Check for ECC errors. This will add TD procedures to iv_queue in
+        // some cases.
+        bool errorsFound;
+        o_rc = __checkEcc<T>(iv_chip, addr, errorsFound, io_sc);
+        if (SUCCESS != o_rc)
+        {
+            PRDF_ERR(PRDF_FUNC "__checkEcc<T>(0x%08x) failed",
+                     iv_chip->getHuid());
+            break;
+        }
+
+        #ifdef __HOSTBOOT_RUNTIME
+
+        if ( iv_queue.empty() )
+        {
+            // The queue is empty so if possible, simply resume the command
+            // instead of starting a new one. This must be checked here instead
+            // of in defaultStep() because a TD procedure could have been run
+            // before defaultStep() and it is possible that canResumeBgScrub()
+            // could give as a false positive in that case.
+            o_rc = canResumeBgScrub( iv_resumeBgScrub, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "canResumeBgScrub(0x%08x) failed",
+                          iv_chip->getHuid() );
+                break;
+            }
+        }
+        else
+        {
+            // At this point, there are new TD procedures in the queue so we
+            // want to mask certain fetch attentions to avoid the complication
+            // of handling the attentions during the TD procedures.
+            o_rc = maskEccAttns();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "maskEccAttns() failed" );
+                break;
+            }
+        }
+
+        #endif
+
+        // Move onto the next step in the state machine.
+        o_rc = nextStep( io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "nextStep() failed on 0x%08x",
+                      iv_chip->getHuid() );
+            break;
+        }
+
+    } while (0);
+
+    // Gather capture data even if something failed above.
+    collectStateCaptureData( io_sc, TD_CTLR_DATA::END );
+
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Failed on 0x%08x", iv_chip->getHuid() );
+
+        // Change signature indicating there was an error in analysis.
+        io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                          PRDFSIG_CmdComplete_ERROR );
+
+        // Something definitely failed, so callout 2nd level support.
+        io_sc.service_data->SetCallout( LEVEL2_SUPPORT, MRU_HIGH );
+        io_sc.service_data->setServiceCall();
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template <TARGETING::TYPE T>
+uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemTdCtlr::defaultStep] "
+
+    uint32_t o_rc = SUCCESS;
+
+    if ( iv_resumeBgScrub )
+    {
+        // Background scrubbing paused for FFDC collection only. Resume the
+        // current command.
+
+        iv_resumeBgScrub = false;
+
+        PRDF_TRAC( PRDF_FUNC "Calling resumeBgScrub<T>(0x%08x)",
+                   iv_chip->getHuid() );
+
+        o_rc = resumeBgScrub<T>( iv_chip, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "resumeBgScrub<T>(0x%08x) failed",
+                      iv_chip->getHuid() );
+        }
+    }
+    else
+    {
+
+        // Unmask the ECC attentions that were explicitly masked during the
+        // TD procedure.
+        o_rc = unmaskEccAttns();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "unmaskEccAttns() failed" );
+        }
+
+        // A TD procedure has completed. Restart background scrubbing on the
+        // next rank.
+
+        TdRankListEntry nextRank = iv_rankList.getNext( iv_stoppedRank );
+
+        PRDF_TRAC( PRDF_FUNC "Calling startBgScrub<T>(0x%08x, m%ds%d)",
+                   nextRank.getChip()->getHuid(),
+                   nextRank.getRank().getMaster(),
+                   nextRank.getRank().getSlave() );
+
+        o_rc = startBgScrub<T>( nextRank.getChip(), nextRank.getRank() );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "startBgScrub<T>(0x%08x,m%ds%d) failed",
+                      nextRank.getChip()->getHuid(),
+                      nextRank.getRank().getMaster(),
+                      nextRank.getRank().getSlave() );
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
 
 //------------------------------------------------------------------------------
 

@@ -461,9 +461,7 @@ actionclass TBDDefaultCallout
 /** MCBIST program complete */
 actionclass mcbist_program_complete
 {
-    #TODO
-    #funccall("McbistCmdComplete");
-    TBDDefaultCallout;
+    funccall("McbistCmdComplete");
 };
 
 /** Verify Chip Mark */

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -191,7 +191,17 @@ bool isBroadcastModeCapable<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
     mss::states l_ret = mss::states::NO;
 
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
-    FAPI_CALL_HWP( l_ret, exp_is_broadcast_capable, fapiTrgt );
+
+    // Check for an Odyssey OCMB
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        FAPI_CALL_HWP( l_ret, ody_is_broadcast_capable, fapiTrgt );
+    }
+    // Default to Explorer OCMB
+    else
+    {
+        FAPI_CALL_HWP( l_ret, exp_is_broadcast_capable, fapiTrgt );
+    }
 
     return ( mss::states::YES == l_ret );
     return false;
@@ -266,14 +276,6 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
     return o_rc;
 
     #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t cleanupSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmbChip )
-{
-    return SUCCESS; // Not needed for MCBIST commands.
 }
 
 //------------------------------------------------------------------------------
