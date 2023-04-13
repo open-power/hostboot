@@ -33,12 +33,15 @@
 #include <ody_omi_setup.H>
 #include <ody_io_ppe_common.H>
 #include <ody_scom_omi.H>
+#include <ody_scom_ody.H>
 #include <io_fir_lib.H>
 
 SCOMT_OMI_USE_D_REG_DL0_ERROR_MASK
 SCOMT_OMI_USE_D_REG_CMN_CONFIG
+SCOMT_OMI_USE_D_REG_DL0_CONFIG0
 SCOMT_OMI_USE_D_REG_DL0_CONFIG1
 SCOMT_OMI_USE_D_REG_DL0_CYA_BITS
+SCOMT_ODY_USE_ODC_TLXT_REGS_TLXCFG0
 
 ///
 /// @brief Setup OMI DL
@@ -51,6 +54,7 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     FAPI_DBG("Starting ody_omi_setup");
 
     using namespace scomt::omi;
+    using namespace scomt::ody;
 
     io_ppe_firs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_firs(FIR_SCOM_LFIR_RW_WCLEAR_REG, FIR_DL0_ERROR_MASK,
             FIR_DL0_ERROR_ACTION, FIR_MC_OMI_RW_WCLEAR_REG,
@@ -58,8 +62,10 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
     D_REG_DL0_ERROR_MASK_t l_dl0_error_mask;
     D_REG_CMN_CONFIG_t l_cmn_config;
+    D_REG_DL0_CONFIG0_t l_dl0_config0;
     D_REG_DL0_CONFIG1_t l_dl0_config1;
     D_REG_DL0_CYA_BITS_t l_dl0_cya;
+    ODC_TLXT_REGS_TLXCFG0_t l_tlxcfg0;
 
     bool l_mfg_mode = false;
 
@@ -84,6 +90,18 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     l_cmn_config.set_CNTR3_EN(0);
     FAPI_TRY(l_cmn_config.putScom(i_target));
 
+    FAPI_TRY(l_dl0_config0.getScom(i_target));
+    l_dl0_config0.set_CFG_TL_CREDITS(0x2);
+    l_dl0_config0.set_TL_EVENT_ACTIONS(0);
+    l_dl0_config0.set_TL_ERROR_ACTIONS(0);
+    l_dl0_config0.set_DEBUG_SELECT(0);
+    l_dl0_config0.set_DEBUG_ENABLE(0);
+    l_dl0_config0.set_TX_LN_REV_ENA(1);
+    l_dl0_config0.set_PWRMGT_ENABLE(0);
+    l_dl0_config0.set_TRAIN_MODE(0);
+    l_dl0_config0.set_VERSION(9);
+    FAPI_TRY(l_dl0_config0.putScom(i_target));
+
     FAPI_TRY(l_dl0_config1.getScom(i_target));
     l_dl0_config1.set_PREIPL_PRBS_TIME(1);
 
@@ -105,6 +123,10 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     l_dl0_cya.set_DIS_SYNCTO(1); // Needed as the host may be running manual training (step by step)
     l_dl0_cya.set_FRBUF_FULL(1);
     FAPI_TRY(l_dl0_cya.putScom(i_target));
+
+    FAPI_TRY(l_tlxcfg0.getScom(i_target));
+    l_tlxcfg0.set_DCP1_INIT(128);
+    FAPI_TRY(l_tlxcfg0.putScom(i_target));
 
     l_ppe_firs.mc_omi_fir_set(i_target);
     l_ppe_firs.tlx_fir_set(i_target);

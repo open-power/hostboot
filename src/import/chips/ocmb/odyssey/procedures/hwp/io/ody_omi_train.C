@@ -54,15 +54,7 @@ fapi2::ReturnCode ody_omi_train(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     // At this point the Odyssey will be driving pattern A and
     //   waiting to receive pattern A.
     FAPI_TRY(l_dl0_config0.getScom(i_target));
-    l_dl0_config0.set_CFG_TL_CREDITS(0x12);
-    l_dl0_config0.set_TL_EVENT_ACTIONS(0);
-    l_dl0_config0.set_TL_ERROR_ACTIONS(0);
-    l_dl0_config0.set_DEBUG_SELECT(0);
-    l_dl0_config0.set_DEBUG_ENABLE(0);
-    l_dl0_config0.set_TX_LN_REV_ENA(1);
-    l_dl0_config0.set_PWRMGT_ENABLE(0);
     l_dl0_config0.set_TRAIN_MODE(8);
-    l_dl0_config0.set_VERSION(9);
     FAPI_TRY(l_dl0_config0.putScom(i_target));
 
 fapi_try_exit:

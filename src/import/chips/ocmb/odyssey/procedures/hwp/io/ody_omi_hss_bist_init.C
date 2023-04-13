@@ -36,6 +36,12 @@
 //------------------------------------------------------------------------------
 #include <ody_omi_hss_bist_init.H>
 #include <ody_io_ppe_common.H>
+#include <ody_scom_omi.H>
+
+SCOMT_OMI_USE_D_REG_CMN_CONFIG
+SCOMT_OMI_USE_D_REG_DL0_CONFIG0
+SCOMT_OMI_USE_D_REG_DL0_DEBUG_AID
+SCOMT_OMI_USE_D_REG_DL0_CYA_BITS
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -50,10 +56,18 @@ fapi2::ReturnCode ody_omi_hss_bist_init(const fapi2::Target<fapi2::TARGET_TYPE_O
 
     ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
 
+    using namespace scomt::omi;
+
+    D_REG_CMN_CONFIG_t l_cmn_config;
+    D_REG_DL0_CONFIG0_t l_dl0_config0;
+    D_REG_DL0_DEBUG_AID_t l_dl0_debug_aid;
+    D_REG_DL0_CYA_BITS_t l_dl0_cya;
+
     uint8_t l_dacTest = 0;
     uint8_t l_esdTest = 0;
     uint8_t l_bist_timer = 0;
     uint32_t l_rx_mask = 0;
+    fapi2::ATTR_FREQ_OMI_MHZ_Type l_omi_freq;
 
     // Get the necessary attributes
     FAPI_DBG("Getting attributes");
@@ -61,9 +75,29 @@ fapi2::ReturnCode ody_omi_hss_bist_init(const fapi2::Target<fapi2::TARGET_TYPE_O
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_BIST_DAC_TEST, i_target, l_dacTest));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_BIST_ESD_TEST, i_target, l_esdTest));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_BIST_TIMER, i_target, l_bist_timer));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, i_target, l_omi_freq));
     l_rx_mask <<= 24;
 
-    FAPI_TRY(l_ppe_common.bist_init(i_target, 1, l_rx_mask, l_dacTest, l_esdTest, l_bist_timer),
+    FAPI_TRY(l_cmn_config.getScom(i_target));
+    l_cmn_config.set_DBG_EN(1);
+    FAPI_TRY(l_cmn_config.putScom(i_target));
+
+    FAPI_TRY(l_dl0_config0.getScom(i_target));
+    l_dl0_config0.set_ENABLE(1);
+    FAPI_TRY(l_dl0_config0.putScom(i_target));
+
+    FAPI_TRY(l_dl0_debug_aid.getScom(i_target));
+    l_dl0_debug_aid.set_PRBS_RESET(0);
+    FAPI_TRY(l_dl0_debug_aid.putScom(i_target));
+
+    FAPI_TRY(l_dl0_cya.getScom(i_target));
+    l_dl0_cya.set_PRBS15_NPRBS7(1);
+    FAPI_TRY(l_dl0_cya.putScom(i_target));
+
+    FAPI_TRY(l_ppe_common.bist_init(i_target, l_dacTest, l_esdTest),
+             "Failed to run common HSS BIST init");
+
+    FAPI_TRY(l_ppe_common.bist_init_thread(i_target, 0, l_rx_mask, l_omi_freq, l_bist_timer),
              "Failed to run common HSS BIST init");
 
 fapi_try_exit:
