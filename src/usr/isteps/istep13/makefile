@@ -27,7 +27,7 @@ MODULE = istep13
 
 OCMB_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/ocmb/procedures
 EXP_INCLUDE_PATH     = ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
-EXPLORER_HWP_PATH  = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXPLORER_HWP_PATH    = ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 P10_PROCEDURE_PATH   = ${ROOTPATH}/src/import/chips/p10/procedures/hwp
 ODYSSEY_HWP_PATH     = ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/
 ODYSSEY_INC_PATH     = ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
@@ -80,6 +80,7 @@ OBJS += ody_ddrphyinit.o
 OBJS += ody_load_imem.o
 OBJS += ody_load_dmem.o
 OBJS += ody_sppe_draminit.o
+OBJS += ody_host_draminit.o
 OBJS += ody_load_pie.o
 OBJS += ody_draminit_mc.o
 OBJS += ody_enable_ecc.o

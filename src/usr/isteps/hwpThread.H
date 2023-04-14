@@ -57,7 +57,7 @@ class HwpWorkItem
     ISTEP_ERROR::IStepError* iv_pStepError;
 
     // @brief Target to execute HWP against
-    const TARGETING::Target* iv_pTarget;
+    TARGETING::Target* iv_pTarget;
 
     // Name of HWP being executed
     const char* iv_hwpName;
@@ -120,7 +120,7 @@ class HwpWorkItem
      * @param[in] i_hwpName  Name of HWP being executed
      */
     HwpWorkItem( ISTEP_ERROR::IStepError& i_stepError,
-                 const TARGETING::Target& i_target,
+                 TARGETING::Target& i_target,
                  const char* i_hwpName ):
       iv_pStepError(&i_stepError),
       iv_pTarget(&i_target),

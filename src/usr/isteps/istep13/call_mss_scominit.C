@@ -52,12 +52,14 @@
 #include    <p10_throttle_sync.H>           // p10_throttle_sync
 #include    <chipids.H> // for EXPLORER ID
 
+#include    <sbeio/sbeioif.H>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ISTEPS_TRACE;
 using   namespace   TARGETING;
+using   namespace   SBEIO;
 
 #define CONTEXT call_mss_scominit
 
@@ -67,7 +69,7 @@ class WorkItem_exp_scominit : public HwpWorkItem
 {
   public:
     WorkItem_exp_scominit( IStepError& i_stepError,
-                           const Target& i_ocmb )
+                               Target& i_ocmb )
     : HwpWorkItem( i_stepError, i_ocmb, "exp_scominit" ) {}
 
     virtual errlHndl_t run_hwp( void ) override
@@ -79,11 +81,11 @@ class WorkItem_exp_scominit : public HwpWorkItem
     }
 };
 
-class WorkItem_ody_mss_scominit : public HwpWorkItem
+class Host_ody_mss_scominit : public HwpWorkItem
 {
   public:
-    WorkItem_ody_mss_scominit( IStepError& i_stepError,
-                           const Target& i_ocmb )
+    Host_ody_mss_scominit( IStepError& i_stepError,
+                               Target& i_ocmb )
     : HwpWorkItem( i_stepError, i_ocmb, "ody_mss_scominit" ) {}
 
     virtual errlHndl_t run_hwp( void ) override
@@ -99,11 +101,30 @@ class WorkItem_ody_mss_scominit : public HwpWorkItem
     }
 };
 
+class ChipOp_ody_mss_scominit : public HwpWorkItem
+{
+  public:
+    ChipOp_ody_mss_scominit( IStepError& i_stepError,
+                                 Target& i_ocmb )
+    : HwpWorkItem( i_stepError, i_ocmb, "ody_mss_scominit" ) {}
+
+    virtual errlHndl_t run_hwp( void ) override
+    {
+        errlHndl_t l_err = nullptr;
+
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_SCOMINIT);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_DDRPHYINIT);
+
+        ERROR_EXIT:   // label is required by RUN_SUB_HWP
+        return l_err;
+    }
+};
+
 class WorkItem_p10_throttle_sync : public HwpWorkItem
 {
   public:
     WorkItem_p10_throttle_sync( IStepError& i_stepError,
-                                const Target& i_proc )
+                                    Target& i_proc )
     : HwpWorkItem( i_stepError, i_proc, "p10_throttle_sync" ) {}
 
     virtual errlHndl_t run_hwp( void ) override
@@ -177,7 +198,7 @@ void run_mss_scominit(IStepError & io_iStepError)
     TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-    for (const auto l_ocmb : l_ocmbTargetList)
+    for (auto l_ocmb : l_ocmbTargetList)
     {
         // check EXPLORER first as this is most likely the configuration
         uint32_t chipId = l_ocmb->getAttr< ATTR_CHIP_ID>();
@@ -201,20 +222,12 @@ void run_mss_scominit(IStepError & io_iStepError)
 
             if (l_runOdyHwpFromHost)
             {
-                threadpool.insert(new WorkItem_ody_mss_scominit(io_iStepError,
-                                                               *l_ocmb));
+                threadpool.insert(new Host_ody_mss_scominit(io_iStepError, *l_ocmb));
             }
             else
             {
-                //@todo JIRA:PFHB-412 Istep12 chipops for Odyssey on P10
+                threadpool.insert(new ChipOp_ody_mss_scominit(io_iStepError, *l_ocmb));
             }
-        }
-        else
-        {
-            TRACFCOMP( g_trac_isteps_trace,
-                "call_mss_scominit: unknown target HUID 0x%.8X with chipId 0x%.4X",
-                get_huid(l_ocmb), chipId );
-            continue;
         }
     }
     HwpWorkItem::start_threads(threadpool, io_iStepError, l_ocmbTargetList.size());
@@ -238,7 +251,7 @@ void run_proc_throttle_sync_13(IStepError & io_iStepError)
     TARGETING::TargetHandleList l_procChips;
     getAllChips( l_procChips, TARGETING::TYPE_PROC );
 
-    for (const auto l_procChip: l_procChips)
+    for (auto l_procChip: l_procChips)
     {
         //  Create a new workitem from this OCMB and feed it to the
         //  thread pool for processing.  Thread pool handles workitem

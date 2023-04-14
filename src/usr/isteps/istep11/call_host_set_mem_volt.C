@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,7 +69,7 @@ class WorkItem_pmic_enable: public ISTEP::HwpWorkItem
 {
   public:
     WorkItem_pmic_enable( IStepError& i_stepError,
-                           const Target& i_ocmb )
+                              Target& i_ocmb )
     : HwpWorkItem( i_stepError, i_ocmb, "pmic_enable" ) {}
 
     virtual errlHndl_t run_hwp( void )
@@ -128,7 +128,7 @@ void* call_host_set_mem_volt (void *io_pArgs)
     // PMICs on non-functional/deconfigured OCMBs prior to enabling PMICs on functional OCMBs
     getClassResources(l_ocmbTargetList, CLASS_CHIP, TYPE_OCMB_CHIP, UTIL_FILTER_PRESENT);
 
-    for (const auto & l_ocmb_target: l_ocmbTargetList)
+    for (auto l_ocmb_target: l_ocmbTargetList)
     {
         // PMICs are not present on Gemini, so skip this enable call
         // check EXPLORER first as this is most likely the configuration

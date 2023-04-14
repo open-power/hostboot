@@ -55,13 +55,17 @@
 #include <ody_load_imem.H>
 #include <ody_load_dmem.H>
 #include <ody_sppe_draminit.H>
+#include <ody_host_draminit.H>
 #include <ody_load_pie.H>
+
+#include <sbeio/sbeioif.H>
 
 using namespace ERRORLOG;
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 using namespace ISTEPS_TRACE;
 using namespace TARGETING;
+using namespace SBEIO;
 
 #define CONTEXT call_mss_draminit
 
@@ -72,7 +76,7 @@ class WorkItem_exp_draminit: public HwpWorkItem_OCMBUpdateCheck
 {
   public:
     WorkItem_exp_draminit( IStepError& i_stepError,
-                           const Target& i_ocmb )
+                               Target& i_ocmb )
     : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "exp_draminit" ) {}
 
     virtual errlHndl_t run_hwp( void ) override
@@ -84,11 +88,11 @@ class WorkItem_exp_draminit: public HwpWorkItem_OCMBUpdateCheck
     }
 };
 
-class WorkItem_ody_draminit: public HwpWorkItem_OCMBUpdateCheck
+class Host_ody_draminit: public HwpWorkItem_OCMBUpdateCheck
 {
   public:
-    WorkItem_ody_draminit( IStepError& i_stepError,
-                           const Target& i_ocmb )
+    Host_ody_draminit( IStepError& i_stepError,
+                           Target& i_ocmb )
     : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "ody_draminit" ) {}
 
     virtual errlHndl_t run_hwp( void ) override
@@ -103,24 +107,36 @@ class WorkItem_ody_draminit: public HwpWorkItem_OCMBUpdateCheck
          *
         RUN_SUB_HWP(CALLER_CONTEXT, l_err, iv_pTarget,
                     ody_load_imem, l_fapi_target, ...);
-         */
-
-        /*
-         * @todo JIRA:PFHB-434 Odyssey chipop for ody_load_imem/ody_load_dmem
-         *
         RUN_SUB_HWP(CALLER_CONTEXT, l_err, iv_pTarget,
                     ody_load_dmem, l_fapi_target, ...);
          */
 
         RUN_SUB_HWP(CONTEXT, l_err, iv_pTarget, ody_sppe_draminit, l_fapi_target, ostream);
+        RUN_SUB_HWP(CONTEXT, l_err, iv_pTarget, ody_host_draminit, l_fapi_target);
+        RUN_SUB_HWP(CONTEXT, l_err, iv_pTarget, ody_load_pie,      l_fapi_target);
 
-        /* @todo JIRA:PFHB-413 Istep13 Updates for Odyssey on P10
-         *
-         [HOST] ody_sppe_draminit
-         *
-         */
+        ERROR_EXIT:   // label is required by RUN_SUB_HWP
+        return l_err;
+    }
+};
 
-        RUN_SUB_HWP(CONTEXT, l_err, iv_pTarget, ody_load_pie, l_fapi_target);
+class ChipOp_ody_draminit: public HwpWorkItem_OCMBUpdateCheck
+{
+  public:
+    ChipOp_ody_draminit( IStepError& i_stepError,
+                             Target& i_ocmb )
+    : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "ody_draminit" ) {}
+
+    virtual errlHndl_t run_hwp( void ) override
+    {
+        errlHndl_t l_err = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
+
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_LOAD_IMEM);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_LOAD_DMEM);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_SPPE_DRAMINIT);
+        RUN_SUB_HWP   (CONTEXT, l_err, iv_pTarget, ody_host_draminit, l_fapi_target);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_LOAD_PIE);
 
         ERROR_EXIT:   // label is required by RUN_SUB_HWP
         return l_err;
@@ -142,42 +158,29 @@ void* call_mss_draminit (void *io_pArgs)
     TargetHandleList l_ocmbTargetList;
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
 
-    for (const auto l_ocmb_target : l_ocmbTargetList)
+    for (auto l_ocmb_target : l_ocmbTargetList)
     {
-        // check EXPLORER first as this is most likely the configuration
         uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
+
+        //  Create a new workitem from this OCMB and feed it to the
+        //  thread pool for processing.  Thread pool handles workitem
+        //  cleanup.
         if (chipId == POWER_CHIPID::EXPLORER_16)
         {
-            //  Create a new workitem from this OCMB and feed it to the
-            //  thread pool for processing.  Thread pool handles workitem
-            //  cleanup.
-            threadpool.insert(new WorkItem_exp_draminit(l_stepError,
-                                                        *l_ocmb_target));
+            threadpool.insert(new WorkItem_exp_draminit(l_stepError, *l_ocmb_target));
         }
         else if (chipId == POWER_CHIPID::ODYSSEY_16)
         {
             if (l_runOdyHwpFromHost)
             {
-                //  Create a new workitem from this OCMB and feed it to the
-                //  thread pool for processing.  Thread pool handles workitem
-                //  cleanup.
-                threadpool.insert(new WorkItem_ody_draminit(l_stepError,
-                                                            *l_ocmb_target));
+                threadpool.insert(new Host_ody_draminit(l_stepError, *l_ocmb_target));
             }
             else
             {
-                // @todo JIRA:PFHB-413 Istep13 Updates for Odyssey on P10
+                threadpool.insert(new ChipOp_ody_draminit(l_stepError, *l_ocmb_target));
             }
         }
-        else
-        {
-            TRACFCOMP( g_trac_isteps_trace,
-                "Skipping *_draminit HWP on target HUID 0x%.8X, chipId 0x%.4X",
-                get_huid(l_ocmb_target), chipId );
-            continue;
-        }
     }
-
     HwpWorkItem::start_threads( threadpool, l_stepError, l_ocmbTargetList.size());
 
     if (HwpWorkItem::cv_encounteredHwpError)

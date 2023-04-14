@@ -55,6 +55,9 @@
 #include    <exp_omi_setup.H>
 #include    <p10_omi_setup.H>
 #include    <ody_omi_setup.H>
+
+#include    <sbeio/sbeioif.H>
+
 #include    <chipids.H>
 
 using   namespace   ISTEP;
@@ -62,14 +65,16 @@ using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEPS_TRACE;
+using   namespace   SBEIO;
 
 namespace ISTEP_12
 {
 class WorkItem_omi_setup: public HwpWorkItem
 {
   public:
-    WorkItem_omi_setup(IStepError& i_stepError, const Target& i_omic )
-                            : HwpWorkItem( i_stepError, i_omic, "omi_setup" ) {}
+    WorkItem_omi_setup(IStepError& i_stepError,
+                           Target& i_omic )
+      : HwpWorkItem( i_stepError, i_omic, "omi_setup" ) {}
 
     virtual errlHndl_t run_hwp( void ) override
     {
@@ -95,67 +100,75 @@ class WorkItem_omi_setup: public HwpWorkItem
         {
             // Get the OCMB from the OMI
             auto l_childOCMB = omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>();
-            if (l_childOCMB.size() == 1)
+            if (l_childOCMB.size() != 1)
             {
-                auto ocmb = l_childOCMB[0];
-                TARGETING::Target * l_ocmbTarget = ocmb.get();
+                continue;
+            }
 
-                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmbTarget);
-                uint32_t chipId = l_ocmbTarget->getAttr< ATTR_CHIP_ID>();
+            auto ocmb = l_childOCMB[0];
+            TARGETING::Target * l_ocmbTarget = ocmb.get();
 
-                if (chipId == POWER_CHIPID::EXPLORER_16)
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmbTarget);
+            uint32_t chipId = l_ocmbTarget->getAttr< ATTR_CHIP_ID>();
+
+            if (chipId == POWER_CHIPID::EXPLORER_16)
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                    INFO_MRK"exp_omi_setup HWP target HUID 0x%.08x ",
+                    get_huid(l_ocmbTarget));
+
+                FAPI_INVOKE_HWP(l_err, exp_omi_setup, ocmb);
+
+                //  process return code
+                if ( l_err )
                 {
                     TRACFCOMP(g_trac_isteps_trace,
-                        INFO_MRK"exp_omi_setup HWP target HUID 0x%.08x ",
-                        get_huid(l_ocmbTarget));
-
-                    FAPI_INVOKE_HWP(l_err, exp_omi_setup, ocmb);
-
-                    //  process return code
-                    if ( l_err )
-                    {
-                        TRACFCOMP(g_trac_isteps_trace,
-                          ERR_MRK"exp_omi_setup HWP: failed on target 0x%08X. "
-                          TRACE_ERR_FMT,
-                          get_huid(l_ocmbTarget),
-                          TRACE_ERR_ARGS(l_err));
-                        continue;
-                    }
-
-                    TRACFCOMP(g_trac_isteps_trace,
-                         INFO_MRK"SUCCESS running exp_omi_setup HWP on target HUID %.8X. ",
-                         get_huid(l_ocmbTarget));
+                      ERR_MRK"exp_omi_setup HWP: failed on target 0x%08X. "
+                      TRACE_ERR_FMT,
+                      get_huid(l_ocmbTarget),
+                      TRACE_ERR_ARGS(l_err));
+                    mutex_lock(&cv_stepErrorMutex);
+                    captureError(l_err, *iv_pStepError, ISTEP_COMP_ID, l_ocmbTarget);
+                    mutex_unlock(&cv_stepErrorMutex);
+                    continue;
                 }
-                else if (chipId == POWER_CHIPID::ODYSSEY_16)
+
+                TRACFCOMP(g_trac_isteps_trace,
+                     INFO_MRK"SUCCESS running exp_omi_setup HWP on target HUID %.8X. ",
+                     get_huid(l_ocmbTarget));
+            }
+            else if (chipId == POWER_CHIPID::ODYSSEY_16)
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                    INFO_MRK"ody_omi_setup HWP target HUID 0x%.08x l_runOdyHwpFromHost:%d",
+                    get_huid(l_ocmbTarget), l_runOdyHwpFromHost);
+
+                if (l_runOdyHwpFromHost)
+                {
+                    FAPI_INVOKE_HWP(l_err, ody_omi_setup, ocmb);
+                }
+                else
+                {
+                    l_err = sendExecHWPRequest(l_ocmbTarget, IO_ODY_OMI_SETUP);
+                }
+
+                //  process return code
+                if ( l_err )
                 {
                     TRACFCOMP(g_trac_isteps_trace,
-                        INFO_MRK"ody_omi_setup HWP target HUID 0x%.08x l_runOdyHwpFromHost:%d",
-                        get_huid(l_ocmbTarget), l_runOdyHwpFromHost);
-
-                    if (l_runOdyHwpFromHost)
-                    {
-                        FAPI_INVOKE_HWP(l_err, ody_omi_setup, ocmb);
-                    }
-                    else
-                    {
-                        //@todo JIRA:PFHB-412 Istep12 chipops for Odyssey on P10
-                    }
-
-                    //  process return code
-                    if ( l_err )
-                    {
-                        TRACFCOMP(g_trac_isteps_trace,
-                          ERR_MRK"call ody_omi_setup HWP: failed on target 0x%08X. "
-                          TRACE_ERR_FMT,
-                          get_huid(l_ocmbTarget),
-                          TRACE_ERR_ARGS(l_err));
-                        continue;
-                    }
-
-                    TRACFCOMP(g_trac_isteps_trace,
-                       INFO_MRK"SUCCESS running ody_omi_setup HWP on target HUID %.8X. ",
-                       get_huid(l_ocmbTarget));
+                      ERR_MRK"call ody_omi_setup HWP: failed on target 0x%08X. "
+                      TRACE_ERR_FMT,
+                      get_huid(l_ocmbTarget),
+                      TRACE_ERR_ARGS(l_err));
+                    mutex_lock(&cv_stepErrorMutex);
+                    captureError(l_err, *iv_pStepError, ISTEP_COMP_ID, l_ocmbTarget);
+                    mutex_unlock(&cv_stepErrorMutex);
+                    continue;
                 }
+
+                TRACFCOMP(g_trac_isteps_trace,
+                   INFO_MRK"SUCCESS running ody_omi_setup HWP on target HUID %.8X. ",
+                   get_huid(l_ocmbTarget));
             }
         }
 
@@ -212,7 +225,7 @@ void* call_omi_setup (void *io_pArgs)
             INFO_MRK"call_omi_setup: %d OMICs found ",
             l_omicTargetList.size());
 
-    for (const auto l_omic_target : l_omicTargetList)
+    for (auto l_omic_target : l_omicTargetList)
     {
         //  Create a new workitem from this membuf and feed it to the
         //  thread pool for processing.  Thread pool handles workitem

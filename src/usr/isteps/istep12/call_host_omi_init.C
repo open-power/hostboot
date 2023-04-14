@@ -77,8 +77,8 @@ class WorkItem_exp_omi_init: public HwpWorkItem_OCMBUpdateCheck
 {
   public:
     WorkItem_exp_omi_init( IStepError& i_stepError,
-                           const Target& i_ocmb )
-    : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "exp_omi_init" ) {}
+                               Target& i_ocmb )
+      : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "exp_omi_init" ) {}
 
     virtual errlHndl_t run_hwp( void ) override
     {
@@ -89,12 +89,12 @@ class WorkItem_exp_omi_init: public HwpWorkItem_OCMBUpdateCheck
     }
 };
 
-class WorkItem_ody_omi_init: public HwpWorkItem_OCMBUpdateCheck
+class Host_ody_omi_init: public HwpWorkItem_OCMBUpdateCheck
 {
   public:
-    WorkItem_ody_omi_init( IStepError& i_stepError,
-                           const Target& i_ocmb )
-    : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "ody_omi_init" ) {}
+    Host_ody_omi_init( IStepError& i_stepError,
+                           Target& i_ocmb )
+      : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "ody_omi_init" ) {}
 
     virtual errlHndl_t run_hwp( void ) override
     {
@@ -109,8 +109,8 @@ class WorkItem_p10_omi_init: public HwpWorkItem_OCMBUpdateCheck
 {
   public:
     WorkItem_p10_omi_init( IStepError& i_stepError,
-                           const Target& i_mcc )
-    : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_mcc, "p10_omi_init" ) {}
+                               Target& i_mcc )
+      : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_mcc, "p10_omi_init" ) {}
 
     virtual errlHndl_t run_hwp( void )
     {
@@ -139,17 +139,13 @@ void* call_host_omi_init (void *io_pArgs)
     TargetHandleList l_ocmbTargetList;
     TargetHandleList l_mccTargetList;
 
-    // get RUN_ODY_HWP_FROM_HOST
-    const auto l_runOdyHwpFromHost =
-       TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
-
     // 12.11.a - Initialize config space on the Explorer/Odyssey
     getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
     TRACFCOMP(g_trac_isteps_trace,
               "call_host_omi_init: %d ocmb chips found",
               l_ocmbTargetList.size());
 
-    for (const auto & l_ocmb_target : l_ocmbTargetList)
+    for (auto l_ocmb_target : l_ocmbTargetList)
     {
         uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
 
@@ -162,14 +158,7 @@ void* call_host_omi_init (void *io_pArgs)
         }
         else if (chipId == POWER_CHIPID::ODYSSEY_16)
         {
-            if (l_runOdyHwpFromHost)
-            {
-                threadpool.insert(new WorkItem_ody_omi_init(l_StepError, *l_ocmb_target));
-            }
-            else
-            {
-                //@todo JIRA:PFHB-412 Istep12 chipops for Odyssey on P10
-            }
+            threadpool.insert(new Host_ody_omi_init(l_StepError, *l_ocmb_target));
         }
     }
 
@@ -190,13 +179,12 @@ void* call_host_omi_init (void *io_pArgs)
               "call_host_omi_init: %d MCCs found",
               l_mccTargetList.size());
 
-    for (const auto & l_mcc_target : l_mccTargetList)
+    for (auto l_mcc_target : l_mccTargetList)
     {
         //  Create a new workitem from this mmcc and feed it to the
         //  thread pool for processing.  Thread pool handles workitem
         //  cleanup.
-        threadpool.insert(new WorkItem_p10_omi_init(l_StepError,
-                                                    *l_mcc_target));
+        threadpool.insert(new WorkItem_p10_omi_init(l_StepError, *l_mcc_target));
     }
     HwpWorkItem::start_threads(threadpool, l_StepError, l_mccTargetList.size());
 

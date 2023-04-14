@@ -32,6 +32,19 @@
 
 #include <hwpThread.H>
 
+/**
+ * @brief SUB-HWP Invoker macro
+ *
+ * This macro is called by HostBoot code to invoke a HW Procedure (HWP), does
+ * the trace before the HWP call, and does the check errl/trace after the HWP.
+ * The caller must ensure a goto label called ERROR_EXIT exists.
+ *
+ * CALLER     - function name of the caller
+ * ERRL       - local errlHndl_t
+ * TARGET     - Target to execute HWP against
+ * FUNC       - HWP function name
+ * _args_...  - Any additional arguments that the HWP requires
+ */
 #define RUN_SUB_HWP(CALLER, ERRL, TARGET, FUNC, _args_...) \
   TRACFCOMP(g_trac_isteps_trace, \
             #CALLER ": run " #FUNC " on target HUID 0x%.8X", get_huid(TARGET)); \
@@ -40,6 +53,29 @@
   { \
       TRACFCOMP(g_trac_isteps_trace, \
                 ERR_MRK #CALLER ": " #FUNC " on target HUID 0x%.8X", get_huid(TARGET)); \
+      goto ERROR_EXIT; \
+  }
+
+/**
+ * @brief SUB-ChipOp Invoker macro
+ *
+ * This macro is called by HostBoot code to invoke a ChipOp, does
+ * the trace before the ChipOp call, and does the check errl/trace after the ChipOp.
+ * The caller must ensure a goto label called ERROR_EXIT exists.
+ *
+ * CALLER     - function name of the caller
+ * ERRL       - local errlHndl_t
+ * TARGET     - Target to execute HWP against
+ * OP         - ChipOp to execute
+ */
+#define RUN_SUB_CHIPOP(CALLER, ERRL, TARGET, OP) \
+  TRACFCOMP(g_trac_isteps_trace, \
+            #CALLER ": run " #OP " on target HUID 0x%.8X", get_huid(TARGET)); \
+  ERRL = sendExecHWPRequest(TARGET, OP); \
+  if (ERRL) \
+  { \
+      TRACFCOMP(g_trac_isteps_trace, \
+                ERR_MRK #CALLER ": " #OP " on target HUID 0x%.8X", get_huid(TARGET)); \
       goto ERROR_EXIT; \
   }
 
@@ -61,7 +97,7 @@ class HwpWorkItem_OCMBUpdateCheck : public HwpWorkItem
      * @param[in] i_hwpName  Name of HWP being executed
      */
     HwpWorkItem_OCMBUpdateCheck( ISTEP_ERROR::IStepError& i_stepError,
-                             const TARGETING::Target&     i_target,
+                                   TARGETING::Target&     i_target,
                                           const char*     i_hwpName ) :
         HwpWorkItem(i_stepError, i_target, i_hwpName) {};
 

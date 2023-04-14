@@ -49,6 +49,8 @@
 #include    <config.h>
 #include    <fapi2.H>
 
+#include    <sbeio/sbeioif.H>
+
 #include    <chipids.H>
 
 #include    <ody_omi_hss_ppe_load.H>
@@ -67,16 +69,17 @@ using   namespace   ISTEPS_TRACE;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
+using   namespace   SBEIO;
 
 #define CONTEXT call_ocmb_omi_scominit
 
 namespace ISTEP_12
 {
-class WorkItem_ody_omi_scominit: public HwpWorkItem
+class Host_ody_omi_scominit: public HwpWorkItem
 {
   public:
-    WorkItem_ody_omi_scominit( IStepError& i_stepError,
-                             const Target& i_ocmb)
+    Host_ody_omi_scominit( IStepError& i_stepError,
+                              Target& i_ocmb)
     : HwpWorkItem( i_stepError, i_ocmb, "ody_omi_scominit" ) {}
 
     virtual errlHndl_t run_hwp( void ) override
@@ -117,6 +120,33 @@ class WorkItem_ody_omi_scominit: public HwpWorkItem
     }
 };
 
+class ChipOp_ody_omi_scominit: public HwpWorkItem
+{
+  public:
+    ChipOp_ody_omi_scominit( IStepError& i_stepError,
+                                 Target& i_ocmb)
+    : HwpWorkItem( i_stepError, i_ocmb, "ody_omi_scominit" ) {}
+
+    virtual errlHndl_t run_hwp( void ) override
+    {
+        errlHndl_t l_err = nullptr;
+
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, IO_ODY_OMI_HSS_LOAD_PPE);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, IO_ODY_OMI_HSS_CONFIG);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, IO_ODY_OMI_HSS_START_PPE);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, IO_ODY_OMI_HSS_BIST_INIT);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, IO_ODY_OMI_HSS_BIST_START);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, IO_ODY_OMI_HSS_BIST_POLL);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, IO_ODY_OMI_HSS_BIST_CLEANUP);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, IO_ODY_OMI_HSS_INIT);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, IO_ODY_OMI_HSS_DCCAL_START);
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, IO_ODY_OMI_HSS_DCCAL_POLL);
+
+        ERROR_EXIT:   // label is required by RUN_SUB_CHIPOP
+        return l_err;
+    }
+};
+
 void* call_ocmb_omi_scominit (void *io_pArgs)
 {
     IStepError l_StepError;
@@ -137,6 +167,9 @@ void* call_ocmb_omi_scominit (void *io_pArgs)
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmb_target);
         uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
 
+        //  Create a new WorkItem from this ocmb and feed it to the
+        //  thread pool for processing.  Thread pool handles WorkItem
+        //  cleanup.
         if (chipId == POWER_CHIPID::EXPLORER_16)
         {
             TRACFCOMP( g_trac_isteps_trace,
@@ -153,14 +186,11 @@ void* call_ocmb_omi_scominit (void *io_pArgs)
 
             if (l_runOdyHwpFromHost)
             {
-                //  Create a new WorkItem from this ocmb and feed it to the
-                //  thread pool for processing.  Thread pool handles WorkItem
-                //  cleanup.
-                threadpool.insert(new WorkItem_ody_omi_scominit(l_StepError,*l_ocmb_target) );
+                threadpool.insert(new Host_ody_omi_scominit(l_StepError, *l_ocmb_target));
             }
             else
             {
-                //@todo JIRA:PFHB-412 Istep12 chipops for Odyssey on P10
+                threadpool.insert(new ChipOp_ody_omi_scominit(l_StepError, *l_ocmb_target));
             }
         }
         else // continue to the next chip

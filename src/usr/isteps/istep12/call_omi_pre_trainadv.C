@@ -40,6 +40,7 @@
 #include    <initservice/isteps_trace.H>
 #include    <istepHelperFuncs.H>          // captureError
 #include    <hwpThread.H>
+#include    <hwpThreadHelper.H>
 
 #include    <fapi2/plat_hwp_invoker.H>
 
@@ -49,19 +50,22 @@
 #include    <ody_omi_hss_tx_zcal.H>
 #include    <ody_omi_pretrain_adv.H>
 
+#include    <sbeio/sbeioif.H>
+
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ISTEPS_TRACE;
 using   namespace   TARGETING;
+using   namespace   SBEIO;
 
 namespace ISTEP_12
 {
 
-class WorkItem_ody_omi_hss_tx_zcal: public HwpWorkItem
+class Host_ody_omi_hss_tx_zcal: public HwpWorkItem
 {
   public:
-    WorkItem_ody_omi_hss_tx_zcal( IStepError& i_stepError,
-                                 const Target& i_ocmb )
+    Host_ody_omi_hss_tx_zcal( IStepError& i_stepError,
+                                  Target& i_ocmb )
     : HwpWorkItem( i_stepError, i_ocmb, "ody_omi_hss_tx_zcal" ) {}
 
     virtual errlHndl_t run_hwp( void ) override
@@ -73,11 +77,27 @@ class WorkItem_ody_omi_hss_tx_zcal: public HwpWorkItem
     }
 };
 
-class WorkItem_ody_omi_pretrain_adv: public HwpWorkItem
+class ChipOp_ody_omi_hss_tx_zcal: public HwpWorkItem
 {
   public:
-    WorkItem_ody_omi_pretrain_adv( IStepError& i_stepError,
-                                 const Target& i_ocmb )
+    ChipOp_ody_omi_hss_tx_zcal( IStepError& i_stepError,
+                                    Target& i_ocmb )
+    : HwpWorkItem( i_stepError, i_ocmb, "ody_omi_hss_tx_zcal" ) {}
+
+    virtual errlHndl_t run_hwp( void ) override
+    {
+        errlHndl_t l_err = nullptr;
+        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, IO_ODY_OMI_HSS_TX_ZCAL);
+        ERROR_EXIT:
+        return l_err;
+    }
+};
+
+class Host_ody_omi_pretrain_adv: public HwpWorkItem
+{
+  public:
+    Host_ody_omi_pretrain_adv( IStepError& i_stepError,
+                                   Target& i_ocmb )
     : HwpWorkItem( i_stepError, i_ocmb, "ody_omi_pretrain_adv" ) {}
 
     virtual errlHndl_t run_hwp( void ) override
@@ -85,6 +105,21 @@ class WorkItem_ody_omi_pretrain_adv: public HwpWorkItem
         errlHndl_t l_err = nullptr;
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
         FAPI_INVOKE_HWP(l_err, ody_omi_pretrain_adv, l_fapi_target);
+        return l_err;
+    }
+};
+
+class ChipOp_ody_omi_pretrain_adv: public HwpWorkItem
+{
+  public:
+    ChipOp_ody_omi_pretrain_adv( IStepError& i_stepError,
+                                     Target& i_ocmb )
+    : HwpWorkItem( i_stepError, i_ocmb, "ody_omi_pretrain_adv" ) {}
+
+    virtual errlHndl_t run_hwp( void ) override
+    {
+        errlHndl_t l_err = nullptr;
+        l_err = sendExecHWPRequest(iv_pTarget, IO_ODY_OMI_PRETRAIN_ADV);
         return l_err;
     }
 };
@@ -112,19 +147,20 @@ void* call_omi_pre_trainadv (void *io_pArgs)
 
         uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
 
+        //  Create a new workitem from this ocmb and feed it to the
+        //  thread pool for processing.  Thread pool handles workitem
+        //  cleanup.
         if (chipId == POWER_CHIPID::ODYSSEY_16)
         {
             if (l_runOdyHwpFromHost)
             {
-                //  Create a new workitem from this ocmb and feed it to the
-                //  thread pool for processing.  Thread pool handles workitem
-                //  cleanup.
-                threadpool.insert(new WorkItem_ody_omi_hss_tx_zcal(l_StepError,
-                                                                  *l_ocmb_target));
+                threadpool.insert(new Host_ody_omi_hss_tx_zcal(l_StepError,
+                                                              *l_ocmb_target));
             }
             else
             {
-                //@todo JIRA:PFHB-412 Istep12 chipops for Odyssey on P10
+                threadpool.insert(new ChipOp_ody_omi_hss_tx_zcal(l_StepError,
+                                                                *l_ocmb_target));
             }
         }
     }
@@ -184,19 +220,20 @@ void* call_omi_pre_trainadv (void *io_pArgs)
 
         uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
 
+        //  Create a new workitem from this ocmb and feed it to the
+        //  thread pool for processing.  Thread pool handles workitem
+        //  cleanup.
         if (chipId == POWER_CHIPID::ODYSSEY_16)
         {
             if (l_runOdyHwpFromHost)
             {
-                //  Create a new workitem from this ocmb and feed it to the
-                //  thread pool for processing.  Thread pool handles workitem
-                //  cleanup.
-                threadpool.insert(new WorkItem_ody_omi_pretrain_adv(l_StepError,
-                                                                   *l_ocmb_target));
+                threadpool.insert(new Host_ody_omi_pretrain_adv(l_StepError,
+                                                               *l_ocmb_target));
             }
             else
             {
-                //@todo JIRA:PFHB-412 Istep12 chipops for Odyssey on P10
+                threadpool.insert(new ChipOp_ody_omi_pretrain_adv(l_StepError,
+                                                                 *l_ocmb_target));
             }
         }
     }

@@ -264,14 +264,7 @@ void* call_mss_getecid (void *io_pArgs)
                 "Running ody_getecid HWP on target HUID 0x%.8X l_runOdyHwpFromHost:%d",
                 get_huid(l_ocmb_target), l_runOdyHwpFromHost);
 
-            if (l_runOdyHwpFromHost)
-            {
-                FAPI_INVOKE_HWP(l_err, ody_getecid, l_fapi_ocmb_target);
-            }
-            else
-            {
-                //@todo JIRA:PFHB-412 Istep12 Updates for Odyssey on P10
-            }
+            FAPI_INVOKE_HWP(l_err, ody_getecid, l_fapi_ocmb_target);
 
             if ( l_err )
             {
@@ -292,7 +285,7 @@ void* call_mss_getecid (void *io_pArgs)
                     get_huid(l_ocmb_target) );
             }
         }
-        else // Not an Explorer, continue to the next chip.
+        else // unknown, continue to the next chip.
         {
             TRACFCOMP( g_trac_isteps_trace,
                 "call_mss_getecid: Unknown chip ID 0x%X on target HUID 0x%.8X",
