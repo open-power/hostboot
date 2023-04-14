@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,6 +139,21 @@ template<>
 fapi2::ReturnCode get_rank_config<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         rank_configuration& o_rank_config);
 
+namespace workarounds
+{
+
+///
+/// @brief Sets up read/write address workaround bits in FARB2 if necessary
+/// @param[in] i_ports the vector of ports
+/// @param[in] i_program the vector of instructions
+/// @note this function will fail if CCS program contains read/write commands that target different ranks
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode setup_ccs_rdwr(
+    const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
+    const ccs::program<mss::mc_type::ODYSSEY>& i_program);
+
+} // namespace workarounds
 } // namespace ccs
 } // namespace mss
 

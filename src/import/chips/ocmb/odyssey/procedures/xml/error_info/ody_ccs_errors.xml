@@ -207,4 +207,62 @@
     </gard>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_ODY_CCS_INCONSISTENT_RANK</rc>
+    <description>
+        Odyssey CCS requires all reads and writes in a program to target the same rank.
+        The given program contains read or write commands to multiple ranks.
+    </description>
+    <ffdc>MC_TARGET</ffdc>
+    <ffdc>FIRST_PORT_RANK</ffdc>
+    <ffdc>MISMATCHED_PORT_RANK</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_ODY_CCS_XMETA_BOTH_HALVES_SELECTED</rc>
+    <description>
+        Odyssey CCS requires only one half selected in MODEQ for XMETA mode.
+    </description>
+    <ffdc>MC_TARGET</ffdc>
+    <ffdc>PORT_SEL</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_ODY_CCS_FAILURE</id>
+      <target>MC_TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
 </hwpErrors>

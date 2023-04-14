@@ -238,6 +238,7 @@ prd_obj_no_sim += ody_port.o
 prd_obj_no_sim += odyssey_memory_size.o
 prd_obj_no_sim += ody_memdiags.o
 prd_obj_no_sim += odyssey_pos.o
+prd_obj_no_sim += ody_attribute_accessors_manual.o
 prd_obj_no_sim += ody_mcbist.o
 prd_obj_no_sim += ody_maint_cmds.o
 prd_obj_no_sim += ecc_traits_odyssey.o

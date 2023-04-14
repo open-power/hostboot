@@ -94,9 +94,6 @@ fapi2::ReturnCode half_dimm_mode_helper(
 #endif
 
     return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-    return fapi2::current_err;
 }
 
 ///

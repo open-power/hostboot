@@ -276,11 +276,13 @@ fapi_try_exit:
 ///
 /// @brief Configures the chip to properly execute CCS instructions - EXPLORER specialization
 /// @param[in] i_ports the vector of ports
+/// @param[in] i_program the vector of instructions
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
 fapi2::ReturnCode setup_to_execute<mss::mc_type::EXPLORER>(
-    const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports)
+    const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
+    const ccs::program<mss::mc_type::EXPLORER>& i_program)
 {
     // Loops through all ports
     for(const auto& l_port : i_ports)

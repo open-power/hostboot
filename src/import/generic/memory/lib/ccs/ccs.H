@@ -307,11 +307,13 @@ fapi_try_exit:
 /// @tparam MC the MC type on which to operate
 /// @tparam P  the port type for this CCS engine - derived from i_ports
 /// @param[in] i_ports the vector of ports
+/// @param[in] i_program the vector of instructions
 /// @return FAPI2_RC_SUCCSS iff ok
 /// @note Code location for pre CCS execute workarounds
 ///
 template< mss::mc_type MC, fapi2::TargetType P>
-fapi2::ReturnCode setup_to_execute(const std::vector< fapi2::Target<P> >& i_ports);
+fapi2::ReturnCode setup_to_execute(const std::vector< fapi2::Target<P> >& i_ports,
+                                   const ccs::program<MC>& i_program);
 
 ///
 /// @brief Cleans up the chip from executing CCS instructions
@@ -501,7 +503,7 @@ static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_
     FAPI_INF("loading ccs instructions (%d) for %s", io_program.iv_instructions.size(), mss::c_str(i_target));
 
     // Pre CCS execution configuration
-    FAPI_TRY(setup_to_execute<MC>(i_ports));
+    FAPI_TRY(setup_to_execute<MC>(i_ports, io_program));
 
     // Stop the CCS engine just for giggles - it might be running ...
     FAPI_TRY( start_stop<MC>(i_target, mss::states::STOP), "Error stopping CCS engine before ccs::execution on %s",

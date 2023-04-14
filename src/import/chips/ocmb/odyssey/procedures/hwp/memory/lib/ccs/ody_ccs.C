@@ -46,6 +46,7 @@
 #include <ody_scom_ody_odc.H>
 #include <generic/memory/lib/ccs/ccs_instruction.H>
 #include <generic/memory/lib/ccs/ccs_ddr5_commands.H>
+#include <lib/ody_attribute_accessors_manual.H>
 
 // Generates linkage
 constexpr std::pair<uint64_t, uint64_t> ccsTraits<mss::mc_type::ODYSSEY>::CS_N[];
@@ -262,11 +263,13 @@ fapi2::ReturnCode instruction_t<mss::mc_type::ODYSSEY>::compute_parity(const fap
 ///
 /// @brief Configures the chip to properly execute CCS instructions - ODYSSEY specialization
 /// @param[in] i_ports the vector of ports
+/// @param[in] i_program the vector of instructions
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
 fapi2::ReturnCode setup_to_execute<mss::mc_type::ODYSSEY>(
-    const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports)
+    const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
+    const ccs::program<mss::mc_type::ODYSSEY>& i_program)
 {
     // Loops through all ports
     for(const auto& l_port : i_ports)
@@ -284,6 +287,9 @@ fapi2::ReturnCode setup_to_execute<mss::mc_type::ODYSSEY>(
         // Only one of these register per chip, so no need to continue looping
         break;
     }
+
+    // Check for read/write commands, and set up workaround bits if needed
+    FAPI_TRY(workarounds::setup_ccs_rdwr(i_ports, i_program));
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -346,19 +352,19 @@ fapi2::ReturnCode fail_type<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::T
                 .set_MC_TARGET(i_target)
                 .set_FAIL_TYPE(i_type)
                 .set_PORT_TARGET(i_port),
-                "%s CCS FAIL Read Miscompare", mss::c_str(i_port));
+                TARGTIDFORMAT " CCS FAIL Read Miscompare", GENTARGTID(i_port));
 
     // This error is likely due to a bad CCS engine/ Odyssey chip
     FAPI_ASSERT(TT::STAT_UE_SUE != i_type,
                 fapi2::MSS_ODY_CCS_UE_SUE()
                 .set_FAIL_TYPE(i_type)
                 .set_MC_TARGET(i_target),
-                "%s CCS FAIL UE or SUE Error", mss::c_str(i_target));
+                TARGTIDFORMAT " CCS FAIL UE or SUE Error", GENTARGTID(i_target));
 
     // Problem with the CCS engine
     FAPI_ASSERT(TT::STAT_HUNG != i_type,
                 fapi2::MSS_ODY_CCS_HUNG().set_MC_TARGET(i_target),
-                "%s CCS appears hung", mss::c_str(i_target));
+                TARGTIDFORMAT " CCS appears hung", GENTARGTID(i_target));
 fapi_try_exit:
     // Due to the PRD update, we need to check for FIR's
     // If any FIR's have lit up, this CCS fail could have been caused by the FIR
@@ -420,5 +426,107 @@ fapi2::ReturnCode get_rank_config<mss::mc_type::ODYSSEY>(const fapi2::Target<fap
     return fapi2::FAPI2_RC_SUCCESS;
 }
 
+namespace workarounds
+{
+
+///
+/// @brief Sets up read/write address workaround bits in FARB2 if necessary
+/// @param[in] i_ports the vector of ports
+/// @param[in] i_program the vector of instructions
+/// @note this function will fail if CCS program contains read/write commands that target different ranks
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode setup_ccs_rdwr(
+    const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
+    const ccs::program<mss::mc_type::ODYSSEY>& i_program)
+{
+    typedef ccsTraits<mss::mc_type::ODYSSEY> TT;
+
+    if (i_ports.size() == 0)
+    {
+        // No ports? Just exit
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_ports[0]);
+    uint64_t l_port_rank = NO_CHIP_SELECT_ACTIVE;
+    bool l_is_half_dimm_mode = false;
+    fapi2::buffer<uint64_t> l_farb2;
+
+    // Check for read/write commands and record what rank they go to
+    for (const auto& l_inst : i_program.iv_instructions)
+    {
+        if (mss::ccs::ddr5::is_write_or_read(l_inst))
+        {
+            if (l_port_rank == NO_CHIP_SELECT_ACTIVE)
+            {
+                // This is the first read/write command, so record the rank
+                l_port_rank = l_inst.iv_port_rank;
+            }
+            else
+            {
+                // This is not the first read/write, so assert that this command uses the same rank as previous
+                // Note that if we have some read/write with valid CS along with other(s) that have NO_CHIP_SELECT_ACTIVE
+                // this is ok, and the workaround bits in FARB2 only matter if the CS is active in a command
+                FAPI_ASSERT((l_inst.iv_port_rank == l_port_rank) || (l_inst.iv_port_rank == NO_CHIP_SELECT_ACTIVE),
+                            fapi2::MSS_ODY_CCS_INCONSISTENT_RANK()
+                            .set_MC_TARGET(l_mc)
+                            .set_FIRST_PORT_RANK(l_port_rank)
+                            .set_MISMATCHED_PORT_RANK(l_inst.iv_port_rank),
+                            TARGTIDFORMAT " mismatched ports in CCS program (%d, %d). All write and read data must go to same rank",
+                            GENTARGTID(l_mc), l_port_rank, l_inst.iv_port_rank);
+            }
+        }
+    }
+
+    if (l_port_rank == NO_CHIP_SELECT_ACTIVE)
+    {
+        FAPI_DBG(TARGTIDFORMAT " No rank-specific read/write commands, so no need to set RDWR_SET_M0/1", GENTARGTID(l_mc));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Set the workaround bits according to the rank we're targeting
+    FAPI_TRY(fapi2::getScom(l_mc, scomt::ody::ODC_SRQ_MBA_FARB2Q, l_farb2));
+
+    // M1 should be set to the port rank of the read/write commands since Odyssey only uses one DIMM per port
+    l_farb2.writeBit<scomt::ody::ODC_SRQ_MBA_FARB2Q_CFG_CCS_RDWR_SET_M1>(l_port_rank);
+    FAPI_DBG(TARGTIDFORMAT " read/write to rank %d, so setting RDWR_SET_M1 to %d", GENTARGTID(l_mc), l_port_rank,
+             l_port_rank);
+
+    FAPI_TRY(mss::ody::half_dimm_mode(l_mc, l_is_half_dimm_mode));
+
+    if (l_is_half_dimm_mode)
+    {
+        // For XMETA mode, M0 needs to be set to the DIMM half, AKA the selected channel (CHA=0, CHB=1)
+        constexpr uint64_t CHA = 0b1010;
+        constexpr uint64_t CHB = 0b0101;
+
+        fapi2::buffer<uint64_t> l_modeq;
+        uint8_t l_port_sel = 0;
+
+        FAPI_TRY( mss::getScom(l_mc, TT::MODEQ_REG, l_modeq) );
+        l_modeq.extractToRight<TT::PORT_SEL, TT::PORT_SEL_LEN>(l_port_sel);
+
+        // Error out if we have both DIMM halves (channels) selected in the CCS mode reg
+        // Note that we are currently selecting both channels for every CCS program so this
+        // will always fail for XMETA on programs we've set up in our lib code
+        FAPI_ASSERT(!((l_port_sel & CHA) && (l_port_sel & CHB)),
+                    fapi2::MSS_ODY_CCS_XMETA_BOTH_HALVES_SELECTED()
+                    .set_MC_TARGET(l_mc)
+                    .set_PORT_SEL(l_port_sel),
+                    TARGTIDFORMAT
+                    " PORT_SEL bits select both halves in CCS MODEQ (%d). Only one half can be selected at a time in XMETA mode",
+                    GENTARGTID(l_mc), l_port_sel);
+
+        l_farb2.writeBit<scomt::ody::ODC_SRQ_MBA_FARB2Q_CFG_CCS_RDWR_SET_M0>(l_port_sel & CHB);
+    }
+
+    FAPI_TRY(fapi2::putScom(l_mc, scomt::ody::ODC_SRQ_MBA_FARB2Q, l_farb2));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // namespace workarounds
 } // namespace ccs
 } // namespace mss
