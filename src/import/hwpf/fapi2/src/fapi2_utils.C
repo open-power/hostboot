@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,6 +94,12 @@ uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
     {
         switch( i_targType )
         {
+            case  TARGET_TYPE_DIMM:
+                {
+                    max_targets = MAX_DIMM_PER_PROC;
+                    break;
+                }
+
             case  TARGET_TYPE_EQ:
                 {
                     max_targets = MAX_EQ_PER_PROC;
@@ -106,21 +112,21 @@ uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
                     break;
                 }
 
-            case  TARGET_TYPE_EX:
+            case  TARGET_TYPE_FC:
                 {
-                    max_targets = MAX_EX_PER_PROC;
+                    max_targets = MAX_FC_PER_PROC;
                     break;
                 }
 
-            case  TARGET_TYPE_MCS:
+            case  TARGET_TYPE_IOLINK:
                 {
-                    max_targets = MAX_MCS_PER_PROC;
+                    max_targets = MAX_IOLINK_PER_PROC;
                     break;
                 }
 
-            case  TARGET_TYPE_MCA:
+            case  TARGET_TYPE_MDS_CTLR:
                 {
-                    max_targets = MAX_MCA_PER_PROC;
+                    max_targets = MAX_MDS_CTLR_PER_PROC;
                     break;
                 }
 
@@ -136,15 +142,15 @@ uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
                     break;
                 }
 
-            case  TARGET_TYPE_PHB:
+            case  TARGET_TYPE_NMMU:
                 {
-                    max_targets = MAX_PHB_PER_PROC;
+                    max_targets = MAX_NMMU_PER_PROC;
                     break;
                 }
 
-            case  TARGET_TYPE_MCBIST:
+            case  TARGET_TYPE_PHB:
                 {
-                    max_targets = MAX_MCBIST_PER_PROC;
+                    max_targets = MAX_PHB_PER_PROC;
                     break;
                 }
 
@@ -220,9 +226,38 @@ uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
                     break;
                 }
 
-            default:
-                max_targets = INVALID_TARGET_COUNT;
-                break;
+            case TARGET_TYPE_NONE:
+            case TARGET_TYPE_SYSTEM:
+            case TARGET_TYPE_PROC_CHIP:
+            case TARGET_TYPE_MEMBUF_CHIP:
+            case TARGET_TYPE_EX:
+            case TARGET_TYPE_MBA:
+            case TARGET_TYPE_MCS:
+            case TARGET_TYPE_XBUS:
+            case TARGET_TYPE_ABUS:
+            case TARGET_TYPE_L4:
+            case TARGET_TYPE_MCA:
+            case TARGET_TYPE_MCBIST:
+            case TARGET_TYPE_CAPP:
+            case TARGET_TYPE_DMI:
+            case TARGET_TYPE_OBUS_BRICK:
+            case TARGET_TYPE_SBE:
+            case TARGET_TYPE_PPE:
+            case TARGET_TYPE_MEM_PORT:
+            case TARGET_TYPE_RESERVED:
+            case TARGET_TYPE_POWER_IC:
+            case TARGET_TYPE_TEMP_SENSOR:
+            case TARGET_TYPE_MULTICAST:
+            case TARGET_TYPE_ALL:
+            case TARGET_TYPE_ALL_MC:
+            case TARGET_TYPE_CHIPS:
+            case TARGET_TYPE_CHIPLETS:
+            case TARGET_TYPE_MULTICASTABLE:
+            case TARGET_TYPE_MULTICAST_CHIP:
+                {
+                    max_targets = INVALID_TARGET_COUNT;
+                    break;
+                }
         }
 
         if( max_targets == INVALID_TARGET_COUNT )

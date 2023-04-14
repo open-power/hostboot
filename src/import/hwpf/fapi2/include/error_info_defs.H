@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,27 +167,31 @@ enum ErrorInfoType
 // @brief used when translating the SBE targets instance into a fapi pos.
 enum maxTargetsPerProc : uint16_t
 {
-    MAX_MCBIST_PER_PROC  =  2,  //Nimbus
-    MAX_MC_PER_PROC      =  2,  //Cumulus,Axone
-    MAX_MI_PER_PROC      =  4,  //Cumulus,Axone
-    MAX_MCS_PER_PROC     =  4,  //Nimbus
-    MAX_EQ_PER_PROC      =  6,  //Nimbus,Cumulus,Axone
-    MAX_MCA_PER_PROC     =  8,  //Nimbus
-    MAX_PHB_PER_PROC     =  6,  //Nimbus,Cumulus,Axone
-    MAX_EX_PER_PROC      = 12,  //Nimbus,Cumulus,Axone
-    MAX_CORE_PER_PROC    = 24,  //Nimbus,Cumulus,Axone
-    MAX_PERV_PER_PROC    = 56,  //Nimbus,Cumulus,Axone
-    MAX_OBUS_PER_PROC    =  4,  //Nimbus,Cumulus,Axone
-    MAX_PEC_PER_PROC     =  3,  //Nimbus,Cumulus,Axone
-    MAX_OMI_PER_PROC     = 16,  //Axone
-    MAX_OMIC_PER_PROC    =  6,  //Axone
-    MAX_MCC_PER_PROC     =  8,  //Axone
-    MAX_OCMB_CHIP_PER_PROC = MAX_OMI_PER_PROC,  //Axone
-    MAX_PAU_PER_PROC     = 6,
-    MAX_IOHS_PER_PROC    = 8,
-    MAX_PMIC_PER_PROC    = 64,
-    MAX_PAUC_PER_PROC    = 4,
-    MAX_GI2C_PER_PROC    = 64,
+    MAX_DIMM_PER_PROC        = 64,
+    MAX_EQ_PER_PROC          =  8,
+    MAX_FC_PER_PROC          = MAX_EQ_PER_PROC * 2, // P10 = 16
+    MAX_CORE_PER_PROC        = MAX_FC_PER_PROC * 2, // P10 = 32
+    MAX_GI2C_PER_PROC        = 64,
+    MAX_IOHS_PER_PROC        =  8,
+    MAX_IOLINK_PER_PROC      = 16,
+    MAX_MDS_CTLR_PER_PROC    = 16,
+    MAX_MC_PER_PROC          =  4,
+    MAX_MCC_PER_PROC         =  8,
+    MAX_MEM_PORT_PER_PROC    = 32,
+    MAX_MI_PER_PROC          =  4,
+    MAX_NMMU_PER_PROC        =  2,
+    MAX_OBUS_PER_PROC        =  4,
+    MAX_OCMB_CHIP_PER_PROC   = 16,
+    MAX_OMI_PER_PROC         = 16,
+    MAX_OMIC_PER_PROC        =  8,
+    MAX_PAU_PER_PROC         =  8,
+    MAX_PAUC_PER_PROC        =  4,
+    MAX_PERV_PER_PROC        = 56,
+    MAX_PHB_PER_PROC         =  6,
+    MAX_PEC_PER_PROC         =  2,
+    MAX_PMIC_PER_PROC        = 64,
+    MAX_POWER_IC_PER_PROC    = 64,
+    MAX_TEMP_SENSOR_PER_PROC = 64,
 
     INVALID_TARGET_COUNT = 0xFFFF,
     INVALID_FAPI_POS     = INVALID_TARGET_COUNT,
