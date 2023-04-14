@@ -26,7 +26,8 @@
 ROOTPATH = ../../..
 
 HIOMAP_DEPS = ast_mboxdd.o pnor_mboxdd.o pnor_hiomapdd.o
-PLDM_DEPS = pnor_pldmdd.o pnor_pldm_utils.o
+PLDM_DEPS += $(if $(CONFIG_FILE_XFER_VIA_PLDM),pnor_pldmdd.o)
+PLDM_DEPS += $(if $(CONFIG_FILE_XFER_VIA_PLDM),pnor_pldm_utils.o)
 
 MODULE = pnor
 OBJS += pnor_utils.o

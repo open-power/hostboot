@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,7 +92,7 @@ void* host_set_ipl_parms( void *io_pArgs )
             "l_semiData.magic=0x%X l_semiData.reboot_cnt=0x%X, l_semiData.mfg_term_reboot=0x%X",
             l_semiData.magic, l_semiData.reboot_cnt, l_semiData.mfg_term_reboot);
 
-#ifdef CONFIG_PLDM
+#ifdef CONFIG_FILE_XFER_VIA_PLDM
 
         errlHndl_t errl = PLDM_PNOR::parse_rt_lid_ids();
         if(errl)
@@ -102,7 +102,9 @@ void* host_set_ipl_parms( void *io_pArgs )
             captureError(errl, l_stepError, ISTEP_COMP_ID);
             break;
         }
+#endif
 
+#ifdef CONFIG_PLDM
         // Force the update of the VPD ECC data if there is a mismatch, for BMC only
         bool l_forceEccUpdateFlag = true;
         const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
