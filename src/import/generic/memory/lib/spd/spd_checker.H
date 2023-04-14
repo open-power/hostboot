@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -120,9 +120,13 @@ fapi2::ReturnCode max_timing_range(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
                  .set_TIMING(i_timing)
                  .set_UPPER_BOUND(TT::UPPER_BOUND)
                  .set_LOWER_BOUND(TT::LOWER_BOUND),
-                 "Failed timing parameter check for %s. %d is outside of %d <= %d for SPD revision 0x%02x",
-                 spd::c_str(i_target), i_timing, TT::LOWER_BOUND, TT::UPPER_BOUND, i_rev );
-
+#ifdef __PPE__
+                 TARGTIDFORMAT "Failed timing parameter check. %d is outside of %d for SPD revision 0x%02x",
+                 TARGTID, i_timing, TT::UPPER_BOUND, i_rev );
+#else
+                 TARGTIDFORMAT "Failed timing parameter check. %d is outside of %d <= %d for SPD revision 0x%02x",
+                 TARGTID, i_timing, TT::LOWER_BOUND, TT::UPPER_BOUND, i_rev );
+#endif
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
@@ -168,8 +172,8 @@ inline fapi2::ReturnCode dram_gen(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
                 .set_DRAM_GEN(i_dram_gen)
                 .set_FUNCTION(i_func_code)
                 .set_DIMM_TARGET(i_target),
-                "Invalid DRAM gen recieved (%d) for %s",
-                i_dram_gen, spd::c_str(i_target));
+                "Invalid DRAM gen recieved (%d) for " TARGTIDFORMAT,
+                i_dram_gen, TARGTID);
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -198,8 +202,39 @@ inline fapi2::ReturnCode reserved_values(const fapi2::Target<TT>& i_target,
                  .set_FUNCTION_CODE(i_ffdc)
                  .set_FAILING_VALUE(i_input)
                  .set_OCMB_TARGET(i_target),
-                 "Reserved bits seen on %s. Value seen:0x%02x",
-                 spd::c_str(i_target), i_input );
+                 TARGTIDFORMAT "Reserved bits seen. Value seen:0x%02x",
+                 TARGTID, i_input );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to check for reserved values
+/// @tparam TT FAPI2 target type
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_reserved_bits array of SORTED reserved bits to sort through
+/// @param[in] i_ffdc ffdc function code
+/// @param[in] i_input value to check
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+/// Note : PPE compatible version of function
+template < fapi2::TargetType TT, size_t N>
+inline fapi2::ReturnCode reserved_values(const fapi2::Target<TT>& i_target,
+        const uint8_t (&i_reserved_bits)[N],
+        const generic_ffdc_codes i_ffdc,
+        const uint8_t i_input)
+{
+    // Lets make an additional check that we aren't being set to a reserved field
+    FAPI_ASSERT( !std::binary_search(i_reserved_bits, i_reserved_bits + (N - 1), i_input),
+                 fapi2::MSS_INVALID_SPD_RESERVED_BITS()
+                 .set_FUNCTION_CODE(i_ffdc)
+                 .set_FAILING_VALUE(i_input)
+                 .set_OCMB_TARGET(i_target),
+                 "Reserved bits seen on " TARGTIDFORMAT ". Value seen:0x%02x",
+                 TARGTID, i_input );
 
     return fapi2::FAPI2_RC_SUCCESS;
 

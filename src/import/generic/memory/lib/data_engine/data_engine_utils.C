@@ -361,6 +361,33 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Retrieve SPD data from DIMM
+/// @param[in] i_target the DIMM target
+/// @param[out] o_spd spd array
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+/// Note : PPE compatible version of function
+fapi2::ReturnCode get_raw_data_dimm(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    uint8_t (&o_spd)[mss::spd::DDR5_SPD_SIZE])
+{
+    // Get SPD blob size
+    size_t l_size = 0;
+
+    FAPI_TRY( fapi2::getSPD(i_target, nullptr, l_size),
+              TARGTIDFORMAT ". Failed to retrieve SPD blob size", TARGTID);
+
+    FAPI_DBG( "SPD size %d for " TARGTIDFORMAT, l_size, TARGTID);
+
+    // Retrieve SPD data content
+    FAPI_TRY( fapi2::getSPD(i_target, o_spd, l_size),
+              TARGTIDFORMAT "Failed to retrieve SPD data", TARGTID);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Retrieve module specific portion of SPD data from planar config
 /// @param[in] i_target the OCMB_CHIP target
 /// @param[out] o_spd reference to std::vector
@@ -472,6 +499,24 @@ fapi2::ReturnCode get_raw_data(
         // Then combine them into a single blob like we get from a DDIMM
         mss::spd::combine_planar_spd(l_planar_vpd, l_isdimm_spd, o_spd);
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Retrieve SPD data
+/// @param[in] i_target the DIMM target
+/// @param[in] i_is_planar the value of ATTR_MEM_MRW_IS_PLANAR
+/// @param[out] o_spd spd array
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+/// Note : PPE compatible version of function
+fapi2::ReturnCode get_raw_data(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    uint8_t (&o_spd)[mss::spd::DDR5_SPD_SIZE])
+{
+    FAPI_TRY(mss::spd::get_raw_data_dimm(i_target, o_spd));
 
 fapi_try_exit:
     return fapi2::current_err;

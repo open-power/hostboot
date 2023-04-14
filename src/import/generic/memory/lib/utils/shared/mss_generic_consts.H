@@ -1153,6 +1153,14 @@ enum class speed_equality : uint8_t
 
 namespace spd
 {
+///
+/// @brief DDR5 spd and EFD array size, used for PPE compatible code since it cannot use vectors
+///
+enum ddr5_spd
+{
+    DDR5_SPD_SIZE = 4096,
+    DDR5_EFD_SIZE = 512,
+};
 
 ///
 /// @brief SPD revisions - not tied any particular module

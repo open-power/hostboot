@@ -947,10 +947,16 @@ class base_0_0 : public mss::spd::base
             l_field = (l_channels_per_dimm * l_bus_width_per_channel * l_prim_die_count * l_dram_density * l_logical_rank_per_dimm)
                       / (8 * l_dram_width);
 
+#ifdef __PPE__
+            FAPI_DBG(GENTARGTIDFORMAT “ DIMM size = % d => % d * \“, GENTARGTID(iv_dimm), l_field, l_channels_per_dimm);
+            FAPI_DBG(GENTARGTIDFORMAT ” ( % d / % d) * % d * \“, GENTARGTID(iv_dimm), l_bus_width_per_channel, l_dram_width,
+                     l_prim_die_count);
+            FAPI_DBG(GENTARGTIDFORMAT “( % d / 8) * % d”, GENTARGTID(iv_dimm), l_dram_density, l_logical_rank_per_dimm );
+#else
             FAPI_DBG("%s DIMM size = %d => %d * (%d / %d) * %d * (%d / 8) * %d",
                      spd::c_str(iv_dimm), l_field, l_channels_per_dimm, l_bus_width_per_channel, l_dram_width,
                      l_prim_die_count, l_dram_density, l_logical_rank_per_dimm );
-
+#endif
             FAPI_TRY(mss::attr::set_dimm_size(iv_dimm, l_field));
 
         fapi_try_exit:

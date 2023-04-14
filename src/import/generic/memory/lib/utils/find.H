@@ -37,6 +37,7 @@
 #define _MSS_FIND_H
 
 #include <fapi2.H>
+#include <generic/memory/lib/utils/mss_pair.H>
 
 #ifndef __PPE__
     #include <vector>
@@ -509,6 +510,73 @@ inline fapi2::ReturnCode lookup_table_check(const fapi2::Target<T>& i_target,
                  "Failed to find a mapped value for %d on %s",
                  i_key,
                  mss::spd::c_str(i_target) );
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief find a key value from a C-style array of STL pairs
+/// @tparam T  input type
+/// @tparam OT the output type to be returned
+/// @tparam N size of the array being passed in
+/// @param[in] i_array the input array of pairs
+/// @param[in] i_key the "map" key
+/// @param[in] o_value the value found from given key
+/// @return true if value is found, false otherwise
+/// @note To use on short arrays. O(N), simple search
+///
+/// Note : PPE compatible version of function
+template<typename T, typename OT, size_t N>
+bool find_value_from_key_mss_pair( const mss::pair<T, OT> (&i_array)[N],
+                                   const T& i_key,
+                                   OT& o_value)
+{
+    // TK Use sort and binary search for larger arrays
+    for (size_t i = 0; i < N; i++)
+    {
+        if (i_array[i].first == i_key)
+        {
+            o_value = i_array[i].second;
+            return true;
+        }
+    }
+
+    FAPI_ERR ("No match found for find_value_from_key");
+    return false;
+}
+
+///
+/// @brief Mapping boilerplate check
+/// @tparam T FAPI2 target type
+/// @tparam IT map key type
+/// @tparam OT map value type
+/// @tparam N size of the array being passed in
+/// @param[in] i_target the FAPI target
+/// @param[in] i_map SPD to attribute data mapping
+/// @param[in] i_ffdc_code FFDC function code
+/// @param[in] i_key Key to query map
+/// @param[out] o_output value from key
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+/// Note : PPE compatible version of function
+template< fapi2::TargetType T, typename IT, typename OT, size_t N>
+inline fapi2::ReturnCode lookup_table_check(const fapi2::Target<T>& i_target,
+        const mss::pair<IT, OT> (&i_map)[N],
+        const generic_ffdc_codes i_ffdc_code,
+        const IT i_key,
+        OT& o_output)
+{
+    const bool l_is_val_found = mss::find_value_from_key_mss_pair(i_map, i_key, o_output);
+    FAPI_ASSERT( l_is_val_found,
+                 fapi2::MSS_LOOKUP_FAILED()
+                 .set_KEY(i_key)
+                 .set_DATA(o_output)
+                 .set_FUNCTION(i_ffdc_code)
+                 .set_TARGET(i_target),
+                 "Failed to find a mapped value for %d on TARGTIDFORMAT",
+                 i_key,
+                 TARGTID );
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;

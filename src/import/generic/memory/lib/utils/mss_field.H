@@ -43,7 +43,6 @@
     #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
     #include <generic/memory/lib/utils/mss_generic_check.H>
 #endif
-
 // reused TARGTID & TARGTIDFORMAT macro defined in generic/memory/lib/utils/mss_generic_check.H
 
 namespace mss
@@ -104,6 +103,17 @@ class field_t
         const size_t get_byte(const std::vector<uint8_t>& i_data) const;
 
         ///
+        /// @brief Byte index getter
+        /// @return the byte index for this field
+        ///
+        const size_t get_byte(const uint8_t (&i_spd)[mss::spd::DDR5_EFD_SIZE]) const;
+
+        ///
+        /// @brief Byte index getter
+        /// @return the byte index for this field
+        ///
+        const size_t get_byte(const uint8_t (&i_spd)[mss::spd::DDR5_SPD_SIZE]) const;
+        ///
         /// @brief Starting bit getter
         /// @return the starting bit position for this field
         ///
@@ -134,11 +144,31 @@ inline const size_t field_t<mss::endian::BIG>::get_byte(const std::vector<uint8_
 }
 
 ///
-/// @brief Byte index getter - big endian specialization
+/// @brief Byte index getter - little endian specialization
 /// @return the byte index for this field
 ///
 template<>
 inline const size_t field_t<mss::endian::LITTLE>::get_byte(const std::vector<uint8_t>& i_data) const
+{
+    return iv_byte;
+}
+
+///
+/// @brief Byte index getter - little endian specialization
+/// @return the byte index for this field
+///
+template<>
+inline const size_t field_t<mss::endian::LITTLE>::get_byte(const uint8_t (&i_efd)[mss::spd::DDR5_EFD_SIZE]) const
+{
+    return iv_byte;
+}
+
+///
+/// @brief Byte index getter - little endian specialization
+/// @return the byte index for this field
+///
+template<>
+inline const size_t field_t<mss::endian::LITTLE>::get_byte(const uint8_t (&i_spd)[mss::spd::DDR5_SPD_SIZE]) const
 {
     return iv_byte;
 }
@@ -211,6 +241,48 @@ fapi_try_exit:
 #ifndef __PPE__
 
 ///
+/// @brief Helper function to extract byte information
+/// @tparam E endian type
+/// @tparam F the field to extract
+/// @tparam T the fapi2 target type
+/// @tparam OT output type
+/// @tparam FFDC ffdc code type
+/// @tparam N size of the spd data array
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_data the data
+/// @param[in] i_ffdc_codes FFDC code
+/// @param[out] o_value raw value for this field
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< mss::endian E,
+          const mss::field_t<E>& F,
+          fapi2::TargetType T,
+          typename OT,
+          typename FFDC,
+          size_t N>
+inline fapi2::ReturnCode get_field(const fapi2::Target<T>& i_target,
+                                   const uint8_t (&i_data)[N],
+                                   const FFDC i_ffdc_codes,
+                                   OT& o_value)
+{
+    const size_t BYTE = F.get_byte(i_data);
+    FAPI_TRY(check::index_within_bounds(i_target, BYTE, N, i_ffdc_codes));
+
+    {
+        // clear out stale state
+        o_value = 0;
+
+        // Extracting desired bits
+        // API enforces uint8_t vector data, so no conversion check needed to uint8_t buffer
+        fapi2::buffer<uint8_t>(i_data[BYTE]).extractToRight<F.get_start(), F.get_length()>(o_value);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
 /// @brief Helper function to set byte field information
 /// @tparam E endian type
 /// @tparam F the field to extract
@@ -258,6 +330,58 @@ inline fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Helper function to set byte field information
+/// @tparam E endian type
+/// @tparam F the field to extract
+/// @tparam T the fapi2 target type
+/// @tparam IT input type
+/// @tparam FFDC ffdc code type
+/// @param[in] i_target the fapi2 target
+/// @param[in] i_setting the setting to set
+/// @param[in] i_ffdc_codes FFDC code
+/// @param[in,out] io_data the data to modify
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< mss::endian E,
+          const mss::field_t<E>& F,
+          fapi2::TargetType T,
+          typename IT,
+          typename FFDC,
+          size_t N >
+inline fapi2::ReturnCode set_field(const fapi2::Target<T>& i_target,
+                                   const IT i_setting,
+                                   const FFDC i_ffdc_codes,
+                                   uint8_t (&io_data)[N])
+{
+    const size_t BYTE = F.get_byte(io_data);
+
+    FAPI_TRY(check::index_within_bounds(i_target, BYTE, N, i_ffdc_codes));
+    FAPI_TRY(check::invalid_type_conversion<uint8_t>(i_target, i_setting, i_ffdc_codes));
+
+    {
+        // Insert desired setting
+        fapi2::buffer<uint8_t> l_buffer(io_data[BYTE]);
+        l_buffer.template insertFromRight<F.get_start(), F.get_length()>(i_setting);
+
+        // Safe to set since no implicit conversion errors will occur here
+        io_data[BYTE] = l_buffer;
+    }
+
+    FAPI_DBG(TARGTIDFORMAT " data[%d] = 0x%02x. Field with start bit %d, bit len %d, has data 0x%02x.",
+             TARGTID,
+             BYTE,
+             io_data[BYTE],
+             F.get_start(),
+             F.get_length(),
+             i_setting);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
 #endif // PPE
 ///
 /// @brief byte field reader
@@ -312,6 +436,62 @@ inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief byte field reader
+/// @tparam E endian type
+/// @tparam F the byte field to read
+/// @tparam TT traits associated with F - required
+/// @tparam T the fapi2 target type
+/// @param[in] i_target the dimm target
+/// @param[in] i_data the data
+/// @param[in] i_ffdc_codes FFDC code
+/// @param[out] o_value raw value for this field
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< mss::endian E,
+          const mss::field_t<E>& F,
+          typename TT,
+          fapi2::TargetType T,
+          typename OT,
+          typename FFDC,
+          size_t N >
+inline fapi2::ReturnCode get_field( const fapi2::Target<T>& i_target,
+                                    const uint8_t (&i_data)[N],
+                                    const FFDC i_ffdc_codes,
+                                    OT& o_value )
+{
+    uint8_t l_temp = 0;
+    FAPI_TRY( (get_field<E, F>(i_target, i_data, i_ffdc_codes, l_temp)),
+              "Failed get_field() for " TARGTIDFORMAT , TARGTID );
+
+    // Test if retrieved data seems valid
+    FAPI_TRY( check::invalid_value(i_target,
+                                   conditional( l_temp,
+                                           TT::COMPARISON_VAL,
+                                           typename TT::template COMPARISON_OP<uint8_t>() ),
+                                   F.get_byte(i_data),
+                                   l_temp,
+                                   i_ffdc_codes,
+                                   TT::FIELD_STR),
+              "%s failed check::invalid_value() for " TARGTIDFORMAT ,
+              TT::FIELD_STR, TARGTID(i_target) );
+
+    // Implicit (possible) promotion during conversion is safe
+    o_value = static_cast<OT>(l_temp);
+
+#ifndef __PPE__
+    FAPI_DBG("%s: 0x%02x for " TARGTIDFORMAT ,
+             TT::FIELD_STR,
+             o_value,
+             TARGTID(i_target));
+#endif
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 #ifndef __PPE__
 ///
 /// @brief byte field writer
@@ -359,6 +539,58 @@ inline fapi2::ReturnCode set_field( const fapi2::Target<T>& i_target,
              BYTE,
              io_data[BYTE],
              spd::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief byte field writer
+/// @tparam E endian type
+/// @tparam F the byte field to read
+/// @tparam TT traits associated with writer
+/// @tparam T the fapi2 target type
+/// @tparam IT input type
+/// @tparam FFDC ffdc code type
+/// @param[in] i_target the dimm target
+/// @param[in] i_setting value to set for field
+/// @param[in] i_ffdc_codes FFDC code
+/// @param[in,out] io_data the data to modify
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template< mss::endian E,
+          const mss::field_t<E>& F,
+          typename TT,
+          fapi2::TargetType T,
+          typename IT,
+          typename FFDC,
+          size_t N >
+inline fapi2::ReturnCode set_field( const fapi2::Target<T>& i_target,
+                                    const IT i_setting,
+                                    const FFDC i_ffdc_codes,
+                                    uint8_t (&io_data)[N] )
+{
+    const size_t BYTE = F.get_byte(io_data);
+
+    // Test if the data we want to set is valid for this field
+    FAPI_TRY( check::invalid_value(i_target,
+                                   conditional( i_setting,
+                                           TT::COMPARISON_VAL,
+                                           typename TT::template COMPARISON_OP<IT>() ),
+                                   BYTE,
+                                   i_setting,
+                                   i_ffdc_codes),
+              "Failed fail_for_invalid_value() for " TARGTIDFORMAT , TARGTID(i_target) );
+
+    FAPI_TRY( (set_field<E, F>(i_target, i_setting, i_ffdc_codes, io_data)),
+              "Failed set_field() for " TARGTIDFORMAT , TARGTID(i_target) );
+
+    FAPI_DBG("%s: Set value of 0x%02x. Data for buffer at byte %d, is now 0x%02x for " TARGTIDFORMAT ,
+             TT::FIELD_STR,
+             i_setting,
+             BYTE,
+             io_data[BYTE],
+             TARGTID(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,6 +116,45 @@ fapi2::ReturnCode get_field_spd(
     const std::vector<uint8_t>& i_binary,
     const uint16_t i_ffdc_code,
     uint8_t& o_field);
+
+///
+/// @brief Get the provided field from the passed in binary
+///
+/// @tparam N size of i_binary array
+/// @param[in] i_target Target for error traces
+/// @param[in] i_field field parameter including byte, start, len
+/// @param[in] i_binary binary (SPD/EFD)
+/// @param[in] i_ffdc_code FFDC code for error traces
+/// @param[out] o_field resulting field
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+/// Note : PPE compatible version of function
+template <size_t N>
+fapi2::ReturnCode get_field_spd(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const mss::field_t<mss::endian::LITTLE>& i_field,
+    const uint8_t (&i_binary)[N],
+    const uint16_t i_ffdc_code,
+    uint8_t& o_field)
+{
+    const size_t BYTE = i_field.get_byte(i_binary);
+
+    // clear out stale state
+    o_field = 0;
+
+    // Passes target for better FFDC
+    FAPI_TRY(mss::spd::index_within_bounds_spd(i_target, BYTE, N, i_ffdc_code));
+
+    {
+        // Extracting desired bits
+        // API enforces uint8_t vector data, so no conversion check needed to uint8_t buffer
+        fapi2::buffer<uint8_t> l_byte(i_binary[BYTE]);
+        FAPI_TRY(l_byte.extractToRight(o_field, i_field.get_start(), i_field.get_length()));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 }// spd
 }// mss
