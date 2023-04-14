@@ -3864,7 +3864,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
 
     // ATxImpedance (set to DIMM0, rank0 value)
     {
-        constexpr uint16_t ATxIMPCMD_Arr[mss::ody::sizes::SPD_ATXCMD_DECODE_MAX]
+        constexpr uint32_t ATxIMPCMD_Arr[mss::ody::sizes::SPD_ATXCMD_DECODE_MAX]
         __attribute__ ((aligned (8))) =
         {
             // These values are pulled from the DDR5 DDIMM SPD doc rev.1.21 for EFD Bytes 32
