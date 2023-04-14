@@ -626,7 +626,7 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
     // from Odyssey, but interrupts from the OCMB are not enabled yet.
     TargetHandleList l_allOCMBs;
     getAllChips(l_allOCMBs, TYPE_OCMB_CHIP, true);
-    for (const auto & l_ocmb : l_allOCMBs)
+    for (const auto l_ocmb : l_allOCMBs)
     {
         uint32_t l_chipId = l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>();
         if (l_chipId == POWER_CHIPID::ODYSSEY_16)
@@ -637,6 +637,26 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
         }
         // There can be no mixing of OCMB types so only need to check one
         break;
+    }
+
+    // Enable scoms via the Odyssey SBE now that the the SBE is running
+    // and we can send it chipops
+    for (const auto l_ocmb : l_allOCMBs)
+    {
+        uint32_t l_chipId = l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>();
+        if (l_chipId == POWER_CHIPID::ODYSSEY_16)
+        {
+            ScomSwitches l_switches = l_ocmb->getAttr<ATTR_SCOM_SWITCHES>();
+
+            // Turn on SBE SCOM 
+            l_switches.useSbeScom = 1;
+
+            // Turn off I2C SCOM since all scoms are restricted on
+            // secure parts
+            l_switches.useI2cScom = 0;
+
+            l_ocmb->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+        }
     }
 
     } while (false);
