@@ -106,7 +106,7 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     l_dl0_cya.set_FRBUF_FULL(1);
     FAPI_TRY(l_dl0_cya.putScom(i_target));
 
-    l_ppe_firs.mc_omi_fir_set(i_target, l_mfg_mode);
+    l_ppe_firs.mc_omi_fir_set(i_target);
     l_ppe_firs.tlx_fir_set(i_target);
 
 fapi_try_exit:
