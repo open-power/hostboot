@@ -35,15 +35,16 @@ owners:
 - deepak.kodihalli.83@gmail.com
 - rushtotom@gmail.com
 - sampmisr@in.ibm.com
+- manojkiran.eda@gmail.com
 
 reviewers:
 - liuxiwei@inspur.com
-- manojkiran.eda@gmail.com
 
 matchers:
 - partial_regex: ibm
   owners:
   - sampmisr@in.ibm.com
+  - manojkiran.eda@gmail.com
 - partial_regex: tools/visualize-pdr
   owners:
   - manojkiran.eda@gmail.com

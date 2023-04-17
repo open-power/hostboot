@@ -29,6 +29,36 @@
             }
         },
         {
+            "containerID": 0,
+            "entityType": 57347,
+            "entityInstance": 0,
+            "sensorOffset": 1,
+            "stateSetId": 15,
+            "event_states": [1, 2, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/network/hypervisor/eth0/ipv6/addr0",
+                "interface": "xyz.openbmc_project.Object.Enable",
+                "property_name": "Enabled",
+                "property_type": "bool",
+                "property_values": [true, false, false]
+            }
+        },
+        {
+            "containerID": 0,
+            "entityType": 57347,
+            "entityInstance": 1,
+            "sensorOffset": 1,
+            "stateSetId": 15,
+            "event_states": [1, 2, 3],
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/network/hypervisor/eth1/ipv6/addr0",
+                "interface": "xyz.openbmc_project.Object.Enable",
+                "property_name": "Enabled",
+                "property_type": "bool",
+                "property_values": [true, false, false]
+            }
+        },
+        {
             "containerID": 1,
             "entityType": 32801,
             "entityInstance": 0,

@@ -136,6 +136,70 @@
             "default_string": "",
             "helpText": "Provides the host a mapping of the lid IDs to human readable names.",
             "displayName": "Hostboot Lid IDs"
+        },
+        {
+            "attribute_name": "hb_power_PS0_model",
+            "string_type": "ASCII",
+            "minimum_string_length": 0,
+            "maximum_string_length": 4,
+            "default_string_length": 4,
+            "default_string": "0000",
+            "helpText": "Specifies the power supply 0 model CCIN in hex.",
+            "displayName": "Power Supply 0 Model",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/powersupply0",
+                "interface": "xyz.openbmc_project.Inventory.Decorator.Asset",
+                "property_type": "string",
+                "property_name": "Model"
+            }
+        },
+        {
+            "attribute_name": "hb_power_PS1_model",
+            "string_type": "ASCII",
+            "minimum_string_length": 0,
+            "maximum_string_length": 4,
+            "default_string_length": 4,
+            "default_string": "0000",
+            "helpText": "Specifies the power supply 1 model CCIN in hex.",
+            "displayName": "Power Supply 1 Model",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/powersupply1",
+                "interface": "xyz.openbmc_project.Inventory.Decorator.Asset",
+                "property_type": "string",
+                "property_name": "Model"
+            }
+        },
+        {
+            "attribute_name": "hb_power_PS2_model",
+            "string_type": "ASCII",
+            "minimum_string_length": 0,
+            "maximum_string_length": 4,
+            "default_string_length": 4,
+            "default_string": "0000",
+            "helpText": "Specifies the power supply 2 model CCIN in hex.",
+            "displayName": "Power Supply 2 Model",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/powersupply2",
+                "interface": "xyz.openbmc_project.Inventory.Decorator.Asset",
+                "property_type": "string",
+                "property_name": "Model"
+            }
+        },
+        {
+            "attribute_name": "hb_power_PS3_model",
+            "string_type": "ASCII",
+            "minimum_string_length": 0,
+            "maximum_string_length": 4,
+            "default_string_length": 4,
+            "default_string": "0000",
+            "helpText": "Specifies the power supply 3 model CCIN in hex.",
+            "displayName": "Power Supply 3 Model",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/powersupply3",
+                "interface": "xyz.openbmc_project.Inventory.Decorator.Asset",
+                "property_type": "string",
+                "property_name": "Model"
+            }
         }
     ]
 }

@@ -605,8 +605,7 @@ Response Handler::setNumericEffecterValue(const pldm_msg* request,
     }
 
     int rc = decode_set_numeric_effecter_value_req(
-        request, payloadLength, &effecterId, &effecterDataSize,
-        reinterpret_cast<uint8_t*>(&effecterValue));
+        request, payloadLength, &effecterId, &effecterDataSize, effecterValue);
 
     if (rc == PLDM_SUCCESS)
     {

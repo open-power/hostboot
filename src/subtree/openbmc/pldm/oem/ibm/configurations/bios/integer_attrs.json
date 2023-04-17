@@ -194,6 +194,70 @@
             "default_value": 0,
             "helpText": "Only used when pvm_rpd_policy is set to “Scheduled”. This value represents the time of day in seconds at which to run the processor diagnostics.",
             "displayName": "RPD Scheduled Run Time of Day in Seconds"
+        },
+        {
+            "attribute_name": "hb_power_PS0_input_voltage",
+            "lower_bound": 0,
+            "upper_bound": 65535,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "readOnly": true,
+            "helpText": "Specifies power supply 0 input voltage(volts)",
+            "displayName": "Power Supply 0 input Voltage",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/sensors/voltage/ps0_input_voltage_rating",
+                "interface": "xyz.openbmc_project.Sensor.Value",
+                "property_type": "double",
+                "property_name": "Value"
+            }
+        },
+        {
+            "attribute_name": "hb_power_PS1_input_voltage",
+            "lower_bound": 0,
+            "upper_bound": 65535,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "readOnly": true,
+            "helpText": "Specifies power supply 1 input voltage(volts)",
+            "displayName": "Power Supply 1 input Voltage",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/sensors/voltage/ps1_input_voltage_rating",
+                "interface": "xyz.openbmc_project.Sensor.Value",
+                "property_type": "double",
+                "property_name": "Value"
+            }
+        },
+        {
+            "attribute_name": "hb_power_PS2_input_voltage",
+            "lower_bound": 0,
+            "upper_bound": 65535,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "readOnly": true,
+            "helpText": "Specifies power supply 2 input voltage(volts)",
+            "displayName": "Power Supply 2 input Voltage",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/sensors/voltage/ps2_input_voltage_rating",
+                "interface": "xyz.openbmc_project.Sensor.Value",
+                "property_type": "double",
+                "property_name": "Value"
+            }
+        },
+        {
+            "attribute_name": "hb_power_PS3_input_voltage",
+            "lower_bound": 0,
+            "upper_bound": 65535,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "readOnly": true,
+            "helpText": "Specifies power supply 3 input voltage(volts)",
+            "displayName": "Power Supply 3 input Voltage",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/sensors/voltage/ps3_input_voltage_rating",
+                "interface": "xyz.openbmc_project.Sensor.Value",
+                "property_type": "double",
+                "property_name": "Value"
+            }
         }
     ]
 }

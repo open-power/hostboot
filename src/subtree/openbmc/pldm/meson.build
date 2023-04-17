@@ -1,5 +1,5 @@
 project('pldm', ['c', 'cpp'],
-        version: '0.1', meson_version: '>=0.57.0',
+        version: '0.1', meson_version: '>=0.58.0',
         default_options: [
           'warning_level=3',
           'default_library=shared',
@@ -188,7 +188,7 @@ executable(
 
 if get_option('systemd').enabled()
   systemd_system_unit_dir = dependency('systemd').get_variable(
-          pkgconfig: 'systemdsystemunitdir')
+          'systemdsystemunitdir')
 
   configure_file(
     copy: true,

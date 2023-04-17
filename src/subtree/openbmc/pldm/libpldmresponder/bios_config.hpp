@@ -158,6 +158,9 @@ class BIOSConfig
     using propName = std::string;
     using DbusChObjProperties = std::map<propName, pldm::utils::PropertyValue>;
 
+    using ifaceName = std::string;
+    using DbusIfacesAdded = std::map<ifaceName, DbusChObjProperties>;
+
     // vector to catch the D-Bus property change signals for BIOS attributes
     std::vector<std::unique_ptr<sdbusplus::bus::match_t>> biosAttrMatch;
 
@@ -198,6 +201,24 @@ class BIOSConfig
                             msg.read(iface, props);
                             processBiosAttrChangeNotification(props,
                                                               biosAttrIndex);
+                        }));
+
+                biosAttrMatch.push_back(
+                    std::make_unique<sdbusplus::bus::match_t>(
+                        pldm::utils::DBusHandler::getBus(),
+                        interfacesAdded() + argNpath(0, dBusMap->objectPath),
+                        [this, biosAttrIndex, interface = dBusMap->interface](
+                            sdbusplus::message_t& msg) {
+                            sdbusplus::message::object_path path;
+                            DbusIfacesAdded interfaces;
+
+                            msg.read(path, interfaces);
+                            auto ifaceIt = interfaces.find(interface);
+                            if (ifaceIt != interfaces.end())
+                            {
+                                processBiosAttrChangeNotification(
+                                    ifaceIt->second, biosAttrIndex);
+                            }
                         }));
             }
         }

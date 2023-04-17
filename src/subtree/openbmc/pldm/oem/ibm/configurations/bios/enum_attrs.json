@@ -37,14 +37,14 @@
         },
         {
             "attribute_name": "vmi_if0_ipv6_method",
-            "possible_values": ["IPv6Static", "IPv6DHCP", "SLAAC"],
+            "possible_values": ["IPv6Static", "IPv6DHCP", "IPv6SLAAC"],
             "default_values": ["IPv6Static"],
             "helpText": "vmi_if0_ipv6_method",
             "displayName": "vmi_if0_ipv6_method"
         },
         {
             "attribute_name": "vmi_if1_ipv6_method",
-            "possible_values": ["IPv6Static", "IPv6DHCP", "SLAAC"],
+            "possible_values": ["IPv6Static", "IPv6DHCP", "IPv6SLAAC"],
             "default_values": ["IPv6Static"],
             "helpText": "vmi_if1_ipv6_method",
             "displayName": "vmi_if1_ipv6_method"
@@ -487,6 +487,62 @@
             "default_values": ["Automatic"],
             "helpText": "Controls whether or not the Runtime Processor Diagnostics (RPD) Feature will be configured on the system. Enabled ( The RPD feature will be configured regardless of the amount of installed memory), Automatic (The RPD feature will be configured on systems with at least 128GB of installed memory and not configured on systems with less than 128GB), Disabled (The RPD feature will not be configured).",
             "displayName": "Runtime Processor Diagnostics Feature"
+        },
+        {
+            "attribute_name": "hb_power_PS0_present",
+            "possible_values": ["Enabled", "Disabled"],
+            "default_values": ["Disabled"],
+            "helpText": "Specifies if Power Supply 0 is present. (Enabled is Present)",
+            "displayName": "Power Supply 0 is functional",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/powersupply0",
+                "interface": "xyz.openbmc_project.Inventory.Item",
+                "property_name": "Present",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "attribute_name": "hb_power_PS1_present",
+            "possible_values": ["Enabled", "Disabled"],
+            "default_values": ["Disabled"],
+            "helpText": "Specifies if Power Supply 1 is present. (Enabled is Present)",
+            "displayName": "Power Supply 1 is functional",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/powersupply1",
+                "interface": "xyz.openbmc_project.Inventory.Item",
+                "property_name": "Present",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "attribute_name": "hb_power_PS2_present",
+            "possible_values": ["Enabled", "Disabled"],
+            "default_values": ["Disabled"],
+            "helpText": "Specifies if Power Supply 2 is Present. (Enabled is Present)",
+            "displayName": "Power Supply 2 is functional",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/powersupply2",
+                "interface": "xyz.openbmc_project.Inventory.Item",
+                "property_name": "Present",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "attribute_name": "hb_power_PS3_present",
+            "possible_values": ["Enabled", "Disabled"],
+            "default_values": ["Disabled"],
+            "helpText": "Specifies if Power Supply 3 is present. (Enabled is Present)",
+            "displayName": "Power Supply 3 is functional",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/inventory/system/chassis/motherboard/powersupply3",
+                "interface": "xyz.openbmc_project.Inventory.Item",
+                "property_name": "Present",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
         }
     ]
 }

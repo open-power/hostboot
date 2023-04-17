@@ -319,8 +319,8 @@ void HostPDRHandler::sendPDRRepositoryChgEvent(std::vector<uint8_t>&& pdrTypes,
                                     actualSize);
     auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
     rc = encode_platform_event_message_req(
-        instanceId, 1, 0, PLDM_PDR_REPOSITORY_CHG_EVENT, eventDataVec.data(),
-        actualSize, request,
+        instanceId, 1, TERMINUS_ID, PLDM_PDR_REPOSITORY_CHG_EVENT,
+        eventDataVec.data(), actualSize, request,
         actualSize + PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES);
     if (rc != PLDM_SUCCESS)
     {

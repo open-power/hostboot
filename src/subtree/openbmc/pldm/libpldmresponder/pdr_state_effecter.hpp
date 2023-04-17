@@ -8,13 +8,10 @@
 
 namespace pldm
 {
-
 namespace responder
 {
-
 namespace pdr_state_effecter
 {
-
 using Json = nlohmann::json;
 
 static const Json empty{};
@@ -91,6 +88,15 @@ void generateStateEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
                 pdr->entity_type = e.value("type", 0);
                 pdr->entity_instance = e.value("instance", 0);
                 pdr->container_id = e.value("container", 0);
+
+                // do not create the PDR when the FRU or the entity path is not
+                // present
+                if (!pdr->entity_type)
+                {
+                    std::cerr << "The entity path for the FRU is not present."
+                              << std::endl;
+                    continue;
+                }
             }
         }
         catch (const std::exception& ex)
