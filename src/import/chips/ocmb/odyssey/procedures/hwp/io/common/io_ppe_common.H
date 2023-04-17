@@ -424,6 +424,10 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init_thread(const fapi2::Target<K
 
     MEM_REG_PPE_DATA_RATE_PUT(iv_regs, i_target, i_thread, l_ppe_data_rate);
 
+    // Cleanup of previous run
+    FAPI_TRY(MEM_REG_BIST_OVERALL_PASS_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(MEM_REG_RX_LINKLAYER_DONE_PUT(iv_regs, i_target, i_thread, 0));
+
     // write the timer
     FAPI_DBG("Setting BIST timer sel: %d", i_bist_timer_sel);
     FAPI_TRY(MEM_REG_RX_BER_TIMER_SEL_BIST_PUT(iv_regs, i_target, i_thread, i_bist_timer_sel));
@@ -536,14 +540,54 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_cleanup(const fapi2::Target<K, M,
         uint8_t& o_done,
         uint32_t& o_fail)
 {
-    const fapi2::buffer<uint64_t> l_ext_cmd = IORESET_PL;
+    const uint16_t c_reg_rx_ctl_cntl5 = 0x1240;
+    const uint16_t c_reg_rx_bit_mode4 = 0x0670;
+    const uint16_t c_reg_rx_bit_mode5 = 0x0680;
+    const uint16_t c_reg_tx_ctl_mode1 = 0x1818;
+    const fapi2::buffer<uint64_t> l_ext_cmd = IORESET_PL | POWER_OFF_PL;
+
+    fapi2::buffer<uint64_t> l_buffer;
+    uint64_t l_addr = 0;
+    uint8_t l_lane = 0;
 
     FAPI_DBG("Starting BIST cleanup");
 
-    FAPI_DBG("Clearing error registers");
+    FAPI_DBG("Clearing error registers and BIST settings");
     FAPI_TRY(FW_REG_FW_BIST_EN_PUT(iv_regs, i_target, i_thread, 0));
 
     FAPI_TRY(MEM_REG_RX_DISABLE_BANK_PDWN_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(MEM_REG_RX_HIST_MIN_EYE_HEIGHT_VALID_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(MEM_REG_RX_HIST_MIN_EYE_WIDTH_VALID_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(MEM_REG_RX_MIN_RECAL_CNT_PUT(iv_regs, i_target, i_thread, 3));
+
+    // Set rx_ctl_cntl5_pg to 0
+    l_buffer = 0;
+    l_addr = buildAddr(iv_regs->base_addr, 0, 0, c_reg_rx_ctl_cntl5);
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer),
+             "Error putscom to address 0x%08X.", l_addr);
+
+    for (l_lane = 0; l_lane < 8; l_lane++)
+    {
+        if (i_rx_lanes_0_31 & 0x80000000)
+        {
+            // Set rx_pr_fw_inertia_amt to 4
+            l_addr = buildAddr(iv_regs->base_addr, 0, l_lane, c_reg_rx_bit_mode4);
+            FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, 4, 48 + 0, 4),
+                     "Error rmwIoHardwareReg to address 0x%08X.", l_addr);
+
+            // Set rx_pr_fw_inertia_amt_coarse to 7
+            l_addr = buildAddr(iv_regs->base_addr, 0, l_lane, c_reg_rx_bit_mode5);
+            FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, 7, 48 + 0, 4),
+                     "Error rmwIoHardwareReg to address 0x%08X.", l_addr);
+        }
+    }
+
+    // Set tx_bist_en_alias to 0
+    l_addr = buildAddr(iv_regs->base_addr, 0, 0, c_reg_tx_ctl_mode1);
+    FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, 0, 48 + 6, 3),
+             "Error rmwIoHardwareReg to address 0x%08X.", l_addr);
+
+    // Possibly TODO: clear rx_pr_unlocked_a_sticky / rx_pr_unlocked_b_sticky
 
     FAPI_TRY(MEM_REG_PPE_ERROR_STATE_PUT(iv_regs, i_target, i_thread, 0));
     FAPI_TRY(MEM_REG_PPE_ERROR_LANE_PUT(iv_regs, i_target, i_thread, 0));
