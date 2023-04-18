@@ -48,7 +48,7 @@ constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_27 = 27;
 constexpr uint64_t literal_33 = 33;
 constexpr uint64_t literal_39 = 39;
-constexpr uint64_t literal_29 = 29;
+constexpr uint64_t literal_9 = 9;
 constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_0xFF = 0xFF;
 constexpr uint64_t literal_0x1 = 0x1;
@@ -62,7 +62,6 @@ constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_15 = 15;
 constexpr uint64_t literal_17 = 17;
 constexpr uint64_t literal_19 = 19;
-constexpr uint64_t literal_9 = 9;
 constexpr uint64_t literal_11 = 11;
 constexpr uint64_t literal_0x0 = 0x0;
 constexpr uint64_t literal_512 = 512;
@@ -110,6 +109,8 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRCD, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRCD));
         fapi2::ATTR_MEM_EFF_DRAM_TRP_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRP;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRP, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRP));
+        fapi2::ATTR_MEM_EFF_DRAM_TWR_Type l_TGT1_ATTR_MEM_EFF_DRAM_TWR;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TWR, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TWR));
         fapi2::ATTR_MEM_EFF_DRAM_TRRD_S_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRRD_S;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRRD_S, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRRD_S));
         fapi2::ATTR_MEM_EFF_DRAM_TRRD_L_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRRD_L;
@@ -227,7 +228,8 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                 l_scom_buffer.insert<28, 7, 57, uint64_t>(literal_39 );
             }
 
-            l_scom_buffer.insert<36, 8, 56, uint64_t>(((l_TGT1_ATTR_MEM_DRAM_CWL / literal_2) + literal_29) );
+            l_scom_buffer.insert<36, 8, 56, uint64_t>((((l_TGT1_ATTR_MEM_DRAM_CWL + l_TGT1_ATTR_MEM_EFF_DRAM_TWR) + literal_9) /
+                    literal_2) );
 
             if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
             {
