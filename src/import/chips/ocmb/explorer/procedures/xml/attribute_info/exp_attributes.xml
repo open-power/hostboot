@@ -292,22 +292,6 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL</id>
-        <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>
-          Controls whether OMI CFG reg accesses
-          are considered big or little endian.
-        </description>
-        <valueType>uint8</valueType>
-        <enum>
-            LITTLE_ENDIAN = 0,
-            BIG_ENDIAN = 1
-        </enum>
-        <platInit/>
-        <default>LITTLE_ENDIAN</default>
-    </attribute>
-
-    <attribute>
         <id>ATTR_MSS_OCMB_ECID</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
