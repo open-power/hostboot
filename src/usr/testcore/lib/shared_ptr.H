@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -102,6 +102,96 @@ class STLSharedPtrTest : public CxxTest::TestSuite
             {
                 TS_FAIL("p4 is not unique after p3.reset.");
             }
+        }
+
+        void testSharedPtrArray()
+        {
+            TS_INFO(ENTER_MRK"testSharedPtrArray");
+
+            static int counter = 0;
+
+            struct test
+            {
+                test() { ++counter; }
+                ~test() { --counter; }
+
+                int x = 0;
+            };
+
+            bool custom_deleter_run = false;
+
+            {
+                std::shared_ptr<test[]> foo(new test[10]);
+
+                if (counter != 10)
+                {
+                    TS_FAIL("testSharedPtrArray: constructor failed to increment count");
+                }
+
+                auto newptr = new test[10];
+
+                if (counter != 20)
+                {
+                    TS_FAIL("testSharedPtrArray: constructor failed to increment count (2)");
+                }
+
+                foo.reset(newptr);
+                newptr = nullptr;
+
+                if (counter != 10)
+                {
+                    TS_FAIL("testSharedPtrArray: constructor failed to increment count");
+                }
+
+                auto foo2 = foo;
+
+                std::shared_ptr<test[]> foo3(new test[10]);
+
+                if (counter != 20)
+                {
+                    TS_FAIL("testSharedPtrArray: constructor failed to increment count");
+                }
+
+                std::shared_ptr<const test[]> constfoo(new const test[10]);
+
+                std::shared_ptr<test[]> foo_custom_deleter(new test[10],
+                                                           [&](test* t)
+                                                           {
+                                                               delete[] t;
+                                                               custom_deleter_run = true;
+                                                           });
+
+                // Make sure these compile
+                foo.get();
+                foo->x = 100;
+                foo.swap(foo3);
+                foo[3];
+
+                foo == foo2;
+                foo != foo2;
+                foo = foo2;
+            }
+
+            if (counter != 0)
+            {
+                TS_FAIL("testSharedPtrArray: constructor failed to decrement count");
+            }
+
+            if (!custom_deleter_run)
+            {
+                TS_FAIL("testSharedPtrArray: did not run custom deleter");
+            }
+
+            {
+                std::shared_ptr<test[][2]> foo(new test[5][2]);
+
+                if (counter != 10)
+                {
+                    TS_FAIL("testSharedPtrArray: constructor failed to increment count for multidimensional array");
+                }
+            }
+
+            TS_INFO(EXIT_MRK"testSharedPtrArray");
         }
 
         void testSharedPtr_Compile1()

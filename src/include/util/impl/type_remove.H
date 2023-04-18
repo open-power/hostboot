@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,24 @@ namespace std
         { typedef T type; };
     template <typename T> struct remove_pointer<T* const volatile>
         { typedef T type; };
+
+    template<typename T>
+    struct remove_extent
+    {
+        using type = T;
+    };
+
+    template<typename T>
+    struct remove_extent<T[]>
+    {
+        using type = T;
+    };
+
+    template<typename T, size_t N>
+    struct remove_extent<T[N]>
+    {
+        using type = T;
+    };
 
     template<class T> struct remove_all_extents { typedef T type;};
     template<class T> struct remove_all_extents<T[]>

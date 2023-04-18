@@ -44,6 +44,30 @@ struct underlying_type
     using type = __underlying_type(T);
 };
 
+template<typename T>
+struct decay
+{
+    using type = typename std::remove_cv<T>::type;
+};
+
+template<typename T>
+struct decay<T[]>
+{
+    using type = T*;
+};
+
+template<typename T, size_t I>
+struct decay<T[I]>
+{
+    using type = T*;
+};
+
+template<typename Ret, typename... Args>
+struct decay<Ret(Args...)>
+{
+    using type = Ret(*)(Args...);
+};
+
 }
 
 #endif

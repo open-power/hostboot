@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,19 +60,33 @@ namespace std
             virtual ~shared_ptr_deleter_base() { }
         };
 
-        // @brief This class is used to destroy objects allocated by "new". We
-        //        don't support arrays yet.
-        template<typename T>
+        // @brief This class is used to destroy objects allocated by "new".
+        template<typename T, typename U>
         class standard_deleter : public shared_ptr_deleter_base
         {
         public:
-            T* ptr;
+            U* ptr;
 
-            standard_deleter(T* p) : ptr(p) { }
+            standard_deleter(U* p) : ptr(p) { }
 
             void operator()() override
             {
                 delete ptr;
+            }
+        };
+
+        // @brief This class is used to destroy objects allocated by "new[]".
+        template<typename T, typename U>
+        class standard_deleter<T[], U> : public shared_ptr_deleter_base
+        {
+        public:
+            U* ptr;
+
+            standard_deleter(U* p) : ptr(p) { }
+
+            void operator()() override
+            {
+                delete[] ptr;
             }
         };
 
@@ -100,7 +114,7 @@ namespace std
     class shared_ptr
     {
         public:
-            typedef T element_type;
+            using element_type = typename std::remove_extent<T>::type;
 
             constexpr shared_ptr() :
                 count(nullptr), pointer(nullptr), owner(nullptr),
@@ -118,7 +132,7 @@ namespace std
                 _setup(ptr);
                 if (ptr)
                 {
-                    deleter = new __impl::standard_deleter<U>(ptr);
+                    deleter = new __impl::standard_deleter<T, U>(ptr);
                 }
             }
 
@@ -135,15 +149,20 @@ namespace std
                 }
             }
 
-            template<typename U> shared_ptr(const shared_ptr<U>& r, T* ptr)
+            template<typename U>
+            shared_ptr(const shared_ptr<U>& r, element_type* ptr)
                 { _copy(r); pointer = ptr; }
 
             shared_ptr(const shared_ptr& r) { _copy(r); }
-            template<typename U> shared_ptr(const shared_ptr<U>& r)
+
+            template<typename U>
+            shared_ptr(const shared_ptr<U>& r)
                 { _copy(r); }
 
             shared_ptr(shared_ptr&& r) { _swap(std::move(r)); }
-            template<typename U> shared_ptr(shared_ptr<U>&& r)
+
+            template<typename U>
+            shared_ptr(shared_ptr<U>&& r)
                 { _swap(std::move(r)); }
 
             ~shared_ptr() { _cleanup(); }
@@ -174,14 +193,14 @@ namespace std
 
                 if (ptr)
                 {
-                    deleter = new __impl::standard_deleter<U>(ptr);
+                    deleter = new __impl::standard_deleter<T, U>(ptr);
                 }
             }
 
             void swap(shared_ptr& r)
             {
-                T* tmp0 = r.owner;
-                T* tmp1 = r.pointer;
+                auto tmp0 = r.owner;
+                auto tmp1 = r.pointer;
                 __impl::shared_ptr_count* tmp2 = r.count;
                 __impl::shared_ptr_deleter_base* tmp3 = r.deleter;
                 r.owner = owner;
@@ -194,11 +213,18 @@ namespace std
                 deleter = tmp3;
             }
 
-            T* get() const { return pointer; }
+            element_type* get() const { return pointer; }
 
             template<typename X = T>
             X& operator*() const { return *pointer; }
-            T* operator->() const { return pointer; }
+            element_type* operator->() const { return pointer; }
+
+            template<typename X = T>
+            auto operator[](size_t index) const
+                -> typename std::enable_if<std::is_array<X>::value, decltype(*get())>::type
+            {
+                return pointer[index];
+            }
 
             long use_count() const
             {
@@ -219,13 +245,13 @@ namespace std
 
         private:
             __impl::shared_ptr_count* count;
-            T* pointer;
-            T* owner;
+            element_type* pointer;
+            element_type* owner;
             __impl::shared_ptr_deleter_base* deleter;
 
-            template<typename U> void _setup(U* ptr)
+            template<typename U> void _setup(U ptr)
             {
-                owner = pointer = static_cast<T*>(ptr);
+                owner = pointer = ptr;
                 deleter = nullptr;
                 if (pointer)
                 {
@@ -314,8 +340,8 @@ namespace std
     {
         if (r.count) r.count->increment();
         count = r.count;
-        owner = static_cast<T*>(r.owner);
-        pointer = static_cast<T*>(r.pointer);
+        owner = static_cast<element_type*>(r.owner);
+        pointer = static_cast<element_type*>(r.pointer);
         deleter = r.deleter;
     }
 
