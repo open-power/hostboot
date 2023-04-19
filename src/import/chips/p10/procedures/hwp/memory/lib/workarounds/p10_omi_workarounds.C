@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,7 +95,7 @@ fapi2::ReturnCode prbs_delay(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& i_omi)
 
     FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
 
-    FAPI_TRY(mss::attr::get_omi_dl_preipl_prbs_time(i_omi, l_prbs_time),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_DL_PREIPL_PRBS_TIME, i_omi, l_prbs_time),
              "Error from FAPI_ATTR_GET (ATTR_OMI_DL_PREIPL_PRBS_TIME)");
     l_prbs_time_scaled = l_prbs_time * mss::common_timings::DELAY_1MS;
 

@@ -1501,4 +1501,17 @@
     <mssAccessorName>mds_ddimm</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_OMI_DL_PREIPL_PRBS_TIME</id>
+    <targetType>TARGET_TYPE_OMI</targetType>
+    <description>
+      The time to send pre-ipl PRBS in ms.
+    </description>
+    <valueType>uint32</valueType>
+    <default>0x400</default>
+    <platInit/>
+    <mrwHide/>
+    <mssAccessorName>omi_dl_preipl_prbs_time</mssAccessorName>
+  </attribute>
+
 </attributes>
