@@ -141,6 +141,50 @@ enum mux_type : int
 };
 };
 
+namespace pib
+{
+enum pib_controller : uint8_t
+{
+    PC_NONE    = 0,
+    PC_GSD2PIB = 1,
+    PC_FSI2PIB = 2,
+    PC_I2CR    = 3,
+    PC_TOD     = 4,
+    PC_GPE0    = 5,
+    PC_GPE1    = 6,
+    PC_GPE2    = 7,
+    PC_GPE3    = 8,
+    PC_ADU     = 9,
+    PC_MMIO    = 9,
+    PC_PME     = 12,
+    PC_SPPE    = 13,
+    PC_SBE     = 14,
+};
+
+enum pib_responder : uint8_t
+{
+    PR_NONE    = 0,
+    PR_OTPROM  = 1,
+    PR_FSIC0   = 2,
+    PR_FSICTAP = 3,
+    PR_I2CR    = 3,
+    PR_TOD     = 4,
+    PR_MBOX    = 5,
+    PR_OCB     = 6,
+    PR_SPIC    = 7,
+    PR_PSU     = 8,
+    PR_ADU     = 9,
+    PR_MMIO    = 9,
+    PR_I2CC    = 10,
+    PR_SBEFIFO = 11,
+    PR_SPIC0   = 12,
+    PR_PME     = 12,
+    PR_SPPE    = 13,
+    PR_SBE     = 14,
+    PR_PCBC    = 15,
+};
+};
+
 /* Chiplet delays measured in PCB network levels relative to the lowest level chiplet */
 /* Odyssey is super boring since it only has two chiplets and both are at the same level */
 const uint8_t ody_chiplet_delay_table[64] = { 0 };
