@@ -408,39 +408,14 @@ uint8_t addIsDimm(uint8_t* o_data,
     uint8_t i2cEngine = 3;              // PIB I2C master engine for DIMM (E = 3)
     uint8_t i2cPort = 0;                // I2C port
     uint8_t i2cAddr = 0x30;             // sensor I2C Address
-    bool useHardcodes = true;
 
     ATTR_TEMP_SENSOR_I2C_CONFIG_type tsData;
-    if(i_dimmTarget->tryGetAttr
-       <TARGETING::ATTR_TEMP_SENSOR_I2C_CONFIG >(tsData))
-    {
-        if ((tsData.engine != 0x80) ||
-            (tsData.port != 0x80) ||
-            (tsData.devAddr != 0x80))
-        {
-            i2cEngine = tsData.engine;
-            i2cPort = tsData.port;
-            i2cAddr = tsData.devAddr;
-            TMGT_INF("ocmbInit:       I2C Engine[%d] Port[%d] Address[0x%02X]",
-                     i2cEngine, i2cPort, i2cAddr);
-
-            useHardcodes = false;
-        }
-    }
-
-    if (useHardcodes)
-    {
-        // Hardcoded values from spec if fail to read from attributes
-        if (i_ocmbNum == 4) i2cPort = 10;
-        else if (i_ocmbNum == 5) i2cPort = 11;
-        else if (i_ocmbNum == 6) i2cPort = 8;
-        else if (i_ocmbNum == 7) i2cPort = 9;
-
-        TMGT_ERR("addIsDimm: Failed reading TEMP_SENSOR_I2C_CONFIG from DIMM HUID 0x%08X",
-                 get_huid(i_dimmTarget));
-        TMGT_INF("ocmbInit:       I2C Engine[%d] Port[%d] Address[0x%02X] (hardcoded)",
-                 i2cEngine, i2cPort, i2cAddr);
-    }
+    tsData = i_dimmTarget->getAttr<ATTR_TEMP_SENSOR_I2C_CONFIG >();
+    i2cEngine = tsData.engine;
+    i2cPort = tsData.port;
+    i2cAddr = tsData.devAddr;
+    TMGT_INF("ocmbInit:       I2C Engine[%d] Port[%d] Address[0x%02X]",
+             i2cEngine, i2cPort, i2cAddr);
 
     writeMemConfigData(o_data,
                        i_dimmTarget,
