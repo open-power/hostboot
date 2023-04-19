@@ -2905,6 +2905,52 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "DRAMINIT utility unit tests", "[
             return 0;
         });
     }
+    GIVEN("Tests endian swapping fix")
+    {
+        // Note: this code is only called in the SBE and here
+        // Including an identical array and calls to ensure that it functions as expected
+        // Array to hold list of addresses that are uint16_t's and do NOT need endianness swapping for SBE
+        const uint32_t NO_SWAP_ADDR[]__attribute__ ((aligned (8))) =
+        {
+            0x58003,
+            0x58008,
+            0x58011,
+            0x580fe,
+            0x580ff,
+        };
+        auto l_no_swap_it = std::begin(NO_SWAP_ADDR);
+        const auto NO_SWAP_END = std::end(NO_SWAP_ADDR);
+
+        fapi2::buffer<uint64_t> l_data(0x0102030405060708);
+
+        // Not in the array? swap it up but do not increment the iterator
+        mss::ody::phy::endian_swap_msg_block_data(0x58000, NO_SWAP_END, l_no_swap_it, l_data);
+        REQUIRE(0x0102030405060807 == l_data);
+        REQUIRE(0x58003 == *l_no_swap_it);
+
+        // Checks that the code iterates through the array expected
+        mss::ody::phy::endian_swap_msg_block_data(0x58003, NO_SWAP_END, l_no_swap_it, l_data);
+        REQUIRE(0x0102030405060807 == l_data);
+        REQUIRE(0x58008 == *l_no_swap_it);
+        mss::ody::phy::endian_swap_msg_block_data(0x58008, NO_SWAP_END, l_no_swap_it, l_data);
+        REQUIRE(0x0102030405060807 == l_data);
+        REQUIRE(0x58011 == *l_no_swap_it);
+        mss::ody::phy::endian_swap_msg_block_data(0x58011, NO_SWAP_END, l_no_swap_it, l_data);
+        REQUIRE(0x0102030405060807 == l_data);
+        REQUIRE(0x580fe == *l_no_swap_it);
+        mss::ody::phy::endian_swap_msg_block_data(0x580fe, NO_SWAP_END, l_no_swap_it, l_data);
+        REQUIRE(0x0102030405060807 == l_data);
+        REQUIRE(0x580ff == *l_no_swap_it);
+        mss::ody::phy::endian_swap_msg_block_data(0x580ff, NO_SWAP_END, l_no_swap_it, l_data);
+        REQUIRE(0x0102030405060807 == l_data);
+        // Swap iterator should be at end now
+        REQUIRE(NO_SWAP_END == l_no_swap_it);
+
+        // If we're at the ending point, always swap even for an address in the array
+        mss::ody::phy::endian_swap_msg_block_data(0x58003, NO_SWAP_END, l_no_swap_it, l_data);
+        REQUIRE(0x0102030405060708 == l_data);
+        REQUIRE(NO_SWAP_END == l_no_swap_it);
+    }
 
 }// scenario
 
