@@ -3595,6 +3595,7 @@
      </enum>
     <default>STATIC</default>
     <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- *********************************************************************-->
   <attribute>
