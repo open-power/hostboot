@@ -3940,6 +3940,16 @@ fapi2::ReturnCode ody_load_imem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OC
                                        const uint32_t i_imem_offset);
 
 ///
+/// @brief Conducts an endian swap if needed on this message block address
+/// @param[in] i_address the current address to load
+/// @param[in] i_end_it the ending iterator of this array
+/// @param[in,out] io_no_swap_it the current iterator to check for the address
+/// @param[in,out] io_data the register data to update if needed
+///
+void endian_swap_msg_block_data(const uint64_t i_address, const uint32_t* const i_end_it,
+                                const uint32_t*& io_no_swap_it, fapi2::buffer<uint64_t>& io_data);
+
+///
 /// @brief Loads the message block into the DMEM
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_struct the message block

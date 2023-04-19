@@ -2980,6 +2980,34 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Conducts an endian swap if needed on this message block address
+/// @param[in] i_address the current address to load
+/// @param[in] i_end_it the ending iterator of this array
+/// @param[in,out] io_no_swap_it the current iterator to check for the address
+/// @param[in,out] io_data the register data to update if needed
+///
+void endian_swap_msg_block_data(const uint64_t i_address, const uint32_t* const i_end_it,
+                                const uint32_t*& io_no_swap_it, fapi2::buffer<uint64_t>& io_data)
+{
+    if (io_no_swap_it < i_end_it && i_address == *io_no_swap_it)
+    {
+        ++io_no_swap_it;
+    }
+    else
+    {
+        constexpr uint64_t BYTE0 = 56;
+        constexpr uint64_t BYTE1 = 48;
+        uint8_t l_byte0 = 0;
+        uint8_t l_byte1 = 0;
+        io_data.extractToRight<BYTE0, BITS_PER_BYTE>(l_byte0)
+        .extractToRight<BYTE1, BITS_PER_BYTE>(l_byte1);
+
+        io_data.insertFromRight<BYTE0, BITS_PER_BYTE>(l_byte1)
+        .insertFromRight<BYTE1, BITS_PER_BYTE>(l_byte0);
+    }
+}
+
+///
 /// @brief Loads the message block values into the DMEM regs
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_struct the message block
@@ -3022,6 +3050,21 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
                                                                 0x580da,
                                                                };
 
+#ifdef __PPE__
+    // Array to hold list of addresses that are uint16_t's and do NOT need endianness swapping for SBE
+    const uint32_t NO_SWAP_ADDR[]__attribute__ ((aligned (8))) =
+    {
+        0x58003,
+        0x58008,
+        0x58011,
+        0x580fe,
+        0x580ff,
+    };
+    auto l_no_swap_it = std::begin(NO_SWAP_ADDR);
+    const auto NO_SWAP_END = std::end(NO_SWAP_ADDR);
+
+#endif
+
     auto l_flush_it = std::begin(FLUSH_ADDR);
     auto l_skip_it = std::begin(SKIP_ADDR);
     const auto FLUSH_END = std::end(FLUSH_ADDR);
@@ -3044,6 +3087,11 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
         else
         {
             l_data = *(l_struct_data);
+
+            // If in PPE, check if we need a data swap
+#ifdef __PPE__
+            endian_swap_msg_block_data(l_address, NO_SWAP_END, l_no_swap_it, l_data);
+#endif
         }
 
         FAPI_TRY(putScom_synopsys_addr_wrapper(i_target, l_address, l_data));
