@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022
+# Contributors Listed Below - COPYRIGHT 2022,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -1057,6 +1057,12 @@ srcInfo = {
                            "userdata1[32:63]":  "SEEPROM Side",
                            "userdata2[0:31]":  "Size - No Ecc",
                            "userdata2[32:63]":  "Size - ECC",
+                      },
+            0x222702: {    "devdesc": "Another thread is already performing an SBE update",
+                           "moduleid": "SBE_UPDATE_SEEPROMS",
+                           "reasoncode": "SBE_UPDATE_ALREADY_IN_PROGRESS",
+                           "userdata1":  "UNUSED",
+                           "userdata2":  "UNUSED",
                       },
             0x240302: {    "devdesc": "LpcDD::_readLPC> Invalid buffer size requested (>4 bytes)",
                            "moduleid": "LPC::MOD_LPCDD_READLPC",
@@ -3576,6 +3582,12 @@ srcInfo = {
             0x22100A: {    "devdesc": "Bad Path in decisionUpdateTree: cur=PERM/DIRTY",
                            "moduleid": "SBE_DECISION_TREE",
                            "reasoncode": "SBE_PERM_SIDE_DIRTY_BAD_PATH",
+                           "userdata1":  "System Situation",
+                           "userdata2":  "Update Actions",
+                      },
+            0x221C0A: {    "devdesc": "Bad Path in decisionUpdateTree: cur=DIRTY, alt=CLEAN",
+                           "moduleid": "SBE_DECISION_TREE",
+                           "reasoncode": "SBE_BOOT_SIDE_DIRTY_BAD_PATH",
                            "userdata1":  "System Situation",
                            "userdata2":  "Update Actions",
                       },
