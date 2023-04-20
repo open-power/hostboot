@@ -152,5 +152,31 @@
   <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ENABLE_LBIST</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+  Enable or Disable LBIST.
+  This is to skip LBIST procedures if user elects
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0,ENABLE = 0x1</enum>
+  <writeable/>
+  <default>ENABLE</default>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_ENABLE_ABIST</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+  Enable or Disable ABIST.
+  This is to skip ABIST procedures if user elects
+  </description>
+  <valueType>uint8</valueType>
+  <enum>DISABLE = 0x0,ENABLE = 0x1</enum>
+  <writeable/>
+  <default>ENABLE</default>
+</attribute>
+<!-- ********************************************************************** -->
 
 </attributes>
