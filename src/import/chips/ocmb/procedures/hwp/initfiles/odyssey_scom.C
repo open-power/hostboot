@@ -30,6 +30,7 @@
 using namespace fapi2;
 
 constexpr uint64_t literal_1 = 1;
+constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_3201 = 3201;
 constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_4001 = 4001;
@@ -87,6 +88,9 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                                const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT2)
 {
     {
+        fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_Type l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, TGT0, l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE));
+        uint64_t l_def_ATTR_MSS_OCMB_HALF_DIMM_MODE = l_TGT0_ATTR_MSS_OCMB_HALF_DIMM_MODE;
         fapi2::ATTR_MEM_EFF_FREQ_Type l_TGT1_ATTR_MEM_EFF_FREQ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, TGT1, l_TGT1_ATTR_MEM_EFF_FREQ));
         uint64_t l_def_MEM_EFF_FREQ_EQ_3200 = (l_TGT1_ATTR_MEM_EFF_FREQ < literal_3201);
@@ -159,6 +163,16 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         uint64_t l_def_NUM_UPPER_ADDR_BITS = (((((l_def_D_EN + l_def_M_EN) + l_def_S2_EN) + l_def_S1_EN) + l_def_R16_EN) +
                                               l_def_C10_EN);
         fapi2::buffer<uint64_t> l_scom_buffer;
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x80108e4ull, l_scom_buffer ));
+
+            if ((l_def_ATTR_MSS_OCMB_HALF_DIMM_MODE == literal_1))
+            {
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(literal_0b1 );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x80108e4ull, l_scom_buffer));
+        }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x801100cull, l_scom_buffer ));
 

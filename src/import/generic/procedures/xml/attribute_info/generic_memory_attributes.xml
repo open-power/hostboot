@@ -52,7 +52,7 @@
           FULL_DIMM = 0,
           HALF_DIMM = 1
       </enum>
-      <platInit/>
+      <writeable/>
       <mssAccessorName>ocmb_half_dimm_mode</mssAccessorName>
   </attribute>
 

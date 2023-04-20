@@ -721,8 +721,9 @@ class base_0_0 : public mss::spd::base
         virtual fapi2::ReturnCode set_poz_mode() const
         {
             uint8_t l_field = fapi2::ENUM_ATTR_MEM_EFF_Z_MODE_FALSE;
-
+            uint8_t l_dimm_mode = fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_FULL_DIMM;
             FAPI_TRY(mss::attr::set_z_mode(iv_ocmb, l_field));
+            FAPI_TRY(mss::attr::set_ocmb_half_dimm_mode(iv_ocmb, l_dimm_mode));
 
         fapi_try_exit:
             return fapi2::current_err;
