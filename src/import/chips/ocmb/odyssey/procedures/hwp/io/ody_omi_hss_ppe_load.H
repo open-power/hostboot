@@ -37,7 +37,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
-#include <ody_common_image_load.H>
+#include <poz_common_image_load.H>
 
 // Constants
 const uint32_t SIZE_32K_BYTES = 32768;
@@ -55,7 +55,7 @@ typedef fapi2::ReturnCode(*ody_omi_hss_ppe_load_FP_t) (
     uint8_t* const,
     uint32_t const,
     uint32_t const,
-    ody_image_type);
+    poz_image_type);
 
 //------------------------------------------------------------------------------
 // Function prototype
@@ -87,8 +87,8 @@ extern "C" {
         uint8_t* const i_img_data,
         uint32_t const i_img_size,
         uint32_t const i_offset,
-        ody_image_type i_type);
+        poz_image_type i_type);
 
 } //extern "C"
 
-ASSERT_ODY_COMMON_IMAGE_LOAD(ody_omi_hss_ppe_load);
+ASSERT_COMMON_IMAGE_LOAD(ody_omi_hss_ppe_load);

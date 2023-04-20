@@ -38,14 +38,14 @@
 #define _ODY_LOAD_IMEM_H_
 
 #include <fapi2.H>
-#include <ody_common_image_load.H>
+#include <poz_common_image_load.H>
 
 // Required for Cronus
 typedef fapi2::ReturnCode (*ody_load_imem_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
         uint8_t* const i_imem_data,
         const uint32_t i_imem_size,
         const uint32_t i_imem_offset,
-        ody_image_type i_image_type);
+        poz_image_type i_image_type);
 
 extern "C"
 {
@@ -63,9 +63,9 @@ extern "C"
                                     uint8_t* const i_imem_data,
                                     const uint32_t i_imem_size,
                                     const uint32_t i_imem_offset,
-                                    ody_image_type i_image_type);
+                                    poz_image_type i_image_type);
 }
 
-ASSERT_ODY_COMMON_IMAGE_LOAD(ody_load_imem);
+ASSERT_COMMON_IMAGE_LOAD(ody_load_imem);
 
 #endif

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/common/include/ody_common_image_load.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/common/include/poz_common_image_load.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -27,7 +27,7 @@
 #include <type_traits>
 #include <fapi2.H>
 
-enum ody_image_type
+enum poz_image_type
 {
     IOPPE_BASE_IMAGE,
     IOPPE_MEMREGS_IMAGE,
@@ -35,13 +35,13 @@ enum ody_image_type
     DDR_DMEM_IMAGE,
 };
 
-typedef fapi2::ReturnCode(*ody_common_image_load_FP_t) (
+typedef fapi2::ReturnCode(*poz_common_image_load_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
     uint8_t* const,
     uint32_t const,
     uint32_t const,
-    ody_image_type);
+    poz_image_type);
 
-#define ASSERT_ODY_COMMON_IMAGE_LOAD(hwp) \
-    static_assert(std::is_same<decltype(&hwp), ody_common_image_load_FP_t>::value, \
+#define ASSERT_COMMON_IMAGE_LOAD(hwp) \
+    static_assert(std::is_same<decltype(&hwp), poz_common_image_load_FP_t>::value, \
                   "HWP is not conforming to common Odyssey image load semantics")
