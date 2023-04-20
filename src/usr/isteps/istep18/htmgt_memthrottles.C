@@ -473,7 +473,8 @@ void init_bulk_power_limits(void)
         if (MyConfig != 0xFFFF0000)
         {
             // Search through table of Power Limits for this Config Signature.
-            for(uint16_t Index_Loop = 0 ; Index_Loop < Index_Config.size() ; Index_Loop++)
+            uint16_t Index_Loop = 0;
+            for(Index_Loop = 0; Index_Loop < Index_Config.size() ; Index_Loop++)
             {
                 // If match on PS config, and N / N+1 bulk power limits != 0
                 if ((Index_Config[Index_Loop] == MyConfig) &&
@@ -489,7 +490,7 @@ void init_bulk_power_limits(void)
                                         (Nplus_Power[Index_Loop])))
                     {
                         TMGT_ERR("init_bulk_power_limits: Failed Attr Write  "
-                                        "ATTR_REAL_XXX_BULK_POWER_LIMIT_WATTS ");
+                                        "ATTR_CURRENT_XXX_BULK_POWER_LIMIT_WATTS ");
                         useSingleEntryBulkPower = true;
 
                         /*@
@@ -497,8 +498,8 @@ void init_bulk_power_limits(void)
                         * @subsys EPUB_FIRMWARE_SP
                         * @moduleid HTMGT_MOD_PS_CONFIG_POWER_LIMIT
                         * @reasoncode HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL
-                        * @userdata2 N Bulk power limit
-                        * @userdata3 N+1 Bulk power limit
+                        * @userdata1 N Bulk power limit
+                        * @userdata2 N+1 Bulk power limit
                         * @devdesc Software problem, Failed to write bulk power limit attributes
                         * @custdesc An internal firmware error occurred
                         */
@@ -508,6 +509,7 @@ void init_bulk_power_limits(void)
                                                     N_Power[Index_Loop],
                                                     Nplus_Power[Index_Loop],
                                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                        err->collectTrace(HTMGT_COMP_NAME);
                         errlCommit(err, HTMGT_COMP_ID);
                     }
                     else
@@ -520,6 +522,36 @@ void init_bulk_power_limits(void)
                     }
                     break; // Stop on first found, Config should not have duplicates.
                 }
+            }
+            // if we hit the end of loop, and not found config post error log.
+            if (Index_Loop == Index_Config.size())
+            {
+                /*@
+                * @errortype
+                * @subsys EPUB_FIRMWARE_SP
+                * @moduleid HTMGT_MOD_PS_CONFIG_POWER_LIMIT
+                * @reasoncode HTMGT_RC_MISSING_DATA
+                * @userdata1 Power Limits failed to find power config in MRW table.
+                * @userdata2 0
+                * @devdesc Power Limits failed to find power config in MRW table.
+                * @custdesc Confirm power supply configuration.
+                */
+                errlHndl_t err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            HTMGT_MOD_PS_CONFIG_POWER_LIMIT,
+                                            HTMGT_RC_MISSING_DATA,
+                                            MyConfig,
+                                            0,
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                err->collectTrace(HTMGT_COMP_NAME);
+
+                // add Index Power Supplly config to FFDC.
+                err->addFFDC(HTMGT_COMP_ID,
+                             reinterpret_cast<void const*>(&Index_Config),
+                             Index_Config.size() * 4, //entries are 4 bytes.
+                             1,     //version
+                             0);
+
+                errlCommit(err, HTMGT_COMP_ID);
             }
         }
     }
@@ -539,15 +571,15 @@ void init_bulk_power_limits(void)
             (!sys->trySetAttr<ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>(power2)))
         {
             TMGT_ERR("init_bulk_power_limits: FAILED write Original bulk power limits "
-                    "- ATTR_REAL_XXX_BULK_POWER_LIMIT_WATTS ");
+                    "- ATTR_CURRENT_XXX_BULK_POWER_LIMIT_WATTS ");
 
             /*@
             * @errortype
             * @subsys EPUB_FIRMWARE_SP
             * @moduleid HTMGT_MOD_MRW_POWER_LIMIT
             * @reasoncode HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL
-            * @userdata2 N Bulk power limit
-            * @userdata3 N+1 Bulk power limit
+            * @userdata1 N Bulk power limit
+            * @userdata2 N+1 Bulk power limit
             * @devdesc Software problem, Failed to write bulk power limit attributes
             * @custdesc An internal firmware error occurred
             */
@@ -557,6 +589,7 @@ void init_bulk_power_limits(void)
                                         power1,
                                         power2,
                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            err->collectTrace(HTMGT_COMP_NAME);
             errlCommit(err, HTMGT_COMP_ID);
         }
     }
