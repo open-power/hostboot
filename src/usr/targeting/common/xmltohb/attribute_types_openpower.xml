@@ -394,7 +394,7 @@
     <writeable/>
   </attribute>
 
-   <attribute>
+  <attribute>
     <id>CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id>
     <description>
         System maximum power cap in output watts when system has redundant power supplies
@@ -970,9 +970,9 @@
     </description>
     <simpleType>
       <uint16_t>
-        <default>0,0,0,0,0,0,0,0,0,0,0,0</default>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</default>
       </uint16_t>
-      <array>12</array>
+      <array>24</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -987,9 +987,9 @@
     </description>
     <simpleType>
       <uint16_t>
-        <default>0,0,0,0,0,0,0,0,0,0,0,0</default>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</default>
       </uint16_t>
-      <array>12</array>
+      <array>24</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
@@ -1008,9 +1008,9 @@
     </description>
     <simpleType>
       <uint32_t>
-        <default>0,0,0,0,0,0,0,0,0,0,0,0</default>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</default>
       </uint32_t>
-      <array>12</array>
+      <array>24</array>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>

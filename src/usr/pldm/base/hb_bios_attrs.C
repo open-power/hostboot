@@ -91,10 +91,16 @@ const char PLDM_BIOS_HB_PS1_INPUT_VOLTAGE[]                = "hb_power_PS1_input
 const char PLDM_BIOS_HB_PS2_INPUT_VOLTAGE[]                = "hb_power_PS2_input_voltage";
 const char PLDM_BIOS_HB_PS3_INPUT_VOLTAGE[]                = "hb_power_PS3_input_voltage";
 
+// TODO JIRA: PFHB-478 remove when BMC PLDM is refreshed from upstream.
 const char PLDM_BIOS_HB_PS0_FUNCTIONAL[]                   = "hb_power_PS0_functional";
 const char PLDM_BIOS_HB_PS1_FUNCTIONAL[]                   = "hb_power_PS1_functional";
 const char PLDM_BIOS_HB_PS2_FUNCTIONAL[]                   = "hb_power_PS2_functional";
 const char PLDM_BIOS_HB_PS3_FUNCTIONAL[]                   = "hb_power_PS3_functional";
+
+const char PLDM_BIOS_HB_PS0_PRESENT[]                   = "hb_power_PS0_present";
+const char PLDM_BIOS_HB_PS1_PRESENT[]                   = "hb_power_PS1_present";
+const char PLDM_BIOS_HB_PS2_PRESENT[]                   = "hb_power_PS2_present";
+const char PLDM_BIOS_HB_PS3_PRESENT[]                   = "hb_power_PS3_present";
 
 
 const char PLDM_BIOS_HB_SEC_VER_LOCKIN_SUPPORTED_STRING[]  = "hb_secure_ver_lockin_enabled";
@@ -160,7 +166,7 @@ const std::vector<const char*> POSSIBLE_HB_POWER_LIMIT_STRINGS = {PLDM_BIOS_ENAB
                                                                   PLDM_BIOS_DISABLED_STRING};
 
 
-const std::vector<const char*> POSSIBLE_HB_PS_FUNCTIONAL_STRINGS = {PLDM_BIOS_ENABLED_STRING,
+const std::vector<const char*> POSSIBLE_HB_PS_PRESENT_STRINGS = {PLDM_BIOS_ENABLED_STRING,
                                                                      PLDM_BIOS_DISABLED_STRING};
 
 
@@ -2291,10 +2297,18 @@ errlHndl_t getPowerSupplyConfig(std::vector<uint8_t>& string_table,
     o_CcinOfPowerSupplies = 0;
     errlHndl_t errl = nullptr;
 
-    static const char* const ps_attr_string[] = {PLDM_BIOS_HB_PS0_FUNCTIONAL,
+    // TODO JIRA: PFHB-478 remove this when BMC PLDM is refreshed from upstream.
+    static const char* const ps_functional_attr_string[] = {
+                                                 PLDM_BIOS_HB_PS0_FUNCTIONAL,
                                                  PLDM_BIOS_HB_PS1_FUNCTIONAL,
                                                  PLDM_BIOS_HB_PS2_FUNCTIONAL,
                                                  PLDM_BIOS_HB_PS3_FUNCTIONAL};
+
+    static const char* const ps_present_attr_string[] = {
+                                                 PLDM_BIOS_HB_PS0_PRESENT,
+                                                 PLDM_BIOS_HB_PS1_PRESENT,
+                                                 PLDM_BIOS_HB_PS2_PRESENT,
+                                                 PLDM_BIOS_HB_PS3_PRESENT};
 
     static const char* const ps_model_attr_string[] = {
                                                  PLDM_BIOS_HB_PS0_MODEL,
@@ -2308,24 +2322,37 @@ errlHndl_t getPowerSupplyConfig(std::vector<uint8_t>& string_table,
                                                 PLDM_BIOS_HB_PS2_INPUT_VOLTAGE,
                                                 PLDM_BIOS_HB_PS3_INPUT_VOLTAGE};
 
-
     // Loop for total number of Power Supplies allowed.
     for (int j=0; j<4; j++)
     {
-        bool ps_functional = false;
+        bool ps_present = false;
         // ########################################################################
-        //  Power Supplies check if functional
+        //  Power Supplies check if present
         // ########################################################################
         std::vector<char>l_decodedValue = {};
         errl = getDecodedEnumAttr(string_table,
                             attr_table,
-                            ps_attr_string[j],
-                            POSSIBLE_HB_PS_FUNCTIONAL_STRINGS,
+                            ps_present_attr_string[j],
+                            POSSIBLE_HB_PS_PRESENT_STRINGS,
                             l_decodedValue);
+
+        if(errl)// BEGIN TODO JIRA: PFHB-478 remove this when BMC PLDM is refreshed from upstream.
+        {
+            delete errl;
+            errl = nullptr;
+            l_decodedValue = {};
+
+            errl = getDecodedEnumAttr(string_table,
+                    attr_table,
+                    ps_functional_attr_string[j],
+                    POSSIBLE_HB_PS_PRESENT_STRINGS,
+                    l_decodedValue);
+        }// END TODO JIRA: PFHB-478 remove this when BMC PLDM is refreshed from upstream.
+
         if(errl)
         {
             PLDM_ERR("getPowerSupplyConfig() Failed to lookup value for %s",
-                        ps_attr_string[j]);
+                        ps_present_attr_string[j]);
             modelPowerSupplies = ps_model_failed;
             o_NumberOfPowerSupplies = 0;
             o_InputVoltPowerSupplies = 0;
@@ -2334,13 +2361,12 @@ errlHndl_t getPowerSupplyConfig(std::vector<uint8_t>& string_table,
 
         if ( strncmp(l_decodedValue.data(), PLDM_BIOS_ENABLED_STRING, l_decodedValue.size()) == 0 )
         {
-            ps_functional = true;
+            ps_present = true;
             o_NumberOfPowerSupplies++;
         }
 
-
-        // If found functional Power Supply then read CCIN and input Voltage.
-        if (ps_functional)
+        // If found present Power Supply then read CCIN and input Voltage.
+        if (ps_present)
         {
             // ########################################################################
             //  PS Model read attribute.
@@ -2435,70 +2461,19 @@ errlHndl_t getPowerSupplyConfig(std::vector<uint8_t>& string_table,
                 break;
             }
 
-            // Determine Voltage 110 vs 220 like Power does.
-            if ( l_retrievedBmcAttributeValue > 0 )
+            // if zero volts ignore reading.
+            // and if we have not stored a voltage or
+            //     This read voltage is less than stored read, then store voltage.
+            if ((l_retrievedBmcAttributeValue != 0) &&
+                ((o_InputVoltPowerSupplies == 0) ||
+                 (l_retrievedBmcAttributeValue < o_InputVoltPowerSupplies)))
             {
-                if (l_retrievedBmcAttributeValue < 160)
-                {
-                    // Add new 110 for future compare.
-                    if (o_InputVoltPowerSupplies == 0)
-                    {
-                        o_InputVoltPowerSupplies = 110;
-                    }
-                    // else 220 over 110, then clear
-                    else if (o_InputVoltPowerSupplies != 110)
-                    {
-                        o_InputVoltPowerSupplies = 0;
-                    }
-                    // else this would be 110 over 110 then no-op.
-                }
-                else if (l_retrievedBmcAttributeValue >= 160)
-                {
-                    // Add new 220 for future compare.
-                    if (o_InputVoltPowerSupplies == 0)
-                    {
-                        o_InputVoltPowerSupplies = 220;
-                    }
-                    // else 110 over 220, then clear
-                    else if (o_InputVoltPowerSupplies != 220)
-                    {
-                        o_InputVoltPowerSupplies = 0;
-                    }
-                    // else this would be 220 over 220 then no-op.
-                }
+                o_InputVoltPowerSupplies = l_retrievedBmcAttributeValue;
             }
+            // else this read does not meet requirements to be used go to next.
 
-            if (o_InputVoltPowerSupplies == 0)
-            {
-                PLDM_ERR("getPowerSupplyConfig: Power Supplies input voltage not valid "
-                                        "or matching! %s : %d", ps_input_volt_attr_string[j],
-                                        l_retrievedBmcAttributeValue );
-
-                modelPowerSupplies = ps_model_failed;
-                o_NumberOfPowerSupplies = 0;
-
-                /*@
-                * @errortype
-                * @severity   ERRL_SEV_UNRECOVERABLE
-                * @moduleid   MOD_GET_POWER_SUPPLY_CONFIG
-                * @reasoncode RC_PS_INPUT_VOLTAGE_NOT_FOUND
-                * @userdata1  Unused
-                * @userdata2  Unused
-                * @devdesc    Software problem, PS input Voltage data from BMC not found.
-                * @custdesc   A software error occurred during system boot
-                */
-                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    MOD_GET_POWER_SUPPLY_CONFIG,
-                                    RC_PS_INPUT_VOLTAGE_NOT_FOUND,
-                                    0,
-                                    0,
-                                    ErrlEntry::ADD_SW_CALLOUT);
-                addPldmFrData(errl);
-
-                break;
-            }
-        }
-    }//End for loop functional
+        }// End if present
+    }//End for loop present
 
     // Change CCIN Char string into Hex number.
     o_CcinOfPowerSupplies = strtoul(modelPowerSupplies.data(), nullptr, 16);
