@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2021
+# Contributors Listed Below - COPYRIGHT 2019,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -34,6 +34,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import
 EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess
 EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess/test
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 
 VPATH += ${ROOTPATH}/src/usr/expaccess/test/
 VPATH += ${ROOTPATH}/src/usr/expaccess/

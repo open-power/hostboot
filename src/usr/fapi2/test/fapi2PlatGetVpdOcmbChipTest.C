@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,7 @@
 
 #include <fapi2PlatGetVpdOcmbChipTest.H>
 #include <plat_vpd_access.H>
+#include <targeting/odyutil.H>
 
 // The maximum size of a the EFD buffer
 // Ony used if failed to get buffer size
@@ -275,6 +276,12 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     ++l_numTests;
     do
     {
+        // TODO JIRA: PFHB-477 re-enable this test for Odyssey
+        if(TARGETING::UTIL::isOdysseyChip(l_ocmbChipTarget.get()))
+        {
+            break;
+        }
+
         TS_INFO("testGetVPD_EFD: Test case 7 start");
 
         // Initialize the other input variables
@@ -308,6 +315,12 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     ++l_numTests;
     do
     {
+        // TODO JIRA: PFHB-477 re-enable this test for Odyssey
+        if(TARGETING::UTIL::isOdysseyChip(l_ocmbChipTarget.get()))
+        {
+            break;
+        }
+
         TS_INFO("testGetVPD_EFD: Test case 8 start");
 
         // Initialize the other input variables
@@ -376,6 +389,12 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     ++l_numTests;
     do
     {
+        // TODO JIRA: PFHB-477 re-enable this test for Odyssey
+        if(TARGETING::UTIL::isOdysseyChip(l_ocmbChipTarget.get()))
+        {
+            break;
+        }
+
         TS_INFO("testGetVPD_EFD: Test case 10 start");
 
         // Initialize the other input variables

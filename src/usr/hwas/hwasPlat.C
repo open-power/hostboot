@@ -782,7 +782,6 @@ errlHndl_t ocmbIdecPhase2(const TARGETING::TargetHandle_t& i_target)
                      "  with value from OCMB IDEC register ID=0x%02X",
                      l_ecFromSpd,
                      l_ec);
-
             /*@
             * @errortype
             * @severity          ERRL_SEV_PREDICTIVE

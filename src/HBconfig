@@ -73,3 +73,9 @@ config SUPPORT_EEPROM_HWACCESS
         the devices with associated records pre-populated into the EECACHE PNOR
         partition will be marked as present; all devices without existing EECACHE
         records will be marked as not present.
+
+config ODYSSEY_BRINGUP
+    default n
+    help
+        A flag indicating Odyssey bringup. Some code paths may be cut/avoided
+        during the bringup. Eventually, this flag needs to be removed.

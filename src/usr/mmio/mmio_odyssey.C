@@ -283,6 +283,18 @@ errlHndl_t routeIbScom(DeviceFW::OperationType i_opType,
         // Only one arg : scom address
         uint64_t l_scomAddr = va_arg(i_args,uint64_t);
 
+        //@FIXME-JIRA:PFHB-466 : NOOP Multicast scoms until we
+        // have the workaround in place because they fail
+        // one of the range checks in the MMIO code
+        if( l_scomAddr & 0xF0000000 )
+        {
+            TRACFCOMP(g_trac_mmio,
+                      "Skipping multicast scom 0x%.8X to %.8X",
+                      l_scomAddr,
+                      TARGETING::get_huid(i_target));
+            break;
+        }
+
         // Transform the scom address into the MMIO address
         uint64_t l_mmioAddr = MMIOCOMMON_scom_to_offset(l_scomAddr);
 
@@ -294,6 +306,10 @@ errlHndl_t routeIbScom(DeviceFW::OperationType i_opType,
                                       DEVICE_MMIO_ADDRESS(l_mmioAddr, io_buflen));
         if( l_errhdl )
         {
+            TRACFCOMP(g_trac_mmio,
+                      "routeIbScom: MMIO failed for SCOM 0x%.8X on %.8X",
+                      l_scomAddr,
+                      TARGETING::get_huid(i_target));
             break;
         }
 

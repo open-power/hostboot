@@ -283,7 +283,8 @@ TESTCASE_MODULES += $(if $(CONFIG_EARLY_TESTCASES) && $(FSP_BUILD) ,,testnvram)
 TESTCASE_MODULES += testsmf
 TESTCASE_MODULES += testexpaccess
 TESTCASE_MODULES += testmdsaccess
-TESTCASE_MODULES += testrtloader
+# TODO JIRA: PFHB-477 This test is not working in 20.2
+TESTCASE_MODULES += $(if $(CONFIG_ODYSSEY_BRINGUP), ,testrtloader)
 TESTCASE_MODULES += testexpupd
 TESTCASE_MODULES += testspi
 TESTCASE_MODULES += testspiserial

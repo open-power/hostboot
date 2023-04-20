@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2022
+# Contributors Listed Below - COPYRIGHT 2014,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -38,6 +38,10 @@ echo "MACHINE IS $MACHINE"
 if [ "$CHIP" == "P10" ];
 then
     export CONFIG_FILE=src/build/configs/simics_p10.config
+    export MACHINE=p10_standalone
+elif [ "$CHIP" == "ODYSSEY" ];
+then
+    export CONFIG_FILE=src/build/configs/odyssey.config
     export MACHINE=p10_standalone
 elif [ "$CHIP" == "BONITO" ];
 then

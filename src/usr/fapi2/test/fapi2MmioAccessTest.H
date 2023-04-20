@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <p10_mmiotests.H>
 #include <plat_hwp_invoker.H>
 #include <test/exptest_utils.H>
+#include <targeting/odyutil.H>
 
 using namespace fapi2;
 
@@ -119,6 +120,11 @@ void test_fapi2MmioInvalidSizes()
 
     for (auto & l_ocmb: l_ocmbTargetList)
     {
+        if(TARGETING::UTIL::isOdysseyChip(l_ocmb))
+        {
+            TS_INFO("test_fapi2MmioInvalidSizes() - Odyssey chip detected; skipping the test");
+            continue; // TODO JIRA: PFHB-477 re-enable this test for Odyssey
+        }
         Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapi2_ocmbTarget( l_ocmb );
         auto first_ocmb_info = l_ocmb->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
         if (!first_ocmb_info.useInbandScom)
@@ -193,6 +199,12 @@ void test_fapi2MmioAccess()
     mutex_lock(iv_serializeTestMutex);
     for (auto & l_ocmb: l_chipList)
     {
+        if(TARGETING::UTIL::isOdysseyChip(l_ocmb))
+        {
+            TS_INFO("test_fapi2MmioAccess() - Odyssey chip detected; skipping the test");
+            continue; // TODO JIRA: PFHB-477 re-enable this test for Odyssey
+        }
+
         Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi2_target( l_ocmb );
 
         numTests++;

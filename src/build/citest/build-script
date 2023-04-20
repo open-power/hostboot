@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2022
+# Contributors Listed Below - COPYRIGHT 2014,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -98,7 +98,7 @@ fi
 
 # Create holding environment, build HB, and populate holding environment
 echo "#--------------------------------"
-if [ "$CHIP" == "P10" ] || [ "$CHIP" == "VPO" ] || [ "$CHIP" == "BONITO" ];then
+if [ "$CHIP" == "P10" ] || [ "$CHIP" == "VPO" ] || [ "$CHIP" == "BONITO" ] || [ "$CHIP" == "ODYSSEY" ];then
     echo "As things stand, when doing a P10 Standalone build, a Sandbox is "
     echo "still created because Simics' autosim depends on it."
     export SETUP_FOR_STANDALONE="1"
@@ -111,6 +111,10 @@ echo "CHIP=$CHIP"
 echo "PNOR=$PNOR"
 echo "CONFIG_FILE=$CONFIG_FILE"
 echo "#--------------------------------"
+
+if [ "$CHIP" == "ODYSSEY" ]; then
+    export HB_USE_ODYSSEY="1"
+fi
 
 #export HOSTBOOT_DEBUG=1    #-- Ensure printkd / tracd is compiled in.
 

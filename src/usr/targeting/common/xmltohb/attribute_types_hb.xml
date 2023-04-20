@@ -198,7 +198,8 @@
     <simpleType>
       <uint16_t>
         <!-- Default to running as soon as Hostboot is able -->
-        <default>0x0609</default>
+        <!-- Note: currently set to 20.2 for Odyssey purposes -->
+        <default>0x1402</default>
       </uint16_t>
     </simpleType>
     <persistency>non-volatile</persistency>

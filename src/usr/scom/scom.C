@@ -52,6 +52,9 @@
 #include <fapi2/plat_hw_access.H>
 #include <scom/scomif.H>
 #include <chipids.H>
+#include <arch/magic.H>
+#include <console/consoleif.H>
+#include <util/misc.H>
 
 
 // Trace definition
@@ -318,7 +321,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
         // bit 32 - always 0
         // bit 33-47 - bcast/chipletID/port
         // bit 48-63 - local addr
-        i_addr = i_addr & 0x000000007FFFFFFF;
+        uint64_t l_scom_addr = i_addr & 0x000000007FFFFFFF;
 
         // If we are doing a read. We need to do a write first..
         if(i_opType == DeviceFW::READ)
@@ -340,7 +343,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                              & l_io_buffer,
                              io_buflen,
                              i_accessType,
-                             i_addr);
+                             l_scom_addr);
 
             if (l_err != NULL)
             {
@@ -360,7 +363,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                                  &(scomout.data64),
                                  io_buflen,
                                  i_accessType,
-                                 i_addr);
+                                 l_scom_addr);
 
                 if (l_err != NULL)
                 {
@@ -383,6 +386,12 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
 
                 nanosleep( 0, 10000 ); //sleep for 10,000 ns
                 elapsed_indScom_time_ns += 10000;
+#ifdef CONFIG_ODYSSEY_BRINGUP
+                if(Util::isSimicsRunning())
+                {
+                    elapsed_indScom_time_ns += (MAX_INDSCOM_TIMEOUT_NS/2); //only check twice
+                }
+#endif
 
             }while ( elapsed_indScom_time_ns <= MAX_INDSCOM_TIMEOUT_NS);
 
@@ -412,7 +421,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       SCOM_CHECK_INDIRECT_AND_DO_SCOM,
                                       SCOM_INDIRECT_READ_FAIL,
-                                      i_addr,
+                                      l_scom_addr,
                                       scomout.data64);
 
                 // we should never hit this so if we do we are going
@@ -430,7 +439,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                     //Add the callouts for the specific PCB/PIB error
                     PIB::addFruCallouts( i_target,
                                          scomout.piberr,
-                                         i_addr,
+                                         l_scom_addr,
                                          l_err );
                 }
 
@@ -460,7 +469,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       SCOM_CHECK_INDIRECT_AND_DO_SCOM,
                                       SCOM_INDIRECT_READ_TIMEOUT,
-                                      i_addr,
+                                      l_scom_addr,
                                       scomout.data64);
 
                 //Best guess is the chip
@@ -500,7 +509,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                              & l_io_buffer,
                              io_buflen,
                              i_accessType,
-                             i_addr);
+                             l_scom_addr);
 
             if (l_err != NULL)
             {
@@ -519,7 +528,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                                  &(scomout.data64),
                                  io_buflen,
                                  i_accessType,
-                                 i_addr);
+                                 l_scom_addr);
 
                 if (l_err != NULL)
                 {
@@ -570,7 +579,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       SCOM_CHECK_INDIRECT_AND_DO_SCOM,
                                       SCOM_INDIRECT_WRITE_FAIL,
-                                      i_addr,
+                                      l_scom_addr,
                                       scomout.data64);
 
                 // we should never hit this so if we do we are going
@@ -588,7 +597,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                     //Add the callouts for the specific PCB/PIB error
                     PIB::addFruCallouts( i_target,
                                          scomout.piberr,
-                                         i_addr,
+                                         l_scom_addr,
                                          l_err );
                 }
 
@@ -618,7 +627,7 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       SCOM_CHECK_INDIRECT_AND_DO_SCOM,
                                       SCOM_INDIRECT_WRITE_TIMEOUT,
-                                      i_addr,
+                                      l_scom_addr,
                                       scomout.data64);
 
                 //Best guess is the chip

@@ -57,8 +57,8 @@ trace_desc_t* g_trac_i2cr = NULL;
 TRAC_INIT(&g_trac_i2cr, I2CR_COMP_NAME, 2*KILOBYTE); //2K
 
 // Easy macro replace for unit testing
-#define TRACUCOMP(args...)  TRACFCOMP(args)
-//#define TRACUCOMP(args...)
+//#define TRACUCOMP(args...)  TRACFCOMP(args)
+#define TRACUCOMP(args...)
 
 using namespace I2C;
 using namespace TARGETING;

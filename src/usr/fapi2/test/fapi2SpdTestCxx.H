@@ -148,6 +148,10 @@ class SPDTest: public CxxTest::TestSuite
               {
                   l_compareSize = SPD::OCMB_SPD_EFD_COMBINED_SIZE;
               }
+              else if( (l_memModule == SPD::MOD_TYPE_DDIMM) && (l_memGen == SPD::DDR5_TYPE) )
+              {
+                  l_compareSize = SPD::OCMB_SPD_EFD_COMBINED_SIZE_DDR5;
+              }
               else if( (l_memModule != SPD::MOD_TYPE_DDIMM) && (l_memGen == SPD::DDR4_TYPE) )
               {
                   l_compareSize = SPD::DDR4_SPD_SIZE;

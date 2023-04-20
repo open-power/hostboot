@@ -43,7 +43,7 @@
 #include <lib/shared/exp_consts.H>
 #include "exptest_utils.H"
 #include "../expscom_trace.H"
-
+#include <targeting/odyutil.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -169,6 +169,13 @@ public:
                 TRACFCOMP( g_trac_expscom, "No OCMB targets found, skipping testExpscomI2c");
                 break;
             }
+
+             // Skip the test if we have Odyssey chips present
+             if(TARGETING::UTIL::isOdysseyChip(l_explorerList[0]))
+             {
+                 TS_INFO("testExpscomI2c: Odyssey chip detected; skipping the test");
+                 break;
+             }
 
             // Get the system's MEM_PORT units, we will use these as test targets
             TargetHandleList l_memportList;
@@ -448,6 +455,13 @@ public:
                 break;
             }
 
+             // Skip the test if we have Odyssey chips present
+             if(TARGETING::UTIL::isOdysseyChip(l_explorerList[0]))
+             {
+                 TS_INFO("testExpscomI2cPlatform: Odyssey chip detected; skipping the test");
+                 break;
+             }
+
             // We will use the first and last targets for these scom tests
             auto l_firstExpChip = l_explorerList.front();
             auto l_lastExpChip  = l_explorerList.back();
@@ -607,6 +621,13 @@ public:
                 TRACFCOMP(g_trac_expscom, "No OCMB targets found, skipping testExpscomMmio");
                 break;
             }
+
+             // Skip the test if we have Odyssey chips present
+             if(TARGETING::UTIL::isOdysseyChip(l_explorerList[0]))
+             {
+                 TS_INFO("testExpscomMmio: Odyssey chip detected; skipping the test");
+                 break;
+             }
 
             auto l_firstExpChip = l_explorerList.front();
             auto l_lastExpChip  = l_explorerList.back();
@@ -782,6 +803,13 @@ public:
                 TRACFCOMP(g_trac_expscom, "No OCMB targets found, skipping testExpscomCombined");
                 break;
             }
+
+             // Skip the test if we have Odyssey chips present
+             if(TARGETING::UTIL::isOdysseyChip(l_explorerList[0]))
+             {
+                 TS_INFO("testExpscomCombined: Odyssey chip detected; skipping the test");
+                 break;
+             }
 
             auto l_firstExpChip = l_explorerList.front();
             auto l_lastExpChip  = l_explorerList.back();
@@ -973,6 +1001,13 @@ public:
                 TS_FAIL("No OCMB targets found, skipping testExpscomSbe");
                 break;
             }
+
+             // Skip the test if we have Odyssey chips present
+             if(TARGETING::UTIL::isOdysseyChip(l_explorerList[0]))
+             {
+                 TS_INFO("testExpscomSbe: Odyssey chip detected; skipping the test");
+                 break;
+             }
 
             auto l_firstExpChip = l_explorerList.front();
             auto l_lastExpChip  = l_explorerList.back();
