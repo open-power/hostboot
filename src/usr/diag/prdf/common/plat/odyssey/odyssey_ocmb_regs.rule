@@ -294,6 +294,13 @@
     # Odyssey chip RDF_FIR_0
     ############################################################################
 
+    register RDF_FIR_MASK_OR_0
+    {
+        name        "Odyssey chip RDF_FIR 0 MASK OR";
+        scomaddr    0x08011803;
+        capture     group never;
+    };
+
     register RDF_0_ERR_RPT_0
     {
         name        "Odyssey chip RDF 0 Error Report 0";
@@ -430,6 +437,13 @@
     ############################################################################
     # Odyssey chip RDF_FIR_1
     ############################################################################
+
+    register RDF_FIR_MASK_OR_1
+    {
+        name        "Odyssey chip RDF_FIR 1 MASK OR";
+        scomaddr    0x08012803;
+        capture     group never;
+    };
 
     register RDF_1_ERR_RPT_0
     {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -262,8 +262,8 @@ uint32_t didCmdStopOnLastAddr( ExtensibleChip * i_chip,
 
         // Get the end address of the current rank.
         MemAddr junk, endAddr;
-        o_rc = getMemAddrRange<T>( i_chip, curAddr.getRank(), junk,
-                                          endAddr, i_rangeType );
+        o_rc = getMemAddrRange<T>( i_chip, curAddr.getRank(), junk, endAddr,
+                                   i_rangeType );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%02x) failed",
@@ -274,8 +274,10 @@ uint32_t didCmdStopOnLastAddr( ExtensibleChip * i_chip,
         // For row repair, compare just the rank and row.
         if ( i_rowRepair )
         {
-            curAddr = MemAddr( curAddr.getRank(), 0, curAddr.getRow(), 0 );
-            endAddr = MemAddr( endAddr.getRank(), 0, endAddr.getRow(), 0 );
+            curAddr = MemAddr( curAddr.getRank(), 0, curAddr.getRow(), 0,
+                               curAddr.getPort() );
+            endAddr = MemAddr( endAddr.getRank(), 0, endAddr.getRow(), 0,
+                               endAddr.getPort() );
         }
 
         // Compare the addresses.

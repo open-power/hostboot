@@ -515,6 +515,10 @@ uint32_t __convertMssMcbistAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
+    // TODO Odyssey - updates needed for the address format. bank is now 2 bits
+    // instead of 3. bank group is now 3 bits instead of 2. column is now 8
+    // bits (3:10) instead of 7 (3:9).
+
     uint64_t dslct   = i_addr.get_dimm();
     uint64_t rslct   = i_addr.get_master_rank();
     uint64_t srnk    = i_addr.get_slave_rank();
@@ -551,7 +555,7 @@ uint32_t __convertMssMcbistAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     uint64_t bnkFull = (bnk << 2) | bnk_grp;
     uint64_t prnk    = (dslct << 2) | rslct;
-    o_addr = MemAddr ( MemRank ( prnk, srnk ), bnkFull, row, col );
+    o_addr = MemAddr ( MemRank ( prnk, srnk ), bnkFull, row, col, 0 );
 
     return o_rc;
 

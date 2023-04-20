@@ -904,6 +904,11 @@
         "description": "LCDL Debug Control3 1",
         "name": "LCDL_DBG_CNTL3_1"
     },
+    "0xc3b1": {
+        "address": "0x0000000008011803",
+        "description": "Odyssey chip RDF_FIR 0 MASK OR",
+        "name": "RDF_FIR_MASK_OR_0"
+    },
     "0xc435": {
         "address": "0x800201040801303f",
         "description": "SNPS Phy Interrupt Status 0",
@@ -913,6 +918,11 @@
         "address": "0x800201040801343f",
         "description": "SNPS Phy Interrupt Status 1",
         "name": "PHY_INTERRUPT_STATUS_1"
+    },
+    "0xc4b1": {
+        "address": "0x0000000008012803",
+        "description": "Odyssey chip RDF_FIR 1 MASK OR",
+        "name": "RDF_FIR_MASK_OR_1"
     },
     "0xc537": {
         "address": "0x0000000008011455",

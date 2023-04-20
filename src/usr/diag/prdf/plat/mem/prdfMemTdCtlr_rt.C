@@ -762,6 +762,8 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::initialize()
 
     uint32_t o_rc = SUCCESS;
 
+    // TODO Odyssey - updates needed in underlying functions
+
     do
     {
         if ( iv_initialized ) break; // nothing to do

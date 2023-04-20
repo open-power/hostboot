@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,9 +88,11 @@ class MemAddr
     /**
      * @brief Creates a MemAddr from the current maintenance address.
      * @param i_addr 64-bit address.
+     * @param i_trgt OCMB chip target.
      */
     template<TARGETING::TYPE T>
-    static MemAddr fromMaintAddr( uint64_t i_addr );
+    static MemAddr fromMaintAddr( uint64_t i_addr,
+                                  TARGETING::TargetHandle_t i_trgt );
 
     /**
      * @brief  Converts internal data structure to a maintenance address.
@@ -123,13 +125,17 @@ class MemAddr
     /** @return This address's column. */
     uint32_t getCol() const { return iv_col; }
 
+    /** @return This address's port. */
+    uint8_t getPort() const { return iv_port; }
+
     /** @brief '==' operator */
     bool operator==( const MemAddr & i_addr ) const
     {
         return ( this->getRank() == i_addr.getRank() &&
                  this->getBank() == i_addr.getBank() &&
                  this->getRow()  == i_addr.getRow()  &&
-                 this->getCol()  == i_addr.getCol() );
+                 this->getCol()  == i_addr.getCol() &&
+                 this->getPort() == i_addr.getPort() );
     }
 
   public: // functions
@@ -137,12 +143,16 @@ class MemAddr
     /**
      * @brief Constructor from components.
      * @param i_rnk Rank   See MemRank class
-     * @param i_bnk Bank   OCMB: b0-b2,bg0-bg1 (5-bit)
-     * @param i_row Row    OCMB: r0-r17        (18-bit)
-     * @param i_col Column OCMB: c3-c9         (7-bit)
+     * @param i_bnk Bank   OCMB (Explorer): b0-b2,bg0-bg1 (5-bit)
+     *                     OCMB (Odyssey) : b0-b1,bg0-bg2 (5-bit)
+     * @param i_row Row    OCMB           : r0-r17        (18-bit)
+     * @param i_col Column OCMB (Explorer): c3-c9         (7-bit)
+     *                     OCMB (Odyssey) : c3-c10        (8-bit)
+     * @param i_port Port
      */
-    MemAddr( MemRank i_rnk, uint8_t i_bnk, uint32_t i_row, uint16_t i_col ) :
-        iv_rnk(i_rnk), iv_bnk(i_bnk), iv_row(i_row), iv_col(i_col)
+    MemAddr( MemRank i_rnk, uint8_t i_bnk, uint32_t i_row, uint16_t i_col,
+             uint8_t i_port ) : iv_rnk(i_rnk), iv_bnk(i_bnk), iv_row(i_row),
+             iv_col(i_col), iv_port(i_port)
     {}
 
   private: // instance variables
@@ -151,6 +161,7 @@ class MemAddr
     uint8_t  iv_bnk = 0;          ///< Bank
     uint32_t iv_row = 0;          ///< Row
     uint16_t iv_col = 0;          ///< Column
+    uint8_t  iv_port = 0;         ///< Port
 };
 
 //------------------------------------------------------------------------------

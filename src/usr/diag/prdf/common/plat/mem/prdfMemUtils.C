@@ -964,6 +964,8 @@ uint32_t getAddrConfig<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[MemUtils::getAddrConfig] "
 
+    // TODO Odyssey - register format changed, updates needed
+
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
     int32_t o_rc = SUCCESS;

@@ -52,36 +52,51 @@ using namespace PlatServices;
 template<TARGETING::TYPE T>
 MemAddr MemAddr::fromReadAddr( uint64_t i_addr )
 {
+    // TODO Odyssey - need updates for odyssey
     uint64_t mrnk = (i_addr >> 59) &     0x7; //  2: 4
     uint64_t srnk = (i_addr >> 56) &     0x7; //  5: 7
     uint64_t row  = (i_addr >> 38) & 0x3ffff; //  8:25
     uint64_t col  = (i_addr >> 31) &    0x7f; // 26:32
     uint64_t bnk  = (i_addr >> 26) &    0x1f; // 33:37
 
-    return MemAddr( MemRank(mrnk, srnk), bnk, row, col );
+    return MemAddr( MemRank(mrnk, srnk), bnk, row, col, 0 );
 }
 
 template
 MemAddr MemAddr::fromReadAddr<TYPE_OCMB_CHIP>( uint64_t i_addr );
 
-template<TARGETING::TYPE T>
-MemAddr MemAddr::fromMaintAddr( uint64_t i_addr )
+template<>
+MemAddr MemAddr::fromMaintAddr<TYPE_OCMB_CHIP>( uint64_t i_addr,
+    TargetHandle_t i_trgt )
 {
-    uint64_t rslct = (i_addr >> 59) &     0x3; //  3: 4
-    uint64_t srnk  = (i_addr >> 56) &     0x7; //  5: 7
-    uint64_t row   = (i_addr >> 38) & 0x3ffff; //  8:25
-    uint64_t col   = (i_addr >> 31) &    0x7f; // 26:32
-    uint64_t bnk   = (i_addr >> 26) &    0x1f; // 33:37
-    uint64_t dslct = (i_addr >> 23) &     0x1; // 40
+    // Odyssey OCMBs
+    if (isOdysseyOcmb(i_trgt))
+    {
+        uint64_t mrnk = (i_addr >> 60) &     0x3; //  2: 3
+        uint64_t srnk = (i_addr >> 57) &     0x7; //  4: 6
+        uint64_t row  = (i_addr >> 39) & 0x3ffff; //  7:24
+        uint64_t col  = (i_addr >> 31) &    0xff; // 25:32
+        uint64_t bnk  = (i_addr >> 26) &    0x1f; // 33:37
+        uint64_t port = (i_addr >> 23) &     0x1; // 40
 
-    uint64_t mrnk  = (dslct << 2) | rslct;
+        return MemAddr( MemRank(mrnk, srnk), bnk, row, col, port );
+    }
+    // Explorer OCMBs
+    else
+    {
+        uint64_t rslct = (i_addr >> 59) &     0x3; //  3: 4
+        uint64_t srnk  = (i_addr >> 56) &     0x7; //  5: 7
+        uint64_t row   = (i_addr >> 38) & 0x3ffff; //  8:25
+        uint64_t col   = (i_addr >> 31) &    0x7f; // 26:32
+        uint64_t bnk   = (i_addr >> 26) &    0x1f; // 33:37
+        uint64_t dslct = (i_addr >> 23) &     0x1; // 40
 
-    return MemAddr( MemRank(mrnk, srnk), bnk, row, col );
+        uint64_t mrnk = (dslct << 2) | rslct;
+        uint64_t port = 0;
+
+        return MemAddr( MemRank(mrnk, srnk), bnk, row, col, port );
+    }
 }
-
-template
-MemAddr MemAddr::fromMaintAddr<TYPE_OCMB_CHIP>( uint64_t i_addr );
-
 
 template<TARGETING::TYPE T>
 uint64_t MemAddr::toMaintAddr() const
@@ -248,7 +263,8 @@ uint32_t getMemMaintAddr( ExtensibleChip * i_chip, MemAddr & o_addr )
     {
         // Get the address object.
         uint64_t addr = reg->GetBitFieldJustified( 0, 64 );
-        o_addr = MemAddr::fromMaintAddr<T>( addr );
+
+        o_addr = MemAddr::fromMaintAddr<T>( addr, i_chip->getTrgt() );
     }
 
     return o_rc;

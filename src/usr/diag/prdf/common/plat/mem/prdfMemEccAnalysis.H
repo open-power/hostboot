@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -123,7 +123,7 @@ template<TARGETING::TYPE T>
 uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
                     UE_TABLE::Type i_type, STEP_CODE_DATA_STRUCT & io_sc )
 {
-    MemAddr addr { i_rank, 0, 0, 0 };
+    MemAddr addr { i_rank, 0, 0, 0, 0 };
     return handleMpe<T>( i_chip, addr, i_type, io_sc );
 }
 
