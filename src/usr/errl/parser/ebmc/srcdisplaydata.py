@@ -9057,4 +9057,10 @@ srcInfo = {
                            "userdata1":  "Lid Id Found",
                            "userdata2":  "Section Id Found",
                       },
+            0x264F41: {    "devdesc": "Power Supply Config failed to find in MRW table.",
+                           "moduleid": "HTMGT_MOD_PS_CONFIG_POWER_LIMIT",
+                           "reasoncode": "HTMGT_RC_MISSING_DATA",
+                           "userdata1":  "Power Supply config being searched for.",
+                           "userdata2":  "0",
+                      },
           }
