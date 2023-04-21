@@ -129,13 +129,31 @@ static void test_msgbuf_extract_generic_real32(void)
     expect(pldm_msgbuf_destroy(ctx) == PLDM_SUCCESS);
 }
 
+static void test_msgbuf_extract_array_generic_uint8(void)
+{
+    struct pldm_msgbuf _ctx;
+    struct pldm_msgbuf* ctx = &_ctx;
+    uint32_t buf[1] = {0};
+    uint8_t arr[1];
+
+    expect(pldm_msgbuf_init(ctx, sizeof(buf), buf, sizeof(buf)) ==
+           PLDM_SUCCESS);
+    expect(pldm_msgbuf_extract_array(ctx, arr, 1) == PLDM_SUCCESS);
+    expect(arr[0] == 0);
+    expect(pldm_msgbuf_destroy(ctx) == PLDM_SUCCESS);
+}
+
 typedef void (*testfn)(void);
 
-static const testfn tests[] = {
-    test_msgbuf_extract_generic_uint8,  test_msgbuf_extract_generic_int8,
-    test_msgbuf_extract_generic_uint16, test_msgbuf_extract_generic_int16,
-    test_msgbuf_extract_generic_uint32, test_msgbuf_extract_generic_int32,
-    test_msgbuf_extract_generic_real32, NULL};
+static const testfn tests[] = {test_msgbuf_extract_generic_uint8,
+                               test_msgbuf_extract_generic_int8,
+                               test_msgbuf_extract_generic_uint16,
+                               test_msgbuf_extract_generic_int16,
+                               test_msgbuf_extract_generic_uint32,
+                               test_msgbuf_extract_generic_int32,
+                               test_msgbuf_extract_generic_real32,
+                               test_msgbuf_extract_array_generic_uint8,
+                               NULL};
 
 int main(void)
 {

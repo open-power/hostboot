@@ -11,6 +11,8 @@ extern "C" {
 
 #include "pldm_types.h"
 
+typedef uint8_t pldm_tid_t;
+
 /** @brief PLDM Types
  */
 enum pldm_supported_types {
@@ -87,6 +89,7 @@ typedef enum {
 #define PLDM_INSTANCE_MAX 31
 #define PLDM_MAX_TYPES 64
 #define PLDM_MAX_CMDS_PER_TYPE 256
+#define PLDM_MAX_TIDS 256
 
 /* Message payload lengths */
 #define PLDM_GET_COMMANDS_REQ_BYTES 5

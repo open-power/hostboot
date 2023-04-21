@@ -351,7 +351,7 @@ TEST(GetPDR, testBadDecodeResponse)
     uint8_t transferFlag = PLDM_END;
     constexpr uint16_t respCnt = 9;
     uint8_t transferCRC = 96;
-    size_t recordDataLength = 32;
+    size_t recordDataLength = respCnt - 1;
     std::array<uint8_t, hdrSize + PLDM_GET_PDR_MIN_RESP_BYTES + respCnt +
                             sizeof(transferCRC)>
         responseMsg{};
@@ -842,7 +842,7 @@ TEST(GetStateSensorReadings, testBadDecodeResponse)
            (sizeof(get_sensor_state_field) * comp_sensorCnt));
 
     rc = decode_get_state_sensor_readings_resp(
-        response, responseMsg.size() - hdrSize + 1, &retcompletion_code,
+        response, responseMsg.size() - hdrSize, &retcompletion_code,
         &retcomp_sensorCnt, retstateField.data());
 
     EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
@@ -1565,14 +1565,11 @@ TEST(PlatformEventMessage, testGoodNumericSensorEventDataDecodeRequest)
     sensorData->event_state = eventState;
     sensorData->previous_event_state = previousEventState;
     sensorData->sensor_data_size = sensorDataSize;
-    sensorData->present_reading[3] =
-        static_cast<uint8_t>(htole32(presentReading) & (0x000000ff));
-    sensorData->present_reading[2] =
-        static_cast<uint8_t>((htole32(presentReading) & (0x0000ff00)) >> 8);
-    sensorData->present_reading[1] =
-        static_cast<uint8_t>((htole32(presentReading) & (0x00ff0000)) >> 16);
-    sensorData->present_reading[0] =
-        static_cast<uint8_t>((htole32(presentReading) & (0xff000000)) >> 24);
+    {
+        uint32_t presentReadingLE = htole32(presentReading);
+        memcpy(&sensorData->present_reading, &presentReadingLE,
+               sizeof(presentReadingLE));
+    }
 
     uint8_t retEventState;
     uint8_t retPreviousEventState;
@@ -1590,10 +1587,11 @@ TEST(PlatformEventMessage, testGoodNumericSensorEventDataDecodeRequest)
     EXPECT_EQ(retPresentReading, presentReading);
 
     int16_t presentReadingNew = -31432;
-    sensorData->present_reading[1] =
-        static_cast<uint8_t>(htole16(presentReadingNew) & (0x000000ff));
-    sensorData->present_reading[0] =
-        static_cast<uint8_t>((htole16(presentReadingNew) & (0x0000ff00)) >> 8);
+    {
+        int16_t presentReadingNewLE = htole16(presentReadingNew);
+        memcpy(&sensorData->present_reading, &presentReadingNewLE,
+               sizeof(presentReadingNewLE));
+    }
     sensorDataSize = PLDM_SENSOR_DATA_SIZE_SINT16;
     sensorData->sensor_data_size = sensorDataSize;
     sensorDataLength = PLDM_SENSOR_EVENT_NUMERIC_SENSOR_STATE_16BIT_DATA_LENGTH;
@@ -1640,12 +1638,6 @@ TEST(PlatformEventMessage, testBadNumericSensorEventDataDecodeRequest)
     numericSensorData->sensor_data_size = PLDM_SENSOR_DATA_SIZE_UINT16;
     rc = decode_numeric_sensor_data(
         reinterpret_cast<uint8_t*>(sensorData.data()), sensorDataLength,
-        &eventState, &previousEventState, &sensorDataSize, &presentReading);
-    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
-
-    numericSensorData->sensor_data_size = PLDM_SENSOR_DATA_SIZE_UINT32;
-    rc = decode_numeric_sensor_data(
-        reinterpret_cast<uint8_t*>(sensorData.data()), sensorDataLength - 1,
         &eventState, &previousEventState, &sensorDataSize, &presentReading);
     EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
 }
@@ -1732,6 +1724,8 @@ TEST(GetNumericEffecterValue, testGoodEncodeResponse)
     uint8_t effecter_operState = EFFECTER_OPER_STATE_ENABLED_NOUPDATEPENDING;
     uint32_t pendingValue = 0x12345678;
     uint32_t presentValue = 0xABCDEF11;
+    uint32_t val_pending;
+    uint32_t val_present;
 
     std::array<uint8_t,
                hdrSize + PLDM_GET_NUMERIC_EFFECTER_VALUE_MIN_RESP_BYTES + 6>
@@ -1748,16 +1742,18 @@ TEST(GetNumericEffecterValue, testGoodEncodeResponse)
         reinterpret_cast<struct pldm_get_numeric_effecter_value_resp*>(
             response->payload);
 
-    uint32_t* val_pending = (uint32_t*)(&resp->pending_and_present_values[0]);
-    *val_pending = le32toh(*val_pending);
-    uint32_t* val_present = (uint32_t*)(&resp->pending_and_present_values[4]);
-    *val_present = le32toh(*val_present);
+    memcpy(&val_pending, &resp->pending_and_present_values[0],
+           sizeof(val_pending));
+    val_pending = le32toh(val_pending);
+    memcpy(&val_present, &resp->pending_and_present_values[4],
+           sizeof(val_present));
+    val_present = le32toh(val_present);
 
     EXPECT_EQ(rc, PLDM_SUCCESS);
     EXPECT_EQ(effecter_dataSize, resp->effecter_data_size);
     EXPECT_EQ(effecter_operState, resp->effecter_oper_state);
-    EXPECT_EQ(pendingValue, *val_pending);
-    EXPECT_EQ(presentValue, *val_present);
+    EXPECT_EQ(pendingValue, val_pending);
+    EXPECT_EQ(presentValue, val_present);
 }
 
 TEST(GetNumericEffecterValue, testBadEncodeResponse)

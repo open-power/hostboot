@@ -173,7 +173,7 @@ uint16_t bcd2dec16(uint16_t bcd)
 
 uint16_t dec2bcd16(uint16_t dec)
 {
-	return dec2bcd8(dec % 100) | dec2bcd8(dec / 100) << 8;
+	return dec2bcd8(dec % 100) | ((uint16_t)(dec2bcd8(dec / 100)) << 8);
 }
 
 uint32_t bcd2dec32(uint32_t bcd)
@@ -183,7 +183,8 @@ uint32_t bcd2dec32(uint32_t bcd)
 
 uint32_t dec2bcd32(uint32_t dec)
 {
-	return dec2bcd16(dec % 10000) | dec2bcd16(dec / 10000) << 16;
+	return dec2bcd16(dec % 10000) |
+	       ((uint32_t)(dec2bcd16(dec / 10000)) << 16);
 }
 
 bool is_time_legal(uint8_t seconds, uint8_t minutes, uint8_t hours, uint8_t day,

@@ -32,8 +32,9 @@ struct pldm_msgbuf {
  * PLDM_ERROR_INVALID_DATA if pointer parameters are invalid, or
  * PLDM_ERROR_INVALID_LENGTH if length constraints are violated.
  */
-static inline int pldm_msgbuf_init(struct pldm_msgbuf *ctx, size_t minsize,
-				   const void *buf, size_t len)
+__attribute__((no_sanitize("pointer-overflow"))) static inline int
+pldm_msgbuf_init(struct pldm_msgbuf *ctx, size_t minsize, const void *buf,
+		 size_t len)
 {
 	uint8_t *end;
 
@@ -77,6 +78,26 @@ static inline int pldm_msgbuf_validate(struct pldm_msgbuf *ctx)
 }
 
 /**
+ * @brief Test whether a message buffer has been exactly consumed
+ *
+ * @param[in] ctx - pldm_msgbuf context for extractor
+ *
+ * @return PLDM_SUCCESS iff there are zero bytes of data that remain unread from
+ * the buffer and no overflow has occurred. Otherwise, PLDM_ERROR_INVALID_LENGTH
+ * indicates that an incorrect sequence of accesses have occurred, and
+ * PLDM_ERROR_INVALID_DATA indicates that the provided context was not a valid
+ * pointer.
+ */
+static inline int pldm_msgbuf_consumed(struct pldm_msgbuf *ctx)
+{
+	if (!ctx) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	return ctx->remaining == 0 ? PLDM_SUCCESS : PLDM_ERROR_INVALID_LENGTH;
+}
+
+/**
  * @brief Destroy the pldm buf
  *
  * @param[in] ctx - pldm_msgbuf context for extractor
@@ -100,6 +121,33 @@ static inline int pldm_msgbuf_destroy(struct pldm_msgbuf *ctx)
 	ctx->remaining = 0;
 
 	return valid;
+}
+
+/**
+ * @brief Destroy the pldm_msgbuf instance, and check that the underlying buffer
+ * has been completely consumed without overflow
+ *
+ * @param[in] ctx - pldm_msgbuf context
+ *
+ * @return PLDM_SUCCESS if all buffer access were in-bounds and completely
+ * consume the underlying buffer. Otherwise, PLDM_ERROR_INVALID_DATA if the ctx
+ * parameter is invalid, or PLDM_ERROR_INVALID_LENGTH if prior accesses would
+ * have occurred byond the bounds of the buffer
+ */
+static inline int pldm_msgbuf_destroy_consumed(struct pldm_msgbuf *ctx)
+{
+	int consumed;
+
+	if (!ctx) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	consumed = pldm_msgbuf_consumed(ctx);
+
+	ctx->cursor = NULL;
+	ctx->remaining = 0;
+
+	return consumed;
 }
 
 /**
@@ -283,6 +331,40 @@ static inline int pldm_msgbuf_extract_real32(struct pldm_msgbuf *ctx,
 		 : pldm_msgbuf_extract_uint32, int32_t                         \
 		 : pldm_msgbuf_extract_int32, real32_t                         \
 		 : pldm_msgbuf_extract_real32)(ctx, dst)
+
+static inline int pldm_msgbuf_extract_array_uint8(struct pldm_msgbuf *ctx,
+						  uint8_t *dst, size_t count)
+{
+	size_t len;
+
+	if (!ctx || !ctx->cursor || !dst) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (!count) {
+		return PLDM_SUCCESS;
+	}
+
+	len = sizeof(*dst) * count;
+	if (len > SSIZE_MAX) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	ctx->remaining -= (ssize_t)len;
+	assert(ctx->remaining >= 0);
+	if (ctx->remaining < 0) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	memcpy(dst, ctx->cursor, len);
+	ctx->cursor += len;
+
+	return PLDM_SUCCESS;
+}
+
+#define pldm_msgbuf_extract_array(ctx, dst, count)                             \
+	_Generic((*(dst)), uint8_t                                             \
+		 : pldm_msgbuf_extract_array_uint8)(ctx, dst, count)
 
 #ifdef __cplusplus
 }

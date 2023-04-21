@@ -16,4 +16,5 @@ endif
 
 if get_option('requester-api').enabled()
    subdir('requester')
+   subdir('transport')
 endif

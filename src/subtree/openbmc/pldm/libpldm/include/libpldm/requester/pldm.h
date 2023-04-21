@@ -8,6 +8,7 @@ extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 
+/* Delete when deleting old api */
 typedef uint8_t mctp_eid_t;
 
 typedef enum pldm_requester_error_codes {
@@ -21,8 +22,12 @@ typedef enum pldm_requester_error_codes {
 	PLDM_REQUESTER_SEND_FAIL = -7,
 	PLDM_REQUESTER_RECV_FAIL = -8,
 	PLDM_REQUESTER_INVALID_RECV_LEN = -9,
+	PLDM_REQUESTER_SETUP_FAIL = -10,
+	PLDM_REQUESTER_INVALID_SETUP = -11,
+	PLDM_REQUESTER_POLL_FAIL = -12,
 } pldm_requester_rc_t;
 
+/* ------ Old API ---- deprecated */
 /**
  * @brief Connect to the MCTP socket and provide an fd to it. The fd can be
  *        used to pass as input to other APIs below, or can be polled.
