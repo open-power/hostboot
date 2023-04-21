@@ -421,6 +421,18 @@ uint16_t pldm_bios_table_attr_entry_string_decode_min_length(
 uint16_t pldm_bios_table_attr_entry_string_decode_def_string(
     const struct pldm_bios_attr_table_entry *entry, char *buffer, size_t size);
 
+/** @struct attr_table_integer_entry_fields
+ *
+ *  Fields of a attribute entry of type integer
+ *
+ */
+struct attr_table_integer_entry_fields {
+        uint64_t lower_bound;
+        uint64_t upper_bound;
+        uint32_t scalar_increment;
+        uint64_t default_value;
+} __attribute__((packed));
+
 /** @struct pldm_bios_table_attr_entry_integer_info
  *
  *  An auxiliary structure for passing parameters to @ref
