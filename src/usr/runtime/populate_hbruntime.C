@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -4706,19 +4706,19 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
     payload_size -= PAGESIZE;
 
     // Determine the size of the mapped area (mapSize) for PHYP + HDAT
-    // Limit this to the minimum of either the LMB size or 256MB:
-    // If LMB Size is < 256MB, then use the LMB size
-    // If LMB Size is >= 256MB, then just use 256MB
+    // Limit this to the minimum of either the LMB size or the VMM cap:
+    // If LMB Size is < VMM cap, then use the LMB size
+    // If LMB Size is >= VMM cap, then just use the VMM cap
     // Additionally, ensure that mapSize is at least equal to the payload_size
     const uint64_t lmb_size = getLMBSizeInMB() * MEGABYTE;
-    const uint64_t limit_256mb = 256 * MEGABYTE;
-    const uint64_t mapSize = std::max( std::min(lmb_size, limit_256mb),
+    const uint64_t lmbCapMb = VMM::BLOCK_MAP_CAP_MB;
+    const uint64_t mapSize = std::max( std::min(lmb_size, lmbCapMb),
                                        payload_size);
 
     TRACFCOMP(g_trac_runtime,
               "verifyAndMovePayload(): mapSize=0x%.16llX, lmb_size=0x%.16llX, "
-              "payload_size=0x%.16llX (limit_256mb=0x%.16llX",
-              mapSize, lmb_size, payload_size, limit_256mb);
+              "payload_size=0x%.16llX (lmbCapMb=0x%.16llX",
+              mapSize, lmb_size, payload_size, lmbCapMb);
 
 
     payloadBase_virt_addr = mm_block_map(
