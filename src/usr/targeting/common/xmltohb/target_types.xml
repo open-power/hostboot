@@ -323,6 +323,9 @@
     <id>chip-ocmb</id>
     <parent>chip-ocmb-generic</parent>
     <attribute>
+      <id>DIMM_POWER</id>
+    </attribute>
+    <attribute>
       <id>EECACHE_VPD_STATE</id>
     </attribute>
     <attribute>
@@ -1939,6 +1942,9 @@
     </attribute>
     <attribute>
       <id>POS_ON_MEM_PORT</id>
+    </attribute>
+    <attribute>
+      <id>PREHEAT_PERCENT</id>
     </attribute>
     <attribute>
       <id>REL_POS</id>

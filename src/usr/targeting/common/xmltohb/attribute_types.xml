@@ -856,6 +856,20 @@
   </attribute>
 
   <attribute>
+    <id>DIMM_POWER</id>
+    <description>
+        The power to allocate to the DIMMs under this OCMB. Written during power cap
+        calculation and sent to the OCC via HTMGT. (value in cW)
+    </description>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <description>
       Set to 1 to disable the delay that Hostboot does prior to sending
       error logs to the BMC to allow time for the BMC to check for
@@ -6822,6 +6836,25 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>PREHEAT_PERCENT</id>
+    <description>
+        The percentage of this DIMM's preheat that affects the associated processor
+        socket. (value in 0.01%)
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0</default>
+      </uint16_t>
+    </simpleType>
+    <range>
+      <min>0</min>
+      <max>10000</max>
+    </range>
+    <persistency>non-volatile</persistency>
+    <readable/>
   </attribute>
 
   <attribute>
