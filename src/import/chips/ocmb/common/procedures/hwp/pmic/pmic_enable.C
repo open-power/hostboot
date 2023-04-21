@@ -36,7 +36,6 @@
 #include <fapi2.H>
 #include <pmic_enable.H>
 #include <generic/memory/lib/utils/find.H>
-#include <lib/utils/pmic_common_utils.H>
 #include <lib/utils/pmic_enable_utils.H>
 #include <lib/utils/pmic_enable_utils_ddr5.H>
 #include <lib/utils/pmic_consts.H>

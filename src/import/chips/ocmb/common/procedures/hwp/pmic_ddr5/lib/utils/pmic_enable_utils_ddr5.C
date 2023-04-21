@@ -38,9 +38,6 @@
 #include <i2c_pmic.H>
 #include <pmic_consts.H>
 #include <pmic_enable_utils_ddr5.H>
-#include <pmic_enable_utils.H>
-#include <pmic_common_utils_ddr5.H>
-#include <pmic_common_utils.H>
 #include <pmic_regs.H>
 #include <pmic_regs_fld.H>
 #include <pmic_enable_4u_settings.H>
@@ -60,92 +57,6 @@ namespace pmic
 
 namespace ddr5
 {
-
-///
-/// @brief Construct a new target_info_redundancy object
-///
-/// @param[in] i_ocmb OCMB target
-/// @param[out] o_rc ReturnCode in case of construction error
-/// @note pmic_enable.C plug rules ensures that a valid number of I2C and PMIC children targets exist
-///
-target_info_redundancy_ddr5::target_info_redundancy_ddr5(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
-        fapi2::ReturnCode& o_rc)
-{
-    o_rc = fapi2::FAPI2_RC_SUCCESS;
-    iv_number_of_pmic_present = 0;
-    iv_number_of_dt_present = 0;
-
-    const auto& I2C_DEVICES =
-        mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>(i_ocmb);
-
-    // Store the PMICs received from platform in an array
-    for (const auto& l_pmic : mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb, fapi2::TARGET_STATE_PRESENT))
-    {
-        iv_pmic_map[iv_number_of_pmic_present] = l_pmic;
-        FAPI_DBG("Found present PMIC: " GENTARGTIDFORMAT, GENTARGTID(l_pmic));
-        iv_pmic_present[iv_number_of_pmic_present] = true;
-        iv_number_of_pmic_present++;
-    }
-
-    // Store the DTs received from platform in an array
-    for (const auto& l_dt : mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_POWER_IC>(i_ocmb,
-            fapi2::TARGET_STATE_PRESENT))
-    {
-        iv_dt_map[iv_number_of_dt_present] = l_dt;
-        FAPI_DBG("Found present DT: " GENTARGTIDFORMAT, GENTARGTID(l_dt));
-        iv_number_of_dt_present++;
-    }
-
-    const uint8_t NUM_GENERIC_I2C_DEV = I2C_DEVICES.size();
-    constexpr auto NUM_PRIMARY_PMICS = CONSTS::NUM_PRIMARY_PMICS_DDR5;
-    constexpr auto NUM_PRIMARY_DT = CONSTS::NUM_PRIMARY_DT_DDR5;
-
-    // If we are given a guaranteed failing list of targets (< 3 PMICs) exit now
-    FAPI_ASSERT((iv_number_of_pmic_present >= NUM_PRIMARY_PMICS) ,
-                fapi2::INVALID_PMIC_DT_DDR5_TARGET_CONFIG()
-                .set_OCMB_TARGET(i_ocmb)
-                .set_NUM_PMICS(iv_number_of_pmic_present)
-                .set_EXPECTED_MIN_PMICS(NUM_PRIMARY_PMICS),
-                GENTARGTIDFORMAT " pmic_enable requires at least %u PMICs. "
-                "Given %u PMICs",
-                GENTARGTID(i_ocmb),
-                NUM_PRIMARY_PMICS,
-                iv_number_of_pmic_present);
-
-    // If we are given a guaranteed failing list of targets (< 3 DTs) exit now
-    FAPI_ASSERT((iv_number_of_dt_present >= NUM_PRIMARY_DT),
-                fapi2::INVALID_PMIC_DT_DDR5_TARGET_CONFIG()
-                .set_OCMB_TARGET(i_ocmb)
-                .set_NUM_DT(iv_number_of_dt_present)
-                .set_EXPECTED_MIN_DT(NUM_PRIMARY_DT),
-                GENTARGTIDFORMAT " pmic_enable requires at least %u DTs. "
-                "Given %u DTs",
-                GENTARGTID(i_ocmb),
-                NUM_PRIMARY_DT,
-                iv_number_of_dt_present);
-
-    // If we are given < 1 ADC, exit now
-    FAPI_ASSERT((NUM_GENERIC_I2C_DEV == mss::generic_i2c_responder::NUM_TOTAL_DEVICES_I2C_DDR5),
-                fapi2::INVALID_GI2C_DDR5_TARGET_CONFIG()
-                .set_OCMB_TARGET(i_ocmb)
-                .set_NUM_GI2CS(NUM_GENERIC_I2C_DEV)
-                .set_EXPECTED_GI2CS(mss::generic_i2c_responder::NUM_TOTAL_DEVICES_I2C_DDR5),
-                GENTARGTIDFORMAT " pmic_enable requires exactly %u GI2C responder. "
-                "Given %u GI2C",
-                GENTARGTID(i_ocmb),
-                mss::generic_i2c_responder::NUM_TOTAL_DEVICES_I2C_DDR5,
-                NUM_GENERIC_I2C_DEV);
-
-    iv_adc = I2C_DEVICES[mss::generic_i2c_responder::ADC];
-
-    iv_ocmb = i_ocmb;
-
-    return;
-
-fapi_try_exit:
-    o_rc = fapi2::current_err;
-}
-
 ///
 /// @brief Setup and enable DT
 ///
@@ -162,24 +73,24 @@ fapi2::ReturnCode setup_dt(const target_info_redundancy_ddr5& i_target_info)
 
     fapi2::buffer<uint8_t> l_dt_data_to_write[NUM_BYTES_TO_WRITE];
 
-    for (auto l_dt_count = 0; l_dt_count < i_target_info.iv_number_of_dt_present; l_dt_count++)
+    for (auto l_dt_count = 0; l_dt_count < i_target_info.iv_number_of_target_infos_present; l_dt_count++)
     {
-        FAPI_INF("Setting up DT " GENTARGTIDFORMAT, GENTARGTID(i_target_info.iv_dt_map[l_dt_count]));
+        FAPI_INF("Setting up DT " GENTARGTIDFORMAT, GENTARGTID(i_target_info.iv_pmic_dt_map[l_dt_count].iv_dt));
 
         // Clear faults 0 reg
         l_dt_data_to_write[0] = 0xFF;
         l_dt_data_to_write[1] = 0xFF;
-        FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(i_target_info.iv_dt_map[l_dt_count],
+        FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(i_target_info.iv_pmic_dt_map[l_dt_count].iv_dt,
                  DT_REGS::FAULTS_CLEAR_0, l_dt_data_to_write));
 
         // Clear faults 1 reg
         l_dt_data_to_write[0] = 0xFF;
         l_dt_data_to_write[1] = 0xFF;
-        FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(i_target_info.iv_dt_map[l_dt_count],
+        FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(i_target_info.iv_pmic_dt_map[l_dt_count].iv_dt,
                  DT_REGS::FAULTS_CLEAR_1, l_dt_data_to_write));
 
         // Enable efuse
-        FAPI_TRY(mss::pmic::i2c::reg_write(i_target_info.iv_dt_map[l_dt_count], DT_REGS::EN_REGISTER, 0x01));
+        FAPI_TRY(mss::pmic::i2c::reg_write(i_target_info.iv_pmic_dt_map[l_dt_count].iv_dt, DT_REGS::EN_REGISTER, 0x01));
 
         // Delay for 1 ms. Might remove this if natural delay is sufficient
         fapi2::delay(1 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
@@ -197,7 +108,6 @@ fapi_try_exit:
 /// @param[in] i_target OCMB target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note There is no support for 1U in DDR5
-/// @note There is no 1U support for DDR5.
 /// @note The below values of PMIC regs are taken from the
 ///       "Non-Redundant PoD5 - Functional Specification dated 20230403"
 ///       document provided by the Power team
@@ -249,7 +159,7 @@ fapi2::ReturnCode pre_config(const target_info_redundancy_ddr5& i_target_info,
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
     using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
 
-    for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_pmic_present; l_pmic_count++)
+    for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_target_infos_present; l_pmic_count++)
     {
         // If the pmic is not overridden to disabled, run the status checking
         FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [i_value_comp_config]
@@ -335,7 +245,7 @@ fapi2::ReturnCode post_config(const target_info_redundancy_ddr5& i_target_info,
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
     using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
 
-    for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_pmic_present; l_pmic_count++)
+    for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_target_infos_present; l_pmic_count++)
     {
         // If the pmic is not overridden to disabled, run the status checking
         FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [i_value]
@@ -550,7 +460,7 @@ fapi2::ReturnCode enable_2u(
     // Enable TI PMIC
     if (l_vendor_id == mss::pmic::vendor::TI)
     {
-        // TI will be enabled by releasing the CAMP control first and then re-instatng it
+        // TI will be enabled by releasing the CAMP control first and then re-instating it
         FAPI_INF("Executing CAMP control release for TI PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC0]));
         FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
         // Release CAMP control (R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL) (1 --> Bit 3)
@@ -702,7 +612,7 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
     static constexpr uint8_t NUM_BYTES_TO_WRITE = 2;
 
-    for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_pmic_present; l_pmic_count++)
+    for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_target_infos_present; l_pmic_count++)
     {
         // If the pmic is not overridden to disabled, run the status checking
         FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [i_ocmb_target]

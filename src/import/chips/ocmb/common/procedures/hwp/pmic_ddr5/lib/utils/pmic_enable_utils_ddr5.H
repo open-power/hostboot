@@ -40,9 +40,9 @@
 #include <fapi2.H>
 #include <pmic_regs.H>
 #include <pmic_regs_fld.H>
-#include <pmic_common_utils.H>
-#include <pmic_consts.H>
+#include <pmic_enable_utils.H>
 #include <lib/utils/pmic_common_utils_ddr5.H>
+#include <pmic_consts.H>
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <mss_pmic_attribute_accessors_manual.H>
@@ -56,90 +56,6 @@ namespace pmic
 namespace ddr5
 {
 using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-
-///
-/// @brief Struct for PMIC / DT / ADC target info for redundant PMIC configs
-/// @note Requires a redundancy config, or else will try to grab null targets
-///
-struct target_info_redundancy_ddr5
-{
-    fapi2::Target<fapi2::TARGET_TYPE_PMIC> iv_pmic_map[CONSTS::NUM_PMICS_4U];
-    fapi2::Target<fapi2::TARGET_TYPE_POWER_IC> iv_dt_map[CONSTS::NUM_PMICS_4U];
-    bool iv_pmic_present[CONSTS::NUM_PMICS_4U];
-    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER> iv_adc;
-
-    uint8_t iv_number_of_pmic_present = 0;
-    uint8_t iv_number_of_dt_present = 0;
-
-    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> iv_ocmb;
-
-    target_info_redundancy_ddr5() = delete;
-
-    ///
-    /// @brief Construct a new target_info_redundancy_ddr5 object
-    ///
-    /// @param[in] i_ocmb OCMB target
-    /// @param[out] o_rc ReturnCode in case of construction error
-    /// @note pmic_enable_ddr5.C plug rules ensures that a valid number of I2C, DT and PMIC children targets exist
-    ///
-    target_info_redundancy_ddr5(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb, fapi2::ReturnCode& o_rc);
-};
-
-///
-/// @brief Run the provided function if the PMIC is present and not overridden to N-Mode
-///
-/// @tparam F function type (expected to be lambda)
-/// @param[in] i_target_info target info struct
-/// @param[in] i_pmic_id desired pmic ID to key on
-/// @param[in] i_func lambda function to run if given PMIC is not disabled
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-template<typename F>
-fapi2::ReturnCode run_if_present(
-    const target_info_redundancy_ddr5& i_target_info,
-    const uint8_t i_pmic_id,
-    const F i_func)
-{
-    fapi2::Target<fapi2::TARGET_TYPE_PMIC> l_pmic;
-    bool l_disabled = false;
-
-    const uint8_t l_num_pmic_4u = CONSTS::NUM_PMICS_4U;
-    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_PMIC>(i_target_info.iv_pmic_map[0]);
-
-    FAPI_ASSERT((i_pmic_id < l_num_pmic_4u),
-                fapi2::INVALID_PMIC_INDEX_RECEIVED()
-                .set_OCMB_TARGET(l_ocmb)
-                .set_NUM_PMICS(i_pmic_id)
-                .set_EXPECTED_MAX_PMICS(l_num_pmic_4u),
-                GENTARGTIDFORMAT " Invalid PMIC index received. Maximum index supported is %u."
-                "Given %u as index",
-                GENTARGTID(l_ocmb),
-                l_num_pmic_4u,
-                i_pmic_id);
-
-    if (i_target_info.iv_pmic_present[i_pmic_id] == true)
-    {
-        l_pmic = i_target_info.iv_pmic_map[i_pmic_id];
-    }
-    else
-    {
-        // If we don't have the PMIC in the target_info_redundancy_ddr5 struct, then platform never provided it as present,
-        // so we should just exit, do not run i_func()
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    // PMIC does exist, now see if it was overridden to disabled via ATTR_PMIC_FORCE_N_MODE
-    FAPI_TRY(mss::pmic::disabled(l_pmic, l_disabled));
-
-    // PMIC target provided here. Other arguments to be provided via capture list
-    if (!l_disabled)
-    {
-        FAPI_TRY(i_func(l_pmic));
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 ///
 /// @brief Setup and enable DT
@@ -199,7 +115,7 @@ fapi2::ReturnCode enable_disable_pmic(const fapi2::Target<fapi2::TARGET_TYPE_GEN
 ///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
 ///       document provided by the Power team
 ///
-fapi2::ReturnCode post_config(const target_info_redundancy_ddr5& i_target_info,
+fapi2::ReturnCode post_config(const mss::pmic::ddr5::target_info_redundancy_ddr5& i_target_info,
                               const uint8_t i_value);
 ///
 /// @brief PMIC power down sequence for 4U parts
@@ -259,7 +175,7 @@ fapi2::ReturnCode setup_adc(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRES
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-                                  const target_info_redundancy_ddr5& i_target_info);
+                                  const mss::pmic::ddr5::target_info_redundancy_ddr5& i_target_info);
 
 ///
 /// @brief Clear ADC events that previously occurred. If not then ALERT will immediately assert.
@@ -279,7 +195,7 @@ fapi2::ReturnCode clear_adc_events(const fapi2::Target<fapi2::TARGET_TYPE_GENERI
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 // TODO: ZEN:MST-1905 Implement health check
-fapi2::ReturnCode redundancy_check_all_pmics(const target_info_redundancy_ddr5& i_target_info);
+fapi2::ReturnCode redundancy_check_all_pmics(const mss::pmic::ddr5::target_info_redundancy_ddr5& i_target_info);
 
 ///
 /// @brief Set the up DTs, ADCs, PMICs for a redundancy configuration / 4U

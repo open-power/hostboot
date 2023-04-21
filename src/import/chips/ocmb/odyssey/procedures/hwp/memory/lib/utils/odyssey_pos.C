@@ -107,7 +107,6 @@ fapi_try_exit:
     return 0;
 }
 
-
 ///
 /// @brief Return an MEM_PORT's relative position from itself
 /// @param[in] i_target a target representing the target in question

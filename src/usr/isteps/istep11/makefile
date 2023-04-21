@@ -60,7 +60,6 @@ EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe
 
 # Istep objs
 OBJS += call_host_prd_hwreconfig.o
@@ -76,6 +75,7 @@ OBJS += pmic_enable_utils.o
 OBJS += pmic_common_utils.o
 OBJS += mss_pmic_attribute_accessors_manual.o
 OBJS += pmic_enable_utils_ddr5.o
+OBJS += pmic_common_utils_ddr5.o
 OBJS += ody_check_for_ready.o
 OBJS += ody_sppe_config_update.o
 OBJS += ody_scratch_regs.o
