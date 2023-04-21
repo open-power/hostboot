@@ -29,7 +29,7 @@
  * This file contains any hardcoded memory addresses used by the
  * Virtual Memory Subsystem
  */
-
+#include <stdint.h>
 #include <limits.h>
 
 /**
@@ -135,6 +135,21 @@ enum BlockPriority
     VFS_PRIORITY   = (SPNOR_PRIORITY + 1), //Dependent on PNOR and SPNOR
     ATTR_PRIORITY  = (SPNOR_PRIORITY + 1), //Dependent on PNOR and SPNOR
 };
+
+namespace VMM
+{
+
+/**
+ *  @brief Constants for VMM restrictions
+ */
+enum VmmRestriction : uint64_t
+{
+    // Mapping more than 256 MB of physical memory into the VMM can lead
+    // to hangs and/or other failures
+    BLOCK_MAP_CAP_MB = 256 * MEGABYTE
+};
+
+}
 
 /** Huge user-space mallocs will use 16GB */
 #define VMM_VADDR_MALLOC (16 * GIGABYTE)

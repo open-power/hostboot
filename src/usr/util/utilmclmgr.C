@@ -857,11 +857,18 @@ errlHndl_t MasterContainerLidMgr::managePhypLids(CompInfo& io_compInfo,
     uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
     payloadBase = payloadBase * MEGABYTE;
 
-    const uint64_t lmb_size = RUNTIME::getLMBSizeInMB() * MEGABYTE;
-    const uint64_t mapSize = std::max(lmb_size, payload_size);
+    const uint64_t lmbSizeMb = (RUNTIME::getLMBSizeInMB() * MEGABYTE);
+    const uint64_t lmbCapMb = VMM::BLOCK_MAP_CAP_MB;
 
-    UTIL_FT("MasterContainerLidMgr::managePhypLids: mapSize=0x%X, lmb_size=0x%X, payload_size=0x%X",
-            mapSize, lmb_size, payload_size);
+    // Cap the memory block map size at the given max, as larger mappings can
+    // cause hostboot to hang
+    const uint64_t effLmbSizeMb = std::min(lmbSizeMb,lmbCapMb);
+    const uint64_t mapSize = std::max(effLmbSizeMb, payload_size);
+
+    UTIL_FT("MasterContainerLidMgr::managePhypLids: lmbSizeMb = 0x%016llX, "
+            "effLmbSizeMb = 0x%016llX, mapSize = 0x%016llX, "
+            "payload_size = 0x%016llX",
+            lmbSizeMb,effLmbSizeMb,mapSize,payload_size);
 
     payloadBase_virt_addr = mm_block_map(
                                reinterpret_cast<void*>(payloadBase),
