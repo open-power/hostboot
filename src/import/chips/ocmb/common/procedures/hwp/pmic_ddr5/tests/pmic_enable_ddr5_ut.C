@@ -41,6 +41,7 @@
 #include <lib/utils/pmic_consts.H>
 #include <lib/utils/pmic_enable_utils.H>
 #include <lib/utils/pmic_enable_utils_ddr5.H>
+#include <lib/utils/pmic_common_utils_ddr5.H>
 #include <pmic_regs.H>
 #include <pmic_regs_fld.H>
 #include <mss_generic_attribute_getters.H>
@@ -242,6 +243,8 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "PMIC enable ddr5", "[pmic_enable
 
     SECTION("Test initialize ADC function")
     {
+        FAPI_INF("Test initialize ADC function");
+
         for_each_target([](const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
         {
             using ADC_REGS = mss::adc::regs;
@@ -348,6 +351,185 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "PMIC enable ddr5", "[pmic_enable
             REQUIRE_FALSE(mss::pmic::i2c::reg_read(l_adc[mss::generic_i2c_responder::ADC], ADC_REGS::LOW_EVENT_FLAGS,
                                                    l_reg_read_buffer));
             REQUIRE(l_reg_read_buffer == 0xFF);
+
+            return 0;
+        });
+    }
+
+    SECTION("Test run_if_present behavior")
+    {
+        for_each_target([](const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
+        {
+
+            uint8_t l_force_n_mode_saved = 0;
+            uint8_t l_force_n_mode_override = 0b11100000;
+            uint8_t l_test_variable = 0xFF;
+            REQUIRE_RC_PASS(mss::attr::get_pmic_force_n_mode(i_ocmb_target, l_force_n_mode_saved));
+
+            // Override, now test
+            REQUIRE_RC_PASS(mss::attr::set_pmic_force_n_mode(i_ocmb_target, l_force_n_mode_override));
+
+            const auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
+
+            FAPI_INF("Test run_if_present behavior for target_info_redundancy_ddr5 ocmb target constructor");
+            {
+                if (l_pmics.size() >= 3)
+                {
+                    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+                    // Grab the targets as a struct, if they exist
+                    mss::pmic::ddr5::target_info_redundancy_ddr5 l_target_info(i_ocmb_target, l_rc);
+                    REQUIRE_RC_PASS(l_rc);
+
+                    // Test the one we expect to be enabled
+                    REQUIRE_RC_PASS(mss::pmic::ddr5::run_if_present(l_target_info, mss::pmic::id::PMIC0,
+                                    [&l_test_variable]
+                                    (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+                    {
+                        l_test_variable = 0xCC;
+                        return fapi2::FAPI2_RC_SUCCESS;
+                    }));
+                    // Expecting changed
+                    REQUIRE(l_test_variable == 0xCC);
+
+                    l_test_variable = 0xFF;
+                    // Test the one we expect to be enabled
+                    REQUIRE_RC_PASS(mss::pmic::ddr5::run_if_present(l_target_info, mss::pmic::id::PMIC1,
+                                    [&l_test_variable]
+                                    (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+                    {
+                        l_test_variable = 0xCC;
+                        return fapi2::FAPI2_RC_SUCCESS;
+                    }));
+                    REQUIRE(l_test_variable == 0xCC);
+
+                    l_test_variable = 0xFF;
+                    // Test the one we expect to be enabled
+                    REQUIRE_RC_PASS(mss::pmic::ddr5::run_if_present(l_target_info, mss::pmic::id::PMIC2,
+                                    [&l_test_variable]
+                                    (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+                    {
+                        l_test_variable = 0xCC;
+                        return fapi2::FAPI2_RC_SUCCESS;
+                    }));
+                    // Expecting unchanged
+                    REQUIRE(l_test_variable == 0xCC);
+
+                    l_test_variable = 0xFF;
+                    // Test one that doesn't exist (make sure we dont null pointer out)
+                    REQUIRE_RC_PASS(mss::pmic::ddr5::run_if_present(l_target_info, mss::pmic::id::PMIC3,
+                                    [&l_test_variable]
+                                    (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+                    {
+                        l_test_variable = 0xDD;
+                        return fapi2::FAPI2_RC_SUCCESS;
+                    }));
+                    // Expecting unchanged
+                    REQUIRE(l_test_variable == 0xFF);
+                }
+            }
+
+            FAPI_INF("Test run_if_present behavior for target_info_redundancy_ddr5 individual target constructor");
+            {
+                l_force_n_mode_override = 0b11110000;
+                REQUIRE_RC_PASS(mss::attr::set_pmic_force_n_mode(i_ocmb_target, l_force_n_mode_override));
+
+                fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+                const auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
+                const auto l_dts = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_POWER_IC>(i_ocmb_target);
+                auto l_adc = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(i_ocmb_target);
+
+                mss::pmic::ddr5::target_info_redundancy_ddr5 l_target_info(l_pmics, l_dts, l_adc, l_rc);
+                REQUIRE_RC_PASS(l_rc);
+
+                // Test the one of the PMICs
+                l_test_variable = 0xFF;
+                REQUIRE_RC_PASS(mss::pmic::ddr5::run_if_present(l_target_info, mss::pmic::id::PMIC3,
+                                [&l_test_variable]
+                                (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+                {
+                    l_test_variable = 0xDD;
+                    return fapi2::FAPI2_RC_SUCCESS;
+                }));
+                // Expecting unchanged
+                REQUIRE(l_test_variable == 0xDD);
+
+                // Remove 1 PMIC from the vector to test, keeping 4 DTs, in order to test the pairing of PMICs and DTs logic
+                auto l_pmics_mod = l_pmics;
+                l_pmics_mod.erase (l_pmics_mod.begin() + 1);
+                l_target_info = mss::pmic::ddr5::target_info_redundancy_ddr5(l_pmics_mod, l_dts, l_adc, l_rc);
+                REQUIRE_RC_PASS(l_rc);
+
+                l_test_variable = 0xFF;
+                // Test one that doesn't exist
+                REQUIRE_RC_PASS(mss::pmic::ddr5::run_if_present(l_target_info, mss::pmic::id::PMIC1,
+                                [&l_test_variable]
+                                (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+                {
+                    l_test_variable = 0xDD;
+                    return fapi2::FAPI2_RC_SUCCESS;
+                }));
+                REQUIRE(l_test_variable == 0xFF);
+
+                l_test_variable = 0xFF;
+                // Test one that exists
+                REQUIRE_RC_PASS(mss::pmic::ddr5::run_if_present(l_target_info, mss::pmic::id::PMIC2,
+                                [&l_test_variable]
+                                (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+                {
+                    l_test_variable = 0xDD;
+                    return fapi2::FAPI2_RC_SUCCESS;
+                }));
+                REQUIRE(l_test_variable == 0xDD);
+
+                // Test for less than 3 PMICs received
+                l_pmics_mod.erase (l_pmics_mod.begin() + 2);
+                l_target_info = mss::pmic::ddr5::target_info_redundancy_ddr5(l_pmics_mod, l_dts, l_adc, l_rc);
+                REQUIRE_SPECIFIC_RC_FAIL(l_rc, fapi2::RC_INVALID_PMIC_DT_DDR5_TARGET_CONFIG);
+
+                // Remove 1 DT from the vector to test, keeping 4 PMICs, in order to test the pairing of PMICs and DTs logic
+                auto l_dts_mod = l_dts;
+                l_dts_mod.erase (l_dts_mod.begin() + 2);
+
+                l_target_info = mss::pmic::ddr5::target_info_redundancy_ddr5(l_pmics, l_dts_mod, l_adc, l_rc);
+                REQUIRE_RC_PASS(l_rc);
+
+                l_test_variable = 0xFF;
+                // Test one that doesn't exist
+                REQUIRE_RC_PASS(mss::pmic::ddr5::run_if_present(l_target_info, mss::pmic::id::PMIC2,
+                                [&l_test_variable]
+                                (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+                {
+                    l_test_variable = 0xDD;
+                    return fapi2::FAPI2_RC_SUCCESS;
+                }));
+                REQUIRE(l_test_variable == 0xFF);
+
+                l_test_variable = 0xFF;
+                // Test one that exists
+                REQUIRE_RC_PASS(mss::pmic::ddr5::run_if_present(l_target_info, mss::pmic::id::PMIC1,
+                                [&l_test_variable]
+                                (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic)
+                {
+                    l_test_variable = 0xDD;
+                    return fapi2::FAPI2_RC_SUCCESS;
+                }));
+                REQUIRE(l_test_variable == 0xDD);
+
+                // Test for less than 3 DTs received
+                l_dts_mod.erase (l_dts_mod.begin() + 3);
+                l_target_info = mss::pmic::ddr5::target_info_redundancy_ddr5(l_pmics, l_dts_mod, l_adc, l_rc);
+                REQUIRE_SPECIFIC_RC_FAIL(l_rc, fapi2::RC_INVALID_PMIC_DT_DDR5_TARGET_CONFIG);
+
+                // Test for 0 ADCs received
+                l_adc.erase (l_adc.begin() + 0);
+                l_target_info = mss::pmic::ddr5::target_info_redundancy_ddr5(l_pmics, l_dts, l_adc, l_rc);
+                REQUIRE_SPECIFIC_RC_FAIL(l_rc, fapi2::RC_INVALID_GI2C_DDR5_TARGET_CONFIG);
+
+            }
+
+            // Put back attr
+            REQUIRE_RC_PASS(mss::attr::set_pmic_force_n_mode(i_ocmb_target, l_force_n_mode_saved));
 
             return 0;
         });
