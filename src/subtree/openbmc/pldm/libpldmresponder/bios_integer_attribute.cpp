@@ -2,6 +2,10 @@
 
 #include "common/utils.hpp"
 
+#include <phosphor-logging/lg2.hpp>
+
+PHOSPHOR_LOG2_USING;
+
 using namespace pldm::utils;
 
 namespace pldm
@@ -10,7 +14,6 @@ namespace responder
 {
 namespace bios
 {
-
 BIOSIntegerAttribute::BIOSIntegerAttribute(const Json& entry,
                                            DBusHandler* const dbusHandler) :
     BIOSAttribute(entry, dbusHandler)
@@ -33,13 +36,12 @@ BIOSIntegerAttribute::BIOSIntegerAttribute(const Json& entry,
     auto rc = pldm_bios_table_attr_entry_integer_info_check(&info, &errmsg);
     if (rc != PLDM_SUCCESS)
     {
-        std::cerr << "Wrong filed for integer attribute, ATTRIBUTE_NAME="
-                  << attr.c_str() << " ERRMSG=" << errmsg
-                  << " LOWER_BOUND=" << integerInfo.lowerBound
-                  << " UPPER_BOUND=" << integerInfo.upperBound
-                  << " DEFAULT_VALUE=" << integerInfo.defaultValue
-                  << " SCALAR_INCREMENT=" << integerInfo.scalarIncrement
-                  << "\n";
+        error(
+            "Wrong filed for integer attribute, ATTRIBUTE_NAME={ATTR_NAME} ERRMSG= {ERR_MSG} LOWER_BOUND={LOW_BOUND} UPPER_BOUND={UPPER_BOUND} DEFAULT_VALUE={DEF_VAL} SCALAR_INCREMENT={SCALAR_INCREMENT}",
+            "ATTR_NAME", attr.c_str(), "ERR_MSG", errmsg, "LOW_BOUND",
+            integerInfo.lowerBound, "UPPER_BOUND", integerInfo.upperBound,
+            "DEF_VAL", integerInfo.defaultValue, "SCALAR_INCREMENT",
+            integerInfo.scalarIncrement);
         throw std::invalid_argument("Wrong field for integer attribute");
     }
 }
@@ -95,8 +97,8 @@ void BIOSIntegerAttribute::setAttrValueOnDbus(
                                             static_cast<double>(currentValue));
     }
 
-    std::cerr << "Unsupported property type on dbus: " << dBusMap->propertyType
-              << std::endl;
+    error("Unsupported property type on dbus: {DBUS_PROP}", "DBUS_PROP",
+          dBusMap->propertyType);
     throw std::invalid_argument("dbus type error");
 }
 
@@ -175,8 +177,8 @@ uint64_t BIOSIntegerAttribute::getAttrValue(const PropertyValue& propertyValue)
     }
     else
     {
-        std::cerr << "Unsupported property type for getAttrValue: "
-                  << dBusMap->propertyType << std::endl;
+        error("Unsupported property type for getAttrValue: {DBUS_PROP}",
+              "DBUS_PROP", dBusMap->propertyType);
         throw std::invalid_argument("dbus type error");
     }
     return value;
@@ -199,8 +201,8 @@ uint64_t BIOSIntegerAttribute::getAttrValue()
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Get Integer Attribute Value Error: AttributeName = "
-                  << name << std::endl;
+        error("Get Integer Attribute Value Error: AttributeName = {ATTR_NAME}",
+              "ATTR_NAME", name);
         return integerInfo.defaultValue;
     }
 }

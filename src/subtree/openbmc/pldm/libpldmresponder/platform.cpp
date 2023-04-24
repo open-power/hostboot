@@ -16,6 +16,10 @@
 #include <libpldm/entity.h>
 #include <libpldm/state_set.h>
 
+#include <phosphor-logging/lg2.hpp>
+
+PHOSPHOR_LOG2_USING;
+
 using namespace pldm::utils;
 using namespace pldm::responder::pdr;
 using namespace pldm::responder::pdr_utils;
@@ -119,21 +123,24 @@ void Handler::generate(const pldm::utils::DBusHandler& dBusIntf,
         }
         catch (const InternalFailure& e)
         {
-            std::cerr << "PDR config directory does not exist or empty, TYPE= "
-                      << pdrType << "PATH= " << dirEntry
-                      << " ERROR=" << e.what() << "\n";
+            error(
+                "PDR config directory does not exist or empty, TYPE= {PDR_TYPE} PATH={DIR_PATH} ERROR={ERR_EXCEP}",
+                "PDR_TYPE", pdrType, "DIR_PATH", dirEntry.path().string(),
+                "ERR_EXCEP", e.what());
         }
         catch (const Json::exception& e)
         {
-            std::cerr << "Failed parsing PDR JSON file, TYPE= " << pdrType
-                      << " ERROR=" << e.what() << "\n";
+            error(
+                "Failed parsing PDR JSON file, TYPE={PDR_TYPE} ERROR={ERR_EXCEP}",
+                "PDR_TYPE", pdrType, "ERR_EXCEP", e.what());
             pldm::utils::reportError(
                 "xyz.openbmc_project.bmc.pldm.InternalFailure");
         }
         catch (const std::exception& e)
         {
-            std::cerr << "Failed parsing PDR JSON file, TYPE= " << pdrType
-                      << " ERROR=" << e.what() << "\n";
+            error(
+                "Failed parsing PDR JSON file, TYPE= {PDR_TYPE} ERROR={ERR_EXCEP}",
+                "PDR_TYPE", pdrType, "ERR_EXCEP", e.what());
             pldm::utils::reportError(
                 "xyz.openbmc_project.bmc.pldm.InternalFailure");
         }
@@ -238,8 +245,8 @@ Response Handler::getPDR(const pldm_msg* request, size_t payloadLength)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Error accessing PDR, HANDLE=" << recordHandle
-                  << " ERROR=" << e.what() << "\n";
+        error("Error accessing PDR, HANDLE={REC_HANDLE} ERROR={ERR_EXCEP}",
+              "REC_HANDLE", recordHandle, "ERR_EXCEP", e.what());
         return CmdHandler::ccOnlyResponse(request, PLDM_ERROR);
     }
     return response;
@@ -738,7 +745,7 @@ bool isOemStateSensor(Handler& handler, uint16_t sensorId,
     getRepoByType(handler.getRepo(), stateSensorPDRs, PLDM_STATE_SENSOR_PDR);
     if (stateSensorPDRs.empty())
     {
-        std::cerr << "Failed to get record by PDR type\n";
+        error("Failed to get record by PDR type");
         return false;
     }
 
@@ -764,10 +771,10 @@ bool isOemStateSensor(Handler& handler, uint16_t sensorId,
 
         if (sensorRearmCount > tmpCompSensorCnt)
         {
-            std::cerr << "The requester sent wrong sensorRearm"
-                      << " count for the sensor, SENSOR_ID=" << sensorId
-                      << "SENSOR_REARM_COUNT=" << (uint16_t)sensorRearmCount
-                      << "\n";
+            error(
+                "The requester sent wrong sensorRearm count for the sensor, SENSOR_ID={SENSOR_ID} SENSOR_REARM_COUNT={SENSOR_REARM_CNT}",
+                "SENSOR_ID", sensorId, "SENSOR_REARM_CNT",
+                (uint16_t)sensorRearmCount);
             break;
         }
 
@@ -803,7 +810,7 @@ bool isOemStateEffecter(Handler& handler, uint16_t effecterId,
                   PLDM_STATE_EFFECTER_PDR);
     if (stateEffecterPDRs.empty())
     {
-        std::cerr << "Failed to get record by PDR type\n";
+        error("Failed to get record by PDR type");
         return false;
     }
 
@@ -829,9 +836,10 @@ bool isOemStateEffecter(Handler& handler, uint16_t effecterId,
 
         if (compEffecterCnt > pdr->composite_effecter_count)
         {
-            std::cerr << "The requester sent wrong composite effecter"
-                      << " count for the effecter, EFFECTER_ID=" << effecterId
-                      << "COMP_EFF_CNT=" << (uint16_t)compEffecterCnt << "\n";
+            error(
+                "The requester sent wrong composite effecter count for the effecter, EFFECTER_ID={EFFECTER_ID} COMP_EFF_CNT={COMP_EFF_CNT}",
+                "EFFECTER_ID", effecterId, "COMP_EFF_CNT",
+                (uint16_t)compEffecterCnt);
             return false;
         }
 

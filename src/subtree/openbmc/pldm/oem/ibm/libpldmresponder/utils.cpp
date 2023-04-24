@@ -6,7 +6,11 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <iostream>
+
+PHOSPHOR_LOG2_USING;
 
 namespace pldm
 {
@@ -23,7 +27,7 @@ int setupUnixSocket(const std::string& socketInterface)
     if (strnlen(socketInterface.c_str(), sizeof(addr.sun_path)) ==
         sizeof(addr.sun_path))
     {
-        std::cerr << "setupUnixSocket: UNIX socket path too long" << std::endl;
+        error("setupUnixSocket: UNIX socket path too long");
         return -1;
     }
 
@@ -31,21 +35,21 @@ int setupUnixSocket(const std::string& socketInterface)
 
     if ((sock = socket(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK, 0)) == -1)
     {
-        std::cerr << "setupUnixSocket: socket() call failed" << std::endl;
+        error("setupUnixSocket: socket() call failed");
         return -1;
     }
 
     if (bind(sock, (struct sockaddr*)&addr, sizeof(addr)) == -1)
     {
-        std::cerr << "setupUnixSocket: bind() call failed with errno " << errno
-                  << std::endl;
+        error("setupUnixSocket: bind() call failed  with errno {ERR}", "ERR",
+              errno);
         close(sock);
         return -1;
     }
 
     if (listen(sock, 1) == -1)
     {
-        std::cerr << "setupUnixSocket: listen() call failed" << std::endl;
+        error("setupUnixSocket: listen() call failed");
         close(sock);
         return -1;
     }
@@ -63,8 +67,7 @@ int setupUnixSocket(const std::string& socketInterface)
     int retval = select(nfd, &rfd, NULL, NULL, &tv);
     if (retval < 0)
     {
-        std::cerr << "setupUnixSocket: select call failed " << errno
-                  << std::endl;
+        error("setupUnixSocket: select call failed {ERR}", "ERR", errno);
         close(sock);
         return -1;
     }
@@ -74,8 +77,7 @@ int setupUnixSocket(const std::string& socketInterface)
         fd = accept(sock, NULL, NULL);
         if (fd < 0)
         {
-            std::cerr << "setupUnixSocket: accept() call failed " << errno
-                      << std::endl;
+            error("setupUnixSocket: accept() call failed {ERR}", "ERR", errno);
             close(sock);
             return -1;
         }
@@ -103,8 +105,7 @@ int writeToUnixSocket(const int sock, const char* buf, const uint64_t blockSize)
         int retval = select(nfd, NULL, &wfd, NULL, &tv);
         if (retval < 0)
         {
-            std::cerr << "writeToUnixSocket: select call failed " << errno
-                      << std::endl;
+            error("writeToUnixSocket: select call failed {ERR}", "ERR", errno);
             close(sock);
             return -1;
         }
@@ -120,13 +121,12 @@ int writeToUnixSocket(const int sock, const char* buf, const uint64_t blockSize)
             {
                 if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
                 {
-                    std::cerr << "writeToUnixSocket: Write call failed with "
-                                 "EAGAIN or EWOULDBLOCK or EINTR"
-                              << std::endl;
+                    error(
+                        "writeToUnixSocket: Write call failed with EAGAIN or EWOULDBLOCK or EINTR");
                     nwrite = 0;
                     continue;
                 }
-                std::cerr << "writeToUnixSocket: Failed to write" << std::endl;
+                error("writeToUnixSocket: Failed to write {ERR}", "ERR", errno);
                 close(sock);
                 return -1;
             }

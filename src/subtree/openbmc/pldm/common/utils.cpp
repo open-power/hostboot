@@ -5,6 +5,7 @@
 #include <libpldm/pdr.h>
 #include <libpldm/pldm_types.h>
 
+#include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 #include <algorithm>
@@ -17,6 +18,8 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+
+PHOSPHOR_LOG2_USING;
 
 namespace pldm
 {
@@ -73,8 +76,8 @@ std::vector<std::vector<uint8_t>> findStateEffecterPDR(uint8_t /*tid*/,
     }
     catch (const std::exception& e)
     {
-        std::cerr << " Failed to obtain a record. ERROR =" << e.what()
-                  << std::endl;
+        error(" Failed to obtain a record. ERROR = {ERR_EXCEP}", "ERR_EXCEP",
+              e.what());
     }
 
     return pdrs;
@@ -127,8 +130,8 @@ std::vector<std::vector<uint8_t>> findStateSensorPDR(uint8_t /*tid*/,
     }
     catch (const std::exception& e)
     {
-        std::cerr << " Failed to obtain a record. ERROR =" << e.what()
-                  << std::endl;
+        error(" Failed to obtain a record. ERROR = {ERR_EXCEP}", "ERR_EXCEP",
+              e.what());
     }
 
     return pdrs;
@@ -140,7 +143,8 @@ uint8_t readHostEID()
     std::ifstream eidFile{HOST_EID_PATH};
     if (!eidFile.good())
     {
-        std::cerr << "Could not open host EID file: " << HOST_EID_PATH << "\n";
+        error("Could not open host EID file: {HOST_PATH}", "HOST_PATH",
+              static_cast<std::string>(HOST_EID_PATH));
     }
     else
     {
@@ -152,8 +156,7 @@ uint8_t readHostEID()
         }
         else
         {
-            std::cerr << "Host EID file was empty"
-                      << "\n";
+            error("Host EID file was empty");
         }
     }
 
@@ -267,8 +270,9 @@ void reportError(const char* errorMsg)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "failed to make a d-bus call to create error log, ERROR="
-                  << e.what() << "\n";
+        error(
+            "failed to make a d-bus call to create error log, ERROR={ERR_EXCEP}",
+            "ERR_EXCEP", e.what());
     }
 }
 
@@ -402,7 +406,8 @@ PropertyValue jsonEntryToDbusVal(std::string_view type,
     }
     else
     {
-        std::cerr << "Unknown D-Bus property type, TYPE=" << type << "\n";
+        error("Unknown D-Bus property type, TYPE={OTHER_TYPE}", "OTHER_TYPE",
+              type);
     }
 
     return propValue;
@@ -465,8 +470,8 @@ int emitStateSensorEventSignal(uint8_t tid, uint16_t sensorId,
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Error emitting pldm event signal:"
-                  << "ERROR=" << e.what() << "\n";
+        error("Error emitting pldm event signal:ERROR={ERR_EXCEP}", "ERR_EXCEP",
+              e.what());
         return PLDM_ERROR;
     }
 
@@ -594,8 +599,9 @@ bool checkForFruPresence(const std::string& objPath)
     }
     catch (const sdbusplus::exception::SdBusError& e)
     {
-        std::cerr << "Failed to check for FRU presence for " << objPath
-                  << " ERROR =" << e.what() << std::endl;
+        error(
+            "Failed to check for FRU presence for {OBJ_PATH} ERROR = {ERR_EXCEP}",
+            "OBJ_PATH", objPath.c_str(), "ERR_EXCEP", e.what());
     }
     return isPresent;
 }

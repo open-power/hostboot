@@ -11,6 +11,7 @@
 #include <systemd/sd-bus.h>
 #include <unistd.h>
 
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/server.hpp>
 #include <xyz/openbmc_project/Logging/Entry/server.hpp>
 
@@ -20,16 +21,16 @@
 #include <iostream>
 #include <vector>
 
+PHOSPHOR_LOG2_USING;
+
 namespace pldm
 {
 namespace responder
 {
-
 using namespace sdbusplus::xyz::openbmc_project::Logging::server;
 
 namespace detail
 {
-
 /**
  * @brief Finds the Entry::Level value for the severity of the PEL
  *        passed in.
@@ -82,7 +83,8 @@ Entry::Level getEntryLevelFromPEL(const std::string& pelFileName)
         }
         else
         {
-            std::cerr << "Unable to open PEL file " << pelFileName << "\n";
+            error("Unable to open PEL file {PEL_FILE_NAME}", "PEL_FILE_NAME",
+                  pelFileName);
         }
     }
 
@@ -114,8 +116,9 @@ int PelHandler::readIntoMemory(uint32_t offset, uint32_t& length,
     }
     catch (const std::exception& e)
     {
-        std::cerr << "GetPEL D-Bus call failed, PEL id = 0x" << std::hex
-                  << fileHandle << ", error = " << e.what() << "\n";
+        error(
+            "GetPEL D-Bus call failed, PEL id = 0x{FILE_HANDLE}, error ={ERR_EXCEP}",
+            "FILE_HANDLE", lg2::hex, fileHandle, "ERR_EXCEP", e.what());
         return PLDM_ERROR;
     }
 
@@ -143,13 +146,14 @@ int PelHandler::read(uint32_t offset, uint32_t& length, Response& response,
         off_t fileSize = lseek(fd, 0, SEEK_END);
         if (fileSize == -1)
         {
-            std::cerr << "file seek failed";
+            error("file seek failed");
             return PLDM_ERROR;
         }
         if (offset >= fileSize)
         {
-            std::cerr << "Offset exceeds file size, OFFSET=" << offset
-                      << " FILE_SIZE=" << fileSize << std::endl;
+            error(
+                "Offset exceeds file size, OFFSET={OFFSET} FILE_SIZE={FILE_SIZE}",
+                "OFFSET", offset, "FILE_SIZE", fileSize);
             return PLDM_DATA_OUT_OF_RANGE;
         }
         if (offset + length > fileSize)
@@ -159,7 +163,7 @@ int PelHandler::read(uint32_t offset, uint32_t& length, Response& response,
         auto rc = lseek(fd, offset, SEEK_SET);
         if (rc == -1)
         {
-            std::cerr << "file seek failed";
+            error("file seek failed");
             return PLDM_ERROR;
         }
         size_t currSize = response.size();
@@ -169,21 +173,22 @@ int PelHandler::read(uint32_t offset, uint32_t& length, Response& response,
         rc = ::read(fd, filePos, length);
         if (rc == -1)
         {
-            std::cerr << "file read failed";
+            error("file read failed");
             return PLDM_ERROR;
         }
         if (rc != length)
         {
-            std::cerr << "mismatch between number of characters to read and "
-                      << "the length read, LENGTH=" << length << " COUNT=" << rc
-                      << std::endl;
+            error(
+                "mismatch between number of characters to read and the length read, LENGTH={LEN} COUNT={CNT}",
+                "LEN", length, "CNT", rc);
             return PLDM_ERROR;
         }
     }
     catch (const std::exception& e)
     {
-        std::cerr << "GetPEL D-Bus call failed on PEL ID 0x" << std::hex
-                  << fileHandle << ", error = " << e.what() << "\n";
+        error(
+            "GetPEL D-Bus call failed on PEL ID 0x{FILE_HANDLE}, error ={ERR_EXCEP}",
+            "FILE_HANDLE", lg2::hex, fileHandle, "ERR_EXCEP", e.what());
         return PLDM_ERROR;
     }
     return PLDM_SUCCESS;
@@ -197,8 +202,7 @@ int PelHandler::writeFromMemory(uint32_t offset, uint32_t length,
     int fd = mkstemp(tmpFile);
     if (fd == -1)
     {
-        std::cerr << "failed to create a temporary pel, ERROR=" << errno
-                  << "\n";
+        error("failed to create a temporary pel, ERROR={ERR}", "ERR", errno);
         return PLDM_ERROR;
     }
     close(fd);
@@ -229,8 +233,9 @@ int PelHandler::fileAck(uint8_t /*fileStatus*/)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "HostAck D-Bus call failed on PEL ID 0x" << std::hex
-                  << fileHandle << ", error = " << e.what() << "\n";
+        error(
+            "HostAck D-Bus call failed on PEL ID 0x{FILE_HANDLE}, error ={ERR_EXCEP}",
+            "FILE_HANDLE", lg2::hex, fileHandle, "ERR_EXCEP", e.what());
         return PLDM_ERROR;
     }
 
@@ -263,8 +268,8 @@ int PelHandler::storePel(std::string&& pelFileName)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "failed to make a d-bus call to PEL daemon, ERROR="
-                  << e.what() << "\n";
+        error("failed to make a d-bus call to PEL daemon, ERROR={ERR_EXCEP}",
+              "ERR_EXCEP", e.what());
         return PLDM_ERROR;
     }
 
@@ -278,7 +283,7 @@ int PelHandler::write(const char* buffer, uint32_t offset, uint32_t& length,
 
     if (offset > 0)
     {
-        std::cerr << "Offset is non zero \n";
+        error("Offset is non zero");
         return PLDM_ERROR;
     }
 
@@ -286,8 +291,7 @@ int PelHandler::write(const char* buffer, uint32_t offset, uint32_t& length,
     auto fd = mkstemp(tmpFile);
     if (fd == -1)
     {
-        std::cerr << "failed to create a temporary pel, ERROR=" << errno
-                  << "\n";
+        error("failed to create a temporary pel, ERROR={ERR}", "ERR", errno);
         return PLDM_ERROR;
     }
 
@@ -305,8 +309,8 @@ int PelHandler::write(const char* buffer, uint32_t offset, uint32_t& length,
 
     if (rc == -1)
     {
-        std::cerr << "file write failed, ERROR=" << errno
-                  << ", LENGTH=" << length << ", OFFSET=" << offset << "\n";
+        error("file write failed, ERROR={ERR}, LENGTH={LEN}, OFFSET={OFFSET}",
+              "ERR", errno, "LEN", length, "OFFSET", offset);
         fs::remove(tmpFile);
         return PLDM_ERROR;
     }
@@ -317,8 +321,8 @@ int PelHandler::write(const char* buffer, uint32_t offset, uint32_t& length,
         rc = storePel(path.string());
         if (rc != PLDM_SUCCESS)
         {
-            std::cerr << "save PEL failed, ERROR = " << rc
-                      << "tmpFile = " << tmpFile << "\n";
+            error("save PEL failed, ERROR = {RC} tmpFile = {TMP_FILE}", "RC",
+                  rc, "TMP_FILE", tmpFile);
         }
     }
 

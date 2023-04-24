@@ -5,6 +5,10 @@
 #include <libpldm/file_io.h>
 #include <libpldm/pldm.h>
 
+#include <phosphor-logging/lg2.hpp>
+
+PHOSPHOR_LOG2_USING;
+
 namespace pldm
 {
 namespace requester
@@ -35,8 +39,8 @@ void DbusToFileHandler::sendNewFileAvailableCmd(uint64_t fileSize)
 {
     if (requester == NULL)
     {
-        std::cerr << "Failed to send resource dump parameters as requester is "
-                     "not set";
+        error(
+            "Failed to send resource dump parameters as requester is not set");
         pldm::utils::reportError(
             "xyz.openbmc_project.bmc.pldm.InternalFailure");
         return;
@@ -54,7 +58,7 @@ void DbusToFileHandler::sendNewFileAvailableCmd(uint64_t fileSize)
     if (rc != PLDM_SUCCESS)
     {
         requester->markFree(mctp_eid, instanceId);
-        std::cerr << "Failed to encode_new_file_req, rc = " << rc << std::endl;
+        error("Failed to encode_new_file_req, rc = {RC}", "RC", rc);
         return;
     }
 
@@ -63,19 +67,16 @@ void DbusToFileHandler::sendNewFileAvailableCmd(uint64_t fileSize)
                                               size_t respMsgLen) {
         if (response == nullptr || !respMsgLen)
         {
-            std::cerr
-                << "Failed to receive response for NewFileAvailable command \n";
+            error("Failed to receive response for NewFileAvailable command");
             return;
         }
         uint8_t completionCode{};
         auto rc = decode_new_file_resp(response, respMsgLen, &completionCode);
         if (rc || completionCode)
         {
-            std::cerr << "Failed to decode_new_file_resp or"
-                      << " Host returned error for new_file_available"
-                      << " rc=" << rc
-                      << ", cc=" << static_cast<unsigned>(completionCode)
-                      << "\n";
+            error(
+                "Failed to decode_new_file_resp or Host returned error for new_file_available rc={RC}, cc = {CC}",
+                "RC", rc, "CC", static_cast<unsigned>(completionCode));
             reportResourceDumpFailure();
         }
     };
@@ -84,7 +85,7 @@ void DbusToFileHandler::sendNewFileAvailableCmd(uint64_t fileSize)
         std::move(requestMsg), std::move(newFileAvailableRespHandler));
     if (rc)
     {
-        std::cerr << "Failed to send NewFileAvailable Request to Host \n";
+        error("Failed to send NewFileAvailable Request to Host");
         reportResourceDumpFailure();
     }
 }
@@ -102,9 +103,8 @@ void DbusToFileHandler::reportResourceDumpFailure()
     }
     catch (const std::exception& e)
     {
-        std::cerr << "failed to set resource dump operation status, "
-                     "ERROR="
-                  << e.what() << "\n";
+        error("failed to set resource dump operation status, ERROR={ERR_EXCEP}",
+              "ERR_EXCEP", e.what());
     }
 }
 
@@ -126,11 +126,11 @@ void DbusToFileHandler::processNewResourceDump(
     }
     catch (const sdbusplus::exception_t& e)
     {
-        std::cerr << "Error " << e.what()
-                  << " found in getting current resource dump status while "
-                     "initiating a new resource dump with objPath="
-                  << resDumpCurrentObjPath.str.c_str()
-                  << " and intf=" << resDumpProgressIntf << "\n";
+        error(
+            "Error {ERR_EXCEP} found in getting current resource dump status while initiating a new resource dump with objPath={DUMP_OBJ_PATH} and intf={DUMP_PROG_INTF}",
+            "ERR_EXCEP", e.what(), "DUMP_OBJ_PATH",
+            resDumpCurrentObjPath.str.c_str(), "DUMP_PROG_INTF",
+            resDumpProgressIntf);
     }
 
     namespace fs = std::filesystem;
@@ -150,8 +150,8 @@ void DbusToFileHandler::processNewResourceDump(
 
     if (!fileHandle)
     {
-        std::cerr << "resource dump file open error: " << resDumpFilePath
-                  << "\n";
+        error("resource dump file open error:{RES_DUMP_PATH}", "RES_DUMP_PATH",
+              resDumpFilePath);
         PropertyValue value{resDumpStatus};
         DBusMapping dbusMapping{resDumpCurrentObjPath, resDumpProgressIntf,
                                 "Status", "string"};
@@ -161,9 +161,9 @@ void DbusToFileHandler::processNewResourceDump(
         }
         catch (const std::exception& e)
         {
-            std::cerr << "failed to set resource dump operation status, "
-                         "ERROR="
-                      << e.what() << "\n";
+            error(
+                "failed to set resource dump operation status, ERROR={ERR_EXCEP}",
+                "ERR_EXCEP", e.what());
         }
         return;
     }
@@ -228,7 +228,8 @@ void DbusToFileHandler::newCsrFileAvailable(const std::string& csr,
 
     if (!certFile)
     {
-        std::cerr << "cert file open error: " << certFilePath << "\n";
+        error("cert file open error: {CERT_PATH}", "CERT_PATH",
+              certFilePath.c_str());
         return;
     }
 
@@ -248,7 +249,7 @@ void DbusToFileHandler::newFileAvailableSendToHost(const uint32_t fileSize,
 {
     if (requester == NULL)
     {
-        std::cerr << "Failed to send csr to host.";
+        error("Failed to send csr to host.");
         pldm::utils::reportError(
             "xyz.openbmc_project.bmc.pldm.InternalFailure");
         return;
@@ -263,7 +264,7 @@ void DbusToFileHandler::newFileAvailableSendToHost(const uint32_t fileSize,
     if (rc != PLDM_SUCCESS)
     {
         requester->markFree(mctp_eid, instanceId);
-        std::cerr << "Failed to encode_new_file_req, rc = " << rc << std::endl;
+        error("Failed to encode_new_file_req, rc = {RC}", "RC", rc);
         return;
     }
     auto newFileAvailableRespHandler = [](mctp_eid_t /*eid*/,
@@ -271,19 +272,17 @@ void DbusToFileHandler::newFileAvailableSendToHost(const uint32_t fileSize,
                                           size_t respMsgLen) {
         if (response == nullptr || !respMsgLen)
         {
-            std::cerr << "Failed to receive response for NewFileAvailable "
-                         "command for vmi \n";
+            error(
+                "Failed to receive response for NewFileAvailable command for vmi");
             return;
         }
         uint8_t completionCode{};
         auto rc = decode_new_file_resp(response, respMsgLen, &completionCode);
         if (rc || completionCode)
         {
-            std::cerr << "Failed to decode_new_file_resp for vmi, or"
-                      << " Host returned error for new_file_available"
-                      << " rc=" << rc
-                      << ", cc=" << static_cast<unsigned>(completionCode)
-                      << "\n";
+            error(
+                "Failed to decode_new_file_resp for vmi, or Host returned error for new_file_available rc = {RC}, cc = {CC}",
+                "RC", rc, "CC", static_cast<unsigned>(completionCode));
             pldm::utils::reportError(
                 "xyz.openbmc_project.bmc.pldm.InternalFailure");
         }
@@ -293,8 +292,7 @@ void DbusToFileHandler::newFileAvailableSendToHost(const uint32_t fileSize,
         std::move(requestMsg), std::move(newFileAvailableRespHandler));
     if (rc)
     {
-        std::cerr
-            << "Failed to send NewFileAvailable Request to Host for vmi \n";
+        error("Failed to send NewFileAvailable Request to Host for vmi");
         pldm::utils::reportError(
             "xyz.openbmc_project.bmc.pldm.InternalFailure");
     }

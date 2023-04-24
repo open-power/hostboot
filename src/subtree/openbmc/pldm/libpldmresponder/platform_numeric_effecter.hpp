@@ -12,8 +12,12 @@
 #include <math.h>
 #include <stdint.h>
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <map>
 #include <optional>
+
+PHOSPHOR_LOG2_USING;
 
 namespace pldm
 {
@@ -21,7 +25,6 @@ namespace responder
 {
 namespace platform_numeric_effecter
 {
-
 /** @brief Function to get the effecter value by PDR factor coefficient, etc.
  *  @param[in] pdr - The structure of pldm_numeric_effecter_value_pdr.
  *  @param[in] effecterValue - effecter value.
@@ -222,7 +225,7 @@ std::pair<int, std::optional<pldm::utils::PropertyValue>>
     }
     else
     {
-        std::cerr << "Wrong field effecterDataSize...\n";
+        error("Wrong field effecterDataSize...");
         return {PLDM_ERROR, {}};
     }
 }
@@ -261,7 +264,7 @@ int setNumericEffecterValueHandler(const DBusInterface& dBusIntf,
                                         PLDM_NUMERIC_EFFECTER_PDR);
     if (numericEffecterPDRs.empty())
     {
-        std::cerr << "The Numeric Effecter PDR repo is empty." << std::endl;
+        error("The Numeric Effecter PDR repo is empty.");
         return PLDM_ERROR;
     }
 
@@ -289,7 +292,7 @@ int setNumericEffecterValueHandler(const DBusInterface& dBusIntf,
 
     if (effecterValueLength != effecterValueArrayLength)
     {
-        std::cerr << "effecter data size is incorrect.\n";
+        error("effecter data size is incorrect.");
         return PLDM_ERROR_INVALID_DATA;
     }
 
@@ -314,16 +317,18 @@ int setNumericEffecterValueHandler(const DBusInterface& dBusIntf,
         }
         catch (const std::exception& e)
         {
-            std::cerr << "Error setting property, ERROR=" << e.what()
-                      << " PROPERTY=" << dbusMapping.propertyName
-                      << " INTERFACE=" << dbusMapping.interface << " PATH="
-                      << dbusMapping.objectPath << "\n";
+            error(
+                "Error setting property, ERROR={ERR_EXCEP} PROPERTY={DBUS_PROP} INTERFACE={DBUS_INTF} PATH={DBUS_OBJ_PATH}",
+                "ERR_EXCEP", e.what(), "DBUS_PROP", dbusMapping.propertyName,
+                "DBUS_INTF", dbusMapping.interface, "DBUS_OBJ_PATH",
+                dbusMapping.objectPath.c_str());
             return PLDM_ERROR;
         }
     }
     catch (const std::out_of_range& e)
     {
-        std::cerr << "Unknown effecter ID : " << effecterId << e.what() << '\n';
+        error("Unknown effecter ID : {EFFECTER_ID} {ERR_EXCEP}", "EFFECTER_ID",
+              effecterId, "ERR_EXCEP", e.what());
         return PLDM_ERROR;
     }
 

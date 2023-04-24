@@ -8,6 +8,7 @@
 #include <libpldm/pldm.h>
 #include <sys/socket.h>
 
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/timer.hpp>
 #include <sdeventplus/event.hpp>
 
@@ -15,12 +16,12 @@
 #include <functional>
 #include <iostream>
 
+PHOSPHOR_LOG2_USING;
+
 namespace pldm
 {
-
 namespace requester
 {
-
 /** @class RequestRetryTimer
  *
  *  The abstract base class for implementing the PLDM request retry logic. This
@@ -74,8 +75,8 @@ class RequestRetryTimer
         }
         catch (const std::runtime_error& e)
         {
-            std::cerr << "Failed to start the request timer. RC = " << e.what()
-                      << "\n";
+            error("Failed to start the request timer. RC = {ERR_EXCEP}",
+                  "ERR_EXCEP", e.what());
             return PLDM_ERROR;
         }
 
@@ -88,8 +89,8 @@ class RequestRetryTimer
         auto rc = timer.stop();
         if (rc)
         {
-            std::cerr << "Failed to stop the request timer. RC = " << rc
-                      << "\n";
+            error("Failed to stop the request timer. RC = {RC}", "RC",
+                  static_cast<int>(rc));
         }
     }
 
@@ -186,11 +187,10 @@ class Request final : public RequestRetryTimer
                            sizeof(currentSendbuffSize));
             if (res == -1)
             {
-                std::cerr
-                    << "Requester : Failed to set the new send buffer size [bytes] : "
-                    << currentSendbuffSize
-                    << " from current size [bytes]: " << oldSendbuffSize
-                    << " , Error : " << strerror(errno) << std::endl;
+                error(
+                    "Requester : Failed to set the new send buffer size [bytes] : {CURR_SND_BUF_SIZE} from current size [bytes]: {OLD_BUF_SIZE} , Error : {ERR}",
+                    "CURR_SND_BUF_SIZE", currentSendbuffSize, "OLD_BUF_SIZE",
+                    oldSendbuffSize, "ERR", strerror(errno));
                 return PLDM_ERROR;
             }
         }
@@ -199,8 +199,8 @@ class Request final : public RequestRetryTimer
         auto rc = pldm_send(eid, fd, requestMsg.data(), requestMsg.size());
         if (rc < 0)
         {
-            std::cerr << "Failed to send PLDM message. RC = " << rc
-                      << ", errno = " << errno << "\n";
+            error("Failed to send PLDM message. RC = {RC}, errno = {ERR}", "RC",
+                  static_cast<int>(rc), "ERR", errno);
             return PLDM_ERROR;
         }
         return PLDM_SUCCESS;

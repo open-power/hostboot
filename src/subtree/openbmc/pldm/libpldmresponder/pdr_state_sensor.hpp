@@ -4,6 +4,10 @@
 
 #include <libpldm/platform.h>
 
+#include <phosphor-logging/lg2.hpp>
+
+PHOSPHOR_LOG2_USING;
+
 namespace pldm
 {
 namespace responder
@@ -37,10 +41,10 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
             auto statesSize = set.value("size", 0);
             if (!statesSize)
             {
-                std::cerr << "Malformed PDR JSON return "
-                             "pdrEntry;- no state set "
-                             "info, TYPE="
-                          << PLDM_STATE_SENSOR_PDR << "\n";
+                error(
+                    "Malformed PDR JSON return pdrEntry;- no state set info, TYPE={STATE_SENSOR_PDR}",
+                    "STATE_SENSOR_PDR",
+                    static_cast<int>(PLDM_STATE_SENSOR_PDR));
                 throw InternalFailure();
             }
             pdrSize += sizeof(state_sensor_possible_states) -
@@ -55,7 +59,7 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
             reinterpret_cast<pldm_state_sensor_pdr*>(entry.data());
         if (!pdr)
         {
-            std::cerr << "Failed to get state sensor PDR.\n";
+            error("Failed to get state sensor PDR.");
             continue;
         }
         pdr->hdr.record_handle = 0;
@@ -169,8 +173,9 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
             }
             catch (const std::exception& e)
             {
-                std::cerr << "D-Bus object path does not exist, sensor ID: "
-                          << pdr->sensor_id << "\n";
+                error(
+                    "D-Bus object path does not exist, sensor ID: {SENSOR_ID}",
+                    "SENSOR_ID", static_cast<uint16_t>(pdr->sensor_id));
             }
 
             dbusMappings.emplace_back(std::move(dbusMapping));

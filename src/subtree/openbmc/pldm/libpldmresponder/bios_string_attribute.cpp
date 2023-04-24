@@ -2,9 +2,13 @@
 
 #include "common/utils.hpp"
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <iostream>
 #include <tuple>
 #include <variant>
+
+PHOSPHOR_LOG2_USING;
 
 using namespace pldm::utils;
 
@@ -14,7 +18,6 @@ namespace responder
 {
 namespace bios
 {
-
 BIOSStringAttribute::BIOSStringAttribute(const Json& entry,
                                          DBusHandler* const dbusHandler) :
     BIOSAttribute(entry, dbusHandler)
@@ -23,8 +26,9 @@ BIOSStringAttribute::BIOSStringAttribute(const Json& entry,
     auto iter = strTypeMap.find(strTypeTmp);
     if (iter == strTypeMap.end())
     {
-        std::cerr << "Wrong string type, STRING_TYPE=" << strTypeTmp
-                  << " ATTRIBUTE_NAME=" << name << "\n";
+        error(
+            "Wrong string type, STRING_TYPE={STR_TYPE} ATTRIBUTE_NAME={ATTR_NAME}",
+            "STR_TYP", strTypeTmp, "ATTR_NAME", name);
         throw std::invalid_argument("Wrong string type");
     }
     stringInfo.stringType = static_cast<uint8_t>(iter->second);
@@ -48,12 +52,11 @@ BIOSStringAttribute::BIOSStringAttribute(const Json& entry,
     auto rc = pldm_bios_table_attr_entry_string_info_check(&info, &errmsg);
     if (rc != PLDM_SUCCESS)
     {
-        std::cerr << "Wrong field for string attribute, ATTRIBUTE_NAME=" << name
-                  << " ERRMSG=" << errmsg
-                  << " MINIMUM_STRING_LENGTH=" << stringInfo.minLength
-                  << " MAXIMUM_STRING_LENGTH=" << stringInfo.maxLength
-                  << " DEFAULT_STRING_LENGTH=" << stringInfo.defLength
-                  << " DEFAULT_STRING=" << stringInfo.defString << "\n";
+        error(
+            "Wrong field for string attribute, ATTRIBUTE_NAME={ATTR_NAME} ERRMSG={ERR_MSG} MINIMUM_STRING_LENGTH={MIN_LEN} MAXIMUM_STRING_LENGTH={MAX_LEN} DEFAULT_STRING_LENGTH={DEF_LEN} DEFAULT_STRING={DEF_STR}",
+            "ATTR_NAME", name, "ERR_MSG", errmsg, "MIN_LEN",
+            stringInfo.minLength, "MAX_LEN", stringInfo.maxLength, "DEF_LEN",
+            stringInfo.defLength, "DEF_STR", stringInfo.defString);
         throw std::invalid_argument("Wrong field for string attribute");
     }
 }
@@ -86,8 +89,8 @@ std::string BIOSStringAttribute::getAttrValue()
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Get String Attribute Value Error: AttributeName = "
-                  << name << std::endl;
+        error("Get String Attribute Value Error: AttributeName = {ATTR_NAME}",
+              "ATTR_NAME", name);
         return stringInfo.defString;
     }
 }
@@ -142,8 +145,8 @@ int BIOSStringAttribute::updateAttrVal(Table& newValue, uint16_t attrHdl,
     }
     catch (const std::bad_variant_access& e)
     {
-        std::cerr << "invalid value passed for the property, error: "
-                  << e.what() << "\n";
+        error("invalid value passed for the property, error: {ERR_EXCEP}",
+              "ERR_EXCEP", e.what());
         return PLDM_ERROR;
     }
     return PLDM_SUCCESS;

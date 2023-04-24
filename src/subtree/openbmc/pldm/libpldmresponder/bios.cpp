@@ -4,6 +4,8 @@
 
 #include <time.h>
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <array>
 #include <chrono>
 #include <ctime>
@@ -12,6 +14,8 @@
 #include <string>
 #include <variant>
 #include <vector>
+
+PHOSPHOR_LOG2_USING;
 
 using namespace pldm::utils;
 
@@ -123,8 +127,9 @@ Response Handler::getDateTime(const pldm_msg* request, size_t /*payloadLength*/)
     }
     catch (const sdbusplus::exception_t& e)
     {
-        std::cerr << "Error getting time, PATH=" << bmcTimePath
-                  << " TIME INTERACE=" << timeInterface << "\n";
+        error(
+            "Error getting time, PATH={BMC_TIME_PATH} TIME INTERACE={TIME_INTERFACE}",
+            "BMC_TIME_PATH", bmcTimePath, "TIME_INTERFACE", timeInterface);
 
         return CmdHandler::ccOnlyResponse(request, PLDM_ERROR);
     }
@@ -177,10 +182,10 @@ Response Handler::setDateTime(const pldm_msg* request, size_t payloadLength)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Error getting the time sync property, PATH="
-                  << timeSyncPath << "INTERFACE=" << timeSyncInterface
-                  << "PROPERTY=" << timeSyncProperty << "ERROR=" << e.what()
-                  << "\n";
+        error(
+            "Error getting the time sync property, PATH={TIME_SYNC_PATH} INTERFACE={SYNC_INTERFACE} PROPERTY={SYNC_PROP} ERROR={ERR_EXCEP}",
+            "TIME_SYNC_PATH", timeSyncPath, "SYNC_INTERFACE", timeSyncInterface,
+            "SYNC_PROP", timeSyncProperty, "ERR_EXCEP", e.what());
     }
 
     constexpr auto setTimeInterface = "xyz.openbmc_project.Time.EpochTime";
@@ -207,10 +212,10 @@ Response Handler::setDateTime(const pldm_msg* request, size_t payloadLength)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Error Setting time,PATH=" << setTimePath
-                  << "TIME INTERFACE=" << setTimeInterface
-                  << "ERROR=" << e.what() << "\n";
-
+        error(
+            "Error Setting time,PATH={SET_TIME_PATH} TIME INTERFACE={TIME_INTERFACE} ERROR={ERR_EXCEP}",
+            "SET_TIME_PATH", setTimePath, "TIME_INTERFACE", setTimeInterface,
+            "ERR_EXCEP", e.what());
         return ccOnlyResponse(request, PLDM_ERROR);
     }
 

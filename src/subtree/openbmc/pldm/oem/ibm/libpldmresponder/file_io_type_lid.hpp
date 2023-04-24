@@ -4,9 +4,13 @@
 
 #include "file_io_by_type.hpp"
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <filesystem>
 #include <sstream>
 #include <string>
+
+PHOSPHOR_LOG2_USING;
 
 namespace pldm
 {
@@ -127,8 +131,8 @@ class LidHandler : public FileHandler
         auto fd = open(lidPath.c_str(), flags, S_IRUSR);
         if (fd == -1)
         {
-            std::cerr << "Could not open file for writing  " << lidPath.c_str()
-                      << "\n";
+            error("Could not open file for writing  {LID_PATH}", "LID_PATH",
+                  lidPath.c_str());
             return PLDM_ERROR;
         }
         close(fd);
@@ -136,7 +140,7 @@ class LidHandler : public FileHandler
         rc = transferFileData(lidPath, false, offset, length, address);
         if (rc != PLDM_SUCCESS)
         {
-            std::cerr << "writeFileFromMemory failed with rc= " << rc << " \n";
+            error("writeFileFromMemory failed with rc= {RC}", "RC", rc);
             return rc;
         }
         if (lidType == PLDM_FILE_TYPE_LID_MARKER)
@@ -204,8 +208,9 @@ class LidHandler : public FileHandler
             size_t fileSize = fs::file_size(lidPath);
             if (offset > fileSize)
             {
-                std::cerr << "Offset exceeds file size, OFFSET=" << offset
-                          << " FILE_SIZE=" << fileSize << "\n";
+                error(
+                    "Offset exceeds file size, OFFSET={OFFSET} FILE_SIZE={FILE_SIZE}",
+                    "OFFSET", offset, "FILE_SIZE", fileSize);
                 return PLDM_DATA_OUT_OF_RANGE;
             }
         }
@@ -214,28 +219,30 @@ class LidHandler : public FileHandler
             flags = O_WRONLY | O_CREAT | O_TRUNC | O_SYNC;
             if (offset > 0)
             {
-                std::cerr << "Offset is non zero in a new file \n";
+                error("Offset is non zero in a new file");
                 return PLDM_DATA_OUT_OF_RANGE;
             }
         }
         auto fd = open(lidPath.c_str(), flags, S_IRUSR);
         if (fd == -1)
         {
-            std::cerr << "could not open file " << lidPath.c_str() << "\n";
+            error("could not open file {LID_PATH}", "LID_PATH",
+                  lidPath.c_str());
             return PLDM_ERROR;
         }
         rc = lseek(fd, offset, SEEK_SET);
         if (rc == -1)
         {
-            std::cerr << "lseek failed, ERROR=" << errno
-                      << ", OFFSET=" << offset << "\n";
+            error("lseek failed, ERROR={ERR}, OFFSET={OFFSET}", "ERR", errno,
+                  "OFFSET", offset);
             return PLDM_ERROR;
         }
         rc = ::write(fd, buffer, length);
         if (rc == -1)
         {
-            std::cerr << "file write failed, ERROR=" << errno
-                      << ", LENGTH=" << length << ", OFFSET=" << offset << "\n";
+            error(
+                "file write failed, ERROR={ERR}, LENGTH={LEN}, OFFSET={OFFSET}",
+                "ERR", errno, "LEN", length, "OFFSET", offset);
             return PLDM_ERROR;
         }
         else if (rc == static_cast<int>(length))

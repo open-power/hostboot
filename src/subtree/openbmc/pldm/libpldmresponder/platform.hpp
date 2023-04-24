@@ -17,7 +17,11 @@
 #include <libpldm/states.h>
 #include <stdint.h>
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <map>
+
+PHOSPHOR_LOG2_USING;
 
 namespace pldm
 {
@@ -25,7 +29,6 @@ namespace responder
 {
 namespace platform
 {
-
 using generatePDR = std::function<void(const pldm::utils::DBusHandler& dBusIntf,
                                        const pldm::utils::Json& json,
                                        pdr_utils::RepoInterface& repo)>;
@@ -313,7 +316,7 @@ class Handler : public CmdHandler
         getRepoByType(pdrRepo, stateEffecterPDRs, PLDM_STATE_EFFECTER_PDR);
         if (stateEffecterPDRs.empty())
         {
-            std::cerr << "Failed to get record by PDR type\n";
+            error("Failed to get record by PDR type");
             return PLDM_PLATFORM_INVALID_EFFECTER_ID;
         }
 
@@ -334,11 +337,10 @@ class Handler : public CmdHandler
                 pdr->possible_states);
             if (compEffecterCnt > pdr->composite_effecter_count)
             {
-                std::cerr << "The requester sent wrong composite effecter"
-                          << " count for the effecter, EFFECTER_ID="
-                          << (unsigned)effecterId
-                          << "COMP_EFF_CNT=" << (unsigned)compEffecterCnt
-                          << "\n";
+                error(
+                    "The requester sent wrong composite effecter count for the effecter, EFFECTER_ID={EFFECTER_ID} COMP_EFF_CNT={COMP_EFF_CNT}",
+                    "EFFECTER_ID", (unsigned)effecterId, "COMP_EFF_CNT",
+                    (unsigned)compEffecterCnt);
                 return PLDM_ERROR_INVALID_DATA;
             }
             break;
@@ -366,13 +368,12 @@ class Handler : public CmdHandler
                 if (states->possible_states_size < bitfieldIndex ||
                     !(states->states[bitfieldIndex].byte & (1 << bit)))
                 {
-                    std::cerr
-                        << "Invalid state set value, EFFECTER_ID="
-                        << (unsigned)effecterId << " VALUE="
-                        << (unsigned)stateField[currState].effecter_state
-                        << " COMPOSITE_EFFECTER_ID=" << (unsigned)currState
-                        << " DBUS_PATH=" << dbusMappings[currState].objectPath
-                        << "\n";
+                    error(
+                        "Invalid state set value, EFFECTER_ID={EFFECTER_ID} VALUE={EFFECTER_STATE} COMPOSITE_EFFECTER_ID={CURR_STATE} DBUS_PATH={DBUS_OBJ_PATH}",
+                        "EFFECTER_ID", (unsigned)effecterId, "EFFECTER_STATE",
+                        (unsigned)stateField[currState].effecter_state,
+                        "CURR_STATE", (unsigned)currState, "DBUS_OBJ_PATH",
+                        dbusMappings[currState].objectPath.c_str());
                     rc = PLDM_PLATFORM_SET_EFFECTER_UNSUPPORTED_SENSORSTATE;
                     break;
                 }
@@ -391,12 +392,12 @@ class Handler : public CmdHandler
                     }
                     catch (const std::exception& e)
                     {
-                        std::cerr
-                            << "Error setting property, ERROR=" << e.what()
-                            << " PROPERTY=" << dbusMapping.propertyName
-                            << " INTERFACE="
-                            << dbusMapping.interface << " PATH="
-                            << dbusMapping.objectPath << "\n";
+                        error(
+                            "Error setting property, ERROR={ERR_EXCEP} PROPERTY={DBUS_PROP} INTERFACE={DBUS_INTF} PATH={DBUS_OBJ_PATH}",
+                            "ERR_EXCEP", e.what(), "DBUS_PROP",
+                            dbusMapping.propertyName, "DBUS_INTF",
+                            dbusMapping.interface, "DBUS_OBJ_PATH",
+                            dbusMapping.objectPath.c_str());
                         return PLDM_ERROR;
                     }
                 }
@@ -411,8 +412,9 @@ class Handler : public CmdHandler
         }
         catch (const std::out_of_range& e)
         {
-            std::cerr << "the effecterId does not exist. effecter id: "
-                      << (unsigned)effecterId << e.what() << '\n';
+            error(
+                "the effecterId does not exist. effecter id: {EFFECTER_ID} {ERR_EXCEP}",
+                "EFFECTER_ID", (unsigned)effecterId, "ERR_EXCEP", e.what());
         }
 
         return rc;

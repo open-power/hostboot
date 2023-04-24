@@ -4,7 +4,11 @@
 
 #include "common/utils.hpp"
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <iostream>
+
+PHOSPHOR_LOG2_USING;
 
 using namespace pldm::utils;
 
@@ -113,8 +117,8 @@ void BIOSEnumAttribute::buildValMap(const Json& dbusVals)
         }
         else
         {
-            std::cerr << "Unknown D-Bus property type, TYPE="
-                      << dBusMap->propertyType << "\n";
+            error("Unknown D-Bus property type, TYPE={PROP_TYPE}", "PROP_TYPE",
+                  dBusMap->propertyType);
             throw std::invalid_argument("Unknown D-BUS property type");
         }
         valMap.emplace(value, possibleValues[pos]);
@@ -238,8 +242,8 @@ int BIOSEnumAttribute::updateAttrVal(Table& newValue, uint16_t attrHdl,
     auto iter = valMap.find(newPropVal);
     if (iter == valMap.end())
     {
-        std::cerr << "Could not find index for new BIOS enum, value="
-                  << std::get<std::string>(newPropVal) << "\n";
+        error("Could not find index for new BIOS enum, value={PROP_VAL}",
+              "PROP_VAL", std::get<std::string>(newPropVal));
         return PLDM_ERROR;
     }
     auto currentValue = iter->second;

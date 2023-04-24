@@ -4,11 +4,14 @@
 #include <libpldm/platform.h>
 #include <libpldm/pldm.h>
 
+#include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include <xyz/openbmc_project/State/OperatingSystem/Status/server.hpp>
 
 #include <fstream>
 #include <iostream>
+
+PHOSPHOR_LOG2_USING;
 
 using namespace pldm::utils;
 
@@ -38,15 +41,16 @@ void HostEffecterParser::parseEffecterJson(const std::string& jsonPath)
     fs::path jsonDir(jsonPath);
     if (!fs::exists(jsonDir) || fs::is_empty(jsonDir))
     {
-        std::cerr << "Host Effecter json path does not exist, DIR=" << jsonPath
-                  << "\n";
+        error("Host Effecter json path does not exist, DIR = {JSON_PATH}",
+              "JSON_PATH", jsonPath.c_str());
         return;
     }
 
     fs::path jsonFilePath = jsonDir / hostEffecterJson;
     if (!fs::exists(jsonFilePath))
     {
-        std::cerr << "json does not exist, PATH=" << jsonFilePath << "\n";
+        error("json does not exist, PATH = {JSON_PATH}", "JSON_PATH",
+              jsonFilePath.c_str());
         throw InternalFailure();
     }
 
@@ -54,7 +58,8 @@ void HostEffecterParser::parseEffecterJson(const std::string& jsonPath)
     auto data = Json::parse(jsonFile, nullptr, false);
     if (data.is_discarded())
     {
-        std::cerr << "Parsing json file failed, FILE=" << jsonFilePath << "\n";
+        error("Parsing json file failed, FILE = {JSON_PATH}", "JSON_PATH",
+              jsonFilePath.c_str());
         throw InternalFailure();
     }
     const Json empty{};
@@ -96,11 +101,10 @@ void HostEffecterParser::parseEffecterJson(const std::string& jsonPath)
             auto states = state.value("state_values", emptyStates);
             if (dbusInfo.propertyValues.size() != states.size())
             {
-                std::cerr << "Number of states do not match with"
-                          << " number of D-Bus property values in the json. "
-                          << "Object path " << dbusInfo.dbusMap.objectPath
-                          << " and property " << dbusInfo.dbusMap.propertyName
-                          << " will not be monitored \n";
+                error(
+                    "Number of states do not match with number of D-Bus property values in the json. Object path {OBJ_PATH} and property {PROP_NAME}  will not be monitored",
+                    "OBJ_PATH", dbusInfo.dbusMap.objectPath.c_str(),
+                    "PROP_NAME", dbusInfo.dbusMap.propertyName);
                 continue;
             }
             for (const auto& s : states)
@@ -147,7 +151,7 @@ void HostEffecterParser::processHostEffecterChangeNotification(
             localOrRemote);
         if (effecterId == PLDM_INVALID_EFFECTER_ID)
         {
-            std::cerr << "Effecter id not found in pdr repo \n";
+            error("Effecter id not found in pdr repo");
             return;
         }
     }
@@ -169,16 +173,16 @@ void HostEffecterParser::processHostEffecterChangeNotification(
             (currHostState != "xyz.openbmc_project.State.Boot.Progress."
                               "ProgressStages.SystemSetup"))
         {
-            std::cout << "Host is not up. Current host state: "
-                      << currHostState.c_str() << "\n";
+            info("Host is not up. Current host state: {CUR_HOST_STATE}",
+                 "CUR_HOST_STATE", currHostState.c_str());
             return;
         }
     }
     catch (const sdbusplus::exception_t& e)
     {
-        std::cerr << "Error in getting current host state. Will still "
-                     "continue to set the host effecter - "
-                  << e.what() << std::endl;
+        error(
+            "Error in getting current host state. Will still continue to set the host effecter - {ERR_EXCEP}",
+            "ERR_EXCEP", e.what());
     }
     uint8_t newState{};
     try
@@ -188,8 +192,7 @@ void HostEffecterParser::processHostEffecterChangeNotification(
     }
     catch (const std::out_of_range& e)
     {
-        std::cerr << "new state not found in json"
-                  << "\n";
+        error("New state not found in json");
         return;
     }
 
@@ -213,13 +216,12 @@ void HostEffecterParser::processHostEffecterChangeNotification(
     }
     catch (const std::runtime_error& e)
     {
-        std::cerr << "Could not set host state effecter \n";
+        error("Could not set host state effecter");
         return;
     }
     if (rc != PLDM_SUCCESS)
     {
-        std::cerr << "Could not set the host state effecter, rc= " << rc
-                  << " \n";
+        error("Could not set the host state effecter, rc= {RC}", "RC", rc);
     }
 }
 
@@ -265,46 +267,46 @@ int HostEffecterParser::setHostStateEffecter(
 
     if (rc != PLDM_SUCCESS)
     {
-        std::cerr << "Message encode failure. PLDM error code = " << std::hex
-                  << std::showbase << rc << "\n";
+        error("Message encode failure. PLDM error code = {RC}", "RC", lg2::hex,
+              rc);
         requester->markFree(mctpEid, instanceId);
         return rc;
     }
 
-    auto setStateEffecterStatesRespHandler =
-        [](mctp_eid_t /*eid*/, const pldm_msg* response, size_t respMsgLen) {
-            if (response == nullptr || !respMsgLen)
-            {
-                std::cerr << "Failed to receive response for "
-                          << "setStateEffecterStates command \n";
-                return;
-            }
-            uint8_t completionCode{};
-            auto rc = decode_set_state_effecter_states_resp(
-                response, respMsgLen, &completionCode);
-            if (rc)
-            {
-                std::cerr << "Failed to decode setStateEffecterStates response,"
-                          << " rc " << rc << "\n";
-                pldm::utils::reportError(
-                    "xyz.openbmc_project.bmc.pldm.SetHostEffecterFailed");
-            }
-            if (completionCode)
-            {
-                std::cerr << "Failed to set a Host effecter "
-                          << ", cc=" << static_cast<unsigned>(completionCode)
-                          << "\n";
-                pldm::utils::reportError(
-                    "xyz.openbmc_project.bmc.pldm.SetHostEffecterFailed");
-            }
-        };
+    auto setStateEffecterStatesRespHandler = [](mctp_eid_t /*eid*/,
+                                                const pldm_msg* response,
+                                                size_t respMsgLen) {
+        if (response == nullptr || !respMsgLen)
+        {
+            error(
+                "Failed to receive response for setStateEffecterStates command");
+            return;
+        }
+        uint8_t completionCode{};
+        auto rc = decode_set_state_effecter_states_resp(response, respMsgLen,
+                                                        &completionCode);
+        if (rc)
+        {
+            error("Failed to decode setStateEffecterStates response, rc {RC}",
+                  "RC", rc);
+            pldm::utils::reportError(
+                "xyz.openbmc_project.bmc.pldm.SetHostEffecterFailed");
+        }
+        if (completionCode)
+        {
+            error("Failed to set a Host effecter, cc = {CC}", "CC",
+                  static_cast<unsigned>(completionCode));
+            pldm::utils::reportError(
+                "xyz.openbmc_project.bmc.pldm.SetHostEffecterFailed");
+        }
+    };
 
     rc = handler->registerRequest(
         mctpEid, instanceId, PLDM_PLATFORM, PLDM_SET_STATE_EFFECTER_STATES,
         std::move(requestMsg), std::move(setStateEffecterStatesRespHandler));
     if (rc)
     {
-        std::cerr << "Failed to send request to set an effecter on Host \n";
+        error("Failed to send request to set an effecter on Host");
     }
     return rc;
 }

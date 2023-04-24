@@ -3,19 +3,20 @@
 #include <config.h>
 #include <libpldm/platform.h>
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <climits>
+
+PHOSPHOR_LOG2_USING;
 
 using namespace pldm::pdr;
 
 namespace pldm
 {
-
 namespace responder
 {
-
 namespace pdr_utils
 {
-
 pldm_pdr* Repo::getPdr() const
 {
     return repo;
@@ -80,10 +81,9 @@ StatestoDbusVal populateMapping(const std::string& type, const Json& dBusValues,
     StatestoDbusVal valueMap;
     if (dBusValues.size() != pv.size())
     {
-        std::cerr
-            << "dBusValues size is not equal to pv size, dBusValues Size: "
-            << dBusValues.size() << ", pv Size: " << pv.size() << "\n";
-
+        error(
+            "dBusValues size is not equal to pv size, dBusValues Size: {DBUS_VAL_SIZE}, pv Size: {PV_SIZE}",
+            "DBUS_VAL_SIZE", dBusValues.size(), "PV_SIZE", pv.size());
         return {};
     }
 
@@ -131,8 +131,8 @@ StatestoDbusVal populateMapping(const std::string& type, const Json& dBusValues,
         }
         else
         {
-            std::cerr << "Unknown D-Bus property type, TYPE=" << type.c_str()
-                      << "\n";
+            error("Unknown D-Bus property type, TYPE={OTHER_TYPE}",
+                  "OTHER_TYPE", type.c_str());
             return {};
         }
 

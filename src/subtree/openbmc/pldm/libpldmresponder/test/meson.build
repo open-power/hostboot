@@ -41,6 +41,7 @@ foreach t : tests
                          gmock,
                          nlohmann_json,
                          phosphor_dbus_interfaces,
+                         phosphor_logging_dep,
                          sdeventplus,
                          sdbusplus]),
        workdir: meson.current_source_dir())

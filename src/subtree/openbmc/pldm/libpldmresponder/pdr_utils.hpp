@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include <nlohmann/json.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 #include <filesystem>
@@ -15,6 +16,8 @@
 #include <iostream>
 #include <string>
 
+PHOSPHOR_LOG2_USING;
+
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
@@ -22,13 +25,10 @@ namespace fs = std::filesystem;
 
 namespace pldm
 {
-
 namespace responder
 {
-
 namespace pdr_utils
 {
-
 /** @struct Type ID associated with pdr
  *
  */
@@ -81,7 +81,8 @@ inline Json readJson(const std::string& path)
     std::ifstream jsonFile(path);
     if (!jsonFile.is_open())
     {
-        std::cerr << "Error opening PDR JSON file, PATH=" << path << "\n";
+        error("Error opening PDR JSON file, PATH={JSON_PATH}", "JSON_PATH",
+              path);
         return {};
     }
 

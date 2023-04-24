@@ -3,6 +3,7 @@
 #include <libpldm/pldm.h>
 
 #include <CLI/CLI.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <sdeventplus/event.hpp>
 #include <sdeventplus/source/io.hpp>
 
@@ -11,6 +12,7 @@
 
 using namespace sdeventplus;
 using namespace sdeventplus::source;
+PHOSPHOR_LOG2_USING;
 
 int main(int argc, char** argv)
 {
@@ -35,8 +37,8 @@ int main(int argc, char** argv)
                                                    &stateField, request);
     if (rc != PLDM_SUCCESS)
     {
-        std::cerr << "Message encode failure. PLDM error code = " << std::hex
-                  << std::showbase << rc << "\n";
+        error("Message encode failure. PLDM error code = {RC}", "RC", lg2::hex,
+              rc);
         return -1;
     }
 
@@ -44,8 +46,7 @@ int main(int argc, char** argv)
     int fd = pldm_open();
     if (-1 == fd)
     {
-        std::cerr << "Failed to init mctp"
-                  << "\n";
+        error("Failed to init mctp");
         return -1;
     }
 
@@ -67,9 +68,8 @@ int main(int argc, char** argv)
             // sent out
             io.set_enabled(Enabled::Off);
             pldm_msg* response = reinterpret_cast<pldm_msg*>(responseMsg);
-            std::cout << "Done. PLDM RC = " << std::hex << std::showbase
-                      << static_cast<uint16_t>(response->payload[0])
-                      << std::endl;
+            info("Done. PLDM RC = {RC}", "RC", lg2::hex,
+                 static_cast<uint16_t>(response->payload[0]));
             free(responseMsg);
             exit(EXIT_SUCCESS);
         }
@@ -80,8 +80,9 @@ int main(int argc, char** argv)
     rc = pldm_send(mctpEid, fd, requestMsg.data(), requestMsg.size());
     if (0 > rc)
     {
-        std::cerr << "Failed to send message/receive response. RC = " << rc
-                  << ", errno = " << errno << "\n";
+        error(
+            "Failed to send message/receive response. RC = {RC} errno = {ERR}",
+            "RC", rc, "ERR", errno);
         return -1;
     }
 

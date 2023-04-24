@@ -1,4 +1,4 @@
-deps = [ CLI11_dep, libpldm_dep, sdeventplus ]
+deps = [ CLI11_dep, libpldm_dep, sdeventplus, phosphor_logging_dep ]
 
 executable('set-state-effecter', 'requester/set_state_effecter.cpp',
            implicit_include_directories: false,

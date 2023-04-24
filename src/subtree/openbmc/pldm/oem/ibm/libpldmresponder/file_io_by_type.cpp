@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Logging/Entry/server.hpp>
 
 #include <exception>
@@ -22,6 +23,8 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+
+PHOSPHOR_LOG2_USING;
 
 namespace pldm
 {
@@ -79,15 +82,17 @@ int FileHandler::transferFileData(const fs::path& path, bool upstream,
         fileExists = fs::exists(path);
         if (!fileExists)
         {
-            std::cerr << "File does not exist. PATH=" << path.c_str() << "\n";
+            error("File does not exist. PATH={FILE_PATH}", "FILE_PATH",
+                  path.c_str());
             return PLDM_INVALID_FILE_HANDLE;
         }
 
         size_t fileSize = fs::file_size(path);
         if (offset >= fileSize)
         {
-            std::cerr << "Offset exceeds file size, OFFSET=" << offset
-                      << " FILE_SIZE=" << fileSize << "\n";
+            error(
+                "Offset exceeds file size, OFFSET={OFFSET} FILE_SIZE={FILE_SIZE}",
+                "OFFSET", offset, "FILE_SIZE", fileSize);
             return PLDM_DATA_OUT_OF_RANGE;
         }
         if (offset + length > fileSize)
@@ -112,8 +117,8 @@ int FileHandler::transferFileData(const fs::path& path, bool upstream,
     int file = open(path.string().c_str(), flags);
     if (file == -1)
     {
-        std::cerr << "File does not exist, PATH = " << path.string() << "\n";
-        ;
+        error("File does not exist, PATH = {FILE_PATH}", "FILE_PATH",
+              path.string());
         return PLDM_ERROR;
     }
     utils::CustomFD fd(file);
@@ -178,16 +183,16 @@ int FileHandler::readFile(const std::string& filePath, uint32_t offset,
 {
     if (!fs::exists(filePath))
     {
-        std::cerr << "File does not exist, HANDLE=" << fileHandle
-                  << " PATH=" << filePath.c_str() << "\n";
+        error("File does not exist, HANDLE={FILE_HANDLE} PATH={FILE_PATH}",
+              "FILE_HANDLE", fileHandle, "FILE_PATH", filePath.c_str());
         return PLDM_INVALID_FILE_HANDLE;
     }
 
     size_t fileSize = fs::file_size(filePath);
     if (offset >= fileSize)
     {
-        std::cerr << "Offset exceeds file size, OFFSET=" << offset
-                  << " FILE_SIZE=" << fileSize << "\n";
+        error("Offset exceeds file size, OFFSET={OFFSET} FILE_SIZE={FILE_SIZE}",
+              "OFFSET", offset, "FILE_SIZE", fileSize);
         return PLDM_DATA_OUT_OF_RANGE;
     }
 
@@ -207,7 +212,8 @@ int FileHandler::readFile(const std::string& filePath, uint32_t offset,
         stream.read(filePos, length);
         return PLDM_SUCCESS;
     }
-    std::cerr << "Unable to read file, FILE=" << filePath.c_str() << "\n";
+    error("Unable to read file, FILE={FILE_PATH}", "FILE_PATH",
+          filePath.c_str());
     return PLDM_ERROR;
 }
 

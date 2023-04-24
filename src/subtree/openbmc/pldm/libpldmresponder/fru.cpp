@@ -7,10 +7,13 @@
 #include <libpldm/utils.h>
 #include <systemd/sd-journal.h>
 
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus.hpp>
 
 #include <iostream>
 #include <set>
+
+PHOSPHOR_LOG2_USING;
 
 namespace pldm
 {
@@ -39,8 +42,8 @@ void FruImpl::buildFRUTable()
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Look up of inventory objects failed and PLDM FRU table "
-                     "creation failed\n";
+        error(
+            "Look up of inventory objects failed and PLDM FRU table creation failed");
         return;
     }
 
@@ -103,9 +106,9 @@ void FruImpl::buildFRUTable()
                 }
                 catch (const std::exception& e)
                 {
-                    std::cout << "Config JSONs missing for the item "
-                                 "interface type, interface = "
-                              << interface.first << "\n";
+                    info(
+                        "Config JSONs missing for the item interface type, interface = {INTF}",
+                        "INTF", interface.first);
                     break;
                 }
             }
@@ -150,9 +153,8 @@ std::string FruImpl::populatefwVersion()
     }
     catch (const std::exception& e)
     {
-        std::cerr << "failed to make a d-bus call "
-                     "Asociation, ERROR= "
-                  << e.what() << "\n";
+        error("failed to make a d-bus call Asociation, ERROR= {ERR_EXCEP}",
+              "ERR_EXCEP", e.what());
         return {};
     }
     return currentBmcVersion;

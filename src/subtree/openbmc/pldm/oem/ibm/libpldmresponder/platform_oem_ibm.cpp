@@ -6,9 +6,12 @@
 #include <libpldm/platform_oem_ibm.h>
 #include <libpldm/pldm.h>
 
+#include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
 #include <iostream>
+
+PHOSPHOR_LOG2_USING;
 
 namespace pldm
 {
@@ -55,8 +58,9 @@ int sendBiosAttributeUpdateEvent(
     }
     catch (const sdbusplus::exception_t& e)
     {
-        std::cerr << "Error in getting current host state, " << e.name()
-                  << " Continue sending the bios attribute update event ... \n";
+        error(
+            "Error in getting current host state, {EXCEP_NAME} Continue sending the bios attribute update event ...",
+            "EXCEP_NAME", e.name());
     }
 
     auto instanceId = requester->getInstanceId(eid);
@@ -74,9 +78,9 @@ int sendBiosAttributeUpdateEvent(
         requestMsg.size() - sizeof(pldm_msg_hdr), request);
     if (rc != PLDM_SUCCESS)
     {
-        std::cerr
-            << "BIOS Attribute update event message encode failure. PLDM error code = "
-            << std::hex << std::showbase << rc << "\n";
+        error(
+            "BIOS Attribute update event message encode failure. PLDM error code = {RC}",
+            "RC", lg2::hex, rc);
         requester->markFree(eid, instanceId);
         return rc;
     }
@@ -86,8 +90,7 @@ int sendBiosAttributeUpdateEvent(
                                                   size_t respMsgLen) {
         if (response == nullptr || !respMsgLen)
         {
-            std::cerr
-                << "Failed to receive response for BIOS Attribute update platform event message \n";
+            error("Failed to receive response for platform event message");
             return;
         }
         uint8_t completionCode{};
@@ -96,11 +99,9 @@ int sendBiosAttributeUpdateEvent(
                                                      &completionCode, &status);
         if (rc || completionCode)
         {
-            std::cerr
-                << "Failed to decode BIOS Attribute update platform_event_message_resp: "
-                << "rc=" << rc
-                << ", cc=" << static_cast<unsigned>(completionCode)
-                << std::endl;
+            error(
+                "Failed to decode BIOS Attribute update platform_event_message_resp: rc = {RC}, cc= {CC}",
+                "RC", rc, "CC", static_cast<unsigned>(completionCode));
         }
     };
     rc = handler->registerRequest(
@@ -108,8 +109,8 @@ int sendBiosAttributeUpdateEvent(
         std::move(requestMsg), std::move(platformEventMessageResponseHandler));
     if (rc)
     {
-        std::cerr
-            << "Failed to send BIOS Attribute update the platform event message \n";
+        error(
+            "Failed to send BIOS Attribute update the platform event message");
     }
 
     return rc;

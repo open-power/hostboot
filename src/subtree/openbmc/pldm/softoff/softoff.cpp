@@ -9,6 +9,7 @@
 #include <libpldm/pldm.h>
 #include <libpldm/state_set.h>
 
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdeventplus/clock.hpp>
 #include <sdeventplus/exception.hpp>
@@ -18,9 +19,10 @@
 #include <array>
 #include <iostream>
 
+PHOSPHOR_LOG2_USING;
+
 namespace pldm
 {
-
 using namespace sdeventplus;
 using namespace sdeventplus::source;
 constexpr auto clockId = sdeventplus::ClockId::RealTime;
@@ -42,8 +44,7 @@ SoftPowerOff::SoftPowerOff(sdbusplus::bus_t& bus, sd_event* event) :
     auto rc = getEffecterID();
     if (completed)
     {
-        std::cerr
-            << "pldm-softpoweroff: effecter to initiate softoff not found \n";
+        error("pldm-softpoweroff: effecter to initiate softoff not found");
         return;
     }
     else if (rc != PLDM_SUCCESS)
@@ -55,8 +56,8 @@ SoftPowerOff::SoftPowerOff(sdbusplus::bus_t& bus, sd_event* event) :
     rc = getSensorInfo();
     if (rc != PLDM_SUCCESS)
     {
-        std::cerr << "Message get Sensor PDRs error. PLDM error code = "
-                  << std::hex << std::showbase << rc << "\n";
+        error("Message get Sensor PDRs error. PLDM error code = {RC}", "RC",
+              lg2::hex, static_cast<int>(rc));
         hasError = true;
         return;
     }
@@ -92,7 +93,7 @@ int SoftPowerOff::getHostState()
     }
     catch (const std::exception& e)
     {
-        std::cerr << "PLDM host soft off: Can't get current host state.\n";
+        error("PLDM host soft off: Can't get current host state.");
         hasError = true;
         return PLDM_ERROR;
     }
@@ -119,8 +120,8 @@ void SoftPowerOff::hostSoftOffComplete(sdbusplus::message_t& msg)
         auto rc = timer.stop();
         if (rc < 0)
         {
-            std::cerr << "PLDM soft off: Failure to STOP the timer. ERRNO="
-                      << rc << "\n";
+            error("PLDM soft off: Failure to STOP the timer. ERRNO={RC}", "RC",
+                  rc);
         }
 
         // This marks the completion of pldm soft power off.
@@ -163,8 +164,8 @@ int SoftPowerOff::getEffecterID()
     }
     catch (const sdbusplus::exception_t& e)
     {
-        std::cerr << "PLDM soft off: Error get VMM PDR,ERROR=" << e.what()
-                  << "\n";
+        error("PLDM soft off: Error get VMM PDR,ERROR={ERR_EXCEP}", "ERR_EXCEP",
+              e.what());
         VMMPdrExist = false;
     }
 
@@ -192,9 +193,7 @@ int SoftPowerOff::getEffecterID()
 
         if (sysFwResponse.size() == 0)
         {
-            std::cerr
-                << "No effecter ID has been found that matches the criteria"
-                << "\n";
+            error("No effecter ID has been found that matches the criteria");
             return PLDM_ERROR;
         }
 
@@ -207,8 +206,8 @@ int SoftPowerOff::getEffecterID()
     }
     catch (const sdbusplus::exception_t& e)
     {
-        std::cerr << "PLDM soft off: Error get system firmware PDR,ERROR="
-                  << e.what() << "\n";
+        error("PLDM soft off: Error get system firmware PDR,ERROR={ERR_EXCEP}",
+              "ERR_EXCEP", e.what());
         completed = true;
         return PLDM_ERROR;
     }
@@ -243,9 +242,7 @@ int SoftPowerOff::getSensorInfo()
 
         if (Response.size() == 0)
         {
-            std::cerr
-                << "No sensor PDR has been found that matches the criteria"
-                << "\n";
+            error("No sensor PDR has been found that matches the criteria");
             return PLDM_ERROR;
         }
 
@@ -255,7 +252,7 @@ int SoftPowerOff::getSensorInfo()
             pdr = reinterpret_cast<pldm_state_sensor_pdr*>(rep.data());
             if (!pdr)
             {
-                std::cerr << "Failed to get state sensor PDR.\n";
+                error("Failed to get state sensor PDR.");
                 return PLDM_ERROR;
             }
         }
@@ -284,8 +281,8 @@ int SoftPowerOff::getSensorInfo()
     }
     catch (const sdbusplus::exception_t& e)
     {
-        std::cerr << "PLDM soft off: Error get State Sensor PDR,ERROR="
-                  << e.what() << "\n";
+        error("PLDM soft off: Error get State Sensor PDR,ERROR={ERR_EXCEP}",
+              "ERR_EXCEP", e.what());
         return PLDM_ERROR;
     }
 
@@ -315,8 +312,8 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
     }
     catch (const sdbusplus::exception_t& e)
     {
-        std::cerr << "PLDM soft off: Error get instanceID,ERROR=" << e.what()
-                  << "\n";
+        error("PLDM soft off: Error get instanceID,ERROR={ERR_EXCEP}",
+              "ERR_EXCEP", e.what());
         return PLDM_ERROR;
     }
 
@@ -331,8 +328,8 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
         instanceID, effecterID, effecterCount, &stateField, request);
     if (rc != PLDM_SUCCESS)
     {
-        std::cerr << "Message encode failure. PLDM error code = " << std::hex
-                  << std::showbase << rc << "\n";
+        error("Message encode failure. PLDM error code = {RC}", "RC", lg2::hex,
+              static_cast<int>(rc));
         return PLDM_ERROR;
     }
 
@@ -340,8 +337,7 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
     int fd = pldm_open();
     if (-1 == fd)
     {
-        std::cerr << "Failed to connect to mctp demux daemon"
-                  << "\n";
+        error("Failed to connect to mctp demux daemon");
         return PLDM_ERROR;
     }
 
@@ -350,9 +346,8 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
                                    Timer::TimePoint /*time*/) {
         if (!responseReceived)
         {
-            std::cerr
-                << "PLDM soft off: ERROR! Can't get the response for the PLDM request msg. Time out!\n"
-                << "Exit the pldm-softpoweroff\n";
+            error(
+                "PLDM soft off: ERROR! Can't get the response for the PLDM request msg. Time out! Exit the pldm-softpoweroff");
             exit(-1);
         }
         return;
@@ -374,8 +369,8 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
                             &responseMsgSize);
         if (rc)
         {
-            std::cerr << "Soft off: failed to recv pldm data. PLDM RC = " << rc
-                      << "\n";
+            error("Soft off: failed to recv pldm data. PLDM RC = {RC}", "RC",
+                  static_cast<int>(rc));
             return;
         }
 
@@ -388,8 +383,8 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
         auto response = reinterpret_cast<pldm_msg*>(responseMsgPtr.get());
         if (response->payload[0] != PLDM_SUCCESS)
         {
-            std::cerr << "Getting the wrong response. PLDM RC = "
-                      << (unsigned)response->payload[0] << "\n";
+            error("Getting the wrong response. PLDM RC = {RC}", "RC",
+                  (unsigned)response->payload[0]);
             exit(-1);
         }
 
@@ -403,15 +398,16 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
         auto ret = startTimer(timeMicroseconds);
         if (ret < 0)
         {
-            std::cerr << "Failure to start Host soft off wait timer, ERRNO = "
-                      << ret << "Exit the pldm-softpoweroff\n";
+            error(
+                "Failure to start Host soft off wait timer, ERRNO = {RET}. Exit the pldm-softpoweroff",
+                "RET", ret);
             exit(-1);
         }
         else
         {
-            std::cerr
-                << "Timer started waiting for host soft off, TIMEOUT_IN_SEC = "
-                << SOFTOFF_TIMEOUT_SECONDS << "\n";
+            error(
+                "Timer started waiting for host soft off, TIMEOUT_IN_SEC = {TIMEOUT_SEC}",
+                "TIMEOUT_SEC", SOFTOFF_TIMEOUT_SECONDS);
         }
         return;
     };
@@ -421,8 +417,9 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
     rc = pldm_send(mctpEID, fd, requestMsg.data(), requestMsg.size());
     if (0 > rc)
     {
-        std::cerr << "Failed to send message/receive response. RC = " << rc
-                  << ", errno = " << errno << "\n";
+        error(
+            "Failed to send message/receive response. RC = {RC}, errno = {ERR}",
+            "RC", static_cast<int>(rc), "ERR", errno);
         return PLDM_ERROR;
     }
 
@@ -435,9 +432,9 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
         }
         catch (const sdeventplus::SdEventError& e)
         {
-            std::cerr
-                << "PLDM host soft off: Failure in processing request.ERROR= "
-                << e.what() << "\n";
+            error(
+                "PLDM host soft off: Failure in processing request.ERROR= {ERR_EXCEP}",
+                "ERR_EXCEP", e.what());
             return PLDM_ERROR;
         }
     }

@@ -11,6 +11,8 @@
 #include <libpldm/platform.h>
 #include <libpldm/pldm.h>
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <array>
 #include <cstring>
 #include <iostream>
@@ -22,6 +24,8 @@
 #include <libpldm/file_io.h>
 #include <libpldm/host.h>
 #endif
+
+PHOSPHOR_LOG2_USING;
 
 namespace pldm
 {
@@ -193,8 +197,8 @@ void Handler::processSetEventReceiver(
     if (rc != PLDM_SUCCESS)
     {
         requester.markFree(eid, instanceId);
-        std::cerr << "Failed to encode_set_event_receiver_req, rc = "
-                  << std::hex << std::showbase << rc << std::endl;
+        error("Failed to encode_set_event_receiver_req, rc = {RC}", "RC",
+              lg2::hex, rc);
         return;
     }
 
@@ -203,8 +207,7 @@ void Handler::processSetEventReceiver(
                                               size_t respMsgLen) {
         if (response == nullptr || !respMsgLen)
         {
-            std::cerr << "Failed to receive response for "
-                         "setEventReceiver command \n";
+            error("Failed to receive response for setEventReceiver command");
             return;
         }
 
@@ -213,9 +216,9 @@ void Handler::processSetEventReceiver(
                                                  &completionCode);
         if (rc || completionCode)
         {
-            std::cerr << "Failed to decode setEventReceiver command response,"
-                      << " rc=" << rc << "cc=" << (unsigned)completionCode
-                      << "\n";
+            error(
+                "Failed to decode setEventReceiver command response, rc = {RC}, cc = {CC}",
+                "RC", rc, "CC", (unsigned)completionCode);
             pldm::utils::reportError(
                 "xyz.openbmc_project.bmc.pldm.InternalFailure");
         }
@@ -226,8 +229,7 @@ void Handler::processSetEventReceiver(
 
     if (rc != PLDM_SUCCESS)
     {
-        std::cerr << "Failed to send the setEventReceiver request"
-                  << "\n";
+        error("Failed to send the setEventReceiver request");
     }
 
     if (oemPlatformHandler)

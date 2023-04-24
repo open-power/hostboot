@@ -3,16 +3,19 @@
 #include <config.h>
 
 #include <common/utils.hpp>
+#include <phosphor-logging/lg2.hpp>
 
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <vector>
+
+PHOSPHOR_LOG2_USING;
+
 namespace pldm
 {
 namespace flightrecorder
 {
-
 using ReqOrResponse = bool;
 using FlightRecorderData = std::vector<uint8_t>;
 using FlightRecorderTimeStamp = std::string;
@@ -91,9 +94,8 @@ class FlightRecorder
         if (flightRecorderPolicy)
         {
             std::ofstream recorderOutputFile(flightRecorderDumpPath);
-            std::cout << "Dumping the flight recorder into : "
-                      << flightRecorderDumpPath << "\n";
-
+            info("Dumping the flight recorder into : {DUMP_PATH}", "DUMP_PATH",
+                 flightRecorderDumpPath);
             for (const auto& message : tapeRecorder)
             {
                 recorderOutputFile << std::get<FlightRecorderTimeStamp>(message)
@@ -117,7 +119,7 @@ class FlightRecorder
         }
         else
         {
-            std::cerr << "Fight recorder policy is disabled\n";
+            error("Fight recorder policy is disabled");
         }
     }
 };

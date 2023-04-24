@@ -21,6 +21,7 @@ foreach t : tests
                          libpldm_dep,
                          nlohmann_json,
                          phosphor_dbus_interfaces,
+                         phosphor_logging_dep,
                          sdbusplus,
                          sdeventplus,
                          test_src]),

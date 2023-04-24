@@ -6,6 +6,10 @@
 #include <config.h>
 #include <libpldm/platform.h>
 
+#include <phosphor-logging/lg2.hpp>
+
+PHOSPHOR_LOG2_USING;
+
 namespace pldm
 {
 namespace responder
@@ -39,10 +43,10 @@ void generateStateEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
             auto statesSize = set.value("size", 0);
             if (!statesSize)
             {
-                std::cerr << "Malformed PDR JSON return "
-                             "pdrEntry;- no state set "
-                             "info, TYPE="
-                          << PLDM_STATE_EFFECTER_PDR << "\n";
+                error(
+                    "Malformed PDR JSON return pdrEntry;- no state set info, TYPE={STATE_EFFECTER_PDR}",
+                    "STATE_EFFECTER_PDR",
+                    static_cast<unsigned>(PLDM_STATE_EFFECTER_PDR));
                 throw InternalFailure();
             }
             pdrSize += sizeof(state_effecter_possible_states) -
@@ -57,7 +61,7 @@ void generateStateEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
             reinterpret_cast<pldm_state_effecter_pdr*>(entry.data());
         if (!pdr)
         {
-            std::cerr << "Failed to get state effecter PDR.\n";
+            error("Failed to get state effecter PDR.");
             continue;
         }
         pdr->hdr.record_handle = 0;
@@ -158,8 +162,9 @@ void generateStateEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
             }
             catch (const std::exception& e)
             {
-                std::cerr << "D-Bus object path does not exist, effecter ID: "
-                          << pdr->effecter_id << "\n";
+                error(
+                    "D-Bus object path does not exist, effecter ID: {EFFECTER_ID}",
+                    "EFFECTER_ID", static_cast<uint16_t>(pdr->effecter_id));
             }
 
             dbusMappings.emplace_back(std::move(dbusMapping));
