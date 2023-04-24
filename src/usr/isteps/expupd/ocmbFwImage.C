@@ -37,8 +37,13 @@
 #include <errl/errlmanager.H>
 #include <hbotcompid.H>
 #include <algorithm>
+#include <pnor/pnorif.H>
 
 #define EXPUPD_8BYTE_ALIGNED(_SIZE) (!(_SIZE & 0x7))
+
+#define TRACF(...) TRACFCOMP(g_trac_expupd, __VA_ARGS__)
+
+using namespace errl_util;
 
 namespace expupd
 {
@@ -308,24 +313,18 @@ errlHndl_t parseTaggedDataTriplet(const uint8_t* i_tripletPtr,
     return l_err;
 }
 
-/* @brief A wildcard for the find_ocmbfw_ext_image function */
-const uint32_t DD_LEVEL_ANY = 0xFFFFFFFFu;
-
-/* @brief Find an image within the OCMBFW extended PNOR partition.
- *
- * @param[in] i_hdr              The PNOR section header.
- * @param[in] i_ocmb_type        The type of OCMB the image should apply to.
- * @param[in] i_image_type       The type of image to search for.
- * @param[in] i_dd_level_major   The major DD level to search for.
- * @param[in] i_dd_level_minor   The minor DD level to search for.
- * @return                       Pointer to the image in PNOR, or nullptr if not found.
+/** @brief Find an image within the extended OCMBFW PNOR partition.
  */
-const ocmbfw_ext_image_info* find_ocmbfw_ext_image(const ocmbfw_ext_pnor_section_header* i_hdr,
-                                                   ocmb_type_t i_ocmb_type,
-                                                   image_type_t i_image_type,
-                                                   uint32_t i_dd_level_major = DD_LEVEL_ANY,
-                                                   uint32_t i_dd_level_minor = DD_LEVEL_ANY)
+errlHndl_t find_ocmbfw_ext_image(const ocmbfw_ext_image_info*& o_img,
+                                 const ocmbfw_ext_pnor_section_header* const i_hdr,
+                                 const ocmb_type_t i_ocmb_type,
+                                 const image_type_t i_image_type,
+                                 const uint32_t i_dd_level_major,
+                                 const uint32_t i_dd_level_minor)
 {
+    errlHndl_t errl = nullptr;
+    o_img = nullptr;
+
     const auto images_end = i_hdr->images + i_hdr->num_images;
 
     const auto it = std::find_if(i_hdr->images, images_end,
@@ -339,12 +338,138 @@ const ocmbfw_ext_image_info* find_ocmbfw_ext_image(const ocmbfw_ext_pnor_section
                                                  || imginfo.dd_level_minor == i_dd_level_minor));
                                  });
 
-    if (it == images_end)
+    if (it != images_end)
     {
-        return nullptr;
+        o_img = it;
+    }
+    else
+    {
+        /*@
+         *@moduleid         EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
+         *@reasoncode       EXPUPD::FW_IMAGE_MISSING
+         *@userdata1[0:15]  Number of images in OCMBFW PNOR partition
+         *@userdata1[16:23] OCMB type searched for
+         *@userdata1[24:31] Image type searched for
+         *@userdata1[32:39] Major DD level searched for
+         *@userdata1[40:47] Minor DD level searched for
+         *@userdata2        Unused
+         *@devdesc          Explorer firmware image not found in OCMB PNOR partition.
+         *@custdesc         Error occurred during system boot.
+         */
+        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
+                                       EXPUPD::FW_IMAGE_MISSING,
+                                       userdata(bits{0 , 15}, i_hdr->num_images,
+                                                bits{16, 23}, i_ocmb_type,
+                                                bits{24, 31}, i_image_type,
+                                                bits{32, 39}, i_dd_level_major,
+                                                bits{40, 47}, i_dd_level_minor),
+                                       0,
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        errl->collectTrace(EXPUPD_COMP_NAME);
     }
 
-    return it;
+    return errl;
+}
+
+/** @brief Produce a pointer to the OCMBFW extended header.
+ *
+ *  @param[out] o_hdr                  Pointer to the extended header in the OCMBFW PNOR partition.
+ *  @param[in] i_optional_base_header  Pointer to the base header, if you have it.
+ *                                     Saves a call to PNOR::getSectionInfo.
+ *  @return                            Error if any, otherwise nullptr.
+ */
+errlHndl_t get_ocmbfw_ext_pnor_section_header(const ocmbfw_ext_pnor_section_header*& o_hdr,
+                                              const ocmbFwHeader* const i_optional_base_header = nullptr)
+{
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+
+    auto basehdr = i_optional_base_header;
+
+    if (!basehdr)
+    {
+        PNOR::SectionInfo_t l_pnorSectionInfo = { };
+
+        // get address and size of packaged image
+        errl = PNOR::getSectionInfo(PNOR::OCMBFW, l_pnorSectionInfo);
+
+        if (errl)
+        {
+            TRACF("load_ocmbfw_pnor_section: getSectionInfo failed: "
+                  TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(errl));
+            break;
+        }
+
+        basehdr = reinterpret_cast<const ocmbFwHeader*>(l_pnorSectionInfo.vaddr);
+    }
+
+    if (basehdr->majorVersion != V2_BASE_HEADER_VERSION_MAJOR
+        || basehdr->minorVersion != V2_BASE_HEADER_VERSION_MINOR)
+    {
+        TRACFCOMP(g_trac_expupd, ERR_MRK
+                  "get_ocmbfw_ext_pnor_section_header: Unsupported header version: %u.%u",
+                  basehdr->majorVersion, basehdr->minorVersion);
+
+        TRACFBIN(g_trac_expupd, "OCMBFW base header", basehdr, basehdr->headerSize);
+
+        /*@
+         *@errortype       ERRL_SEV_PREDICTIVE
+         *@moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
+         *@reasoncode      EXPUPD::INVALID_HEADER_VERSION
+         *@userdata1       majorVersion
+         *@userdata2       minorVersion
+         *@devdesc         Invalid header version for OCMB Flash Image
+         *@custdesc        Error occurred during system boot.
+         */
+        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
+                                       EXPUPD::INVALID_HEADER_VERSION,
+                                       basehdr->majorVersion,
+                                       basehdr->minorVersion,
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
+    o_hdr = reinterpret_cast<const ocmbfw_ext_pnor_section_header*>(reinterpret_cast<const uint8_t*>(basehdr)
+                                                                    + basehdr->headerSize);
+
+    if (o_hdr->header_version != OCMBFW_EXT_PARTITION_VERSION_1)
+    {
+        TRACFCOMP(g_trac_expupd,
+                  ERR_MRK"get_ocmbfw_ext_pnor_section_header: "
+                  "Invalid OCMBFW extended header version %u",
+                  o_hdr->header_version);
+
+        /*@
+         *@errortype       ERRL_SEV_PREDICTIVE
+         *@moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
+         *@reasoncode      EXPUPD::OCMB_INVALID_EXT_HEADER_VERSION
+         *@userdata1       Unsupported OCMBFW extended header version
+         *@userdata2       Unused.
+         *@devdesc         Unsupported OCMBFW extended header version.
+         *@custdesc        Error occurred during system boot.
+         */
+        errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                       EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
+                                       EXPUPD::OCMB_INVALID_EXT_HEADER_VERSION,
+                                       o_hdr->header_version,
+                                       0,
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        break;
+    }
+
+    } while (false);
+
+    if (errl)
+    {
+        errl->collectTrace(EXPUPD_COMP_NAME);
+    }
+
+    return errl;
 }
 
 /**
@@ -449,39 +574,16 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
         if((l_header->majorVersion == V1_BASE_HEADER_VERSION_MAJOR) &&
            (l_header->minorVersion == V1_BASE_HEADER_VERSION_MINOR))
         {
-            // Version 1 is supported and there is no extended header to parse.
-        }
-        else if ((l_header->majorVersion == V2_BASE_HEADER_VERSION_MAJOR) &&
-                 (l_header->minorVersion == V2_BASE_HEADER_VERSION_MINOR))
-        {
-            // Version 2 is supported and does have an extended header.
-
-            ext_header = reinterpret_cast<const ocmbfw_ext_pnor_section_header*>
-                (reinterpret_cast<const char*>(l_header + 1)
-                 + sizeof(taggedTriplet_t)
-                 + HEADER_SHA512_SIZE);
+            // This version is supported as-is.
         }
         else
         {
-            TRACFCOMP(g_trac_expupd, ERR_MRK
-                      "ocmbFwValidateImage: Unsupported header version: %u.%u",
-                      l_header->majorVersion, l_header->minorVersion);
-           /*@errorlog
-            * @errortype       ERRL_SEV_PREDICTIVE
-            * @moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
-            * @reasoncode      EXPUPD::INVALID_HEADER_VERSION
-            * @userdata1       majorVersion
-            * @userdata2       minorVersion
-            * @devdesc         Invalid header version for OCMB Flash Image
-            * @custdesc        Error occurred during system boot.
-            */
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                           EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
-                                           EXPUPD::INVALID_HEADER_VERSION,
-                                           l_header->majorVersion,
-                                           l_header->minorVersion,
-                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            break;
+            l_err = get_ocmbfw_ext_pnor_section_header(ext_header, l_header);
+
+            if (l_err)
+            {
+                break;
+            }
         }
 
         //Check that header size is within min/max range and 8byte aligned
@@ -520,54 +622,15 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
 
         if (ext_header)
         {
-            if (ext_header->header_version != OCMBFW_EXT_PARTITION_VERSION_1)
-            {
-                TRACFCOMP(g_trac_expupd,
-                          ERR_MRK"ocmbFwValidateImage: Invalid OCMBFW extended header version %u",
-                          ext_header->header_version);
+            const ocmbfw_ext_image_info* imageinfo = nullptr;
+            l_err = find_ocmbfw_ext_image(imageinfo, ext_header,
+                                          OCMB_TYPE_EXPLORER, IMAGE_TYPE_RUNTIME);
 
-                /*@
-                 *@errortype       ERRL_SEV_PREDICTIVE
-                 *@moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
-                 *@reasoncode      EXPUPD::OCMB_INVALID_EXT_HEADER_VERSION
-                 *@userdata1       OCMBFW extended header version
-                 *@userdata2       <unused>
-                 *@devdesc         Unsupported OCMBFW extended header version.
-                 *@custdesc        Error occurred during system boot.
-                 */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                                EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
-                                                EXPUPD::OCMB_INVALID_EXT_HEADER_VERSION,
-                                                ext_header->header_version,
-                                                0,
-                                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                l_err->collectTrace(EXPUPD_COMP_NAME);
-                break;
-            }
-
-            const auto imageinfo = find_ocmbfw_ext_image(ext_header, OCMB_TYPE_EXPLORER, IMAGE_TYPE_RUNTIME);
-
-            if (!imageinfo)
+            if (l_err)
             {
                 TRACFCOMP(g_trac_expupd,
                           ERR_MRK"ocmbFwValidateImage: No Explorer firmware found in PNOR partition");
 
-                /*@
-                 *@errortype       ERRL_SEV_PREDICTIVE
-                 *@moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
-                 *@reasoncode      EXPUPD::EXPLORER_FW_IMAGE_MISSING
-                 *@userdata1       Number of images in OCMBFW PNOR partition
-                 *@userdata2       <unused>
-                 *@devdesc         Explorer firmware image not found in OCMB PNOR partition.
-                 *@custdesc        Error occurred during system boot.
-                 */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                                EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
-                                                EXPUPD::EXPLORER_FW_IMAGE_MISSING,
-                                                ext_header->num_images,
-                                                0,
-                                                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                l_err->collectTrace(EXPUPD_COMP_NAME);
                 break;
             }
 
@@ -655,6 +718,80 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
 
     TRACFCOMP(g_trac_expupd, EXIT_MRK "ocmbFwValidateImage()");
     return l_err;
+}
+
+/** @brief Unload the OCMBFW PNOR partition. Used as a deleter for a
+ *  unique_ptr that acts as a resource manager for the PNOR
+ *  partition. Argument is ignored.
+ */
+void unload_ocmbfw_pnor_partition(const void*)
+{
+#ifdef CONFIG_SECUREBOOT
+    auto l_errl = PNOR::unloadSecureSection(PNOR::OCMBFW);
+
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_expupd,
+                  "unload_ocmbfw_pnor_partition: Failed to unload OCMBFW PNOR partition! "
+                  TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(l_errl));
+        l_errl->collectTrace(EXPUPD_COMP_NAME);
+        errlCommit(l_errl, EXPUPD_COMP_ID);
+    }
+#endif
+}
+
+ocmbfw_owning_ptr_t load_ocmbfw_pnor_section(errlHndl_t& o_err)
+{
+    TRACF(ENTER_MRK"call_ocmb_check_for_ready/load_ocmbfw_pnor_section");
+
+    assert(!o_err, "load_ocmbfw_pnor_section: o_err already contains an error!");
+
+    const ocmbfw_ext_pnor_section_header* hdr = nullptr;
+
+#ifdef CONFIG_SECUREBOOT
+    ocmbfw_owning_ptr_t owning_ptr(nullptr, unload_ocmbfw_pnor_partition);
+#else
+    ocmbfw_owning_ptr_t owning_ptr(nullptr, hbstd::noop_deleter);
+#endif
+
+    do
+    {
+
+#ifdef CONFIG_SECUREBOOT
+    o_err = PNOR::loadSecureSection(PNOR::OCMBFW);
+
+    if (o_err)
+    {
+        TRACF("load_ocmbfw_pnor_section: Failed to load PNOR OCMBFW section"
+              TRACE_ERR_FMT,
+              TRACE_ERR_ARGS(o_err));
+        break;
+    }
+
+    // This causes the unique_ptr to invoke the deleter when it goes
+    // out of scope, which will unload the section. We want this to
+    // happen even if it's the wrong version or something and we can't
+    // get the real pointer to the header.
+    owning_ptr.reset(reinterpret_cast<const ocmbfw_ext_pnor_section_header*>(1));
+#endif
+
+    o_err = get_ocmbfw_ext_pnor_section_header(hdr);
+
+    if (!o_err)
+    {
+        // Release the pointer first, so that it doesn't invoke the
+        // deleter and unload the pnor section.
+        owning_ptr.release();
+        owning_ptr.reset(hdr);
+    }
+
+    } while (false);
+
+    TRACF(EXIT_MRK"call_ocmb_check_for_ready/load_ocmbfw_pnor_section = %p",
+          owning_ptr.get());
+
+    return owning_ptr;
 }
 
 } //namespace expupd

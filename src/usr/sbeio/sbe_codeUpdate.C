@@ -35,6 +35,13 @@
 #include "sbe_fifodd.H"
 #include <sbeio/sbeioreasoncodes.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/odyutil.H>
+
+//  FAPI support
+#include <fapi2.H>
+#include <plat_hwp_invoker.H>
+
+#include <ody_code_getlevels.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -44,21 +51,84 @@ TRACDCOMP(g_trac_sbeio,"CodeUpdate: " printf_string,##args)
 #define SBE_TRACF(printf_string,args...) \
 TRACFCOMP(g_trac_sbeio,"CodeUpdate: " printf_string,##args)
 
+const int UPDATABLE_IMG_SECTION_CNT = 4;
+
+/**
+ * @brief Response structures for Odyssey getCodeLevels chipops.
+ */
+struct get_code_levels_response
+{
+    uint16_t num_capabilities;
+    uint16_t num_sub_images;
+    uint32_t reserved;
+
+    sppeCLIP_t updatable_images[UPDATABLE_IMG_SECTION_CNT];
+};
+
+/** @brief Implementation for the chipop used by ody_code_getlevels.
+ *
+ *  @param[in] i_target         The OCMB target
+ *  @param[out] o_sppeCLIPData  The code level information packages for the SPPE.
+ */
+extern "C"
+fapi2::ReturnCode ody_chipop_getcodelevels(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                           std::vector<sppeCLIP_t>& o_sppeCLIPdata)
+{
+    using namespace SBEIO;
+
+    fapi2::ReturnCode rc;
+
+    o_sppeCLIPdata.clear();
+
+    get_code_levels_response response = { };
+
+    SbeFifo::fifoGetCodeLevelsRequest req;
+    auto errl = SbeFifo::getTheInstance().performFifoChipOp(i_target.get(),
+                                                            reinterpret_cast<uint32_t*>(&req),
+                                                            reinterpret_cast<uint32_t*>(&response),
+                                                            sizeof(response));
+
+    if (errl)
+    {
+        SBE_TRACF("ody_chipop_getcodelevels failed: " TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(errl));
+        addErrlPtrToReturnCode(rc, errl);
+    }
+    else
+    {
+        for (const auto& sppe_clip : response.updatable_images)
+        {
+            SBE_TRACF("ody_chipop_getcodelevels: Image type: %d", sppe_clip.type);
+
+            const auto hash_words = reinterpret_cast<const uint32_t*>(&sppe_clip.hash);
+
+            SBE_TRACF("ody_chipop_getcodelevels: Image hash prefix: %08x %08x %08x %08x",
+                      hash_words[0], hash_words[1],
+                      hash_words[2], hash_words[3]);
+
+            sppeCLIP_t clip = { };
+            clip.type = (sppeImageType_t)sppe_clip.type;
+
+            static_assert(sizeof(sppe_clip.hash) == sizeof(clip.hash),
+                          "Size of image hashes must be the same!");
+            memcpy(&clip.hash, &sppe_clip.hash, sizeof(clip.hash));
+
+            o_sppeCLIPdata.push_back(clip);
+        }
+    }
+
+    return rc;
+}
+
 namespace SBEIO
 {
-
-    /**
-    * @brief @TODO JIRA PFHB-255
-    *
-    * @param[in] i_chipTarget The chip you would like to perform the chipop on
-    *                       NOTE: HB should only be sending this to non-boot procs or Odyssey chips
-    *
-    * @return errlHndl_t Error log handle on failure.
-    *
-    */
-    errlHndl_t sendGetCodeLevelsRequest(TARGETING::Target * i_chipTarget)
+    errlHndl_t sendGetCodeLevelsRequest(TARGETING::Target * i_chipTarget,
+                                        std::vector<codelevel_info_t>& o_codelevels)
     {
+        SBE_TRACF(ENTER_MRK"sendGetCodeLevelsRequest(0x%08X)", get_huid(i_chipTarget));
+
         errlHndl_t errl = nullptr;
+        o_codelevels.clear();
 
         do
         {
@@ -66,18 +136,71 @@ namespace SBEIO
             errl = sbeioInterfaceChecks(i_chipTarget,
                                         SbeFifo::SBE_FIFO_CLASS_CODE_UPDATE_MESSAGES,
                                         SbeFifo::SBE_FIFO_CMD_GET_CODE_LEVELS);
+
             if(errl)
             {
                 break;
             }
 
-            SBE_TRACF(EXIT_MRK "Skipping unimplemented chipop sendGetCodeLevelsRequest");
+            if (!TARGETING::UTIL::isOdysseyChip(i_chipTarget))
+            {
+                SBE_TRACF("sendGetCodeLevelsRequest: Chip 0x%08X is not an Odyssey",
+                          get_huid(i_chipTarget));
+                break;
+            }
+
+            std::vector<sppeCLIP_t> clips;
+            FAPI_INVOKE_HWP(errl, ody_code_getlevels, { i_chipTarget }, clips);
+
+            if (errl)
+            {
+                SBE_TRACF("sendGetCodeLevelsRequest: ody_code_getlevels failed: " TRACE_ERR_FMT,
+                          TRACE_ERR_ARGS(errl));
+
+                break;
+            }
+
+            // We only want the bootloader and runtime clips, and
+            // then we transform those into our own
+            // codelevel_info_t data structure.
+
+            clips.erase(std::remove_if(begin(clips), end(clips),
+                                       [](const auto& clip)
+                                       { return (clip.type != Bootloader
+                                                 && clip.type != Runtime); }),
+                        end(clips));
+
+            o_codelevels.resize(clips.size());
+
+            std::transform(begin(clips), end(clips), begin(o_codelevels),
+                           [](const auto& clip)
+                           {
+                               codelevel_info_t::codelevel_info_type codelevel_type = { };
+
+                               switch (clip.type)
+                               {
+                               case Bootloader:
+                                   codelevel_type = codelevel_info_t::bootloader;
+                                   break;
+                               case Runtime:
+                                   codelevel_type = codelevel_info_t::runtime;
+                                   break;
+                               default:
+                                   assert(false); // this can't happen
+                               }
+
+                               codelevel_info_t info = { };
+                               info.type = codelevel_type;
+                               static_assert(sizeof(info.hash) == sizeof(clip.hash));
+                               memcpy(&info.hash, &clip.hash, sizeof(info.hash));
+                               return info;
+                           });
 
         }while(0);
 
-        SBE_TRACD(EXIT_MRK "sendGetCodeLevelsRequest");
+        SBE_TRACF(EXIT_MRK"sendGetCodeLevelsRequest(0x%08X)", get_huid(i_chipTarget));
         return errl;
-    };
+    }
 
     /**
     * @brief @TODO JIRA PFHB-255

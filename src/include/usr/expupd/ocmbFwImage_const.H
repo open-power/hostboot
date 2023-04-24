@@ -174,6 +174,9 @@ struct ocmbfw_ext_pnor_section_header
     ocmbfw_ext_image_info images[1]; // any number of images
 } PACKED;
 
+/* @brief A wildcard for the find_ocmbfw_ext_image function */
+const uint32_t DD_LEVEL_ANY = 0xFFFFFFFFu;
+
 } //namespace expupd
 
 #endif

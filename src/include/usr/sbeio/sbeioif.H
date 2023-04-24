@@ -605,6 +605,31 @@ namespace SBEIO
     */
     errlHndl_t sendSecondarySbeHaltRequest(TARGETING::Target * i_procChip);
 
+    /** @brief Describes the version of an SPPE code image
+     */
+    struct codelevel_info_t
+    {
+        enum codelevel_info_type
+        {
+            bootloader,
+            runtime
+        };
+
+        codelevel_info_type type;
+        uint8_t hash[64];
+    };
+
+    /**
+     * @brief Get current code levels on the given chip's SPPE.
+     *
+     * @param[in] i_chipTarget   The chip you would like to perform the chipop on
+     *                           NOTE: Only valid on Odyssey chips.
+     * @param[out] o_codelevels  The image levels on the device.
+     *
+     * @return errlHndl_t        Error log handle on failure.
+     */
+    errlHndl_t sendGetCodeLevelsRequest(TARGETING::Target * i_chipTarget,
+                                        std::vector<codelevel_info_t>& o_codelevels);
 
     /**
     * @brief Send the IO or MEMORY HWP request to the SBE.  These overloaded

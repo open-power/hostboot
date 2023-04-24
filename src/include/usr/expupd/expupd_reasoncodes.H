@@ -55,6 +55,7 @@ namespace EXPUPD
         DEVICE_READ_FAIL                          = EXPUPD_COMP_ID | 0x0b,
         EXPLORER_FW_IMAGE_MISSING                 = EXPUPD_COMP_ID | 0x0c,
         OCMB_INVALID_EXT_HEADER_VERSION           = EXPUPD_COMP_ID | 0x0d,
+        FW_IMAGE_MISSING                          = EXPUPD_COMP_ID | 0x0e,
     };
 
 }; // namespace EXPUPD

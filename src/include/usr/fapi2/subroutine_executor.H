@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,9 +110,10 @@ struct values_equal
 
 // The list of HWP names to execute on the HOST, as opposed to delegating them
 // to be run on the SBE.
-static constexpr const char* const hwp_whitelist[] =
+static constexpr const char* const host_hwp_list[] =
 {
-  "p10_putmemproc"
+    "p10_putmemproc",
+    "ody_chipop_getcodelevels"
 };
 
 /** @brief strcmp that can run at compile-time given constexpr arguments.
@@ -133,20 +134,53 @@ static constexpr int compile_time_strcmp(const char* a, const char* b)
  * @param[in] name      Name of hardware procedure (not including arguemnts)
  * @return              True if the HWP should be executed on the host, false otherwise
  */
-static constexpr bool is_hwp_whitelisted(const char* const name)
+static constexpr bool is_host_hwp(const char* const name)
 {
-    bool is_whitelisted = false;
+    bool is_host_hwp = false;
 
-    for (size_t i = 0; i < std::size(hwp_whitelist); ++i) {
-        if (compile_time_strcmp(name, hwp_whitelist[i]) == 0)
+    for (size_t i = 0; i < std::size(host_hwp_list); ++i) {
+        if (compile_time_strcmp(name, host_hwp_list[i]) == 0)
         {
-            is_whitelisted = true;
+            is_host_hwp = true;
             break;
         }
     }
 
-    return is_whitelisted;
+    return is_host_hwp;
 }
+
+/**
+ * @brief This structure is for checking at compiletime whether a
+ * function call is an invocation of p10_putsram to the boot processor
+ * or a PCI chiplet and should therefore be run on the host.
+ *
+ * @tparam B  Whether the name of the HWP is p10_putsram or not. If
+ *            not, the value() function always returns false.
+ */
+template<bool B>
+struct is_host_p10_putsram
+{
+    static constexpr bool value(...) { return false; }
+};
+
+template<>
+struct is_host_p10_putsram<true>
+{
+    /**
+     * @brief Determine whether a call to p10_putsram with these
+     * arguments should be run on the host.
+     *
+     * @param[in] isbootproc   Whether this call is to the boot processor.
+     * @param[in] t1, t2, ...  The rest of the arguments to the function.
+     * @return bool            True if the call is to a PCI chiplet or boot proc,
+     *                         false otherwise.
+     */
+    template<typename T, typename T2>
+    static constexpr bool value(bool isbootproc, T&& t1, T2&& t2, ...)
+    {
+        return isbootproc || t2 == PCI0_PERV_CHIPLET_ID || t2 == PCI1_PERV_CHIPLET_ID;
+    }
+};
 
 /**
  * @brief Subroutine Executor macro example code - Platforms will need to
@@ -162,19 +196,16 @@ static constexpr bool is_hwp_whitelisted(const char* const name)
         errlHndl_t l_errl = nullptr; \
         /* Read the FUNC as a string and pass it to the conversion method \
         to determine what hwp we need to request */ \
-        const char* l_function = #FUNC; \
         do  \
         { \
-            if (values_equal<bool, is_hwp_whitelisted(#FUNC), true>::value) \
+            if (values_equal<bool, is_host_hwp(#FUNC), true>::value) \
             { \
-                FAPI_INF("subroutine_executor: executing hwp %s natively", \
-                         l_function); \
+                FAPI_INF("subroutine_executor: executing hwp " #FUNC " natively"); \
                 FAPI_PLAT_EXEC_HWP(RC, FUNC, _args); \
             } \
             else \
             { \
-                FAPI_INF("subroutine_executor: executing hwp %s via SBE chip-op", \
-                          l_function); \
+                FAPI_INF("subroutine_executor: executing hwp " #FUNC " via SBE chip-op"); \
                 /* Check if the target exists on the boot proc*/ \
                 bool isBootProc = true; \
                 /* Read the target argument, which is the first argument in the list */ \
@@ -189,18 +220,15 @@ static constexpr bool is_hwp_whitelisted(const char* const name)
                     break; \
                 } \
                 /* Run hwp on host if targ is on boot proc or if PCI chiplet*/ \
-                if (strcmp(l_function, "p10_putsram") == 0 && \
-                        (isBootProc || \
-                         _GET_2ND_ARG(_args) == PCI0_PERV_CHIPLET_ID || \
-                         _GET_2ND_ARG(_args) == PCI1_PERV_CHIPLET_ID)) \
+                if (is_host_p10_putsram<compile_time_strcmp(#FUNC, "p10_putsram") == 0>::value(isBootProc, _args)) \
                 { \
-                    FAPI_INF("subroutine_executor:    isBootProc = %d .. executing hwp %s on host", \
-                            isBootProc, l_function); \
+                    FAPI_INF("subroutine_executor:    isBootProc = %d .. executing hwp " #FUNC " on host", \
+                            isBootProc); \
                     FAPI_PLAT_EXEC_HWP(RC, FUNC, _args); \
                 } \
                 else \
                 { \
-                    l_errl =  requestHwpViaSbe(l_function, _args); \
+                    l_errl =  requestHwpViaSbe(#FUNC, _args); \
                 } \
             } \
             break; \

@@ -35,6 +35,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe
 
 #Common Objects
 OBJS += sbe_attn.o

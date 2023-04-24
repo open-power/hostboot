@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -488,6 +488,13 @@ auto scope_exit(F&& i_functor)
                                     // destructor will call our deleter
         std::move(deleter)
     };
+}
+
+/** @brief A do-nothing function deleter for resources that have no
+ *  cleanup.
+ */
+inline void noop_deleter(const void*)
+{
 }
 
 }

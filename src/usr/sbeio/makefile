@@ -29,6 +29,8 @@ MODULE = sbeio
 # pull in .mk common between sbeio and sbeio_rt
 include common/common.mk
 
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe
+
 # sbeio's unique objects
 OBJS += sbe_psudd.o
 OBJS += sbe_secureHwp.o
@@ -58,9 +60,12 @@ OBJS += sbe_psuSyncFabTopoIdTable.o
 OBJS += sbe_halt.o
 OBJS += p10_clock_test.o
 OBJS += p10_clock_test_cmn.o
+OBJS += ody_code_getlevels.o
 
 # sbeio's sub directories
 SUBDIRS += test.d
 SUBDIRS += runtime.d
+
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe
 
 include ${ROOTPATH}/config.mk

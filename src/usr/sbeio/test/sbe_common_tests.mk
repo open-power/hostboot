@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021
+# Contributors Listed Below - COPYRIGHT 2021,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -36,6 +36,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe
+
 VPATH += ${EXTRAINCDIR}
 
 TESTS += ${ROOTPATH}/src/usr/sbeio/test/sbe_ffdctest.H

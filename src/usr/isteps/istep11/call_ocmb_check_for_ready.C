@@ -71,20 +71,152 @@
 // sendProgressCode
 #include <initservice/istepdispatcherif.H>
 
+// Code update
+#include <expupd/expupd.H>
+#include <expupd/ocmbFwImage.H>
+
 using namespace ISTEPS_TRACE;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
 using namespace TARGETING;
 
+#define TRACF(...) TRACFCOMP(g_trac_isteps_trace, __VA_ARGS__)
+
+using namespace expupd;
+using namespace SBEIO;
+
 namespace ISTEP_11
 {
+
+/** brief Add callouts and collect traces for the given Odyssey code
+ *  update error. Deconfigure the given OCMB (delayed).
+ */
+void handle_odyssey_code_update_error(IStepError& i_stepError,
+                                      errlHndl_t& i_errl,
+                                      const Target* const i_ocmb)
+{
+    i_errl->collectTrace(SBEIO_COMP_NAME);
+    i_errl->collectTrace(I2CR_COMP_NAME);
+    i_errl->collectTrace(EXPUPD_COMP_NAME);
+
+    i_errl->addHwCallout(i_ocmb,
+                         HWAS::SRCI_PRIORITY_HIGH,
+                         HWAS::DELAYED_DECONFIG,
+                         HWAS::GARD_NULL);
+
+    captureError(i_errl, i_stepError, ISTEP_COMP_ID, i_ocmb);
+}
+
+errlHndl_t odyssey_code_update(Target* const i_ocmb,
+                               const ocmbfw_owning_ptr_t& i_fwhdr)
+{
+    TRACF(ENTER_MRK"call_ocmb_check_for_ready/odyssey_code_update(0x%08X)",
+          get_huid(i_ocmb));
+
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+
+    const auto ec = i_ocmb->getAttr<ATTR_EC>();
+    const auto dd_level_major = (ec & 0xF0) >> 4,
+               dd_level_minor = (ec & 0x0F);
+
+    /* Get the code levels on the Odyssey and see whether there are
+     * any hash mismatches. */
+
+    std::vector<codelevel_info_t> codelevels;
+    errl = sendGetCodeLevelsRequest(i_ocmb, codelevels);
+
+    if (errl)
+    {
+        break;
+    }
+
+    for (const auto& codelevel : codelevels)
+    {
+        image_type_t image_type = { };
+        const char* image_type_str = nullptr;
+
+        switch (codelevel.type)
+        {
+        case codelevel_info_t::bootloader:
+            image_type = IMAGE_TYPE_BOOTLOADER;
+            image_type_str = "bootloader";
+            break;
+        case codelevel_info_t::runtime:
+            image_type = IMAGE_TYPE_RUNTIME;
+            image_type_str = "runtime";
+            break;
+        }
+
+        /* Find the appropriate image in PNOR to compare hashes with. */
+
+        const ocmbfw_ext_image_info* img = nullptr;
+        errl = find_ocmbfw_ext_image(img, i_fwhdr.get(), OCMB_TYPE_ODYSSEY, image_type,
+                                     dd_level_major, dd_level_minor);
+
+        if (errl)
+        {
+            TRACF("odyssey_code_update: Cannot locate image with ocmb type = %d, "
+                  "image type = %d, dd = %d.%d in OCMBFW PNOR partition",
+                  OCMB_TYPE_ODYSSEY, image_type, dd_level_major, dd_level_minor);
+            break;
+        }
+
+        static_assert(sizeof(img->image_hash) == sizeof(codelevel.hash));
+
+        /* If the hashes don't match, we need to update this image. */
+
+        if (memcmp(&img->image_hash, &codelevel.hash, sizeof(img->image_hash)))
+        {
+            TRACF("odyssey_code_update: OCMB 0x%08x %s needs update",
+                  get_huid(i_ocmb), image_type_str);
+        }
+        else
+        {
+            TRACF("odyssey_code_update: OCMB 0x%08x %s does NOT need update",
+                  get_huid(i_ocmb), image_type_str);
+        }
+    }
+
+    } while (false);
+
+    TRACF(EXIT_MRK"call_ocmb_check_for_ready/odyssey_code_update");
+
+    return errl;
+}
+
 void* call_ocmb_check_for_ready (void *io_pArgs)
 {
-    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_ocmb_check_for_ready");
+    TRACF(ENTER_MRK"call_ocmb_check_for_ready");
 
-    errlHndl_t  l_errl = nullptr;
+    errlHndl_t l_errl = nullptr;
     IStepError l_StepError;
 
+    do
+    {
+
+    bool perform_odyssey_codeupdate_check = true;
+    const auto ocmbfw_pnor_section_header = load_ocmbfw_pnor_section(l_errl);
+
+    if (l_errl)
+    {
+        TRACF("call_ocmb_check_for_ready: load_ocmbfw_pnor_section failed: "
+              TRACE_ERR_FMT,
+              TRACE_ERR_ARGS(l_errl));
+
+        TRACF("call_ocmb_check_for_ready: Ignoring error until support for "
+              "OCMBFW PNOR partition version 1 is dropped");
+
+        // @TODO: Capture this error when OCMBFW V1 support is deprecated
+        delete l_errl;
+        l_errl = nullptr;
+
+        //captureError(l_errl, l_StepError, ISTEP_COMP_ID);
+
+        perform_odyssey_codeupdate_check = false;
+    }
 
     // We need to do an explicit delay before our first i2c operation
     //  to Explorer to ensure we don't catch it too early in the boot
@@ -295,14 +427,14 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                     FAPI_INVOKE_HWP(l_errl, ody_sppe_config_update, l_fapi_ocmb_target);
                     if(l_errl)
                     {
-                        TRACFCOMP(g_trac_isteps_trace, "call_ocmb_check_for_ready: ody_sppe_config failed on OCMB 0x%x", get_huid(l_ocmb));
+                        TRACF("call_ocmb_check_for_ready: ody_sppe_config failed on OCMB 0x%x", get_huid(l_ocmb));
                         captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
                     }
 
                     FAPI_INVOKE_HWP(l_errl, ody_cbs_start, l_fapi_ocmb_target);
                     if(l_errl)
                     {
-                        TRACFCOMP(g_trac_isteps_trace, "call_ocmb_check_for_ready: ody_cbs_start failed on OCMB 0x%x", get_huid(l_ocmb));
+                        TRACF("call_ocmb_check_for_ready: ody_cbs_start failed on OCMB 0x%x", get_huid(l_ocmb));
                         captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
                     }
 
@@ -316,10 +448,20 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                     FAPI_INVOKE_HWP(l_errl, ody_sppe_check_for_ready, l_fapi_ocmb_target);
                     if(l_errl)
                     {
-                        TRACFCOMP(g_trac_isteps_trace, "call_ocmb_check_for_ready: ody_sppe_check_for_ready failed on OCMB 0x%x", get_huid(l_ocmb));
+                        // TODO JIRA: PFHB-257 Handle Odyssey boot failures
+                        TRACF("call_ocmb_check_for_ready: ody_sppe_check_for_ready failed on OCMB 0x%x", get_huid(l_ocmb));
                         captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
                     }
-                    // TODO JIRA: PFHB-257 Handle Odyssey boot failures
+                    else if (perform_odyssey_codeupdate_check)
+                    {
+                        l_errl = odyssey_code_update(l_ocmb, ocmbfw_pnor_section_header);
+
+                        if (l_errl)
+                        {
+                            handle_odyssey_code_update_error(l_StepError, l_errl, l_ocmb);
+                        }
+                    }
+
                 }
 
             } // End of if/else l_errl
@@ -333,7 +475,7 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
     // Loop thru the list of processors and send Memory config info to SBE
     for (auto &l_procTarget: functionalProcChipList)
     {
-        l_errl = SBEIO::psuSendSbeMemConfig(l_procTarget);
+        l_errl = psuSendSbeMemConfig(l_procTarget);
 
         if (l_errl)
         {
@@ -373,7 +515,9 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
         break;
     }
 
-    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_ocmb_check_for_ready");
+    } while (false);
+
+    TRACF(EXIT_MRK"call_ocmb_check_for_ready");
     return l_StepError.getErrorHandle();
 }
 
