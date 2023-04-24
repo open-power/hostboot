@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,20 +86,88 @@ namespace ERRORLOG { class ErrlEntry; };
         ( (TO_UINT32(TWO_UINT8_TO_UINT16(mostleft_8, left_8)) << 16) | \
           (TO_UINT32(TWO_UINT8_TO_UINT16(right_8, mostright_8))) )
 
+namespace errl_util
+{
+
+/** @brief Generate a right-justified bitmask with the given number of
+ *  bits set to 1.
+ */
+inline uint64_t right_bitmask(const int bits)
+{
+    if (bits == 64)
+    {
+        return 0ull - 1;
+    }
+
+    return ((1ull << bits) - 1);
+}
+
+/** @brief Base case for recursion.
+ */
+inline uint64_t userdata_(const uint64_t accumulator)
+{
+    return accumulator;
+}
+
+struct bits
+{
+    int start = 0, end = 0;
+};
+
+/** @brief Set the given bits in [accumulator] to [value].
+ *  Then do the same thing for the rest of the arguments.
+ */
+template<typename T, typename... Args>
+uint64_t userdata_(const uint64_t accumulator,
+                   const bits range, const T value,
+                   Args&&... rest)
+{
+    return userdata_(accumulator
+                     | ((static_cast<uint64_t>(value)
+                         & right_bitmask(range.end - range.start + 1))
+                        << (64 - range.end - 1)),
+                     std::forward<Args>(rest)...);
+}
+
+/**
+ * @brief Create a 64-bit userdata value for an error log from a list
+ * of bit ranges and values.
+ *
+ * Example:
+ *
+ *   userdata(bits{0 ,  7}, value1,
+ *            bits{8 , 15}, value2,
+ *            bits{16, 31}, value3,
+ *            bits{32, 33}, value4,
+ *            bits{34, 63}, value5)
+ *
+ * In this example, the bit range [0, 7] will be set to the lower 8
+ * bits of value1, the bit range [32, 33] will be set to the lower 2
+ * bits of value4, etc. Any starting and ending positions can be used
+ * (as long as they fit in 64 bits), and any number of ranges/values
+ * can be used, and any types of values can be used, as long as each
+ * type is convertible to uint64_t. The starting and ending bit
+ * positions are inclusive.
+ */
+template<typename... Args>
+uint64_t userdata(Args&&... args)
+{
+    return userdata_(0, std::forward<Args>(args)...);
+}
+
+}
+
 namespace ERRORLOG
 {
 
 
-
 /**
  *    @brief Scope is found in user header section.
-
  */
 enum errlScope_t
 {
     ERRL_SCOPE_PLATFORM            = 0x03, ///< Entire Platform
 };
-
 
 
 /**
