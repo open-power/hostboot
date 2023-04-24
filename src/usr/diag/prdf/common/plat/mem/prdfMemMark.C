@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,18 +70,30 @@ namespace MarkStore
 //          Axone:  (0x08011C18-0x08011C1F)
 //      - Each register maps to master ranks 0-7.
 
-template<TARGETING::TYPE T>
-uint32_t readChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
-                       MemMark & o_mark )
+template<>
+uint32_t readChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+    const MemRank & i_rank, const uint8_t& i_port, MemMark & o_mark)
 {
     #define PRDF_FUNC "[readChipMark<T>] "
+
+    // TODO Odyssey - need adjustments for new registers and new galois mapping
 
     uint32_t o_rc = SUCCESS;
     o_mark = MemMark(); // ensure invalid
 
     // get the register name
     char msName[64];
-    sprintf( msName, "HW_MS%x", i_rank.getMaster() );
+
+    // Check for Odyssey OCMBs
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        sprintf( msName, "HW_MS%x_%x", i_rank.getMaster(), i_port );
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        sprintf( msName, "HW_MS%x", i_rank.getMaster() );
+    }
 
     // get the mark store register
     SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
@@ -113,11 +125,6 @@ uint32_t readChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
 
     #undef PRDF_FUNC
 }
-
-template
-uint32_t readChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                       const MemRank & i_rank,
-                                       MemMark & o_mark );
 
 //------------------------------------------------------------------------------
 
@@ -454,6 +461,7 @@ uint32_t __addRowRepairCallout( TargetHandle_t i_trgt,
 
 template<TARGETING::TYPE T>
 uint32_t __applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
+                             const uint8_t& i_port,
                              STEP_CODE_DATA_STRUCT & io_sc,
                              const MemMark & i_chipMark,
                              const MemMark & i_symMark,
@@ -462,6 +470,7 @@ uint32_t __applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
 template<>
 uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                              const MemRank & i_rank,
+                                             const uint8_t& i_port,
                                              STEP_CODE_DATA_STRUCT & io_sc,
                                              const MemMark & i_chipMark,
                                              const MemMark & i_symMark,
@@ -542,7 +551,7 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                 }
                 // A spare DRAM is available.
                 o_dsdEvent = new DsdEvent<TYPE_OCMB_CHIP>{ i_chip, i_rank,
-                                                           i_chipMark };
+                                                           i_chipMark, i_port };
             }
             else
             {
@@ -597,7 +606,7 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 template<TARGETING::TYPE T>
 uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
-                           STEP_CODE_DATA_STRUCT & io_sc,
+                           const uint8_t& i_port, STEP_CODE_DATA_STRUCT & io_sc,
                            TdEntry * & o_dsdEvent )
 {
     #define PRDF_FUNC "[MarkStore::applyRasPolicies] "
@@ -615,11 +624,11 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
     {
         // Get the chip mark.
         MemMark chipMark;
-        o_rc = readChipMark<T>( i_chip, i_rank, chipMark );
+        o_rc = readChipMark<T>( i_chip, i_rank, i_port, chipMark );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "readChipMark(0x%08x,0x%02x) failed",
-                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "readChipMark(0x%08x,0x%02x,%x) failed",
+                      i_chip->getHuid(), i_rank.getKey(), i_port );
             break;
         }
 
@@ -694,8 +703,8 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
         }
 
         // Apply type specific RAS policies.
-        o_rc = __applyRasPolicies<T>( i_chip, i_rank, io_sc, chipMark, symMark,
-                                      o_dsdEvent, allRepairsUsed );
+        o_rc = __applyRasPolicies<T>( i_chip, i_rank, i_port, io_sc, chipMark,
+                                      symMark, o_dsdEvent, allRepairsUsed );
         if ( SUCCESS != o_rc ) break;
 
     } while (0);
@@ -717,6 +726,7 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
 template
 uint32_t applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                            const MemRank & i_rank,
+                                           const uint8_t& i_port,
                                            STEP_CODE_DATA_STRUCT & io_sc,
                                            TdEntry * & o_dsdEvent );
 
@@ -724,7 +734,8 @@ uint32_t applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 template<TARGETING::TYPE T>
 uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          STEP_CODE_DATA_STRUCT & io_sc, bool & o_dsd )
+                          const uint8_t& i_port, STEP_CODE_DATA_STRUCT & io_sc,
+                          bool & o_dsd )
 {
     #define PRDF_FUNC "[chipMarkCleanup] "
 
@@ -739,11 +750,11 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
         // It is possible this function was called and there is no chip mark. So
         // first check if one exists.
         MemMark chipMark;
-        o_rc = readChipMark<T>( i_chip, i_rank, chipMark );
+        o_rc = readChipMark<T>( i_chip, i_rank, i_port, chipMark );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "readChipMark(0x%08x,0x%02x) failed",
-                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "readChipMark(0x%08x,0x%02x,%x) failed",
+                      i_chip->getHuid(), i_rank.getKey(), i_port );
             break;
         }
 
@@ -765,7 +776,7 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
 
         // Apply all RAS policies.
         TdEntry * dsdEvent = nullptr;
-        o_rc = applyRasPolicies<T>( i_chip, i_rank, io_sc, dsdEvent );
+        o_rc = applyRasPolicies<T>( i_chip, i_rank, i_port, io_sc, dsdEvent );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "applyRasPolicies(0x%08x,0x%02x) failed",
@@ -790,6 +801,7 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
 template
 uint32_t chipMarkCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           const MemRank & i_rank,
+                                          const uint8_t& i_port,
                                           STEP_CODE_DATA_STRUCT & io_sc,
                                           bool & o_dsd );
 

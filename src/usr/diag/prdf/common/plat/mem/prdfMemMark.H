@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,12 +114,13 @@ namespace MarkStore
  * @brief  Reads markstore and returns the chip mark for the given rank.
  * @param  i_chip OCMB chip.
  * @param  i_rank Target rank.
+ * @param  i_port The target memory port.
  * @param  o_mark The returned chip mark.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t readChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
-                       MemMark & o_mark );
+                       const uint8_t& i_port, MemMark & o_mark );
 
 /**
  * @brief  Writes a chip mark into markstore for the given rank.
@@ -202,6 +203,7 @@ bool isSafeToRemoveChipMark( ExtensibleChip * i_chip, const MemRank & i_rank );
  *
  * @param  i_chip     OCMB chip.
  * @param  i_rank     Target rank.
+ * @param  i_port     Target port.
  * @param  io_sc      The step code data struct.
  * @param  o_dsdEvent A new DsdEvent if DRAM sparing is available. Otherwise,
  *                    nullptr. Note that this is not used in all cases so the
@@ -211,7 +213,7 @@ bool isSafeToRemoveChipMark( ExtensibleChip * i_chip, const MemRank & i_rank );
  */
 template<TARGETING::TYPE T>
 uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
-                           STEP_CODE_DATA_STRUCT & io_sc,
+                           const uint8_t& i_port, STEP_CODE_DATA_STRUCT & io_sc,
                            TdEntry * & o_dsdEvent );
 
 /**
@@ -226,13 +228,15 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
  *
  * @param  i_chip OCMB chip.
  * @param  i_rank Target rank.
+ * @param  i_port Target port.
  * @param  io_sc  The step code data struct.
  * @param  o_dsd  Flag to indicate a dram spare deploy procedure was queued
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          STEP_CODE_DATA_STRUCT & io_sc, bool & o_dsd );
+                          const uint8_t& i_port, STEP_CODE_DATA_STRUCT & io_sc,
+                          bool & o_dsd );
 
 #endif // Not supported on FSP.
 

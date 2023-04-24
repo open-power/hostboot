@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -156,7 +156,8 @@ uint32_t RrdEvent<T>::verifyRowRepair( STEP_CODE_DATA_STRUCT & io_sc,
 
             // Take actions to cleanup the chip mark
             bool junk = false;
-            o_rc = MarkStore::chipMarkCleanup<T>(iv_chip, iv_rank, io_sc, junk);
+            o_rc = MarkStore::chipMarkCleanup<T>(iv_chip, iv_rank, iv_port,
+                                                 io_sc, junk);
             if ( SUCCESS != o_rc )
             {
                 PRDF_TRAC( PRDF_FUNC "chipMarkCleanup(0x%08x, 0x%02x) failed",

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,7 +108,8 @@ class TdEntry
     {
         return ( this->iv_tdType == i_e.iv_tdType &&
                  this->getKey()  == i_e.getKey()  &&
-                 this->iv_chip   == i_e.iv_chip );
+                 this->iv_chip   == i_e.iv_chip &&
+                 this->iv_port   == i_e.iv_port );
     }
 
     /**
@@ -132,16 +133,21 @@ class TdEntry
     /** @return The event phase */
     Phase getPhase() const { return iv_phase; }
 
+    /** @return The port in which this event occurred */
+    uint8_t getPort() const { return iv_port; }
+
   protected: // functions
 
     /**
      * @brief Constructor
      * @param i_tdType  See TdType enum
      * @param i_chip    OCMB chip
+     * @param i_port    Target port
      * @param i_rank    Target rank
      */
-    TdEntry( TdType i_tdType, ExtensibleChip * i_chip, MemRank i_rank ) :
-        iv_tdType(i_tdType), iv_chip(i_chip), iv_rank(i_rank)
+    TdEntry( TdType i_tdType, ExtensibleChip * i_chip, uint8_t i_port,
+             MemRank i_rank) :
+        iv_tdType(i_tdType), iv_chip(i_chip), iv_port(i_port), iv_rank(i_rank)
     {}
 
   protected: // instance variables
@@ -149,6 +155,7 @@ class TdEntry
     const TdType iv_tdType;         ///< The event type (see enum TdType).
     Phase iv_phase = TD_PHASE_0;    ///< The event phase (see enum Phase).
     ExtensibleChip * const iv_chip; ///< The chip in which this event occurred.
+    uint8_t iv_port;                ///< The port in which this event occurred.
 
     // These are not used for comparisons, but used by all procedures and also
     // used for displaying FFDC in the TD controller.

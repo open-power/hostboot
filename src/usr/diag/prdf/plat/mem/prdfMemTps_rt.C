@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -473,6 +473,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             break;
         }
 
+        // TODO Odyssey - need to know the port for the MemMarks
         // Get the symbol mark.
         MemMark symMark;
         o_rc = MarkStore::readSymbolMark<T>( iv_chip, iv_rank, symMark );
@@ -485,11 +486,11 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
         // Get the chip mark.
         MemMark chipMark;
-        o_rc = MarkStore::readChipMark<T>( iv_chip, iv_rank, chipMark );
+        o_rc = MarkStore::readChipMark<T>(iv_chip, iv_rank, iv_port, chipMark);
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x, 0x%02x) "
-                      "failed", iv_chip->getHuid(), iv_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x, 0x%02x, %x) "
+                      "failed", iv_chip->getHuid(), iv_rank.getKey(), iv_port );
             break;
         }
 
@@ -753,7 +754,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
                     // Trigger VCM to see if it's contained to a single row
                     TdEntry * vcm = new VcmEvent<T>{ iv_chip, iv_rank,
-                                                     newChipMark };
+                                                     newChipMark, iv_port };
                     MemDbUtils::pushToQueue<T>( iv_chip, vcm );
                     vcmQueued = true;
                 }
@@ -859,7 +860,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
                     // Trigger VCM to see if it's contained to a single row
                     TdEntry * vcm = new VcmEvent<T>{ iv_chip, iv_rank,
-                                                     newChipMark };
+                                                     newChipMark, iv_port };
                     MemDbUtils::pushToQueue<T>( iv_chip, vcm );
                     vcmQueued = true;
                 }
@@ -1004,7 +1005,8 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         if ( !vcmQueued )
         {
             bool junk = false;
-            o_rc = MarkStore::chipMarkCleanup<T>(iv_chip, iv_rank, io_sc, junk);
+            o_rc = MarkStore::chipMarkCleanup<T>(iv_chip, iv_rank, iv_port,
+                                                 io_sc, junk);
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "MarkStore::chipMarkCleanup(0x%08x,0x%02x) "

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -181,9 +181,10 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
         // Iterate all ranks to get DRAM repair data
         for ( auto & rank : masterRanks )
         {
+            // TODO Odyssey - collect both port0 and port1
             // Get chip/symbol marks
             MemMark cm, sm;
-            rc = MarkStore::readChipMark<T>( chip, rank, cm );
+            rc = MarkStore::readChipMark<T>( chip, rank, 0, cm );
             if ( SUCCESS != rc )
             {
                 PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,0x%02x) "

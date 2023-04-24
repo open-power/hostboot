@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,7 +101,8 @@ int32_t RcdParityError( ExtensibleChip * i_chip,
 
             for ( const auto & r : list )
             {
-                TdEntry * entry = new TpsEvent<TYPE_OCMB_CHIP>( i_chip, r );
+                // TODO Odyssey - need port update here
+                TdEntry * entry = new TpsEvent<TYPE_OCMB_CHIP>( i_chip, r, 0 );
                 MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( i_chip, entry );
                 uint32_t rc = MemDbUtils::handleTdEvent<TYPE_OCMB_CHIP>(i_chip,
                                                                         io_sc);

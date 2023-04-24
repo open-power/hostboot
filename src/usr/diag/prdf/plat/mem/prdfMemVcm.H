@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,10 +54,11 @@ class VcmEvent : public TdEntry
      * @param i_chip OCMB.
      * @param i_rank Rank reporting chip mark.
      * @param i_mark Chip mark placed by hardware.
+     * @param i_port Target port.
      */
     VcmEvent<T>( ExtensibleChip * i_chip, const MemRank & i_rank,
-                 const MemMark & i_mark ) :
-        TdEntry(VCM_EVENT, i_chip, i_rank), iv_mark(i_mark),
+                 const MemMark & i_mark, const uint8_t& i_port ) :
+        TdEntry(VCM_EVENT, i_chip, i_port, i_rank), iv_mark(i_mark),
         iv_rowRepairEnabled(PlatServices::isRowRepairEnabled<T>(i_chip,i_rank))
     {
         PRDF_ASSERT( nullptr != i_chip );
@@ -299,7 +300,8 @@ class VcmEvent : public TdEntry
         uint32_t o_rc = SUCCESS;
 
         bool junk = false;
-        o_rc = MarkStore::chipMarkCleanup<T>( iv_chip, iv_rank, io_sc, junk );
+        o_rc = MarkStore::chipMarkCleanup<T>( iv_chip, iv_rank, iv_port, io_sc,
+                                              junk );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,42 +49,6 @@ namespace MemEcc
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-uint32_t __handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
-                        UE_TABLE::Type i_type, STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[MemEcc::__handleMemUe] "
-
-    uint32_t o_rc = SUCCESS;
-
-    MemRank rank = i_addr.getRank();
-
-    // Add the rank to the callout list.
-    MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
-    io_sc.service_data->SetCallout( mm );
-
-    // All memory UEs should be customer viewable.
-    io_sc.service_data->setServiceCall();
-
-    // Add entry to UE table.
-    MemDbUtils::addUeTableEntry<T>( i_chip, i_type, i_addr );
-
-    #ifdef __HOSTBOOT_RUNTIME
-
-    // Dynamically deallocate the rank.
-    if ( SUCCESS != MemDealloc::rank<T>( i_chip, rank ) )
-    {
-        PRDF_ERR( PRDF_FUNC "MemDealloc::rank<T>(0x%08x,m%ds%d) failed",
-                  i_chip->getHuid(), rank.getMaster(), rank.getSlave() );
-    }
-
-    #endif
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 template<>
 uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                       const MemAddr & i_addr,
@@ -100,16 +64,28 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     do
     {
-        // Handle the memory UE.
-        o_rc = __handleMemUe<TYPE_OCMB_CHIP>( i_chip, i_addr, i_type, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "__handleMemUe(0x%08x,%d) failed",
-                      i_chip->getHuid(), i_type );
-            break;
-        }
+        MemRank rank = i_addr.getRank();
+
+        // Add the rank to the callout list.
+        MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
+        io_sc.service_data->SetCallout( mm );
+
+        // All memory UEs should be customer viewable.
+        io_sc.service_data->setServiceCall();
+
+        // Add entry to UE table.
+        MemDbUtils::addUeTableEntry<TYPE_OCMB_CHIP>( i_chip, i_type, i_addr );
 
         #ifdef __HOSTBOOT_RUNTIME
+
+        // Dynamically deallocate the rank.
+        if ( SUCCESS != MemDealloc::rank<TYPE_OCMB_CHIP>( i_chip, rank ) )
+        {
+            PRDF_ERR( PRDF_FUNC "MemDealloc::rank<TYPE_OCMB_CHIP>(0x%08x,m%ds%d"
+                      ") failed", i_chip->getHuid(), rank.getMaster(),
+                      rank.getSlave() );
+        }
+
         // Increment the UE counter and store the rank we're on, resetting
         // the UE and CE counts if we have stopped on a new rank.
         OcmbDataBundle * ocmbdb = getOcmbDataBundle(i_chip);
@@ -392,16 +368,17 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemAddr & i_addr,
     uint32_t o_rc = SUCCESS;
 
     MemRank rank = i_addr.getRank();
+    uint8_t port = i_addr.getPort();
 
     do
     {
         // Read the chip mark from markstore.
         MemMark chipMark;
-        o_rc = MarkStore::readChipMark<T>( i_chip, rank, chipMark );
+        o_rc = MarkStore::readChipMark<T>( i_chip, rank, port, chipMark );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,0x%02x) failed",
-                      i_chip->getHuid(), rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,0x%02x,%x) failed",
+                      i_chip->getHuid(), rank.getKey(), port );
             break;
         }
 
@@ -425,7 +402,7 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemAddr & i_addr,
         {
         #endif
 
-        TdEntry * entry = new VcmEvent<T>( i_chip, rank, chipMark );
+        TdEntry * entry = new VcmEvent<T>( i_chip, rank, chipMark, port );
         MemDbUtils::pushToQueue<T>( i_chip, entry );
 
         #ifndef __HOSTBOOT_RUNTIME
@@ -713,7 +690,8 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
             // will still try to start TPS just in case MNFG disables the
             // termination policy.
 
-            MemDbUtils::pushToQueue<T>( i_chip, new TpsEvent<T>(i_chip, rank) );
+            MemDbUtils::pushToQueue<T>( i_chip, new TpsEvent<T>(i_chip, rank,
+                addr.getPort()) );
             o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc );
             if ( SUCCESS != o_rc )
             {
@@ -784,7 +762,8 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
         // unlikely the procedure will result in a repair because of the UE.
         // However, we want to run TPS once just to see how bad the rank is.
         MemRank rank = addr.getRank();
-        MemDbUtils::pushToQueue<T>( i_chip, new TpsEvent<T>(i_chip, rank) );
+        MemDbUtils::pushToQueue<T>( i_chip, new TpsEvent<T>(i_chip, rank,
+            addr.getPort()) );
         o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc );
         if ( SUCCESS != o_rc )
         {
@@ -1100,8 +1079,9 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                 }
 
                 bool dsd = false;
+                // TODO Odyssey - need port
                 o_rc = MarkStore::chipMarkCleanup<TYPE_OCMB_CHIP>( i_chip, rank,
-                                                                   io_sc, dsd );
+                    0, io_sc, dsd );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",

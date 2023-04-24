@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -213,8 +213,9 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
 
             MemRank rank ( r );
 
+            // TODO Odyssey - need port to get the MemMarks, check both ports
             MemMark cm;
-            if ( SUCCESS != MarkStore::readChipMark<T>( chip, rank, cm ) )
+            if ( SUCCESS != MarkStore::readChipMark<T>( chip, rank, 0, cm ) )
             {
                 PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,0x%02x) "
                           "failed", chip->getHuid(), rank.getKey() );

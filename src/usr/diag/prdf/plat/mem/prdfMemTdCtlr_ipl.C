@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -215,7 +215,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintHARD_CTE );
 
             // Add a TPS procedure to the queue.
-            TdEntry * e = new TpsEvent<T>{ i_chip, rank };
+            TdEntry * e = new TpsEvent<T>{ i_chip, rank, i_addr.getPort() };
             MemDbUtils::pushToQueue<T>( i_chip, e );
         }
         else // Nothing found.

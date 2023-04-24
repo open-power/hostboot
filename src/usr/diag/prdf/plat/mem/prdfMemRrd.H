@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,12 +48,13 @@ class RrdEvent : public TdEntry
     /**
      * @brief Constructor
      * @param i_chip OCMB.
-     * @param i_rank Rank reporting chip mark.
+     * @param i_rank Rank reporting the chip mark.
      * @param i_mark Chip mark placed by hardware.
+     * @param i_port The port reporting the chip mark.
      */
     RrdEvent<T>( ExtensibleChip * i_chip, const MemRank & i_rank,
-                 const MemMark & i_mark ) :
-        TdEntry(RRD_EVENT, i_chip, i_rank), iv_mark(i_mark)
+                 const MemMark & i_mark, const uint8_t& i_port ) :
+        TdEntry(RRD_EVENT, i_chip, i_port, i_rank), iv_mark(i_mark)
     {
         PRDF_ASSERT( nullptr != i_chip );
         PRDF_ASSERT( T == i_chip->getType() );

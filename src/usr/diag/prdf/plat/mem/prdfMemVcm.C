@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -424,7 +424,8 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::rowRepairEndRank(
         }
 
         // Add a row repair deploy event to the targeted diagnostics queue
-        TdEntry * rrd = new RrdEvent<TYPE_OCMB_CHIP>{iv_chip, iv_rank, iv_mark};
+        TdEntry * rrd = new RrdEvent<TYPE_OCMB_CHIP>{iv_chip, iv_rank, iv_mark,
+                                                     iv_port};
         MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, rrd );
 
         // Signature: "VCM: verified: common row fail"

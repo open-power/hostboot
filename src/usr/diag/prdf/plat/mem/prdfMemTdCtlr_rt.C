@@ -157,7 +157,7 @@ uint32_t __handleNceEte( ExtensibleChip * i_chip,
             // Add a TPS procedure to the queue, if needed.
             if ( doTps )
             {
-                TdEntry * e = new TpsEvent<T>{ i_chip, rank };
+                TdEntry * e = new TpsEvent<T>{ i_chip, rank, i_addr.getPort() };
                 MemDbUtils::pushToQueue<T>( i_chip, e );
             }
         }
@@ -369,7 +369,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
             // Add a TPS request to the TD queue for additional analysis. It is
             // unlikely the procedure will result in a repair because of the UE.
             // However, we want to run TPS once just to see how bad the rank is.
-            TdEntry * e = new TpsEvent<T>{ i_chip, rank };
+            TdEntry * e = new TpsEvent<T>{ i_chip, rank, i_addr.getPort() };
             MemDbUtils::pushToQueue<T>( i_chip, e );
 
             // Because of the UE, any further TPS requests will likely have no
@@ -693,8 +693,9 @@ uint32_t __findChipMarks( TdRankList<TC> & i_rankList )
         MemRank          rank = entry.getRank();
 
         // Call readChipMark to get MemMark.
+        // TODO Odyssey - this needs to check both ports?
         MemMark chipMark;
-        o_rc = MarkStore::readChipMark<TP>( chip, rank, chipMark );
+        o_rc = MarkStore::readChipMark<TP>( chip, rank, 0, chipMark );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "readChipMark(0x%08x,0x%02x) failed",
@@ -728,7 +729,8 @@ uint32_t __findChipMarks( TdRankList<TC> & i_rankList )
         if ( !cmVerified )
         {
             // Chip mark is not present in VPD. Add it to queue.
-            TdEntry * e = new VcmEvent<TP>{ chip, rank, chipMark };
+            // TODO Odyssey - this needs to check the relevant port
+            TdEntry * e = new VcmEvent<TP>{ chip, rank, chipMark, 0 };
             MemDbUtils::pushToQueue<TP>( chip, e );
 
             // We will want to clear the MPE attention for the unverified chip
@@ -737,6 +739,7 @@ uint32_t __findChipMarks( TdRankList<TC> & i_rankList )
             // initialize() will be called again and we can redetect the
             // unverified chip marks.
             SCAN_COMM_REGISTER_CLASS * reg = __getEccFirAnd<TP>( chip );
+            // TODO Odyssey - adjust bits positions/FIR for odyssey
             reg->setAllBits();
             reg->ClearBit(  0 + rank.getMaster() ); // fetch
             reg->ClearBit( 20 + rank.getMaster() ); // scrub
@@ -857,9 +860,10 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
             MemRank rank = entry.getRank();
 
             // Get the chip mark
+            // TODO Odyssey - check both ports?
             MemMark chipMark;
             o_rc = MarkStore::readChipMark<TYPE_OCMB_CHIP>( ocmbChip, rank,
-                                                            chipMark );
+                                                            0, chipMark );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_OCMB_CHIP>(0x%08x,%d) "

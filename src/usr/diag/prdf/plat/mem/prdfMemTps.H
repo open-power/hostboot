@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,10 +52,11 @@ class TpsEvent : public TdEntry
      * @brief Constructor
      * @param i_chip OCMB.
      * @param i_rank Target rank.
-     * @param i_ban  True to ban all subsequent requests for TPS on this rank.
+     * @param i_port Target port.
      */
-    TpsEvent<T>( ExtensibleChip * i_chip, MemRank i_rank ) :
-        TdEntry(TPS_EVENT, i_chip, i_rank)
+    TpsEvent<T>( ExtensibleChip * i_chip, MemRank i_rank,
+                 const uint8_t& i_port ) :
+        TdEntry(TPS_EVENT, i_chip, i_port, i_rank)
     {
         PRDF_ASSERT( nullptr != i_chip );
         PRDF_ASSERT( T == i_chip->getType() );

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,8 @@ MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
                                  uint8_t i_galois, uint8_t i_mask )
 {
     #define PRDF_FUNC "[MemSymbol::fromGalois] "
+
+    // TODO Odyssey - need adjustments for x8 dram galois mapping
 
     // Get symbol from Galois field.
     uint8_t symbol = SYMBOLS_PER_RANK;
