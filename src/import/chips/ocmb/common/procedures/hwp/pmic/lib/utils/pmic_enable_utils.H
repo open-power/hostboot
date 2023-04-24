@@ -560,7 +560,7 @@ fapi2::ReturnCode pre_enable_steps(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>&
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target - OCMB parent target of pmic
-/// @param[in] i_id - PMIC0 or PMIC1
+/// @param[in] i_id - PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 fapi2::ReturnCode bias_with_spd_phase_comb(
@@ -573,7 +573,7 @@ fapi2::ReturnCode bias_with_spd_phase_comb(
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id PMIC0 or PMIC1
+/// @param[in] i_id PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 fapi2::ReturnCode bias_with_spd_volt_ranges(
@@ -586,7 +586,7 @@ fapi2::ReturnCode bias_with_spd_volt_ranges(
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id PMIC0 or PMIC1
+/// @param[in] i_id PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 fapi2::ReturnCode bias_with_spd_startup_seq(
@@ -599,11 +599,13 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_relative_pmic_id relative PMIC position (0/1 if DDR4, 0/1/2/3 if DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode set_current_limiter_warnings(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_relative_pmic_id);
 
 ///
 /// @brief Set the startup seq register with the given parameters
@@ -628,7 +630,7 @@ fapi2::ReturnCode set_startup_seq_register(
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id relative ID of PMIC (0/1)
+/// @param[in] i_id relative ID of PMIC (0/1) (or PMIC2 or PMIC3 for DDR5)
 /// @param[in] i_rail_index SWA/SWB/SWC/SWD rails of pmic
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
@@ -643,7 +645,7 @@ fapi2::ReturnCode bias_with_spd_voltages_TI_rev_less_then_23(
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id relative ID of PMIC (0/1)
+/// @param[in] i_id relative ID of PMIC (0/1) (or PMIC2 or PMIC3 for DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 template <mss::pmic::vendor V>
@@ -669,12 +671,14 @@ fapi2::ReturnCode order_pmics_by_sequence(
 /// @tparam V mss::pmic::vendor (IDT/TI)
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_relative_pmic_id relative PMIC position (0/1 if DDR4, 0/1/2/3 if DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 template <mss::pmic::vendor V>
 fapi2::ReturnCode bias_with_spd_settings(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_relative_pmic_id);
 
 //------------------- ENABLE FUNCTIONS-----------------//
 

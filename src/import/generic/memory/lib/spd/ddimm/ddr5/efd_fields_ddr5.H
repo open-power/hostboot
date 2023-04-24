@@ -1457,84 +1457,116 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             PMIC3_SWD_OFF_DIRECTION_LEN = 1,
 
             // Byte 494: PMIC0 SWA Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC0_SWA_CURRENT_WARNING_BYTE = 494,
             PMIC0_SWA_CURRENT_WARNING_START = 0,
-            PMIC0_SWA_CURRENT_WARNING_LEN = 6,
+            PMIC0_SWA_CURRENT_WARNING_LEN = 8,
 
             // Byte 495: PMIC0 SWB Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC0_SWB_CURRENT_WARNING_BYTE = 495,
             PMIC0_SWB_CURRENT_WARNING_START = 0,
-            PMIC0_SWB_CURRENT_WARNING_LEN = 6,
+            PMIC0_SWB_CURRENT_WARNING_LEN = 8,
 
             // Byte 496: PMIC0 SWC Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC0_SWC_CURRENT_WARNING_BYTE = 496,
             PMIC0_SWC_CURRENT_WARNING_START = 0,
-            PMIC0_SWC_CURRENT_WARNING_LEN = 6,
+            PMIC0_SWC_CURRENT_WARNING_LEN = 8,
 
             // Byte 497: PMIC0 SWD Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC0_SWD_CURRENT_WARNING_BYTE = 497,
             PMIC0_SWD_CURRENT_WARNING_START = 0,
-            PMIC0_SWD_CURRENT_WARNING_LEN = 6,
+            PMIC0_SWD_CURRENT_WARNING_LEN = 8,
 
             // Byte 498: PMIC1 SWA Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC1_SWA_CURRENT_WARNING_BYTE = 498,
             PMIC1_SWA_CURRENT_WARNING_START = 0,
-            PMIC1_SWA_CURRENT_WARNING_LEN = 6,
+            PMIC1_SWA_CURRENT_WARNING_LEN = 8,
 
             // Byte 499: PMIC1 SWB Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC1_SWB_CURRENT_WARNING_BYTE = 499,
             PMIC1_SWB_CURRENT_WARNING_START = 0,
-            PMIC1_SWB_CURRENT_WARNING_LEN = 6,
+            PMIC1_SWB_CURRENT_WARNING_LEN = 8,
 
             // Byte 500: PMIC1 SWC Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC1_SWC_CURRENT_WARNING_BYTE = 500,
             PMIC1_SWC_CURRENT_WARNING_START = 0,
-            PMIC1_SWC_CURRENT_WARNING_LEN = 6,
+            PMIC1_SWC_CURRENT_WARNING_LEN = 8,
 
             // Byte 501: PMIC1 SWD Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC1_SWD_CURRENT_WARNING_BYTE = 501,
             PMIC1_SWD_CURRENT_WARNING_START = 0,
-            PMIC1_SWD_CURRENT_WARNING_LEN = 6,
+            PMIC1_SWD_CURRENT_WARNING_LEN = 8,
 
             // Byte 502: PMIC2 SWA Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC2_SWA_CURRENT_WARNING_BYTE = 502,
             PMIC2_SWA_CURRENT_WARNING_START = 0,
-            PMIC2_SWA_CURRENT_WARNING_LEN = 6,
+            PMIC2_SWA_CURRENT_WARNING_LEN = 8,
 
             // Byte 503: PMIC2 SWB Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC2_SWB_CURRENT_WARNING_BYTE = 503,
             PMIC2_SWB_CURRENT_WARNING_START = 0,
-            PMIC2_SWB_CURRENT_WARNING_LEN = 6,
+            PMIC2_SWB_CURRENT_WARNING_LEN = 8,
 
             // Byte 504: PMIC2 SWC Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC2_SWC_CURRENT_WARNING_BYTE = 504,
             PMIC2_SWC_CURRENT_WARNING_START = 0,
-            PMIC2_SWC_CURRENT_WARNING_LEN = 6,
+            PMIC2_SWC_CURRENT_WARNING_LEN = 8,
 
             // Byte 505: PMIC2 SWD Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC2_SWD_CURRENT_WARNING_BYTE = 505,
             PMIC2_SWD_CURRENT_WARNING_START = 0,
-            PMIC2_SWD_CURRENT_WARNING_LEN = 6,
+            PMIC2_SWD_CURRENT_WARNING_LEN = 8,
 
             // Byte 506: PMIC3 SWA Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC3_SWA_CURRENT_WARNING_BYTE = 506,
             PMIC3_SWA_CURRENT_WARNING_START = 0,
-            PMIC3_SWA_CURRENT_WARNING_LEN = 6,
+            PMIC3_SWA_CURRENT_WARNING_LEN = 8,
 
             // Byte 507: PMIC3 SWB Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC3_SWB_CURRENT_WARNING_BYTE = 507,
             PMIC3_SWB_CURRENT_WARNING_START = 0,
-            PMIC3_SWB_CURRENT_WARNING_LEN = 6,
+            PMIC3_SWB_CURRENT_WARNING_LEN = 8,
 
             // Byte 508: PMIC3 SWC Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC3_SWC_CURRENT_WARNING_BYTE = 508,
             PMIC3_SWC_CURRENT_WARNING_START = 0,
-            PMIC3_SWC_CURRENT_WARNING_LEN = 6,
+            PMIC3_SWC_CURRENT_WARNING_LEN = 8,
 
             // Byte 509: PMIC3 SWD Recommended Current Consumption Warning and Threshold
+            // Note: These are pulled in including the two reserved bits [1:0], since this is
+            // exactly how it will be written to the PMIC registers
             PMIC3_SWD_CURRENT_WARNING_BYTE = 509,
             PMIC3_SWD_CURRENT_WARNING_START = 0,
-            PMIC3_SWD_CURRENT_WARNING_LEN = 6,
+            PMIC3_SWD_CURRENT_WARNING_LEN = 8,
 
         };
 

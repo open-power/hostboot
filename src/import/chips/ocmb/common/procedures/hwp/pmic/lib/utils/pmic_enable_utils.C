@@ -503,7 +503,7 @@ fapi_try_exit:
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target - OCMB parent target of pmic
-/// @param[in] i_id - PMIC0 or PMIC1
+/// @param[in] i_id - PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 fapi2::ReturnCode bias_with_spd_phase_comb(
@@ -533,7 +533,7 @@ fapi_try_exit:
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id PMIC0 or PMIC1
+/// @param[in] i_id PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 fapi2::ReturnCode bias_with_spd_volt_ranges(
@@ -575,11 +575,63 @@ fapi_try_exit:
 }
 
 ///
+/// @brief bias PMIC with SPD settings for coarse voltage offset
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode bias_with_spd_coarse_volt_offset(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id)
+{
+    using FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
+    using REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+
+    uint8_t l_swa_coarse_offset = 0;
+    uint8_t l_swb_coarse_offset = 0;
+    uint8_t l_swc_coarse_offset = 0;
+    uint8_t l_swd_coarse_offset = 0;
+
+    fapi2::buffer<uint8_t> l_volt_coarse_offset_buffer;
+
+    FAPI_TRY(mss::attr::get_swa_voltage_coarse_offset[i_id](i_ocmb_target, l_swa_coarse_offset));
+    FAPI_TRY(mss::attr::get_swb_voltage_coarse_offset[i_id](i_ocmb_target, l_swb_coarse_offset));
+    FAPI_TRY(mss::attr::get_swc_voltage_coarse_offset[i_id](i_ocmb_target, l_swc_coarse_offset));
+    FAPI_TRY(mss::attr::get_swd_voltage_coarse_offset[i_id](i_ocmb_target, l_swd_coarse_offset));
+
+    // Read in what the register has, as to not overwrite any default values
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R78_VID_OFFSET_COARSE,
+                                      l_volt_coarse_offset_buffer));
+
+    // Set the buffer bits appropriately
+    // Note that the SPD and attributes are numbered right-to-left, so we access the register without reversing it
+    l_volt_coarse_offset_buffer.insertFromRight<FIELDS::R78_SWA_VID_OFFSET_COARSE_START_NON_REVERSED,
+                                                FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_swa_coarse_offset);
+    l_volt_coarse_offset_buffer.insertFromRight<FIELDS::R78_SWB_VID_OFFSET_COARSE_START_NON_REVERSED,
+                                                FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_swb_coarse_offset);
+    l_volt_coarse_offset_buffer.insertFromRight<FIELDS::R78_SWC_VID_OFFSET_COARSE_START_NON_REVERSED,
+                                                FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_swc_coarse_offset);
+    l_volt_coarse_offset_buffer.insertFromRight<FIELDS::R78_SWD_VID_OFFSET_COARSE_START_NON_REVERSED,
+                                                FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_swd_coarse_offset);
+
+    // Write back to PMIC
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R78_VID_OFFSET_COARSE,
+                                       l_volt_coarse_offset_buffer));
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
 /// @brief bias PMIC with SPD settings for startup sequence
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id PMIC0 or PMIC1
+/// @param[in] i_id PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
 fapi2::ReturnCode bias_with_spd_startup_seq(
@@ -680,7 +732,7 @@ fapi_try_exit:
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id relative ID of PMIC (0/1)
+/// @param[in] i_id relative ID of PMIC (0/1) (or PMIC2 or PMIC3 for DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 template <>
@@ -716,7 +768,7 @@ fapi_try_exit:
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id relative ID of PMIC (0/1)
+/// @param[in] i_id relative ID of PMIC (0/1) (or PMIC2 or PMIC3 for DDR5)
 /// @param[in] i_rail_index SWA/SWB/SWC/SWD rails of pmic
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
@@ -794,7 +846,7 @@ fapi_try_exit:
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id relative ID of PMIC (0/1)
+/// @param[in] i_id relative ID of PMIC (0/1) (or PMIC2 or PMIC3 for DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 template <>
@@ -819,8 +871,11 @@ fapi2::ReturnCode bias_with_spd_voltages<mss::pmic::vendor::TI>(
         }
         else
         {
-            // Voltage ranges
+            // Voltage ranges in R2B
             FAPI_TRY(mss::pmic::bias_with_spd_volt_ranges(i_pmic_target, i_ocmb_target, i_id));
+
+            // Voltage Coarse Offset in R78
+            FAPI_TRY(mss::pmic::bias_with_spd_coarse_volt_offset(i_pmic_target, i_ocmb_target, i_id));
 
             // Voltage settings
             uint8_t l_volt_bitmap;
@@ -845,35 +900,34 @@ fapi_try_exit:
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_relative_pmic_id relative PMIC position (0/1 if DDR4, 0/1/2/3 if DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 template<>
 fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::IDT>(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_relative_pmic_id)
 {
     // Unlock Vendor Region
     FAPI_TRY(mss::pmic::unlock_vendor_region(i_pmic_target),
              "Error unlocking vendor region on PMIC %s", mss::c_str(i_pmic_target));
 
     {
-        // PMIC position/ID of the OCMB target. There could be 4 total, but we care about whether its PMIC0(2) or PMIC1(3)
-        const mss::pmic::id l_relative_pmic_id = get_relative_pmic_id(i_pmic_target);
-
         // Phase combination
-        FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_ocmb_target, i_relative_pmic_id));
 
         // Voltage ranges
-        FAPI_TRY(mss::pmic::bias_with_spd_volt_ranges(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_volt_ranges(i_pmic_target, i_ocmb_target, i_relative_pmic_id));
 
         // Voltages
-        FAPI_TRY(mss::pmic::bias_with_spd_voltages<mss::pmic::IDT>(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_voltages<mss::pmic::IDT>(i_pmic_target, i_ocmb_target, i_relative_pmic_id));
 
         // Startup sequence
-        FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_ocmb_target, i_relative_pmic_id));
 
         // Current consumption
-        FAPI_TRY(mss::pmic::set_current_limiter_warnings(i_pmic_target, i_ocmb_target));
+        FAPI_TRY(mss::pmic::set_current_limiter_warnings(i_pmic_target, i_ocmb_target, i_relative_pmic_id));
     }
 
 fapi_try_exit:
@@ -886,34 +940,33 @@ fapi_try_exit:
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_relative_pmic_id relative PMIC position (0/1 if DDR4, 0/1/2/3 if DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 template<>
 fapi2::ReturnCode bias_with_spd_settings<mss::pmic::vendor::TI>(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_relative_pmic_id)
 {
     // Unlock Vendor Region
     FAPI_TRY(mss::pmic::unlock_vendor_region(i_pmic_target),
              "Error unlocking vendor region on PMIC %s", mss::c_str(i_pmic_target));
     {
-        // PMIC position/ID under OCMB target
-        const mss::pmic::id l_relative_pmic_id = get_relative_pmic_id(i_pmic_target);
-
         // Phase combination
-        FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_phase_comb(i_pmic_target, i_ocmb_target, i_relative_pmic_id));
 
         // Voltages
         // For TI pmic revision < 0x23, the PMIC only has range 0 for SWA-C.
         // We need to convert anything SPD that says range 1 --> range 0
         // For revision >= 0x23, use the SPD data
-        FAPI_TRY(mss::pmic::bias_with_spd_voltages<mss::pmic::TI>(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_voltages<mss::pmic::TI>(i_pmic_target, i_ocmb_target, i_relative_pmic_id));
 
         // Startup sequence
-        FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_ocmb_target, l_relative_pmic_id));
+        FAPI_TRY(mss::pmic::bias_with_spd_startup_seq(i_pmic_target, i_ocmb_target, i_relative_pmic_id));
 
         // Current consumption
-        FAPI_TRY(mss::pmic::set_current_limiter_warnings(i_pmic_target, i_ocmb_target));
+        FAPI_TRY(mss::pmic::set_current_limiter_warnings(i_pmic_target, i_ocmb_target, i_relative_pmic_id));
     }
 
 fapi_try_exit:
@@ -926,14 +979,15 @@ fapi_try_exit:
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_relative_pmic_id relative PMIC position (0/1 if DDR4, 0/1/2/3 if DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode set_current_limiter_warnings(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_relative_pmic_id)
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
-    const mss::pmic::id l_id = get_relative_pmic_id(i_pmic_target);
 
     // Quick handy array for the current limiter warning threshold registers
     static const std::vector<uint8_t> CURRENT_LIMITER_REGS =
@@ -947,7 +1001,7 @@ fapi2::ReturnCode set_current_limiter_warnings(
     for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
     {
         uint8_t l_warning_threshold = 0;
-        FAPI_TRY(mss::attr::get_current_warning[l_rail_index][l_id](i_ocmb_target, l_warning_threshold));
+        FAPI_TRY(mss::attr::get_current_warning[l_rail_index][i_relative_pmic_id](i_ocmb_target, l_warning_threshold));
 
         // If we have 0, then we either have an old SPD (< 0.4), or some bad values in there.
         // In which case, we will leave the register alone at its default (3000mA warning)
@@ -1135,6 +1189,9 @@ fapi2::ReturnCode enable_spd(
 
     FAPI_INF("Setting PMIC %s settings from SPD", mss::c_str(i_pmic_target));
 
+    // PMIC position/ID under OCMB target
+    const mss::pmic::id l_relative_pmic_id = get_relative_pmic_id(i_pmic_target);
+
     // Make sure it is TI or IDT
     FAPI_ASSERT((i_vendor_id == mss::pmic::vendor::IDT ||
                  i_vendor_id == mss::pmic::vendor::TI),
@@ -1153,13 +1210,13 @@ fapi2::ReturnCode enable_spd(
     if (i_vendor_id == mss::pmic::vendor::IDT)
     {
         FAPI_TRY(mss::pmic::check::validate_and_return_pmic_revisions(i_ocmb_target, i_pmic_target, i_vendor_id, l_rev_reg));
-        FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::IDT>(i_pmic_target, i_ocmb_target),
+        FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::IDT>(i_pmic_target, i_ocmb_target, l_relative_pmic_id),
                  "enable_spd (IDT): Error biasing PMIC %s with SPD settings",
                  mss::c_str(i_pmic_target));
     }
     else
     {
-        FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic_target, i_ocmb_target),
+        FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic_target, i_ocmb_target, l_relative_pmic_id),
                  "enable_spd (TI): Error biasing PMIC %s with SPD settings",
                  mss::c_str(i_pmic_target));
     }
@@ -2803,9 +2860,12 @@ fapi2::ReturnCode redundancy_vr_enable_kickoff(
                                          [&i_target_info, &l_enable_fields]
                                          (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
+            // PMIC position/ID under OCMB target
+            const mss::pmic::id l_relative_pmic_id = get_relative_pmic_id(i_pmic);
+
             // Perform VR Enable steps
             FAPI_TRY_LAMBDA(mss::pmic::set_4u_settings(i_pmic, l_enable_fields.iv_pmic_id));
-            FAPI_TRY_LAMBDA(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic, i_target_info.iv_ocmb));
+            FAPI_TRY_LAMBDA(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic, i_target_info.iv_ocmb, l_relative_pmic_id));
             fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
             FAPI_TRY_LAMBDA(mss::pmic::start_vr_enable(i_pmic));

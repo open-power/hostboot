@@ -47,6 +47,7 @@
 #include <mss_pmic_attribute_accessors_manual.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/poll.H>
+#include <generic/memory/lib/utils/pos.H>
 
 
 namespace mss
@@ -430,6 +431,8 @@ fapi2::ReturnCode enable_2u(
     FAPI_INF("Enabling PMICs on " GENTARGTIDFORMAT " with 2U mode", GENTARGTID(i_ocmb_target));
 
     auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
+    uint8_t l_first_pmic_id = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_pmics[PMIC0], l_first_pmic_id));
 
     // Check for number of pmics received
     FAPI_TRY(mss::pmic::check_number_pmics_received_2u(i_ocmb_target, l_pmics.size()));
@@ -438,10 +441,14 @@ fapi2::ReturnCode enable_2u(
     FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, l_pmics));
 
     // Get vendor ID. We just need vendor ID from 1 PMIC as both PMICs will be from the same vendor
-    FAPI_TRY(mss::attr::get_mfg_id[get_relative_pmic_id(l_pmics[PMIC0])](i_ocmb_target, l_vendor_id));
+    FAPI_TRY(mss::attr::get_mfg_id[l_first_pmic_id](i_ocmb_target, l_vendor_id));
 
     for (const auto& l_pmic : l_pmics)
     {
+        // PMIC position/ID under OCMB target
+        uint8_t l_relative_pmic_id = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_pmic, l_relative_pmic_id));
+
         // Clear global status reg
         FAPI_TRY(mss::pmic::i2c::reg_write(l_pmic, REGS::R14, 0x01));
 
@@ -452,8 +459,15 @@ fapi2::ReturnCode enable_2u(
         FAPI_TRY(mss::pmic::i2c::reg_write(l_pmic, REGS::R30, 0xD0));
 
         // Bias with SPD
-        // TODO: ZEN:MST-1964 Cross check SPD data with bias_with_spd_settings() values
-        //FAPI_TRY_LAMBDA(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic, i_ocmb_target));
+        if (l_vendor_id == mss::pmic::vendor::TI)
+        {
+            FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(l_pmic, i_ocmb_target,
+                     static_cast<mss::pmic::id>(l_relative_pmic_id)));
+        }
+        else
+        {
+            FAPI_ERR("Renesas not yet supported");
+        }
     }
 
     FAPI_INF("Executing VR_ENABLE for PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC0]));
@@ -629,9 +643,14 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
         FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [i_ocmb_target]
                           (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
+            uint16_t l_vendor_id = 0;
             fapi2::buffer<uint8_t> l_pmic_data_to_write[NUM_BYTES_TO_WRITE];
 
             FAPI_INF("Initializing PMIC " GENTARGTIDFORMAT, GENTARGTID(i_pmic));
+
+            // PMIC position/ID under OCMB target
+            uint8_t l_relative_pmic_id = 0;
+            FAPI_TRY_LAMBDA(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, i_pmic, l_relative_pmic_id));
 
             // Clear global status reg
             FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, REGS::R14, 0x01));
@@ -658,9 +677,19 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
             // Set VIN_BULK PG threshold
             FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, REGS::R1A, 0x60));
 
+            // Get PMIC vendor
+            FAPI_TRY_LAMBDA(mss::attr::get_mfg_id[l_relative_pmic_id](i_ocmb_target, l_vendor_id));
+
             // Bias with SPD
-            // TODO: ZEN:MST-1964 Cross check SPD data with bias_with_spd_settings() values
-            //FAPI_TRY_LAMBDA(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic, i_ocmb_target));
+            if (l_vendor_id == mss::pmic::vendor::TI)
+            {
+                FAPI_TRY_LAMBDA(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic, i_ocmb_target,
+                static_cast<mss::pmic::id>(l_relative_pmic_id)));
+            }
+            else
+            {
+                FAPI_ERR("Renesas not yet supported");
+            }
 
             return fapi2::FAPI2_RC_SUCCESS;
 

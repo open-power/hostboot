@@ -67,10 +67,18 @@ struct pmicFields<mss::pmic::product::TPS5383X>
     static constexpr uint8_t R73_SWA_NEG_OVER_CURRENT_STATUS = 0;
 
     // R78 - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
+    // used in pmic_status because we used reverse_buffer read/write
     static constexpr uint8_t R78_SWA_VID_OFFSET_COARSE_START = 0;
     static constexpr uint8_t R78_SWB_VID_OFFSET_COARSE_START = 2;
     static constexpr uint8_t R78_SWC_VID_OFFSET_COARSE_START = 4;
     static constexpr uint8_t R78_SWD_VID_OFFSET_COARSE_START = 6;
+
+    // R78 - bit positions non-flipped (0 is for bit0, 1 is for bit1, etc)
+    // used in pmic_enable because we don't use reverse_buffer read/write
+    static constexpr uint8_t R78_SWA_VID_OFFSET_COARSE_START_NON_REVERSED = 6;
+    static constexpr uint8_t R78_SWB_VID_OFFSET_COARSE_START_NON_REVERSED = 4;
+    static constexpr uint8_t R78_SWC_VID_OFFSET_COARSE_START_NON_REVERSED = 2;
+    static constexpr uint8_t R78_SWD_VID_OFFSET_COARSE_START_NON_REVERSED = 0;
 
     static constexpr uint8_t R78_VID_OFFSET_COARSE_LENGTH = 2;
 

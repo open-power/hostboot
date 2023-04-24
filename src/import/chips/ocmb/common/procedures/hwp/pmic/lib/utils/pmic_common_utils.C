@@ -368,7 +368,7 @@ fapi_try_exit:
 /// @brief Calculate target voltage for PMIC from attribute settings
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_id relative ID of PMIC (0/1)
+/// @param[in] i_id relative ID of PMIC (0/1) (or PMIC2 or PMIC3 for DDR5)
 /// @param[in] i_rail RAIL to calculate voltage for
 /// @param[out] o_volt_bitmap output bitmap
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code

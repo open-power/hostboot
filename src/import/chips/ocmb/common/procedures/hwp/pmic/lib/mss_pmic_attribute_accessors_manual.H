@@ -170,6 +170,36 @@ static constexpr pmic_attr_ptr_signed get_swd_voltage_offset[] =
     mss::attr::get_pmic3_swd_voltage_offset
 };
 
+// Voltage Coarse Offset
+static constexpr pmic_attr_ptr get_swa_voltage_coarse_offset[] =
+{
+    mss::attr::get_pmic0_swa_voltage_coarse_offset,
+    mss::attr::get_pmic1_swa_voltage_coarse_offset,
+    mss::attr::get_pmic2_swa_voltage_coarse_offset,
+    mss::attr::get_pmic3_swa_voltage_coarse_offset
+};
+static constexpr pmic_attr_ptr get_swb_voltage_coarse_offset[] =
+{
+    mss::attr::get_pmic0_swb_voltage_coarse_offset,
+    mss::attr::get_pmic1_swb_voltage_coarse_offset,
+    mss::attr::get_pmic2_swb_voltage_coarse_offset,
+    mss::attr::get_pmic3_swb_voltage_coarse_offset
+};
+static constexpr pmic_attr_ptr get_swc_voltage_coarse_offset[] =
+{
+    mss::attr::get_pmic0_swc_voltage_coarse_offset,
+    mss::attr::get_pmic1_swc_voltage_coarse_offset,
+    mss::attr::get_pmic2_swc_voltage_coarse_offset,
+    mss::attr::get_pmic3_swc_voltage_coarse_offset
+};
+static constexpr pmic_attr_ptr get_swd_voltage_coarse_offset[] =
+{
+    mss::attr::get_pmic0_swd_voltage_coarse_offset,
+    mss::attr::get_pmic1_swd_voltage_coarse_offset,
+    mss::attr::get_pmic2_swd_voltage_coarse_offset,
+    mss::attr::get_pmic3_swd_voltage_coarse_offset
+};
+
 // EFD Fields
 
 // Offset
@@ -263,6 +293,14 @@ static constexpr const pmic_attr_ptr_signed* get_volt_offset[] =
     get_swd_voltage_offset
 };
 
+static constexpr const pmic_attr_ptr* get_volt_coarse_offset[] =
+{
+    get_swa_voltage_coarse_offset,
+    get_swb_voltage_coarse_offset,
+    get_swc_voltage_coarse_offset,
+    get_swd_voltage_coarse_offset
+};
+
 // EFD Offset + Direction functions
 static constexpr const pmic_attr_ptr_signed* get_efd_volt_offset[] =
 {
@@ -309,8 +347,8 @@ static constexpr pmic_attr_ptr get_swc_sequence_delay[] =
 {
     mss::attr::get_pmic0_swc_sequence_delay,
     mss::attr::get_pmic1_swc_sequence_delay,
-    mss::attr::get_pmic1_swc_sequence_delay,
-    mss::attr::get_pmic1_swc_sequence_delay
+    mss::attr::get_pmic2_swc_sequence_delay,
+    mss::attr::get_pmic3_swc_sequence_delay
 };
 static constexpr pmic_attr_ptr get_swd_sequence_delay[] =
 {

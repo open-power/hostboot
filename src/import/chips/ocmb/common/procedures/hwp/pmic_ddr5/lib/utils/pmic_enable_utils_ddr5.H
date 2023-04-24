@@ -42,6 +42,7 @@
 #include <pmic_regs_fld.H>
 #include <pmic_enable_utils.H>
 #include <lib/utils/pmic_common_utils_ddr5.H>
+#include <pmic_common_utils.H>
 #include <pmic_consts.H>
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
