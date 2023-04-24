@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,9 +148,14 @@ fapi2::ReturnCode pgpe_start(
               "Error getting ATTR_PSTATES_ENABLED");
 
     // Boot if not OFF
-    if (l_pstates_mode != fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF &&
-        (l_ps_enabled == fapi2::ENUM_ATTR_PSTATES_ENABLED_TRUE) )
+    if (l_pstates_mode != fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF)
     {
+        if (l_ps_enabled != fapi2::ENUM_ATTR_PSTATES_ENABLED_TRUE)
+        {
+            FAPI_ERR("PGPE booting is enabled but Pstates are NOT (via p10_pstate_parameter_block);  PGPE is, thus, NOT actually booted!!!!");
+            goto fapi_try_exit;
+        }
+
         // Set auto mode if needed
         if (l_pstates_mode == fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_AUTO)
         {
