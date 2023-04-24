@@ -53,6 +53,10 @@ template<>
 struct pmicFields<mss::pmic::product::TPS5383X>
 {
     static constexpr uint8_t R9C_EN_VINUV_FLT_LATCH = 7;
+
+    static constexpr uint8_t R9C_ON_OFF_CONFIG_BIT_0 = 0;
+    static constexpr uint8_t R9C_ON_OFF_CONFIG_BIT_1 = 1;
+    static constexpr uint8_t R9C_ON_OFF_CONFIG_BIT_2 = 2;
 };
 
 ///

@@ -152,7 +152,7 @@ fapi_try_exit:
 /// @param[in] i_target_info target info struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode setup_dt(const target_info_redundancy_ddr5& i_target_info)
@@ -238,7 +238,7 @@ fapi_try_exit:
 /// @param[in] i_value_comp_config bool value to be written to the comp_config register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode pre_config(const target_info_redundancy_ddr5& i_target_info,
@@ -247,6 +247,7 @@ fapi2::ReturnCode pre_config(const target_info_redundancy_ddr5& i_target_info,
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
     using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+    using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
 
     for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_pmic_present; l_pmic_count++)
     {
@@ -272,8 +273,12 @@ fapi2::ReturnCode pre_config(const target_info_redundancy_ddr5& i_target_info,
                 FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic, l_reg_addr, l_reg_buffer));
             }
 
-            // Set Global ON_OFF_CONFIG
-            FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, CONSTS::PRE_CONFIG_ON_OFF));
+            // ON/OFF config selection for all rails. Rail turn on/off by EN pin only
+            FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_buffer));
+            l_reg_buffer.clearBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_0>();
+            l_reg_buffer.setBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_1>();
+            l_reg_buffer.clearBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_2>();
+            FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_buffer));
 
             return fapi2::FAPI2_RC_SUCCESS;
 
@@ -295,7 +300,7 @@ fapi_try_exit:
 /// @param[in] i_value to be written to GPO_VALUE ADC reg
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode enable_disable_pmic(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc,
@@ -319,7 +324,7 @@ fapi_try_exit:
 /// @param[in] i_value to be written to PMIC R32 reg
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode post_config(const target_info_redundancy_ddr5& i_target_info,
@@ -327,8 +332,8 @@ fapi2::ReturnCode post_config(const target_info_redundancy_ddr5& i_target_info,
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
     using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
-    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+    using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
 
     for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_pmic_present; l_pmic_count++)
     {
@@ -346,8 +351,12 @@ fapi2::ReturnCode post_config(const target_info_redundancy_ddr5& i_target_info,
             l_pmic_buffer.writeBit<FIELDS::R32_VR_ENABLE>(i_value);
             FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic, REGS::R32, l_pmic_buffer));
 
-            // ON_OFF_CONFIG
-            FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, CONSTS::POST_CONFIG_ON_OFF));
+            // ON/OFF config selection for all rails. Rail turn on by I2C, turn off by I2C or falling edge of PGD1_SNS_1P8
+            FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_pmic_buffer));
+            l_pmic_buffer.clearBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_0>();
+            l_pmic_buffer.clearBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_1>();
+            l_pmic_buffer.setBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_2>();
+            FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_pmic_buffer));
 
             return fapi2::FAPI2_RC_SUCCESS;
 
@@ -592,7 +601,7 @@ fapi_try_exit:
 /// @param[in] i_adc ADC target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode setup_adc(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc)
@@ -683,7 +692,7 @@ fapi_try_exit:
 /// @param[in] i_target_info target info struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
@@ -713,6 +722,7 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
             FAPI_TRY_LAMBDA(mss::pmic::unlock_vendor_region(i_pmic));
 
             // Write to reg lock reg
+            FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, TPS_REGS::RA2_REG_LOCK, 0x00));
             FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, TPS_REGS::RA2_REG_LOCK, 0x95));
             FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, TPS_REGS::RA2_REG_LOCK, 0x64));
 
@@ -726,6 +736,12 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 
             // Set VIN_BULK PG threshold
             FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, REGS::R1A, 0x60));
+
+            // Clear breadcrumb register.
+            // This register is causing I2C to fail as this register changes I2C addresses.
+            // This register does not do anything in ddr4 hence it was decided that we can use this in ddr5 too.
+            // The power team will let the memory team know which register to use instead.
+            //FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, TPS_REGS::RA3_BREADCRUMB, 0x00));
 
             // Bias with SPD
             // TODO: ZEN:MST-1964 Cross check SPD data with bias_with_spd_settings() values
@@ -750,7 +766,7 @@ fapi_try_exit:
 /// @param[in] i_adc ADC target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode clear_adc_events(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc)
@@ -787,7 +803,7 @@ fapi2::ReturnCode redundancy_check_all_pmics(const target_info_redundancy_ddr5& 
 /// @param[in] i_ocmb_target OCMB target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
