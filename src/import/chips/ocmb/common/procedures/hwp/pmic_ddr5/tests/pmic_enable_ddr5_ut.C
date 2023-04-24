@@ -101,8 +101,7 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "PMIC enable ddr5", "[pmic_enable
             using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
             using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
             using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
-
-            const uint8_t l_pre_config = CONSTS::PRE_CONFIG_ON_OFF;
+            using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
 
             static const fapi2::buffer<uint8_t> l_regs_to_be_written_soft_stop[] = { REGS::R82,
                                                                                      REGS::R85,
@@ -129,8 +128,10 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "PMIC enable ddr5", "[pmic_enable
                 }
 
                 // Check Global ON_OFF_CONFIG
-                REQUIRE_FALSE(mss::pmic::i2c::reg_read(l_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_read_buffer));
-                REQUIRE(l_reg_read_buffer == l_pre_config);
+                REQUIRE_FALSE(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_read_buffer));
+                REQUIRE_FALSE(l_reg_read_buffer.getBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_0>());
+                REQUIRE(l_reg_read_buffer.getBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_1>());
+                REQUIRE_FALSE(l_reg_read_buffer.getBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_2>());
             }
 
             FAPI_INF("Test PMIC pre config during power down");
@@ -146,8 +147,10 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "PMIC enable ddr5", "[pmic_enable
                 }
 
                 // Check Global ON_OFF_CONFIG
-                REQUIRE_FALSE(mss::pmic::i2c::reg_read(l_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_read_buffer));
-                REQUIRE(l_reg_read_buffer == l_pre_config);
+                REQUIRE_FALSE(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_read_buffer));
+                REQUIRE_FALSE(l_reg_read_buffer.getBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_0>());
+                REQUIRE(l_reg_read_buffer.getBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_1>());
+                REQUIRE_FALSE(l_reg_read_buffer.getBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_2>());
             }
 
             return 0;
@@ -162,11 +165,10 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "PMIC enable ddr5", "[pmic_enable
             using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
             using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
             using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+            using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
             const auto& l_pmics = mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target);
             fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
             fapi2::buffer<uint8_t> l_reg_read_buffer;
-
-            const uint8_t l_post_config = CONSTS::POST_CONFIG_ON_OFF;
 
             // Grab the targets as a struct, if they exist
             mss::pmic::ddr5::target_info_redundancy_ddr5 l_target_info(i_ocmb_target, l_rc);
@@ -180,8 +182,10 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "PMIC enable ddr5", "[pmic_enable
                 REQUIRE_FALSE(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R32, l_reg_read_buffer));
                 REQUIRE(l_reg_read_buffer.getBit<FIELDS::PWR_OFF_SEQ>() == CONSTS::ENABLE);
 
-                REQUIRE_FALSE(mss::pmic::i2c::reg_read(l_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_read_buffer));
-                REQUIRE(l_reg_read_buffer == l_post_config);
+                REQUIRE_FALSE(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_read_buffer));
+                REQUIRE_FALSE(l_reg_read_buffer.getBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_0>());
+                REQUIRE_FALSE(l_reg_read_buffer.getBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_1>());
+                REQUIRE(l_reg_read_buffer.getBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_2>());
             }
 
             FAPI_INF("Test PMIC post config during power down");
@@ -193,8 +197,10 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "PMIC enable ddr5", "[pmic_enable
                 REQUIRE_FALSE(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R32, l_reg_read_buffer));
                 REQUIRE(l_reg_read_buffer.getBit<FIELDS::PWR_OFF_SEQ>() == CONSTS::DISABLE);
 
-                REQUIRE_FALSE(mss::pmic::i2c::reg_read(l_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_read_buffer));
-                REQUIRE(l_reg_read_buffer == l_post_config);
+                REQUIRE_FALSE(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_reg_read_buffer));
+                REQUIRE_FALSE(l_reg_read_buffer.getBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_0>());
+                REQUIRE_FALSE(l_reg_read_buffer.getBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_1>());
+                REQUIRE(l_reg_read_buffer.getBit<TPS_FIELDS::R9C_ON_OFF_CONFIG_BIT_2>());
             }
 
             return 0;
