@@ -41,6 +41,9 @@
 #undef TRACFCOMP
 #define TRACFCOMP(X, args...) do { (void)X; CONSOLE_TRACE(args); } while (false)
 
+#undef TRACFCOMP_CHECKED
+#define TRACFCOMP_CHECKED(X, Y, args...) do { (void)X; (void)Y; CONSOLE_TRACE(args); } while (false)
+
 [[maybe_unused]]
 static uint8_t dce_bytetochar(const uint8_t c)
 {
