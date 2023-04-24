@@ -43,10 +43,10 @@ endif
 CFLAGS += -include config.h
 
 COMMONFLAGS += $(OPT_LEVEL) -nostdlib
-CFLAGS += $(COMMONFLAGS) -mcpu=power7 -nostdinc -g -mno-vsx -mno-altivec\
+CFLAGS += $(COMMONFLAGS) -mcpu=power9 -nostdinc -g -mno-vsx -mno-altivec\
           -Werror -Wall -mtraceback=no -pipe -mabi=elfv1 \
 	  -ffunction-sections -fdata-sections -ffreestanding -mbig-endian
-ASMFLAGS += $(COMMONFLAGS) -mcpu=power7 -mbig-endian -ffreestanding -mabi=elfv1
+ASMFLAGS += $(COMMONFLAGS) -mcpu=power9 -mbig-endian -ffreestanding -mabi=elfv1
 CXXFLAGS += $(CFLAGS) -nostdinc++ -fno-rtti -fno-exceptions -Werror -Wall \
 	    -fuse-cxa-atexit -std=gnu++17 -Wno-register
 LDFLAGS += --nostdlib --sort-common -EB $(COMMONFLAGS)
