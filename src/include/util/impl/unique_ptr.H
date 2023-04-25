@@ -37,6 +37,7 @@
 #include <cstddef>
 #include <utility>
 #include <stdint.h>
+#include <stdlib.h>
 
 namespace std
 {
@@ -488,6 +489,24 @@ auto scope_exit(F&& i_functor)
                                     // destructor will call our deleter
         std::move(deleter)
     };
+}
+
+template<typename T>
+using malloc_ptr = std::unique_ptr<T, decltype(&free)>;
+
+/** Create a unique_ptr from an allocation made by malloc().
+ *
+ * @tparam    T            Type of the unique_ptr. At least this much space is allocated.
+ * @param[in] extra_space  Any space above the size of the template parameter T to
+ *                         include in the allocation.
+ * @return                 A pointer to an allocation that will be deallocated with free()
+ * @note                   The destructor of type T will NOT be called when this pointer
+ *                         goes out of scope.
+ */
+template<typename T>
+malloc_ptr<T> make_malloc_ptr(const int64_t extra_space = 0)
+{
+    return malloc_ptr<T>(static_cast<T*>(malloc(sizeof(T) + extra_space)), &free);
 }
 
 /** @brief A do-nothing function deleter for resources that have no
