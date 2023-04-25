@@ -54,6 +54,7 @@ template<>
 struct pmicRegs<mss::pmic::product::TPS5383X>
 {
     static constexpr uint8_t R73                   = 0x73;
+    static constexpr uint8_t R78_VID_OFFSET_COARSE = 0x78;
 
     static constexpr uint8_t R94_SOFT_STOP_CFG_SWA = 0x94;
     static constexpr uint8_t R95_SOFT_STOP_CFG_SWB = 0x95;

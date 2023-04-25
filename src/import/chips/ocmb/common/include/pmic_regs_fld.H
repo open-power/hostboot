@@ -66,6 +66,14 @@ struct pmicFields<mss::pmic::product::TPS5383X>
     static constexpr uint8_t R73_SWB_NEG_OVER_CURRENT_STATUS = 1;
     static constexpr uint8_t R73_SWA_NEG_OVER_CURRENT_STATUS = 0;
 
+    // R78 - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
+    static constexpr uint8_t R78_SWA_VID_OFFSET_COARSE_START = 0;
+    static constexpr uint8_t R78_SWB_VID_OFFSET_COARSE_START = 2;
+    static constexpr uint8_t R78_SWC_VID_OFFSET_COARSE_START = 4;
+    static constexpr uint8_t R78_SWD_VID_OFFSET_COARSE_START = 6;
+
+    static constexpr uint8_t R78_VID_OFFSET_COARSE_LENGTH = 2;
+
     static constexpr uint8_t R9C_EN_VINUV_FLT_LATCH = 7;
 
     static constexpr uint8_t R9C_ON_OFF_CONFIG_BIT_0 = 0;

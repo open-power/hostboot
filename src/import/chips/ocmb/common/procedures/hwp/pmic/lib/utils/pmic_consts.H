@@ -261,6 +261,25 @@ struct consts<mss::pmic::product::TPS5383X>
 {
     static constexpr uint8_t TI_REV_23 = 0x23;
 
+    // R78 - bits are flipped here to go with bit numbering 0:7
+    // R78 - power on default values
+    static constexpr uint8_t R78_SWA_VID_OFFSET_COARSE_DEFAULT = 0x01;
+    static constexpr uint8_t R78_SWB_VID_OFFSET_COARSE_DEFAULT = 0x01;
+    static constexpr uint8_t R78_SWC_VID_OFFSET_COARSE_DEFAULT = 0x01;
+    static constexpr uint8_t R78_SWD_VID_OFFSET_COARSE_DEFAULT = 0x03;
+    // R78 - bits are flipped here to go with bit numbering 0:7
+    // R78 - number of ranges for each rail and values for ranges in mV
+    static constexpr uint32_t R78_VOLT_SWABCD_RANGE0_MIN   = 0;
+    static constexpr uint32_t R78_VOLT_SWABCD_RANGE1_MIN   = 800;
+    static constexpr uint32_t R78_VOLT_SWABCD_RANGE2_MIN   = 500;
+    static constexpr uint32_t R78_VOLT_SWABCD_RANGE3_MIN   = 1500;
+    // R78 voltage ranges
+    static constexpr uint8_t R78_NUM_RANGES                = 4;
+    static constexpr uint8_t R78_RANGE_0                   = 0;
+    static constexpr uint8_t R78_RANGE_1                   = 1;
+    static constexpr uint8_t R78_RANGE_2                   = 2;
+    static constexpr uint8_t R78_RANGE_3                   = 3;
+
     // R94 -> R97
     static constexpr uint8_t MAX_SOFT_STOP_CFG = 0xBF;
 };
