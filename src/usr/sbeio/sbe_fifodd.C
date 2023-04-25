@@ -101,11 +101,21 @@ SbeFifo::~SbeFifo()
     }
 }
 
+errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
+                             uint32_t          * i_pFifoRequest,
+                             uint32_t          * i_pFifoResponse,
+                             uint32_t            i_responseSize)
+{
+    memory_stream stream { i_pFifoRequest, *i_pFifoRequest * sizeof(uint32_t) };
+
+    return performFifoChipOp(i_target, std::move(stream), i_pFifoResponse, i_responseSize);
+}
+
 /**
  * @brief perform SBE FIFO chip-op
  */
 errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
-                             uint32_t          * i_pFifoRequest,
+                             fifo_chipop_data_stream&& i_requestStream,
                              uint32_t          * i_pFifoResponse,
                              uint32_t            i_responseSize)
 {
@@ -118,15 +128,17 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
 
     do
     {
+        std::array<uint32_t, 2> request_header = { };
         errl = writeRequest(i_target,
-                            i_pFifoRequest);
+                            i_requestStream,
+                            request_header);
         if (errl) break;  // return with error
 
         // skip reading a response for commands that don't have one
         if ((i_pFifoResponse != nullptr) && (i_responseSize > 0))
         {
             errl = readResponse(i_target,
-                                i_pFifoRequest,
+                                &request_header[0],
                                 i_pFifoResponse,
                                 i_responseSize);
             if (errl) break;  // return with error
@@ -170,12 +182,34 @@ errlHndl_t SbeFifo::performFifoReset(TARGETING::Target * i_target)
     return errl;
 }
 
+bool read_at_least(SbeFifo::fifo_chipop_data_stream& stream,
+                   void* const buffer,
+                   const size_t amt)
+{
+    auto ptr = reinterpret_cast<uint8_t*>(buffer);
+    size_t read = 0;
+
+    while (read < amt)
+    {
+        const auto this_pass = stream.read(ptr + read, amt - read);
+
+        if (this_pass == 0)
+        {
+            break;
+        }
+
+        read += this_pass;
+    }
+
+    return read == amt;
+}
 
 /**
  * @brief write FIFO request message
  */
 errlHndl_t SbeFifo::writeRequest(TARGETING::Target * i_target,
-                        uint32_t * i_pFifoRequest)
+                                 fifo_chipop_data_stream& i_stream,
+                                 std::array<uint32_t, 2>& o_request_header)
 {
     errlHndl_t errl = NULL;
 
@@ -193,23 +227,32 @@ errlHndl_t SbeFifo::writeRequest(TARGETING::Target * i_target,
 
         //The first uint32_t has the number of uint32_t words in the request
         l_addr                = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_UPFIFO_DATA_IN : SBE_FIFO_UPFIFO_DATA_IN;
-        uint32_t * l_pSent    = i_pFifoRequest; //advance as words sent
-        uint32_t   l_cnt      = *l_pSent;
-        SBE_TRACDBIN("Write Request in SBEIO",i_pFifoRequest,
-                     l_cnt*sizeof(*l_pSent));
 
-        for (uint32_t i=0;i<l_cnt;i++)
+        uint32_t l_word = 0;
+        bool go = read_at_least(i_stream, &l_word, sizeof(l_word));
+
+        int i = 0;
+        while (go)
         {
+            if (i < 2)
+            {
+                o_request_header[i] = l_word;
+            }
+
             // Wait for room to write into fifo
             errl = waitUpFifoReady(i_target);
             if (errl) break;
 
             // Send data into fifo
-            errl = writeCfam(i_target,l_addr,l_pSent);
+            errl = writeCfam(i_target,l_addr,&l_word);
+
+            ++i;
+
             if (errl) break;
 
-            l_pSent++;
+            go = read_at_least(i_stream, &l_word, sizeof(l_word));
         }
+
         if (errl) break;
 
         //notify SBE that last word has been sent

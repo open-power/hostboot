@@ -41,7 +41,9 @@
 #include <fapi2.H>
 #include <plat_hwp_invoker.H>
 
+// Odyssey HWPs
 #include <ody_code_getlevels.H>
+#include <ody_code_update.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -115,6 +117,48 @@ fapi2::ReturnCode ody_chipop_getcodelevels(const fapi2::Target<fapi2::TARGET_TYP
 
             o_sppeCLIPdata.push_back(clip);
         }
+    }
+
+    return rc;
+}
+
+/**
+ * @brief Implementation for the chipop used by ody_code_update.
+ *
+ * @param[in] i_target         The OCMB target to update.
+ * @param[in] i_imageType      The type of image to update on the OCMB.
+ * @param[in] i_image          The image contents.
+ * @param[in] i_imageSize      Length of image contents in bytes.
+ *
+ * @return                     fapi2 return code.
+ */
+extern "C"
+fapi2::ReturnCode ody_chipop_codeupdate(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                        const sppeImageType_t& i_imageType,
+                                        const void* const i_image,
+                                        const size_t i_imageSize)
+{
+    using namespace SBEIO;
+
+    fapi2::ReturnCode rc;
+
+    SbeFifo::fifoUpdateImageRequest request(i_imageType, i_imageSize);
+
+    memory_stream header_stream(&request, sizeof(request));
+    memory_stream body_stream(i_image, i_imageSize);
+
+    SbeFifo::fifoStandardResponse response;
+    auto errl = SbeFifo::getTheInstance().performFifoChipOp(i_target.get(),
+                                                            cat_streams(&header_stream,
+                                                                        &body_stream),
+                                                            reinterpret_cast<uint32_t*>(&response),
+                                                            sizeof(response));
+
+    if (errl)
+    {
+        SBE_TRACF("ody_chipop_getcodelevels failed: " TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(errl));
+        addErrlPtrToReturnCode(rc, errl);
     }
 
     return rc;
@@ -203,15 +247,16 @@ namespace SBEIO
     }
 
     /**
-    * @brief @TODO JIRA PFHB-255
-    *
-    * @param[in] i_chipTarget The chip you would like to perform the chipop on
-    *                       NOTE: HB should only be sending this to non-boot procs or Odyssey chips
-    *
-    * @return errlHndl_t Error log handle on failure.
-    *
-    */
-    errlHndl_t sendUpdateImageRequest(TARGETING::Target * i_chipTarget)
+     * @param[in] i_chipTarget The chip you would like to perform the chipop on
+     *                       NOTE: HB should only be sending this to Odyssey chips
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t sendUpdateImageRequest(TARGETING::Target* const i_chipTarget,
+                                      const codelevel_info_t& i_clip,
+                                      const void* const i_img,
+                                      const size_t i_img_size)
     {
         errlHndl_t errl = nullptr;
 
@@ -226,8 +271,54 @@ namespace SBEIO
                 break;
             }
 
-            SBE_TRACF(EXIT_MRK "Skipping unimplemented chipop sendUpdateImageRequest");
+            if (!TARGETING::UTIL::isOdysseyChip(i_chipTarget))
+            {
+                SBE_TRACF(EXIT_MRK"sendUpdateImageRequest(0x%08X): Not an Odyssey chip",
+                          get_huid(i_chipTarget));
+                break;
+            }
 
+            sppeCLIP_t clip { };
+
+            static_assert(sizeof(clip.hash) == sizeof(i_clip.hash));
+            memcpy(&clip.hash, &i_clip.hash, sizeof(clip.hash));
+
+            switch (i_clip.type)
+            {
+            case codelevel_info_t::bootloader:
+                clip.type = Bootloader;
+                break;
+            case codelevel_info_t::runtime:
+                clip.type = Runtime;
+                break;
+            }
+
+            sppeImage_t sppe_image
+            {
+                .type = clip.type,
+                .pakSize = i_img_size,
+                .pak = (void*)i_img
+            };
+
+            static_assert(sizeof(sppe_image.hash) == sizeof(i_clip.hash));
+            memcpy(&sppe_image.hash, &i_clip.hash, sizeof(sppe_image.hash));
+
+            std::vector<sppeImageType_t> results;
+
+            FAPI_INVOKE_HWP(errl,
+                            ody_code_update,
+                            { i_chipTarget },
+                            { clip },
+                            { sppe_image },
+                            true /* force update */,
+                            results);
+
+            if (errl)
+            {
+                SBE_TRACF("sendUpdateImageRequest: ody_code_update failed: " TRACE_ERR_FMT,
+                          TRACE_ERR_ARGS(errl));
+                break;
+            }
         }while(0);
 
         SBE_TRACD(EXIT_MRK "sendUpdateImageRequest");

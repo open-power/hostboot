@@ -142,6 +142,17 @@ errlHndl_t find_ocmbfw_ext_image(const ocmbfw_ext_image_info*& o_img,
                                  uint32_t i_dd_level_major = DD_LEVEL_ANY,
                                  uint32_t i_dd_level_minor = DD_LEVEL_ANY);
 
+/**
+ * @brief Get the pointer to the contents of the given image within
+ * the OCMBFW PNOR partition.
+ *
+ * @param[in] i_hdr  The extended OCMBFW PNOR partition header.
+ * @param[in] i_img  The image info structure for the desired image.
+ * @return           The contents of the image.
+ */
+const void* get_ext_image_contents(const ocmbfw_ext_pnor_section_header* i_hdr,
+                                   const ocmbfw_ext_image_info* i_img);
+
 }//namespace expupd
 
 #endif

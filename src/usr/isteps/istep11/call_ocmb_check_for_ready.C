@@ -107,10 +107,111 @@ void handle_odyssey_code_update_error(IStepError& i_stepError,
     captureError(i_errl, i_stepError, ISTEP_COMP_ID, i_ocmb);
 }
 
-errlHndl_t odyssey_code_update(Target* const i_ocmb,
-                               const ocmbfw_owning_ptr_t& i_fwhdr)
+/**
+ * @brief List of pairs of the image level currently flashed on the
+ *        SBE, and a pointer to new image contents in the OCMBFW PNOR
+ *        partition for that image type.
+ */
+using cur_version_new_image_t = std::vector<std::pair<codelevel_info_t, const ocmbfw_ext_image_info*>>;
+
+/**
+ * @brief Write a set of firmware images to the given Odyssey chip.
+ *
+ * @param[in] i_ocmb              The Odyssey chip.
+ * @param[in] i_fwhdr             The OCMBFW PNOR partition header pointer.
+ * @param[in] i_updates_required  The images to write.
+ */
+errlHndl_t odyssey_update_code(Target* const i_ocmb,
+                               const ocmbfw_owning_ptr_t& i_fwhdr,
+                               const cur_version_new_image_t& i_updates_required)
 {
-    TRACF(ENTER_MRK"call_ocmb_check_for_ready/odyssey_code_update(0x%08X)",
+    TRACF(ENTER_MRK"call_ocmb_check_for_ready/odyssey_update_code(0x%08X)",
+          get_huid(i_ocmb));
+
+    errlHndl_t errl = nullptr;
+
+    for (const auto [ clip, img ] : i_updates_required)
+    {
+        TRACF("call_ocmb_check_for_ready/odyssey_update_code(0x%08X): "
+              "Updating firmware image %d...",
+              get_huid(i_ocmb),
+              clip.type);
+
+ #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+        CONSOLE::displayf(CONSOLE::DEFAULT, nullptr,
+                          "Updating firmware image %d on Odyssey chip 0x%08X",
+                          clip.type, get_huid(i_ocmb));
+ #endif
+
+        errl = sendUpdateImageRequest(i_ocmb,
+                                      clip,
+                                      get_ext_image_contents(i_fwhdr.get(), img),
+                                      img->image_size);
+
+        if (errl)
+        {
+            TRACF("call_ocmb_check_for_ready/odyssey_update_code(0x%08X): "
+                  "sendUpdateImageRequest(type=%d) failed: " TRACE_ERR_FMT,
+                  get_huid(i_ocmb),
+                  clip.type,
+                  TRACE_ERR_ARGS(errl));
+            break;
+        }
+        else
+        {
+            TRACF("call_ocmb_check_for_ready/odyssey_update_code(0x%08X): "
+                  "Update completed successfully",
+                  get_huid(i_ocmb));
+        }
+    }
+
+    TRACF(EXIT_MRK"call_ocmb_check_for_ready/odyssey_update_code(0x%08X) = 0x%08X",
+          get_huid(i_ocmb), ERRL_GETPLID_SAFE(errl));
+
+    return errl;
+}
+
+/** @brief Convert a numeric value from 0-15 to a hex character representing it.
+ */
+char char_to_hex(uint8_t value)
+{
+    value = value & 0xF;
+    if (value < 10) return '0' + value;
+    return 'A' + (value - 10);
+}
+
+/**
+ * @brief Convert a byte string to a human-readable hexadecimal representation.
+ *
+ * @param[out] o_buf       The output buffer (must contain at 2*i_bytes_len + 1 elements)
+ * @param[in] i_bytes      The bytes to convert
+ * @param[in] i_bytes_len  Number of bytes to convert
+ */
+void str_to_hex(char* const o_buf, const uint8_t* const i_bytes, const size_t i_bytes_len)
+{
+    for (size_t i = 0; i < i_bytes_len; ++i)
+    {
+        o_buf[i*2] = char_to_hex(i_bytes[i] >> 4);
+        o_buf[i*2 + 1] = char_to_hex(i_bytes[i]);
+    }
+
+    o_buf[i_bytes_len * 2] = '\0';
+}
+
+/**
+ * @brief Check which Odyssey images need to be updated in the given chip, compared
+ *        to what exists in PNOR.
+ *
+ * @param[in] i_ocmb               The Odyssey chip.
+ * @param[in] i_fwhdr              The OCMBFW PNOR partition header pointer.
+ * @param[out] o_updates_required  The images needing update.
+ * @return                         Error if any, otherwise nullptr.
+ */
+errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
+                                               const ocmbfw_owning_ptr_t& i_fwhdr,
+                                               cur_version_new_image_t& o_updates_required)
+{
+    TRACF(ENTER_MRK"call_ocmb_check_for_ready/check_for_odyssey_codeupdate_needed(0x%08X)",
           get_huid(i_ocmb));
 
     errlHndl_t errl = nullptr;
@@ -158,7 +259,7 @@ errlHndl_t odyssey_code_update(Target* const i_ocmb,
 
         if (errl)
         {
-            TRACF("odyssey_code_update: Cannot locate image with ocmb type = %d, "
+            TRACF("check_for_odyssey_codeupdate_needed: Cannot locate image with ocmb type = %d, "
                   "image type = %d, dd = %d.%d in OCMBFW PNOR partition",
                   OCMB_TYPE_ODYSSEY, image_type, dd_level_major, dd_level_minor);
             break;
@@ -170,19 +271,26 @@ errlHndl_t odyssey_code_update(Target* const i_ocmb,
 
         if (memcmp(&img->image_hash, &codelevel.hash, sizeof(img->image_hash)))
         {
-            TRACF("odyssey_code_update: OCMB 0x%08x %s needs update",
-                  get_huid(i_ocmb), image_type_str);
+            char flashed_hash_str[25] = { }, hb_hash_str[25] = { };
+            str_to_hex(flashed_hash_str, codelevel.hash, (sizeof(flashed_hash_str) - 1) / 2);
+            str_to_hex(hb_hash_str, img->image_hash, (sizeof(hb_hash_str) - 1) / 2);
+
+            TRACF("check_for_odyssey_codeupdate_needed: OCMB 0x%08X %s needs update "
+                  "(flashed level = %s, hostboot's level = %s)",
+                  get_huid(i_ocmb), image_type_str, flashed_hash_str, hb_hash_str);
+
+            o_updates_required.push_back({ codelevel, img });
         }
         else
         {
-            TRACF("odyssey_code_update: OCMB 0x%08x %s does NOT need update",
+            TRACF("check_for_odyssey_codeupdate_needed: OCMB 0x%08X %s does NOT need update",
                   get_huid(i_ocmb), image_type_str);
         }
     }
 
     } while (false);
 
-    TRACF(EXIT_MRK"call_ocmb_check_for_ready/odyssey_code_update");
+    TRACF(EXIT_MRK"call_ocmb_check_for_ready/check_for_odyssey_codeupdate_needed");
 
     return errl;
 }
@@ -446,26 +554,49 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                     UTIL::assertGetToplevelTarget()->setAttr<ATTR_OCMB_BOOT_FLAGS>(0xC0000000);
 
                     FAPI_INVOKE_HWP(l_errl, ody_sppe_check_for_ready, l_fapi_ocmb_target);
+
+                    do
+                    {
+
                     if(l_errl)
                     {
                         // TODO JIRA: PFHB-257 Handle Odyssey boot failures
-                        TRACF("call_ocmb_check_for_ready: ody_sppe_check_for_ready failed on OCMB 0x%x", get_huid(l_ocmb));
+                        TRACF("call_ocmb_check_for_ready: ody_sppe_check_for_ready failed on OCMB 0x%x",
+                              get_huid(l_ocmb));
                         captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
+                        break;
                     }
-                    else if (perform_odyssey_codeupdate_check)
+
+                    if (perform_odyssey_codeupdate_check)
                     {
-                        l_errl = odyssey_code_update(l_ocmb, ocmbfw_pnor_section_header);
+                        cur_version_new_image_t updates_needed;
+                        l_errl = check_for_odyssey_codeupdate_needed(l_ocmb,
+                                                                     ocmbfw_pnor_section_header,
+                                                                     updates_needed);
 
                         if (l_errl)
                         {
                             handle_odyssey_code_update_error(l_StepError, l_errl, l_ocmb);
+                            break;
+                        }
+
+                        if (!updates_needed.empty())
+                        {
+                            l_errl = odyssey_update_code(l_ocmb,
+                                                         ocmbfw_pnor_section_header,
+                                                         updates_needed);
+                        }
+
+                        if (l_errl)
+                        {
+                            handle_odyssey_code_update_error(l_StepError, l_errl, l_ocmb);
+                            break;
                         }
                     }
 
+                    } while (false);
                 }
-
             } // End of if/else l_errl
-
         } // End of OCMB Loop
 
         // Grab informational Explorer logs (early IPL = true)

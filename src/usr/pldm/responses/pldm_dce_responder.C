@@ -137,16 +137,16 @@ uint8_t* perform_relocs(lid_header* const header)
         switch (relocs[i].reloc_type)
         {
         case RELOC_TYPE_DESCRIPTOR:
-            DCE_INF("DCE: Performing descriptor relocation at %p from %p",
-                    dest_addr,
-                    src);
+            PLDM_INF("DCE: Performing descriptor relocation at %p from %p",
+                     dest_addr,
+                     src);
 
             memcpy(dest_addr, src, sizeof(ppc_function_thunk_t));
             break;
         case RELOC_TYPE_ADDR64:
-            DCE_INF("DCE: Performing addr64 relocation at %p from %p",
-                    dest_addr,
-                    src);
+            PLDM_INF("DCE: Performing addr64 relocation at %p from %p",
+                     dest_addr,
+                     src);
 
             *reinterpret_cast<uint8_t**>(dest_addr) = src;
             break;

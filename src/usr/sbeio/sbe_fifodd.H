@@ -798,17 +798,6 @@ public:
     };
 
     /**
-     * @brief Struct for FIFO Code Level Information Package (CLIP). A variable number of these can be returned with the
-     *        response to Get Code Levels request.
-     */
-    struct fifoCodeLevelInfoPackage
-    {
-        uint16_t reserved;
-        uint16_t imgType; // See fifoUpdateImageType for options
-        uint32_t imgHash[SBE_MAX_LENGTH_IMAGE_HASH];
-    };
-
-    /**
      * @brief Struct for FIFO Get Code Levels request. This message type is only supported on Odyssey chips.
      */
     struct fifoGetCodeLevelsRequest
@@ -841,18 +830,17 @@ public:
         uint16_t reserved2;
         uint16_t imageType;
         uint32_t imageSize;
-        uint32_t image[];
 
-        fifoUpdateImageRequest() :
-            wordCnt(0),
-            reserved(0),
-            chipId(0),
-            commandClass(SBE_FIFO_CLASS_CODE_UPDATE_MESSAGES),
-            command(SBE_FIFO_CMD_UPDATE_IMAGE),
-            reserved2(0),
-            imageType(0),
-            imageSize(0)
+        fifoUpdateImageRequest(const uint16_t i_image_type, const size_t i_image_size_bytes)
         {
+            wordCnt = (sizeof(fifoUpdateImageRequest) + i_image_size_bytes) / sizeof(uint32_t);
+            reserved = 0;
+            chipId = 0;
+            commandClass = SBE_FIFO_CLASS_CODE_UPDATE_MESSAGES;
+            command = SBE_FIFO_CMD_UPDATE_IMAGE;
+            reserved2 = 0;
+            imageType = i_image_type;
+            imageSize = i_image_size_bytes / sizeof(uint32_t);
         }
     } PACKED;
 
@@ -929,6 +917,54 @@ public:
             uint32_t   i_responseSize);
 
     /**
+     * @brief A structure that provides a stream of data for writing
+     *        to the SBE FIFO for chipops.
+     */
+    class fifo_chipop_data_stream
+    {
+    public:
+        /**
+         * @brief Attempt to read the given number of bytes from the
+         *        stream.
+         *
+         * @param[out] o_buf  The output buffer for the data read.
+         * @param[in]  i_amt  The maximum amount of data to read.
+         * @return            The amount of data actually read.
+         *                    If 0, the stream is at its end. This
+         *                    may be less than i_amt, but if it is
+         *                    greater than 0 it still does not
+         *                    indicate end-of-stream.
+         */
+        virtual int read(void* o_buf, int i_amt) = 0;
+
+        virtual ~fifo_chipop_data_stream() { }
+
+        fifo_chipop_data_stream() = default;
+
+        fifo_chipop_data_stream(const fifo_chipop_data_stream&) = delete;
+        fifo_chipop_data_stream& operator=(const fifo_chipop_data_stream&) = delete;
+
+        fifo_chipop_data_stream(fifo_chipop_data_stream&&) = default;
+        fifo_chipop_data_stream& operator=(fifo_chipop_data_stream&&) = default;
+    };
+
+    /**
+     * @Brief perform SBE FIFO chip-op and stream the request data.
+     *
+     * @param[in]  i_target         Target to access
+     * @param[in]  i_requestStream  Request stream. Ownership is
+     *                              taken by this function.
+     * @param[in]  i_pFifoResponse  Pointer to response
+     * @param[in]  i_responseSize   Size of response in bytes
+     *
+     * @return errlHndl_t Error log handle on failure.
+     */
+    errlHndl_t performFifoChipOp(TARGETING::Target * i_target,
+            fifo_chipop_data_stream&& i_requestStream,
+            uint32_t * i_pFifoResponse,
+            uint32_t   i_responseSize);
+
+    /**
      * @Brief perform SBE FIFO reset
      *
      *        NOT to be used on running SBE -- only for IPL
@@ -980,15 +1016,17 @@ private:
     //-------------------------------------------------------------------
 
     /**
-     * @brief send a request via SBE FIFO
+     * @brief send a request via SBE FIFO using a data stream.
      *
      * @param[in]  i_target         Target to access
-     * @param[in]  i_pFifoRequest   Pointer to FIFO request.
-     *                              First word has count of unit32_t words.
+     * @param[in]  i_stream         Stream for request data.
+     *                              First word has count of uint32_t words.
+     * @param[out] o_request_header The first two words of the request.
      * @return errlHndl_t Error log handle on failure.
      */
     errlHndl_t writeRequest(TARGETING::Target * i_target,
-            uint32_t * i_pFifoRequest);
+                            fifo_chipop_data_stream& i_stream,
+                            std::array<uint32_t, 2>& o_request_header);
 
     /**
      * @brief read the response via SBE FIFO
@@ -1126,6 +1164,82 @@ private:
     enum { MAX_UP_FIFO_TIMEOUT_NS = 90000*NS_PER_MSEC }; //=90s
 
 }; // End of classSbeFifo
+
+/**
+ * @brief An SBE FIFO chipop data stream that reads a range of bytes
+ *        in memory.
+ */
+class memory_stream : public SbeFifo::fifo_chipop_data_stream
+{
+    size_t length = 0, offset = 0;
+    const uint8_t* data = nullptr;
+
+public:
+    int read(void* const o_buf, const int i_amt) override
+    {
+        int amt_read = 0;
+
+        if (offset < length)
+        {
+            amt_read = std::min(length - offset, static_cast<size_t>(i_amt));
+
+            memcpy(o_buf, data + offset, amt_read);
+            offset += amt_read;
+        }
+
+        return amt_read;
+    }
+
+    memory_stream(const void* const i_data, const size_t i_len)
+        : length(i_len), data(reinterpret_cast<const uint8_t*>(i_data))
+    { }
+};
+
+/**
+ * @brief An SBE FIFO chipop data stream that combines other streams
+ *        in sequence. Constructed with a list of streams, a stream_cat
+ *        will return all the data from the first stream, then all the
+ *        data from the second stream, etc.
+ */
+template<size_t NumStreams>
+class stream_cat : public SbeFifo::fifo_chipop_data_stream
+{
+    size_t active_stream = 0;
+    std::array<SbeFifo::fifo_chipop_data_stream*, NumStreams> streams;
+
+public:
+    template<typename... Args>
+    stream_cat(Args&&... args)
+        : streams({ std::forward<Args>(args)... })
+    { }
+
+    int read(void* const o_buf, const int i_amt) override
+    {
+        int amt_read = 0;
+
+        if (active_stream < streams.size())
+        {
+            amt_read = streams[active_stream]->read(o_buf, i_amt);
+
+            if (amt_read == 0)
+            {
+                ++active_stream;
+                return read(o_buf, i_amt);
+            }
+        }
+
+        return amt_read;
+    }
+};
+
+/**
+ * @brief Convenience function for constructing a stream_cat<N>.
+ */
+template<typename... Args>
+inline stream_cat<sizeof...(Args)> cat_streams(Args&&... args)
+{
+    return stream_cat<sizeof...(Args)>({ args... });
+}
 
 }
 

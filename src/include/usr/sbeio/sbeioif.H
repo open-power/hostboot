@@ -632,6 +632,21 @@ namespace SBEIO
                                         std::vector<codelevel_info_t>& o_codelevels);
 
     /**
+     * @brief Update the image described by the given codelevel info
+     * structure with the given image data.
+     *
+     * @param[in] i_chipTarget  The Odyssey chip target.
+     * @param[in] i_clip        The descriptor of the image on the SPPE to update.
+     *                          (The hash is ignored.)
+     * @param[in] i_img         The image contents to write to SPPE storage.
+     * @param[in] i_img_size    The size of the image contents to write.
+     */
+    errlHndl_t sendUpdateImageRequest(TARGETING::Target* i_chipTarget,
+                                      const codelevel_info_t& i_clip,
+                                      const void* i_img,
+                                      size_t i_img_size);
+
+    /**
     * @brief Send the IO or MEMORY HWP request to the SBE.  These overloaded
     *        wrapper functions perform initial checks and then call the local
     *        function to send the HWP request.

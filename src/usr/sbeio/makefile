@@ -30,6 +30,8 @@ MODULE = sbeio
 include common/common.mk
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include
 
 # sbeio's unique objects
 OBJS += sbe_psudd.o
@@ -61,6 +63,7 @@ OBJS += sbe_halt.o
 OBJS += p10_clock_test.o
 OBJS += p10_clock_test_cmn.o
 OBJS += ody_code_getlevels.o
+OBJS += ody_code_update.o
 
 # sbeio's sub directories
 SUBDIRS += test.d

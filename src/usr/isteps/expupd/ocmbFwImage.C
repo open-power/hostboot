@@ -372,6 +372,16 @@ errlHndl_t find_ocmbfw_ext_image(const ocmbfw_ext_image_info*& o_img,
     return errl;
 }
 
+/**
+ * @brief Get the pointer to the contents of the given image within
+ * the OCMBFW PNOR partition.
+ */
+const void* get_ext_image_contents(const ocmbfw_ext_pnor_section_header* const i_hdr,
+                                   const ocmbfw_ext_image_info* const i_img)
+{
+    return reinterpret_cast<const uint8_t*>(i_hdr) + i_img->image_offset;
+}
+
 /** @brief Produce a pointer to the OCMBFW extended header.
  *
  *  @param[out] o_hdr                  Pointer to the extended header in the OCMBFW PNOR partition.
