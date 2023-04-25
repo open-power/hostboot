@@ -744,7 +744,11 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
                    l_section.crcSPD, l_section.crcActual,
                    i_location );
             TRACFBIN( g_trac_spd, "SPD Data", l_spddata, l_section.numbytes );
+
+// DDR5 SPD currently has a CRC issue that causes miscompares, which fails the boot
+#ifndef CONFIG_ODYSSEY_BRINGUP
             l_foundMiscompare = true;
+#endif
 
             // Write the new CRC out to the SPD if asked
             if( (FIX == i_mode) || (CHECK_AND_FIX == i_mode) )

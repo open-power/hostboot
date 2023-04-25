@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,6 +70,9 @@ errlHndl_t checkForIplAttentions()
 {
     errlHndl_t err = NULL;
 
+/* This causes a bunch of I2C NACK errors to show up during
+   the Odyssey boot */
+#ifndef CONFIG_ODYSSEY_BRINGUP
     assert(!Service::getGlobalInstance()->running());
 
     TargetHandleList     list;
@@ -180,6 +183,8 @@ errlHndl_t checkForIplAttentions()
     }
 
     // ====================================================================
+
+#endif
 
     return l_plidElog;
 }

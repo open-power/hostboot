@@ -133,7 +133,8 @@ void* call_host_set_mem_volt (void *io_pArgs)
         // PMICs are not present on Gemini, so skip this enable call
         // check EXPLORER first as this is most likely the configuration
         uint32_t chipId = l_ocmb_target->getAttr<ATTR_CHIP_ID>();
-        if (chipId == POWER_CHIPID::EXPLORER_16)
+        if (chipId == POWER_CHIPID::EXPLORER_16 ||
+            chipId == POWER_CHIPID::ODYSSEY_16)
         {
             //  Create a new workitem from this membuf and feed it to the
             //  thread pool for processing.  Thread pool handles workitem
