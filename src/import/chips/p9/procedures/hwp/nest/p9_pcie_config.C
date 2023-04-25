@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,10 @@ const uint64_t PCI_NFIR_ACTION0_REG = 0x5B0F81E000000000ULL;
 const uint64_t PCI_NFIR_ACTION1_REG = 0x7F0F81E000000000ULL;
 const uint64_t PCI_NFIR_MASK_REG    = 0x0030001C00000000ULL;
 
+// AND-mask to be applied to ACTION0/ACTION1 to trigger checkstop
+// based on value of ATTR_PROC_PCIE_ECC_HANDLING_MODE
+const uint64_t PCI_NFIR_ECC_HANDLING_XSTOP_MASK = 0xE7FFFFFFFFFFFFFFULL;
+
 // PCI PBCQ Hardware Configuration Register field definitions
 const uint8_t PEC_PBCQ_HWCFG_HANG_POLL_SCALE = 0x1;
 const uint8_t PEC_PBCQ_HWCFG_DATA_POLL_SCALE = 0x1;
@@ -97,6 +101,7 @@ fapi2::ReturnCode p9_pcie_config(
     fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION1_Type l_hw423589_option1;
     fapi2::ATTR_PROC_PCIE_CACHE_INJ_MODE_Type l_cache_inject_mode;
     fapi2::ATTR_PROC_PCIE_CACHE_INJ_THROTTLE_Type l_cache_inject_throttle;
+    fapi2::ATTR_PROC_PCIE_ECC_HANDLING_MODE_Type l_ecc_handling_mode;
     fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE_Type l_extended_addressing_mode;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
@@ -107,6 +112,9 @@ fapi2::ReturnCode p9_pcie_config(
     uint8_t l_attr_proc_pcie_iovalid_enable = 0;
     std::vector<uint64_t> l_base_addr_nm0, l_base_addr_nm1, l_base_addr_m;
     uint64_t l_base_addr_mmio;
+
+    uint64_t l_nfir_action0_reg = PCI_NFIR_ACTION0_REG;
+    uint64_t l_nfir_action1_reg = PCI_NFIR_ACTION1_REG;
 
     auto l_pec_chiplets_vec = i_target.getChildren<fapi2::TARGET_TYPE_PEC>(
                                   fapi2::TARGET_STATE_FUNCTIONAL);
@@ -302,6 +310,16 @@ fapi2::ReturnCode p9_pcie_config(
             l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_TCE_ARBITRATION>();
         }
 
+        // parametrize FIR settings
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_ECC_HANDLING_MODE, l_pec_chiplet, l_ecc_handling_mode),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_ECC_HANDLING_MODE)");
+
+        if (l_ecc_handling_mode == fapi2::ENUM_ATTR_PROC_PCIE_ECC_HANDLING_MODE_CHECKSTOP)
+        {
+            l_nfir_action0_reg &= PCI_NFIR_ECC_HANDLING_XSTOP_MASK;
+            l_nfir_action1_reg &= PCI_NFIR_ECC_HANDLING_XSTOP_MASK;
+        }
+
         FAPI_DBG("PEC%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplet, PEC_PBCQHWCFG_REG, l_buf),
                  "Error from putScom (PEC_PBCQHWCFG_REG)");
@@ -434,19 +452,19 @@ fapi2::ReturnCode p9_pcie_config(
         // Phase2 init step 9
         // NestBase+StackBase+0x6
         // Set the per FIR Bit Action 0 register
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, PCI_NFIR_ACTION0_REG);
+        FAPI_DBG("PHB%i: %#lx", l_phb_id, l_nfir_action0_reg);
         FAPI_TRY(fapi2::putScom(l_phb_chiplet,
                                 PHB_NFIRACTION0_REG,
-                                PCI_NFIR_ACTION0_REG),
+                                l_nfir_action0_reg),
                  "Error from putScom (PHB_NFIRACTION0_REG)");
 
         // Phase2 init step 10
         // NestBase+StackBase+0x7
         // Set the per FIR Bit Action 1 register
-        FAPI_DBG("PHB%i: %#lx", l_phb_id, PCI_NFIR_ACTION1_REG);
+        FAPI_DBG("PHB%i: %#lx", l_phb_id, l_nfir_action1_reg);
         FAPI_TRY(fapi2::putScom(l_phb_chiplet,
                                 PHB_NFIRACTION1_REG,
-                                PCI_NFIR_ACTION1_REG),
+                                l_nfir_action1_reg),
                  "Error from putScom (PHB_NFIRACTION1_REG)");
 
         // Phase2 init step 11

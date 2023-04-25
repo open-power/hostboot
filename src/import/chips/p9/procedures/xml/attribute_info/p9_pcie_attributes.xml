@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -622,6 +622,21 @@
     </description>
     <valueType>uint16</valueType>
     <array>4</array>
+    <platInit/>
+    <persistRuntime/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PROC_PCIE_ECC_HANDLING_MODE</id>
+    <targetType>TARGET_TYPE_PEC</targetType>
+    <description>
+      Attribute which controls the FIR reaction to inbound SUE, UE errors from the system fabric:
+	FREEZE          = 0x0 - default
+	CHECKSTOP       = 0x1 - trigger system checkstop
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FREEZE = 0x0, CHECKSTOP = 0x1</enum>
+    <default>FREEZE</default>
     <platInit/>
     <persistRuntime/>
   </attribute>
