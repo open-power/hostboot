@@ -58,6 +58,9 @@ fapi2::ReturnCode ody_omi_hss_dccal_poll(const fapi2::Target<fapi2::TARGET_TYPE_
     const uint8_t l_thread = 0;
     uint8_t l_done = 0;
     uint32_t l_fail = 0;
+    uint8_t l_pos = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BUS_POS, i_target, l_pos));
 
     l_ppe_regs.flushCache(i_target);
     FAPI_TRY(l_ppe_common.ext_cmd_poll(i_target, l_thread, l_cmd, l_done, l_fail));
@@ -65,10 +68,11 @@ fapi2::ReturnCode ody_omi_hss_dccal_poll(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_ASSERT(l_done && !l_fail,
                 fapi2::IO_PPE_DONE_DCCAL_FAILED()
                 .set_TARGET(i_target)
+                .set_POS(l_pos)
                 .set_FAIL(l_fail)
                 .set_DONE(l_done),
-                "IO PPE Dccal Done Fail :: Done(%d), Fail(0x%04X)",
-                l_done, l_fail);
+                "IO PPE Dccal Done Fail on %d :: Done(%d), Fail(0x%04X)",
+                l_pos, l_done, l_fail);
 
 fapi_try_exit:
     FAPI_DBG("End ody_omi_hss_dccal_poll");

@@ -55,7 +55,9 @@ fapi2::ReturnCode ody_omi_hss_bist_cleanup(const fapi2::Target<fapi2::TARGET_TYP
     const uint8_t l_thread = 0;
     uint8_t l_done = 0;
     uint32_t l_fail = 0;
+    uint8_t l_pos = 0;
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BUS_POS, i_target, l_pos));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LANES, i_target, l_rx_lanes));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_LANES, i_target, l_tx_lanes));
 
@@ -64,22 +66,24 @@ fapi2::ReturnCode ody_omi_hss_bist_cleanup(const fapi2::Target<fapi2::TARGET_TYP
 
     FAPI_ASSERT(l_done && !l_fail,
                 fapi2::IO_PPE_DONE_POLL_FAILED()
+                .set_POS(l_pos)
                 .set_FAIL(l_fail)
                 .set_DONE(l_done)
                 .set_TARGET(i_target),
-                "IO PPE Ext Cmd Clear Done Fail :: Done(%d), Fail(0x%04X)",
-                l_done, l_fail);
+                "IO PPE Ext Cmd Clear Done Fail on %d :: Done(%d), Fail(0x%04X)",
+                l_pos, l_done, l_fail);
 
     FAPI_TRY(l_ppe_common.bist_cleanup(i_target, l_thread, l_rx_lanes, l_tx_lanes, l_done, l_fail),
              "Failed to run common HSS BIST cleanup");
 
     FAPI_ASSERT(l_done && !l_fail,
                 fapi2::IO_PPE_DONE_CLEANUP_FAILED()
+                .set_POS(l_pos)
                 .set_FAIL(l_fail)
                 .set_DONE(l_done)
                 .set_TARGET(i_target),
-                "IO PPE Bist Cleanup Done Fail :: Done(%d), Fail(0x%04X)",
-                l_done, l_fail);
+                "IO PPE Bist Cleanup Done Fail on %d :: Done(%d), Fail(0x%04X)",
+                l_pos, l_done, l_fail);
 
 fapi_try_exit:
     FAPI_DBG("End");

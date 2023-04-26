@@ -77,6 +77,7 @@ enum ERROR_MASK_FIR_BITS
     MASK_TX_DEGRADE_MODE = 45,
     MASK_LOST_BLOCK_LOCK = 30,
     MASK_EDPL_THRESH_REACHED = 27,
+    MASK_RX_PERFORMANCE_THRESH_BREACH = 26,
     MASK_TX_PERFORMANCE_THRESH_BREACH = 25,
     MASK_REMOTE_LINK_ERRRO_4 = 19,
     MASK_REMOTE_LINK_ERROR_5 = 18,
@@ -228,6 +229,7 @@ fapi2::ReturnCode io_ppe_firs<K, M, V>::mc_omi_fir_set(const fapi2::Target<K, M,
     l_buffer.setBit<MASK_TX_DEGRADE_MODE>();
     l_buffer.clearBit<MASK_LOST_BLOCK_LOCK>();
     l_buffer.setBit<MASK_TX_PERFORMANCE_THRESH_BREACH>();
+    l_buffer.clearBit<MASK_RX_PERFORMANCE_THRESH_BREACH>();
     l_buffer.setBit<MASK_EDPL_THRESH_REACHED>();
     l_buffer.clearBit<MASK_REMOTE_LINK_ERRRO_4>();
     l_buffer.clearBit<MASK_REMOTE_LINK_ERROR_5>();

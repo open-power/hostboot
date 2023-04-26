@@ -64,9 +64,9 @@ template<fapi2::TargetType K, fapi2::MulticastType M = fapi2::MULTICAST_OR, type
 class io_ppe_regs
 {
     public:
-        const uint64_t csar_scom_addr;
-        const uint64_t csdr_scom_addr;
-        const uint64_t base_addr;
+        uint64_t csar_scom_addr;
+        uint64_t csdr_scom_addr;
+        uint64_t base_addr;
 
         io_ppe_regs(uint64_t i_csar, uint64_t i_csdr, uint64_t i_base_addr) :
             csar_scom_addr(i_csar), csdr_scom_addr(i_csdr), base_addr(i_base_addr)

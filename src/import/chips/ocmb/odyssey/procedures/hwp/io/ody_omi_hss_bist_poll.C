@@ -56,7 +56,9 @@ fapi2::ReturnCode ody_omi_hss_bist_poll(const fapi2::Target<fapi2::TARGET_TYPE_O
     uint32_t l_rx_lanes = 0;
     uint32_t l_tx_lanes = 0;
     uint32_t l_ext_cmd_override = 0;
+    uint8_t l_pos = 0;
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BUS_POS, i_target, l_pos));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LANES, i_target, l_rx_lanes));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_LANES, i_target, l_tx_lanes));
 
@@ -70,11 +72,12 @@ fapi2::ReturnCode ody_omi_hss_bist_poll(const fapi2::Target<fapi2::TARGET_TYPE_O
 
     FAPI_ASSERT(l_done && !l_fail,
                 fapi2::IO_PPE_DONE_POLL_FAILED()
+                .set_POS(l_pos)
                 .set_FAIL(l_fail)
                 .set_DONE(l_done)
                 .set_TARGET(i_target),
-                "IO PPE Bist Done Fail :: Done(%d), Fail(0x%04X)",
-                l_done, l_fail);
+                "IO PPE Bist Done Fail on %d :: Done(%d), Fail(0x%04X)",
+                l_pos, l_done, l_fail);
 
 fapi_try_exit:
     FAPI_DBG("HWP End: ody_omi_hss_bist_poll");

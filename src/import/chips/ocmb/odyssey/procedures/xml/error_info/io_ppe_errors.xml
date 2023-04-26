@@ -30,6 +30,7 @@
       <rc>RC_IO_PPE_DONE_POLL_FAILED</rc>
       <description>IO PPE done poll time-out</description>
       <ffdc>TARGET</ffdc>
+      <ffdc>POS</ffdc>
       <ffdc>DONE</ffdc>
       <ffdc>FAIL</ffdc>
       <callout>
@@ -42,6 +43,7 @@
       <rc>RC_IO_PPE_DONE_CLEANUP_FAILED</rc>
       <description>IO PPE done BIST clenaup failed</description>
       <ffdc>TARGET</ffdc>
+      <ffdc>POS</ffdc>
       <ffdc>DONE</ffdc>
       <ffdc>FAIL</ffdc>
       <callout>
@@ -53,6 +55,7 @@
     <hwpError>
       <rc>RC_IO_PPE_DONE_DCCAL_FAILED</rc>
       <description>IO PPE done DCCAL poll failed</description>
+      <ffdc>POS</ffdc>
       <ffdc>TARGET</ffdc>
       <ffdc>DONE</ffdc>
       <ffdc>FAIL</ffdc>
