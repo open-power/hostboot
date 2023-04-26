@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,11 +89,11 @@ uint32_t TpsEvent<T>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
 
         // Look for any ECC errors that occurred during the command.
         uint32_t eccAttns;
-        o_rc = checkEccFirs<T>( iv_chip, eccAttns );
+        o_rc = checkEccFirs<T>( iv_chip, iv_port, eccAttns );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x) failed",
-                      iv_chip->getHuid() );
+            PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x, %x) failed",
+                      iv_chip->getHuid(), iv_port );
             break;
         }
 

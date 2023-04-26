@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,10 +41,7 @@
 #include <iipconst.h>
 #include <targeting/common/target.H>
 #include <prdfParserEnums.H>
-
-#ifdef __HOSTBOOT_MODULE
-  #include <chipids.H>
-#endif
+#include <chipids.H>
 
 //------------------------------------------------------------------------------
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,12 +145,14 @@ enum MaintEccAttns
 /**
  * @brief  Checks for all currently active maintenance attentions.
  * @param  i_chip     OCMB.
+ * @param  i_port     Target port.
  * @param  o_eccAttns Mask of all currently active maintenance attentions. See
  *                    enum MaintEccAttns for values.
  * @return Non-SUCCESS on SCOM failures, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-uint32_t checkEccFirs( ExtensibleChip * i_chip, uint32_t & o_eccAttns );
+uint32_t checkEccFirs( ExtensibleChip * i_chip, const uint8_t& i_port,
+                       uint32_t & o_eccAttns );
 
 /**
  * @param  i_chip              OCMB.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1254,9 +1254,7 @@ uint8_t getNumRanksPerDimm<TYPE_OCMB_CHIP>(TargetHandle_t i_trgt, uint8_t i_ds)
 
 bool isOdysseyOcmb(TARGETING::TargetHandle_t i_trgt)
 {
-    // The Odyssey chip ID value of 0x60C0 is copied from the chipids.H file
-    // in Hostboot.
-    return (getChipId(i_trgt) == 0x60C0);
+    return (getChipId(i_trgt) == POWER_CHIPID::ODYSSEY_16);
 }
 
 //##############################################################################

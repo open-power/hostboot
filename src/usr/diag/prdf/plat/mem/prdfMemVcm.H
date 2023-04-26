@@ -186,11 +186,11 @@ class VcmEvent : public TdEntry
 
             // Look for any ECC errors that occurred during the command.
             uint32_t eccAttns;
-            o_rc = checkEccFirs<T>( iv_chip, eccAttns );
+            o_rc = checkEccFirs<T>( iv_chip, iv_port, eccAttns );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x) failed",
-                          iv_chip->getHuid() );
+                PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x, %x) failed",
+                          iv_chip->getHuid(), iv_port );
                 break;
             }
 

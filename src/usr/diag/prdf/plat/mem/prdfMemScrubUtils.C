@@ -175,11 +175,10 @@ uint32_t clearEccFirs<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t checkEccFirs<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                       uint32_t & o_eccAttns )
+uint32_t __expCheckEccFirs( ExtensibleChip * i_chip, const uint8_t& i_port,
+                            uint32_t & o_eccAttns )
 {
-    #define PRDF_FUNC "[checkEccFirs<TYPE_OCMB_CHIP>] "
+    #define PRDF_FUNC "[__expCheckEccFirs] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -232,6 +231,84 @@ uint32_t checkEccFirs<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     return o_rc;
 
     #undef PRDF_FUNC
+}
+
+uint32_t __odyCheckEccFirs( ExtensibleChip * i_chip, const uint8_t& i_port,
+                            uint32_t & o_eccAttns )
+{
+    #define PRDF_FUNC "[__odyCheckEccFirs] "
+
+    uint32_t o_rc = SUCCESS;
+
+    o_eccAttns = MAINT_NO_ERROR;
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    char rdfName[64];
+
+    sprintf(rdfName, "RDF_FIR_%x", i_port);
+
+    SCAN_COMM_REGISTER_CLASS * rdffir    = i_chip->getRegister(rdfName);
+    SCAN_COMM_REGISTER_CLASS * mcbistfir = i_chip->getRegister("MCBIST_FIR");
+
+    do
+    {
+        o_rc = rdffir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on RDFFIR: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // We can assume that any chip mark placed by a maintenance command was
+        // done on the rank in which the command stopped. So we can blindly
+        // check all bits to determine if there was an MPE on the stopped rank.
+        if ( 0 != rdffir->GetBitFieldJustified(21,8) ) o_eccAttns |= MAINT_MPE;
+
+        if ( rdffir->IsBitSet(29) ) o_eccAttns |= MAINT_NCE;
+        if ( rdffir->IsBitSet(30) ) o_eccAttns |= MAINT_TCE;
+        if ( rdffir->IsBitSet(31) ) o_eccAttns |= MAINT_SCE;
+        if ( rdffir->IsBitSet(32) ) o_eccAttns |= MAINT_MCE;
+        if ( rdffir->IsBitSet(35) ) o_eccAttns |= MAINT_UE;
+        if ( rdffir->IsBitSet(38) ) o_eccAttns |= MAINT_IUE;
+        if ( rdffir->IsBitSet(40) ) o_eccAttns |= MAINT_IMPE;
+
+        o_rc = mcbistfir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCBISTFIR: mcbChip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        if ( mcbistfir->IsBitSet(6) ) o_eccAttns |= MAINT_HARD_NCE_ETE;
+        if ( mcbistfir->IsBitSet(7) ) o_eccAttns |= MAINT_SOFT_NCE_ETE;
+        if ( mcbistfir->IsBitSet(8) ) o_eccAttns |= MAINT_INT_NCE_ETE;
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t checkEccFirs<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                       const uint8_t& i_port,
+                                       uint32_t & o_eccAttns )
+{
+    // Check for Odyssey OCMBs
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        return __odyCheckEccFirs(i_chip, i_port, o_eccAttns);
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        return __expCheckEccFirs(i_chip, i_port, o_eccAttns);
+    }
 }
 
 //------------------------------------------------------------------------------

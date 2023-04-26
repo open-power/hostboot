@@ -172,10 +172,11 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
     {
         // Check for ECC errors.
         uint32_t eccAttns = 0;
-        o_rc = checkEccFirs<T>( i_chip, eccAttns );
+        o_rc = checkEccFirs<T>( i_chip, i_addr.getPort(), eccAttns );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "checkEccFirs<T>(0x%08x) failed", huid );
+            PRDF_ERR( PRDF_FUNC "checkEccFirs<T>(0x%08x, %x) failed", huid,
+                      i_addr.getPort() );
             break;
         }
 
