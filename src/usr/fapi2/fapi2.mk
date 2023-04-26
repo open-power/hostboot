@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2022
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -72,9 +72,7 @@ endef
 #Hostboot objects
 OBJS += plat_utils.o
 OBJS += attribute_service.o
-#OBJS += plat_attribute_service.o
 OBJS += plat_attr_override_sync.o
-#OBJS += plat_hwp_invoker.o
 OBJS += target.o
 OBJS += plat_hw_access.o
 OBJS += plat_spd_access.o
