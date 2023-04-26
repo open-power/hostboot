@@ -192,7 +192,8 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
                 continue;
             }
 
-            rc = MarkStore::readSymbolMark<T>( chip, rank, sm );
+            // TODO Odyssey - collect both port0 and port1
+            rc = MarkStore::readSymbolMark<T>( chip, rank, 0, sm );
             if ( SUCCESS != rc )
             {
                 PRDF_ERR( PRDF_FUNC "readSymbolMark<T>(0x%08x,0x%02x) "

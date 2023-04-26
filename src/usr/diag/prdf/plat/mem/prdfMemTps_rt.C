@@ -476,11 +476,11 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         // TODO Odyssey - need to know the port for the MemMarks
         // Get the symbol mark.
         MemMark symMark;
-        o_rc = MarkStore::readSymbolMark<T>( iv_chip, iv_rank, symMark );
+        o_rc = MarkStore::readSymbolMark<T>(iv_chip, iv_rank, iv_port, symMark);
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "readSymbolMark<T>(0x%08x, 0x%02x) "
-                      "failed", iv_chip->getHuid(), iv_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "readSymbolMark<T>(0x%08x, 0x%02x, %x) "
+                      "failed", iv_chip->getHuid(), iv_rank.getKey(), iv_port );
             break;
         }
 
@@ -530,11 +530,12 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             {
                 // Placing a chip mark to deploy a spare does not risk a UE
                 MemMark newCM(trgt, iv_rank, i_badDqCount.symList.at(0).symbol);
-                o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank, newCM );
+                o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank, iv_port,
+                                                    newCM );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
-                              "failed", iv_chip->getHuid(), getKey() );
+                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x,%x) "
+                              "failed", iv_chip->getHuid(), getKey(), iv_port );
                     break;
                 }
             }
@@ -557,11 +558,12 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         MemSymbol symbol = i_badDqCount.symList.at(0).symbol;
                         MemMark newSymMark( trgt, iv_rank, symbol );
                         o_rc = MarkStore::writeSymbolMark<T>( iv_chip,
-                                iv_rank, newSymMark );
+                                iv_rank, iv_port, newSymMark );
                         if ( SUCCESS != o_rc )
                         {
-                            PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x)"
-                                      " failed", iv_chip->getHuid(), getKey() );
+                            PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x,"
+                                      "%x) failed", iv_chip->getHuid(),
+                                      getKey(), iv_port );
                             break;
                         }
 
@@ -620,11 +622,12 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             {
                 // Placing a chip mark to deploy a spare does not risk a UE
                 MemMark newCM(trgt, iv_rank, i_badDqCount.symList.at(0).symbol);
-                o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank, newCM );
+                o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank, iv_port,
+                                                   newCM );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
-                              "failed", iv_chip->getHuid(), getKey() );
+                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x,%x) "
+                              "failed", iv_chip->getHuid(), getKey(), iv_port );
                     break;
                 }
             }
@@ -656,11 +659,13 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
                         MemMark newSymMark( trgt, iv_rank, highSym.symbol );
                         o_rc = MarkStore::writeSymbolMark<T>( iv_chip, iv_rank,
+                                                              iv_port,
                                                               newSymMark );
                         if ( SUCCESS != o_rc )
                         {
-                            PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x)"
-                                      " failed", iv_chip->getHuid(), getKey() );
+                            PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x,"
+                                      "%x) failed", iv_chip->getHuid(),
+                                      getKey(), iv_port );
                             break;
                         }
 
@@ -741,11 +746,12 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     MemMark newChipMark( trgt, iv_rank,
                                          i_badChipCount.symList.at(0).symbol );
                     o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank,
-                                                        newChipMark );
+                                                        iv_port, newChipMark );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
-                                  "failed", iv_chip->getHuid(), getKey() );
+                        PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x,%x) "
+                                  "failed", iv_chip->getHuid(), getKey(),
+                                  iv_port );
                         break;
                     }
 
@@ -822,11 +828,12 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     MemMark newChipMark( trgt, iv_rank,
                                          i_badChipCount.symList.at(0).symbol );
                     o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank,
-                                                        newChipMark );
+                                                        iv_port, newChipMark );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
-                                  "failed", iv_chip->getHuid(), getKey() );
+                        PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x,%x) "
+                                  "failed", iv_chip->getHuid(), getKey(),
+                                  iv_port );
                         break;
                     }
 
@@ -841,12 +848,14 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         // instead of at the end of the function to make room
                         // for the additional symbol mark.
                         o_rc = MarkStore::clearSymbolMark<T>( iv_chip,
-                                                              iv_rank );
+                                                              iv_rank,
+                                                              iv_port );
                         if ( SUCCESS != o_rc )
                         {
                             PRDF_ERR( PRDF_FUNC "MarkStore::clearSymbolMark("
-                                      "0x%08x,0x%02x) failed",
-                                      iv_chip->getHuid(), iv_rank.getKey() );
+                                      "0x%08x,0x%02x,%x) failed",
+                                      iv_chip->getHuid(), iv_rank.getKey(),
+                                      iv_port );
                             break;
                         }
 
@@ -897,11 +906,12 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     MemMark newSymMark( trgt, iv_rank,
                                         i_badDqCount.symList.at(0).symbol );
                     o_rc = MarkStore::writeSymbolMark<T>( iv_chip,
-                        iv_rank, newSymMark );
+                        iv_rank, iv_port, newSymMark );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x) "
-                                  "failed", iv_chip->getHuid(), getKey() );
+                        PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x,%x) "
+                                  "failed", iv_chip->getHuid(), getKey(),
+                                  iv_port );
                         break;
                     }
 

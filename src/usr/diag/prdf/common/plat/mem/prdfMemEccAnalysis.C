@@ -1069,8 +1069,9 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             else // Otherwise, place a chip mark on the failing DRAM.
             {
                 MemMark chipMark( trgt, rank, galois );
+                // TODO Odyssey - need port
                 o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>( i_chip, rank,
-                                                                 chipMark );
+                                                                 0, chipMark );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) failed",

@@ -74,7 +74,7 @@ template<>
 uint32_t readChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     const MemRank & i_rank, const uint8_t& i_port, MemMark & o_mark)
 {
-    #define PRDF_FUNC "[readChipMark<T>] "
+    #define PRDF_FUNC "[readChipMark<TYPE_OCMB_CHIP>] "
 
     // TODO Odyssey - need adjustments for new registers and new galois mapping
 
@@ -128,19 +128,31 @@ uint32_t readChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-uint32_t writeChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
-                        const MemMark & i_mark )
+template<>
+uint32_t writeChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+    const MemRank & i_rank, const uint8_t& i_port, const MemMark & i_mark )
 {
-    #define PRDF_FUNC "[writeChipMark<T>] "
+    #define PRDF_FUNC "[writeChipMark<TYPE_OCMB_CHIP>] "
 
     PRDF_ASSERT( i_mark.isValid() );
+
+    // TODO Odyssey - need adjustments to galois mapping for x8 drams
 
     uint32_t o_rc = SUCCESS;
 
     // get the register name
     char msName[64];
-    sprintf( msName, "HW_MS%x", i_rank.getMaster() );
+
+    // Check for Odyssey OCMBs
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        sprintf( msName, "HW_MS%x_%x", i_rank.getMaster(), i_port );
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        sprintf( msName, "HW_MS%x", i_rank.getMaster() );
+    }
 
     // get the mark store register
     SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
@@ -168,23 +180,28 @@ uint32_t writeChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
     #undef PRDF_FUNC
 }
 
-template
-uint32_t writeChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                        const MemRank & i_rank,
-                                        const MemMark & i_mark );
-
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-uint32_t clearChipMark( ExtensibleChip * i_chip, const MemRank & i_rank )
+template<>
+uint32_t clearChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+    const MemRank & i_rank, const uint8_t& i_port )
 {
-    #define PRDF_FUNC "[clearChipMark<T>] "
+    #define PRDF_FUNC "[clearChipMark<TYPE_OCMB_CHIP>] "
 
     uint32_t o_rc = SUCCESS;
 
     // get the register name
     char msName[64];
-    sprintf( msName, "HW_MS%x", i_rank.getMaster() );
+
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        sprintf( msName, "HW_MS%x_%x", i_rank.getMaster(), i_port );
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        sprintf( msName, "HW_MS%x", i_rank.getMaster() );
+    }
 
     // get the mark store register
     SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
@@ -204,24 +221,31 @@ uint32_t clearChipMark( ExtensibleChip * i_chip, const MemRank & i_rank )
     #undef PRDF_FUNC
 }
 
-template
-uint32_t clearChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                        const MemRank & i_rank );
-
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-uint32_t readSymbolMark( ExtensibleChip * i_chip,
-                         const MemRank & i_rank, MemMark & o_mark )
+template<>
+uint32_t readSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+    const MemRank & i_rank, const uint8_t& i_port, MemMark & o_mark )
 {
-    #define PRDF_FUNC "[readSymbolMark<T>] "
+    #define PRDF_FUNC "[readSymbolMark<TYPE_OCMB_CHIP>] "
+
+    // TODO Odyssey - need adjustments to galois mapping for x8 drams
 
     uint32_t o_rc = SUCCESS;
     o_mark = MemMark(); // ensure invalid
 
     // get the register name
     char msName[64];
-    sprintf( msName, "FW_MS%x", i_rank.getMaster() );
+
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        sprintf( msName, "FW_MS%x_%x", i_rank.getMaster(), i_port );
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        sprintf( msName, "FW_MS%x", i_rank.getMaster() );
+    }
 
     // get the mark store register
     SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
@@ -270,18 +294,15 @@ uint32_t readSymbolMark( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-template
-uint32_t readSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                         const MemRank & i_rank,
-                                         MemMark & o_mark );
-
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-uint32_t writeSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          const MemMark & i_mark )
+template<>
+uint32_t writeSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+    const MemRank & i_rank, const uint8_t& i_port, const MemMark & i_mark )
 {
-    #define PRDF_FUNC "[writeSymbolMark<T>] "
+    #define PRDF_FUNC "[writeSymbolMark<TYPE_OCMB_CHIP>] "
+
+    // TODO Odyssey - need adjustments to galois mapping for x8 drams
 
     PRDF_ASSERT( i_mark.isValid() );
 
@@ -289,7 +310,16 @@ uint32_t writeSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
 
     // get the register name
     char msName[64];
-    sprintf( msName, "FW_MS%x", i_rank.getMaster() );
+
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        sprintf( msName, "FW_MS%x_%x", i_rank.getMaster(), i_port );
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        sprintf( msName, "FW_MS%x", i_rank.getMaster() );
+    }
 
     // get the mark store register
     SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
@@ -326,23 +356,28 @@ uint32_t writeSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
     #undef PRDF_FUNC
 }
 
-template
-uint32_t writeSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                          const MemRank & i_rank,
-                                          const MemMark & i_mark );
-
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-uint32_t clearSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank )
+template<>
+uint32_t clearSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+    const MemRank & i_rank, const uint8_t& i_port )
 {
-    #define PRDF_FUNC "[clearSymbolMark<T>] "
+    #define PRDF_FUNC "[clearSymbolMark<TYPE_OCMB_CHIP>] "
 
     uint32_t o_rc = SUCCESS;
 
     // get the register name
     char msName[64];
-    sprintf( msName, "FW_MS%x", i_rank.getMaster() );
+
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        sprintf( msName, "FW_MS%x_%x", i_rank.getMaster(), i_port );
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        sprintf( msName, "FW_MS%x", i_rank.getMaster() );
+    }
 
     // get the mark store register
     SCAN_COMM_REGISTER_CLASS * fwms = i_chip->getRegister( msName );
@@ -361,10 +396,6 @@ uint32_t clearSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank )
 
     #undef PRDF_FUNC
 }
-
-template
-uint32_t clearSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                          const MemRank & i_rank );
 
 //------------------------------------------------------------------------------
 
@@ -667,11 +698,11 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
 
         // Get the symbol mark.
         MemMark symMark;
-        o_rc = readSymbolMark<T>( i_chip, i_rank, symMark );
+        o_rc = readSymbolMark<T>( i_chip, i_rank, i_port, symMark );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "readSymbolMark(0x%08x,0x%02x) failed",
-                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "readSymbolMark(0x%08x,0x%02x,%x) failed",
+                      i_chip->getHuid(), i_rank.getKey(), i_port );
             break;
         }
 
@@ -680,11 +711,11 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
         if ( symMark.isValid() &&
              chipMark.getSymbol().getDram() == symMark.getSymbol().getDram() )
         {
-            o_rc = clearSymbolMark<T>( i_chip, i_rank );
+            o_rc = clearSymbolMark<T>( i_chip, i_rank, i_port );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "clearSymbolMark(0x%08x,0x%02x) failed",
-                          i_chip->getHuid(), i_rank.getKey() );
+                PRDF_ERR( PRDF_FUNC "clearSymbolMark(0x%08x,0x%02x,%x) failed",
+                          i_chip->getHuid(), i_rank.getKey(), i_port );
                 break;
             }
 

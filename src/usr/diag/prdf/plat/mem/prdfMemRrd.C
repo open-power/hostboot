@@ -137,11 +137,11 @@ uint32_t RrdEvent<T>::verifyRowRepair( STEP_CODE_DATA_STRUCT & io_sc,
             io_sc.service_data->setSignature( iv_chip->getHuid(),
                                               PRDFSIG_RrdRowDeployed );
 
-            o_rc = MarkStore::clearChipMark<T>( iv_chip, iv_rank );
+            o_rc = MarkStore::clearChipMark<T>( iv_chip, iv_rank, iv_port );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "clearChipMark(0x%08x,0x%02x) failed",
-                          iv_chip->getHuid(), getKey() );
+                PRDF_ERR( PRDF_FUNC "clearChipMark(0x%08x,0x%02x,%x) failed",
+                          iv_chip->getHuid(), getKey(), iv_port );
                 break;
             }
         }

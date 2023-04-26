@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,11 +65,11 @@ uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Remove the chip mark.
-        o_rc = MarkStore::clearChipMark<T>( iv_chip, iv_rank );
+        o_rc = MarkStore::clearChipMark<T>( iv_chip, iv_rank, iv_port );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "clearChipMark(0x%08x,0x%02x) failed",
-                      iv_chip->getHuid(), getKey() );
+            PRDF_ERR( PRDF_FUNC "clearChipMark(0x%08x,0x%02x,%x) failed",
+                      iv_chip->getHuid(), getKey(), iv_port );
             break;
         }
 

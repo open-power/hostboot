@@ -222,8 +222,9 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
                 continue; // skip this rank
             }
 
+            // TODO Odyssey - need port to get the MemMarks, check both ports
             MemMark sm;
-            if ( SUCCESS != MarkStore::readSymbolMark<T>( chip, rank, sm ) )
+            if ( SUCCESS != MarkStore::readSymbolMark<T>( chip, rank, 0, sm ) )
             {
                 PRDF_ERR( PRDF_FUNC "readSymbolMark<T>(0x%08x,0x%02x) "
                           "failed", chip->getHuid(), rank.getKey() );
