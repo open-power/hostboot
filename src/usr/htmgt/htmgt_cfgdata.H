@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,6 +82,7 @@ namespace HTMGT
         OCC_CFGDATA_TCT_CONFIG     = 0x13,  // Thermal Control Treshold
         OCC_CFGDATA_AVSBUS_CONFIG  = 0x14,  // AVSBus Config
         OCC_CFGDATA_GPU_CONFIG     = 0x15,  // GPU Config
+        OCC_CFGDATA_MEM_POWER      = 0x16,  // Memory Power
 
         OCC_CFGDATA_FORMAT_END,             // Marker to indicate last entry
         OCC_CFGDATA_CLEAR_ALL      = 0xFF,  // Clear All Active Config Data
@@ -157,6 +158,7 @@ namespace HTMGT
         { OCC_CFGDATA_APSS_CONFIG,    TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_OCC_ROLE,       TARGET_ALL,  TO_20SEC,CFGSTATE_STANDBY },
         { OCC_CFGDATA_MEM_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
+        { OCC_CFGDATA_MEM_POWER,      TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_PCAP_CONFIG,    TARGET_MASTER, TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_MEM_THROTTLE,   TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
         // MEM_CONFIG must be sent before TCT_CONFIG to ensure correct memory thresholds

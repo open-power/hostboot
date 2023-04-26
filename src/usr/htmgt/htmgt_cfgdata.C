@@ -52,250 +52,263 @@ using namespace TARGETING;
 namespace HTMGT
 {
 
+void getMemPowerMessageData(Occ *i_occ,
+                             uint8_t* o_data,
+                             uint64_t & o_size);
+
 #define OCC_MEM_TYPE_EXPLORER 0xA0
 #define OCC_MEM_TYPE_ODYSSEY  0xB0
 #define OCC_MEM_TYPE_ISDIMM   0xC0
-    bool G_wofSupported = true;
-    uint8_t G_system_type = 0;
-    uint8_t G_memory_type = OCC_MEM_TYPE_EXPLORER;
+bool G_wofSupported = true;
+uint8_t G_system_type = 0;
+uint8_t G_memory_type = OCC_MEM_TYPE_EXPLORER;
 
 
-    // Send config format data to all OCCs
-    errlHndl_t sendOccConfigData(const occCfgDataFormat i_requestedFormat)
+// Send config format data to all OCCs
+errlHndl_t sendOccConfigData(const occCfgDataFormat i_requestedFormat)
+{
+    errlHndl_t l_err = nullptr;
+    uint8_t cmdData[OCC_MAX_DATA_LENGTH] = {0};
+
+    if (G_debug_trace & DEBUG_TRACE_VERBOSE)
     {
-        errlHndl_t l_err = nullptr;
-        uint8_t cmdData[OCC_MAX_DATA_LENGTH] = {0};
+        TMGT_INF("sendOccConfigData called");
+    }
 
-        if (G_debug_trace & DEBUG_TRACE_VERBOSE)
+    const occCfgDataTable_t* start = &occCfgDataTable[0];
+    const occCfgDataTable_t* end =
+        &occCfgDataTable[OCC_CONFIG_TABLE_SIZE];
+    bool validFormat = true;
+    if (OCC_CFGDATA_CLEAR_ALL != i_requestedFormat)
+    {
+        const occCfgDataTable_t * target =
+            std::find(start, end, i_requestedFormat);
+        if (target != end)
         {
-            TMGT_INF("sendOccConfigData called");
+            // only need to send a single packet
+            start = target;
+            end = start+1;
         }
-
-        const occCfgDataTable_t* start = &occCfgDataTable[0];
-        const occCfgDataTable_t* end =
-            &occCfgDataTable[OCC_CONFIG_TABLE_SIZE];
-        bool validFormat = true;
-        if (OCC_CFGDATA_CLEAR_ALL != i_requestedFormat)
+        else
         {
-            const occCfgDataTable_t * target =
-                std::find(start, end, i_requestedFormat);
-            if (target != end)
-            {
-                // only need to send a single packet
-                start = target;
-                end = start+1;
-            }
-            else
-            {
-                TMGT_ERR("sendOccConfigData: Invalid cfg format supplied %d",
-                         i_requestedFormat);
-                validFormat = false;
-            }
+            TMGT_ERR("sendOccConfigData: Invalid cfg format supplied %d",
+                     i_requestedFormat);
+            validFormat = false;
         }
+    }
 
-        if (validFormat)
+    if (validFormat)
+    {
+        // Loop through all functional OCCs
+        std::vector<Occ*> occList = OccManager::getOccArray();
+        for (std::vector<Occ*>::iterator itr = occList.begin();
+             itr < occList.end();
+             itr++)
         {
-            // Loop through all functional OCCs
-            std::vector<Occ*> occList = OccManager::getOccArray();
-            for (std::vector<Occ*>::iterator itr = occList.begin();
-                 itr < occList.end();
-                 itr++)
-            {
-                Occ * occ = (*itr);
-                const uint8_t occInstance = occ->getInstance();
-                const occRole role = occ->getRole();
+            Occ * occ = (*itr);
+            const uint8_t occInstance = occ->getInstance();
+            const occRole role = occ->getRole();
 
-                // MAP HOMER for this OCC
-                TARGETING::Target* procTarget = nullptr;
-                procTarget = TARGETING::
-                    getImmediateParentByAffinity(occ->getTarget());
-                HBPM::ScopedHomerMapper l_mapper(procTarget);
-                l_err = l_mapper.map();
-                if (l_err)
+            // MAP HOMER for this OCC
+            TARGETING::Target* procTarget = nullptr;
+            procTarget = TARGETING::
+                getImmediateParentByAffinity(occ->getTarget());
+            HBPM::ScopedHomerMapper l_mapper(procTarget);
+            l_err = l_mapper.map();
+            if (l_err)
+            {
+                TMGT_ERR("sendOccConfigData: Unable to get HOMER virtual "
+                         "address for OCC%d (rc=0x%04X)",
+                         occInstance, l_err->reasonCode());
+                l_err->collectTrace(HTMGT_COMP_NAME);
+                l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                break;
+            }
+            occ->setHomerAddr(l_mapper.getHomerVirtAddr());
+
+            // Loop through all config data types
+            for (const occCfgDataTable_t *itr = start; itr < end; ++itr)
+            {
+                const occCfgDataFormat format = itr->format;
+                bool sendData = true;
+
+                // Make sure format is supported by this OCC
+                if (TARGET_MASTER == itr->targets)
                 {
-                    TMGT_ERR("sendOccConfigData: Unable to get HOMER virtual "
-                             "address for OCC%d (rc=0x%04X)",
-                             occInstance, l_err->reasonCode());
-                    l_err->collectTrace(HTMGT_COMP_NAME);
-                    l_err->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-                    break;
+                    if (OCC_ROLE_MASTER != role)
+                    {
+                        sendData = false;
+                    }
                 }
-                occ->setHomerAddr(l_mapper.getHomerVirtAddr());
 
-                // Loop through all config data types
-                for (const occCfgDataTable_t *itr = start; itr < end; ++itr)
+                // Make sure data is supported in the current state
+                const occStateId state = occ->getState();
+                if (CFGSTATE_STANDBY == itr->supportedStates)
                 {
-                    const occCfgDataFormat format = itr->format;
-                    bool sendData = true;
-
-                    // Make sure format is supported by this OCC
-                    if (TARGET_MASTER == itr->targets)
+                    if (OCC_STATE_STANDBY != state)
                     {
-                        if (OCC_ROLE_MASTER != role)
-                        {
-                            sendData = false;
-                        }
+                        sendData = false;
                     }
-
-                    // Make sure data is supported in the current state
-                    const occStateId state = occ->getState();
-                    if (CFGSTATE_STANDBY == itr->supportedStates)
+                }
+                else if (CFGSTATE_SBYOBS == itr->supportedStates)
+                {
+                    if ((OCC_STATE_STANDBY != state) &&
+                        (OCC_STATE_OBSERVATION != state))
                     {
-                        if (OCC_STATE_STANDBY != state)
-                        {
-                            sendData = false;
-                        }
+                        sendData = false;
                     }
-                    else if (CFGSTATE_SBYOBS == itr->supportedStates)
+                }
+
+                if (sendData)
+                {
+                    uint64_t cmdDataLen = 0;
+                    switch(format)
                     {
-                        if ((OCC_STATE_STANDBY != state) &&
-                            (OCC_STATE_OBSERVATION != state))
-                        {
-                            sendData = false;
-                        }
-                    }
+                        case OCC_CFGDATA_OCC_ROLE:
+                            getOCCRoleMessageData(OCC_ROLE_MASTER ==
+                                                  occ->getRole(),
+                                                  OCC_ROLE_FIR_MASTER ==
+                                                  occ->getRole(),
+                                                  cmdData, cmdDataLen);
+                            break;
 
-                    if (sendData)
-                    {
-                        uint64_t cmdDataLen = 0;
-                        switch(format)
-                        {
-                            case OCC_CFGDATA_OCC_ROLE:
-                                getOCCRoleMessageData(OCC_ROLE_MASTER ==
-                                                      occ->getRole(),
-                                                      OCC_ROLE_FIR_MASTER ==
-                                                      occ->getRole(),
-                                                      cmdData, cmdDataLen);
-                                break;
+                        case OCC_CFGDATA_APSS_CONFIG:
+                            getApssMessageData(cmdData, cmdDataLen);
+                            break;
 
-                            case OCC_CFGDATA_APSS_CONFIG:
-                                getApssMessageData(cmdData, cmdDataLen);
-                                break;
+                        case OCC_CFGDATA_MEM_CONFIG:
+                            getMemConfigMessageData(occ,
+                                                    cmdData, cmdDataLen);
+                            break;
 
-                            case OCC_CFGDATA_MEM_CONFIG:
-                                getMemConfigMessageData(occ,
-                                                        cmdData, cmdDataLen);
-                                break;
+                        case OCC_CFGDATA_PCAP_CONFIG:
+                            getPowerCapMessageData(cmdData, cmdDataLen);
+                            break;
 
-                            case OCC_CFGDATA_PCAP_CONFIG:
-                                getPowerCapMessageData(cmdData, cmdDataLen);
-                                break;
+                        case OCC_CFGDATA_SYS_CONFIG:
+                            getSystemConfigMessageData(*occ,
+                                                       cmdData, cmdDataLen);
+                            break;
 
-                            case OCC_CFGDATA_SYS_CONFIG:
-                                getSystemConfigMessageData(*occ,
-                                                           cmdData, cmdDataLen);
-                                break;
+                        case OCC_CFGDATA_MEM_THROTTLE:
+                            if (!int_flags_set(FLAG_DISABLE_MEM_CONFIG))
+                            {
+                                getMemThrottleMessageData(occ->getTarget(),
+                                                          occInstance,
+                                                          cmdData,
+                                                          cmdDataLen);
+                            }
+                            break;
 
-                            case OCC_CFGDATA_MEM_THROTTLE:
-                                if (!int_flags_set(FLAG_DISABLE_MEM_CONFIG))
-                                {
-                                    getMemThrottleMessageData(occ->getTarget(),
-                                                              occInstance,
-                                                              cmdData,
-                                                              cmdDataLen);
-                                }
-                                break;
+                        case OCC_CFGDATA_TCT_CONFIG:
+                            getThermalControlMessageData(procTarget,
+                                                         cmdData,
+                                                         cmdDataLen);
+                            break;
 
-                            case OCC_CFGDATA_TCT_CONFIG:
-                                getThermalControlMessageData(procTarget,
-                                                             cmdData,
-                                                             cmdDataLen);
-                                break;
-
-                            case OCC_CFGDATA_AVSBUS_CONFIG:
-                                getAVSBusConfigMessageData( occ->getTarget(),
-                                                            cmdData,
-                                                            cmdDataLen );
-                                break;
-
-                            case OCC_CFGDATA_GPU_CONFIG:
-                                getGPUConfigMessageData(occ->getTarget(),
+                        case OCC_CFGDATA_AVSBUS_CONFIG:
+                            getAVSBusConfigMessageData( occ->getTarget(),
                                                         cmdData,
-                                                        cmdDataLen);
-                                break;
+                                                        cmdDataLen );
+                            break;
 
-                            default:
-                                TMGT_ERR("sendOccConfigData: Unsupported"
-                                         " format type 0x%02X",
-                                         format);
-                        }
+                        case OCC_CFGDATA_GPU_CONFIG:
+                            getGPUConfigMessageData(occ->getTarget(),
+                                                    cmdData,
+                                                    cmdDataLen);
+                            break;
 
-                        if (cmdDataLen > 0)
+                        case OCC_CFGDATA_MEM_POWER:
+                            if (!int_flags_set(FLAG_DISABLE_MEM_CONFIG))
+                            {
+                                getMemPowerMessageData(occ,
+                                                       cmdData,
+                                                       cmdDataLen);
+                            }
+                            break;
+
+                        default:
+                            TMGT_ERR("sendOccConfigData: Unsupported"
+                                     " format type 0x%02X",
+                                     format);
+                    }
+
+                    if (cmdDataLen > 0)
+                    {
+                        TMGT_INF("sendOccConfigData: Sending config"
+                                 " 0x%02X to OCC%d",
+                                 format, occInstance);
+                        OccCmd cmd(occ, OCC_CMD_SETUP_CFG_DATA,
+                                   cmdDataLen, cmdData);
+                        l_err = cmd.sendOccCmd();
+                        if (l_err != nullptr)
                         {
-                            TMGT_INF("sendOccConfigData: Sending config"
-                                     " 0x%02X to OCC%d",
-                                     format, occInstance);
-                            OccCmd cmd(occ, OCC_CMD_SETUP_CFG_DATA,
-                                       cmdDataLen, cmdData);
-                            l_err = cmd.sendOccCmd();
-                            if (l_err != nullptr)
+                            TMGT_ERR("sendOccConfigData: OCC%d cfg "
+                                     "format 0x%02X failed with rc=0x%04X",
+                                     occInstance, format,
+                                     l_err->reasonCode());
+                            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                        }
+                        else
+                        {
+                            if (OCC_RC_SUCCESS != cmd.getRspStatus())
                             {
                                 TMGT_ERR("sendOccConfigData: OCC%d cfg "
-                                         "format 0x%02X failed with rc=0x%04X",
+                                         "format 0x%02X had bad rsp status"
+                                         " 0x%02X",
                                          occInstance, format,
-                                         l_err->reasonCode());
-                                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
-                            }
-                            else
-                            {
-                                if (OCC_RC_SUCCESS != cmd.getRspStatus())
-                                {
-                                    TMGT_ERR("sendOccConfigData: OCC%d cfg "
-                                             "format 0x%02X had bad rsp status"
-                                             " 0x%02X",
-                                             occInstance, format,
-                                             cmd.getRspStatus());
-                                }
-                            }
-
-                            // Send poll between config packets to flush errors
-                            l_err = occ->pollForErrors(false);
-                            if (l_err)
-                            {
-                                ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                                         cmd.getRspStatus());
                             }
                         }
-                    } // if (sendData)
 
-                    if (OccManager::occNeedsReset())
-                    {
-                        TMGT_ERR("sendOccConfigData(): OCCs need to be reset");
-                        // No reason to keep sending config data for this OCC
-                        break;
+                        // Send poll between config packets to flush errors
+                        l_err = occ->pollForErrors(false);
+                        if (l_err)
+                        {
+                            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+                        }
                     }
-
-                } // for each config format
-                occ->invalidateHomer();
+                } // if (sendData)
 
                 if (OccManager::occNeedsReset())
                 {
-                    // All OCCs are going to be reset so no need to continue
+                    TMGT_ERR("sendOccConfigData(): OCCs need to be reset");
+                    // No reason to keep sending config data for this OCC
                     break;
                 }
 
-            } // for each OCC
-        }
+            } // for each config format
+            occ->invalidateHomer();
 
-        if ((nullptr == l_err) && (OccManager::occNeedsReset()))
-        {
-            /*@
-             * @errortype
-             * @reasoncode HTMGT_RC_OCC_UNEXPECTED_STATE
-             * @moduleid  HTMGT_MOD_SEND_OCC_CONFIG
-             * @userdata1 requested config format
-             * @devdesc Failed to send all required config data
-             * @custdesc An internal firmware error occurred
-             */
-            bldErrLog(l_err,
-                      HTMGT_MOD_SEND_OCC_CONFIG,
-                      HTMGT_RC_OCC_UNEXPECTED_STATE,
-                      i_requestedFormat, 0, 0, 0,
-                      ERRORLOG::ERRL_SEV_INFORMATIONAL);
-        }
+            if (OccManager::occNeedsReset())
+            {
+                // All OCCs are going to be reset so no need to continue
+                break;
+            }
 
-        return l_err;
+        } // for each OCC
+    }
 
-    } // end sendOccConfigData()
+    if ((nullptr == l_err) && (OccManager::occNeedsReset()))
+    {
+        /*@
+         * @errortype
+         * @reasoncode HTMGT_RC_OCC_UNEXPECTED_STATE
+         * @moduleid  HTMGT_MOD_SEND_OCC_CONFIG
+         * @userdata1 requested config format
+         * @devdesc Failed to send all required config data
+         * @custdesc An internal firmware error occurred
+         */
+        bldErrLog(l_err,
+                  HTMGT_MOD_SEND_OCC_CONFIG,
+                  HTMGT_RC_OCC_UNEXPECTED_STATE,
+                  i_requestedFormat, 0, 0, 0,
+                  ERRORLOG::ERRL_SEV_INFORMATIONAL);
+    }
+
+    return l_err;
+
+} // end sendOccConfigData()
 
 
 // Utility function for writing Memory Config data
@@ -336,7 +349,63 @@ void writeMemConfigData( uint8_t *& o_data,
 
     //Byte 11 DIMM Info Byte 3 (Reserved/DIMM I2C Address)
     o_data[io_index++] = i_dimmInfo3;
-}
+
+    //Bytes 12-17 (starting in version 0x31)
+    if (i_dimmInfo1 == 0xFF) // cache line data
+    {
+        uint64_t clockFreq[2] = {0};
+        uint8_t burstLen[2] = {0};
+        // Get list of functional memory ports associated with this OCMB_CHIP target
+        TargetHandleList port_list;
+        getChildAffinityTargets(port_list, i_target, CLASS_UNIT, TYPE_MEM_PORT);
+        size_t port = 0;
+        for(const auto & portTarget : port_list)
+        {
+            if (!portTarget->tryGetAttr<ATTR_MEM_EFF_FREQ>(clockFreq[port]))
+            {
+                TMGT_ERR("writeMemConfigData: Failed to get MEM_EFF_FREQ for port[%d]",
+                         port);
+            }
+            if (G_memory_type == OCC_MEM_TYPE_ODYSSEY)
+            {
+                ATTR_MEM_BURST_LENGTH_type burst;
+                if (portTarget->tryGetAttr<ATTR_MEM_BURST_LENGTH>(burst))
+                {
+                    if ((burst == MEM_BURST_LENGTH_BL16) ||
+                        (burst == MEM_BURST_LENGTH_BC8_OTF))
+                        burstLen[port] = 16;
+                    else if ((burst == MEM_BURST_LENGTH_BL32) ||
+                             (burst == MEM_BURST_LENGTH_BL32_OTF))
+                        burstLen[port] = 32;
+                    else
+                        TMGT_ERR("writeMemConfigData: Unsuppored MEM_BURST_LENGTH of %d "
+                                 "for port[%d]", burst, port);
+                }
+                else
+                {
+                    TMGT_ERR("writeMemConfigData: Failed to get MEM_BURST_LENGTH for "
+                             "port[%d]", port);
+                }
+            }
+            else // Explorer (DDR4)
+            {
+                burstLen[port] = 8;
+            }
+            if (++port == 2) break;
+        }
+        o_data[io_index++] = (clockFreq[0] >> 8) & 0xFF;
+        o_data[io_index++] = clockFreq[0] & 0xFF;
+        o_data[io_index++] = (clockFreq[1] >> 8) & 0xFF;
+        o_data[io_index++] = clockFreq[1] & 0xFF;
+        o_data[io_index++] = burstLen[0];
+        o_data[io_index++] = burstLen[1];
+    }
+    else
+    {
+        bzero(&o_data[io_index], 6);
+        io_index += 6;
+    }
+} // end writeMemConfigData()
 
 
 uint8_t convert_temp_type(const uint8_t i_sensor_type)
@@ -783,26 +852,33 @@ uint8_t ocmbInit(Occ *i_occ,
             }
 
             // Get list of functional memory ports associated with this OCMB_CHIP
+            uint8_t max_ports_per_ocmb = HTMGT_MAX_PORT_PER_OCMB_CHIP;
             getChildAffinityTargets(port_list, ocmb, CLASS_UNIT, TYPE_MEM_PORT);
-            if (port_list.size() > 0)
+            for(const auto & port_target : port_list)
             {
-                TargetHandleList dimm_list;
-
-                // Currently only support a single port per OCMB (use first port)
-                Target* port_target = port_list[0];
-                if (port_list.size() > 1)
+                numSets += addOcmbInternalDts(o_data, ocmb, l_ocmb_num, l_memType, io_index);
+                // G_memory_type gets set in addOcmbInternalDts()
+                if (G_memory_type == OCC_MEM_TYPE_ODYSSEY)
                 {
-                    TMGT_ERR("ocmbInit: Found %d functional ports (expected 1)",
-                             port_list.size());
+                    max_ports_per_ocmb = HTMGT_MAX_PORT_PER_OCMB_CHIP_ODYSSEY;
                 }
 
-                numSets += addOcmbInternalDts(o_data, ocmb, l_ocmb_num, l_memType, io_index);
+                // unit identifies unique Port under an OCMB
+                const uint8_t port_unit = port_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                if (port_unit > max_ports_per_ocmb)
+                {
+                    TMGT_ERR("ocmbInit: OCMB%d / Port%d - Ignored due to invalid port (max=%d)",
+                             l_ocmb_num, port_unit, max_ports_per_ocmb);
+                    continue;
+                }
+
                 if (!isDIMMs)
                 {
                     numSets += addOcmbExternalDts(o_data, ocmb, l_memType, io_index);
                 }
 
-                // Get list of functional DIMMs assocated for this port (single port)
+                // Get list of functional DIMMs associated with this port
+                TargetHandleList dimm_list;
                 getChildAffinityTargets(dimm_list, port_target,
                                         CLASS_LOGICAL_CARD, TYPE_DIMM);
                 const unsigned long l_port_huid = get_huid(port_target);
@@ -859,7 +935,7 @@ void getMemConfigMessageData(Occ *i_occ,
     assert(o_data != nullptr);
 
     o_data[index++] = OCC_CFGDATA_MEM_CONFIG;
-    o_data[index++] = 0x30; // version
+    o_data[index++] = 0x31; // version
 
     //System reference needed for these ATTR.
     Target* sys = UTIL::assertGetToplevelTarget();
@@ -915,6 +991,189 @@ void getMemConfigMessageData(Occ *i_occ,
 }
 
 
+/* Function Specification *******************************************************/
+/*                                                                              */
+/*  Name:      ocmbPowerData                                                    */
+/*                                                                              */
+/*  Function:  Build memory power config data for specified processor           */
+/*                                                                              */
+/*  Returns:   Number of OCMBs added                                            */
+/*                                                                              */
+/* End Function Specification ***************************************************/
+uint8_t ocmbPowerData(Occ *i_occ,
+                 uint8_t* o_data,
+                 uint32_t & io_index)
+{
+    TargetHandleList ocmb_list;
+    uint8_t numOcmbs = 0;
+
+    const TargetHandle_t occ_target = i_occ->getTarget();
+    ConstTargetHandle_t proc = getParentChip(occ_target);
+    assert(proc != nullptr);
+
+    // Use same check as memory config:
+    ATTR_POSITION_type l_procPosition = proc->getAttr<ATTR_POSITION>();
+    ATTR_MODEL_type l_procModel = proc->getAttr<ATTR_MODEL>();
+    if( l_procModel == TARGETING::MODEL_POWER10 )
+    {
+        ATTR_DIMM_POWER_type dimmPower;
+        ATTR_DIMM_POWER_UTIL_type utilPoints;
+        Target* sys = UTIL::assertGetToplevelTarget();
+        if (!sys->tryGetAttr<ATTR_DIMM_POWER_UTIL>(utilPoints))
+        {
+            TMGT_ERR("ocmbPowerData: Failed to read DIMM_POWER_UTIL array");
+            return 0;
+        }
+
+        const uint8_t numUtilPoints = sizeof(utilPoints);
+        if ((sizeof(dimmPower)/4) < numUtilPoints)
+        {
+            TMGT_ERR("ocmbPowerData: Missing DIMM_POWER points (%d, but expected %d)",
+                     sizeof(dimmPower)/4, numUtilPoints);
+            return 0;
+        }
+        if (numUtilPoints > 1)
+        {
+            // Get functional OCMBs associated with this processor
+            getChildAffinityTargets(ocmb_list, proc, CLASS_CHIP, TYPE_OCMB_CHIP);
+
+            TMGT_INF("ocmbPowerData: Proc%d has %d functional OCMB_CHIPs",
+                     l_procPosition, ocmb_list.size());
+
+            for (const auto & ocmb : ocmb_list)
+            {
+                uint8_t l_ocmb_num = 0;
+                // OCMB instance comes from the parent (OMI target)
+                Target *omi_target = getImmediateParentByAffinity(ocmb);
+                if (omi_target != nullptr)
+                {
+                    // get relative OCMB per processor
+                    l_ocmb_num = omi_target->getAttr<ATTR_CHIP_UNIT>();
+                }
+                else
+                {
+                    const ATTR_HUID_type l_ocmb_huid = get_huid(ocmb);
+                    TMGT_ERR("ocmbPowerData: Unable to determine OCMB parent for OCMB HUID 0x%04X",
+                             l_ocmb_huid);
+                    continue;
+                }
+
+                if (!ocmb->tryGetAttr<ATTR_DIMM_POWER>(dimmPower))
+                {
+                    TMGT_ERR("ocmbPowerData: Failed to read DIMM_POWER for OCMB%d target",
+                             l_ocmb_num);
+                    break;
+                }
+                const size_t entryStartIndex = io_index;
+                o_data[io_index++] = l_ocmb_num;
+                bzero(&o_data[io_index], 6);
+                io_index += 6;
+                const size_t offsetNumPoints = io_index++;
+
+                size_t numPoints = 0;
+                uint16_t lastUtil = 0;
+                for (size_t pointIndex = 0; pointIndex < numUtilPoints; ++pointIndex)
+                {
+                    if ((utilPoints[pointIndex] == 0) ||
+                        (utilPoints[pointIndex] <= lastUtil))
+                    {
+                        // ignore invalid entries
+                        continue;
+                    }
+                    const uint16_t utilCpercent = utilPoints[pointIndex] * 100;
+                    TMGT_INF("ocmbPowerData: adding OCMB%d / %3d c percent / %dcW",
+                             l_ocmb_num, utilCpercent, dimmPower[pointIndex]);
+                    o_data[io_index++] = utilCpercent >> 8;
+                    o_data[io_index++] = utilCpercent & 0xFF;
+                    o_data[io_index++] = 0;
+                    o_data[io_index++] = 0;
+                    o_data[io_index++] = (dimmPower[pointIndex] >> 24) & 0xFF;
+                    o_data[io_index++] = (dimmPower[pointIndex] >> 16) & 0xFF;
+                    o_data[io_index++] = (dimmPower[pointIndex] >>  8) & 0xFF;
+                    o_data[io_index++] = dimmPower[pointIndex] & 0xFF;
+                    lastUtil = utilPoints[pointIndex];
+                    ++numPoints;
+                }
+                if (numPoints >= 2)
+                {
+                    o_data[offsetNumPoints] = numPoints;
+                    ++numOcmbs;
+                }
+                else
+                {
+                    // OCC needs 2 points for interpolation!
+                    TMGT_ERR("ocmbPowerData: skipping OCMB%d because OCC needs at least 2 points",
+                             l_ocmb_num);
+                    // Reset index back to start of the entry (will NOT be used for this OCMB)
+                    io_index = entryStartIndex;
+                }
+            }
+        }
+    }
+    else
+    {
+        TMGT_ERR("ocmbPowerData: SKIPPING UNKNOWN PROCESSOR[%d] (model 0x%02X, HUID=0x%08lX)",
+                 l_procPosition, l_procModel, get_huid(proc));
+    }
+
+    TMGT_INF("ocmbPowerData: returning %d OCMBs for OCC%d",
+             numOcmbs, i_occ->getInstance());
+
+    return numOcmbs;
+
+} // end ocmbPowerData()
+
+
+void getMemPowerMessageData(Occ *i_occ,
+                            uint8_t* o_data,
+                            uint64_t & o_size)
+{
+    uint32_t index = 0;
+
+    assert(o_data != nullptr);
+
+    o_data[index++] = OCC_CFGDATA_MEM_POWER;
+    o_data[index++] = 0x01; // version
+
+    Target* sys = UTIL::assertGetToplevelTarget();
+    ConstTargetHandle_t proc = getParentChip(i_occ->getTarget());
+
+    auto maxDimmPower = sys->getAttr<ATTR_MAX_DIMM_POWER>();
+    auto chipFanCfm = proc->getAttr<ATTR_CHIP_FAN_CFM>();
+    uint16_t thermalCredit = 0;
+    if (chipFanCfm > 0)
+    {
+        thermalCredit = 1.8 / chipFanCfm * 10000;
+    }
+    TMGT_INF("getMemPowerMessageData: thermalCreditFactor=%d (CFM=%d)",
+             thermalCredit, chipFanCfm);
+
+    o_data[index++] = thermalCredit >> 8;
+    o_data[index++] = thermalCredit & 0xFF;
+    o_data[index++] = (maxDimmPower >> 24) & 0xFF;
+    o_data[index++] = (maxDimmPower >> 16) & 0xFF;
+    o_data[index++] = (maxDimmPower >>  8) & 0xFF;
+    o_data[index++] = maxDimmPower & 0xFF;
+    bzero(&o_data[index], 7);
+    index += 7;
+    size_t offsetNumOcmbs = index++; // fill in at end
+
+    size_t numOcmbs = 0;
+    if ((chipFanCfm > 0) && (maxDimmPower > 0))
+    {
+        // fill in details of the memory config
+        numOcmbs = ocmbPowerData(i_occ, o_data, index);
+    }
+    else
+    {
+        TMGT_INF("getMemPowerMessageData: CHIP_FAN_CFM=%d, MAX_DIMM_POWER=%d "
+                 "(WOF Memory power credit disabled)",
+                 chipFanCfm, maxDimmPower);
+    }
+
+    o_data[offsetNumOcmbs] = numOcmbs;
+    o_size = index;
+}
 
 
 void getMemThrottleMessageData(const TargetHandle_t i_occ,
@@ -1044,28 +1303,26 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
                                        TYPE_MEM_PORT, UTIL_FILTER_FUNCTIONAL);
         for(const auto & port_target : port_list)
         {
-            // unit identifies unique Port under a processor
-            uint8_t port_unit = port_target->getAttr
-                <TARGETING::ATTR_CHIP_UNIT>();
-            const uint8_t port_rel_pos = port_unit % 2;
-            if ((nps_min[port_rel_pos] == 0) ||
-                (nps_redun[port_rel_pos] == 0) ||
-                (nps_oversub[port_rel_pos] == 0))
+            // unit identifies unique Port under an OCMB
+            const uint8_t port_unit = port_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+            if ((nps_min[port_unit] == 0) ||
+                (nps_redun[port_unit] == 0) ||
+                (nps_oversub[port_unit] == 0))
             {
-                TMGT_ERR("getMemThrottleMessageData: OCMB%d/Port%d [%d]"
+                TMGT_ERR("getMemThrottleMessageData: OCMB%d/Port%d"
                          " - Ignored due to null throttle",
-                         l_ocmb_pos, port_unit, port_rel_pos);
+                         l_ocmb_pos, port_unit);
                 TMGT_ERR("N/slot: Min=%d, Redun=%d, Oversub=%d",
-                         nps_min[port_rel_pos],
-                         nps_redun[port_rel_pos],
-                         nps_oversub[port_rel_pos]);
+                         nps_min[port_unit],
+                         nps_redun[port_unit],
+                         nps_oversub[port_unit]);
                 continue;
             }
-            if (port_rel_pos >= max_ports_per_ocmb)
+            if (port_unit >= max_ports_per_ocmb)
             {
                 TMGT_ERR("getMemThrottleMessageData: OCMB%d / Port%d"
-                         " - Ignored due invalid Port position: %d",
-                         l_ocmb_pos, port_unit, port_rel_pos);
+                         " - Ignored due to invalid port(max=%d)",
+                         l_ocmb_pos, port_unit, max_ports_per_ocmb);
                 continue;
             }
             TMGT_INF("getMemThrottleMessageData: OCC%d / OCMB%d / port%d",
@@ -1074,19 +1331,19 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
             o_data[index] = l_ocmb_pos; // Mem Buf
             o_data[index+1] = 0x00; // reserved
             // Minimum
-            UINT16_PUT(&o_data[index+ 2], nps_min[port_rel_pos]);
+            UINT16_PUT(&o_data[index+ 2], nps_min[port_unit]);
             // Disabled
-            UINT16_PUT(&o_data[index+ 4], nps_redun[port_rel_pos]);
-            UINT16_PUT(&o_data[index+ 6], npp_redun[port_rel_pos]);
+            UINT16_PUT(&o_data[index+ 4], nps_redun[port_unit]);
+            UINT16_PUT(&o_data[index+ 6], npp_redun[port_unit]);
             // Ultra Turbo
-            UINT16_PUT(&o_data[index+ 8], nps_redun[port_rel_pos]);
-            UINT16_PUT(&o_data[index+10], npp_redun[port_rel_pos]);
+            UINT16_PUT(&o_data[index+ 8], nps_redun[port_unit]);
+            UINT16_PUT(&o_data[index+10], npp_redun[port_unit]);
             // Fmax
-            UINT16_PUT(&o_data[index+12], nps_redun[port_rel_pos]);
-            UINT16_PUT(&o_data[index+14], npp_redun[port_rel_pos]);
+            UINT16_PUT(&o_data[index+12], nps_redun[port_unit]);
+            UINT16_PUT(&o_data[index+14], npp_redun[port_unit]);
             // Oversubscription
-            UINT16_PUT(&o_data[index+16], nps_oversub[port_rel_pos]);
-            UINT16_PUT(&o_data[index+18], npp_oversub[port_rel_pos]);
+            UINT16_PUT(&o_data[index+16], nps_oversub[port_unit]);
+            UINT16_PUT(&o_data[index+18], npp_oversub[port_unit]);
             // reserved
             o_data[index+20] = 0x00;
             o_data[index+21] = 0x00;
@@ -1955,6 +2212,12 @@ void readConfigData(Occ * i_occ,
                                     o_cfgDataPtr,
                                     cfgDataLength);
             break;
+
+        case OCC_CFGDATA_MEM_POWER:
+            getMemPowerMessageData(i_occ,
+                                   o_cfgDataPtr, cfgDataLength);
+            break;
+
 
         default:
             TMGT_ERR("readConfigData: Unsupported i_format type 0x%02X",
