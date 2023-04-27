@@ -70,16 +70,14 @@ fapi2::ReturnCode ody_omi_hss_init_rx_lanes(const fapi2::Target<fapi2::TARGET_TY
     FAPI_DBG("Starting ody_omi_hss_init_rx_lanes");
     uint32_t l_rx_lane_mask = 0;
     const uint8_t c_thread = 0;
-    fapi2::ATTR_OMI_RX_LTEG_Type l_rx_lte_gain = -1;
-    fapi2::ATTR_OMI_RX_LTEZ_Type l_rx_lte_zero = -1;
-    int32_t l_rx_peak1 = -1;
-    int32_t l_rx_peak2 = -1;
-    fapi2::ATTR_OMI_RX_PHASE_STEP_Type l_rx_phase_step = -1;
+    fapi2::ATTR_OMI_RX_LTEG_Type l_rx_lte_gain = 0;
+    fapi2::ATTR_OMI_RX_LTEZ_Type l_rx_lte_zero = 0;
+    int32_t l_rx_peak1 = 0;
+    int32_t l_rx_peak2 = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LANES, i_target, l_rx_lane_mask));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LTEG, i_target, l_rx_lte_gain));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LTEZ, i_target, l_rx_lte_zero));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_PHASE_STEP, i_target, l_rx_phase_step));
 
     if ( i_freq < 32000)
     {
@@ -96,8 +94,7 @@ fapi2::ReturnCode ody_omi_hss_init_rx_lanes(const fapi2::Target<fapi2::TARGET_TY
                                       l_rx_lte_gain,
                                       l_rx_lte_zero,
                                       l_rx_peak1,
-                                      l_rx_peak2,
-                                      l_rx_phase_step));
+                                      l_rx_peak2));
 
 fapi_try_exit:
     FAPI_DBG("End ody_omi_hss_init_rx_lanes");

@@ -112,6 +112,18 @@ class io_ppe_common
 
         uint32_t calc_ppe_data_rate(const uint32_t i_data_rate);
 
+        fapi2::ReturnCode set_lte_gain_zero(const fapi2::Target<K, M, V>& i_target,
+                                            const uint8_t i_thread,
+                                            const uint8_t i_lane,
+                                            const uint32_t i_rx_lte_g,
+                                            const uint32_t i_rx_lte_z);
+
+        fapi2::ReturnCode set_ctle_peaking(const fapi2::Target<K, M, V>& i_target,
+                                           const uint8_t i_thread,
+                                           const uint8_t i_lane,
+                                           const int32_t i_rx_peak1,
+                                           const int32_t i_rx_peak2);
+
         fapi2::ReturnCode ppe_start(const fapi2::Target<K, M, V>& i_target);
 
         fapi2::ReturnCode config_ppe(const fapi2::Target<K, M, V>& i_target,
@@ -157,11 +169,10 @@ class io_ppe_common
         fapi2::ReturnCode hss_init_rx(const fapi2::Target<K, M, V>& i_target,
                                       const uint8_t i_thread,
                                       const uint32_t i_lane_mask,
-                                      const int32_t& i_rx_lte_g,
-                                      const int32_t& i_rx_lte_z,
-                                      const int32_t& i_rx_peak1,
-                                      const int32_t& i_rx_peak2,
-                                      const int32_t& i_rx_pr_phase_step);
+                                      const int32_t i_rx_lte_g,
+                                      const int32_t i_rx_lte_z,
+                                      const int32_t i_rx_peak1,
+                                      const int32_t i_rx_peak2);
 
         fapi2::ReturnCode setup_func_margin(const fapi2::Target<K, M, V>& i_target,
                                             const uint8_t i_thread,
@@ -263,6 +274,59 @@ uint32_t io_ppe_common<K, M, V>::calc_ppe_data_rate(const uint32_t i_data_rate)
     }
 
     return l_ppe_data_rate;
+}
+
+template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
+fapi2::ReturnCode io_ppe_common<K, M, V>::set_lte_gain_zero(const fapi2::Target<K, M, V>& i_target,
+        const uint8_t i_thread,
+        const uint8_t i_lane,
+        const uint32_t i_rx_lte_g,
+        const uint32_t i_rx_lte_z)
+{
+    FAPI_DBG("Starting io_ppe_common::set_lte_gain_zero");
+    uint64_t l_addr = 0;
+    fapi2::buffer<uint64_t> l_buffer = 0;
+
+    FAPI_TRY(MEM_REG_PPE_LTE_GAIN_DISABLE_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PPE_LTE_ZERO_DISABLE_PUT(iv_regs, i_target, i_thread, 1));
+    l_buffer.insertFromRight<IO_PPE_RX_LTE_GAIN, IO_PPE_RX_LTE_GAIN_LEN, uint32_t>(i_rx_lte_g);
+    l_buffer.insertFromRight<IO_PPE_RX_LTE_ZERO, IO_PPE_RX_LTE_ZERO_LEN, uint32_t>(i_rx_lte_z);
+
+    // LTE Gain and Zero
+    l_addr = buildAddr(iv_regs->base_addr, i_thread, i_lane, IO_PPE_RX_DAC_CNTL3_PL); // A Bank LTE G/Z
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer));
+    l_addr = buildAddr(iv_regs->base_addr, i_thread, i_lane, IO_PPE_RX_DAC_CNTL4_PL); // B Bank LTE G/Z
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer));
+
+    FAPI_TRY(iv_regs->flushCache(i_target));
+fapi_try_exit:
+    FAPI_DBG("Ending io_ppe_common::set_lte_gain_zero");
+    return fapi2::current_err;
+}
+
+template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
+fapi2::ReturnCode io_ppe_common<K, M, V>::set_ctle_peaking(const fapi2::Target<K, M, V>& i_target,
+        const uint8_t i_thread,
+        const uint8_t i_lane,
+        const int32_t i_rx_peak1,
+        const int32_t i_rx_peak2)
+{
+    FAPI_DBG("Starting io_ppe_common::set_ctle_peaking");
+    uint64_t l_addr = 0;
+    fapi2::buffer<uint64_t> l_buffer = 0;
+
+    l_buffer.insertFromRight<IO_PPE_RX_CTLE_PEAK1, IO_PPE_RX_CTLE_PEAK1_LEN, uint32_t>(i_rx_peak1);
+    l_buffer.insertFromRight<IO_PPE_RX_CTLE_PEAK2, IO_PPE_RX_CTLE_PEAK2_LEN, uint32_t>(i_rx_peak2);
+
+    l_addr = buildAddr(iv_regs->base_addr, i_thread, i_lane, IO_PPE_RX_DAC_CNTL6_PL); // A Bank CTLE PEAK1/2
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer));
+    l_addr = buildAddr(iv_regs->base_addr, i_thread, i_lane, IO_PPE_RX_DAC_CNTL13_PL); // B Bank CTLE PEAK1/2
+    FAPI_TRY(putScom(i_target, l_addr, l_buffer));
+
+    FAPI_TRY(iv_regs->flushCache(i_target));
+fapi_try_exit:
+    FAPI_DBG("Ending io_ppe_common::set_ctle_peaking");
+    return fapi2::current_err;
 }
 
 
@@ -417,9 +481,7 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init_thread(const fapi2::Target<K
 {
     FAPI_DBG("Start");
     uint32_t l_lane = 0;
-    uint64_t l_addr = 0;
     uint32_t l_rx_mask = i_rx_mask;
-    fapi2::buffer<uint64_t> l_buffer;
     uint8_t l_ppe_data_rate = calc_ppe_data_rate(i_freq);
 
     MEM_REG_PPE_DATA_RATE_PUT(iv_regs, i_target, i_thread, l_ppe_data_rate);
@@ -436,10 +498,6 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init_thread(const fapi2::Target<K
     FAPI_DBG("Setting FW BIST EN enabled");
     FAPI_TRY(FW_REG_FW_BIST_EN_PUT(iv_regs, i_target, i_thread, 1));
 
-    //"ppe_lte_gain_disable": 1,
-    FAPI_TRY(MEM_REG_PPE_LTE_GAIN_DISABLE_PUT(iv_regs, i_target, i_thread, 1));
-    //"ppe_lte_zero_disable": 1,
-    FAPI_TRY(MEM_REG_PPE_LTE_ZERO_DISABLE_PUT(iv_regs, i_target, i_thread, 1));
     //"ppe_channel_loss": 2,
     FAPI_TRY(MEM_REG_PPE_CHANNEL_LOSS_PUT(iv_regs, i_target, i_thread, 2));
 
@@ -454,14 +512,6 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init_thread(const fapi2::Target<K
             FAPI_TRY(MEM_REG_RX_QUAD_PH_ADJ_MIN_CHECK_PL_PUT(iv_regs, i_target, i_thread, l_lane, 0));
             //"rx_quad_ph_adj_max_check": 31 *
             FAPI_TRY(MEM_REG_RX_QUAD_PH_ADJ_MAX_CHECK_PL_PUT(iv_regs, i_target, i_thread, l_lane, 31));
-
-            l_buffer.flush<0>();
-            l_buffer.insertFromRight(7, IO_PPE_RX_LTE_GAIN, IO_PPE_RX_LTE_GAIN_LEN);
-            l_buffer.insertFromRight(0, IO_PPE_RX_LTE_ZERO, IO_PPE_RX_LTE_ZERO_LEN);
-            l_addr = buildAddr(iv_regs->base_addr, 0, l_lane, IO_PPE_RX_DAC_CNTL3_PL); // A Bank LTE G/Z
-            FAPI_TRY(putScom(i_target, l_addr, l_buffer));
-            l_addr = buildAddr(iv_regs->base_addr, 0, l_lane, IO_PPE_RX_DAC_CNTL4_PL); // B Bank LTE G/Z
-            FAPI_TRY(putScom(i_target, l_addr, l_buffer));
         }
 
         l_rx_mask <<= 1;
@@ -678,59 +728,23 @@ template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::hss_init_rx(const fapi2::Target<K, M, V>& i_target,
         const uint8_t i_thread,
         const uint32_t i_lane_mask,
-        const int32_t& i_rx_lte_g,
-        const int32_t& i_rx_lte_z,
-        const int32_t& i_rx_peak1,
-        const int32_t& i_rx_peak2,
-        const int32_t& i_rx_pr_phase_step)
+        const int32_t i_rx_lte_g,
+        const int32_t i_rx_lte_z,
+        const int32_t i_rx_peak1,
+        const int32_t i_rx_peak2)
 {
     FAPI_DBG("Starting io_ppe_common::hss_init_rx");
-    uint64_t l_addr = 0;
     uint8_t l_lane = 0;
-    fapi2::buffer<uint64_t> l_lte_buffer = 0;
-    fapi2::buffer<uint64_t> l_peak_buffer = 0;
-
-    if (i_rx_lte_g != -1)
-    {
-        FAPI_TRY(MEM_REG_PPE_LTE_GAIN_DISABLE_PUT(iv_regs, i_target, i_thread, 1));
-        l_lte_buffer.insertFromRight<IO_PPE_RX_LTE_GAIN, IO_PPE_RX_LTE_GAIN_LEN, uint32_t>(i_rx_lte_g);
-    }
-
-    if (i_rx_lte_z != -1)
-    {
-        FAPI_TRY(MEM_REG_PPE_LTE_ZERO_DISABLE_PUT(iv_regs, i_target, i_thread, 1));
-        l_lte_buffer.insertFromRight<IO_PPE_RX_LTE_ZERO, IO_PPE_RX_LTE_ZERO_LEN, uint32_t>(i_rx_lte_z);
-    }
-
-    if (i_rx_peak1 != -1)
-    {
-        FAPI_TRY(MEM_REG_RX_CTLE_PEAK1_CAL_DISABLE_PUT(iv_regs, i_target, i_thread, 1));
-        l_peak_buffer.insertFromRight<IO_PPE_RX_CTLE_PEAK1, IO_PPE_RX_CTLE_PEAK1_LEN, uint32_t>(i_rx_peak1);
-    }
-
-    if (i_rx_peak2 != -1)
-    {
-        FAPI_TRY(MEM_REG_RX_CTLE_PEAK2_CAL_DISABLE_PUT(iv_regs, i_target, i_thread, 1));
-        l_peak_buffer.insertFromRight<IO_PPE_RX_CTLE_PEAK2, IO_PPE_RX_CTLE_PEAK2_LEN, uint32_t>(i_rx_peak2);
-    }
 
     for (l_lane = 0; l_lane < 8; l_lane++)
     {
         if (i_lane_mask & (0x80000000 >> l_lane))
         {
             // LTE Gain and Zero
-            l_addr = buildAddr(iv_regs->base_addr, 0, l_lane, IO_PPE_RX_DAC_CNTL3_PL); // A Bank LTE G/Z
-            FAPI_TRY(putScom(i_target, l_addr, l_lte_buffer));
-            l_addr = buildAddr(iv_regs->base_addr, 0, l_lane, IO_PPE_RX_DAC_CNTL4_PL); // B Bank LTE G/Z
-            FAPI_TRY(putScom(i_target, l_addr, l_lte_buffer));
+            FAPI_TRY(set_lte_gain_zero(i_target, i_thread, l_lane, i_rx_lte_g, i_rx_lte_z));
 
             // CTLE Peak1 and Peak2
-            l_addr = buildAddr(iv_regs->base_addr, 0, l_lane, IO_PPE_RX_DAC_CNTL6_PL); // A Bank CTLE PEAK1/2
-            FAPI_TRY(putScom(i_target, l_addr, l_peak_buffer));
-            l_addr = buildAddr(iv_regs->base_addr, 0, l_lane, IO_PPE_RX_DAC_CNTL13_PL); // B Bank CTLE PEAK1/2
-            FAPI_TRY(putScom(i_target, l_addr, l_peak_buffer));
-
-            // TODO what do we do with phase_step? It is overwritten in the ppe code
+            FAPI_TRY(set_ctle_peaking(i_target, i_thread, l_lane, i_rx_peak1, i_rx_peak2));
         }
     }
 

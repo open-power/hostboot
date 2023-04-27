@@ -127,18 +127,7 @@
             OMI Rx LTE Zero
         </description>
         <valueType>int32</valueType>
-        <default>0</default>
-        <platInit/>
-    </attribute>
-<!-- ********************************************************************** -->
-    <attribute>
-        <id>ATTR_OMI_RX_PHASE_STEP</id>
-        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-        <description>
-            OMI Rx Phase Step (RX CDR Bandwidth)
-        </description>
-        <valueType>int32</valueType>
-        <default>-1</default>
+        <default>1</default>
         <platInit/>
     </attribute>
 <!-- ********************************************************************** -->
@@ -149,7 +138,7 @@
             OMI Tx Pre1 Cursor
         </description>
         <valueType>uint8</valueType>
-        <default>0</default>
+        <default>4</default>
         <platInit/>
     </attribute>
 <!-- ********************************************************************** -->
