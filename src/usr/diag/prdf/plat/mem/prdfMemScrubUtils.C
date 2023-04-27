@@ -137,8 +137,7 @@ uint32_t clearEccCounters<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t clearEccFirs<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+uint32_t __expClearEccFirs( ExtensibleChip * i_chip )
 {
     uint32_t o_rc = SUCCESS;
 
@@ -171,6 +170,65 @@ uint32_t clearEccFirs<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
     } while(0);
 
     return o_rc;
+}
+
+uint32_t __odyClearEccFirs( ExtensibleChip * i_chip )
+{
+    uint32_t o_rc = SUCCESS;
+
+    // Note: Odyssey FIR bits are write to clear
+
+    do
+    {
+
+        // Clear MCBISTFIR[6:10]
+        o_rc = __clearFir<TYPE_OCMB_CHIP>( i_chip, "MCBIST_FIR",
+                                           0x03e0000000000000ull );
+        if ( SUCCESS != o_rc ) break;
+
+        // Maintenance AUEs/IAUEs will be reported as system checkstops.
+        // Maintenance IMPEs will be reported as recoverable attentions at
+        // all times. Maintence IUEs will be masked during Memory
+        // Diagnostics and handled in the Targeted diagnostics code. After
+        // Memory Diagnostics, maintenance IUEs will be reported as
+        // recoverable in the field (no stop-on-error), but will remain
+        // masked if MNFG thresholds are enabled. In this case, the command
+        // will stop on RCE ETE in order to get a more accuracy callout. So
+        // clear RDFFIR[21:33,35:36,39] always and RDFFIR[38] in MNFG
+        // mode or during Memory Diagnostics.
+        uint64_t              mask  = 0x000007ffd9000000ull;
+        if ( mfgMode() )      mask |= 0x0000000002000000ull;
+        #ifndef __HOSTBOOT_RUNTIME
+        if ( isInMdiaMode() ) mask |= 0x0000000002000000ull;
+        #endif
+
+        // Clear both RDF_FIRs
+        o_rc = __clearFir<TYPE_OCMB_CHIP>( i_chip, "RDF_FIR_0", mask );
+        if ( SUCCESS != o_rc ) break;
+
+        o_rc = __clearFir<TYPE_OCMB_CHIP>( i_chip, "RDF_FIR_1", mask );
+        if ( SUCCESS != o_rc ) break;
+
+    } while(0);
+
+    return o_rc;
+}
+
+
+template<>
+uint32_t clearEccFirs<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+{
+    // Odyssey OCMBs
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        return __odyClearEccFirs(i_chip);
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        return __expClearEccFirs(i_chip);
+    }
+
 }
 
 //------------------------------------------------------------------------------

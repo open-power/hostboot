@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -217,6 +217,7 @@ class OcmbDataBundle : public DataBundle
     /** Set to true if mainline NCEs and TCEs should be permanently masked. This
      *  is checked at the end of targeted diagnostics before background
      *  scrubbing is resumed. */
+    // TODO Odyssey - need to mask per port
     bool iv_maskMainlineNceTce = false;
 
     // These are used to limit the number of times a scrub command will stop

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,6 +200,7 @@ template<> inline
 void banTps<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                         const MemRank & i_rank )
 {
+    // TODO Odyssey - need the port
     // Ban TPS on this rank.
     getOcmbDataBundle(i_chip)->getTdCtlr()->banTps( i_chip, i_rank );
     // Permanently mask mainline NCEs and TCEs because of the TPS ban.

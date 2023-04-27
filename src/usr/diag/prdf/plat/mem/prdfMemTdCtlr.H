@@ -357,6 +357,7 @@ class MemTdCtlr
     bool iv_resumeBgScrub = false;
 
     /** Map to keep track of ranks that have banned TPS. */
+    // TODO Odyssey - need the port
     std::map< std::pair<ExtensibleChip *, MemRank>, bool > iv_tpsBans;
 
     #else // IPL only
