@@ -74,6 +74,7 @@ ReturnCode mod_cbs_start_prep(
     SBE_FIFO_FSB_DOWNFIFO_RESET_t FSB_DOWNFIFO_RESET;
     FSI2PIB_STATUS_t FSI2PIB_STATUS;
     SB_MSG_t SB_MSG;
+    SB_CS_t SB_CS;
 
     FAPI_INF("Drop CFAM protection 0 to ungate VDN_PRESENT");
     FAPI_TRY(ROOT_CTRL0.getCfam(i_target));
@@ -92,9 +93,14 @@ ReturnCode mod_cbs_start_prep(
                 .set_PROC_TARGET(i_target),
                 "ERROR: VDN power is NOT on. i.e. FSI2PIB_STATUS register bit 16 is NOT set.");
 
-    FAPI_INF("Clear Selfboot Message Register, Reset SBE FIFO.");
+    FAPI_INF("Clear Selfboot Message Register, clear SBE start bit, reset SBE FIFO.");
     SB_MSG = 0;
     FAPI_TRY(SB_MSG.putCfam(i_target));
+
+    FAPI_TRY(SB_CS.getCfam(i_target));
+    SB_CS.set_START_RESTART_VECTOR0(0);
+    SB_CS.set_START_RESTART_VECTOR1(0);
+    FAPI_TRY(SB_CS.putCfam(i_target));
 
     FSB_DOWNFIFO_RESET = 0x80000000;
     FAPI_TRY(FSB_DOWNFIFO_RESET.putCfam(i_target));
@@ -123,25 +129,6 @@ ReturnCode mod_cbs_start_prep(
     CBS_CS.set_OPTION_SKIP_SCAN0_CLOCKSTART(not i_scan0_clockstart);
     CBS_CS.set_OPTION_PREVENT_SBE_START(not i_start_sbe);
     FAPI_TRY(CBS_CS.putCfam(i_target));
-
-fapi_try_exit:
-    return current_err;
-}
-
-ReturnCode mod_cbs_cleanup(const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_target)
-{
-    ROOT_CTRL0_t ROOT_CTRL0;
-    SB_CS_t SB_CS;
-
-    FAPI_INF("Clear CBS command to enable clock gating inside clock controller");
-    FAPI_TRY(ROOT_CTRL0.getCfam(i_target));
-    ROOT_CTRL0.set_FSI_CC_CBS_CMD(0);
-    FAPI_TRY(ROOT_CTRL0.putCfam(i_target));
-
-    FAPI_INF("Clear SBE start bit to facilitate restarts later");
-    FAPI_TRY(SB_CS.getCfam(i_target));
-    SB_CS.set_START_RESTART_VECTOR0(0);
-    FAPI_TRY(SB_CS.putCfam(i_target));
 
 fapi_try_exit:
     return current_err;
@@ -205,8 +192,6 @@ ReturnCode mod_cbs_start(
                 .set_PROC_TARGET(i_target),
                 //.set_CLOCK_POS(l_callout_clock),
                 "ERROR: CBS HAS NOT REACHED IDLE STATE VALUE 0x002 ");
-
-    FAPI_TRY(mod_cbs_cleanup(i_target));
 
 fapi_try_exit:
     FAPI_INF("Exiting ...");
@@ -472,17 +457,31 @@ fapi_try_exit:
 ReturnCode mod_poz_tp_init_common(const Target<TARGET_TYPE_ANY_POZ_CHIP>& i_target)
 {
     INTR_HOST_MASK_t HOST_MASK;
+    ROOT_CTRL0_t ROOT_CTRL0;
     PERV_CTRL0_t PERV_CTRL0;
     CPLT_CTRL0_t CPLT_CTRL0;
     CPLT_CTRL2_t CPLT_CTRL2;
+    SB_CS_t SB_CS;
+
     fapi2::buffer<uint32_t> l_attr_pg;
     fapi2::buffer<uint64_t> l_data64;
 
     FAPI_INF("Entering ...");
     fapi2::Target<fapi2::TARGET_TYPE_PERV> l_tpchiplet = get_tp_chiplet_target(i_target);
 
+    FAPI_INF("Clear SBE start bits to be tidy");
+    FAPI_TRY(SB_CS.getScom(i_target));
+    SB_CS.set_START_RESTART_VECTOR0(0);
+    SB_CS.set_START_RESTART_VECTOR1(0);
+    FAPI_TRY(SB_CS.putScom(i_target));
+
+    FAPI_INF("Clear CBS command to enable clock gating inside clock controller");
+    ROOT_CTRL0 = 0;
+    ROOT_CTRL0.set_FSI_CC_CBS_CMD(-1);
+    FAPI_TRY(ROOT_CTRL0.putScom_CLEAR(i_target));
+
     FAPI_DBG("Set up IPOLL mask");
-    HOST_MASK = HOST_MASK_REG_IPOLL_MASK ;
+    HOST_MASK = HOST_MASK_REG_IPOLL_MASK;
     FAPI_TRY(HOST_MASK.putScom(i_target));
 
     FAPI_DBG("Transfer PERV partial good attribute into region good register (cplt_ctrl2 reg)");
