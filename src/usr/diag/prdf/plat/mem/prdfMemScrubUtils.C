@@ -74,13 +74,35 @@ uint32_t __clearFir( ExtensibleChip * i_chip, const char * i_firAnd,
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t clearCmdCompleteAttn<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+uint32_t __expClearCmdCompleteAttn( ExtensibleChip * i_chip )
 {
     // Clear MCBISTFIR[10].
     return __clearFir<TYPE_OCMB_CHIP>( i_chip, "MCBISTFIR_AND",
                                        0xffdfffffffffffffull );
 }
+
+uint32_t __odyClearCmdCompleteAttn( ExtensibleChip * i_chip )
+{
+    // Clear MCBISTFIR[11]. Note: Odyssey FIRs are write to clear.
+    return __clearFir<TYPE_OCMB_CHIP>( i_chip, "MCBIST_FIR",
+                                       0x0010000000000000ull );
+}
+
+template<>
+uint32_t clearCmdCompleteAttn<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+{
+    // Check for Odyssey OCMBs
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        return __odyClearCmdCompleteAttn(i_chip);
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        return __expClearCmdCompleteAttn(i_chip);
+    }
+}
+
 
 //------------------------------------------------------------------------------
 
