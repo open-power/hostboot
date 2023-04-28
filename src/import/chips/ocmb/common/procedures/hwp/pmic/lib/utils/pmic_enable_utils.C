@@ -63,7 +63,7 @@ namespace gpio
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode poll_input_port_ready(
-    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio_target,
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const uint8_t i_pmic_pair_bit)
 {
@@ -1347,12 +1347,12 @@ fapi2::ReturnCode power_down_sequence_4u(const fapi2::Target<fapi2::TARGET_TYPE_
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     const auto I2C_DEVICES =
-        mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(i_target);
+        mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>(i_target);
 
     // Grab the targets as a struct, if they exist
     target_info_redundancy l_target_info(i_target, l_rc);
 
-    // If platform did not provide a usable (functional) set of targets (4 GENERICI2CSLAVE, at least 2 PMICs),
+    // If platform did not provide a usable (functional) set of targets (4 GENERICI2CRESPONDER, at least 2 PMICs),
     // Then we can't properly disable, the part is as good as dead, since re-enable would fail
     if (l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
@@ -1772,7 +1772,7 @@ fapi2::ReturnCode adc_min_vltg_read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
 
     // Grab the targets as a struct, if they exist
     target_info_redundancy l_target_info(i_ocmb_target, l_rc);
-    FAPI_TRY(l_rc, "Unusable PMIC/GENERICI2CSLAVE child target configuration found from %s",
+    FAPI_TRY(l_rc, "Unusable PMIC/GENERICI2CRESPONDER child target configuration found from %s",
              mss::c_str(i_ocmb_target));
 
     // ADC1
@@ -1883,7 +1883,8 @@ fapi_try_exit:
 /// @param[in] i_has_no_vddr1 true if the card is a has PMIC redundancy but no VDDR1 rail, which needs this workaround
 /// @return fapi2::ReturnCode
 ///
-fapi2::ReturnCode setup_adc1(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc, const bool i_has_no_vddr1)
+fapi2::ReturnCode setup_adc1(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc,
+                             const bool i_has_no_vddr1)
 {
     for (const auto& l_pair : ADC1_CH_INIT)
     {
@@ -1902,7 +1903,7 @@ fapi_try_exit:
 /// @param[in] i_adc ADC2
 /// @return fapi2::ReturnCode
 ///
-fapi2::ReturnCode setup_adc2(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc)
+fapi2::ReturnCode setup_adc2(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc)
 {
     for (const auto& l_pair : ADC2_CH_INIT)
     {
@@ -2085,7 +2086,7 @@ fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note Corresponds to steps (6,7,8) & (16,17,18) in 4U DDIMM Functional Spec
 ///
-fapi2::ReturnCode setup_gpio_efuse(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio)
+fapi2::ReturnCode setup_gpio_efuse(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio)
 {
     fapi2::buffer<uint8_t> l_reg_contents;
 
@@ -2137,7 +2138,7 @@ fapi2::ReturnCode setup_pmic_pair_and_gpio(
     const std::map<size_t, fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmic_map,
     const uint8_t i_pmic_id_0,
     const uint8_t i_pmic_id_1,
-    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio)
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio)
 {
     bool l_already_enabled = false;
     // The sequence below is defined in section 6.1.1 of the
@@ -2516,7 +2517,7 @@ fapi_try_exit:
 /// @param[out] o_already_enabled true if efuses already on, else false
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else
 ///
-fapi2::ReturnCode efuses_already_enabled(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
+fapi2::ReturnCode efuses_already_enabled(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio,
         bool& o_already_enabled)
 {
     fapi2::buffer<uint8_t> l_polarity;
@@ -2899,9 +2900,9 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
     // Grab the targets as a struct, if they exist
     target_info_redundancy l_target_info(i_ocmb_target, l_rc);
 
-    // If platform did not provide a usable set of targets (4 GENERICI2CSLAVE, at least 2 PMICs),
+    // If platform did not provide a usable set of targets (4 GENERICI2CRESPONDER, at least 2 PMICs),
     // Then we can't properly enable
-    FAPI_TRY(l_rc, "Unusable PMIC/GENERICI2CSLAVE child target configuration found from %s",
+    FAPI_TRY(l_rc, "Unusable PMIC/GENERICI2CRESPONDER child target configuration found from %s",
              mss::c_str(i_ocmb_target));
 
     // Grabs data to see if a workaround needs to be run below

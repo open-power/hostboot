@@ -61,7 +61,7 @@ namespace gpio
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode poll_input_port_ready(
-    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio_target,
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const mss::gpio::fields i_pmic_pair_bit);
 
@@ -351,10 +351,10 @@ struct target_info_redundancy
 {
     std::map<size_t, fapi2::Target<fapi2::TARGET_TYPE_PMIC>> iv_pmic_map;
 
-    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_adc1;
-    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_adc2;
-    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_gpio1;
-    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_gpio2;
+    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER> iv_adc1;
+    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER> iv_adc2;
+    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER> iv_gpio1;
+    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER> iv_gpio2;
 
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> iv_ocmb;
 
@@ -376,7 +376,7 @@ struct target_info_redundancy
         uint8_t l_attr = 0;
 
         const auto I2C_DEVICES =
-            mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(i_ocmb);
+            mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>(i_ocmb);
 
         // The ATTR_REL_POS (mss::index) numbering is how PMIC HWP's have numbered the PMICs and how platform
         // provides them. This varies from the "Redundant Power on DIMM – Functional Specification" numbering
@@ -388,31 +388,31 @@ struct target_info_redundancy
         }
 
         const uint8_t NUM_PMICS = iv_pmic_map.size();
-        const uint8_t NUM_GENERICI2CSLAVE = I2C_DEVICES.size();
+        const uint8_t NUM_GENERICI2CRESPONDER = I2C_DEVICES.size();
         const auto NUM_PRIMARY_PMICS = CONSTS::NUM_PRIMARY_PMICS;
 
         // If we are given a guaranteed failing list of targets (< 2 PMICs or < 4 GI2CS), exit now
         FAPI_ASSERT((NUM_PMICS >= NUM_PRIMARY_PMICS) &&
-                    (NUM_GENERICI2CSLAVE == mss::generic_i2c_slave::NUM_TOTAL_DEVICES),
+                    (NUM_GENERICI2CRESPONDER == mss::generic_i2c_responder_ddr4::NUM_TOTAL_DEVICES),
                     fapi2::INVALID_PMIC_GI2C_TARGET_CONFIG()
                     .set_OCMB_TARGET(i_ocmb)
                     .set_NUM_PMICS(NUM_PMICS)
-                    .set_NUM_GI2CS(NUM_GENERICI2CSLAVE)
+                    .set_NUM_GI2CS(NUM_GENERICI2CRESPONDER)
                     .set_EXPECTED_MIN_PMICS(NUM_PRIMARY_PMICS)
-                    .set_EXPECTED_GI2CS(mss::generic_i2c_slave::NUM_TOTAL_DEVICES),
+                    .set_EXPECTED_GI2CS(mss::generic_i2c_responder_ddr4::NUM_TOTAL_DEVICES),
                     "%s pmic_enable requires at least %u PMICs and exactly %u GI2C targets. "
                     "Given %u PMICs, %u GI2C",
                     mss::c_str(i_ocmb),
                     NUM_PRIMARY_PMICS,
-                    mss::generic_i2c_slave::NUM_TOTAL_DEVICES,
+                    mss::generic_i2c_responder_ddr4::NUM_TOTAL_DEVICES,
                     NUM_PMICS,
-                    NUM_GENERICI2CSLAVE);
+                    NUM_GENERICI2CRESPONDER);
 
         // Since we have all 4 and they are sorted, we already know what is where
-        iv_adc1 = I2C_DEVICES[mss::generic_i2c_slave::ADC1];
-        iv_adc2 = I2C_DEVICES[mss::generic_i2c_slave::ADC2];
-        iv_gpio1 = I2C_DEVICES[mss::generic_i2c_slave::GPIO1];
-        iv_gpio2 = I2C_DEVICES[mss::generic_i2c_slave::GPIO2];
+        iv_adc1 = I2C_DEVICES[mss::generic_i2c_responder_ddr4::ADC1];
+        iv_adc2 = I2C_DEVICES[mss::generic_i2c_responder_ddr4::ADC2];
+        iv_gpio1 = I2C_DEVICES[mss::generic_i2c_responder_ddr4::GPIO1];
+        iv_gpio2 = I2C_DEVICES[mss::generic_i2c_responder_ddr4::GPIO2];
 
         iv_ocmb = i_ocmb;
 
@@ -436,7 +436,7 @@ struct target_info_redundancy
 struct enable_fields_4u
 {
     uint8_t iv_pmic_id;
-    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE> iv_gpio;
+    fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER> iv_gpio;
     uint8_t iv_input_port_bit;
 };
 
@@ -793,7 +793,8 @@ fapi2::ReturnCode check_for_no_vddr1_rail( const fapi2::Target<fapi2::TARGET_TYP
 /// @param[in] i_has_no_vddr1 true if the card is a has PMIC redundancy but no VDDR1 rail, which needs this workaround
 /// @return fapi2::ReturnCode
 ///
-fapi2::ReturnCode setup_adc1(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc, const bool i_has_no_vddr1);
+fapi2::ReturnCode setup_adc1(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc,
+                             const bool i_has_no_vddr1);
 
 ///
 /// @brief Setup ADC2
@@ -801,7 +802,7 @@ fapi2::ReturnCode setup_adc1(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSL
 /// @param[in] i_adc ADC2
 /// @return fapi2::ReturnCode
 ///
-fapi2::ReturnCode setup_adc2(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc);
+fapi2::ReturnCode setup_adc2(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc);
 
 ///
 /// @brief Set the up PMIC ADC to read VIN_BULK
@@ -834,7 +835,7 @@ fapi2::ReturnCode validate_efuse_on(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note Corresponds to steps (6,7,8) & (16,17,18) in 4U DDIMM Functional Spec
 ///
-fapi2::ReturnCode setup_gpio_efuse(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio);
+fapi2::ReturnCode setup_gpio_efuse(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio);
 
 ///
 /// @brief Set the up PMIC pair and matching GPIO expander prior to PMIC enable
@@ -850,7 +851,7 @@ fapi2::ReturnCode setup_pmic_pair_and_gpio(
     const std::map<size_t, fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmic_map,
     const uint8_t i_pmic_id_0,
     const uint8_t i_pmic_id_1,
-    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio);
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio);
 
 ///
 /// @brief Step 1 of enable_with_redundancy: set up the GPIO EFUSE's
@@ -980,7 +981,7 @@ fapi2::ReturnCode reset_n_mode_attrs(const target_info_redundancy& i_target_info
 /// @param[out] o_already_enabled true if efuses already on, else false
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else
 ///
-fapi2::ReturnCode efuses_already_enabled(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
+fapi2::ReturnCode efuses_already_enabled(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio,
         bool& o_already_enabled);
 
 ///

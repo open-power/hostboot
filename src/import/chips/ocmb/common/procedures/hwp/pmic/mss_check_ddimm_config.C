@@ -86,9 +86,9 @@ extern "C"
             }
 
 
-            // If platform did not provide a usable set of targets (4 GENERICI2CSLAVE, at least 2 PMICs),
+            // If platform did not provide a usable set of targets (4 GENERICI2CRESPONDER, at least 2 PMICs),
             // Then we can't properly enable, this is asserted via this ReturnCode
-            FAPI_TRY(l_rc, "Unusable PMIC/GENERICI2CSLAVE child target configuration found from %s",
+            FAPI_TRY(l_rc, "Unusable PMIC/GENERICI2CRESPONDER child target configuration found from %s",
                      mss::c_str(i_ocmb_target));
         }
         else
