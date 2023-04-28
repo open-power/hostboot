@@ -79,6 +79,7 @@ struct pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R04                                 = 0x04;
     static constexpr uint8_t R05                                 = 0x05;
     static constexpr uint8_t R06                                 = 0x06;
+    static constexpr uint8_t R07                                 = 0x07;
     /* R07 RESERVED */
     static constexpr uint8_t R08                                 = 0x08;
     static constexpr uint8_t R09                                 = 0x09;

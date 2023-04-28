@@ -315,7 +315,7 @@
   <hwpError>
     <rc>RC_INVALID_PMIC_GI2C_TARGET_CONFIG</rc>
     <description>
-       Expected 4 GENERICI2CSLAVE targets and at least 2 PMICs in order to
+       Expected 4 GENERICI2CRESPONDER targets and at least 2 PMICs in order to
        properly perform 4U pmic_enable.
     </description>
     <ffdc>OCMB_TARGET</ffdc>

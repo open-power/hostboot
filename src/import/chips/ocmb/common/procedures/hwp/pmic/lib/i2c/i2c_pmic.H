@@ -413,6 +413,139 @@ inline fapi2::ReturnCode reg_write_contiguous(const fapi2::Target<T>& i_target,
     // Use fapi2 putI2c interface to execute command
     return fapi2::putI2c(i_target, l_data);
 }
+
+///
+/// @brief Perform a register read contiguous operation on the given target
+/// @tparam T target type (PMIC, GENERICI2CRESPONDER, etc.)
+/// @param[in] i_target the target
+/// @param[in] i_addr address to read
+/// @param[in,out] io_command command buffer
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template<fapi2::TargetType T>
+inline void reg_read_contiguous_helper(const fapi2::Target<T>& i_target,
+                                       const uint8_t i_addr,
+                                       std::vector<uint8_t>& io_command);
+
+///
+/// @brief Perform a register read contiguous operation on the given target
+/// @param[in] i_target the PMIC device target
+/// @param[in] i_addr address to read
+/// @param[in,out] io_command command buffer
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template<>
+inline void reg_read_contiguous_helper(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_target,
+                                       const uint8_t i_addr,
+                                       std::vector<uint8_t>& io_command)
+{
+    io_command.push_back(i_addr);
+}
+
+///
+/// @brief Perform a register read contiguous operation on the given target
+/// @param[in] i_target the GENERICI2CRESPONDER target
+/// @param[in] i_addr address to read
+/// @param[in,out] io_command command buffer
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template<>
+inline void reg_read_contiguous_helper(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_target,
+                                       const uint8_t i_addr,
+                                       std::vector<uint8_t>& io_command)
+{
+    add_adc_opcode(i_target, mss::adc::i2c::opcode::READ, io_command);
+    io_command.push_back(i_addr);
+}
+
+///
+/// @brief Perform a register read contiguous operation on the given target
+/// @param[in] i_target the DT device target
+/// @param[in] i_addr address to read
+/// @param[in,out] io_command command buffer
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template<>
+inline void reg_read_contiguous_helper(const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_target,
+                                       const uint8_t i_addr,
+                                       std::vector<uint8_t>& io_command)
+{
+    io_command.push_back(i_addr);
+}
+
+///
+/// @brief Perform register read operation on a contiguous address of given target
+/// @tparam T target type
+/// @tparam N size of the data buffer
+/// @param[in] i_target the PMIC/I2C/DT device target
+/// @param[in] i_addr starting register address to read from
+/// @param[out] o_data_buffer buffer of data to be read from given register addresses
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <fapi2::TargetType T, size_t N>
+inline fapi2::ReturnCode reg_read_contiguous(const fapi2::Target<T>& i_target,
+        const uint8_t i_addr,
+        fapi2::buffer<uint8_t> (&o_data_buffer)[N])
+{
+    std::vector<uint8_t> l_data_vector;
+    std::vector<uint8_t> l_command;
+    uint32_t l_count = 0;
+
+    reg_read_contiguous_helper(i_target, i_addr, l_command);
+
+    // Flush o_data_buffer to avoid stale data
+    for(l_count = 0; l_count < N; l_count++)
+    {
+        o_data_buffer[l_count] = 0;
+    }
+
+    FAPI_TRY(fapi2::getI2c(i_target, N, l_command, l_data_vector),
+             "i2C read failed on " TARGTIDFORMAT " for address 0x%02x", MSSTARGID(i_target), i_addr);
+
+    // Fill the array o_data_buffer from the read vector
+    l_count = 0;
+
+    // The array indexing will not run over as we are passing the number of bytes to be read to getI2C()
+    for(auto l_data : l_data_vector)
+    {
+        o_data_buffer[l_count] = l_data;
+        l_count++;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform register read operation on a contiguous address of given target and then reverse the buffer
+/// @tparam T target type
+/// @tparam N size of the data buffer
+/// @param[in] i_target the PMIC/I2C/DT device target
+/// @param[in] i_addr starting register address to read from
+/// @param[out] o_data_buffer reverse buffer of data to be read from given register addresses
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <fapi2::TargetType T, size_t N>
+inline fapi2::ReturnCode reg_read_contiguous_reverse(const fapi2::Target<T>& i_target,
+        const uint8_t i_addr,
+        fapi2::buffer<uint8_t> (&o_data_buffer)[N])
+{
+    reg_read_contiguous(i_target, i_addr, o_data_buffer);
+
+    // Reverse the read data
+    for(uint32_t l_count = 0; l_count < N; l_count++)
+    {
+        o_data_buffer[l_count].reverse();
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // i2c
 } // pmic
 } // mss

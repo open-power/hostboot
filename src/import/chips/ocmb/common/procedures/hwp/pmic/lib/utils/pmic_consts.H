@@ -678,11 +678,25 @@ namespace dt
 ///
 enum regs
 {
+    RO_INPUTS_1    = 0xBC,
+    RO_INPUTS_0    = 0xBE,
     FAULTS_CLEAR_0 = 0xD4,
     FAULTS_CLEAR_1 = 0xD6,
     EN_REGISTER    = 0xDE,
 
     BREADCRUMB     = 0xE0,
+};
+
+///
+/// @brief Fields and contents for DT regs
+///
+enum fields
+{
+    GPI_1           = 13,
+    SWIN_FAULT_A    = 13,
+    SWIN_FAULT_B    =  9,
+    SWIN_FAULT_C    =  5,
+    SWIN_FAULT_D    =  1,
 };
 
 ///

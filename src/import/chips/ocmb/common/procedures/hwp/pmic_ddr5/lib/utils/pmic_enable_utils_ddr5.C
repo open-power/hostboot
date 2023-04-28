@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file pmic_enable_utils.C
+/// @file pmic_enable_utils_ddr5.C
 /// @brief Utility functions for DDR5 PMIC enable operation
 ///
 // *HWP HWP Owner: Sneha Kadam <sneha.kadam1@ibm.com>
@@ -307,7 +307,7 @@ fapi2::ReturnCode power_down_sequence_4u(const fapi2::Target<fapi2::TARGET_TYPE_
     // Grab the targets as a struct, if they exist
     target_info_redundancy_ddr5 l_target_info(i_target, l_rc);
 
-    // If platform did not provide a usable (functional) set of targets (4 GENERICI2CSLAVE, at least 2 PMICs),
+    // If platform did not provide a usable (functional) set of targets (4 GENERICI2CRESPONDER, at least 2 PMICs),
     // Then we can't properly disable, the part is as good as dead, since re-enable would fail
     if (l_rc != fapi2::FAPI2_RC_SUCCESS)
     {

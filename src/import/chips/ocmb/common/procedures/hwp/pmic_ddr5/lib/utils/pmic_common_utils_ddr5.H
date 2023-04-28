@@ -266,6 +266,182 @@ fapi2::ReturnCode get_minimum_vin_bulk_threshold(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     uint16_t& o_vin_bulk_min);
 
+// Extra constants
+static constexpr uint16_t CURRENT_MULTIPLIER = 125;
+static constexpr uint16_t PHASE_MIN = 250;
+static constexpr uint16_t PHASE_MAX = 1500;
+
+///
+/// @brief Bread crumb values to return
+///
+enum bread_crumb : uint8_t
+{
+    ALL_GOOD             = 0,
+    FIRST_ATTEMPT        = 0x51,
+    RECOVERY_ATTEMPTED   = 0x52,
+    STILL_A_FAIL         = 0x53,
+};
+
+///
+/// @brief N Mode State to return
+///
+enum aggregate_state : uint8_t
+{
+    N_PLUS_1                  = 0,
+    N_MODE_POSSIBLE           = 1,
+    N_MODE_RECOVERY_ATTEMPTED = 2,
+    N_MODE                    = 3,
+    LOST                      = 4,
+    GI2C_I2C_FAIL             = 5,
+    DIMM_NOT_4U               = 6,
+};
+
+///
+/// @brief States for the pmics to be returned in a uint8_t bitmap
+///
+enum pmic_state : uint8_t
+{
+    PMIC_DECONFIGURED       = 0b10000000,
+    PMIC_NOT_PRESENT        = 0b00001000,
+    PMIC_I2C_FAIL           = 0b00000100,
+    PMIC_CURRENT_IMBALANCE  = 0b00000010,
+    PMIC_PWR_NOT_GOOD       = 0b00000001,
+    PMIC_ALL_GOOD           = 0b00000000,
+};
+
+///
+/// @brief States for the dts to be returned in a uint8_t bitmap
+///
+enum dt_state : uint8_t
+{
+    DT_DECONFIGURED  = 0b10000000,
+    DT_NOT_PRESENT   = 0b01000000,
+    DT_I2C_FAIL      = 0b00100000,
+    DT_SWIN_FAULT_D  = 0b00010000,
+    DT_SWIN_FAULT_C  = 0b00001000,
+    DT_SWIN_FAULT_B  = 0b00000100,
+    DT_SWIN_FAULT_A  = 0b00000010,
+    DT_GPI_1         = 0b00000001,
+    DT_ALL_GOOD      = 0b00000000,
+};
+
+///
+/// @brief Struct of DT health check telemetry to populate
+///
+struct __attribute__((__packed__)) dt_health_check_telemetry
+{
+    uint8_t  iv_breadcrumb   = 0;
+    uint8_t  reserved0 = 0;
+
+    uint16_t iv_ro_inputs_1 = 0;
+    uint16_t iv_ro_inputs_0 = 0;
+
+    uint16_t reserved1 = 0;
+};
+
+///
+/// @brief Struct of PMIC health check telemetry to populate
+///
+struct __attribute__((__packed__)) pmic_health_check_telemetry
+{
+    // Error register
+    // Direct read from 8 bit register
+    uint8_t iv_r04 = 0;
+    uint8_t iv_r05 = 0;
+    uint8_t iv_r06 = 0;
+    uint8_t iv_r07 = 0;
+
+    // Status register
+    // Direct read from 8 bit register
+    uint8_t iv_r08 = 0;
+    uint8_t iv_r09 = 0;
+    uint8_t iv_r0a = 0;
+    uint8_t iv_r0b = 0;
+
+    // Values in mA
+    uint16_t iv_swa_current_mA = 0;
+    uint16_t iv_swb_current_mA = 0;
+    uint16_t iv_swc_current_mA = 0;
+    uint16_t iv_swd_current_mA = 0;
+};
+
+///
+/// @brief Struct of health check telemetry data
+///
+struct __attribute__((__packed__)) health_check_telemetry_data
+{
+    aggregate_state iv_aggregate_state = aggregate_state::N_PLUS_1;
+
+    uint8_t reserved = 0;
+    uint16_t reserved1 = 0;
+
+    dt_health_check_telemetry iv_dt0;
+    dt_health_check_telemetry iv_dt1;
+    dt_health_check_telemetry iv_dt2;
+    dt_health_check_telemetry iv_dt3;
+
+    pmic_health_check_telemetry iv_pmic0;
+    pmic_health_check_telemetry iv_pmic1;
+    pmic_health_check_telemetry iv_pmic2;
+    pmic_health_check_telemetry iv_pmic3;
+};
+
+///
+/// @brief Get the pmics and dt objects
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @return std::vector<pmic_dt_info>
+///
+fapi2::ReturnCode set_pmic_dt_states(target_info_redundancy_ddr5& io_target_info);
+
+///
+/// @brief Check if we are 4U by checking for at least 3 DT targets
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @return true if 4U, false if not
+///
+bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
+
+///
+/// @brief Write a register of a PMIC target
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair struct including target / state info
+/// @param[in] i_reg register
+/// @param[in] i_data input buffer
+///
+void pmic_reg_write(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint8_t>& i_data);
+
+///
+/// @brief Write a register of a DT target
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair struct including target / state info
+/// @param[in] i_reg register
+/// @param[in] i_data input buffer
+///
+void dt_reg_write(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint8_t>& i_data);
+
+///
+/// @brief Read contiguous registers of a PMIC target
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
+/// @param[in] i_reg register
+/// @param[out] o_output output buffer
+///
+template <size_t N>
+void pmic_reg_read_contiguous(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
+                              fapi2::buffer<uint8_t> (&o_output)[N]);
+
+///
+/// @brief Read contiguous registers of a DT target
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
+/// @param[in] i_reg register
+/// @param[out] o_output output buffer
+///
+template <size_t N>
+void dt_reg_read_contiguous(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
+                            fapi2::buffer<uint8_t> (&o_output)[N]);
+
 } // ddr5
 } // pmic
 } // mss

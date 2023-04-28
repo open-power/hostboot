@@ -210,6 +210,131 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Get the pmics and dt objects
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @return std::vector<pmic_dt_info>
+///
+fapi2::ReturnCode set_pmic_dt_states(target_info_redundancy_ddr5& io_target_info)
+{
+    for (auto l_count = 0; l_count < io_target_info.iv_number_of_target_infos_present; l_count++)
+    {
+        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(io_target_info, l_count, [l_count, &io_target_info]
+                          (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+        {
+            io_target_info.iv_pmic_dt_map[l_count].iv_pmic_state = mss::pmic::ddr5::pmic_state::PMIC_ALL_GOOD;
+            io_target_info.iv_pmic_dt_map[l_count].iv_dt_state = mss::pmic::ddr5::dt_state::DT_ALL_GOOD;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if we are 4U by checking for at least 3 DT targets
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @return true if 4U, false if not
+///
+bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
+{
+    // Platform is expected to provide at least 3 DT targets
+    // All 4U DDIMMs have minimum 3 DT targets, and all 2U DDIMMs have zero, so checking those is sufficient to say if we have a 4U
+    const auto DTS = i_ocmb_target.getChildren<fapi2::TARGET_TYPE_POWER_IC>(fapi2::TARGET_STATE_PRESENT);
+
+    return (DTS.size() >= mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>::NUM_PRIMARY_DT_DDR5);
+}
+
+///
+/// @brief Write a register of a PMIC target. This function is for the runtime health check and telemetry functions
+///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair struct including target / state info
+/// @param[in] i_reg register
+/// @param[in] i_data input buffer
+///
+void pmic_reg_write(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint8_t>& i_data)
+{
+    if (!(io_pmic.iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
+    {
+        if (mss::pmic::i2c::reg_write(io_pmic.iv_pmic, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            io_pmic.iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL;
+        }
+    }
+}
+
+///
+/// @brief Write a register of a DT target. This function is for the runtime health check and telemetry functions
+///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair struct including target / state info
+/// @param[in] i_reg register
+/// @param[in] i_data input buffer
+///
+void dt_reg_write(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint8_t>& i_data)
+{
+    if (!(io_pmic.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
+    {
+        if (mss::pmic::i2c::reg_write(io_pmic.iv_dt, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            io_pmic.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
+        }
+    }
+}
+
+
+///
+/// @brief Read contiguous registers of a PMIC target. This function is for the runtime health check and telemetry functions
+///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
+/// @param[in] i_reg register
+/// @param[out] o_output output buffer
+///
+template <size_t N>
+void pmic_reg_read_contiguous(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
+                              fapi2::buffer<uint8_t> (&o_output)[N])
+{
+    if (!(io_pmic.iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
+    {
+        if (mss::pmic::i2c::reg_read_contiguous(io_pmic.iv_pmic, i_reg, o_output) != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            io_pmic.iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL;
+        }
+    }
+}
+
+///
+/// @brief Read contiguous registers of a DT target. This function is for the runtime health check and telemetry functions
+///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
+/// @param[in] i_reg register
+/// @param[out] o_output output buffer
+///
+template <size_t N>
+void dt_reg_read_contiguous(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
+                            fapi2::buffer<uint8_t> (&o_output)[N])
+{
+    if (!(io_pmic.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
+    {
+        if (mss::pmic::i2c::reg_read_contiguous(io_pmic.iv_dt, i_reg, o_output) != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            io_pmic.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
+        }
+    }
+}
+
 } // ddr5
 } // pmic
 } // mss
