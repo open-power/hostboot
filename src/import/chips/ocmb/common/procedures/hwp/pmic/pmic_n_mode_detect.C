@@ -91,9 +91,9 @@ bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 {
     // SBE is expected to provide exactly 4 GI2C targets
     // All 4U DDIMMs have 4 GI2C targets, and all 1U/2U DDIMMs have zero, so checking those is sufficient to say if we have a 4U
-    const auto GI2CS = i_ocmb_target.getChildren<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(fapi2::TARGET_STATE_PRESENT);
+    const auto GI2CS = i_ocmb_target.getChildren<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>(fapi2::TARGET_STATE_PRESENT);
 
-    return (GI2CS.size() == mss::generic_i2c_slave::NUM_TOTAL_DEVICES);
+    return (GI2CS.size() == mss::generic_i2c_responder_ddr4::NUM_TOTAL_DEVICES);
 }
 
 ///
@@ -105,7 +105,7 @@ bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 /// @param[in,out] io_failed_pmics Bit map of failed PMICS on a GPIO
 /// @return aggregate_state N mode state according to the status of GPIO and ADC only
 ///
-aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
+aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio,
                            pmic_info& io_pmic1,
                            pmic_info& io_pmic2,
                            fapi2::buffer<uint8_t>& io_failed_pmics)
@@ -162,7 +162,7 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAV
 ///
 /// @param[in] i_adc ADC target
 ///
-aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc)
+aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc)
 {
     FAPI_INF(TARGTIDFORMAT " Checking ADC for EVENT_FLAG", MSSTARGID(i_adc));
 
@@ -376,8 +376,8 @@ std::vector<pmic_info> get_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
 /// @param[out] o_data telemetry data struct
 ///
 void populate_gpio_data(
-    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio1,
-    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio2,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio1,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio2,
     telemetry_data& o_data)
 {
     fapi2::buffer<uint8_t> l_reg_contents_1;
@@ -571,7 +571,7 @@ void populate_pmic_data(
 /// @param[in] i_adc_reg Register
 /// @return double scale factor
 ///
-uint32_t get_adc_scale_factor(const mss::generic_i2c_slave i_adc_num, const uint8_t i_adc_reg)
+uint32_t get_adc_scale_factor(const mss::generic_i2c_responder_ddr4 i_adc_num, const uint8_t i_adc_reg)
 {
     // mul by 5
 
@@ -580,7 +580,7 @@ uint32_t get_adc_scale_factor(const mss::generic_i2c_slave i_adc_num, const uint
     static constexpr uint32_t SINGLE_PHASE_SCALE = 37765;
 
     // Specific channels need specific scale factors due to the dual phasing
-    if (i_adc_num == mss::generic_i2c_slave::ADC1)
+    if (i_adc_num == mss::generic_i2c_responder_ddr4::ADC1)
     {
         // CH5 or CH3, we need to use a different scale factor
         if ((i_adc_reg == mss::adc::regs::RECENT_CH3_LSB) || (i_adc_reg == mss::adc::regs::RECENT_CH5_LSB) ||
@@ -590,7 +590,7 @@ uint32_t get_adc_scale_factor(const mss::generic_i2c_slave i_adc_num, const uint
             return DUAL_PHASE_SCALE;
         }
     }
-    else if (i_adc_num == mss::generic_i2c_slave::ADC2) // ADC2
+    else if (i_adc_num == mss::generic_i2c_responder_ddr4::ADC2) // ADC2
     {
         if ((i_adc_reg == mss::adc::regs::RECENT_CH0_LSB) ||
             (i_adc_reg == mss::adc::regs::MAX_CH0_LSB) ||
@@ -612,8 +612,8 @@ uint32_t get_adc_scale_factor(const mss::generic_i2c_slave i_adc_num, const uint
 /// @param[out] o_adc_data data struct
 ///
 void populate_adc_data(
-    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc,
-    const mss::generic_i2c_slave i_adc_num,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc,
+    const mss::generic_i2c_responder_ddr4 i_adc_num,
     adc_telemetry& o_adc_data)
 {
     FAPI_INF(TARGTIDFORMAT " Populating ADC data", MSSTARGID(i_adc));
@@ -752,7 +752,8 @@ fapi2::ReturnCode pmic_n_mode_detect(
     aggregate_state l_state = aggregate_state::N_PLUS_1;
 
     // Expecting to receive 4 GI2C targets and 4 PMICs from PPE platform
-    const auto GI2C_DEVICES = i_ocmb_target.getChildren<fapi2::TARGET_TYPE_GENERICI2CSLAVE>(fapi2::TARGET_STATE_PRESENT);
+    const auto GI2C_DEVICES = i_ocmb_target.getChildren<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>
+                              (fapi2::TARGET_STATE_PRESENT);
     auto PMICS = get_pmics(i_ocmb_target);
 
     if (PMICS.empty())
@@ -773,10 +774,10 @@ fapi2::ReturnCode pmic_n_mode_detect(
 
     {
         // Grab the targets
-        const auto& ADC1 = GI2C_DEVICES[mss::generic_i2c_slave::ADC1];
-        const auto& ADC2 = GI2C_DEVICES[mss::generic_i2c_slave::ADC2];
-        const auto& GPIO1 = GI2C_DEVICES[mss::generic_i2c_slave::GPIO1];
-        const auto& GPIO2 = GI2C_DEVICES[mss::generic_i2c_slave::GPIO2];
+        const auto& ADC1 = GI2C_DEVICES[mss::generic_i2c_responder_ddr4::ADC1];
+        const auto& ADC2 = GI2C_DEVICES[mss::generic_i2c_responder_ddr4::ADC2];
+        const auto& GPIO1 = GI2C_DEVICES[mss::generic_i2c_responder_ddr4::GPIO1];
+        const auto& GPIO2 = GI2C_DEVICES[mss::generic_i2c_responder_ddr4::GPIO2];
 
         // Start with the GPIOs
         aggregate_state l_output_state_1 = gpio_check(GPIO1, PMICS[mss::pmic::id::PMIC0], PMICS[mss::pmic::id::PMIC1],
@@ -823,8 +824,8 @@ fapi2::ReturnCode pmic_n_mode_detect(
         populate_pmic_data(PMICS[mss::pmic::id::PMIC3], l_info.iv_telemetry_data.iv_pmic4);
 
         // Finally, the ADCs
-        populate_adc_data(ADC1, mss::generic_i2c_slave::ADC1, l_info.iv_telemetry_data.iv_adc1);
-        populate_adc_data(ADC2, mss::generic_i2c_slave::ADC2, l_info.iv_telemetry_data.iv_adc2);
+        populate_adc_data(ADC1, mss::generic_i2c_responder_ddr4::ADC1, l_info.iv_telemetry_data.iv_adc1);
+        populate_adc_data(ADC2, mss::generic_i2c_responder_ddr4::ADC2, l_info.iv_telemetry_data.iv_adc2);
 
         FAPI_TRY(send_struct(l_info, o_data));
 
