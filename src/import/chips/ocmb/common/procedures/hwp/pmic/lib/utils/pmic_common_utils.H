@@ -56,6 +56,9 @@ const std::vector<const char*> PMIC_RAIL_NAMES = {"SWA", "SWB", "SWC", "SWD"};
 using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
 using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
 using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;;
+using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+using TPS_CONSTS = mss::pmic::consts<mss::pmic::product::TPS5383X>;;
+using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
 
 // Arrays to easily index common parameters by rail
 static constexpr uint8_t const VOLT_SETTING_ACTIVE_REGS[] =
@@ -331,6 +334,8 @@ struct status_regs
     uint8_t iv_r09;
     uint8_t iv_r0A;
     uint8_t iv_r0B;
+    uint8_t iv_r33;
+    uint8_t iv_r73;
 };
 
 ///
@@ -343,7 +348,10 @@ struct status_field
     bool iv_assert_out;
 };
 
-static const std::vector<std::pair<uint8_t, std::vector<status_field>>> IDT_SPECIFIC_STATUS_FIELDS =
+///
+/// @brief const vector of statuses to check
+///
+static const std::vector<std::pair<uint8_t, std::vector<status_field>>> ERROR_LOG_REG_FIELDS =
 {
     {
         REGS::R04,
@@ -373,6 +381,63 @@ static const std::vector<std::pair<uint8_t, std::vector<status_field>>> IDT_SPEC
             {FIELDS::R06_SWB_OVER_VOLTAGE, "SWB_OVER_VOLTAGE", true},
             {FIELDS::R06_SWC_OVER_VOLTAGE, "SWC_OVER_VOLTAGE", true},
             {FIELDS::R06_SWD_OVER_VOLTAGE, "SWD_OVER_VOLTAGE", true},
+        }
+    }
+};
+
+///
+/// @brief const vector of statuses to check
+///
+static const std::vector<std::pair<uint8_t, std::vector<status_field>>> STATUS_FIELDS_TI_LT_REV23 =
+{
+    // TI REV < 0x23 has some R0A status bits different than other PMICs and revisions
+    {
+        REGS::R0A,
+        {   {FIELDS::R0A_SWA_OUTPUT_OVER_VOLTAGE_STATUS,  "SWA_OUTPUT_OVER_VOLTAGE", true},
+            {FIELDS::R0A_SWB_OUTPUT_OVER_VOLTAGE_STATUS,  "SWB_OUTPUT_OVER_VOLTAGE", true},
+            {FIELDS::R0A_SWC_OUTPUT_OVER_VOLTAGE_STATUS,  "SWC_OUTPUT_OVER_VOLTAGE", true},
+            {FIELDS::R0A_SWD_OUTPUT_OVER_VOLTAGE_STATUS,  "SWD_OUTPUT_OVER_VOLTAGE", true},
+            {TPS_FIELDS::R0A_SWA_NEG_OVER_CURRENT_STATUS, "SWA_NEGATIVE_OVER_CURRENT", true},
+            {TPS_FIELDS::R0A_SWB_NEG_OVER_CURRENT_STATUS, "SWB_NEGATIVE_OVER_CURRENT", true},
+            {TPS_FIELDS::R0A_SWC_NEG_OVER_CURRENT_STATUS, "SWC_NEGATIVE_OVER_CURRENT", true},
+            {TPS_FIELDS::R0A_SWD_NEG_OVER_CURRENT_STATUS, "SWD_NEGATIVE_OVER_CURRENT", true},
+        }
+    }
+};
+
+///
+/// @brief const vector of statuses to check
+///
+static const std::vector<std::pair<uint8_t, std::vector<status_field>>> STATUS_FIELDS_NOT_TI_LT_REV23 =
+{
+    // R0A status bits for other PMICs that are not TI REV < 0x23
+    {
+        REGS::R0A,
+        {   {FIELDS::R0A_SWA_OUTPUT_OVER_VOLTAGE_STATUS,  "SWA_OUTPUT_OVER_VOLTAGE", true},
+            {FIELDS::R0A_SWB_OUTPUT_OVER_VOLTAGE_STATUS,  "SWB_OUTPUT_OVER_VOLTAGE", true},
+            {FIELDS::R0A_SWC_OUTPUT_OVER_VOLTAGE_STATUS,  "SWC_OUTPUT_OVER_VOLTAGE", true},
+            {FIELDS::R0A_SWD_OUTPUT_OVER_VOLTAGE_STATUS,  "SWD_OUTPUT_OVER_VOLTAGE", true},
+            {FIELDS::R0A_PEC_ERROR_STATUS,                "PEC_ERROR", true},
+            {FIELDS::R0A_PARITY_ERROR_STATUS,             "PARITY_ERROR", true},
+            {FIELDS::R0A_IBI_STATUS,                      "PENDING_IBI", true},
+        }
+    }
+};
+
+///
+/// @brief const vector of statuses to check
+///
+static const std::vector<std::pair<uint8_t, std::vector<status_field>>> STATUS_FIELDS_TI_GTE_REV23 =
+{
+    // TI REV >= 0x23 status bits unique to this PMIC
+    {
+        // R73 - don't forget to unlock this for reading
+        TPS_REGS::R73,
+        {   {TPS_FIELDS::R73_VIN_OK_Z,                    "VIN_NOT_OK", true},
+            {TPS_FIELDS::R73_SWD_NEG_OVER_CURRENT_STATUS, "SWD_NEGATIVE_OVER_CURRENT", true},
+            {TPS_FIELDS::R73_SWC_NEG_OVER_CURRENT_STATUS, "SWC_NEGATIVE_OVER_CURRENT", true},
+            {TPS_FIELDS::R73_SWB_NEG_OVER_CURRENT_STATUS, "SWB_NEGATIVE_OVER_CURRENT", true},
+            {TPS_FIELDS::R73_SWA_NEG_OVER_CURRENT_STATUS, "SWA_NEGATIVE_OVER_CURRENT", true},
         }
     }
 };
@@ -411,18 +476,6 @@ static const std::vector<std::pair<uint8_t, std::vector<status_field>>> STATUS_F
     },
 
     {
-        REGS::R0A,
-        {   {FIELDS::R0A_SWA_OUTPUT_OVER_VOLTAGE_STATUS, "SWA_OUTPUT_OVER_VOLTAGE", true},
-            {FIELDS::R0A_SWB_OUTPUT_OVER_VOLTAGE_STATUS, "SWB_OUTPUT_OVER_VOLTAGE", true},
-            {FIELDS::R0A_SWC_OUTPUT_OVER_VOLTAGE_STATUS, "SWC_OUTPUT_OVER_VOLTAGE", true},
-            {FIELDS::R0A_SWD_OUTPUT_OVER_VOLTAGE_STATUS, "SWD_OUTPUT_OVER_VOLTAGE", true},
-            {FIELDS::R0A_PEC_ERROR_STATUS,               "PEC_ERROR", true},
-            {FIELDS::R0A_PARITY_ERROR_STATUS,            "PARITY_ERROR", true},
-            {FIELDS::R0A_IBI_STATUS,                     "PENDING_IBI", true},
-        }
-    },
-
-    {
         REGS::R0B,
         {   {FIELDS::R0B_SWA_OUTPUT_CURRENT_LIMITER_WARNING_STATUS, "SWA_OUTPUT_CURRENT_LIMITER_EVENT", true},
             {FIELDS::R0B_SWB_OUTPUT_CURRENT_LIMITER_WARNING_STATUS, "SWB_OUTPUT_CURRENT_LIMITER_EVENT", true},
@@ -432,6 +485,14 @@ static const std::vector<std::pair<uint8_t, std::vector<status_field>>> STATUS_F
             {FIELDS::R0B_SWB_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS  , "SWB_OUTPUT_UNDER_VOLTAGE_LOCKOUT", true},
             {FIELDS::R0B_SWC_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS  , "SWC_OUTPUT_UNDER_VOLTAGE_LOCKOUT", true},
             {FIELDS::R0B_SWD_OUTPUT_UNDER_VOLTAGE_LOCKOUT_STATUS  , "SWD_OUTPUT_UNDER_VOLTAGE_LOCKOUT", true},
+        }
+    },
+
+    {
+        REGS::R33,
+        {   {FIELDS::R33_VIN_MGMT_PGOOD_SWITCHOVER_MODE_STATUS, "VIN_MGMT_PGOOD_SWITCHOVER_MODE", true},
+            {FIELDS::R33_VIN_BULK_UNDER_VOLTAGE_LOCKOUT_STATUS, "VIN_BULK_UNDER_VOLTAGE_LOCKOUT", true},
+            {FIELDS::R33_VOUT_1P0V_OUTPUT_POWER_GOOD_STATUS,    "VOUT_1P0V_OUTPUT_POWER_GOOD", true},
         }
     }
 };
@@ -466,6 +527,22 @@ fapi2::ReturnCode check_all_pmics_helper(
 /// @note To be used with 1U/2U Enable sequence
 ///
 fapi2::ReturnCode check_all_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
+
+///
+/// @brief Unlock PMIC registers R70 to RA3
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode unlock_pmic_r70_to_ra3(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Lock PMIC registers R70 to RA3
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode lock_pmic_r70_to_ra3(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
 /// @brief Check the PMIC's status codes and report back if an error occurred

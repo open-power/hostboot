@@ -201,6 +201,8 @@
     <ffdc>R09_VALUE</ffdc>
     <ffdc>R0A_VALUE</ffdc>
     <ffdc>R0B_VALUE</ffdc>
+    <ffdc>R33_VALUE</ffdc>
+    <ffdc>R73_VALUE</ffdc>
     <callout>
       <target>PMIC_TARGET</target>
       <priority>HIGH</priority>

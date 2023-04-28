@@ -596,13 +596,16 @@ fapi2::ReturnCode check_all_pmics_helper(
                 .set_R08_VALUE(l_values.iv_r08)
                 .set_R09_VALUE(l_values.iv_r09)
                 .set_R0A_VALUE(l_values.iv_r0A)
-                .set_R0B_VALUE(l_values.iv_r0B),
+                .set_R0B_VALUE(l_values.iv_r0B)
+                .set_R33_VALUE(l_values.iv_r33)
+                .set_R73_VALUE(l_values.iv_r73),
 #ifndef __PPE__
                 "PMIC on OCMB %s had one or more status bits set after running pmic_enable(). "
                 "One of possibly several bad PMICs: %s R04=0x%02X R05=0x%02X R06=0x%02X"
-                " R08=0x%02X R09=0x%02X R0A=0x%02X R0B=0x%02X",
+                " R08=0x%02X R09=0x%02X R0A=0x%02X R0B=0x%02X  R33=0x%02X  R73=0x%02X",
                 l_ocmb_c_str, mss::c_str(i_pmic_target), l_values.iv_r04, l_values.iv_r05,
-                l_values.iv_r06, l_values.iv_r08, l_values.iv_r09, l_values.iv_r0A, l_values.iv_r0B);
+                l_values.iv_r06, l_values.iv_r08, l_values.iv_r09, l_values.iv_r0A, l_values.iv_r0B,
+                l_values.iv_r33, l_values.iv_r73);
 #else // PPE plat supports a maximum of 4 arguments in trace
                 "PMIC on OCMB %s had one or more status bits set after running pmic_enable(). "
                 "One of possibly several bad PMICs: %s",
@@ -670,6 +673,44 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Unlock PMIC registers R70 to RA3
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode unlock_pmic_r70_to_ra3(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+
+    // make sure it is locked to make sure unlock will work afterwards
+    FAPI_TRY(lock_pmic_r70_to_ra3(i_pmic_target));
+
+    // unlock R78 to RA3 by writing RA2=0x95 followed by RA2=0x64
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, TPS_REGS::RA2_REG_LOCK, 0x95));
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, TPS_REGS::RA2_REG_LOCK, 0x64));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Lock PMIC registers R70 to RA3
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode lock_pmic_r70_to_ra3(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+
+    // lock R78 to RA3 by writing RA2=0x00
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, TPS_REGS::RA2_REG_LOCK, 0x00));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Check the PMIC's status codes and report back if an error occurred
 ///
 /// @param[in] i_pmic_target PMIC target
@@ -682,12 +723,26 @@ fapi2::ReturnCode check_pmic(
     status_regs& io_values,
     bool& o_error)
 {
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using TPS_CONSTS = mss::pmic::consts<mss::pmic::product::TPS5383X>;
+
     o_error = false;
     bool l_pmic_is_idt = false;
+    bool l_pmic_is_ti = false;
+    fapi2::buffer<uint8_t> l_pmic_rev;
 
     FAPI_TRY(pmic_is_idt(i_pmic_target, l_pmic_is_idt));
+    FAPI_TRY(pmic_is_ti(i_pmic_target, l_pmic_is_ti));
 
-    if (l_pmic_is_idt)
+    // If TI PMIC get the revision
+    if (l_pmic_is_ti)
+    {
+        FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3B_REVISION, l_pmic_rev));
+    }
+
+    // Check error log register fields
+    // Applies to IDT or TI rev >= 0x23
+    if ((l_pmic_is_idt) || (l_pmic_is_ti && (l_pmic_rev >= TPS_CONSTS::TI_REV_23)))
     {
         // These registers reflect the previous power down cycle of the PMIC. Therefore, they may
         // not necessarily cause issues on this life. So, we do not need to worry about keeping track if
@@ -696,16 +751,43 @@ fapi2::ReturnCode check_pmic(
 
         // if we exit from this try, there were i2c errors
         FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, "PMIC_WARNING_BIT",
-                 mss::pmic::status::IDT_SPECIFIC_STATUS_FIELDS, io_values, l_status_error));
+                 mss::pmic::status::ERROR_LOG_REG_FIELDS, io_values, l_status_error));
     }
 
     {
         bool l_status_error = false;
 
+        // Check statuses for specific vendors that have unique status bits
+        // TI REV < 0x23
+        if (l_pmic_is_ti && (l_pmic_rev < TPS_CONSTS::TI_REV_23))
+        {
+            FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, "ERROR",
+                     mss::pmic::status::STATUS_FIELDS_TI_LT_REV23, io_values, l_status_error));
+            o_error |= l_status_error;
+        }
+        // All others (IDT and TI REV >=0x23)
+        else
+        {
+            FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, "ERROR",
+                     mss::pmic::status::STATUS_FIELDS_NOT_TI_LT_REV23, io_values, l_status_error));
+            o_error |= l_status_error;
+        }
+
+        // TI REV >= 0x23
+        if (l_pmic_is_ti && (l_pmic_rev >= TPS_CONSTS::TI_REV_23))
+        {
+            // unlock register R73 for reading as that is in STATUS_FIELDS_TI_GTE_REV23
+            FAPI_TRY(unlock_pmic_r70_to_ra3(i_pmic_target));
+
+            FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, "ERROR",
+                     mss::pmic::status::STATUS_FIELDS_TI_GTE_REV23, io_values, l_status_error));
+            o_error |= l_status_error;
+        }
+
         // if we exit from this try, there were i2c errors
         FAPI_TRY(mss::pmic::status::check_fields(i_pmic_target, "ERROR",
                  mss::pmic::status::STATUS_FIELDS, io_values, l_status_error));
-        o_error = l_status_error;
+        o_error |= l_status_error;
     }
 
 fapi_try_exit:
@@ -779,6 +861,14 @@ void status_reg_save_helper(
 
         case REGS::R0B:
             io_values.iv_r0B = i_value;
+            break;
+
+        case REGS::R33:
+            io_values.iv_r33 = i_value;
+            break;
+
+        case TPS_REGS::R73:
+            io_values.iv_r73 = i_value;
             break;
 
         default:

@@ -52,6 +52,20 @@ struct pmicFields;
 template<>
 struct pmicFields<mss::pmic::product::TPS5383X>
 {
+    // R0A unique status bits for TPS53831 (TI revision < 0x23)
+    // other R0A bits are below in JEDEC_COMPLIANT section
+    static constexpr uint8_t R0A_SWA_NEG_OVER_CURRENT_STATUS = 3;
+    static constexpr uint8_t R0A_SWB_NEG_OVER_CURRENT_STATUS = 2;
+    static constexpr uint8_t R0A_SWC_NEG_OVER_CURRENT_STATUS = 1;
+    static constexpr uint8_t R0A_SWD_NEG_OVER_CURRENT_STATUS = 0;
+
+    // R73 status bits for TPS53830 (TI revision >= 0x23)
+    static constexpr uint8_t R73_VIN_OK_Z                    = 4;
+    static constexpr uint8_t R73_SWD_NEG_OVER_CURRENT_STATUS = 3;
+    static constexpr uint8_t R73_SWC_NEG_OVER_CURRENT_STATUS = 2;
+    static constexpr uint8_t R73_SWB_NEG_OVER_CURRENT_STATUS = 1;
+    static constexpr uint8_t R73_SWA_NEG_OVER_CURRENT_STATUS = 0;
+
     static constexpr uint8_t R9C_EN_VINUV_FLT_LATCH = 7;
 
     static constexpr uint8_t R9C_ON_OFF_CONFIG_BIT_0 = 0;
@@ -211,8 +225,11 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R31_ADC_READ_SETTING_LENGTH        = 8;
 
     // R33 - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
-    static constexpr uint8_t R33_TEMPERATURE_SETTING_START      = 0;
-    static constexpr uint8_t R33_TEMPERATURE_SETTING_LENGTH     = 3;
+    static constexpr uint8_t R33_TEMPERATURE_SETTING_START             = 0;
+    static constexpr uint8_t R33_TEMPERATURE_SETTING_LENGTH            = 3;
+    static constexpr uint8_t R33_VIN_MGMT_PGOOD_SWITCHOVER_MODE_STATUS = 3;
+    static constexpr uint8_t R33_VIN_BULK_UNDER_VOLTAGE_LOCKOUT_STATUS = 4;
+    static constexpr uint8_t R33_VOUT_1P0V_OUTPUT_POWER_GOOD_STATUS    = 5;
 
     static constexpr uint8_t DELAY_FLD_LENGTH               = 3;
     static constexpr uint8_t VOLTAGE_SETTING_START          = 0;

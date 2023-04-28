@@ -259,6 +259,8 @@ struct consts;
 template<>
 struct consts<mss::pmic::product::TPS5383X>
 {
+    static constexpr uint8_t TI_REV_23 = 0x23;
+
     // R94 -> R97
     static constexpr uint8_t MAX_SOFT_STOP_CFG = 0xBF;
 };
