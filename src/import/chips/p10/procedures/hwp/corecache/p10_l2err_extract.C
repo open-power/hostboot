@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,7 +97,7 @@ fapi2::ReturnCode p10_l2err_extract(
 
 
     // mark function entry
-    FAPI_DBG("Entering p10_l2err_extract...");
+    FAPI_INF("Entering p10_l2err_extract...");
 
     // check if the supplied data is the correct size, used mostly for
     // manual tool input
@@ -117,7 +117,7 @@ fapi2::ReturnCode p10_l2err_extract(
                                    P10_TRACEARRAY_BITS_PER_ROW * i,
                                    P10_TRACEARRAY_BITS_PER_ROW),
                  "buffer extract() call returns an error.");
-        FAPI_DBG("%2X: 0x%016llX%016llX",
+        FAPI_INF("%2X: 0x%016llX%016llX",
                  i, l_trace_array[i].get<uint64_t>( 0 ),
                  l_trace_array[i].get<uint64_t>( 1 ));
     }
@@ -176,7 +176,7 @@ fapi2::ReturnCode p10_l2err_extract(
     // look for CE/UE
     l_error_found = false;
     l_trace_index = P10_TRACEARRAY_NUM_ROWS; // the last entry in the array is the newest
-    FAPI_DBG("l_trace_index = %X", l_trace_index);
+    FAPI_INF("l_trace_index = %X", l_trace_index);
 
     while( !l_error_found && (l_trace_index > 0) )
     {
@@ -185,8 +185,8 @@ fapi2::ReturnCode p10_l2err_extract(
         if (p10_tracearray_is_trace_start_marker(l_trace_array[l_trace_index]) ==
             fapi2::FAPI2_RC_SUCCESS)
         {
-            FAPI_DBG("Head found at trace index %i", l_trace_index);
-            FAPI_DBG("%2X: 0x%016llX%016llX",
+            FAPI_INF("Head found at trace index %i", l_trace_index);
+            FAPI_INF("%2X: 0x%016llX%016llX",
                      l_trace_index,
                      l_trace_array[l_trace_index].get<uint64_t>( 0 ),
                      l_trace_array[l_trace_index].get<uint64_t>( 1 ));
@@ -202,8 +202,8 @@ fapi2::ReturnCode p10_l2err_extract(
             if ( l_trace_array[l_trace_index].isBitSet(64) &&
                  !(i_err_type == L2ERR_UE) )
             {
-                FAPI_DBG("Found CE at trace index %i", l_trace_index);
-                FAPI_DBG("%2X: 0x%016llX%016llX",
+                FAPI_INF("Found CE at trace index %i", l_trace_index);
+                FAPI_INF("%2X: 0x%016llX%016llX",
                          l_trace_index,
                          l_trace_array[l_trace_index].get<uint64_t>( 0 ),
                          l_trace_array[l_trace_index].get<uint64_t>( 1 ));
@@ -216,7 +216,7 @@ fapi2::ReturnCode p10_l2err_extract(
             if ( l_trace_array[l_trace_index].isBitSet(65) &&
                  !(i_err_type == L2ERR_CE) )
             {
-                FAPI_DBG("Found UE at trace index %i", l_trace_index);
+                FAPI_INF("Found UE at trace index %i", l_trace_index);
                 l_error_found = true;
                 l_ce_ue = false;
                 break;
@@ -225,13 +225,13 @@ fapi2::ReturnCode p10_l2err_extract(
 
     } //end loop looking for CE/UE
 
-    FAPI_DBG("Found UE or CE: l_error_found = %i", l_error_found);
+    FAPI_INF("Found UE or CE: l_error_found = %i", l_error_found);
     o_error_found = l_error_found;
 
     // Return if error not found.
     if (!l_error_found)
     {
-        FAPI_DBG("No error is found!");
+        FAPI_INF("No error is found!");
         return fapi2::current_err;
     }
 
@@ -243,6 +243,8 @@ fapi2::ReturnCode p10_l2err_extract(
     {
         FAPI_TRY(l_trace_array[l_ce_trace_index].extractToRight( l_cycles, 88, 7 ), //LFSR
                  "buffer extractToRight() call returns an error.");
+
+        FAPI_INF("l_ce_trace_index: %d, l_indexes_index: %d, l_cycles: %d", l_ce_trace_index, l_indexes_index, l_cycles);
 
         if( l_cycles != 0 )
         {
@@ -276,7 +278,7 @@ fapi2::ReturnCode p10_l2err_extract(
                     break;
             }
 
-            FAPI_DBG("cycles = %x", l_cycles);
+            FAPI_INF("cycles = %x", l_cycles);
 
             // Put "l_trace_index" into "l_indexes" up to "cycles" number of times
             for( ; (l_cycles > 0) && (l_indexes_index < L2ERR_MAX_CYCLES_BACK);
@@ -289,7 +291,7 @@ fapi2::ReturnCode p10_l2err_extract(
         else
         {
             //This is a compression stamp
-            FAPI_DBG( "Skipping compression stamp\n" );
+            FAPI_INF( "Skipping compression stamp\n" );
         }
 
         //Go look at the previous entry
@@ -300,33 +302,41 @@ fapi2::ReturnCode p10_l2err_extract(
 
     for ( int8_t i = L2ERR_MAX_CYCLES_BACK - 1; i >= 0; i--)
     {
-        FAPI_DBG("uncomp %i cycles back: 0x%016llX%016llX",
+        FAPI_INF("uncomp %i cycles back: 0x%016llX%016llX",
                  i, l_trace_array[l_indexes[i]].get<uint64_t>( 0 ),
                  l_trace_array[l_indexes[i]].get<uint64_t>( 1 ));
     }
 
-    // Find what cycle the CE occured on and calculate location of DW data
-    l_back_of_2to1_nextcycle = l_trace_array[l_trace_index + 1].isBitSet( 66 );
+    //Only try to gather the syndrome and back_of_2to1_nextcycle if we have a CE
+    if (l_ce_ue)
+    {
+        FAPI_ASSERT((l_trace_index + 1) < P10_TRACEARRAY_NUM_ROWS,
+                    fapi2::P10_L2ERR_EXTRACT_SYNDROME_NOT_FOUND()
+                    .set_TARGET(i_target)
+                    .set_TRACE_ARRAY_1(0xDEADDEADDEADDEADull)
+                    .set_TRACE_ARRAY_2(l_trace_index)
+                    .set_TRACE_ARRAY_3(0)
+                    .set_TRACE_ARRAY_4(0),
+                    "Error: could not find syndrome. Not enough data.  Error found at index: %d", l_trace_index);
 
-    //Get syndrome which is the cycle after the CE
-    FAPI_TRY(l_trace_array[ l_trace_index + 1 ].extractToRight( l_syndrome,  80,  8 ),
-             "extractToRight() Syndrome data call returns an error.");
+        // Find what cycle the CE occured on and calculate location of DW data
+        l_back_of_2to1_nextcycle = l_trace_array[l_trace_index + 1].isBitSet( 66 );
+
+        //Get syndrome which is the cycle after the CE
+        FAPI_TRY(l_trace_array[ l_trace_index + 1 ].extractToRight( l_syndrome,  80,  8 ),
+                 "extractToRight() Syndrome data call returns an error.");
+    }
 
     FAPI_ASSERT(!(l_ce_ue && (l_syndrome == 0)),
                 fapi2::P10_L2ERR_EXTRACT_SYNDROME_NOT_FOUND()
                 .set_TARGET(i_target)
-                .set_TRACE_ARRAY_1(l_trace_array[ l_trace_index + 1 ].get<uint64_t>( 0 ))
-                .set_TRACE_ARRAY_2(l_trace_array[ l_trace_index + 1 ].get<uint64_t>( 1 ))
-                .set_TRACE_ARRAY_3(l_trace_array[ l_trace_index + 2 ].get<uint64_t>( 0 ))
-                .set_TRACE_ARRAY_4(l_trace_array[ l_trace_index + 2 ].get<uint64_t>( 1 )),
-                "Error: could not find syndrome. Trace cycle CE+1= 0x%016llX%016llX; "
-                "Trace cycle CE+2=%016llX%016llX",
-                l_trace_array[ l_trace_index + 1 ].get<uint64_t>( 0 ),
-                l_trace_array[ l_trace_index + 1 ].get<uint64_t>( 1 ),
-                l_trace_array[ l_trace_index + 2 ].get<uint64_t>( 0 ),
-                l_trace_array[ l_trace_index + 2 ].get<uint64_t>( 1 ));
+                .set_TRACE_ARRAY_1(0)
+                .set_TRACE_ARRAY_2(0)
+                .set_TRACE_ARRAY_3(0)
+                .set_TRACE_ARRAY_4(0),
+                "Error: could not find syndrome.");
 
-    FAPI_DBG("Found syndrome: %2X", l_syndrome);
+    FAPI_INF("Found syndrome: %2X", l_syndrome);
 
     // Look up column from syndrome
     if ( l_ce_ue )
@@ -353,7 +363,7 @@ fapi2::ReturnCode p10_l2err_extract(
                     .set_SYNDROME(l_syndrome),
                     "Syndrome ECC is unknown. %2X", l_syndrome);
 
-        FAPI_DBG("syndrome_col = %u", l_syndrome_col);
+        FAPI_INF("syndrome_col = %u", l_syndrome_col);
     }
     else
     {
@@ -378,9 +388,9 @@ fapi2::ReturnCode p10_l2err_extract(
     // extract bank
     l_bank = l_addr47_56 & 0x7;
 
-    FAPI_DBG("Found member: %i", l_member);
-    FAPI_DBG("addr47_54=%X, addr55_56=%X, l_address47_56=%X", l_addr47_54, l_addr55_56, l_addr47_56);
-    FAPI_DBG("bank = %i", l_bank);
+    FAPI_INF("Found member: %i", l_member);
+    FAPI_INF("addr47_54=%X, addr55_56=%X, l_address47_56=%X", l_addr47_54, l_addr55_56, l_addr47_56);
+    FAPI_INF("bank = %i", l_bank);
 
     //find DW
     for( l_dw = 0; l_dw < L2ERR_NUM_DWS; l_dw++ )
@@ -401,24 +411,24 @@ fapi2::ReturnCode p10_l2err_extract(
                 l_trace_array[ l_indexes[ 1 ] ].get<uint64_t>( 0 ),
                 l_trace_array[ l_indexes[ 1 ] ].get<uint64_t>( 1 ));
 
-    FAPI_DBG("Found DW=%i", l_dw);
+    FAPI_INF("Found DW=%i", l_dw);
 
     // print out error location information
     if( l_ce_ue )
     {
-        FAPI_DBG("CE Location Information");
+        FAPI_INF("CE Location Information");
     }
     else
     {
-        FAPI_DBG("UE Location Information");
+        FAPI_INF("UE Location Information");
     }
 
-    FAPI_DBG("\tMember   = %u", l_member);
-    FAPI_DBG("\tDW       = %u", l_dw);
-    FAPI_DBG("\tBank     = %u", l_bank);
-    FAPI_DBG("\tBack2to1 = %s", l_back_of_2to1_nextcycle ? "true" : "false");
-    FAPI_DBG("\tSyndrome_col = %u", l_syndrome_col);
-    FAPI_DBG("\tAddress   = 0x%X", l_addr47_56);
+    FAPI_INF("\tMember   = %u", l_member);
+    FAPI_INF("\tDW       = %u", l_dw);
+    FAPI_INF("\tBank     = %u", l_bank);
+    FAPI_INF("\tBack2to1 = %s", l_back_of_2to1_nextcycle ? "true" : "false");
+    FAPI_INF("\tSyndrome_col = %u", l_syndrome_col);
+    FAPI_INF("\tAddress   = 0x%X", l_addr47_56);
 
     o_err_data.ce_ue = l_ce_ue ? L2ERR_CE : L2ERR_UE;
     o_err_data.member = l_member;
