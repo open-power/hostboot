@@ -212,7 +212,7 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             l_scom_buffer.insert<0, 4, 60, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TCCD_L + literal_1) / literal_2) );
             l_scom_buffer.insert<4, 6, 58, uint64_t>(((((l_TGT1_ATTR_MEM_DRAM_CWL + literal_8) + l_TGT1_ATTR_MEM_EFF_DRAM_TWTR_L) +
                     literal_1) / literal_2) );
-            l_scom_buffer.insert<16, 6, 58, uint64_t>((l_TGT1_ATTR_MEM_EFF_DRAM_TRCD / literal_2) );
+            l_scom_buffer.insert<16, 6, 58, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TRCD + literal_1) / literal_2) );
             l_scom_buffer.insert<22, 6, 58, uint64_t>((l_TGT1_ATTR_MEM_EFF_DRAM_TRP / literal_2) );
 
             if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
