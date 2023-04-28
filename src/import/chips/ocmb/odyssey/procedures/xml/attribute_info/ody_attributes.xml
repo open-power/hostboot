@@ -35,7 +35,7 @@
 <!-- -->
 
 
-<attributes>   
+<attributes>
     <attribute>
         <id>ATTR_MSS_OCMB_ODY_OMI_CFG_ENDIAN_CTRL</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -109,6 +109,81 @@
         <default>0xFF</default>
         <writeable/>
         <mssAccessorName>ody_draminit_step_enable</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_SENSOR_POLLING_PERIOD</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Temperature sensor polling period, in milliseconds.
+        </description>
+        <valueType>uint32</valueType>
+        <default>200</default>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_DQS_TRACKING_PERIOD</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Number of temperature sensor polls between attempts of DDR5
+            DQS tracking algorithm. Temperature delta since previous execution
+            will be checked, and if the delta is large enough the DQS tracking
+            will be performed and the saved temperature values will be updated.
+            For example, to check temperature deltas every 5 sensor polls, set
+            this attribute to a value of 5.
+        </description>
+        <valueType>uint8</valueType>
+        <default>5</default>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_THERMAL_SENSOR_0_PREVIOUS_VALUE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Value of thermal sensor 0 the previous time DQS tracking executed.
+            Updated in DQS tracking procedure.
+        </description>
+        <valueType>uint16</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_THERMAL_SENSOR_1_PREVIOUS_VALUE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Value of thermal sensor 1 the previous time DQS tracking executed.
+            Updated in DQS tracking procedure.
+        </description>
+        <valueType>uint16</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_THERMAL_SENSOR_2_PREVIOUS_VALUE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Value of thermal sensor 2 the previous time DQS tracking executed.
+            Updated in DQS tracking procedure.
+        </description>
+        <valueType>uint16</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_THERMAL_SENSOR_3_PREVIOUS_VALUE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Value of thermal sensor 3 the previous time DQS tracking executed.
+            Updated in DQS tracking procedure.
+        </description>
+        <valueType>uint16</valueType>
+        <initToZero></initToZero>
+        <writeable/>
     </attribute>
 
     <attribute>
