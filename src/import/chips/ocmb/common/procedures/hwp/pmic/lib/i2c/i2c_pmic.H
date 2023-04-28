@@ -63,18 +63,18 @@ namespace i2c
 ///
 /// @brief Add provided opcode if the Target is an ADC
 ///
-/// @param[in] i_target GENERICI2CSLAVE target
+/// @param[in] i_target GENERICI2CRESPONDER target
 /// @param[in] i_opcode opcode to add
 /// @param[in,out] io_command command vector
 ///
-inline void add_adc_opcode(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_target,
+inline void add_adc_opcode(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_target,
                            const mss::adc::i2c::opcode i_opcode,
                            std::vector<uint8_t>& io_command)
 {
     // For DDR4:ADC's are index 0,1; GPIO0 is index 2
     // For DDR5: Going to use the same function for DDR5 since there is only 1 ADC supported in DDR5
     // and the below condition will still be satisfied
-    if (mss::index(i_target) <= mss::generic_i2c_slave::ADC2)
+    if (mss::index(i_target) <= mss::generic_i2c_responder_ddr4::ADC2)
     {
         // ADC devices need an extra opcode frame
         io_command.push_back(i_opcode);
@@ -115,14 +115,14 @@ inline void reg_write_helper(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_tar
 
 ///
 /// @brief Set up i2c command buffer for the given target
-/// @param[in] i_target the GENERICI2CSLAVE target
+/// @param[in] i_target the GENERICI2CRESPONDER target
 /// @param[in] i_addr address to read
 /// @param[in] i_data_buffer data buffer
 /// @param[in,out] io_command command buffer
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template<>
-inline void reg_write_helper(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_target,
+inline void reg_write_helper(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_target,
                              const uint8_t i_addr,
                              const fapi2::buffer<uint8_t> i_data_buffer,
                              std::vector<uint8_t>& io_command)
@@ -177,7 +177,7 @@ fapi_try_exit:
 
 ///
 /// @brief Perform a register read operation on the given target
-/// @tparam T target type (PMIC, GENERICI2CSLAVE, etc.)
+/// @tparam T target type (PMIC, GENERICI2CRESPONDER, etc.)
 /// @param[in] i_target the target
 /// @param[in] i_addr address to read
 /// @param[in,out] io_command command buffer
@@ -205,13 +205,13 @@ inline void reg_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_targ
 
 ///
 /// @brief Perform a register read operation on the given target
-/// @param[in] i_target the GENERICI2CSLAVE target
+/// @param[in] i_target the GENERICI2CRESPONDER target
 /// @param[in] i_addr address to read
 /// @param[in,out] io_command command buffer
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template<>
-inline void reg_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_target,
+inline void reg_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_target,
                             const uint8_t i_addr,
                             std::vector<uint8_t>& io_command)
 {
@@ -379,7 +379,7 @@ inline void reg_write_contiguous_helper(const fapi2::Target<fapi2::TARGET_TYPE_P
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template<>
-inline void reg_write_contiguous_helper(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_target,
+inline void reg_write_contiguous_helper(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_target,
                                         const uint8_t i_addr,
                                         std::vector<uint8_t>& io_command)
 {

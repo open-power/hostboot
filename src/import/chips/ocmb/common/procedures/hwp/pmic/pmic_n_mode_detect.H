@@ -274,8 +274,8 @@ typedef struct
 /// @param[out] o_data data struct
 ///
 void populate_gpio_data(
-    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio1,
-    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio2,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio1,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio2,
     telemetry_data& o_data);
 
 ///
@@ -295,7 +295,7 @@ void populate_pmic_data(
 /// @param[in] i_adc_reg Register
 /// @return double scale factor
 ///
-uint32_t get_adc_scale_factor(const mss::generic_i2c_slave i_adc_num, const uint8_t i_adc_reg);
+uint32_t get_adc_scale_factor(const mss::generic_i2c_responder_ddr4 i_adc_num, const uint8_t i_adc_reg);
 
 ///
 /// @brief Populate the ADC data struct
@@ -305,8 +305,8 @@ uint32_t get_adc_scale_factor(const mss::generic_i2c_slave i_adc_num, const uint
 /// @param[out] o_adc_data data struct
 ///
 void populate_adc_data(
-    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc,
-    const mss::generic_i2c_slave i_adc_num,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc,
+    const mss::generic_i2c_responder_ddr4 i_adc_num,
     adc_telemetry& o_adc_data);
 
 ///
@@ -346,7 +346,7 @@ bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
 /// @param[in,out] io_failed_pmics Bit map of failed PMICS on a GPIO
 /// @return aggregate_state N mode state according to the status of GPIO and ADC only
 ///
-aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_gpio,
+aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio,
                            pmic_info& io_pmic1,
                            pmic_info& io_pmic2,
                            fapi2::buffer<uint8_t>& io_failed_pmics);
@@ -383,7 +383,7 @@ void get_gpio_pmic_state( aggregate_state& io_output_state,
 ///
 /// @param[in] i_adc ADC target
 ///
-aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CSLAVE>& i_adc);
+aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc);
 
 ///
 /// @brief Compare two phases provided from two pmics, declaring N-mode & pmic states as needed
