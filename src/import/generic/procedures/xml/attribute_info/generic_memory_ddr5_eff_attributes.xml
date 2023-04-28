@@ -122,6 +122,105 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_DDR5_EN_TX_DQ_PREAMBLE_PATTERN_U0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Control the length of DDR5 write DQ preamble for U0
+      EnTxDqPreamblePatternU0 in phyinit struct
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>
+        TCK0 = 0,
+        TCK1 = 0x1,
+        TCK2 = 0x3,
+        TCK3 = 0x7,
+        TCK4 = 0xF
+    </enum>
+    <default>TCK0</default>
+    <mssAccessorName>ddr5_en_tx_dq_preamble_pattern_u0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DDR5_EN_TX_DQ_PREAMBLE_PATTERN_U1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Control the length of DDR5 write DQ preamble for U1
+      EnTxDqPreamblePatternU1 in phyinit struct
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>
+        TCK0 = 0,
+        TCK1 = 0x1,
+        TCK2 = 0x3,
+        TCK3 = 0x7,
+        TCK4 = 0xF
+    </enum>
+    <default>TCK0</default>
+    <mssAccessorName>ddr5_en_tx_dq_preamble_pattern_u1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DDR5_EN_TX_DM_PREAMBLE_PATTERN</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Control the length of DDR5 write DM preamble
+      EnTxDmPreamblePattern in phyinit struct
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>
+        TCK0 = 0,
+        TCK1 = 0x1,
+        TCK2 = 0x3,
+        TCK3 = 0x7,
+        TCK4 = 0xF
+    </enum>
+    <default>TCK0</default>
+    <mssAccessorName>ddr5_en_tx_dm_preamble_pattern</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DDR5_TX_DQ_PREAMBLE_PATTERN_U0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Control the pattern of DDR5 write DQ preamble for U0
+      TxDqPreamblePatternU0 in phyinit struct
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_tx_dq_preamble_pattern_u0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DDR5_TX_DQ_PREAMBLE_PATTERN_U1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Control the pattern of DDR5 write DQ preamble for U1
+      TxDqPreamblePatternU1 in phyinit struct
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_tx_dq_preamble_pattern_u1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_DDR5_TX_DM_PREAMBLE_PATTERN</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Control the pattern of DDR5 write DM preamble
+      TxDmPreamblePattern in phyinit struct
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_tx_dm_preamble_pattern</mssAccessorName>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MEM_EFF_REDUNDANT_CS_EN</id>
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
@@ -281,6 +380,56 @@
         <enum>NOT_USED = 0, 32_BITS = 32, 36_BITS = 36, 40_BITS = 40</enum>
         <mssAccessorName>ddr5_channel_bus_width</mssAccessorName>
         <array>2</array>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MIN</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Low bound of the Vref sweep range used during VrefCS training
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>ddr5_vrefcs_sweep_min</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MAX</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            High bound of the Vref sweep range used during VrefCS training.
+            The max value is not included in the sweep
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>ddr5_vrefcs_sweep_max</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DDR5_VREFCA_SWEEP_MIN</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Low bound of the Vref sweep range used during VrefCA training
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>ddr5_vrefca_sweep_min</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_DDR5_VREFCA_SWEEP_MAX</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            High bound of the Vref sweep range used during VrefCA training.
+            The max value is not included in the sweep
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>ddr5_vrefca_sweep_max</mssAccessorName>
     </attribute>
 
 </attributes>

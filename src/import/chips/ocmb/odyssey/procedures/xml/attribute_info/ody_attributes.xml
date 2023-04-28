@@ -711,6 +711,49 @@
         <mssAccessorName>sim_tcasl_add</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_ODY_POWERDOWN_ANIBS</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Right-justified bitmap, set bit to '1' to power down corresponding ANIB block
+            PowerDownANIBs in ddrphyinit struct
+        </description>
+        <valueType>uint16</valueType>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>powerdown_anibs</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_LP2_PWRSAVINGS</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Enable additional Power savings during LP2
+            LP2_PwrSavings_En in ddrphyinit struct
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            ENABLE    = 1,
+            DISABLE   = 0
+        </enum>
+        <default>0</default>
+        <writeable/>
+        <mssAccessorName>lp2_pwrsavings</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_SPECIAL_OFFSET_VALUE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Configure internal offset value
+            special_offset_value in ddrphyinit struct
+        </description>
+        <valueType>uint16</valueType>
+        <default>0x525</default>
+        <writeable/>
+        <mssAccessorName>special_offset_value</mssAccessorName>
+    </attribute>
+
     <!-- end phyinit structure inputs section -->
 
     <!-- draminit structure (message block) inputs section below -->
