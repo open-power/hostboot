@@ -211,7 +211,8 @@ bool isBroadcastModeCapable<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 
 template<>
 uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
-                                      const MemRank & i_rank )
+                                      const MemRank & i_rank,
+                                      const uint8_t& i_port )
 {
     #define PRDF_FUNC "[PlatServices::startSfRead<TYPE_OCMB_CHIP>] "
 
@@ -241,8 +242,8 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
     {
         // Get the first address of the given rank.
         mss::mcbist::address saddr, eaddr;
-        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_ocmb, i_rank, saddr, eaddr,
-                                                SLAVE_RANK );
+        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_ocmb, i_rank, i_port, saddr,
+                                                eaddr, SLAVE_RANK );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",

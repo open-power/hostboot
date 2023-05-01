@@ -144,6 +144,7 @@ void mnfgForceHalfBandwidthMode(ExtensibleChip* i_chip, unsigned int i_link);
  *         the actual address based on the actual HW config.
  * @param  i_chip      An OCMB.
  * @param  i_rank      The target rank.
+ * @param  i_port      The target memory port.
  * @param  o_startAddr The returned start address.
  * @param  o_endAddr   The returned end address.
  * @param  i_rangeType See enum AddrRangeType.
@@ -151,8 +152,8 @@ void mnfgForceHalfBandwidthMode(ExtensibleChip* i_chip, unsigned int i_link);
  */
 template<TARGETING::TYPE TT, typename VT>
 uint32_t getMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          VT & o_startAddr, VT & o_endAddr,
-                          AddrRangeType i_rangeType );
+                          const uint8_t& i_port, VT & o_startAddr,
+                          VT & o_endAddr, AddrRangeType i_rangeType );
 
 /**
  * @brief  Returns the start and end address of the given rank.
@@ -164,6 +165,7 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
  * @param  i_chip      An OCMB.
  * @param  o_startAddr The returned start address.
  * @param  o_endAddr   The returned end address.
+ * @param  i_port      The target memory port.
  * @param  i_dimmSlct  When used, this function will only return the address
  *                     range for the target DIMM select. Otherwise, the default
  *                     is to return the  address range for all DIMM selects.
@@ -172,6 +174,7 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
 template<TARGETING::TYPE TT, typename VT>
 uint32_t getMemAddrRange( ExtensibleChip * i_chip,
                           VT & o_startAddr, VT & o_endAddr,
+                          const uint8_t& i_port,
                           uint8_t i_dimmSlct = MAX_DIMM_PER_PORT );
 
 /**
@@ -241,15 +244,18 @@ void getPmicTelemetry(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid = 0);
  * @param  i_rank Will start background scrubbing on the first address of this
  *                slave rank. To ensure the command is started on a master rank
  *                boundary, make sure the slave rank value is 0.
+ * @param  i_port Target memory port.
  * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
  */
 template<TARGETING::TYPE T>
-uint32_t startBgScrub( ExtensibleChip * i_chip, const MemRank & i_rank );
+uint32_t startBgScrub( ExtensibleChip * i_chip, const MemRank & i_rank,
+                       const uint8_t& i_port );
 
 /**
  * @brief  Starts a scrub command on the target rank.
  * @param  i_chip      OCMB chip.
  * @param  i_rank      Target rank.
+ * @param  i_rank      Target port.
  * @param  i_rangeType See enum AddrRangeType.
  * @param  i_stopCond  The stop conditions for the targeted scrub.
  * @param  i_endBound  End bound to determine where scrub stops when hitting
@@ -258,7 +264,8 @@ uint32_t startBgScrub( ExtensibleChip * i_chip, const MemRank & i_rank );
  */
 template<TARGETING::TYPE TT, typename SCT>
 uint32_t startTdScrub(ExtensibleChip * i_chip, const MemRank & i_rank,
-                      AddrRangeType i_rangeType, SCT i_stopCond,
+                      const uint8_t& i_port, AddrRangeType i_rangeType,
+                      SCT i_stopCond,
                       mss::mcbist::end_boundary i_endBound = mss::mcbist::NONE);
 
 /*

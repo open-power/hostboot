@@ -74,7 +74,8 @@ uint32_t MemTdCtlr<T>::initialize()
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
-uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc,
+                                    const uint8_t& i_port )
 {
     #define PRDF_FUNC "[MemTdCtlr::defaultStep] "
 
@@ -121,13 +122,15 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
                        nextRank.getRank().getSlave() );
 
             // Start a super fast command to the end of memory.
-            o_rc = startSfRead<T>( nextRank.getChip(), nextRank.getRank() );
+            o_rc = startSfRead<T>( nextRank.getChip(), nextRank.getRank(),
+                                   i_port );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "startSfRead<T>(0x%08x,m%ds%d) failed",
+                PRDF_ERR( PRDF_FUNC "startSfRead<T>(0x%08x,m%ds%d,%x) failed",
                           nextRank.getChip()->getHuid(),
                           nextRank.getRank().getMaster(),
-                          nextRank.getRank().getSlave() );
+                          nextRank.getRank().getSlave(),
+                          i_port );
                 break;
             }
         }

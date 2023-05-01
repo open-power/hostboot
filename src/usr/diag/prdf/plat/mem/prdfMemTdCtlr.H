@@ -212,10 +212,11 @@ class MemTdCtlr
      *
      * At runtime, this function will restart background scrubbing.
      *
-     * @param  io_sc The step code data struct.
+     * @param  io_sc  The step code data struct.
+     * @param  i_port The target memory port.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t defaultStep( STEP_CODE_DATA_STRUCT & io_sc );
+    uint32_t defaultStep(STEP_CODE_DATA_STRUCT & io_sc, const uint8_t& i_port);
 
     /**
      * @brief Progresses onto the next step of the state machine.
@@ -224,10 +225,11 @@ class MemTdCtlr
      * one is in progress. Otherwise, it pops the next procedure off of the
      * queue, if one exists, and starts that procedure.
      *
-     * @param  io_sc The step code data struct.
+     * @param  io_sc  The step code data struct.
+     * @param  i_port The target memory port.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc )
+    uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, const uint8_t& i_port )
     {
         uint32_t rc = SUCCESS;
 
@@ -235,13 +237,13 @@ class MemTdCtlr
         {
             if ( iv_queue.empty() ) // No more TD procedures.
             {
-                rc = defaultStep( io_sc );
+                rc = defaultStep( io_sc, i_port );
             }
             else
             {
                 // Get the next entry in the queue and move forward.
                 iv_curProcedure = iv_queue.getNextEntry();
-                rc = nextStep( io_sc );
+                rc = nextStep( io_sc, i_port );
             }
         }
         else
@@ -258,7 +260,7 @@ class MemTdCtlr
             {
                 // This procedure is done so clean it up and move on.
                 iv_curProcedure = nullptr; iv_queue.pop();
-                rc = nextStep( io_sc );
+                rc = nextStep( io_sc, i_port );
             }
         }
 

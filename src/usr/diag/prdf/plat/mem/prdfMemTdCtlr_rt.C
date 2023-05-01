@@ -506,11 +506,11 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
         #endif
 
         // Move onto the next step in the state machine.
-        o_rc = nextStep( io_sc );
+        o_rc = nextStep( io_sc, addr.getPort() );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "nextStep() failed on 0x%08x",
-                      iv_chip->getHuid() );
+            PRDF_ERR( PRDF_FUNC "nextStep(%x) failed on 0x%08x",
+                      addr.getPort(), iv_chip->getHuid() );
             break;
         }
 
@@ -540,7 +540,8 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
-uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc,
+                                    const uint8_t& i_port )
 {
     #define PRDF_FUNC "[MemTdCtlr::defaultStep] "
 
@@ -584,13 +585,13 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
                    nextRank.getRank().getMaster(),
                    nextRank.getRank().getSlave() );
 
-        o_rc = startBgScrub<T>( nextRank.getChip(), nextRank.getRank() );
+        o_rc = startBgScrub<T>(nextRank.getChip(), nextRank.getRank(), i_port);
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "startBgScrub<T>(0x%08x,m%ds%d) failed",
+            PRDF_ERR( PRDF_FUNC "startBgScrub<T>(0x%08x,m%ds%d,%x) failed",
                       nextRank.getChip()->getHuid(),
                       nextRank.getRank().getMaster(),
-                      nextRank.getRank().getSlave() );
+                      nextRank.getRank().getSlave(), i_port );
         }
     }
 

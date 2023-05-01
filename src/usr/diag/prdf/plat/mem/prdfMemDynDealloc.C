@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -938,7 +938,7 @@ template int32_t page<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip, MemAddr i_addr);
 //------------------------------------------------------------------------------
 
 template<TYPE T>
-int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
+int32_t rank( ExtensibleChip * i_chip, MemRank i_rank, const uint8_t& i_port )
 {
     #define PRDF_FUNC "[MemDealloc::rank] "
 
@@ -950,12 +950,12 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
 
         // Get the address range of i_rank.
         MemAddr startAddr, endAddr;
-        o_rc = getMemAddrRange<T>( i_chip, i_rank, startAddr, endAddr,
+        o_rc = getMemAddrRange<T>( i_chip, i_rank, i_port, startAddr, endAddr,
                                    SLAVE_RANK );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%02x) failed",
-                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%02x,%x) failed",
+                      i_chip->getHuid(), i_rank.getKey(), i_port );
             break;
         }
         PRDF_TRAC( PRDF_FUNC "getMemAddrRange: startAddr=0x%016llx, endAddr="
@@ -986,12 +986,13 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
 
     #undef PRDF_FUNC
 }
-template int32_t rank<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip, MemRank i_rank);
+template int32_t rank<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip, MemRank i_rank,
+                                      const uint8_t& i_port);
 
 //------------------------------------------------------------------------------
 
 template<TYPE T>
-int32_t port( ExtensibleChip * i_chip )
+int32_t port( ExtensibleChip * i_chip, const uint8_t& i_port )
 {
     #define PRDF_FUNC "[MemDealloc::port] "
 
@@ -1003,11 +1004,11 @@ int32_t port( ExtensibleChip * i_chip )
 
         // Get the address range of i_chip.
         MemAddr startAddr, endAddr;
-        o_rc = getMemAddrRange<T>( i_chip, startAddr, endAddr );
+        o_rc = getMemAddrRange<T>( i_chip, startAddr, endAddr, i_port );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x) failed",
-                      i_chip->getHuid() );
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,%x) failed",
+                      i_chip->getHuid(), i_port );
             break;
         }
         PRDF_TRAC( PRDF_FUNC "getMemAddrRange: startAddr=0x%016llx, endAddr="
@@ -1038,7 +1039,8 @@ int32_t port( ExtensibleChip * i_chip )
 
     #undef PRDF_FUNC
 }
-template int32_t port<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip );
+template int32_t port<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                       const uint8_t& i_port );
 
 //------------------------------------------------------------------------------
 

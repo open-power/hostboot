@@ -457,6 +457,7 @@ void mnfgForceHalfBandwidthMode(ExtensibleChip* i_chip, unsigned int i_link)
 template<>
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           const MemRank & i_rank,
+                                          const uint8_t& i_port,
                                           mss::mcbist::address & o_startAddr,
                                           mss::mcbist::address & o_endAddr,
                                           AddrRangeType i_rangeType )
@@ -466,18 +467,17 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
-    // TODO RTC 210072 - support for multiple ports
     if ( SLAVE_RANK == i_rangeType )
     {
         FAPI_CALL_HWP_NORETURN( mss::mcbist::address::get_srank_range,
-                                0, i_rank.getDimmSlct(),
+                                i_port, i_rank.getDimmSlct(),
                                 i_rank.getRankSlct(), i_rank.getSlave(),
                                 o_startAddr, o_endAddr );
     }
     else if ( MASTER_RANK == i_rangeType )
     {
         FAPI_CALL_HWP_NORETURN( mss::mcbist::address::get_mrank_range,
-                                0, i_rank.getDimmSlct(),
+                                i_port, i_rank.getDimmSlct(),
                                 i_rank.getRankSlct(), o_startAddr, o_endAddr );
     }
     else
@@ -567,6 +567,7 @@ uint32_t __convertMssMcbistAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 template<>
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           const MemRank & i_rank,
+                                          const uint8_t& i_port,
                                           MemAddr & o_startAddr,
                                           MemAddr & o_endAddr,
                                           AddrRangeType i_rangeType )
@@ -578,12 +579,13 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     do
     {
-        uint32_t o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, saddr,
-                                                         eaddr, i_rangeType );
+        uint32_t o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, i_port,
+            saddr, eaddr, i_rangeType );
         if ( SUCCESS != o_rc )
         {
-            PRDF_TRAC( PRDF_FUNC "Fail from getMemAddrRange(0x%08x,0x%02x,%d)",
-                       i_chip->getHuid(), i_rank.getKey(), i_rangeType );
+            PRDF_TRAC( PRDF_FUNC "Fail from getMemAddrRange(0x%08x,0x%02x,%x,"
+                       "%d)", i_chip->getHuid(), i_rank.getKey(), i_port,
+                       i_rangeType );
             break;
         }
 
@@ -618,7 +620,8 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 template<TARGETING::TYPE TT, typename VT>
 uint32_t getMemAddrRange( ExtensibleChip * i_chip, VT & o_startAddr,
-                          VT & o_endAddr, uint8_t i_dimmSlct )
+                          VT & o_endAddr, const uint8_t& i_port,
+                          uint8_t i_dimmSlct )
 {
     #define PRDF_FUNC "[PlatServices::__getMemAddrRange] "
 
@@ -642,8 +645,8 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip, VT & o_startAddr,
         MemRank lastRank  = rankList.back();
 
         // Get the address range of the first rank.
-        o_rc = getMemAddrRange<TT>( i_chip, firstRank, o_startAddr, o_endAddr,
-                                    MASTER_RANK );
+        o_rc = getMemAddrRange<TT>( i_chip, firstRank, i_port, o_startAddr,
+                                    o_endAddr, MASTER_RANK );
         if ( SUCCESS != o_rc ) break;
 
         // Check if there is only one rank configured.
@@ -651,7 +654,7 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip, VT & o_startAddr,
 
         // Get the end address of the last rank.
         VT junk;
-        o_rc = getMemAddrRange<TT>( i_chip, lastRank, junk, o_endAddr,
+        o_rc = getMemAddrRange<TT>( i_chip, lastRank, i_port, junk, o_endAddr,
                                     MASTER_RANK );
         if ( SUCCESS != o_rc ) break;
 
@@ -666,12 +669,14 @@ template
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           mss::mcbist::address & o_startAddr,
                                           mss::mcbist::address & o_endAddr,
+                                          const uint8_t& i_port,
                                           uint8_t i_dimmSlct );
 
 template
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           MemAddr & o_startAddr,
                                           MemAddr & o_endAddr,
+                                          const uint8_t& i_port,
                                           uint8_t i_dimmSlct );
 
 
@@ -858,7 +863,8 @@ void getPmicTelemetry(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid)
 
 template<>
 uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
-                                       const MemRank & i_rank )
+                                       const MemRank & i_rank,
+                                       const uint8_t& i_port )
 {
     #define PRDF_FUNC "[PlatServices::startBgScrub<TYPE_OCMB_CHIP>] "
 
@@ -918,8 +924,8 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
     {
         // Get the first address of the given rank.
         mss::mcbist::address saddr, eaddr;
-        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_ocmb, i_rank, saddr, eaddr,
-                                                SLAVE_RANK );
+        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_ocmb, i_rank, i_port, saddr,
+                                                eaddr, SLAVE_RANK );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
@@ -960,7 +966,8 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
 template<>
 uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
-        const MemRank & i_rank, AddrRangeType i_rangeType,
+        const MemRank & i_rank, const uint8_t& i_port,
+        AddrRangeType i_rangeType,
         mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> i_stopCond,
         mss::mcbist::end_boundary i_endBound)
 {
@@ -979,12 +986,12 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
     {
         // Get the address range of the given rank.
         mss::mcbist::address saddr, eaddr;
-        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, saddr, eaddr,
-                                                i_rangeType );
+        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, i_port, saddr,
+                                                eaddr, i_rangeType );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
-                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x,%x) failed",
+                      i_chip->getHuid(), i_rank.getKey(), i_port );
             break;
         }
 
@@ -1093,12 +1100,12 @@ uint32_t startTdScrubOnNextRow<TYPE_OCMB_CHIP>(
     {
         // Get the address range of the given rank.
         mss::mcbist::address junk, eaddr;
-        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, junk, eaddr,
-                                                i_rangeType );
+        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>(i_chip, i_rank, i_addr.getPort(),
+                                               junk, eaddr, i_rangeType);
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
-                      i_chip->getHuid(), i_rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x,%x) failed",
+                      i_chip->getHuid(), i_rank.getKey(), i_addr.getPort() );
             break;
         }
 

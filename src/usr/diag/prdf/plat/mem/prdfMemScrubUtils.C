@@ -419,12 +419,13 @@ uint32_t didCmdStopOnLastAddr( ExtensibleChip * i_chip,
 
         // Get the end address of the current rank.
         MemAddr junk, endAddr;
-        o_rc = getMemAddrRange<T>( i_chip, curAddr.getRank(), junk, endAddr,
-                                   i_rangeType );
+        o_rc = getMemAddrRange<T>( i_chip, curAddr.getRank(), curAddr.getPort(),
+                                   junk, endAddr, i_rangeType );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%02x) failed",
-                      i_chip->getHuid(), curAddr.getRank().getKey() );
+            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%02x,%x) failed",
+                      i_chip->getHuid(), curAddr.getRank().getKey(),
+                      curAddr.getPort() );
             break;
         }
 

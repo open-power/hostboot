@@ -803,6 +803,8 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
     PRDF_ASSERT( nullptr != i_omi );
     PRDF_ASSERT( TYPE_OMI == getTargetType(i_omi) );
 
+    // TODO Odyssey - need updates for regs, input port
+
     do
     {
         // No cleanup if this is a checkstop attention.
@@ -887,7 +889,8 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         //   During runtime, send a dynamic memory deallocation message.
         //   During Memory Diagnostics, tell MDIA to stop pattern tests.
         #ifdef __HOSTBOOT_RUNTIME
-        MemDealloc::port<TYPE_OCMB_CHIP>( ocmbChip );
+        // TODO Odyssey - need port, maybe both?
+        MemDealloc::port<TYPE_OCMB_CHIP>( ocmbChip, 0 );
         #else
         if ( isInMdiaMode() )
         {

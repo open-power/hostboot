@@ -273,11 +273,12 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::startCmd()
     }
 
     // Start the time based scrub procedure on this slave rank.
-    o_rc = startTdScrub<TYPE_OCMB_CHIP>(iv_chip, iv_rank, SLAVE_RANK, stopCond);
+    o_rc = startTdScrub<TYPE_OCMB_CHIP>(iv_chip, iv_rank, iv_port, SLAVE_RANK,
+                                        stopCond);
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                  iv_chip->getHuid(), getKey() );
+        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x,%x) failed",
+                  iv_chip->getHuid(), getKey(), iv_port );
     }
 
     return o_rc;

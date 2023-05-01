@@ -79,11 +79,12 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         #ifdef __HOSTBOOT_RUNTIME
 
         // Dynamically deallocate the rank.
-        if ( SUCCESS != MemDealloc::rank<TYPE_OCMB_CHIP>( i_chip, rank ) )
+        if ( SUCCESS != MemDealloc::rank<TYPE_OCMB_CHIP>(i_chip, rank,
+                                                         i_addr.getPort()) )
         {
             PRDF_ERR( PRDF_FUNC "MemDealloc::rank<TYPE_OCMB_CHIP>(0x%08x,m%ds%d"
-                      ") failed", i_chip->getHuid(), rank.getMaster(),
-                      rank.getSlave() );
+                      ",%x) failed", i_chip->getHuid(), rank.getMaster(),
+                      rank.getSlave(), i_addr.getPort() );
         }
 
         // Increment the UE counter and store the rank we're on, resetting
@@ -113,6 +114,8 @@ template<>
 uint32_t maskMemPort<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 {
     #define PRDF_FUNC "[MemEcc::maskMemPort<TYPE_OCMB_CHIP>] "
+
+    // TODO Odyssey - need port passed in
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
@@ -192,7 +195,8 @@ uint32_t maskMemPort<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
         #ifdef __HOSTBOOT_RUNTIME
 
         // Dynamically deallocate the port.
-        if ( SUCCESS != MemDealloc::port<TYPE_OCMB_CHIP>( i_chip ) )
+        // TODO Odyssey - need port
+        if ( SUCCESS != MemDealloc::port<TYPE_OCMB_CHIP>( i_chip, 0 ) )
         {
             PRDF_ERR( PRDF_FUNC "MemDealloc::port<TYPE_OCMB_CHIP>(0x%08x) "
                       "failed", i_chip->getHuid() );

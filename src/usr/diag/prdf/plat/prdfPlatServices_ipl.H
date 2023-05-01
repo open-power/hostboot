@@ -101,14 +101,16 @@ bool isBroadcastModeCapable( ExtensibleChip * i_chip );
 /**
  * @brief  Starts a super fast read command from the first address of the given
  *         rank to the end of memory.
- * @param  i_chip MCBIST/MCA, MBA, or OCMB chip.
+ * @param  i_chip OCMB chip.
  * @param  i_rank Will start the command on the first address of this slave
  *         rank. To ensure the command is started on a master rank boundary,
  *         make sure the slave rank value is 0.
+ * @param  i_port Target memory port
  * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
  */
 template<TARGETING::TYPE T>
-uint32_t startSfRead( ExtensibleChip * i_chip, const MemRank & i_rank );
+uint32_t startSfRead( ExtensibleChip * i_chip, const MemRank & i_rank,
+                    const uint8_t& i_port );
 
 } // end namespace PlatServices
 

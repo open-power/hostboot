@@ -131,7 +131,7 @@ uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
         // error (i.e. a UE).
 
         bool lastAddr = false;
-        o_rc = didCmdStopOnLastAddr<T>( iv_chip, MASTER_RANK, lastAddr );
+        o_rc = didCmdStopOnLastAddr<T>(iv_chip, MASTER_RANK, lastAddr);
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "didCmdStopOnLastAddr(0x%08x) failed",
@@ -185,12 +185,12 @@ uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
     stopCond.set_pause_on_ue(mss::ON);
 
     // Start the time based scrub procedure on this master rank.
-    o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, MASTER_RANK,
+    o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, iv_port, MASTER_RANK,
                                          stopCond );
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                  iv_chip->getHuid(), getKey() );
+        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x,%x) failed",
+                  iv_chip->getHuid(), getKey(), iv_port );
     }
 
     return o_rc;

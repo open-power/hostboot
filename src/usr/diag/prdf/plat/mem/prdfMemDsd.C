@@ -194,12 +194,12 @@ uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
     stopCond.set_mce_hard_symbol_count_enable(mss::ON);
 
     // Start the time based scrub procedure on this master rank.
-    o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, MASTER_RANK,
+    o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, iv_port, MASTER_RANK,
                                          stopCond );
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x) failed",
-                  iv_chip->getHuid(), getKey() );
+        PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x,%x) failed",
+                  iv_chip->getHuid(), getKey(), iv_port );
     }
 
     return o_rc;

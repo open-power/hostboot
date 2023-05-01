@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ bool isEnabled();
 /**
  * @brief  Sends message to hypervisor for page dealloc
  * @param  i_chip OCMB chip
- * @param  i_addr   The address to page dealloc.
+ * @param  i_addr The address to page dealloc.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
@@ -55,21 +55,21 @@ int32_t page( ExtensibleChip * i_chip, MemAddr i_addr );
 /**
  * @brief  Sends message to hypervisor to dealloc all memory on a rank
  * @param  i_chip OCMB chip
- * @param  i_addr   The address to page dealloc.
- * @param  i_isFetch TRUE if we are calling this because of FETCH UE,
- *                   FALSE otherwise.
+ * @param  i_rank Target memory rank.
+ * @param  i_port Target memory port.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-int32_t rank( ExtensibleChip * i_chip, MemRank i_rank );
+int32_t rank( ExtensibleChip * i_chip, MemRank i_rank, const uint8_t& i_port );
 
 /**
  * @brief  Sends a message to hypervisor to dealloc all memory behind a port
  * @param  i_chip OCMB chip
+ * @param  i_port Target memory port
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-int32_t port( ExtensibleChip * i_chip );
+int32_t port( ExtensibleChip * i_chip, const uint8_t& i_port );
 
 /**
  * @brief  Sends a message to hypervisor to dealloc all memory behind dimm List.

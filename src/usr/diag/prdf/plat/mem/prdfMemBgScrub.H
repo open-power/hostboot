@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,7 +72,7 @@ uint32_t startInitialBgScrub( ExtensibleChip * i_chip )
         MemRank rank = ranklist.front();
 
         // Start background scrubbing.
-        o_rc = PlatServices::startBgScrub<T>( i_chip, rank );
+        o_rc = PlatServices::startBgScrub<T>( i_chip, rank, 0 );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "startBgScrub(0x%08x,%d) failed",
