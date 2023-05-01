@@ -74,8 +74,6 @@ namespace SBEIO
 {
 
 
-mutex_t l_pubFifoOpMux = MUTEX_INITIALIZER;
-
 SbeFifo & SbeFifo::getTheInstance()
 {
     return Singleton<SbeFifo>::instance();
@@ -121,8 +119,9 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
 {
     errlHndl_t errl = nullptr;
 
-    //Serialize access to PSU
-    mutex_lock(&l_pubFifoOpMux);
+    //Serialize access to the FIFO
+    mutex_t* l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SBE_FIFO_MUTEX>();
+    const auto lock = scoped_mutex_lock(*l_mutex);
 
     SBE_TRACD(ENTER_MRK "performFifoChipOp");
 
@@ -151,8 +150,6 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
     }
     while (0);
 
-    mutex_unlock(&l_pubFifoOpMux);
-
     SBE_TRACD(EXIT_MRK "performFifoChipOp");
 
     return errl;
@@ -167,7 +164,8 @@ errlHndl_t SbeFifo::performFifoReset(TARGETING::Target * i_target)
     errlHndl_t errl = nullptr;
 
     //Serialize access to the FIFO
-    mutex_lock(&l_pubFifoOpMux);
+    mutex_t* l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SBE_FIFO_MUTEX>();
+    const auto lock = scoped_mutex_lock(*l_mutex);
 
     SBE_TRACF(ENTER_MRK "sending FSI SBEFIFO Reset to HUID 0x%08X",
               TARGETING::get_huid(i_target));
@@ -176,8 +174,6 @@ errlHndl_t SbeFifo::performFifoReset(TARGETING::Target * i_target)
     uint32_t l_dummy = 0xDEAD;
     uint32_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_DNFIFO_RESET : SBE_FIFO_DNFIFO_RESET;
     errl = writeCfam(i_target,l_addr,&l_dummy);
-
-    mutex_unlock(&l_pubFifoOpMux);
 
     return errl;
 }
