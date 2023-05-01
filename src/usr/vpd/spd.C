@@ -175,7 +175,7 @@ errlHndl_t getMemType(uint8_t &                     o_memType,
  *
  * @param[in] i_target - The target to read data from.
  *
- * @param[in] i_memType - The memory type
+ * @param[in] i_memType - The memory type (DDR revision).
  *
  * @return errlHndl_t - NULL if successful, otherwise a pointer
  *      to the error log.
@@ -194,6 +194,8 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
  *
  * @param[in] i_target       - The target to read data from.
  *
+ * @param[in] i_memType      - The memory type (DDR revision).
+ *
  * @param[in] i_eepromSource - The EEPROM source (CACHE/HARDWARE).
  *                             Default to AUTOSELECT.
  *
@@ -201,8 +203,9 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
  *      to the error log.
  */
 errlHndl_t getDdimmModHeight(uint8_t & o_ddimmModHeight,
-                           Target * i_target,
-                           EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
+                             Target * i_target,
+                             uint8_t i_memType,
+                             EEPROM::EEPROM_SOURCE i_eepromSource = EEPROM::AUTOSELECT);
 
 
 /**
@@ -1409,7 +1412,7 @@ errlHndl_t spdUpdateEepromRedundancy(Target * i_target, const uint8_t i_memType)
             if (modType == DDIMM)
             {
                 uint8_t ddimmModHeight = DDIMM_MOD_HEIGHT_INVALID;
-                err = getDdimmModHeight(ddimmModHeight, i_target);
+                err = getDdimmModHeight(ddimmModHeight, i_target, i_memType);
                 if ( err )
                 {
                     errlCommit(err, VPD_COMP_ID);
@@ -2430,16 +2433,19 @@ errlHndl_t getModType ( modSpecTypes_t & o_modType,
 
 
 errlHndl_t getDdimmModHeight(uint8_t & o_dimmModHeight,
-                           Target * i_target,
-                           EEPROM::EEPROM_SOURCE i_eepromSource)
+                             Target * i_target,
+                             uint8_t i_memType,
+                             EEPROM::EEPROM_SOURCE i_eepromSource)
 {
     errlHndl_t err{nullptr};
 
-    err = spdFetchData( DDIMM_MOD_HEIGHT_ADDR,
-                        DDIMM_MOD_HEIGHT_SZ,
-                        &o_dimmModHeight,
-                        i_target,
-                        i_eepromSource);
+    static_assert( sizeof(o_dimmModHeight) == SPD::DDIMM_MOD_HEIGHT_SZ );
+    size_t l_len = SPD::DDIMM_MOD_HEIGHT_SZ;
+    err = spdGetValue( DDIMM_MODULE_HEIGHT,
+                       &o_dimmModHeight,
+                       l_len,
+                       i_target,
+                       i_memType );
 
     TRACUCOMP( g_trac_spd,
                EXIT_MRK"SPD::getDimmSizeType() - DIMM mod height: 0x%02X, Error: %s",

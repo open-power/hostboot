@@ -1088,12 +1088,16 @@ errlHndl_t getMemInfo(T::TargetHandle_t     i_target,
 
             if (o_memModType == SPD::MOD_TYPE_DDIMM)
             {
+                // Module height byte varies by dimm type so need to use the
+                // more complex call that supports all varieties.
                 static_assert( sizeof(o_memHeight) == SPD::DDIMM_MOD_HEIGHT_SZ );
-                err = ocmbFetchData(i_target,
-                                    SPD::DDIMM_MOD_HEIGHT_ADDR,
-                                    SPD::DDIMM_MOD_HEIGHT_SZ,
-                                    &o_memHeight,
-                                    i_eepromSource);
+                size_t l_len = SPD::DDIMM_MOD_HEIGHT_SZ;
+                err = ocmbGetSPD(i_target,
+                                 &o_memHeight,
+                                 l_len,
+                                 DDIMM_MODULE_HEIGHT,
+                                 o_memType,
+                                 i_eepromSource);
                 if (err)
                 {
                     TRACFCOMP(g_trac_spd,

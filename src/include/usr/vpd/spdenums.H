@@ -111,7 +111,6 @@ enum spdModType_t : uint8_t
 enum dimmModHeight_t : uint8_t
 {
     // DDIMM Mod height (1U/2U/4U)
-    DDIMM_MOD_HEIGHT_ADDR      = 0xC1,
     DDIMM_MOD_HEIGHT_SZ        = 0x01,
 
     DDIMM_MOD_HEIGHT_4U        = 0x80,
