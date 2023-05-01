@@ -46,11 +46,11 @@ constexpr uint8_t POWERIC1 = 1;
 constexpr uint8_t POWERIC2 = 2;
 constexpr uint8_t POWERIC3 = 3;
 
-// Mapping from PMIC ID to SPD byte for DDR4
-constexpr uint16_t SPD_POWERIC0_I2C_BYTE = 412;
-constexpr uint16_t SPD_POWERIC1_I2C_BYTE = 413;
-constexpr uint16_t SPD_POWERIC2_I2C_BYTE = 414;
-constexpr uint16_t SPD_POWERIC3_I2C_BYTE = 415;
+// Mapping from POWERIC ID to SPD byte for DDR5
+constexpr uint16_t SPD_POWERIC0_I2C_BYTE = 247;
+constexpr uint16_t SPD_POWERIC1_I2C_BYTE = 248;
+constexpr uint16_t SPD_POWERIC2_I2C_BYTE = 249;
+constexpr uint16_t SPD_POWERIC3_I2C_BYTE = 250;
 
 // Mapping from REL_POS ID to GPIO/ADC address
 static const std::vector<uint16_t> DDR5_POWERIC_I2C_ADDR_VECTOR =
