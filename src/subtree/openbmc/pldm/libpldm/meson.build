@@ -63,3 +63,7 @@ configure_file(output: 'config.h',
 if get_option('tests').enabled()
   subdir('tests')
 endif
+
+install_subdir('instance-db',
+               install_mode: 'r--r--r--',
+               install_dir: get_option('datadir') / meson.project_name())

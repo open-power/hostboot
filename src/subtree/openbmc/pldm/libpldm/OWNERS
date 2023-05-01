@@ -40,6 +40,7 @@ reviewers:
 - edtanous@google.com
 - jason.m.bills@linux.intel.com
 - manojkiran.eda@gmail.com
+- rushtotom@gmail.com
 
 matchers:
 
@@ -62,3 +63,6 @@ openbmc:
 - name: Patrick Williams
   email: patrick@stwcx.xyz
   discord: stwcx
+- name: Tom Joseph
+  email: rushtotom@gmail.com
+  discord: tomjose

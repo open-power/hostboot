@@ -143,6 +143,161 @@ static void test_msgbuf_extract_array_generic_uint8(void)
     expect(pldm_msgbuf_destroy(ctx) == PLDM_SUCCESS);
 }
 
+static void test_msgbuf_insert_generic_int32(void)
+{
+    struct pldm_msgbuf _ctx;
+    struct pldm_msgbuf* ctx = &_ctx;
+    int32_t src = -12345;
+    int32_t checkVal = 0;
+    uint8_t buf[sizeof(int32_t)] = {0};
+
+    expect(pldm_msgbuf_init(ctx, 0, buf, sizeof(buf)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_insert(ctx, src) == PLDM_SUCCESS);
+
+    struct pldm_msgbuf _ctxExtract;
+    struct pldm_msgbuf* ctxExtract = &_ctxExtract;
+
+    expect(pldm_msgbuf_init(ctxExtract, 0, buf, sizeof(buf)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_extract(ctxExtract, &checkVal) == PLDM_SUCCESS);
+
+    expect(src == checkVal);
+    expect(pldm_msgbuf_destroy(ctxExtract) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_destroy(ctx) == PLDM_SUCCESS);
+}
+
+static void test_msgbuf_insert_generic_uint32(void)
+{
+    struct pldm_msgbuf _ctx;
+    struct pldm_msgbuf* ctx = &_ctx;
+    uint32_t src = 0xf1223344;
+    uint32_t checkVal = 0;
+    uint8_t buf[sizeof(uint32_t)] = {0};
+
+    expect(pldm_msgbuf_init(ctx, 0, buf, sizeof(buf)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_insert(ctx, src) == PLDM_SUCCESS);
+
+    struct pldm_msgbuf _ctxExtract;
+    struct pldm_msgbuf* ctxExtract = &_ctxExtract;
+
+    expect(pldm_msgbuf_init(ctxExtract, 0, buf, sizeof(buf)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_extract(ctxExtract, &checkVal) == PLDM_SUCCESS);
+
+    expect(src == checkVal);
+    expect(pldm_msgbuf_destroy(ctxExtract) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_destroy(ctx) == PLDM_SUCCESS);
+}
+
+static void test_msgbuf_insert_generic_uint16(void)
+{
+    struct pldm_msgbuf _ctx;
+    struct pldm_msgbuf* ctx = &_ctx;
+    uint16_t src = 0xf344;
+    uint16_t checkVal = 0;
+    uint8_t buf[sizeof(uint16_t)] = {0};
+
+    expect(pldm_msgbuf_init(ctx, 0, buf, sizeof(uint16_t)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_insert(ctx, src) == PLDM_SUCCESS);
+
+    struct pldm_msgbuf _ctxExtract;
+    struct pldm_msgbuf* ctxExtract = &_ctxExtract;
+
+    expect(pldm_msgbuf_init(ctxExtract, 0, buf, sizeof(buf)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_extract(ctxExtract, &checkVal) == PLDM_SUCCESS);
+
+    expect(src == checkVal);
+    expect(pldm_msgbuf_destroy(ctxExtract) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_destroy(ctx) == PLDM_SUCCESS);
+}
+
+static void test_msgbuf_insert_generic_int16(void)
+{
+    struct pldm_msgbuf _ctx;
+    struct pldm_msgbuf* ctx = &_ctx;
+    int16_t src = -12;
+    int16_t checkVal = 0;
+    uint8_t buf[sizeof(int16_t)] = {0};
+
+    expect(pldm_msgbuf_init(ctx, 0, buf, sizeof(uint16_t)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_insert(ctx, src) == PLDM_SUCCESS);
+
+    struct pldm_msgbuf _ctxExtract;
+    struct pldm_msgbuf* ctxExtract = &_ctxExtract;
+
+    expect(pldm_msgbuf_init(ctxExtract, 0, buf, sizeof(buf)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_extract(ctxExtract, &checkVal) == PLDM_SUCCESS);
+
+    expect(src == checkVal);
+    expect(pldm_msgbuf_destroy(ctxExtract) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_destroy(ctx) == PLDM_SUCCESS);
+}
+
+static void test_msgbuf_insert_generic_uint8(void)
+{
+    struct pldm_msgbuf _ctx;
+    struct pldm_msgbuf* ctx = &_ctx;
+    uint8_t src = 0xf4;
+    uint8_t checkVal = 0;
+    uint8_t buf[sizeof(uint8_t)] = {0};
+
+    expect(pldm_msgbuf_init(ctx, 0, buf, sizeof(buf)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_insert(ctx, src) == PLDM_SUCCESS);
+
+    struct pldm_msgbuf _ctxExtract;
+    struct pldm_msgbuf* ctxExtract = &_ctxExtract;
+
+    expect(pldm_msgbuf_init(ctxExtract, 0, buf, sizeof(buf)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_extract(ctxExtract, &checkVal) == PLDM_SUCCESS);
+
+    expect(src == checkVal);
+    expect(pldm_msgbuf_destroy(ctxExtract) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_destroy(ctx) == PLDM_SUCCESS);
+}
+
+static void test_msgbuf_insert_generic_int8(void)
+{
+    struct pldm_msgbuf _ctx;
+    struct pldm_msgbuf* ctx = &_ctx;
+    int8_t src = -4;
+    int8_t checkVal = 0;
+    uint8_t buf[sizeof(int8_t)] = {0};
+
+    expect(pldm_msgbuf_init(ctx, 0, buf, sizeof(buf)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_insert(ctx, src) == PLDM_SUCCESS);
+
+    struct pldm_msgbuf _ctxExtract;
+    struct pldm_msgbuf* ctxExtract = &_ctxExtract;
+
+    expect(pldm_msgbuf_init(ctxExtract, 0, buf, sizeof(buf)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_extract(ctxExtract, &checkVal) == PLDM_SUCCESS);
+
+    expect(src == checkVal);
+    expect(pldm_msgbuf_destroy(ctxExtract) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_destroy(ctx) == PLDM_SUCCESS);
+}
+
+static void test_msgbuf_insert_array_generic_uint8(void)
+{
+    struct pldm_msgbuf _ctx;
+    struct pldm_msgbuf* ctx = &_ctx;
+    uint8_t src[6] = {0x11, 0x22, 0x44, 0x55, 0x66, 0x77};
+    uint8_t buf[6] = {0};
+    uint8_t retBuff[6] = {0};
+
+    expect(pldm_msgbuf_init(ctx, 0, buf, sizeof(buf)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_insert_array(ctx, src, sizeof(src)) == PLDM_SUCCESS);
+
+    struct pldm_msgbuf _ctxExtract;
+    struct pldm_msgbuf* ctxExtract = &_ctxExtract;
+
+    expect(pldm_msgbuf_init(ctxExtract, 0, buf, sizeof(buf)) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_extract_array(ctxExtract, retBuff, sizeof(retBuff)) ==
+           PLDM_SUCCESS);
+
+    expect(memcmp(src, retBuff, sizeof(retBuff)) == 0);
+    expect(pldm_msgbuf_destroy(ctxExtract) == PLDM_SUCCESS);
+    expect(pldm_msgbuf_destroy(ctx) == PLDM_SUCCESS);
+}
+
 typedef void (*testfn)(void);
 
 static const testfn tests[] = {test_msgbuf_extract_generic_uint8,
@@ -153,6 +308,13 @@ static const testfn tests[] = {test_msgbuf_extract_generic_uint8,
                                test_msgbuf_extract_generic_int32,
                                test_msgbuf_extract_generic_real32,
                                test_msgbuf_extract_array_generic_uint8,
+                               test_msgbuf_insert_generic_uint8,
+                               test_msgbuf_insert_generic_int8,
+                               test_msgbuf_insert_generic_uint16,
+                               test_msgbuf_insert_generic_int16,
+                               test_msgbuf_insert_generic_uint32,
+                               test_msgbuf_insert_generic_int32,
+                               test_msgbuf_insert_array_generic_uint8,
                                NULL};
 
 int main(void)

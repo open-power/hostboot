@@ -14,6 +14,7 @@ endif
 
 
 tests = [
+  'instance-id',
   'libpldm_base_test',
   'libpldm_platform_test',
   'libpldm_bios_test',

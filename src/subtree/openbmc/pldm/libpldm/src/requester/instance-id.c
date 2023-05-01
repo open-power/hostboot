@@ -1,17 +1,27 @@
 // NOLINTNEXTLINE(bugprone-reserved-identifier,cert-dcl37-c,cert-dcl51-cpp)
 #define _GNU_SOURCE
-#include "libpldm/requester/instance-id.h"
+#include "libpldm/instance-id.h"
 #include "libpldm/pldm.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <unistd.h>
+
+#define BIT(i) (1UL << (i))
 
 #define PLDM_TID_MAX 256
 #define PLDM_INST_ID_MAX 32
 
+/* We need to track our allocations explicitly due to OFD lock merging/splitting
+ */
+struct pldm_tid_state {
+	pldm_instance_id_t prev;
+	uint32_t allocations;
+};
+
 struct pldm_instance_db {
-	pldm_instance_id_t prev[PLDM_TID_MAX];
+	struct pldm_tid_state state[PLDM_TID_MAX];
 	int lock_db_fd;
 };
 
@@ -23,12 +33,26 @@ static inline int iid_next(pldm_instance_id_t cur)
 int pldm_instance_db_init(struct pldm_instance_db **ctx, const char *dbpath)
 {
 	struct pldm_instance_db *l_ctx;
+	struct stat statbuf;
+	int rc;
 
 	/* Make sure the provided pointer was initialised to NULL. In the future
 	 * if we stabilise the ABI and expose the struct definition the caller
 	 * can potentially pass a valid pointer to a struct they've allocated
 	 */
 	if (!ctx || *ctx) {
+		return -EINVAL;
+	}
+
+	/* Ensure the underlying file is sized for properly managing allocations
+	 */
+	rc = stat(dbpath, &statbuf);
+	if (rc < 0) {
+		return -EINVAL;
+	}
+
+	if (statbuf.st_size <
+	    ((off_t)(PLDM_TID_MAX) * (off_t)(PLDM_INST_ID_MAX))) {
 		return -EINVAL;
 	}
 
@@ -39,7 +63,7 @@ int pldm_instance_db_init(struct pldm_instance_db **ctx, const char *dbpath)
 
 	/* Initialise previous ID values so the next one is zero */
 	for (int i = 0; i < PLDM_TID_MAX; i++) {
-		l_ctx->prev[i] = 31;
+		l_ctx->state[i].prev = 31;
 	}
 
 	/* Lock database may be read-only, either by permissions or mountpoint
@@ -89,15 +113,20 @@ int pldm_instance_id_alloc(struct pldm_instance_db *ctx, pldm_tid_t tid,
 		return -EINVAL;
 	}
 
-	l_iid = ctx->prev[tid];
+	l_iid = ctx->state[tid].prev;
 	if (l_iid >= PLDM_INST_ID_MAX) {
 		return -EPROTO;
 	}
 
-	while ((l_iid = iid_next(l_iid)) != ctx->prev[tid]) {
+	while ((l_iid = iid_next(l_iid)) != ctx->state[tid].prev) {
 		struct flock flop;
 		off_t loff;
 		int rc;
+
+		/* Have we already allocated this instance ID? */
+		if (ctx->state[tid].allocations & BIT(l_iid)) {
+			continue;
+		}
 
 		/* Derive the instance ID offset in the lock database */
 		loff = tid * PLDM_INST_ID_MAX + l_iid;
@@ -138,7 +167,8 @@ int pldm_instance_id_alloc(struct pldm_instance_db *ctx, pldm_tid_t tid,
 		/* F_UNLCK is the type of the lock if we could successfully
 		 * promote it to F_WRLCK */
 		if (flop.l_type == F_UNLCK) {
-			ctx->prev[tid] = l_iid;
+			ctx->state[tid].prev = l_iid;
+			ctx->state[tid].allocations |= BIT(l_iid);
 			*iid = l_iid;
 			return 0;
 		}
@@ -163,6 +193,11 @@ int pldm_instance_id_free(struct pldm_instance_db *ctx, pldm_tid_t tid,
 	struct flock flop;
 	int rc;
 
+	/* Trying to free an instance ID that is not currently allocated */
+	if (!(ctx->state[tid].allocations & BIT(iid))) {
+		return -EINVAL;
+	}
+
 	flop = cflu;
 	flop.l_start = tid * PLDM_INST_ID_MAX + iid;
 	rc = fcntl(ctx->lock_db_fd, F_OFD_SETLK, &flop);
@@ -172,6 +207,9 @@ int pldm_instance_id_free(struct pldm_instance_db *ctx, pldm_tid_t tid,
 		}
 		return -EPROTO;
 	}
+
+	/* Mark the instance ID as no-longer allocated */
+	ctx->state[tid].allocations &= ~BIT(iid);
 
 	return 0;
 }
