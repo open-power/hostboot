@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1258,6 +1258,91 @@ void cmd_nvdimm_op( char* &o_output, uint16_t i_op )
 }
 
 
+/**
+ * @brief Report out several pieces of useful information about the
+ *        NVDIMMs and the BPMs..
+ * @param[out] o_output  Output display buffer, memory allocated here.
+ */
+
+void cmd_nvdimm_info( char* &o_output)
+{
+    o_output = new char[1500];
+
+    // Get the list of functional NVDIMM Targets from the system
+    TARGETING::TargetHandleList l_nvdimmTargetList;
+    NVDIMM::nvdimm_getNvdimmList(l_nvdimmTargetList);
+    sprintf( o_output, "\n--NVDIMM Info--\nNumber of NV DIMMs = %d\n\n",
+             l_nvdimmTargetList.size() );
+
+    uint8_t dimm = 0;
+    for (const auto & l_nvdimm : l_nvdimmTargetList)
+    {
+        UTIL_FT("Processing %.8X", TARGETING::get_huid(l_nvdimm));
+        NVDIMM::externalStatus_t l_status;
+        NVDIMM::nvdimmExternalStatus(l_nvdimm, l_status);
+        TRACFBIN( Util::g_util_trace, "Status", &l_status, sizeof(l_status) );
+        char tmpbuf[500];
+        sprintf( tmpbuf, "%d: HUID = %.8X\n",
+                 dimm,
+                 TARGETING::get_huid(l_nvdimm) );
+        strcat( o_output, tmpbuf );
+        sprintf( tmpbuf, "%d: NV FW active slot = %d\n",
+                 dimm,
+                 l_status.nvSlot );
+        strcat( o_output, tmpbuf );
+        sprintf( tmpbuf, "%d: NV FW (slot 0) = 0x%.2X%.2X%.2X\n",
+                 dimm,
+                 l_status.nvCodeLevel[0][0],
+                 l_status.nvCodeLevel[0][1],
+                 l_status.nvCodeLevel[0][2] );
+        strcat( o_output, tmpbuf );
+        sprintf( tmpbuf, "%d: NV FW (slot 1) = 0x%.2X%.2X%.2X\n",
+                 dimm,
+                 l_status.nvCodeLevel[1][0],
+                 l_status.nvCodeLevel[1][1],
+                 l_status.nvCodeLevel[1][2] );
+        strcat( o_output, tmpbuf );
+        sprintf( tmpbuf, "%d: NV HW Revision = 0x%.2X\n",
+                 dimm,
+                 l_status.nvHwRev );
+        strcat( o_output, tmpbuf );
+        sprintf( tmpbuf, "%d: NV Flash Lifetime = %d percent\n",
+                 dimm,
+                 l_status.nvLifetime );
+        strcat( o_output, tmpbuf );
+        sprintf( tmpbuf, "%d: BPM FW Revision = 0x%.4X\n",
+                 dimm,
+                 l_status.bpmCodeLevel );
+        strcat( o_output, tmpbuf );
+        sprintf( tmpbuf, "%d: BPM Lifetime = %d percent\n",
+                 dimm,
+                 l_status.bpmLifetime );
+        strcat( o_output, tmpbuf );
+        sprintf( tmpbuf, "%d: BPM Runtime = %d\n",
+                 dimm,
+                 l_status.bpmRuntime );
+        strcat( o_output, tmpbuf );
+        sprintf( tmpbuf, "%d: BPM Serial Number = ",
+                 dimm );
+        strcat( o_output, tmpbuf );
+        for( size_t x=0; x<sizeof(l_status.bpmSerial); x++ )
+        {
+            sprintf( tmpbuf, "%.2X", l_status.bpmSerial[x] );
+            strcat( o_output, tmpbuf );
+        }
+        strcat( o_output, "\n" );
+
+        dimm++;
+        strcat( o_output, "\n" );
+        UTIL_FT("String size = %d", strlen(o_output));
+    }
+    strcat( o_output, "-----\n" );
+
+    return;
+}  // end cmd_nvdimm_info
+
+
+
 #endif
 
 /**
@@ -1631,6 +1716,18 @@ int hbrtCommand( int argc,
             sprintf(*l_output, "ERROR: nvdimm_op <op>");
         }
     }
+    else if( !strcmp( argv[0], "nvdimm_info" ) )
+    {
+        if (argc == 1)
+        {
+            cmd_nvdimm_info( *l_output );
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf(*l_output, "Usage: nvdimm_info");
+        }
+    }
 
 #endif
     else
@@ -1680,6 +1777,8 @@ int hbrtCommand( int argc,
                            "    0x1=disarm 0x2=disable_encryption 0x4=remove_keys\n"
                            "    0x8=enable_encryption 0x10=arm 0x20=es_healthcheck\n"
                            "    0x40=nvm_healthcheck\n");
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "nvdimm_info\n");
         strcat( *l_output, l_tmpstr );
 
 #endif

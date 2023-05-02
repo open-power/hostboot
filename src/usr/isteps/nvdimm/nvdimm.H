@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,10 +158,6 @@ enum i2cReg : uint16_t
     ES_HWREV = 0x104,
     ES_FWREV0 = 0x106,
     ES_FWREV1 = 0x107,
-    SLOT0_ES_FWREV0 = 0x108,
-    SLOT0_ES_FWREV1 = 0x109,
-    SLOT1_ES_FWREV0 = 0x10A,
-    SLOT1_ES_FWREV1 = 0x10B,
     ES_CHARGE_TIMEOUT0 = 0x110,
     ES_CHARGE_TIMEOUT1 = 0x111,
     ES_ATTRIBUTES = 0x114,
@@ -322,6 +318,12 @@ enum i2cReg : uint16_t
     ENCRYPTION_ERASE_KEY_TEST        = 0x528,
     ENCRYPTION_ERASE_KEY_TEST_VERIFY = 0x529,
     ENCRYPTION_KEY_VALIDATION        = 0x52A,
+    BPM_PART_NO_FIRST       = 0x5A0,
+    BPM_PART_NO_LAST        = 0x5AF,
+    BPM_SERIAL_NO_FIRST     = 0x5B0,
+    BPM_SERIAL_NO_LAST      = 0x5B6,
+    BPM_FW_VERSION_FIRST    = 0x5B7,
+    BPM_FW_VERSION_LAST     = 0x5B8,
 };
 
 // i2cReg macros

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,7 @@
 #include <isteps/nvdimm/nvdimm.H>  // implements some of these
 #include "../nvdimm.H" // for g_trac_nvdimm
 #include <sys/time.h>
+#include "../bpm_update.H" // for readViaScapRegister
 
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
@@ -1205,6 +1206,205 @@ void nvdimm_stats( void )
         errlCommit(l_err, NVDIMM_COMP_ID);
     }
 }
+
+/**
+ * @brief Collect a set of general information about the NVDIMMs and BPMs.
+ */
+void nvdimmExternalStatus( Target* i_nvdimm,
+                           externalStatus_t& o_status )
+{
+    errlHndl_t l_err = nullptr;
+
+    //---- NVDimm code level (rev0,rev1,subrev)
+    static const uint8_t REGMAP[2][3] = {
+        { SLOT0_FWREV0, SLOT0_FWREV1, SLOT0_SUBFWREV },
+        { SLOT1_FWREV0, SLOT1_FWREV1, SLOT1_SUBFWREV }
+    };
+    for( uint8_t slot = 0; slot < 2; slot++ )
+    {
+        for( uint8_t entry = 0; entry < 3; entry++ )
+        {
+            o_status.nvCodeLevel[slot][entry] = 0xFF;
+            l_err = nvdimmReadReg(i_nvdimm,
+                                  REGMAP[slot][entry],
+                                  o_status.nvCodeLevel[slot][entry] );
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmExternalStatus::"
+                          "nvdimm[%X] failed to read reg 0x%.2X",
+                          TARGETING::get_huid(i_nvdimm),
+                          REGMAP[slot][entry]);
+                delete l_err; //just throw error away
+                l_err = NULL;
+                o_status.nvCodeLevel[slot][entry] = 0xFF;
+            }
+        }
+    }
+
+    //---- NVDimm current FW slot
+    o_status.nvSlot = 0xFF;
+    l_err = nvdimmGetRunningSlot(i_nvdimm,
+                                 o_status.nvSlot );
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmExternalStatus::"
+                  "nvdimm[%X] failed to call nvdimmGetRunningSlot",
+                  TARGETING::get_huid(i_nvdimm));
+        delete l_err; //just throw error away
+        l_err = NULL;
+        o_status.nvSlot = 0xFF;
+    }
+
+    //---- NVDimm Hardware Revision
+    o_status.nvHwRev = 0xFF;
+    l_err = nvdimmReadReg(i_nvdimm,
+                          HWREV,
+                          o_status.nvHwRev );
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmExternalStatus::"
+                  "nvdimm[%X] failed to read reg HWREV(0x%.2X)",
+                  TARGETING::get_huid(i_nvdimm),
+                  HWREV);
+        delete l_err; //just throw error away
+        l_err = NULL;
+        o_status.nvHwRev = 0xFF;
+    }
+
+    //---- NVDimm flash lifetime
+    o_status.nvLifetime = 0xFF;
+    l_err = nvdimmReadReg(i_nvdimm,
+                          NVM_LIFETIME,
+                          o_status.nvLifetime);
+    if (l_err != nullptr)
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmExternalStatus::"
+                  "nvdimm[%X] failed to read reg NVM_LIFETIME(0x%.2X)",
+                  TARGETING::get_huid(i_nvdimm),
+                  NVM_LIFETIME);
+        delete l_err; //just throw error away
+        l_err = NULL;
+        o_status.nvLifetime = 0xFF;
+    }
+
+    // This BPM information requires at least v4.4 of the NV firmware
+    if( (o_status.nvSlot != 0xFF)
+        && (o_status.nvCodeLevel[o_status.nvSlot][0] != 0xFF)
+        && (o_status.nvCodeLevel[o_status.nvSlot][0] >= 0x44) )
+    {
+        //---- BPM Code level (major,minor)
+        uint8_t bpmMajor = 0xFF, bpmMinor = 0xFF;
+        l_err = nvdimmReadReg(i_nvdimm,
+                              BPM_FW_VERSION_LAST,
+                              bpmMajor);
+        if (l_err != nullptr)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmExternalStatus::"
+                      "nvdimm[%X] failed to read reg BPM_FW_VERSION_LAST(0x%.2X)",
+                      TARGETING::get_huid(i_nvdimm),
+                      BPM_FW_VERSION_LAST);
+            delete l_err; //just throw error away
+            l_err = NULL;
+            bpmMajor = 0xFF;
+        }
+
+        l_err = nvdimmReadReg(i_nvdimm,
+                              BPM_FW_VERSION_FIRST,
+                              bpmMinor);
+        if (l_err != nullptr)
+        {
+            TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmExternalStatus::"
+                      "nvdimm[%X] failed to read reg BPM_FW_VERSION_FIRST(0x%.2X)",
+                      TARGETING::get_huid(i_nvdimm),
+                      BPM_FW_VERSION_FIRST);
+            delete l_err; //just throw error away
+            l_err = NULL;
+            bpmMinor = 0xFF;
+        }
+        o_status.bpmCodeLevel = TWO_UINT8_TO_UINT16(bpmMajor, bpmMinor);
+
+
+        //---- BPM Serial number
+        memset( o_status.bpmSerial, 0xFF, sizeof(o_status.bpmSerial) );
+        for( uint16_t l_reg = BPM_SERIAL_NO_FIRST;
+             l_reg <= BPM_SERIAL_NO_LAST;
+             l_reg++ )
+        {
+            uint16_t l_offset = l_reg-BPM_SERIAL_NO_FIRST;
+            l_err = nvdimmReadReg(i_nvdimm,
+                                  l_reg,
+                                  o_status.bpmSerial[l_offset]);
+            if (l_err != nullptr)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmExternalStatus::"
+                          "nvdimm[%X] failed to read reg BPM_SERIAL_NO_X(0x%.2X)",
+                          TARGETING::get_huid(i_nvdimm),
+                          l_reg);
+                delete l_err; //just throw error away
+                l_err = NULL;
+            }
+        }
+    }
+    else
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmExternalStatus::"
+                  "nvdimm[%X] could not read BPM info due to downlevel NV firmware (0x%.2X)",
+                  TARGETING::get_huid(i_nvdimm),
+                  o_status.nvCodeLevel[o_status.nvSlot][0]);
+        o_status.bpmCodeLevel = 0xFFFF;
+        memset( o_status.bpmSerial, 0xFF, sizeof(o_status.bpmSerial) );
+    }
+
+    //---- BPM charge level, aka Lifetime
+    o_status.bpmLifetime = 0xFF;
+    l_err = nvdimmReadReg(i_nvdimm,
+                          ES_LIFETIME,
+                          o_status.bpmLifetime);
+    if (l_err != nullptr)
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmExternalStatus::"
+                  "nvdimm[%X] failed to read reg ES_LIFETIME(0x%.2X)",
+                  TARGETING::get_huid(i_nvdimm),
+                  ES_LIFETIME);
+        delete l_err; //just throw error away
+        l_err = NULL;
+        o_status.bpmLifetime = 0xFF;
+    }
+
+
+    //---- BPM operational runtime
+    uint8_t runtime_msb = 0xFF;
+    l_err = nvdimmReadReg(i_nvdimm,
+                          ES_RUNTIME1,
+                          runtime_msb);
+    if (l_err != nullptr)
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmExternalStatus::"
+                  "nvdimm[%X] failed to read reg ES_RUNTIME1(0x%.2X)",
+                  TARGETING::get_huid(i_nvdimm),
+                  ES_RUNTIME1);
+        delete l_err; //just throw error away
+        l_err = NULL;
+        runtime_msb = 0xFF;
+    }
+    uint8_t runtime_lsb = 0xFF;
+    l_err = nvdimmReadReg(i_nvdimm,
+                          ES_RUNTIME0,
+                          runtime_lsb);
+    if (l_err != nullptr)
+    {
+        TRACFCOMP(g_trac_nvdimm, ERR_MRK"nvdimmExternalStatus::"
+                  "nvdimm[%X] failed to read reg ES_RUNTIME0(0x%.2X)",
+                  TARGETING::get_huid(i_nvdimm),
+                  ES_RUNTIME0);
+        delete l_err; //just throw error away
+        l_err = NULL;
+        runtime_lsb = 0xFF;
+    }
+    o_status.bpmRuntime = TWO_UINT8_TO_UINT16(runtime_msb, runtime_lsb);
+
+}
+
 
 struct registerNvdimmRt
 {

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -48,13 +48,12 @@ OBJS += nvdimm.o
 OBJS += nvdimmdd.o
 OBJS += errlud_nvdimm.o
 OBJS += nvdimmErrorLog.o
+OBJS += bpm_update.o
 
 ifneq (${HOSTBOOT_RUNTIME},1)
 
 # code update path for NVDIMMs (not at RUNTIME)
 OBJS += nvdimm_update.o
-# code update path for BPMs (not at runtime)
-OBJS += bpm_update.o
 
 endif
 

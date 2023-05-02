@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -495,6 +495,9 @@ public:
     // Force User to supply a nvdimm target.
     Bpm() = delete;
 
+
+#ifndef __HOSTBOOT_RUNTIME
+
     /**
      * @brief Runs the BPM firmware update using the given image.
      *
@@ -525,16 +528,29 @@ public:
      */
     bool hasAttemptedUpdate();
 
+#endif //#ifndef __HOSTBOOT_RUNTIME
+
     /**
      *  @brief returns the nvdimm that is associated with this BPM.
      */
     const TARGETING::TargetHandle_t getNvdimm();
+
+    /**
+     * @brief returns the BPM serial number
+     *
+     * @param[in] o_serial The BPM serial number.
+     *
+     * @return  errlHndl_t  nullptr on success. Otherwise, pointer to an
+     *                      errlEntry.
+     */
+    errlHndl_t readSerialNumber( uint8_t o_serial[7] );
 
 private:
 
     // The nvdimm whose battery firmware will be updated.
     const TARGETING::TargetHandle_t iv_nvdimm;
 
+#ifndef __HOSTBOOT_RUNTIME
     // The Bootstrap Loader version of the BPM
     uint8_t iv_bslVersion;
 
@@ -791,36 +807,6 @@ private:
     errlHndl_t resetDevice();
 
     /**
-     *  @brief Write to the BPM register via the SCAP registers
-     *
-     *  @param[in]      i_reg       The BPM register to write to.
-     *
-     *  @param[in]      i_data      The data to write to the given register.
-     *
-     *  @return         errlHndl_t  nullptr on success. Otherwise, an error.
-     */
-    errlHndl_t writeViaScapRegister(uint8_t i_reg, uint8_t i_data);
-
-    /**
-     *  @brief Reads the BPM register via the SCAP registers
-     *
-     *  @param[in]      i_reg       The BPM register to read from.
-     *
-     *  @param[in/out]  io_data     The data that was in the given register.
-     *
-     *  @return         errlHndl_t  nullptr on success. Otherwise, an error.
-     */
-    errlHndl_t readViaScapRegister(uint8_t i_reg, uint8_t & io_data);
-
-    /**
-     *  @brief Disables write protection on the BPM by sending the password
-     *         sequence to I2C_REG_PROTECT
-     *
-     *  @return     errlHndl_t      nullptr on success. Otherwise, an error.
-     */
-    errlHndl_t disableWriteProtection();
-
-    /**
      *  @brief Many operations performed on the BPM require the magic registers
      *         to have specific values written in them. This function acts as a
      *         helper to facilitate that process.
@@ -985,14 +971,6 @@ private:
     errlHndl_t verifyGoodBpmState();
 
     /**
-     *  @brief Helper function for the SCAP register functions that will poll
-     *         the busy bit in SCAP_STATUS until it is zero.
-     *
-     *  @return     errlHndl_t      nullptr on success. Otherwise, an error.
-     */
-    errlHndl_t waitForBusyBit();
-
-    /**
      *  @brief Starting with BSL version 1.4 it is necessary to check the CRC of
      *         the firmware image once it has been written to the BPM. If this
      *         is not done or fails to succeed then the firmware image will not
@@ -1062,6 +1040,45 @@ private:
      */
     uint16_t crc16_calc(const void* const i_ptr, int i_size);
 
+#endif //#ifndef __HOSTBOOT_RUNTIME
+
+    /**
+     *  @brief Helper function for the SCAP register functions that will poll
+     *         the busy bit in SCAP_STATUS until it is zero.
+     *
+     *  @return     errlHndl_t      nullptr on success. Otherwise, an error.
+     */
+    errlHndl_t waitForBusyBit();
+
+    /**
+     *  @brief Write to the BPM register via the SCAP registers
+     *
+     *  @param[in]      i_reg       The BPM register to write to.
+     *
+     *  @param[in]      i_data      The data to write to the given register.
+     *
+     *  @return         errlHndl_t  nullptr on success. Otherwise, an error.
+     */
+    errlHndl_t writeViaScapRegister(uint8_t i_reg, uint8_t i_data);
+
+    /**
+     *  @brief Reads the BPM register via the SCAP registers
+     *
+     *  @param[in]      i_reg       The BPM register to read from.
+     *
+     *  @param[in/out]  io_data     The data that was in the given register.
+     *
+     *  @return         errlHndl_t  nullptr on success. Otherwise, an error.
+     */
+    errlHndl_t readViaScapRegister(uint8_t i_reg, uint8_t & io_data);
+
+    /**
+     *  @brief Disables write protection on the BPM by sending the password
+     *         sequence to I2C_REG_PROTECT
+     *
+     *  @return     errlHndl_t      nullptr on success. Otherwise, an error.
+     */
+    errlHndl_t disableWriteProtection();
 
 };
 

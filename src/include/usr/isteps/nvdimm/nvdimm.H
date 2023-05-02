@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -499,11 +499,38 @@ void nvdimmAddPage4Regs(TARGETING::Target *i_nvdimm, errlHndl_t& io_err);
 void nvdimm_init(TARGETING::Target *i_nvdimm);
 
 #ifdef __HOSTBOOT_RUNTIME
+
 /**
  * @brief Collect the Lifetime Percentage from the BPM for every NVDIMM
  *        and send it to PHYP
  */
 void nvdimm_stats( void );
+
+/**
+ * @brief Set of data to be returned from nvdimmExternalStatus
+ */
+typedef struct externalStatus
+{
+    uint8_t nvCodeLevel[2][3]; // NVDimm code level (rev0,rev1,subrev), slotX
+    uint8_t nvSlot;            // NVDimm current FW slot
+    uint8_t nvHwRev;           // NVDimm Hardware Revision
+    uint8_t nvLifetime;        // NVDimm flash lifetime
+    uint16_t bpmCodeLevel;     // BPM Code level (major,minor)
+    uint8_t bpmSerial[7];      // BPM Serial number
+    uint8_t bpmLifetime;       // BPM charge level, aka Lifetime percentage
+    uint16_t bpmRuntime;       // BPM operational runtime
+} externalStatus_t;
+
+/**
+ * @brief Collect a set of general information about the NVDIMMs and BPMs.
+ *
+ * @param[in] i_nvdimm  Specific NVDIMM to query
+ * @param[out] o_status  General status
+ */
+void nvdimmExternalStatus( TARGETING::Target* i_nvdimm,
+                           externalStatus_t& o_status );
+
+
 #endif
 
 }

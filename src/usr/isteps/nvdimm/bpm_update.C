@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -234,6 +234,7 @@ uint8_t getSegmentIdentifier(uint16_t i_segmentCode)
     return segmentId;
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 /**
  *  @brief Helper function to sleep for longer durations in 5 second increments.
  *
@@ -494,11 +495,14 @@ void const * BpmConfigLidImage::getFirstFragment() const
 
     return fragment;
 }
+#endif //#ifndef __HOSTBOOT_RUNTIME
+
 
 // =============================================================================
 //                           Bpm Class Functions
 // =============================================================================
 
+#ifndef __HOSTBOOT_RUNTIME
 Bpm::Bpm(const TARGETING::TargetHandle_t i_nvdimm)
     : iv_nvdimm(i_nvdimm),
       iv_bslVersion(0),
@@ -515,6 +519,7 @@ Bpm::Bpm(const TARGETING::TargetHandle_t i_nvdimm)
     memset(&iv_segmentB, 0, SEGMENT_SIZE);
 
 }
+
 
 bool Bpm::attemptAnotherUpdate()
 {
@@ -2145,6 +2150,8 @@ errlHndl_t Bpm::resetDevice()
     return errl;
 }
 
+#endif //#ifndef __HOSTBOOT_RUNTIME
+
 errlHndl_t Bpm::readViaScapRegister(uint8_t const i_reg, uint8_t & io_data)
 {
     TRACUCOMP(g_trac_bpm, ENTER_MRK"Bpm::readViaScapRegister()");
@@ -2474,6 +2481,8 @@ errlHndl_t Bpm::disableWriteProtection()
 
     return errl;
 }
+
+#ifndef __HOSTBOOT_RUNTIME
 
 errlHndl_t Bpm::switchBpmPage(uint16_t const i_segmentCode)
 {
@@ -3793,6 +3802,8 @@ errlHndl_t Bpm::verifyGoodBpmState()
     return errl;
 }
 
+#endif //#ifndef __HOSTBOOT_RUNTIME
+
 errlHndl_t Bpm::waitForBusyBit()
 {
     errlHndl_t errl = nullptr;
@@ -3851,6 +3862,8 @@ errlHndl_t Bpm::waitForBusyBit()
 
     return errl;
 }
+
+#ifndef __HOSTBOOT_RUNTIME
 
 errlHndl_t Bpm::runConfigUpdates(BpmConfigLidImage i_configImage)
 {
@@ -4173,6 +4186,83 @@ uint16_t Bpm::crc16_calc(const void* i_ptr, int i_size)
 
     return (crc & 0xFFFF);
 }
+
+#endif //#ifndef __HOSTBOOT_RUNTIME
+
+
+/**
+ * @brief returns the BPM serial number
+ */
+errlHndl_t Bpm::readSerialNumber( uint8_t o_serial[7] )
+{
+    errlHndl_t l_err = nullptr;
+    bool l_unprotected = false;
+
+    do {
+        l_err = disableWriteProtection();
+        if (l_err != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::readSerialNumber::"
+                      "nvdimm[%X] failed call to disableWriteProtection",
+                      TARGETING::get_huid(iv_nvdimm));
+            break;
+        }
+        l_unprotected = true;
+
+        // BPM Serial is in regs 0x16..0x10 (little-endian order)
+        for( size_t r = 0; r<7; r++ )
+        {
+            uint8_t reg = 0x16-r;
+            l_err = readViaScapRegister(reg, o_serial[r]);
+            if (l_err != nullptr)
+            {
+                TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::readSerialNumber::"
+                          "nvdimm[%X] failed to read BPM SN reg 0x%.2X",
+                          TARGETING::get_huid(iv_nvdimm),
+                          reg);
+                break;
+            }
+        }
+        if (l_err != nullptr) { break; }
+
+    } while(0);
+
+    // The Page4 registers are protected again by writing 0x00
+    // to the I2C Protect Register (0x3D)
+    if( l_unprotected )
+    {
+        errlHndl_t tmp_errl = nvdimmWriteReg(iv_nvdimm,
+                                             I2C_REG_PROTECT,
+                                             0x00);
+        if (tmp_errl != nullptr)
+        {
+            TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::readSerialNumber::"
+                      "nvdimm[%X] failed to reenable write protection",
+                      TARGETING::get_huid(iv_nvdimm));
+            // just commit the log as informational since we probably
+            // already failed above
+            tmp_errl->collectTrace(BPM_COMP_NAME);
+            tmp_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            ERRORLOG::errlCommit(tmp_errl, BPM_COMP_ID);
+        }
+    }
+
+    // Add the latest BPM traces for context
+    if( l_err )
+    {
+        l_err->collectTrace(BPM_COMP_NAME);
+    }
+
+    return l_err;
+}
+
+#ifdef __HOSTBOOT_RUNTIME
+// A much reduced version for use at runtime
+Bpm::Bpm(const TARGETING::TargetHandle_t i_nvdimm)
+    : iv_nvdimm(i_nvdimm)
+{
+}
+#endif// #ifdef __HOSTBOOT_RUNTIME
 
 }; // End of BPM namespace
 }; // End of NVDIMM namespace
