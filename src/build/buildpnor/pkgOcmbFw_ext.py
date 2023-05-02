@@ -229,7 +229,8 @@ def pack_fw_image_info_struct(image_type, image_path, ocmb_type,
     if pakfile_hash_path:
         ec = subprocess.run(['paktool', 'extract', image_path, pakfile_hash_path])
         if ec.returncode != 0:
-            error('paktool exited with error')
+            print(format(ec.args))
+            error('paktool exited with error :: '.format(ec.args))
 
         image_hash = open(pakfile_hash_path, 'rb').read()
     elif unhashed_header_size:
