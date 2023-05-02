@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -65,7 +65,7 @@ my ($bb);
 my ($sourcebase) = "$sandboxbase/src";
 my ($version) = $HEAD_VER_FLAG; # default to oldest version
 my ($collect) = 0;
-my ($INCLUDE, $Arg, $file, $dir, $string_file);
+my ($INCLUDE, $Arg, $file, $dir, $string_file, $collision_file);
 my $args = "";
 
 my $fail_on_collision = 0; # 1 = exit with error if hash collision occurs
@@ -127,6 +127,7 @@ while (@ARGV) {
     }
     if ($Arg eq "-s") {
         $string_file = shift;
+        $collision_file = $string_file . ".collisions";
         next;
     }
     if ($Arg eq "-c") {
@@ -315,6 +316,12 @@ sub determine_args() {
 	print STDOUT "\nError: File $string_file does not exist.  Current directory may not be writable.\n\n";
 	help();
 	exit(127);
+    }
+
+    if (defined $collision_file)
+    {
+        open ( CFH , ">$collision_file")
+          or die ("Cannot open $_: $!, stopped");
     }
 
     # Make sure trexStringFile is readable/writeable
@@ -682,10 +689,12 @@ sub assimilate_file($) {
 		}
 		if ($hashstr1 ne $hashstr2)
 		{
-		    print "*** ERROR: HASH Collision! (a_f)\n",
-			  "    Two different strings have the same hash value ($l_hash)\n",
-			  "    String 1: $hash_strings_array{$l_hash}\n",
+		    my $msg = "*** ERROR: HASH Collision! (a_f)\n".
+			  "    Two different strings have the same hash value ($l_hash)\n".
+			  "    String 1: $hash_strings_array{$l_hash}\n".
 			  "    String 2: $newstring\n";
+                    print $msg;
+                    print CFH $msg;
 		    if ($fail_on_collision) {
 		    	exit(1);
 		    }
@@ -775,10 +784,12 @@ sub hash_strings() {
 	    }
 	    if ($l_tmp ne $printf_string)
 	    {
-		print "*** ERROR: HASH Collision! (h_s)\n",
-		      "    Two different strings have the same hash value ($hash_val)\n",
-		      "    String 1: $l_hash_strings{$hash_val}\n",
+		my $msg = "*** ERROR: HASH Collision! (h_s)\n".
+		      "    Two different strings have the same hash value ($hash_val)\n".
+		      "    String 1: $l_hash_strings{$hash_val}\n".
 		      "    String 2: $printf_string (file $l_file_name)\n";
+                print $msg;
+                print CFH $msg;
 		if ($fail_on_collision) {
 		    exit(1);
 		}
@@ -818,10 +829,12 @@ sub write_string_file() {
             # Check for hash collisions.
             if ($l_tmp ne $l_tmp2)
             {
-		print "*** ERROR: HASH Collision! (w_s_f)\n",
-		      "    Two different strings have the same hash value ($l_key)\n",
-		      "    String 1: $hash_strings_array{$l_key}\n",
+		my $msg = "*** ERROR: HASH Collision! (w_s_f)\n".
+		      "    Two different strings have the same hash value ($l_key)\n".
+		      "    String 1: $hash_strings_array{$l_key}\n".
 		      "    String 2: $string_file_array{$l_key}\n";
+                print $msg;
+                print CFH $msg;
 		if ($fail_on_collision) {
 		    exit(1);
 		}
