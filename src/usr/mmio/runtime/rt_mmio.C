@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,14 +126,17 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
             // send message to hypervisor level to do the mmio operation
             l_err = SCOM::sendScomToHyp(i_opType, i_ocmbTarget,
                                         l_fullAddr, l_scombuf );
-            if( io_buflen == 4 )
+            if (i_opType == DeviceFW::READ)
             {
-                 // data is right-justified
-                 memcpy( io_buffer, l_scombuf+4, 4 );
-            }
-            else // io_buflen == 8
-            {
-                 memcpy( io_buffer, l_scombuf, 8 );
+                if( io_buflen == 4 )
+                {
+                    // data is left-justified
+                    memcpy( io_buffer, l_scombuf, 4 );
+                }
+                else // io_buflen == 8
+                {
+                    memcpy( io_buffer, l_scombuf, 8 );
+                }
             }
         }
     }
