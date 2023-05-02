@@ -129,23 +129,6 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
-        // TODO - just assume we complete for odyssey right now
-        if (isOdysseyOcmb(iv_chip->getTrgt()))
-        {
-            PRDF_TRAC( PRDF_FUNC "Odyssey cmd complete on 0x%08x",
-                       iv_chip->getHuid() );
-            // The command reached the end of memory. Send a message to MDIA.
-            o_rc = mdiaSendEventMsg(iv_chip->getTrgt(), MDIA::COMMAND_COMPLETE);
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(0x%08x,COMMAND_COMPLETE) "
-                          "failed", iv_chip->getHuid() );
-                break;
-            }
-            io_sc.service_data->setDontCommitErrl();
-            break;
-        }
-
         #endif
 
         collectStateCaptureData( io_sc, TD_CTLR_DATA::START );
@@ -329,6 +312,7 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
         curSrnk  = iv_curProcedure->getRank().getSlave();
         curPhase = iv_curProcedure->getPhase();
         curType  = iv_curProcedure->getType();
+        curPort  = iv_curProcedure->getPort();
     }
 
     uint32_t pos = 0;
