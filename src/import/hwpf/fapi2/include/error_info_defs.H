@@ -72,6 +72,14 @@ typedef struct
     struct sbeFfdc_t ffdcData[MAX_SBE_FFDC_ENTRIES]; // fapi FFDC data
 } SbeFfdcData_t; // ~248 bytes
 
+// Data type for poz ffdc buffer sent through fifo using ptr
+typedef struct
+{
+    uint32_t  fapiRc;      // Return code from failure
+    uint32_t  ffdcLength;  // length of Fapi FFDC data (in bytes)
+    struct sbeFfdc_t* ffdcDataPtr; // fapi FFDC data ptr
+} pozFfdcData_t; // Ffdc data
+
 ///
 /// @brief Type to hold the ffdc element in the ffdc class
 /// Needed so that the size can be squirled away before the
