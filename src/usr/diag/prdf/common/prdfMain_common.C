@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,10 @@
 #include <prdfRegisterCache.H>
 #include <prdfScanFacility.H>
 #include <prdfMfgThresholdMgr.H>
+
+#ifdef __HOSTBOOT_MODULE
+#include <hbotcompid.H>
+#endif
 
 #ifdef __HOSTBOOT_RUNTIME
 #include <prdfP9McbistDomain.H>
@@ -233,7 +237,17 @@ errlHndl_t main( ATTENTION_VALUE_TYPE i_priAttnType,
     if(( g_initialized == false)&&(NULL ==systemPtr))
     {
         g_prd_errlHndl = noLock_initialize();
-        if(g_prd_errlHndl != NULL) rc = PRD_NOT_INITIALIZED;
+        if(g_prd_errlHndl != NULL)
+        {
+            rc = PRD_NOT_INITIALIZED;
+
+            #ifdef __HOSTBOOT_MODULE
+            // Add extra traces to help determine why initialization failed.
+            g_prd_errlHndl->collectTrace(VFS_COMP_NAME,  512);
+            g_prd_errlHndl->collectTrace(PNOR_COMP_NAME, 512);
+            g_prd_errlHndl->collectTrace(UTIL_COMP_NAME, 512);
+            #endif
+        }
     }
 
     ServiceDataCollector serviceData;

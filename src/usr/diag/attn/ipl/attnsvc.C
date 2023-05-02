@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -410,7 +410,9 @@ void* Service::prdTask(void * i_svc)
              ATTN_PRD_TASK_MODULE,                     // moduleid
              ATTN_PRD_TASK_CRASHED,                    // reason Code
              (uint64_t)l_tidRc,                        // tid rc
-             (uint64_t)l_tid                           // task that crashed
+             (uint64_t)l_tid,                          // task that crashed
+             ErrlEntry::ADD_SW_CALLOUT,
+             ErrlEntry::FORCE_DUMP
             );
 
         l_err->collectTrace("PRDF"      , 512 );
