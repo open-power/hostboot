@@ -137,7 +137,7 @@ extern "C"
                     FAPI_TRY(l_rc, "%s Error calculating mss::power_thermal::throttle constructor in p10_mss_utils_to_throttles",
                              mss::c_str(l_port));
 
-                    FAPI_TRY(l_throttle.calc_slots_and_power(l_calc_util));
+                    FAPI_TRY( l_throttle.calc_slots_and_power( l_calc_util ) );
 
                     FAPI_INF( "%s Calculated N commands per port %d, per slot %d, commands per dram clock window %d, maxpower is %d",
                               mss::c_str(l_port),
@@ -159,7 +159,7 @@ extern "C"
                     FAPI_TRY(l_rc, "%s Error calculating mss::power_thermal::throttle constructor in p10_mss_utils_to_throttles",
                              mss::c_str(l_port));
 
-                    FAPI_TRY(l_throttle.calc_slots_and_power(l_calc_util));
+                    FAPI_TRY( l_throttle.calc_slots_and_power( l_calc_util ) );
 
                     FAPI_INF( "%s Calculated N commands per port %d, per slot %d, commands per dram clock window %d, maxpower is %d",
                               mss::c_str(l_port),
