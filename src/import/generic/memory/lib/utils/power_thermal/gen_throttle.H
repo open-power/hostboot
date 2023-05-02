@@ -492,7 +492,7 @@ throttle<MC, TT>::throttle( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_port, f
              iv_runtime_n_slot,
              iv_runtime_n_port);
 
-    FAPI_INF("Safemode util (min util allowed) is %d c%% for target " GENTARGTIDFORMAT,
+    FAPI_INF("Safemode util (min util allowed) is %d c (centi-percent) for target " GENTARGTIDFORMAT,
              iv_min_util_port,
              GENTARGTID(iv_target));
 
