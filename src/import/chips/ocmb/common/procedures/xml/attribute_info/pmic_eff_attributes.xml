@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -73,6 +73,18 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC0 SWA Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic0_swa_voltage_coarse_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -130,6 +142,18 @@
         <valueType>int8</valueType>
         <writeable/>
         <mssAccessorName>pmic0_swb_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC0 SWB Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic0_swb_voltage_coarse_offset</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -193,6 +217,18 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC0 SWC Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic0_swc_voltage_coarse_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -250,6 +286,18 @@
         <valueType>int8</valueType>
         <writeable/>
         <mssAccessorName>pmic0_swd_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC0 SWD Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic0_swd_voltage_coarse_offset</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -325,6 +373,18 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC1 SWA Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic1_swa_voltage_coarse_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -382,6 +442,18 @@
         <valueType>int8</valueType>
         <writeable/>
         <mssAccessorName>pmic1_swb_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC1 SWB Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic1_swb_voltage_coarse_offset</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -445,6 +517,18 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC1 SWC Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic1_swc_voltage_coarse_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC1_SWC_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -502,6 +586,18 @@
         <valueType>int8</valueType>
         <writeable/>
         <mssAccessorName>pmic1_swd_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC1 SWD Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic1_swd_voltage_coarse_offset</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -577,6 +673,18 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC2_SWA_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC2 SWA Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic2_swa_voltage_coarse_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC2_SWA_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -634,6 +742,18 @@
         <valueType>int8</valueType>
         <writeable/>
         <mssAccessorName>pmic2_swb_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC2_SWB_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC2 SWB Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic2_swb_voltage_coarse_offset</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -697,6 +817,18 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC2_SWC_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC2 SWC Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic2_swc_voltage_coarse_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC2_SWC_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -754,6 +886,18 @@
         <valueType>int8</valueType>
         <writeable/>
         <mssAccessorName>pmic2_swd_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC2_SWD_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC2 SWD Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic2_swd_voltage_coarse_offset</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -829,6 +973,18 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC3_SWA_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC3 SWA Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic3_swa_voltage_coarse_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC3_SWA_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -886,6 +1042,18 @@
         <valueType>int8</valueType>
         <writeable/>
         <mssAccessorName>pmic3_swb_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC3_SWB_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC3 SWB Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic3_swb_voltage_coarse_offset</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -949,6 +1117,18 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC3_SWC_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC3 SWC Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic3_swc_voltage_coarse_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC3_SWC_SEQUENCE_DELAY</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -1006,6 +1186,18 @@
         <valueType>int8</valueType>
         <writeable/>
         <mssAccessorName>pmic3_swd_voltage_offset</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC3_SWD_VOLTAGE_COARSE_OFFSET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          PMIC3 SWD Voltage Range Coarse Offset
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic3_swd_voltage_coarse_offset</mssAccessorName>
     </attribute>
 
     <attribute>
