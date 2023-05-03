@@ -30,6 +30,8 @@
 #include <util/utilcommonattr.H>
 #include <util/random.H>
 
+#include <targeting/targplatutil.H>
+
 // To fetch topology id related structures
 #include <arch/memorymap.H>
 
@@ -103,7 +105,7 @@ void hdatBldErrLog(errlHndl_t &   io_err,
              i_modid, i_rc, i_data1, i_data2, i_data3, i_data4,
              i_sev);
 
-    if (NULL == io_err)
+    if (nullptr == io_err)
     {
         io_err = new ERRORLOG::ErrlEntry(i_sev,
                                          i_modid,
@@ -149,17 +151,17 @@ void hdatBldErrLog(errlHndl_t &   io_err,
 bool isFunctional( const Target* i_Target)
 {
     bool o_funcState = false;
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     do
     {
-        if(NULL == i_Target)
+        if(nullptr == i_Target)
         {
-            HDAT_ERR("Input Target Pointer is NULL");
+            HDAT_ERR("Input Target Pointer is nullptr");
             /*@
              * @errortype
              * @moduleid         HDAT::MOD_UTIL_IS_FUNCTIONAL
              * @reasoncode       HDAT::RC_INVALID_OBJECT
-             * @devdesc          Input Target Pointer is NULL
+             * @devdesc          Input Target Pointer is nullptr
              * @custdesc         Firmware encountered an internal error
              */
             hdatBldErrLog(l_errl,
@@ -186,11 +188,11 @@ errlHndl_t hdatGetIdEc(const Target *i_pTarget,
                            uint32_t &o_ecLevel,
                            uint32_t &o_chipId)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     do
     {
-        const TARGETING::Target *l_pCTarget = NULL;
+        const TARGETING::Target *l_pCTarget = nullptr;
         if(i_pTarget->getAttr<TARGETING::ATTR_CLASS>() != TARGETING::CLASS_CHIP)
         {
             l_pCTarget = getParentChip(i_pTarget);
@@ -214,17 +216,17 @@ errlHndl_t hdatGetIdEc(const Target *i_pTarget,
 errlHndl_t hdatGetHwCardId(const Target *i_pTarget, uint32_t &o_cardId)
 {
     HDAT_ENTER();
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     do
     {
-        if(NULL == i_pTarget)
+        if(nullptr == i_pTarget)
         {
-            HDAT_ERR("Input Target pointer is NULL.");
+            HDAT_ERR("Input Target pointer is nullptr.");
             /*@
              * @errortype
              * @moduleid         HDAT::MOD_UTIL_CARD_ID
              * @reasoncode       HDAT::RC_INVALID_OBJECT
-             * @devdesc          Input Target Pointer is NULL
+             * @devdesc          Input Target Pointer is nullptr
              * @custdesc         Firmware encountered an internal
              *                   error while retrieving target data
              */
@@ -254,7 +256,6 @@ errlHndl_t hdatGetHwCardId(const Target *i_pTarget, uint32_t &o_cardId)
             break;
         }
         TARGETING::TargetHandleList targetList;
-        targetList.clear();
         getParentAffinityTargets(targetList,i_pTarget,
                     TARGETING::CLASS_ENC,TARGETING::TYPE_NODE);
         if(targetList.empty())
@@ -298,56 +299,37 @@ errlHndl_t hdatGetHwCardId(const Target *i_pTarget, uint32_t &o_cardId)
 void hdatPopulateMTMAndSerialNumber()
 {
     HDAT_ENTER();
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     TARGETING::ATTR_RAW_MTM_type l_rawMTM = {};
     TARGETING::ATTR_SERIAL_NUMBER_type l_serialNumber = {};
-    TARGETING::Target *l_pSysTarget = NULL;
+    TARGETING::Target *l_pSysTarget = TARGETING::UTIL::assertGetToplevelTarget();
 
-    size_t     l_vpdSize = 0;
+    size_t l_vpdSize = 0;
 
-    (void) TARGETING::targetService().getTopLevelTarget(l_pSysTarget);
-    if(l_pSysTarget == NULL)
-    {
-        HDAT_ERR("Error in getting Top Level Target");
-        assert(l_pSysTarget != NULL);
-    }
+    TARGETING::Target * l_nodeTarget = TARGETING::UTIL::getCurrentNodeTarget();
 
-    TARGETING::PredicateCTM l_nodePredicate(TARGETING::CLASS_ENC,
-                                             TARGETING::TYPE_NODE);
-    TARGETING::PredicateHwas l_predHwas;
-    l_predHwas.present(true);
-
-    TARGETING::PredicatePostfixExpr l_presentNode;
-    l_presentNode.push(&l_nodePredicate).push(&l_predHwas).And();
-
-    //Get all Nodes
-    TARGETING::TargetRangeFilter l_nodeFilter(
-                                        TARGETING::targetService().begin(),
-                                        TARGETING::targetService().end(),
-                                        &l_presentNode);
-
-    TARGETING::Target *l_nodeTarget = (*l_nodeFilter);
     HDAT_DBG("before deviceRead  PVPD::VSYS, PVPD::TM");
+    l_errl = deviceRead(l_nodeTarget,
+                        nullptr,
+                        l_vpdSize,
+                        DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::TM ));
 
-   l_errl = deviceRead(l_nodeTarget, NULL, l_vpdSize,
-            DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::TM ));
-
-    if(l_errl == NULL)
+    if(l_errl == nullptr)
     {
         uint8_t l_vpddata[l_vpdSize+1] = {0};
-        l_errl = deviceRead(l_nodeTarget, l_vpddata, l_vpdSize,
-                DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::TM ));
+        l_errl = deviceRead(l_nodeTarget,
+                            l_vpddata,
+                            l_vpdSize,
+                            DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::TM ));
 
-        if(l_errl == NULL)
+        if(l_errl == nullptr)
         {
             const uint8_t l_mtmSize= 0x08;
             //phyp would require just 8 characters of MTM
-            strncpy(l_rawMTM,reinterpret_cast<const char*>(l_vpddata),
-                    l_mtmSize);
-            HDAT_DBG("from deviceRead l_rawMTM=%s, l_vpddata=%s",l_rawMTM,l_vpddata);
+            strncpy(l_rawMTM, reinterpret_cast<const char*>(l_vpddata), l_mtmSize);
+            HDAT_DBG("from deviceRead l_rawMTM=%s, l_vpddata=%s", l_rawMTM, l_vpddata);
 
-            if(!l_pSysTarget->trySetAttr<TARGETING::ATTR_RAW_MTM>
-                                                  (l_rawMTM))
+            if(!l_pSysTarget->trySetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
             {
                 HDAT_ERR("Error in setting MTM");
             }
@@ -366,41 +348,41 @@ void hdatPopulateMTMAndSerialNumber()
         ERRORLOG::errlCommit(l_errl,HDAT_COMP_ID);
     }
 
-    if(!l_pSysTarget->trySetAttr<TARGETING::ATTR_RAW_MTM>
-                         (l_rawMTM))
+    if(!l_pSysTarget->trySetAttr<TARGETING::ATTR_RAW_MTM>(l_rawMTM))
     {
         HDAT_ERR("Error in setting MTM");
     }
 
     HDAT_DBG("before deviceRead PVPD::VSYS, PVPD::SE");
-    l_errl = deviceRead(l_nodeTarget, NULL, l_vpdSize,
-            DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::SE ));
+    l_errl = deviceRead(l_nodeTarget,
+                        nullptr,
+                        l_vpdSize,
+                        DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::SE ));
 
-    if(l_errl == NULL)
+    if(l_errl == nullptr)
     {
         uint8_t l_vpddata[l_vpdSize+1] = {0};
 
-        l_errl = deviceRead(l_nodeTarget, l_vpddata, l_vpdSize,
-                DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::SE ));
+        l_errl = deviceRead(l_nodeTarget,
+                            l_vpddata,
+                            l_vpdSize,
+                            DEVICE_PVPD_ADDRESS( PVPD::VSYS, PVPD::SE ));
 
-        if(l_errl == NULL)
+        if(l_errl == nullptr)
         {
             const uint8_t l_serialSize = 0x07;
             //phyp would require just 7 character of serial number
-            strncpy(reinterpret_cast<char *>(l_serialNumber),
-                    reinterpret_cast<const char*>(l_vpddata),l_serialSize);
+            strncpy(reinterpret_cast<char *>(l_serialNumber), reinterpret_cast<const char*>(l_vpddata), l_serialSize);
             HDAT_DBG("from deviceRead l_serialNumber=%s and l_vpddata=%s",
-                                                 l_serialNumber,l_vpddata);
+                    l_serialNumber,l_vpddata);
 
-            if(!l_pSysTarget->trySetAttr
-                <TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber))
+            if(!l_pSysTarget->trySetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber))
             {
                 HDAT_ERR("Error in setting Serial Number");
             }
         }
     }
-    if(!l_pSysTarget->trySetAttr
-           <TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber))
+    if(!l_pSysTarget->trySetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_serialNumber))
     {
         HDAT_ERR("Error in setting Serial Number");
     }
@@ -442,13 +424,7 @@ void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
 
 
     HDAT_DBG("entered hdatGetLocationCode with fru type 0x%x",i_frutype);
-    TARGETING::Target *l_pSystemTarget = NULL;
-    (void) TARGETING::targetService().getTopLevelTarget(l_pSystemTarget);
-    if(l_pSystemTarget == NULL)
-    {
-        HDAT_ERR("Error in getting Top Level Target");
-        assert(l_pSystemTarget != NULL);
-    }
+    TARGETING::Target *l_pSystemTarget = TARGETING::UTIL::assertGetToplevelTarget();
 
     if(i_frutype == HDAT_SLCA_FRU_TYPE_SV ||
        i_frutype == HDAT_SLCA_FRU_TYPE_VV)
@@ -510,7 +486,7 @@ void hdatGetLocationCode(TARGETING::Target *i_pFruTarget,
              l_cutString = strchr(l_pPhysPath, '/');
              l_suffix = l_cutString;
 
-             while (l_cutString != NULL)
+             while (l_cutString != nullptr)
              {
                  l_suffix = l_cutString;
                  l_cutString = strchr(l_cutString+1, '/');
@@ -547,7 +523,7 @@ errlHndl_t hdatGetAsciiKwd( TARGETING::Target * i_target,uint32_t &o_kwdSize,
            uint32_t i_num, size_t theSize[],const HdatKeywordInfo i_Keywords[])
 {
     HDAT_ENTER();
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     switch (i_vpdtype)
     {
@@ -579,7 +555,7 @@ errlHndl_t hdatGetFullRecords( TARGETING::Target * i_target,uint32_t &o_kwdSize,
            uint32_t i_num, size_t theSize[])
 {
     HDAT_ENTER();
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     switch (i_vpdtype)
     {
@@ -613,7 +589,7 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
     HDAT_DBG("entered hdatGetAsciiKwdForPvpd with total number of kwds=%d ",
                                i_num);
 
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     uint64_t fails = 0x0;
     VPD::vpdRecord theRecord = 0x0;
     VPD::vpdKeyword theKeyword = 0x0;
@@ -625,15 +601,15 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
     size_t numLXKwds {};
     size_t cmds{};
 
-    o_kwd = NULL;
+    o_kwd = nullptr;
     o_kwdSize = 0;
     memset (theSize,0, sizeof(size_t) * i_num);
 
     do
     {
-        assert(i_target != NULL);
+        assert(i_target != nullptr);
 
-        uint8_t *theData = NULL;
+        uint8_t *theData = nullptr;
 
         const uint32_t numCmds = i_num;
 
@@ -653,7 +629,7 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
             }
 
             l_err = deviceRead( i_target,
-                              NULL,
+                              nullptr,
                               theSize[curCmd],
                               DEVICE_PVPD_ADDRESS( theRecord,
                                                    theKeyword ) );
@@ -768,14 +744,14 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
                     HDAT_VERSION1,
                     true);
 
-                if ( NULL != theData )
+                if ( nullptr != theData )
                 {
                     delete[]  theData;
-                    theData = NULL;
+                    theData = nullptr;
                 }
                 continue;
             }
-            if ( NULL != theData )
+            if ( nullptr != theData )
             {
                 if(theRecord == PVPD::LXR0 &&
                     theKeyword == PVPD::RT)
@@ -806,7 +782,7 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
 
                 loc += theSize[curCmd];
                 delete[] theData;
-                theData = NULL;
+                theData = nullptr;
                 HDAT_DBG("hdatGetAsciiKwdForPvpd: copied to main array %d kwd",
                           curCmd);
             }
@@ -832,20 +808,20 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
 {
     HDAT_ENTER();
 
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     uint64_t fails = 0x0;
     VPD::vpdRecord theRecord = 0x0;
     size_t totSize{};
 
 
-    o_kwd = NULL;
+    o_kwd = nullptr;
     o_kwdSize = 0;
     memset (theSize,0, sizeof(size_t) * i_num);
 
     do
     {
-        assert(i_target != NULL , "Input target to collect the VPD is NULL");
-        uint8_t *theData = NULL;
+        assert(i_target != nullptr , "Input target to collect the VPD is nullptr");
+        uint8_t *theData = nullptr;
 
         const uint32_t numRecs = i_num;
 
@@ -864,7 +840,7 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
             }
 
             l_err = deviceRead( i_target,
-                              NULL,
+                              nullptr,
                               theSize[curRec],
                               DEVICE_PVPD_ADDRESS( theRecord,
                                                    IPVPD::FULL_RECORD ) );
@@ -955,14 +931,14 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
                     HDAT_VERSION1,
                     true);
 
-                if ( NULL != theData )
+                if ( nullptr != theData )
                 {
                     delete[]  theData;
-                    theData = NULL;
+                    theData = nullptr;
                 }
                 continue;
             }
-            if ( NULL != theData )
+            if ( nullptr != theData )
             {
                 memcpy(reinterpret_cast<void *>(o_kwd + loc), &l_startTag, sizeof(uint8_t));
                 loc += sizeof(uint8_t);
@@ -974,7 +950,7 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
 
                 o_kwdSize += l_RecTagSize ; // Add each rec's tag size as well to final size
                 delete[] theData;
-                theData = NULL;
+                theData = nullptr;
                 HDAT_DBG("hdatGetPvpdFullRecord: copied to main array %d kwd",
                           curRec);
             }
@@ -997,26 +973,26 @@ errlHndl_t hdatGetAsciiKwdForMvpd(TARGETING::Target * i_target,
            struct vpdData i_fetchVpd[], uint32_t i_num,size_t theSize[])
 {
     HDAT_ENTER();
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     uint64_t cmds = 0x0;
     uint64_t fails = 0x0;
     uint64_t theRecord = 0x0;
     uint64_t theKeyword = 0x0;
 
-    o_kwd = NULL;
+    o_kwd = nullptr;
     o_kwdSize = 0;
 
 
     do
     {
-        if(i_target == NULL)
+        if(i_target == nullptr)
         {
             HDAT_ERR("no functional Targets found");
             break;
         }
 
         //size_t theSize[100] = {0};//assuming max kwd num 100
-        uint8_t *theData = NULL;
+        uint8_t *theData = nullptr;
 
 
         for( uint32_t curCmd = 0; curCmd < i_num; curCmd++ )
@@ -1028,7 +1004,7 @@ errlHndl_t hdatGetAsciiKwdForMvpd(TARGETING::Target * i_target,
             HDAT_DBG("fetching proc kwd size MVPD, size initialised=%x",
                       theSize[curCmd]);
             err = deviceRead( i_target,
-                              NULL,
+                              nullptr,
                               theSize[curCmd],
                               DEVICE_MVPD_ADDRESS( theRecord,
                                                    theKeyword ) );
@@ -1094,15 +1070,15 @@ errlHndl_t hdatGetAsciiKwdForMvpd(TARGETING::Target * i_target,
                 delete err;
                 err = nullptr;
 
-                if ( NULL != theData )
+                if ( nullptr != theData )
                 {
                    // free( theData );
                     delete[] theData;
-                    theData = NULL;
+                    theData = nullptr;
                 }
                 continue;
             }
-            if ( NULL != theData )
+            if ( nullptr != theData )
             {
                 //copy to output array and free theData
                 memcpy(reinterpret_cast<void *>(o_kwd + loc),theData,
@@ -1111,7 +1087,7 @@ errlHndl_t hdatGetAsciiKwdForMvpd(TARGETING::Target * i_target,
                 loc += theSize[curCmd];
                 //free( theData );
                 delete[] theData;
-                theData = NULL;
+                theData = nullptr;
                 HDAT_DBG("copied to main array %d kwd",
                           curCmd);
             }
@@ -1138,23 +1114,23 @@ errlHndl_t hdatGetMvpdFullRecord(TARGETING::Target * i_target,
            const IpVpdFacade::recordInfo i_fetchVpd[], uint32_t i_num,size_t theSize[])
 {
     HDAT_ENTER();
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     uint64_t fails = 0x0;
     uint64_t theRecord = 0x0;
 
-    o_kwd = NULL;
+    o_kwd = nullptr;
     o_kwdSize = 0;
 
 
     do
     {
-        if(i_target == NULL)
+        if(i_target == nullptr)
         {
             HDAT_ERR("no functional Targets found");
             break;
         }
 
-        uint8_t *theData = NULL;
+        uint8_t *theData = nullptr;
 
 
         for( uint32_t curRec = 0; curRec < i_num; curRec++ )
@@ -1164,7 +1140,7 @@ errlHndl_t hdatGetMvpdFullRecord(TARGETING::Target * i_target,
             HDAT_DBG("fetching proc Record size MVPD, size initialised=%x",
                       theSize[curRec]);
             err = deviceRead( i_target,
-                              NULL,
+                              nullptr,
                               theSize[curRec],
                               DEVICE_MVPD_ADDRESS( theRecord,
                                                    MVPD::FULL_RECORD ) );
@@ -1232,15 +1208,15 @@ errlHndl_t hdatGetMvpdFullRecord(TARGETING::Target * i_target,
                 delete err;
                 err = nullptr;
 
-                if ( NULL != theData )
+                if ( nullptr != theData )
                 {
                    // free( theData );
                     delete[] theData;
-                    theData = NULL;
+                    theData = nullptr;
                 }
                 continue;
             }
-            if ( NULL != theData )
+            if ( nullptr != theData )
             {
                 memcpy(reinterpret_cast<void *>(o_kwd + loc), &l_startTag, sizeof(uint8_t));
                 loc += sizeof(uint8_t);
@@ -1253,7 +1229,7 @@ errlHndl_t hdatGetMvpdFullRecord(TARGETING::Target * i_target,
                 o_kwdSize += l_RecTagSize ; // Add each rec's tag size as well to final size
 
                 delete[] theData;
-                theData = NULL;
+                theData = nullptr;
                 HDAT_DBG("copied to main array %d kwd",
                           curRec);
             }
@@ -1277,8 +1253,7 @@ uint32_t hdatGetMaxCecNodes()
     TARGETING::TargetHandleList l_nodeTargetList;
     do
     {
-        TARGETING::Target* sys = NULL;
-        TARGETING::targetService().getTopLevelTarget(sys);
+        TARGETING::Target* sys = TARGETING::UTIL::assertGetToplevelTarget();
 
         PredicateCTM predNode(CLASS_ENC, TYPE_NODE);
         PredicateHwas predFunctional;
@@ -1307,7 +1282,7 @@ void hdatPrintHdrs(const hdatHDIF_t *i_hdif,
     uint32_t l_idx;
     char l_string[sizeof(i_hdif->hdatStructName)+1];
 
-    if (NULL != i_hdif)
+    if (nullptr != i_hdif)
     {
         // Null terminate the eye catcher string.
         memcpy(l_string, &i_hdif->hdatStructName,
@@ -1327,7 +1302,7 @@ void hdatPrintHdrs(const hdatHDIF_t *i_hdif,
         HDAT_INF("      hdatChildStrOffset = %u", i_hdif->hdatChildStrOffset);
     }
 
-    if (NULL != i_data && NULL != i_hdif)
+    if (nullptr != i_data && nullptr != i_hdif)
     {
         l_data = const_cast<hdatHDIFDataHdr_t *>(i_data);
         HDAT_INF("  **hdatHDIFDataHdr_t**");
@@ -1339,7 +1314,7 @@ void hdatPrintHdrs(const hdatHDIF_t *i_hdif,
         }
     }
 
-    if (NULL != i_child && NULL != i_hdif)
+    if (nullptr != i_child && nullptr != i_hdif)
     {
         l_child = const_cast<hdatHDIFChildHdr_t *>(i_child);
         HDAT_INF("  **hdatHDIFChildHdr_t**");
@@ -1353,7 +1328,7 @@ void hdatPrintHdrs(const hdatHDIF_t *i_hdif,
         HDAT_INF("");
     }
 
-    if (NULL != i_dataArray)
+    if (nullptr != i_dataArray)
     {
         HDAT_INF("  **hdatHDIFDataArray_t**");
         HDAT_INF("      hdatOffset = %u", i_dataArray->hdatOffset);
@@ -1380,7 +1355,7 @@ void hdatPrintKwd(const char *i_kwd,
     l_rem = i_kwdLen % HDAT_HEX_SIZE;
 
     HDAT_INF("  **ASCII keyword VPD**");
-    if (NULL == i_kwd)
+    if (nullptr == i_kwd)
     {
         HDAT_INF("      No keyword VPD");
     }
@@ -1394,7 +1369,7 @@ void hdatPrintKwd(const char *i_kwd,
                     (*(reinterpret_cast<uint32_t *>(l_kwd + 8))) ,
                     (*(reinterpret_cast<uint32_t *>(l_kwd + 12)))  );
 
-            i_kwd += 16;
+            l_kwd += 16;
         } // end for loop
 
 
@@ -1442,15 +1417,15 @@ errlHndl_t hdatFetchRawSpdData(TARGETING::Target * i_target,
            size_t &o_kwdSize,char* &o_kwd)
 {
 
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     uint64_t keyword = SPD::ENTIRE_SPD;
 
     do
     {
-        assert(i_target != NULL);
+        assert(i_target != nullptr);
 
         l_err = deviceRead( i_target,
-                            NULL,
+                            nullptr,
                             o_kwdSize,
                             DEVICE_SPD_ADDRESS(keyword) );
         if (l_err)
@@ -1492,10 +1467,10 @@ errlHndl_t hdatFetchRawSpdData(TARGETING::Target * i_target,
                     0,
                     ERRORLOG::ERRL_SEV_UNRECOVERABLE);
 
-        if ( NULL != o_kwd)
+        if ( nullptr != o_kwd)
         {
             delete[]  o_kwd;
-            o_kwd = NULL;
+            o_kwd = nullptr;
         }
     }
 
@@ -1650,9 +1625,7 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
             }
             else if (i_jedec_ptr[SVPD_SPD_BYTE_TWO] == SVPD_DDR5_DEVICE_TYPE)
             {
-                // It's a DDR5 DDIMM
-                HDAT_DBG("Detected DDR5 DDIMM, VPD format is unknown");
-                l_invalid_dimm = true;
+                HDAT_DBG("Detected DDR5 DDIMM");
             }
             else
             {
@@ -1665,8 +1638,6 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
             }
             if(l_invalid_dimm == true)
             {
-// TODO JIRA:PFHB-387: This error is removed to make unit tests work
-#ifndef CONFIG_ODYSSEY_BRINGUP
                 /*@
                  * @errortype
                  * @refcode    LIC_REFCODE
@@ -1691,7 +1662,6 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
                       i_jedec_ptr[SVPD_SPD_BYTE_THREE],    // SRC hex word 3
                       0,                                   // SRC hex word 4
                       ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-#endif
                 return l_err;
             }
         }
@@ -1965,9 +1935,9 @@ void hdatGetTarget (const hdatSpiraDataAreas i_dataArea,
     if ( (l_type != TARGETING::TYPE_NA) &&
          (l_class != TARGETING::CLASS_NA))
     {
-        TARGETING::Target* l_sys = NULL;
+        TARGETING::Target* l_sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(l_sys);
-        assert(l_sys != NULL);
+        assert(l_sys != nullptr);
 
         if( (l_type == TARGETING::TYPE_SYS ) &&
             (l_class == TARGETING::CLASS_SYS))
@@ -2075,7 +2045,7 @@ errlHndl_t hdatformatAsciiKwd(const struct vpdData i_fetchVpd[],
    l_loc +=sizeof(uint8_t);
 
    HDAT_EXIT();
-   return NULL;
+   return nullptr;
 }
 
 
@@ -2083,10 +2053,10 @@ errlHndl_t hdatGetFullEepromVpd(TARGETING::Target * i_target,
                                 size_t &io_dataSize,
                                 char* &o_data)
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     HDAT_ENTER();
-    if(i_target != NULL)
+    if(i_target != nullptr)
     {
         o_data = new char[io_dataSize];
 
@@ -2115,10 +2085,10 @@ errlHndl_t hdatGetFullEepromVpd(TARGETING::Target * i_target,
                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
                           HDAT_VERSION1,
                           true);
-            if(o_data != NULL)  // No point in keeping this data with err
+            if(o_data != nullptr)  // No point in keeping this data with err
             {
                 delete[] o_data;
-                o_data = NULL;
+                o_data = nullptr;
             }
         }
     }
@@ -2318,8 +2288,8 @@ void hdatGetSMPLinkInfo(TARGETING::Target* i_pTarget,
 
     //@TODO RTC 246357 missing attribute
     //@TODO RTC 246438 VNDR NV is not defined: in the bp vpd yet
- /*   errlHndl_t l_err = NULL;
-    uint8_t *l_NVKwd = NULL;
+ /*   errlHndl_t l_err = nullptr;
+    uint8_t *l_NVKwd = nullptr;
     PVPD::pvpdRecord l_Record = PVPD::VNDR;
     PVPD::pvpdKeyword l_KeyWord = PVPD::NV;
     size_t l_nvKwdSize = 0;
@@ -2336,9 +2306,9 @@ void hdatGetSMPLinkInfo(TARGETING::Target* i_pTarget,
                 &nodeCheckExpr);
     TARGETING::Target* l_target = l_targList[0];
 
-    l_err = deviceRead(l_target,NULL,l_nvKwdSize,
+    l_err = deviceRead(l_target,nullptr,l_nvKwdSize,
                             DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
-    if(l_err == NULL)
+    if(l_err == nullptr)
     {
         if(l_nvKwdSize == sizeof(hdatNVKwdStruct_t))
         {
@@ -2346,7 +2316,7 @@ void hdatGetSMPLinkInfo(TARGETING::Target* i_pTarget,
             l_err = deviceRead(l_target,l_kwd,l_nvKwdSize,
                             DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
 
-            if(l_err == NULL)
+            if(l_err == nullptr)
             {
                 l_NVKwd = new uint8_t[sizeof(hdatNVKwdStruct_t)];
                 memcpy(l_NVKwd, l_kwd, sizeof(hdatNVKwdStruct_t));
@@ -2368,10 +2338,10 @@ void hdatGetSMPLinkInfo(TARGETING::Target* i_pTarget,
         HDAT_ERR("deviceRead failed for NV keyword VNDR record");
     }
 
-    const hdatSMPLinkInfo_t *l_smpLinkInfoPtr = NULL;
+    const hdatSMPLinkInfo_t *l_smpLinkInfoPtr = nullptr;
     uint32_t           l_smpLinkInfoSize = 0;
 
-    if(l_NVKwd != NULL)
+    if(l_NVKwd != nullptr)
     {
         if((reinterpret_cast<hdatNVKwdStruct_t *>(l_NVKwd)->magic == HDAT_NV_KWD_MAGIC_WRD)
                         &&(reinterpret_cast<hdatNVKwdStruct_t *>(l_NVKwd)->version == 0x01))
@@ -2415,15 +2385,15 @@ void hdatGetSMPLinkInfo(TARGETING::Target* i_pTarget,
         memcpy(&l_hdatSMPLinkInfo, &l_smpLinkInfoPtr[l_count], sizeof(hdatSMPLinkInfo_t));
         o_SMPLinkEntries.push_back(l_hdatSMPLinkInfo);
     }
-    if(l_NVKwd != NULL)
+    if(l_NVKwd != nullptr)
     {
         delete l_NVKwd;
-        l_NVKwd = NULL;
+        l_NVKwd = nullptr;
     }
-    if(l_err != NULL)
+    if(l_err != nullptr)
     {
         delete l_err;
-        l_err = NULL;
+        l_err = nullptr;
     }
 
 */
@@ -2434,7 +2404,7 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
                                         hdatSMPLinkInfo_t * io_SMPInfoFullPcrdDataPtr,
                                         TARGETING::Target* i_pProcTarget)
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     HDAT_ENTER();
     std::vector<hdatSMPLinkInfo_t> l_SMPLinkInfoCntr(io_SMPInfoFullPcrdDataPtr,
                            io_SMPInfoFullPcrdDataPtr + i_SMPInfoFullPcrdHdrPtr->hdatArrayCnt);
@@ -2473,7 +2443,7 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
                     break;
                 }
             }
-            if(l_errl != NULL)
+            if(l_errl != nullptr)
             {
                 HDAT_ERR(" Error in getting the PLL Freq bucket");
                 break;
@@ -2501,7 +2471,7 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
             }
 
 /*TODO RTC:216061 Re-enable when attr exists
-            uint32_t *l_freqList = NULL;
+            uint32_t *l_freqList = nullptr;
             TARGETING::ATTR_MODEL_type l_chipModel = i_pProcTarget->getAttr<TARGETING::ATTR_MODEL>();
             uint32_t l_chipECLevel = i_pProcTarget->getAttr<TARGETING::ATTR_HDAT_EC>();
             if(l_chipModel == TARGETING::MODEL_NIMBUS)
@@ -2524,7 +2494,7 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
                 }
             }
 
-            if(l_freqList == NULL)
+            if(l_freqList == nullptr)
             {
                 HDAT_ERR("Invalid proc model and ec 0x%x, 0x%x", l_chipModel , l_chipECLevel);
                     * @errortype
@@ -2564,7 +2534,7 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
             }
             **/
             l_SMPInfoEle.hdatSMPLinkSpeed = HDAT_OBUS_FREQ_25GBPS;
-            if(l_errl != NULL){break;};
+            if(l_errl != nullptr){break;};
         }
     }while(0);
     //Replace the updated data in the passed in pointer.
@@ -2740,7 +2710,7 @@ void hdatGetHostSpiDevInfo(std::vector<hdatSpiDevData_t>&o_spiDevEntries,
 
     std::vector<spiSlaveDevice> spiInfo;
     getSpiDeviceInfo(spiInfo, i_pProcTarget);
-    char *l_hwSubsystemOrScope = NULL;
+    char *l_hwSubsystemOrScope = nullptr;
 
     if(spiInfo.empty())
     {
@@ -2762,11 +2732,11 @@ void hdatGetHostSpiDevInfo(std::vector<hdatSpiDevData_t>&o_spiDevEntries,
             l_spiObj.hdatSpiDevPurp =
                 static_cast<uint8_t>(spiDev.devicePurpose);
             l_spiObj.hdatSpiSlcaIndex = spiDev.residentFruSlcaIndex;
-            char *l_vendor = NULL;
+            char *l_vendor = nullptr;
             l_vendor = const_cast<char *>(spiDev.description.vendor);
-            char *l_deviceType= NULL;
+            char *l_deviceType= nullptr;
             l_deviceType = const_cast<char *>(spiDev.description.deviceType);
-            char *l_dataTypeOrPurpose = NULL;
+            char *l_dataTypeOrPurpose = nullptr;
             l_dataTypeOrPurpose =
                 const_cast<char *>(spiDev.description.dataTypeOrPurpose);
             l_hwSubsystemOrScope =

@@ -91,12 +91,6 @@ const DepModInfo  g_istep20Dependancies = {
         DEP_LIB(libistep20.so),
         DEP_LIB(libxz.so),
         DEP_LIB(libruntime.so),
-        // TODO JIRA: PFHB-477 remove the below libs once unit tests move to the end of istep 21
-        DEP_LIB(libsecureboot_ext.so),
-        DEP_LIB(libhtmgt.so),
-        DEP_LIB(libimageprocs.so),
-        DEP_LIB(libruntime.so),
-        DEP_LIB(libpm.so),
         NULL
     }
 };
