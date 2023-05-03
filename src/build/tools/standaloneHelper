@@ -177,7 +177,7 @@ generate_sbe_odyssey_images()
        # Also rebuild if the SBE env scripts don't exist
        [ ! -f "$SPPE_SCRIPT_TO_RUN" ] || \
        [ ! -d "$SPPE_SCRIPTS_PATH" ] || \
-       [ $HB_FORCE_REBUILD_SBE ]
+       [ $HB_FORCE_REBUILD_ODY ]
     then
         echo -e "\n\n Generating SBE Odyssey images..."
 

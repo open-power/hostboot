@@ -107,14 +107,22 @@ ppe: $(PPE_PATH)/Makefile
 
 .PHONY: $(PPE_PATH)/Makefile
 $(PPE_PATH)/Makefile:
+ifeq (${HB_PRESERVE_SUBMODULES},1)
+	echo "***Skipping submodule update for $(PPE_PATH)"
+else
 	git submodule update --init --checkout -- $(PPE_PATH)
+endif
 
 .PHONY: sbe
 sbe: $(SBE_PATH)/Makefile
 
 .PHONY: $(SBE_PATH)/Makefile
 $(SBE_PATH)/Makefile:
+ifeq (${HB_PRESERVE_SUBMODULES},1)
+	echo "***Skipping submodule update for $(SBE_PATH)"
+else
 	git submodule update --init --checkout -- $(SBE_PATH)
+endif
 
 EKB_PATH := $(ROOTPATH)/src/build/tools/extern/ekb
 
@@ -123,7 +131,11 @@ ekb: $(EKB_PATH)/ekb
 
 .PHONY: $(EKB_PATH)/ekb
 $(EKB_PATH)/ekb:
+ifeq (${HB_PRESERVE_SUBMODULES},1)
+	echo "***Skipping submodule update for $(EKB_PATH)"
+else
 	git submodule update --init --checkout -- $(EKB_PATH)
+endif
 
 .PHONY: gcda_clean
 gcda_clean:
