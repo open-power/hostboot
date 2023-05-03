@@ -104,9 +104,7 @@ actionclass omi_L
 
 actionclass omi_bus
 {
-    # TODO
-    #funccall("calloutBusInterface");
-    TBDDefaultCallout;
+    funccall("calloutBusInterface");
 };
 
 actionclass mem_port0_M
@@ -131,16 +129,12 @@ actionclass mem_port1_L
 
 actionclass dimm0_H
 {
-    # TODO
-    #funccall("CalloutAttachedDimmsHigh");
-    TBDDefaultCallout;
+    funccall("CalloutAttachedDimmsHigh_0");
 };
 
 actionclass dimm1_H
 {
-    # TODO
-    #funccall("CalloutAttachedDimmsHigh");
-    TBDDefaultCallout;
+    funccall("CalloutAttachedDimmsHigh_1");
 };
 
 actionclass parent_proc
@@ -284,8 +278,7 @@ actionclass dimm1_H_mem_port1_L_th_32perDay
 actionclass info_only_th32
 {
     threshold32pday;
-    #TODO
-    #funccall("ClearServiceCallFlag"); # must be called after thresholding
+    funccall("ClearServiceCallFlag"); # must be called after thresholding
 };
 
 actionclass ocmb_M_info_only
@@ -331,8 +324,7 @@ actionclass omi_bus_info_only
 actionclass info_only_th1
 {
     threshold1;
-    #TODO
-    #funccall("ClearServiceCallFlag"); # must be called after thresholding
+    funccall("ClearServiceCallFlag"); # must be called after thresholding
 };
 
 actionclass ocmb_M_info_only_th1
@@ -356,8 +348,7 @@ actionclass omi_degraded_mode
 actionclass info_only_mnfgInfo_th1
 {
     threshold1;
-    #TODO
-    #funccall("ClearServiceCallFlag_mnfgInfo"); # must be called after threshold
+    funccall("ClearServiceCallFlag_mnfgInfo"); # must be called after threshold
 };
 
 actionclass ocmb_th1_x4Root
@@ -588,12 +579,18 @@ actionclass mainline_ue_handling
     TBDDefaultCallout;
 };
 
-actionclass mainline_ue_handling_UERE
+actionclass mainline_ue_handling_0_UERE
 {
     SueSource;
     mainline_ue_handling;
-    # TODO
-    #funccall("ClearMainlineIue");
+    funccall("ClearMainlineIue_0");
+};
+
+actionclass mainline_ue_handling_1_UERE
+{
+    SueSource;
+    mainline_ue_handling;
+    funccall("ClearMainlineIue_1");
 };
 
 /** Handle Mainline IUEs */

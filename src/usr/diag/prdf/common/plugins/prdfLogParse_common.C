@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -238,8 +238,9 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
             break;
 
         case TYPE_MEM_PORT:
-            l_chip    = l_chip / MAX_PORT_PER_OCMB;
-            l_chiplet = l_chiplet % MAX_PORT_PER_OCMB;
+            // TODO Odyssey - not sure how to handle the exp/ody change here?
+            l_chip    = l_chip / MAX_PORT_PER_ODY_OCMB;
+            l_chiplet = l_chiplet % MAX_PORT_PER_ODY_OCMB;
             snprintf( o_chipName, i_sz_chipName, "memport(n%dp%dc%d)",
                       l_node, l_chip, l_chiplet );
             break;

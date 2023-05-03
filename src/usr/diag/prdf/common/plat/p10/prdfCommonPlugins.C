@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,19 +67,20 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( explorer_ocmb,  CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p10_proc,       CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p10_mcc,        CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p10_phb,        CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p10_eq,         CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p10_core,       CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p10_pec,        CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p10_pauc,       CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p10_omic,       CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p10_pau,        CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p10_iohs,       CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p10_nmmu,       CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p10_mc,         CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( explorer_ocmb, CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( odyssey_ocmb,  CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_proc,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_mcc,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_phb,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_eq,        CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_core,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_pec,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_pauc,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_omic,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_pau,       CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_iohs,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_nmmu,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p10_mc,        CommonPlugins, ClearServiceCallFlag );
 
 /**
  * @brief   Clear the service call flag (field and MNFG) so that thresholding
@@ -112,6 +113,7 @@ PRDF_PLUGIN_DEFINE_NS(p10_mc,   CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 PRDF_PLUGIN_DEFINE_NS(p10_mcc,  CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 PRDF_PLUGIN_DEFINE_NS(p10_omic, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 PRDF_PLUGIN_DEFINE_NS(explorer_ocmb, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(odyssey_ocmb, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 
 /**
  * @brief   Common plugin to check if the EC level is DD1.0

@@ -188,6 +188,105 @@ int32_t returnNoClearFirBits( ExtensibleChip* i_chip,
 }
 PRDF_PLUGIN_DEFINE( odyssey_ocmb, returnNoClearFirBits );
 
+/**
+ * @brief  Plugin to clear the side-effect mainline IUEs (RDFFIR[17]) when
+ *         we get a mainline UE (RDFFIR[14])
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_port Target memory port.
+ * @return SUCCESS
+ */
+int32_t ClearMainlineIue( ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port )
+{
+    #define PRDF_FUNC "[odyssey_ocmb::ClearMainlineIue] "
+
+    // Note: Odyssey FIRs are write to clear.
+
+    char regName[64];
+
+    sprintf(regName, "RDF_FIR_%x", i_port);
+
+    SCAN_COMM_REGISTER_CLASS * rdffir = i_chip->getRegister(regName);
+
+    rdffir->SetBit(18);
+
+    if ( SUCCESS != rdffir->Write() )
+    {
+        PRDF_ERR( PRDF_FUNC "Write() failed on %s. i_chip huid=0x%08x",
+                  regName, i_chip->getHuid() );
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+#define CLEAR_MAINLINE_IUE(POS) \
+int32_t ClearMainlineIue_##POS( ExtensibleChip * i_chip, \
+                                STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    return ClearMainlineIue(i_chip, io_sc, POS); \
+} \
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, ClearMainlineIue_##POS );
+
+CLEAR_MAINLINE_IUE(0);
+CLEAR_MAINLINE_IUE(1);
+
+//##############################################################################
+//
+//                             Callout plugins
+//
+//##############################################################################
+
+/**
+ * @brief  Calls out the entire OMI bus interface.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t calloutBusInterface(ExtensibleChip* i_chip,
+                            STEP_CODE_DATA_STRUCT& io_sc)
+{
+    TargetHandle_t rxTrgt = i_chip->getTrgt();
+    TargetHandle_t txTrgt = getConnectedParent(rxTrgt, TYPE_OMI);
+
+    calloutBus(io_sc, rxTrgt, txTrgt, HWAS::OMI_BUS_TYPE);
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(odyssey_ocmb, calloutBusInterface);
+
+/**
+ * @brief  Adds all attached DIMMs at HIGH priority.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_port Target memory port.
+ * @return SUCCESS
+ */
+int32_t CalloutAttachedDimmsHigh( ExtensibleChip * i_chip,
+                                  STEP_CODE_DATA_STRUCT & io_sc,
+                                  uint8_t i_port )
+{
+    TargetHandle_t memPort = getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT,
+                                               i_port);
+    for ( auto & dimm : getConnectedChildren(memPort, TYPE_DIMM) )
+        io_sc.service_data->SetCallout( dimm, MRU_HIGH );
+
+    return SUCCESS; // nothing to return to rule code
+}
+
+#define CALLOUT_ATTACHED_DIMMS_PLUGIN(POS) \
+int32_t CalloutAttachedDimmsHigh_##POS( ExtensibleChip * i_chip, \
+                                        STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    return CalloutAttachedDimmsHigh(i_chip, io_sc, POS); \
+} \
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, CalloutAttachedDimmsHigh_##POS );
+
+CALLOUT_ATTACHED_DIMMS_PLUGIN(0);
+CALLOUT_ATTACHED_DIMMS_PLUGIN(1);
+
 //##############################################################################
 //
 //                             MCBIST_FIR
@@ -236,7 +335,6 @@ int32_t McbistCmdComplete( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( odyssey_ocmb, McbistCmdComplete );
-
 
 } // end namespace explorer_ocmb
 

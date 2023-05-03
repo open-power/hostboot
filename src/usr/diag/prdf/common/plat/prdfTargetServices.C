@@ -529,7 +529,8 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_parent, TYPE i_childType,
             }
         }
         // Other special cases
-        else if ( TYPE_MEM_PORT == parentType && TYPE_DIMM == i_childType )
+        else if ((TYPE_MEM_PORT == parentType && TYPE_DIMM == i_childType) ||
+                 (TYPE_OCMB_CHIP == parentType && TYPE_MEM_PORT == i_childType))
         {
             // i_connPos is the DIMM select (0-1). Note that we don't use
             // getTargetPosition() on the DIMM because that does not return a
@@ -540,7 +541,8 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_parent, TYPE i_childType,
             // parent unit like all of the other checks in this function.
             // Fortunately, it will be very difficult to have a bug where the
             // getConnected code returns DIMMs on a different MEM_PORT
-            // target. So this is an acceptable risk.
+            // target. So this is an acceptable risk. Similarly for getting a
+            // MEM_PORT target from an OCMB_CHIP.
             for ( const auto & child : list )
             {
                 if ( i_childPos == child->getAttr<ATTR_REL_POS>() )
@@ -550,9 +552,7 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_parent, TYPE i_childType,
                 }
             }
         }
-        else if ( (TYPE_OMI == parentType && TYPE_OCMB_CHIP == i_childType) ||
-                  (TYPE_OCMB_CHIP == parentType && TYPE_MEM_PORT == i_childType)
-                )
+        else if ( TYPE_OMI == parentType && TYPE_OCMB_CHIP == i_childType )
         {
             // There should only be one in the list.
             PRDF_ASSERT( 1 == list.size() );

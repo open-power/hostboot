@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,7 +104,15 @@ uint32_t __getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     BitmapData data;
 
-    for ( uint32_t ps = 0; ps < MAX_PORT_PER_OCMB; ps++ )
+    // Determine max number of ports based on OCMB type. Default to Explorer.
+    // Change value if an Odyssey OCMB.
+    uint8_t maxPorts = MAX_PORT_PER_EXP_OCMB;
+    if (isOdysseyOcmb(i_trgt))
+    {
+        maxPorts = MAX_PORT_PER_ODY_OCMB;
+    }
+
+    for ( uint32_t ps = 0; ps < maxPorts; ps++ )
     {
         // Skip if the DIMM doesn't exist
         if ( nullptr == getConnectedDimm(i_trgt, i_rank, ps) ) continue;
