@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,18 +127,17 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
 
             for (const auto & l_proc: l_procTargetList)
             {
-                // Do not call special wakeup for procs with no PG-good cores
-                // Find all PRESENT CORE chiplets of the proc
+                // Do not call special wakeup for procs with no functional cores
                 TargetHandleList l_coreTargetList;
                 getCoreChiplets( l_coreTargetList,
                                  UTIL_FILTER_CORE_ALL,
-                                 UTIL_FILTER_PRESENT,
+                                 UTIL_FILTER_FUNCTIONAL,
                                  l_proc);
                 if (l_coreTargetList.empty())
                 {
-                    // No PRESENT cores, continue
+                    // No FUNCTIONAL cores, continue
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Proc 0x%x has no PG-good cores, not calling p10_core_special_wakeup (ENABLE)",
+                        "Proc 0x%x has no functional cores, not calling p10_core_special_wakeup (ENABLE)",
                         l_proc->getAttr<ATTR_HUID>());
                     continue;
                 }
@@ -368,16 +367,15 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
 
             for (const auto & l_proc: l_procTargetList)
             {
-                // Do not call special wakeup for procs with no PG-good cores
-                // Find all PRESENT CORE chiplets of the proc
+                // Do not call special wakeup for procs with no functional cores
                 TargetHandleList l_coreTargetList;
                 getCoreChiplets( l_coreTargetList,
                                  UTIL_FILTER_CORE_ALL,
-                                 UTIL_FILTER_PRESENT,
+                                 UTIL_FILTER_FUNCTIONAL,
                                  l_proc);
                 if (l_coreTargetList.empty())
                 {
-                    // No PRESENT cores, continue
+                    // No FUNCTIONAL cores, continue
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                         "Proc 0x%x has no PG-good cores, not calling p10_core_special_wakeup (DISABLE)",
                         l_proc->getAttr<ATTR_HUID>());
