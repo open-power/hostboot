@@ -213,10 +213,10 @@
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
             Timeout (in msec) polling for get_mail during
-            ody draminit training. Default is 20000msec.
+            ody draminit training. Default is 400000msec.
         </description>
-        <valueType>uint16</valueType>
-        <default>20000</default>
+        <valueType>uint64</valueType>
+        <default>400000</default>
         <platInit/>
         <mrwHide/>
         <mssAccessorName>phy_get_mail_timeout</mssAccessorName>
