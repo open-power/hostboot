@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -76,6 +76,13 @@
     <valueType>uint32</valueType>
     <default>0xFFFFFFFF</default><!-- Ensures platform explicitly puts a valid number in here -->
     <platInit/>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>
+        TARGET_TYPE_OCMB_CHIP,
+        TARGET_TYPE_DIMM,
+        TARGET_TYPE_TEMP_SENSOR
+      </targetTypes>
+    </sbeAttrSync>
   </attribute>
   <!-- ******************************************************************************** -->
   <attribute>
@@ -116,6 +123,15 @@
     <valueType>uint32</valueType>
     <default>0xFFFFFFFF</default><!-- Ensures platform explicitly puts a valid number in here -->
     <platInit/>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>
+        TARGET_TYPE_OCMB_CHIP,
+        TARGET_TYPE_PERV,
+        TARGET_TYPE_MEM_PORT,
+        TARGET_TYPE_DIMM,
+        TARGET_TYPE_TEMP_SENSOR
+      </targetTypes>
+    </sbeAttrSync>
   </attribute>
   <!-- ******************************************************************************** -->
   <attribute>

@@ -46,6 +46,13 @@
         <valueType>uint8</valueType>
         <default>0</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>
+            TARGET_TYPE_MEM_PORT,
+            TARGET_TYPE_DIMM,
+            TARGET_TYPE_TEMP_SENSOR
+          </targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -60,6 +67,11 @@
         <valueType>uint8</valueType>
         <default>0</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>
+            TARGET_TYPE_TEMP_SENSOR
+          </targetTypes>
+        </sbeAttrSync>
     </attribute>
 
 </attributes>

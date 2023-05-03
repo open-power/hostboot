@@ -216,6 +216,11 @@
     <mssAccessorName>mfg_flags</mssAccessorName>
     <initToZero/>
     <mrwHide/>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>
+        TARGET_TYPE_SYSTEM
+      </targetTypes>
+    </sbeAttrSync>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
