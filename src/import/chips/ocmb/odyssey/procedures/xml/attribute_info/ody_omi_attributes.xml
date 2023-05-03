@@ -39,6 +39,9 @@
         </enum>
         <default>X8</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -55,6 +58,9 @@
         </enum>
         <default>X8</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -70,6 +76,9 @@
         </enum>
         <default>DISABLED</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -85,6 +94,9 @@
         </enum>
         <default>DISABLED</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -96,6 +108,9 @@
         <valueType>uint8</valueType>
         <default>5</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -107,6 +122,9 @@
         <valueType>uint32</valueType>
         <default>0</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -118,6 +136,9 @@
         <valueType>int32</valueType>
         <default>7</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -129,6 +150,9 @@
         <valueType>int32</valueType>
         <default>1</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -140,6 +164,9 @@
         <valueType>uint8</valueType>
         <default>4</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -151,6 +178,9 @@
         <valueType>uint8</valueType>
         <default>0</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -162,6 +192,9 @@
         <valueType>uint8</valueType>
         <default>0</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -173,6 +206,9 @@
         <valueType>uint8</valueType>
         <default>0</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -184,6 +220,9 @@
         <valueType>uint8</valueType>
         <default>0</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
     <attribute>
@@ -195,6 +234,9 @@
         <valueType>uint8</valueType>
         <default>0</default>
         <platInit/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 <!-- ********************************************************************** -->
   </attributes>
