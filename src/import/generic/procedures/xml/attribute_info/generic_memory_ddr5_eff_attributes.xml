@@ -48,6 +48,9 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssAccessorName>ddr5_tx_slew_rise_dq</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -61,6 +64,9 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssAccessorName>ddr5_tx_slew_fall_dq</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -76,6 +82,9 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>ddr5_tx_slew_rise_ac</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -91,6 +100,9 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>ddr5_tx_slew_fall_ac</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -106,6 +118,9 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>ddr5_tx_slew_rise_ck</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -119,6 +134,9 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssAccessorName>ddr5_tx_slew_fall_ck</mssAccessorName>
+    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -139,6 +157,9 @@
     </enum>
     <default>TCK0</default>
     <mssAccessorName>ddr5_en_tx_dq_preamble_pattern_u0</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -159,6 +180,9 @@
     </enum>
     <default>TCK0</default>
     <mssAccessorName>ddr5_en_tx_dq_preamble_pattern_u1</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -179,6 +203,9 @@
     </enum>
     <default>TCK0</default>
     <mssAccessorName>ddr5_en_tx_dm_preamble_pattern</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -192,6 +219,9 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_tx_dq_preamble_pattern_u0</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -205,6 +235,9 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_tx_dq_preamble_pattern_u1</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -218,6 +251,9 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_tx_dm_preamble_pattern</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -234,6 +270,9 @@
     <array>2</array>
     <mssUnits>bool</mssUnits>
     <mssAccessorName>ddr5_redundant_cs_en</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -247,6 +286,9 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssAccessorName>ddr5_rxen_adj</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -261,6 +303,9 @@
     <valueType>uint16</valueType>
     <writeable/>
     <mssAccessorName>ddr5_wl_adj_start</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -275,6 +320,9 @@
     <valueType>uint16</valueType>
     <writeable/>
     <mssAccessorName>ddr5_wl_adj_end</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -291,6 +339,9 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssAccessorName>ddr5_phy_vref_rd</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -308,6 +359,9 @@
     <writeable/>
     <mssAccessorName>ddr5_rtt_park_rd</mssAccessorName>
     <array>2 4</array>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -325,6 +379,9 @@
     <writeable/>
     <mssAccessorName>ddr5_rtt_park_wr</mssAccessorName>
     <array>2 4</array>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -337,6 +394,9 @@
         <valueType>uint64</valueType>
         <writeable/>
         <mssAccessorName>ddr5_spd_cl_supported</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
 
@@ -352,6 +412,9 @@
         <default>1</default>
         <writeable/>
         <mssAccessorName>ddr5_chb_active</mssAccessorName>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -365,6 +428,9 @@
         <writeable/>
         <enum>NOT_EN = 0, PORT0_EN = 1, PORT1_EN = 2, BOTH_EN = 3</enum>
         <mssAccessorName>ddr5_mem_port_enable</mssAccessorName>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -380,6 +446,9 @@
         <enum>NOT_USED = 0, 32_BITS = 32, 36_BITS = 36, 40_BITS = 40</enum>
         <mssAccessorName>ddr5_channel_bus_width</mssAccessorName>
         <array>2</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -392,6 +461,9 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>ddr5_vrefcs_sweep_min</mssAccessorName>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -405,6 +477,9 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>ddr5_vrefcs_sweep_max</mssAccessorName>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -417,6 +492,9 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>ddr5_vrefca_sweep_min</mssAccessorName>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -430,6 +508,9 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>ddr5_vrefca_sweep_max</mssAccessorName>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
 </attributes>

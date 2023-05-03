@@ -34,6 +34,9 @@
         <valueType>uint32</valueType>
         <writeable/>
         <mssAccessorName>si_signature_hash</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -49,6 +52,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dimm_rcd_ibt_ca</mssAccessorName>
         <array>2</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -64,6 +70,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dimm_rcd_ibt_cke</mssAccessorName>
         <array>2</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -79,6 +88,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dimm_rcd_ibt_cs</mssAccessorName>
         <array>2</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -94,6 +106,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dimm_rcd_ibt_odt</mssAccessorName>
         <array>2</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -110,6 +125,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dram_drv_imp_dq_dqs</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -128,6 +146,9 @@
         <mssUnits>nCK</mssUnits>
         <mssAccessorName>si_dram_preamble</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -144,6 +165,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dram_rtt_nom</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -160,6 +184,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dram_rtt_park</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -177,6 +204,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_dram_rtt_wr</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -194,6 +224,9 @@
       <writeable/>
       <array>2 4</array>
       <mssAccessorName>si_geardown_mode</mssAccessorName>
+      <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+        <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+      </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -208,6 +241,9 @@
         <writeable/>
         <mssAccessorName>si_mc_drv_dq_dqs</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -225,6 +261,9 @@
         <enum>DISABLE = 0, ENABLE = 1</enum>
         <mssAccessorName>si_mc_rcv_eq_dq_dqs</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -242,6 +281,9 @@
         <enum>DISABLE = 0, FFE = 1</enum>
         <mssAccessorName>si_mc_drv_eq_dq_dqs</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -259,6 +301,9 @@
         <writeable/>
         <mssAccessorName>si_phy_equalization</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -275,6 +320,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_clk</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -312,6 +360,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_cmd_addr</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -328,6 +379,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_cntl</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -344,6 +398,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_cscid</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -362,6 +419,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_dq_dqs_pull_down</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -380,6 +440,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_dq_dqs_pull_up</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -396,6 +459,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_slew_rate_clk</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -412,6 +478,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_slew_rate_cmd_addr</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -428,6 +497,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_slew_rate_cntl</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -444,6 +516,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_slew_rate_cscid</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -460,6 +535,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_slew_rate_dq_dqs</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -475,6 +553,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_rcv_imp_alert_n</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -495,6 +576,9 @@
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_rcv_imp_dq_dqs</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -512,6 +596,9 @@
         <writeable/>
         <mssAccessorName>si_odt_rd</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -529,6 +616,9 @@
         <writeable/>
         <mssAccessorName>si_odt_wr</mssAccessorName>
         <array>2 4</array>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -541,6 +631,9 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>si_vref_dram_wr</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -555,6 +648,9 @@
         <enum>DISABLE = 0</enum>
         <mssUnits>percent of Vdd</mssUnits>
         <mssAccessorName>si_vref_mc_rd</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -569,6 +665,9 @@
         <writeable/>
         <mssUnits>signed</mssUnits>
         <mssAccessorName>si_windage_rd_ctr</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
 <attribute>
@@ -583,6 +682,9 @@
     <array>2</array>
     <writeable/>
     <mssAccessorName>ddr4_f1rc1x</mssAccessorName>
+    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -597,6 +699,9 @@
     <array>2</array>
     <writeable/>
     <mssAccessorName>ddr4_f1rc2x</mssAccessorName>
+    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
     <attribute>
@@ -611,6 +716,9 @@
     <array>2</array>
     <writeable/>
     <mssAccessorName>ddr4_f1rc3x</mssAccessorName>
+    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
     <attribute>
@@ -625,6 +733,9 @@
     <array>2</array>
     <writeable/>
     <mssAccessorName>ddr4_f1rc4x</mssAccessorName>
+    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
     <attribute>
@@ -639,6 +750,9 @@
     <array>2</array>
     <writeable/>
     <mssAccessorName>ddr4_f1rc5x</mssAccessorName>
+    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
     <attribute>
@@ -653,6 +767,9 @@
     <array>2</array>~
     <writeable/>
     <mssAccessorName>ddr4_f1rc6x</mssAccessorName>
+    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -667,6 +784,9 @@
     <array>2</array>
     <writeable/>
     <mssAccessorName>ddr4_f1rc7x</mssAccessorName>
+    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
     <attribute>
@@ -687,6 +807,9 @@
         </enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_phy_drv_imp_dq_dqs_pull_up</mssAccessorName>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
 </attributes>

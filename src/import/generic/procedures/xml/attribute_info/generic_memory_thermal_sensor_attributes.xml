@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -48,6 +48,9 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>module_thermal_sensors</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -65,6 +68,9 @@
         <writeable/>
         <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_0_availability</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -82,6 +88,9 @@
         <writeable/>
         <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_0_secondary_availability</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -102,6 +111,9 @@
         <writeable/>
         <default>NO_SENSOR</default>
         <mssAccessorName>therm_sensor_0_type</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -124,6 +136,9 @@
         <writeable/>
         <default>DISABLED</default>
         <mssAccessorName>therm_sensor_0_usage</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -136,6 +151,9 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_0_i2c_addr</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -153,6 +171,9 @@
         <writeable/>
         <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_1_availability</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -170,6 +191,9 @@
         <writeable/>
         <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_1_secondary_availability</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -190,6 +214,9 @@
         <writeable/>
         <default>NO_SENSOR</default>
         <mssAccessorName>therm_sensor_1_type</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -212,6 +239,9 @@
         <writeable/>
         <default>DISABLED</default>
         <mssAccessorName>therm_sensor_1_usage</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -224,6 +254,9 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_1_i2c_addr</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -241,6 +274,9 @@
         <writeable/>
         <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_2_availability</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -261,6 +297,9 @@
         <writeable/>
         <default>NO_SENSOR</default>
         <mssAccessorName>therm_sensor_2_type</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -283,6 +322,9 @@
         <writeable/>
         <default>DISABLED</default>
         <mssAccessorName>therm_sensor_2_usage</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -295,6 +337,9 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_2_i2c_addr</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -312,6 +357,9 @@
         <writeable/>
         <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_3_availability</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -332,6 +380,9 @@
         <writeable/>
         <default>NO_SENSOR</default>
         <mssAccessorName>therm_sensor_3_type</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -354,6 +405,9 @@
         <writeable/>
         <default>DISABLED</default>
         <mssAccessorName>therm_sensor_3_usage</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -366,6 +420,9 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_3_i2c_addr</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -383,6 +440,9 @@
         <writeable/>
         <default>NOT_AVAILABLE</default>
         <mssAccessorName>therm_sensor_differential_availability</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -403,6 +463,9 @@
         <writeable/>
         <default>NO_SENSOR</default>
         <mssAccessorName>therm_sensor_differential_type</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -423,6 +486,9 @@
         <writeable/>
         <default>DISABLED</default>
         <mssAccessorName>therm_sensor_differential_usage</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -435,6 +501,9 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_differential_i2c_addr</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -447,6 +516,9 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_0_secondary_i2c_addr</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -459,6 +531,9 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_1_secondary_i2c_addr</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -472,6 +547,9 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_1_secondary_location</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -485,6 +563,9 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_0_secondary_location</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -498,6 +579,9 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_3_location</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -511,6 +595,9 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_2_location</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -524,6 +611,9 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_1_location</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -537,5 +627,8 @@
         <writeable/>
         <initToZero/>
         <mssAccessorName>therm_sensor_0_location</mssAccessorName>
+        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
     </attribute>
 </attributes>
