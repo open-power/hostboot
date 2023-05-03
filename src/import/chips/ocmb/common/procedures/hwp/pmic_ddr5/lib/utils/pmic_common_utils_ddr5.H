@@ -180,6 +180,73 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Run the provided function if the DT is present and not overridden to N-Mode
+///
+/// @tparam F function type (expected to be lambda)
+/// @param[in] i_target_info target info struct
+/// @param[in] i_dt_id desired DT ID to key on
+/// @param[in] i_func lambda function to run if given DT is not disabled
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+template<typename F>
+fapi2::ReturnCode run_if_present_dt(
+    const target_info_redundancy_ddr5& i_target_info,
+    const uint8_t i_dt_id,
+    const F i_func)
+{
+    fapi2::Target<fapi2::TARGET_TYPE_POWER_IC> l_dt;
+    fapi2::Target<fapi2::TARGET_TYPE_PMIC> l_pmic;
+    bool l_disabled = false;
+    bool l_dt_found = false;
+    uint8_t l_count = 0;
+
+    const uint8_t l_num_dt_4u = CONSTS::NUM_DTS_4U;
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target_info.iv_pmic_dt_map[0].iv_dt);
+
+    FAPI_ASSERT((i_dt_id < l_num_dt_4u),
+                fapi2::INVALID_DT_INDEX_RECEIVED()
+                .set_OCMB_TARGET(l_ocmb)
+                .set_NUM_DTS(i_dt_id)
+                .set_EXPECTED_MAX_DTS(l_num_dt_4u),
+                GENTARGTIDFORMAT " Invalid DT index received. Maximum index supported is %u."
+                "Given %u as index",
+                GENTARGTID(l_ocmb),
+                l_num_dt_4u,
+                i_dt_id);
+
+    for (l_count = 0; l_count <= i_target_info.iv_number_of_target_infos_present; l_count++)
+    {
+        if( i_dt_id == i_target_info.iv_pmic_dt_map[l_count].iv_rel_pos)
+        {
+            l_dt = i_target_info.iv_pmic_dt_map[i_dt_id].iv_dt;
+            l_pmic = i_target_info.iv_pmic_dt_map[i_dt_id].iv_pmic;
+            l_dt_found = true;
+            break;
+        }
+    }
+
+    if (!l_dt_found)
+    {
+        // If we don't have the DT in the target_info_redundancy_ddr5 struct, then platform never provided it as present,
+        // so we should just exit, do not run i_func()
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // DT does exist, now see if it was overridden to disabled via ATTR_PMIC_FORCE_N_MODE
+    // We are using the PMIC target here as PMIC and DT are a pair
+    FAPI_TRY(mss::pmic::disabled(l_pmic, l_disabled));
+
+    // DT target provided here. Other arguments to be provided via capture list
+    if (!l_disabled)
+    {
+        FAPI_TRY(i_func(l_dt));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Helper function to get the minimum vin bulk threshold
 ///
 /// @param[in] i_vin_bulk_min_threshold
