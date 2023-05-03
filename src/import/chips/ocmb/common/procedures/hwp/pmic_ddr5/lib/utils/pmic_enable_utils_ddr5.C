@@ -75,28 +75,36 @@ fapi2::ReturnCode setup_dt(const target_info_redundancy_ddr5& i_target_info)
 
     for (auto l_dt_count = 0; l_dt_count < i_target_info.iv_number_of_target_infos_present; l_dt_count++)
     {
-        FAPI_INF("Setting up DT " GENTARGTIDFORMAT, GENTARGTID(i_target_info.iv_pmic_dt_map[l_dt_count].iv_dt));
+        // If the corresponding PMIC in the PMIC/DT pair is not overridden to disabled, run the enable
+        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present_dt(i_target_info, l_dt_count, [&l_dt_data_to_write]
+                          (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
+        {
+            FAPI_INF("Setting up DT " GENTARGTIDFORMAT, GENTARGTID(i_dt));
 
-        // Clear faults 0 reg
-        l_dt_data_to_write[0] = 0xFF;
-        l_dt_data_to_write[1] = 0xFF;
-        FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(i_target_info.iv_pmic_dt_map[l_dt_count].iv_dt,
-                 DT_REGS::FAULTS_CLEAR_0, l_dt_data_to_write));
+            // Clear faults 0 reg
+            l_dt_data_to_write[0] = 0xFF;
+            l_dt_data_to_write[1] = 0xFF;
+            FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_contiguous(i_dt, DT_REGS::FAULTS_CLEAR_0, l_dt_data_to_write));
 
-        // Clear faults 1 reg
-        l_dt_data_to_write[0] = 0xFF;
-        l_dt_data_to_write[1] = 0xFF;
-        FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(i_target_info.iv_pmic_dt_map[l_dt_count].iv_dt,
-                 DT_REGS::FAULTS_CLEAR_1, l_dt_data_to_write));
+            // Clear faults 1 reg
+            l_dt_data_to_write[0] = 0xFF;
+            l_dt_data_to_write[1] = 0xFF;
+            FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_contiguous(i_dt, DT_REGS::FAULTS_CLEAR_1, l_dt_data_to_write));
 
-        // Enable efuse
-        FAPI_TRY(mss::pmic::i2c::reg_write(i_target_info.iv_pmic_dt_map[l_dt_count].iv_dt, DT_REGS::EN_REGISTER, 0x01));
+            // Enable efuse
+            FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_dt, DT_REGS::EN_REGISTER, 0x01));
 
-        // Clear breadcrumb register.
-        FAPI_TRY(mss::pmic::i2c::reg_write(i_target_info.iv_pmic_dt_map[l_dt_count].iv_dt, DT_REGS::BREADCRUMB, 0x00));
+            // Clear breadcrumb register.
+            FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_dt, DT_REGS::BREADCRUMB, 0x00));
 
-        // Delay for 1 ms. Might remove this if natural delay is sufficient
-        fapi2::delay(1 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+            // Delay for 1 ms. Might remove this if natural delay is sufficient
+            fapi2::delay(1 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit_lambda:
+            return fapi2::current_err;
+        }));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;

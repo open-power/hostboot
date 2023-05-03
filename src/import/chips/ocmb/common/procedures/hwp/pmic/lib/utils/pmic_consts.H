@@ -294,6 +294,7 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t RANGE_1                    = 1;
     static constexpr uint8_t NUM_PRIMARY_PMICS          = 2; // PMIC0/2, PMIC1/3
     static constexpr uint8_t NUM_PMICS_4U               = 4; // DDR4: 2 redundant, DDR5: 1 redundant
+    static constexpr uint8_t NUM_DTS_4U                 = 4; // DDR4: not present, DDR5: 1 redundant
     static constexpr uint8_t NUMBER_OF_RAILS            = 4;
 
     static constexpr uint8_t VENDOR_PASSWORD_LOW        = 0x73;
@@ -662,6 +663,20 @@ enum regs
     EN_REGISTER    = 0xDE,
 
     BREADCRUMB     = 0xE0,
+};
+
+///
+/// @brief Constants for POWER_IC devices
+///
+enum dt_i2c_devices
+{
+    NUM_TOTAL_DEVICES = 4,
+
+    // POWER_IC REL_POS orderings
+    DT0 = 0,
+    DT1 = 1,
+    DT2 = 2,
+    DT3 = 3,
 };
 
 } // dt

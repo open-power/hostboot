@@ -538,4 +538,23 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_INVALID_DT_INDEX_RECEIVED</rc>
+    <description>
+       Out of bounds DT index encountered in pmic_enable target loop.
+       Expected max 4 DTs.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>NUM_DTS</ffdc>
+    <ffdc>EXPECTED_MAX_DTS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
