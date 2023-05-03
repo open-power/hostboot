@@ -27,7 +27,7 @@
  * @file hdatram.C
  *
  * @brief This file contains the implementation of the HdatRam class.
- *    
+ *
  */
 
 /*----------------------------------------------------------------------------*/
@@ -40,7 +40,7 @@
 #include <stdio.h>
 
 
-namespace HDAT 
+namespace HDAT
 {
 /*----------------------------------------------------------------------------*/
 /* Global variables                                                           */
@@ -60,9 +60,9 @@ HdatRam::HdatRam(errlHndl_t &o_errlHndl,
                  uint32_t i_resourceId,
                  uint32_t i_slcaIndex)
 
-: HdatHdif(o_errlHndl, HDAT_RAM_STRUCT_NAME, HDAT_RAM_LAST, cv_actualCnt++, 
+: HdatHdif(o_errlHndl, HDAT_RAM_STRUCT_NAME, HDAT_RAM_LAST, cv_actualCnt++,
     HDAT_NO_CHILD, HDAT_RAM_VERSION),
-  iv_kwdSize(0), iv_kwd(NULL)
+  iv_kwdSize(0), iv_kwd(nullptr)
 {
     HDAT_ENTER();
 
@@ -158,7 +158,7 @@ HdatRam::HdatRam(errlHndl_t &o_errlHndl,
     this->addData(HDAT_RAM_SIZE, sizeof(hdatRamAreaSize_t));
     this->align();
 
-    HDAT_EXIT(); 
+    HDAT_EXIT();
     return;
 }
 
@@ -192,7 +192,7 @@ uint32_t HdatRam::getRamSize()
     }
     l_size += sizeof(hdatRamAreaId_t);
     l_size += sizeof(hdatRamAreaSize_t);
-            
+
     l_size+= this->endCommitSize();
 
     return l_size;
@@ -228,7 +228,7 @@ void HdatRam::prt()
     HDAT_INF("      iv_kwdSize = %u", iv_kwdSize);
     this->print();
     //hdatPrintFruId(&iv_fru);
-    hdatPrintKwd(iv_kwd, iv_kwdSize);
+    //hdatPrintKwd(iv_kwd, iv_kwdSize);
 
     HDAT_INF("  **hdatRamAreaId_t**");
     HDAT_INF("      hdatRamAreaId = %u", iv_ramArea.hdatRamAreaId);

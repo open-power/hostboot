@@ -1149,17 +1149,16 @@ errlHndl_t HdatMsVpd::loadMsDataAllProcs()
                             hdatMemParentType l_parentType = HDAT_MEM_PARENT_RISER;
 
                             std::list<hdatRamArea> l_areas;
-                            l_areas.clear();
                             uint32_t  l_areaSizeInMB = 0;
                             bool      l_areaFunctional = false;
                             uint32_t  l_numDimms = 0;
 
-                            l_err = hdatScanDimmsP10(l_pOcmbTarget,
-                                                     l_areas,
-                                                     l_areaSizeInMB,
-                                                     l_numDimms,
-                                                     l_areaFunctional,
-                                                     l_parentType);
+                            l_err = hdatScanDimms(l_pOcmbTarget,
+                                                  l_areas,
+                                                  l_areaSizeInMB,
+                                                  l_numDimms,
+                                                  l_areaFunctional,
+                                                  l_parentType);
                             if(nullptr != l_err)
                             {
                                 HDAT_ERR("Error in calling Scan Dimms");
@@ -1999,106 +1998,49 @@ bool HdatMsVpd::hdatFindGroupForMcc(const TARGETING::Target *i_pProcTarget,
 /*******************************************************************************
 *  hdatScanDimms
 *******************************************************************************/
-errlHndl_t HdatMsVpd::hdatScanDimms(const TARGETING::Target *i_pTarget,
-                         const TARGETING::Target *i_pMcsTarget,
-                         uint32_t i_mcaFruid,
-                         std::list<hdatRamArea>& o_areas,
-                         uint32_t& o_areaSize,
-                         uint32_t& o_dimmNum,
-                         bool& o_areaFunctional,
-                         hdatMemParentType& o_parentType)
+errlHndl_t HdatMsVpd::hdatScanDimms(const TARGETING::Target *i_pOcmbTarget,
+                                    std::list<hdatRamArea>& o_areas,
+                                    uint32_t& o_areaSize,
+                                    uint32_t& o_dimmNum,
+                                    bool& o_areaFunctional,
+                                    hdatMemParentType& o_parentType)
 {
+    HDAT_ENTER();
     errlHndl_t l_err = nullptr;
 
-    do
+    if(i_pOcmbTarget->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_OCMB_CHIP)
     {
-        if(i_pTarget->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_MCA)
-        {
-            HDAT_ERR("Input Target is type not MCA");
-            break;
-        }
+        HDAT_ERR("Input Target is type not OCMB_CHIP");
+        goto ERROR_EXIT;
+    }
 
-        if(i_pMcsTarget->getAttr<TARGETING::ATTR_TYPE>() != TARGETING::TYPE_MCS)
-        {
-            HDAT_ERR("Input Target is type not MCA");
-            break;
-        }
-
-        /*TODO RTC:216061 Re-enable when attr exists
-        TARGETING::ATTR_EFF_DIMM_SIZE_type l_dimSizes = {{0}};
+    //for each mem-port connected to this this ocmb_chip
+    for (const auto l_pmemPortTarget : composable(getChildChiplets)(i_pOcmbTarget, TYPE_MEM_PORT, true))
+    {
+        TARGETING::ATTR_MEM_EFF_DIMM_SIZE_type l_dimSizes = {0};
         //Get configured memory size
-        if(!i_pMcsTarget->
-                   tryGetAttr<TARGETING::ATTR_EFF_DIMM_SIZE>(l_dimSizes))
+        if(!l_pmemPortTarget->tryGetAttr<TARGETING::ATTR_MEM_EFF_DIMM_SIZE>(l_dimSizes))
         {
-            HDAT_ERR("DIMM size should be available with MCS");
+            HDAT_ERR("DIMM size should be available with MEM_PORT");
         }
-        **/
 
-        uint8_t l_mcaPort = 0;
-        if(!i_pTarget->
-                   tryGetAttr<TARGETING::ATTR_REL_POS>(l_mcaPort))
+        //for each logical DIMM connected to this this MEM_PORT
+        for (const auto l_pDimmTarget : composable(getChildAffinityTargetsByState)(l_pmemPortTarget,
+                                                                                   CLASS_LOGICAL_CARD,
+                                                                                   TYPE_DIMM,
+                                                                                   UTIL_FILTER_PRESENT))
         {
-           HDAT_ERR("REL_POS not there in MCA port");
-        }
-        else
-        {
-            l_mcaPort= l_mcaPort%2;
-        }
-        //[TODO RTC: 47148]
+            uint32_t l_dimmfru = l_pDimmTarget->getAttr<TARGETING::ATTR_FRU_ID>();
 
-        //for each DIMM connected to this this MCA
-        TARGETING::PredicateCTM l_dimmPredicate(TARGETING::
-                                                CLASS_LOGICAL_CARD,
-                                                TARGETING::TYPE_DIMM);
-        TARGETING::PredicateHwas l_predDimm;
-        l_predDimm.present(true);
-        TARGETING::PredicatePostfixExpr l_presentDimm;
-        l_presentDimm.push(&l_dimmPredicate).push(&l_predDimm).And();
+            TARGETING::ATTR_MEM_PORT_type l_dimmMemPort = 0;
 
-        TARGETING::TargetHandleList l_dimmList;
-
-        // Get associated dimms
-        TARGETING::targetService().
-        getAssociated(l_dimmList, i_pTarget,
-                      TARGETING::TargetService::CHILD_BY_AFFINITY,
-                      TARGETING::TargetService::ALL, &l_presentDimm);
-
-        for(uint32_t j=0; j < l_dimmList.size(); ++j)
-        {
-            //fetch each dimm
-            TARGETING::Target *l_pDimmTarget = l_dimmList[j];
-
-            uint32_t l_dimmfru = 0;
-            l_dimmfru = l_pDimmTarget->getAttr<TARGETING::ATTR_FRU_ID>();
-
-            //TODO RTC:216061 Re-enable when attr exists
-            //uint8_t l_mcaDimm = 0;
-            TARGETING::ATTR_REL_POS_type l_dimmRelPos = 0;
-
-            if(l_pDimmTarget->
-               tryGetAttr<TARGETING::ATTR_REL_POS>(l_dimmRelPos))
+            if(!l_pDimmTarget->tryGetAttr<TARGETING::ATTR_MEM_PORT>(l_dimmMemPort))
             {
-                //TODO RTC:216061 Re-enable when attr exists
-                //uint8_t l_mcaDimm = l_dimmRelPos%2; //2 DIMMs per MCA
-                l_dimmRelPos = 0;
-                if(!i_pTarget->
-                    tryGetAttr<TARGETING::ATTR_REL_POS>(l_dimmRelPos))
-                {
-                    HDAT_ERR("Attribute REL_POS in MCA is not "
-                             "present");
-                }
-            }
-            else
-            {
-                HDAT_ERR("Attribute REL_POS in DIMM "
-                         "is not present");
+                HDAT_ERR("DIMM size should be available with MEM_PORT");
             }
 
-            //Convert GB to MB
-            // TODO RTC:216061 Re-enable when attr exists
-            //uint32_t l_dimmSizeInMB =
-            //         l_dimSizes[l_mcaPort][l_mcaDimm] * HDAT_MB_PER_GB;
-            uint32_t l_dimmSizeInMB = 24 * HDAT_MB_PER_GB;
+            // Convert GB to MB
+            uint32_t l_dimmSizeInMB = l_dimSizes[l_dimmMemPort] * HDAT_MB_PER_GB;
             uint32_t l_huid = TARGETING::get_huid(l_pDimmTarget);
 
             bool foundArea = false;
@@ -2106,17 +2048,13 @@ errlHndl_t HdatMsVpd::hdatScanDimms(const TARGETING::Target *i_pTarget,
                                                   l_area != o_areas.end();
                                                   ++l_area)
             {
-                //we do not need to compare each dimm fru id with mca fru id
-                //to create ram area, by the below logic
-                //dimms with same fruid will fall into same ram area
-                //even if they have fru id same with mca
+                // dimms with same fruid will fall into same ram area
+                // even if they have fru id same with mca
                 if (l_area->ivfruId == l_dimmfru)//this means soldered dimms
                 {
                     foundArea = true;
-                    l_area->ivFunctional = (l_area)->ivFunctional ||
-                                            isFunctional(l_pDimmTarget);
-                    (l_area)->ivFunctional = true;
-                    (l_area)->ivSize += l_dimmSizeInMB;
+                    l_area->ivFunctional = l_area->ivFunctional || isFunctional(l_pDimmTarget);
+                    l_area->ivSize += l_dimmSizeInMB;
                     break;
                 }
             }
@@ -2127,162 +2065,18 @@ errlHndl_t HdatMsVpd::hdatScanDimms(const TARGETING::Target *i_pTarget,
             {
                 o_dimmNum++;
                 o_areas.push_back(hdatRamArea(l_huid,
-                                        isFunctional(l_pDimmTarget),
-                                         l_dimmSizeInMB,l_dimmfru));
+                                  isFunctional(l_pDimmTarget),
+                                  l_dimmSizeInMB,l_dimmfru));
             }
             o_areaSize += l_dimmSizeInMB;
-            o_areaFunctional = o_areaFunctional ||
-                               isFunctional(l_pDimmTarget);
-        }
+            o_areaFunctional = o_areaFunctional || isFunctional(l_pDimmTarget);
+        }  //end of dimm list
 
+        // @TODO JIRA PFHB-387 Not correct, but for now we're going to ignore that fact.
         o_parentType = HDAT_MEM_PARENT_CEC_FRU;
+    } // end of mem_port list
 
-        if(l_err != nullptr)
-        {
-            //break if error
-            break;
-        }
-    }
-    while(0);
-    return l_err;
-}
-
-/*******************************************************************************
-*  hdatScanDimmsAxone
-*******************************************************************************/
-errlHndl_t HdatMsVpd::hdatScanDimmsP10(const TARGETING::Target *i_pOcmbTarget,
-                         std::list<hdatRamArea>& o_areas,
-                         uint32_t& o_areaSize,
-                         uint32_t& o_dimmNum,
-                         bool& o_areaFunctional,
-                         hdatMemParentType& o_parentType)
-{
-    HDAT_ENTER();
-    errlHndl_t l_err = nullptr;
-
-    do
-    {
-        if(i_pOcmbTarget->getAttr<TARGETING::ATTR_TYPE>() !=
-           TARGETING::TYPE_OCMB_CHIP)
-        {
-            HDAT_ERR("Input Target is type not OCMB_CHIP");
-            break;
-        }
-
-        //for each mem-port connected to this this ocmb_chip
-        TARGETING::PredicateCTM l_allMemPort(TARGETING::CLASS_UNIT,
-                                         TARGETING::TYPE_MEM_PORT);
-        TARGETING::PredicateHwas l_funcMemPort;
-        l_funcMemPort.functional(true);
-        TARGETING::PredicatePostfixExpr l_allFuncMemPort;
-        l_allFuncMemPort.push(&l_allMemPort).push(&l_funcMemPort).And();
-
-        TARGETING::TargetHandleList l_memPortList;
-
-        TARGETING::targetService().
-              getAssociated(l_memPortList, i_pOcmbTarget,
-                      TARGETING::TargetService::CHILD,
-                      TARGETING::TargetService::ALL, &l_allFuncMemPort);
-
-        for(uint32_t i=0; i < l_memPortList.size(); i++)
-        {
-            TARGETING::Target *l_pmemPortTarget = l_memPortList[i];
-
-            TARGETING::ATTR_MEM_EFF_DIMM_SIZE_type l_dimSizes = {0};
-            //Get configured memory size
-            if(!l_pmemPortTarget->
-                   tryGetAttr<TARGETING::ATTR_MEM_EFF_DIMM_SIZE>(l_dimSizes))
-            {
-                HDAT_ERR("DIMM size should be available with MEM_PORT");
-            }
-
-            //for each DIMM connected to this this MCA
-            TARGETING::PredicateCTM l_dimmPredicate(TARGETING::
-                                                    CLASS_LOGICAL_CARD,
-                                                    TARGETING::TYPE_DIMM);
-            TARGETING::PredicateHwas l_predDimm;
-            l_predDimm.present(true);
-            TARGETING::PredicatePostfixExpr l_presentDimm;
-            l_presentDimm.push(&l_dimmPredicate).push(&l_predDimm).And();
-
-            TARGETING::TargetHandleList l_dimmList;
-
-            // Get associated dimms
-            TARGETING::targetService().
-            getAssociated(l_dimmList, l_pmemPortTarget,
-                          TARGETING::TargetService::CHILD_BY_AFFINITY,
-                          TARGETING::TargetService::ALL, &l_presentDimm);
-
-            for(uint32_t j=0; j < l_dimmList.size(); ++j)
-            {
-                //fetch each dimm
-                TARGETING::Target *l_pDimmTarget = l_dimmList[j];
-
-                uint32_t l_dimmfru = 0;
-                l_dimmfru = l_pDimmTarget->getAttr<TARGETING::ATTR_FRU_ID>();
-
-                TARGETING::ATTR_MEM_PORT_type l_dimmMemPort = 0;
-
-                if(!l_pDimmTarget->
-                    tryGetAttr<TARGETING::ATTR_MEM_PORT>(l_dimmMemPort))
-                {
-                    HDAT_ERR("DIMM size should be available with MEM_PORT");
-                }
-
-                //Convert GB to MB
-                uint32_t l_dimmSizeInMB = l_dimSizes[l_dimmMemPort] *
-                    HDAT_MB_PER_GB;
-                uint32_t l_huid = TARGETING::get_huid(l_pDimmTarget);
-
-                bool foundArea = false;
-                for (std::list<hdatRamArea>::iterator l_area = o_areas.begin();
-                                                      l_area != o_areas.end();
-                                                      ++l_area)
-                {
-                    //we do not need to compare each dimm fru id with mca fru id
-                    //to create ram area, by the below logic
-                    //dimms with same fruid will fall into same ram area
-                    //even if they have fru id same with mca
-                    if (l_area->ivfruId == l_dimmfru)//this means soldered dimms
-                    {
-                        foundArea = true;
-                        l_area->ivFunctional = (l_area)->ivFunctional ||
-                                                isFunctional(l_pDimmTarget);
-                        (l_area)->ivFunctional = true;
-                        (l_area)->ivSize += l_dimmSizeInMB;
-                        break;
-                    }
-                }
-
-                //Search in the list of RAM Areas if not
-                //present create a new ram area
-                if (!foundArea)
-                {
-                    o_dimmNum++;
-                    o_areas.push_back(hdatRamArea(l_huid,
-                                      isFunctional(l_pDimmTarget),
-                                      l_dimmSizeInMB,l_dimmfru));
-                }
-                o_areaSize += l_dimmSizeInMB;
-                o_areaFunctional = o_areaFunctional ||
-                                   isFunctional(l_pDimmTarget);
-            }  //end of dimm list
-
-            o_parentType = HDAT_MEM_PARENT_CEC_FRU;
-
-            if(l_err != nullptr)
-            {
-                //break if error
-                break;
-            }
-        } // end of mem_port list
-        if(l_err != nullptr)
-        {
-            //break if error
-            break;
-        }
-    }
-    while(0);
+ERROR_EXIT:
     HDAT_EXIT();
     return l_err;
 }

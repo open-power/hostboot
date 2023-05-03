@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,7 @@
  *  @file hdatspiraH.H
  *
  *  @brief This file contains the definition of the Service Processor Interface
- *         Root Array Secure boot (SPIRA-H) data structure.  This data structure 
+ *         Root Array Secure boot (SPIRA-H) data structure.  This data structure
  *         is prebuilt as part of one of the LIDS loaded into memory.
  *
  *         Usage note:  The SPIRA-H structure is built as part of the host LIDs.
@@ -64,7 +64,7 @@ namespace HDAT
  * @brief Construct an HdatSpiraH object.
  *
  *        This function maps the Service Processor Interface Root Array (SPIRA-H)
- *        structure from the mainstore address where the containing lid loaded. 
+ *        structure from the mainstore address where the containing lid loaded.
  *
  * @pre The SPIRA-H containing Lid must have loaded in mainstore.
  *
@@ -72,8 +72,8 @@ namespace HDAT
  *
  * @param o_errlHndl - output parameter - error log handle
  *
- * @return A null error log handle if successful, else the return code pointed 
- *         to by errlHndl_t 
+ * @return A null error log handle if successful, else the return code pointed
+ *         to by errlHndl_t
  *
  */
 HdatSpiraH::HdatSpiraH(errlHndl_t &o_errlHndl, hdatMsAddr_t &i_msAddr)
@@ -86,24 +86,16 @@ HdatSpiraH::HdatSpiraH(errlHndl_t &o_errlHndl, hdatMsAddr_t &i_msAddr)
     memcpy(&iv_msAddr , &i_msAddr , sizeof(hdatMsAddr_t));
 
     // Get Target Service, and the system target.
-    TargetService& l_targetService = targetService();
-    TARGETING::Target* l_sysTarget = NULL;
-    (void) l_targetService.getTopLevelTarget(l_sysTarget);
+    TARGETING::Target* l_sysTarget = UTIL::assertGetToplevelTarget();
 
-    // asserting
-    assert(l_sysTarget != NULL);
-
-    uint64_t l_hrmor = l_sysTarget->getAttr<ATTR_PAYLOAD_BASE>();
-    l_hrmor = l_sysTarget->getAttr<ATTR_PAYLOAD_BASE>() * MEGABYTE;
+    uint64_t l_hrmor = l_sysTarget->getAttr<ATTR_PAYLOAD_BASE>() * MEGABYTE;
     iv_msAddr +=l_hrmor;
 
     // Allocate space for spiraH in process memory
+    iv_spirah = reinterpret_cast<hdatSpiraH_t *>(calloc(sizeof(hdatSpiraH_t), 1));
 
-    iv_spirah = reinterpret_cast<hdatSpiraH_t *>(calloc(sizeof(hdatSpiraH_t),
-                                                 1));
-
-    if(NULL == o_errlHndl) 
-    { // Set SPIRA-H to defaults 
+    if(nullptr == o_errlHndl)
+    { // Set SPIRA-H to defaults
         setSpiraHHdrs();
     }
 
@@ -116,7 +108,7 @@ HdatSpiraH::HdatSpiraH(errlHndl_t &o_errlHndl, hdatMsAddr_t &i_msAddr)
 
 /**
  * @brief This function gets the spirah from the stored mainstore adress.
- *         The mainstore address is where spirah is loaded as part of lid. 
+ *         The mainstore address is where spirah is loaded as part of lid.
  *
  * @pre The primary LID which contains the NACA and the primary/secondary LID
  *      which contains the SPIRA-H must have been loaded
@@ -126,7 +118,7 @@ HdatSpiraH::HdatSpiraH(errlHndl_t &o_errlHndl, hdatMsAddr_t &i_msAddr)
  */
 errlHndl_t HdatSpiraH::getSpiraH()
 {
-    errlHndl_t l_errlHndl = NULL;
+    errlHndl_t l_errlHndl = nullptr;
     HDAT_ENTER();
 
     if(iv_msAddr != 0)
@@ -166,7 +158,7 @@ errlHndl_t HdatSpiraH::getSpiraH()
 /**
  * @brief HdatSpiraH object destructor
  *
- *        This is the destructor for an HdatSpiraH object.  Any heap storage 
+ *        This is the destructor for an HdatSpiraH object.  Any heap storage
  *        allocated for the object is dallocated.
  *
  * @pre No preconditions exist
@@ -176,12 +168,12 @@ errlHndl_t HdatSpiraH::getSpiraH()
  */
 HdatSpiraH::~HdatSpiraH()
 {
-    errlHndl_t l_errlHndl = NULL;
+    errlHndl_t l_errlHndl = nullptr;
     uint32_t rc=0;
     HDAT_ENTER();
 
     free(iv_spirah);
-    if(iv_virt_addr != NULL)
+    if(iv_virt_addr != nullptr)
     {
         rc =  mm_block_unmap(reinterpret_cast<void*>(
                         ALIGN_PAGE_DOWN((uint64_t)iv_virt_addr)));
@@ -313,9 +305,9 @@ void HdatSpiraH::chgSpiraHEntry(hdatSpiraHDataAreas i_dataArea,
     return;
 }
 
-/** 
+/**
  * @brief This routine initializes the SPIRA-H HDIF header and clears the N-Tuple array
- *       
+ *
  * @pre None
  *
  * @post None
@@ -374,4 +366,4 @@ void HdatSpiraH::chgSpiraHEntry(hdatSpiraHDataAreas i_dataArea,
     HDAT_EXIT();
 }
 
-} //HDAT 
+} //HDAT

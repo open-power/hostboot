@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <iostream>
 #endif
 #include <targeting/common/util.H>
+#include <targeting/targplatutil.H>
 #include <string.h>
 #include <util/align.H>
 
@@ -307,25 +308,22 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
                                         i_slcaParentIndex,
                                         o_hdatslca);
 
-    if((o_hdatslca[i_slcaParentIndex].first_child_index == 0xFFFF) &&
-                                                         (l_slcaEntryIndex))
+    if((o_hdatslca[i_slcaParentIndex].first_child_index == 0xFFFF) && (l_slcaEntryIndex))
     {
         o_hdatslca[i_slcaParentIndex].first_child_index = l_slcaEntryIndex;
 
-        o_hdatslca[i_slcaParentIndex].first_child_rid =
-                                       o_hdatslca[l_slcaEntryIndex].fru_rid;
+        o_hdatslca[i_slcaParentIndex].first_child_rid = o_hdatslca[l_slcaEntryIndex].fru_rid;
 
-        o_hdatslca[i_slcaParentIndex].first_child_pldm_entity_id =
-                                    o_hdatslca[l_slcaEntryIndex].pldm_entity_id;
+        o_hdatslca[i_slcaParentIndex].first_child_pldm_entity_id = o_hdatslca[l_slcaEntryIndex].pldm_entity_id;
 
         o_hdatslca[i_slcaParentIndex].number_of_children++;
         o_hdatslca[i_slcaParentIndex].number_of_children_2B++;
 
     }
 
+
     l_slcaBPIndex = l_slcaEntryIndex;
-    hdatGetLocationCode(i_Target, HDAT_SLCA_FRU_TYPE_BP,
-                                                          l_nodeLocCode);
+    hdatGetLocationCode(i_Target, HDAT_SLCA_FRU_TYPE_BP, l_nodeLocCode);
 
     TARGETING::PredicateHwas l_predHwas;
     l_predHwas.present(true);
@@ -369,8 +367,7 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
 
     //TODO : RTC Story 311075
     //Need to refine the SLCA table filter
-    if (!l_pSystemTarget->getAttr<
-              TARGETING::ATTR_PLDM_CONNECTOR_PDRS_ENABLED>())
+    if (!l_pSystemTarget->getAttr<TARGETING::ATTR_PLDM_CONNECTOR_PDRS_ENABLED>())
     {
         l_presentChildren.push(&l_procFilter).push(&l_memFilter).Or().
                      push(&l_pciFilter).Or().push(&l_psFilter).Or().
@@ -390,12 +387,12 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
         TARGETING::TargetHandleList l_fullProcDimmChildList;
 
         // Get the present list except for proc and dimm
-        l_presentChildren.push(&l_memFilter).
-                     push(&l_pciFilter).Or().push(&l_psFilter).Or().
-                     push(&l_fanFilter).Or().push(&l_uartFilter).Or().
-                     push(&l_usbFilter).Or().push(&l_ethFilter).Or().
-                     push(&l_vrmFilter).Or().push(&l_tpmFilter).Or().
-                     push(&l_predHwas).And();
+        l_presentChildren.push(&l_memFilter).push(&l_pciFilter).Or()
+                         .push(&l_psFilter).Or().push(&l_fanFilter).Or()
+                         .push(&l_uartFilter).Or().push(&l_usbFilter).Or()
+                         .push(&l_ethFilter).Or().push(&l_vrmFilter).Or()
+                         .push(&l_tpmFilter).Or().push(&l_predHwas).And();
+
         TARGETING::targetService().
                   getAssociated(l_childList, i_Target,
                           TARGETING::TargetService::CHILD,
@@ -677,93 +674,60 @@ static void hdatAddOpPanelToSLCATable(TARGETING::Target *i_Target,
  *
  * @retval HDAT_OTHER_COMP_ERROR
  */
-errlHndl_t hdatConstructslcaTable(std::vector<HDAT_slcaEntry_t>
-                                                          &o_hdatslcaentries)
+errlHndl_t hdatConstructslcaTable(std::vector<HDAT_slcaEntry_t> & o_hdatslcaentries)
 {
     HDAT_ENTER();
-    TARGETING::Target *l_pSystemTarget = NULL;
-    (void) TARGETING::targetService().getTopLevelTarget(l_pSystemTarget);
+    TARGETING::Target *l_pSystemTarget = TARGETING::UTIL::assertGetToplevelTarget();
 
-    if(l_pSystemTarget == NULL)
-    {
-        HDAT_ERR("Error in getting Top Level Target");
-        assert(l_pSystemTarget != NULL);
-    }
     uint16_t l_slcaVVIndex = hdatAddSLCAEntry(l_pSystemTarget,
-                                              HDAT_SLCA_FRU_TYPE_VV,0,
+                                              HDAT_SLCA_FRU_TYPE_VV,
+                                              0,
                                               o_hdatslcaentries);
 
     uint16_t l_slcaSVIndex = hdatAddSLCAEntry(l_pSystemTarget,
-                                            HDAT_SLCA_FRU_TYPE_SV,l_slcaVVIndex,
+                                             HDAT_SLCA_FRU_TYPE_SV,
+                                             l_slcaVVIndex,
                                              o_hdatslcaentries);
 
-    if((o_hdatslcaentries[0].first_child_index == 0xFFFF) &&
-                                                         (l_slcaSVIndex))
+    if((o_hdatslcaentries[0].first_child_index == 0xFFFF) && (l_slcaSVIndex))
     {
         o_hdatslcaentries[0].first_child_index = l_slcaSVIndex;
 
-        o_hdatslcaentries[0].first_child_rid =
-                                       o_hdatslcaentries[l_slcaSVIndex].fru_rid;
+        o_hdatslcaentries[0].first_child_rid = o_hdatslcaentries[l_slcaSVIndex].fru_rid;
 
-        o_hdatslcaentries[0].first_child_pldm_entity_id =
-                             o_hdatslcaentries[l_slcaSVIndex].pldm_entity_id;
+        o_hdatslcaentries[0].first_child_pldm_entity_id = o_hdatslcaentries[l_slcaSVIndex].pldm_entity_id;
 
         o_hdatslcaentries[0].number_of_children++;
         o_hdatslcaentries[0].number_of_children_2B++;
 
     }
 
-    TARGETING::PredicateCTM l_nodePredicate(TARGETING::CLASS_ENC,
-                                             TARGETING::TYPE_NODE);
-    TARGETING::PredicateHwas l_predHwas;
-    l_predHwas.present(true);
+    TARGETING::Target *l_nodeTarget = TARGETING::UTIL::getCurrentNodeTarget();
 
-    TARGETING::PredicatePostfixExpr l_presentNode;
-    l_presentNode.push(&l_nodePredicate).push(&l_predHwas).And();
+    //Add EV here and make SP, BP and OP as children of EV
+    uint16_t l_slcaEVIndex = hdatAddSLCAEntry(l_pSystemTarget,
+                                       HDAT_SLCA_FRU_TYPE_EV,l_slcaVVIndex,
+                                       o_hdatslcaentries);
 
-    //Get all Nodes
-    TARGETING::TargetRangeFilter l_nodeFilter(
-                                        TARGETING::targetService().begin(),
-                                        TARGETING::targetService().end(),
-                                        &l_presentNode);
+    o_hdatslcaentries[l_slcaEVIndex].first_child_index = 0xFFFF;
+    o_hdatslcaentries[l_slcaEVIndex].first_child_rid   = 0xFFFF;
+    o_hdatslcaentries[l_slcaEVIndex].first_child_pldm_entity_id.entityType = 0xFFFF;
+    o_hdatslcaentries[l_slcaEVIndex].first_child_pldm_entity_id.entityInstanceNumber = 0xFFFF;
+    o_hdatslcaentries[l_slcaEVIndex].first_child_pldm_entity_id.containerId = 0xFFFF;
 
-    TARGETING::Target *l_nodeTarget = (*l_nodeFilter);
-    if(l_nodeTarget != NULL)
-    {
-        //Add EV here and make SP, BP and OP as children of EV
-        uint16_t l_slcaEVIndex = hdatAddSLCAEntry(l_pSystemTarget,
-                                           HDAT_SLCA_FRU_TYPE_EV,l_slcaVVIndex,
-                                           o_hdatslcaentries);
+    o_hdatslcaentries[l_slcaVVIndex].number_of_children++;
+    o_hdatslcaentries[l_slcaVVIndex].number_of_children_2B++;
 
-        o_hdatslcaentries[l_slcaEVIndex].first_child_index = 0xFFFF;
-        o_hdatslcaentries[l_slcaEVIndex].first_child_rid   = 0xFFFF;
-        o_hdatslcaentries[l_slcaEVIndex].first_child_pldm_entity_id.entityType =
-                                                                         0xFFFF;
-        o_hdatslcaentries[l_slcaEVIndex].first_child_pldm_entity_id.entityInstanceNumber = 0xFFFF;
-        o_hdatslcaentries[l_slcaEVIndex].first_child_pldm_entity_id.containerId = 0xFFFF;
+    hdatAddNodeToSLCATable(l_nodeTarget, l_slcaEVIndex, o_hdatslcaentries);
 
-        o_hdatslcaentries[l_slcaVVIndex].number_of_children++;
-        o_hdatslcaentries[l_slcaVVIndex].number_of_children_2B++;
+    //Add Service Processor FRUs to SLCA table
+    hdatAddSPToSLCATable(l_nodeTarget, l_slcaEVIndex, o_hdatslcaentries);
 
-        hdatAddNodeToSLCATable(l_nodeTarget, l_slcaEVIndex,
-                                                    o_hdatslcaentries);
+    //Add Op-Panel  FRUs to SLCA table
+    hdatAddOpPanelToSLCATable(l_nodeTarget, l_slcaEVIndex, o_hdatslcaentries);
 
-        //Add Service Processor FRUs to SLCA table
-        hdatAddSPToSLCATable(l_nodeTarget,l_slcaEVIndex,
-                                                          o_hdatslcaentries);
-
-        //Add Op-Panel  FRUs to SLCA table
-        hdatAddOpPanelToSLCATable(l_nodeTarget,l_slcaEVIndex,
-                                                             o_hdatslcaentries);
-
-    }
-    else
-    {
-        HDAT_ERR("Error retrieving nodes. There must be alteast one node");
-        assert(l_nodeTarget != NULL);
-    }
     HDAT_EXIT();
-    return NULL;
+    return nullptr;
 
 }
 
@@ -786,7 +750,7 @@ static errlHndl_t hdatSetSLCAStructHdrs(hdatSLCAStruct_t &o_slcaStruct,
                                        uint32_t i_nrOfSLCAEntries)
 {
     HDAT_ENTER();
-    errlHndl_t l_errlHndl = NULL;
+    errlHndl_t l_errlHndl = nullptr;
 
     uint32_t l_hdatslcastructsize = i_nrOfSLCAEntries *
                                                 sizeof(HDAT_slcaEntry_t);
@@ -852,7 +816,7 @@ errlHndl_t hdatBuildSLCA(const HDAT::hdatMsAddr_t &i_msAddr,
     HDAT_ENTER();
     std::vector<HDAT_slcaEntry_t> l_hdatslcaentries;
     hdatSLCAStruct_t l_hdatslcastruct;
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
 
     hdatPopulateMTMAndSerialNumber();
     hdatConstructslcaTable(l_hdatslcaentries);
@@ -902,7 +866,7 @@ errlHndl_t hdatBuildSLCA(const HDAT::hdatMsAddr_t &i_msAddr,
 
     if( rc != 0)
     {
-        errlHndl_t l_errl = NULL;
+        errlHndl_t l_errl = nullptr;
         /*@
          * @errortype
          * @moduleid         HDAT::MOD_SLCA_DESTRUCTOR

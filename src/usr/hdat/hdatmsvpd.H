@@ -882,32 +882,6 @@ class HdatMsVpd : public HdatHdif
                             uint32_t& o_groupOfMcc);
 
         /**
-         * @brief Get the DIMMS list present on the system
-         *
-         * @param[in] i_pTarget Mca target
-         * @param[in] i_pMcsTarget Mcs target
-         * @param[in] i_membufFruid - membuf fruid decides the parent type
-         * @param[out] o_areas list of ram area structure based on the DIMM
-         * present.
-         * @param[out] o_areaSize - Total DIMM size
-         * @param[out] o_dimmNum - Total DIMM number
-         * @param[out] o_areaFunctional - DIMM functional status
-         * @param[out] o_parentType - memory parent type based on whether
-         *              the dimms are pluggable or soldered
-         *
-         * @return A null error log handle if successful, else the return the
-         * error handle
-         */
-        errlHndl_t hdatScanDimms(const TARGETING::Target *i_pTarget,
-                         const TARGETING::Target *i_pMcsTarget,
-                         uint32_t i_membufFruid,
-                         std::list<hdatRamArea>& o_areas,
-                         uint32_t& o_areaSize,
-                         uint32_t& o_dimmNum,
-                         bool& o_areaFunctional,
-                         hdatMemParentType& i_parentType);
-
-        /**
          * @brief Get the DIMMS list present on the P10 system
          *
          * @param[in] i_pTarget OCMB Chip target
@@ -922,12 +896,12 @@ class HdatMsVpd : public HdatHdif
          * @return A null error log handle if successful, else the return the
          * error handle
          */
-        errlHndl_t hdatScanDimmsP10(const TARGETING::Target *i_pOcmbTarget,
-                         std::list<hdatRamArea>& o_areas,
-                         uint32_t& o_areaSize,
-                         uint32_t& o_dimmNum,
-                         bool& o_areaFunctional,
-                         hdatMemParentType& i_parentType);
+        errlHndl_t hdatScanDimms(const TARGETING::Target *i_pOcmbTarget,
+                                 std::list<hdatRamArea>& o_areas,
+                                 uint32_t& o_areaSize,
+                                 uint32_t& o_dimmNum,
+                                 bool& o_areaFunctional,
+                                 hdatMemParentType& i_parentType);
 
         /**
          * @brief Get max memory blocks connected to membuf
