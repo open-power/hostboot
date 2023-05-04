@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -415,6 +415,7 @@ fapi2::ReturnCode EffGroupingMccAttrs::getAttrs(
     uint8_t l_omi_pos = 0;
     uint64_t l_min_size = 0;
     uint64_t l_ocmb_size = 0;
+    uint8_t l_ocmb_type = fapi2::ENUM_ATTR_NAME_NONE;
 
     // Get the ocmbs attached to this MCC
     auto l_omis = i_target.getChildren<fapi2::TARGET_TYPE_OMI>();
@@ -438,9 +439,22 @@ fapi2::ReturnCode EffGroupingMccAttrs::getAttrs(
         if (l_ocmbs.size() > 0)
         {
             // Get the amount of memory behind this OCMB
-            FAPI_TRY(mss::eff_memory_size<mss::mc_type::EXPLORER>(l_ocmbs[0], l_ocmb_size),
-                     "Error returned from eff_memory_size - ocmb, l_rc 0x%.8X",
-                     (uint64_t)fapi2::current_err);
+            const auto& l_ocmb = l_ocmbs[0];
+            FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, l_ocmb, l_ocmb_type));
+            FAPI_DBG("OCMB Type: %d", l_ocmb_type)
+
+            if (l_ocmb_type == fapi2::ENUM_ATTR_NAME_ODYSSEY)
+            {
+                FAPI_TRY(mss::eff_memory_size<mss::mc_type::ODYSSEY>(l_ocmbs[0], l_ocmb_size),
+                         "Error returned from eff_memory_size (ODYSSEY) - ocmb, l_rc 0x%.8X",
+                         (uint64_t)fapi2::current_err);
+            }
+            else
+            {
+                FAPI_TRY(mss::eff_memory_size<mss::mc_type::EXPLORER>(l_ocmbs[0], l_ocmb_size),
+                         "Error returned from eff_memory_size (EXPLORER) - ocmb, l_rc 0x%.8X",
+                         (uint64_t)fapi2::current_err);
+            }
 
             FAPI_DBG("OCMB size: %lu GB", l_ocmb_size);
 
