@@ -88,6 +88,10 @@ SCENARIO_METHOD(ocmb_chip_target_test_fixture, "PMIC enable ddr5", "[pmic_enable
                 FAPI_INF("Enable efuse")
                 REQUIRE_FALSE(mss::pmic::i2c::reg_read(l_dt, DT_REGS::EN_REGISTER, l_reg_read_buffer));
                 REQUIRE(l_reg_read_buffer == 0x01);
+
+                FAPI_INF("Reset breadcrumb")
+                REQUIRE_FALSE(mss::pmic::i2c::reg_read(l_dt, DT_REGS::BREADCRUMB, l_reg_read_buffer));
+                REQUIRE(l_reg_read_buffer == 0x00);
             }
 
             return 0;
