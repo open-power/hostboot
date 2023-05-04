@@ -705,6 +705,44 @@ Target * getImmediateParentByAffinity(const Target * i_child )
     return l_parent;
 }
 
+Target * getAffinityParent( const Target * i_unit , TARGETING::TYPE i_pType)
+{
+    Target * l_parent = NULL;
+    TARGETING::PredicateCTM l_predicate;
+
+    l_predicate.setType(i_pType);
+
+    // Create a vector of TARGETING::Target pointers
+    TARGETING::TargetHandleList l_chipList;
+
+    // Get parent
+    TARGETING::targetService().getAssociated(l_chipList, i_unit,
+                                             TARGETING::TargetService::PARENT_BY_AFFINITY,
+                                             TARGETING::TargetService::ALL, &l_predicate);
+
+    if (l_chipList.size() == 1)
+    {
+        l_parent = l_chipList[0];
+    }
+    else if (l_chipList.size() == 0)
+    {
+        TARG_ERR("Failed to find an affinity parent target for huid=%.8X of type %d",
+                 TARGETING::get_huid(i_unit),
+                 i_pType);
+        auto l_ppath = i_unit->getAttr<ATTR_PHYS_PATH>();
+        char* l_ppathstr = l_ppath.toString();
+        TARG_ERR("ATTR_PHYS_PATH=%s", l_ppathstr);
+        free(l_ppathstr);
+    }
+    else
+    {
+        TARG_ERR("Found %d parent targets for huid=%.8X, only expected to find 1",
+                 l_chipList.size(),
+                 TARGETING::get_huid(i_unit));
+    }
+
+    return l_parent;
+}
 
 Target * getParent( const Target * i_unit , TARGETING::TYPE i_pType)
 {
@@ -718,8 +756,8 @@ Target * getParent( const Target * i_unit , TARGETING::TYPE i_pType)
 
     // Get parent
     TARGETING::targetService().getAssociated(l_chipList, i_unit,
-                          TARGETING::TargetService::PARENT,
-                          TARGETING::TargetService::ALL, &l_predicate);
+                                             TARGETING::TargetService::PARENT,
+                                             TARGETING::TargetService::ALL, &l_predicate);
 
     if (l_chipList.size() == 1)
     {

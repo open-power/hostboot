@@ -1259,53 +1259,41 @@ errlHndl_t HdatMsVpd::loadMsDataAllProcs()
                                 goto ERROR_EXIT;
                             }
 
-                            //for each mem-port connected to this this ocmb_chip
-                            TargetHandleList l_memPortList;
-                            getChildChiplets(l_memPortList, l_pOcmbTarget, TYPE_MEM_PORT, true);
-
-                            Target *l_pmemPortTarget;
-                            l_pmemPortTarget = l_memPortList[0]; // @TODO JIRA PFHB-387
-
-                            uint32_t l_memBusFreq = 0;
-                            l_memBusFreq = getMemBusFreqP10(l_pmemPortTarget);
-
                             std::list<hdatRamArea>::iterator l_area = l_areas.begin();
-
                             for (uint32_t l_ramId = 0; l_area != l_areas.end(); ++l_ramId, ++l_area)
                             {
-                                uint32_t l_status = (l_area)->ivFunctional
+                                uint32_t l_status = l_area->ivFunctional
                                     ? (HDAT_RAM_INSTALLED | HDAT_RAM_FUNCTIONAL)
                                     : HDAT_RAM_INSTALLED;
 
-                                Target *l_pDimmTarget = Target::getTargetFromHuid(l_area->ivHuid);
-
-                                ATTR_SLCA_RID_type l_dimmRid = 0;
-                                ATTR_SLCA_INDEX_type l_dimmSlcaIndex = 0;
-                                l_dimmRid = l_pDimmTarget->getAttr<ATTR_SLCA_RID>();
-
-                                l_dimmSlcaIndex = l_pDimmTarget->getAttr<ATTR_SLCA_INDEX>();
+                                Target * l_pDimmTarget = Target::getTargetFromHuid(l_area->ivHuid);
+                                Target * l_memPort = getAffinityParent(l_pDimmTarget, TYPE_MEM_PORT);
+                                auto l_memBusFreq = getMemBusFreqP10(l_memPort);
 
                                 uint32_t l_dimmId = 0;
                                 l_dimmId |= 1 << (31 - l_pOmiTarget->getAttr<ATTR_CHIP_UNIT>());
-                                l_dimmId |= 1 << (31 - (l_pmemPortTarget->getAttr<ATTR_CHIP_UNIT>() + 16));
+                                l_dimmId |= 1 << (31 - (l_memPort->getAttr<ATTR_CHIP_UNIT>() + 16));
                                 l_dimmId |= 1 << (31 - (l_pDimmTarget->getAttr<ATTR_REL_POS>() + 20));
 
                                 l_err = addRamFru(l_index,
-                                        l_pDimmTarget,
-                                        l_dimmRid,
-                                        l_dimmSlcaIndex,
-                                        l_ramId,
-                                        l_status,
-                                        (l_area)->ivSize,
-                                        l_dimmId,
-                                        l_memBusFreq);
+                                                  l_pDimmTarget,
+                                                  l_pDimmTarget->getAttr<ATTR_SLCA_RID>(),
+                                                  l_pDimmTarget->getAttr<ATTR_SLCA_INDEX>(),
+                                                  l_ramId,
+                                                  l_status,
+                                                  l_area->ivSize,
+                                                  l_dimmId,
+                                                  l_memBusFreq);
 
                                 if (l_err) // Failed to add ram fru
                                 {
-                                    HDAT_ERR("Error in adding RAM FRU Index:%d Rid:[0x%08X] status:[0x%08X] Size:[0x%08X] RamID:[0x%08X]",
-                                            l_index,(l_area)->ivHuid,
-                                            l_status,(l_area)->ivSize,
-                                            l_ramId);
+                                    HDAT_ERR("Error in adding RAM FRU "
+                                             "Index:%d Rid:[0x%08X] status:[0x%08X] Size:[0x%08X] RamID:[0x%08X]",
+                                             l_index,
+                                             l_area->ivHuid,
+                                             l_status,
+                                             l_area->ivSize,
+                                             l_ramId);
                                     ERRORLOG::errlCommit(l_err, HDAT_COMP_ID);
                                     continue;
                                 }
