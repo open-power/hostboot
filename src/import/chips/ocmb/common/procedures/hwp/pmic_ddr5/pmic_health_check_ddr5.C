@@ -124,13 +124,64 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Attempt recovery for a specific DT/PMIC pair
+///
+/// @param[in,out] io_pmic_dt_target_info PMIC and DT target info struct
+/// @return None
+///
+void attempt_recovery(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_target_info)
+{
+    using DT_REGS  = mss::dt::regs;
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+    static constexpr uint8_t NUM_BYTES_TO_WRITE = 2;
+    fapi2::buffer<uint8_t> l_dt_data_to_write[NUM_BYTES_TO_WRITE];
+    fapi2::buffer<uint8_t> l_pmic_buffer;
+
+    // Disable efuse
+    mss::pmic::ddr5::dt_reg_write(io_pmic_dt_target_info, DT_REGS::EN_REGISTER, 0x00);
+
+    // Delay for 10 ms. Might remove this if natural delay is sufficient
+    fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+    // Clear faults 0 reg
+    l_dt_data_to_write[0] = 0xFF;
+    l_dt_data_to_write[1] = 0xFF;
+    mss::pmic::ddr5::dt_reg_write_contiguous(io_pmic_dt_target_info, DT_REGS::FAULTS_CLEAR_0, l_dt_data_to_write);
+
+    // Clear faults 1 reg
+    l_dt_data_to_write[0] = 0xFF;
+    l_dt_data_to_write[1] = 0xFF;
+    mss::pmic::ddr5::dt_reg_write_contiguous(io_pmic_dt_target_info, DT_REGS::FAULTS_CLEAR_1, l_dt_data_to_write);
+
+    // Disable VR Enable (0 --> Bit 7)
+    mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_pmic_dt_target_info, REGS::R32, l_pmic_buffer);
+    l_pmic_buffer.clearBit<FIELDS::R32_VR_ENABLE>();
+    mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_pmic_dt_target_info, REGS::R32, l_pmic_buffer);
+
+    // Enable efuse
+    mss::pmic::ddr5::dt_reg_write(io_pmic_dt_target_info, DT_REGS::EN_REGISTER, 0x01);
+
+    // Delay for 10 ms. Might remove this if natural delay is sufficient
+    fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+    // Clear global status reg
+    mss::pmic::ddr5::pmic_reg_write(io_pmic_dt_target_info, REGS::R14, 0x01);
+
+    // Start VR Enable (1 --> Bit 7)
+    mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_pmic_dt_target_info, REGS::R32, l_pmic_buffer);
+    l_pmic_buffer.setBit<FIELDS::R32_VR_ENABLE>();
+    mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_pmic_dt_target_info, REGS::R32, l_pmic_buffer);
+}
+
+///
 /// @brief Check bread crumbs for a specific DT/PMIC
 ///
-/// @param[in] i_target pmic target
+/// @param[in,out] io_pmic_dt_target_info PMIC and DT target info struct
 /// @param[in,out] io_dt_health_check struct which contains DT regs info
-/// @return FAPI2_RC_SUCCESS iff okay
+/// None
 ///
-void check_and_advance_breadcrumb_reg(const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_target,
+void check_and_advance_breadcrumb_reg(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_target_info,
                                       mss::pmic::ddr5::dt_health_check_telemetry& io_dt_health_check)
 {
     using DT_REGS  = mss::dt::regs;
@@ -141,7 +192,7 @@ void check_and_advance_breadcrumb_reg(const fapi2::Target<fapi2::TARGET_TYPE_POW
             {
                 // Set breadcrumb to FIRST_ATTEMPT
                 io_dt_health_check.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::FIRST_ATTEMPT;
-                mss::pmic::i2c::reg_write(i_target, DT_REGS::BREADCRUMB, mss::pmic::ddr5::bread_crumb::FIRST_ATTEMPT);
+                mss::pmic::ddr5::dt_reg_write(io_pmic_dt_target_info, DT_REGS::BREADCRUMB, mss::pmic::ddr5::bread_crumb::FIRST_ATTEMPT);
                 break;
             }
 
@@ -149,9 +200,9 @@ void check_and_advance_breadcrumb_reg(const fapi2::Target<fapi2::TARGET_TYPE_POW
             {
                 // Set breadcrumb to RECOVERY_ATTEMPTED
                 io_dt_health_check.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::RECOVERY_ATTEMPTED;
-                mss::pmic::i2c::reg_write(i_target, DT_REGS::BREADCRUMB, mss::pmic::ddr5::bread_crumb::RECOVERY_ATTEMPTED);
-                // TODO: ZEN:MST-1905 Implement PMIC Health Check tool
-                // Call recovery procedure
+                mss::pmic::ddr5::dt_reg_write(io_pmic_dt_target_info, DT_REGS::BREADCRUMB,
+                                              mss::pmic::ddr5::bread_crumb::RECOVERY_ATTEMPTED);
+                attempt_recovery(io_pmic_dt_target_info);
                 break;
             }
 
@@ -159,7 +210,7 @@ void check_and_advance_breadcrumb_reg(const fapi2::Target<fapi2::TARGET_TYPE_POW
             {
                 // Set breadcrumb to STILL_A_FAIL
                 io_dt_health_check.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::STILL_A_FAIL;
-                mss::pmic::i2c::reg_write(i_target, DT_REGS::BREADCRUMB, mss::pmic::ddr5::bread_crumb::STILL_A_FAIL);
+                mss::pmic::ddr5::dt_reg_write(io_pmic_dt_target_info, DT_REGS::BREADCRUMB, mss::pmic::ddr5::bread_crumb::STILL_A_FAIL);
                 break;
             }
 
@@ -176,12 +227,12 @@ void check_and_advance_breadcrumb_reg(const fapi2::Target<fapi2::TARGET_TYPE_POW
 ///
 /// @brief Update bread crumbs for a specific PMIC/DT pair
 ///
-/// @param[in] i_target_info PMIC and DT target info struct
+/// @param[in,out] io_pmic_dt_target_info PMIC and DT target info struct
 /// @param[in,out] io_health_check_info health check struct
 /// @param[in] DT number to be checked for breadcrumbs
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-void update_pmic_breadcrumb(mss::pmic::ddr5::target_info_pmic_dt_pair& i_target_info,
+void update_pmic_breadcrumb(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_target_info,
                             mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
                             const uint8_t i_dt_number)
 {
@@ -189,25 +240,25 @@ void update_pmic_breadcrumb(mss::pmic::ddr5::target_info_pmic_dt_pair& i_target_
     {
         case mss::dt::dt_i2c_devices::DT0:
             {
-                check_and_advance_breadcrumb_reg(i_target_info.iv_dt, io_health_check_info.iv_dt0);
+                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt0);
                 break;
             }
 
         case mss::dt::dt_i2c_devices::DT1:
             {
-                check_and_advance_breadcrumb_reg(i_target_info.iv_dt, io_health_check_info.iv_dt1);
+                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt1);
                 break;
             }
 
         case mss::dt::dt_i2c_devices::DT2:
             {
-                check_and_advance_breadcrumb_reg(i_target_info.iv_dt, io_health_check_info.iv_dt2);
+                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt2);
                 break;
             }
 
         case mss::dt::dt_i2c_devices::DT3:
             {
-                check_and_advance_breadcrumb_reg(i_target_info.iv_dt, io_health_check_info.iv_dt3);
+                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt3);
                 break;
             }
     }
@@ -535,22 +586,22 @@ mss::pmic::ddr5::dt_state check_dt_faults(mss::pmic::ddr5::target_info_redundanc
 
     if (io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_dt_state)
     {
-        check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_dt, io_health_check_info.iv_dt0);
+        check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT0], io_health_check_info.iv_dt0);
     }
 
     if (io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_dt_state)
     {
-        check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_dt, io_health_check_info.iv_dt1);
+        check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT1], io_health_check_info.iv_dt1);
     }
 
     if (io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_dt_state)
     {
-        check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_dt, io_health_check_info.iv_dt2);
+        check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT2], io_health_check_info.iv_dt2);
     }
 
     if (io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_dt_state)
     {
-        check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_dt, io_health_check_info.iv_dt3);
+        check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT3], io_health_check_info.iv_dt3);
     }
 
     return static_cast<mss::pmic::ddr5::dt_state>(std::max({io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_dt_state,

@@ -94,6 +94,14 @@ fapi2::ReturnCode reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5&
                                    mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
 
 ///
+/// @brief Attempt recovery for a specific DT/PMIC pair
+///
+/// @param[in,out] io_pmic_dt_target_info PMIC and DT target info struct
+/// @return None
+///
+void attempt_recovery(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_target_info);
+
+///
 /// @brief Check bread crumbs for a specific DT/PMIC
 ///
 /// @param[in] i_target pmic target
@@ -102,16 +110,15 @@ fapi2::ReturnCode reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5&
 ///
 void check_and_advance_breadcrumb_reg(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_target,
                                       mss::pmic::ddr5::pmic_health_check_telemetry& io_dt_health_check);
-
 ///
 /// @brief Update bread crumbs for a specific PMIC/DT pair
 ///
-/// @param[in] i_target_info PMIC and DT target info struct
+/// @param[in,out] io_pmic_dt_target_info PMIC and DT target info struct
 /// @param[in,out] io_health_check_info health check struct
 /// @param[in] DT number to be checked for breadcrumbs
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-void update_pmic_breadcrumb(mss::pmic::ddr5::target_info_pmic_dt_pair& i_target_info,
+void update_pmic_breadcrumb(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_target_info,
                             mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
                             const uint8_t i_dt_number);
 

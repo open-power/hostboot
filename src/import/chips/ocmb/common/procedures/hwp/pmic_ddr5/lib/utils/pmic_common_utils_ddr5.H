@@ -421,6 +421,49 @@ void pmic_reg_write(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg, cons
 void dt_reg_write(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint8_t>& i_data);
 
 ///
+/// @brief Reverse write a register of a PMIC target
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair struct including target / state info
+/// @param[in] i_reg register
+/// @param[in] i_data input buffer
+/// @return None
+///
+void pmic_reg_write_reverse_buffer(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
+                                   const fapi2::buffer<uint8_t>& i_data);
+
+///
+/// @brief Reverse write a register of a DT target
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair struct including target / state info
+/// @param[in] i_reg register
+/// @param[in] i_data input buffer
+/// @return None
+///
+void dt_reg_write_reverse_buffer(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
+                                 const fapi2::buffer<uint8_t>& i_data);
+
+///
+/// @brief Reverse read a register of a PMIC target
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
+/// @param[in] i_reg register
+/// @param[out] o_data output buffer
+/// @return None
+///
+void pmic_reg_read_reverse_buffer(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
+                                  fapi2::buffer<uint8_t>& o_data);
+
+///
+/// @brief Reverse read contiguous registers of a DT target
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
+/// @param[in] i_reg register
+/// @param[out] o_output output buffer
+/// @return None
+///
+void dt_reg_read_reverse_buffer(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg, fapi2::buffer<uint8_t>& o_data);
+
+///
 /// @brief Read contiguous registers of a PMIC target
 ///
 /// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
@@ -441,6 +484,30 @@ void pmic_reg_read_contiguous(target_info_pmic_dt_pair& io_pmic, const uint8_t i
 template <size_t N>
 void dt_reg_read_contiguous(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
                             fapi2::buffer<uint8_t> (&o_output)[N]);
+
+///
+/// @brief Write contiguous registers to a PMIC target
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
+/// @param[in] i_reg register
+/// @param[in] i_data_buffer buffer of data to be writen to register addresses
+/// @return None
+///
+template <size_t N>
+void pmic_reg_write_contiguous(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
+                               fapi2::buffer<uint8_t> (&i_data_buffer)[N]);
+
+///
+/// @brief Write contiguous registers to a DT target
+///
+/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
+/// @param[in] i_reg register
+/// @param[in] i_data_buffer buffer of data to be writen to register addresses
+/// @return None
+///
+template <size_t N>
+void dt_reg_write_contiguous(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
+                             fapi2::buffer<uint8_t> (&i_data_buffer)[N]);
 
 } // ddr5
 } // pmic
