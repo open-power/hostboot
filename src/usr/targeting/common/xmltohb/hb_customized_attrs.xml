@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -788,6 +788,13 @@
     </attribute>
     <attribute>
         <id>ATTR_PROC_PCIE_CACHE_INJ_THROTTLE</id>
+        <writeable/>
+    </attribute>
+
+    <!-- The PCIE_ECC_HANDLING_MODE property needs to be set
+         explicitly to CHECKSTOP on a storage machine by the FSP code. -->
+    <attribute>
+        <id>ATTR_PROC_PCIE_ECC_HANDLING_MODE</id>
         <writeable/>
     </attribute>
 
