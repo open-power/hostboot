@@ -641,6 +641,8 @@ enum regs
     FAULTS_CLEAR_0 = 0xD4,
     FAULTS_CLEAR_1 = 0xD6,
     EN_REGISTER    = 0xDE,
+
+    BREADCRUMB     = 0xE0,
 };
 
 } // dt

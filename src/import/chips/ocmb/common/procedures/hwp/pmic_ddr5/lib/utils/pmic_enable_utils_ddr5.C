@@ -92,6 +92,9 @@ fapi2::ReturnCode setup_dt(const target_info_redundancy_ddr5& i_target_info)
         // Enable efuse
         FAPI_TRY(mss::pmic::i2c::reg_write(i_target_info.iv_pmic_dt_map[l_dt_count].iv_dt, DT_REGS::EN_REGISTER, 0x01));
 
+        // Clear breadcrumb register.
+        FAPI_TRY(mss::pmic::i2c::reg_write(i_target_info.iv_pmic_dt_map[l_dt_count].iv_dt, DT_REGS::BREADCRUMB, 0x00));
+
         // Delay for 1 ms. Might remove this if natural delay is sufficient
         fapi2::delay(1 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
     }
@@ -646,12 +649,6 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 
             // Set VIN_BULK PG threshold
             FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, REGS::R1A, 0x60));
-
-            // Clear breadcrumb register.
-            // This register is causing I2C to fail as this register changes I2C addresses.
-            // This register does not do anything in ddr4 hence it was decided that we can use this in ddr5 too.
-            // The power team will let the memory team know which register to use instead.
-            //FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, TPS_REGS::RA3_BREADCRUMB, 0x00));
 
             // Bias with SPD
             // TODO: ZEN:MST-1964 Cross check SPD data with bias_with_spd_settings() values
