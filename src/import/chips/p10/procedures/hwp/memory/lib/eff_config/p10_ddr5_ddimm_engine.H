@@ -1642,6 +1642,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         }
 
         ///
+        /// @brief Set the pmic0 swa volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic0_swa_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_VOLT_RANGE_OFFSET_SWA, i_spd, pmic::SET_PMIC0_SWA_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic0_swa_voltage_coarse_offset(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the pmic0 swa volt off field
         ///
         /// @param[in] i_spd SPD binary
@@ -1776,6 +1795,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   "PMIC0 SWB range select"));
 
             FAPI_TRY(mss::attr::set_pmic0_swb_voltage_range_select(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic0 swb volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic0_swb_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_VOLT_RANGE_OFFSET_SWB, i_spd, pmic::SET_PMIC0_SWB_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic0_swb_voltage_coarse_offset(iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1922,6 +1960,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         }
 
         ///
+        /// @brief Set the pmic0 swc volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic0_swc_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_VOLT_RANGE_OFFSET_SWC, i_spd, pmic::SET_PMIC0_SWC_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic0_swc_voltage_coarse_offset(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the pmic0 swc volt off field
         ///
         /// @param[in] i_spd SPD binary
@@ -2056,6 +2113,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   "PMIC0 SWD range select"));
 
             FAPI_TRY(mss::attr::set_pmic0_swd_voltage_range_select(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic0 swd volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic0_swd_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_VOLT_RANGE_OFFSET_SWD, i_spd, pmic::SET_PMIC0_SWD_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic0_swd_voltage_coarse_offset(iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2227,6 +2303,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         }
 
         ///
+        /// @brief Set the pmic1 swa volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic1_swa_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_VOLT_RANGE_OFFSET_SWA, i_spd, pmic::SET_PMIC1_SWA_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic1_swa_voltage_coarse_offset(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the pmic1 swa volt off field
         ///
         /// @param[in] i_spd SPD binary
@@ -2361,6 +2456,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   "PMIC1 SWB range select"));
 
             FAPI_TRY(mss::attr::set_pmic1_swb_voltage_range_select(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic1 swb volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic1_swb_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_VOLT_RANGE_OFFSET_SWB, i_spd, pmic::SET_PMIC1_SWB_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic1_swb_voltage_coarse_offset(iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2507,6 +2621,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         }
 
         ///
+        /// @brief Set the pmic1 swc volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic1_swc_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_VOLT_RANGE_OFFSET_SWC, i_spd, pmic::SET_PMIC1_SWC_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic1_swc_voltage_coarse_offset(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the pmic1 swc volt off field
         ///
         /// @param[in] i_spd SPD binary
@@ -2641,6 +2774,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   "PMIC1 SWD range select"));
 
             FAPI_TRY(mss::attr::set_pmic1_swd_voltage_range_select(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic1 swd volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic1_swd_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_VOLT_RANGE_OFFSET_SWD, i_spd, pmic::SET_PMIC1_SWD_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic1_swd_voltage_coarse_offset(iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2812,6 +2964,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         }
 
         ///
+        /// @brief Set the pmic2 swa volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic2_swa_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_VOLT_RANGE_OFFSET_SWA, i_spd, pmic::SET_PMIC2_SWA_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic2_swa_voltage_coarse_offset(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the pmic2 swa volt off field
         ///
         /// @param[in] i_spd SPD binary
@@ -2946,6 +3117,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   "PMIC2 SWB range select"));
 
             FAPI_TRY(mss::attr::set_pmic2_swb_voltage_range_select(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic2 swb volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic2_swb_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_VOLT_RANGE_OFFSET_SWB, i_spd, pmic::SET_PMIC2_SWB_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic2_swb_voltage_coarse_offset(iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -3092,6 +3282,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         }
 
         ///
+        /// @brief Set the pmic2 swc volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic2_swc_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_VOLT_RANGE_OFFSET_SWC, i_spd, pmic::SET_PMIC2_SWC_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic2_swc_voltage_coarse_offset(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the pmic2 swc volt off field
         ///
         /// @param[in] i_spd SPD binary
@@ -3226,6 +3435,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   "PMIC2 SWD range select"));
 
             FAPI_TRY(mss::attr::set_pmic2_swd_voltage_range_select(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic2 swd volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic2_swd_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_VOLT_RANGE_OFFSET_SWD, i_spd, pmic::SET_PMIC2_SWD_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic2_swd_voltage_coarse_offset(iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -3398,6 +3626,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         }
 
         ///
+        /// @brief Set the pmic3 swa volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic3_swa_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_VOLT_RANGE_OFFSET_SWA, i_spd, pmic::SET_PMIC3_SWA_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic3_swa_voltage_coarse_offset(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the pmic3 swa volt off field
         ///
         /// @param[in] i_spd SPD binary
@@ -3532,6 +3779,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   "PMIC3 SWB range select"));
 
             FAPI_TRY(mss::attr::set_pmic3_swb_voltage_range_select(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic3 swb volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic3_swb_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_VOLT_RANGE_OFFSET_SWB, i_spd, pmic::SET_PMIC3_SWB_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic3_swb_voltage_coarse_offset(iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -3678,6 +3944,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         }
 
         ///
+        /// @brief Set the pmic3 swc volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic3_swc_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_VOLT_RANGE_OFFSET_SWC, i_spd, pmic::SET_PMIC3_SWC_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic3_swc_voltage_coarse_offset(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the pmic3 swc volt off field
         ///
         /// @param[in] i_spd SPD binary
@@ -3812,6 +4097,25 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   "PMIC3 SWD range select"));
 
             FAPI_TRY(mss::attr::set_pmic3_swd_voltage_range_select(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic3 swd volt coarse offset field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic3_swd_volt_coarse_off(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_VOLT_RANGE_OFFSET_SWD, i_spd, pmic::SET_PMIC3_SWD_VOLTAGE_COARSE_OFFSET,
+                                   l_field));
+
+            FAPI_TRY(mss::attr::set_pmic3_swd_voltage_coarse_offset(iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4977,84 +5281,100 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             FAPI_TRY(set_pmic3_rev(i_spd));
             FAPI_TRY(set_pmic0_swa_volt_set(i_spd));
             FAPI_TRY(set_pmic0_swa_range_select(i_spd));
+            FAPI_TRY(set_pmic0_swa_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic0_swa_volt_off(i_spd));
             FAPI_TRY(set_pmic0_swa_delay(i_spd));
             FAPI_TRY(set_pmic0_swa_order(i_spd));
             FAPI_TRY(set_pmic0_swb_volt_set(i_spd));
             FAPI_TRY(set_pmic0_swb_range_select(i_spd));
+            FAPI_TRY(set_pmic0_swb_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic0_swb_volt_off(i_spd));
             FAPI_TRY(set_pmic0_swb_delay(i_spd));
             FAPI_TRY(set_pmic0_swb_order(i_spd));
             FAPI_TRY(set_pmic0_swc_volt_set(i_spd));
             FAPI_TRY(set_pmic0_swc_range_select(i_spd));
+            FAPI_TRY(set_pmic0_swc_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic0_swc_volt_off(i_spd));
             FAPI_TRY(set_pmic0_swc_delay(i_spd));
             FAPI_TRY(set_pmic0_swc_order(i_spd));
             FAPI_TRY(set_pmic0_swd_volt_set(i_spd));
             FAPI_TRY(set_pmic0_swd_range_select(i_spd));
+            FAPI_TRY(set_pmic0_swd_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic0_swd_volt_off(i_spd));
             FAPI_TRY(set_pmic0_swd_delay(i_spd));
             FAPI_TRY(set_pmic0_swd_order(i_spd));
             FAPI_TRY(set_pmic0_phase_combin(i_spd));
             FAPI_TRY(set_pmic1_swa_volt_set(i_spd));
             FAPI_TRY(set_pmic1_swa_range_select(i_spd));
+            FAPI_TRY(set_pmic1_swa_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic1_swa_volt_off(i_spd));
             FAPI_TRY(set_pmic1_swa_delay(i_spd));
             FAPI_TRY(set_pmic1_swa_order(i_spd));
             FAPI_TRY(set_pmic1_swb_volt_set(i_spd));
             FAPI_TRY(set_pmic1_swb_range_select(i_spd));
+            FAPI_TRY(set_pmic1_swb_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic1_swb_volt_off(i_spd));
             FAPI_TRY(set_pmic1_swb_delay(i_spd));
             FAPI_TRY(set_pmic1_swb_order(i_spd));
             FAPI_TRY(set_pmic1_swc_volt_set(i_spd));
             FAPI_TRY(set_pmic1_swc_range_select(i_spd));
+            FAPI_TRY(set_pmic1_swc_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic1_swc_volt_off(i_spd));
             FAPI_TRY(set_pmic1_swc_delay(i_spd));
             FAPI_TRY(set_pmic1_swc_order(i_spd));
             FAPI_TRY(set_pmic1_swd_volt_set(i_spd));
             FAPI_TRY(set_pmic1_swd_range_select(i_spd));
+            FAPI_TRY(set_pmic1_swd_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic1_swd_volt_off(i_spd));
             FAPI_TRY(set_pmic1_swd_delay(i_spd));
             FAPI_TRY(set_pmic1_swd_order(i_spd));
             FAPI_TRY(set_pmic1_phase_combin(i_spd));
             FAPI_TRY(set_pmic2_swa_volt_set(i_spd));
             FAPI_TRY(set_pmic2_swa_range_select(i_spd));
+            FAPI_TRY(set_pmic2_swa_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic2_swa_volt_off(i_spd));
             FAPI_TRY(set_pmic2_swa_delay(i_spd));
             FAPI_TRY(set_pmic2_swa_order(i_spd));
             FAPI_TRY(set_pmic2_swb_volt_set(i_spd));
             FAPI_TRY(set_pmic2_swb_range_select(i_spd));
+            FAPI_TRY(set_pmic2_swb_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic2_swb_volt_off(i_spd));
             FAPI_TRY(set_pmic2_swb_delay(i_spd));
             FAPI_TRY(set_pmic2_swb_order(i_spd));
             FAPI_TRY(set_pmic2_swc_volt_set(i_spd));
             FAPI_TRY(set_pmic2_swc_range_select(i_spd));
+            FAPI_TRY(set_pmic2_swc_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic2_swc_volt_off(i_spd));
             FAPI_TRY(set_pmic2_swc_delay(i_spd));
             FAPI_TRY(set_pmic2_swc_order(i_spd));
             FAPI_TRY(set_pmic2_swd_volt_set(i_spd));
             FAPI_TRY(set_pmic2_swd_range_select(i_spd));
+            FAPI_TRY(set_pmic2_swd_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic2_swd_volt_off(i_spd));
             FAPI_TRY(set_pmic2_swd_delay(i_spd));
             FAPI_TRY(set_pmic2_swd_order(i_spd));
             FAPI_TRY(set_pmic2_phase_combin(i_spd));
             FAPI_TRY(set_pmic3_swa_volt_set(i_spd));
             FAPI_TRY(set_pmic3_swa_range_select(i_spd));
+            FAPI_TRY(set_pmic3_swa_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic3_swa_volt_off(i_spd));
             FAPI_TRY(set_pmic3_swa_delay(i_spd));
             FAPI_TRY(set_pmic3_swa_order(i_spd));
             FAPI_TRY(set_pmic3_swb_volt_set(i_spd));
             FAPI_TRY(set_pmic3_swb_range_select(i_spd));
+            FAPI_TRY(set_pmic3_swb_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic3_swb_volt_off(i_spd));
             FAPI_TRY(set_pmic3_swb_delay(i_spd));
             FAPI_TRY(set_pmic3_swb_order(i_spd));
             FAPI_TRY(set_pmic3_swc_volt_set(i_spd));
             FAPI_TRY(set_pmic3_swc_range_select(i_spd));
+            FAPI_TRY(set_pmic3_swc_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic3_swc_volt_off(i_spd));
             FAPI_TRY(set_pmic3_swc_delay(i_spd));
             FAPI_TRY(set_pmic3_swc_order(i_spd));
             FAPI_TRY(set_pmic3_swd_volt_set(i_spd));
             FAPI_TRY(set_pmic3_swd_range_select(i_spd));
+            FAPI_TRY(set_pmic3_swd_volt_coarse_off(i_spd));
             FAPI_TRY(set_pmic3_swd_volt_off(i_spd));
             FAPI_TRY(set_pmic3_swd_delay(i_spd));
             FAPI_TRY(set_pmic3_swd_order(i_spd));
