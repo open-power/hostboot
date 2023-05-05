@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -231,6 +231,7 @@ fapi2::ReturnCode bootMemory(
     FAPI_DBG("SRAM PGM[1]: 0x%016llX", l_sram_program[1]);
 
     // Write to SRAM
+    FAPI_INF("OCC boot program insertion into SRAM");
     FAPI_EXEC_HWP(l_rc, p10_pm_ocb_indir_access, i_target,
                   ocb::OCB_CHAN1,
                   ocb::OCB_PUT,
@@ -239,6 +240,11 @@ fapi2::ReturnCode bootMemory(
                   0,
                   l_ocb_length_act,
                   l_sram_program);
+
+    if (l_rc)
+    {
+        FAPI_ERR("OCC boot program insertion into SRAM failed");
+    }
 
     FAPI_ASSERT(l_ocb_length_act == SRAM_PROGRAM_SIZE,
                 fapi2::OCC_CONTROL_MEM_BOOT_LENGTH_MISMATCH()
@@ -258,7 +264,13 @@ fapi_try_exit:
                   0,   // Length
                   ocb::OCB_Q_OUFLOW_NULL,
                   ocb::OCB_Q_ITPTYPE_NULL);
-    fapi2::current_err = l_rc;
+
+    // Overwrite the error code only if things are good up to this point
+    if ((!fapi2::current_err) && l_rc)
+    {
+        FAPI_ERR("Restoration of Channel 1 to Circular mode failed");
+        fapi2::current_err = l_rc;
+    }
 
     return fapi2::current_err;
 }
@@ -279,7 +291,6 @@ fapi2::ReturnCode pollOCCState(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
 
-#ifdef __HOSTBOOT_MODULE
     using namespace scomt;
     using namespace proc;
 
@@ -287,7 +298,7 @@ fapi2::ReturnCode pollOCCState(
     uint32_t                 l_timeout_counter = TIMEOUT_COUNT;
     uint32_t retry_cnt = 30;
 
-    FAPI_DBG("OCC state polling...");
+    FAPI_INF("OCC polling start ...");
 
     while( retry_cnt-- )
     {
@@ -319,7 +330,6 @@ fapi2::ReturnCode pollOCCState(
 
     FAPI_INF("OCC was activated successfully!!!!");
 
-#endif
 fapi_try_exit:
     return fapi2::current_err;
 
