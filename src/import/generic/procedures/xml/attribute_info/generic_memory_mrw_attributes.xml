@@ -55,9 +55,6 @@
     <default>32</default>
     <platInit/>
     <mssAccessorName>mrw_safemode_mem_throttled_n_commands_per_port</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -88,9 +85,6 @@
     <array>100</array>
     <default>0xFFFFF8000384044C</default>
     <mssAccessorName>mrw_pwr_intercept</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -121,9 +115,6 @@
     <array>100</array>
     <default>0xFFFFF800041A044C</default>
     <mssAccessorName>mrw_pwr_slope</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -147,9 +138,6 @@
     </enum>
     <default>0x0</default>
     <mssAccessorName>mrw_refresh_rate_request</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -270,9 +258,6 @@
     <platInit/>
     <default>OFF</default>
     <mssAccessorName>mrw_idle_power_control_requested</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -314,9 +299,6 @@
     <mssUnits>cW</mssUnits>
     <default>0x000006A4</default>
     <mssAccessorName>mrw_vmem_regulator_power_limit_per_dimm_ddr4</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -331,9 +313,6 @@
     <platInit/>
     <initToZero/>
     <mssAccessorName>mrw_max_number_dimms_possible_per_vmem_regulator</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -433,9 +412,6 @@
     <platInit/>
     <default>EXTEND</default>
     <mssAccessorName>mrw_temp_refresh_range</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -447,9 +423,6 @@
     <default>YES</default>
     <platInit/>
     <mssAccessorName>mrw_reset_delay_before_cal</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -484,9 +457,6 @@
     <platInit/>
     <default>0xD90C</default>
     <mssAccessorName>mrw_periodic_memcal_mode_options</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -505,9 +475,6 @@
     <platInit/>
     <default>0x8000</default>
     <mssAccessorName>mrw_periodic_zqcal_mode_options</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -523,9 +490,6 @@
     <platInit/>
     <default>AUTO</default>
     <mssAccessorName>mrw_dram_2n_mode</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
  <attribute>
@@ -569,9 +533,6 @@
     <enum> DISABLE = 0, ENABLE = 1 </enum>
     <default> 0  </default>
     <mssAccessorName>mrw_temp_refresh_mode</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -588,9 +549,6 @@
     <initToZero/>
     <enum> NO = 0, YES = 1 </enum>
     <mssAccessorName>mrw_force_bcmode_off</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -609,9 +567,6 @@
     <default> 0 </default>
     <enum> NO_NVDIMM = 0, NVDIMM_CAPABLE = 1 </enum>
     <mssAccessorName>mrw_nvdimm_plug_rules</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -626,9 +581,6 @@
     <default> 1  </default>
     <enum> DISABLE = 0, ENABLE = 1 </enum>
     <mssAccessorName>mrw_allow_unsupported_rcw</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -644,9 +596,6 @@
     <default> 0xC0 </default>
     <enum> X4 = 0, X8 = 1 </enum>
     <mssAccessorName>mrw_supported_dram_width</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -816,9 +765,6 @@
     <default>0x000009C4</default>
     <platInit/>
     <mssAccessorName>mrw_safemode_dram_databus_util</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -833,9 +779,6 @@
     <platInit/>
     <mrwHide/>
     <mssAccessorName>mrw_thermal_sensor_polling_period</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -853,9 +796,6 @@
     <default>RIGHT_TO_LEFT</default>
     <platInit/>
     <mssAccessorName>mrw_dimm_slot_airflow</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -885,9 +825,6 @@
     <initToZero></initToZero>
     <platInit/>
     <mssAccessorName>mrw_ocmb_reset_group</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -956,9 +893,6 @@
     <array>10</array>
     <platInit/>
     <mssAccessorName>mrw_thermal_memory_power_limit</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 <!-- END DEPRECATED -->
 
@@ -977,9 +911,6 @@
     <default>DISABLED</default>
     <platInit/>
     <mssAccessorName>mrw_orverride_therm_sensor_usage</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>

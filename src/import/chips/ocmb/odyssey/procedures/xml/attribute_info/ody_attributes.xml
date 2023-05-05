@@ -67,9 +67,6 @@
         <default>TRAINING_IMAGE</default>
         <writeable/>
         <mssAccessorName>ody_phy_image_select</mssAccessorName>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -163,9 +160,6 @@
         <valueType>uint16</valueType>
         <initToZero></initToZero>
         <writeable/>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -178,9 +172,6 @@
         <valueType>uint16</valueType>
         <initToZero></initToZero>
         <writeable/>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -193,9 +184,6 @@
         <valueType>uint16</valueType>
         <initToZero></initToZero>
         <writeable/>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -208,9 +196,6 @@
         <valueType>uint16</valueType>
         <initToZero></initToZero>
         <writeable/>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -741,9 +726,6 @@
         <default>0</default>
         <writeable/>
         <mssAccessorName>sim_tdqs2dq</mssAccessorName>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -757,9 +739,6 @@
         <default>0</default>
         <writeable/>
         <mssAccessorName>sim_tdqsck</mssAccessorName>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -772,9 +751,6 @@
         <default>0</default>
         <writeable/>
         <mssAccessorName>sim_tstaoff</mssAccessorName>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -787,9 +763,6 @@
         <default>0</default>
         <writeable/>
         <mssAccessorName>sim_tpdm</mssAccessorName>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -807,9 +780,6 @@
         <default>NO_OVERRIDE</default>
         <writeable/>
         <mssAccessorName>sim_tcasl_override</mssAccessorName>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -826,9 +796,6 @@
         <array>4</array>
         <writeable/>
         <mssAccessorName>sim_tcasl_add</mssAccessorName>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>

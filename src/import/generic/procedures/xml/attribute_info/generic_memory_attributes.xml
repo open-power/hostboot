@@ -105,9 +105,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssAccessorName>dimm_buffer_delay</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -168,9 +165,6 @@
     <mssBlobLength>80</mssBlobLength>
     <mssAccessorName>mem_vpd_dq_map</mssAccessorName>
     <array>80</array>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -187,9 +181,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f0rc0f</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -208,9 +199,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>cs_cmd_latency</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -227,9 +215,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>ca_parity_latency</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -246,9 +231,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f0rc02</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -265,9 +247,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f0rc03</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -284,9 +263,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f0rc04</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -303,9 +279,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f0rc05</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -322,9 +295,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f0rc0b</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -341,9 +311,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f0rc1x</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -360,9 +327,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f0rc7x</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -379,9 +343,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f1rc00</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -398,9 +359,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f1rc02</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -417,9 +375,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f1rc03</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -436,9 +391,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f1rc04</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -455,9 +407,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dimm_ddr4_f1rc05</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -533,9 +482,6 @@
     <platInit/>
     <initToZero/>
     <mssAccessorName>mss_omi_edpl_disable</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -550,9 +496,6 @@
     <writeable/>
     <enum>NO = 0, YES = 1</enum>
     <mssAccessorName>ignore_mem_plug_rules</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -567,9 +510,6 @@
     <writeable/>
     <enum>NO = 0, YES = 1</enum>
     <mssAccessorName>ignore_mem_plug_rules_dimm_size_mix</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -584,9 +524,6 @@
     <writeable/>
     <enum>NO = 0, YES = 1</enum>
     <mssAccessorName>ignore_mem_plug_rules_dimm_height_mix</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -609,9 +546,6 @@
     <platInit/>
     <writeable/>
     <mssAccessorName>omi_x4_degrade_action</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -634,9 +568,6 @@
     <writeable/>
     <overrideOnly/>
     <mssAccessorName>omi_crc_debug</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -650,9 +581,6 @@
     <writeable/>
     <default>ENABLED</default>
     <mssAccessorName>enable_fir_unmasking</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -668,9 +596,6 @@
     <platInit/>
     <mrwHide/>
     <mssAccessorName>is_apollo</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -837,8 +762,5 @@
         <array>2</array>
         <writeable/>
         <mssAccessorName>dram_address_mirroring</mssAccessorName>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 </attributes>

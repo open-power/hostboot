@@ -114,9 +114,6 @@
   <platInit/>
   <mrwHide/>
   <mssAccessorName>ody_enable_us_tmpl_a</mssAccessorName>
-  <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>

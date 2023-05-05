@@ -128,9 +128,6 @@
     <array>2</array>
     <mssUnit>ratio</mssUnit>
     <mssAccessorName>host_to_ddr_speed_ratio</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -171,9 +168,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dram_bank_bits</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -193,9 +187,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dram_bank_group_bits</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -214,9 +205,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dram_column_bits</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -265,9 +253,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>prim_die_count</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -307,9 +292,6 @@
     <default>32,32</default>
     <array>2</array>
     <mssAccessorName>prim_bus_width</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -328,9 +310,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>channels_per_dimm</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -346,9 +325,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dram_ppr</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -364,9 +340,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>dram_soft_ppr</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -422,9 +395,6 @@
     <writeable/>
     <mssUnits> nck </mssUnits>
     <mssAccessorName>dram_tras</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -553,9 +523,6 @@
     <writeable/>
     <mssUnits> nck </mssUnits>
     <mssAccessorName>dram_trrd_dlr</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -670,9 +637,6 @@
     <writeable/>
     <mssUnits> nck </mssUnits>
     <mssAccessorName>dram_tmaw</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -754,9 +718,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>register_type</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -774,9 +735,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>module_mfg_id</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -850,9 +808,6 @@
     <writeable/>
     <array>2</array>
     <mssAccessorName>register_rev</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -868,9 +823,6 @@
     <writeable/>
     <array>2 20</array>
     <mssAccessorName>package_rank_map</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -886,9 +838,6 @@
     <writeable/>
     <array>2 20</array>
     <mssAccessorName>nibble_map</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -964,9 +913,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssAccessorName>dram_mds</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -1098,9 +1044,6 @@
     <writeable/>
     <mssUnits> mV </mssUnits>
     <mssAccessorName>volt_vddr</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -1114,9 +1057,6 @@
     <writeable/>
     <mssUnits> mV </mssUnits>
     <mssAccessorName>volt_vddq</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -1130,9 +1070,6 @@
     <writeable/>
     <mssUnits> mV </mssUnits>
     <mssAccessorName>volt_vpp</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -1160,9 +1097,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssAccessorName>spd_content_revision</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -1201,9 +1135,6 @@
     <array>2</array>
     <writeable/>
     <mssAccessorName>byte_enables</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>

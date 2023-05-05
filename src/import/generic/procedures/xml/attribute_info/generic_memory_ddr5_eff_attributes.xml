@@ -134,9 +134,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssAccessorName>ddr5_tx_slew_fall_ck</mssAccessorName>
-    <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -394,9 +391,6 @@
         <valueType>uint64</valueType>
         <writeable/>
         <mssAccessorName>ddr5_spd_cl_supported</mssAccessorName>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
 
@@ -446,9 +440,6 @@
         <enum>NOT_USED = 0, 32_BITS = 32, 36_BITS = 36, 40_BITS = 40</enum>
         <mssAccessorName>ddr5_channel_bus_width</mssAccessorName>
         <array>2</array>
-        <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>

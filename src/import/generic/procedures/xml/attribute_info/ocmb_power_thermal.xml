@@ -172,9 +172,6 @@
       <default>32</default>
       <platInit/>
       <mssAccessorName>safemode_mem_throttled_n_commands_per_port</mssAccessorName>
-      <sbeAttrSync toSBE="0" fromSBE="0" chipTypes="ody">
-        <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-      </sbeAttrSync>
     </attribute>
 
     <attribute>
