@@ -120,12 +120,11 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Data (2MB)</description>
+        <description>Hostboot Data (1824K)</description>
         <eyeCatch>HBD</eyeCatch>
-        <physicalRegionSize>0x200000</physicalRegionSize>
+        <physicalRegionSize>0x1C8000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
-        <ecc/>
     </section>
     <section>
         <description>Hostboot Extended image (17.77MB w/o ECC)</description>
@@ -135,21 +134,19 @@ Layout Description
         <side>sideless</side>
     </section>
     <section>
-        <description>SBE-IPL (Staging Area) (752K)</description>
+        <description>SBE-IPL (Staging Area) (672K)</description>
         <eyeCatch>SBE</eyeCatch>
-        <physicalRegionSize>0xBC000</physicalRegionSize>
+        <physicalRegionSize>0xA8000</physicalRegionSize>
         <sha512perEC/>
         <sha512Version/>
         <side>sideless</side>
-        <ecc/>
     </section>
     <section>
-        <description>HCODE Ref Image (1.125MB)</description>
+        <description>HCODE Ref Image (1MB)</description>
         <eyeCatch>HCODE</eyeCatch>
-        <physicalRegionSize>0x120000</physicalRegionSize>
+        <physicalRegionSize>0x100000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
-        <ecc/>
     </section>
     <section>
         <description>Hostboot Runtime Services for Sapphire (12.0MB)</description>
@@ -159,9 +156,9 @@ Layout Description
         <side>sideless</side>
     </section>
     <section>
-        <description>Payload (8.875MB)</description>
+        <description>Payload (2MB)</description>
         <eyeCatch>PAYLOAD</eyeCatch>
-        <physicalRegionSize>0x08E0000</physicalRegionSize>
+        <physicalRegionSize>0x0200000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
     </section>
@@ -176,26 +173,24 @@ Layout Description
     <section>
         <!-- Note there is no <sha512Version/> tag on purpose to avoid hostboot
              from skipping header. Signing is forced in build pnor phase -->
-        <description>Special PNOR Test Space with Header (36K)</description>
+        <description>Special PNOR Test Space with Header (32K)</description>
         <eyeCatch>TESTRO</eyeCatch>
-        <physicalRegionSize>0x9000</physicalRegionSize>
+        <physicalRegionSize>0x8000</physicalRegionSize>
         <side>sideless</side>
         <testonly/>
         <preserved/>
         <readOnly/>
-        <ecc/>
     </section>
     <section>
         <!-- @HBBL_SIZE_SYNC -->
-        <description>Hostboot Bootloader (44K)</description>
+        <description>Hostboot Bootloader (40K)</description>
         <eyeCatch>HBBL</eyeCatch>
-        <!-- Physical Size includes Header rounded to ECC valid size -->
+        <!-- Physical Size includes Header rounded to page size -->
         <!-- Max size of actual HBBL content is 4K secure header + 32K -->
-        <!-- logical content + ECC overhead = 44K -->
-        <physicalRegionSize>0xB000</physicalRegionSize>
+        <!-- logical content = 36K.  4K space reserved for expansion. -->
+        <physicalRegionSize>0xA000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
-        <ecc/>
     </section>
     <section>
         <description>Ref Image Ring Overrides (20K)</description>
@@ -212,30 +207,27 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>OCC Lid (1.125M)</description>
+        <description>OCC Lid (1M)</description>
         <eyeCatch>OCC</eyeCatch>
-        <physicalRegionSize>0x120000</physicalRegionSize>
+        <physicalRegionSize>0x100000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
-        <ecc/>
     </section>
     <section>
-        <description>VFRT data for WOF (6MB)</description>
+        <description>VFRT data for WOF (5,464K)</description>
         <!-- We need 266KB per module sort, going to support
-             40 tables by default, plus ECC  -->
+             40 tables by default  -->
         <eyeCatch>WOFDATA</eyeCatch>
-        <physicalRegionSize>0x600000</physicalRegionSize>
+        <physicalRegionSize>0x556000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
-        <ecc/>
     </section>
     <section>
-        <description>Memory Data (128K)</description>
+        <description>Memory Data (116K)</description>
         <eyeCatch>MEMD</eyeCatch>
-        <physicalRegionSize>0x20000</physicalRegionSize>
+        <physicalRegionSize>0x1D000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
-        <ecc/>
     </section>
     <section>
         <description>Secureboot Test Load (12K)</description>
@@ -246,21 +238,19 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Secure Boot (144K)</description>
+        <description>Secure Boot (128K)</description>
         <eyeCatch>SECBOOT</eyeCatch>
-        <physicalRegionSize>0x24000</physicalRegionSize>
+        <physicalRegionSize>0x20000</physicalRegionSize>
         <side>sideless</side>
-        <ecc/>
         <preserved/>
     </section>
     <section>
-        <description>Open CAPI Memory Buffer (OCMB) Firmware (2MB)</description>
+        <description>Open CAPI Memory Buffer (OCMB) Firmware (1,824K)</description>
         <eyeCatch>OCMBFW</eyeCatch>
-        <physicalRegionSize>0x200000</physicalRegionSize>
+        <physicalRegionSize>0x1C8000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
         <readOnly/>
-        <ecc/>
     </section>
     <section>
         <description>HDAT Data (16K)</description>
@@ -287,12 +277,11 @@ Layout Description
         <side>sideless</side>
     </section>
     <section>
-        <description>HCODE_LID Ref Image (1.125MB)</description>
+        <description>HCODE_LID Ref Image (1MB)</description>
         <eyeCatch>HCODE_LID</eyeCatch>
-        <physicalRegionSize>0x120000</physicalRegionSize>
+        <physicalRegionSize>0x100000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
-        <ecc/>
     </section>
     <section>
         <description>Planar SPD (32K)</description>
