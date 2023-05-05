@@ -932,20 +932,20 @@ class base_0_0 : public mss::spd::base
             uint8_t l_dram_width = 0;
             uint8_t l_prim_die_count = 0;
             uint8_t l_dram_density = 0;
-            uint8_t l_logical_rank_per_dimm = 0;
+            uint8_t l_master_ranks = 0;
 
             FAPI_TRY( mss::attr::get_channels_per_dimm(iv_dimm, l_channels_per_dimm) );
             FAPI_TRY( mss::attr::get_prim_bus_width(iv_dimm, l_bus_width_per_channel) );
             FAPI_TRY( mss::attr::get_dram_width(iv_dimm, l_dram_width) );
             FAPI_TRY( mss::attr::get_prim_die_count(iv_dimm, l_prim_die_count) );
             FAPI_TRY( mss::attr::get_dram_density(iv_dimm, l_dram_density) );
-            FAPI_TRY( mss::attr::get_logical_ranks_per_dimm(iv_dimm, l_logical_rank_per_dimm) );
+            FAPI_TRY( mss::attr::get_num_master_ranks_per_dimm(iv_dimm, l_master_ranks) );
 
             // Calculate dimm size
             // Formula from SPD Spec (seriously, they don't have parenthesis in the spec)
             // Total = l_channels_per_dimm * l_bus_width_per_channel / l_dram_width * l_die_per_package *
             //         l_dram_density / 8 * l_ranks_per_channel
-            l_field = (l_channels_per_dimm * l_bus_width_per_channel * l_prim_die_count * l_dram_density * l_logical_rank_per_dimm)
+            l_field = (l_channels_per_dimm * l_bus_width_per_channel * l_prim_die_count * l_dram_density * l_master_ranks)
                       / (8 * l_dram_width);
 
 #ifdef __PPE__
@@ -956,7 +956,7 @@ class base_0_0 : public mss::spd::base
 #else
             FAPI_DBG("%s DIMM size = %d => %d * (%d / %d) * %d * (%d / 8) * %d",
                      spd::c_str(iv_dimm), l_field, l_channels_per_dimm, l_bus_width_per_channel, l_dram_width,
-                     l_prim_die_count, l_dram_density, l_logical_rank_per_dimm );
+                     l_prim_die_count, l_dram_density, l_master_ranks );
 #endif
             FAPI_TRY(mss::attr::set_dimm_size(iv_dimm, l_field));
 
