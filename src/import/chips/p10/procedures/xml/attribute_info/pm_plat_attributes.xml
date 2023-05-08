@@ -3624,4 +3624,21 @@
     <overrideOnly/>
   </attribute>
   <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_OCC_START_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Disables the starting of the OCC PPC405.  This is typically used
+    in lab environments under Cronus.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <platInit/>
+    <overrideOnly/>
+    <default>OFF</default>
+    <group>istep21</group>
+  </attribute>
+  <!-- *********************************************************************-->
 </attributes>
