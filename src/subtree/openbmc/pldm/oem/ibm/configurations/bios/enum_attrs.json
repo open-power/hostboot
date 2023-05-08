@@ -130,6 +130,14 @@
             "displayName": "HMC managed System"
         },
         {
+            "attribute_name": "pvm_vmi_support",
+            "possible_values": ["Disabled", "Enabled"],
+            "default_values": ["Disabled"],
+            "helpText": "Indicates whether or not VMI support has been provisioned by Hypervisor. Enabled - VMI is available, Disabled - VMI is not available.",
+            "displayName": "VMI Support",
+            "readOnly": true
+        },
+        {
             "attribute_name": "pvm_rtad",
             "possible_values": ["Disabled", "Enabled"],
             "default_values": ["Disabled"],

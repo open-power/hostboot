@@ -28,7 +28,7 @@ class MockHostEffecterParser : public HostEffecterParser
     MOCK_METHOD(void, createHostEffecterMatch,
                 (const std::string&, const std::string&, size_t, size_t,
                  uint16_t),
-                (const override));
+                (override));
 
     const std::vector<EffecterInfo>& gethostEffecterInfo()
     {

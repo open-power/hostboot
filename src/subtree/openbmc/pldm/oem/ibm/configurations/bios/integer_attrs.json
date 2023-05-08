@@ -196,6 +196,15 @@
             "displayName": "RPD Scheduled Run Time of Day in Seconds"
         },
         {
+            "attribute_name": "pvm_rpd_scheduled_duration",
+            "lower_bound": 30,
+            "upper_bound": 1440,
+            "scalar_increment": 1,
+            "default_value": 1440,
+            "helpText": "Only used when pvm_rpd_policy is set to “Scheduled”. This value represents the duration in minutes to run the processor diagnostics, starting at the Scheduled Time of Day. Note: If the RPD is unable to test every core within the specified Run Time Duration, the RPD will resume where it left off, at the next Schedule Run Time of Day.",
+            "displayName": "RPD Scheduled Run Time Duration in Minutes"
+        },
+        {
             "attribute_name": "hb_power_PS0_input_voltage",
             "lower_bound": 0,
             "upper_bound": 65535,

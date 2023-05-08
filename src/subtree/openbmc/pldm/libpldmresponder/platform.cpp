@@ -667,7 +667,7 @@ Response Handler::getStateSensorReadings(const pldm_msg* request,
     bitfield8_t sensorRearm{};
     uint8_t reserved{};
 
-    if (payloadLength != PLDM_GET_SENSOR_READING_REQ_BYTES)
+    if (payloadLength != PLDM_GET_STATE_SENSOR_READINGS_REQ_BYTES)
     {
         return ccOnlyResponse(request, PLDM_ERROR_INVALID_LENGTH);
     }
