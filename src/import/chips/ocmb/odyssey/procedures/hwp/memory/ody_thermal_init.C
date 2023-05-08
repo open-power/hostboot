@@ -60,6 +60,9 @@ extern "C"
         // Clear the emergency mode throttle bit
         FAPI_TRY (mss::ody::thermal::mc::disable_safe_mode_throttles(i_target));
 
+        // Init SPPE polling attributes
+        FAPI_TRY(mss::ody::thermal::init_sppe_polling_attr(i_target));
+
     fapi_try_exit:
         return fapi2::current_err;
     }

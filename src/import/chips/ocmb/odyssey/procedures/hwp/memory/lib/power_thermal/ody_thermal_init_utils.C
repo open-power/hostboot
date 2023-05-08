@@ -232,6 +232,37 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Function that initializes runtime SPPE polling attr
+/// @param[in] i_ocmb the OCMB target
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode init_sppe_polling_attr(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
+{
+
+    uint32_t l_temp_polling_period_ms;
+    uint8_t l_temp_dqs_tracking_period;
+
+    // Get Init values from init attrs
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_ODY_SENSOR_POLLING_PERIOD_MS_INIT,
+                             i_ocmb,
+                             l_temp_polling_period_ms) );
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_ODY_DQS_TRACKING_PERIOD_INIT,
+                             i_ocmb,
+                             l_temp_dqs_tracking_period));
+
+    // Set runtime attrs
+    FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_ODY_SENSOR_POLLING_PERIOD_MS,
+                             i_ocmb,
+                             l_temp_polling_period_ms) );
+    FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_ODY_DQS_TRACKING_PERIOD,
+                             i_ocmb,
+                             l_temp_dqs_tracking_period));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 namespace mc
 {
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,6 +139,12 @@ fapi2::ReturnCode read_dts_sensors(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
 ///
 fapi2::ReturnCode read_oc_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb);
 
+///
+/// @brief Function that initializes runtime SPPE polling attr
+/// @param[in] i_ocmb the OCMB target
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode init_sppe_polling_attr(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb);
 
 namespace mc
 {

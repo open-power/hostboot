@@ -119,10 +119,24 @@
     </attribute>
 
     <attribute>
-        <id>ATTR_ODY_SENSOR_POLLING_PERIOD</id>
+        <id>ATTR_ODY_SENSOR_POLLING_PERIOD_MS</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
             Temperature sensor polling period, in milliseconds.
+            This value is used internally by the polling algorithm and HWPs,
+            and should not be overriden.
+        </description>
+        <valueType>uint32</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_SENSOR_POLLING_PERIOD_MS_INIT</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Temperature sensor polling period initial value, in milliseconds.
+            This value is set up for polling during the mss_thermal_init step.
         </description>
         <valueType>uint32</valueType>
         <default>200</default>
@@ -140,8 +154,21 @@
             DQS tracking algorithm. Temperature delta since previous execution
             will be checked, and if the delta is large enough the DQS tracking
             will be performed and the saved temperature values will be updated.
-            For example, to check temperature deltas every 5 sensor polls, set
-            this attribute to a value of 5.
+            This value is used internally by the polling algorithm and HWPs,
+            and should not be overriden.
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_DQS_TRACKING_PERIOD_INIT</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Initial value for number of temperature sensor polls between
+            attempts of DDR5 DQS tracking algorithm. This value is set up
+            for polling during the mss_thermal_init step.
         </description>
         <valueType>uint8</valueType>
         <default>5</default>
