@@ -69,7 +69,7 @@ class field_t
 {
     private:
 
-        size_t iv_byte;
+        const size_t iv_byte;
         const size_t iv_start;
         const size_t iv_length;
 
@@ -84,7 +84,7 @@ class field_t
         /// @param[in] i_start_bit
         /// @param[in] i_bit_length
         ///
-        constexpr field_t(size_t i_byte_index,
+        constexpr field_t(const size_t i_byte_index,
                           const size_t i_start_bit,
                           const size_t i_bit_length)
             : iv_byte(i_byte_index),
@@ -102,14 +102,6 @@ class field_t
         /// @return the byte index for this field
         ///
         const size_t get_byte(const std::vector<uint8_t>& i_data) const;
-
-        ///
-        /// @brief Byte index setter
-        ///
-        void set_byte(size_t i_data)
-        {
-            iv_byte = i_data;
-        }
 
         ///
         /// @brief Starting bit getter
