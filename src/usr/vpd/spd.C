@@ -85,6 +85,10 @@ namespace SPD
 // Globals
 // ----------------------------------------------
 bool g_loadModule = true;
+typedef std::array<uint8_t, SPD::IBM_11S_SN_SIZE + 1>   COMPOSED_SN_typeStdArr;
+typedef std::array<uint8_t, SPD::IBM_11S_PN_SIZE + 1>   COMPOSED_PN_typeStdArr;
+typedef std::array<uint8_t, SPD::IBM_11S_FN_SIZE + 1>   COMPOSED_FN_typeStdArr;
+typedef std::array<uint8_t, SPD::IBM_11S_CCIN_SIZE + 1> COMPOSED_CCIN_typeStdArr;
 
 // This mutex is used to lock for writing/updating the global variables.
 mutex_t g_spdMutex = MUTEX_INITIALIZER;
@@ -275,16 +279,16 @@ EEPROM_CONTENT_TYPE getEepromType( Target* i_target )
  *
  * @param[in] i_target - DIMM target
  *
- * @param[in] i_ccinNumber - CCIN number to set in attribute
+ * @param[in] i_CCIN - CCIN number to set in attribute
  *
  * @return void
  */
-void setDDR4CCIN ( Target * i_target, const char * i_ccinNumber)
+void setDDR4CCIN ( Target * i_target, const COMPOSED_CCIN_typeStdArr &i_CCIN)
 {
     ATTR_FRU_CCIN_type l_CCIN = {0};
     static_assert (sizeof(ATTR_FRU_CCIN_type) >= SPD::IBM_11S_CCIN_SIZE);
-    memcpy(&l_CCIN, i_ccinNumber, SPD::IBM_11S_CCIN_SIZE);
-    i_target->trySetAttr<ATTR_FRU_CCIN>(l_CCIN);
+    memcpy(&l_CCIN, &i_CCIN, SPD::IBM_11S_CCIN_SIZE);
+    i_target->setAttr<ATTR_FRU_CCIN>(l_CCIN);
 }
 
 /**
@@ -296,12 +300,12 @@ void setDDR4CCIN ( Target * i_target, const char * i_ccinNumber)
  *
  * @return void
  */
-void setDDR4SN ( Target * i_target, const char * i_serialNumber)
+void setDDR4SN ( Target * i_target, const COMPOSED_SN_typeStdArr &i_serialNumber)
 {
     ATTR_SERIAL_NUMBER_type l_SN = {0};
     static_assert (sizeof(ATTR_SERIAL_NUMBER_type) >= SPD::IBM_11S_SN_SIZE);
-    memcpy(l_SN, i_serialNumber, SPD::IBM_11S_SN_SIZE);
-    i_target->trySetAttr<ATTR_SERIAL_NUMBER>(l_SN);
+    memcpy(l_SN, &i_serialNumber, SPD::IBM_11S_SN_SIZE);
+    i_target->setAttr<ATTR_SERIAL_NUMBER>(l_SN);
 }
 
 /**
@@ -313,12 +317,12 @@ void setDDR4SN ( Target * i_target, const char * i_serialNumber)
  *
  * @return void
  */
-void setDDR4PN ( Target * i_target, const char * i_partNumber)
+void setDDR4PN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber)
 {
     ATTR_PART_NUMBER_type l_PN = {0};
     static_assert (sizeof(ATTR_PART_NUMBER_type) >= SPD::IBM_11S_PN_SIZE);
-    memcpy(l_PN, i_partNumber, SPD::IBM_11S_PN_SIZE);
-    i_target->trySetAttr<ATTR_PART_NUMBER>(l_PN);
+    memcpy(l_PN, &i_partNumber, SPD::IBM_11S_PN_SIZE);
+    i_target->setAttr<ATTR_PART_NUMBER>(l_PN);
 }
 
 /**
@@ -330,13 +334,13 @@ void setDDR4PN ( Target * i_target, const char * i_partNumber)
  *
  * @return void
  */
-void setDDR4FN ( Target * i_target, const char * i_fruNumber)
+void setDDR4FN ( Target * i_target, const COMPOSED_FN_typeStdArr &i_fruNumber)
 {
     ATTR_FRU_NUMBER_type l_FN = {0};
     // FN is same size as PN
     static_assert (sizeof(ATTR_FRU_NUMBER_type) >= SPD::IBM_11S_FN_SIZE);
-    memcpy(l_FN, i_fruNumber, SPD::IBM_11S_FN_SIZE);
-    i_target->trySetAttr<ATTR_FRU_NUMBER>(l_FN);
+    memcpy(l_FN, &i_fruNumber, SPD::IBM_11S_FN_SIZE);
+    i_target->setAttr<ATTR_FRU_NUMBER>(l_FN);
 }
 
 /**
@@ -347,14 +351,14 @@ void setDDR4FN ( Target * i_target, const char * i_fruNumber)
  *
  * @param[in] i_partNumber - Part Number to map to pull the CCIN
  *
- * @param[in/out] io_ccinNumber - CCIN
+ * @param[in/out] io_CCIN - CCIN
  *
  *                Caller has initialized the io_ccinNumber
  *                to null bytes
  *
  * @return void
  */
-void buildDDR4CCIN ( Target * i_target, const char * i_partNumber, char * io_ccinNumber)
+void buildDDR4CCIN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber, COMPOSED_CCIN_typeStdArr &io_CCIN)
 {
     std::pair<const char*, const char*> pn_ccin[] =
     {
@@ -373,10 +377,10 @@ void buildDDR4CCIN ( Target * i_target, const char * i_partNumber, char * io_cci
     errlHndl_t l_err = nullptr;
     for (const auto [ pn, ccin ] : pn_ccin)
     {
-        if (!strcmp(pn, i_partNumber))
+        if (!strcmp(pn, reinterpret_cast<const char *>(&i_partNumber)))
         {
             // ONLY copy IBM_11S_FN_SIZE, preserve the NULL byte
-            strncpy(io_ccinNumber, ccin, SPD::IBM_11S_CCIN_SIZE);
+            memcpy(&io_CCIN, ccin, SPD::IBM_11S_CCIN_SIZE);
             missing = false;
             break;
         }
@@ -394,14 +398,14 @@ void buildDDR4CCIN ( Target * i_target, const char * i_partNumber, char * io_cci
          * @moduleid         VPD::VPD_SPD_PRESENCE_DETECT
          * @userdata1        target huid
          * @userdata2        partNumber
-         * @devdesc          Unsupported partNumber
-         * @custdesc         Unexpected partNumber
+         * @devdesc          Unsupported FRU part number
+         * @custdesc         Unexpected FRU part number detected
          */
          l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
                                           VPD::VPD_SPD_PRESENCE_DETECT,
                                           VPD::VPD_ISDIMM_UNSUPPORTED_PN_FOR_CCIN,
                                           get_huid(i_target),
-                                          strtoul(i_partNumber, nullptr, 16),
+                                          strtoul(reinterpret_cast<const char *>(&i_partNumber), nullptr, 16),
                                           ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
          l_err->addPartCallout( i_target,
                               HWAS::VPD_PART_TYPE,
@@ -423,16 +427,16 @@ void buildDDR4CCIN ( Target * i_target, const char * i_partNumber, char * io_cci
  *
  * @param[in] i_target - DIMM target
  *
- * @param[in] i_partNumber - Part Number to map to pull the CCIN
+ * @param[in] i_partNumber - Part Number to map to pull the FN
  *
- * @param[in/out] io_fruNumber - CCIN
+ * @param[in/out] io_fruNumber - FRU Number
  *
  *                Caller has initialized the io_fruNumber
  *                to null bytes
  *
  * @return void
  */
-void buildDDR4FN ( Target * i_target, const char * i_partNumber, char * io_fruNumber)
+void buildDDR4FN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber, COMPOSED_FN_typeStdArr &io_fruNumber)
 {
     std::pair<const char*, const char*> pn_fn[] =
     {
@@ -453,10 +457,10 @@ void buildDDR4FN ( Target * i_target, const char * i_partNumber, char * io_fruNu
 
     for (const auto [ pn, fn ] : pn_fn)
     {
-        if (!strcmp(pn, i_partNumber))
+        if (!strcmp(pn, reinterpret_cast<const char *> (&i_partNumber)))
         {
             // ONLY copy IBM_11S_FN_SIZE, preserve the NULL byte
-            strncpy(io_fruNumber, fn, SPD::IBM_11S_FN_SIZE);
+            memcpy(&io_fruNumber, fn, SPD::IBM_11S_FN_SIZE);
             missing = false;
             break;
         }
@@ -474,14 +478,14 @@ void buildDDR4FN ( Target * i_target, const char * i_partNumber, char * io_fruNu
          * @moduleid         VPD::VPD_SPD_PRESENCE_DETECT
          * @userdata1        target huid
          * @userdata2        partNumber
-         * @devdesc          Unsupported partNumber
-         * @custdesc         Unexpected partNumber
+         * @devdesc          Unsupported FRU part number
+         * @custdesc         Unexpected FRU part number detected
          */
          l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
                                           VPD::VPD_SPD_PRESENCE_DETECT,
                                           VPD::VPD_ISDIMM_UNSUPPORTED_PN_FOR_FN,
                                           get_huid(i_target),
-                                          strtoul(i_partNumber, nullptr, 16),
+                                          strtoul(reinterpret_cast<const char *>(&i_partNumber), nullptr, 16),
                                           ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
          l_err->addPartCallout( i_target,
                               HWAS::VPD_PART_TYPE,
@@ -511,7 +515,7 @@ void buildDDR4FN ( Target * i_target, const char * i_partNumber, char * io_fruNu
  *
  * @return void
  */
-void buildDDR4SN ( const uint8_t * i_SPD, char * io_string)
+void buildDDR4SN ( const uint8_t * i_SPD, COMPOSED_SN_typeStdArr &io_string)
 {
     // First calculate the number of nibbles by composing the desired string
     size_t num_nibbles = snprintf(NULL, 0, "%02X%02X%02X%02X%02X%02X",
@@ -524,7 +528,7 @@ void buildDDR4SN ( const uint8_t * i_SPD, char * io_string)
     // We can have 12 bytes in the SN, the composed SN is only using 6 bytes today
     assert( num_nibbles <= (2* SPD::IBM_11S_SN_SIZE) );
     // Now copy the desired string to its output destination
-    snprintf(io_string, SPD::IBM_11S_SN_SIZE+1, "%02X%02X%02X%02X%02X%02X",
+    snprintf(reinterpret_cast<char *>(&io_string), SPD::IBM_11S_SN_SIZE+1, "%02X%02X%02X%02X%02X%02X",
                         i_SPD[SPD::ddr4Data[SPD::MFG_ID_MSB].offset],  // byte 321  SPD enum=0x60
                         i_SPD[SPD::ddr4Data[SPD::MFG_ID_LSB].offset],  // byte 320  SPD enum=0x61
                         i_SPD[SPD::ddr4Data[SPD::SN_BYTE0].offset],    // byte 325  SPD enum=0x62
@@ -548,7 +552,7 @@ void buildDDR4SN ( const uint8_t * i_SPD, char * io_string)
  *
  * @return void
  */
-void buildDDR4PN ( const uint8_t * i_SPD, char * io_string)
+void buildDDR4PN ( const uint8_t * i_SPD, COMPOSED_PN_typeStdArr &io_string)
 {
     // First calculate the number of nibbles by composing the desired string
     size_t num_nibbles = snprintf(NULL, 0, "%02X%02X%02X%X",
@@ -559,7 +563,7 @@ void buildDDR4PN ( const uint8_t * i_SPD, char * io_string)
     // We can have 7 bytes in the PN, the composed PN is only using 3.5 bytes today (MODULE_ORGANIZATION one nibble)
     assert( num_nibbles <= (2* SPD::IBM_11S_PN_SIZE) );
     // Now copy the desired string to its output destination
-    snprintf(io_string, SPD::IBM_11S_PN_SIZE+1, "%02X%02X%02X%X",
+    snprintf(reinterpret_cast<char *>(&io_string), SPD::IBM_11S_PN_SIZE+1, "%02X%02X%02X%X",
                         i_SPD[SPD::ddr4Data[SPD::MODULE_SDRAM_DENSITY_BANK].offset],    // byte  4 SPD enum=0x04
                         i_SPD[SPD::ddr4Data[SPD::SDRAM_ADDRESSING].offset],             // byte  5 SPD enum=0x05
                         i_SPD[SPD::ddr4Data[SPD::DRAM_PRI_PACKAGE_OFFSET].offset],      // byte  6 SPD enum=0x06
@@ -600,10 +604,10 @@ errlHndl_t composeIsDimmVPD ( Target * i_target)
          break;
     }
 
-    char tmpSN[SPD::IBM_11S_SN_SIZE + 1] = {'\0'};
-    char tmpPN[SPD::IBM_11S_PN_SIZE + 1] = {'\0'};
-    char tmpFN[SPD::IBM_11S_FN_SIZE + 1] = {'\0'};
-    char tmpCCIN[SPD::IBM_11S_CCIN_SIZE + 1] = {'\0'};
+    COMPOSED_SN_typeStdArr tmpSN = {0};
+    COMPOSED_PN_typeStdArr tmpPN = {0};
+    COMPOSED_FN_typeStdArr tmpFN = {0};
+    COMPOSED_CCIN_typeStdArr tmpCCIN = {0};
 
     // If we have any errors we log the issue and we keep on
     // trying to collect as much data as possible
@@ -2763,7 +2767,7 @@ void setPartAndSerialNumberAttributes( Target * i_target )
             l_partDataSize = expectedPNSize; //truncate it
         }
         memcpy(l_PN, l_partNumberData, l_partDataSize);
-        i_target->trySetAttr<ATTR_PART_NUMBER>(l_PN);
+        i_target->setAttr<ATTR_PART_NUMBER>(l_PN);
         TRACFBIN(g_trac_spd,
                  "                                : PART NUMBER =",
                  l_PN, l_partDataSize);
@@ -2779,7 +2783,7 @@ void setPartAndSerialNumberAttributes( Target * i_target )
             l_partDataSize = expectedFNSize; //truncate it
         }
         memcpy(l_FN, l_partNumberData, l_partDataSize);
-        i_target->trySetAttr<ATTR_FRU_NUMBER>(l_FN);
+        i_target->setAttr<ATTR_FRU_NUMBER>(l_FN);
         TRACFBIN(g_trac_spd,
                  "                                : FRU NUMBER =",
                  l_FN, l_partDataSize);
@@ -2793,7 +2797,7 @@ void setPartAndSerialNumberAttributes( Target * i_target )
             l_serialDataSize = expectedSNSize; //truncate it
         }
         memcpy(l_SN, l_serialNumberData, l_serialDataSize);
-        i_target->trySetAttr<ATTR_SERIAL_NUMBER>(l_SN);
+        i_target->setAttr<ATTR_SERIAL_NUMBER>(l_SN);
         TRACFBIN(g_trac_spd,
                  "                                : SERIAL NUMBER =",
                  l_SN, l_serialDataSize);
@@ -2810,7 +2814,7 @@ void setPartAndSerialNumberAttributes( Target * i_target )
                 l_ccinDataSize = expectedCCSize; //truncate it
             }
             memcpy(&l_CC, l_ccinData, l_ccinDataSize);
-            i_target->trySetAttr<ATTR_FRU_CCIN>(l_CC);
+            i_target->setAttr<ATTR_FRU_CCIN>(l_CC);
             TRACFCOMP(g_trac_spd,
                       "                                : CCIN = %lX",
                       l_CC);
