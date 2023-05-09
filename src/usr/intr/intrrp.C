@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1726,21 +1726,28 @@ void IntrRp::handleExternalInterrupt()
 
                     uint64_t intSource = l_intr.second;
 
-                    //Mask off current interrupt source
-                    maskInterruptSource(intSource, *targ_itr);
-
-                    //Send EOI so other interrupt sources other than the one
-                    // masked previously can be presented
-
-                    errlHndl_t l_err = sendXiveEOI(intSource, l_pir);
-
-                    if (l_err)
+                    // Mask off current interrupt source
+                    errlHndl_t pError = maskInterruptSource(intSource, *targ_itr);
+                    if(pError)
                     {
-                        TRACFCOMP(g_trac_intr, "IntrRp::msgHandler() External "
-                            "Interrupt sendXiveEOI returned error for intSource: "
-                            "%lx, and pir: 0x%lx", intSource, l_pir);
-                        errlCommit(l_err, INTR_COMP_ID);
+                        TRACFCOMP(g_trac_intr, ERR_MRK
+                            "IntrRp::handleExternalInterrupt: Error masking "
+                            "interrupt source: 0x%016llX for proc: 0x%08X.",
+                            intSource,  get_huid((*targ_itr)->proc));
+                        errlCommit(pError,INTR_COMP_ID);
+                    }
 
+                    // Send EOI so interrupt sources other than the one
+                    // masked previously can be presented
+                    pError = sendXiveEOI(intSource, l_pir);
+                    if (pError)
+                    {
+                        TRACFCOMP(g_trac_intr, ERR_MRK
+                            "IntrRp::handleExternalInterrupt: sendXiveEOI "
+                            "returned error for interrupt source: 0x%016llX "
+                            "and PIR: 0x%lx",
+                            intSource, l_pir);
+                        errlCommit(pError, INTR_COMP_ID);
                     }
 
                     //Call function to route the interrupt
