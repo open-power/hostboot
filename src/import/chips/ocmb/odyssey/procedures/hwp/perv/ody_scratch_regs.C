@@ -300,6 +300,24 @@ fapi2::ReturnCode ody_scratch_regs_update(
         l_scratch16_reg.setBit<SCRATCH11_REG_VALID_BIT>();
     }
 
+    // scratch 12 -- dynamic inits
+    if (i_update_all || !l_scratch16_reg.getBit<SCRATCH12_REG_VALID_BIT>())
+    {
+        fapi2::buffer<uint32_t> l_scratch12_reg = 0;
+        fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC_Type l_dynamic_init_feature_vec = { 0 };
+
+        FAPI_DBG("Reading ATTR_DYNAMIC_INIT_FEATURE_VEC");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DYNAMIC_INIT_FEATURE_VEC, i_target, l_dynamic_init_feature_vec),
+                 "Error from FAPI_ATTR_GET (ATTR_DYNAMIC_INIT_FEATURE_VEC)");
+        l_scratch12_reg.insertFromRight<ATTR_DYNAMIC_INIT_FEATURE_STARTBIT, ATTR_DYNAMIC_INIT_FEATURE_LENGTH>
+        (l_dynamic_init_feature_vec[0] >> 32);
+
+        FAPI_DBG("Setting up value of Scratch 12 mailbox register");
+        FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER12, l_scratch12_reg));
+
+        l_scratch16_reg.setBit<SCRATCH12_REG_VALID_BIT>();
+    }
+
     FAPI_DBG("Setting up value of Scratch 16 mailbox register (valid)");
     FAPI_TRY(ody_scratch_regs_put_scratch(i_target, i_use_scom, SCRATCH_REGISTER16, l_scratch16_reg));
 
