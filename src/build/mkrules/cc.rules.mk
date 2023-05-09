@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2022
+# Contributors Listed Below - COPYRIGHT 2013,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -67,26 +67,35 @@ ifdef DOCPPCHECK
 	CXX_PRINT=$(C2) "    CPPCHECK        $(notdir $<)"
 	# Note: Error code 127 means that the command timed-out. We do not fail
 	# for timeouts
-	CXX_CPPCHECK_COMMAND=$(C1) set -o pipefail && cd `dirname $<` && timeout 2m $(CXX_CHECK) `basename $<` 2>&1 | tee .`basename $<`.cppcheck; exit_code=$$? ; \
-	if [ "$$exit_code" -ne 1 ]; then \
-		rm -f .`basename $<`.cppcheck; \
-		if [ "$$exit_code" -eq 127 ]; then \
-			exit_code=0; \
-		fi; \
-	else \
-		cat .`basename $<`.cppcheck >> $(PROJECT_ROOT)/allCppcheckErrors; \
-		echo >> $(PROJECT_ROOT)/allCppcheckErrors; \
+	# Note: The two noted files below crash cppcheck and must be ignored
+	#     until the problem can be fixed via JIRA PFHB-483
+	CXX_CPPCHECK_COMMAND=$(C1) \
+	if [[ " p10_fbc_no_hp_scom.C p10_fbc_ab_hp_scom.C " =~ " `basename $<` " ]]; then \
 		exit_code=0; \
-	fi; exit "$$exit_code"
-	C_CPPCHECK_COMMAND=$(C1) set -o pipefail && cd `dirname $<` && timeout 2m $(C_CHECK) `basename $<` 2>&1 | tee .`basename $<`.cppcheck; exit_code=$$? ; \
+	else \
+		set -o pipefail && cd `dirname $<` && timeout 2m $(CXX_CHECK) `basename $<` 2>&1 | tee .`basename $<`.cppcheck.xml; exit_code=$$? ; \
+		if [ "$$exit_code" -ne 1 ]; then \
+			rm -f .`basename $<`.cppcheck.xml; \
+			if [ "$$exit_code" -eq 127 ]; then \
+				exit_code=0; \
+			fi; \
+		else \
+			cat .`basename $<`.cppcheck.xml >> $(PROJECT_ROOT)/allCppcheckErrors.xml; \
+			echo >> $(PROJECT_ROOT)/allCppcheckErrors.xml; \
+			sed -i -z 's/<?xml version="1.0" encoding="UTF-8"?>//2g' $(PROJECT_ROOT)/allCppcheckErrors.xml; \
+			exit_code=0; \
+		fi; \
+	fi;  exit "$$exit_code"
+	C_CPPCHECK_COMMAND=$(C1) set -o pipefail && cd `dirname $<` && timeout 2m $(C_CHECK) `basename $<` 2>&1 | tee .`basename $<`.cppcheck.xml; exit_code=$$? ; \
 	if [ "$$exit_code" -ne 1 ]; then \
-		rm -f .`basename $<`.cppcheck; \
+		rm -f .`basename $<`.cppcheck.xml; \
 		if [ "$$exit_code" -eq 127 ]; then \
 			exit_code=0; \
 		fi; \
 	else \
-		cat .`basename $<`.cppcheck >> $(PROJECT_ROOT)/allCppcheckErrors; \
-		echo >> $(PROJECT_ROOT)/allCppcheckErrors; \
+		cat .`basename $<`.cppcheck.xml >> $(PROJECT_ROOT)/allCppcheckErrors.xml; \
+		echo >> $(PROJECT_ROOT)/allCppcheckErrors.xml; \
+		sed -i -z 's/<?xml version="1.0" encoding="UTF-8"?>//2g' $(PROJECT_ROOT)/allCppcheckErrors.xml; \
 		exit_code=0; \
 	fi; exit "$$exit_code"
 else
