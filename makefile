@@ -47,7 +47,7 @@ IMAGE_PASS_POST += check_istep_modules
 # dummy variables here, but will be set to the actual tool in the "cppcheck" rule
 BUILDCPPCHECK := $(PROJECT_ROOT)/src/build/tools/build-cppcheck
 CPPCHECKTOOL := $(PROJECT_ROOT)/src/build/tools/cpptools/cppcheck/cppcheck
-CPPCHECKFLAGS := --inline-suppr --error-exitcode=1 --template='Error CPPCHECK {file}: line {line}\nSyntax error string: {id}\n{message}'
+CPPCHECKFLAGS := --inline-suppr --quiet --xml --xml-version=2 --error-exitcode=1 --template='Error CPPCHECK {file}: line {line}\nSyntax error string: {id}\n{message}'
 CPPCHECK := $(CPPCHECKTOOL) $(CPPCHECKFLAGS)
 export CXX_CHECK ?= true
 export C_CHECK ?= true
