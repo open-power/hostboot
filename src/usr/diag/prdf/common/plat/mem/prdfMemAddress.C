@@ -138,12 +138,12 @@ uint64_t MemAddr::incRowAddr( ExtensibleChip * i_chip ) const
     // extraRowBits will denote whether row15:row17 are used (0:3);
     bool twoDimmConfig, col3Config;
     uint8_t mrnkBits, srnkBits, extraRowBits;
-    int32_t rc = MemUtils::getAddrConfig<TYPE_OCMB_CHIP>( i_chip,
-            iv_rnk.getDimmSlct(), twoDimmConfig, mrnkBits, srnkBits,
-            extraRowBits, col3Config );
+    // TODO Odyssey - needs odyssey version
+    int32_t rc = MemUtils::expGetAddrConfig( i_chip, iv_rnk.getDimmSlct(),
+        twoDimmConfig, mrnkBits, srnkBits, extraRowBits, col3Config );
     if ( SUCCESS != rc )
     {
-        PRDF_ERR( "[MemAddr::incRowAddr] getAddrConfig(0x%08x, %d)",
+        PRDF_ERR( "[MemAddr::incRowAddr] expGetAddrConfig(0x%08x, %d)",
                   i_chip->getHuid(), iv_rnk.getDimmSlct() );
     }
 

@@ -960,14 +960,11 @@ uint64_t reverseBits( uint64_t i_val, uint64_t i_numBits )
 
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t getAddrConfig<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-    uint8_t i_dslct, bool & o_twoDimmConfig, uint8_t & o_prnkBits,
-    uint8_t & o_srnkBits, uint8_t & o_extraRowBits, bool & o_col3Config )
+uint32_t expGetAddrConfig( ExtensibleChip * i_chip, uint8_t i_dslct,
+    bool & o_twoDimmConfig, uint8_t & o_prnkBits, uint8_t & o_srnkBits,
+    uint8_t & o_extraRowBits, bool & o_col3Config )
 {
-    #define PRDF_FUNC "[MemUtils::getAddrConfig] "
-
-    // TODO Odyssey - register format changed, updates needed
+    #define PRDF_FUNC "[MemUtils::expGetAddrConfig] "
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
@@ -1016,6 +1013,86 @@ uint32_t getAddrConfig<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     // Check whether the column3 bit is used
     o_col3Config = db->iv_addrConfig.getCol3Valid();
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+
+uint32_t odyGetAddrConfig( ExtensibleChip * i_chip, uint8_t i_portSlct,
+    bool & o_twoPortConfig, uint8_t & o_prnkBits, uint8_t & o_srnkBits,
+    uint8_t & o_extraRowBits, bool & o_col3Config, bool & o_col10Config,
+    bool & o_bank1Config)
+{
+    #define PRDF_FUNC "[MemUtils::odyGetAddrConfig] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+    int32_t o_rc = SUCCESS;
+
+    OcmbDataBundle * db = getOcmbDataBundle( i_chip );
+    BitStringBuffer mc_addr_trans0(64);
+    o_rc = db->iv_addrConfig.getMcAddrTrans0( mc_addr_trans0 );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to get MC_ADDR_TRANS0 configuration data "
+                  "from 0x%08x", i_chip->getHuid() );
+        return o_rc;
+    }
+
+    BitStringBuffer mc_addr_trans1(64);
+    o_rc = db->iv_addrConfig.getMcAddrTrans1( mc_addr_trans1 );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to get MC_ADDR_TRANS1 configuration data "
+                  "from 0x%08x", i_chip->getHuid() );
+        return o_rc;
+    }
+
+    BitStringBuffer mc_addr_trans2(64);
+    o_rc = db->iv_addrConfig.getMcAddrTrans2( mc_addr_trans2 );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Unable to get MC_ADDR_TRANS2 configuration data "
+                  "from 0x%08x", i_chip->getHuid() );
+        return o_rc;
+    }
+
+    // Check for two port config
+    o_twoPortConfig = false;
+    if ( mc_addr_trans0.isBitSet(0) && mc_addr_trans0.isBitSet(1) )
+        o_twoPortConfig = true;
+
+    // Get the primary rank bits that are configured
+    o_prnkBits = 0;
+
+    // The 'half' bit (prank0) of the primary rank is not used in two port mode
+    if (!o_twoPortConfig)
+    {
+        o_prnkBits++;
+    }
+    if ( mc_addr_trans0.isBitSet(i_portSlct ? 18: 17) ) o_prnkBits++;
+
+    // Get the secondary rank bits that are configured
+    o_srnkBits = 0;
+    if ( mc_addr_trans1.isBitSet(i_portSlct ?  2: 1) ) o_srnkBits++;
+    if ( mc_addr_trans1.isBitSet(i_portSlct ? 10: 9) ) o_srnkBits++;
+    if ( mc_addr_trans1.isBitSet(i_portSlct ? 18:17) ) o_srnkBits++;
+
+    // Get the extra row bits that are configured
+    o_extraRowBits = 0;
+    if ( mc_addr_trans0.isBitSet(i_portSlct ? 34:33) ) o_extraRowBits++;
+    if ( mc_addr_trans0.isBitSet(i_portSlct ? 42:41) ) o_extraRowBits++;
+
+    // Check whether the column3 bit is used
+    o_col3Config = db->iv_addrConfig.getCol3Valid();
+
+    // Check whether column10 is enabled
+    if ( mc_addr_trans2.isBitSet(i_portSlct ? 18:17) ) o_col10Config = true;
+
+    // Check whether bank1 is enabled
+    if ( mc_addr_trans2.isBitSet(i_portSlct ? 34:33) ) o_bank1Config = true;
 
     return o_rc;
 

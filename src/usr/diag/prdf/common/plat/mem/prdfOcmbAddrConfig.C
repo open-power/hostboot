@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -185,6 +185,67 @@ uint32_t OcmbAddrConfig::getMcAddrTrans2( BitStringBuffer & o_addr_trans2 )
     else
     {
         o_addr_trans2 = *(mc_addr_trans2->GetBitString());
+    }
+
+    #endif
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+uint32_t OcmbAddrConfig::getMcAddrTrans3( BitStringBuffer & o_addr_trans3 )
+{
+    #define PRDF_FUNC "[OcmbAddrConfig::getMcAddrTrans3] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // Note: MC_ADDR_TRANS3 is an Odyssey only register. Return if we are on
+    // a non-Odyssey OCMB.
+    if (!isOdysseyOcmb(iv_ocmb->getTrgt()))
+    {
+        return o_rc;
+    }
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+    if ( iv_addr_trans3.isZero() )
+    {
+        // Try to read MC_ADDR_TRANS3 and update the instance variable
+        SCAN_COMM_REGISTER_CLASS * mc_addr_trans3 =
+            iv_ocmb->getRegister( "MC_ADDR_TRANS3" );
+
+        o_rc = mc_addr_trans3->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS3: iv_ocmb=0x%08x",
+                      iv_ocmb->getHuid() );
+        }
+        else
+        {
+            iv_addr_trans3 = *(mc_addr_trans3->GetBitString());
+        }
+    }
+
+    o_addr_trans3 = iv_addr_trans3;
+
+    #else
+
+    // Try to read MC_ADDR_TRANS and update the instance variable
+    SCAN_COMM_REGISTER_CLASS * mc_addr_trans3 =
+        iv_ocmb->getRegister( "MC_ADDR_TRANS3" );
+
+    o_rc = mc_addr_trans3->Read();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Read failed on MC_ADDR_TRANS3: iv_ocmb=0x%08x",
+                  iv_ocmb->getHuid() );
+    }
+    else
+    {
+        o_addr_trans3 = *(mc_addr_trans3->GetBitString());
     }
 
     #endif

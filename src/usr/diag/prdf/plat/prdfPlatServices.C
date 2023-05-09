@@ -501,23 +501,12 @@ uint64_t __maskBits( uint64_t i_val, uint64_t i_numBits )
 
 //------------------------------------------------------------------------------
 
-template <TARGETING::TYPE T>
-uint32_t __convertMssMcbistAddr( ExtensibleChip * i_chip,
-                                 const mss::mcbist::address & i_addr,
-                                 MemAddr & o_addr );
-
-
-template<>
-uint32_t __convertMssMcbistAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+uint32_t __expConvertMssMcbistAddr( ExtensibleChip * i_chip,
         const mss::mcbist::address & i_addr, MemAddr & o_addr )
 {
-    #define PRDF_FUNC "[PlatServices::__convertMssMcbistAddr] "
+    #define PRDF_FUNC "[PlatServices::__expConvertMssMcbistAddr] "
 
     uint32_t o_rc = SUCCESS;
-
-    // TODO Odyssey - updates needed for the address format. bank is now 2 bits
-    // instead of 3. bank group is now 3 bits instead of 2. column is now 8
-    // bits (3:10) instead of 7 (3:9).
 
     uint64_t dslct   = i_addr.get_dimm();
     uint64_t rslct   = i_addr.get_master_rank();
@@ -530,11 +519,11 @@ uint32_t __convertMssMcbistAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     // Adjust the address components based on what is configured.
     bool twoDimmConfig, col3Config;
     uint8_t prnkBits, srnkBits, extraRowBits;
-    o_rc = MemUtils::getAddrConfig<TYPE_OCMB_CHIP>( i_chip, dslct,
-            twoDimmConfig, prnkBits, srnkBits, extraRowBits, col3Config );
+    o_rc = MemUtils::expGetAddrConfig( i_chip, dslct, twoDimmConfig, prnkBits,
+                                       srnkBits, extraRowBits, col3Config );
     if ( SUCCESS != o_rc )
     {
-        PRDF_ERR( PRDF_FUNC "Failure from getAddrConfig" );
+        PRDF_ERR( PRDF_FUNC "Failure from expGetAddrConfig" );
     }
     else
     {
@@ -560,6 +549,81 @@ uint32_t __convertMssMcbistAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     return o_rc;
 
     #undef PRDF_FUNC
+}
+
+uint32_t __odyConvertMssMcbistAddr( ExtensibleChip * i_chip,
+        const mss::mcbist::address & i_addr, MemAddr & o_addr )
+{
+    #define PRDF_FUNC "[PlatServices::__odyConvertMssMcbistAddr] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // The 'dimm select' in the mss::mcbist::address actually specifies port.
+    uint64_t port    = i_addr.get_dimm();
+    uint64_t prnk    = i_addr.get_master_rank();
+    uint64_t srnk    = i_addr.get_slave_rank();
+    uint64_t bnk     = i_addr.get_bank();
+    uint64_t bnk_grp = i_addr.get_bank_group();
+    uint64_t row     = i_addr.get_row();
+    uint64_t col     = i_addr.get_column();
+
+    // Adjust the address components based on what is configured.
+    bool twoPortConfig, col3Config, col10Config, bank1Config;
+    uint8_t prnkBits, srnkBits, extraRowBits;
+    o_rc = MemUtils::odyGetAddrConfig( i_chip, port, twoPortConfig, prnkBits,
+        srnkBits, extraRowBits, col3Config, col10Config, bank1Config );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "Failure from odyGetAddrConfig" );
+    }
+    else
+    {
+        // Mask off the non-configured bits. If this address came from
+        // hardware,this would not be a problem. However, the get_mrank_range()
+        // and get_srank_range() HWPS got lazy, just set the entire fields
+        // and did not take into account the actual bit ranges.
+        prnk = __maskBits( prnk, prnkBits );
+        srnk  = __maskBits( srnk, srnkBits );
+        row = (row >> (2-extraRowBits)) << (2-extraRowBits);
+
+        // Check if column 3 or 10 are configured
+        if ( !col3Config )
+        {
+            col = col & 0xffffffffffffff7full;
+        }
+        if ( !col10Config )
+        {
+            col = ((col >> 1) << 1);
+        }
+
+        // Check if bank 1 is configured
+        if ( !bank1Config )
+        {
+            bnk = ((bnk >> 1) << 1);
+        }
+    }
+
+    uint64_t bnkFull = (bnk << 3) | bnk_grp;
+    o_addr = MemAddr ( MemRank ( prnk, srnk ), bnkFull, row, col, 0 );
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+uint32_t __convertMssMcbistAddr( ExtensibleChip * i_chip,
+    const mss::mcbist::address & i_addr, MemAddr & o_addr )
+{
+    // Check for Odyssey OCMB
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        return __odyConvertMssMcbistAddr(i_chip, i_addr, o_addr);
+    }
+    // Default to Explorer OCMB
+    else
+    {
+        return __expConvertMssMcbistAddr(i_chip, i_addr, o_addr);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -589,8 +653,7 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             break;
         }
 
-        o_rc = __convertMssMcbistAddr<TYPE_OCMB_CHIP>( i_chip, saddr,
-                                                       o_startAddr );
+        o_rc = __convertMssMcbistAddr( i_chip, saddr, o_startAddr );
         if ( SUCCESS != o_rc )
         {
             PRDF_TRAC( PRDF_FUNC "Could not convert start address from "
@@ -599,8 +662,7 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             break;
         }
 
-        o_rc = __convertMssMcbistAddr<TYPE_OCMB_CHIP>( i_chip, eaddr,
-                                                       o_endAddr );
+        o_rc = __convertMssMcbistAddr( i_chip, eaddr, o_endAddr );
         if ( SUCCESS != o_rc )
         {
             PRDF_TRAC( PRDF_FUNC "Could not convert end address from "

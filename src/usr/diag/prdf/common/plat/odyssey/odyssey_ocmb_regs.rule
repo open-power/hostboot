@@ -55,28 +55,28 @@
         capture     group srq_fir_regs;
     };
 
-    register MBXLT0
+    register MC_ADDR_TRANS
     {
         name        "Odyssey chip Address Translation Register 0";
         scomaddr    0x08011012;
         capture     group srq_fir_regs;
     };
 
-    register MBXLT1
+    register MC_ADDR_TRANS1
     {
         name        "Odyssey chip Address Translation Register 1";
         scomaddr    0x08011013;
         capture     group srq_fir_regs;
     };
 
-    register MBXLT2
+    register MC_ADDR_TRANS2
     {
         name        "Odyssey chip Address Translation Register 2";
         scomaddr    0x08011014;
         capture     group srq_fir_regs;
     };
 
-    register MBXLT3
+    register MC_ADDR_TRANS3
     {
         name        "Odyssey chip Address Translation Register 3";
         scomaddr    0x08011021;
@@ -1188,3 +1188,4 @@
         scomaddr    0x800c00830801343f;
         capture     group arc_1_regs;
     };
+

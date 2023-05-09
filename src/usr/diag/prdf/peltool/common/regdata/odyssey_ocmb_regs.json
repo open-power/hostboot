@@ -694,6 +694,21 @@
         "description": "Odyssey chip TP_LOCAL_FIR Checkstop Config",
         "name": "TP_LOCAL_FIR_CFG_CS"
     },
+    "0x85e6": {
+        "address": "0x0000000008011013",
+        "description": "Odyssey chip Address Translation Register 1",
+        "name": "MC_ADDR_TRANS1"
+    },
+    "0x85e8": {
+        "address": "0x0000000008011014",
+        "description": "Odyssey chip Address Translation Register 2",
+        "name": "MC_ADDR_TRANS2"
+    },
+    "0x85ea": {
+        "address": "0x0000000008011021",
+        "description": "Odyssey chip Address Translation Register 3",
+        "name": "MC_ADDR_TRANS3"
+    },
     "0x85f3": {
         "address": "0x0000000008010c07",
         "description": "Odyssey chip OCMB_PHY_FIR Unit Checkstop Config",
@@ -779,26 +794,6 @@
         "description": "Odyssey chip TP_LOCAL_FIR Recoverable Config",
         "name": "TP_LOCAL_FIR_CFG_RE"
     },
-    "0x964c": {
-        "address": "0x0000000008011012",
-        "description": "Odyssey chip Address Translation Register 0",
-        "name": "MBXLT0"
-    },
-    "0x964e": {
-        "address": "0x0000000008011013",
-        "description": "Odyssey chip Address Translation Register 1",
-        "name": "MBXLT1"
-    },
-    "0x9650": {
-        "address": "0x0000000008011014",
-        "description": "Odyssey chip Address Translation Register 2",
-        "name": "MBXLT2"
-    },
-    "0x9652": {
-        "address": "0x0000000008011021",
-        "description": "Odyssey chip Address Translation Register 3",
-        "name": "MBXLT3"
-    },
     "0x97c8": {
         "address": "0x0000000008011804",
         "description": "Odyssey chip RDF_FIR 0 Checkstop Config",
@@ -883,6 +878,11 @@
         "address": "0x00000000080114dc",
         "description": "Odyssey chip Configured Command Sequence Status Reg",
         "name": "MCB_CNTLSTAT"
+    },
+    "0xb9bd": {
+        "address": "0x0000000008011012",
+        "description": "Odyssey chip Address Translation Register 0",
+        "name": "MC_ADDR_TRANS"
     },
     "0xbb73": {
         "address": "0x00000000080114d6",

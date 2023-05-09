@@ -61,7 +61,6 @@ int32_t Initialize( ExtensibleChip * i_chip )
 
     #ifdef __HOSTBOOT_RUNTIME
     // Initialize the address configuration variable within the OcmbDataBundle
-    /* TODO: Addr translation register format has changed for odyssey
     do
     {
         // Call getMcAddrTrans# to populate those instance variables with data
@@ -87,8 +86,14 @@ int32_t Initialize( ExtensibleChip * i_chip )
                       "data bundle for 0x%08x", i_chip->getHuid() );
             break;
         }
+        if ( SUCCESS != db->iv_addrConfig.getMcAddrTrans3( temp ) )
+        {
+            PRDF_ERR( PRDF_FUNC "Failed to initialize mc_addr_trans3 in ocmb "
+                      "data bundle for 0x%08x", i_chip->getHuid() );
+            break;
+        }
 
-    } while(0);*/
+    } while(0);
     #endif
 
     return SUCCESS;

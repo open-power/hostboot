@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -176,7 +176,7 @@ uint64_t reverseBits( uint64_t i_val, uint64_t i_numBits );
 
 
 /**
- * @brief  Gets the address configuration for the inputted OCMB
+ * @brief  Gets the address configuration for the inputted Explorer OCMB
  * @param  i_chip          An OCMB chip.
  * @param  i_dslct         The dimm select (0:1).
  * @param  o_twoDimmConfig True if there are two dimms configured.
@@ -186,11 +186,29 @@ uint64_t reverseBits( uint64_t i_val, uint64_t i_numBits );
  * @param  o_col3Config    True if the col3 bit is used.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-template<TARGETING::TYPE T>
-uint32_t getAddrConfig( ExtensibleChip * i_chip, uint8_t i_dslct,
-                        bool & o_twoDimmConfig, uint8_t & o_prnkBits,
-                        uint8_t & o_srnkBits, uint8_t & o_extraRowBits,
-                        bool & o_col3Config );
+uint32_t expGetAddrConfig( ExtensibleChip * i_chip, uint8_t i_dslct,
+                           bool & o_twoDimmConfig, uint8_t & o_prnkBits,
+                           uint8_t & o_srnkBits, uint8_t & o_extraRowBits,
+                           bool & o_col3Config );
+
+/**
+ * @brief  Gets the address configuration for the inputted Odyssey OCMB
+ * @param  i_chip          An OCMB chip.
+ * @param  i_portSlct      The port select (0:1).
+ * @param  o_twoPortConfig True if there are two ports configured.
+ * @param  o_prnkBits      The number of primary rank bits.
+ * @param  o_srnkBits      The number of secondary rank bits.
+ * @param  o_extraRowBits  The number of extra row bits.
+ * @param  o_col3Config    True if the col3 bit is used.
+ * @param  o_col10Config   True if the col10 bit is used.
+ * @param  o_bank1Config   True if the bank1 bit is used.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+uint32_t odyGetAddrConfig( ExtensibleChip * i_chip, uint8_t i_portSlct,
+                           bool & o_twoPortConfig, uint8_t & o_prnkBits,
+                           uint8_t & o_srnkBits, uint8_t & o_extraRowBits,
+                           bool & o_col3Config, bool & o_col10Config,
+                           bool & o_bank1Config );
 
 } // end namespace MemUtils
 

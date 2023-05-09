@@ -129,6 +129,9 @@ void hwpErrorIsolation( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     TargetHandle_t trgt = i_chip->getTrgt();
     uint32_t plid = 0;
 
+    // TODO Odyssey - if we have a low priority OCMB callout with a higher
+    // priority level2 callout, we want to adjust the OCMB callout to GARD.
+
     // Check for non-zero value in PLID attribute.
     if ( trgt->tryGetAttr<ATTR_PRD_HWP_PLID>(plid) && (0 != plid) )
     {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,8 @@ class OcmbAddrConfig
     #ifdef __HOSTBOOT_RUNTIME
     /** @brief Default constructor. */
     OcmbAddrConfig( ExtensibleChip * i_ocmb ) : iv_ocmb(i_ocmb),
-        iv_addr_trans0(64), iv_addr_trans1(64), iv_addr_trans2(64)
+        iv_addr_trans0(64), iv_addr_trans1(64), iv_addr_trans2(64),
+        iv_addr_trans3(64)
     {}
     #else
     /** @brief Default constructor. */
@@ -59,7 +60,7 @@ class OcmbAddrConfig
     #endif
 
     /**
-     * @brief Returns the data stored in iv_mc_addr_trans0, reads from the
+     * @brief Returns the data stored in iv_addr_trans0, reads from the
      *        MC_ADDR_TRANS register to update if the data is 0.
      * @param o_addr_trans0 The data returned from iv_addr_trans0
      * @return Non-SUCCESS if the scom to the reg fails, SUCCESS otherwise
@@ -67,7 +68,7 @@ class OcmbAddrConfig
     uint32_t getMcAddrTrans0( BitStringBuffer & o_addr_trans0 );
 
     /**
-     * @brief Returns the data stored in iv_mc_addr_trans1, reads from the
+     * @brief Returns the data stored in iv_addr_trans1, reads from the
      *        MC_ADDR_TRANS1 register to update if the data is 0.
      * @param o_addr_trans1 The data returned from iv_addr_trans1
      * @return Non-SUCCESS if the scom to the reg fails, SUCCESS otherwise
@@ -75,12 +76,21 @@ class OcmbAddrConfig
     uint32_t getMcAddrTrans1( BitStringBuffer & o_addr_trans1 );
 
     /**
-     * @brief Returns the data stored in iv_mc_addr_trans2, reads from the
+     * @brief Returns the data stored in iv_addr_trans2, reads from the
      *        MC_ADDR_TRANS2 register to update if the data is 0.
      * @param o_addr_trans2 The data returned from iv_addr_trans2
      * @return Non-SUCCESS if the scom to the reg fails, SUCCESS otherwise
      */
     uint32_t getMcAddrTrans2( BitStringBuffer & o_addr_trans2 );
+
+    /**
+     * @brief Returns the data stored in iv_addr_trans3, reads from the
+     *        MC_ADDR_TRANS3 register to update if the data is 0.
+     *        Note: Odyssey only
+     * @param o_addr_trans3 The data returned from iv_addr_trans2
+     * @return Non-SUCCESS if the scom to the reg fails, SUCCESS otherwise
+     */
+    uint32_t getMcAddrTrans3( BitStringBuffer & o_addr_trans3 );
 
     /** @brief Returns whether the column3 address bit is valid or not depending
      *         on bit 56 of the MCBCFG register. If the scom fails to the
@@ -104,6 +114,9 @@ class OcmbAddrConfig
     BitStringBuffer iv_addr_trans0;
     BitStringBuffer iv_addr_trans1;
     BitStringBuffer iv_addr_trans2;
+
+    // Odyssey only
+    BitStringBuffer iv_addr_trans3;
     #endif
 };
 
