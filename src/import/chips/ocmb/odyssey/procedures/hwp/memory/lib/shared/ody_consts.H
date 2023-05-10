@@ -101,6 +101,9 @@ enum sizes
     // Synopsys PUB revision version
     PUB_REV = 0x350,
 
+    // Current Synopsys PMU revision returned from the message block
+    PMU_REV = 0x0014,
+
     // Maximum number of external DTS sensors
     NUM_DTS = 4,
 

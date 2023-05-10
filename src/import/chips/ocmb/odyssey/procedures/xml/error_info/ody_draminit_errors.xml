@@ -60,6 +60,28 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_ODY_DRAMINIT_TRAINING_FW_MISMATCH</rc>
+    <description>
+        Ody draminit training message block has an unsupported FW version.
+        This can likely be solved by a firmware binary update
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>MSG_FW_VERSION</ffdc>
+    <ffdc>EXPECTED_FW_VERSION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_ODY_DRAMINIT_TRAINING_FAILURE_MAIL</rc>
     <description>
         Ody draminit training mailbox message indicated a

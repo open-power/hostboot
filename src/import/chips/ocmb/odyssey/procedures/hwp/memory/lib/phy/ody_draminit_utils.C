@@ -6824,6 +6824,41 @@ void display_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targe
 }
 
 ///
+/// @brief Checks the FW revision in the message block
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_is_sim true if this is a simulation run
+/// @param[in] i_msg_block_response the message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode check_fw_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                    const uint8_t i_is_sim,
+                                    const _PMU_SMB_DDR5_1D_t& i_msg_block_response)
+{
+    // If this is a simulation run, just exit out successfully, the version might not be correct
+    if(i_is_sim)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Version corresponding with the M19 drop
+    constexpr uint16_t EXPECTED_PMU_REVISION = PMU_REV;
+    FAPI_ASSERT((i_msg_block_response.PmuRevision == EXPECTED_PMU_REVISION),
+                fapi2::ODY_DRAMINIT_TRAINING_FW_MISMATCH()
+                .set_PORT_TARGET(i_target)
+                .set_MSG_FW_VERSION(i_msg_block_response.PmuRevision)
+                .set_EXPECTED_FW_VERSION(EXPECTED_PMU_REVISION),
+                TARGTIDFORMAT " DRAM training response's FW version does not match the expected FW version"
+                " response version:0x%04x expected:0x%04x. Please update the FW",
+                TARGTID, i_msg_block_response.PmuRevision, EXPECTED_PMU_REVISION);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
 /// @brief Checks the training status from mail and message block
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_status the final mail status from training
@@ -6838,8 +6873,14 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
 
     mss::ody::phy::bad_bit_interface l_interface(i_msg_block_response);
     bool l_firs_found = false;
+    uint8_t l_is_sim = 0;
+    FAPI_TRY( mss::attr::get_is_simulation(l_is_sim) );
 
-    // First check for catastrophic training failure. No need to check FIRs if training failed completely
+    // First check for a mismatch between the Synopsys binary FW revision and the FW revision the code expects
+    // A mismatch in the FW revision is a catastrophic error and needs to be handled by code and FW binary updates
+    FAPI_TRY(check_fw_revision(i_target, l_is_sim, i_msg_block_response));
+
+    // Check for catastrophic training failure. No need to check FIRs if training failed completely
     // Check training complete mail message
     FAPI_ASSERT((i_status == SUCCESSFUL_COMPLETION),
                 fapi2::ODY_DRAMINIT_TRAINING_FAILURE_MAIL()
