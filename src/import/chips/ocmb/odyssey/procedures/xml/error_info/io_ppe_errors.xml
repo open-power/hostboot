@@ -24,6 +24,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
 <hwpErrors>
+  <format>poz</format>
   <!-- ******************************************************************** -->
     <hwpError>
       <rc>RC_IO_PPE_DONE_POLL_FAILED</rc>

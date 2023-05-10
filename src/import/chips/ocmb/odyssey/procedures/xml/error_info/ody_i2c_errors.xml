@@ -23,6 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
+  <format>poz</format>
 
   <hwpError>
     <rc>RC_ODYSSEY_I2C_ERROR</rc>

@@ -26,6 +26,7 @@
 <!-- Halt codes for poz_chiplet_reset -->
 
 <hwpErrors>
+  <format>poz</format>
    <!-- ******************************************************************** -->
    <hwpError>
       <rc>RC_POZ_HEARTBEAT_NOT_SET_ERR</rc>

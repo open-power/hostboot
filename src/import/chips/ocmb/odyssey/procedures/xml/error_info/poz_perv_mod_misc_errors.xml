@@ -26,6 +26,7 @@
 <!-- Halt codes for poz_perv_mod_misc -->
 
 <hwpErrors>
+  <format>poz</format>
   <!-- ******************************************************************** -->
     <hwpError>
       <rc>RC_POZ_CBS_NOT_IN_IDLE_STATE</rc>

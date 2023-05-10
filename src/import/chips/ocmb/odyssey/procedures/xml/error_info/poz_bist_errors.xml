@@ -26,6 +26,7 @@
 <!-- Halt codes for poz_bist                                                -->
 
 <hwpErrors>
+  <format>poz</format>
   <!-- ******************************************************************** -->
     <hwpError>
       <rc>RC_BAD_BIST_PARAMS_FORMAT</rc>

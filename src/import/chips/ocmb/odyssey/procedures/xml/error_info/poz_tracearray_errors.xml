@@ -24,6 +24,7 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
 <hwpErrors>
+  <format>poz</format>
   <hwpError>
     <sbeError/>
     <rc>RC_GETTRACEARRAY_INVALID_BUS</rc>

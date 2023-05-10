@@ -25,6 +25,7 @@
 <!-- File: poz_sppe_check_for_ready_errors.xml                              -->
 <!-- Halt codes for poz_sppe_check_for_ready                                -->
 <hwpErrors>
+  <format>poz</format>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_POZ_SPPE_NOT_READY_ERR</rc>

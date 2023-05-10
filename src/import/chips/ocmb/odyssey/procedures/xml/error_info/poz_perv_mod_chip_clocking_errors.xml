@@ -26,6 +26,7 @@
 <!-- Halt codes for poz_perv_mod_chip_clocking -->
 
 <hwpErrors>
+  <format>poz</format>
  <!-- ******************************************************************** -->
    <hwpError>
       <sbeError/>
