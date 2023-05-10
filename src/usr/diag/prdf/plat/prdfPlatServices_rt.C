@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -128,11 +128,19 @@ uint32_t stopBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_chip->getTrgt() );
 
     errlHndl_t errl;
-    FAPI_INVOKE_HWP( errl, exp_stop, fapiTrgt );
+
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        FAPI_INVOKE_HWP( errl, ody_stop, fapiTrgt );
+    }
+    else
+    {
+        FAPI_INVOKE_HWP( errl, exp_stop, fapiTrgt );
+    }
 
     if ( nullptr != errl )
     {
-        PRDF_ERR( PRDF_FUNC "exp_stop(0x%08x) failed", i_chip->getHuid());
+        PRDF_ERR( PRDF_FUNC "stop(0x%08x) failed", i_chip->getHuid());
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         rc = FAIL;
     }
@@ -169,45 +177,93 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             break;
         }
 
-        // Check UE and CE stop counters to determine stop conditions
-        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
-        if ( getOcmbDataBundle(i_chip)->iv_ueStopCounter.thReached(io_sc) )
+        // Resume the command on the next address.
+        errlHndl_t errl;
+
+        if (isOdysseyOcmb(i_chip->getTrgt()))
         {
-            // If we've reached the limit of UEs we're allowed to stop on
-            // per rank, only set the stop on mpe stop condition.
-            stopCond.set_pause_on_mpe(mss::ON);
-        }
-        else if ( getOcmbDataBundle(i_chip)->iv_ceStopCounter.thReached(io_sc) )
-        {
-            // If we've reached the limit of CEs we're allowed to stop on
-            // per rank, set all the normal stop conditions except stop on CE
-            stopCond.set_pause_on_aue(mss::ON);
+            // Check UE and CE stop counters to determine stop conditions
+            mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> stopCond;
+            if ( getOcmbDataBundle(i_chip)->iv_ueStopCounter.thReached(io_sc) )
+            {
+                // If we've reached the limit of UEs we're allowed to stop on
+                // per rank, only set the stop on mpe stop condition.
+                stopCond.set_pause_on_mpe(mss::ON);
+            }
+            else if (
+                getOcmbDataBundle(i_chip)->iv_ceStopCounter.thReached(io_sc))
+            {
+                // If we've reached the limit of CEs we're allowed to stop on
+                // per rank, set all the normal stop conditions except stop on
+                // CE
+                stopCond.set_pause_on_aue(mss::ON);
 
-            #ifdef CONFIG_HBRT_PRD
+                #ifdef CONFIG_HBRT_PRD
 
-            stopCond.set_pause_on_mpe(mss::ON)
-                    .set_pause_on_ue(mss::ON);
+                stopCond.set_pause_on_mpe(mss::ON)
+                        .set_pause_on_ue(mss::ON);
 
-            // In MNFG mode, stop on RCE_ETE to get an accurate callout for IUEs
-            if ( mfgMode() ) stopCond.set_thresh_rce(1);
+                // In MNFG mode, stop on RCE_ETE to get an accurate callout for
+                // IUEs
+                if ( mfgMode() ) stopCond.set_thresh_rce(1);
 
-            #endif
+                #endif
+            }
+            else
+            {
+                // If we haven't reached threshold on the number of UEs or CEs
+                // we have stopped on, do not change the stop conditions.
+                stopCond = mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>(
+                mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>::DONT_CHANGE);
+            }
+
+            FAPI_INVOKE_HWP( errl, ody_continue_cmd, fapiTrgt,
+                mss::mcbist::end_boundary::DONT_CHANGE, stopCond );
         }
         else
         {
-            // If we haven't reached threshold on the number of UEs or CEs we
-            // have stopped on, do not change the stop conditions.
-            stopCond = mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>(
-            mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>::DONT_CHANGE );
+            // Check UE and CE stop counters to determine stop conditions
+            mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
+            if ( getOcmbDataBundle(i_chip)->iv_ueStopCounter.thReached(io_sc) )
+            {
+                // If we've reached the limit of UEs we're allowed to stop on
+                // per rank, only set the stop on mpe stop condition.
+                stopCond.set_pause_on_mpe(mss::ON);
+            }
+            else if (
+                getOcmbDataBundle(i_chip)->iv_ceStopCounter.thReached(io_sc))
+            {
+                // If we've reached the limit of CEs we're allowed to stop on
+                // per rank, set all the normal stop conditions except stop on
+                // CE
+                stopCond.set_pause_on_aue(mss::ON);
+
+                #ifdef CONFIG_HBRT_PRD
+
+                stopCond.set_pause_on_mpe(mss::ON)
+                        .set_pause_on_ue(mss::ON);
+
+                // In MNFG mode, stop on RCE_ETE to get an accurate callout for
+                // IUEs
+                if ( mfgMode() ) stopCond.set_thresh_rce(1);
+
+                #endif
+            }
+            else
+            {
+                // If we haven't reached threshold on the number of UEs or CEs
+                // we have stopped on, do not change the stop conditions.
+                stopCond = mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>(
+                mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>::DONT_CHANGE);
+            }
+
+            FAPI_INVOKE_HWP( errl, exp_continue_cmd, fapiTrgt,
+                mss::mcbist::end_boundary::DONT_CHANGE, stopCond );
         }
 
-        // Resume the command on the next address.
-        errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, exp_continue_cmd, fapiTrgt,
-            mss::mcbist::end_boundary::DONT_CHANGE, stopCond );
         if ( nullptr != errl )
         {
-            PRDF_ERR( PRDF_FUNC "exp_continue_cmd(0x%08x) failed",
+            PRDF_ERR( PRDF_FUNC "continue_cmd(0x%08x) failed",
                       i_chip->getHuid() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;

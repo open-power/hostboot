@@ -342,13 +342,21 @@ int32_t mssGetSteerMux<TYPE_MEM_PORT>( TargetHandle_t i_memport,
 
     fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(i_memport);
 
-    // TODO Odyssey: ody version of hwp
-    FAPI_INVOKE_HWP( errl, exp_check_steering, fapiPort,
-                     i_rank.getMaster(), spare0, spare1 );
+    TargetHandle_t ocmb = getConnectedParent(i_memport, TYPE_OCMB_CHIP);
+    if (isOdysseyOcmb(ocmb))
+    {
+        FAPI_INVOKE_HWP( errl, ody_check_steering, fapiPort,
+                         i_rank.getMaster(), spare0, spare1 );
+    }
+    else
+    {
+        FAPI_INVOKE_HWP( errl, exp_check_steering, fapiPort,
+                         i_rank.getMaster(), spare0, spare1 );
+    }
 
     if ( nullptr != errl )
     {
-        PRDF_ERR( "[PlatServices::mssGetSteerMux] exp_check_steering() "
+        PRDF_ERR( "[PlatServices::mssGetSteerMux] check_steering() "
                   "failed. HUID: 0x%08x rank: %d",
                   getHuid(i_memport), i_rank.getMaster() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
@@ -385,13 +393,21 @@ int32_t mssSetSteerMux<TYPE_MEM_PORT>( TargetHandle_t i_memport,
                                                      i_symbol.getDram(),
                                                      isDramWidthX4(dimm) );
 
-    // TODO Odyssey: ody version of hwp
-    FAPI_INVOKE_HWP( errl, exp_do_steering, fapiPort,
-                     i_rank.getMaster(), l_dramSymbol );
+    TargetHandle_t ocmb = getConnectedParent(i_memport, TYPE_OCMB_CHIP);
+    if (isOdysseyOcmb(ocmb))
+    {
+        FAPI_INVOKE_HWP( errl, ody_do_steering, fapiPort,
+                         i_rank.getMaster(), l_dramSymbol );
+    }
+    else
+    {
+        FAPI_INVOKE_HWP( errl, exp_do_steering, fapiPort,
+                         i_rank.getMaster(), l_dramSymbol );
+    }
 
     if ( nullptr != errl )
     {
-        PRDF_ERR( "[PlatServices::mssSetSteerMux] exp_do_steering() "
+        PRDF_ERR( "[PlatServices::mssSetSteerMux] do_steering() "
                   "failed. HUID: 0x%08x, rank: %d, symbol: %d",
                   getHuid(i_memport), i_rank.getMaster(), l_dramSymbol );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
@@ -415,13 +431,21 @@ int32_t mssUndoSteerMux<TYPE_MEM_PORT>( TargetHandle_t i_memport,
 
     fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(i_memport);
 
-    // TODO Odyssey: ody version of hwp
-    FAPI_INVOKE_HWP( errl, exp_unspare, fapiPort,
-                     i_rank.getMaster(), i_spare );
+    TargetHandle_t ocmb = getConnectedParent(i_memport, TYPE_OCMB_CHIP);
+    if (isOdysseyOcmb(ocmb))
+    {
+        FAPI_INVOKE_HWP( errl, ody_unspare, fapiPort,
+                         i_rank.getMaster(), i_spare );
+    }
+    else
+    {
+        FAPI_INVOKE_HWP( errl, exp_unspare, fapiPort,
+                         i_rank.getMaster(), i_spare );
+    }
 
     if ( nullptr != errl )
     {
-        PRDF_ERR( "[PlatServices::mssUndoSteerMux] exp_unspare() "
+        PRDF_ERR( "[PlatServices::mssUndoSteerMux] unspare() "
                   "failed. HUID: 0x%08x, rank: %d, spare: %d",
                   getHuid(i_memport), i_rank.getMaster(), i_spare );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );

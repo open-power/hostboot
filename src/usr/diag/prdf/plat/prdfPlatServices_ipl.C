@@ -122,14 +122,24 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
     errlHndl_t errl = nullptr;
 
     fapi2::buffer<uint8_t> tmpRepairedRankMask, tmpBadDimmMask;
-    FAPI_INVOKE_HWP( errl, exp_restore_repairs,
-                     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>( i_target ),
-                     tmpRepairedRankMask, tmpBadDimmMask );
+
+    if (isOdysseyOcmb(i_target))
+    {
+        FAPI_INVOKE_HWP( errl, ody_restore_repairs,
+                         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>( i_target ),
+                         tmpRepairedRankMask, tmpBadDimmMask );
+    }
+    else
+    {
+        FAPI_INVOKE_HWP( errl, exp_restore_repairs,
+                         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>( i_target ),
+                         tmpRepairedRankMask, tmpBadDimmMask );
+    }
 
     if ( nullptr != errl )
     {
         PRDF_ERR( "[PlatServices::mssRestoreDramRepairs] "
-                  "exp_restore_repairs() failed. HUID: 0x%08x",
+                  "restore_repairs() failed. HUID: 0x%08x",
                   getHuid(i_target) );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
@@ -226,18 +236,6 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
     // Get the OCMB_CHIP fapi target
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt ( i_ocmb->getTrgt() );
 
-    // Get the stop conditions.
-    mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
-    stopCond.set_pause_on_mpe(mss::ON)
-            .set_pause_on_ue(mss::ON)
-            .set_pause_on_aue(mss::ON)
-            .set_nce_inter_symbol_count_enable(mss::ON)
-            .set_nce_soft_symbol_count_enable( mss::ON)
-            .set_nce_hard_symbol_count_enable( mss::ON);
-
-    // Stop on hard CEs if MNFG CE checking is enabled.
-    if ( isMfgCeCheckingEnabled() ) stopCond.set_pause_on_nce_hard(mss::ON);
-
     do
     {
         // Get the first address of the given rank.
@@ -262,11 +260,51 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
         // Start the super fast read command.
         errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, exp_sf_read, fapiTrgt, stopCond,
-                         saddr );
+
+        if (isOdysseyOcmb(i_ocmb->getTrgt()))
+        {
+            // Get the stop conditions.
+            mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> stopCond;
+            stopCond.set_pause_on_mpe(mss::ON)
+                    .set_pause_on_ue(mss::ON)
+                    .set_pause_on_aue(mss::ON)
+                    .set_nce_inter_symbol_count_enable(mss::ON)
+                    .set_nce_soft_symbol_count_enable( mss::ON)
+                    .set_nce_hard_symbol_count_enable( mss::ON);
+
+            // Stop on hard CEs if MNFG CE checking is enabled.
+            if ( isMfgCeCheckingEnabled() )
+            {
+                stopCond.set_pause_on_nce_hard(mss::ON);
+            }
+
+            FAPI_INVOKE_HWP( errl, ody_sf_read, fapiTrgt, stopCond,
+                             saddr );
+        }
+        else
+        {
+            // Get the stop conditions.
+            mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
+            stopCond.set_pause_on_mpe(mss::ON)
+                    .set_pause_on_ue(mss::ON)
+                    .set_pause_on_aue(mss::ON)
+                    .set_nce_inter_symbol_count_enable(mss::ON)
+                    .set_nce_soft_symbol_count_enable( mss::ON)
+                    .set_nce_hard_symbol_count_enable( mss::ON);
+
+            // Stop on hard CEs if MNFG CE checking is enabled.
+            if ( isMfgCeCheckingEnabled() )
+            {
+                stopCond.set_pause_on_nce_hard(mss::ON);
+            }
+
+            FAPI_INVOKE_HWP( errl, exp_sf_read, fapiTrgt, stopCond,
+                             saddr );
+        }
+
         if ( nullptr != errl )
         {
-            PRDF_ERR( PRDF_FUNC "exp_sf_read(0x%08x,%d) failed",
+            PRDF_ERR( PRDF_FUNC "sf_read(0x%08x,%d) failed",
                       i_ocmb->getHuid(), i_rank.getMaster() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
