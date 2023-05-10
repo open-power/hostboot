@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2022
+# Contributors Listed Below - COPYRIGHT 2014,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -26,7 +26,18 @@
 
 export CITESTPATH=${PROJECT_ROOT}/src/build/citest
 export PATH=${CITESTPATH}:${PATH}
-export CXXPATH=/opt/rh/devtoolset-3/root/usr/bin
+
+# Compute the local tool chain location to compile cppcheck for static analysis.
+# By default, this is /usr/bin (which works for RHEL8, Fedora37, etc.).
+# However, if OS is RHEL7 then use the devtoolset-8 location.
+export CXXPATH=/usr/bin
+RED_HAT_RELEASE_FILE=/etc/redhat-release
+if [ -f "$RED_HAT_RELEASE_FILE" ]; then
+    RED_HAT_DIST=`sed "s/^.*release \([0-9]*\)\..*$/rh\1/" $RED_HAT_RELEASE_FILE`
+    if [[ $RED_HAT_DIST == "rh7" ]]; then
+        export CXXPATH=/opt/rh/devtoolset-8/root/usr/bin
+    fi
+fi
 
 # Determine backing build.
 export BACKING_BUILD=`cat ${CITESTPATH}/etc/bbuild`
