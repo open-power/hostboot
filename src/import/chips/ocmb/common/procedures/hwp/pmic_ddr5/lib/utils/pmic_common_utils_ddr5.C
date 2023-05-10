@@ -254,18 +254,18 @@ bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 /// @brief Write a register of a PMIC target. This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
-/// @param[in,out] io_pmic target_info_pmic_dt_pair struct including target / state info
+/// @param[in,out] io_pmic_dt target_info_pmic_dt_pair struct including target / state info
 /// @param[in] i_reg register
 /// @param[in] i_data input buffer
 ///
-void pmic_reg_write(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint8_t>& i_data)
+void pmic_reg_write(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t i_reg, const fapi2::buffer<uint8_t>& i_data)
 {
-    if (!(io_pmic.iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
+    if (!(io_pmic_dt.iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
     {
-        if (mss::pmic::i2c::reg_write(io_pmic.iv_pmic, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
+        if (mss::pmic::i2c::reg_write(io_pmic_dt.iv_pmic, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
         {
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            io_pmic.iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL;
+            io_pmic_dt.iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL;
         }
     }
 }
@@ -274,18 +274,58 @@ void pmic_reg_write(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg, cons
 /// @brief Write a register of a DT target. This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
-/// @param[in,out] io_pmic target_info_pmic_dt_pair struct including target / state info
+/// @param[in,out] io_pmic_dt target_info_pmic_dt_pair struct including target / state info
 /// @param[in] i_reg register
 /// @param[in] i_data input buffer
 ///
-void dt_reg_write(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg, const fapi2::buffer<uint8_t>& i_data)
+void dt_reg_write(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t i_reg, const fapi2::buffer<uint8_t>& i_data)
 {
-    if (!(io_pmic.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
+    if (!(io_pmic_dt.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
     {
-        if (mss::pmic::i2c::reg_write(io_pmic.iv_dt, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
+        if (mss::pmic::i2c::reg_write(io_pmic_dt.iv_dt, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
         {
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            io_pmic.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
+            io_pmic_dt.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
+        }
+    }
+}
+
+///
+/// @brief Read a register of a PMIC target. This function is for the runtime health check and telemetry functions
+///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
+///
+/// @param[in,out] io_pmic_dt target_info_pmic_dt_pair struct including target / state info
+/// @param[in] i_reg register
+/// @param[out] o_data input buffer
+///
+void pmic_reg_read(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t i_reg, fapi2::buffer<uint8_t>& o_data)
+{
+    if (!(io_pmic_dt.iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
+    {
+        if (mss::pmic::i2c::reg_read(io_pmic_dt.iv_pmic, i_reg, o_data) != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            io_pmic_dt.iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL;
+        }
+    }
+}
+
+///
+/// @brief Read a register of a DT target. This function is for the runtime health check and telemetry functions
+///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
+///
+/// @param[in,out] io_pmic_dt target_info_pmic_dt_pair struct including target / state info
+/// @param[in] i_reg register
+/// @param[out] o_data input buffer
+///
+void dt_reg_read(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t i_reg, fapi2::buffer<uint8_t>& o_data)
+{
+    if (!(io_pmic_dt.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
+    {
+        if (mss::pmic::i2c::reg_read(io_pmic_dt.iv_dt, i_reg, o_data) != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            io_pmic_dt.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
         }
     }
 }
@@ -294,20 +334,20 @@ void dt_reg_write(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg, const 
 /// @brief Reverse write a register of a PMIC target. This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
-/// @param[in,out] io_pmic target_info_pmic_dt_pair struct including target / state info
+/// @param[in,out] io_pmic_dt target_info_pmic_dt_pair struct including target / state info
 /// @param[in] i_reg register
 /// @param[in] i_data input buffer
 /// @return None
 ///
-void pmic_reg_write_reverse_buffer(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
+void pmic_reg_write_reverse_buffer(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t i_reg,
                                    const fapi2::buffer<uint8_t>& i_data)
 {
-    if (!(io_pmic.iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
+    if (!(io_pmic_dt.iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
     {
-        if (mss::pmic::i2c::reg_write_reverse_buffer(io_pmic.iv_pmic, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
+        if (mss::pmic::i2c::reg_write_reverse_buffer(io_pmic_dt.iv_pmic, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
         {
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            io_pmic.iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL;
+            io_pmic_dt.iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL;
         }
     }
 }
@@ -316,20 +356,20 @@ void pmic_reg_write_reverse_buffer(target_info_pmic_dt_pair& io_pmic, const uint
 /// @brief Reverse write a register of a DT target. This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
-/// @param[in,out] io_pmic target_info_pmic_dt_pair struct including target / state info
+/// @param[in,out] io_pmic_dt target_info_pmic_dt_pair struct including target / state info
 /// @param[in] i_reg register
 /// @param[in] i_data input buffer
 /// @return None
 ///
-void dt_reg_write_reverse_buffer(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
+void dt_reg_write_reverse_buffer(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t i_reg,
                                  const fapi2::buffer<uint8_t>& i_data)
 {
-    if (!(io_pmic.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
+    if (!(io_pmic_dt.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
     {
-        if (mss::pmic::i2c::reg_write_reverse_buffer(io_pmic.iv_dt, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
+        if (mss::pmic::i2c::reg_write_reverse_buffer(io_pmic_dt.iv_dt, i_reg, i_data) != fapi2::FAPI2_RC_SUCCESS)
         {
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            io_pmic.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
+            io_pmic_dt.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
         }
     }
 }
@@ -338,20 +378,20 @@ void dt_reg_write_reverse_buffer(target_info_pmic_dt_pair& io_pmic, const uint8_
 /// @brief Reverse read a register of a PMIC target. This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
-/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
+/// @param[in,out] io_pmic_dt target_info_pmic_dt_pair class including target / state info
 /// @param[in] i_reg register
 /// @param[out] o_data output buffer
 /// @return None
 ///
-void pmic_reg_read_reverse_buffer(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
+void pmic_reg_read_reverse_buffer(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t i_reg,
                                   fapi2::buffer<uint8_t>& o_data)
 {
-    if (!(io_pmic.iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
+    if (!(io_pmic_dt.iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
     {
-        if (mss::pmic::i2c::reg_read_reverse_buffer(io_pmic.iv_pmic, i_reg, o_data) != fapi2::FAPI2_RC_SUCCESS)
+        if (mss::pmic::i2c::reg_read_reverse_buffer(io_pmic_dt.iv_pmic, i_reg, o_data) != fapi2::FAPI2_RC_SUCCESS)
         {
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            io_pmic.iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL;
+            io_pmic_dt.iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL;
         }
     }
 }
@@ -360,109 +400,20 @@ void pmic_reg_read_reverse_buffer(target_info_pmic_dt_pair& io_pmic, const uint8
 /// @brief Reverse read contiguous registers of a DT target. This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
-/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
+/// @param[in,out] io_pmic_dt target_info_pmic_dt_pair class including target / state info
 /// @param[in] i_reg register
 /// @param[out] o_data output buffer
 /// @return None
 ///
-void dt_reg_read_reverse_buffer(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg, fapi2::buffer<uint8_t>& o_data)
+void dt_reg_read_reverse_buffer(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t i_reg,
+                                fapi2::buffer<uint8_t>& o_data)
 {
-    if (!(io_pmic.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
+    if (!(io_pmic_dt.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
     {
-        if (mss::pmic::i2c::reg_read_reverse_buffer(io_pmic.iv_dt, i_reg, o_data) != fapi2::FAPI2_RC_SUCCESS)
+        if (mss::pmic::i2c::reg_read_reverse_buffer(io_pmic_dt.iv_dt, i_reg, o_data) != fapi2::FAPI2_RC_SUCCESS)
         {
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            io_pmic.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
-        }
-    }
-}
-
-///
-/// @brief Read contiguous registers of a PMIC target. This function is for the runtime health check and telemetry functions
-///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
-///
-/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
-/// @param[in] i_reg register
-/// @param[out] o_output output buffer
-///
-template <size_t N>
-void pmic_reg_read_contiguous(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
-                              fapi2::buffer<uint8_t> (&o_output)[N])
-{
-    if (!(io_pmic.iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
-    {
-        if (mss::pmic::i2c::reg_read_contiguous(io_pmic.iv_pmic, i_reg, o_output) != fapi2::FAPI2_RC_SUCCESS)
-        {
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            io_pmic.iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL;
-        }
-    }
-}
-
-///
-/// @brief Read contiguous registers of a DT target. This function is for the runtime health check and telemetry functions
-///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
-///
-/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
-/// @param[in] i_reg register
-/// @param[out] o_output output buffer
-///
-template <size_t N>
-void dt_reg_read_contiguous(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
-                            fapi2::buffer<uint8_t> (&o_output)[N])
-{
-    if (!(io_pmic.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
-    {
-        if (mss::pmic::i2c::reg_read_contiguous(io_pmic.iv_dt, i_reg, o_output) != fapi2::FAPI2_RC_SUCCESS)
-        {
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            io_pmic.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
-        }
-    }
-}
-
-///
-/// @brief Write contiguous registers to a PMIC target. This function is for the runtime health check and telemetry functions
-///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
-///
-/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
-/// @param[in] i_reg register
-/// @param[in] i_data_buffer buffer of data to be writen to register addresses
-/// @return None
-///
-template <size_t N>
-void pmic_reg_write_contiguous(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
-                               fapi2::buffer<uint8_t> (&i_data_buffer)[N])
-{
-    if (!(io_pmic.iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
-    {
-        if (mss::pmic::i2c::reg_write_contiguous(io_pmic.iv_pmic, i_reg, i_data_buffer) != fapi2::FAPI2_RC_SUCCESS)
-        {
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            io_pmic.iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL;
-        }
-    }
-}
-
-///
-/// @brief Write contiguous registers to a DT target. This function is for the runtime health check and telemetry functions
-///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
-///
-/// @param[in,out] io_pmic target_info_pmic_dt_pair class including target / state info
-/// @param[in] i_reg register
-/// @param[in] i_data_buffer buffer of data to be writen to register addresses
-/// @return None
-///
-template <size_t N>
-void dt_reg_write_contiguous(target_info_pmic_dt_pair& io_pmic, const uint8_t i_reg,
-                             fapi2::buffer<uint8_t> (&i_data_buffer)[N])
-{
-    if (!(io_pmic.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
-    {
-        if (mss::pmic::i2c::reg_write_contiguous(io_pmic.iv_dt, i_reg, i_data_buffer) != fapi2::FAPI2_RC_SUCCESS)
-        {
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            io_pmic.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
+            io_pmic_dt.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
         }
     }
 }

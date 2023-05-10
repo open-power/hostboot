@@ -58,8 +58,13 @@ enum data_position : uint8_t
     DATA_9   = 9,
     DATA_10  = 10,
     DATA_11  = 11,
+    DATA_12  = 12,
+    DATA_13  = 13,
+    DATA_14  = 14,
+    DATA_15  = 15,
 };
 
+static constexpr uint8_t NUMBER_ADDITIONAL_DT_REGS_READ = 2;
 static constexpr uint8_t NUMBER_DT_REGS_READ = 4;
 static constexpr uint8_t NUMBER_PMIC_REGS_READ = 12;
 
@@ -71,7 +76,20 @@ static constexpr uint8_t NUMBER_PMIC_REGS_READ = 12;
 /// @return index of minimum phase value from the array
 ///
 template <size_t N>
-uint8_t check_phase_min(const uint32_t (&i_phase)[N]);
+uint8_t check_phase_min(const uint32_t (&i_phase)[N])
+{
+    uint8_t l_min = 0;
+
+    for ( uint8_t l_count = 0; l_count < N; l_count++ )
+    {
+        if (i_phase[l_count] < i_phase[l_min])
+        {
+            l_min = l_count;
+        }
+    }
+
+    return l_min;
+}
 
 ///
 /// @brief Check maximum phase value from the given array
@@ -81,7 +99,20 @@ uint8_t check_phase_min(const uint32_t (&i_phase)[N]);
 /// @return index of maximum phase value from the array
 ///
 template <size_t N>
-uint8_t check_phase_max(const uint32_t (&i_phase)[N]);
+uint8_t check_phase_max(const uint32_t (&i_phase)[N])
+{
+    uint8_t l_max = 0;
+
+    for ( uint8_t l_count = 0; l_count < N; l_count++ )
+    {
+        if (i_phase[l_count] > i_phase[l_max])
+        {
+            l_max = l_count;
+        }
+    }
+
+    return l_max;
+}
 
 ///
 /// @brief Reset bread crumbs for all PMICs
@@ -118,9 +149,9 @@ void check_and_advance_breadcrumb_reg(const fapi2::Target<fapi2::TARGET_TYPE_PMI
 /// @param[in] DT number to be checked for breadcrumbs
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-void update_pmic_breadcrumb(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_target_info,
-                            mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
-                            const uint8_t i_dt_number);
+void update_breadcrumb(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_target_info,
+                       mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+                       const uint8_t i_dt_number);
 
 ///
 /// @brief Compare 4 phases provided from 4 pmics, update pmic states if needed
@@ -263,10 +294,12 @@ fapi2::ReturnCode read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& i
 /// @brief Store the read regs into struct
 ///
 /// @param[in] i_data DT data to be filled into the health_check struct
+/// @param[in] i_data_breadcrumb data to be filled into the health_check struct
 /// @param[in,out] io_dt_health_check struct to be filled in
 /// @return None
 ///
 void fill_dt_struct(const fapi2::buffer<uint8_t> (&i_data)[NUMBER_DT_REGS_READ],
+                    const fapi2::buffer<uint8_t>& i_data_breadcrumb,
                     mss::pmic::ddr5::dt_health_check_telemetry& io_dt_health_check);
 
 ///
@@ -278,6 +311,54 @@ void fill_dt_struct(const fapi2::buffer<uint8_t> (&i_data)[NUMBER_DT_REGS_READ],
 ///
 void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                   mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
+
+///
+/// @brief Check if n mode is detected from the states of the individual PMIC/DT pair
+///
+/// @param[in,out] io_health_check_info health check struct
+/// @return aggregate state of the DIMM
+///
+mss::pmic::ddr5::aggregate_state check_n_mode(mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
+
+///
+/// @brief Collect additional ADC data in case of N_MODE detected
+///
+/// @param[in] i_target_info PMIC and DT target info struct
+/// @param[in,out] io_additional_info additional health check data
+/// @return None
+///
+void collect_additional_adc_data(const mss::pmic::ddr5::target_info_redundancy_ddr5& i_target_info,
+                                 mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info);
+
+///
+/// @brief Collect additional PMIC data in case of N_MODE detected
+///
+/// @param[in] i_target_info PMIC and DT target info struct
+/// @param[in,out] io_additional_info additional health check data
+/// @return None
+///
+void collect_additional_pmic_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                                  mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info);
+
+///
+/// @brief Collect additional DT data in case of N_MODE detected
+///
+/// @param[in] i_target_info PMIC and DT target info struct
+/// @param[in,out] io_additional_info additional health check data
+/// @return None
+///
+void collect_additional_dt_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                                mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info);
+
+///
+/// @brief Collect additional data in case of N_MODE detected
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_additional_info additional health check data
+/// @return None
+///
+void collect_additional_n_mode_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                                    mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info);
 
 extern "C"
 {

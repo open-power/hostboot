@@ -678,13 +678,20 @@ namespace dt
 ///
 enum regs
 {
-    RO_INPUTS_1    = 0xBC,
-    RO_INPUTS_0    = 0xBE,
-    FAULTS_CLEAR_0 = 0xD4,
-    FAULTS_CLEAR_1 = 0xD6,
-    EN_REGISTER    = 0xDE,
-
-    BREADCRUMB     = 0xE0,
+    OPS_STATE            = 0x90,
+    FAULTS_STATUS_0      = 0x92,
+    FAULTS_STATUS_1      = 0x94,
+    FIRST_FAULT_STATUS_0 = 0x96,
+    FIRST_FAULT_STATUS_1 = 0x98,
+    INFET_POWER_MTP_ADDR = 0xA6,
+    NVM_DATA             = 0xA8,
+    VCC_VIN_VINP         = 0xB4,
+    RO_INPUTS_1          = 0xBC,
+    RO_INPUTS_0          = 0xBE,
+    FAULTS_CLEAR_0       = 0xD4,
+    FAULTS_CLEAR_1       = 0xD6,
+    EN_REGISTER          = 0xDE,
+    BREADCRUMB           = 0xE0,
 };
 
 ///
