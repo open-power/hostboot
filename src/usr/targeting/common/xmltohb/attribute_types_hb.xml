@@ -204,6 +204,7 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
   </attribute>
 
   <attribute>
