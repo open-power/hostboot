@@ -2768,7 +2768,7 @@ fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
         {
             // Report progress at 1% intervals (only in Cronus)
             // Percentage of the number of bytes copied so far
-            uint32_t l_new_progress_pct = 100 * (l_bytes_copied) / i_mem_total_size;
+            uint32_t l_new_progress_pct = 100 * (l_bytes_copied) / i_mem_size;
 
             // Calculate the time progress
             const auto l_current_time = time(nullptr);
