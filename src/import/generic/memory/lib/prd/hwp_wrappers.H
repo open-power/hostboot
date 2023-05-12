@@ -220,7 +220,7 @@ fapi2::ReturnCode ody_sf_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 /// @param[in] i_address mcbist::address representing the address from which to start.
 //    Defaults to the first address behind the target
 /// @param[in] i_end whether to end, and where
-///   Defaults to stop after slave rank
+///   Defaults to STOP_AFTER_SUBTEST because STOP_AFTER_SLAVE_RANK not working on Odyssey.
 /// @param[in] i_end_address mcbist::address representing the address to end.
 //    Defaults to TT::LARGEST_ADDRESS
 /// @return FAPI2_RC_SUCCESS iff everything ok
@@ -228,7 +228,7 @@ fapi2::ReturnCode ody_sf_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 fapi2::ReturnCode ody_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop,
                                const mss::mcbist::address& i_address = mss::mcbist::address(),
-                               const mss::mcbist::end_boundary i_end = mss::mcbist::end_boundary::STOP_AFTER_SLAVE_RANK,
+                               const mss::mcbist::end_boundary i_end = mss::mcbist::end_boundary::STOP_AFTER_SUBTEST,
                                const mss::mcbist::address& i_end_address = mss::mcbist::address(
                                        mss::mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>::LARGEST_ADDRESS) );
 
