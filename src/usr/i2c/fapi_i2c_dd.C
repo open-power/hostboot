@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,6 +79,11 @@ DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
 DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
                        DeviceFW::FAPI_I2C,
                        TARGETING::TYPE_GENERIC_I2C_DEVICE,
+                       fapiI2cPerformOp );
+
+DEVICE_REGISTER_ROUTE( DeviceFW::WILDCARD,
+                       DeviceFW::FAPI_I2C,
+                       TARGETING::TYPE_POWER_IC,
                        fapiI2cPerformOp );
 
 errlHndl_t fapiI2cPerformOp(DeviceFW::OperationType i_opType,
