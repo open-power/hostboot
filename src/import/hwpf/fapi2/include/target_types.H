@@ -248,6 +248,10 @@ constexpr LogTargetType toLogTargetType()
     return (LogTargetType)getBitPos(T, 0);
 }
 
+constexpr TargetType logToTargetType(const LogTargetType i_logTargetType)
+{
+    return TargetType(1ULL << i_logTargetType);
+}
 // The fsp x86 compiler is too old to support the full C++11 standard and
 // they have not been able to upgrade to a later compiler yet due to a
 // requirement to run tools on LCB machines which are still running RHEL6
