@@ -36,19 +36,35 @@ extern "C"
     {
         FAPI_DBG("Entering");
         SbeAttributeUpdRespFileParser l_resp;
+        SbeTarget                     l_sbe_target;
+        AttrRespEntry_t               l_attrRespEntry;
+
+
         FAPI_TRY(l_resp.setChipTarget(i_ocmb_targ), "setChipTarget failed");
         FAPI_TRY(l_resp.parseFile(i_buf, i_buf_size), "parseFile failed");
         FAPI_DBG("----------------- PARSING DONE ------------");
 
-        // TODO: remove after complete implementation
-        l_resp.printMe();
-
-        if(l_resp.getRemainingTargSectionCount() != 0)
+        while(l_resp.getRemainingTargSectionCount())
         {
-            // TODO: Add logics to take care different compatible versions.
-            FAPI_ERR("Attribute update failed");
-            fapi2::current_err = FAPI2_RC_FALSE;
-            goto fapi_try_exit;
+            FAPI_DBG("l_resp.getRemainingTargSectionCount() = %d",
+                     l_resp.getRemainingTargSectionCount());
+
+            SbeAttrTargetSectionUpdRespParser& l_targ_parser =
+                l_resp.getNextTargetSection(l_sbe_target);
+
+            while (l_targ_parser.getRemainingRowCount())
+            {
+                FAPI_DBG("getRemainingRowCount() = %d", l_targ_parser.getRemainingRowCount());
+
+                SbeAttrRowUpdResParser& l_attr = l_targ_parser.getNextRow();
+
+                l_attr.getResponse(l_attrRespEntry);
+
+                fapi2::TargetType l_targType =
+                    fapi2::logToTargetType(l_sbe_target.iv_targ_type);
+                o_errors.emplace_back(l_targType, l_sbe_target.iv_inst_num,
+                                      l_attrRespEntry.iv_attrId, l_attrRespEntry.iv_rc);
+            }
         }
 
     fapi_try_exit:

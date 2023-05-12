@@ -126,6 +126,9 @@ struct __attribute__((packed)) TargetEntry_t
     uint32_t                iv_magicWord;   //ASCII characters 'T' 'A' 'R' 'G'
 };
 
+// *INDENT-OFF*
+// The above directive has been added to avoid formatting of the below
+// structure by astyle.
 struct __attribute__((packed)) AttrEntry_t
 {
     AttrEntry_t(uint32_t i_attrId = 0,
@@ -138,14 +141,40 @@ struct __attribute__((packed)) AttrEntry_t
     iv_row(i_row),
     iv_col(i_col),
     iv_hgt(i_hgt)
-{}
+    {
 
-uint32_t   iv_attrId;       //attribute ID
-uint16_t   iv_dataSize;     //data size
-uint8_t    iv_row;          //row number
-uint8_t    iv_col;          //col number
-uint8_t    iv_hgt;          //height
-uint8_t    iv_res;          //1-byte reserved
+    }
+
+    uint32_t   iv_attrId;       //attribute ID
+    union
+    {
+        // For the generator and the attribute list parsing,
+        // the fields in this structure is used.
+        struct __attribute__((packed))
+        {
+            uint16_t        iv_dataSize;     //data size
+            uint8_t         iv_row;          //row number
+            uint8_t         iv_col;          //col number
+            uint8_t         iv_hgt;          //height
+            uint8_t         iv_res;          //1-byte reserved
+        };
+        // The attribute update response message contains
+        // attribute ID and SbeAttributeRC
+        struct __attribute__((packed))
+        {
+            SbeAttributeRC  iv_rc;          //RC
+            uint16_t        iv_reserved;    //2-bytes reserved
+        };
+    };
+};
+// *INDENT-ON*
+
+// This structure represents the attribute section of the
+// attribute update chip-op response.
+struct AttrRespEntry_t
+{
+    uint32_t            iv_attrId; //Attribute ID
+    SbeAttributeRC      iv_rc;     //Reason for the failure
 };
 
 /**
@@ -202,13 +231,19 @@ struct AttrError_t
 };
 
 // ---------------- Base Classes Common for Generator and Parser ---------------
+//Forward declaration
+class SbeAttrTargetSectionHandler;
+
 class SbeAttrRowHandler
 {
     public:
         SbeAttrRowHandler() :
             iv_value_ptr(0),
-            iv_value_size_aligned(0)
+            iv_value_size_aligned(0),
+            iv_parentTargetSection(nullptr)
         {}
+
+        SbeAttrRowHandler(const SbeAttrTargetSectionHandler* i_parentTargetSection);
 
         ~SbeAttrRowHandler();
 
@@ -226,6 +261,14 @@ class SbeAttrRowHandler
          */
         fapi2::ReturnCode getAttrEntry(AttrEntry_t& o_attrEntry);
 
+        /**
+         * @brief  To get the parent target section containing this attribute
+         *
+         * @return returns SbeAttrTargetSectionHandler
+         * @
+         */
+        const SbeAttrTargetSectionHandler& getParent();
+
     protected:
         void setAlignedSize();
 
@@ -237,14 +280,20 @@ class SbeAttrRowHandler
          */
         fapi2::INVALID_ATTR_INDEX get_RC_INVALID_ATTR_INDEX();
 
-        AttrEntry_t iv_attr_entry;
-        uint8_t*    iv_value_ptr;
-        uint16_t    iv_value_size_aligned;
+        AttrEntry_t                        iv_attr_entry;
+        uint8_t*                           iv_value_ptr;
+        uint16_t                           iv_value_size_aligned;
+        const SbeAttrTargetSectionHandler* iv_parentTargetSection;
 };
+
+//Forward declaration
+class SbeAttributeFileHandler;
 
 class SbeAttrTargetSectionHandler
 {
     public:
+        SbeAttrTargetSectionHandler(const SbeAttributeFileHandler* i_parentAttrFile);
+
         bool checkMatching(const SbeTarget& i_sbe_targ);
 
         inline void getSbeTarget(SbeTarget& o_sbe_targ) const
@@ -263,20 +312,30 @@ class SbeAttrTargetSectionHandler
             return iv_targ_inst_num;
         }
 
+        /**
+         * @brief  To get the parent attribute file containing this target section
+         *
+         * @return returns SbeAttributeFileHandler
+         * @
+         */
+        const SbeAttributeFileHandler& getParent() const;
+
     protected:
         SbeAttrTargetSectionHandler():
             iv_targ_type(fapi2::LOG_TARGET_TYPE_MULTICAST),
             iv_targ_inst_num(0),
-            iv_next_row_index(0)
+            iv_next_row_index(0),
+            iv_parentAttrFile(nullptr)
         {}
 
-        fapi2::LogTargetType           iv_targ_type;
-        uint8_t                        iv_targ_inst_num;
+        fapi2::LogTargetType                 iv_targ_type;
+        uint8_t                              iv_targ_inst_num;
         // This is needed only for parser childrens. but keeping here
         //   to make all child can be contained in the vector
         //   defined for base class.
-        uint16_t                       iv_next_row_index;
-        std::vector<SbeAttrRowHandler> iv_attr_rows;
+        uint16_t                             iv_next_row_index;
+        std::vector<SbeAttrRowHandler>       iv_attr_rows;
+        const SbeAttributeFileHandler*       iv_parentAttrFile;
 };
 
 class SbeAttributeFileHandler
@@ -290,6 +349,11 @@ class SbeAttributeFileHandler
          */
         fapi2::ReturnCode setChipTarget(
             const fapi2::Target<fapi2::TARGET_TYPE_ANY_POZ_CHIP>& i_chip_targ);
+
+        SbeAttributeFileTypes getFileType() const
+        {
+            return iv_file_type;
+        }
 
     protected:
         SbeAttributeFileHandler():
@@ -564,13 +628,14 @@ class SbeAttrTargetSectionParser : public SbeAttrTargetSectionHandler
         /**
          * @brief Parse a target and all its attribute
          *
-         * @param[io] io_buf    The pointer to the buffer containing the blob; At the end,
-         *                      the buffer pointer will be incremented by the size of this
-         *                      target and its attribute
+         * @param[io] io_buf    The pointer to the buffer containing the blob; At the
+         *                      end, the buffer pointer will be incremented by the size
+         *                      of this target section and its attribute sections.
          *
-         * @param[io] io_size   The number of bytes to be processed. At the end, the number
-         *                      bytes to be processed will be decremented by the size of this
-         *                      target and its attribute.
+         * @param[io] io_size   The number of bytes to be processed. At the end,
+         *                      the number of bytes to be processed will be decremented
+         *                      by the size of this target section and its attribute
+         *                      sections.
          *
          */
         fapi2::ReturnCode parse(uint8_t** io_buf, uint16_t* io_size);
@@ -630,8 +695,9 @@ class SbeAttributFileParser : public SbeAttributeFileHandler
         /**
          * @brief  parse the input file
          *
-         * @param[in] i_buf input buffer containing the attr file returned from sbe
-         * @param[in] i_buf_size size of the buffer
+         * @param[in] i_buf input The buffer containing the attribute file returned by
+         *                        SBE
+         * @param[in] i_buf_size  The size of the buffer
          */
         fapi2::ReturnCode parseFile(uint8_t* i_buf, uint16_t i_size);
 
@@ -665,7 +731,7 @@ class SbeAttrRowUpdResParser : public SbeAttrRowParser
     public:
         SbeAttrRowUpdResParser() = default;
 
-        fapi2::ReturnCode getResponse(SbeAttributeRC& o_resp);
+        void getResponse(AttrRespEntry_t& o_attrRespEntry);
 };
 
 class SbeAttrTargetSectionUpdRespParser : public SbeAttrTargetSectionParser
@@ -675,6 +741,7 @@ class SbeAttrTargetSectionUpdRespParser : public SbeAttrTargetSectionParser
         SbeAttrTargetSectionUpdRespParser() = default;
 
         SbeAttrRowUpdResParser& getNextRow();
+
 };
 
 class SbeAttributeUpdRespFileParser : public SbeAttributFileParser
@@ -728,8 +795,8 @@ class SbeAttrTargetSectionListRespParser : public SbeAttrTargetSectionParser
          *
          * @param[in]  i_rc            The error code to be used
          *
-         * @param[o]   io_errors       The output vector which includes the attributes of this
-         *                             target section
+         * @param[o]   io_errors       The output vector which includes the attributes
+         *                             of this target section
          *
          * @return FAPI2_RC_SUCCESS if ok
          */

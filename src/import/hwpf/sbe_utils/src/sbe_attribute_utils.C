@@ -45,15 +45,21 @@
  *                                              |<- SbeAttributeListRespFileParser
  *
  */
-
+#include <cassert>
 #include "sbe_attribute_utils.H"
 
 using namespace fapi2;
 
 namespace sbeutil
 {
-
 // ---------------------------- SbeAttrRowHandler ------------------------------
+SbeAttrRowHandler::SbeAttrRowHandler(
+    const SbeAttrTargetSectionHandler* i_parentTargetSection) :
+    SbeAttrRowHandler()
+{
+    iv_parentTargetSection = i_parentTargetSection;
+}
+
 SbeAttrRowHandler::~SbeAttrRowHandler()
 {
 
@@ -106,11 +112,32 @@ void SbeAttrRowHandler::setAlignedSize()
     iv_value_size_aligned = l_tot_aligned_size - sizeof(AttrEntry_t);
 }
 
+const SbeAttrTargetSectionHandler& SbeAttrRowHandler::getParent()
+{
+    assert(iv_parentTargetSection != nullptr);
+
+    return *iv_parentTargetSection;
+}
+
 // ---------------------- SbeAttrTargetSectionHandler ------------------------
+SbeAttrTargetSectionHandler::SbeAttrTargetSectionHandler(
+    const SbeAttributeFileHandler* i_parentAttrFile) :
+    SbeAttrTargetSectionHandler()
+{
+    iv_parentAttrFile = i_parentAttrFile;
+}
+
 bool SbeAttrTargetSectionHandler::checkMatching(const SbeTarget& i_sbe_targ)
 {
     return ((iv_targ_type == i_sbe_targ.iv_targ_type) &&
             (iv_targ_inst_num == i_sbe_targ.iv_inst_num));
+}
+
+const SbeAttributeFileHandler& SbeAttrTargetSectionHandler::getParent() const
+{
+    assert(iv_parentAttrFile != nullptr);
+
+    return *iv_parentAttrFile;
 }
 
 // -------------------------- SbeAttributeFileHandler --------------------------
@@ -282,37 +309,57 @@ ReturnCode SbeAttrRowParser::parse(uint8_t** io_buf, uint16_t* io_size)
 {
     FAPI_DBG("SbeAttrRowParser::parse Entering ...");
 
-    FAPI_ASSERT(*io_size >= sizeof(AttrEntry_t),
-                INSUFFICIENT_DATA_IN_BUFFER()
-                .set_ACTSIZE(*io_size)
-                .set_SIZE(sizeof(AttrEntry_t)),
-                "io_size (%d) is less than sizeof(AttrEntry_t)", *io_size);
+    if (getParent().getParent().getFileType() == SBE_ATTRIBUTE_FILE_UPD_RESPONSE)
+    {
+        FAPI_ASSERT(*io_size >= sizeof(AttrRespEntry_t),
+                    INSUFFICIENT_DATA_IN_BUFFER()
+                    .set_ACTSIZE(*io_size)
+                    .set_SIZE(sizeof(AttrRespEntry_t)),
+                    "io_size (%d) is less than sizeof(AttrRespEntry_t)", *io_size);
 
-    iv_attr_entry.iv_attrId   = be32toh(reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_attrId);
-    FAPI_DBG("iv_attr_entry.iv_attrId = 0x%08x", iv_attr_entry.iv_attrId);
+        iv_attr_entry.iv_attrId   =
+            be32toh(reinterpret_cast<AttrRespEntry_t*>(*io_buf)->iv_attrId);
+        iv_attr_entry.iv_rc       =
+            (SbeAttributeRC)be32toh(reinterpret_cast<AttrRespEntry_t*>(*io_buf)->iv_rc);
+        FAPI_DBG("iv_attr_entry.iv_attrId = 0x%08x", iv_attr_entry.iv_attrId);
 
-    iv_attr_entry.iv_dataSize = be16toh(reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_dataSize);
-    iv_attr_entry.iv_row      = reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_row;
-    iv_attr_entry.iv_col      = reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_col;
-    iv_attr_entry.iv_hgt      = reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_hgt;
+        *io_buf += sizeof(AttrRespEntry_t);
+        *io_size -= sizeof(AttrRespEntry_t);
+    }
+    else
+    {
+        FAPI_ASSERT(*io_size >= sizeof(AttrEntry_t),
+                    INSUFFICIENT_DATA_IN_BUFFER()
+                    .set_ACTSIZE(*io_size)
+                    .set_SIZE(sizeof(AttrEntry_t)),
+                    "io_size (%d) is less than sizeof(AttrEntry_t)", *io_size);
 
-    *io_buf += sizeof(AttrEntry_t);
-    *io_size -= sizeof(AttrEntry_t);
+        iv_attr_entry.iv_attrId   = be32toh(reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_attrId);
+        FAPI_DBG("iv_attr_entry.iv_attrId = 0x%08x", iv_attr_entry.iv_attrId);
 
-    setAlignedSize();
+        iv_attr_entry.iv_dataSize = be16toh(reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_dataSize);
+        iv_attr_entry.iv_row      = reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_row;
+        iv_attr_entry.iv_col      = reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_col;
+        iv_attr_entry.iv_hgt      = reinterpret_cast<AttrEntry_t*>(*io_buf)->iv_hgt;
 
-    FAPI_ASSERT(*io_size >= iv_value_size_aligned,
-                INSUFFICIENT_DATA_IN_BUFFER()
-                .set_ACTSIZE(*io_size)
-                .set_SIZE(iv_value_size_aligned),
-                "io_size (%d) is less than iv_value_size_aligned(%d)",
-                *io_size, iv_value_size_aligned);
+        *io_buf += sizeof(AttrEntry_t);
+        *io_size -= sizeof(AttrEntry_t);
 
-    iv_value_ptr = new uint8_t[iv_attr_entry.iv_dataSize];
-    memcpy(iv_value_ptr, *io_buf, iv_attr_entry.iv_dataSize);
+        setAlignedSize();
 
-    *io_buf += iv_value_size_aligned;
-    *io_size -= iv_value_size_aligned;
+        FAPI_ASSERT(*io_size >= iv_value_size_aligned,
+                    INSUFFICIENT_DATA_IN_BUFFER()
+                    .set_ACTSIZE(*io_size)
+                    .set_SIZE(iv_value_size_aligned),
+                    "io_size (%d) is less than iv_value_size_aligned(%d)",
+                    *io_size, iv_value_size_aligned);
+
+        iv_value_ptr = new uint8_t[iv_attr_entry.iv_dataSize];
+        memcpy(iv_value_ptr, *io_buf, iv_attr_entry.iv_dataSize);
+
+        *io_buf += iv_value_size_aligned;
+        *io_size -= iv_value_size_aligned;
+    }
 
 fapi_try_exit:
     return current_err;
@@ -352,7 +399,7 @@ ReturnCode SbeAttrTargetSectionParser::parse(uint8_t** io_buf, uint16_t* io_size
 
         for(int i = 0; i < l_num_attrs; i++)
         {
-            iv_attr_rows.push_back(SbeAttrRowParser());
+            iv_attr_rows.emplace_back((SbeAttrTargetSectionHandler*)this);
             FAPI_TRY(static_cast<SbeAttrRowParser&>(
                          iv_attr_rows.back()).parse(io_buf, io_size),
                      "SbeAttrRowParser.parse failed");
@@ -414,7 +461,7 @@ ReturnCode SbeAttributFileParser::parseFile(uint8_t* i_buf, uint16_t i_size)
 
             for(uint16_t i = 0; i < l_num_targs; i++)
             {
-                iv_target_sections.push_back(SbeAttrTargetSectionParser());
+                iv_target_sections.emplace_back((SbeAttributeFileHandler*)this);
                 FAPI_TRY(static_cast<SbeAttrTargetSectionParser&>(
                              iv_target_sections.back()).parse(&l_cur_ptr, &i_size));
             }
@@ -454,17 +501,10 @@ fapi_try_exit:
 }
 
 // ---------------------- SbeAttrRowUpdResParser ------------------------------
-ReturnCode SbeAttrRowUpdResParser::getResponse(SbeAttributeRC& o_resp)
+void SbeAttrRowUpdResParser::getResponse(AttrRespEntry_t& o_attrRespEntry)
 {
-    FAPI_ASSERT(iv_attr_entry.iv_dataSize == sizeof(SbeAttributeRC),
-                INVALID_ATTR_FILE(),
-                "iv_dataSize(%d) != sizeof(SbeAttributeRC)(%d)",
-                iv_attr_entry.iv_dataSize, sizeof(SbeAttributeRC));
-
-    o_resp = *(reinterpret_cast<SbeAttributeRC*>(iv_value_ptr));
-
-fapi_try_exit:
-    return current_err;
+    o_attrRespEntry.iv_attrId   = iv_attr_entry.iv_attrId;
+    o_attrRespEntry.iv_rc       = iv_attr_entry.iv_rc;
 }
 
 // ------------------ SbeAttrTargetSectionUpdRespParser-----------------------
@@ -562,7 +602,7 @@ ReturnCode SbeAttrTargetSectionListRespParser::addAttributesToError(const SbeAtt
         SbeAttrRowListResParser& l_attr = this->getNextRow();
         FAPI_TRY(l_attr.getAttrEntry(l_attrEntry), "getAttrEntry returned error");
 
-        io_errors.emplace_back(fapi2::TargetType(1ULL << this->iv_targ_type),
+        io_errors.emplace_back(fapi2::logToTargetType(this->iv_targ_type),
                                this->iv_targ_inst_num,
                                uint32_t(l_attrEntry.iv_attrId),
                                i_rc);
