@@ -95,29 +95,26 @@ fapi2::ReturnCode ody_omi_hss_ppe_load(
         l_invalid = true;
     }
 
-//TODO: Temporarily remove to expedite SBE code developments.
-//      Need to re-instate before merge.
-#if 0
-
     // IOPPE_BASE_IMAGE
     else if (i_type == poz_image_type::IOPPE_BASE_IMAGE)
     {
-        if ( (i_img_size != SIZE_32K_BYTES) ||
-             ( (i_offset != OFFSET_0K) && (i_offset != OFFSET_32K) && (i_offset != OFFSET_64K) ) )
+        if ( (i_offset != OFFSET_0K) && (i_offset != OFFSET_32K) && (i_offset != OFFSET_64K) )
         {
             l_invalid = true;
         }
     }
     // IOPPE_MEMREGS_IMAGE
-    else
+    else if (i_type == poz_image_type::IOPPE_MEMREGS_IMAGE)
     {
         if ( (i_img_size != SIZE_1K_BYTES) || (i_offset != OFFSET_0K) )
         {
             l_invalid = true;
         }
     }
-
-#endif
+    else
+    {
+        l_invalid = true;
+    }
 
     FAPI_ASSERT( !l_invalid,
                  fapi2::ODY_IO_LOAD_PPE_IMG_ERROR()
