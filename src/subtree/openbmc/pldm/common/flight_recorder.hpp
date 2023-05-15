@@ -79,8 +79,8 @@ class FlightRecorder
             int currentIndex = index++;
             tapeRecorder[currentIndex] = std::make_tuple(
                 pldm::utils::getCurrentSystemTime(), isRequest, buffer);
-            index =
-                (currentIndex == FLIGHT_RECORDER_MAX_ENTRIES - 1) ? 0 : index;
+            index = (currentIndex == FLIGHT_RECORDER_MAX_ENTRIES - 1) ? 0
+                                                                      : index;
         }
     }
 

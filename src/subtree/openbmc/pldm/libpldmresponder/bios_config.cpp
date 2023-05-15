@@ -340,8 +340,8 @@ int BIOSConfig::checkAttributeValueTable(const Table& table)
                 // get default_value
                 for (size_t i = 0; i < defIndices.size(); i++)
                 {
-                    defaultValue =
-                        getValue(pvHandls[defIndices[i]], *stringTable);
+                    defaultValue = getValue(pvHandls[defIndices[i]],
+                                            *stringTable);
                 }
 
                 break;
@@ -443,8 +443,8 @@ void BIOSConfig::updateBaseBIOSTableProperty()
     try
     {
         auto& bus = dbusHandler->getBus();
-        auto service =
-            dbusHandler->getService(biosConfigPath, biosConfigInterface);
+        auto service = dbusHandler->getService(biosConfigPath,
+                                               biosConfigInterface);
         auto method = bus.new_method_call(service.c_str(), biosConfigPath,
                                           dbusProperties, "Set");
         std::variant<BaseBIOSTable> value = baseBIOSTableMaps;
@@ -488,9 +488,9 @@ void BIOSConfig::buildAndStoreAttrTables(const Table& stringTable)
     {
         auto& bus = dbusHandler->getBus();
         auto service = dbusHandler->getService(biosObjPath, biosInterface);
-        auto method =
-            bus.new_method_call(service.c_str(), biosObjPath,
-                                "org.freedesktop.DBus.Properties", "Get");
+        auto method = bus.new_method_call(service.c_str(), biosObjPath,
+                                          "org.freedesktop.DBus.Properties",
+                                          "Get");
         method.append(biosInterface, "BaseBIOSTable");
         auto reply = bus.call(method);
         std::variant<BaseBIOSTable> varBiosTable{};
@@ -665,8 +665,8 @@ void BIOSConfig::traceBIOSUpdate(
     auto stringTable = getBIOSTable(PLDM_BIOS_STRING_TABLE);
     auto attrTable = getBIOSTable(PLDM_BIOS_ATTR_TABLE);
 
-    auto [attrHandle, attrType] =
-        table::attribute_value::decodeHeader(attrValueEntry);
+    auto [attrHandle,
+          attrType] = table::attribute_value::decodeHeader(attrValueEntry);
 
     auto attrHeader = table::attribute::decodeHeader(attrEntry);
     BIOSStringTable biosStringTable(*stringTable);
@@ -726,8 +726,8 @@ int BIOSConfig::checkAttrValueToUpdate(
     const pldm_bios_attr_table_entry* attrEntry, Table&)
 
 {
-    auto [attrHandle, attrType] =
-        table::attribute_value::decodeHeader(attrValueEntry);
+    auto [attrHandle,
+          attrType] = table::attribute_value::decodeHeader(attrValueEntry);
 
     switch (attrType)
     {
@@ -736,8 +736,8 @@ int BIOSConfig::checkAttrValueToUpdate(
         {
             auto value =
                 table::attribute_value::decodeEnumEntry(attrValueEntry);
-            auto [pvHdls, defIndex] =
-                table::attribute::decodeEnumEntry(attrEntry);
+            auto [pvHdls,
+                  defIndex] = table::attribute::decodeEnumEntry(attrEntry);
             if (!(value.size() == 1))
             {
                 return PLDM_ERROR_INVALID_LENGTH;
@@ -755,8 +755,8 @@ int BIOSConfig::checkAttrValueToUpdate(
         {
             auto value =
                 table::attribute_value::decodeIntegerEntry(attrValueEntry);
-            auto [lower, upper, scalar, def] =
-                table::attribute::decodeIntegerEntry(attrEntry);
+            auto [lower, upper, scalar,
+                  def] = table::attribute::decodeIntegerEntry(attrEntry);
 
             if (value < lower || value > upper)
             {
@@ -805,8 +805,8 @@ int BIOSConfig::setAttrValue(const void* entry, size_t size, bool isBMC,
 
     auto attrValHeader = table::attribute_value::decodeHeader(attrValueEntry);
 
-    auto attrEntry =
-        table::attribute::findByHandle(*attrTable, attrValHeader.attrHandle);
+    auto attrEntry = table::attribute::findByHandle(*attrTable,
+                                                    attrValHeader.attrHandle);
     if (!attrEntry)
     {
         return PLDM_ERROR;
@@ -818,8 +818,8 @@ int BIOSConfig::setAttrValue(const void* entry, size_t size, bool isBMC,
         return rc;
     }
 
-    auto destTable =
-        table::attribute_value::updateTable(*attrValueTable, entry, size);
+    auto destTable = table::attribute_value::updateTable(*attrValueTable, entry,
+                                                         size);
 
     if (!destTable)
     {
@@ -832,9 +832,10 @@ int BIOSConfig::setAttrValue(const void* entry, size_t size, bool isBMC,
 
         BIOSStringTable biosStringTable(*stringTable);
         auto attrName = biosStringTable.findString(attrHeader.stringHandle);
-        auto iter = std::find_if(
-            biosAttributes.begin(), biosAttributes.end(),
-            [&attrName](const auto& attr) { return attr->name == attrName; });
+        auto iter = std::find_if(biosAttributes.begin(), biosAttributes.end(),
+                                 [&attrName](const auto& attr) {
+            return attr->name == attrName;
+        });
 
         if (iter == biosAttributes.end())
         {
@@ -922,8 +923,8 @@ void BIOSConfig::processBiosAttrChangeNotification(
         return;
     }
 
-    auto [attrHdl, attrType, stringHdl] =
-        table::attribute::decodeHeader(tableEntry);
+    auto [attrHdl, attrType,
+          stringHdl] = table::attribute::decodeHeader(tableEntry);
 
     auto attrValueSrcTable = getBIOSTable(PLDM_BIOS_ATTR_VAL_TABLE);
 
@@ -993,8 +994,8 @@ void BIOSConfig::constructPendingAttribute(
 
         auto iter = std::find_if(biosAttributes.begin(), biosAttributes.end(),
                                  [&attributeName](const auto& attr) {
-                                     return attr->name == attributeName;
-                                 });
+            return attr->name == attributeName;
+        });
 
         if (iter == biosAttributes.end())
         {
@@ -1021,8 +1022,8 @@ void BIOSConfig::constructPendingAttribute(
         }
 
         const auto [attrType, readonlyStatus, displayName, description,
-                    menuPath, currentValue, defaultValue, option] =
-            baseBIOSTableMaps.at(attributeName);
+                    menuPath, currentValue, defaultValue,
+                    option] = baseBIOSTableMaps.at(attributeName);
 
         entry->attr_handle = htole16(handler);
 
@@ -1060,25 +1061,25 @@ void BIOSConfig::listenPendingAttributes()
         pldm::utils::DBusHandler::getBus(),
         propertiesChanged(objPath, objInterface),
         [this](sdbusplus::message_t& msg) {
-            constexpr auto propertyName = "PendingAttributes";
+        constexpr auto propertyName = "PendingAttributes";
 
-            using Value =
-                std::variant<std::string, PendingAttributes, BaseBIOSTable>;
-            using Properties = std::map<DbusProp, Value>;
+        using Value =
+            std::variant<std::string, PendingAttributes, BaseBIOSTable>;
+        using Properties = std::map<DbusProp, Value>;
 
-            Properties props{};
-            std::string intf;
-            msg.read(intf, props);
+        Properties props{};
+        std::string intf;
+        msg.read(intf, props);
 
-            auto valPropMap = props.find(propertyName);
-            if (valPropMap == props.end())
-            {
-                return;
-            }
+        auto valPropMap = props.find(propertyName);
+        if (valPropMap == props.end())
+        {
+            return;
+        }
 
-            PendingAttributes pendingAttributes =
-                std::get<PendingAttributes>(valPropMap->second);
-            this->constructPendingAttribute(pendingAttributes);
+        PendingAttributes pendingAttributes =
+            std::get<PendingAttributes>(valPropMap->second);
+        this->constructPendingAttribute(pendingAttributes);
         });
 
     biosAttrMatch.emplace_back(std::move(updateBIOSMatch));

@@ -298,8 +298,8 @@ int setNumericEffecterValueHandler(const DBusInterface& dBusIntf,
 
     try
     {
-        const auto& [dbusMappings, dbusValMaps] =
-            handler.getDbusObjMaps(effecterId);
+        const auto& [dbusMappings,
+                     dbusValMaps] = handler.getDbusObjMaps(effecterId);
         pldm::utils::DBusMapping dbusMapping{
             dbusMappings[0].objectPath, dbusMappings[0].interface,
             dbusMappings[0].propertyName, dbusMappings[0].propertyType};

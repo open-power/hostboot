@@ -128,8 +128,8 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
 
         pldm::responder::pdr_utils::DbusMappings dbusMappings{};
         pldm::responder::pdr_utils::DbusValMaps dbusValMaps{};
-        uint8_t* start =
-            entry.data() + sizeof(pldm_state_sensor_pdr) - sizeof(uint8_t);
+        uint8_t* start = entry.data() + sizeof(pldm_state_sensor_pdr) -
+                         sizeof(uint8_t);
         for (const auto& sensor : sensors)
         {
             auto set = sensor.value("set", empty);
@@ -163,8 +163,8 @@ void generateStateSensorPDR(const DBusInterface& dBusIntf, const Json& json,
             pldm::utils::DBusMapping dbusMapping{};
             try
             {
-                auto service =
-                    dBusIntf.getService(objectPath.c_str(), interface.c_str());
+                auto service = dBusIntf.getService(objectPath.c_str(),
+                                                   interface.c_str());
 
                 dbusMapping = pldm::utils::DBusMapping{
                     objectPath, interface, propertyName, propertyType};

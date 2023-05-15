@@ -95,8 +95,8 @@ int mctpSockSendRecv(const std::vector<uint8_t>& requestMsg,
         auto reqhdr = reinterpret_cast<const pldm_msg_hdr*>(&requestMsg[2]);
         do
         {
-            ssize_t peekedLength =
-                recv(socketFd(), nullptr, 0, MSG_PEEK | MSG_TRUNC);
+            ssize_t peekedLength = recv(socketFd(), nullptr, 0,
+                                        MSG_PEEK | MSG_TRUNC);
             responseMsg.resize(peekedLength);
             auto recvDataLength =
                 recv(socketFd(), reinterpret_cast<void*>(responseMsg.data()),
@@ -139,8 +139,8 @@ void CommandInterface::exec()
     auto& bus = pldm::utils::DBusHandler::getBus();
     try
     {
-        auto service =
-            pldm::utils::DBusHandler().getService(pldmObjPath, pldmRequester);
+        auto service = pldm::utils::DBusHandler().getService(pldmObjPath,
+                                                             pldmRequester);
         auto method = bus.new_method_call(service.c_str(), pldmObjPath,
                                           pldmRequester, "GetInstanceId");
         method.append(mctp_eid);

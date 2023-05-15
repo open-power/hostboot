@@ -138,9 +138,9 @@ std::string FruImpl::populatefwVersion()
     std::string currentBmcVersion;
     try
     {
-        auto method =
-            bus.new_method_call(pldm::utils::mapperService, fwFunctionalObjPath,
-                                pldm::utils::dbusProperties, "Get");
+        auto method = bus.new_method_call(pldm::utils::mapperService,
+                                          fwFunctionalObjPath,
+                                          pldm::utils::dbusProperties, "Get");
         method.append("xyz.openbmc_project.Association", "endpoints");
         std::variant<std::vector<std::string>> paths;
         auto reply = bus.call(method);
@@ -169,11 +169,11 @@ void FruImpl::populateRecords(
     auto numRecsCount = numRecs;
     static uint32_t bmc_record_handle = 0;
 
-    for (auto const& [recType, encType, fieldInfos] : recordInfos)
+    for (const auto& [recType, encType, fieldInfos] : recordInfos)
     {
         std::vector<uint8_t> tlvs;
         uint8_t numFRUFields = 0;
-        for (auto const& [intf, prop, propType, fieldTypeNum] : fieldInfos)
+        for (const auto& [intf, prop, propType, fieldTypeNum] : fieldInfos)
         {
             try
             {
@@ -340,9 +340,9 @@ Response Handler::getFRURecordTable(const pldm_msg* request,
         sizeof(pldm_msg_hdr) + PLDM_GET_FRU_RECORD_TABLE_MIN_RESP_BYTES, 0);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
 
-    auto rc =
-        encode_get_fru_record_table_resp(request->hdr.instance_id, PLDM_SUCCESS,
-                                         0, PLDM_START_AND_END, responsePtr);
+    auto rc = encode_get_fru_record_table_resp(request->hdr.instance_id,
+                                               PLDM_SUCCESS, 0,
+                                               PLDM_START_AND_END, responsePtr);
     if (rc != PLDM_SUCCESS)
     {
         return ccOnlyResponse(request, rc);
@@ -387,8 +387,8 @@ Response Handler::getFRURecordByOption(const pldm_msg* request,
         return ccOnlyResponse(request, rc);
     }
 
-    auto respPayloadLength =
-        PLDM_GET_FRU_RECORD_BY_OPTION_MIN_RESP_BYTES + fruData.size();
+    auto respPayloadLength = PLDM_GET_FRU_RECORD_BY_OPTION_MIN_RESP_BYTES +
+                             fruData.size();
     Response response(sizeof(pldm_msg_hdr) + respPayloadLength, 0);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
 

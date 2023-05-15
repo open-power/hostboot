@@ -38,9 +38,9 @@ const pldm_pdr_record* getRecordByHandle(const RepoInterface& pdrRepo,
                                          PdrEntry& pdrEntry)
 {
     uint8_t* pdrData = nullptr;
-    auto record =
-        pldm_pdr_find_record(pdrRepo.getPdr(), recordHandle, &pdrData,
-                             &pdrEntry.size, &pdrEntry.handle.nextRecordHandle);
+    auto record = pldm_pdr_find_record(pdrRepo.getPdr(), recordHandle, &pdrData,
+                                       &pdrEntry.size,
+                                       &pdrEntry.handle.nextRecordHandle);
     if (record)
     {
         pdrEntry.data = pdrData;

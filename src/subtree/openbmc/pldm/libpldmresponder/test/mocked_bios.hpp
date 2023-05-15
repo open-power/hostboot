@@ -8,8 +8,7 @@ using testing::ElementsAreArray;
 class MockBIOSStringTable : public pldm::responder::bios::BIOSStringTable
 {
   public:
-    MockBIOSStringTable() : BIOSStringTable({})
-    {}
+    MockBIOSStringTable() : BIOSStringTable({}) {}
 
     MOCK_METHOD(uint16_t, findHandle, (const std::string&), (const override));
 

@@ -18,8 +18,7 @@ class ProgressCodeHandler : public FileHandler
   public:
     /** @brief ProgressCodeHandler constructor
      */
-    ProgressCodeHandler(uint32_t fileHandle) : FileHandler(fileHandle)
-    {}
+    ProgressCodeHandler(uint32_t fileHandle) : FileHandler(fileHandle) {}
 
     int writeFromMemory(uint32_t /*offset*/, uint32_t /*length*/,
                         uint64_t /*address*/,
@@ -65,8 +64,7 @@ class ProgressCodeHandler : public FileHandler
     /** @brief ProgressCodeHandler destructor
      */
 
-    ~ProgressCodeHandler()
-    {}
+    ~ProgressCodeHandler() {}
 };
 
 } // namespace responder

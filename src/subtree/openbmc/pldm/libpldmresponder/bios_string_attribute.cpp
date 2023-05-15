@@ -106,10 +106,10 @@ void BIOSStringAttribute::constructEntry(
         stringInfo.defString.data(),
     };
 
-    auto attrTableEntry =
-        table::attribute::constructStringEntry(attrTable, &info);
-    auto [attrHandle, attrType, _] =
-        table::attribute::decodeHeader(attrTableEntry);
+    auto attrTableEntry = table::attribute::constructStringEntry(attrTable,
+                                                                 &info);
+    auto [attrHandle, attrType,
+          _] = table::attribute::decodeHeader(attrTableEntry);
 
     std::string currStr{};
     if (optAttributeValue.has_value())

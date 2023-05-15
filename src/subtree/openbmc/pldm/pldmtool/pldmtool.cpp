@@ -54,8 +54,8 @@ class RawOp : public CommandInterface
 
 void registerCommand(CLI::App& app)
 {
-    auto raw =
-        app.add_subcommand("raw", "send a raw request and print response");
+    auto raw = app.add_subcommand("raw",
+                                  "send a raw request and print response");
     commands.push_back(std::make_unique<RawOp>("raw", "raw", raw));
 }
 

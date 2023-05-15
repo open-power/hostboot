@@ -47,27 +47,26 @@ class Handler : public oem_platform::Handler
             propertiesChanged("/xyz/openbmc_project/state/host0",
                               "xyz.openbmc_project.State.Host"),
             [this](sdbusplus::message_t& msg) {
-                pldm::utils::DbusChangedProps props{};
-                std::string intf;
-                msg.read(intf, props);
-                const auto itr = props.find("CurrentHostState");
-                if (itr != props.end())
+            pldm::utils::DbusChangedProps props{};
+            std::string intf;
+            msg.read(intf, props);
+            const auto itr = props.find("CurrentHostState");
+            if (itr != props.end())
+            {
+                pldm::utils::PropertyValue value = itr->second;
+                auto propVal = std::get<std::string>(value);
+                if (propVal == "xyz.openbmc_project.State.Host.HostState.Off")
                 {
-                    pldm::utils::PropertyValue value = itr->second;
-                    auto propVal = std::get<std::string>(value);
-                    if (propVal ==
-                        "xyz.openbmc_project.State.Host.HostState.Off")
-                    {
-                        hostOff = true;
-                        setEventReceiverCnt = 0;
-                        disableWatchDogTimer();
-                    }
-                    else if (propVal ==
-                             "xyz.openbmc_project.State.Host.HostState.Running")
-                    {
-                        hostOff = false;
-                    }
+                    hostOff = true;
+                    setEventReceiverCnt = 0;
+                    disableWatchDogTimer();
                 }
+                else if (propVal ==
+                         "xyz.openbmc_project.State.Host.HostState.Running")
+                {
+                    hostOff = false;
+                }
+            }
             });
     }
 

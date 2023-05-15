@@ -12,8 +12,7 @@ namespace responder
 {
 namespace bios
 {
-BIOSTable::BIOSTable(const char* filePath) : filePath(filePath)
-{}
+BIOSTable::BIOSTable(const char* filePath) : filePath(filePath) {}
 
 bool BIOSTable::isEmpty() const noexcept
 {

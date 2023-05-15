@@ -211,8 +211,8 @@ void buildAllCodeUpdateSensorPDR(oem_ibm_platform::Handler* platformHandler,
                                  uint16_t stateSetID, pdr_utils::Repo& repo)
 {
     size_t pdrSize = 0;
-    pdrSize =
-        sizeof(pldm_state_sensor_pdr) + sizeof(state_sensor_possible_states);
+    pdrSize = sizeof(pldm_state_sensor_pdr) +
+              sizeof(state_sensor_possible_states);
     std::vector<uint8_t> entry{};
     entry.resize(pdrSize);
     pldm_state_sensor_pdr* pdr =
@@ -312,9 +312,8 @@ int pldm::responder::oem_ibm_platform::Handler::sendEventToHost(
         }
         std::cout << tempStream.str() << std::endl;
     }
-    auto oemPlatformEventMessageResponseHandler = [](mctp_eid_t /*eid*/,
-                                                     const pldm_msg* response,
-                                                     size_t respMsgLen) {
+    auto oemPlatformEventMessageResponseHandler =
+        [](mctp_eid_t /*eid*/, const pldm_msg* response, size_t respMsgLen) {
         uint8_t completionCode{};
         uint8_t status{};
         auto rc = decode_platform_event_message_resp(response, respMsgLen,
@@ -445,51 +444,50 @@ void pldm::responder::oem_ibm_platform::Handler::_processSystemReboot(
         propertiesChanged("/xyz/openbmc_project/state/chassis0",
                           "xyz.openbmc_project.State.Chassis"),
         [this](sdbusplus::message_t& msg) {
-            DbusChangedProps props{};
-            std::string intf;
-            msg.read(intf, props);
-            const auto itr = props.find("CurrentPowerState");
-            if (itr != props.end())
+        DbusChangedProps props{};
+        std::string intf;
+        msg.read(intf, props);
+        const auto itr = props.find("CurrentPowerState");
+        if (itr != props.end())
+        {
+            PropertyValue value = itr->second;
+            auto propVal = std::get<std::string>(value);
+            if (propVal == "xyz.openbmc_project.State.Chassis.PowerState.Off")
             {
-                PropertyValue value = itr->second;
-                auto propVal = std::get<std::string>(value);
-                if (propVal ==
-                    "xyz.openbmc_project.State.Chassis.PowerState.Off")
+                pldm::utils::DBusMapping dbusMapping{
+                    "/xyz/openbmc_project/control/host0/"
+                    "power_restore_policy/one_time",
+                    "xyz.openbmc_project.Control.Power.RestorePolicy",
+                    "PowerRestorePolicy", "string"};
+                value = "xyz.openbmc_project.Control.Power.RestorePolicy."
+                        "Policy.AlwaysOn";
+                try
                 {
-                    pldm::utils::DBusMapping dbusMapping{
-                        "/xyz/openbmc_project/control/host0/"
-                        "power_restore_policy/one_time",
-                        "xyz.openbmc_project.Control.Power.RestorePolicy",
-                        "PowerRestorePolicy", "string"};
-                    value = "xyz.openbmc_project.Control.Power.RestorePolicy."
-                            "Policy.AlwaysOn";
-                    try
-                    {
-                        dBusIntf->setDbusProperty(dbusMapping, value);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        error(
-                            "Setting one-time restore policy failed, unable to set property PowerRestorePolicy ERROR={ERR_EXCEP}",
-                            "ERR_EXCEP", e.what());
-                    }
-                    dbusMapping = pldm::utils::DBusMapping{
-                        "/xyz/openbmc_project/state/bmc0",
-                        "xyz.openbmc_project.State.BMC",
-                        "RequestedBMCTransition", "string"};
-                    value = "xyz.openbmc_project.State.BMC.Transition.Reboot";
-                    try
-                    {
-                        dBusIntf->setDbusProperty(dbusMapping, value);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        error(
-                            "BMC state transition to reboot failed, unable to set property RequestedBMCTransition ERROR={ERR_EXCEP}",
-                            "ERR_EXCEP", e.what());
-                    }
+                    dBusIntf->setDbusProperty(dbusMapping, value);
+                }
+                catch (const std::exception& e)
+                {
+                    error(
+                        "Setting one-time restore policy failed, unable to set property PowerRestorePolicy ERROR={ERR_EXCEP}",
+                        "ERR_EXCEP", e.what());
+                }
+                dbusMapping = pldm::utils::DBusMapping{
+                    "/xyz/openbmc_project/state/bmc0",
+                    "xyz.openbmc_project.State.BMC", "RequestedBMCTransition",
+                    "string"};
+                value = "xyz.openbmc_project.State.BMC.Transition.Reboot";
+                try
+                {
+                    dBusIntf->setDbusProperty(dbusMapping, value);
+                }
+                catch (const std::exception& e)
+                {
+                    error(
+                        "BMC state transition to reboot failed, unable to set property RequestedBMCTransition ERROR={ERR_EXCEP}",
+                        "ERR_EXCEP", e.what());
                 }
             }
+        }
         });
 }
 

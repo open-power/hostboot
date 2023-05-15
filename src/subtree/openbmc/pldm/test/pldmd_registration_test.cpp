@@ -18,8 +18,8 @@ class TestHandler : public CmdHandler
     {
         handlers.emplace(testCmd,
                          [this](const pldm_msg* request, size_t payloadLength) {
-                             return this->handle(request, payloadLength);
-                         });
+            return this->handle(request, payloadLength);
+        });
     }
 
     Response handle(const pldm_msg* /*request*/, size_t /*payloadLength*/)

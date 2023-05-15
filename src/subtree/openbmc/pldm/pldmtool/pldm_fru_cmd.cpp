@@ -100,8 +100,8 @@ class FRUTablePrint
                 reinterpret_cast<const pldm_fru_record_data_format*>(p);
             output["FRU Record Set Identifier"] =
                 (int)le16toh(record->record_set_id);
-            output["FRU Record Type"] =
-                typeToString(fruRecordTypes, record->record_type);
+            output["FRU Record Type"] = typeToString(fruRecordTypes,
+                                                     record->record_type);
             output["Number of FRU fields"] = (int)record->num_fru_fields;
             output["Encoding Type for FRU fields"] =
                 typeToString(fruEncodingType, record->encoding_type);
@@ -124,20 +124,23 @@ class FRUTablePrint
                                            fruGeneralFieldTypes.end());
                     if (tlv->type == PLDM_FRU_FIELD_TYPE_IANA)
                     {
-                        fruFieldValue =
-                            fruFieldParserU32(tlv->value, tlv->length);
+                        fruFieldValue = fruFieldParserU32(tlv->value,
+                                                          tlv->length);
                     }
                     else if (tlv->type == PLDM_FRU_FIELD_TYPE_MANUFAC_DATE)
                     {
-                        fruFieldValue =
-                            fruFieldParserTimestamp(tlv->value, tlv->length);
+                        fruFieldValue = fruFieldParserTimestamp(tlv->value,
+                                                                tlv->length);
+                    }
+                    else
+                    {
+                        fruFieldValue = fruFieldValuestring(tlv->value,
+                                                            tlv->length);
                     }
 
-                    frudata["FRU Field Type"] =
-                        typeToString(FruFieldTypeMap, tlv->type);
+                    frudata["FRU Field Type"] = typeToString(FruFieldTypeMap,
+                                                             tlv->type);
                     frudata["FRU Field Length"] = (int)(tlv->length);
-                    fruFieldValue =
-                        fruFieldValuestring(tlv->value, tlv->length);
                     frudata["FRU Field Value"] = fruFieldValue;
                     frufielddata.emplace_back(frudata);
                 }
@@ -146,8 +149,8 @@ class FRUTablePrint
 #ifdef OEM_IBM
                     if (tlv->type == PLDM_OEM_FRU_FIELD_TYPE_RT)
                     {
-                        auto oemIPZValue =
-                            fruFieldValuestring(tlv->value, tlv->length);
+                        auto oemIPZValue = fruFieldValuestring(tlv->value,
+                                                               tlv->length);
 
                         if (populateMaps.find(oemIPZValue) !=
                             populateMaps.end())
@@ -165,21 +168,21 @@ class FRUTablePrint
                     }
                     if (tlv->type == PLDM_OEM_FRU_FIELD_TYPE_IANA)
                     {
-                        fruFieldValue =
-                            fruFieldParserU32(tlv->value, tlv->length);
+                        fruFieldValue = fruFieldParserU32(tlv->value,
+                                                          tlv->length);
                     }
                     else if (tlv->type != 2)
                     {
-                        fruFieldValue =
-                            fruFieldIPZParser(tlv->value, tlv->length);
+                        fruFieldValue = fruFieldIPZParser(tlv->value,
+                                                          tlv->length);
                     }
                     else
                     {
-                        fruFieldValue =
-                            fruFieldValuestring(tlv->value, tlv->length);
+                        fruFieldValue = fruFieldValuestring(tlv->value,
+                                                            tlv->length);
                     }
-                    frudata["FRU Field Type"] =
-                        typeToString(FruFieldTypeMap, tlv->type);
+                    frudata["FRU Field Type"] = typeToString(FruFieldTypeMap,
+                                                             tlv->type);
                     frudata["FRU Field Length"] = (int)(tlv->length);
                     frudata["FRU Field Value"] = fruFieldValue;
                     frufielddata.emplace_back(frudata);
@@ -415,7 +418,7 @@ class GetFruRecordTable : public CommandInterface
         auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
 
         auto rc = encode_get_fru_record_table_req(
-            instanceId, 0, PLDM_START_AND_END, request,
+            instanceId, 0, PLDM_GET_FIRSTPART, request,
             requestMsg.size() - sizeof(pldm_msg_hdr));
         return {rc, requestMsg};
     }
@@ -454,13 +457,13 @@ void registerCommand(CLI::App& app)
     commands.push_back(std::make_unique<GetFruRecordTableMetadata>(
         "fru", "GetFruRecordTableMetadata", getFruRecordTableMetadata));
 
-    auto getFRURecordByOption =
-        fru->add_subcommand("GetFRURecordByOption", "get FRU Record By Option");
+    auto getFRURecordByOption = fru->add_subcommand("GetFRURecordByOption",
+                                                    "get FRU Record By Option");
     commands.push_back(std::make_unique<GetFRURecordByOption>(
         "fru", "GetFRURecordByOption", getFRURecordByOption));
 
-    auto getFruRecordTable =
-        fru->add_subcommand("GetFruRecordTable", "get FRU Record Table");
+    auto getFruRecordTable = fru->add_subcommand("GetFruRecordTable",
+                                                 "get FRU Record Table");
     commands.push_back(std::make_unique<GetFruRecordTable>(
         "fru", "GetFruRecordTable", getFruRecordTable));
 }

@@ -96,29 +96,29 @@ HostPDRHandler::HostPDRHandler(
         propertiesChanged("/xyz/openbmc_project/state/host0",
                           "xyz.openbmc_project.State.Host"),
         [this, repo, entityTree, bmcEntityTree](sdbusplus::message_t& msg) {
-            DbusChangedProps props{};
-            std::string intf;
-            msg.read(intf, props);
-            const auto itr = props.find("CurrentHostState");
-            if (itr != props.end())
+        DbusChangedProps props{};
+        std::string intf;
+        msg.read(intf, props);
+        const auto itr = props.find("CurrentHostState");
+        if (itr != props.end())
+        {
+            PropertyValue value = itr->second;
+            auto propVal = std::get<std::string>(value);
+            if (propVal == "xyz.openbmc_project.State.Host.HostState.Off")
             {
-                PropertyValue value = itr->second;
-                auto propVal = std::get<std::string>(value);
-                if (propVal == "xyz.openbmc_project.State.Host.HostState.Off")
-                {
-                    // Delete all the remote terminus information
-                    std::erase_if(tlPDRInfo, [](const auto& item) {
-                        auto const& [key, value] = item;
-                        return key != TERMINUS_HANDLE;
-                    });
-                    pldm_pdr_remove_remote_pdrs(repo);
-                    pldm_entity_association_tree_destroy_root(entityTree);
-                    pldm_entity_association_tree_copy_root(bmcEntityTree,
-                                                           entityTree);
-                    this->sensorMap.clear();
-                    this->responseReceived = false;
-                }
+                // Delete all the remote terminus information
+                std::erase_if(tlPDRInfo, [](const auto& item) {
+                    auto const& [key, value] = item;
+                    return key != TERMINUS_HANDLE;
+                });
+                pldm_pdr_remove_remote_pdrs(repo);
+                pldm_entity_association_tree_destroy_root(entityTree);
+                pldm_entity_association_tree_copy_root(bmcEntityTree,
+                                                       entityTree);
+                this->sensorMap.clear();
+                this->responseReceived = false;
             }
+        }
         });
 }
 
@@ -174,9 +174,9 @@ void HostPDRHandler::getHostPDR(uint32_t nextRecordHandle)
     }
     auto instanceId = requester.getInstanceId(mctp_eid);
 
-    auto rc =
-        encode_get_pdr_req(instanceId, recordHandle, 0, PLDM_GET_FIRSTPART,
-                           UINT16_MAX, 0, request, PLDM_GET_PDR_REQ_BYTES);
+    auto rc = encode_get_pdr_req(instanceId, recordHandle, 0,
+                                 PLDM_GET_FIRSTPART, UINT16_MAX, 0, request,
+                                 PLDM_GET_PDR_REQ_BYTES);
     if (rc != PLDM_SUCCESS)
     {
         requester.markFree(mctp_eid, instanceId);
@@ -330,9 +330,8 @@ void HostPDRHandler::sendPDRRepositoryChgEvent(std::vector<uint8_t>&& pdrTypes,
         return;
     }
 
-    auto platformEventMessageResponseHandler = [](mctp_eid_t /*eid*/,
-                                                  const pldm_msg* response,
-                                                  size_t respMsgLen) {
+    auto platformEventMessageResponseHandler =
+        [](mctp_eid_t /*eid*/, const pldm_msg* response, size_t respMsgLen) {
         if (response == nullptr || !respMsgLen)
         {
             error(
@@ -692,11 +691,9 @@ void HostPDRHandler::setHostSensorState(const PDRList& stateSensorPDRs)
                     return;
                 }
 
-                auto getStateSensorReadingRespHandler = [=, this](
-                                                            mctp_eid_t /*eid*/,
-                                                            const pldm_msg*
-                                                                response,
-                                                            size_t respMsgLen) {
+                auto getStateSensorReadingRespHandler =
+                    [=, this](mctp_eid_t /*eid*/, const pldm_msg* response,
+                              size_t respMsgLen) {
                     if (response == nullptr || !respMsgLen)
                     {
                         error(
@@ -774,8 +771,8 @@ void HostPDRHandler::setHostSensorState(const PDRList& stateSensorPDRs)
                             error("Error invalid_data, Invalid event state");
                             return;
                         }
-                        const auto& [containerId, entityType, entityInstance] =
-                            entityInfo;
+                        const auto& [containerId, entityType,
+                                     entityInstance] = entityInfo;
                         pldm::responder::events::StateSensorEntry
                             stateSensorEntry{containerId, entityType,
                                              entityInstance, sensorOffset};

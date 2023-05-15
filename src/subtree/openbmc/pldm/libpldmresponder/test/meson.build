@@ -21,19 +21,13 @@ if get_option('oem-ibm').enabled()
   ]
 endif
 
-  dep_src_files = [
-  '../../pldmd/instance_id.cpp',
-  '../../pldmd/dbus_impl_requester.cpp'
-  ]
-dep_src = declare_dependency(sources: dep_src_files,include_directories: '../../requester')
-
 foreach t : tests
   test(t, executable(t.underscorify(), t + '.cpp',
                      implicit_include_directories: false,
+                     include_directories: [ '../../requester', '../../pldmd' ],
                      link_args: dynamic_linker,
                      build_rpath: get_option('oe-sdk').enabled() ? rpath : '',
                      dependencies: [
-                         dep_src,
                          libpldm_dep,
                          libpldmresponder_dep,
                          libpldmutils,

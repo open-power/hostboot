@@ -174,8 +174,7 @@ class CodeUpdate
      */
     int assembleCodeUpdateImage();
 
-    virtual ~CodeUpdate()
-    {}
+    virtual ~CodeUpdate() {}
 
   private:
     std::string currBootSide;      //!< current boot side
@@ -184,7 +183,7 @@ class CodeUpdate
     std::string nonRunningVersion; //!< alternate image
     std::string newImageId;        //!< new image id
     bool codeUpdateInProgress =
-        false; //!< indicates whether codeupdate is going on
+        false;                     //!< indicates whether codeupdate is going on
     const pldm::utils::DBusHandler* dBusIntf; //!< D-Bus handler
     std::vector<std::unique_ptr<sdbusplus::bus::match_t>>
         captureNextBootSideChange; //!< vector to catch the D-Bus property

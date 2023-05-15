@@ -108,8 +108,7 @@ class GetFileTable : public CommandInterface
         return {PLDM_ERROR, {}};
     }
 
-    void parseResponseMsg(pldm_msg*, size_t) override
-    {}
+    void parseResponseMsg(pldm_msg*, size_t) override {}
     void exec()
     {
         std::vector<uint8_t> requestMsg(sizeof(pldm_msg_hdr) +
@@ -182,7 +181,7 @@ class GetFileTable : public CommandInterface
             startptr += sizeof(filetableData->file_name_length);
 
             fdata["FileName"] = (std::string(
-                reinterpret_cast<char const*>(startptr), nameLength));
+                reinterpret_cast<const char*>(startptr), nameLength));
             startptr += nameLength;
 
             auto fileSize = *(reinterpret_cast<uint32_t*>(startptr));
@@ -209,8 +208,8 @@ void registerCommand(CLI::App& app)
     commands.push_back(std::make_unique<GetAlertStatus>(
         "oem_ibm", "getAlertStatus", getAlertStatus));
 
-    auto getFileTable =
-        oem_ibm->add_subcommand("GetFileTable", "get file table");
+    auto getFileTable = oem_ibm->add_subcommand("GetFileTable",
+                                                "get file table");
 
     commands.push_back(std::make_unique<GetFileTable>("oem_ibm", "getFileTable",
                                                       getFileTable));

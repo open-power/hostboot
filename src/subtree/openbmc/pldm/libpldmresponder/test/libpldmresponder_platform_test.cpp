@@ -407,10 +407,10 @@ TEST(parseStateSensor, allScenarios)
                                     0x43, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
                                     0x00, 0x01, 0x0b, 0x00, 0x01, 0x18};
 
-    const auto& [terminusHandle1, sensorID1, sensorInfo1] =
-        parseStateSensorPDR(sample1PDR);
-    const auto& [containerID1, entityType1, entityInstance1] =
-        std::get<0>(sensorInfo1);
+    const auto& [terminusHandle1, sensorID1,
+                 sensorInfo1] = parseStateSensorPDR(sample1PDR);
+    const auto& [containerID1, entityType1,
+                 entityInstance1] = std::get<0>(sensorInfo1);
     const auto& states1 = std::get<1>(sensorInfo1);
     CompositeSensorStates statesCmp1{{3u, 4u}};
 
@@ -428,10 +428,10 @@ TEST(parseStateSensor, allScenarios)
                                     0x1F, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
                                     0x00, 0x01, 0x02, 0x00, 0x02, 0x18, 0x2E};
 
-    const auto& [terminusHandle2, sensorID2, sensorInfo2] =
-        parseStateSensorPDR(sample2PDR);
-    const auto& [containerID2, entityType2, entityInstance2] =
-        std::get<0>(sensorInfo2);
+    const auto& [terminusHandle2, sensorID2,
+                 sensorInfo2] = parseStateSensorPDR(sample2PDR);
+    const auto& [containerID2, entityType2,
+                 entityInstance2] = std::get<0>(sensorInfo2);
     const auto& states2 = std::get<1>(sensorInfo2);
     CompositeSensorStates statesCmp2{{3u, 4u, 9u, 10u, 11u, 13u}};
 
@@ -451,10 +451,10 @@ TEST(parseStateSensor, allScenarios)
         0x00, 0x03, 0x00, 0x21, 0x00, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00,
         0x02, 0x21, 0x00, 0x01, 0x06, 0x0F, 0x00, 0x01, 0x1E};
 
-    const auto& [terminusHandle3, sensorID3, sensorInfo3] =
-        parseStateSensorPDR(sample3PDR);
-    const auto& [containerID3, entityType3, entityInstance3] =
-        std::get<0>(sensorInfo3);
+    const auto& [terminusHandle3, sensorID3,
+                 sensorInfo3] = parseStateSensorPDR(sample3PDR);
+    const auto& [containerID3, entityType3,
+                 entityInstance3] = std::get<0>(sensorInfo3);
     const auto& states3 = std::get<1>(sensorInfo3);
     CompositeSensorStates statesCmp3{{1u, 2u}, {1u, 2u, 3u, 4u}};
 

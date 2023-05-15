@@ -115,8 +115,8 @@ class GetPDR : public CommandInterface
                 }
 
                 // check for circular references.
-                auto result =
-                    recordsSeen.emplace(recordHandle, prevRecordHandle);
+                auto result = recordsSeen.emplace(recordHandle,
+                                                  prevRecordHandle);
                 if (!result.second)
                 {
                     std::cerr
@@ -149,9 +149,9 @@ class GetPDR : public CommandInterface
                                         PLDM_GET_PDR_REQ_BYTES);
         auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
 
-        auto rc =
-            encode_get_pdr_req(instanceId, recordHandle, 0, PLDM_GET_FIRSTPART,
-                               UINT16_MAX, 0, request, PLDM_GET_PDR_REQ_BYTES);
+        auto rc = encode_get_pdr_req(instanceId, recordHandle, 0,
+                                     PLDM_GET_FIRSTPART, UINT16_MAX, 0, request,
+                                     PLDM_GET_PDR_REQ_BYTES);
         return {rc, requestMsg};
     }
 
@@ -927,8 +927,8 @@ class GetPDR : public CommandInterface
         output["containerID"] = pdr->container_id;
         output["effecterSemanticID"] = pdr->effecter_semantic_id;
         output["effecterInit"] = effecterInit[pdr->effecter_init];
-        output["effecterDescriptionPDR"] =
-            (pdr->has_description_pdr ? true : false);
+        output["effecterDescriptionPDR"] = (pdr->has_description_pdr ? true
+                                                                     : false);
         output["compositeEffecterCount"] =
             unsigned(pdr->composite_effecter_count);
 
@@ -1336,8 +1336,8 @@ void registerCommand(CLI::App& app)
     auto platform = app.add_subcommand("platform", "platform type command");
     platform->require_subcommand(1);
 
-    auto getPDR =
-        platform->add_subcommand("GetPDR", "get platform descriptor records");
+    auto getPDR = platform->add_subcommand("GetPDR",
+                                           "get platform descriptor records");
     commands.push_back(std::make_unique<GetPDR>("platform", "getPDR", getPDR));
 
     auto setStateEffecterStates = platform->add_subcommand(

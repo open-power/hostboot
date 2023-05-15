@@ -54,7 +54,7 @@ struct EffecterInfo
     uint16_t entityInstance; //!< Entity instance for the host effecter
     uint8_t compEffecterCnt; //!< Composite effecter count
     std::vector<DBusEffecterMapping>
-        dbusInfo; //!< D-Bus information for the effecter id
+        dbusInfo;            //!< D-Bus information for the effecter id
 };
 
 /** @class HostEffecterParser

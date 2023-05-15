@@ -18,8 +18,7 @@ using ::testing::Return;
 class RequestIntfTest : public testing::Test
 {
   protected:
-    RequestIntfTest() : event(sdeventplus::Event::get_default())
-    {}
+    RequestIntfTest() : event(sdeventplus::Event::get_default()) {}
 
     /** @brief This function runs the sd_event_run in a loop till all the events
      *         in the testcase are dispatched and exits when there are no events

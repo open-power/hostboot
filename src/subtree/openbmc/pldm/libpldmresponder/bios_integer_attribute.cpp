@@ -112,11 +112,11 @@ void BIOSIntegerAttribute::constructEntry(
         integerInfo.scalarIncrement,  integerInfo.defaultValue,
     };
 
-    auto attrTableEntry =
-        table::attribute::constructIntegerEntry(attrTable, &info);
+    auto attrTableEntry = table::attribute::constructIntegerEntry(attrTable,
+                                                                  &info);
 
-    auto [attrHandle, attrType, _] =
-        table::attribute::decodeHeader(attrTableEntry);
+    auto [attrHandle, attrType,
+          _] = table::attribute::decodeHeader(attrTableEntry);
 
     int64_t currentValue{};
     if (optAttributeValue.has_value())

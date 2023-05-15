@@ -93,15 +93,15 @@ int setStateEffecterStatesHandler(
     int rc = PLDM_SUCCESS;
     try
     {
-        const auto& [dbusMappings, dbusValMaps] =
-            handler.getDbusObjMaps(effecterId);
+        const auto& [dbusMappings,
+                     dbusValMaps] = handler.getDbusObjMaps(effecterId);
         for (uint8_t currState = 0; currState < compEffecterCnt; ++currState)
         {
             std::vector<StateSetNum> allowed{};
             // computation is based on table 79 from DSP0248 v1.1.1
             uint8_t bitfieldIndex = stateField[currState].effecter_state / 8;
-            uint8_t bit =
-                stateField[currState].effecter_state - (8 * bitfieldIndex);
+            uint8_t bit = stateField[currState].effecter_state -
+                          (8 * bitfieldIndex);
             if (states->possible_states_size < bitfieldIndex ||
                 !(states->states[bitfieldIndex].byte & (1 << bit)))
             {

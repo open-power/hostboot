@@ -275,8 +275,8 @@ int SoftPowerOff::getSensorInfo()
                 sensorOffset = offset;
                 break;
             }
-            possibleStatesStart +=
-                possibleStateSize + sizeof(setId) + sizeof(possibleStateSize);
+            possibleStatesStart += possibleStateSize + sizeof(setId) +
+                                   sizeof(possibleStateSize);
         }
     }
     catch (const sdbusplus::exception_t& e)
@@ -342,8 +342,8 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
     }
 
     // Add a timer to the event loop, default 30s.
-    auto timerCallback = [=, this](Timer& /*source*/,
-                                   Timer::TimePoint /*time*/) {
+    auto timerCallback =
+        [=, this](Timer& /*source*/, Timer::TimePoint /*time*/) {
         if (!responseReceived)
         {
             error(

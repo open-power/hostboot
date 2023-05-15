@@ -13,8 +13,7 @@ namespace oem_platform
 class Handler : public CmdHandler
 {
   public:
-    Handler(const pldm::utils::DBusHandler* dBusIntf) : dBusIntf(dBusIntf)
-    {}
+    Handler(const pldm::utils::DBusHandler* dBusIntf) : dBusIntf(dBusIntf) {}
 
     /** @brief Interface to get the state sensor readings requested by pldm
      *  requester for OEM types. Each specific type should implement a handler

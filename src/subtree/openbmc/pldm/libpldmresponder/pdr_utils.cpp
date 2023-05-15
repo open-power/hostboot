@@ -32,9 +32,9 @@ const pldm_pdr_record* Repo::getFirstRecord(PdrEntry& pdrEntry)
 {
     constexpr uint32_t firstNum = 0;
     uint8_t* pdrData = nullptr;
-    auto record =
-        pldm_pdr_find_record(getPdr(), firstNum, &pdrData, &pdrEntry.size,
-                             &pdrEntry.handle.nextRecordHandle);
+    auto record = pldm_pdr_find_record(getPdr(), firstNum, &pdrData,
+                                       &pdrEntry.size,
+                                       &pdrEntry.handle.nextRecordHandle);
     if (record)
     {
         pdrEntry.data = pdrData;
@@ -47,9 +47,9 @@ const pldm_pdr_record* Repo::getNextRecord(const pldm_pdr_record* currRecord,
                                            PdrEntry& pdrEntry)
 {
     uint8_t* pdrData = nullptr;
-    auto record =
-        pldm_pdr_get_next_record(getPdr(), currRecord, &pdrData, &pdrEntry.size,
-                                 &pdrEntry.handle.nextRecordHandle);
+    auto record = pldm_pdr_get_next_record(getPdr(), currRecord, &pdrData,
+                                           &pdrEntry.size,
+                                           &pdrEntry.handle.nextRecordHandle);
     if (record)
     {
         pdrEntry.data = pdrData;
@@ -157,8 +157,8 @@ std::tuple<TerminusHandle, SensorID, SensorInfo>
             reinterpret_cast<const state_sensor_possible_states*>(statesPtr);
         PossibleStates possibleStates{};
         uint8_t possibleStatesPos{};
-        auto updateStates = [&possibleStates,
-                             &possibleStatesPos](const bitfield8_t& val) {
+        auto updateStates =
+            [&possibleStates, &possibleStatesPos](const bitfield8_t& val) {
             for (int i = 0; i < CHAR_BIT; i++)
             {
                 if (val.byte & (1 << i))
@@ -184,8 +184,8 @@ std::tuple<TerminusHandle, SensorID, SensorInfo>
         std::make_tuple(static_cast<ContainerID>(pdr->container_id),
                         static_cast<EntityType>(pdr->entity_type),
                         static_cast<EntityInstance>(pdr->entity_instance));
-    auto sensorInfo =
-        std::make_tuple(std::move(entityInfo), std::move(sensors));
+    auto sensorInfo = std::make_tuple(std::move(entityInfo),
+                                      std::move(sensors));
     return std::make_tuple(pdr->terminus_handle, pdr->sensor_id,
                            std::move(sensorInfo));
 }

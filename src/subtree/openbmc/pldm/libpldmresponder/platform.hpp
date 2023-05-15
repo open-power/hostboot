@@ -73,43 +73,38 @@ class Handler : public CmdHandler
 
         handlers.emplace(PLDM_GET_PDR,
                          [this](const pldm_msg* request, size_t payloadLength) {
-                             return this->getPDR(request, payloadLength);
-                         });
+            return this->getPDR(request, payloadLength);
+        });
         handlers.emplace(PLDM_SET_NUMERIC_EFFECTER_VALUE,
                          [this](const pldm_msg* request, size_t payloadLength) {
-                             return this->setNumericEffecterValue(
-                                 request, payloadLength);
-                         });
+            return this->setNumericEffecterValue(request, payloadLength);
+        });
         handlers.emplace(PLDM_SET_STATE_EFFECTER_STATES,
                          [this](const pldm_msg* request, size_t payloadLength) {
-                             return this->setStateEffecterStates(request,
-                                                                 payloadLength);
-                         });
+            return this->setStateEffecterStates(request, payloadLength);
+        });
         handlers.emplace(PLDM_PLATFORM_EVENT_MESSAGE,
                          [this](const pldm_msg* request, size_t payloadLength) {
-                             return this->platformEventMessage(request,
-                                                               payloadLength);
-                         });
+            return this->platformEventMessage(request, payloadLength);
+        });
         handlers.emplace(PLDM_GET_STATE_SENSOR_READINGS,
                          [this](const pldm_msg* request, size_t payloadLength) {
-                             return this->getStateSensorReadings(request,
-                                                                 payloadLength);
-                         });
+            return this->getStateSensorReadings(request, payloadLength);
+        });
 
         // Default handler for PLDM Events
         eventHandlers[PLDM_SENSOR_EVENT].emplace_back(
             [this](const pldm_msg* request, size_t payloadLength,
                    uint8_t formatVersion, uint8_t tid, size_t eventDataOffset) {
-                return this->sensorEvent(request, payloadLength, formatVersion,
-                                         tid, eventDataOffset);
-            });
+            return this->sensorEvent(request, payloadLength, formatVersion, tid,
+                                     eventDataOffset);
+        });
         eventHandlers[PLDM_PDR_REPOSITORY_CHG_EVENT].emplace_back(
             [this](const pldm_msg* request, size_t payloadLength,
                    uint8_t formatVersion, uint8_t tid, size_t eventDataOffset) {
-                return this->pldmPDRRepositoryChgEvent(request, payloadLength,
-                                                       formatVersion, tid,
-                                                       eventDataOffset);
-            });
+            return this->pldmPDRRepositoryChgEvent(
+                request, payloadLength, formatVersion, tid, eventDataOffset);
+        });
 
         // Additional OEM event handlers for PLDM events, append it to the
         // standard handlers
@@ -328,8 +323,8 @@ class Handler : public CmdHandler
             if (pdr->effecter_id != effecterId)
             {
                 pdr = nullptr;
-                pdrRecord =
-                    stateEffecterPDRs.getNextRecord(pdrRecord, pdrEntry);
+                pdrRecord = stateEffecterPDRs.getNextRecord(pdrRecord,
+                                                            pdrEntry);
                 continue;
             }
 
@@ -354,17 +349,17 @@ class Handler : public CmdHandler
         int rc = PLDM_SUCCESS;
         try
         {
-            const auto& [dbusMappings, dbusValMaps] =
-                effecterDbusObjMaps.at(effecterId);
+            const auto& [dbusMappings,
+                         dbusValMaps] = effecterDbusObjMaps.at(effecterId);
             for (uint8_t currState = 0; currState < compEffecterCnt;
                  ++currState)
             {
                 std::vector<StateSetNum> allowed{};
                 // computation is based on table 79 from DSP0248 v1.1.1
-                uint8_t bitfieldIndex =
-                    stateField[currState].effecter_state / 8;
-                uint8_t bit =
-                    stateField[currState].effecter_state - (8 * bitfieldIndex);
+                uint8_t bitfieldIndex = stateField[currState].effecter_state /
+                                        8;
+                uint8_t bit = stateField[currState].effecter_state -
+                              (8 * bitfieldIndex);
                 if (states->possible_states_size < bitfieldIndex ||
                     !(states->states[bitfieldIndex].byte & (1 << bit)))
                 {

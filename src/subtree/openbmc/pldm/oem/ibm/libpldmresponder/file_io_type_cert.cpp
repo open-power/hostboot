@@ -231,8 +231,8 @@ int CertHandler::newFileAvailable(uint64_t length)
     }
     else if (certType == PLDM_FILE_TYPE_ROOT_CERT)
     {
-        fileFd =
-            open((filePath + "RootCert").c_str(), flags, S_IRUSR | S_IWUSR);
+        fileFd = open((filePath + "RootCert").c_str(), flags,
+                      S_IRUSR | S_IWUSR);
     }
     if (fileFd == -1)
     {
@@ -297,8 +297,8 @@ int CertHandler::newFileAvailableWithMetaData(uint64_t length,
     }
     else if (certType == PLDM_FILE_TYPE_ROOT_CERT)
     {
-        fileFd =
-            open((filePath + "RootCert").c_str(), flags, S_IRUSR | S_IWUSR);
+        fileFd = open((filePath + "RootCert").c_str(), flags,
+                      S_IRUSR | S_IWUSR);
     }
     if (fileFd == -1)
     {

@@ -131,8 +131,8 @@ int DumpHandler::newFileAvailable(uint64_t length)
 
     try
     {
-        auto service =
-            pldm::utils::DBusHandler().getService(notifyObjPath, dumpInterface);
+        auto service = pldm::utils::DBusHandler().getService(notifyObjPath,
+                                                             dumpInterface);
         using namespace sdbusplus::xyz::openbmc_project::Dump::server;
         auto method = bus.new_method_call(service.c_str(), notifyObjPath,
                                           dumpInterface, "Notify");

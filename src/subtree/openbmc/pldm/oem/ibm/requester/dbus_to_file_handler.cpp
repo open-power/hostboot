@@ -52,9 +52,9 @@ void DbusToFileHandler::sendNewFileAvailableCmd(uint64_t fileSize)
     // Need to revisit this logic at the time of multiple resource dump support
     uint32_t fileHandle = 1;
 
-    auto rc =
-        encode_new_file_req(instanceId, PLDM_FILE_TYPE_RESOURCE_DUMP_PARMS,
-                            fileHandle, fileSize, request);
+    auto rc = encode_new_file_req(instanceId,
+                                  PLDM_FILE_TYPE_RESOURCE_DUMP_PARMS,
+                                  fileHandle, fileSize, request);
     if (rc != PLDM_SUCCESS)
     {
         requester->markFree(mctp_eid, instanceId);
@@ -259,17 +259,16 @@ void DbusToFileHandler::newFileAvailableSendToHost(const uint32_t fileSize,
                                     PLDM_NEW_FILE_REQ_BYTES);
     auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
 
-    auto rc =
-        encode_new_file_req(instanceId, type, fileHandle, fileSize, request);
+    auto rc = encode_new_file_req(instanceId, type, fileHandle, fileSize,
+                                  request);
     if (rc != PLDM_SUCCESS)
     {
         requester->markFree(mctp_eid, instanceId);
         error("Failed to encode_new_file_req, rc = {RC}", "RC", rc);
         return;
     }
-    auto newFileAvailableRespHandler = [](mctp_eid_t /*eid*/,
-                                          const pldm_msg* response,
-                                          size_t respMsgLen) {
+    auto newFileAvailableRespHandler =
+        [](mctp_eid_t /*eid*/, const pldm_msg* response, size_t respMsgLen) {
         if (response == nullptr || !respMsgLen)
         {
             error(

@@ -60,9 +60,9 @@ class GetDateTime : public CommandInterface
 
         uint8_t seconds, minutes, hours, day, month;
         uint16_t year;
-        auto rc =
-            decode_get_date_time_resp(responsePtr, payloadLength, &cc, &seconds,
-                                      &minutes, &hours, &day, &month, &year);
+        auto rc = decode_get_date_time_resp(responsePtr, payloadLength, &cc,
+                                            &seconds, &minutes, &hours, &day,
+                                            &month, &year);
         if (rc != PLDM_SUCCESS || cc != PLDM_SUCCESS)
         {
             std::cerr << "Response Message Error: "
@@ -191,8 +191,7 @@ class GetBIOSTableHandler : public CommandInterface
         return {PLDM_ERROR, {}};
     }
 
-    void parseResponseMsg(pldm_msg*, size_t) override
-    {}
+    void parseResponseMsg(pldm_msg*, size_t) override {}
 
     std::optional<Table> getBIOSTable(pldm_bios_table_types tableType)
     {
@@ -786,8 +785,8 @@ class SetBIOSAttributeCurrentValue : public GetBIOSTableHandler
             return;
         }
 
-        auto attrEntry =
-            findAttrEntryByName(attrName, *attrTable, *stringTable);
+        auto attrEntry = findAttrEntryByName(attrName, *attrTable,
+                                             *stringTable);
         if (attrEntry == nullptr)
         {
             std::cout << "Could not find attribute :" << attrName << std::endl;
@@ -929,8 +928,8 @@ void registerCommand(CLI::App& app)
     commands.push_back(
         std::make_unique<GetDateTime>("bios", "GetDateTime", getDateTime));
 
-    auto setDateTime =
-        bios->add_subcommand("SetDateTime", "set host date time");
+    auto setDateTime = bios->add_subcommand("SetDateTime",
+                                            "set host date time");
     commands.push_back(
         std::make_unique<SetDateTime>("bios", "setDateTime", setDateTime));
 

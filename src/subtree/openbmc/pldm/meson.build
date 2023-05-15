@@ -175,8 +175,6 @@ endif
 executable(
   'pldmd',
   'pldmd/pldmd.cpp',
-  'pldmd/dbus_impl_requester.cpp',
-  'pldmd/instance_id.cpp',
   'pldmd/dbus_impl_pdr.cpp',
   'fw-update/inventory_manager.cpp',
   'fw-update/package_parser.cpp',

@@ -41,8 +41,7 @@ struct CustomFD
     CustomFD(CustomFD&&) = delete;
     CustomFD& operator=(CustomFD&&) = delete;
 
-    CustomFD(int fd) : fd(fd)
-    {}
+    CustomFD(int fd) : fd(fd) {}
 
     ~CustomFD()
     {
@@ -254,8 +253,8 @@ class DBusHandler : public DBusHandlerInterface
     auto getDbusProperty(const char* objPath, const char* dbusProp,
                          const char* dbusInterface)
     {
-        auto VariantValue =
-            getDbusPropertyVariant(objPath, dbusProp, dbusInterface);
+        auto VariantValue = getDbusPropertyVariant(objPath, dbusProp,
+                                                   dbusInterface);
         return std::get<Property>(VariantValue);
     }
 

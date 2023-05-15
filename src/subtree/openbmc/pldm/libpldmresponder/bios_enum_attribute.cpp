@@ -181,8 +181,8 @@ void BIOSEnumAttribute::setAttrValueOnDbus(
 
     auto it = std::find_if(valMap.begin(), valMap.end(),
                            [&valueString](const auto& typePair) {
-                               return typePair.second == valueString;
-                           });
+        return typePair.second == valueString;
+    });
     if (it == valMap.end())
     {
         return;
@@ -195,8 +195,8 @@ void BIOSEnumAttribute::constructEntry(
     const BIOSStringTable& stringTable, Table& attrTable, Table& attrValueTable,
     std::optional<std::variant<int64_t, std::string>> optAttributeValue)
 {
-    auto possibleValuesHandle =
-        getPossibleValuesHandle(stringTable, possibleValues);
+    auto possibleValuesHandle = getPossibleValuesHandle(stringTable,
+                                                        possibleValues);
     std::vector<uint8_t> defaultIndices(1, 0);
     defaultIndices[0] = getValueIndex(defaultValue, possibleValues);
 
@@ -206,10 +206,10 @@ void BIOSEnumAttribute::constructEntry(
         (uint8_t)defaultIndices.size(),       defaultIndices.data(),
     };
 
-    auto attrTableEntry =
-        table::attribute::constructEnumEntry(attrTable, &info);
-    auto [attrHandle, attrType, _] =
-        table::attribute::decodeHeader(attrTableEntry);
+    auto attrTableEntry = table::attribute::constructEnumEntry(attrTable,
+                                                               &info);
+    auto [attrHandle, attrType,
+          _] = table::attribute::decodeHeader(attrTableEntry);
 
     std::vector<uint8_t> currValueIndices(1, 0);
 

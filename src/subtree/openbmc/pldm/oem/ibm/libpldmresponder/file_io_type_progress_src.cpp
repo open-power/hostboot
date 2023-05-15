@@ -27,8 +27,8 @@ int ProgressCodeHandler::setRawBootProperty(
 
     try
     {
-        auto service =
-            pldm::utils::DBusHandler().getService(RawObjectPath, RawInterface);
+        auto service = pldm::utils::DBusHandler().getService(RawObjectPath,
+                                                             RawInterface);
         auto method = bus.new_method_call(service.c_str(), RawObjectPath,
                                           FreedesktopInterface, SetMethod);
         method.append(RawInterface, RawProperty,

@@ -171,8 +171,8 @@ TEST_F(TestBIOSConfig, buildTablesTest)
             case PLDM_BIOS_ENUMERATION:
             case PLDM_BIOS_ENUMERATION_READ_ONLY:
             {
-                auto [pvHdls, defInds] =
-                    table::attribute::decodeEnumEntry(entry);
+                auto [pvHdls,
+                      defInds] = table::attribute::decodeEnumEntry(entry);
                 auto possibleValues = jsonEntry->at("possible_values")
                                           .get<std::vector<std::string>>();
                 std::vector<std::string> strings;
@@ -201,8 +201,8 @@ TEST_F(TestBIOSConfig, buildTablesTest)
              attrValueTable->data(), attrValueTable->size()))
     {
         auto header = table::attribute_value::decodeHeader(entry);
-        auto attrEntry =
-            table::attribute::findByHandle(*attrTable, header.attrHandle);
+        auto attrEntry = table::attribute::findByHandle(*attrTable,
+                                                        header.attrHandle);
         auto attrHeader = table::attribute::decodeHeader(attrEntry);
         auto attrName = biosStringTable.findString(attrHeader.stringHandle);
         auto jsonEntry = findJsonEntry(attrName);

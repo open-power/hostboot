@@ -40,8 +40,8 @@ class LidHandler : public FileHandler
         std::stringstream stream;
         stream << std::hex << fileHandle;
         auto lidName = stream.str() + ".lid";
-        std::string patchDir =
-            permSide ? LID_ALTERNATE_PATCH_DIR : LID_RUNNING_PATCH_DIR;
+        std::string patchDir = permSide ? LID_ALTERNATE_PATCH_DIR
+                                        : LID_RUNNING_PATCH_DIR;
         auto patch = fs::path(patchDir) / lidName;
         if (fs::is_regular_file(patch))
         {
@@ -309,8 +309,7 @@ class LidHandler : public FileHandler
 
     /** @brief LidHandler destructor
      */
-    ~LidHandler()
-    {}
+    ~LidHandler() {}
 
   protected:
     std::string lidPath;

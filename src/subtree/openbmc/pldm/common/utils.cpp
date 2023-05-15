@@ -281,8 +281,8 @@ void DBusHandler::setDbusProperty(const DBusMapping& dBusMap,
 {
     auto setDbusValue = [&dBusMap, this](const auto& variant) {
         auto& bus = getBus();
-        auto service =
-            getService(dBusMap.objectPath.c_str(), dBusMap.interface.c_str());
+        auto service = getService(dBusMap.objectPath.c_str(),
+                                  dBusMap.interface.c_str());
         auto method = bus.new_method_call(
             service.c_str(), dBusMap.objectPath.c_str(), dbusProperties, "Set");
         method.append(dBusMap.interface.c_str(), dBusMap.propertyName.c_str(),
@@ -351,8 +351,8 @@ PropertyValue DBusHandler::getDbusPropertyVariant(
 {
     auto& bus = DBusHandler::getBus();
     auto service = getService(objPath, dbusInterface);
-    auto method =
-        bus.new_method_call(service.c_str(), objPath, dbusProperties, "Get");
+    auto method = bus.new_method_call(service.c_str(), objPath, dbusProperties,
+                                      "Get");
     method.append(dbusInterface, dbusProp);
     PropertyValue value{};
     auto reply = bus.call(method);
@@ -502,8 +502,8 @@ uint16_t findStateSensorId(const pldm_pdr* pdrRepo, uint8_t tid,
             {
                 return sensorPdr->sensor_id;
             }
-            possible_states_start +=
-                possibleStateSize + sizeof(setId) + sizeof(possibleStateSize);
+            possible_states_start += possibleStateSize + sizeof(setId) +
+                                     sizeof(possibleStateSize);
         }
     }
     return PLDM_INVALID_EFFECTER_ID;

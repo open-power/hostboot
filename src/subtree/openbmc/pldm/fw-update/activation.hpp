@@ -115,8 +115,8 @@ class Activation : public ActivationIntf
         {
             if (!deleteImpl)
             {
-                deleteImpl =
-                    std::make_unique<Delete>(bus, objPath, updateManager);
+                deleteImpl = std::make_unique<Delete>(bus, objPath,
+                                                      updateManager);
             }
         }
 

@@ -1,10 +1,3 @@
-requester_inc = include_directories('../../')
-test_src = declare_dependency(
-          sources: [
-            '../../pldmd/dbus_impl_requester.cpp',
-            '../../pldmd/instance_id.cpp'],
-          include_directories:requester_inc)
-
 tests = [
   'handler_test',
   'request_test',
@@ -13,6 +6,7 @@ tests = [
 foreach t : tests
   test(t, executable(t.underscorify(), t + '.cpp',
                      implicit_include_directories: false,
+                     include_directories: [ '../../', '../../pldmd' ],
                      link_args: dynamic_linker,
                      build_rpath: get_option('oe-sdk').enabled() ? rpath : '',
                      dependencies: [
@@ -24,6 +18,6 @@ foreach t : tests
                          phosphor_logging_dep,
                          sdbusplus,
                          sdeventplus,
-                         test_src]),
+                    ]),
        workdir: meson.current_source_dir())
 endforeach

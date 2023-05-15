@@ -45,8 +45,7 @@ class DumpHandler : public FileHandler
 
     /** @brief DumpHandler destructor
      */
-    ~DumpHandler()
-    {}
+    ~DumpHandler() {}
 
   private:
     static int fd;     //!< fd to manage the dump offload to bmc

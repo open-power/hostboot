@@ -39,8 +39,6 @@ int sendBiosAttributeUpdateEvent(
             (currHostState != "xyz.openbmc_project.State.Boot.Progress."
                               "ProgressStages.OSRunning") &&
             (currHostState != "xyz.openbmc_project.State.Boot.Progress."
-                              "ProgressStages.OSStart") &&
-            (currHostState != "xyz.openbmc_project.State.Boot.Progress."
                               "ProgressStages.SystemSetup"))
         {
             return PLDM_SUCCESS;
@@ -85,9 +83,8 @@ int sendBiosAttributeUpdateEvent(
         return rc;
     }
 
-    auto platformEventMessageResponseHandler = [](mctp_eid_t /*eid*/,
-                                                  const pldm_msg* response,
-                                                  size_t respMsgLen) {
+    auto platformEventMessageResponseHandler =
+        [](mctp_eid_t /*eid*/, const pldm_msg* response, size_t respMsgLen) {
         if (response == nullptr || !respMsgLen)
         {
             error("Failed to receive response for platform event message");
