@@ -982,9 +982,9 @@ static void astlpc_test_buffers_bad_host_init(void)
 	host.mmio.bmc = false;
 
 	/* Set the MTU to 0 to provoke a failure */
-	host.astlpc =
-		mctp_astlpc_init(MCTP_BINDING_ASTLPC_MODE_HOST, 0, lpc_mem,
-				 &astlpc_direct_mmio_ops, &host.mmio);
+	host.astlpc = mctp_astlpc_init(MCTP_BINDING_ASTLPC_MODE_HOST, 0,
+				       lpc_mem, &astlpc_direct_mmio_ops,
+				       &host.mmio);
 
 	rc = mctp_register_bus(host.mctp, &host.astlpc->binding, 8);
 	assert(rc < 0);
