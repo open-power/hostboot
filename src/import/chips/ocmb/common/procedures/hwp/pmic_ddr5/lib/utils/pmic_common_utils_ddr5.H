@@ -407,9 +407,9 @@ struct __attribute__ ((__packed__)) adc_additional_n_mode_telemetry_data
     uint8_t iv_gpo_value_cfg = 0;
 
     uint8_t iv_dummy_3       = 0;
+    uint8_t iv_gpi_value     = 0;
     uint8_t iv_dummy_4       = 0;
     uint8_t iv_dummy_5       = 0;
-    uint8_t iv_dummy_6       = 0;
 };
 
 ///
@@ -455,6 +455,30 @@ struct __attribute__ ((__packed__)) additional_n_mode_telemetry_data
     pmic_additional_n_mode_telemetry_data iv_pmic[CONSTS::NUM_PMICS_4U];
 
     dt_additional_n_mode_telemetry_data iv_dt[CONSTS::NUM_DTS_4U];
+};
+
+///
+/// @brief Struct of consolidated health check data which includes the following:
+///        1. Health check
+///        2. Additional data collected in case of n-mode detected
+///        3. Periodic telemetry data in case of n-mode detected
+///
+struct __attribute__ ((__packed__)) consolidated_health_check_data
+{
+    health_check_telemetry_data iv_health_check;
+    additional_n_mode_telemetry_data iv_additional_data;
+    // TODO: ZEN:MST-1906 Implement periodic telemetry data collection tool
+    // periodic_telemetry_data;
+
+    uint8_t iv_pmic0_errors = 0;
+    uint8_t iv_pmic1_errors = 0;
+    uint8_t iv_pmic2_errors = 0;
+    uint8_t iv_pmic3_errors = 0;
+
+    uint8_t iv_dt0_errors = 0;
+    uint8_t iv_dt1_errors = 0;
+    uint8_t iv_dt2_errors = 0;
+    uint8_t iv_dt3_errors = 0;
 };
 
 ///
@@ -592,6 +616,52 @@ void dt_reg_read_contiguous(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t 
     if (!(io_pmic_dt.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
     {
         if (mss::pmic::i2c::reg_read_contiguous(io_pmic_dt.iv_dt, i_reg, o_output) != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            io_pmic_dt.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
+        }
+    }
+}
+
+///
+/// @brief Read contiguous registers of a PMIC target and then reverse the buffer.
+///        This function is for the runtime health check and telemetry functions
+///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
+///
+/// @param[in,out] io_pmic_dt target_info_pmic_dt_pair class including target / state info
+/// @param[in] i_reg register
+/// @param[out] o_output output buffer
+///
+template <size_t N>
+void pmic_reg_read_contiguous_reverse(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t i_reg,
+                                      fapi2::buffer<uint8_t> (&o_output)[N])
+{
+    if (!(io_pmic_dt.iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
+    {
+        if (mss::pmic::i2c::reg_read_contiguous_reverse(io_pmic_dt.iv_pmic, i_reg, o_output) != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            io_pmic_dt.iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL;
+        }
+    }
+}
+
+///
+/// @brief Read contiguous registers of a DT target and then reverse the buffer.
+///        This function is for the runtime health check and telemetry functions
+///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
+///
+/// @param[in,out] io_pmic_dt target_info_pmic_dt_pair class including target / state info
+/// @param[in] i_reg register
+/// @param[out] o_output output buffer
+///
+template <size_t N>
+void dt_reg_read_contiguous_reverse(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t i_reg,
+                                    fapi2::buffer<uint8_t> (&o_output)[N])
+{
+    if (!(io_pmic_dt.iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
+    {
+        if (mss::pmic::i2c::reg_read_contiguous_reverse(io_pmic_dt.iv_dt, i_reg, o_output) != fapi2::FAPI2_RC_SUCCESS)
         {
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             io_pmic_dt.iv_dt_state |= mss::pmic::ddr5::dt_state::DT_I2C_FAIL;
