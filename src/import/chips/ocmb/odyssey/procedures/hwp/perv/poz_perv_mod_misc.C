@@ -140,9 +140,19 @@ ReturnCode mod_cbs_start(
     bool i_scan0_clockstart)
 {
     CBS_CS_t CBS_CS;
+    SB_CS_t SB_CS;
+    fapi2::buffer<uint8_t> l_bootSide;
     int l_timeout = 0;
 
     FAPI_INF("Entering ...");
+
+    // Get and set the side to boot the SPPE from
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SPPE_BOOT_SIDE, i_target, l_bootSide));
+    FAPI_TRY(SB_CS.getCfam(i_target));
+    FAPI_DBG("Current boot side set to %d.", SB_CS.getBits<17, 2>());
+    SB_CS.insertFromRight<17, 2, uint8_t>(l_bootSide);
+    FAPI_DBG("New boot side set to %d.", SB_CS.getBits<17, 2>());
+    FAPI_TRY(SB_CS.putCfam(i_target));
 
     FAPI_TRY(mod_cbs_start_prep(i_target, i_start_sbe, i_scan0_clockstart));
 
