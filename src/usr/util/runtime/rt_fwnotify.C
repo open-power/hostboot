@@ -666,6 +666,7 @@ void deallocateResource(const hostInterfaces::deallocate_t & i_deallocated)
         // Only Core/FC PLDM state sensors exist
         if (l_resourceType == hostInterfaces::ResourceProc)
         {
+#ifdef CONFIG_PLDM
             PLDM::state_query_id_t l_sensor_id = 0x0000;
             l_err = PLDM::thePdrManager().getStateSensorId(l_deallocTarget, l_sensor_id);
             if (l_err)
@@ -677,6 +678,7 @@ void deallocateResource(const hostInterfaces::deallocate_t & i_deallocated)
             }
             // alert BMC that this target is no longer functional
             PLDM::sendFruFunctionalStateChangedEvent(l_deallocTarget, l_sensor_id, 0);
+#endif
         }
 
     } while (0);
@@ -834,6 +836,7 @@ void handleMctpAvailable(void)
     errlHndl_t errl = nullptr;
 
     do{
+#ifdef CONFIG_PLDM
     auto& next_pldm_request = PLDM::get_next_request();
 
     // if we have a complete PLDM request already queued, that is an unexpected
@@ -850,6 +853,7 @@ void handleMctpAvailable(void)
                                                          sizeof(pldm_msg_hdr)));
         PLDM::clear_next_request();
     }
+#endif
 
     int return_code = MCTP::get_next_packet();
     TRACDCOMP(g_trac_hbrt, "handleMctpAvailable: initial get packet returned rc : %d ", return_code );
@@ -873,6 +877,7 @@ void handleMctpAvailable(void)
     }
     else
     {
+#ifdef CONFIG_PLDM
         uint8_t sleep_time_sec = 0;
         while(next_pldm_request.empty())
         {
@@ -896,6 +901,7 @@ void handleMctpAvailable(void)
                 break;
              }
         }
+#endif
     }
 
     if(return_code)
@@ -925,6 +931,7 @@ void handleMctpAvailable(void)
         // ok to disable the bridge
         setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
 
+#ifdef CONFIG_PLDM
         errl = PLDM::handle_next_pldm_request();
         if(errl)
         {
@@ -932,10 +939,12 @@ void handleMctpAvailable(void)
             // No need to flag an error since it may just be informational
             // errl will be committed soon
         }
+#endif
 
         // Re-enable the bridge
         setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
 
+#ifdef CONFIG_PLDM
         // If a new response comes in while handling a new inbound request,
         // by definition that is a timed out response we gave up on earlier,
         // so throw it away
@@ -943,6 +952,7 @@ void handleMctpAvailable(void)
         {
             PLDM::clear_next_response();
         }
+#endif
     }
     }while(0);
 

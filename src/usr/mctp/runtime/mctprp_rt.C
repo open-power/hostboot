@@ -144,6 +144,7 @@ static void rx_message(uint8_t i_eid, bool i_tag_owner, uint8_t i_msg_tag,
 
           PLDM::pldm_mctp_message req(tagOwner, i_msg_tag, move(pldm_msg_data));
 
+#ifdef CONFIG_PLDM
           // Skip first byte of the MCTP payload which has the payload type.
           // The PLDM layer is unaware of this byte.
           const PLDM::pldmrp_rt_rc rc = PLDM::cache_next_pldm_msg(std::move(req));
@@ -180,6 +181,7 @@ static void rx_message(uint8_t i_eid, bool i_tag_owner, uint8_t i_msg_tag,
               addBmcAndHypErrorCallouts(errl);
               errlCommit(errl, MCTP_COMP_ID);
           }
+#endif
           break;
       }
       default:

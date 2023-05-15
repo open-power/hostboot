@@ -33,6 +33,7 @@ OBJS += alloc.o
 OBJS += log.o
 OBJS += mctp_trace.o
 OBJS += mctp_plat_core.o
+OBJS += crc32.o
 
 VPATH += ${ROOTPATH}/src/usr/mctp
 VPATH += ${ROOTPATH}/src/subtree/openbmc/libmctp/

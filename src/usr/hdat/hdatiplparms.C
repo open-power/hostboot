@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -675,7 +675,11 @@ void HdatIplParms::hdatGetSystemParamters()
     // hostbootTerminusId() returns terminus_id_t which is uint16_t but HDAT
     // spec defined it as uint8_t so doing a a type cast here
     this->iv_hdatIPLParams->iv_sysParms.hdatHbrtTerminusId =
+#ifdef CONFIG_PLDM
         static_cast<uint8_t>(PLDM::thePdrManager().hostbootTerminusId());
+#else
+        0;
+#endif
 
     TARGETING::ATTR_VTPM_ENABLED_type l_vTpmEnabled;
     if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_VTPM_ENABLED>
