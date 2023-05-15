@@ -52,6 +52,14 @@ ReturnCode ody_apply_sbe_attribute_row<{{target_type}}>(
     AttrEntry_t l_attrEntry;
     ReturnCode l_rc = FAPI2_RC_SUCCESS;
 
+    // track that each attribute expected to be transmitted by the SBE
+    // and posted on the host is ultimately processed
+    {% for attr in attr_data.from_sbe_list[target_type] %}
+        {% if attr.fromSbeSync(attr_data.chip_type, target_type) %}
+    bool l_{{attr.name}}_found = false;
+        {% endif %}
+    {% endfor %}
+
     while (i_targ_parser.getRemainingRowCount())
     {
         FAPI_DBG("getRemainingRowCount() = %d", i_targ_parser.getRemainingRowCount());
@@ -70,11 +78,12 @@ ReturnCode ody_apply_sbe_attribute_row<{{target_type}}>(
                             sizeof({{attr.value_type}}_t)),
                          "getAttrValue failed for the attribute {{attr.name}}");
                 l_rc = FAPI_ATTR_SET({{attr.name}}, i_targ, l_val);
+                l_{{attr.name}}_found = true;
                 if (l_rc != FAPI2_RC_SUCCESS)
                 {
-                    FAPI_ERR("FAPI_ATTR_SET failed for the attribute {{attr.name}}");
+                    FAPI_INF("FAPI_ATTR_SET failed for the attribute {{attr.name}}");
                     o_errors.emplace_back({{target_type}}, i_targ_parser.getInstNum(),
-                                        {{attr.name}}, SBE_ATTRIBUTE_RC_SET_ATTR_FAILED);
+                                          {{attr.name}}, SBE_ATTRIBUTE_RC_SET_ATTR_FAILED);
                     fapi2::current_err = FAPI2_RC_SUCCESS;
                 }
              {% else %}
@@ -84,14 +93,27 @@ ReturnCode ody_apply_sbe_attribute_row<{{target_type}}>(
             }
         {% endfor %}
             default:
-                // SBE returns an attribute that hwp is not aware
-                FAPI_ERR("Unknown Attribute : 0x%08X TargetType : 0xllX",
-                        l_attrEntry.iv_attrId, {{target_type}});
+                // SBE returns an attribute that Host is not aware of
+                FAPI_INF("Unknown Attribute : 0x%08X TargetType : 0x%llX",
+                         l_attrEntry.iv_attrId, {{target_type}});
                 o_errors.emplace_back({{target_type}}, i_targ_parser.getInstNum(),
-                                    uint32_t(l_attrEntry.iv_attrId), SBE_ATTRIBUTE_RC_ATTR_NOT_FOUND);
+                                      uint32_t(l_attrEntry.iv_attrId), SBE_ATTRIBUTE_RC_ATTR_NOT_FOUND);
                 break;
         }
     }
+
+    {% for attr in attr_data.from_sbe_list[target_type] %}
+        {% if attr.fromSbeSync(attr_data.chip_type, target_type) %}
+    if (!l_{{attr.name}}_found)
+    {
+        // attribute expected to be received was not found/posted
+        FAPI_INF("Attribute {{attr.name}} expected by host but not received");
+        o_errors.emplace_back({{target_type}}, 0xFF,
+                              {{attr.name}}, SBE_ATTRIBUTE_RC_EXPECTED_BUT_NOT_RECEIVED);
+    }
+        {% endif %}
+    {% endfor %}
+
 
 fapi_try_exit:
     return current_err;
