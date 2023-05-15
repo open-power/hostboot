@@ -207,7 +207,7 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr size_t LEFT_SHIFT = (sizeof(uint64_t) * 8) - BITS_IN_SUBTEST;
 
         // LARGEST_ADDRESS. port select (bit0~1) are always 0 so shift 2 more bits.
-        static constexpr uint64_t LARGEST_ADDRESS = ~0 >> (mss::mcbist::address::MAGIC_PAD + 2);
+        static constexpr uint64_t LARGEST_ADDRESS = 0xFFFFFFFFFFFFFFFF >> (mss::mcbist::address::MAGIC_PAD + 2);
 
         // Length of expected patterns
         static constexpr uint64_t EXPECTED_PATTERN_SIZE = 8;
