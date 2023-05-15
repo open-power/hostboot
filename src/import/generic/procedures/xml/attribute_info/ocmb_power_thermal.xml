@@ -38,9 +38,6 @@
         <valueType>uint16</valueType>
         <writeable/>
         <mssAccessorName>ody_mem_throttled_n_commands_per_port</mssAccessorName>
-        <sbeAttrSync toSBE="0" fromSBE="1" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -54,9 +51,6 @@
         <valueType>uint16</valueType>
         <writeable/>
         <mssAccessorName>ody_mem_throttled_n_commands_per_slot</mssAccessorName>
-        <sbeAttrSync toSBE="0" fromSBE="1" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -71,7 +65,7 @@
         <valueType>uint16</valueType>
         <writeable/>
         <mssAccessorName>ody_runtime_mem_throttled_n_commands_per_port</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
         </sbeAttrSync>
     </attribute>
@@ -87,7 +81,7 @@
         <valueType>uint16</valueType>
         <writeable/>
         <mssAccessorName>ody_runtime_mem_throttled_n_commands_per_slot</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
         </sbeAttrSync>
     </attribute>
@@ -104,7 +98,7 @@
         <valueType>uint16</valueType>
         <writeable/>
         <mssAccessorName>mem_throttled_n_commands_per_port</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
     </attribute>
@@ -120,7 +114,7 @@
         <valueType>uint16</valueType>
         <writeable/>
         <mssAccessorName>mem_throttled_n_commands_per_slot</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
     </attribute>
@@ -137,7 +131,7 @@
         <valueType>uint16</valueType>
         <writeable/>
         <mssAccessorName>runtime_mem_throttled_n_commands_per_port</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
     </attribute>
@@ -153,7 +147,7 @@
         <valueType>uint16</valueType>
         <writeable/>
         <mssAccessorName>runtime_mem_throttled_n_commands_per_slot</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
     </attribute>
@@ -209,7 +203,7 @@
         <writeable/>
         <array>2</array>
         <mssAccessorName>mem_watt_target</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
     </attribute>
@@ -227,7 +221,7 @@
         <writeable/>
         <array>2</array>
         <mssAccessorName>total_pwr_slope</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
     </attribute>
@@ -243,7 +237,7 @@
         <writeable/>
         <array>2</array>
         <mssAccessorName>total_pwr_intercept</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
     </attribute>
@@ -256,9 +250,6 @@
         <valueType>uint32</valueType>
         <writeable/>
         <mssAccessorName>port_maxpower</mssAccessorName>
-        <sbeAttrSync toSBE="0" fromSBE="1" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -274,7 +265,7 @@
         <mssUnit>cW</mssUnit>
         <array>2</array>
         <mssAccessorName>dimm_thermal_limit</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
     </attribute>

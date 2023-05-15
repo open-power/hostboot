@@ -49,6 +49,7 @@
             BIG_ENDIAN = 1
         </enum>
         <platInit/>
+        <mrwHide/>
         <default>LITTLE_ENDIAN</default>
     </attribute>
 

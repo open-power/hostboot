@@ -165,6 +165,9 @@
     <mssBlobLength>80</mssBlobLength>
     <mssAccessorName>mem_vpd_dq_map</mssAccessorName>
     <array>80</array>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -637,9 +640,6 @@
     <platInit/>
     <overrideOnly/>
     <mssAccessorName>post_memdiags_read_subtest</mssAccessorName>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -659,9 +659,6 @@
     <platInit/>
     <overrideOnly/>
     <mssAccessorName>post_memdiags_read_subtest_fail_behavior</mssAccessorName>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -762,5 +759,8 @@
         <array>2</array>
         <writeable/>
         <mssAccessorName>dram_address_mirroring</mssAccessorName>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+        </sbeAttrSync>
     </attribute>
 </attributes>
