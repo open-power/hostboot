@@ -562,15 +562,15 @@ fapi2::ReturnCode setup_adc(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRES
     l_data_adc[ADC_REGS::DUMMY_BYTE_2] = 0x00;
     l_data_adc[ADC_REGS::GPO_VALUE]   = 0x00;
     l_data_adc[ADC_REGS::DUMMY_BYTE_3] = 0x00;
-    l_data_adc[ADC_REGS::DUMMY_BYTE_4]   = 0x00;
-    l_data_adc[ADC_REGS::DUMMY_BYTE_5] = 0x00;
-    l_data_adc[ADC_REGS::DUMMY_BYTE_6]   = 0x00;
+    l_data_adc[ADC_REGS::GPI_VALUE]   = 0x00;
+    l_data_adc[ADC_REGS::DUMMY_BYTE_4] = 0x00;
+    l_data_adc[ADC_REGS::DUMMY_BYTE_5]   = 0x00;
     l_data_adc[ADC_REGS::SEQUENCE_CFG] = 0x11;
     l_data_adc[ADC_REGS::CHANNEL_SEQ]   = 0x00;
     l_data_adc[ADC_REGS::AUTO_SEQ_CH_SEL] = 0x7E;
-    l_data_adc[ADC_REGS::DUMMY_BYTE_7]   = 0x00;
+    l_data_adc[ADC_REGS::DUMMY_BYTE_6]   = 0x00;
     l_data_adc[ADC_REGS::ALERT_CH_SEL] = 0x7E;
-    l_data_adc[ADC_REGS::DUMMY_BYTE_8]   = 0x00;
+    l_data_adc[ADC_REGS::DUMMY_BYTE_7]   = 0x00;
     l_data_adc[ADC_REGS::ALERT_MAP]   = 0x00;
     l_data_adc[ADC_REGS::ALERT_PIN_CFG] = 0x00;
 

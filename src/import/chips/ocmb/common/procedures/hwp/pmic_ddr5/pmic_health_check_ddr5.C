@@ -60,7 +60,7 @@ fapi2::ReturnCode reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5&
                                            (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
         {
             // Clear breadcrumb reg
-            mss::pmic::ddr5::pmic_reg_write(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::BREADCRUMB, mss::pmic::ddr5::bread_crumb::ALL_GOOD);
+            mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::BREADCRUMB, mss::pmic::ddr5::bread_crumb::ALL_GOOD);
             return fapi2::FAPI2_RC_SUCCESS;
         });
     }
@@ -95,8 +95,9 @@ void attempt_recovery(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_targ
     // Disable efuse
     mss::pmic::ddr5::dt_reg_write(io_pmic_dt_target_info, DT_REGS::EN_REGISTER, 0x00);
 
-    // Delay for 10 ms. Might remove this if natural delay is sufficient
-    fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+    // Delay for 100 ms. Less delay is affecting recovery procedure for current imbalance
+    // This amount should be ok as the recovery will rarely be used
+    fapi2::delay(100 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
     // Clear faults 0 reg
     l_dt_data_to_write[0] = 0xFF;
@@ -170,9 +171,9 @@ void check_and_advance_breadcrumb_reg(mss::pmic::ddr5::target_info_pmic_dt_pair&
 
         case mss::pmic::ddr5::bread_crumb::STILL_A_FAIL:
             {
-                // Do nothing
-                // TK need to figure out what to do here exit wise
-                // Maybe just send STILL_A_FAIL response
+                // Do nothing. Keep the state as is
+                io_dt_health_check.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::STILL_A_FAIL;
+                mss::pmic::ddr5::dt_reg_write(io_pmic_dt_target_info, DT_REGS::BREADCRUMB, mss::pmic::ddr5::bread_crumb::STILL_A_FAIL);
                 break;
             }
     }
@@ -243,27 +244,18 @@ fapi2::ReturnCode phase_comparison(mss::pmic::ddr5::target_info_redundancy_ddr5&
 
     if (i_phase_values[l_phase_min_index] < mss::pmic::ddr5::PHASE_MIN)
     {
-        const auto l_index = i_pmic[l_phase_min_index];
-        mss::pmic::ddr5::run_if_present_dt(io_target_info, l_index,
-                                           [&io_target_info, l_index, &io_health_check_info]
-                                           (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
+        if (i_phase_values[l_phase_max_index] > mss::pmic::ddr5::PHASE_MAX)
         {
-            io_target_info.iv_pmic_dt_map[l_index].iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_CURRENT_IMBALANCE;
-            update_breadcrumb(io_target_info.iv_pmic_dt_map[l_index], io_health_check_info, l_index);
-            return fapi2::FAPI2_RC_SUCCESS;
-        });
-    }
-    else if (i_phase_values[l_phase_max_index] > mss::pmic::ddr5::PHASE_MAX)
-    {
-        const auto l_index = i_pmic[l_phase_max_index];
-        mss::pmic::ddr5::run_if_present_dt(io_target_info, l_index,
-                                           [&io_target_info, l_index, &io_health_check_info]
-                                           (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
-        {
-            io_target_info.iv_pmic_dt_map[l_index].iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_CURRENT_IMBALANCE;
-            update_breadcrumb(io_target_info.iv_pmic_dt_map[l_index], io_health_check_info, l_index);
-            return fapi2::FAPI2_RC_SUCCESS;
-        });
+            const auto l_index = i_pmic[l_phase_min_index];
+            mss::pmic::ddr5::run_if_present_dt(io_target_info, l_index,
+                                               [&io_target_info, l_index, &io_health_check_info]
+                                               (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
+            {
+                io_target_info.iv_pmic_dt_map[l_index].iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_CURRENT_IMBALANCE;
+                update_breadcrumb(io_target_info.iv_pmic_dt_map[l_index], io_health_check_info, l_index);
+                return fapi2::FAPI2_RC_SUCCESS;
+            });
+        }
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -469,18 +461,10 @@ void check_current_imbalance(mss::pmic::ddr5::target_info_redundancy_ddr5& io_ta
 ///      are the rail currents to detect current imbalances (other status faults are summed up into
 ///      the DT IC “GPI_1” bit)
 ///
-mss::pmic::ddr5::pmic_state check_pmic_faults(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-        mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
+void check_pmic_faults(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                       mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
-    using CONSTS  = mss::pmic::id;
-
     check_current_imbalance(io_target_info, io_health_check_info);
-
-    return static_cast<mss::pmic::ddr5::pmic_state>(std::max({io_target_info.iv_pmic_dt_map[CONSTS::PMIC0].iv_pmic_state,
-            io_target_info.iv_pmic_dt_map[CONSTS::PMIC1].iv_pmic_state,
-            io_target_info.iv_pmic_dt_map[CONSTS::PMIC2].iv_pmic_state,
-            io_target_info.iv_pmic_dt_map[CONSTS::PMIC3].iv_pmic_state
-                                                             }));
 }
 
 ///
@@ -497,7 +481,7 @@ mss::pmic::ddr5::dt_state get_dt_state(const mss::pmic::ddr5::dt_health_check_te
     fapi2::buffer<uint16_t> l_reg0 = i_dt_health_check.iv_ro_inputs_0;
     fapi2::buffer<uint16_t> l_reg1 = i_dt_health_check.iv_ro_inputs_1;
 
-    if(l_reg1.getBit<DT_FIELDS::GPI_1>())
+    if(!l_reg1.getBit<DT_FIELDS::GPI_1>())
     {
         l_state = mss::pmic::ddr5::dt_state::DT_GPI_1;
     }
@@ -519,6 +503,28 @@ mss::pmic::ddr5::dt_state get_dt_state(const mss::pmic::ddr5::dt_health_check_te
     }
 
     return l_state;
+}
+
+///
+/// @brief Reverse the DT regs. When performing bit operations on DT regs,
+///        we have to flip the buffer from PMIC style[7:0], to fapi2-style [0:7].
+///        After the operations have been performed, we would like to revert
+///        the style so as to print the data in PMIC style.
+///
+/// @param[in,out] io_dt_health_check struct to be filled in
+/// @return None
+///
+void reverse_dt_regs(mss::pmic::ddr5::dt_health_check_telemetry& io_dt_health_check)
+{
+    // Re-reverse the I2C read data
+    fapi2::buffer<uint16_t> l_reg = 0;
+    l_reg = io_dt_health_check.iv_ro_inputs_1;
+    l_reg.reverse();
+    io_dt_health_check.iv_ro_inputs_1 = l_reg;
+
+    l_reg = io_dt_health_check.iv_ro_inputs_0;
+    l_reg.reverse();
+    io_dt_health_check.iv_ro_inputs_0 = l_reg;
 }
 
 ///
@@ -557,6 +563,11 @@ mss::pmic::ddr5::dt_state check_dt_faults(mss::pmic::ddr5::target_info_redundanc
     {
         check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT3], io_health_check_info.iv_dt3);
     }
+
+    reverse_dt_regs(io_health_check_info.iv_dt0);
+    reverse_dt_regs(io_health_check_info.iv_dt1);
+    reverse_dt_regs(io_health_check_info.iv_dt2);
+    reverse_dt_regs(io_health_check_info.iv_dt3);
 
     return static_cast<mss::pmic::ddr5::dt_state>(std::max({io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_dt_state,
             io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_dt_state,
@@ -645,23 +656,20 @@ fapi_try_exit:
 /// @brief Store the read regs into struct
 ///
 /// @param[in] i_data DT data to be filled into the health_check struct
+/// @param[in] i_data DT data1 to be filled into the health_check struct
 /// @param[in] i_data_breadcrumb data to be filled into the health_check struct
 /// @param[in,out] io_dt_health_check struct to be filled in
 /// @return None
 ///
 void fill_dt_struct(const fapi2::buffer<uint8_t> (&i_data)[NUMBER_DT_REGS_READ],
+                    const fapi2::buffer<uint8_t> (&i_data1)[NUMBER_DT_REGS_READ],
                     const fapi2::buffer<uint8_t>& i_data_breadcrumb,
                     mss::pmic::ddr5::dt_health_check_telemetry& io_dt_health_check)
 {
-    static constexpr uint8_t NUMBER_OF_BITS = 8;
+    static constexpr uint8_t BITS_PER_BYTE = 8;
 
-    io_dt_health_check.iv_ro_inputs_1 = i_data[data_position::DATA_0];
-    io_dt_health_check.iv_ro_inputs_1 <<= NUMBER_OF_BITS;
-    io_dt_health_check.iv_ro_inputs_1 |= i_data[data_position::DATA_1];
-
-    io_dt_health_check.iv_ro_inputs_0 = i_data[data_position::DATA_2];
-    io_dt_health_check.iv_ro_inputs_0 <<= NUMBER_OF_BITS;
-    io_dt_health_check.iv_ro_inputs_0 |= i_data[data_position::DATA_3];
+    io_dt_health_check.iv_ro_inputs_1 = (i_data[0] << BITS_PER_BYTE) | i_data[1];
+    io_dt_health_check.iv_ro_inputs_0 = (i_data1[0] << BITS_PER_BYTE) | i_data1[1];
 
     io_dt_health_check.iv_breadcrumb = i_data_breadcrumb;
 }
@@ -679,18 +687,20 @@ void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
     using CONSTS  = mss::dt::dt_i2c_devices;
 
     fapi2::buffer<uint8_t> l_data_buffer[NUMBER_DT_REGS_READ];
+    fapi2::buffer<uint8_t> l_data_buffer1[NUMBER_DT_REGS_READ];
     fapi2::buffer<uint8_t> l_data_breadcrumb = 0;;
 
     for (auto l_dt_count = 0; l_dt_count < io_target_info.iv_number_of_target_infos_present; l_dt_count++)
     {
         // If the pmic is not overridden to disabled, run the below code
         mss::pmic::ddr5::run_if_present_dt(io_target_info, l_dt_count, [&io_target_info, l_dt_count, &l_data_buffer,
-                                           &l_data_breadcrumb]
+                                           &l_data_buffer1, &l_data_breadcrumb]
                                            (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_pmic) -> fapi2::ReturnCode
         {
             using DT_REGS  = mss::dt::regs;
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::RO_INPUTS_1, l_data_buffer);
+            mss::pmic::ddr5::dt_reg_read_contiguous_reverse(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::RO_INPUTS_1, l_data_buffer);
+            mss::pmic::ddr5::dt_reg_read_contiguous_reverse(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::RO_INPUTS_0, l_data_buffer1);
             mss::pmic::ddr5::dt_reg_read(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::BREADCRUMB, l_data_breadcrumb);
             return fapi2::FAPI2_RC_SUCCESS;
         });
@@ -698,19 +708,19 @@ void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
         switch(l_dt_count)
         {
             case CONSTS::DT0:
-                fill_dt_struct(l_data_buffer, l_data_breadcrumb, io_health_check_info.iv_dt0);
+                fill_dt_struct(l_data_buffer, l_data_buffer1, l_data_breadcrumb, io_health_check_info.iv_dt0);
                 break;
 
             case CONSTS::DT1:
-                fill_dt_struct(l_data_buffer, l_data_breadcrumb, io_health_check_info.iv_dt1);
+                fill_dt_struct(l_data_buffer, l_data_buffer1, l_data_breadcrumb, io_health_check_info.iv_dt1);
                 break;
 
             case CONSTS::DT2:
-                fill_dt_struct(l_data_buffer, l_data_breadcrumb, io_health_check_info.iv_dt2);
+                fill_dt_struct(l_data_buffer, l_data_buffer1, l_data_breadcrumb, io_health_check_info.iv_dt2);
                 break;
 
             case CONSTS::DT3:
-                fill_dt_struct(l_data_buffer, l_data_breadcrumb, io_health_check_info.iv_dt3);
+                fill_dt_struct(l_data_buffer, l_data_buffer1, l_data_breadcrumb, io_health_check_info.iv_dt3);
                 break;
         }
     }
@@ -777,6 +787,7 @@ void collect_additional_adc_data(const mss::pmic::ddr5::target_info_redundancy_d
     fapi2::buffer<uint8_t> l_data_adc[NUM_BYTES_TO_READ];
 
     mss::pmic::i2c::reg_read_contiguous(i_target_info.iv_adc, ADC_REGS::SYSTEM_STATUS, l_data_adc);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     io_additional_info.iv_adc.iv_system_status = l_data_adc[data_position::DATA_0];
     io_additional_info.iv_adc.iv_general_cfg   = l_data_adc[data_position::DATA_1];
@@ -791,9 +802,9 @@ void collect_additional_adc_data(const mss::pmic::ddr5::target_info_redundancy_d
     io_additional_info.iv_adc.iv_dummy_2       = l_data_adc[data_position::DATA_10];
     io_additional_info.iv_adc.iv_gpo_value_cfg = l_data_adc[data_position::DATA_11];
     io_additional_info.iv_adc.iv_dummy_3       = l_data_adc[data_position::DATA_12];
-    io_additional_info.iv_adc.iv_dummy_4       = l_data_adc[data_position::DATA_13];
-    io_additional_info.iv_adc.iv_dummy_5       = l_data_adc[data_position::DATA_14];
-    io_additional_info.iv_adc.iv_dummy_6       = l_data_adc[data_position::DATA_15];
+    io_additional_info.iv_adc.iv_gpi_value     = l_data_adc[data_position::DATA_13];
+    io_additional_info.iv_adc.iv_dummy_4       = l_data_adc[data_position::DATA_14];
+    io_additional_info.iv_adc.iv_dummy_5       = l_data_adc[data_position::DATA_15];
 }
 
 ///
@@ -904,6 +915,230 @@ void collect_additional_n_mode_data(mss::pmic::ddr5::target_info_redundancy_ddr5
 }
 
 ///
+/// @brief Send the consolidated_health_check_data struct in case of n-mode
+///
+/// @param[in] i_info consolidated_health_check_data struct
+/// @oaram[in] i_length_of_data number of bytes to be trasmitted
+/// @param[out] o_data hwp_data_ostream data stream
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode send_struct(mss::pmic::ddr5::consolidated_health_check_data& i_info,
+                              const uint16_t i_length_of_data,
+                              fapi2::hwp_data_ostream& o_data)
+{
+    // Casted to char pointer so we can increment in single bytes
+    char* i_info_casted  = reinterpret_cast<char*>(&i_info);
+
+    // Loop through in increments of hwp_data_unit size (currently uint32_t)
+    // Until we have copied the entire structure
+    for (uint16_t l_byte = 0; l_byte < i_length_of_data; l_byte += sizeof(fapi2::hwp_data_unit))
+    {
+        fapi2::hwp_data_unit l_data_unit = 0;
+
+        // The number of bytes to copy is either always 4 (size of hwp_data_unit),
+        // OR less if we have fewer than 4 bytes left in the struct, in which case we copy
+        // that amount.
+        const size_t l_bytes_to_copy = std::min(sizeof(fapi2::hwp_data_unit), sizeof(i_info) - l_byte);
+
+        memcpy(&l_data_unit, i_info_casted + l_byte, l_bytes_to_copy);
+        FAPI_TRY(o_data.put(l_data_unit));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Generate and send the io_consolidated_data struct
+///
+/// @param[in] i_target_info PMIC and DT target info struct
+/// @param[in] i_health_check_info health check struct
+/// @param[in] i_additional_info additional data collected struct in case of n-mode detected
+/// @param[in,out] io_consolidated_data consolidate data of all the structs to be sent
+/// @param[out] o_data hwp_data_ostream of struct information
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode generate_and_send_response(const mss::pmic::ddr5::target_info_redundancy_ddr5& i_target_info,
+        const mss::pmic::ddr5::health_check_telemetry_data& i_health_check_info,
+        const mss::pmic::ddr5::additional_n_mode_telemetry_data& i_additional_info,
+        mss::pmic::ddr5::consolidated_health_check_data& io_consolidated_data,
+        fapi2::hwp_data_ostream& o_data)
+{
+    using CONSTS  = mss::pmic::id;
+    using CONSTS_DT = mss::dt::dt_i2c_devices;
+    static constexpr uint8_t LENGTH_BYTES_TO_SEND = 1;
+
+    io_consolidated_data.iv_health_check = i_health_check_info;
+
+    if(io_consolidated_data.iv_health_check.iv_aggregate_state == mss::pmic::ddr5::aggregate_state::N_MODE)
+    {
+        io_consolidated_data.iv_additional_data = i_additional_info;
+        // TODO: ZEN:MST-1906 Implement periodic telemetry data collection tool
+        // io_consolidated_data.iv_periodic_telemetry_data;
+
+        io_consolidated_data.iv_pmic0_errors = i_target_info.iv_pmic_dt_map[CONSTS::PMIC0].iv_pmic_state;
+        io_consolidated_data.iv_pmic1_errors = i_target_info.iv_pmic_dt_map[CONSTS::PMIC1].iv_pmic_state;
+        io_consolidated_data.iv_pmic2_errors = i_target_info.iv_pmic_dt_map[CONSTS::PMIC2].iv_pmic_state;
+        io_consolidated_data.iv_pmic3_errors = i_target_info.iv_pmic_dt_map[CONSTS::PMIC3].iv_pmic_state;
+
+        io_consolidated_data.iv_dt0_errors = i_target_info.iv_pmic_dt_map[CONSTS_DT::DT0].iv_dt_state;
+        io_consolidated_data.iv_dt1_errors = i_target_info.iv_pmic_dt_map[CONSTS_DT::DT1].iv_dt_state;
+        io_consolidated_data.iv_dt2_errors = i_target_info.iv_pmic_dt_map[CONSTS_DT::DT2].iv_dt_state;
+        io_consolidated_data.iv_dt3_errors = i_target_info.iv_pmic_dt_map[CONSTS_DT::DT3].iv_dt_state;
+
+        FAPI_TRY(send_struct(io_consolidated_data, sizeof(io_consolidated_data), o_data));
+    }
+    else
+    {
+        FAPI_TRY(send_struct(io_consolidated_data, LENGTH_BYTES_TO_SEND, o_data));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Resets breadcrumb for PMIC/DT pair if both PMIC and DT states are ALL_GOOD
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_health_check_info health check struct
+/// None
+///
+void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                                mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
+{
+    using CONSTS = mss::dt::dt_i2c_devices;
+    using DT_REGS  = mss::dt::regs;
+
+    if (!io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_pmic_state
+        && !io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_dt_state )
+    {
+        mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[CONSTS::DT0], DT_REGS::BREADCRUMB,
+                                      mss::pmic::ddr5::bread_crumb::ALL_GOOD);
+        // Resetting the struct bread crumb variable
+        io_health_check_info.iv_dt0.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+    }
+
+    if (!io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_pmic_state
+        && !io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_dt_state )
+    {
+        mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[CONSTS::DT1], DT_REGS::BREADCRUMB,
+                                      mss::pmic::ddr5::bread_crumb::ALL_GOOD);
+        // Resetting the struct bread crumb variable
+        io_health_check_info.iv_dt1.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+    }
+
+    if (!io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_pmic_state
+        && !io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_dt_state )
+    {
+        mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[CONSTS::DT2], DT_REGS::BREADCRUMB,
+                                      mss::pmic::ddr5::bread_crumb::ALL_GOOD);
+        // Resetting the struct bread crumb variable
+        io_health_check_info.iv_dt2.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+    }
+
+    if (!io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_pmic_state
+        && !io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_dt_state )
+    {
+        mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[CONSTS::DT3], DT_REGS::BREADCRUMB,
+                                      mss::pmic::ddr5::bread_crumb::ALL_GOOD);
+        // Resetting the struct bread crumb variable
+        io_health_check_info.iv_dt3.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+    }
+}
+
+///
+/// @brief Runtime Health check helper for 4U parts
+///
+/// @param[in] i_ocmb_target ocmb target
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_health_check_info health check struct
+/// @param[in,out] io_additional_info additional health check data
+/// @param[in,out] io_consolidated_data consolidate data of all the structs to be sent
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode pmic_health_check_ddr5_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+        mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+        mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
+        mss::pmic::ddr5::consolidated_health_check_data& io_consolidated_health_check_data)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    io_health_check_info.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::N_PLUS_1;
+    mss::pmic::ddr5::dt_state l_dt_state = mss::pmic::ddr5::dt_state::DT_ALL_GOOD;
+    mss::pmic::ddr5::aggregate_state l_n_mode = mss::pmic::ddr5::aggregate_state::N_PLUS_1;
+
+    // Check if we have recevied any PMIC/DT pairs. Else declare LOST
+    if (!io_target_info.iv_number_of_target_infos_present)
+    {
+        io_consolidated_health_check_data.iv_health_check.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::LOST;
+        // If we are not given any PMIC/DT targets, exit now
+        constexpr auto NUM_PRIMARY_PMICS = CONSTS::NUM_PRIMARY_PMICS_DDR5;
+        constexpr auto NO_PMIC_DT_TARGETS = 0;
+        FAPI_ASSERT((io_target_info.iv_number_of_target_infos_present == NO_PMIC_DT_TARGETS),
+                    fapi2::NO_PMIC_DT_DDR5_TARGETS_FOUND()
+                    .set_OCMB_TARGET(i_ocmb_target)
+                    .set_NUM_PMICS(io_target_info.iv_number_of_target_infos_present)
+                    .set_EXPECTED_MIN_PMICS(NUM_PRIMARY_PMICS),
+                    GENTARGTIDFORMAT " Pmic health check requires at least %u PMICs and DTs. "
+                    "Given %u PMICs and DTs",
+                    GENTARGTID(i_ocmb_target),
+                    NUM_PRIMARY_PMICS,
+                    io_target_info.iv_number_of_target_infos_present);
+    }
+
+    // Platform has asserted we will receive at least 3 DT targets iff 4U
+    // Do a check to see if we are 4U by checking for minimum 3 DT targets
+    if (!mss::pmic::ddr5::is_4u(i_ocmb_target))
+    {
+        io_consolidated_health_check_data.iv_health_check.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::DIMM_NOT_4U;
+        FAPI_ERR(GENTARGTIDFORMAT " DIMM is not 4U", GENTARGTID(i_ocmb_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    if(io_target_info.iv_number_of_target_infos_present <= CONSTS::NUM_PRIMARY_PMICS_DDR5)
+    {
+        io_consolidated_health_check_data.iv_health_check.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::N_MODE;
+        FAPI_ERR(GENTARGTIDFORMAT " Declaring N-mode due to not enough functional PMICs/DTs provided",
+                 GENTARGTID(i_ocmb_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Read and store DT regs for fault calculations
+    read_dt_regs(io_target_info, io_health_check_info);
+
+    // Read and store PMIC regs for fault calculations
+    FAPI_TRY(read_pmic_regs(io_target_info, io_health_check_info));
+
+    // Check DT faults and set aggregate state
+    l_dt_state = check_dt_faults(io_target_info, io_health_check_info);
+
+    // If not faults on DT, then check for PMIC faults
+    if (!l_dt_state)
+    {
+        check_pmic_faults(io_target_info, io_health_check_info);
+    }
+
+    check_and_reset_breadcrumb(io_target_info, io_health_check_info);
+
+    l_n_mode = check_n_mode(io_health_check_info);
+
+    // If n-mode detected, then collect additional data
+    if(l_n_mode == mss::pmic::ddr5::aggregate_state::N_MODE)
+    {
+        collect_additional_n_mode_data(io_target_info, io_additional_info);
+        // TODO: ZEN:MST-1906 Implement periodic telemetry data collection tool
+        // periodic_data_collection();
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Runtime Health check for 4U parts
 ///
 /// @param[in] i_ocmb_target ocmb target
@@ -913,86 +1148,26 @@ void collect_additional_n_mode_data(mss::pmic::ddr5::target_info_redundancy_ddr5
 fapi2::ReturnCode pmic_health_check_ddr5(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
         fapi2::hwp_data_ostream& o_data)
 {
-    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-
     FAPI_INF(GENTARGTIDFORMAT " Running pmic_health_check HWP", GENTARGTID(i_ocmb_target));
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
-    mss::pmic::ddr5::health_check_telemetry_data l_info;
+    mss::pmic::ddr5::health_check_telemetry_data l_health_check_info;
     mss::pmic::ddr5::additional_n_mode_telemetry_data l_additional_info;
-
-    l_info.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::N_PLUS_1;
-    mss::pmic::ddr5::dt_state l_dt_state = mss::pmic::ddr5::dt_state::DT_ALL_GOOD;
-    mss::pmic::ddr5::pmic_state l_pmic_state = mss::pmic::ddr5::pmic_state::PMIC_ALL_GOOD;
-    mss::pmic::ddr5::aggregate_state l_n_mode = mss::pmic::ddr5::aggregate_state::N_PLUS_1;
+    // TODO: ZEN:MST-1906 Implement periodic telemetry data collection tool
+    // mss::pmic::ddr5::periodic_telemetry_data l_periodic_telemetry_data;
+    mss::pmic::ddr5::consolidated_health_check_data l_consolidated_health_check_data;
 
     // Grab the targets as a struct, if they exist
     mss::pmic::ddr5::target_info_redundancy_ddr5 l_target_info(i_ocmb_target, l_rc);
+
     FAPI_TRY(mss::pmic::ddr5::set_pmic_dt_states(l_target_info));
 
-    // Check if we have recevied any PMIC/DT pairs. Else declare LOST
-    if (!l_target_info.iv_number_of_target_infos_present)
-    {
-        l_info.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::LOST;
-        FAPI_ERR(GENTARGTIDFORMAT " No PMICs or DTs present", GENTARGTID(i_ocmb_target));
-        // TODO: ZEN:MST-1905 Implement PMIC Health Check tool
-        // Need to talk to HB, power and Z team to come to an agreement on the number of bytes to be passed
-        //FAPI_TRY(send_struct(l_info.iv_aggregate_state, o_data));
-        return fapi2::FAPI2_RC_FALSE;
-    }
+    FAPI_TRY(pmic_health_check_ddr5_helper(i_ocmb_target, l_target_info, l_health_check_info, l_additional_info,
+                                           l_consolidated_health_check_data));
 
-    // Platform has asserted we will receive at least 3 DT targets iff 4U
-    // Do a check to see if we are 4U by checking for minimum 3 DT targets
-    if (!mss::pmic::ddr5::is_4u(i_ocmb_target))
-    {
-        l_info.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::DIMM_NOT_4U;
-        FAPI_ERR(GENTARGTIDFORMAT " DIMM is not 4U", GENTARGTID(i_ocmb_target));
-        //FAPI_TRY(send_struct(l_info.iv_aggregate_state, o_data));
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    if(l_target_info.iv_number_of_target_infos_present <= CONSTS::NUM_PRIMARY_PMICS_DDR5)
-    {
-        l_info.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::N_MODE;
-        FAPI_ERR(GENTARGTIDFORMAT " Declaring N-mode dure to not enough functional PMICs/DTs provided",
-                 GENTARGTID(i_ocmb_target));
-        //FAPI_TRY(send_struct(l_info.iv_aggregate_state, o_data));
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    // Read and store DT regs for fault calculations
-    read_dt_regs(l_target_info, l_info);
-
-    // Read and store DT regs for fault calculations
-    FAPI_TRY(read_pmic_regs(l_target_info, l_info));
-
-    // Check DT faults and set aggregate state
-    l_dt_state = check_dt_faults(l_target_info, l_info);
-
-    // If not faults on DT, then check for PMIC faults
-    if (!l_dt_state)
-    {
-        l_pmic_state = check_pmic_faults(l_target_info, l_info);
-    }
-
-    // If no pmic faults then reset the breadcrumb regs
-    if (!l_pmic_state)
-    {
-        FAPI_TRY(reset_breadcrumb(l_target_info, l_info));
-    }
-
-    l_n_mode = check_n_mode(l_info);
-
-    // If n-mode detected, then collect additional data
-    if(l_n_mode == mss::pmic::ddr5::aggregate_state::N_MODE)
-    {
-        collect_additional_n_mode_data(l_target_info, l_additional_info);
-        // TODO: ZEN:MST-1906 Implement periodic telemetry data collection tool
-        // periodic_data_collection();
-    }
-
-    // TK: in next commit
-    // generate_response(l_info, o_data);
+    FAPI_TRY(generate_and_send_response(l_target_info, l_health_check_info, l_additional_info,
+                                        l_consolidated_health_check_data,
+                                        o_data));
 
 fapi_try_exit:
     return fapi2::current_err;

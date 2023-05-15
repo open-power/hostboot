@@ -65,8 +65,12 @@ enum data_position : uint8_t
 };
 
 static constexpr uint8_t NUMBER_ADDITIONAL_DT_REGS_READ = 2;
-static constexpr uint8_t NUMBER_DT_REGS_READ = 4;
+static constexpr uint8_t NUMBER_DT_REGS_READ = 2;
 static constexpr uint8_t NUMBER_PMIC_REGS_READ = 12;
+
+typedef fapi2::ReturnCode (*pmic_health_check_ddr5_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
+    fapi2::hwp_data_ostream&);
 
 ///
 /// @brief Check minimum phase value from the given array
@@ -249,8 +253,8 @@ void check_current_imbalance(mss::pmic::ddr5::target_info_redundancy_ddr5& io_ta
 ///      are the rail currents to detect current imbalances (other status faults are summed up into
 ///      the DT IC “GPI_1” bit)
 ///
-mss::pmic::ddr5::pmic_state check_pmic_faults(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-        mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
+void check_pmic_faults(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                       mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
 
 ///
 /// @brief Check for DT faults in regs of a specific DT
@@ -259,6 +263,17 @@ mss::pmic::ddr5::pmic_state check_pmic_faults(mss::pmic::ddr5::target_info_redun
 /// @return mss::pmic::ddr5::dt_state fault state of current DT
 ///
 mss::pmic::ddr5::dt_state get_dt_state(const mss::pmic::ddr5::dt_health_check_telemetry& i_dt_health_check);
+
+///
+/// @brief Reverse the DT regs. When performing bit operations on DT regs,
+///        we have to flip the buffer from PMIC style[7:0], to fapi2-style [0:7].
+///        After the operations have been performed, we would like to revert
+///        the style so as to print the data in PMIC style.
+///
+/// @param[in,out] io_dt_health_check struct to be filled in
+/// @return None
+///
+void reverse_dt_regs(mss::pmic::ddr5::dt_health_check_telemetry& io_dt_health_check);
 
 ///
 /// @brief Check DT faults for all given DTs
@@ -294,11 +309,13 @@ fapi2::ReturnCode read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& i
 /// @brief Store the read regs into struct
 ///
 /// @param[in] i_data DT data to be filled into the health_check struct
+/// @param[in] i_data DT data1 to be filled into the health_check struct
 /// @param[in] i_data_breadcrumb data to be filled into the health_check struct
 /// @param[in,out] io_dt_health_check struct to be filled in
 /// @return None
 ///
 void fill_dt_struct(const fapi2::buffer<uint8_t> (&i_data)[NUMBER_DT_REGS_READ],
+                    const fapi2::buffer<uint8_t> (&i_data1)[NUMBER_DT_REGS_READ],
                     const fapi2::buffer<uint8_t>& i_data_breadcrumb,
                     mss::pmic::ddr5::dt_health_check_telemetry& io_dt_health_check);
 
@@ -359,6 +376,60 @@ void collect_additional_dt_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io
 ///
 void collect_additional_n_mode_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                                     mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info);
+
+///
+/// @brief Send the consolidated_health_check_data struct in case of n-mode
+///
+/// @param[in] i_info consolidated_health_check_data struct
+/// @oaram[in] i_length_of_data number of bytes to be trasmitted
+/// @param[out] o_data hwp_data_ostream data stream
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode send_struct(mss::pmic::ddr5::consolidated_health_check_data& i_info,
+                              const uint16_t i_length_of_data,
+                              fapi2::hwp_data_ostream& o_data);
+
+///
+/// @brief Generate and send the io_consolidated_data struct
+///
+/// @param[in] i_target_info PMIC and DT target info struct
+/// @param[in] i_health_check_info health check struct
+/// @param[in] i_additional_info additional data collected struct in case of n-mode detected
+/// @param[in,out] io_consolidated_data consolidate data of all the structs to be sent
+/// @param[out] o_data hwp_data_ostream of struct information
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode generate_and_send_response(const mss::pmic::ddr5::target_info_redundancy_ddr5& i_target_info,
+        const mss::pmic::ddr5::health_check_telemetry_data& i_health_check_info,
+        const mss::pmic::ddr5::additional_n_mode_telemetry_data& i_additional_info,
+        mss::pmic::ddr5::consolidated_health_check_data& io_consolidated_data,
+        fapi2::hwp_data_ostream& o_data);
+
+///
+/// @brief Resets breadcrumb for PMIC/DT pair if both PMIC and DT states are ALL_GOOD
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_health_check_info health check struct
+/// None
+///
+void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                                mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
+
+///
+/// @brief Runtime Health check helper for 4U parts
+///
+/// @param[in] i_ocmb_target ocmb target
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_health_check_info health check struct
+/// @param[in,out] io_additional_info additional health check data
+/// @param[in,out] io_consolidated_data consolidate data of all the structs to be sent
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode pmic_health_check_ddr5_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+        mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+        mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
+        mss::pmic::ddr5::consolidated_health_check_data& io_consolidated_health_check_data);
 
 extern "C"
 {

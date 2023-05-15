@@ -511,15 +511,15 @@ enum regs
     DUMMY_BYTE_2        = 0x0A,
     GPO_VALUE           = 0x0B,
     DUMMY_BYTE_3        = 0x0C,
-    DUMMY_BYTE_4        = 0x0D,
-    DUMMY_BYTE_5        = 0x0E,
-    DUMMY_BYTE_6        = 0x0F,
+    GPI_VALUE           = 0x0D,
+    DUMMY_BYTE_4        = 0x0E,
+    DUMMY_BYTE_5        = 0x0F,
     SEQUENCE_CFG        = 0x10,
     CHANNEL_SEQ         = 0x11,
     AUTO_SEQ_CH_SEL     = 0x12,
-    DUMMY_BYTE_7        = 0x13,
+    DUMMY_BYTE_6        = 0x13,
     ALERT_CH_SEL        = 0x14,
-    DUMMY_BYTE_8        = 0x15,
+    DUMMY_BYTE_7        = 0x15,
     ALERT_MAP           = 0x16,
     ALERT_PIN_CFG       = 0x17,
 
@@ -665,6 +665,7 @@ enum opcode
     READ             = 0x10,
     WRITE            = 0x08,
     WRITE_CONTIGUOUS = 0x28,
+    READ_CONTIGUOUS  = 0x30,
 };
 }; // ns i2c
 

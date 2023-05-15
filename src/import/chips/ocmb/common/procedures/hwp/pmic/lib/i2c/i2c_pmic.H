@@ -454,7 +454,7 @@ inline void reg_read_contiguous_helper(const fapi2::Target<fapi2::TARGET_TYPE_GE
                                        const uint8_t i_addr,
                                        std::vector<uint8_t>& io_command)
 {
-    add_adc_opcode(i_target, mss::adc::i2c::opcode::READ, io_command);
+    add_adc_opcode(i_target, mss::adc::i2c::opcode::READ_CONTIGUOUS, io_command);
     io_command.push_back(i_addr);
 }
 
