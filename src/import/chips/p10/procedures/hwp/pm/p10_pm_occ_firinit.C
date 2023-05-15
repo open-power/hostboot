@@ -289,8 +289,7 @@ fapi2::ReturnCode pm_occ_fir_init(
     FAPI_TRY(l_occFir.mask(C405ICU_M_TIMEOUT),               FIR_MASK_ERROR);       // 55
     FAPI_TRY(l_occFir.mask(C405DCU_M_TIMEOUT),               FIR_MASK_ERROR);       // 56
     FAPI_TRY(l_occFir.setRecvAttn(OCC_COMPLEX_FAULT),        FIR_REC_ATTN_ERROR);   // 57
-    FAPI_TRY(l_occFir.setCheckStop(OCC_COMPLEX_NOTIFY),
-             FIR_CHECKSTOP_ERROR);  // 58  @TODO:  EWM 304808 - This MUST be set to "masked" before GA !!!!!!
+    FAPI_TRY(l_occFir.mask(OCC_COMPLEX_NOTIFY),              FIR_MASK_ERROR);       // 58
     FAPI_TRY(l_occFir.mask(SPARE_59),                        FIR_MASK_ERROR);       // 59
     FAPI_TRY(l_occFir.mask(SPARE_60),                        FIR_MASK_ERROR);       // 60
     FAPI_TRY(l_occFir.mask(SPARE_61),                        FIR_MASK_ERROR);       // 61
