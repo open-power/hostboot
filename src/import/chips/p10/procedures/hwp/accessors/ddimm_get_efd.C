@@ -148,11 +148,13 @@ const size_t SPD_EFD_META_DATA_BYTE_SIZE = 4;
 const size_t SPD_EFD_META_DATA_EFD_BYTE_1_OFFSET = 1;
 const size_t SPD_EFD_META_DATA_EFD_FUNCTION_TYPE_MASK = 0x0F;
 // Byte 2 offset to an individual EFD meta data
-// Bits 0 - 4: The end to the EFD block offset in the EFD memory space
+// Bits 0 - 5: The end to the EFD block offset in the EFD memory space
 //             SPD_EFD_META_DATA_EFD_BLOCK_OFFSET_MASK can mask these bits out
+// @note - DDR4 only uses bits 4:0 but bit 5 is required to be '0'
+//         so this is okay to use both for DDR4 and DDR5
 // size is 1 byte; address 2
 const size_t SPD_EFD_META_DATA_EFD_BYTE_2_OFFSET = 2;
-const size_t SPD_EFD_META_DATA_EFD_BLOCK_OFFSET_MASK = 0x1F;
+const size_t SPD_EFD_META_DATA_EFD_BLOCK_OFFSET_MASK = 0x3F;
 // Byte 3 offset to an individual EFD meta data
 // Bits 0 - 4: EFD block offset extension to an EFD in the EFD memory space
 //             Currently not used
