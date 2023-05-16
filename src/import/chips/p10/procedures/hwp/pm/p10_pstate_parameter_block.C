@@ -2173,11 +2173,12 @@ void PlatPmPPB::attr_init( void )
     iv_bias.frequency_0p5pct = iv_attrs.attr_freq_bias;
     for (int p=0;  p < NUM_PV_POINTS; ++p)
     {
-        for (int r=0;  r < RUNTIME_RAILS; ++r)
-        {
-            iv_bias.vdd_ext_0p5pct[p] = iv_attrs.attr_voltage_ext_bias[RUNTIME_RAIL_VDD][r];
-            iv_bias.vcs_ext_0p5pct[p] = iv_attrs.attr_voltage_ext_bias[RUNTIME_RAIL_VCS][r];
-        }
+            iv_bias.vdd_ext_0p5pct[p] = iv_attrs.attr_voltage_ext_bias[RUNTIME_RAIL_VDD][p];
+            iv_bias.vcs_ext_0p5pct[p] = iv_attrs.attr_voltage_ext_bias[RUNTIME_RAIL_VCS][p];
+            FAPI_INF ("attr_voltage_ext_bias CF %d:  VDD  = %d ; VCS = %d",
+                p,
+                iv_bias.vdd_ext_0p5pct[p],
+                iv_bias.vcs_ext_0p5pct[p]);
     }
 
 fapi_try_exit:
