@@ -809,12 +809,10 @@ actionclass analyzeODP_FIR_1
     analyze(gODP_FIR_1);
 };
 
-# TODO
 actionclass analyzeDLX_FIR
 {
-    capture(dlx_fir_regs);
-    #capture(omi_ocmb_ffdc);
-    #funccall("CollectOmiFfdc");
+    capture(omi_ocmb_ffdc);
+    funccall("CollectOmiFfdc");
     analyze(gDLX_FIR);
 };
 

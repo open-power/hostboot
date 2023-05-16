@@ -336,6 +336,50 @@ int32_t McbistCmdComplete( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( odyssey_ocmb, McbistCmdComplete );
 
-} // end namespace explorer_ocmb
+//##############################################################################
+//
+//                             DLX_FIR
+//
+//##############################################################################
+
+/**
+ * @brief  Plugin that collects OMI fail related FFDC registers from the OMIC.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t CollectOmiFfdc( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[odyssey_ocmb::CollectOmiFfdc] "
+
+    // Get the OMI and OMIC targets
+    TargetHandle_t omiTrgt = getConnectedParent( i_chip->getTrgt(), TYPE_OMI );
+    TargetHandle_t omicTrgt = getConnectedParent( omiTrgt, TYPE_OMIC );
+
+    // Get the FFDC for the appropriate DL
+    uint8_t omiPosRelOmic = omiTrgt->getAttr<ATTR_REL_POS>(); // 0:1
+    char ffdcName[64];
+    sprintf( ffdcName, "dl%x_ffdc", omiPosRelOmic );
+
+    // Collect the capture data
+    ExtensibleChip * omicChip = (ExtensibleChip *)systemPtr->GetChip(omicTrgt);
+    if ( nullptr != omicChip )
+    {
+        omicChip->CaptureErrorData( io_sc.service_data->GetCaptureData(),
+                                    Util::hashString(ffdcName) );
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "Failed to get OMIC ExtensibleChip for trgt "
+                  "huid=0x%08x.", getHuid(omicTrgt) );
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, CollectOmiFfdc );
+
+} // end namespace odyssey_ocmb
 
 } // end namespace PRDF

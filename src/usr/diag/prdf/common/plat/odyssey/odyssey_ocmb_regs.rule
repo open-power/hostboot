@@ -646,105 +646,105 @@
     {
         name        "Odyssey chip DLX CMN Configuration Register";
         scomaddr    0x0801240E;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register PMU_CNTR
     {
         name        "Odyssey chip DLX Performance Counter Values";
         scomaddr    0x0801240F;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_CONFIG0
     {
         name        "Odyssey chip DLX Configuration0 Register";
         scomaddr    0x08012410;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_CONFIG1
     {
         name        "Odyssey chip DLX Configuration1 Register";
         scomaddr    0x08012411;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_EDPL_MAX_COUNT
     {
         name        "Odyssey chip DLX EDPL Max Count Register";
         scomaddr    0x08012415;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_STATUS
     {
         name        "Odyssey chip DLX Status Register";
         scomaddr    0x08012416;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_TRAINING_STATUS
     {
         name        "Odyssey chip DLX Training Status Register";
         scomaddr    0x08012417;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_RMT_CONFIG
     {
         name        "Odyssey chip DLX Outgoing Link Info Register";
         scomaddr    0x08012418;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_RMT_INFO
     {
         name        "Odyssey chip DLX Incoming Link Info Register";
         scomaddr    0x08012419;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_SKIT_CTL
     {
         name        "Odyssey chip DLX Skitter Control Register";
         scomaddr    0x0801241A;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_SKIT_STATUS
     {
         name        "Odyssey chip DLX Skitter Status Register";
         scomaddr    0x0801241B;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_CYA2
     {
         name        "Odyssey chip DLX CYA2 Register";
         scomaddr    0x0801241C;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_ERR_ACTION
     {
         name        "Odyssey chip DLX Error Action Register";
         scomaddr    0x0801241D;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_DEBUG_AID
     {
         name        "Odyssey chip DLX Debug Aid Register";
         scomaddr    0x0801241E;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     register DLX_CYA_BITS
     {
         name        "Odyssey chip DLX Chicken Switch Register";
         scomaddr    0x0801241F;
-        capture     group dlx_fir_regs;
+        capture     group omi_ocmb_ffdc;
     };
 
     ############################################################################
