@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -108,7 +108,7 @@ namespace HTMGT
             io_err->addFFDC(HTMGT_COMP_ID,
                             occ_data,
                             occ_data_len,
-                            1, //version
+                            2, //version
                             SUBSEC_ELOG_TYPE_HTMGT_DATA);
         }
     }

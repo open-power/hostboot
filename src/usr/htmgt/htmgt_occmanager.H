@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -341,6 +341,7 @@ namespace HTMGT
             bool                    iv_occsAreRunning;
             bool                    iv_needsReset;
             bool                    iv_occsStarted;
+            static uint8_t          cv_ipsStatus;
 
 
             /**

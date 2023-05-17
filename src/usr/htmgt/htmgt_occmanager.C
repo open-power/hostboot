@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,7 +49,7 @@ namespace HTMGT
 
     uint32_t OccManager::cv_safeReturnCode = 0;
     uint32_t OccManager::cv_safeOccInstance = 0;
-
+    uint8_t  OccManager::cv_ipsStatus = 0;
 
     OccManager::OccManager()
         :iv_occMaster(nullptr),
@@ -1175,9 +1175,13 @@ namespace HTMGT
     // NOTE: o_data is pointer to OCC_MAX_DATA_LENGTH byte buffer
     // Error parser is in: src/usr/htmgt/plugins/ebmc/b2600.py
     // Some tools use older parser: src/usr/htmgt/plugins/errludP_htmgt.H
+    //
+    // NOTE: SBE requires message data size must be divisible by 16 (see
+    // defaultMsgPath_SbeOrCmdHeaderDiffer in src/usr/sbeio/runtime/test/sbeiotestRt.H)
     void OccManager::_getHtmgtData(uint16_t & o_length, uint8_t *o_data)
     {
         uint16_t index = 0;
+        const uint8_t OCC_OFFSET = 0x20;
 
         TARGETING::Target* sys = nullptr;
         TARGETING::targetService().getTopLevelTarget(sys);
@@ -1189,7 +1193,11 @@ namespace HTMGT
             sys->tryGetAttr<TARGETING::ATTR_CUMULATIVE_PMCOMPLEX_RESET_COUNT>
                 (resets_since_boot);
         }
-        // First add HTMGT specific data
+        // Need additional space, so adding 0xFF so parsers know this is a new format
+        o_data[index++] = 0xFF; // Key indicating next byte is an offset
+        o_data[index++] = OCC_OFFSET; // offset to OCC data
+
+        // HTMGT specific data
         o_data[index++] = _getNumOccs();
         o_data[index++] =
             (nullptr!=iv_occMaster)?iv_occMaster->getInstance():0xFF;
@@ -1204,8 +1212,15 @@ namespace HTMGT
         index += 4;
         UINT32_PUT(&o_data[index], cv_safeOccInstance);
         index += 4;
+        o_data[index++] = cv_ipsStatus; // IPS status
+        if (OCC_OFFSET > index)
+        {
+            // zero remaining reserved bytes
+            bzero(&o_data[index], OCC_OFFSET-index);
+        }
 
         // Now add OCC specific data (for each OCC)
+        index = OCC_OFFSET;
         for( const auto & occ : iv_occArray )
         {
             o_data[index++] = occ->getInstance();
@@ -1406,7 +1421,7 @@ namespace HTMGT
         o_data[index++] = 0; // reserved
         o_data[index++] = 1; // .dynamicPerformance
         o_data[index++] = 1; // .FFO
-        o_data[index++] = 0; // reserved (IPS)
+        o_data[index++] = 1; // .IdlePowerSaver
         o_data[index++] = 1; // .maxPerformance
         o_data[index++] = 0; // reserved
         o_data[index++] = 0; // reserved

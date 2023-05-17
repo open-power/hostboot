@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -395,7 +395,11 @@ namespace HTMGT
                     }
                     break;
                 }
+            }
 
+            if (OCC_ROLE_MASTER == iv_role)
+            {
+                OccManager::cv_ipsStatus = pollRsp->IPSStatus;
             }
 
             if (pollRsp->requestedCfg != 0x00)

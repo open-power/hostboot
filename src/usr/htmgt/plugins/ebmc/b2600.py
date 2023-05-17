@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -24,6 +24,8 @@
 # IBM_PROLOG_END_TAG
 import json
 from udparsers.helpers.errludP_Helpers import hexConcat, memConcat, intConcat, hexDump
+
+# Plugin normally installed in: /usr/lib/python3.11/site-packages/udparsers/b2600/b2600.py
 
 # ###################################################
 # Used to convert attention types to readable string
@@ -80,7 +82,11 @@ class errludP_htmgt:
         d = dict()
         subd = dict()
         i = 0
+        occOffset = 16;
 
+        if ver > 1:
+            occOffset = data[i+1]
+            i += 2
         numOccs = data[i]
         i += 1
         subd['Number of OCCs']=numOccs
@@ -104,6 +110,19 @@ class errludP_htmgt:
         else:
             #skip over this data since not in safe mode
             i += 9
+        if ver > 1:
+            ipsStatus = data[i]
+            ipsString, i= hexConcat(data, i, i+1)
+            if ipsStatus & 0x01:
+                ipsString += " : Enabled"
+                if ipsStatus & 0x02:
+                    ipsString += " and Active"
+            else:
+                ipsString += " : Disabled"
+            subd['IPS Status'] = ipsString
+            #skip remaining data
+            i = occOffset
+
 
         d['HTMGT']= subd
 
@@ -116,7 +135,8 @@ class errludP_htmgt:
             subd2['Role'], i=hexConcat(data, i, i+1)
             subd2['Master Capable']=bool(data[i])
             i += 1
-            subd2['Comm Established']=bool(data[i])
+            commEst = data[i]
+            subd2['Comm Established']=bool(commEst)
             i += 1
             subd2['Mode'], i=hexConcat(data, i, i+1)
             subd2['reserved'], i=hexConcat(data, i, i+2)
@@ -134,7 +154,7 @@ class errludP_htmgt:
             # Keep values in this check in sync with
             # check in src/usr/htmgt/plugins/errludP_htmgt.H
             status, _= intConcat(data, i, i+2)
-            if (status & 0x0ff) != 0:
+            if (status & 0x0ff) != 0 and commEst:
                 statusString, i= hexConcat(data, i, i+4)
                 statusString += " -"
                 if (status & 0x0080):

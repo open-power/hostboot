@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,9 +99,7 @@ namespace HTMGT
         uint8_t safeMode;
         uint32_t safeReturnCode;
         uint32_t safeOccInstance;
-
-        // Now add OCC specific data (for each OCC)
-        occData_t occData[8];
+        // OCC specific data follows
     } __attribute__ ((__packed__));
     typedef struct htmgtStateData htmgtStateData_t;
 
@@ -140,8 +138,17 @@ namespace HTMGT
             {
                 htmgtStateData_t* hdata = static_cast<htmgtStateData_t*>
                     (i_pBuffer);
+                uint8_t* bytePtr = static_cast<uint8_t*>(i_pBuffer);
+                uint8_t occOffset = 16;
                 i_parser.PrintString( "HTMGT", "" );
-                i_parser.PrintNumber("  Number of OCCs", "%d", hdata->numOccs);
+                if (i_version > 1)
+                {
+                    // skip 2 bytes
+                    occOffset = bytePtr[1];
+                    hdata = reinterpret_cast<htmgtStateData_t*>(&bytePtr[2]);
+                }
+                const uint8_t numOccs = hdata->numOccs;
+                i_parser.PrintNumber("  Number of OCCs", "%d", numOccs);
                 i_parser.PrintNumber("  Master OCC", "%d",
                                      hdata->masterInstance);
                 i_parser.PrintNumber("  State", "0x%02X", hdata->state);
@@ -162,11 +169,15 @@ namespace HTMGT
                     i_parser.PrintNumber("    Safe OCC Instance", "%d",
                                          TO_UINT32(&hdata->safeOccInstance));
                 }
+                if (i_version > 1)
+                {
+                    i_parser.PrintNumber("  Idle Power Save", "0x%02X", bytePtr[18]);
+                }
                 for (unsigned int instance = 0;
-                     instance < hdata->numOccs;
+                     instance < numOccs;
                      ++instance)
                 {
-                    occData_t *odata = &hdata->occData[instance];
+                    occData_t *odata = reinterpret_cast<occData_t*>(&bytePtr[occOffset]);
                     char occ_name[16];
                     sprintf(occ_name, "OCC%d", odata->instance);
                     i_parser.PrintBlank();
