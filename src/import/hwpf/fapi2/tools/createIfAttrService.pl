@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -34,21 +34,21 @@ my $arg_output_dir = undef;
 
 # Get the options from the command line - the rest of @ARGV will
 # be filenames
-GetOptions("output-dir=s" => \$arg_output_dir);
+GetOptions( "output-dir=s" => \$arg_output_dir );
 
 my $numArgs = $#ARGV + 1;
-if (($numArgs < 2) || ($arg_output_dir eq undef))
+if ( ( $numArgs < 2 ) || ( $arg_output_dir eq undef ) )
 {
-    print ("Usage: createIfAttrService.pl --output-dir=<output dir>\n");
-    print ("           [<if-attr-file1> <if-attr-file2> ...]\n");
-    print ("           -a <attr-xml-file1> [<attr-xml-file2> ...]\n");
-    print ("  This perl script will parse if-attr files (containing the\n");
-    print ("  attributes used by the initfile) and attribute XML files\n");
-    print ("  (containing all HWPF attributes) and create the\n");
-    print ("  getInitFileAttr() function in a file called\n");
-    print ("  fapi2_attribute_service.C. Only the attributes specified in\n");
-    print ("  the if-attr files are supported. If no if-attr files are\n");
-    print ("  specified then all attributes are supported\n");
+    print("Usage: createIfAttrService.pl --output-dir=<output dir>\n");
+    print("           [<if-attr-file1> <if-attr-file2> ...]\n");
+    print("           -a <attr-xml-file1> [<attr-xml-file2> ...]\n");
+    print("  This perl script will parse if-attr files (containing the\n");
+    print("  attributes used by the initfile) and attribute XML files\n");
+    print("  (containing all HWPF attributes) and create the\n");
+    print("  getInitFileAttr() function in a file called\n");
+    print("  fapi2_attribute_service.C. Only the attributes specified in\n");
+    print("  the if-attr files are supported. If no if-attr files are\n");
+    print("  specified then all attributes are supported\n");
     exit(1);
 }
 
@@ -56,7 +56,7 @@ if (($numArgs < 2) || ($arg_output_dir eq undef))
 # Specify perl modules to use
 #------------------------------------------------------------------------------
 use XML::Simple;
-my $xml = new XML::Simple (KeyAttr=>[]);
+my $xml = new XML::Simple( KeyAttr => [] );
 
 #------------------------------------------------------------------------------
 # Set PREFERRED_PARSER to XML::Parser. Otherwise it uses XML::SAX which contains
@@ -74,7 +74,7 @@ $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 my $asFile = $arg_output_dir;
 $asFile .= "/";
 $asFile .= "fapi2_attribute_service.C";
-open(ASFILE, ">", $asFile);
+open( ASFILE, ">", $asFile );
 
 #------------------------------------------------------------------------------
 # Print Start of file information to fapi2_attribute_service.C
@@ -96,8 +96,8 @@ print ASFILE "                         uint8_t * o_val)\n";
 print ASFILE "{\n";
 print ASFILE "    ReturnCode l_rc;\n\n";
 
-my $xmlFiles = 0;
-my $attCount = 0;
+my $xmlFiles       = 0;
+my $attCount       = 0;
 my $numIfAttrFiles = 0;
 my @attrIds;
 
@@ -109,28 +109,28 @@ my $attribute = 'attribute';
 #------------------------------------------------------------------------------
 # For each argument
 #------------------------------------------------------------------------------
-foreach my $argnum (0 .. $#ARGV)
+foreach my $argnum ( 0 .. $#ARGV )
 {
     my $infile = $ARGV[$argnum];
 
-    if ($infile eq '-a')
+    if ( $infile eq '-a' )
     {
         # Start of attribute XML files
         $xmlFiles = 1;
         next;
     }
 
-    if ($xmlFiles == 0)
+    if ( $xmlFiles == 0 )
     {
         #----------------------------------------------------------------------
         # Process initfile attr file. This file contains the HWPF attributes
         # that the initfile uses.
         #----------------------------------------------------------------------
         $numIfAttrFiles++;
-        open(ATTRFILE, "<", $infile);
+        open( ATTRFILE, "<", $infile );
 
         # Read each line of the file (each line contains an attribute)
-        while(my $fileAttrId = <ATTRFILE>)
+        while ( my $fileAttrId = <ATTRFILE> )
         {
             # Remove newline
             chomp($fileAttrId);
@@ -140,16 +140,16 @@ foreach my $argnum (0 .. $#ARGV)
 
             foreach my $attrId (@attrIds)
             {
-                if ($fileAttrId eq $attrId)
+                if ( $fileAttrId eq $attrId )
                 {
                     $match = 1;
                     last;
                 }
             }
 
-            if (!($match))
+            if ( !($match) )
             {
-                push(@attrIds, $fileAttrId);
+                push( @attrIds, $fileAttrId );
             }
         }
 
@@ -161,19 +161,19 @@ foreach my $argnum (0 .. $#ARGV)
         # Process XML file. The ForceArray option ensures that there is an
         # array of attributes even if there is only one attribute in the file
         #----------------------------------------------------------------------
-        my $attributes = $xml->XMLin($infile, ForceArray => [$attribute]);
+        my $attributes = $xml->XMLin( $infile, ForceArray => [$attribute] );
 
         #----------------------------------------------------------------------
         # For each Attribute
         #----------------------------------------------------------------------
-        foreach my $attr (@{$attributes->{attribute}})
+        foreach my $attr ( @{ $attributes->{attribute} } )
         {
             #------------------------------------------------------------------
             # Check that the AttributeId exists
             #------------------------------------------------------------------
-            if (! exists $attr->{id})
+            if ( !exists $attr->{id} )
             {
-                print ("createIfAttrService.pl ERROR. Att 'id' missing\n");
+                print("createIfAttrService.pl ERROR. Att 'id' missing\n");
                 exit(1);
             }
 
@@ -187,7 +187,7 @@ foreach my $argnum (0 .. $#ARGV)
             {
                 foreach my $attrId (@attrIds)
                 {
-                    if ($attr->{id} eq $attrId)
+                    if ( $attr->{id} eq $attrId )
                     {
                         $match = 1;
                         last;
@@ -199,7 +199,7 @@ foreach my $argnum (0 .. $#ARGV)
                 $match = 1;
             }
 
-            if (!($match))
+            if ( !($match) )
             {
                 # Look at the next attribute in the XML file
                 next;
@@ -209,22 +209,22 @@ foreach my $argnum (0 .. $#ARGV)
             # Figure out the number of attribute array dimensions
             #------------------------------------------------------------------
             my $numArrayDimensions = 0;
-            if ($attr->{array})
+            if ( $attr->{array} )
             {
                 # Remove leading whitespace
                 my $dimText = $attr->{array};
                 $dimText =~ s/^\s+//;
 
                 # Split on commas or whitespace
-                my @vals = split(/\s*,\s*|\s+/, $dimText);
+                my @vals = split( /\s*,\s*|\s+/, $dimText );
 
-                $numArrayDimensions=@vals;
+                $numArrayDimensions = @vals;
             }
 
             #------------------------------------------------------------------
             # Print the attribute get code to fapi2_attribute_service.C
             #------------------------------------------------------------------
-            if ($attCount > 0)
+            if ( $attCount > 0 )
             {
                 print ASFILE "    else ";
             }
@@ -238,7 +238,7 @@ foreach my $argnum (0 .. $#ARGV)
             print ASFILE "    {\n";
             print ASFILE "        $attr->{id}_Type l_attr;\n";
 
-            if (exists $attr->{privileged})
+            if ( exists $attr->{privileged} )
             {
                 print ASFILE "        l_rc = FAPI_ATTR_GET_RAW(fapi2::$attr->{id}, i_target, l_attr);\n";
             }
@@ -255,7 +255,7 @@ foreach my $argnum (0 .. $#ARGV)
 #------------------------------------------------------------------------------
 # Print End of file information to fapi2_attribute_service.C
 #--------------------------------------------------------------------------
-if ($attCount > 0)
+if ( $attCount > 0 )
 {
     print ASFILE "    else\n";
 }
@@ -264,13 +264,12 @@ print ASFILE "        FAPI_ERR(\"getInitFileAttr: Unrecognized attr ID: 0x%x\", 
 print ASFILE "    }\n\n";
 print ASFILE "    if (l_rc)\n";
 print ASFILE "    {\n";
-print ASFILE "            FAPI_ERR(\"getInitFileAttr: Error getting attr ID 0x%x from targType 0x%x\",\n";
+print ASFILE "            FAPI_ERR(\"getInitFileAttr: Error getting attr ID 0x%x from targType 0x%lx\",\n";
 print ASFILE "                     i_id, i_target.getType());\n";
 print ASFILE "    }\n\n";
 print ASFILE "    return l_rc;\n";
 print ASFILE "}\n\n";
 print ASFILE "}\n";
-
 
 #------------------------------------------------------------------------------
 # Close output file
