@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/import/chips/ocmb/explorer/procedures/xml/error_info/exp_omi_init_errors.xml $ -->
+<!-- $Source: src/import/chips/ocmb/common/procedures/xml/error_info/omi_init_errors.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
@@ -22,19 +22,75 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Error definitions for exp_omi_init HWP -->
+<!-- Error definitions for ody_omi_init HWP -->
+<!-- EKB-Mirror-To: hostboot -->
 <hwpErrors>
-
+  <format>poz</format>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_OCMB_IS_NOT_EXPLORER</rc>
+    <rc>RC_PROC_DOES_NOT_SUPPORT_US_B</rc>
     <description>
       Procedure: exp_omi_init.C
-      The Explorer O0DID was not read.
+      Upstream tempate B was requested, but the
+      connected processor does not support it.
     </description>
-    <ffdc>ID</ffdc>
-    <ffdc>EXPECTED</ffdc>
+    <ffdc>PROC_TARGET</ffdc>
+    <ffdc>US_TEMPLATES_0159</ffdc>
+    <ffdc>B</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>PROC_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PROC_DOES_NOT_SUPPORT_DS_A</rc>
+    <description>
+      Procedure: exp_omi_init.C
+      Downstream tempate A was requested, but the
+      connected processor does not support it.
+    </description>
+    <ffdc>PROC_TARGET</ffdc>
+    <ffdc>DS_TEMPLATES_0147</ffdc>
+    <ffdc>A</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>PROC_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_METADATA_ENABLE_REQUIRES_TEMPLATE_5_OR_9</rc>
+    <description>
+      Procedure: exp_omi_init.C
+      Upstream template 5 or 9 need to be enabled for
+      metadata enable.
+    </description>
     <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>TMPL_5</ffdc>
+    <ffdc>TMPL_9</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>LOW</priority>
@@ -46,6 +102,18 @@
     <deconfigure>
       <target>OCMB_TARGET</target>
     </deconfigure>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_ACTAG_PASID_CONFIG_INVALID</rc>
+    <description>
+      MFIR_ACTAG_PASID_CFG_ERR has been lit due to unsupported configuration in number of acTAGs and PASIDs
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
