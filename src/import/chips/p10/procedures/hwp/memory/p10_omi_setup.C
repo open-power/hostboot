@@ -232,6 +232,14 @@ fapi2::ReturnCode p10_omi_setup_odyssey( const fapi2::Target<fapi2::TARGET_TYPE_
         FAPI_TRY(scomt::omi::PUT_ERROR_ACTION(l_omi, l_val));
     }
 
+    for (const auto& l_omic : mss::find_targets<fapi2::TARGET_TYPE_OMIC>(i_target))
+    {
+        FAPI_TRY(scomt::omic::PREP_MC_OMI_FIR_MASK_REG_WO_OR(l_omic));
+        l_val = 0;
+        l_val.setBit<scomt::omic::MC_OMI_FIR_REG_DL0_CRC_ERROR>();
+        l_val.setBit<scomt::omic::MC_OMI_FIR_REG_DL0_EDPL>();
+        FAPI_TRY(scomt::omic::PUT_MC_OMI_FIR_MASK_REG_WO_OR(l_omic, l_val));
+    }
 
 fapi_try_exit:
     FAPI_INF("End p10_omi_setup_odyssey");
