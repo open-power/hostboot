@@ -1507,7 +1507,7 @@ typedef struct runtime_config
     int RetEn;        ///< Retention Enable input parameter, instructs phyinit to \n
     ///< issue register reads during initialization to retention registers.
     uint32_t pubRev;  ///< Digital hardware PUB revision number.
-    uint32_t enableBits[3]; ///< PIE and ACSM configuration bits.
+    uint32_t enableBits[5]; ///< PIE and ACSM configuration bits.
 } runtime_config_t;
 
 #endif
