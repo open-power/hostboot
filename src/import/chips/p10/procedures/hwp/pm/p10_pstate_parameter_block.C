@@ -1192,13 +1192,14 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         if (iv_attrs.attr_extended_freq_mode)
         {
             pstatef = (float)(5050 * 1000) /(float)(iv_frequency_step_khz);
+            io_globalppb->base.dpll_pstate0_value = revle32((uint32_t)internal_round(pstatef));
         }
         else
         {
             pstatef = (float)(iv_attrs.attr_pstate0_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
+            io_globalppb->base.dpll_pstate0_value = revle32((Pstate)internal_round(pstatef));
         }
 
-        io_globalppb->base.dpll_pstate0_value = revle32((Pstate)internal_round(pstatef));
 
         FAPI_INF("l_globalppb.dpll_pstate0_value %X (%d)",
                 revle32(io_globalppb->base.dpll_pstate0_value),
