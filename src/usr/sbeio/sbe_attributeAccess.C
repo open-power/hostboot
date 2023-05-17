@@ -39,6 +39,7 @@
 #include <targeting/common/targetservice.H>
 #include <ody_generate_sbe_attribute_data.H>
 #include <ody_analyze_sbe_attr_response.H>
+#include <ody_apply_sbe_attribute_data.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -99,6 +100,8 @@ namespace SBEIO
     errlHndl_t sendAttrListRequest(TARGETING::Target * i_chipTarget)
     {
         errlHndl_t errl = nullptr;
+        SbeFifo::fifoAttrListRequest* l_request = new SbeFifo::fifoAttrListRequest;
+        SbeFifo::fifoAttrListResponse* l_response = new SbeFifo::fifoAttrListResponse;
 
         do
         {
@@ -110,10 +113,38 @@ namespace SBEIO
             {
                 break;
             }
-            SBE_TRACF(EXIT_MRK "Skipping unimplemented chipop sendAttrListRequest");
+
+            l_request->wordCnt = 2; // Leave the list of attributes blank so that SPPE returns all of the attributes
+
+            errl = SbeFifo::getTheInstance().performFifoChipOp(i_chipTarget,
+                                                               reinterpret_cast<uint32_t*>(l_request),
+                                                               reinterpret_cast<uint32_t*>(l_response),
+                                                               sizeof(SbeFifo::fifoAttrListResponse));
+            if(errl)
+            {
+                SBE_TRACF(ERR_MRK"sendAttrListRequest: could not send attr list request to SPPE");
+                break;
+            }
+
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>l_fapiOcmb(i_chipTarget);
+            std::vector<sbeutil::AttrError_t>l_sbeErrors;
+            FAPI_INVOKE_HWP(errl,
+                            ody_apply_sbe_attribute_data,
+                            l_fapiOcmb,
+                            l_response->AttrListResponse,
+                            sizeof(l_response->AttrListResponse),
+                            l_sbeErrors);
+            // TODO JIRA: PFHB-439 Process the returned l_attrErrors vector
+            if(errl)
+            {
+                SBE_TRACF(ERR_MRK"sendAttrListRequest: could not parse attr blob from SPPE");
+                break;
+            }
 
 
         }while(0);
+        delete l_request;
+        delete l_response;
 
         SBE_TRACD(EXIT_MRK "sendAttrListRequest");
         return errl;

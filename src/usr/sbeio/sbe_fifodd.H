@@ -769,6 +769,15 @@ public:
     } PACKED;
 
     /**
+     * @brief Struct for FIFO Attribute List response. This message type is only supported on Odyssey chips.
+     */
+    struct fifoAttrListResponse
+    {
+        uint8_t AttrListResponse[ODY_ATTR_LIST_CHIPOP_MAX_SIZE];
+        fifoAttrListResponse() {}
+    } PACKED;
+
+    /**
      * @brief Struct for FIFO Attribute Update request. This message type is only supported on Odyssey chips.
      */
     struct fifoAttrUpdateRequest

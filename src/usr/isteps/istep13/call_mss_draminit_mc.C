@@ -115,10 +115,11 @@ class ChipOp_ody_draminit_mc: public HwpWorkItem_OCMBUpdateCheck
 
         RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_DRAMINIT_MC);
 
-        /* @todo JIRA:PFHB-258 - for ody_apply_sbe_attribute_data
-         *
-        RUN_SUB_HWP   (CONTEXT, l_err, iv_pTarget, ody_apply_sbe_attribute_data, l_fapi_target);
-         */
+        l_err = SBEIO::sendAttrListRequest(iv_pTarget);
+        if(l_err)
+        {
+            goto ERROR_EXIT;
+        }
 
         RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_ENABLE_ECC);
 

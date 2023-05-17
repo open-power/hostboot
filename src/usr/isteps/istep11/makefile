@@ -95,5 +95,4 @@ VPATH += ${COMMON_PATH_OCMB}/procedures/hwp/pmic_ddr5/lib/utils/
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv/
 
-
 include ${ROOTPATH}/config.mk

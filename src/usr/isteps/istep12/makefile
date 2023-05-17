@@ -67,10 +67,6 @@ EXTRAINCDIR += ${ODYSSEY_HWP_PATH}/io/common
 EXTRAINCDIR += ${ODYSSEY_INC_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
-EXTRAINCDIR += ${ODYSSEY_HWP_PATH}/utils/
-EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/sbe_utils/include/
-EXTRAINCDIR += ${ROOTPATH}/src/usr/
-EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/attr/
 
 VPATH += $(P10_NEST_HWP_PATH)
 VPATH += $(P10_IO_HWP_PATH)
@@ -98,10 +94,7 @@ VPATH += ${ODYSSEY_HWP_PATH}/memory
 VPATH += ${ODYSSEY_HWP_PATH}/memory/lib/inband
 VPATH += ${ODYSSEY_HWP_PATH}/io
 VPATH += ${ODYSSEY_HWP_PATH}/io/common
-VPATH += ${ODYSSEY_HWP_PATH}/utils
 VPATH += ${P10_MEMORY_HWP_PATH}
-VPATH += ${ROOTPATH}/src/import/hwpf/sbe_utils/src/
-VPATH += ${ROOTPATH}/obj/genfiles/attr/
 
 OBJS += exp_omi_setup.o
 OBJS += p10_omi_setup.o
@@ -149,9 +142,5 @@ OBJS += ody_inband.o
 OBJS += ody_putsram.o
 OBJS += ody_putsram_io_ppe.o
 OBJS += io_ppe_cache.o
-OBJS += ody_generate_sbe_attribute_data.o
-OBJS += ody_analyze_sbe_attr_response.o
-OBJS += sbe_targets.o
-OBJS += sbe_attribute_utils.o
 
 include ${ROOTPATH}/config.mk

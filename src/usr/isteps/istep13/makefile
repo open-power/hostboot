@@ -98,7 +98,6 @@ OBJS += dwc_ddrphy_phyinit_I_loadPIEImage.o
 OBJS += dwc_ddrphy_phyinit_LoadPieProdCode_rdimm.o
 OBJS += dwc_ddrphy_phyinit_LoadPieProdCode.o
 
-
 include ${ROOTPATH}/config.mk
 
 VPATH += ${EXPLORER_HWP_PATH}

@@ -50,7 +50,7 @@ namespace SBEIO
     // The maximum amount of pages hostboot will allow FFDC package buffers from SBE to be.
     // This is chosen arbitrarily as a defense against cases where the End-of-Transmission (EOT) is not
     // recieved from SBE.
-    static constexpr uint8_t SBE_FFDC_MAX_PAGES = 3;
+    static constexpr uint8_t SBE_FFDC_MAX_PAGES = 6;
 
     struct sbeCapabilities_t
     {

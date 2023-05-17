@@ -55,6 +55,13 @@ EXTRAINCDIR += ${PMIC_PROCEDURES_PATH}/hwp/pmic/
 EXTRAINCDIR += ${PMIC_PROCEDURES_PATH}/hwp/pmic/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/
 EXTRAINCDIR += ${ODYSSEY_PROCEDURES_PATH}/hwp/perv/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/sbe_utils/include
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/attr
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/sbe_utils/include/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/attr/
+
 
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib
@@ -351,6 +358,16 @@ MSS_ODYSSEY_SOURCE := $(shell find $(MSS_PATH_ODYSSEY) -name '*.C' -exec basenam
 MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_ODYSSEY_SOURCE))
 
 MODULE = isteps_mss
+
+OBJS += sbe_targets.o
+OBJS += sbe_attribute_utils.o
+OBJS += ody_apply_sbe_attribute_data.o
+OBJS += ody_generate_sbe_attribute_data.o
+OBJS += ody_analyze_sbe_attr_response.o
+
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/utils/
+VPATH += ${ROOTPATH}/src/import/hwpf/sbe_utils/src/
+VPATH += ${ROOTPATH}/obj/genfiles/attr/
 
 OBJS += $(MSS_MODULE_OBJS)
 $(call BUILD_MODULE)

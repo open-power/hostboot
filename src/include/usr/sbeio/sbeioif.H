@@ -675,6 +675,19 @@ namespace SBEIO
      */
     errlHndl_t sendAttrUpdateRequest(TARGETING::Target* i_chipTarget);
 
+    /**
+     * @brief Send the attribute pull request to SPPE and process the returned attribute
+     *        blob. We request the attribute blob via a chip op AD-02; SPPE returns back
+     *        the list of all attributes requiring sync and their values. A HWP then
+     *        takes the returned blob, parses it, and sets the Host-side of attributes
+     *        according to the parsed values.
+     *
+     * @param[in] i_chipTarget The Odyssey chip to perform the chipop on
+     *
+     * @return errlHndl_t Error log handle on failure.
+     */
+    errlHndl_t sendAttrListRequest(TARGETING::Target* i_chipTarget);
+
 } //end namespace SBEIO
 
 #endif /* _SBEIOIF_H */
