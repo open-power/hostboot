@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2021
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -47,7 +47,7 @@ SUBDIRS+=tod.d
 SUBDIRS+=fab_iovalid.d
 SUBDIRS+=nest.d
 SUBDIRS+=ucd.d
-SUBDIRS+=expupd.d
+SUBDIRS+=ocmbupd.d
 SUBDIRS+=$(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),bios_attr_accessors.d)
 
 #TODO: RTC 176018

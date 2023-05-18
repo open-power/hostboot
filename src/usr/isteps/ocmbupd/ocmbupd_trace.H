@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/expupd/ocmbFwImage.H $                         */
+/* $Source: src/usr/isteps/ocmbupd/ocmbupd_trace.H $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,39 +22,19 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __OCMBFWIMAGE_H
-#define __OCMBFWIMAGE_H
+#ifndef __OCMBUPD_TRACE_H
+#define __OCMBUPD_TRACE_H
 
-/**
- * @file ocmbFwImage.H
- *
- * Interface for validating the OCMB firmware image from PNOR
- *
- */
+/******************************************************************************/
+// Includes
+/******************************************************************************/
+#include <trace/interface.H>
 
-#include <errl/errlentry.H>
-#include <expupd/expupd.H>
-#include <utility>
-
-namespace expupd
+namespace ocmbupd
 {
 
-constexpr uint32_t HEADER_SHA512_SIZE = 64;
+extern trace_desc_t *g_trac_ocmbupd;
 
-/**
- * @brief Validates OCMB firmware header of packaged image
- *
- * @param[in] i_imageStart Start address of packaged image
- * @param[in] i_imageSize Size of packaged image
- * @param[out] o_imageInfo Information pertaining to image after
- *             being stripped of OCMB firmware header
- * @return errlHndl_t indicating success or failure
- *
- */
-errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
-                               const uint64_t i_imageSize,
-                               rawImageInfo_t& o_imageInfo);
-
-}//namespace expupd
+}   //  end namespace
 
 #endif

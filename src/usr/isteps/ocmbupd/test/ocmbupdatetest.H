@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/expupd/test/expupdatetest.H $                  */
+/* $Source: src/usr/isteps/ocmbupd/test/ocmbupdatetest.H $                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,11 +23,11 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __EXPUPDATETEST_H
-#define __EXPUPDATETEST_H
+#ifndef __OCMBUPDATETEST_H
+#define __OCMBUPDATETEST_H
 
 /**
- *  @file expupdatetest.H
+ *  @file ocmbupdatetest.H
  *
  *  @brief Test cases for explorer chip firmware update
  */
@@ -42,10 +42,10 @@
 #include <exp_fw_update.H>
 #include <generic/memory/lib/utils/endian_utils.H>
 #include <test/exptest_utils.H>
-#include <expupd/ocmbFwImage_const.H>
+#include <ocmbupd/ocmbFwImage_const.H>
 #include <ocmbFwImage.H>
-#include <expupd_trace.H>
-#include <expupd/expupd_reasoncodes.H>
+#include <ocmbupd_trace.H>
+#include <ocmbupd/ocmbupd_reasoncodes.H>
 #include <spdenums.H>
 #include <spd.H>
 #include <ocmb_spd.H>
@@ -54,7 +54,7 @@
 #include <vfs/vfs.H> // module_is_loaded & module_load
 #endif
 
-namespace expupd
+namespace ocmbupd
 {
     // Functionality entry-points being brought in to be tested
     void writeExplorerFwVersion(TARGETING::TargetHandle_t i_ocmb, const uint8_t* i_versionStr,
@@ -65,10 +65,10 @@ namespace expupd
         rawImageInfo_t& o_imageInfo);
 }
 
-using namespace expupd;
+using namespace ocmbupd;
 
 const char MSS_LIBRARY_NAME[] = "libisteps_mss.so";
-const char EXPUPD_LIBRARY_NAME[] = "libexpupd.so";
+const char OCMBUPD_LIBRARY_NAME[] = "libocmbupd.so";
 
 /**
  * @brief Generic function to load a module
@@ -242,11 +242,11 @@ class ExpUpdateTest: public CxxTest::TestSuite
             }
             if (memcmp(l_readBackData, l_paddedTestStr, l_spdKeywordSize) != 0)
             {
-                TRACFBIN(g_trac_expupd, "testFwVersionWrite: Test FW version string:",
+                TRACFBIN(g_trac_ocmbupd, "testFwVersionWrite: Test FW version string:",
                     l_paddedTestStr, l_spdKeywordSize);
-                TRACFBIN(g_trac_expupd, "testFwVersionWrite: Actual FW version string read back:",
+                TRACFBIN(g_trac_ocmbupd, "testFwVersionWrite: Actual FW version string read back:",
                     l_readBackData, l_spdKeywordSize);
-                TS_FAIL("testFwVersionWrite: expupd::writeExplorerFwVersion failed to write "
+                TS_FAIL("testFwVersionWrite: ocmbupd::writeExplorerFwVersion failed to write "
                     "version string to SPD of OCMB: 0x%08X", TARGETING::get_huid(l_ocmb));
             }
 
@@ -272,11 +272,11 @@ class ExpUpdateTest: public CxxTest::TestSuite
     }
 
     /**
-     *  @brief Test expupd::ocmbFwValidateImage by passing a hard-coded, correctly formatted OCMB
+     *  @brief Test ocmbupd::ocmbFwValidateImage by passing a hard-coded, correctly formatted OCMB
      *  FW header. The test is considered a success if the output struct of the function o_imageInfo
      *  has imageSHA512HashPtr, fwVersionStrPtr, and fwVersionStrSize set to the values of the
      *  hard-coded header.
-     *  Note that expupd::ocmbFwValidateImage uses expupd::setFwVersionInfo() to fill in
+     *  Note that ocmbupd::ocmbFwValidateImage uses ocmbupd::setFwVersionInfo() to fill in
      *  fwVersionStrPtr and fwVersionStrSize. Therefore, the expected path of that function is being
      *  tested here as well.
      */
@@ -348,9 +348,9 @@ class ExpUpdateTest: public CxxTest::TestSuite
             {
                 TS_FAIL("testOcmbFwValidateImage: Incorrect version string retrieved when testing "
                     "ocmbFwValidateImage().");
-                TRACFBIN(g_trac_expupd, "testOcmbFwValidateImage: Firmware version string expected:",
+                TRACFBIN(g_trac_ocmbupd, "testOcmbFwValidateImage: Firmware version string expected:",
                     l_testFwStr, l_testFwStrSize);
-                TRACFBIN(g_trac_expupd, "testOcmbFwValidateImage: Firmware version string retrieved:",
+                TRACFBIN(g_trac_ocmbupd, "testOcmbFwValidateImage: Firmware version string retrieved:",
                     l_imageInfo.fwVersionStrPtr, std::min(l_imageInfo.fwVersionStrSize, (size_t)MAX_BIN_TRACE));
             }
 
@@ -358,9 +358,9 @@ class ExpUpdateTest: public CxxTest::TestSuite
             {
                 TS_FAIL("testOcmbFwValidateImage: Incorrect SHA512 retrieved when testing "
                     "ocmbFwValidateImage().");
-                TRACFBIN(g_trac_expupd, "testOcmbFwValidateImage: SHA512 value expected:",
+                TRACFBIN(g_trac_ocmbupd, "testOcmbFwValidateImage: SHA512 value expected:",
                     l_testSHA512, HEADER_SHA512_SIZE);
-                TRACFBIN(g_trac_expupd, "testOcmbFwValidateImage: SHA512 value retrieved:",
+                TRACFBIN(g_trac_ocmbupd, "testOcmbFwValidateImage: SHA512 value retrieved:",
                     l_imageInfo.imageSHA512HashPtr, HEADER_SHA512_SIZE);
             }
 
@@ -375,7 +375,7 @@ class ExpUpdateTest: public CxxTest::TestSuite
     }
 
     /**
-     *  @brief Test failure path of expupd::setFwVersionInfo() when the "version=" string is not
+     *  @brief Test failure path of ocmbupd::setFwVersionInfo() when the "version=" string is not
      *  found in the data blob passed to the function.
      */
     void testSetFwVersionInfoFailurePath( void )
@@ -395,8 +395,8 @@ class ExpUpdateTest: public CxxTest::TestSuite
             if ( l_err
                  && l_imageInfo.fwVersionStrSize == 0
                  && l_imageInfo.fwVersionStrPtr  == nullptr
-                 && (l_err->reasonCode() == EXPUPD::MISSING_FW_VERSION)
-                 && (l_err->moduleId()   == EXPUPD::MOD_SET_FW_VERSION_INFO) )
+                 && (l_err->reasonCode() == OCMBUPD::MISSING_FW_VERSION)
+                 && (l_err->moduleId()   == OCMBUPD::MOD_SET_FW_VERSION_INFO) )
             {
                 TS_TRACE("testSetFwVersionInfoFailurePath: Missing fw version string failed as expected.");
                 delete l_err;
@@ -411,7 +411,7 @@ class ExpUpdateTest: public CxxTest::TestSuite
             {
                 TS_INFO("testSetFwVersionInfoFailurePath: From test fail, "
                     "l_imageInfo.fwVersionStrSize: %lu", l_imageInfo.fwVersionStrSize);
-                TRACFBIN(g_trac_expupd, "testSetFwVersionInfoFailurePath: From test fail, FW "
+                TRACFBIN(g_trac_ocmbupd, "testSetFwVersionInfoFailurePath: From test fail, FW "
                     "string representation in l_imageInfo:", l_imageInfo.fwVersionStrPtr,
                     std::min(l_imageInfo.fwVersionStrSize, (size_t)MAX_BIN_TRACE));
             }
@@ -420,7 +420,7 @@ class ExpUpdateTest: public CxxTest::TestSuite
             {
                 TS_INFO("testSetFwVersionInfoFailurePath: Error info. "
                     "Expected RC: 0x%x ModId: 0x%x. Actual RC: 0x%x ModId: 0x%x.",
-                    EXPUPD::MISSING_FW_VERSION, EXPUPD::MOD_SET_FW_VERSION_INFO,
+                    OCMBUPD::MISSING_FW_VERSION, OCMBUPD::MOD_SET_FW_VERSION_INFO,
                     l_err->reasonCode(), l_err->moduleId());
             }
             else
@@ -455,10 +455,10 @@ class ExpUpdateTest: public CxxTest::TestSuite
             TS_FAIL("ExpUpdateTest() - Constuctor: failed to load MSS module");
             errlCommit( err, CXXTEST_COMP_ID );
         }
-        err = loadModule(EXPUPD_LIBRARY_NAME);
+        err = loadModule(OCMBUPD_LIBRARY_NAME);
         if(err)
         {
-            TS_FAIL("ExpUpdateTest() - Constuctor: failed to load EXPUPD module");
+            TS_FAIL("ExpUpdateTest() - Constuctor: failed to load OCMBUPD module");
             errlCommit( err, CXXTEST_COMP_ID );
         }
 #endif

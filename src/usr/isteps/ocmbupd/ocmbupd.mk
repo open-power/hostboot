@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/isteps/expupd/expupd.mk $
+# $Source: src/usr/isteps/ocmbupd/ocmbupd.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2021
+# Contributors Listed Below - COPYRIGHT 2019,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -38,6 +38,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/vpd
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 
 OBJS += expupd.o
+OBJS += odyupd.o
 OBJS += ocmbFwImage.o
 
 # Need to build exp_fw_update procedure

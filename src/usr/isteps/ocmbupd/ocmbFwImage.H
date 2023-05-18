@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/expupd/expupd_trace.H $                        */
+/* $Source: src/usr/isteps/ocmbupd/ocmbFwImage.H $                        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,19 +22,39 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __EXPUPD_TRACE_H
-#define __EXPUPD_TRACE_H
+#ifndef __OCMBFWIMAGE_H
+#define __OCMBFWIMAGE_H
 
-/******************************************************************************/
-// Includes
-/******************************************************************************/
-#include <trace/interface.H>
+/**
+ * @file ocmbFwImage.H
+ *
+ * Interface for validating the OCMB firmware image from PNOR
+ *
+ */
 
-namespace expupd
+#include <errl/errlentry.H>
+#include <ocmbupd/ocmbupd.H>
+#include <utility>
+
+namespace ocmbupd
 {
 
-extern trace_desc_t *g_trac_expupd;
+constexpr uint32_t HEADER_SHA512_SIZE = 64;
 
-}   //  end namespace
+/**
+ * @brief Validates OCMB firmware header of packaged image
+ *
+ * @param[in] i_imageStart Start address of packaged image
+ * @param[in] i_imageSize Size of packaged image
+ * @param[out] o_imageInfo Information pertaining to image after
+ *             being stripped of OCMB firmware header
+ * @return errlHndl_t indicating success or failure
+ *
+ */
+errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
+                               const uint64_t i_imageSize,
+                               rawImageInfo_t& o_imageInfo);
+
+}//namespace ocmbupd
 
 #endif

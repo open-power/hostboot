@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/expupd/expupd.H $                             */
+/* $Source: src/include/usr/ocmbupd/ocmbupd.H $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,15 +22,16 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __EXPUPD_H
-#define __EXPUPD_H
+#ifndef __OCMBUPD_H
+#define __OCMBUPD_H
 
 #include <isteps/hwpisteperror.H>
 #include <targeting/common/target.H>
 
+#include <sbeio/sbeioif.H>
 #include "ocmbFwImage_const.H"
 
-namespace expupd
+namespace ocmbupd
 {
 
 /**
@@ -47,49 +48,6 @@ typedef struct rawImageInfo
 
 
 /**
- * @brief Find out which explorer chips need an update.
- *        Check flash image SHA512 hash value of each explorer chip
- *        and add to list if the value does not match the SHA512 hash
- *        of the image in PNOR.
- *
- * @note  Cleanup call PNOR::unloadSecureSection(PNOR::OCMBFW)
- *        if o_imageLoaded returns true
- *
- * @param[out] o_stepError Error handle for logging istep failures
- * @param[out] o_flashUpdateList List of Explorer OCMB's that mismatch
- * @param[out] o_versionUpdateList List of Explorer OCMB's that need version
- *                data rewritten
- * @param[out] o_imageInfo PNOR image information for update
- * @param[out] o_imageLoaded true if PNOR::OCMBFW secure section loaded
- * @param[out] o_rebootRequired true if any OCMB FW upate is triggered by a FW
- *                  mismatch or forced by attribute, but not the mfg flag
- * @param[in]  i_checkMfgFlag Use the mfg flag in update decision
- */
-void explorerUpdateCheck(ISTEP_ERROR::IStepError& o_stepError,
-                         TARGETING::TargetHandleList& o_flashUpdateList,
-                         TARGETING::TargetHandleList& o_versionUpdateList,
-                         rawImageInfo_t & o_imageInfo,
-                         bool & o_imageLoaded,
-                         bool & o_rebootRequired,
-                         bool i_checkMfgFlag  );
-
-/**
- * @brief Call the HWP to perform update on list of Ocmb chips.
- *        This will try to update multiple OCMBs at a time via threads.
- *
- * @param[out] o_stepError Error handle for logging istep failures
- * @param[in]  i_explorerList List of Explorer OCMB's that need to update
- * @param[in]  i_imageInfo PNOR OCMBFW image information for update
- * @param[in]  i_rebootRequired true if any OCMB FW upate is triggered by a FW
- *                  mismatch or forced by attribute, but not the mfg flag
- */
-void performUpdate(ISTEP_ERROR::IStepError& o_stepError,
-                   TARGETING::TargetHandleList& i_explorerList,
-                   rawImageInfo_t& i_imageInfo,
-                   bool i_rebootRequired );
-
-
-/**
  * @brief Check flash image SHA512 hash value of each explorer chip
  *        and update the flash if it does not match the SHA512 hash
  *        of the image in PNOR.
@@ -97,7 +55,7 @@ void performUpdate(ISTEP_ERROR::IStepError& o_stepError,
  * @param[out] o_stepError Error handle for logging istep failures
  *
  */
-void updateAll(ISTEP_ERROR::IStepError& o_stepError);
+void explorerUpdateAll(ISTEP_ERROR::IStepError& o_stepError);
 
 
 /**
@@ -106,10 +64,42 @@ void updateAll(ISTEP_ERROR::IStepError& o_stepError);
  */
 void ocmbFwI2cUpdateStatusCheck( ISTEP_ERROR::IStepError & io_StepError);
 
+/**
+ * @brief List of pairs of the image level currently flashed on the
+ *        SBE, and a pointer to new image contents in the OCMBFW PNOR
+ *        partition for that image type.
+ */
+using ody_cur_version_new_image_t
+    = std::vector<std::pair<SBEIO::codelevel_info_t, const ocmbfw_ext_image_info*>>;
+
 /** @brief Resource owner for the OCMBFW partition.
  */
 using ocmbfw_owning_ptr_t = std::unique_ptr<const ocmbfw_ext_pnor_section_header,
                                             void(*)(const void*)>;
+
+/**
+ * @brief Check which Odyssey images need to be updated in the given chip, compared
+ *        to what exists in PNOR.
+ *
+ * @param[in] i_ocmb               The Odyssey chip.
+ * @param[in] i_fwhdr              The OCMBFW PNOR partition header pointer.
+ * @param[out] o_updates_required  The images needing update.
+ * @return                         Error if any, otherwise nullptr.
+ */
+errlHndl_t check_for_odyssey_codeupdate_needed(TARGETING::Target* i_ocmb,
+                                               const ocmbfw_owning_ptr_t& i_fwhdr,
+                                               ody_cur_version_new_image_t& o_updates_required);
+
+/**
+ * @brief Write a set of firmware images to the given Odyssey chip.
+ *
+ * @param[in] i_ocmb              The Odyssey chip.
+ * @param[in] i_fwhdr             The OCMBFW PNOR partition header pointer.
+ * @param[in] i_updates_required  The images to write.
+ */
+errlHndl_t odyssey_update_code(TARGETING::Target* i_ocmb,
+                               const ocmbfw_owning_ptr_t& i_fwhdr,
+                               const ody_cur_version_new_image_t& i_updates_required);
 
 /**
  * @brief Load the OCMBFW PNOR partition and produce a pointer to the extended
@@ -153,6 +143,6 @@ errlHndl_t find_ocmbfw_ext_image(const ocmbfw_ext_image_info*& o_img,
 const void* get_ext_image_contents(const ocmbfw_ext_pnor_section_header* i_hdr,
                                    const ocmbfw_ext_image_info* i_img);
 
-}//namespace expupd
+}//namespace ocmbupd
 
 #endif

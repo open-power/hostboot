@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/isteps/expupd/makefile $
+# $Source: src/usr/isteps/ocmbupd/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -23,13 +23,11 @@
 #
 # IBM_PROLOG_END_TAG
 
-ROOTPATH = ../../../..
-MODULE = expupd
+ROOTPATH = ../../../../..
+MODULE = testocmbupd
 
-SUBDIRS += test.d
+include test.mk
 
-include expupd.mk
+TESTS = ocmbupdatetest.H
 
 include ${ROOTPATH}/config.mk
-
-VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/

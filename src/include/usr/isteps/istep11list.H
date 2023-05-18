@@ -141,7 +141,7 @@ const DepModInfo g_istep11Dependancies = {
         DEP_LIB(libistep11.so),
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libimageprocs.so),
-        DEP_LIB(libexpupd.so),
+        DEP_LIB(libocmbupd.so),
         NULL
     }
 };

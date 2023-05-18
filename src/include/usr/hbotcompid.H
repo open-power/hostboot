@@ -492,12 +492,12 @@ const compId_t UCD_COMP_ID = 0x4100;
 const char UCD_COMP_NAME[] = "ucd";
 //@}
 
-/** @name EXPUPD
- *  Explorer update component
+/** @name OCMBUPD
+ *  OCMB update component
  */
 //@{
-const compId_t EXPUPD_COMP_ID = 0x4200;
-const char EXPUPD_COMP_NAME[] = "expupd";
+const compId_t OCMBUPD_COMP_ID = 0x4200;
+const char OCMBUPD_COMP_NAME[] = "ocmbupd";
 //@}
 
 //
@@ -554,7 +554,7 @@ const char I2CR_COMP_NAME[] = "i2cr";
 /** @name HDAT
  *  HDAT component
  *  @Note HDAT_COMP_ID=0x9000 matches with what is
- *  defined in fips_comp_id.H 
+ *  defined in fips_comp_id.H
  */
 //@{
 const compId_t HDAT_COMP_ID = 0x9000;

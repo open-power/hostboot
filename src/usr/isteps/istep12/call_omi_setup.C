@@ -46,7 +46,7 @@
 #include    <initservice/isteps_trace.H>
 #include    <istepHelperFuncs.H>          // captureError
 
-#include    <expupd/expupd.H> // i2c update check
+#include    <ocmbupd/ocmbupd.H> // i2c update check
 
 // Fapi Support
 #include    <config.h>
@@ -259,7 +259,7 @@ void* call_omi_setup (void *io_pArgs)
         }
         else
         {
-            expupd::ocmbFwI2cUpdateStatusCheck(l_StepError);
+            ocmbupd::ocmbFwI2cUpdateStatusCheck(l_StepError);
         }
     }
 

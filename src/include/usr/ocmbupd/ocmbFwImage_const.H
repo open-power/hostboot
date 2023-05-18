@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/usr/expupd/ocmbFwImage_const.H $                  */
+/* $Source: src/include/usr/ocmbupd/ocmbFwImage_const.H $                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -25,7 +25,7 @@
 #ifndef __OCMBFWIMAGE_CONST_H
 #define __OCMBFWIMAGE_CONST_H
 
-namespace expupd
+namespace ocmbupd
 {
 
 // ********************************WARNING**********************************
@@ -177,6 +177,6 @@ struct ocmbfw_ext_pnor_section_header
 /* @brief A wildcard for the find_ocmbfw_ext_image function */
 const uint32_t DD_LEVEL_ANY = 0xFFFFFFFFu;
 
-} //namespace expupd
+} //namespace ocmbupd
 
 #endif

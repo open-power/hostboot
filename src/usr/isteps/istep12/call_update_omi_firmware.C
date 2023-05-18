@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,7 @@
 // Targeting support
 #include    <targeting/targplatutil.H>
 
-#include    <expupd/expupd.H>
+#include    <ocmbupd/ocmbupd.H>
 
 #include    <istepHelperFuncs.H>          // captureError
 #include    <fapi2/plat_hwp_invoker.H>
@@ -122,11 +122,11 @@ void* call_update_omi_firmware (void *io_pArgs)
     if (UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>())
     {
         TRACFCOMP( g_trac_isteps_trace,
-                   "skipping expupd::UpdateAll() due to MPIPL");
+                   "skipping ocmbupd::explorerUpdateAll() due to MPIPL");
     }
     else
     {
-        expupd::updateAll(l_StepError);
+        ocmbupd::explorerUpdateAll(l_StepError);
     }
 
     TRACFCOMP( g_trac_isteps_trace, "call_update_omi_firmware exit" );

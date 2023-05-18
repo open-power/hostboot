@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/expupd/expupd.C $                              */
+/* $Source: src/usr/isteps/ocmbupd/expupd.C $                             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -29,7 +29,7 @@
  *          HWP: exp_fw_update
  */
 
-#include <expupd/expupd_reasoncodes.H>
+#include <ocmbupd/ocmbupd_reasoncodes.H>
 #include <pnor/pnorif.H>
 #include <targeting/targplatutil.H>
 #include <targeting/common/utilFilter.H>
@@ -63,12 +63,12 @@ using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
 using namespace TARGETING;
 
-namespace expupd
+namespace ocmbupd
 {
 
 // Initialize the trace buffer for this component
-trace_desc_t* g_trac_expupd  = nullptr;
-TRAC_INIT(&g_trac_expupd, EXPUPD_COMP_NAME, 2*KILOBYTE);
+trace_desc_t* g_trac_ocmbupd  = nullptr;
+TRAC_INIT(&g_trac_ocmbupd, OCMBUPD_COMP_NAME, 2*KILOBYTE);
 
 /**
  * @brief Structure for retrieving the explorer SHA512 hash value
@@ -114,7 +114,7 @@ errlHndl_t getFlashedHash(TargetHandle_t i_target, sha512regs_t& o_regs)
                         l_scomBuffer);
         if(l_err)
         {
-            TRACFCOMP(g_trac_expupd, ERR_MRK
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                       "getFlashedHash: Failed reading SHA512 hash from"
                       " ocmb[0x%08x]. bytesCopied[%u]. "
                       TRACE_ERR_FMT,
@@ -164,13 +164,13 @@ bool isMdsDdimm(TargetHandle_t i_ocmb)
         // If an error occurred, then commit the error and return false
         if( l_err )
         {
-            TRACFCOMP(g_trac_expupd, ERR_MRK"isMdsDdimm> Error trying to read SPD for 0x%0.8X, "
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK"isMdsDdimm> Error trying to read SPD for 0x%0.8X, "
                                      "committing error and returning false", get_huid(i_ocmb));
 
            /*@
             * @errortype
-            * @moduleid        EXPUPD::MOD_IS_MDS_DDIMM
-            * @reasoncode      EXPUPD::DEVICE_READ_FAIL
+            * @moduleid        OCMBUPD::MOD_IS_MDS_DDIMM
+            * @reasoncode      OCMBUPD::DEVICE_READ_FAIL
             * @userdata1       HUID of OCMB target being examined
             * @userdata2       <unused>
             * @devdesc         Device read failed on OCMB target - indeterminate
@@ -178,12 +178,12 @@ bool isMdsDdimm(TargetHandle_t i_ocmb)
             * @custdesc        Error occurred during system boot.
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                            EXPUPD::MOD_IS_MDS_DDIMM,
-                                            EXPUPD::DEVICE_READ_FAIL,
+                                            OCMBUPD::MOD_IS_MDS_DDIMM,
+                                            OCMBUPD::DEVICE_READ_FAIL,
                                             get_huid(i_ocmb),
                                             0,
                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-            errlCommit(l_err, EXPUPD_COMP_ID);
+            errlCommit(l_err, OCMBUPD_COMP_ID);
             break;
         }
 
@@ -195,7 +195,7 @@ bool isMdsDdimm(TargetHandle_t i_ocmb)
     }
     while (0);
 
-    TRACFCOMP(g_trac_expupd, INFO_MRK"isMdsDdimm> returning %s for 0x%0.8X",
+    TRACFCOMP(g_trac_ocmbupd, INFO_MRK"isMdsDdimm> returning %s for 0x%0.8X",
                              (l_isMdsDdimm ? "true" : "false"), get_huid(i_ocmb) );
     return l_isMdsDdimm;
 } // isMdsDdimm
@@ -223,7 +223,7 @@ bool checkAndSetForceFlag(TargetHandle_t i_ocmb,
                                  l_fWVerKeyword);
         if( l_err )
         {
-            TRACFCOMP(g_trac_expupd,"checkAndSetForceFlag> Error calling getKeywordEntry, deleting and returning false");
+            TRACFCOMP(g_trac_ocmbupd,"checkAndSetForceFlag> Error calling getKeywordEntry, deleting and returning false");
             delete l_err;
             l_err = nullptr;
             break;
@@ -232,7 +232,7 @@ bool checkAndSetForceFlag(TargetHandle_t i_ocmb,
         // Skip all version checking if the keyword isn't writable
         if( !l_fWVerKeyword->writable )
         {
-            TRACFCOMP(g_trac_expupd,"Skipping checkAndSetForceFlag on %.8X because SPD is not writable",
+            TRACFCOMP(g_trac_ocmbupd,"Skipping checkAndSetForceFlag on %.8X because SPD is not writable",
                       get_huid(i_ocmb));
             break;
         }
@@ -252,7 +252,7 @@ bool checkAndSetForceFlag(TargetHandle_t i_ocmb,
                                DEVICE_SPD_ADDRESS(SPD::EXPLORER_FW_VERSION));
             if( l_err )
             {
-                TRACFCOMP(g_trac_expupd,"checkAndSetForceFlag> Error trying to read SPD, deleting and returning false");
+                TRACFCOMP(g_trac_ocmbupd,"checkAndSetForceFlag> Error trying to read SPD, deleting and returning false");
                 delete l_err;
                 l_err = nullptr;
                 break;
@@ -266,7 +266,7 @@ bool checkAndSetForceFlag(TargetHandle_t i_ocmb,
                      l_forceFlag, 3 ) )
         {
             // flag is there, return true and clear it out
-            TRACFCOMP(g_trac_expupd,"checkAndSetForceFlag> Special update flag detected");
+            TRACFCOMP(g_trac_ocmbupd,"checkAndSetForceFlag> Special update flag detected");
             if( io_spdBuffer )
             {
                 io_spdBuffer[l_spdKeywordSize-3] = '\0';
@@ -278,7 +278,7 @@ bool checkAndSetForceFlag(TargetHandle_t i_ocmb,
         else
         {
             // flag is not there, return false and set it
-            TRACFCOMP(g_trac_expupd,"checkAndSetForceFlag> Special update flag not detected");
+            TRACFCOMP(g_trac_ocmbupd,"checkAndSetForceFlag> Special update flag not detected");
             if( io_spdBuffer )
             {
                 memcpy( &(io_spdBuffer[l_spdKeywordSize-3]),
@@ -314,7 +314,7 @@ void writeExplorerFwVersion(TargetHandle_t i_ocmb, const uint8_t* i_versionStr, 
 
         if (l_err)
         {
-            TRACFCOMP(g_trac_expupd,
+            TRACFCOMP(g_trac_ocmbupd,
                       "writeExplorerFwVersion: Error getting EXPLORER_FW_VERSION entry for OCMB 0x%08X",
                       get_huid(i_ocmb));
             break;
@@ -323,7 +323,7 @@ void writeExplorerFwVersion(TargetHandle_t i_ocmb, const uint8_t* i_versionStr, 
         // Skip all version checking if the keyword isn't writable
         if( !l_fWVerKeyword->writable )
         {
-            TRACFCOMP(g_trac_expupd,"Skipping writeExplorerFwVersion on %.8X because SPD is not writable",
+            TRACFCOMP(g_trac_ocmbupd,"Skipping writeExplorerFwVersion on %.8X because SPD is not writable",
                       get_huid(i_ocmb));
             break;
         }
@@ -337,10 +337,10 @@ void writeExplorerFwVersion(TargetHandle_t i_ocmb, const uint8_t* i_versionStr, 
         // Data copied over to l_paddedData should be at most l_spdKeywordSize
         size_t l_copySize = std::min(l_spdKeywordSize, i_strSize);
         memcpy(l_paddedData, i_versionStr, l_copySize);
-        TRACDCOMP(g_trac_expupd,
+        TRACDCOMP(g_trac_ocmbupd,
                   "writeExplorerFwVersion: Attempting to write FW version of OCMB: 0x%08X",
                   get_huid(i_ocmb));
-        TRACDBIN(g_trac_expupd, "writeExplorerFwVersion: OCMB FW Version string:",
+        TRACDBIN(g_trac_ocmbupd, "writeExplorerFwVersion: OCMB FW Version string:",
                  l_paddedData, l_spdKeywordSize);
 
         // If we're in a force-once case, we need to add a special flag
@@ -351,7 +351,7 @@ void writeExplorerFwVersion(TargetHandle_t i_ocmb, const uint8_t* i_versionStr, 
         {
             // ignoring return value because we don't care
             (void)checkAndSetForceFlag( i_ocmb, l_paddedData );
-            TRACDBIN(g_trac_expupd, "writeExplorerFwVersion: with flag:",
+            TRACDBIN(g_trac_ocmbupd, "writeExplorerFwVersion: with flag:",
                      l_paddedData, l_spdKeywordSize);
         }
 
@@ -363,16 +363,16 @@ void writeExplorerFwVersion(TargetHandle_t i_ocmb, const uint8_t* i_versionStr, 
 
     if (l_err)
     {
-        TRACFCOMP(g_trac_expupd, ERR_MRK"writeExplorerFwVersion: Failed to update version keyword "
+        TRACFCOMP(g_trac_ocmbupd, ERR_MRK"writeExplorerFwVersion: Failed to update version keyword "
             "for OCMB 0x%08X", get_huid(i_ocmb));
-        TRACFBIN(g_trac_expupd, ERR_MRK"writeExplorerFwVersion: Failed trying to write this "
+        TRACFBIN(g_trac_ocmbupd, ERR_MRK"writeExplorerFwVersion: Failed trying to write this "
             "version string: ", i_versionStr, i_strSize);
-        l_err->collectTrace(EXPUPD_COMP_NAME);
-        errlCommit(l_err, EXPUPD_COMP_ID);
+        l_err->collectTrace(OCMBUPD_COMP_NAME);
+        errlCommit(l_err, OCMBUPD_COMP_ID);
     }
     else
     {
-        TRACDCOMP(g_trac_expupd, "writeExplorerFwVersion: successfully updated version string in "
+        TRACDCOMP(g_trac_ocmbupd, "writeExplorerFwVersion: successfully updated version string in "
             "SPD of OCMB 0x%08X", TARGETING::get_huid(i_ocmb));
     }
 
@@ -455,18 +455,18 @@ void OcmbWorkItem::operator()()
                     l_fapi2Target, l_image_a_good, l_image_b_good);
     if (l_err)
     {
-        TRACFCOMP(g_trac_expupd,
+        TRACFCOMP(g_trac_ocmbupd,
               ERR_MRK"Error from run_fw_adapter_properties_get for OCMB 0x%08x",
               TARGETING::get_huid(iv_ocmb));
 
-        l_err->collectTrace(EXPUPD_COMP_NAME);
+        l_err->collectTrace(OCMBUPD_COMP_NAME);
 
         // addErrorDetails may not be thread-safe.  Protect with mutex.
         mutex_lock(&g_stepErrorMutex);
 
         // Create IStep error log and cross reference to error
         // that occurred (will commit l_err)
-        captureError(l_err, *iv_pStepError, EXPUPD_COMP_ID);
+        captureError(l_err, *iv_pStepError, OCMBUPD_COMP_ID);
 
         mutex_unlock(&g_stepErrorMutex);
     }
@@ -476,11 +476,11 @@ void OcmbWorkItem::operator()()
                     iv_imageInfo->imagePtr, iv_imageInfo->imageSize);
     if (l_err)
     {
-        TRACFCOMP(g_trac_expupd,
+        TRACFCOMP(g_trac_ocmbupd,
                   ERR_MRK"Error from exp_fw_update for OCMB 0x%08x",
                   TARGETING::get_huid(iv_ocmb));
 
-        l_err->collectTrace(EXPUPD_COMP_NAME);
+        l_err->collectTrace(OCMBUPD_COMP_NAME);
 
         // explicitly deconfigure this part since we don't want to run on
         //  down-level code
@@ -512,13 +512,13 @@ void OcmbWorkItem::operator()()
 
         // Create IStep error log and cross reference to error
         // that occurred (will commit l_err)
-        captureError(l_err, *iv_pStepError, EXPUPD_COMP_ID);
+        captureError(l_err, *iv_pStepError, OCMBUPD_COMP_ID);
 
         mutex_unlock(&g_stepErrorMutex);
     }
     else
     {
-        TRACFCOMP(g_trac_expupd,
+        TRACFCOMP(g_trac_ocmbupd,
                   "OcmbWorkItem(): successfully updated OCMB 0x%08x",
                   TARGETING::get_huid(iv_ocmb));
 
@@ -537,18 +537,18 @@ void OcmbWorkItem::operator()()
                             l_fapi2Target);
             if (l_err)
             {
-                TRACFCOMP(g_trac_expupd,
+                TRACFCOMP(g_trac_ocmbupd,
                           ERR_MRK"Error from exp_flash_read_test for OCMB 0x%08x",
                           TARGETING::get_huid(iv_ocmb));
 
-                l_err->collectTrace(EXPUPD_COMP_NAME);
+                l_err->collectTrace(OCMBUPD_COMP_NAME);
 
                 // addErrorDetails may not be thread-safe.  Protect with mutex.
                 mutex_lock(&g_stepErrorMutex);
 
                 // Create IStep error log and cross reference to error
                 // that occurred (will commit l_err)
-                captureError(l_err, *iv_pStepError, EXPUPD_COMP_ID);
+                captureError(l_err, *iv_pStepError, OCMBUPD_COMP_ID);
 
                 mutex_unlock(&g_stepErrorMutex);
             }
@@ -557,7 +557,25 @@ void OcmbWorkItem::operator()()
 }
 
 
-// Find out if any explorer chips need an update
+/**
+ * @brief Find out which explorer chips need an update.
+ *        Check flash image SHA512 hash value of each explorer chip
+ *        and add to list if the value does not match the SHA512 hash
+ *        of the image in PNOR.
+ *
+ * @note  Cleanup call PNOR::unloadSecureSection(PNOR::OCMBFW)
+ *        if o_imageLoaded returns true
+ *
+ * @param[out] o_stepError Error handle for logging istep failures
+ * @param[out] o_flashUpdateList List of Explorer OCMB's that mismatch
+ * @param[out] o_versionUpdateList List of Explorer OCMB's that need version
+ *                data rewritten
+ * @param[out] o_imageInfo PNOR image information for update
+ * @param[out] o_imageLoaded true if PNOR::OCMBFW secure section loaded
+ * @param[out] o_rebootRequired true if any OCMB FW upate is triggered by a FW
+ *                  mismatch or forced by attribute, but not the mfg flag
+ * @param[in]  i_checkMfgFlag Use the mfg flag in update decision
+ */
 void explorerUpdateCheck(IStepError& o_stepError,
                          TargetHandleList& o_flashUpdateList,
                          TARGETING::TargetHandleList& o_versionUpdateList,
@@ -582,7 +600,7 @@ void explorerUpdateCheck(IStepError& o_stepError,
     auto l_forced_behavior =
             l_pTopLevel->getAttr<ATTR_OCMB_FW_UPDATE_OVERRIDE>();
 
-    TRACFCOMP(g_trac_expupd, ENTER_MRK
+    TRACFCOMP(g_trac_ocmbupd, ENTER_MRK
               "explorerUpdateCheck: %d ocmb chips found, force=%d",
               l_ocmbTargetList.size(), l_forced_behavior);
 
@@ -591,14 +609,14 @@ void explorerUpdateCheck(IStepError& o_stepError,
         // If no OCMB chips exist, we're done.
         if(l_ocmbTargetList.size() == 0)
         {
-            TRACFCOMP(g_trac_expupd, INFO_MRK "Skipping update, no OCMB found");
+            TRACFCOMP(g_trac_ocmbupd, INFO_MRK "Skipping update, no OCMB found");
             break;
         }
 
         // Exit now if told to
         if( OCMB_FW_UPDATE_BEHAVIOR_PREVENT_UPDATE == l_forced_behavior )
         {
-            TRACFCOMP(g_trac_expupd, INFO_MRK "Skipping update due to override "
+            TRACFCOMP(g_trac_ocmbupd, INFO_MRK "Skipping update due to override "
                 "(PREVENT_UPDATE)");
             break;
         }
@@ -610,16 +628,16 @@ void explorerUpdateCheck(IStepError& o_stepError,
         l_err = PNOR::loadSecureSection(PNOR::OCMBFW);
         if(l_err)
         {
-            TRACFCOMP(g_trac_expupd, ERR_MRK
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                       "explorerUpdateCheck: Failed to load OCMBFW section"
                       " from PNOR! "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(l_err));
 
-            l_err->collectTrace(EXPUPD_COMP_NAME);
+            l_err->collectTrace(OCMBUPD_COMP_NAME);
 
             // Capture error
-            captureError(l_err, o_stepError, EXPUPD_COMP_ID);
+            captureError(l_err, o_stepError, OCMBUPD_COMP_ID);
             break;
         }
         o_imageLoaded = true;
@@ -629,15 +647,15 @@ void explorerUpdateCheck(IStepError& o_stepError,
         l_err = PNOR::getSectionInfo(PNOR::OCMBFW, l_pnorSectionInfo);
         if(l_err)
         {
-            TRACFCOMP(g_trac_expupd, ERR_MRK
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                       "explorerUpdateCheck: Failure in getSectionInfo(). "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(l_err));
 
-            l_err->collectTrace(EXPUPD_COMP_NAME);
+            l_err->collectTrace(OCMBUPD_COMP_NAME);
 
             // Capture error
-            captureError(l_err, o_stepError, EXPUPD_COMP_ID);
+            captureError(l_err, o_stepError, OCMBUPD_COMP_ID);
             break;
         }
 
@@ -653,15 +671,15 @@ void explorerUpdateCheck(IStepError& o_stepError,
                                   o_imageInfo);
         if(l_err)
         {
-            TRACFCOMP(g_trac_expupd, ERR_MRK
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                       "explorerUpdateCheck: Failure in ocmbFwValidateImage. "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(l_err));
 
-            l_err->collectTrace(EXPUPD_COMP_NAME);
+            l_err->collectTrace(OCMBUPD_COMP_NAME);
 
             // Capture error
-            captureError(l_err, o_stepError, EXPUPD_COMP_ID);
+            captureError(l_err, o_stepError, OCMBUPD_COMP_ID);
             break;
         }
 
@@ -669,7 +687,7 @@ void explorerUpdateCheck(IStepError& o_stepError,
         bool l_forceMdsUpdate = (OCMB_FW_UPDATE_BEHAVIOR_MDS_FORCE_UPDATE == l_forced_behavior);
         if (l_forceMdsUpdate)
         {
-            TRACFCOMP(g_trac_expupd, "explorerUpdateCheck: Forcing updates on MDS targets only");
+            TRACFCOMP(g_trac_ocmbupd, "explorerUpdateCheck: Forcing updates on MDS targets only");
         }
 
         // For each explorer chip, compare flash hash with PNOR hash and
@@ -682,7 +700,7 @@ void explorerUpdateCheck(IStepError& o_stepError,
             if(l_ocmbTarget->getAttr<ATTR_CHIP_ID>() !=
                                                      POWER_CHIPID::EXPLORER_16)
             {
-                TRACFCOMP(g_trac_expupd,
+                TRACFCOMP(g_trac_ocmbupd,
                       "explorerUpdateCheck: skipping update of non-Explorer OCMB 0x%08x",
                       get_huid(l_ocmbTarget));
                 continue;
@@ -700,7 +718,7 @@ void explorerUpdateCheck(IStepError& o_stepError,
                     o_flashUpdateList.push_back(l_ocmbTarget);
                     o_rebootRequired = true;
 
-                    TRACFCOMP(g_trac_expupd,
+                    TRACFCOMP(g_trac_ocmbupd,
                               "explorerUpdateCheck: Forcing an update on OCMB MDS DIMM "
                               "[0x%08x]", get_huid(l_ocmbTarget));
                 }
@@ -718,39 +736,39 @@ void explorerUpdateCheck(IStepError& o_stepError,
             l_err = getFlashedHash(l_ocmbTarget, l_regs);
             if(l_err)
             {
-                TRACFCOMP(g_trac_expupd, ERR_MRK
+                TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                          "explorerUpdateCheck: Failure in getFlashedHash(huid = 0x%08x). "
                          TRACE_ERR_FMT,
                          get_huid(l_ocmbTarget),
                          TRACE_ERR_ARGS(l_err));
 
-                l_err->collectTrace(EXPUPD_COMP_NAME);
+                l_err->collectTrace(OCMBUPD_COMP_NAME);
 
                 // Capture error
-                captureError(l_err, o_stepError, EXPUPD_COMP_ID, l_ocmbTarget);
+                captureError(l_err, o_stepError, OCMBUPD_COMP_ID, l_ocmbTarget);
 
                 //Don't stop on error, go to next target.
                 continue;
             }
 
             // Trace the hash and image ID values
-            TRACFCOMP(g_trac_expupd,
+            TRACFCOMP(g_trac_ocmbupd,
                       "explorerUpdateCheck: OCMB 0x%08x image ID=0x%08x",
                       get_huid(l_ocmbTarget), l_regs.imageId);
-            TRACFBIN(g_trac_expupd, "SHA512 HASH FROM EXPLORER",
+            TRACFBIN(g_trac_ocmbupd, "SHA512 HASH FROM EXPLORER",
                      l_regs.sha512Hash, HEADER_SHA512_SIZE);
 
             //Compare hashes.  If different, add to list for update.
             if(memcmp(l_regs.sha512Hash, o_imageInfo.imageSHA512HashPtr,
                       HEADER_SHA512_SIZE))
             {
-                TRACFCOMP(g_trac_expupd,
+                TRACFCOMP(g_trac_ocmbupd,
                         "explorerUpdateCheck: SHA512 hash mismatch on ocmb[0x%08x]",
                         get_huid(l_ocmbTarget));
 
                 if ( Util::isSimicsRunning() )
                 {
-                    TRACFCOMP(g_trac_expupd,
+                    TRACFCOMP(g_trac_ocmbupd,
                               INFO_MRK "explorerUpdateCheck: Simics running so ignoring mismatch");
                     //force a write to the SPD to test out more paths
                     o_versionUpdateList.push_back(l_ocmbTarget);
@@ -764,7 +782,7 @@ void explorerUpdateCheck(IStepError& o_stepError,
             }
             else
             {
-                TRACFCOMP(g_trac_expupd,
+                TRACFCOMP(g_trac_ocmbupd,
                           "explorerUpdateCheck: SHA512 hash for ocmb[0x%08x]"
                           " matches SHA512 hash of PNOR image.",
                           get_huid(l_ocmbTarget));
@@ -779,10 +797,10 @@ void explorerUpdateCheck(IStepError& o_stepError,
                                          l_fWVerKeyword);
                 if( l_err )
                 {
-                    TRACFCOMP(g_trac_expupd,
+                    TRACFCOMP(g_trac_ocmbupd,
                               "explorerUpdateCheck: getKeywordEntry error");
-                    l_err->collectTrace(EXPUPD_COMP_NAME);
-                    captureError(l_err, o_stepError, EXPUPD_COMP_ID, l_ocmbTarget);
+                    l_err->collectTrace(OCMBUPD_COMP_NAME);
+                    captureError(l_err, o_stepError, OCMBUPD_COMP_ID, l_ocmbTarget);
                     continue; //Don't stop on error, go to next target.
                 }
 
@@ -796,9 +814,9 @@ void explorerUpdateCheck(IStepError& o_stepError,
                                    DEVICE_SPD_ADDRESS(SPD::EXPLORER_FW_VERSION));
                 if( l_err )
                 {
-                    TRACFCOMP(g_trac_expupd,"explorerUpdateCheck> Error trying to read SPD, deleting and returning false");
-                    l_err->collectTrace(EXPUPD_COMP_NAME);
-                    captureError(l_err, o_stepError, EXPUPD_COMP_ID, l_ocmbTarget);
+                    TRACFCOMP(g_trac_ocmbupd,"explorerUpdateCheck> Error trying to read SPD, deleting and returning false");
+                    l_err->collectTrace(OCMBUPD_COMP_NAME);
+                    captureError(l_err, o_stepError, OCMBUPD_COMP_ID, l_ocmbTarget);
                     continue; //Don't stop on error, go to next target.
                 }
 
@@ -806,7 +824,7 @@ void explorerUpdateCheck(IStepError& o_stepError,
                            o_imageInfo.fwVersionStrPtr,
                            o_imageInfo.fwVersionStrSize) )
                 {
-                    TRACFCOMP(g_trac_expupd,"explorerUpdateCheck> Version info in SPD is out of date, will force a rewrite");
+                    TRACFCOMP(g_trac_ocmbupd,"explorerUpdateCheck> Version info in SPD is out of date, will force a rewrite");
                     o_versionUpdateList.push_back(l_ocmbTarget);
                 }
             }
@@ -815,7 +833,7 @@ void explorerUpdateCheck(IStepError& o_stepError,
             if( OCMB_FW_UPDATE_BEHAVIOR_FORCE_UPDATE
                 == l_forced_behavior )
             {
-                TRACFCOMP(g_trac_expupd, INFO_MRK "explorerUpdateCheck: "
+                TRACFCOMP(g_trac_ocmbupd, INFO_MRK "explorerUpdateCheck: "
                           "Forcing ocmb[0x%08X] update due to override"
                           " (FORCE_UPDATE)", get_huid(l_ocmbTarget) );
                 o_flashUpdateList.push_back(l_ocmbTarget);
@@ -824,7 +842,7 @@ void explorerUpdateCheck(IStepError& o_stepError,
             // Or if we are using the MFG flag and the flag is set
             else if (i_checkMfgFlag && TARGETING::isDimmSpiFlashScreenSet())
             {
-                TRACFCOMP(g_trac_expupd, INFO_MRK "explorerUpdateCheck: "
+                TRACFCOMP(g_trac_ocmbupd, INFO_MRK "explorerUpdateCheck: "
                           "Forcing ocmb[0x%08X] update due to mfg flag"
                           " (MNFG_DIMM_SPI_FLASH_SCREEN)",
                           get_huid(l_ocmbTarget) );
@@ -837,13 +855,13 @@ void explorerUpdateCheck(IStepError& o_stepError,
                 // check SPD for special flag
                 if( checkAndSetForceFlag( l_ocmbTarget ) )
                 {
-                    TRACFCOMP(g_trac_expupd, INFO_MRK "explorerUpdateCheck: Previously forced ocmb[0x%08X] update due to override (FORCE_UPDATE_ONCE), not forcing this time",
+                    TRACFCOMP(g_trac_ocmbupd, INFO_MRK "explorerUpdateCheck: Previously forced ocmb[0x%08X] update due to override (FORCE_UPDATE_ONCE), not forcing this time",
                               get_huid(l_ocmbTarget) );
                     o_versionUpdateList.push_back(l_ocmbTarget); //need to clear the flag
                 }
                 else
                 {
-                    TRACFCOMP(g_trac_expupd, INFO_MRK "explorerUpdateCheck: Forcing ocmb[0x%08X] update due to override (FORCE_UPDATE_ONCE)",
+                    TRACFCOMP(g_trac_ocmbupd, INFO_MRK "explorerUpdateCheck: Forcing ocmb[0x%08X] update due to override (FORCE_UPDATE_ONCE)",
                               get_huid(l_ocmbTarget) );
                     o_flashUpdateList.push_back(l_ocmbTarget);
                     o_rebootRequired = true; //forcing update = do a reboot
@@ -851,7 +869,7 @@ void explorerUpdateCheck(IStepError& o_stepError,
             }
         } // All OCMB loop
 
-        TRACFCOMP(g_trac_expupd,
+        TRACFCOMP(g_trac_ocmbupd,
                   "explorerUpdateCheck: %d OCMB chips require update, %d SPDs will be rewritten",
                   o_flashUpdateList.size(),
                   o_versionUpdateList.size());
@@ -859,24 +877,34 @@ void explorerUpdateCheck(IStepError& o_stepError,
 
     if( OCMB_FW_UPDATE_BEHAVIOR_CHECK_BUT_NO_UPDATE == l_forced_behavior )
     {
-        TRACFCOMP(g_trac_expupd,
+        TRACFCOMP(g_trac_ocmbupd,
             INFO_MRK "explorerUpdateCheck: Skipping update due to override "
             "(CHECK_BUT_NO_UPDATE)");
         o_flashUpdateList.clear();
         o_rebootRequired = false;
     }
 
-    TRACFCOMP(g_trac_expupd, EXIT_MRK
+    TRACFCOMP(g_trac_ocmbupd, EXIT_MRK
               "explorerUpdateCheck: o_imageLoaded=%d, o_rebootRequired=%d",
               o_imageLoaded,
               o_rebootRequired);
     return;
 }
 
-void performUpdate( IStepError& o_stepError,
-                    TargetHandleList& i_explorerList,
-                    rawImageInfo_t& i_imageInfo,
-                    bool i_rebootRequired )
+/**
+ * @brief Call the HWP to perform update on list of Ocmb chips.
+ *        This will try to update multiple OCMBs at a time via threads.
+ *
+ * @param[out] o_stepError Error handle for logging istep failures
+ * @param[in]  i_explorerList List of Explorer OCMB's that need to update
+ * @param[in]  i_imageInfo PNOR OCMBFW image information for update
+ * @param[in]  i_rebootRequired true if any OCMB FW upate is triggered by a FW
+ *                  mismatch or forced by attribute, but not the mfg flag
+ */
+void explorerPerformUpdate( IStepError& o_stepError,
+                            TargetHandleList& i_explorerList,
+                            rawImageInfo_t& i_imageInfo,
+                            bool i_rebootRequired )
 {
     errlHndl_t l_err = nullptr;
     Util::ThreadPool<IStepWorkItem> threadpool;
@@ -888,7 +916,7 @@ void performUpdate( IStepError& o_stepError,
         // Nothing to update, just exit
         if( i_explorerList.empty() )
         {
-            TRACFCOMP(g_trac_expupd, INFO_MRK "performUpdate: Nothing to update");
+            TRACFCOMP(g_trac_ocmbupd, INFO_MRK "explorerPerformUpdate: Nothing to update");
             break;
         }
 
@@ -905,7 +933,7 @@ void performUpdate( IStepError& o_stepError,
         size_t l_numTargets = i_explorerList.size();
         uint32_t l_numThreads = std::min(l_maxThreads, l_numTargets);
 
-        TRACFCOMP(g_trac_expupd,
+        TRACFCOMP(g_trac_ocmbupd,
                   INFO_MRK"Starting %llu thread(s) to handle %llu OCMB target(s) ",
                   l_numThreads, l_numTargets);
 
@@ -929,14 +957,14 @@ void performUpdate( IStepError& o_stepError,
         l_err = threadpool.shutdown();
         if(l_err)
         {
-            TRACFCOMP(g_trac_expupd,
-                      ERR_MRK"performUpdate: thread pool returned an error "
+            TRACFCOMP(g_trac_ocmbupd,
+                      ERR_MRK"explorerPerformUpdate: thread pool returned an error "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(l_err));
-            l_err->collectTrace(EXPUPD_COMP_NAME);
+            l_err->collectTrace(OCMBUPD_COMP_NAME);
 
             // Capture error
-            captureError(l_err, o_stepError, EXPUPD_COMP_ID);
+            captureError(l_err, o_stepError, OCMBUPD_COMP_ID);
         }
 
     } while(0);
@@ -945,8 +973,8 @@ void performUpdate( IStepError& o_stepError,
     // forced by attribute
     if(l_rebootRequired)
     {
-        TRACFCOMP(g_trac_expupd,
-                  "performUpdate: %d OCMB chip(s) %s update.  Requesting reboot...",
+        TRACFCOMP(g_trac_ocmbupd,
+                  "explorerPerformUpdate: %d OCMB chip(s) %s update.  Requesting reboot...",
                   i_explorerList.size(), o_stepError.isNull()?"completed":"attempted");
         HWAS::setOrClearReconfigLoopReason(HWAS::ReconfigSetOrClear::RECONFIG_SET,
                                            RECONFIGURE_LOOP_OCMB_FW_UPDATE);
@@ -961,7 +989,7 @@ void performUpdate( IStepError& o_stepError,
  * @param[out] o_stepError Error handle for logging istep failures
  *
  */
-void updateAll(IStepError& o_stepError)
+void explorerUpdateAll(IStepError& o_stepError)
 {
     bool l_imageLoaded = false;
     bool l_rebootRequired = false;
@@ -983,10 +1011,10 @@ void updateAll(IStepError& o_stepError)
     if (!l_flashUpdateList.empty())
     {
         // try to perform the update now with list
-        performUpdate(o_stepError,
-                      l_flashUpdateList,
-                      l_imageInfo,
-                      l_rebootRequired);
+        explorerPerformUpdate(o_stepError,
+                              l_flashUpdateList,
+                              l_imageInfo,
+                              l_rebootRequired);
     }
 
     // Update the version information on all indicated parts
@@ -1004,20 +1032,20 @@ void updateAll(IStepError& o_stepError)
         errlHndl_t l_err = PNOR::unloadSecureSection(PNOR::OCMBFW);
         if(l_err)
         {
-            TRACFCOMP(g_trac_expupd, ERR_MRK
-                      "updateAll: Failed to unload OCMBFW. "
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK
+                      "explorerUpdateAll: Failed to unload OCMBFW. "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(l_err));
 
-            l_err->collectTrace(EXPUPD_COMP_NAME);
+            l_err->collectTrace(OCMBUPD_COMP_NAME);
 
             // Capture error
-            captureError(l_err, o_stepError, EXPUPD_COMP_ID);
+            captureError(l_err, o_stepError, OCMBUPD_COMP_ID);
         }
 #endif //CONFIG_SECUREBOOT
     }
 
-    TRACFCOMP(g_trac_expupd, EXIT_MRK"updateAll()");
+    TRACFCOMP(g_trac_ocmbupd, EXIT_MRK"explorerUpdateAll()");
 }
 
 /**
@@ -1037,7 +1065,7 @@ void disableInbandScomsOCMB(const TARGETING::TargetHandleList i_ocmbTargetList)
         ScomSwitches l_switches = l_ocmb->getAttr<ATTR_SCOM_SWITCHES>();
         if (l_switches.useI2cScom == 0)
         {
-            TRACFCOMP( g_trac_expupd,
+            TRACFCOMP( g_trac_ocmbupd,
                 "disabledInbandScomsOCMB: OCMB 0x%.8X updated to use i2c scom",
                 TARGETING::get_huid(l_ocmb) );
             l_switches.useI2cScom = 1;
@@ -1069,7 +1097,7 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
     // Avoid falling back to i2c mode in manufacturing mode
     bool mfgMode = TARGETING::areMfgThresholdsActive();
 
-    TRACFCOMP(g_trac_expupd, "ocmbFwI2cUpdateStatusCheck: "
+    TRACFCOMP(g_trac_ocmbupd, "ocmbFwI2cUpdateStatusCheck: "
               "Enter OCMB_FW_UPDATE_STATUS: updateRequired = %d, "
               "updateI2c = %d, i2cUpdateAttepted = %d, hardFailure = %d, "
               "mdfgMode = %d",
@@ -1104,10 +1132,10 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
             disableInbandScomsOCMB(l_ocmbUpdateList);
 
             // do the i2c update of the Explorer(s)
-            performUpdate(io_StepError,
-                          l_ocmbUpdateList,
-                          l_imageInfo,
-                          l_rebootRequired);
+            explorerPerformUpdate(io_StepError,
+                                  l_ocmbUpdateList,
+                                  l_imageInfo,
+                                  l_rebootRequired);
 
             l_updStatus.i2cUpdateAttempted = 1;
         }
@@ -1122,7 +1150,7 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
     }
 
     l_nodeTarget->setAttr<ATTR_OCMB_FW_UPDATE_STATUS>(l_updStatus);
-    TRACFCOMP(g_trac_expupd, "ocmbFwI2cUpdateStatusCheck: "
+    TRACFCOMP(g_trac_ocmbupd, "ocmbFwI2cUpdateStatusCheck: "
               "Exit OCMB_FW_UPDATE_STATUS: updateRequired = %d, "
               "updateI2c = %d, i2cUpdateAttepted = %d, hardFailure = %d",
               l_updStatus.updateRequired, l_updStatus.updateI2c,
@@ -1136,7 +1164,7 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
         errlHndl_t l_err = PNOR::unloadSecureSection(PNOR::OCMBFW);
         if(l_err)
         {
-            TRACFCOMP(g_trac_expupd, ERR_MRK
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                       "ocmbFwI2cUpdateStatusCheck: Failed to unload OCMBFW. "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(l_err));
@@ -1151,4 +1179,4 @@ void ocmbFwI2cUpdateStatusCheck( IStepError & io_StepError)
 }
 
 
-}//namespace expupd
+}//namespace ocmbupd

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/expupd/ocmbFwImage.C $                         */
+/* $Source: src/usr/isteps/ocmbupd/ocmbFwImage.C $                        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -30,22 +30,22 @@
  */
 
 #include "ocmbFwImage.H"
-#include <expupd/ocmbFwImage_const.H>
-#include <expupd/expupd_reasoncodes.H>
-#include "expupd_trace.H"
+#include <ocmbupd/ocmbFwImage_const.H>
+#include <ocmbupd/ocmbupd_reasoncodes.H>
+#include "ocmbupd_trace.H"
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <hbotcompid.H>
 #include <algorithm>
 #include <pnor/pnorif.H>
 
-#define EXPUPD_8BYTE_ALIGNED(_SIZE) (!(_SIZE & 0x7))
+#define OCMBUPD_8BYTE_ALIGNED(_SIZE) (!(_SIZE & 0x7))
 
-#define TRACF(...) TRACFCOMP(g_trac_expupd, __VA_ARGS__)
+#define TRACF(...) TRACFCOMP(g_trac_ocmbupd, __VA_ARGS__)
 
 using namespace errl_util;
 
-namespace expupd
+namespace ocmbupd
 {
 
 
@@ -146,24 +146,24 @@ errlHndl_t setFwVersionInfo(const uint8_t* i_tripletStartPtr, const size_t i_tri
         o_imageInfo.fwVersionStrPtr = l_searchPtr;
         o_imageInfo.fwVersionStrSize = l_length;
 
-        TRACDBIN(g_trac_expupd, "setFwVersionInfo: OCMB FW Version: ", o_imageInfo.fwVersionStrPtr,
+        TRACDBIN(g_trac_ocmbupd, "setFwVersionInfo: OCMB FW Version: ", o_imageInfo.fwVersionStrPtr,
             o_imageInfo.fwVersionStrSize);
     }
     else
     {
-        TRACFCOMP(g_trac_expupd, ERR_MRK"setFwVersionInfo: OCMB FW Version not found.");
+        TRACFCOMP(g_trac_ocmbupd, ERR_MRK"setFwVersionInfo: OCMB FW Version not found.");
        /* @errorlog
         * @errortype       ERRL_SEV_PREDICTIVE
-        * @moduleid        EXPUPD::MOD_SET_FW_VERSION_INFO
-        * @reasoncode      EXPUPD::MISSING_FW_VERSION
+        * @moduleid        OCMBUPD::MOD_SET_FW_VERSION_INFO
+        * @reasoncode      OCMBUPD::MISSING_FW_VERSION
         * @userdata1       Pointer to start of the search area (i.e. the TAG_KEY_VALUE_PAIRS section)
         * @userdata2       Number of bytes in the search area
         * @devdesc         Missing OCMB firmware version value in TAG_KEY_VALUE_PAIRS section.
         * @custdesc        Error occurred during system boot.
         */
         l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                        EXPUPD::MOD_SET_FW_VERSION_INFO,
-                                        EXPUPD::MISSING_FW_VERSION,
+                                        OCMBUPD::MOD_SET_FW_VERSION_INFO,
+                                        OCMBUPD::MISSING_FW_VERSION,
                                         (uint64_t)i_tripletStartPtr,
                                         i_tripletSize,
                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -201,7 +201,7 @@ errlHndl_t parseTaggedDataTriplet(const uint8_t* i_tripletPtr,
         // Check that we have enough room for the triplet
         if((l_dataStartPtr > i_endDataPtr) ||
            ((l_dataStartPtr + l_ttPtr->dataSize) > i_endDataPtr) ||
-           !EXPUPD_8BYTE_ALIGNED(l_ttPtr->dataSize))
+           !OCMBUPD_8BYTE_ALIGNED(l_ttPtr->dataSize))
         {
             int64_t l_reqdSize = sizeof(taggedTriplet_t);
             l_reqdSize += (l_dataStartPtr > i_endDataPtr)? 0: l_ttPtr->dataSize;
@@ -209,7 +209,7 @@ errlHndl_t parseTaggedDataTriplet(const uint8_t* i_tripletPtr,
             int64_t l_allocSize =
                 reinterpret_cast<int64_t>(i_endDataPtr - i_tripletPtr);
 
-            TRACFCOMP(g_trac_expupd, ERR_MRK
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                       "parseTaggedDataTriplet: Triplet does not fit or is"
                       " misaligned.  bytesReqd[%d] bytesAllocated[%d]",
                       l_reqdSize,
@@ -217,16 +217,16 @@ errlHndl_t parseTaggedDataTriplet(const uint8_t* i_tripletPtr,
 
            /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
-            * @moduleid        EXPUPD::MOD_PARSE_TAGGED_DATA_TRIPLET
-            * @reasoncode      EXPUPD::INVALID_DATA_TRIPLET_SIZE
+            * @moduleid        OCMBUPD::MOD_PARSE_TAGGED_DATA_TRIPLET
+            * @reasoncode      OCMBUPD::INVALID_DATA_TRIPLET_SIZE
             * @userdata1       allocated size
             * @userdata2       required size
             * @devdesc         Tagged data triplet size is too big or misaligned
             * @custdesc        Error occurred during system boot.
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                         EXPUPD::MOD_PARSE_TAGGED_DATA_TRIPLET,
-                                         EXPUPD::INVALID_DATA_TRIPLET_SIZE,
+                                         OCMBUPD::MOD_PARSE_TAGGED_DATA_TRIPLET,
+                                         OCMBUPD::INVALID_DATA_TRIPLET_SIZE,
                                          l_allocSize,
                                          l_reqdSize,
                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -239,7 +239,7 @@ errlHndl_t parseTaggedDataTriplet(const uint8_t* i_tripletPtr,
             // Check that hash data is complete
             if(l_ttPtr->dataSize != HEADER_SHA512_SIZE)
             {
-                TRACFCOMP(g_trac_expupd, ERR_MRK
+                TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                       "parseTaggedDataTriplet: Invalid hash triplet size."
                       " expected[%u] actual[%u]",
                       HEADER_SHA512_SIZE,
@@ -247,16 +247,16 @@ errlHndl_t parseTaggedDataTriplet(const uint8_t* i_tripletPtr,
 
                /*@errorlog
                 * @errortype       ERRL_SEV_PREDICTIVE
-                * @moduleid        EXPUPD::MOD_PARSE_TAGGED_DATA_TRIPLET
-                * @reasoncode      EXPUPD::INVALID_HASH_TRIPLET_SIZE
+                * @moduleid        OCMBUPD::MOD_PARSE_TAGGED_DATA_TRIPLET
+                * @reasoncode      OCMBUPD::INVALID_HASH_TRIPLET_SIZE
                 * @userdata1       Expected Size
                 * @userdata2       Actual Size
                 * @devdesc         Incorrect hash size in OCMB image header
                 * @custdesc        Error occurred during system boot.
                 */
                 l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                         EXPUPD::MOD_PARSE_TAGGED_DATA_TRIPLET,
-                                         EXPUPD::INVALID_HASH_TRIPLET_SIZE,
+                                         OCMBUPD::MOD_PARSE_TAGGED_DATA_TRIPLET,
+                                         OCMBUPD::INVALID_HASH_TRIPLET_SIZE,
                                          HEADER_SHA512_SIZE,
                                          l_ttPtr->dataSize,
                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -269,7 +269,7 @@ errlHndl_t parseTaggedDataTriplet(const uint8_t* i_tripletPtr,
         else if(l_ttPtr->tagId == TAG_KEY_VALUE_PAIRS)
         {
             //trace up to MAX_BIN_TRACE bytes of the data in case it is useful
-            TRACFBIN(g_trac_expupd, "OCMB FW IMAGE KEY/VALUE DATA",
+            TRACFBIN(g_trac_ocmbupd, "OCMB FW IMAGE KEY/VALUE DATA",
                      l_dataStartPtr,
                      std::min(l_ttPtr->dataSize, MAX_BIN_TRACE));
 
@@ -284,22 +284,22 @@ errlHndl_t parseTaggedDataTriplet(const uint8_t* i_tripletPtr,
         else
         {
             //unsupported tag id.
-            TRACFCOMP(g_trac_expupd, ERR_MRK
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                       "parseTaggedDataTriplet: Invalid tag id[%u].",
                       l_ttPtr->tagId);
 
            /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
-            * @moduleid        EXPUPD::MOD_PARSE_TAGGED_DATA_TRIPLET
-            * @reasoncode      EXPUPD::INVALID_TAG_ID
+            * @moduleid        OCMBUPD::MOD_PARSE_TAGGED_DATA_TRIPLET
+            * @reasoncode      OCMBUPD::INVALID_TAG_ID
             * @userdata1       tag id
             * @userdata2       <unused>
             * @devdesc         Invalid tag id found in OCMB image header
             * @custdesc        Error occurred during system boot.
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                         EXPUPD::MOD_PARSE_TAGGED_DATA_TRIPLET,
-                                         EXPUPD::INVALID_TAG_ID,
+                                         OCMBUPD::MOD_PARSE_TAGGED_DATA_TRIPLET,
+                                         OCMBUPD::INVALID_TAG_ID,
                                          l_ttPtr->tagId,
                                          0,
                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -345,8 +345,8 @@ errlHndl_t find_ocmbfw_ext_image(const ocmbfw_ext_image_info*& o_img,
     else
     {
         /*@
-         *@moduleid         EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
-         *@reasoncode       EXPUPD::FW_IMAGE_MISSING
+         *@moduleid         OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE
+         *@reasoncode       OCMBUPD::FW_IMAGE_MISSING
          *@userdata1[0:15]  Number of images in OCMBFW PNOR partition
          *@userdata1[16:23] OCMB type searched for
          *@userdata1[24:31] Image type searched for
@@ -357,8 +357,8 @@ errlHndl_t find_ocmbfw_ext_image(const ocmbfw_ext_image_info*& o_img,
          *@custdesc         Error occurred during system boot.
          */
         errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                       EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
-                                       EXPUPD::FW_IMAGE_MISSING,
+                                       OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
+                                       OCMBUPD::FW_IMAGE_MISSING,
                                        SrcUserData(bits{0 , 15}, i_hdr->num_images,
                                                    bits{16, 23}, i_ocmb_type,
                                                    bits{24, 31}, i_image_type,
@@ -366,7 +366,7 @@ errlHndl_t find_ocmbfw_ext_image(const ocmbfw_ext_image_info*& o_img,
                                                    bits{40, 47}, i_dd_level_minor),
                                        0,
                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-        errl->collectTrace(EXPUPD_COMP_NAME);
+        errl->collectTrace(OCMBUPD_COMP_NAME);
     }
 
     return errl;
@@ -420,24 +420,24 @@ errlHndl_t get_ocmbfw_ext_pnor_section_header(const ocmbfw_ext_pnor_section_head
     if (basehdr->majorVersion != V2_BASE_HEADER_VERSION_MAJOR
         || basehdr->minorVersion != V2_BASE_HEADER_VERSION_MINOR)
     {
-        TRACFCOMP(g_trac_expupd, ERR_MRK
+        TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                   "get_ocmbfw_ext_pnor_section_header: Unsupported header version: %u.%u",
                   basehdr->majorVersion, basehdr->minorVersion);
 
-        TRACFBIN(g_trac_expupd, "OCMBFW base header", basehdr, basehdr->headerSize);
+        TRACFBIN(g_trac_ocmbupd, "OCMBFW base header", basehdr, basehdr->headerSize);
 
         /*@
          *@errortype       ERRL_SEV_PREDICTIVE
-         *@moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
-         *@reasoncode      EXPUPD::INVALID_HEADER_VERSION
+         *@moduleid        OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE
+         *@reasoncode      OCMBUPD::INVALID_HEADER_VERSION
          *@userdata1       majorVersion
          *@userdata2       minorVersion
          *@devdesc         Invalid header version for OCMB Flash Image
          *@custdesc        Error occurred during system boot.
          */
         errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                       EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
-                                       EXPUPD::INVALID_HEADER_VERSION,
+                                       OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
+                                       OCMBUPD::INVALID_HEADER_VERSION,
                                        basehdr->majorVersion,
                                        basehdr->minorVersion,
                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -449,23 +449,23 @@ errlHndl_t get_ocmbfw_ext_pnor_section_header(const ocmbfw_ext_pnor_section_head
 
     if (o_hdr->header_version != OCMBFW_EXT_PARTITION_VERSION_1)
     {
-        TRACFCOMP(g_trac_expupd,
+        TRACFCOMP(g_trac_ocmbupd,
                   ERR_MRK"get_ocmbfw_ext_pnor_section_header: "
                   "Invalid OCMBFW extended header version %u",
                   o_hdr->header_version);
 
         /*@
          *@errortype       ERRL_SEV_PREDICTIVE
-         *@moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
-         *@reasoncode      EXPUPD::OCMB_INVALID_EXT_HEADER_VERSION
+         *@moduleid        OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE
+         *@reasoncode      OCMBUPD::OCMB_INVALID_EXT_HEADER_VERSION
          *@userdata1       Unsupported OCMBFW extended header version
          *@userdata2       Unused.
          *@devdesc         Unsupported OCMBFW extended header version.
          *@custdesc        Error occurred during system boot.
          */
         errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                       EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
-                                       EXPUPD::OCMB_INVALID_EXT_HEADER_VERSION,
+                                       OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
+                                       OCMBUPD::OCMB_INVALID_EXT_HEADER_VERSION,
                                        o_hdr->header_version,
                                        0,
                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -476,7 +476,7 @@ errlHndl_t get_ocmbfw_ext_pnor_section_header(const ocmbfw_ext_pnor_section_head
 
     if (errl)
     {
-        errl->collectTrace(EXPUPD_COMP_NAME);
+        errl->collectTrace(OCMBUPD_COMP_NAME);
     }
 
     return errl;
@@ -500,7 +500,7 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
         reinterpret_cast<const uint8_t*>(i_imageStart);
     errlHndl_t l_err = nullptr;
 
-    TRACFCOMP(g_trac_expupd,
+    TRACFCOMP(g_trac_ocmbupd,
               ENTER_MRK "ocmbFwValidateImage(): startAddr[0x%016x] size[%u]",
                       i_imageStart, i_imageSize);
 
@@ -525,23 +525,23 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
         // Check input parameters
         if((!l_imageStartPtr) || (i_imageSize < l_minHeaderSize))
         {
-            TRACFCOMP(g_trac_expupd, ERR_MRK
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                       "ocmbFwValidateImage: Invalid image address[%p] or"
                       " size[%u]",
                       l_imageStartPtr, i_imageSize);
 
            /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
-            * @moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
-            * @reasoncode      EXPUPD::INVALID_PARMS
+            * @moduleid        OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE
+            * @reasoncode      OCMBUPD::INVALID_PARMS
             * @userdata1       i_imageStart
             * @userdata2       i_imageSize
             * @devdesc         Invalid size or address for OCMB Flash Image
             * @custdesc        Error occurred during system boot.
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                           EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
-                                           EXPUPD::INVALID_PARMS,
+                                           OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
+                                           OCMBUPD::INVALID_PARMS,
                                            i_imageStart,
                                            i_imageSize,
                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -554,22 +554,22 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
         // Check eye catcher value
         if(l_header->eyeCatcher != EYE_CATCHER_VALUE)
         {
-            TRACFCOMP(g_trac_expupd, ERR_MRK
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                       "ocmbFwValidateImage: Invalid eye catcher value: "
                       "expected[0x%016llx] actual[0x%016llx]",
                       EYE_CATCHER_VALUE, l_header->eyeCatcher);
            /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
-            * @moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
-            * @reasoncode      EXPUPD::INVALID_EYE_CATCHER
+            * @moduleid        OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE
+            * @reasoncode      OCMBUPD::INVALID_EYE_CATCHER
             * @userdata1       Expected Value
             * @userdata2       Actual Value
             * @devdesc         Invalid eye catcher value for OCMB Flash Image
             * @custdesc        Error occurred during system boot.
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                           EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
-                                           EXPUPD::INVALID_EYE_CATCHER,
+                                           OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
+                                           OCMBUPD::INVALID_EYE_CATCHER,
                                            EYE_CATCHER_VALUE,
                                            l_header->eyeCatcher,
                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -599,23 +599,23 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
         //Check that header size is within min/max range and 8byte aligned
         if((l_header->headerSize < l_minHeaderSize) ||
            (l_header->headerSize > l_maxHeaderSize) ||
-           !EXPUPD_8BYTE_ALIGNED(l_header->headerSize))
+           !OCMBUPD_8BYTE_ALIGNED(l_header->headerSize))
         {
-            TRACFCOMP(g_trac_expupd, ERR_MRK
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                       "ocmbFwValidateImage: Unsupported header size: %u bytes",
                       l_header->headerSize);
            /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
-            * @moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
-            * @reasoncode      EXPUPD::INVALID_HEADER_SIZE
+            * @moduleid        OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE
+            * @reasoncode      OCMBUPD::INVALID_HEADER_SIZE
             * @userdata1       header size
             * @userdata2       maximum allowed size
             * @devdesc         Invalid header size for OCMB Flash Image
             * @custdesc        Error occurred during system boot.
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                           EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
-                                           EXPUPD::INVALID_HEADER_SIZE,
+                                           OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
+                                           OCMBUPD::INVALID_HEADER_SIZE,
                                            l_header->headerSize,
                                            l_maxHeaderSize,
                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -623,7 +623,7 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
         }
 
         // Trace header information.
-        TRACFCOMP(g_trac_expupd, "OCMB HEADER:  Version[%u.%u] size[%u]"
+        TRACFCOMP(g_trac_ocmbupd, "OCMB HEADER:  Version[%u.%u] size[%u]"
                   " triplets[%u]",
                  l_header->majorVersion,
                  l_header->minorVersion,
@@ -638,7 +638,7 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
 
             if (l_err)
             {
-                TRACFCOMP(g_trac_expupd,
+                TRACFCOMP(g_trac_ocmbupd,
                           ERR_MRK"ocmbFwValidateImage: No Explorer firmware found in PNOR partition");
 
                 break;
@@ -650,7 +650,7 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
             o_imageInfo.fwVersionStrPtr = reinterpret_cast<const uint8_t*>("http://www.ibm.com");
             o_imageInfo.fwVersionStrSize = strlen(reinterpret_cast<const char*>(o_imageInfo.fwVersionStrPtr));
 
-            TRACFCOMP(g_trac_expupd,
+            TRACFCOMP(g_trac_ocmbupd,
                       "ocmbFwValidateImage: Found Explorer firmware image: Pointer=%p, size=%d",
                       o_imageInfo.imagePtr, o_imageInfo.imageSize);
         }
@@ -678,7 +678,7 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
                                                l_numBytes);
                 if(l_err)
                 {
-                    TRACFCOMP(g_trac_expupd, ERR_MRK
+                    TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                               "ocmbFwValidateImage: Failed parsing tagged data"
                               " triplet %u of %u. "
                               TRACE_ERR_FMT,
@@ -699,20 +699,20 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
         // Check if we found a SHA512 hash in the header
         if(!o_imageInfo.imageSHA512HashPtr)
         {
-            TRACFCOMP(g_trac_expupd, ERR_MRK
+            TRACFCOMP(g_trac_ocmbupd, ERR_MRK
                       "ocmbFwValidateImage: No SHA512 Hash found in header!");
            /*@errorlog
             * @errortype       ERRL_SEV_PREDICTIVE
-            * @moduleid        EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE
-            * @reasoncode      EXPUPD::MISSING_SHA512_HASH
+            * @moduleid        OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE
+            * @reasoncode      OCMBUPD::MISSING_SHA512_HASH
             * @userdata1       <unused>
             * @userdata2       <unused>
             * @devdesc         Missing SHA512 hash in OCMB Flash Image
             * @custdesc        Error occurred during system boot.
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                           EXPUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
-                                           EXPUPD::MISSING_SHA512_HASH,
+                                           OCMBUPD::MOD_OCMB_FW_VALIDATE_IMAGE,
+                                           OCMBUPD::MISSING_SHA512_HASH,
                                            0, 0,
                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             break;
@@ -721,12 +721,12 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
         //** Header is valid if we made it this far **
 
         // Trace the SHA512 hash
-        TRACFBIN(g_trac_expupd, "OCMB FW IMAGE SHA512 HASH",
+        TRACFBIN(g_trac_ocmbupd, "OCMB FW IMAGE SHA512 HASH",
                  o_imageInfo.imageSHA512HashPtr, HEADER_SHA512_SIZE);
 
     }while(0);
 
-    TRACFCOMP(g_trac_expupd, EXIT_MRK "ocmbFwValidateImage()");
+    TRACFCOMP(g_trac_ocmbupd, EXIT_MRK "ocmbFwValidateImage()");
     return l_err;
 }
 
@@ -741,12 +741,12 @@ void unload_ocmbfw_pnor_partition(const void*)
 
     if (l_errl)
     {
-        TRACFCOMP(g_trac_expupd,
+        TRACFCOMP(g_trac_ocmbupd,
                   "unload_ocmbfw_pnor_partition: Failed to unload OCMBFW PNOR partition! "
                   TRACE_ERR_FMT,
                   TRACE_ERR_ARGS(l_errl));
-        l_errl->collectTrace(EXPUPD_COMP_NAME);
-        errlCommit(l_errl, EXPUPD_COMP_ID);
+        l_errl->collectTrace(OCMBUPD_COMP_NAME);
+        errlCommit(l_errl, OCMBUPD_COMP_ID);
     }
 #endif
 }
@@ -804,4 +804,4 @@ ocmbfw_owning_ptr_t load_ocmbfw_pnor_section(errlHndl_t& o_err)
     return owning_ptr;
 }
 
-} //namespace expupd
+} //namespace ocmbupd
