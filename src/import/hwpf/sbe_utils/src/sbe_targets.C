@@ -36,7 +36,7 @@ ReturnCode find_ocmb_chip_type(
 {
     FAPI_DBG("find_ocmb_chip_type Entering");
     ATTR_BUS_POS_Type l_bus_pos;
-    FAPI_TRY(FAPI_ATTR_GET(ATTR_BUS_POS, i_target, l_bus_pos),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BUS_POS, i_target, l_bus_pos),
              "ATTR_BUS_POS read failed");
     o_sbe_chip_type = (SbeChipType_t)(CHIP_TYPE_ODYSSEY_00 + l_bus_pos);
 
@@ -52,7 +52,6 @@ ReturnCode find_chip_type(
 
     o_sbe_chip_type = CHIP_TYPE_ANY;
 
-fapi_try_exit:
     return current_err;
 }
 
@@ -90,7 +89,6 @@ ReturnCode convertToSbeTarget<TARGET_TYPE_SYSTEM>(
     o_sbe_targ.iv_targ_type = LOG_TARGET_TYPE_SYSTEM;
     o_sbe_targ.iv_inst_num = 0;
 
-fapi_try_exit:
     return current_err;
 }
 
@@ -102,7 +100,6 @@ ReturnCode convertToSbeTarget<TARGET_TYPE_OCMB_CHIP>(
     o_sbe_targ.iv_targ_type = LOG_TARGET_TYPE_OCMB_CHIP;
     o_sbe_targ.iv_inst_num = 0;
 
-fapi_try_exit:
     return current_err;
 }
 

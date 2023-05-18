@@ -181,7 +181,6 @@ ReturnCode SbeAttributeUpdateFileGenerator::_addAttribute(
             iv_target_sections.back()).addAttribute(i_attr_entry, i_val);
     }
 
-fapi_try_exit:
     return current_err;
 }
 

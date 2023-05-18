@@ -41,17 +41,17 @@
 
 {% for attr in attr_data.getToSbeSystemAttributes() %}
 {
-    {{attr.name}}_Type l_val;
-    FAPI_TRY(FAPI_ATTR_GET({{attr.name}}, l_sysTarget, l_val),
+    fapi2::{{attr.name}}_Type l_val;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::{{attr.name}}, l_sysTarget, l_val),
                 "{{attr.name}} read failed");
     FAPI_DBG("updating 0x%08X, size=%d, value=0x%8X",
-                {{attr.name}}, sizeof({{attr.name}}_Type), l_val);
+                fapi2::{{attr.name}}, sizeof(fapi2::{{attr.name}}_Type), l_val);
 
     FAPI_TRY(l_update_gen.addAttribute(
                     l_sysTarget,
-                    {{attr.name}},
+                    fapi2::{{attr.name}},
                     &l_val,
-                    sizeof({{attr.name}}_Type),
+                    sizeof(fapi2::{{attr.name}}_Type),
                     sizeof({{attr.value_type}}_t)),
                 "{{attr.name}} addAttribute failed");
 }
@@ -59,17 +59,17 @@
 
 {% for attr in attr_data.getToSbeOdysseyChipAttributes() %}
 {
-    {{attr.name}}_Type l_val;
-    FAPI_TRY(FAPI_ATTR_GET({{attr.name}}, i_ocmb_targ, l_val),
+    fapi2::{{attr.name}}_Type l_val;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::{{attr.name}}, i_ocmb_targ, l_val),
                 "{{attr.name}} read failed");
     FAPI_DBG("updating 0x%08X, size=%d, value=0x%8X",
-                {{attr.name}}, sizeof({{attr.name}}_Type), l_val);
+                fapi2::{{attr.name}}, sizeof(fapi2::{{attr.name}}_Type), l_val);
 
     FAPI_TRY(l_update_gen.addAttribute(
                     i_ocmb_targ,
-                    {{attr.name}},
+                    fapi2::{{attr.name}},
                     &l_val,
-                    sizeof({{attr.name}}_Type),
+                    sizeof(fapi2::{{attr.name}}_Type),
                     sizeof({{attr.value_type}}_t)),
                 "{{attr.name}} addAttribute failed");
 }
@@ -82,17 +82,17 @@ for(auto& l_child_targ : i_ocmb_targ.getChildren<{{targ}}>(TARGET_STATE_PRESENT)
 {
     {% for attr in attr_data.to_sbe_list[targ] %}
     {
-        {{attr.name}}_Type l_val;
-        FAPI_TRY(FAPI_ATTR_GET({{attr.name}}, l_child_targ, l_val),
+        fapi2::{{attr.name}}_Type l_val;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::{{attr.name}}, l_child_targ, l_val),
                     "{{attr.name}} read failed");
         FAPI_DBG("updating 0x%08X, size=%d, value=0x%8X",
-                    {{attr.name}}, sizeof({{attr.name}}_Type), l_val);
+                    fapi2::{{attr.name}}, sizeof(fapi2::{{attr.name}}_Type), l_val);
 
         FAPI_TRY(l_update_gen.addAttribute(
                         l_child_targ,
-                        {{attr.name}},
+                        fapi2::{{attr.name}},
                         &l_val,
-                        sizeof({{attr.name}}_Type),
+                        sizeof(fapi2::{{attr.name}}_Type),
                         sizeof({{attr.value_type}}_t)),
                     "{{attr.name}} addAttribute failed");
     }

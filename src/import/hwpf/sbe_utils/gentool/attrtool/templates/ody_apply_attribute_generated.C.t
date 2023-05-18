@@ -70,20 +70,20 @@ ReturnCode ody_apply_sbe_attribute_row<{{target_type}}>(
         switch (l_attrEntry.iv_attrId)
         {
         {% for attr in attr_data.from_sbe_list[target_type] %}
-            case {{attr.name}}:
+            case fapi2::{{attr.name}}:
             {
              {% if attr.fromSbeSync(attr_data.chip_type, target_type) %}
-                {{attr.name}}_Type l_val;
-                FAPI_TRY(l_attr.getAttrValue(&l_val, sizeof({{attr.name}}_Type),
+                fapi2::{{attr.name}}_Type l_val;
+                FAPI_TRY(l_attr.getAttrValue(&l_val, sizeof(fapi2::{{attr.name}}_Type),
                             sizeof({{attr.value_type}}_t)),
                          "getAttrValue failed for the attribute {{attr.name}}");
-                l_rc = FAPI_ATTR_SET({{attr.name}}, i_targ, l_val);
+                l_rc = FAPI_ATTR_SET(fapi2::{{attr.name}}, i_targ, l_val);
                 l_{{attr.name}}_found = true;
                 if (l_rc != FAPI2_RC_SUCCESS)
                 {
                     FAPI_INF("FAPI_ATTR_SET failed for the attribute {{attr.name}}");
                     o_errors.emplace_back({{target_type}}, i_targ_parser.getInstNum(),
-                                          {{attr.name}}, SBE_ATTRIBUTE_RC_SET_ATTR_FAILED);
+                                          fapi2::{{attr.name}}, SBE_ATTRIBUTE_RC_SET_ATTR_FAILED);
                     fapi2::current_err = FAPI2_RC_SUCCESS;
                 }
              {% else %}
@@ -109,7 +109,7 @@ ReturnCode ody_apply_sbe_attribute_row<{{target_type}}>(
         // attribute expected to be received was not found/posted
         FAPI_INF("Attribute {{attr.name}} expected by host but not received");
         o_errors.emplace_back({{target_type}}, 0xFF,
-                              {{attr.name}}, SBE_ATTRIBUTE_RC_EXPECTED_BUT_NOT_RECEIVED);
+                              fapi2::{{attr.name}}, SBE_ATTRIBUTE_RC_EXPECTED_BUT_NOT_RECEIVED);
     }
         {% endif %}
     {% endfor %}
