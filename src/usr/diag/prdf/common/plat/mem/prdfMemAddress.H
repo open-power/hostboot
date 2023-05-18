@@ -81,9 +81,11 @@ class MemAddr
     /**
      * @brief Creates a MemAddr from a mainline memory read address.
      * @param i_addr 64-bit address.
+     * @param i_trgt OCMB chip target.
      */
     template<TARGETING::TYPE T>
-    static MemAddr fromReadAddr( uint64_t i_addr );
+    static MemAddr fromReadAddr( uint64_t i_addr,
+                                 TARGETING::TargetHandle_t i_trgt );
 
     /**
      * @brief Creates a MemAddr from the current maintenance address.
@@ -96,13 +98,14 @@ class MemAddr
 
     /**
      * @brief  Converts internal data structure to a maintenance address.
+     * @param  i_trgt OCMB chip target.
      * @return A uint64_t version of the address.
      * @note   Does not include error type. This is because in most cases we
      *         will use this function to write out to hardware and in doing so
      *         we will want to clear the status bits anyway.
      */
     template<TARGETING::TYPE T>
-    uint64_t toMaintAddr() const;
+    uint64_t toMaintAddr( TARGETING::TargetHandle_t i_trgt ) const;
 
     /**
      * @brief  Returns a right justified uint64_t version of the address that

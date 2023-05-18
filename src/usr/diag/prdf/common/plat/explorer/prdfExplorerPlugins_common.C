@@ -614,7 +614,7 @@ int32_t AnalyzeFetchMpe_##RANK( ExtensibleChip * i_chip, \
                                 STEP_CODE_DATA_STRUCT & io_sc ) \
 { \
     MemRank rank ( RANK ); \
-    MemEcc::analyzeFetchMpe<TYPE_OCMB_CHIP>( i_chip, rank, io_sc ); \
+    MemEcc::analyzeFetchMpe<TYPE_OCMB_CHIP>( i_chip, rank, 0, io_sc ); \
     return SUCCESS; \
 } \
 PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeFetchMpe_##RANK );

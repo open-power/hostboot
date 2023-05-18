@@ -385,6 +385,97 @@ int32_t CollectOmiFfdc( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 }
 PRDF_PLUGIN_DEFINE( odyssey_ocmb, CollectOmiFfdc );
 
+//##############################################################################
+//
+//                               RDF_FIR
+//
+//##############################################################################
+
+/**
+ * @brief  RDF_FIR[1:8] - Mainline MPE.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+#define PLUGIN_FETCH_MPE_ERROR(PORT,RANK) \
+int32_t AnalyzeFetchMpe_##PORT##_##RANK( ExtensibleChip * i_chip, \
+                                         STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    MemRank rank ( RANK ); \
+    MemEcc::analyzeFetchMpe<TYPE_OCMB_CHIP>( i_chip, rank, PORT, io_sc ); \
+    return SUCCESS; \
+} \
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeFetchMpe_##PORT##_##RANK );
+
+PLUGIN_FETCH_MPE_ERROR(0,0);
+PLUGIN_FETCH_MPE_ERROR(0,1);
+PLUGIN_FETCH_MPE_ERROR(0,2);
+PLUGIN_FETCH_MPE_ERROR(0,3);
+PLUGIN_FETCH_MPE_ERROR(0,4);
+PLUGIN_FETCH_MPE_ERROR(0,5);
+PLUGIN_FETCH_MPE_ERROR(0,6);
+PLUGIN_FETCH_MPE_ERROR(0,7);
+PLUGIN_FETCH_MPE_ERROR(1,0);
+PLUGIN_FETCH_MPE_ERROR(1,1);
+PLUGIN_FETCH_MPE_ERROR(1,2);
+PLUGIN_FETCH_MPE_ERROR(1,3);
+PLUGIN_FETCH_MPE_ERROR(1,4);
+PLUGIN_FETCH_MPE_ERROR(1,5);
+PLUGIN_FETCH_MPE_ERROR(1,6);
+PLUGIN_FETCH_MPE_ERROR(1,7);
+
+#undef PLUGIN_FETCH_MPE_ERROR
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDF_FIR[9:10] - Mainline NCE and/or TCE.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchNceTce( ExtensibleChip * i_chip,
+                            STEP_CODE_DATA_STRUCT & io_sc )
+{
+    MemEcc::analyzeFetchNceTce<TYPE_OCMB_CHIP>( i_chip, io_sc );
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeFetchNceTce );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDF_FIR[14,17] - Mainline AUE and IAUE
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchAueIaue( ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[odyssey_ocmb::AnalyzeFetchAueIaue] "
+
+    MemAddr addr;
+    if ( SUCCESS != getMemReadAddr<TYPE_OCMB_CHIP>(i_chip,
+                                                   MemAddr::READ_AUE_ADDR,
+                                                   addr) )
+    {
+        PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x,READ_AUE_ADDR) failed",
+                  i_chip->getHuid() );
+    }
+    else
+    {
+        MemRank rank = addr.getRank();
+        MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
+        io_sc.service_data->SetCallout( mm, MRU_HIGH );
+    }
+
+    return SUCCESS; // nothing to return to rule code
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeFetchAueIaue );
+
 } // end namespace odyssey_ocmb
 
 } // end namespace PRDF

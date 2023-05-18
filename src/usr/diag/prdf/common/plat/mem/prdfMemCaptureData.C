@@ -159,7 +159,8 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
 
     do
     {
-        getMasterRanks<T>( i_trgt, masterRanks );
+        // TODO Odyssey - multiple port support
+        getMasterRanks<T>( i_trgt, 0, masterRanks );
         if( masterRanks.empty() )
         {
             PRDF_ERR( PRDF_FUNC "Master Rank list size is 0");
@@ -286,7 +287,8 @@ void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
     do
     {
         std::vector<MemRank> masterRanks;
-        getMasterRanks<T>( i_trgt, masterRanks );
+        // TODO Odyssey - multiple port support
+        getMasterRanks<T>( i_trgt, 0, masterRanks );
         if( masterRanks.empty() )
         {
             PRDF_ERR( PRDF_FUNC "Master Rank list size is 0");
@@ -368,7 +370,8 @@ void captureRowRepairVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
     do
     {
         std::vector<MemRank> masterRanks;
-        getMasterRanks<T>( i_trgt, masterRanks );
+        // TODO Odyssey - multiple port support
+        getMasterRanks<T>( i_trgt, 0, masterRanks );
         if( masterRanks.empty() )
         {
             PRDF_ERR( PRDF_FUNC "Master Rank list size is 0");

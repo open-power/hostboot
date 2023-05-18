@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,9 +82,10 @@ class MemIplCeStats
      *         analysis. Will also clear the scrub statistics counters when
      *         collection is complete.
      * @param  i_rank The rank the maintenance command stopped on.
+     * @param  i_port The target memory port.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    int32_t collectStats( const MemRank & i_rank );
+    int32_t collectStats( const MemRank & i_rank, uint8_t i_port );
 
     /**
      * @brief  Analyzes the maintenance statistics that were gathered, making

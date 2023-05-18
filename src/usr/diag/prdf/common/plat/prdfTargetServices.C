@@ -1108,25 +1108,22 @@ void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
 }
 
 template<>
-void getMasterRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
+void getMasterRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt, uint8_t i_port,
                                      std::vector<MemRank> & o_ranks,
                                      uint8_t i_ds )
 {
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
 
-    // TODO RTC 210072 - Explorer only has one port, however, multiple ports
-    // will be supported in the future. Updates will need to be made here so we
-    // can get the relevant port.
-    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
+    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, i_port );
     __getMasterRanks<TYPE_MEM_PORT>( memPort, o_ranks, i_ds );
 }
 
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-void getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
-                      uint8_t i_ds )
+void getSlaveRanks( TargetHandle_t i_trgt, uint8_t i_port,
+                    std::vector<MemRank> & o_ranks, uint8_t i_ds )
 {
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( T == getTargetType(i_trgt) );
@@ -1141,17 +1138,18 @@ void getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
             continue;
 
         // Get the number of slave ranks per master rank.
-        uint8_t numRanks = getNumRanksPerDimm<T>( i_trgt, ds );
+        uint8_t numRanks = getNumRanksPerDimm<T>( i_trgt, ds, i_port );
         if ( 0 == numRanks ) continue; // nothing to do
 
-        uint8_t numMasterRanks = getNumMasterRanksPerDimm<T>( i_trgt, ds );
+        uint8_t numMasterRanks = getNumMasterRanksPerDimm<T>( i_trgt, ds,
+                                                              i_port );
         PRDF_ASSERT( 0 < numMasterRanks ); // ATTR bug
 
         uint8_t numSlaveRanks = numRanks / numMasterRanks;
 
         // Get the current list of master ranks for this DIMM select
         std::vector<MemRank> tmpList;
-        getMasterRanks<T>( i_trgt, tmpList, ds );
+        getMasterRanks<T>( i_trgt, i_port, tmpList, ds );
 
         // Start inserting the slave ranks into the list.
         for ( auto & mrank : tmpList )
@@ -1167,7 +1165,7 @@ void getSlaveRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
 }
 
 template
-void getSlaveRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
+void getSlaveRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt, uint8_t i_port,
                                     std::vector<MemRank> & o_ranks,
                                     uint8_t i_ds );
 
@@ -1202,15 +1200,12 @@ uint8_t __getNumMasterRanksPerDimm( TargetHandle_t i_trgt, uint8_t i_ds )
 
 template<>
 uint8_t getNumMasterRanksPerDimm<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
-                                                  uint8_t i_ds )
+                                                  uint8_t i_ds, uint8_t i_port )
 {
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
 
-    // TODO RTC 210072 - Explorer only has one port, however, multiple ports
-    // will be supported in the future. Updates will need to be made here so we
-    // can get the relevant port.
-    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
+    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, i_port );
     return __getNumMasterRanksPerDimm<TYPE_MEM_PORT>( memPort, i_ds );
 }
 //------------------------------------------------------------------------------
@@ -1243,15 +1238,13 @@ uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt, uint8_t i_ds )
 }
 
 template<>
-uint8_t getNumRanksPerDimm<TYPE_OCMB_CHIP>(TargetHandle_t i_trgt, uint8_t i_ds)
+uint8_t getNumRanksPerDimm<TYPE_OCMB_CHIP>(TargetHandle_t i_trgt, uint8_t i_ds,
+                                           uint8_t i_port)
 {
     PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
 
-    // TODO RTC 210072 - Explorer only has one port, however, multiple ports
-    // will be supported in the future. Updates will need to be made here so we
-    // can get the relevant port.
-    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
+    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, i_port );
     return __getNumRanksPerDimm<TYPE_MEM_PORT>( memPort, i_ds );
 }
 

@@ -96,12 +96,11 @@ int32_t RcdParityError( ExtensibleChip * i_chip,
         if (getOcmbDataBundle(i_chip)->iv_rcdParityTh.thReached(io_sc))
         {
             std::vector<MemRank> list;
-            getSlaveRanks<TYPE_OCMB_CHIP>( i_chip->getTrgt(), list );
+            getSlaveRanks<TYPE_OCMB_CHIP>( i_chip->getTrgt(), 0, list );
             PRDF_ASSERT( !list.empty() ); // target configured with no ranks
 
             for ( const auto & r : list )
             {
-                // TODO Odyssey - need port update here
                 TdEntry * entry = new TpsEvent<TYPE_OCMB_CHIP>( i_chip, r, 0 );
                 MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( i_chip, entry );
                 uint32_t rc = MemDbUtils::handleTdEvent<TYPE_OCMB_CHIP>(i_chip,

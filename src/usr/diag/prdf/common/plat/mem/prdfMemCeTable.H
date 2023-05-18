@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,7 +134,7 @@ class MemCeTable
         MemAddr addr;                ///< Physical address of this entry
         uint8_t dram;                ///< The DRAM in which the CE was detected
         uint8_t dramPins;            ///< The failing pins of the DRAM
-        uint8_t portSlct;            ///< The port select of the DRAM (MBA only)
+        uint8_t portSlct;            ///< The port select of the DRAM
         bool    isHard;              ///< TRUE if a hard CE was detected
         bool    isDramSpared;        ///< TRUE if on spare DRAM
 

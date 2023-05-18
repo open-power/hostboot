@@ -67,7 +67,7 @@ uint32_t startInitialBgScrub( ExtensibleChip * i_chip )
     {
         // Get the first configured rank.
         std::vector<MemRank> ranklist;
-        PlatServices::getMasterRanks<T>( i_chip->getTrgt(), ranklist );
+        PlatServices::getMasterRanks<T>( i_chip->getTrgt(), 0, ranklist );
         PRDF_ASSERT( !ranklist.empty() ); // i_chip configured with no ranks
         MemRank rank = ranklist.front();
 

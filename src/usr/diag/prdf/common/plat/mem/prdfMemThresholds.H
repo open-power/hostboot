@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,14 +44,15 @@ class ExtensibleChip;
  * @post   Must callout if the count is greater than the returned values.
  * @param  i_chip      OCMB chip.
  * @param  i_rank      The rank for which the threshold is needed.
+ * @param  i_port      The target memory port.
  * @param  o_cePerDram CEs allowed per DRAM.
  * @param  o_cePerRank CEs allowed per rank per logical DIMM.
  * @param  o_cePerDimm CEs allowed per logical DIMM.
  */
 template <TARGETING::TYPE T>
 void getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
-                     uint32_t & o_cePerDram, uint32_t & o_cePerRank,
-                     uint32_t & o_cePerDimm );
+                     uint8_t i_port, uint32_t & o_cePerDram,
+                     uint32_t & o_cePerRank, uint32_t & o_cePerDimm );
 
 #ifdef __HOSTBOOT_MODULE
 

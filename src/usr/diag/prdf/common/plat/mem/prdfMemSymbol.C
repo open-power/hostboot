@@ -343,6 +343,7 @@ void MemSymbol::updateSpared(const MemSymbol & i_sp0,
 template<>
 uint32_t getMemReadSymbol<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                            const MemRank & i_rank,
+                                           uint8_t i_port,
                                            MemSymbol & o_sym1,
                                            MemSymbol & o_sym2 )
 {
@@ -368,14 +369,20 @@ uint32_t getMemReadSymbol<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             break;
         }
 
-        // MBSEVR[0:7]   = mainline NCE galois field
-        // MBSEVR[8:15]  = mainline NCE mask field
-        // MBSEVR[16:23] = mainline TCE galois field
-        // MBSEVR[24:31] = mainline TCE mask field
-        uint8_t nceGalois = reg->GetBitFieldJustified( 0,  8 );
-        uint8_t nceMask   = reg->GetBitFieldJustified( 8,  8 );
-        uint8_t tceGalois = reg->GetBitFieldJustified( 16, 8 );
-        uint8_t tceMask   = reg->GetBitFieldJustified( 24, 8 );
+        // MBSEVR[0:7]   = port0 mainline NCE galois field
+        // MBSEVR[8:15]  = port0 mainline NCE mask field
+        // MBSEVR[16:23] = port0 mainline TCE galois field
+        // MBSEVR[24:31] = port0 mainline TCE mask field
+        // Odyssey OCMBs only:
+        // MBSEVR[32:39] = port1 mainline NCE galois field
+        // MBSEVR[40:47] = port1 mainline NCE mask field
+        // MBSEVR[48:55] = port1 mainline TCE galois field
+        // MBSEVR[56:63] = port1 mainline TCE mask field
+
+        uint8_t nceGalois = reg->GetBitFieldJustified((i_port ? 32 :  0), 8);
+        uint8_t nceMask   = reg->GetBitFieldJustified((i_port ? 40 :  8), 8);
+        uint8_t tceGalois = reg->GetBitFieldJustified((i_port ? 48 : 16), 8);
+        uint8_t tceMask   = reg->GetBitFieldJustified((i_port ? 56 : 24), 8);
 
         // Get the NCE/TCE symbol.
         o_sym1 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank,

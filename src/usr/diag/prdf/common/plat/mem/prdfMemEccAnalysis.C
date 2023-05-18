@@ -433,7 +433,7 @@ uint32_t handleMpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 template<TARGETING::TYPE T>
 uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          STEP_CODE_DATA_STRUCT & io_sc )
+                          uint8_t i_port, STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemEcc::analyzeFetchMpe] "
 
@@ -462,12 +462,12 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 
         // There is only one address register and it will contain the latest
         // chip mark placed. So it is possible this address will be out of sync
-        // with the rank that reported the attention. In this case, we will
-        // simply fake an address with the correct rank and move on.
-        if ( i_rank != addr.getRank() )
+        // with the port/rank that reported the attention. In this case, we will
+        // simply fake an address with the correct port/rank and move on.
+        if ( i_rank != addr.getRank() || i_port != addr.getPort())
         {
-            o_rc = MemEcc::handleMpe<T>( i_chip, i_rank, UE_TABLE::FETCH_MPE,
-                                         io_sc );
+            o_rc = MemEcc::handleMpe<T>( i_chip, i_rank, i_port,
+                                         UE_TABLE::FETCH_MPE, io_sc );
         }
         else
         {
@@ -511,6 +511,7 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 template
 uint32_t analyzeFetchMpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                           const MemRank & i_rank,
+                                          uint8_t i_port,
                                           STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
@@ -642,7 +643,7 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
 
         // Get the symbols for the NCE/TCE attention.
         MemSymbol sym1, sym2;
-        o_rc = getMemReadSymbol<T>( i_chip, rank, sym1, sym2 );
+        o_rc = getMemReadSymbol<T>( i_chip, rank, addr.getPort(), sym1, sym2 );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemReadSymbol(0x%08x) failed",

@@ -76,14 +76,14 @@ TdRankListEntry MemTdCtlr<T>::getStopRank( const MemAddr & i_addr )
     if ( ::Util::isSimicsRunning() )
     {
         std::vector<MemRank> list;
-        getSlaveRanks<T>( iv_chip->getTrgt(), list );
+        getSlaveRanks<T>( iv_chip->getTrgt(), i_addr.getPort(), list );
         PRDF_ASSERT( !list.empty() ); // func target with no config ranks
 
         stopRank = list.back(); // Get the last configured rank.
     }
     // #####################################################################
 
-    return TdRankListEntry( iv_chip, stopRank );
+    return TdRankListEntry( iv_chip, stopRank, i_addr.getPort() );
 }
 
 //------------------------------------------------------------------------------

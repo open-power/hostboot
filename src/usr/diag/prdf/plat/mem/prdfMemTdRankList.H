@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,8 +45,9 @@ class TdRankListEntry
     TdRankListEntry() = delete; // Don't allow default contructor
 
     /** @brief Constructor from components. */
-    TdRankListEntry( ExtensibleChip * i_chip, const MemRank & i_rank ) :
-        iv_chip(i_chip), iv_rank(i_rank)
+    TdRankListEntry( ExtensibleChip * i_chip, const MemRank & i_rank,
+                     uint8_t i_port ) :
+        iv_chip(i_chip), iv_rank(i_rank), iv_port(i_port)
     {}
 
     /** @brief Accessor function. */
@@ -55,21 +56,28 @@ class TdRankListEntry
     /** @brief Accessor function. */
     MemRank getRank() const { return iv_rank; }
 
+    /** @brief Accessor function. */
+    uint8_t getPort() const { return iv_port; }
+
     /** @brief '==' operator */
     bool operator==( const TdRankListEntry & e ) const
     {
         PRDF_ASSERT( this->getChip()->getType() == e.getChip()->getType() );
         return ( this->getChip()->getPos() == e.getChip()->getPos() ) &&
-               ( this->iv_rank             == e.iv_rank             );
+               ( this->iv_rank             == e.iv_rank             ) &&
+               ( this->iv_port             == e.iv_port             );
     }
 
     /** @brief '<' operator */
     bool operator<( const TdRankListEntry & e ) const
     {
         PRDF_ASSERT( this->getChip()->getType() == e.getChip()->getType() );
-        return (  this->getChip()->getPos() <  e.getChip()->getPos()    ) ||
+        return ( (this->getChip()->getPos() < e.getChip()->getPos()) ) ||
                ( (this->getChip()->getPos() == e.getChip()->getPos()) &&
-                 (this->getRank()           <  e.getRank()          )   );
+                 (this->getPort() < e.getPort()) ) ||
+               ( (this->getChip()->getPos() == e.getChip()->getPos()) &&
+                 (this->getPort() == e.getPort()) &&
+                 (this->getRank() <  e.getRank()) );
     }
 
     /** @brief '<=' operator */
@@ -82,6 +90,7 @@ class TdRankListEntry
 
     ExtensibleChip * iv_chip = nullptr;    ///< OCMB chip.
     MemRank          iv_rank = MemRank(0); ///< Any rank on the OCMB
+    uint8_t          iv_port = 0;          ///< Memory port of the rank.
 };
 
 /**
@@ -136,7 +145,8 @@ class TdRankList
             // know the rank in the next entry will be the first rank of that
             // chip. So we can assume the rank in the next entry will be the
             // first rank of the target chip.
-            TdRankListEntry entry ( i_current.getChip(), next_it->getRank() );
+            TdRankListEntry entry ( i_current.getChip(), next_it->getRank(),
+                                    next_it->getPort() );
             next_it = std::find( iv_list.begin(), iv_list.end(), entry );
             PRDF_ASSERT( iv_list.end() != next_it ); // code bug
         }
@@ -167,13 +177,31 @@ inline TdRankList<TARGETING::TYPE_OCMB_CHIP>::TdRankList(
 
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
-    std::vector<MemRank> rankList;
-    getSlaveRanks<TYPE_OCMB_CHIP>( i_chip->getTrgt(), rankList );
-    PRDF_ASSERT( !rankList.empty() ); // target configured with no ranks
-
-    for ( auto & rank : rankList )
+    // Get ranks on port0
+    if (nullptr != getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT, 0))
     {
-        iv_list.push_back( TdRankListEntry(i_chip, rank) );
+        std::vector<MemRank> rankList0;
+        getSlaveRanks<TYPE_OCMB_CHIP>( i_chip->getTrgt(), 0, rankList0 );
+        PRDF_ASSERT( !rankList0.empty() ); // target configured with no ranks
+
+        for ( auto & rank : rankList0 )
+        {
+            iv_list.push_back( TdRankListEntry(i_chip, rank, 0) );
+        }
+    }
+
+    // Get ranks for port1
+    if (isOdysseyOcmb(i_chip->getTrgt()) &&
+        nullptr != getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT, 1))
+    {
+        std::vector<MemRank> rankList1;
+        getSlaveRanks<TYPE_OCMB_CHIP>( i_chip->getTrgt(), 1, rankList1 );
+        PRDF_ASSERT( !rankList1.empty() ); // target configured with no ranks
+
+        for ( auto & rank : rankList1 )
+        {
+            iv_list.push_back( TdRankListEntry(i_chip, rank, 1) );
+        }
     }
 }
 

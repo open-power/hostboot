@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,8 @@ void MemIplCeStats<TYPE_OCMB_CHIP>::banAnalysis( uint8_t i_dimmSlct )
 //------------------------------------------------------------------------------
 
 template<TYPE T>
-int32_t MemIplCeStats<T>::collectStats( const MemRank & i_stopRank )
+int32_t MemIplCeStats<T>::collectStats( const MemRank & i_stopRank,
+                                        uint8_t i_port )
 {
     #define PRDF_FUNC "[MemIplCeStats::collectStats] "
     int32_t o_rc = SUCCESS;
@@ -103,10 +104,9 @@ int32_t MemIplCeStats<T>::collectStats( const MemRank & i_stopRank )
         {
             uint8_t dimmSlct = i_stopRank.getDimmSlct();
             uint8_t dram = symData[i].symbol.getDram();
-            uint8_t portSlct = symData[i].symbol.getPortSlct();
 
             // Check if analysis is banned
-            DimmKey banKey = { dimmSlct, portSlct };
+            DimmKey banKey = { dimmSlct, i_port };
             if ( iv_bannedAnalysis[banKey] ) continue;
 
             // Update iv_ceSymbols with the new symbol data.
@@ -114,17 +114,17 @@ int32_t MemIplCeStats<T>::collectStats( const MemRank & i_stopRank )
             iv_ceSymbols.push_back (symkey );
 
             // Increment the soft CEs per DRAM.
-            DramKey dramKey = { i_stopRank, dram, portSlct };
+            DramKey dramKey = { i_stopRank, dram, i_port };
             iv_dramMap[dramKey] += symData[i].count;
 
             // Increment the soft CEs per half rank.
-            HalfRankKey rankKey = { i_stopRank, portSlct };
+            HalfRankKey rankKey = { i_stopRank, i_port };
             iv_rankMap[rankKey] += symData[i].count;
 
             // In case of dimm select, rank select does not matter
             MemRank dimmRank( dimmSlct << DIMM_SLCT_PER_PORT );
             // Increment the soft CEs per half dimm select.
-            HalfRankKey dsKey = { dimmRank, portSlct };
+            HalfRankKey dsKey = { dimmRank, i_port };
             iv_dsMap[dsKey] += symData[i].count;
         }
 
@@ -226,7 +226,8 @@ bool MemIplCeStats<T>::calloutCePerDram()
 
         // Get the CEs per DRAM threshold.
         uint32_t dramTh = 1, junk0, junk1;
-        getMnfgMemCeTh<T>( iv_chip, dramIter->first.rank, dramTh, junk0, junk1);
+        getMnfgMemCeTh<T>( iv_chip, dramIter->first.rank,
+                           dramIter->first.portSlct, dramTh, junk0, junk1);
 
         // Now, check if a threshold has been reached. If not, continue to the
         // next entry in iv_dsMap.
@@ -292,7 +293,8 @@ bool MemIplCeStats<T>::calloutCePerRank()
 
         // Get the CEs per rank threshold.
         uint32_t junk0, rankTh, junk1;
-        getMnfgMemCeTh<T>( iv_chip, rankIter->first.rank, junk0, rankTh, junk1);
+        getMnfgMemCeTh<T>( iv_chip, rankIter->first.rank,
+                           rankIter->first.portSlct, junk0, rankTh, junk1);
 
         // Now, check if a threshold has been reached. If not, continue to the
         // next entry in iv_rankMap.
@@ -358,7 +360,8 @@ bool MemIplCeStats<T>::calloutCePerDs()
 
         // Get the CEs per dimm select threshold.
         uint32_t junk0, junk1, dsTh;
-        getMnfgMemCeTh<T>( iv_chip, dsIter->first.rank, junk0, junk1, dsTh );
+        getMnfgMemCeTh<T>( iv_chip, dsIter->first.rank,
+                           dsIter->first.portSlct, junk0, junk1, dsTh );
 
         // Now, check if a threshold has been reached. If not, continue to the
         // next entry in iv_dsMap.

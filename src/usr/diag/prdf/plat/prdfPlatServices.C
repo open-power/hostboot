@@ -693,7 +693,7 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip, VT & o_startAddr,
     {
         // Get the rank list.
         std::vector<MemRank> rankList;
-        getMasterRanks<TT>( i_chip->getTrgt(), rankList, i_dimmSlct );
+        getMasterRanks<TT>( i_chip->getTrgt(), i_port, rankList, i_dimmSlct );
         if ( rankList.empty() )
         {
             PRDF_ERR( PRDF_FUNC "i_chip=0x%08x configured with no ranks",

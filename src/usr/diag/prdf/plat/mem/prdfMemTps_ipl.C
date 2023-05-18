@@ -71,7 +71,7 @@ uint32_t TpsEvent<T>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
         switch ( iv_phase )
         {
             case TD_PHASE_1: // Collect all CE stats.
-                o_rc = ceStats->collectStats( iv_rank );
+                o_rc = ceStats->collectStats( iv_rank, iv_port );
                 break;
 
             case TD_PHASE_2: // Collect hard CE stats.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -136,8 +136,8 @@ ThresholdResolution::ThresholdPolicy getRcdParityTh()
 
 template <TYPE T>
 void getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
-                     uint32_t & o_cePerDram, uint32_t & o_cePerRank,
-                     uint32_t & o_cePerDimm )
+                     uint8_t i_port, uint32_t & o_cePerDram,
+                     uint32_t & o_cePerRank, uint32_t & o_cePerDimm )
 {
     // Get base threshold ( 2GB ).
     uint8_t baseTh = getMnfgCeTh();
@@ -161,8 +161,8 @@ void getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
         uint8_t size = 4;
 
         // Get number of ranks per DIMM select.
-        uint8_t rankCount = getNumRanksPerDimm<T>( i_chip->getTrgt(),
-                                                   i_rank.getDimmSlct() );
+        uint8_t rankCount = getNumRanksPerDimm<T>(i_chip->getTrgt(),
+                                                  i_rank.getDimmSlct(), i_port);
         PRDF_ASSERT( 0 != rankCount ); // Code bug.
 
         // Get number of allowed CEs.
@@ -186,8 +186,8 @@ void getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
 // need these templates to avoid linker errors
 template
 void getMnfgMemCeTh<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-    const MemRank & i_rank, uint32_t & o_cePerDram, uint32_t & o_cePerRank,
-    uint32_t & o_cePerDimm );
+    const MemRank & i_rank, uint8_t i_port, uint32_t & o_cePerDram,
+    uint32_t & o_cePerRank, uint32_t & o_cePerDimm );
 
 } // end namespace PRDF
 

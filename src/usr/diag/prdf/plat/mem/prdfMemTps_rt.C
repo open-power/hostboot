@@ -390,7 +390,7 @@ uint32_t TpsEvent<T>::analyzeEccErrors( const uint32_t & i_eccAttns,
             io_sc.service_data->setSignature( iv_chip->getHuid(),
                                               PRDFSIG_MaintMPE );
 
-            o_rc = MemEcc::handleMpe<T>( iv_chip, iv_rank,
+            o_rc = MemEcc::handleMpe<T>( iv_chip, iv_rank, iv_port,
                                          UE_TABLE::SCRUB_MPE, io_sc );
             if ( SUCCESS != o_rc )
             {

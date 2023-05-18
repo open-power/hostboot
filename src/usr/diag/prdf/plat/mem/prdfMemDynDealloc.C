@@ -916,7 +916,8 @@ int32_t page( ExtensibleChip * i_chip, MemAddr i_addr )
     do
     {
         if ( !isEnabled() ) break; // nothing to do
-        PRDF_TRAC( PRDF_FUNC "i_addr=0x%016llx", i_addr.toMaintAddr<T>() );
+        PRDF_TRAC( PRDF_FUNC "i_addr=0x%016llx",
+                   i_addr.toMaintAddr<T>(i_chip->getTrgt()) );
 
         o_rc = getSystemAddr<T>( i_chip, i_addr, sysAddr);
         if( SUCCESS != o_rc )
@@ -960,8 +961,8 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank, const uint8_t& i_port )
             break;
         }
         PRDF_TRAC( PRDF_FUNC "getMemAddrRange: startAddr=0x%016llx, endAddr="
-                   "0x%016llx", startAddr.toMaintAddr<T>(),
-                   endAddr.toMaintAddr<T>() );
+                   "0x%016llx", startAddr.toMaintAddr<T>(i_chip->getTrgt()),
+                   endAddr.toMaintAddr<T>(i_chip->getTrgt()) );
 
         // Get the system addresses.
         uint64_t ssAddr = 0;
@@ -1013,8 +1014,8 @@ int32_t port( ExtensibleChip * i_chip, const uint8_t& i_port )
             break;
         }
         PRDF_TRAC( PRDF_FUNC "getMemAddrRange: startAddr=0x%016llx, endAddr="
-                   "0x%016llx", startAddr.toMaintAddr<T>(),
-                   endAddr.toMaintAddr<T>() );
+                   "0x%016llx", startAddr.toMaintAddr<T>(i_chip->getTrgt()),
+                   endAddr.toMaintAddr<T>(i_chip->getTrgt()) );
 
         // Get the system addresses.
         uint64_t ssAddr = 0;

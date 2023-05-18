@@ -390,6 +390,7 @@ bool isDramWidthX4(TARGETING::TargetHandle_t i_trgt);
 /**
  * @brief  Returns a sorted list of configured master ranks for an OCMB.
  * @param  i_trgt  OCMB_CHIP target.
+ * @param  i_port  Target memory port.
  * @param  o_ranks The returned list.
  * @param  i_ds    When used, this function will only return the list of ranks
  *                 for the target DIMM select. Otherwise, the default is to
@@ -399,13 +400,14 @@ bool isDramWidthX4(TARGETING::TargetHandle_t i_trgt);
  *         configured with no memory.
  */
 template<TARGETING::TYPE T>
-void getMasterRanks( TARGETING::TargetHandle_t i_trgt,
+void getMasterRanks( TARGETING::TargetHandle_t i_trgt, uint8_t i_port,
                      std::vector<MemRank> & o_ranks,
                      uint8_t i_ds = MAX_DIMM_PER_PORT );
 
 /**
  * @brief  Returns a sorted list of configured slave ranks for an OCMB.
  * @param  i_trgt  OCMB_CHIP target.
+ * @param  i_port  Target memory port.
  * @param  o_ranks The returned list.
  * @param  i_ds    When used, this function will only return the list of ranks
  *                 for the target DIMM select. Otherwise, the default is to
@@ -415,7 +417,7 @@ void getMasterRanks( TARGETING::TargetHandle_t i_trgt,
  *         configured with no memory.
  */
 template<TARGETING::TYPE T>
-void getSlaveRanks( TARGETING::TargetHandle_t i_trgt,
+void getSlaveRanks( TARGETING::TargetHandle_t i_trgt, uint8_t i_port,
                     std::vector<MemRank> & o_ranks,
                     uint8_t i_ds = MAX_DIMM_PER_PORT );
 
@@ -423,21 +425,24 @@ void getSlaveRanks( TARGETING::TargetHandle_t i_trgt,
  * @brief  Obtains the number of master ranks per DIMM select.
  * @param  i_trgt OCMB_CHIP target.
  * @param  i_ds   DIMM select.
+ * @param  i_port Target memory port.
  * @return Total number of master ranks configured per DIMM select.
  */
 template<TARGETING::TYPE T>
 uint8_t getNumMasterRanksPerDimm( TARGETING::TargetHandle_t i_trgt,
-                                  uint8_t i_ds );
+                                  uint8_t i_ds, uint8_t i_port );
 
 /**
  * @brief  Obtains the total number of ranks (including slave ranks) per DIMM
  *         select.
  * @param  i_trgt OCMB_CHIP target.
  * @param  i_ds   DIMM select.
+ * @param  i_port Target memory port.
  * @return Total number of ranks configured per DIMM select.
  */
 template<TARGETING::TYPE T>
-uint8_t getNumRanksPerDimm( TARGETING::TargetHandle_t i_trgt, uint8_t i_ds );
+uint8_t getNumRanksPerDimm( TARGETING::TargetHandle_t i_trgt, uint8_t i_ds,
+                            uint8_t i_port );
 
 /**
  * @brief   Checks if the input OCMB target is an Odyssey OCMB

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -230,6 +230,7 @@ class MemSymbol
  * @brief  Reads the memory NCE/TCE vector trap register from hardware.
  * @param  i_chip   OCMB_CHIP.
  * @param  i_rank   The rank this symbol is on.
+ * @param  i_port   The port this symbol is on.
  * @param  o_sym1   The first symbol. Should always be valid for both NCE/TCE.
  * @param  o_sym2   The second symbol. Only valid for TCEs.
  * @note   For OCMBs, both NCEs and TCEs report to the same error vector and
@@ -240,7 +241,8 @@ class MemSymbol
  */
 template<TARGETING::TYPE T>
 uint32_t getMemReadSymbol( ExtensibleChip * i_chip, const MemRank & i_rank,
-                           MemSymbol & o_sym1, MemSymbol & o_sym2 );
+                           uint8_t i_port, MemSymbol & o_sym1,
+                           MemSymbol & o_sym2 );
 
 } // end namespace PRDF
 

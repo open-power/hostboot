@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ uint32_t MemCeTable<T>::addEntry( const MemAddr & i_addr,
     uint32_t o_rc = NO_TH_REACHED;
 
     TableData data (i_addr, i_symbol.getDram(), i_symbol.getDramPins(),
-                    i_symbol.getPortSlct(), i_isHard, i_symbol.isDramSpared());
+                    i_addr.getPort(), i_isHard, i_symbol.isDramSpared());
 
     // First, check if the entry already exists. If so, increment its count and
     // move it to the end of the queue.
@@ -105,7 +105,8 @@ uint32_t MemCeTable<T>::addEntry( const MemAddr & i_addr,
     {
         // Get the MNFG CE thresholds.
         uint32_t dramTh, rankTh, dimmTh;
-        getMnfgMemCeTh<T>( iv_chip, thisRank, dramTh, rankTh, dimmTh );
+        getMnfgMemCeTh<T>( iv_chip, thisRank, i_addr.getPort(), dramTh, rankTh,
+                           dimmTh );
 
         // The returned values are the number allowed. Add 1 to get threshold.
         dramTh++; rankTh++; dimmTh++;
@@ -114,7 +115,7 @@ uint32_t MemCeTable<T>::addEntry( const MemAddr & i_addr,
         uint32_t dramCount = 0, rankCount = 0, dimmCount = 0;
         for ( auto & entry : iv_table )
         {
-            if ( i_symbol.getPortSlct() != entry.portSlct ) continue;
+            if ( i_addr.getPort() != entry.portSlct ) continue;
 
             MemRank itRank = entry.addr.getRank();
 

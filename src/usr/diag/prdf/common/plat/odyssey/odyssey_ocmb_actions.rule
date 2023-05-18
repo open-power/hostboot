@@ -456,103 +456,83 @@ actionclass mcbist_program_complete
 };
 
 /** Verify Chip Mark */
-# TODO
 actionclass verify_chip_mark_port0_rank0
 {
-    #funccall("AnalyzeFetchMpe_0");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_0_0");
 };
 actionclass verify_chip_mark_port0_rank1
 {
-    #funccall("AnalyzeFetchMpe_1");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_0_1");
 };
 actionclass verify_chip_mark_port0_rank2
 {
-    #funccall("AnalyzeFetchMpe_2");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_0_2");
 };
 actionclass verify_chip_mark_port0_rank3
 {
-    #funccall("AnalyzeFetchMpe_3");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_0_3");
 };
 actionclass verify_chip_mark_port0_rank4
 {
-    #funccall("AnalyzeFetchMpe_4");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_0_4");
 };
 actionclass verify_chip_mark_port0_rank5
 {
-    #funccall("AnalyzeFetchMpe_5");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_0_5");
 };
 actionclass verify_chip_mark_port0_rank6
 {
-    #funccall("AnalyzeFetchMpe_6");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_0_6");
 };
 actionclass verify_chip_mark_port0_rank7
 {
-    #funccall("AnalyzeFetchMpe_7");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_0_7");
 };
 
 actionclass verify_chip_mark_port1_rank0
 {
-    #funccall("AnalyzeFetchMpe_0");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_1_0");
 };
 actionclass verify_chip_mark_port1_rank1
 {
-    #funccall("AnalyzeFetchMpe_1");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_1_1");
 };
 actionclass verify_chip_mark_port1_rank2
 {
-    #funccall("AnalyzeFetchMpe_2");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_1_2");
 };
 actionclass verify_chip_mark_port1_rank3
 {
-    #funccall("AnalyzeFetchMpe_3");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_1_3");
 };
 actionclass verify_chip_mark_port1_rank4
 {
-    #funccall("AnalyzeFetchMpe_4");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_1_4");
 };
 actionclass verify_chip_mark_port1_rank5
 {
-    #funccall("AnalyzeFetchMpe_5");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_1_5");
 };
 actionclass verify_chip_mark_port1_rank6
 {
-    #funccall("AnalyzeFetchMpe_6");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_1_6");
 };
 actionclass verify_chip_mark_port1_rank7
 {
-    #funccall("AnalyzeFetchMpe_7");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchMpe_1_7");
 };
 
 /** Mainline NCE/TCE handling */
 actionclass mainline_nce_tce_handling
 {
-    # TODO
-    #funccall("AnalyzeFetchNceTce");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchNceTce");
 };
 
 /** Handle Mainline AUEs/IAUEs */
 actionclass mainline_aue_iaue_handling0_chnlFail
 {
     SueSource;
-    # TODO
-    #funccall("AnalyzeFetchAueIaue");
+    funccall("AnalyzeFetchAueIaue");
     mem_port0_L;
     threshold1;
     funccall("returnNoClearFirBits");
@@ -561,8 +541,7 @@ actionclass mainline_aue_iaue_handling0_chnlFail
 actionclass mainline_aue_iaue_handling1_chnlFail
 {
     SueSource;
-    # TODO
-    #funccall("AnalyzeFetchAueIaue");
+    funccall("AnalyzeFetchAueIaue");
     mem_port1_L;
     threshold1;
     funccall("returnNoClearFirBits");

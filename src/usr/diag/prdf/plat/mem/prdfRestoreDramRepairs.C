@@ -147,7 +147,8 @@ void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_portTrgt,
     if ( !i_nvdimmNoGard )
     {
         std::vector<MemRank> ranks;
-        getMasterRanks<T>( i_portTrgt, ranks, getDimmSlct(i_dimmTrgt) );
+        // TODO Odyssey - needs multiple port support
+        getMasterRanks<T>( i_portTrgt, 0, ranks, getDimmSlct(i_dimmTrgt) );
 
         for ( auto & rank : ranks )
         {
@@ -465,7 +466,8 @@ uint32_t restoreDramRepairs( TargetHandle_t i_trgt )
         }
 
         std::vector<MemRank> ranks;
-        getMasterRanks<T>( i_trgt, ranks );
+        // TODO Odyssey - needs multiple port support
+        getMasterRanks<T>( i_trgt, 0, ranks );
 
         bool spareDramDeploy = mnfgSpareDramDeploy();
 
