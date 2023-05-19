@@ -757,7 +757,38 @@ inline instruction_t<MC> nttm_read_command()
 
 // TK commands to add
 // termination update for writes/reads
-// write data select/timing update/adds (it's weird for ODY + DDR5 CCS)
+
+///
+/// @brief Updates the idle count for the write to write data enable
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_inst the instruction to update
+/// @return fapi2::ReturnCode SUCCESS iff procedure is successful
+/// @note Just updates the idles of the instruction passed in assuming it is a write
+/// Also assumes that the idles will just go to the write data enable and that any preprogrammed idles do not matter
+/// Keeping this function as requiring specializations for future proofing as this is MC specific
+/// This function should be run on a write command or on a command where write data needs to be passed out to the DRAM (legacy PDA or NTTM)
+///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+fapi2::ReturnCode update_wr_to_wr_data_enable_timing(const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
+        instruction_t<MC>& io_inst);
+
+///
+/// @brief Appends the write data enable latching sequence to the instruction vector
+/// @tparam MC The memory controller type of the traits
+/// @param[in] i_port_rank the port rank on which to send data
+/// @param[in,out] io_insts the instruction vector to update
+/// @param[in] i_is_bc8 optional input true if this command is a BC8
+/// @param[in] i_idles optional input of the idles before the next command
+/// @note Keeping this function as requiring specializations for future proofing as this is MC specific
+/// This function should be run after a command in which write data needs to be sent on the bus
+///
+template< mss::mc_type MC >
+void append_wr_data_enable_command(const uint64_t i_port_rank,
+                                   std::vector<instruction_t<mss::mc_type::ODYSSEY>>& io_inst,
+                                   const bool i_is_bc8 = false,
+                                   const uint16_t i_idles = 0);
 
 ///
 /// @brief Return true if this instruction is a read or write command

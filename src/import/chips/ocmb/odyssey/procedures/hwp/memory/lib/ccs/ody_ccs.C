@@ -56,6 +56,111 @@ namespace mss
 {
 namespace ccs
 {
+namespace ddr5
+{
+
+///
+/// @brief Updates the idle count for the write to write data enable - Odyssey specialization
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_inst the instruction to update
+/// @return fapi2::ReturnCode SUCCESS iff procedure is successful
+/// @note Just updates the idles of the instruction passed in assuming it is a write
+/// Also assumes that the idles will just go to the write data enable and that any preprogrammed idles do not matter
+/// Keeping this function as requiring specializations for future proofing as this is MC specific
+/// This function should be run on a write command or on a command where write data needs to be passed out to the DRAM (legacy PDA or NTTM)
+///
+template <>
+fapi2::ReturnCode update_wr_to_wr_data_enable_timing(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        mss::ccs::instruction_t<mss::mc_type::ODYSSEY>& io_inst)
+{
+    // CL is used as the base timing here
+
+    // The calculations are as follows:
+    // 1. subtract 18 to account for the write command and the staging latch (constant provided by design team)
+    // 2. divide by 2 to account for 2:1 clock cycles from the PHY to the MC
+    constexpr uint8_t CLOCK_DIVISOR = 2;
+    constexpr uint8_t HW_DELAY = 18;
+    uint8_t l_cl = 0;
+    FAPI_TRY(mss::attr::get_dram_cl(i_target, l_cl));
+
+    l_cl = l_cl > HW_DELAY ? (l_cl - HW_DELAY) : 0;
+    l_cl = l_cl / CLOCK_DIVISOR;
+    io_inst.iv_idles = l_cl;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Appends the write data enable latching sequence to the instruction vector
+/// @tparam MC The memory controller type of the traits
+/// @param[in] i_port_rank the port rank on which to send data
+/// @param[in,out] io_insts the instruction vector to update
+/// @param[in] i_is_bc8 optional input true if this command is a BC8
+/// @param[in] i_idles optional input of the idles before the next command
+/// @note Keeping this function as requiring specializations for future proofing as this is MC specific
+/// This function should be run after a command in which write data needs to be sent on the bus
+///
+template <>
+void append_wr_data_enable_command<mss::mc_type::ODYSSEY>(const uint64_t i_port_rank,
+        std::vector<mss::ccs::instruction_t<mss::mc_type::ODYSSEY>>& io_inst,
+        const bool i_is_bc8,
+        const uint16_t i_idles)
+{
+    typedef ccsTraits<mss::mc_type::ODYSSEY> TT;
+
+    constexpr uint64_t PORT_RANK0_SEL = 0b01;
+    constexpr uint64_t PORT_RANK1_SEL = 0b10;
+    const auto RANK_SEL = i_port_rank == 0 ? PORT_RANK0_SEL : PORT_RANK1_SEL;
+
+    // The data enables need to be started 6 DRAM clocks (3 CCS cycles) before the force data is set
+    // For BL16, 4 CCS cycles are needed (leads to 8 DRAM clocks)
+    // For BC8, 2 CCS cycles are needed (leads to 4 DRAM clocks)
+    // Data on commands
+    {
+        auto l_inst = des_command<mss::mc_type::ODYSSEY>();
+        l_inst.arr0.template insertFromRight<TT::ARR0_CMD0_WRDATA_CSN, TT::ARR0_CMD0_WRDATA_CSN_LEN>(RANK_SEL)
+        .template insertFromRight<TT::ARR0_CMD1_WRDATA_CSN, TT::ARR0_CMD1_WRDATA_CSN_LEN>(RANK_SEL)
+        .template setBit<TT::ARR0_CMD0_WRDATA_EN>()
+        .template setBit<TT::ARR0_CMD1_WRDATA_EN>();
+
+        // Hold the WR data enables for as long as needed
+        {
+            if(i_is_bc8)
+            {
+                l_inst.iv_repeats = 1;
+                // As 3 cycles are needed, add in one idle here
+                l_inst.iv_idles = 1;
+            }
+            else
+            {
+                l_inst.iv_repeats = 2;
+            }
+
+            io_inst.push_back(l_inst);
+        }
+
+        // Pulse data valid
+        {
+            // BC8? re-initialize the idle command to ensure the data enables are disabled
+            if(i_is_bc8)
+            {
+                l_inst = des_command<mss::mc_type::ODYSSEY>();
+            }
+            else
+            {
+                l_inst.iv_repeats = 0;
+            }
+
+            l_inst.arr1.template setBit<TT::ARR1_FORCE_DATA>();
+            l_inst.iv_idles = i_idles;
+            io_inst.push_back(l_inst);
+        }
+    }
+}
+
+} // namespace ddr5
+
 ///
 /// @brief Create, initialize a JEDEC Device Deselect CCS command - Odyssey specialization
 /// @param[in] i_idle the idle time to the next command (default to 0)
