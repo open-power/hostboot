@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -269,7 +269,7 @@ p10_sbe_scratch_regs_get_mc_pll_bucket(
 
 #ifndef __PPE__
 
-    for (const auto l_mc_target : i_target_chip.getChildren<fapi2::TARGET_TYPE_MC>(fapi2::TARGET_STATE_FUNCTIONAL))
+    for (const auto& l_mc_target : i_target_chip.getChildren<fapi2::TARGET_TYPE_MC>(fapi2::TARGET_STATE_FUNCTIONAL))
     {
         fapi2::ATTR_FREQ_MC_MHZ_Type l_attr_freq_mc_mhz;
         fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_num;
@@ -329,7 +329,7 @@ p10_sbe_scratch_regs_get_iohs_pll_bucket(
 
 #ifndef __PPE__
 
-    for (const auto l_iohs_target : i_target_chip.getChildren<fapi2::TARGET_TYPE_IOHS>(fapi2::TARGET_STATE_FUNCTIONAL))
+    for (const auto& l_iohs_target : i_target_chip.getChildren<fapi2::TARGET_TYPE_IOHS>(fapi2::TARGET_STATE_FUNCTIONAL))
     {
         fapi2::ATTR_FREQ_IOHS_MHZ_Type l_attr_freq_iohs_mhz;
         fapi2::ATTR_CHIP_UNIT_POS_Type l_unit_num;
