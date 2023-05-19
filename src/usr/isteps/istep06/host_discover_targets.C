@@ -471,6 +471,11 @@ void* host_discover_targets( void *io_pArgs )
     errlHndl_t l_err(nullptr);
     ISTEP_ERROR::IStepError l_stepError;
 
+    // There are a series of functions below that rely on the successful completion of
+    // the previous function.  This bool will track if some function calls need to be
+    // skipped.
+    bool skip_functions_due_to_previous_error = false;
+
     do
     {
 
@@ -556,19 +561,51 @@ void* host_discover_targets( void *io_pArgs )
 
 #if( defined(CONFIG_SUPPORT_EEPROM_CACHING) && !defined(CONFIG_SUPPORT_EEPROM_HWACCESS) )
         l_err = EEPROM::cacheEECACHEPartition();
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      ERR_MRK"host_discover_targets: cacheEECACHEPartition(() Failed");
+
+            captureError(l_err, l_stepError, ISTEP_COMP_ID);
+
+            // set bool to skip some functions below
+            skip_functions_due_to_previous_error = true;
+        }
 #endif
 
-        if(nullptr == l_err)
+        if(skip_functions_due_to_previous_error == false)
         {
             HWAS::HWASDiscovery l_HWASDiscovery;
             l_err = l_HWASDiscovery.discoverTargets();
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"host_discover_targets: l_HWASDiscovery.discoverTargets() Failed");
+
+                captureError(l_err, l_stepError, ISTEP_COMP_ID);
+
+                // set bool to skip some functions below
+                skip_functions_due_to_previous_error = true;
+            }
         }
 
-        if (nullptr == l_err)
+        if (skip_functions_due_to_previous_error == false)
         {
             // PMIC and POWER_IC targets have been marked functional
             // now check that their pairing status matches
             l_err = HWAS::deconfigureUnmatchedPairsOnDDIMM();
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
+                          "host_discover_targets: deconfigureUnmatchedPairsOnDDIMM() Failed");
+
+                captureError(l_err, l_stepError, ISTEP_COMP_ID);
+
+                // set bool to skip some functions below
+                skip_functions_due_to_previous_error = true;
+            }
         }
     }
 
@@ -577,7 +614,7 @@ void* host_discover_targets( void *io_pArgs )
      * BMC that we have done so. This will cause them to fetch the new PDRs
      * from us. This has to be done after presence detection. */
 
-    if (!l_err)
+    if (skip_functions_due_to_previous_error == false)
     {
         l_err = exchange_pdrs();
 
@@ -587,11 +624,15 @@ void* host_discover_targets( void *io_pArgs )
                       ERR_MRK"host_discover_targets: Failed to exchange PDRs with the BMC");
 
             captureError(l_err, l_stepError, ISTEP_COMP_ID);
+
+            // If this fails, we will skip the following function calls
             break;
         }
     }
 #endif
 
+    // NOTE: The bool skip_functions_due_to_previous_error isn't used below.
+    //       All functions will be attempted
 
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
     CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "---------------------------------");

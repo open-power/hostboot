@@ -832,6 +832,9 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
             HDAT_DBG("hdatGetPvpdFullRecord : curRecord %d (%s), size = 0x%X (%d)",
                       theRecord, i_fetchVpd[curRec].recordName, theSize[curRec], theSize[curRec]);
 
+            // It is not necessary to include the very large PSPD section of the Platform VPD
+            // as it is not used by PHYP.  It is only used during the memory initialization
+            // during the IPL.
             if (!(strcmp(i_fetchVpd[curRec].recordName, "PSPD")))
             {
                 HDAT_DBG("hdatGetPvpdFullRecord : Skipping %s because of its size 0x%X (%d)",
@@ -1612,7 +1615,7 @@ errlHndl_t hdatConvertRawSpdToIpzFormat(
 
 
         // Below code probes for the DIMM module and DIMM type from the raw SPD
-        // data. DDR4 module is suppored for both DDIMM and ISDIMM.
+        // data. DDR4 module is supported for both DDIMM and ISDIMM.
         // So if its a DDR5 module (VPD format is unknown now) or any other
         // unknown types, we wont proceed further and return back.
         if((i_jedec_ptr[SVPD_SPD_BYTE_THREE] == SVPD_DDIMM_MODULE_TYPE) ||
