@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022
+# Contributors Listed Below - COPYRIGHT 2022,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -32,7 +32,13 @@
 BMC_PATCH_DIRECTORY=/usr/local/share/hostfw/running/
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SSHPASS_SCRIPT="$SCRIPT_DIR/hb_sshpass"
-STANDALONE_COMMIT_CHANGE_ID=I7f9e2bfa6d30f91a9055c1a0fde73c3e207e48ea
+#STANDALONE_COMMIT_CHANGE_ID=I7f9e2bfa6d30f91a9055c1a0fde73c3e207e48ea
+STANDALONE_COMMIT_CHANGE_ID=I090b925139d1ed594679f43065b68fa434305469
+# If the STANDALONE_COMMIT_CHANGE_ID is not found, then MGP_FILES_EXIST will be set to 0.
+# Users can force the script to continue without that commit with HB_PATCH_BMC_FORCE_PATCH.
+# With that set and this variable equal 0 then the script won't attempt to copy a non-existent
+# directory.
+MGP_FILES_EXIST=1
 
 #User might specify a different ssh port (e.g. for simics)
 if [ -z "$SSH_PORT" ]
@@ -217,6 +223,7 @@ function MAKE_GIT_PATCHFILES () {
             touch $MGP_COPYDIR/HB_BASE_IS__$relcommit
         else
             echo "No base commit found, skipping patches"
+            MGP_FILES_EXIST=0
         fi
     else
         # if EXTERNAL_PATCHES is set, the patch files already exist so just copy them over
@@ -339,8 +346,10 @@ else   # Apply the data to the BMC
        PATCH_HBRT
    fi
 
-   SSHPASS $COPY "$COPYDIR"/* "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
-   rm $COPYDIR/*
+   if [ ${MGP_FILES_EXIST} -eq 1 ]; then
+       SSHPASS $COPY "$COPYDIR"/* "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
+       rm $COPYDIR/*
+   fi
    rmdir $COPYDIR
 
    if [[ $RESTART_PLDMD = 1 ]] ; then
