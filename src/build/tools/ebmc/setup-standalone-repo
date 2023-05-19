@@ -94,20 +94,14 @@ function checkout_hostboot_level ()
     echo ""
     echo "Checking out a new branch for $HOSTBOOT_COMMIT_HASH as $branch_name ..."
     git fetch gerrit && git checkout -b $branch_name $HOSTBOOT_COMMIT_HASH
-    rc=$?
-    if [ ${rc} -ne 0 ]; then
-        return ${rc};
-    fi
+    return $?
 }
 
 # Gets the change id for the required standalone commit
 function get_standalone_changes ()
 {
     ssh -p 29418 hostboot.gerrit gerrit query "(intopic:bmc_standalone_patching_release-${build_release}) project:hostboot" --current-patch-set | grep -E 'change I|subject:'
-    rc=$?
-    if [ ${rc} -ne 0 ]; then
-        return ${rc}
-    fi
+    return $?
 }
 
 # Uses a change id to query for the current patch set for that change. For example "refs/changes/06/152106/4"
@@ -125,10 +119,7 @@ function gerrit_pick ()
 {
     # $1 input is a commit or search string
     git fetch gerrit $(gerrit_refs $1) && git cherry-pick --strategy=recursive -X theirs FETCH_HEAD
-    rc=$?
-    if [ ${rc} -ne 0 ]; then
-        return ${rc}
-    fi
+    return $?
 }
 
 function cherrypick_standalone_patch ()
@@ -187,10 +178,7 @@ function pull_pnor_xml ()
 {
     echo "Getting the OP-BUILD PNOR defaultPnorLayout_64.xml to replace the STANDALONE pnorLayoutP10.xml to properly build patches for BMC"
     cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/output/build/openpower-pnor-p10*/p10Layouts/defaultPnorLayout_64.xml $PROJECT_ROOT/src/build/buildpnor/pnorLayoutP10.xml
-    rc=$?
-    if [ ${rc} -ne 0 ]; then
-        return ${rc}
-    fi
+    return $?
 }
 
 function verify_config_file ()
@@ -202,6 +190,10 @@ function verify_config_file ()
         echo ""
         echo "User environment variable for CONFIG_FILE not found... fixing."
         cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/openpower/configs/hostboot/p10ebmc.config $PROJECT_ROOT/
+        rc=$?
+        if [ ${rc} -ne 0 ]; then
+            return ${rc}
+        fi
         export CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config
         echo "Environment variable for config now set to:"
         echo $(env | grep CONFIG_FILE)
@@ -217,11 +209,108 @@ function verify_config_file ()
             echo ""
             echo "User config file $config DOES NOT match the build config file. Replacing with the one from the build."
             cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/openpower/configs/hostboot/p10ebmc.config $PROJECT_ROOT/
+            rc=$?
+            if [ ${rc} -ne 0 ]; then
+                return ${rc}
+            fi
             export CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config
             echo "Environment variable for config now set to:"
             echo $(env | grep CONFIG_FILE)
         fi
     fi
+}
+
+function update_customrc()
+{
+    while true; do
+        read -p "It is recommended that this script update your customrc with CONFIG_FILE and BMC_STANDALONE_PATCHING defaults to prevent issues re-entering the hostboot workon in the future. Do that now [Y/N]? " yn
+        case $yn in
+            [Yy] )
+                   echo ""
+                   echo "    Your customrc will be modified. Should you wish to use this repo again for purposes other than"
+                   echo "    patching you MUST undo these edits. customrc.backup will be created before this script makes changes"
+                   echo ""
+                   break ;;
+            [Nn] )
+                # Remind the user of their responsibilities. Put this notice here so it's not seen when doing copy-only actions.
+                echo ""
+                echo "WARNING: If you exit this current workon your CONFIG_FILE and BMC_STANDALONE_PATCHING vars could"
+                echo "         be incorrect next time you enter a workon and cause hard to debug issues! BEWARE!"
+                echo ""
+                return 0
+                break;;
+            * ) echo " Please answer Y or N." ;;
+            esac
+    done
+    # Get the line the header starts on
+    customrcHeader=$(grep -in "P10 STANDALONE PATCHING" $PROJECT_ROOT/customrc | cut -f1 -d:)
+    if [ -z "${customrcHeader}"  ]; then
+        # Make a backup in case the user needs it
+        \cp $PROJECT_ROOT/customrc $PROJECT_ROOT/customrc.backup
+        # Write the standalone patching section in the user's custom rc
+        $(echo "" >> $PROJECT_ROOT/customrc)
+        $(echo "###########################################################" >> $PROJECT_ROOT/customrc)
+        $(echo "########### P10 STANDALONE PATCHING"                         >> $PROJECT_ROOT/customrc)
+        $(echo "###########################################################" >> $PROJECT_ROOT/customrc)
+        $(echo "export CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config"             >> $PROJECT_ROOT/customrc)
+        $(echo "export BMC_STANDALONE_PATCHING=1"                            >> $PROJECT_ROOT/customrc)
+        # Try again
+        customrcHeader=$(grep -in "P10 STANDALONE PATCHING" $PROJECT_ROOT/customrc | cut -f1 -d:)
+        if [ -z "${customrcHeader}" ]; then
+            # Just give up
+            echo "Can't find the P10 STANDALONE PATCHING header in $PROJECT_ROOT/customrc."
+            return 1
+        fi
+    else
+        configs=$(grep -n "CONFIG_FILE" $PROJECT_ROOT/customrc | cut -f1 -d:)
+        # There may be multiple CONFIG_FILE= lines in the customrc. Look for the one this script added.
+        foundConfigLine=0
+        for CONFIG_LINE in ${configs[@]} ; do
+            # If the CONFIG_FILE line number is 2 greater than the header line, then that's the one
+            # we want to modify
+            if [ $((${CONFIG_LINE} - 2)) -eq ${customrcHeader} ]; then
+                # Replace the line with the proper export
+                $(sed -i "${CONFIG_LINE}s,.*,export CONFIG_FILE=${PROJECT_ROOT}/p10ebmc.config," $PROJECT_ROOT/customrc)
+                foundConfigLine=1
+            elif [ $((${CONFIG_LINE})) -gt $((${customrcHeader} + 2)) ]; then
+                # Comment out lines after the target CONFIG_FILE line so they aren't the last to be sourced by the
+                # workon
+                configStr=$(sed -n "${CONFIG_LINE}p" $PROJECT_ROOT/customrc)
+                case $configStr in
+                '#'* )
+                    ;;
+                * )
+                    $(sed -i "${CONFIG_LINE}s/./#&/" $PROJECT_ROOT/customrc)
+                    ;;
+                esac
+            fi
+        done
+        if [ ${foundConfigLine} -eq 0 ]; then
+            # Header line exists, but the config line wasn't found. Just insert a new config line where it was supposed
+            # to be
+            expectedLine=$((${customrcHeader} + 2))
+            if [ $(wc -l $PROJECT_ROOT/customrc | cut -f1 -d" ") -lt $expectedLine ]; then
+                $(echo "export CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config" >> $PROJECT_ROOT/customrc)
+            else
+                $(sed -i "${expectedLine}iexport CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config" $PROJECT_ROOT/customrc)
+            fi
+        fi
+
+        # Ensure the BMC_STANDALONE_PATCHING line hasn't been changed in a way that would break patching.
+        grep -q "BMC_STANDALONE_PATCHING" $PROJECT_ROOT/customrc
+        if [ $? -eq 0 ]; then
+            $(sed -i 's/.*BMC_STANDALONE_PATCHING.*/export BMC_STANDALONE_PATCHING=1/' $PROJECT_ROOT/customrc)
+        else
+            # Not found, insert at expected location
+            expectedLine=$((${customrcHeader} + 3))
+            if [ $(wc -l $PROJECT_ROOT/customrc | cut -f1 -d" ") -lt $expectedLine ]; then
+                $(echo "export BMC_STANDALONE_PATCHING=1" >> $PROJECT_ROOT/customrc)
+            else
+                $(sed -i "${expectedLine}iexport BMC_STANDALONE_PATCHING=1" $PROJECT_ROOT/customrc)
+            fi
+        fi
+    fi
+    return 0
 }
 
 function cleanup_repo ()
@@ -412,6 +501,14 @@ function main ()
             echo "ERROR: Couldn't verify config file. See above messages for more info."
             return ${rc}
         fi
+        # Ask if the user wants their customrc file updated so that they may exit and enter the workon without losing
+        # the required env vars this script sets.
+        update_customrc
+        rc=$?
+        if [ ${rc} -ne 0 ]; then
+            echo "ERROR: Could not update user's customrc file."
+            return ${rc}
+        fi
         # Replace the existing PNOR layout (made for standalone) with the one from the release (made for hardware).
         pull_pnor_xml
         rc=$?
@@ -419,11 +516,14 @@ function main ()
             echo "ERROR: Couldn't copy PNOR layout from release level. See above messages for more info."
             return ${rc}
         fi
+        # export to indicate to assemble.standalone.mk which PNOR layout to model
+        export BMC_STANDALONE_PATCHING=1
 
         while true; do
             read -p " To finish setup, this script must 'make clobber' and perform 'hb simsetup' in this repo. Do that now [Y/N]? " yn
             case $yn in
                 [Yy] ) cleanup_repo
+                       echo ""
                        echo "Hostboot repo has been clobbered and a new sandbox for this driver has been created. You may now apply your changes, compile, prime, and patch the system."
                        echo "IMPORTANT: If you exit this shell you MUST export the correct CONFIG_FILE in the new shell to build patches again on this branch. The file is located in your project root."
                        echo "IMPORTANT: REQUIRED to export BMC_STANDALONE_PATCHING=1 in your CUSTOMRC or in your new shell to build patches again on this branch. The file is located in your project root."
@@ -441,6 +541,7 @@ function main ()
     fi
 
 }
+
 
 # The user must source this script
 # otherwise it can't update the environment variable for the CONFIG_FILE
