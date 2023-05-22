@@ -41,6 +41,7 @@ void mctp_astlpc_destroy(struct mctp_binding_astlpc *astlpc);
 
 struct mctp_binding *mctp_binding_astlpc_core(struct mctp_binding_astlpc *b);
 
+bool mctp_astlpc_tx_done(struct mctp_binding_astlpc *astlpc);
 int mctp_astlpc_poll(struct mctp_binding_astlpc *astlpc);
 
 /* fileio-based interface */
