@@ -722,7 +722,7 @@ PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeMaintIue );
  */
 int32_t AnalyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
-    MemEcc::analyzeImpe<TYPE_OCMB_CHIP>( i_chip, io_sc );
+    MemEcc::analyzeImpe<TYPE_OCMB_CHIP>( i_chip, io_sc, 0 );
     return SUCCESS; // nothing to return to rule code
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeImpe );

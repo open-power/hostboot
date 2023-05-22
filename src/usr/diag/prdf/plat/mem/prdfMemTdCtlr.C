@@ -470,18 +470,40 @@ void MemTdCtlr<TYPE_OCMB_CHIP>::recaptureRegs( STEP_CODE_DATA_STRUCT & io_sc )
     CaptureData & cd = io_sc.service_data->GetCaptureData();
 
     // refresh and recapture the ocmb registers
-    const char * ocmbRegs[] =
-    {
-        "MCBISTFIR", "RDFFIR", "MBSEC0", "MBSEC1", "OCMB_MBSSYMEC0",
-        "OCMB_MBSSYMEC1", "OCMB_MBSSYMEC2", "OCMB_MBSSYMEC3",
-        "OCMB_MBSSYMEC4", "OCMB_MBSSYMEC5", "OCMB_MBSSYMEC6",
-        "OCMB_MBSSYMEC7", "OCMB_MBSSYMEC8", "MBSMSEC", "MCBMCAT",
-    };
 
-    for ( uint32_t i = 0; i < sizeof(ocmbRegs)/sizeof(char*); i++ )
+    // Odyssey OCMBs
+    if (isOdysseyOcmb(iv_chip->getTrgt()))
     {
-        SCAN_COMM_REGISTER_CLASS * reg = iv_chip->getRegister( ocmbRegs[i] );
-        cache.flush( iv_chip, reg );
+        const char * odyRegs[] =
+        {
+            "MCBIST_FIR", "RDF_FIR_0", "RDF_FIR_1", "MBSEC0", "MBSEC1",
+            "MBSSYMEC0", "MBSSYMEC1", "MBSSYMEC2", "MBSSYMEC3", "MBSSYMEC4",
+            "MBSSYMEC5", "MBSSYMEC6", "MBSSYMEC7", "MBSSYMEC8", "MBSSYMEC9",
+            "MBSMSEC", "MCBMCAT",
+        };
+
+        for ( uint32_t i = 0; i < sizeof(odyRegs)/sizeof(char*); i++ )
+        {
+            SCAN_COMM_REGISTER_CLASS * reg = iv_chip->getRegister( odyRegs[i] );
+            cache.flush( iv_chip, reg );
+        }
+    }
+    // Explorer OCMBs
+    else
+    {
+        const char * expRegs[] =
+        {
+            "MCBISTFIR", "RDFFIR", "MBSEC0", "MBSEC1", "OCMB_MBSSYMEC0",
+            "OCMB_MBSSYMEC1", "OCMB_MBSSYMEC2", "OCMB_MBSSYMEC3",
+            "OCMB_MBSSYMEC4", "OCMB_MBSSYMEC5", "OCMB_MBSSYMEC6",
+            "OCMB_MBSSYMEC7", "OCMB_MBSSYMEC8", "MBSMSEC", "MCBMCAT",
+        };
+
+        for ( uint32_t i = 0; i < sizeof(expRegs)/sizeof(char*); i++ )
+        {
+            SCAN_COMM_REGISTER_CLASS * reg = iv_chip->getRegister( expRegs[i] );
+            cache.flush( iv_chip, reg );
+        }
     }
 
     iv_chip->CaptureErrorData( cd, Util::hashString("MaintCmdRegs_ocmb") );

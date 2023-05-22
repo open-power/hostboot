@@ -553,9 +553,7 @@ actionclass mainline_ue_handling
     threshold( field(33 / 30 min ) ); # To prevent flooding. Will be unmasked
                                       # when background scrubbing resumes after
                                       # targeted diagnostics is complete.
-    # TODO
-    #funccall("AnalyzeFetchUe");
-    TBDDefaultCallout;
+    funccall("AnalyzeFetchUe");
 };
 
 actionclass mainline_ue_handling_0_UERE
@@ -581,7 +579,7 @@ actionclass mainline_iue_handling
     # SUE just in case it is needed in the checkstop analysis.
     SueSource;
     # Thresholding done in the plugin
-    # TODO
+    # TODO Odyssey
     #funccall("AnalyzeMainlineIue");
     TBDDefaultCallout;
 };
@@ -595,24 +593,26 @@ actionclass maintenance_iue_handling
     # SUE just in case it is needed in the checkstop analysis.
     SueSource;
     # Thresholding done in the plugin
-    #TODO
+    #TODO Odyssey
     #funccall("AnalyzeMaintIue");
     TBDDefaultCallout;
 };
 
-actionclass memory_impe_handling
+actionclass memory_impe_handling_0
 {
-    # TODO
-    #funccall("AnalyzeImpe");
-    TBDDefaultCallout;
+    funccall("AnalyzeImpe_0");
+};
+
+actionclass memory_impe_handling_1
+{
+    funccall("AnalyzeImpe_1");
 };
 
 /** Handle Maintenance AUEs */
 actionclass maintenance_aue_handling0_chnlFail
 {
     SueSource;
-    #TODO
-    #funccall("AnalyzeMaintAue");
+    funccall("AnalyzeMaintAue");
     mem_port0_L;
     threshold1;
     funccall("returnNoClearFirBits");
@@ -621,8 +621,7 @@ actionclass maintenance_aue_handling0_chnlFail
 actionclass maintenance_aue_handling1_chnlFail
 {
     SueSource;
-    #TODO
-    #funccall("AnalyzeMaintAue");
+    funccall("AnalyzeMaintAue");
     mem_port1_L;
     threshold1;
     funccall("returnNoClearFirBits");

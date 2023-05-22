@@ -106,6 +106,7 @@
         name        "Odyssey chip MBS Memory Scrub/Read Error Counter Reg 0";
         scomaddr    0x08011455;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBSEC1
@@ -127,6 +128,7 @@
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 0";
         scomaddr    0x08011458;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBSSYMEC1
@@ -134,6 +136,7 @@
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 1";
         scomaddr    0x08011459;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBSSYMEC2
@@ -141,6 +144,7 @@
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 2";
         scomaddr    0x0801145A;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBSSYMEC3
@@ -148,6 +152,7 @@
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 3";
         scomaddr    0x0801145B;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBSSYMEC4
@@ -155,6 +160,7 @@
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 4";
         scomaddr    0x0801145C;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBSSYMEC5
@@ -162,6 +168,7 @@
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 5";
         scomaddr    0x0801145D;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBSSYMEC6
@@ -169,6 +176,7 @@
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 6";
         scomaddr    0x0801145E;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBSSYMEC7
@@ -176,6 +184,7 @@
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 7";
         scomaddr    0x0801145F;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBSSYMEC8
@@ -183,6 +192,7 @@
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 8";
         scomaddr    0x08011460;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBSSYMEC9
@@ -190,6 +200,7 @@
         name        "Odyssey chip MCBIST Modal Symbol Counter Register 9";
         scomaddr    0x08011461;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBSMSEC
@@ -197,6 +208,7 @@
         name        "Odyssey chip MBS Memory Scrub/Read Error Count Register";
         scomaddr    0x08011469;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBNCER
@@ -267,6 +279,7 @@
         name        "Odyssey chip Maint Current Address Trap Register";
         scomaddr    0x080114D7;
         capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MCB_CNTL

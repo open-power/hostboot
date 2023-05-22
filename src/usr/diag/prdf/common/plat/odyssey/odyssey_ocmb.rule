@@ -496,6 +496,7 @@ chip odyssey_ocmb
         reset       (^, 0x08011400);
         mask        (|, 0x08011403);
         capture     group default;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register MCBIST_FIR_MASK
@@ -551,6 +552,7 @@ chip odyssey_ocmb
         reset       (^, 0x08011800);
         mask        (|, 0x08011803);
         capture     group default;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register RDF_FIR_MASK_0
@@ -606,6 +608,7 @@ chip odyssey_ocmb
         reset       (^, 0x08012800);
         mask        (|, 0x08012803);
         capture     group default;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register RDF_FIR_MASK_1
@@ -2067,7 +2070,7 @@ group gRDF_FIR_0
     /** RDF_FIR_0[20]
      *  Mainline read IMPE
      */
-    (rRDF_FIR_0, bit(20)) ? memory_impe_handling;
+    (rRDF_FIR_0, bit(20)) ? memory_impe_handling_0;
 
     /** RDF_FIR_0[21:28]
      *  Maintenance MPE
@@ -2132,7 +2135,7 @@ group gRDF_FIR_0
     /** RDF_FIR_0[40]
      *  Maintenance IMPE
      */
-    (rRDF_FIR_0, bit(40)) ? memory_impe_handling;
+    (rRDF_FIR_0, bit(40)) ? memory_impe_handling_0;
 
     /** RDF_FIR_0[41]
      *  RDDATA valid error
@@ -2349,7 +2352,7 @@ group gRDF_FIR_1
     /** RDF_FIR_1[20]
      *  Mainline read IMPE
      */
-    (rRDF_FIR_1, bit(20)) ? memory_impe_handling;
+    (rRDF_FIR_1, bit(20)) ? memory_impe_handling_1;
 
     /** RDF_FIR_1[21:28]
      *  Maintenance MPE
@@ -2414,7 +2417,7 @@ group gRDF_FIR_1
     /** RDF_FIR_1[40]
      *  Maintenance IMPE
      */
-    (rRDF_FIR_1, bit(40)) ? memory_impe_handling;
+    (rRDF_FIR_1, bit(40)) ? memory_impe_handling_1;
 
     /** RDF_FIR_1[41]
      *  RDDATA valid error

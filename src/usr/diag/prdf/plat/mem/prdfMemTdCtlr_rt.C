@@ -95,13 +95,15 @@ uint32_t __handleNceEte( ExtensibleChip * i_chip,
                 // Increment the UE counter and store the rank we're on,
                 // reset the UE and CE counts if we have stopped on a new rank.
                 OcmbDataBundle * ocmbdb = getOcmbDataBundle(i_chip);
-                if ( ocmbdb->iv_ceUeRank != i_addr.getRank() )
+                if ( ocmbdb->iv_ceUeRank.first != i_addr.getPort() ||
+                     ocmbdb->iv_ceUeRank.second != i_addr.getRank() )
                 {
                     ocmbdb->iv_ceStopCounter.reset();
                     ocmbdb->iv_ueStopCounter.reset();
                 }
                 ocmbdb->iv_ceStopCounter.inc( io_sc );
-                ocmbdb->iv_ceUeRank = i_addr.getRank();
+                ocmbdb->iv_ceUeRank = std::make_pair(i_addr.getPort(),
+                                                     i_addr.getRank());
 
                 break;
             }
@@ -609,6 +611,7 @@ uint32_t MemTdCtlr<T>::maskEccAttns()
 
     uint32_t o_rc = SUCCESS;
 
+    // TODO Odyssey - reg updates
     SCAN_COMM_REGISTER_CLASS * mask = iv_chip->getRegister( "RDFFIR_MASK_OR" );
 
     mask->clearAllBits();
@@ -635,6 +638,7 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns()
 
     uint32_t o_rc = SUCCESS;
 
+    // TODO Odyssey - reg updates
     // Memory CEs were masked at the beginning of the TD procedure, so
     // clear and unmask them. Also, it is possible that memory UEs have
     // thresholded so clear and unmask them as well.
@@ -812,6 +816,7 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
 
     do
     {
+        // TODO Odyssey - reg updates
         // Check if maintenance command complete attention is set.
         SCAN_COMM_REGISTER_CLASS * mcbistfir =
                                 iv_chip->getRegister("MCBISTFIR");
@@ -922,6 +927,7 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub( bool & o_canResume,
 {
     #define PRDF_FUNC "[MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub] "
 
+    // TODO Odyssey - reg updates
     uint32_t o_rc = SUCCESS;
 
     o_canResume = false;

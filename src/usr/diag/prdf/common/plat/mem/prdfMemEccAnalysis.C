@@ -88,15 +88,17 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         }
 
         // Increment the UE counter and store the rank we're on, resetting
-        // the UE and CE counts if we have stopped on a new rank.
+        // the UE and CE counts if we have stopped on a new port/rank.
         OcmbDataBundle * ocmbdb = getOcmbDataBundle(i_chip);
-        if ( ocmbdb->iv_ceUeRank != i_addr.getRank() )
+        if ( ocmbdb->iv_ceUeRank.first != i_addr.getPort() ||
+             ocmbdb->iv_ceUeRank.second != i_addr.getRank() )
         {
             ocmbdb->iv_ceStopCounter.reset();
             ocmbdb->iv_ueStopCounter.reset();
         }
         ocmbdb->iv_ueStopCounter.inc( io_sc );
-        ocmbdb->iv_ceUeRank = i_addr.getRank();
+        ocmbdb->iv_ceUeRank = std::make_pair(i_addr.getPort(),
+                                             i_addr.getRank());
         #endif
 
     } while (0);
@@ -977,7 +979,8 @@ uint32_t analyzeMaintIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 template<>
 uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                      STEP_CODE_DATA_STRUCT & io_sc )
+                                      STEP_CODE_DATA_STRUCT & io_sc,
+                                      uint8_t i_port )
 {
 
     #define PRDF_FUNC "[MemEcc::analyzeImpe] "
@@ -989,13 +992,24 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     do
     {
         // get the mark shadow register
-        SCAN_COMM_REGISTER_CLASS * msr = i_chip->getRegister("EXP_MSR");
+        char regName[64];
 
+        // Odyssey OCMBs
+        if (isOdysseyOcmb(i_chip->getTrgt()))
+        {
+            sprintf(regName, "MSR_%x", i_port);
+        }
+        else
+        {
+            sprintf(regName, "EXP_MSR");
+        }
+
+        SCAN_COMM_REGISTER_CLASS * msr = i_chip->getRegister(regName);
         o_rc = msr->Read();
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "Read() failed on EXP_MSR: i_chip=0x%08x",
-                      i_chip->getHuid() );
+            PRDF_ERR( PRDF_FUNC "Read() failed on MSR_%x: i_chip=0x%08x",
+                      i_port, i_chip->getHuid() );
             break;
         }
 
@@ -1031,16 +1045,15 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         if ( db->getImpeThresholdCounter()->inc(rank, dram, io_sc) )
         {
             // Check if a DRAM spare is available
-            uint8_t ps = symbol.getPortSlct();
             TargetHandle_t memPort = getConnectedChild( i_chip->getTrgt(),
-                                                        TYPE_MEM_PORT, ps );
+                                                        TYPE_MEM_PORT, i_port );
             bool spareAvailable = false;
-            o_rc = isSpareAvailable<TYPE_MEM_PORT>( memPort, rank, ps,
+            o_rc = isSpareAvailable<TYPE_MEM_PORT>( memPort, rank, i_port,
                                                     spareAvailable );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "isSpareAvailable(0x%08x, 0x%02x, %d) "
-                          "failed", getHuid(memPort), rank.getKey(), ps );
+                          "failed", getHuid(memPort), rank.getKey(), i_port );
                 break;
             }
 
@@ -1074,9 +1087,8 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             else // Otherwise, place a chip mark on the failing DRAM.
             {
                 MemMark chipMark( trgt, rank, galois );
-                // TODO Odyssey - need port
                 o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>( i_chip, rank,
-                                                                 0, chipMark );
+                    i_port, chipMark );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) failed",
@@ -1085,9 +1097,8 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                 }
 
                 bool dsd = false;
-                // TODO Odyssey - need port
                 o_rc = MarkStore::chipMarkCleanup<TYPE_OCMB_CHIP>( i_chip, rank,
-                    0, io_sc, dsd );
+                    i_port, io_sc, dsd );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",
@@ -1112,16 +1123,37 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         // attentions.
         if ( io_sc.service_data->queryServiceCall() )
         {
-            SCAN_COMM_REGISTER_CLASS * mask
-                                  = i_chip->getRegister( "RDFFIR_MASK_OR" );
-            mask->SetBit(19); // mainline
-            mask->SetBit(39); // maintenance
-            o_rc = mask->Write();
-            if ( SUCCESS != o_rc )
+            // Odyssey OCMBs
+            if (isOdysseyOcmb(i_chip->getTrgt()))
             {
-                PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_MASK_OR: "
-                          "0x%08x", i_chip->getHuid() );
-                break;
+                char maskName[64];
+                sprintf(maskName, "RDF_FIR_MASK_OR_%x", i_port);
+
+                SCAN_COMM_REGISTER_CLASS * mask = i_chip->getRegister(maskName);
+                mask->SetBit(20); // mainline
+                mask->SetBit(40); // maintenance
+                o_rc = mask->Write();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "Write() failed on RDF_FIR_MASK_OR_%x: "
+                              "0x%08x", i_port, i_chip->getHuid() );
+                    break;
+                }
+            }
+            // Explorer OCMBs
+            else
+            {
+                SCAN_COMM_REGISTER_CLASS * mask =
+                    i_chip->getRegister( "RDFFIR_MASK_OR" );
+                mask->SetBit(19); // mainline
+                mask->SetBit(39); // maintenance
+                o_rc = mask->Write();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_MASK_OR: "
+                              "0x%08x", i_chip->getHuid() );
+                    break;
+                }
             }
         }
         #endif // __HOSTBOOT_MODULE

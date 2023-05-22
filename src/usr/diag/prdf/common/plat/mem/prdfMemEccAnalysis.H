@@ -186,10 +186,12 @@ uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
  * @brief  Analyzes a maint or mainline IMPE attention.
  * @param  i_chip   OCMB.
  * @param  io_sc    The step code data struct.
+ * @param  i_port   Target port select.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
+                      uint8_t i_port );
 
 #ifdef __HOSTBOOT_RUNTIME
 

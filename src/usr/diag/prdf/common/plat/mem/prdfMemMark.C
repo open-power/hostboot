@@ -514,15 +514,14 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     do
     {
-        const uint8_t ps   = i_chipMark.getSymbol().getPortSlct();
         const uint8_t dram = i_chipMark.getSymbol().getDram();
 
         TargetHandle_t memPort = getConnectedChild( i_chip->getTrgt(),
-                                                    TYPE_MEM_PORT, ps );
+                                                    TYPE_MEM_PORT, i_port );
 
         // Determine if DRAM sparing is enabled.
         bool isEnabled = false;
-        o_rc = isDramSparingEnabled<TYPE_MEM_PORT>( memPort, i_rank, ps,
+        o_rc = isDramSparingEnabled<TYPE_MEM_PORT>( memPort, i_rank, i_port,
                                                     isEnabled );
         if ( SUCCESS != o_rc )
         {
@@ -564,7 +563,7 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             // the manufacturer. Check the VPD for available spares.
             bool spAvail;
             o_rc = isSpareAvailable<TYPE_MEM_PORT>( memPort, i_rank,
-                                                    ps, spAvail );
+                                                    i_port, spAvail );
             if ( spAvail )
             {
                 // If spare0 is deployed and bad (has the chip mark), we want to
@@ -670,8 +669,8 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
         __addCallout( i_chip, i_rank, chipMark.getSymbol(), io_sc );
 
         // Get the row repair
-        // TODO RTC 210072 - support for multiple ports
-        TargetHandle_t dimm = getConnectedDimm( i_chip->getTrgt(), i_rank );
+        TargetHandle_t dimm = getConnectedDimm( i_chip->getTrgt(), i_rank,
+                                                i_port );
         MemRowRepair rowRepair;
         o_rc = getRowRepairData<T>( dimm, i_rank, rowRepair );
 

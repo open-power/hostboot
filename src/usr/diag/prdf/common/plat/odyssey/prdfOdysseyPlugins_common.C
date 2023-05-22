@@ -476,6 +476,132 @@ int32_t AnalyzeFetchAueIaue( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeFetchAueIaue );
 
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDF_FIR[15] - Mainline UE.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeFetchUe( ExtensibleChip * i_chip,
+                        STEP_CODE_DATA_STRUCT & io_sc )
+{
+    MemEcc::analyzeFetchUe<TYPE_OCMB_CHIP>( i_chip, io_sc );
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeFetchUe );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDF_FIR[18] - Mainline read IUE.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return PRD_NO_CLEAR_FIR_BITS if IUE threshold is reached, else SUCCESS.
+ */
+int32_t AnalyzeMainlineIue( ExtensibleChip * i_chip,
+                            STEP_CODE_DATA_STRUCT & io_sc )
+{
+    int32_t rc = SUCCESS;
+    MemEcc::analyzeMainlineIue<TYPE_OCMB_CHIP>( i_chip, io_sc );
+
+    #ifdef __HOSTBOOT_MODULE
+
+    if ( MemEcc::queryIueTh<TYPE_OCMB_CHIP>(i_chip, io_sc) )
+        rc = PRD_NO_CLEAR_FIR_BITS;
+
+    #endif
+
+    return rc; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeMainlineIue );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDF_FIR[38] - Maint IUE.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return PRD_NO_CLEAR_FIR_BITS if IUE threshold is reached, else SUCCESS.
+ */
+int32_t AnalyzeMaintIue( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    int32_t rc = SUCCESS;
+    MemEcc::analyzeMaintIue<TYPE_OCMB_CHIP>( i_chip, io_sc );
+
+    #ifdef __HOSTBOOT_MODULE
+
+    if ( MemEcc::queryIueTh<TYPE_OCMB_CHIP>(i_chip, io_sc) )
+        rc = PRD_NO_CLEAR_FIR_BITS;
+
+    #endif
+
+    return rc; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeMaintIue );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDF_FIR[20,40] - Mainline and Maint IMPE
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_port Target port select.
+ * @return SUCCESS
+ */
+int32_t AnalyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
+                     uint8_t i_port )
+{
+    MemEcc::analyzeImpe<TYPE_OCMB_CHIP>( i_chip, io_sc, i_port );
+    return SUCCESS; // nothing to return to rule code
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeImpe );
+
+#define ANALYZE_IMPE_PLUGIN(POS) \
+int32_t AnalyzeImpe_##POS( ExtensibleChip * i_chip, \
+                           STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    return AnalyzeImpe(i_chip, io_sc, POS); \
+} \
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeImpe_##POS );
+
+ANALYZE_IMPE_PLUGIN(0);
+ANALYZE_IMPE_PLUGIN(1);
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDFFIR[34] - Maintenance AUE
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t AnalyzeMaintAue( ExtensibleChip * i_chip,
+                         STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[odyssey_ocmb::AnalyzeMaintAue] "
+
+    MemAddr addr;
+    if ( SUCCESS != getMemMaintAddr<TYPE_OCMB_CHIP>(i_chip, addr) )
+    {
+        PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
+                  i_chip->getHuid() );
+    }
+    else
+    {
+        MemRank rank = addr.getRank();
+        MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
+        io_sc.service_data->SetCallout( mm, MRU_HIGH );
+    }
+
+    return SUCCESS; // nothing to return to rule code
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeMaintAue );
+
 } // end namespace odyssey_ocmb
 
 } // end namespace PRDF

@@ -228,10 +228,10 @@ class OcmbDataBundle : public DataBundle
     TimeBasedThreshold iv_ceStopCounter =
         TimeBasedThreshold( 16, ThresholdResolution::SEVEN_HOURS );;
 
-    // If we stop on a UE or a CE, we will need to store the rank that the
-    // error is on so that we can clear our respective thresholds if the
-    // next error we stop on is on a different rank.
-    MemRank iv_ceUeRank;
+    // If we stop on a UE or a CE, we will need to store the port and rank that
+    // the error is on so that we can clear our respective thresholds if the
+    // next error we stop on is on a different port/rank.
+    std::pair<uint8_t, MemRank> iv_ceUeRank;
 
     #else // IPL only
 
