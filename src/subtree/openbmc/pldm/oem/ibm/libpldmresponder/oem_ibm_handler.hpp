@@ -31,12 +31,13 @@ class Handler : public oem_platform::Handler
   public:
     Handler(const pldm::utils::DBusHandler* dBusIntf,
             pldm::responder::CodeUpdate* codeUpdate, int mctp_fd,
-            uint8_t mctp_eid, pldm::dbus_api::Requester& requester,
+            uint8_t mctp_eid, pldm::InstanceIdDb& instanceIdDb,
             sdeventplus::Event& event,
             pldm::requester::Handler<pldm::requester::Request>* handler) :
         oem_platform::Handler(dBusIntf),
         codeUpdate(codeUpdate), platformHandler(nullptr), mctp_fd(mctp_fd),
-        mctp_eid(mctp_eid), requester(requester), event(event), handler(handler)
+        mctp_eid(mctp_eid), instanceIdDb(instanceIdDb), event(event),
+        handler(handler)
     {
         codeUpdate->setVersions();
         setEventReceiverCnt = 0;
@@ -192,10 +193,9 @@ class Handler : public oem_platform::Handler
     /** @brief MCTP EID of host firmware */
     uint8_t mctp_eid;
 
-    /** @brief reference to Requester object, primarily used to access API to
-     *  obtain PLDM instance id.
-     */
-    pldm::dbus_api::Requester& requester;
+    /** @brief reference to an InstanceIdDb object, used to obtain a PLDM
+     * instance id. */
+    pldm::InstanceIdDb& instanceIdDb;
     /** @brief sdeventplus event source */
     std::unique_ptr<sdeventplus::source::Defer> assembleImageEvent;
     std::unique_ptr<sdeventplus::source::Defer> startUpdateEvent;

@@ -255,7 +255,7 @@ int HostEffecterParser::setHostStateEffecter(
 {
     uint8_t& mctpEid = hostEffecterInfo[effecterInfoIndex].mctpEid;
     uint8_t& compEffCnt = hostEffecterInfo[effecterInfoIndex].compEffecterCnt;
-    auto instanceId = requester->getInstanceId(mctpEid);
+    auto instanceId = instanceIdDb->next(mctpEid);
 
     std::vector<uint8_t> requestMsg(
         sizeof(pldm_msg_hdr) + sizeof(effecterId) + sizeof(compEffCnt) +
@@ -269,7 +269,7 @@ int HostEffecterParser::setHostStateEffecter(
     {
         error("Message encode failure. PLDM error code = {RC}", "RC", lg2::hex,
               rc);
-        requester->markFree(mctpEid, instanceId);
+        instanceIdDb->free(mctpEid, instanceId);
         return rc;
     }
 

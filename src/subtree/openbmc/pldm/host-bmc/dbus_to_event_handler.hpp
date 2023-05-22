@@ -1,7 +1,7 @@
 #pragma once
 
 #include "libpldmresponder/pdr_utils.hpp"
-#include "pldmd/dbus_impl_requester.hpp"
+#include "pldmd/instance_id.hpp"
 #include "requester/handler.hpp"
 
 #include <libpldm/platform.h>
@@ -41,7 +41,7 @@ class DbusToPLDMEvent
      *  @param[in] handler - PLDM request handler
      */
     explicit DbusToPLDMEvent(
-        int mctp_fd, uint8_t mctp_eid, pldm::dbus_api::Requester& requester,
+        int mctp_fd, uint8_t mctp_eid, pldm::InstanceIdDb& instanceIdDb,
         pldm::requester::Handler<pldm::requester::Request>* handler);
 
   public:
@@ -71,10 +71,10 @@ class DbusToPLDMEvent
     /** @brief MCTP EID of host firmware */
     uint8_t mctp_eid;
 
-    /** @brief reference to Requester object, primarily used to access API to
-     *  obtain PLDM instance id.
+    /** @brief reference to an Instance ID database object, used to obtain PLDM
+     * instance IDs
      */
-    pldm::dbus_api::Requester& requester;
+    pldm::InstanceIdDb& instanceIdDb;
 
     /** @brief D-Bus property changed signal match */
     std::vector<std::unique_ptr<sdbusplus::bus::match_t>> stateSensorMatchs;

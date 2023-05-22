@@ -3,7 +3,7 @@
 #include "common/types.hpp"
 #include "device_updater.hpp"
 #include "package_parser.hpp"
-#include "pldmd/dbus_impl_requester.hpp"
+#include "pldmd/instance_id.hpp"
 #include "requester/handler.hpp"
 #include "watch.hpp"
 
@@ -24,7 +24,6 @@ namespace fw_update
 
 using namespace sdeventplus;
 using namespace sdeventplus::source;
-using namespace pldm::dbus_api;
 using namespace pldm;
 
 using DeviceIDRecordOffset = size_t;
@@ -48,11 +47,11 @@ class UpdateManager
     explicit UpdateManager(
         Event& event,
         pldm::requester::Handler<pldm::requester::Request>& handler,
-        Requester& requester, const DescriptorMap& descriptorMap,
+        InstanceIdDb& instanceIdDb, const DescriptorMap& descriptorMap,
         const ComponentInfoMap& componentInfoMap) :
         event(event),
-        handler(handler), requester(requester), descriptorMap(descriptorMap),
-        componentInfoMap(componentInfoMap),
+        handler(handler), instanceIdDb(instanceIdDb),
+        descriptorMap(descriptorMap), componentInfoMap(componentInfoMap),
         watch(event.get(),
               std::bind_front(&UpdateManager::processPackage, this))
     {}
@@ -96,7 +95,7 @@ class UpdateManager
     Event& event; //!< reference to PLDM daemon's main event loop
     /** @brief PLDM request handler */
     pldm::requester::Handler<pldm::requester::Request>& handler;
-    Requester& requester; //!< reference to Requester object
+    InstanceIdDb& instanceIdDb; //!< reference to an InstanceIdDb
 
   private:
     /** @brief Device identifiers of the managed FDs */

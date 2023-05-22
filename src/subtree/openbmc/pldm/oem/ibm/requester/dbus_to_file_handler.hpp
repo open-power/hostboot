@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pldmd/dbus_impl_requester.hpp"
+#include "pldmd/instance_id.hpp"
 #include "requester/handler.hpp"
 
 #include <libpldm/platform.h>
@@ -34,12 +34,12 @@ class DbusToFileHandler
     /** @brief Constructor
      *  @param[in] mctp_fd - fd of MCTP communications socket
      *  @param[in] mctp_eid - MCTP EID of host firmware
-     *  @param[in] requester - pointer to a Requester object
+     *  @param[in] instanceIdDb - pointer to a InstanceIdDb object
      *  @param[in] resDumpCurrentObjPath - resource dump current object path
      *  @param[in] handler - PLDM request handler
      */
     DbusToFileHandler(
-        int mctp_fd, uint8_t mctp_eid, dbus_api::Requester* requester,
+        int mctp_fd, uint8_t mctp_eid, pldm::InstanceIdDb* instanceIdDb,
         sdbusplus::message::object_path resDumpCurrentObjPath,
         pldm::requester::Handler<pldm::requester::Request>* handler);
 
@@ -85,10 +85,8 @@ class DbusToFileHandler
     /** @brief MCTP EID of host firmware */
     uint8_t mctp_eid;
 
-    /** @brief Pointer to a Requester object, primarily used to access API to
-     *  obtain PLDM instance id.
-     */
-    dbus_api::Requester* requester;
+    /** @brief Pointer to an InstanceIdDb used to obtain PLDM instance id. */
+    pldm::InstanceIdDb* instanceIdDb;
 
     /** @brief Hold the current resource dump object path */
     sdbusplus::message::object_path resDumpCurrentObjPath;

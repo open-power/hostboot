@@ -20,7 +20,7 @@ namespace responder
 namespace platform
 {
 int sendBiosAttributeUpdateEvent(
-    uint8_t eid, dbus_api::Requester* requester,
+    uint8_t eid, pldm::InstanceIdDb* instanceIdDb,
     const std::vector<uint16_t>& handles,
     pldm::requester::Handler<pldm::requester::Request>* handler)
 {
@@ -61,7 +61,7 @@ int sendBiosAttributeUpdateEvent(
             "EXCEP_NAME", e.name());
     }
 
-    auto instanceId = requester->getInstanceId(eid);
+    auto instanceId = instanceIdDb->next(eid);
 
     std::vector<uint8_t> requestMsg(
         sizeof(pldm_msg_hdr) + sizeof(pldm_bios_attribute_update_event_req) -
@@ -79,7 +79,7 @@ int sendBiosAttributeUpdateEvent(
         error(
             "BIOS Attribute update event message encode failure. PLDM error code = {RC}",
             "RC", lg2::hex, rc);
-        requester->markFree(eid, instanceId);
+        instanceIdDb->free(eid, instanceId);
         return rc;
     }
 

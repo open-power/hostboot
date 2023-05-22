@@ -19,7 +19,7 @@ void InventoryManager::discoverFDs(const std::vector<mctp_eid_t>& eids)
 {
     for (const auto& eid : eids)
     {
-        auto instanceId = requester.getInstanceId(eid);
+        auto instanceId = instanceIdDb.next(eid);
         Request requestMsg(sizeof(pldm_msg_hdr) +
                            PLDM_QUERY_DEVICE_IDENTIFIERS_REQ_BYTES);
         auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
@@ -27,7 +27,7 @@ void InventoryManager::discoverFDs(const std::vector<mctp_eid_t>& eids)
             instanceId, PLDM_QUERY_DEVICE_IDENTIFIERS_REQ_BYTES, request);
         if (rc)
         {
-            requester.markFree(eid, instanceId);
+            instanceIdDb.free(eid, instanceId);
             error(
                 "encode_query_device_identifiers_req failed, EID={EID}, RC = {RC}",
                 "EID", unsigned(eid), "RC", rc);
@@ -150,7 +150,7 @@ void InventoryManager::queryDeviceIdentifiers(mctp_eid_t eid,
 
 void InventoryManager::sendGetFirmwareParametersRequest(mctp_eid_t eid)
 {
-    auto instanceId = requester.getInstanceId(eid);
+    auto instanceId = instanceIdDb.next(eid);
     Request requestMsg(sizeof(pldm_msg_hdr) +
                        PLDM_GET_FIRMWARE_PARAMETERS_REQ_BYTES);
     auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
@@ -158,7 +158,7 @@ void InventoryManager::sendGetFirmwareParametersRequest(mctp_eid_t eid)
         instanceId, PLDM_GET_FIRMWARE_PARAMETERS_REQ_BYTES, request);
     if (rc)
     {
-        requester.markFree(eid, instanceId);
+        instanceIdDb.free(eid, instanceId);
         error("encode_get_firmware_parameters_req failed, EID={EID}, RC = {RC}",
               "EID", unsigned(eid), "RC", rc);
         return;

@@ -15,7 +15,6 @@
 
 #include <iostream>
 
-using namespace pldm::dbus_api;
 using namespace pldm::utils;
 using namespace pldm::responder;
 using namespace pldm::responder::pdr;
@@ -37,10 +36,10 @@ class MockOemPlatformHandler : public oem_ibm_platform::Handler
   public:
     MockOemPlatformHandler(const pldm::utils::DBusHandler* dBusIntf,
                            pldm::responder::CodeUpdate* codeUpdate, int mctp_fd,
-                           uint8_t mctp_eid, Requester& requester,
+                           uint8_t mctp_eid, pldm::InstanceIdDb& instanceIdDb,
                            sdeventplus::Event& event) :
         oem_ibm_platform::Handler(dBusIntf, codeUpdate, mctp_fd, mctp_eid,
-                                  requester, event, nullptr)
+                                  instanceIdDb, event, nullptr)
     {}
     MOCK_METHOD(uint16_t, getNextEffecterId, ());
     MOCK_METHOD(uint16_t, getNextSensorId, ());
@@ -56,7 +55,6 @@ TEST(OemSetStateEffecterStatesHandler, testGoodRequest)
     TestInstanceIdDb instanceIdDb;
 
     sdbusplus::bus_t bus(sdbusplus::bus::new_default());
-    Requester requester(bus, "/abc/def", instanceIdDb);
     auto event = sdeventplus::Event::get_default();
     std::vector<get_sensor_state_field> stateField;
 
@@ -66,8 +64,8 @@ TEST(OemSetStateEffecterStatesHandler, testGoodRequest)
     std::unique_ptr<oem_platform::Handler> oemPlatformHandler{};
 
     oemPlatformHandler = std::make_unique<oem_ibm_platform::Handler>(
-        mockDbusHandler.get(), mockCodeUpdate.get(), 0x1, 0x9, requester, event,
-        nullptr);
+        mockDbusHandler.get(), mockCodeUpdate.get(), 0x1, 0x9, instanceIdDb,
+        event, nullptr);
 
     auto rc = oemPlatformHandler->getOemStateSensorReadingsHandler(
         entityID_, entityInstance_, stateSetId_, compSensorCnt_, stateField);
@@ -191,7 +189,6 @@ TEST(generateStateEffecterOEMPDR, testGoodRequest)
     sdbusplus::bus_t bus(sdbusplus::bus::new_default());
     std::filesystem::path dbPath;
     TestInstanceIdDb instanceIdDb;
-    Requester requester(bus, "/abc/def", instanceIdDb);
     auto mockDbusHandler = std::make_unique<MockdBusHandler>();
     auto event = sdeventplus::Event::get_default();
     std::unique_ptr<CodeUpdate> mockCodeUpdate =
@@ -199,7 +196,7 @@ TEST(generateStateEffecterOEMPDR, testGoodRequest)
     std::unique_ptr<oem_ibm_platform::Handler> mockoemPlatformHandler =
         std::make_unique<MockOemPlatformHandler>(mockDbusHandler.get(),
                                                  mockCodeUpdate.get(), 0x1, 0x9,
-                                                 requester, event);
+                                                 instanceIdDb, event);
     Repo inRepo(inPDRRepo);
 
     mockoemPlatformHandler->buildOEMPDR(inRepo);
@@ -298,7 +295,6 @@ TEST(generateStateSensorOEMPDR, testGoodRequest)
     sdbusplus::bus_t bus(sdbusplus::bus::new_default());
     std::filesystem::path dbPath;
     TestInstanceIdDb instanceIdDb;
-    Requester requester(bus, "/abc/def", instanceIdDb);
 
     auto mockDbusHandler = std::make_unique<MockdBusHandler>();
     auto event = sdeventplus::Event::get_default();
@@ -307,7 +303,7 @@ TEST(generateStateSensorOEMPDR, testGoodRequest)
     std::unique_ptr<oem_ibm_platform::Handler> mockoemPlatformHandler =
         std::make_unique<MockOemPlatformHandler>(mockDbusHandler.get(),
                                                  mockCodeUpdate.get(), 0x1, 0x9,
-                                                 requester, event);
+                                                 instanceIdDb, event);
     Repo inRepo(inPDRRepo);
     mockoemPlatformHandler->buildOEMPDR(inRepo);
     ASSERT_EQ(inRepo.empty(), false);

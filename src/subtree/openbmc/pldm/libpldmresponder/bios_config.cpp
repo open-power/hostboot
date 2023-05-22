@@ -18,7 +18,6 @@
 
 PHOSPHOR_LOG2_USING;
 
-using namespace pldm::dbus_api;
 using namespace pldm::utils;
 
 namespace pldm
@@ -44,11 +43,11 @@ constexpr auto attrValueTableFile = "attributeValueTable";
 
 BIOSConfig::BIOSConfig(
     const char* jsonDir, const char* tableDir, DBusHandler* const dbusHandler,
-    int fd, uint8_t eid, dbus_api::Requester* requester,
+    int fd, uint8_t eid, pldm::InstanceIdDb* instanceIdDb,
     pldm::requester::Handler<pldm::requester::Request>* handler) :
     jsonDir(jsonDir),
     tableDir(tableDir), dbusHandler(dbusHandler), fd(fd), eid(eid),
-    requester(requester), handler(handler)
+    instanceIdDb(instanceIdDb), handler(handler)
 
 {
     fs::create_directories(tableDir);
@@ -1042,7 +1041,7 @@ void BIOSConfig::constructPendingAttribute(
     {
 #ifdef OEM_IBM
         auto rc = pldm::responder::platform::sendBiosAttributeUpdateEvent(
-            eid, requester, listOfHandles, handler);
+            eid, instanceIdDb, listOfHandles, handler);
         if (rc != PLDM_SUCCESS)
         {
             return;

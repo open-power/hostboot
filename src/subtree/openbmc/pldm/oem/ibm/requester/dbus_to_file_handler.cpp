@@ -27,25 +27,25 @@ static constexpr auto resDumpStatus =
     "xyz.openbmc_project.Common.Progress.OperationStatus.Failed";
 
 DbusToFileHandler::DbusToFileHandler(
-    int mctp_fd, uint8_t mctp_eid, dbus_api::Requester* requester,
+    int mctp_fd, uint8_t mctp_eid, pldm::InstanceIdDb* instanceIdDb,
     sdbusplus::message::object_path resDumpCurrentObjPath,
     pldm::requester::Handler<pldm::requester::Request>* handler) :
     mctp_fd(mctp_fd),
-    mctp_eid(mctp_eid), requester(requester),
+    mctp_eid(mctp_eid), instanceIdDb(instanceIdDb),
     resDumpCurrentObjPath(resDumpCurrentObjPath), handler(handler)
 {}
 
 void DbusToFileHandler::sendNewFileAvailableCmd(uint64_t fileSize)
 {
-    if (requester == NULL)
+    if (instanceIdDb == NULL)
     {
         error(
-            "Failed to send resource dump parameters as requester is not set");
+            "Failed to send resource dump parameters as instance ID DB is not set");
         pldm::utils::reportError(
             "xyz.openbmc_project.bmc.pldm.InternalFailure");
         return;
     }
-    auto instanceId = requester->getInstanceId(mctp_eid);
+    auto instanceId = instanceIdDb->next(mctp_eid);
     std::vector<uint8_t> requestMsg(sizeof(pldm_msg_hdr) +
                                     PLDM_NEW_FILE_REQ_BYTES);
     auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
@@ -57,7 +57,7 @@ void DbusToFileHandler::sendNewFileAvailableCmd(uint64_t fileSize)
                                   fileHandle, fileSize, request);
     if (rc != PLDM_SUCCESS)
     {
-        requester->markFree(mctp_eid, instanceId);
+        instanceIdDb->free(mctp_eid, instanceId);
         error("Failed to encode_new_file_req, rc = {RC}", "RC", rc);
         return;
     }
@@ -247,14 +247,14 @@ void DbusToFileHandler::newFileAvailableSendToHost(const uint32_t fileSize,
                                                    const uint32_t fileHandle,
                                                    const uint16_t type)
 {
-    if (requester == NULL)
+    if (instanceIdDb == NULL)
     {
         error("Failed to send csr to host.");
         pldm::utils::reportError(
             "xyz.openbmc_project.bmc.pldm.InternalFailure");
         return;
     }
-    auto instanceId = requester->getInstanceId(mctp_eid);
+    auto instanceId = instanceIdDb->next(mctp_eid);
     std::vector<uint8_t> requestMsg(sizeof(pldm_msg_hdr) +
                                     PLDM_NEW_FILE_REQ_BYTES);
     auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
@@ -263,7 +263,7 @@ void DbusToFileHandler::newFileAvailableSendToHost(const uint32_t fileSize,
                                   request);
     if (rc != PLDM_SUCCESS)
     {
-        requester->markFree(mctp_eid, instanceId);
+        instanceIdDb->free(mctp_eid, instanceId);
         error("Failed to encode_new_file_req, rc = {RC}", "RC", rc);
         return;
     }

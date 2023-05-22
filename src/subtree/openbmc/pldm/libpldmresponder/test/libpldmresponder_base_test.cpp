@@ -18,14 +18,11 @@ class TestBaseCommands : public testing::Test
 {
   protected:
     TestBaseCommands() :
-        instanceIdDb(), requester(pldm::utils::DBusHandler::getBus(),
-                                  "/abc/def", this->instanceIdDb),
-        event(sdeventplus::Event::get_default())
+        instanceIdDb(), event(sdeventplus::Event::get_default())
     {}
 
     uint8_t mctpEid = 0;
     TestInstanceIdDb instanceIdDb;
-    Requester requester;
     sdeventplus::Event event;
 };
 
@@ -35,7 +32,7 @@ TEST_F(TestBaseCommands, testPLDMTypesGoodRequest)
     auto request = reinterpret_cast<pldm_msg*>(requestPayload.data());
     // payload length will be 0 in this case
     size_t requestPayloadLength = 0;
-    base::Handler handler(mctpEid, requester, event, nullptr, nullptr);
+    base::Handler handler(mctpEid, instanceIdDb, event, nullptr, nullptr);
     auto response = handler.getPLDMTypes(request, requestPayloadLength);
     // Need to support OEM type.
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
@@ -52,7 +49,7 @@ TEST_F(TestBaseCommands, testGetPLDMCommandsGoodRequest)
         requestPayload{};
     auto request = reinterpret_cast<pldm_msg*>(requestPayload.data());
     size_t requestPayloadLength = requestPayload.size() - sizeof(pldm_msg_hdr);
-    base::Handler handler(mctpEid, requester, event, nullptr, nullptr);
+    base::Handler handler(mctpEid, instanceIdDb, event, nullptr, nullptr);
     auto response = handler.getPLDMCommands(request, requestPayloadLength);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
     uint8_t* payload_ptr = responsePtr->payload;
@@ -69,7 +66,7 @@ TEST_F(TestBaseCommands, testGetPLDMCommandsBadRequest)
 
     request->payload[0] = 0xFF;
     size_t requestPayloadLength = requestPayload.size() - sizeof(pldm_msg_hdr);
-    base::Handler handler(mctpEid, requester, event, nullptr, nullptr);
+    base::Handler handler(mctpEid, instanceIdDb, event, nullptr, nullptr);
     auto response = handler.getPLDMCommands(request, requestPayloadLength);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
     uint8_t* payload_ptr = responsePtr->payload;
@@ -94,7 +91,7 @@ TEST_F(TestBaseCommands, testGetPLDMVersionGoodRequest)
 
     ASSERT_EQ(0, rc);
 
-    base::Handler handler(mctpEid, requester, event, nullptr, nullptr);
+    base::Handler handler(mctpEid, instanceIdDb, event, nullptr, nullptr);
     auto response = handler.getPLDMVersion(request, requestPayloadLength);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
 
@@ -125,7 +122,7 @@ TEST_F(TestBaseCommands, testGetPLDMVersionBadRequest)
 
     ASSERT_EQ(0, rc);
 
-    base::Handler handler(mctpEid, requester, event, nullptr, nullptr);
+    base::Handler handler(mctpEid, instanceIdDb, event, nullptr, nullptr);
     auto response = handler.getPLDMVersion(request, requestPayloadLength - 1);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
 
@@ -150,7 +147,7 @@ TEST_F(TestBaseCommands, testGetTIDGoodRequest)
     auto request = reinterpret_cast<pldm_msg*>(requestPayload.data());
     size_t requestPayloadLength = 0;
 
-    base::Handler handler(mctpEid, requester, event, nullptr, nullptr);
+    base::Handler handler(mctpEid, instanceIdDb, event, nullptr, nullptr);
     auto response = handler.getTID(request, requestPayloadLength);
 
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());

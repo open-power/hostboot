@@ -16,18 +16,15 @@ class InventoryManagerTest : public testing::Test
   protected:
     InventoryManagerTest() :
         event(sdeventplus::Event::get_default()), instanceIdDb(),
-        dbusImplRequester(pldm::utils::DBusHandler::getBus(),
-                          "/xyz/openbmc_project/pldm", instanceIdDb),
-        reqHandler(fd, event, dbusImplRequester, false, 90000, seconds(1), 2,
+        reqHandler(fd, event, instanceIdDb, false, 90000, seconds(1), 2,
                    milliseconds(100)),
-        inventoryManager(reqHandler, dbusImplRequester, outDescriptorMap,
+        inventoryManager(reqHandler, instanceIdDb, outDescriptorMap,
                          outComponentInfoMap)
     {}
 
     int fd = -1;
     sdeventplus::Event event;
     TestInstanceIdDb instanceIdDb;
-    pldm::dbus_api::Requester dbusImplRequester;
     requester::Handler<requester::Request> reqHandler;
     InventoryManager inventoryManager;
     DescriptorMap outDescriptorMap{};

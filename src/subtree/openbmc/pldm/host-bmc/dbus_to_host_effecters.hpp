@@ -2,7 +2,7 @@
 
 #include "common/types.hpp"
 #include "common/utils.hpp"
-#include "pldmd/dbus_impl_requester.hpp"
+#include "pldmd/instance_id.hpp"
 #include "requester/handler.hpp"
 
 #include <phosphor-logging/lg2.hpp>
@@ -74,7 +74,7 @@ class HostEffecterParser
     virtual ~HostEffecterParser() = default;
 
     /** @brief Constructor to create a HostEffecterParser object.
-     *  @param[in] requester - PLDM Requester object pointer
+     *  @param[in] instanceIdDb - PLDM InstanceIdDb object pointer
      *  @param[in] fd - socket fd to communicate to host
      *  @param[in] repo -  PLDM PDR repository
      *  @param[in] dbusHandler - D-bus Handler
@@ -82,11 +82,11 @@ class HostEffecterParser
      *  @param[in] handler - PLDM request handler
      */
     explicit HostEffecterParser(
-        pldm::dbus_api::Requester* requester, int fd, const pldm_pdr* repo,
+        pldm::InstanceIdDb* instanceIdDb, int fd, const pldm_pdr* repo,
         pldm::utils::DBusHandler* const dbusHandler,
         const std::string& jsonPath,
         pldm::requester::Handler<pldm::requester::Request>* handler) :
-        requester(requester),
+        instanceIdDb(instanceIdDb),
         sockFd(fd), pdrRepo(repo), dbusHandler(dbusHandler), handler(handler)
     {
         try
@@ -173,10 +173,10 @@ class HostEffecterParser
                                          uint16_t effecterId);
 
   protected:
-    pldm::dbus_api::Requester*
-        requester;           //!< Reference to Requester to obtain instance id
-    int sockFd;              //!< Socket fd to send message to host
-    const pldm_pdr* pdrRepo; //!< Reference to PDR repo
+    pldm::InstanceIdDb* instanceIdDb; //!< Reference to the InstanceIdDb object
+                                      //!< to obtain instance id
+    int sockFd;                       //!< Socket fd to send message to host
+    const pldm_pdr* pdrRepo;          //!< Reference to PDR repo
     std::vector<EffecterInfo> hostEffecterInfo; //!< Parsed effecter information
     std::vector<std::unique_ptr<sdbusplus::bus::match_t>>
         effecterInfoMatch; //!< vector to catch the D-Bus property change
