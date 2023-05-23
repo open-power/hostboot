@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1422,7 +1422,6 @@ namespace HBPM
         do {
             io_overrideImg = nullptr;
 
-#ifndef __HOSTBOOT_RUNTIME
             // Block any use of overrides if we're secure
             if( PNOR::isInhibitedSection(PNOR::RINGOVD) )
             {
@@ -1430,7 +1429,6 @@ namespace HBPM
                            "getRingOvd: ignore overrides in secure mode" );
                 break;
             }
-#endif
 
             uint32_t l_lidId = Util::HWREFIMG_RINGOVD_LIDID;
             if(g_pRingOvdLidMgr.get() == nullptr)

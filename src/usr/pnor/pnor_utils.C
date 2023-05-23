@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,8 @@
 
 #include <errl/errlmanager.H>
 #include <assert.h>
+#include <secureboot/service.H>
+#include <util/misc.H>
 
 #ifdef __HOSTBOOT_RUNTIME
 extern trace_desc_t* g_trac_hbrt;;
@@ -54,6 +56,7 @@ extern trace_desc_t* g_trac_hbrt;;
 #define PNOR_UTIL_TRACE_BL_SKIP(arg0, args...) TRACFCOMP(g_trac_hbrt, args)
 
 #else //HBI
+#include <kernel/bltohbdatamgr.H>
 extern trace_desc_t* g_trac_pnor;;
 #define PNOR_UTIL_TRACE(arg0, args...) TRACFCOMP(g_trac_pnor, args)
 #define PNOR_UTIL_TRACE_W_BRK(arg0, args...) TRACFCOMP(g_trac_pnor, args)
@@ -504,3 +507,63 @@ bool PNOR::cmpSecurebootMagicNumber(const uint8_t* i_vaddr)
 
     return memcmp(&ROM_MAGIC_NUMBER, i_vaddr, sizeof(ROM_MAGIC_NUMBER))==0;
 }
+
+#ifndef BOOTLOADER
+
+bool PNOR::isInhibitedSection(const uint32_t i_section)
+{
+#ifdef CONFIG_SECUREBOOT
+    bool retVal = false;
+
+    if ((i_section == ATTR_PERM ||
+         i_section == ATTR_TMP  ||
+         i_section == RINGOVD )
+         && SECUREBOOT::enabled() )
+    {
+        // Default to these sections not being allowed in secure mode
+        retVal = true;
+
+
+#ifndef __HOSTBOOT_RUNTIME
+        // This is the scenario where a section might be inhibited so check
+        // global struct from bootloader for this setting
+        retVal = ! ( g_BlToHbDataManager.getAllowAttrOverrides() );
+
+        // First argument discarded
+        PNOR_UTIL_TRACE(0, INFO_MRK"PNOR::isInhibitedSection: "
+                  "Inside Attr check: retVal=0x%X, i_section=%s",
+                  retVal,
+                  PNOR::SectionIdToString(i_section));
+
+#else
+        // This is the scenario where a section might be inhibited so check
+        // attribute to determine if these sections are allowed
+        if ( Util::isTargetingLoaded() )
+        {
+            TARGETING::TargetService& tS = TARGETING::targetService();
+            TARGETING::Target* sys = nullptr;
+            (void) tS.getTopLevelTarget( sys );
+            assert(sys, "PNOR::isInhibitedSection() system target is NULL");
+
+            retVal = ! (sys->getAttr<
+                TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>());
+
+            // First argument discarded
+            PNOR_UTIL_TRACE(0, INFO_MRK"PNOR::isInhibitedSection: "
+                      "Inside Attr check: retVal=0x%X, attr=0x%X, i_section=%s",
+                      retVal,
+                      sys->getAttr<
+                        TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>(),
+                      PNOR::SectionIdToString(i_section));
+       }
+#endif
+
+    }
+
+    return retVal;
+#else
+    return false;
+#endif
+}
+
+#endif // End #ifndef BOOTLOADER
