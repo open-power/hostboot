@@ -39,15 +39,15 @@
 
 // Max number of error log slots per GPE
 // Support 1 unrecoverable & 1 informational elog per GPE
-#define MAX_ELOG_SLOTS_PER_GPE 2
+#define MAX_ELOG_SLOTS_PER_GPE 1
 
 // Maximum number of error log entries in error log table
 #ifdef __PPE_QME
     // QME local table in QME SRAM .. logs downloaded by XGPE
-    #define MAX_ELOG_ENTRIES 2
+    #define MAX_ELOG_ENTRIES 1
 #else
     // OCC global table in OCC SRAM .. (8 QMEs + 1 PGPE + 1 XPGE)*2
-    #define MAX_ELOG_ENTRIES 20
+    #define MAX_ELOG_ENTRIES 10
 #endif
 
 // Structure of an individual error log entry in the table
