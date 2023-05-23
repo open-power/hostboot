@@ -63,24 +63,24 @@ def checkForPpeTraceBuff():
 
     return magicWordOffset
 
-def parseXgpeUserDataSection(data):
+def parseQmeUserDataSection(data):
 
     with open( "/tmp/qmeElogBin.bin", "wb" ) as qmeTraceBinFile:
         qmeTraceBinFile.write( data )
     magicWordOffset = checkForPpeTraceBuff()
-    cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(672) + " if=" + "/tmp/qmeElogBin.bin " + " of=" + "/tmp/qmeTrace.bin" + " bs=1 >/dev/null 2>&1"
+    cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(1080) + " if=" + "/tmp/qmeElogBin.bin " + " of=" + "/tmp/qmeTrace.bin" + " bs=1 >/dev/null 2>&1"
     rc = os.system( cmd )
     if( rc ):
         print( "Failed To Extract QME Trace Section. RC : " + str( rc ) )
 
 
 def parseUDToJson(subType, ver, data):
-    parseXgpeUserDataSection( data )
+    parseQmeUserDataSection( data )
     #Execute pmPpe2fsp tool to convert ppe trace to fsp trace.
     #This provide the right path to the tool as per BMC env
     ppeFormatFile = "/tmp/qmeTrace.bin"
     fspFormatFile = "/tmp/qmeTrace_fsp.bin"
-    udparsers.b2900.pmPpe2fsp.get_qme_trace_data_as_string(ppeFormatFile, fspFormatFile)
+    udparsers.b2900.pmPpe2fsp.get_pm_trace_data_as_string(ppeFormatFile, fspFormatFile)
 
     with open( fspFormatFile, 'rb' ) as fspFormat:
         readData = fspFormat.read()

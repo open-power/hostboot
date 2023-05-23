@@ -68,7 +68,7 @@ def parseXgpeUserDataSection(data):
     with open( "/tmp/xgpeElogBin.bin", "wb" ) as xgpeTraceBinFile:
         xgpeTraceBinFile.write( data )
     magicWordOffset = checkForPpeTraceBuff()
-    cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(672) + " if=" + "/tmp/xgpeElogBin.bin " + " of=" + "/tmp/xgpeTrace.bin" + " bs=1 >/dev/null 2>&1"
+    cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(1080) + " if=" + "/tmp/xgpeElogBin.bin " + " of=" + "/tmp/xgpeTrace.bin" + " bs=1 >/dev/null 2>&1"
     rc = os.system( cmd )
     if( rc ):
         print( "Failed To Extract XGPE Trace Section. RC : " + str( rc ) )
