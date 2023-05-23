@@ -63,19 +63,19 @@ def checkForPpeTraceBuff():
 
     return magicWordOffset
 
-def parseXgpeUserDataSection(data):
+def parsePgpeUserDataSection(data):
 
     with open( "/tmp/pgpeElogBin.bin", "wb" ) as pgpeTraceBinFile:
         pgpeTraceBinFile.write( data )
     magicWordOffset = checkForPpeTraceBuff()
-    cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(672) + " if=" + "/tmp/pgpeElogBin.bin " + " of=" + "/tmp/pgpeTrace.bin" + " bs=1 >/dev/null 2>&1"
+    cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(1080) + " if=" + "/tmp/pgpeElogBin.bin " + " of=" + "/tmp/pgpeTrace.bin" + " bs=1 >/dev/null 2>&1"
     rc = os.system( cmd )
     if( rc ):
         print( "Failed To Extract PGPE Trace Section. RC : " + str( rc ) )
 
 
 def parseUDToJson(subType, ver, data):
-    parseXgpeUserDataSection( data )
+    parsePgpeUserDataSection( data )
     #Execute pmPpe2fsp tool to convert ppe trace to fsp trace.
     #This provide the right path to the tool as per BMC env
     ppeFormatFile = "/tmp/pgpeTrace.bin"
