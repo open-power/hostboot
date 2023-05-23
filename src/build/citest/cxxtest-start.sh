@@ -65,9 +65,6 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         ODYSSEY_PNOR_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_nor_DD1.img.ecc
     fi
 
-    SPPE_SCRIPTS_PATH=/sbe/odyssey_standalone/sbeTest/
-    SPPE_SCRIPT_TO_RUN=${SBE_DIR}/simics/sbe/odyssey_standalone/sbestartupodystandalone.simics
-
     # Set up some ENV vars that SBE simics scripts require
     export SBEROOT=${SBE_DIR}
     export PYTHON_USER_PACKAGE_PATH=$(python3 -m site --user-site)

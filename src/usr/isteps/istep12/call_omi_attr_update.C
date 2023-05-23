@@ -33,15 +33,19 @@
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
+#include    <istepHelperFuncs.H>
 
 #include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
 
 #include    <initservice/isteps_trace.H>
 
+#include    <sbeio/sbeioif.H>
+
 //  targeting support.
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include    <targeting/odyutil.H>
 
 //Fapi Support
 #include    <config.h>
@@ -58,8 +62,29 @@ namespace ISTEP_12
 void* call_omi_attr_update (void *io_pArgs)
 {
     IStepError l_StepError;
+    errlHndl_t l_errl = nullptr;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_omi_attr_update entry" );
+    TargetHandleList l_ocmbChipList;
+    getAllChips(l_ocmbChipList, TYPE_OCMB_CHIP, true /* functional only */);
+
+    for(auto l_ocmb : l_ocmbChipList)
+    {
+        if(!UTIL::isOdysseyChip(l_ocmb))
+        {
+            continue; // Only push attributes out to Odyssey chips
+        }
+
+        l_errl = SBEIO::sendAttrUpdateRequest(l_ocmb);
+        if(l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"call_omi_attr_update: could not sync attributes");
+            captureError(l_errl, l_StepError, ISTEP_COMP_ID, l_ocmb);
+            // TODO JIRA: PFHB-443 check for code update on error
+        }
+        // Still try to push the attributes out to other OCMBs
+    }
+
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_omi_attr_update exit" );
 

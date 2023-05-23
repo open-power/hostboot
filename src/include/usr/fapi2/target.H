@@ -425,6 +425,8 @@ constexpr TheseChildTypesDontHaveAValidParent isProperParent(TargetType i_child,
         /* These target types are to support legacy P9 code */
         {   TARGET_TYPE_DIMM      , TARGET_TYPE_MBA },
         {   TARGET_TYPE_MBA       , TARGET_TYPE_MEMBUF_CHIP },
+
+        {   TARGET_TYPE_PERV      , TARGET_TYPE_OCMB_CHIP },
     };
 
     const TargetType ignore_types =

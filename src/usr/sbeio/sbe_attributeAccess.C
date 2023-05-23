@@ -28,6 +28,8 @@
 *
 */
 
+#include <fapi2.H>
+#include <plat_hwp_invoker.H>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include <sbeio/sbeioif.H>
@@ -35,6 +37,8 @@
 #include "sbe_fifodd.H"
 #include <sbeio/sbeioreasoncodes.H>
 #include <targeting/common/targetservice.H>
+#include <ody_generate_sbe_attribute_data.H>
+#include <ody_analyze_sbe_attr_response.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -127,6 +131,8 @@ namespace SBEIO
     errlHndl_t sendAttrUpdateRequest(TARGETING::Target * i_chipTarget)
     {
         errlHndl_t errl = nullptr;
+        SbeFifo::fifoAttrUpdateRequest* l_request = new SbeFifo::fifoAttrUpdateRequest;
+        SbeFifo::fifoAttrUpdateResponse* l_response = new SbeFifo::fifoAttrUpdateResponse;
 
         do
         {
@@ -138,10 +144,49 @@ namespace SBEIO
             {
                 break;
             }
-            SBE_TRACF(EXIT_MRK "Skipping unimplemented chipop sendAttrUpdateRequest");
 
+            l_request->wordCnt = 2 + (ODY_GENERATE_ATTR_DATA_SIZE / 4); // Two words for bookkeeping + the size of the attribute blob in words
+
+            // Generate the binary blob of the attributes to send to SPPE
+            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>l_fapiOcmb(i_chipTarget);
+            FAPI_INVOKE_HWP(errl,
+                            ody_generate_sbe_attribute_data,
+                            l_fapiOcmb,
+                            l_request->AttrUpdateRequest,
+                            sizeof(l_request->AttrUpdateRequest));
+            if(errl)
+            {
+                SBE_TRACF(ERR_MRK"sendAttrUpdateRequest: ody_generate_sbe_attribute_data failed");
+                break;
+            }
+
+            errl = SbeFifo::getTheInstance().performFifoChipOp(i_chipTarget,
+                                                               reinterpret_cast<uint32_t*>(l_request),
+                                                               reinterpret_cast<uint32_t*>(l_response),
+                                                               sizeof(SbeFifo::fifoAttrUpdateResponse));
+            if(errl)
+            {
+                SBE_TRACF(ERR_MRK"sendAttrUpdateRequest: attribute push failed");
+                break;
+            }
+
+            std::vector<sbeutil::AttrError_t>l_attrErrors;
+            FAPI_INVOKE_HWP(errl,
+                            ody_analyze_sbe_attr_response,
+                            l_fapiOcmb,
+                            l_response->AttrUpdateResponse,
+                            sizeof(l_response->AttrUpdateResponse),
+                            l_attrErrors);
+            // TODO JIRA: PFHB-439 Process the returned l_attrErrors vector
+            if(errl)
+            {
+                SBE_TRACF(ERR_MRK"sendAttrUpdateRequest: error returned from ody_analyze_sbe_attr_response");
+                break;
+            }
 
         }while(0);
+        delete l_request;
+        delete l_response;
 
         SBE_TRACD(EXIT_MRK "sendAttrUpdateRequest");
         return errl;

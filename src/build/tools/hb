@@ -625,15 +625,6 @@ hb_startsimics()
             exit 1
         fi
 
-        if [ -z $SPPE_SCRIPT_TO_RUN ]; then
-            SPPE_SCRIPT_TO_RUN=${SBE_ODY_DIR}/simics/sbe/odyssey_standalone/sbestartupodystandalone.simics
-        fi
-        if [[ ! -f $SPPE_SCRIPT_TO_RUN ]]; then
-            echo "File does not exist: " ${SPPE_SCRIPT_TO_RUN}
-            echo "Please make sure to run \"hb prime\" to create it."
-            exit 1
-        fi
-
         # Set up some ENV vars that SBE simics scripts require
         export SBEROOT=${SBE_ODY_DIR}
         export PYTHON_USER_PACKAGE_PATH=$(python3 -m site --user-site)

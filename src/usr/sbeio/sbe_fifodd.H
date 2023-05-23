@@ -40,6 +40,8 @@
 #include <error_info_defs.H>
 #include <sbeio/sbe_utils.H>
 
+#include <ody_sbe_attribute_data_size.H>
+
 namespace SBEIO
 {
 
@@ -776,7 +778,7 @@ public:
         uint8_t  chipId;
         uint8_t  commandClass;
         uint8_t  command;
-        uint32_t AttrUpdateRequest[];
+        uint8_t AttrUpdateRequest[ODY_GENERATE_ATTR_DATA_SIZE];
         fifoAttrUpdateRequest() :
             wordCnt(0),
             reserved(0),
@@ -785,6 +787,16 @@ public:
             command(SBE_FIFO_CMD_ATTRIBUTE_UPDATE)
         {}
     } PACKED;
+
+    /**
+     * @brief Struct for FIFO Attribute Update response. This message type is only supported on Odyssey chips.
+     */
+    struct fifoAttrUpdateResponse
+    {
+        uint8_t AttrUpdateResponse[ODY_GENERATE_ATTR_DATA_SIZE];
+        fifoAttrUpdateResponse() {}
+    } PACKED;
+
     ///////////////////////////////////////////////////////////////////////
     //                     Code Update Access Messages
     ///////////////////////////////////////////////////////////////////////

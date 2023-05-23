@@ -37,6 +37,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/utils
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/attr
 
 VPATH += ${EXTRAINCDIR}
 
