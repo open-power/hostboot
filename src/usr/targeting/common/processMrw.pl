@@ -1372,11 +1372,8 @@ sub processDdimmAndChildren
         # All logical DIMMs share a single PDR entry for the physical DDIMM
         $targetObj->setAttribute($ldimm, "PDR_ENTITY_INSTANCE", $ddimmId);
 
-        # FAPI position is the same as the position we use everywhere else.
-        my $dimmFapiPosition = $dimmPosPerNode;
-
         # Get the FAPI_NAME by using the data gathered above.
-        my $dimmFapiName = $targetObj->getFapiName($type, $nodeParentPos, $dimmFapiPosition);
+        my $dimmFapiName = $targetObj->getFapiName($type, $nodeParentPos, $dimmPosPerNode);
 
         # Take advantage of previous work done on the NODEs.  Use the parent NODE's
         # affinity/physical path for our self and append the necessary data.
@@ -1385,14 +1382,13 @@ sub processDdimmAndChildren
         my $dimmPhysical = $nodeParentPhysical . "/dimm-" . $dimmId;
 
         ## Now that we collected all the data we need, set some target attributes
-        # The HUID needs to match the FAPI_POS
-        $targetObj->setHuid($ldimm, $sysParentPos, $nodeParentPos, $dimmFapiPosition);
+        $targetObj->setHuid($ldimm, $sysParentPos, $nodeParentPos, $dimmPosPerNode);
         $targetObj->setAttribute($ldimm, "POSITION",      $dimmId);
         $targetObj->setAttribute($ldimm, "ORDINAL_ID",    $dimmPosPerSystem);
-        $targetObj->setAttribute($ldimm, "FAPI_POS",      $dimmFapiPosition);
+        $targetObj->setAttribute($ldimm, "FAPI_POS",      $dimmPosPerSystem);
         $targetObj->setAttribute($ldimm, "FAPI_NAME",     $dimmFapiName);
         $targetObj->setAttribute($ldimm, "FAPINAME_NODE", $nodeParentPos);
-        $targetObj->setAttribute($ldimm, "FAPINAME_POS",  $dimmFapiPosition);
+        $targetObj->setAttribute($ldimm, "FAPINAME_POS",  $dimmPosPerNode);
         $targetObj->setAttribute($ldimm, "REL_POS",       $dimmPosPerParent);
         $targetObj->setAttribute($ldimm, "AFFINITY_PATH", $dimmAffinity);
         $targetObj->setAttribute($ldimm, "PHYS_PATH",     $dimmPhysical);
@@ -1631,11 +1627,8 @@ sub processIsdimmAndChildren
     my $staticAbsLocationCode = getStaticAbsLocationCode($targetObj, $target);
     $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE", $staticAbsLocationCode);
 
-    # FAPI position is the same as the position we use everywhere else.
-    my $dimmFapiPosition = $dimmPosPerNode;
-
     # Get the FAPI_NAME by using the data gathered above.
-    my $dimmFapiName = $targetObj->getFapiName($type, $nodeParentPos, $dimmFapiPosition);
+    my $dimmFapiName = $targetObj->getFapiName($type, $nodeParentPos, $dimmPosPerNode);
 
     # Take advantage of previous work done on the NODEs.  Use the parent NODE's
     # affinity/physical path for our self and append the necessary data.
@@ -1643,15 +1636,14 @@ sub processIsdimmAndChildren
     my $dimmPhysical = $nodeParentPhysical . "/dimm-" . $dimmId;
 
     ## Now that we collected all the data we need, set some target attributes
-    # The HUID needs to match the FAPI_POS
-    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $dimmFapiPosition);
+    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $dimmPosPerNode);
     $targetObj->setAttribute($target, "POSITION",      $dimmId);
     $targetObj->setAttribute($target, "PDR_ENTITY_INSTANCE", $dimmId);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $dimmPosPerSystem);
-    $targetObj->setAttribute($target, "FAPI_POS",      $dimmFapiPosition);
+    $targetObj->setAttribute($target, "FAPI_POS",      $dimmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $dimmFapiName);
     $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_POS",  $dimmFapiPosition);
+    $targetObj->setAttribute($target, "FAPINAME_POS",  $dimmPosPerNode);
     $targetObj->setAttribute($target, "REL_POS",       $dimmPosPerParent);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $dimmAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $dimmPhysical);
