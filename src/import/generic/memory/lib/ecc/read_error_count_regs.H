@@ -27,7 +27,7 @@
 /// @file read_error_count_regs.H
 /// @brief Subroutines for the MBS Memory Scrub/Read Error Count registers (MBSEC*Q)
 ///
-// *HWP HWP Owner: Matt Hickman <Matthew.Hickman@ibm.com>
+// *HWP HWP Owner: Sneha Kadam <Sneha.Kadam1@ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3

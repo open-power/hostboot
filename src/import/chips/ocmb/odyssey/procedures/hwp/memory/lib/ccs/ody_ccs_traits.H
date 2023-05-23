@@ -29,7 +29,7 @@
 /// @brief Run and manage the CCS engine for Odyssey
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
-// *HWP HWP Backup: Matthew Hickman <Matthew.Hickman@ibm.com>
+// *HWP HWP Backup: Sneha Kadam <Sneha.Kadam1@ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP

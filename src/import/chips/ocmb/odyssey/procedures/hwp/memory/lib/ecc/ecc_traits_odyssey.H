@@ -29,7 +29,7 @@
 /// @brief Traits class for the MC ECC syndrome registers
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Matt Hickman <Matthew.Hickman@ibm.com>
+// *HWP HWP Backup: Sneha Kadam <Sneha.Kadam1@ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
 // *HWP Consumed by: FSP:HB
