@@ -575,26 +575,6 @@ get_single_parent(TARGETING::Target* const target,
     return l_parentList;
 }
 
-// @TODO JIRA PFHB-484
-// When the getParent function below is instrumented with code coverage, the
-// custom linker fails with a duplicate weak symbol error due to the presence of
-// the contained lambda function.  This macro forces the visibility of the
-// getParent function to hidden when instrumented with code coverage,
-// avoiding that problem, while using the default visibility otherwise.  This
-// may result in larger profiled binary sizes since the function can no longer
-// be shared across any translation units (but then again profiled binaries
-// are already hugely inflated).  Remove this workaround once the lamda (or
-// linker) is modified to avoid the error, namely:
-//
-// exception caught: Duplicate weak symbol with contained value member detected:
-// _ZNK5fapi26TargetILNS_10TargetTypeE1024ELNS_13MulticastTypeE0ENS_20plat_target_handle_tEE9getParentILS1_2048EEENS0_IXT_ELS2_0ES3_EEv
-// with member: _ZZNK5fapi26TargetILNS_10TargetTypeE1024ELNS_13MulticastTypeE0ENS_20plat_target_handle_tEE9getParentILS1_2048EEENS0_IXT_ELS2_0ES3_EEvENKUlmE_clEm
-#ifdef PROFILE_CODE
-#define GET_PARENT_VISIBILITY __attribute__ ((visibility ("hidden")))
-#else
-#define GET_PARENT_VISIBILITY
-#endif
-
 ///
 /// @brief Get this target's immediate parent
 /// @tparam T_SELF The type of target on which this is called
@@ -604,7 +584,7 @@ get_single_parent(TARGETING::Target* const target,
 ///
 template<TargetType T_SELF, MulticastType M, typename V>
 template<TargetType K_PARENT>
-GET_PARENT_VISIBILITY inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
+inline Target<K_PARENT, M, V> Target<T_SELF, M, V>::getParent(void) const
 {
     static_assert(impl::check<impl::isProperParent(T_SELF, K_PARENT)>::value);
 

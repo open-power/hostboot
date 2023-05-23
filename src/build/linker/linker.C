@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Jan Hlavac                                                         */
 /*                                                                        */
@@ -534,7 +534,20 @@ int main(int argc, char** argv)
                         continue;
                     }
 
+                    /* We are now ignoring this error for classes other than Singleton,
+                       because the underlying condition is always and currently present
+                       in the code even when we don't detect it (see above comment block),
+                       and the linker will choose the library in which the symbol resides
+                       to link to (which we want, because other libraries may not
+                       be loaded when the symbol in question is used).
+                    */
+                    if (!strstr(j->c_str(), "Singleton"))
+                    {
+                        continue;
+                    }
+
                     cout << "\tDuplicate member found: " << *j << endl;
+
                     throw std::runtime_error(
                                 string("Duplicate weak symbol with contained "
                                        "value member detected: ") +
