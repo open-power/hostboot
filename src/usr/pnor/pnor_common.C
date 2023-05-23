@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -361,60 +361,6 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC,
 
     TRACUCOMP(g_trac_pnor, "< PNOR::parseTOC" );
     return l_errhdl;
-}
-
-bool PNOR::isInhibitedSection(const uint32_t i_section)
-{
-#ifdef CONFIG_SECUREBOOT
-    bool retVal = false;
-
-    if ((i_section == ATTR_PERM ||
-         i_section == ATTR_TMP  ||
-         i_section == RINGOVD )
-         && SECUREBOOT::enabled() )
-    {
-        // Default to these sections not being allowed in secure mode
-        retVal = true;
-
-
-#ifndef __HOSTBOOT_RUNTIME
-        // This is the scenario where a section might be inhibited so check
-        // global struct from bootloader for this setting
-        retVal = ! ( g_BlToHbDataManager.getAllowAttrOverrides() );
-
-        TRACFCOMP(g_trac_pnor, INFO_MRK"PNOR::isInhibitedSection: "
-                  "Inside Attr check: retVal=0x%X, i_section=%s",
-                  retVal,
-                  PNOR::SectionIdToString(i_section));
-
-#else
-        // This is the scenario where a section might be inhibited so check
-        // attribute to determine if these sections are allowed
-        if ( Util::isTargetingLoaded() )
-        {
-            TARGETING::TargetService& tS = TARGETING::targetService();
-            TARGETING::Target* sys = nullptr;
-            (void) tS.getTopLevelTarget( sys );
-            assert(sys, "PNOR::isInhibitedSection() system target is NULL");
-
-            retVal = ! (sys->getAttr<
-                TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>());
-
-            TRACFCOMP(g_trac_pnor, INFO_MRK"PNOR::isInhibitedSection: "
-                      "Inside Attr check: retVal=0x%X, attr=0x%X, i_section=%s",
-                      retVal,
-                      sys->getAttr<
-                        TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>(),
-                      PNOR::SectionIdToString(i_section));
-       }
-#endif
-
-    }
-
-    return retVal;
-#else
-    return false;
-#endif
 }
 
 bool PNOR::isSectionEmpty(const PNOR::SectionId i_section)
