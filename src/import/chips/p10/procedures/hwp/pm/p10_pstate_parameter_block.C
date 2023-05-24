@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,7 @@
     #include <util/misc.H>                   // Util::isSimicsRunning
 #endif
 
-using namespace pm_pstate_parameter_block;
+using namespace ppb;
 
 #define IQ_BUFFER_ALLOC            255
 #define PSTATE_MAX                 255
@@ -155,7 +155,6 @@ char const* region_names[] = VPD_OP_SLOPES_REGION_ORDER_STR;
 double mod(double a);
 double power(double x,int y);
 double root(double num, int r);
-using namespace pm_pstate_parameter_block;
 
 ///////////////////////////////////////////////////////////
 ////////     p10_pstate_parameter_block
@@ -235,6 +234,17 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // ----------------
         FAPI_TRY(l_pmPPB->compute_vpd_pts());
 
+        // ----------------
+        // WOF initialization
+        // ----------------
+        io_size = 0;
+        FAPI_TRY(l_pmPPB->wof_init(
+                 ppb::STORE_WOF_TABLE_ON,
+                 o_buf,
+                 io_size),
+                 "WOF initialization failure");
+
+        // ----------------
         // Safe mode freq and volt init
         // ----------------
         FAPI_TRY(l_pmPPB->safe_mode_init());
@@ -253,15 +263,6 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // RESCLK Initialization
         // ----------------
         l_pmPPB->resclk_init();
-
-        // ----------------
-        // WOF initialization
-        // ----------------
-        io_size = 0;
-        FAPI_TRY(l_pmPPB->wof_init(
-                 o_buf,
-                 io_size),
-                 "WOF initialization failure");
 
         // ----------------
         // Set this part's fmax value based on VPD and attributes
@@ -1093,6 +1094,12 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
                 revle32(io_globalppb->base.safe_frequency_khz),
                 revle32(io_globalppb->base.safe_voltage_mv[SAFE_VOLTAGE_VDD]),
                 revle32(io_globalppb->base.safe_voltage_mv[SAFE_VOLTAGE_VDD]));
+
+        // safe_throttle_idx
+        io_globalppb->base.safe_throttle_idx = revle32(iv_safe_mode_throt_idx);
+        FAPI_INF("Safe Mode Throttle Index %d (0x%X)",
+                revle32(io_globalppb->base.safe_throttle_idx),
+                revle32(io_globalppb->base.safe_throttle_idx));
 
         // Initialize res clk data
         memset(&io_globalppb->resclk,0,sizeof(ResClkSetup_t));
@@ -2207,7 +2214,24 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
             // Compute the VPD operating points
             FAPI_TRY(compute_vpd_pts());
 
-            FAPI_TRY(safe_mode_init());
+            // ----------------
+            // WOF table analysis to determine the safe mode throttle index
+            // ----------------
+            // allocate a dummy buffer to keep wof_init happy
+            uint8_t* t_buf = new uint8_t[1024];
+            memset(t_buf, 0, 8);
+            uint32_t io_size = 0;
+            FAPI_TRY(wof_init(
+                     ppb::STORE_WOF_TABLE_OFF,
+                     t_buf,
+                     io_size),
+                     "WOF initialization failure");
+            delete[] t_buf;
+
+            // ----------------
+            // Safe mode freq and volt init
+            // ----------------
+            FAPI_TRY(safe_mode_init())
 
             if(iv_attrs.attr_avs_bus_num[VDN] == INVALID_BUS_NUM)
             {
@@ -2476,7 +2500,6 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundAW()
 
     do
     {
-
         // First read is to get size of VPD record, note the o_buffer is nullptr
         FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CP00,
                     fapi2::MVPD_KEYWORD_AW,
@@ -5288,6 +5311,15 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
         FAPI_SYSTEM, iv_attrs.attr_pm_safe_frequency_mhz));
     }
 
+    fapi2::ATTR_SAFE_MODE_THROTTLE_IDX_Type l_SMIdx;
+    l_SMIdx = iv_safe_mode_throt_idx;
+    FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_SAFE_MODE_THROTTLE_IDX,
+                             iv_procChip,
+                             l_SMIdx));
+
+    FAPI_INF("Setting safe mode throttle index to 0x%x (%d)",
+        l_SMIdx,l_SMIdx);
+
     FAPI_INF("VDD boot_mode_mv 0x%x (%d)",
         iv_attrs.attr_boot_voltage_mv[VDD],
         iv_attrs.attr_boot_voltage_mv[VDD]);
@@ -5299,7 +5331,6 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     FAPI_INF("VDN boot_mode_mv 0x%x (%d)",
         iv_attrs.attr_boot_voltage_mv[VDN],
         iv_attrs.attr_boot_voltage_mv[VDN]);
-
 
 fapi_try_exit:
     FAPI_INF("<<<<<<<<<< safe_mode_computation");
@@ -6130,7 +6161,8 @@ void PlatPmPPB::compute_dds_slopes(
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode PlatPmPPB::update_vrt(
                              uint8_t* i_pBuffer,
-                             VRT_t* o_vrt_data)
+                             uint8_t  i_floor_ps,
+                             VRT_t*   o_vrt_data)
 {
     uint32_t          l_index_0 = 0;
     uint8_t           l_type = 0;
@@ -6138,7 +6170,6 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
     uint32_t          l_step_freq_khz;
     Pstate            l_ps;
     uint8_t           l_temp = 0;
-    uint32_t          l_core_floor_mhz = 0;
 
     l_step_freq_khz = iv_frequency_step_khz;
 //    FAPI_DBG("l_step_freq_khz = 0x%X (%d)", l_step_freq_khz, l_step_freq_khz);
@@ -6197,9 +6228,6 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
     double f_freq_bias = 0;
     int freq_bias_value_hp = 0;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
-                            iv_procChip,
-                            l_core_floor_mhz));
     freq_bias_value_hp = iv_bias.frequency_0p5pct;
 
     f_freq_bias = calc_bias(freq_bias_value_hp);
@@ -6218,12 +6246,17 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
         // Note: the table generation already did rounding so simply translate
         float l_freq_raw_khz = 0;
         float l_freq_biased_khz = 0;
-        //THis condition to handle if sys vrt is less than 60
+        //This condition to handle if sys vrt is less than 60
         //CeffRatio overage
         if (*i_pBuffer <= 60 )
         {
-            FAPI_TRY(freq2pState(l_core_floor_mhz*1000, &l_ps, ROUND_NEAR));
-            l_ps = l_ps + *i_pBuffer;
+            l_ps = i_floor_ps + *i_pBuffer;
+            FAPI_DBG("Throttle Pstate: %u (0x%X)", l_ps, l_ps);
+            if (l_ps > iv_safe_mode_throt_idx)
+            {
+                iv_safe_mode_throt_idx = *i_pBuffer;
+                FAPI_DBG("New Max Throttle Index: %u (0x%X)", iv_safe_mode_throt_idx, iv_safe_mode_throt_idx);
+            }
         }
         else
         {
@@ -6367,6 +6400,7 @@ uint64_t  PlatPmPPB::fmmr_value()
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
                              fapi2::ATTR_WOF_TABLE_DATA_Type* l_wof_table_data,
+                             ppb::STORE_WOF_TABLE i_wof_table_mode,
                              uint8_t* o_buf,
                              uint32_t& io_size)
 {
@@ -6377,6 +6411,8 @@ fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
     uint16_t l_vcs_size = 0;
     uint16_t l_io_size  = 0;
     uint16_t l_ac_size  = 0;
+    uint32_t l_core_floor_mhz = 0;
+    uint8_t  l_floor_ps = 0;
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
@@ -6422,6 +6458,13 @@ fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
         FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_WOF_TDP_IO_INDEX, iv_procChip, l_wof_tdp_io_index ) );
         FAPI_DBG( "ATTR_WOF_TDP_IO_INDEX value is 0x%02x", l_wof_tdp_io_index );
 
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
+                            iv_procChip,
+                            l_core_floor_mhz));
+
+        FAPI_TRY(freq2pState(l_core_floor_mhz*1000, &l_floor_ps, ROUND_NEAR));
+        FAPI_INF("Floor Pstate: %u (0x%X)", l_floor_ps, l_floor_ps);
+
         // Convert system vrt to homer vrt
         for (uint32_t vrt_index = 0;
                 vrt_index < l_total_index;
@@ -6433,6 +6476,7 @@ fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
 
             l_rc = update_vrt (
                     ((*l_wof_table_data) + l_wof_table_index),
+                    l_floor_ps,
                     &l_vrt
                     );
             if (l_rc)
@@ -6489,8 +6533,11 @@ fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
             l_vrt.vrtHeader.value = revle32(l_vrt.vrtHeader.value);
             l_wof_table_index += sizeof (l_vrt);
 
-            memcpy(o_buf + l_index, &l_vrt, sizeof (l_vrt));
-            l_index += sizeof (l_vrt);
+            if (i_wof_table_mode == ppb::STORE_WOF_TABLE_ON)
+            {
+                memcpy(o_buf + l_index, &l_vrt, sizeof (l_vrt));
+                l_index += sizeof (l_vrt);
+            }
         }
 
         io_size = l_index;
@@ -6507,6 +6554,7 @@ fapi_try_exit:
 ////////  wof_init
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode PlatPmPPB::wof_init(
+                             STORE_WOF_TABLE i_wof_table_mode,
                              uint8_t* o_buf,
                              uint32_t& io_size)
 {
@@ -6534,7 +6582,7 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         {
           b_wof_error = true;
         }
-        if (wof_convert_tables( l_wof_table_data, o_buf, io_size ))
+        if (wof_convert_tables( l_wof_table_data, i_wof_table_mode, o_buf, io_size ))
         {
           b_wof_error = true;
         }

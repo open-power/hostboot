@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,7 +105,7 @@ typedef struct
 
 } PstateSuperStructure;
 
-namespace pm_pstate_parameter_block
+namespace ppb
 {
 
 enum ROUNDING
@@ -113,6 +113,13 @@ enum ROUNDING
     ROUND_UP,
     ROUND_DOWN
 };
+
+enum STORE_WOF_TABLE
+{
+    STORE_WOF_TABLE_ON,
+    STORE_WOF_TABLE_OFF
+};
+
 
 #define BIAS_PCT_UNIT              0.5
 using namespace fapi2;
@@ -251,9 +258,10 @@ class PlatPmPPB
             iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_occ_freq_mhz(0),
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_ocs_enabled(0),
-            iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true), iv_eco_count(0),
+            iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true), iv_eco_count(0), iv_safe_mode_throt_idx(0),
             iv_dccr_value(0), iv_flmr_value(0), iv_fmmr_value(0),
             iv_wts_vddPsavFreq(0), iv_wts_vddWofBaseFreq(0), iv_wts_vddUTFreq(0), iv_wts_vddFixedFreq(0)
+
         {
             attr_init();
         }
@@ -286,34 +294,40 @@ class PlatPmPPB
 
         /// -----------------------------------------------------------------------
         /// @brief Initialize WOF data
+        /// @param[out]    i_wof_table_mode Indicates to store the WOF table or not to o_buf
         /// @param[out]    o_buf points to WOF data
         /// @param[inout]  io_size size of the wof  table
         /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode wof_init(
+            ppb::STORE_WOF_TABLE i_wof_table_mode,
             uint8_t* o_buf,
             uint32_t& io_size);
 
         /// -----------------------------------------------------------------------
         /// @brief Convert the WOF Tables from System version to the HOMER version
         /// @param[in]     l_wof_table_data points to WOF data tables
+        /// @param[out]    i_wof_table_mode Indicates to store the WOF table or not to o_buf
         /// @param[out]    o_buf points to WOF data in the output memory buffer
         /// @param[inout]  io_size size of the wof  table
         /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode wof_convert_tables(
             fapi2::ATTR_WOF_TABLE_DATA_Type* l_wof_table_data,
+            ppb::STORE_WOF_TABLE i_wof_table_mode,
             uint8_t* o_buf,
             uint32_t& io_size);
 
         /// -----------------------------------------------------------------------
         /// @brief VRT data initialization from WOF data
         /// @param[in]     i_pBuffer WOF data buffer
+        /// @param[in]     i_floor_ps  Pstate of the floor frequency
         /// @param[inout]  o_vrt_data  vrt data
         /// @return fapi2::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode update_vrt(
             uint8_t* i_pBuffer,
+            uint8_t  i_floor_ps,
             VRT_t* o_vrt_data);
 
         /// -----------------------------------------------------------------------
@@ -818,6 +832,7 @@ class PlatPmPPB
         uint8_t                   iv_pdv_model_data;
         uint8_t                   iv_qrvrm_enable_flag;
         uint8_t                   iv_eco_count;
+        uint32_t                  iv_safe_mode_throt_idx;
 
         PoundVOpPoint_t           iv_operating_points[NUM_VPD_PTS_SET][NUM_PV_POINTS];
         PoundVOpPoint_t           iv_attr_mvpd_poundV_raw[NUM_PV_POINTS];

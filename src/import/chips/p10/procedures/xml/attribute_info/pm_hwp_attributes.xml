@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -981,6 +981,24 @@
   <enum>DISABLED = 0x0, ENABLED = 0x1</enum>
   <default>DISABLED</default>
   <writeable/>
+</attribute>
+
+ <!-- ********************************************************************* -->
+<attribute>
+  <id>ATTR_SAFE_MODE_THROTTLE_IDX</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+  Set the index into a 64 entry Core Throttle Table to use while in Safe Mode.
+
+  Legal values are 0 to 63.  All others are invalid.
+
+  Consumer: p10_pstate_parameter_build ->
+            PGPE Hcode -> QME Hcode
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <default>0</default>
+  <group>safe</group>
 </attribute>
 
 </attributes>
