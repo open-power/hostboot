@@ -684,15 +684,23 @@ enum regs
     FAULTS_STATUS_1      = 0x94,
     FIRST_FAULT_STATUS_0 = 0x96,
     FIRST_FAULT_STATUS_1 = 0x98,
+    IIN_VCC              = 0x9A,
+    VINP_VIN             = 0x9C,
+    VUAX_B_A             = 0x9E,
+    VUAX_D_C             = 0xA0,
+    VINP_MIN_MAX         = 0xA2,
+    IIN_MIN_MAX          = 0xA4,
     INFET_POWER_MTP_ADDR = 0xA6,
     NVM_DATA             = 0xA8,
     VCC_VIN_VINP         = 0xB4,
+    NEG_ORFET_CNT        = 0xBB,
     RO_INPUTS_1          = 0xBC,
     RO_INPUTS_0          = 0xBE,
     FAULTS_CLEAR_0       = 0xD4,
     FAULTS_CLEAR_1       = 0xD6,
     EN_REGISTER          = 0xDE,
     BREADCRUMB           = 0xE0,
+    OR_FET_CNT_SEL       = 0xE6,
 };
 
 ///

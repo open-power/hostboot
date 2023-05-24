@@ -1065,45 +1065,19 @@ fapi2::ReturnCode pmic_health_check_ddr5_helper(const fapi2::Target<fapi2::TARGE
         mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
         mss::pmic::ddr5::consolidated_health_check_data& io_consolidated_health_check_data)
 {
-    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-
     io_health_check_info.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::N_PLUS_1;
     mss::pmic::ddr5::dt_state l_dt_state = mss::pmic::ddr5::dt_state::DT_ALL_GOOD;
     mss::pmic::ddr5::aggregate_state l_n_mode = mss::pmic::ddr5::aggregate_state::N_PLUS_1;
 
-    // Check if we have recevied any PMIC/DT pairs. Else declare LOST
-    if (!io_target_info.iv_number_of_target_infos_present)
-    {
-        io_consolidated_health_check_data.iv_health_check.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::LOST;
-        // If we are not given any PMIC/DT targets, exit now
-        constexpr auto NUM_PRIMARY_PMICS = CONSTS::NUM_PRIMARY_PMICS_DDR5;
-        constexpr auto NO_PMIC_DT_TARGETS = 0;
-        FAPI_ASSERT((io_target_info.iv_number_of_target_infos_present == NO_PMIC_DT_TARGETS),
-                    fapi2::NO_PMIC_DT_DDR5_TARGETS_FOUND()
-                    .set_OCMB_TARGET(i_ocmb_target)
-                    .set_NUM_PMICS(io_target_info.iv_number_of_target_infos_present)
-                    .set_EXPECTED_MIN_PMICS(NUM_PRIMARY_PMICS),
-                    GENTARGTIDFORMAT " Pmic health check requires at least %u PMICs and DTs. "
-                    "Given %u PMICs and DTs",
-                    GENTARGTID(i_ocmb_target),
-                    NUM_PRIMARY_PMICS,
-                    io_target_info.iv_number_of_target_infos_present);
-    }
+    // Check for all the asserts (correct PMIC/DT pair received, DIMM is 4U)
+    FAPI_TRY(health_check_tele_tool_assert_helper(i_ocmb_target,
+             io_target_info,
+             io_consolidated_health_check_data.iv_health_check.iv_aggregate_state));
 
-    // Platform has asserted we will receive at least 3 DT targets iff 4U
-    // Do a check to see if we are 4U by checking for minimum 3 DT targets
-    if (!mss::pmic::ddr5::is_4u(i_ocmb_target))
+    if((io_consolidated_health_check_data.iv_health_check.iv_aggregate_state ==
+        mss::pmic::ddr5::aggregate_state::DIMM_NOT_4U) ||
+       (io_consolidated_health_check_data.iv_health_check.iv_aggregate_state == mss::pmic::ddr5::aggregate_state::N_MODE))
     {
-        io_consolidated_health_check_data.iv_health_check.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::DIMM_NOT_4U;
-        FAPI_ERR(GENTARGTIDFORMAT " DIMM is not 4U", GENTARGTID(i_ocmb_target));
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    if(io_target_info.iv_number_of_target_infos_present <= CONSTS::NUM_PRIMARY_PMICS_DDR5)
-    {
-        io_consolidated_health_check_data.iv_health_check.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::N_MODE;
-        FAPI_ERR(GENTARGTIDFORMAT " Declaring N-mode due to not enough functional PMICs/DTs provided",
-                 GENTARGTID(i_ocmb_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 

@@ -251,6 +251,62 @@ bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 }
 
 ///
+/// @brief Helper function to check initial asserts of
+///        1. Did we received any PMIC/DT pairs from target
+///        2. Is the DIMM 4U
+///        3. Did we receive correct number of PMIC/DT pairs from target
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_state aggregate state
+/// @return true if 4U, false if not
+///
+fapi2::ReturnCode health_check_tele_tool_assert_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+        mss::pmic::ddr5::aggregate_state& io_state)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    // Check if we have recevied any PMIC/DT pairs. Else declare LOST
+    if (!io_target_info.iv_number_of_target_infos_present)
+    {
+        io_state = mss::pmic::ddr5::aggregate_state::LOST;
+        // If we are not given any PMIC/DT targets, exit now
+        constexpr auto NUM_PRIMARY_PMICS = CONSTS::NUM_PRIMARY_PMICS_DDR5;
+        FAPI_ASSERT(false,
+                    fapi2::NO_PMIC_DT_DDR5_TARGETS_FOUND()
+                    .set_OCMB_TARGET(i_ocmb_target)
+                    .set_NUM_PMICS(io_target_info.iv_number_of_target_infos_present)
+                    .set_EXPECTED_MIN_PMICS(NUM_PRIMARY_PMICS),
+                    GENTARGTIDFORMAT " Pmic health check requires at least %u PMICs and DTs. "
+                    "Given %u PMICs and DTs",
+                    GENTARGTID(i_ocmb_target),
+                    NUM_PRIMARY_PMICS,
+                    io_target_info.iv_number_of_target_infos_present);
+    }
+
+    // Platform has asserted we will receive at least 3 DT targets iff 4U
+    // Do a check to see if we are 4U by checking for minimum 3 DT targets
+    if (!mss::pmic::ddr5::is_4u(i_ocmb_target))
+    {
+        io_state = mss::pmic::ddr5::aggregate_state::DIMM_NOT_4U;
+        FAPI_ERR(GENTARGTIDFORMAT " DIMM is not 4U", GENTARGTID(i_ocmb_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    if(io_target_info.iv_number_of_target_infos_present <= CONSTS::NUM_PRIMARY_PMICS_DDR5)
+    {
+        io_state = mss::pmic::ddr5::aggregate_state::N_MODE;
+        FAPI_ERR(GENTARGTIDFORMAT " Declaring N-mode due to not enough functional PMICs/DTs provided",
+                 GENTARGTID(i_ocmb_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Write a register of a PMIC target. This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
