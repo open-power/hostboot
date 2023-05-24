@@ -49,6 +49,7 @@
 #include <sbeio/sbe_retry_handler.H>
 #include <initservice/initserviceif.H>
 #include <targeting/odyutil.H>
+#include <util/misc.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -296,21 +297,27 @@ errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
         if (l_elapsed_time_ns >= MAX_UP_FIFO_TIMEOUT_NS )
         {
             SBE_TRACF(ERR_MRK "waitUpFifoReady: "
-                      "timeout waiting for upstream FIFO to be not full");
+                      "timeout waiting for upstream FIFO to be not full on %.8X",
+                      TARGETING::get_huid(i_target));
 
             /*@
              * @errortype
              * @moduleid     SBEIO_FIFO
              * @reasoncode   SBEIO_FIFO_UPSTREAM_TIMEOUT
              * @userdata1    Timeout in NS
+             * @userdata2[00:31]  Failing Target
+             * @userdata2[32:63]  FIFO Status
              * @devdesc      Timeout waiting for upstream FIFO to have
              *               room to write
+             * @custdesc     Firmware error communicating with a chip
              */
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  SBEIO_FIFO,
                                  SBEIO_FIFO_UPSTREAM_TIMEOUT,
                                  MAX_UP_FIFO_TIMEOUT_NS,
-                                 0);
+                                 TWO_UINT32_TO_UINT64(
+                                   TARGETING::get_huid(i_target),
+                                   l_data));
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
@@ -692,24 +699,28 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
         // time out if wait too long
         if (l_elapsed_time_ns >= MAX_UP_FIFO_TIMEOUT_NS )
         {
-            SBE_TRACF(ERR_MRK "waitDnFifoReady: "
-                      "timeout waiting for downstream FIFO to be not full");
+            SBE_TRACF(ERR_MRK "waitDnFifoReady: timeout waiting for downstream FIFO to be not full on %.8X",
+                      TARGETING::get_huid(i_target));
 
             /*@
              * @errortype
              * @moduleid     SBEIO_FIFO
              * @reasoncode   SBEIO_FIFO_DOWNSTREAM_TIMEOUT
              * @userdata1    Timeout in NS
-             * @userdata2    FIFO Status
+             * @userdata2[00:31]  Failing Target
+             * @userdata2[32:63]  FIFO Status
              * @devdesc      Timeout waiting for downstream FIFO to have
              *               data to receive
+             * @custdesc     Firmware error communicating with a chip
              */
 
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                 SBEIO_FIFO,
                                 SBEIO_FIFO_DOWNSTREAM_TIMEOUT,
                                 MAX_UP_FIFO_TIMEOUT_NS,
-                                o_status);
+                                TWO_UINT32_TO_UINT64(
+                                   TARGETING::get_huid(i_target),
+                                   o_status));
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
@@ -717,6 +728,16 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
             // Keep a copy of the plid so we can pass it to the retry_handler
             // so the error logs it creates will be linked
             uint32_t l_errPlid = errl->plid();
+
+            //@TODO-JIRA:PFHB-489 Add Odyssey Timeout support
+            if( TARGETING::UTIL::isOdysseyChip(i_target) )
+            {
+                errl->addHwCallout(  i_target,
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::DELAYED_DECONFIG,
+                                     HWAS::GARD_NULL );
+                break;
+            }
 
             // Commit error log now if this is a FSP system because
             // we will not return from retry handler
@@ -728,7 +749,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
                                      HWAS::GARD_NULL );
                 ERRORLOG::errlCommit( errl, SBEIO_COMP_ID );
             }
-            //On open power systems we want to deconfigure the processor
+            //On BMC systems we want to deconfigure the chip
             else
             {
                 errl->addHwCallout(  i_target,
@@ -740,7 +761,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
             // Set the retry handler's mode to be informational, this will run
             // p9_extract_rc then TI the system on fsp-systems.
             // On open power systems if mode is set to informational we will run
-            // p9_extract_rc then return back to this function
+            // p10_extract_rc then return back to this function
             SbeRetryHandler l_SBEobj = SbeRetryHandler(
                 i_target,
                 SbeRetryHandler::SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY,
@@ -772,6 +793,13 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
         // try later
         nanosleep( 0, 10000 ); //sleep for 10,000 ns
         l_elapsed_time_ns += 10000;
+
+        // In simics a dead chip can take forever to timeout so
+        // make time move faster so we don't hang forever.
+        if( Util::isSimicsRunning() )
+        {
+            l_elapsed_time_ns += (MAX_UP_FIFO_TIMEOUT_NS/100);
+        }
     }
     while (1);
 
