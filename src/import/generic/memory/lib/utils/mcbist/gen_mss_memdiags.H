@@ -317,6 +317,32 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set up memory controller specific settings for pre-steer
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the portTraits associated with the port
+/// @param[in] i_target the memory controller target
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mss::portTraits<MC> >
+fapi2::ReturnCode pre_steer_settings( const fapi2::Target<T>&
+                                      i_target )
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    // Set up
+    FAPI_TRY( mss::getScom(i_target, TT::ECC_REG, l_data) );
+
+    l_data.setBit<TT::RECR_MBSECCQ_MAINT_NO_RETRY_UE>();
+    l_data.setBit<TT::RECR_MBSECCQ_MAINT_NO_RETRY_MPE>();
+
+    FAPI_TRY( mss::putScom(i_target, TT::ECC_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and return the original mask value
 /// @tparam MC the mc type of the T
 /// @tparam T fapi2::TargetType of the MCBIST engine
@@ -803,7 +829,7 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
     const fapi2::Target<T>& i_target,
     const constraints<MC> i_const,
     fapi2::ReturnCode& o_rc ):
-    operation<MC>(i_target, get_scrub_subtest<MC>(), i_const)
+    operation<MC>(i_target, mss::mcbist::scrub_subtest<MC>(), i_const)
 {
     mss::mcbist::address l_generic_start_address;
     mss::mcbist::address l_generic_end_address;
@@ -935,6 +961,174 @@ fapi_try_exit:
     return;
 }
 
+///
+/// @class Class for memdiags' continuous steer
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mcbistTraits associated with T
+///
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+struct continuous_steer_operation : public operation<MC>
+{
+
+    ///
+    /// @brief memdiags::continuous_steer_operation constructor
+    /// @param[in] i_target the target of the mcbist engine
+    /// @param[in] i_const the contraints of the operation
+    /// @param[out] o_rc the fapi2::ReturnCode of the intialization process
+    ///
+    continuous_steer_operation( const fapi2::Target<T>& i_target,
+                                const constraints<MC> i_const,
+                                fapi2::ReturnCode& o_rc );
+
+    continuous_steer_operation() = delete;
+};
+
+///
+/// @brief memdiags::continuous_steer_operation constructor
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mcbistTraits associated with T
+/// @param[in] i_target the target of the mcbist engine
+/// @param[in] i_const the contraints of the operation
+/// @param[out] o_rc the fapi2::ReturnCode of the intialization process
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT>
+continuous_steer_operation<MC, T, TT>::continuous_steer_operation(
+    const fapi2::Target<T>& i_target,
+    const constraints<MC> i_const,
+    fapi2::ReturnCode& o_rc ):
+    operation<MC>(i_target, mss::mcbist::steer_subtest<MC>(), i_const)
+{
+    mss::mcbist::address l_generic_start_address;
+    mss::mcbist::address l_generic_end_address;
+
+    FAPI_INF("setting up for continuous steer for %s", mss::c_str(i_target));
+
+    // Steer operations run 128B
+    operation<MC>::iv_program.change_len64(mss::OFF);
+
+    // We build a little program here which allows us to restart the loop in the event of a pause.
+    // So we need to craft some of the address ranges and some of the subtests by hand.
+
+    // Setup address config 0 to cover all the addresses for a port/dimm.
+    // We leverage the MCBIST's ability to skip invalid addresses, and just setup
+    // If we're running in the simulator, we want to only touch the addresses which training touched
+    // *INDENT-OFF*
+    operation<MC>::iv_sim ?
+        l_generic_start_address.get_sim_end_address(l_generic_end_address) :
+        l_generic_start_address.get_range<mss::mcbist::address::DIMM>(l_generic_end_address);
+    // *INDENT-ON*
+
+    FAPI_TRY( mss::mcbist::config_address_range0<MC>(i_target, l_generic_start_address, l_generic_end_address) );
+
+    // We push on a fake subtest 0 and subtest 1. We fix them up after we fill in the
+    // rest of the subtests.
+    operation<MC>::iv_program.iv_subtests.push_back(operation<MC>::iv_subtest);
+    operation<MC>::iv_program.iv_subtests.push_back(operation<MC>::iv_subtest);
+
+    // a generic 0 - DIMM address range.
+    //
+    // Subtests 2-9: One subtest per port/dimm each covering the whole range of that
+    // port/dimm. scrub_subtests by default are using address config 0, so each of
+    // these get their full address complement.
+    for (const auto& p : operation<MC>::iv_target.template getChildren<TT::PORT_TYPE>())
+    {
+        for (const auto& d : p.template getChildren<fapi2::TARGET_TYPE_DIMM>())
+        {
+            // Don't destroy the subtest passed in, copy it
+            auto l_subtest = operation<MC>::iv_subtest;
+
+            // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
+            l_subtest.enable_port(mss::relative_pos<MC, T>(p));
+            l_subtest.enable_dimm(mss::index(d));
+            operation<MC>::iv_program.iv_subtests.push_back(l_subtest);
+            FAPI_INF("adding steer subtest for %s (dimm %d) ( 0x%04x)", mss::c_str(d), mss::index(d), l_subtest);
+        }
+    }
+
+    //
+    // Subtest 10: goto subtest 2. This causes us to loop back to the first port/dimm and go thru them all
+    // This subtest will be marked the last when the MCBMR registers are filled in.
+    //
+    operation<MC>::iv_program.iv_subtests.push_back(mss::mcbist::goto_subtest<MC>(2));
+    FAPI_INF("last goto subtest (10) is going to subtest 2 ( 0x%04x) for %s", operation<MC>::iv_program.iv_subtests[2],
+             mss::c_str(operation<MC>::iv_target));
+
+    // Ok, now we can go back in to fill in the first two subtests.
+
+    {
+        auto l_subtest = operation<MC>::iv_subtest;
+        auto l_port = operation<MC>::iv_const.iv_start_address.get_port();
+        auto l_dimm = operation<MC>::iv_const.iv_start_address.get_dimm();
+        size_t l_index = 2;
+
+        // By default if we don't find our port/dimm in the subtests, we just go back to the beginning.
+        uint64_t l_goto_subtest = 2;
+
+        //
+        // subtest 0
+        //
+
+        // load the start address given and calculate the end address. Stick this into address config 1
+        // We don't need to account for the simulator here as the caller can do that when they setup the
+        // start address.
+        // *INDENT-OFF*
+        operation<MC>::iv_sim ?
+            operation<MC>::iv_const.iv_start_address.get_sim_end_address(operation<MC>::iv_const.iv_end_address) :
+            operation<MC>::iv_const.iv_start_address.template get_range<mss::mcbist::address::DIMM>(operation<MC>::iv_const.iv_end_address);
+        // *INDENT-ON*
+
+        FAPI_TRY( mss::mcbist::config_address_range1<MC>(i_target, operation<MC>::iv_const.iv_start_address,
+                  operation<MC>::iv_const.iv_end_address) );
+
+        // We need to use this address range. We know it's ok to write to element 0 as we pushed it on above
+        // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
+        l_subtest.change_addr_sel(1);
+        l_subtest.enable_port(l_port);
+        l_subtest.enable_dimm(l_dimm);
+
+        operation<MC>::iv_program.iv_subtests[0] = l_subtest;
+        FAPI_INF("adding steer subtest 0 for port %d dimm %d (0x%04x) for %s", l_port, l_dimm, l_subtest, mss::c_str(i_target));
+
+        //
+        // subtest 1
+        //
+
+        // From the port/dimm specified in the start address, we know what subtest should execute next. The idea
+        // being that this 0'th subtest is a mechanism to allow the caller to start a scrub 'in the middle' and
+        // jump to the next port/dimm which would have been scrubbed. The hard part is that we don't know where
+        // in the subtest vector the 'next' port/dimm are placed. So we look for our port/dimm (skipping subtest 0
+        // since we know that's us and skipping subtest 1 since it isn't there yet.)
+        for (; l_index < operation<MC>::iv_program.iv_subtests.size(); ++l_index)
+        {
+            auto l_my_dimm = operation<MC>::iv_program.iv_subtests[l_index].get_dimm();
+            auto l_my_port = operation<MC>::iv_program.iv_subtests[l_index].get_port();
+
+            if ((l_dimm == l_my_dimm) && (l_port == l_my_port))
+            {
+                l_goto_subtest = l_index + 1;
+                break;
+            }
+        }
+
+        // Since we set l_goto_subtest up with a meaningful default, we can just make a subtest with the
+        // l_goto_subtest subtest specified and pop that in to index 1.
+        FAPI_INF("adding steer subtest 1 to goto subtest %d (port %d, dimm %d, test 0x%04x) for %s", l_goto_subtest,
+                 operation<MC>::iv_program.iv_subtests[l_goto_subtest].get_port(),
+                 operation<MC>::iv_program.iv_subtests[l_goto_subtest].get_dimm(),
+                 operation<MC>::iv_program.iv_subtests[l_goto_subtest], mss::c_str(i_target) );
+
+        operation<MC>::iv_program.iv_subtests[1] = mss::mcbist::goto_subtest<MC>(l_goto_subtest);
+    }
+
+    // Initialize the common sections
+    FAPI_TRY( operation<MC>::base_init() );
+
+fapi_try_exit:
+    o_rc = fapi2::current_err;
+    return;
+}
 
 
 ///
@@ -956,13 +1150,13 @@ struct targeted_scrub_operation : public operation<MC>
     targeted_scrub_operation( const fapi2::Target<T>& i_target,
                               const constraints<MC> i_const,
                               fapi2::ReturnCode& o_rc ):
-        operation<MC>(i_target, get_scrub_subtest<MC>(), i_const)
+        operation<MC>(i_target, mss::mcbist::scrub_subtest<MC>(), i_const)
     {
         // Scrub operations run 128B
         this->iv_program.change_len64(mss::OFF);
 
-        // We're a single-port operation
-        o_rc = this->single_port_init();
+        // We're a multi-port operation
+        o_rc = this->multi_port_init();
 
         // Targeted scrub needs to force a pause and the end boundary. So we make sure that happens here.
         // Note: the PAUSE_ON_ERROR_MODE setting should pause the test on errors, or at the end so we
@@ -971,6 +1165,42 @@ struct targeted_scrub_operation : public operation<MC>
     }
 
     targeted_scrub_operation() = delete;
+};
+
+///
+/// @class Class for memdiags' targeted steer
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mcbistTraits associated with T
+///
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+struct targeted_steer_operation : public operation<MC>
+{
+
+    ///
+    /// @brief memdiags::targeted_steer_operation constructor
+    /// @param[in] i_target the target of the mcbist engine
+    /// @param[in] i_const the contraints of the operation
+    /// @param[out] o_rc the fapi2::ReturnCode of the intialization process
+    ///
+    targeted_steer_operation( const fapi2::Target<T>& i_target,
+                              const constraints<MC> i_const,
+                              fapi2::ReturnCode& o_rc ):
+        operation<MC>(i_target, mss::mcbist::steer_subtest<MC>(), i_const)
+    {
+        // Scrub operations run 128B
+        this->iv_program.change_len64(mss::OFF);
+
+        // We're a multi-port operation
+        o_rc = this->multi_port_init();
+
+        // Targeted steer needs to force a pause and the end boundary. So we make sure that happens here.
+        // Note: the PAUSE_ON_ERROR_MODE setting should pause the test on errors, or at the end so we
+        // shouldn't need a forced pause
+        this->iv_program.change_forced_pause( end_boundary::NONE );
+    }
+
+    targeted_steer_operation() = delete;
 };
 
 ///
@@ -1104,6 +1334,44 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Steer - continuous steer all memory behind the target
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType of the target
+/// @param[in] i_target the target behind which all memory should be scrubbed
+/// @param[in] i_stop stop conditions
+/// @param[in] i_speed the speed to steer
+/// @param[in] i_address mcbist::address representing the address from which to start.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+/// @note The function is asynchronous, and the caller should be looking for a done attention
+/// @note The address is often the port, dimm, rank but this is not enforced in the API.
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode background_steer( const fapi2::Target<T>& i_target,
+                                    const stop_conditions<MC>& i_stop,
+                                    const speed i_speed,
+                                    const mss::mcbist::address& i_address )
+{
+    using ET = mss::mcbistMCTraits<MC>;
+    FAPI_INF("continuous (background) steer for %s", mss::c_str(i_target));
+
+    FAPI_TRY( pre_steer_settings<MC>(i_target) );
+
+    {
+        fapi2::ReturnCode l_rc;
+        constraints<MC> l_const(i_stop, i_speed, end_boundary::STOP_AFTER_ADDRESS, i_address);
+        continuous_steer_operation<MC> l_op(i_target, l_const, l_rc);
+
+        FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
+                     ET::memdiags_continuous_scrub_failed_init().set_MC_TARGET(i_target),
+                     "Unable to initialize the MCBIST engine for a continuous steer %s", mss::c_str(i_target) );
+
+        return l_op.execute();
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Scrub - targeted scrub all memory described by the input address (rank, slave, etc.)
@@ -1139,6 +1407,48 @@ fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
         FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
                      ET::memdiags_targeted_scrub_failed_init().set_MC_TARGET(i_target),
                      "Unable to initialize the MCBIST engine for a targeted scrub %s", mss::c_str(i_target) );
+
+        return l_op.execute();
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Scrub - targeted steer all memory described by the input address (rank, slave, etc.)
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType of the target
+/// @param[in] i_target the target behind which all memory should be scrubbed
+/// @param[in] i_stop stop conditions
+/// @param[in] i_speed the speed to scrub
+/// @param[in] i_start_address mcbist::address representing the address from which to start.
+/// @param[in] i_end_address mcbist::address representing the address at which to end.
+/// @param[in] i_end whether to end, and where
+/// @return FAPI2_RC_SUCCESS iff everything ok
+/// @note The function is asynchronous, and the caller should be looking for a done attention
+/// @note The address is often the port, dimm, rank but this is not enforced in the API.
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode targeted_steer( const fapi2::Target<T>& i_target,
+                                  const stop_conditions<MC>& i_stop,
+                                  const mss::mcbist::address& i_start_address,
+                                  const mss::mcbist::address& i_end_address,
+                                  const end_boundary i_end )
+{
+    using ET = mss::mcbistMCTraits<MC>;
+    FAPI_INF("targeted steer for %s", mss::c_str(i_target));
+
+    FAPI_TRY( pre_steer_settings<MC>(i_target) );
+
+    {
+        fapi2::ReturnCode l_rc;
+        constraints<MC> l_const(i_stop, speed::LUDICROUS, i_end, i_start_address, i_end_address);
+        targeted_steer_operation<MC> l_op(i_target, l_const, l_rc);
+
+        FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
+                     ET::memdiags_targeted_scrub_failed_init().set_MC_TARGET(i_target),
+                     "Unable to initialize the MCBIST engine for a targeted steer %s", mss::c_str(i_target) );
 
         return l_op.execute();
     }
@@ -1390,7 +1700,7 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode mss_background_scrub_helper( const fapi2::Target<T>& i_target )
 {
-    FAPI_INF("Start mss_background_scrub_helper b on: %s", mss::c_str( i_target ));
+    FAPI_INF("Start mss_background_scrub_helper on: %s", mss::c_str( i_target ));
 
     // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
     // attributes for the PHY, etc.
@@ -1415,6 +1725,48 @@ fapi2::ReturnCode mss_background_scrub_helper( const fapi2::Target<T>& i_target 
     }
 
     // Unmask firs after background scrub is started
+    FAPI_TRY ( mss::unmask::after_background_scrub<MC>( i_target ) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Begin background steer helper
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mcbistTraits associated with T
+/// @param[in] i_target MC
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+fapi2::ReturnCode mss_background_steer_helper( const fapi2::Target<T>& i_target )
+{
+    FAPI_INF("Start mss_background_steer_helper on: %s", mss::c_str( i_target ));
+
+    // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
+    // attributes for the PHY, etc.
+    if (mss::count_dimm(i_target) == 0)
+    {
+        FAPI_INF("... skipping background steer for %s - no DIMM ...", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // If we're running in the simulator, we want to only touch the addresses which training touched
+    uint8_t l_sim = 0;
+    FAPI_TRY( mss::attr::get_is_simulation(l_sim) );
+
+    // Kick off background steer if we are not running in sim
+    if (!(l_sim))
+    {
+        // Start background steer
+        FAPI_TRY ( mss::memdiags::background_steer<MC>( i_target,
+                   mss::mcbist::stop_conditions<MC>(),
+                   mss::mcbist::speed::BG_SCRUB,
+                   mss::mcbist::address() ) );
+    }
+
+    // Unmask firs after background steer is started
     FAPI_TRY ( mss::unmask::after_background_scrub<MC>( i_target ) );
 
 fapi_try_exit:
@@ -1448,6 +1800,38 @@ fapi2::ReturnCode mss_firmware_background_scrub_helper( const fapi2::Target<T>& 
 
     // Do not unmask firs here, since PRD explicitly calls mss::unmask::after_background_scrub.
     // In Cronus, the procedure calls mss_background_scrub_helper which does the unmasks.
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Begin firmware background steer helper
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mcbistTraits associated with T
+/// @param[in] i_target MC
+/// @param[in] i_stop stop conditions
+/// @param[in] i_speed the speed to scrub
+/// @param[in] i_address mcbist::address representing the address from which to start
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+fapi2::ReturnCode mss_firmware_background_steer_helper( const fapi2::Target<T>& i_target,
+        const stop_conditions<MC>& i_stop,
+        const speed i_speed,
+        const mss::mcbist::address& i_address )
+{
+    FAPI_INF("Start mss_firmware_background_steer_helper on: %s", mss::c_str( i_target ));
+
+    // Start background steer
+    FAPI_TRY ( mss::memdiags::background_steer<MC>( i_target,
+               i_stop,
+               i_speed,
+               i_address) );
+
+    // Do not unmask firs here, since PRD explicitly calls mss::unmask::after_background_scrub.
+    // In Cronus, the procedure calls mss_background_steer_helper which does the unmasks.
 
 fapi_try_exit:
     return fapi2::current_err;

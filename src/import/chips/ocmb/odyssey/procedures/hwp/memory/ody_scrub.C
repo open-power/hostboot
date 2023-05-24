@@ -56,7 +56,8 @@ extern "C"
         FAPI_INF("Start ody scrub for %s", mss::c_str(i_target));
 
         // Kickoff background scrub and unmask firs
-        FAPI_TRY(mss::memdiags::mss_background_scrub_helper<mss::mc_type::ODYSSEY>(i_target));
+        // Note DDR5 requires use of the steer operation for running scrub
+        FAPI_TRY(mss::memdiags::mss_background_steer_helper<mss::mc_type::ODYSSEY>(i_target));
 
     fapi_try_exit:
         FAPI_INF("End ody scrub for %s", mss::c_str(i_target));

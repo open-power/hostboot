@@ -96,22 +96,36 @@ fapi2::ReturnCode ody_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 }
 
 ///
-/// @brief Continuous background scrub command wrapper for Odyssey
+/// @brief Continuous background steer (DDR5 scrub) command wrapper for Odyssey
 /// @param[in] i_target the target behind which all memory should be scrubbed
 /// @param[in] i_stop stop conditions
 /// @param[in] i_speed the speed to scrub
 /// @param[in] i_address mcbist::address representing the address from which to start.
 /// @return FAPI2_RC_SUCCESS iff everything ok
 ///
-fapi2::ReturnCode ody_background_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+fapi2::ReturnCode ody_background_steer( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                         const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop,
                                         const mss::mcbist::speed i_speed,
                                         const mss::mcbist::address& i_address )
 {
-    return mss::memdiags::mss_firmware_background_scrub_helper<mss::mc_type::ODYSSEY>(i_target,
+    return mss::memdiags::mss_firmware_background_steer_helper<mss::mc_type::ODYSSEY>(i_target,
             i_stop,
             i_speed,
             i_address);
+}
+
+///
+/// @brief Single address steer command wrapper for Odyssey
+/// @param[in] i_target the target behind which all memory should be scrubbed
+/// @param[in] i_address mcbist::address representing the address to test.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+fapi2::ReturnCode ody_single_address_steer( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const mss::mcbist::address& i_address )
+{
+    mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> l_stop;
+    return mss::memdiags::targeted_steer<mss::mc_type::ODYSSEY>(i_target, l_stop, i_address, i_address,
+            mss::mcbist::end_boundary::DONT_CHANGE);
 }
 
 ///
