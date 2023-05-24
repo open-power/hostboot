@@ -550,7 +550,59 @@ errlHndl_t discoverOcmbDependentTargetsAndEnable(const Target &i_sysTarget)
                     }
                 }
             }
-            if( l_err ) { break; }
+            if( l_err )
+            {
+                // something went wrong, knock out this OCMB and move on
+                platHwasErrorAddHWCallout(l_err,
+                                          cur_ocmb,
+                                          SRCI_PRIORITY_LOW,
+                                          DECONFIG,
+                                          GARD_NULL);
+                errlCommit(l_err, HWAS_COMP_ID);
+                continue;
+            }
+
+            // Walk through any PERV children
+            TargetHandleList l_pervList;
+            getChildAffinityTargets(l_pervList, cur_ocmb,
+                                    CLASS_UNIT, TYPE_PERV,
+                                    false /*all*/);
+
+            SPD::spdMemType_t l_memType(SPD::MEM_TYPE_INVALID);
+            SPD::spdModType_t l_memMod(SPD::MOD_TYPE_INVALID);
+            SPD::dimmModHeight_t l_memHeight(SPD::DDIMM_MOD_HEIGHT_INVALID);
+
+            l_err = SPD::getMemInfo(cur_ocmb, l_memType,
+                                    l_memMod, l_memHeight);
+            if (l_err)
+            {
+                HWAS_ERR("discoverOcmbDependentTargetsAndEnable(): Error from getMemInfo() for OCMB 0x%08X, memory type = 0x%2X, mod = 0x%2X and height = 0x%2X",
+                         TARGETING::get_huid(cur_ocmb), l_memType, l_memMod, l_memHeight);
+                // something went wrong, knock out the OCMB too
+                platHwasErrorAddHWCallout(l_err,
+                                          cur_ocmb,
+                                          SRCI_PRIORITY_LOW,
+                                          DECONFIG,
+                                          GARD_NULL);
+                errlCommit(l_err, HWAS_COMP_ID);
+                continue;
+            }
+
+            for( auto cur_perv : l_pervList )
+            {
+                // Only Odyssey/DDR5 OCMBs have Pervasive targets
+                bool l_hasPerv = false; //default to DDR4
+                if( l_memType == SPD::DDR5_TYPE )
+                {
+                    l_hasPerv = true;
+                }
+
+                // set HWAS state of the PERV
+                enableHwasState(cur_perv,
+                                l_hasPerv, l_hasPerv,
+                                0 /*no reason*/);
+            }
+
         }
         if( l_err ) { break; }
 #endif // #ifdef __HOSTBOOT_MODULE

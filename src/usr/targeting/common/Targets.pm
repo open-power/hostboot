@@ -858,6 +858,23 @@ sub getTargetPosition
 
 
 #--------------------------------------------------
+# @brief Maps a target type to the fapi target string
+#--------------------------------------------------
+my %FAPI_TYPE_STRINGS =
+(
+    # chips
+    PROC        => "pu",
+    OCMB_CHIP   => "ocmb",
+    GENERIC_I2C_DEVICE    => "generici2cslave",
+    MDS_CTLR    => "mds",
+
+    # units
+    MEM_PORT    => "mp",
+    SMPGROUP    => "iolink",
+    PERV_ODY    => "perv",
+);
+
+#--------------------------------------------------
 # @brief Generate the fapi string for a given target
 #
 # @param[in] $self   - The global target object
@@ -865,6 +882,7 @@ sub getTargetPosition
 # @param[in] $node - The node parent of the input target
 # @param[in] $chipPos - chip position relative to node
 # @param[in] $chipletPos - unit position relative to chip
+# @param[in] $parentType - The type of the parent target
 #
 # @return the position of the target given
 #--------------------------------------------------
@@ -875,13 +893,19 @@ sub getFapiName
     my $node        = shift;
     my $chipPos     = shift; # chip position relative to node
     my $chipletPos  = shift; # unit position relative to chip
+    my $parentType  = shift;
 
     if ($targetType eq "")
     {
-        die "getFapiName: ERROR: Please specify a taget name\n";
+        die "getFapiName: ERROR: Please specify a target name\n";
     }
 
-    my $chipName = $targetType; # default to target type
+    # Handle legacy code until it adds new parm
+    if( $parentType eq undef )
+    {
+        $parentType = "PROC";
+    }
+
     my $fapiName = "";
 
     #This is a static variable. Persists over time
@@ -903,6 +927,7 @@ sub getFapiName
     {
         return "k0";
     }
+    # First-level "chip" targets with their own chiptype
     elsif ($targetType eq "PROC"   || $targetType eq "DIMM" ||
            $targetType eq "MEMBUF" || $targetType eq "PMIC" ||
            $targetType eq "OCMB_CHIP" || $targetType eq "GENERIC_I2C_DEVICE" ||
@@ -915,26 +940,16 @@ sub getFapiName
                  current node: $node, chipPos: $chipPos\n";
         }
 
-        if ($targetType eq "PROC")
+        my $chipName = $targetType; # default to target type
+        if( exists $FAPI_TYPE_STRINGS{$targetType} )
         {
-            $chipName = "pu";
-        }
-        elsif ($targetType eq "OCMB_CHIP")
-        {
-            $chipName = "ocmb";
-        }
-        elsif ($targetType eq "GENERIC_I2C_DEVICE")
-        {
-            $chipName = "generici2cslave";
-        }
-        elsif ($targetType eq "MDS_CTLR")
-        {
-            $chipName = "mds";
+            $chipName = $FAPI_TYPE_STRINGS{$targetType};
         }
 
         $chipName = lc $chipName;
         $fapiName = sprintf("%s:k0:n%d:s0:p%02d", $chipName, $node, $chipPos);
     }
+    # Unit-level "sub" targets
     else
     {
         if ($node eq "" || $chipPos eq "" || $chipletPos eq "")
@@ -944,27 +959,24 @@ sub getFapiName
                  chipletPos: $chipletPos\n";
         }
 
-        if ($targetType eq "MBA" || $targetType eq "L4")
+        # chip portion comes from parent
+        my $chipName = $parentType;
+        if( exists $FAPI_TYPE_STRINGS{$parentType} )
         {
-            $chipName = "membuf.$targetType";
-
+            $chipName = $FAPI_TYPE_STRINGS{$parentType};
         }
-        elsif ($targetType eq "MEM_PORT")
-        {
-            $chipName = "ocmb.mp";
-        }
-        elsif ($targetType eq "SMPGROUP")
-        {
-            $chipName = "pu.iolink";
-        }
-        else
-        {
-            $chipName = "pu.$targetType";
-        }
-
         $chipName = lc $chipName;
-        $fapiName = sprintf("%s:k0:n%d:s0:p%02d:c%d",
-                            $chipName, $node, $chipPos, $chipletPos);
+
+        # unit portion comes from myself
+        my $unitName = $targetType;
+        if( exists $FAPI_TYPE_STRINGS{$targetType} )
+        {
+            $unitName = $FAPI_TYPE_STRINGS{$targetType};
+        }
+        $unitName = lc $unitName;
+
+        $fapiName = sprintf("%s.%s:k0:n%d:s0:p%02d:c%d",
+                            $chipName, $unitName, $node, $chipPos, $chipletPos);
     }
 
     return $fapiName;

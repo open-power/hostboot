@@ -1256,7 +1256,8 @@ public:
                                         0);
         // Simple test for now to verify correct subsys comes back
         // for MC target type
-        epubSubSystem_t l_subsys = l_err->getSubSystem(TARGETING::TYPE_MC);
+        epubSubSystem_t l_subsys = l_err->getSubSystem(TARGETING::TYPE_MC,
+                                                       TARGETING::TYPE_PROC);
         if(l_subsys != EPUB_MEMORY_SUBSYS)
         {
             TS_FAIL( "Incorrect subsystem type returned for TYPE_MC" );
@@ -1266,7 +1267,8 @@ public:
             TS_INFO( "Correct subsystem type returned for TYPE_MC!" );
         }
 
-        l_subsys = l_err->getSubSystem(TARGETING::TYPE_SMPGROUP);
+        l_subsys = l_err->getSubSystem(TARGETING::TYPE_SMPGROUP,
+                                       TARGETING::TYPE_IOHS);
         if(l_subsys != EPUB_CEC_HDW_SUBSYS)
         {
             TS_FAIL( "Incorrect subsystem type returned for TYPE_SMPGROUP" );
@@ -1303,10 +1305,14 @@ public:
              ++l_pTarget)
         {
             TARGETING::ATTR_TYPE_type type = l_pTarget->getAttr<TARGETING::ATTR_TYPE>();
+            auto pParent = getImmediateParentByPhysical(*l_pTarget);
+            auto parenttype = pParent ?
+              pParent->getAttr<TARGETING::ATTR_TYPE>()
+              : TARGETING::TYPE_NA;
             // skip types that have been checked already
             if (mTypesTried.count(type) == 0)
             {
-                l_subsys = l_err->getSubSystem(type);
+                l_subsys = l_err->getSubSystem(type,parenttype);
                 if(l_subsys == EPUB_MISC_UNKNOWN)
                 {
                     TS_FAIL( "testErrl_verifySubsystem_known: "
@@ -1323,7 +1329,8 @@ public:
         }
 
         // out of bounds check (should be unknown)
-        l_subsys = l_err->getSubSystem(TARGETING::TYPE_LAST_IN_RANGE);
+        l_subsys = l_err->getSubSystem(TARGETING::TYPE_LAST_IN_RANGE,
+                                       TARGETING::TYPE_LAST_IN_RANGE);
         if (l_subsys != EPUB_MISC_UNKNOWN)
         {
             TS_FAIL( "testErrl_verifySubsystem_known: "

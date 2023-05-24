@@ -3680,6 +3680,9 @@
       <id>PARENT_DECONFIG_RULES</id>
     </attribute>
     <attribute>
+      <id>PG_SAVED</id>
+    </attribute>
+    <attribute>
       <default>PERV</default>
       <id>TYPE</id>
     </attribute>
@@ -3688,9 +3691,6 @@
   <targetType>
     <id>unit-perv-power10</id>
     <parent>unit-perv</parent>
-    <attribute>
-      <id>PG_SAVED</id>
-    </attribute>
   </targetType>
 
   <targetType>

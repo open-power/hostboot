@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,7 +103,7 @@ const epubTargetTypeToSub_t TARGET_TO_SUBSYS_TABLE[] =
     { TARGETING::TYPE_MI                , EPUB_MEMORY_SUBSYS        },
     { TARGETING::TYPE_DMI               , EPUB_MEMORY_SUBSYS        },
     { TARGETING::TYPE_OBUS              , EPUB_PROCESSOR_BUS_CTL    },
-    { TARGETING::TYPE_PERV              , EPUB_PROCESSOR_SUBSYS     },
+    { TARGETING::TYPE_PERV              , EPUB_MISC_UNKNOWN         },
     { TARGETING::TYPE_PEC               , EPUB_IO_PHB               },
     { TARGETING::TYPE_PHB               , EPUB_IO_PHB               },
     { TARGETING::TYPE_TPM               , EPUB_CEC_HDW_SUBSYS       },

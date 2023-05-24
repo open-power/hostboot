@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <hwas/common/hwasCommon.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
+#include <chipids.H>
 
 using PARTIAL_GOOD::pg_entry_t;
 using PARTIAL_GOOD::pg_mask_t;
@@ -1041,7 +1042,8 @@ public:
     }
 
     /**
-     * @brief   test pervStates
+     * @brief Confirms that all PERV targets under a present CHIP are also present
+     *        for chips with pervasive targets.
      */
     void testHWASpervStates()
     {
@@ -1054,10 +1056,7 @@ public:
         Target * pSys;
         targetService().getTopLevelTarget(pSys);
 
-        PredicateCTM predChip(CLASS_CHIP);
         PredicateCTM predPerv(CLASS_UNIT, TYPE_PERV);
-        PredicatePostfixExpr checkExpr;
-        checkExpr.push(&predChip).Or().push(&predPerv).Or();
 
         TargetHandleList pPervList;
         // get list of all PERV targets
@@ -1097,7 +1096,16 @@ public:
                 l_ptarget = getParentChip(l_target);
                 HwasState phwasState = l_ptarget->getAttr<ATTR_HWAS_STATE>();
 
-                if (phwasState.present == true)
+                // the PERV state should match the CHIP state in general
+                bool l_expectedState = phwasState.present;
+                // Except Explorer has no pervasive chiplets so the PERV
+                // targets should not be present
+                if( POWER_CHIPID::EXPLORER_16 == l_ptarget->getAttr<ATTR_CHIP_ID>() )
+                {
+                    l_expectedState = false;
+                }
+
+                if (l_expectedState == true)
                 {
                     if (hwasState.present == false)
                     {

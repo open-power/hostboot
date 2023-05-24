@@ -970,11 +970,13 @@ private:
     /**
      *  @brief maps the target type to corresponding subsystem ID
      *
-     *  @param[in]  i_target   Target Type.
+     *  @param[in]  i_targetType   Target Type.
+     *  @param[in]  i_parentType   Parent Target Type.
      *
      *  @return     subsystem ID
      */
-    epubSubSystem_t getSubSystem( TARGETING::TYPE i_target ) const;
+    epubSubSystem_t getSubSystem( TARGETING::TYPE i_targetType, 
+                                  TARGETING::TYPE i_parentType ) const;
 
     /**
      *  @brief maps the procedure to a corresponding subsystem ID

@@ -2832,10 +2832,13 @@
   <attribute>
     <description>
         Hardware Unit ID
-        SSSSNNNNTTTTTTTTiiiiiiiiiiiiiiii
+        SSSSNNNNTTTTTTTTCCiiiiiiiiiiiiii
         S=System
         N=Node Number
         T=Target Type (matches TYPE attribute)
+        C=Context (for same TYPE that is on multiple kinds of chips)
+          : 00=PROC_CHIP (for P10 backward compatibility),
+          : 01=OCMB_CHIP
         i=Instance/Sequence number of target, relative to node
     </description>
     <id>HUID</id>

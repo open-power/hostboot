@@ -390,6 +390,7 @@ constexpr TheseChildTypesDontHaveAValidParent isProperParent(TargetType i_child,
         {   TARGET_TYPE_OCMB_CHIP , TARGET_TYPE_OMI       },
         {   TARGET_TYPE_PMIC
           | TARGET_TYPE_MEM_PORT
+          | TARGET_TYPE_PERV
           | TARGET_TYPE_GENERICI2CSLAVE
           | TARGET_TYPE_MDS_CTLR
           | TARGET_TYPE_TEMP_SENSOR
@@ -772,6 +773,18 @@ inline std::vector<Target<K_CHILD, M, V> >
                             TARGETING::CLASS_NA,
                             l_type,
                             l_state);
+        }
+        else if(K_CHILD == fapi2::TARGET_TYPE_PERV)
+        {
+            // PERV targets live under both PROC_CHIP and OCMB_CHIP parent.
+            // Since the OCMB_CHIP is an affinity child of the PROC_CHIP,
+            // if we use the getChildAffinity interfaces we will pick up
+            // extras from the downstream OCMBs.  Instead we should use
+            // the physical path provided by getChildChiplets.
+            TARGETING::getChildChiplets(l_childList,
+                                        FAPI_TO_HBTARG(this),
+                                        l_type,
+                                        l_functional);
         }
         // All chiplets need to use ALL so that we report the architectural
         //  limits, versus what PG might say

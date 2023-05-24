@@ -148,6 +148,8 @@ my %MAX_INST_PER_PARENT =
     LPCREFCLKENDPT => 1, # Number of LPCREFCLKENDPTs per PROC
     OMIC_CLK => 1, # Number of OMIC_CLK per PROC
     CAPP => 2, # Number of CAPP per PROC
+    PERV_ODY  => 9, # Number of PERVs per OCMB_CHIP
+                    # Only 2 are used, but they are sparsely populated (1,8)
 );
 
 # The maximum number of target instances per PROC.  Please use wrapper methods
@@ -220,6 +222,11 @@ my %MAX_INST_PER_PROC =
     PHB        => getMaxInstPerParent("PEC") * getMaxInstPerParent("PHB"),
                   # PHB is same as PCIE
     PERV       => getMaxInstPerParent("PERV"),
+
+    # This entry is really a lie, the value is per parent OCMB_CHIP, but due to
+    # its usage in some common functions we are keeping the per-proc naming
+    # convention.
+    PERV_ODY   => getMaxInstPerParent("PERV_ODY"),
 
     PCIESWITCH => 2,
     MBA        => 16,
@@ -578,15 +585,15 @@ sub processTargets
                      ($xmlType eq "lcard-dimm-ddimm-ddr5") ||
                      ($xmlType eq "lcard-dimm-ddimm-ddr5-4u")) )
             {
-                # The P10 children that get processed are PMIC, POWER_IC, OCMB,
-                # MEM_PORT, TEMP_SENSOR, and GENERIC_I2C_DEVICE
+                # The children that get processed are PMIC, POWER_IC, OCMB,
+                # MEM_PORT, PERV, TEMP_SENSOR, and GENERIC_I2C_DEVICE
                 processDdimmAndChildren($targetObj, $target);
             }
             # Look for Industry Standard DIMMs (aka ISDIMMs)
             elsif ( ($type eq "DIMM") &&
                     ($xmlType eq "lcard-dimm-ddr4"))
             {
-                # Currently no other P10 children are processed on the ISDIMM
+                # Currently no other children are processed on the ISDIMM
                 processIsdimmAndChildren($targetObj, $target);
             }
             elsif ( ($type eq "OCMB_CHIP") &&
@@ -594,7 +601,7 @@ sub processTargets
             {
                 # If the OCMB_CHIP is on a planar then it needs to be processed here; otherwise,
                 # assume it was processed as a child of the DDIMM above
-                # The only P10 child that gets processed here is MEM_PORT
+                # The only child that gets processed here is MEM_PORT
                 processOcmbChipPlanarAndChildren($targetObj, $target);
             }
             elsif ($type eq "BMC")
@@ -1912,49 +1919,49 @@ sub processMdsCtlr
 sub processOcmbChipAndChildren
 {
     my $targetObj        = shift;
-    my $target           = shift;
+    my $ocmbTarget       = shift;
     my $ocmbPhysId       = shift;
 
-    my $path = $targetObj->getAttribute($target,"INSTANCE_PATH");
-    my $name = $targetObj->getInstanceName($target);
+    my $path = $targetObj->getAttribute($ocmbTarget,"INSTANCE_PATH");
+    my $name = $targetObj->getInstanceName($ocmbTarget);
     print "processOcmbChipAndChildren($name,$path,ocmbPhysId=$ocmbPhysId)\n" if $targetObj->{debug};
 
     # Some sanity checks.  Make sure we are processing the correct target type
     # and make sure the target's parent has been processed.
-    my $type = targetTypeSanityCheck($targetObj, $target, "OCMB_CHIP");
-    validateParentHasBeenProcessed($targetObj, $target);
+    my $type = targetTypeSanityCheck($targetObj, $ocmbTarget, "OCMB_CHIP");
+    validateParentHasBeenProcessed($targetObj, $ocmbTarget);
 
     # OCMB's logical position matches the OMI-derived position of the DDIMM
-    my $ddimmParent = $targetObj->findParentByType($target, "DIMM");
+    my $ddimmParent = $targetObj->findParentByType($ocmbTarget, "DIMM");
     my $ocmbPosPerNode = $targetObj->getAttribute($ddimmParent, "TEMP_DDIMM_OMI_POS_PER_NODE");
     print "-ocmbPosPerNode=$ocmbPosPerNode\n" if $targetObj->{debug};
 
     # Set the OCMB's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
     # FAPINAME_POS, ORDINAL_ID, AFFINITY_PATH and PHYS_PATH.
-    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target,
+    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $ocmbTarget,
                                                      $ocmbPhysId, $type,
                                                      1); #1 OCMB per DDIMM
 
-    my $staticAbsoluteLocationCode = getStaticAbsLocationCode($targetObj, $target);
-    $targetObj->setAttribute($target, "STATIC_ABS_LOCATION_CODE", $staticAbsoluteLocationCode);
+    my $staticAbsoluteLocationCode = getStaticAbsLocationCode($targetObj, $ocmbTarget);
+    $targetObj->setAttribute($ocmbTarget, "STATIC_ABS_LOCATION_CODE", $staticAbsoluteLocationCode);
 
     # Set the EEPROM_VPD_PRIMARY_INFO and FAPI_I2C_CONTROL_INFO attributes
-    setEepromAttributesForDdimmI2cDevices($targetObj, $target, $type);
-    setFapi2AttributeForDdimmI2cDevices($targetObj, $target, $type);
+    setEepromAttributesForDdimmI2cDevices($targetObj, $ocmbTarget, $type);
+    setFapi2AttributeForDdimmI2cDevices($targetObj, $ocmbTarget, $type);
 
     # Get some useful info from the OCMB parent's SYS, NODE and self targets.
-    my $sysParent = $targetObj->findParentByType($target, "SYS");
+    my $sysParent = $targetObj->findParentByType($ocmbTarget, "SYS");
     my $sysParentPos = $targetObj->getAttribute($sysParent, "ORDINAL_ID");
-    my $nodeParent = $targetObj->findParentByType($target, "NODE");
+    my $nodeParent = $targetObj->findParentByType($ocmbTarget, "NODE");
     my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
 
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
-                {OCMB_CHIPS}[$ocmbPosPerNode]{KEY} = $target;
+                {OCMB_CHIPS}[$ocmbPosPerNode]{KEY} = $ocmbTarget;
     print "*** Saving SYS-$sysParentPos/NODES-$nodeParentPos/OCMB_CHIPS-$ocmbPosPerNode\n" if $targetObj->{debug};
 
     # Mark this target as processed
-    markTargetAsProcessed($targetObj, $target);
+    markTargetAsProcessed($targetObj, $ocmbTarget);
 
     ## Process children MEM_PORT and TEMP_SENSOR
     # Children may differ for different systems.
@@ -1962,14 +1969,24 @@ sub processOcmbChipAndChildren
     my $foundMemPort = false;
     my $foundTempSensor = false;
 
-    foreach my $child (@{ $targetObj->getTargetChildren($target) })
+    foreach my $child (@{ $targetObj->getTargetChildren($ocmbTarget) })
     {
         my $childType = $targetObj->getType($child);
+        print "Child : $child, type=$childType\n" if $targetObj->{debug};
 
         if ($childType eq "MEM_PORT")
         {
             processMemPort($targetObj, $child);
             $foundMemPort = true;
+        }
+        elsif ($childType eq "PERV")
+        {
+            print "Found PERV $child\n";
+            setCommonAttrForChiplet($targetObj, $child,
+                                    $sysParentPos, $nodeParentPos,
+                                    $ocmbPosPerNode,
+                                    "PERV_ODY", #override for unique numbering
+                                    );
         }
         else
         {
@@ -1992,7 +2009,7 @@ sub processOcmbChipAndChildren
     {
         select()->flush(); # flush buffer before spewing out error message
         die "\nprocessOcmbChipAndChildren::ERROR: Did not find a \"MEM_PORT\" " .
-            "child for this OCMB_CHIP ($target). Did the MRW structure " .
+            "child for this OCMB_CHIP ($ocmbTarget). Did the MRW structure " .
             "change?  If so update this script to reflect changes.  Error"
     }
 
@@ -2131,6 +2148,7 @@ sub processOcmbChipPlanarAndChildren
             processMemPort($targetObj, $child);
             $foundMemPort = true;
         }
+        # Note - If Odyssey is supported as planar, need to handle PERV children
     }
 
     if ($foundMemPort == false)
@@ -2261,7 +2279,8 @@ sub processMemPort
     my $memPortPosPerNode = ($ocmbParentPos * getMaxInstPerParent($type)) + $memPortInstancePos;
 
     # Get the FAPI_NAME by using the data gathered above.
-    my $memPortFapiName = $targetObj->getFapiName($type, $nodeParentPos, $ocmbParentPos, $memPortInstancePos);
+    my $memPortFapiName = $targetObj->getFapiName($type, $nodeParentPos, $ocmbParentPos,
+                                                  $memPortInstancePos, "OCMB_CHIP");
 
     # Take advantage of previous work done on the OCMBs.  Use the parent OCMB's
     # affinity/physical path for our self and append the mem_port to the end.
@@ -2793,7 +2812,8 @@ sub iterateOverChiplets
             if (@phb_array[$i] ne "")
             {
                 setCommonAttrForChiplet
-                    ($targetObj, @phb_array[$i], $sys, $node, $proc);
+                    ($targetObj, @phb_array[$i],
+                     $sys, $node, $proc);
                 # Mark this target as processed
                 markTargetAsProcessed($targetObj, $target);
             }
@@ -2842,6 +2862,7 @@ sub splitSmpLinkUnitNumber
 # @param[in] $sysPos    - The parent SYS target position
 # @param[in] $nodePos   - The parent NODE target position
 # @param[in] $procPos   - The parent PROC target position
+# @param[in] $targetType - The effective target type, typically just getType()
 #--------------------------------------------------
 sub setCommonAttrForChiplet
 {
@@ -2850,6 +2871,7 @@ sub setCommonAttrForChiplet
     my $sysPos    = shift;
     my $nodePos   = shift;
     my $procPos   = shift;
+    my $specialType  = shift;
 
     my $instanceName = $targetObj->getInstanceName($target);
     my $targetType  = $targetObj->getType($target);
@@ -2864,6 +2886,12 @@ sub setCommonAttrForChiplet
         $targetObj->setAttribute($target, "TYPE", $targetType);
         my $abus_path = $targetObj->getAttribute($target, "INSTANCE_PATH");
         $targetObj->setAttribute($target, "INSTANCE_PATH", $abus_path."/".$instanceName);
+    }
+
+    # If not passed a special type, use the normal one
+    if( $specialType eq undef )
+    {
+        $specialType = $targetType;
     }
 
     # Make sure the target's parent has been processed.
@@ -2898,21 +2926,27 @@ sub setCommonAttrForChiplet
 
     # Calculate a per parent numerical value.  The per parent numerical value
     # is used to populate the AFFINITY_PATH, PHYS_PATH and REL_PATH.
-    my $perParentNumValue = $targetPos % getMaxInstPerParent($targetType);
+    my $perParentNumValue = $targetPos % getMaxInstPerParent($specialType);
 
     # Calculate a per PROC numerical value.  The per PROC numerical value
     # is used to populate the HUID.
-    my $perProcNumValue = ($procPos * getMaxInstPerProc($targetType)) + $targetPos;
+    my $perProcNumValue = ($procPos * getMaxInstPerProc($specialType)) + $targetPos;
 
     # Calculate the ORDINAL_ID. The ORDINAL_ID can have gaps if not all target
     # instances are used. FAPI_POS also uses this value
-    my $ordinalId = calculateOrdinalId($targetType, $nodePos, $procPos, $targetPos);
-
-    # Get the FAPI_NAME by using the data gathered above.
-    my $fapiName = $targetObj->getFapiName($targetType, $nodePos, $procPos, $targetPos);
+    my $ordinalId = calculateOrdinalId($specialType, $nodePos, $procPos, $targetPos);
 
     # Get the parent, to extract the affinity and physical path from.
     my $targetParent = $targetObj->getTargetParent($target);
+
+    # Get the FAPI_NAME by using the data gathered above.
+    my $parentChipType = "PROC";
+    if( $specialType eq "PERV_ODY" )
+    {
+        $parentChipType = "OCMB_CHIP";
+    }
+    my $fapiName = $targetObj->getFapiName($specialType, $nodePos, $procPos,
+                                           $targetPos, $parentChipType);
 
     # Special case: OMI has 2 parents, OMIC and MCC.  Use the paths from MCC parent.
     if ($targetType eq "OMI")
@@ -2945,6 +2979,31 @@ sub setCommonAttrForChiplet
     $targetObj->setAttribute($target, "FAPINAME_UNIT", $chipunit);
     $targetObj->setAttribute($target, "REL_POS",       $perParentNumValue);
     $targetObj->setAttribute($target, "PDR_ENTITY_INSTANCE", $chipunit);
+
+    # There are some unique rules for the Pervasive targets under
+    # the Odyssey chip
+    if ($specialType eq "PERV_ODY")
+    {
+        print "PERV_ODY overrides for $target\n" if $targetObj->{debug};
+
+        # Add a context offset to the HUID
+        # SSSSNNNNTTTTTTTTCCiiiiiiiiiiiiii
+        #  CC=01 for Odyssey
+        my $huidhex = hex($targetObj->getAttribute($target,"HUID"));
+        $huidhex |= 0x4000;
+        my $huid = sprintf("0x%08X",$huidhex);
+        $targetObj->setAttribute($target,"HUID",$huid);
+
+        # Agreement with Cronus to add arbitrary 0x8000 to FAPI_POS
+        my $fapipos = $targetObj->getAttribute($target,"FAPI_POS");
+        $fapipos |= 0x8000;
+        $targetObj->setAttribute($target,"FAPI_POS",$fapipos);
+
+        # Arbitrary jump of 0x400 on Ordinal to handle largest system
+        my $ordid = $targetObj->getAttribute($target,"ORDINAL_ID");
+        $ordid |= 0x400;
+        $targetObj->setAttribute($target,"ORDINAL_ID",$ordid);
+    }
 
     # Remove abus/xbus from smpgroup affinity and physical path
     if ($targetType eq "SMPGROUP")

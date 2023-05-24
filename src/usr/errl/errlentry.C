@@ -2009,8 +2009,11 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
                         pTarget->getAttr<TARGETING::ATTR_TYPE>() );
 
                 // use the target type to get the failing ssid.
+                auto pParent = getImmediateParentByPhysical(pTarget);
                 iv_User.setSubSys( getSubSystem(
-                        pTarget->getAttr<TARGETING::ATTR_TYPE>()));
+                        pTarget->getAttr<TARGETING::ATTR_TYPE>(),
+                        pParent ? pParent->getAttr<TARGETING::ATTR_TYPE>()
+                                : TARGETING::TYPE_NA) );
             }
             else
             {
@@ -2117,11 +2120,13 @@ bool ErrlEntry::isTerminateLog() const
 
 ///////////////////////////////////////////////////////////////////////////////
 // Map the target type to correct subsystem ID using a binary search
-epubSubSystem_t ErrlEntry::getSubSystem( TARGETING::TYPE i_target ) const
+epubSubSystem_t ErrlEntry::getSubSystem( TARGETING::TYPE i_targetType, 
+                                         TARGETING::TYPE i_parentType ) const
 {
 
     TRACDCOMP(g_trac_errl, ENTER_MRK"getSubSystem()"
-            " i_target = 0x%x", i_target );
+            " i_targetType = 0x%x, i_parentType = 0x%x",
+              i_targetType, i_parentType );
 
     // local variables
     epubSubSystem_t subsystem = EPUB_MISC_UNKNOWN;
@@ -2130,23 +2135,32 @@ epubSubSystem_t ErrlEntry::getSubSystem( TARGETING::TYPE i_target ) const
     // iterator will either point to the match (if exists) or just past
     auto it = std::lower_bound(TARGET_TO_SUBSYS_TABLE,
                   std::end(TARGET_TO_SUBSYS_TABLE),
-                  i_target,
+                  i_targetType,
                   [](const epubTargetTypeToSub_t& lhs, TARGETING::TYPE rhs){return lhs.xType < rhs; });
     // verify iterator not outside table
     if (it < std::end(TARGET_TO_SUBSYS_TABLE))
     {
        // verify iterator is pointing to target entry
-       if (it->xType == i_target)
+       if (it->xType == i_targetType)
        {
           // found a valid subsystem for target type
           subsystem = it->xSubSys;
+
+          // there are some types that exist in multiple places, these units
+          // will rely on their parent chip for complete resolution
+          if( (subsystem == EPUB_MISC_UNKNOWN)
+              && (i_targetType != i_parentType) )
+          {
+              subsystem = getSubSystem(i_parentType,TARGETING::TYPE_NA);
+          }
        }
     }
 
     if( subsystem == EPUB_MISC_UNKNOWN )
     {
         TRACFCOMP(g_trac_errl,"WRN>> Failed to find subsystem ID for "
-                               "target type 0x%x", i_target);
+                               "target type 0x%x, parent type 0x%x",
+                  i_targetType, i_parentType);
     }
 
     TRACDCOMP(g_trac_errl, EXIT_MRK"getSubSystem()  ssid  0x%x", subsystem );
