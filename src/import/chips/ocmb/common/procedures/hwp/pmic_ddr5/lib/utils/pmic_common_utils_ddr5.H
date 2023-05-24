@@ -458,6 +458,111 @@ struct __attribute__ ((__packed__)) additional_n_mode_telemetry_data
 };
 
 ///
+/// @brief Struct of adc data for periodic telemetry data collected once every 24 hours
+///
+struct __attribute__ ((__packed__)) adc_periodic_telemetry_data
+{
+    // These are the MSB and LSB,
+    // two combined 8 bit registers
+    uint16_t iv_max_ch0_mV = 0;
+    uint16_t iv_max_ch1_mV = 0;
+    uint16_t iv_max_ch2_mV = 0;
+    uint16_t iv_max_ch3_mV = 0;
+    uint16_t iv_max_ch4_mV = 0;
+    uint16_t iv_max_ch5_mV = 0;
+    uint16_t iv_max_ch6_mV = 0;
+    uint16_t iv_max_ch7_mV = 0;
+
+    uint16_t iv_min_ch0_mV = 0;
+    uint16_t iv_min_ch1_mV = 0;
+    uint16_t iv_min_ch2_mV = 0;
+    uint16_t iv_min_ch3_mV = 0;
+    uint16_t iv_min_ch4_mV = 0;
+    uint16_t iv_min_ch5_mV = 0;
+    uint16_t iv_min_ch6_mV = 0;
+    uint16_t iv_min_ch7_mV = 0;
+
+    uint16_t iv_recent_ch0_mV = 0;
+    uint16_t iv_recent_ch1_mV = 0;
+    uint16_t iv_recent_ch2_mV = 0;
+    uint16_t iv_recent_ch3_mV = 0;
+    uint16_t iv_recent_ch4_mV = 0;
+    uint16_t iv_recent_ch5_mV = 0;
+    uint16_t iv_recent_ch6_mV = 0;
+    uint16_t iv_recent_ch7_mV = 0;
+};
+
+///
+/// @brief Struct of pmic data for periodic telemetry data collected once every 24 hours
+///
+struct __attribute__ ((__packed__)) pmic_periodic_telemetry_data
+{
+    // Values in mA
+    uint16_t iv_swa_current_mA     = 0;
+    uint16_t iv_swb_current_mA     = 0;
+    uint16_t iv_swc_current_mA     = 0;
+    uint16_t iv_swd_current_mA     = 0;
+
+    uint8_t iv_r31_sample_vin     = 0;
+    uint8_t iv_r31_sample_temp    = 0;
+    uint8_t iv_r7c_set_swa_offset = 0;
+    uint8_t iv_r7d_set_swb_offset = 0;
+
+    uint8_t iv_r7e_set_swc_offset = 0;
+    uint8_t iv_r7f_set_swd_offset = 0;
+    uint8_t reserved              = 0;
+    uint8_t reserved1             = 0;
+};
+
+///
+/// @brief Struct of dt data for periodic telemetry data collected once every 24 hours
+///
+struct __attribute__ ((__packed__)) dt_periodic_telemetry_data
+{
+    uint16_t iv_iin_vcc  = 0;
+    uint16_t iv_vinp_vin = 0;
+
+    uint16_t iv_vaux_b_a = 0;
+    uint16_t iv_vaux_d_c = 0;
+
+    uint16_t iv_vinp_min_max = 0;
+    uint16_t iv_iin_min_max  = 0;
+
+    uint8_t iv_breadcrumb        = 0;
+    uint8_t iv_neg_orfet_cnt_swa = 0;
+    uint8_t iv_neg_orfet_cnt_swc = 0;
+    uint8_t iv_neg_orfet_cnt_swd = 0;
+};
+
+///
+/// @brief Struct of periodic telemetry data collected once every 24 hours
+/// Revision history:
+///     0x51: Initial revision supporting periodic data collection logic from
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
+///       document provided by the Power team
+///
+struct __attribute__ ((__packed__)) periodic_telemetry_data
+{
+    // Revision of this struct formatting, to be updated
+    // when the structure changes
+    uint8_t iv_revision = 0x51;
+    uint8_t reserved = 0;
+    uint16_t reserved1 = 0;
+
+    uint8_t iv_serial_number[22] = {0};
+    uint8_t reserved2 = 0;
+    uint8_t reserved3 = 0;
+
+    uint8_t iv_ccin_number[4] = {0};
+
+    adc_periodic_telemetry_data iv_adc;
+
+    pmic_periodic_telemetry_data iv_pmic[CONSTS::NUM_PMICS_4U];
+
+    dt_periodic_telemetry_data iv_dt[CONSTS::NUM_DTS_4U];
+};
+
+///
 /// @brief Struct of consolidated health check data which includes the following:
 ///        1. Health check
 ///        2. Additional data collected in case of n-mode detected
@@ -496,6 +601,21 @@ fapi2::ReturnCode set_pmic_dt_states(target_info_redundancy_ddr5& io_target_info
 /// @return true if 4U, false if not
 ///
 bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
+
+///
+/// @brief Helper function to check initial asserts of
+///        1. Did we received any PMIC/DT pairs from target
+///        2. Is the DIMM 4U
+///        3. Did we receive correct number of PMIC/DT pairs from target
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_state aggregate state
+/// @return true if 4U, false if not
+///
+fapi2::ReturnCode health_check_tele_tool_assert_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+        mss::pmic::ddr5::aggregate_state& io_state);
 
 ///
 /// @brief Write a register of a PMIC target
