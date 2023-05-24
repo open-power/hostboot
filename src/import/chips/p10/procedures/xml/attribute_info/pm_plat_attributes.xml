@@ -3231,24 +3231,6 @@
 
  <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_SAFE_MODE_THROTTLE_IDX</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    Set the index into a 64 entry Core Throttle Table to use while in Safe Mode.
-
-    Legal values are 0 to 63.  All others are invalid.
-
-    Consumer: p10_pstate_parameter_build ->
-              PGPE Hcode -> QME Hcode
-    </description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <default>48</default>
-    <group>safe</group>
-  </attribute>
-
- <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_SYSTEM_THROTTLE_PSTATE_NUMBER_LIMIT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>

@@ -60,7 +60,7 @@
 #define __INTERNAL_POUNDV__
 #include "p10_pstate_parameter_block_int_vpd.H"
 
-using namespace pm_pstate_parameter_block;
+using namespace ppb;
 using namespace scomt;
 static const uint32_t DPLL_TIMEOUT_MS       = 50000;
 static const uint32_t DPLL_TIMEOUT_MCYCLES  = 20;
@@ -126,7 +126,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 const VoltageConfigActions_t i_action)
 {
 
-    pm_pstate_parameter_block::AttributeList attrs;
+    ppb::AttributeList attrs;
     uint32_t l_present_boot_voltage[MAX_VRM];
     bool  l_dpll_lesser_value = false;
     fapi2::buffer<uint64_t> l_fmult_data(0);
@@ -156,8 +156,6 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         FAPI_TRY(update_vdn_dpll_data(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
-
-
 
     // Compute the boot/safe values
     FAPI_TRY(l_pmPPB.compute_boot_safe(i_action));
@@ -216,13 +214,15 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             if (attrs.attr_boot_voltage_mv[VDD] &&
                 attrs.attr_boot_voltage_mv[VCS])
             {
+                // *INDENT-OFF*
                 FAPI_TRY(update_VDD_VCS_voltage(i_target,
                                                 attrs.attr_avs_bus_num,
                                                 attrs.attr_avs_bus_rail_select,
                                                 attrs.attr_boot_voltage_mv,
                                                 attrs.attr_ext_vrm_step_size_mv,
                                                 l_present_boot_voltage),
-                         "Error from VDD/VCS setup function");
+                "Error from VDD/VCS setup function");
+                // *INDENT-ON*
             }
         }
 
@@ -261,6 +261,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
                 FAPI_INF("Setting Boot voltage value for VDN (%d mv), origin (%d mv)",
                          attrs.attr_boot_voltage_mv[VDN], vdn_origin);
+                // *INDENT-OFF*
                 FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
                                                      attrs.attr_avs_bus_num[VDN],
                                                      attrs.attr_avs_bus_rail_select[VDN],
@@ -269,6 +270,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                                      l_present_boot_voltage[VDN],
                                                      VDN),
                          "error from VDN setup function");
+                // *INDENT-ON*
 
                 if (attrs.attr_array_write_assist_set)
                 {
@@ -290,6 +292,7 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             if (attrs.attr_boot_voltage_mv[VIO])
             {
                 FAPI_INF("Setting Boot voltage value for VIO (%d mv)", attrs.attr_boot_voltage_mv[VIO]);
+                // *INDENT-OFF*
                 FAPI_TRY(p10_setup_evid_voltageWrite(i_target,
                                                      attrs.attr_avs_bus_num[VIO],
                                                      attrs.attr_avs_bus_rail_select[VIO],
@@ -297,7 +300,8 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                                      attrs.attr_ext_vrm_step_size_mv[VIO],
                                                      l_present_boot_voltage[VIO],
                                                      VIO),
-                         "error from VIO setup function");
+                "error from VIO setup function");
+                // *INDENT-ON*
             }
         }
 
@@ -871,7 +875,7 @@ fapi2::ReturnCode update_vdn_dpll_data(
     FAPI_INF("update_vdn_dpll_data >>>>>");
 
     fapi2::voltageBucketData_t l_poundV_data;
-    pm_pstate_parameter_block::AttributeList attrs;
+    ppb::AttributeList attrs;
     uint32_t l_safe_mode_dpll_value = 0;
     uint32_t l_present_boot_voltage[MAX_VRM];
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;

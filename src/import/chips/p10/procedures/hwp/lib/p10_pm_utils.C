@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -806,7 +806,7 @@ fapi2::ReturnCode wof_validate_header(
                                 "WOF Tables Override validation failed.  One of more fields mismatch.");
                 }
 
-                l_wof_enabled = fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
+//                l_wof_enabled = fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
             }
         }
     }
