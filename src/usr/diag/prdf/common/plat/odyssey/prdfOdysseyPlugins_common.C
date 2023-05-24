@@ -466,7 +466,8 @@ int32_t AnalyzeFetchAueIaue( ExtensibleChip * i_chip,
     else
     {
         MemRank rank = addr.getRank();
-        MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
+        MemoryMru mm { i_chip->getTrgt(), rank, addr.getPort(),
+                       MemoryMruData::CALLOUT_RANK };
         io_sc.service_data->SetCallout( mm, MRU_HIGH );
     }
 
@@ -592,7 +593,8 @@ int32_t AnalyzeMaintAue( ExtensibleChip * i_chip,
     else
     {
         MemRank rank = addr.getRank();
-        MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
+        MemoryMru mm { i_chip->getTrgt(), rank, addr.getPort(),
+                       MemoryMruData::CALLOUT_RANK };
         io_sc.service_data->SetCallout( mm, MRU_HIGH );
     }
 

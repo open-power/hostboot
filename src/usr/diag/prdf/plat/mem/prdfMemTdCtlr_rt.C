@@ -124,7 +124,7 @@ uint32_t __handleNceEte( ExtensibleChip * i_chip,
                                 "counter registers: %d", count );
 
             // Add the rank to the callout list.
-            MemoryMru mm { i_chip->getTrgt(), rank,
+            MemoryMru mm { i_chip->getTrgt(), rank, i_addr.getPort(),
                            MemoryMruData::CALLOUT_RANK };
             io_sc.service_data->SetCallout( mm );
 
@@ -191,12 +191,12 @@ uint32_t __handleSoftInterCeEte<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 template<TARGETING::TYPE T>
 uint32_t __handleRceEte( ExtensibleChip * i_chip,
-                         const MemRank & i_rank, bool & o_errorsFound,
+                         const MemAddr & i_addr, bool & o_errorsFound,
                          STEP_CODE_DATA_STRUCT & io_sc );
 
 template<>
 uint32_t __handleRceEte<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                         const MemRank & i_rank,
+                                         const MemAddr & i_addr,
                                          bool & o_errorsFound,
                                          STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -210,26 +210,49 @@ uint32_t __handleRceEte<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     do
     {
         // The RCE ETE attention could be from IUE, IMPE, or IRCD. Need to check
-        // RDFFIR[37] to determine if there was at least one IUE.
-        SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister( "RDFFIR" );
-        o_rc = fir->Read();
-        if ( SUCCESS != o_rc )
+        // RDFFIR[37] (RDF_FIR[38] on Odyssey) to determine if there was at
+        // least one IUE.
+
+        // Odyssey OCMBs
+        if (isOdysseyOcmb(i_chip->getTrgt()))
         {
-            PRDF_ERR( PRDF_FUNC "Read() failed on RDFFIR: i_chip=0x%08x",
-                      i_chip->getHuid() );
-            break;
+            char reg[64];
+            sprintf(reg, "RDF_FIR_%x", i_addr.getPort());
+            SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister( reg );
+            o_rc = fir->Read();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR(PRDF_FUNC "Read() failed on RDF_FIR_%x: "
+                         "i_chip=0x%08x", i_addr.getPort(), i_chip->getHuid());
+                break;
+            }
+            if ( !fir->IsBitSet(38) ) break; // nothing else to do
         }
-        if ( !fir->IsBitSet(37) ) break; // nothing else to do
+        // Explorer OCMBs
+        else
+        {
+            SCAN_COMM_REGISTER_CLASS * fir = i_chip->getRegister( "RDFFIR" );
+            o_rc = fir->Read();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Read() failed on RDFFIR: i_chip=0x%08x",
+                          i_chip->getHuid() );
+                break;
+            }
+            if ( !fir->IsBitSet(37) ) break; // nothing else to do
+        }
 
         // Handle the IUE.
         o_errorsFound = true;
         io_sc.service_data->AddSignatureList( i_chip->getTrgt(),
                                               PRDFSIG_MaintIUE );
-        o_rc = MemEcc::handleMemIue<TYPE_OCMB_CHIP>( i_chip, i_rank, io_sc );
+        o_rc = MemEcc::handleMemIue<TYPE_OCMB_CHIP>( i_chip, i_addr.getRank(),
+                                                     i_addr.getPort(), io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "analyzeMaintIue(0x%08x) failed",
-                      i_chip->getHuid() );
+            PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,0x%02x,%x) failed",
+                      i_chip->getHuid(), i_addr.getRank().getKey(),
+                      i_addr.getPort() );
             break;
         }
 
@@ -341,7 +364,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
 
         if ( 0 != (eccAttns & MAINT_RCE_ETE) )
         {
-            o_rc = __handleRceEte<T>( i_chip, rank, o_errorsFound,
+            o_rc = __handleRceEte<T>( i_chip, i_addr, o_errorsFound,
                                       io_sc );
             if ( SUCCESS != o_rc )
             {

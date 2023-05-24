@@ -440,11 +440,12 @@ bool isSafeToRemoveChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 void __addCallout( ExtensibleChip * i_chip, const MemRank & i_rank,
-                   const MemSymbol & i_symbol, STEP_CODE_DATA_STRUCT & io_sc )
+                   uint8_t i_port, const MemSymbol & i_symbol,
+                   STEP_CODE_DATA_STRUCT & io_sc )
 {
     if ( i_symbol.isValid() )
     {
-        MemoryMru mm { i_chip->getTrgt(), i_rank, i_symbol };
+        MemoryMru mm { i_chip->getTrgt(), i_rank, i_port, i_symbol };
         io_sc.service_data->SetCallout( mm );
     }
 }
@@ -544,9 +545,9 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             }
 
             // Add the spares to the callout list if they exist.
-            __addCallout( i_chip, i_rank, sp0, io_sc );
-            __addCallout( i_chip, i_rank, sp1, io_sc );
-            __addCallout( i_chip, i_rank, ecc, io_sc );
+            __addCallout( i_chip, i_rank, i_port, sp0, io_sc );
+            __addCallout( i_chip, i_rank, i_port, sp1, io_sc );
+            __addCallout( i_chip, i_rank, i_port, ecc, io_sc );
 
             // Add the row repairs to the callout list if they exist
             o_rc = __addRowRepairCallout<TARGETING::TYPE_OCMB_CHIP>( memPort,
@@ -666,7 +667,7 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
         if ( !chipMark.isValid() ) break;
 
         // Add the chip mark to the callout list.
-        __addCallout( i_chip, i_rank, chipMark.getSymbol(), io_sc );
+        __addCallout( i_chip, i_rank, i_port, chipMark.getSymbol(), io_sc );
 
         // Get the row repair
         TargetHandle_t dimm = getConnectedDimm( i_chip->getTrgt(), i_rank,
@@ -723,7 +724,7 @@ uint32_t applyRasPolicies( ExtensibleChip * i_chip, const MemRank & i_rank,
         }
 
         // Add the symbol mark to the callout list if it exists.
-        __addCallout( i_chip, i_rank, symMark.getSymbol(), io_sc );
+        __addCallout( i_chip, i_rank, i_port, symMark.getSymbol(), io_sc );
 
         // Make the error log predictive and exit if DRAM repairs are disabled.
         if ( areDramRepairsDisabled() )

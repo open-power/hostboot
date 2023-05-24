@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,7 @@ class MemoryMru
      * @param i_symbol    The symbol in which the error occurred.
      */
     MemoryMru( TARGETING::TargetHandle_t i_target, const MemRank & i_rank,
-               const MemSymbol & i_symbol );
+               uint8_t i_port, const MemSymbol & i_symbol );
 
     /**
      * @brief Constructor for special callouts.
@@ -71,7 +71,7 @@ class MemoryMru
      * @param i_specialCallout See enum MemoryMruData::Callout.
      */
     MemoryMru( TARGETING::TargetHandle_t i_target, const MemRank & i_rank,
-               MemoryMruData::Callout i_specialCallout );
+               uint8_t i_port, MemoryMruData::Callout i_specialCallout );
 
   public: // functions
 

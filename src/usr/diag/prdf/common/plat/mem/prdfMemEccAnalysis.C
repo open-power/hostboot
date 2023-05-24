@@ -67,7 +67,8 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         MemRank rank = i_addr.getRank();
 
         // Add the rank to the callout list.
-        MemoryMru mm { i_chip->getTrgt(), rank, MemoryMruData::CALLOUT_RANK };
+        MemoryMru mm { i_chip->getTrgt(), rank, i_addr.getPort(),
+                       MemoryMruData::CALLOUT_RANK };
         io_sc.service_data->SetCallout( mm );
 
         // All memory UEs should be customer viewable.
@@ -394,7 +395,7 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemAddr & i_addr,
         PRDF_ASSERT( chipMark.isValid() );
 
         // Add the mark to the callout list.
-        MemoryMru mm { i_chip->getTrgt(), rank, chipMark.getSymbol() };
+        MemoryMru mm { i_chip->getTrgt(), rank, port, chipMark.getSymbol() };
         io_sc.service_data->SetCallout( mm );
 
         // Add entry to UE table.
@@ -533,7 +534,7 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
     MemRank        rank = i_addr.getRank();
 
     // Add the DIMM to the callout list
-    MemoryMru memmru ( trgt, rank, i_symbol );
+    MemoryMru memmru ( trgt, rank, i_addr.getPort(), i_symbol );
     io_sc.service_data->SetCallout( memmru, MRU_MEDA );
 
     // Add data to the CE table.
@@ -571,7 +572,8 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
             // all memory behind the chip. Also, since the counts are all
             // over the place, there may be a problem with the chip. So call
             // it out as well.
-            MemoryMru all_mm ( trgt, rank, MemoryMruData::CALLOUT_ALL_MEM );
+            MemoryMru all_mm ( trgt, rank, i_addr.getPort(),
+                               MemoryMruData::CALLOUT_ALL_MEM );
             io_sc.service_data->SetCallout( all_mm, MRU_MEDA );
             io_sc.service_data->SetCallout( trgt,   MRU_MEDA );
             io_sc.service_data->setServiceCall();
@@ -805,6 +807,7 @@ uint32_t analyzeFetchUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 template<>
 uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                        const MemRank & i_rank,
+                                       uint8_t i_port,
                                        STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemEcc::handleMemIue] "
@@ -815,7 +818,8 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     uint32_t o_rc = SUCCESS;
 
     // Add the DIMM to the callout list.
-    MemoryMru mm { i_chip->getTrgt(), i_rank, MemoryMruData::CALLOUT_RANK };
+    MemoryMru mm { i_chip->getTrgt(), i_rank, i_port,
+                   MemoryMruData::CALLOUT_RANK };
     io_sc.service_data->SetCallout( mm );
 
     #ifdef __HOSTBOOT_MODULE
@@ -911,11 +915,12 @@ uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
         }
         MemRank rank = addr.getRank();
 
-        o_rc = handleMemIue<T>( i_chip, rank, io_sc );
+        o_rc = handleMemIue<T>( i_chip, rank, addr.getPort(), io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,m%ds%d) failed",
-                      i_chip->getHuid(), rank.getMaster(), rank.getSlave() );
+            PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,m%ds%d,%x) failed",
+                      i_chip->getHuid(), rank.getMaster(), rank.getSlave(),
+                      addr.getPort() );
             break;
         }
 
@@ -956,11 +961,12 @@ uint32_t analyzeMaintIue( ExtensibleChip * i_chip,
         }
         MemRank rank = addr.getRank();
 
-        o_rc = handleMemIue<T>( i_chip, rank, io_sc );
+        o_rc = handleMemIue<T>( i_chip, rank, addr.getPort(), io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,m%ds%d) failed",
-                      i_chip->getHuid(), rank.getMaster(), rank.getSlave() );
+            PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,m%ds%d,%x) failed",
+                      i_chip->getHuid(), rank.getMaster(), rank.getSlave(),
+                      addr.getPort() );
             break;
         }
 
@@ -1033,7 +1039,7 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         }
 
         // Add the DIMM to the callout list
-        MemoryMru memmru( trgt, rank, MemoryMruData::CALLOUT_RANK );
+        MemoryMru memmru( trgt, rank, i_port, MemoryMruData::CALLOUT_RANK );
         io_sc.service_data->SetCallout( memmru );
 
         #ifdef __HOSTBOOT_MODULE

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,8 +161,8 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
 
 //------------------------------------------------------------------------------
 
-MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_target,
-                      const MemRank & i_rank, const MemSymbol & i_symbol ) :
+MemoryMru::MemoryMru(TARGETING::TargetHandle_t i_target, const MemRank & i_rank,
+                     uint8_t i_port, const MemSymbol & i_symbol) :
     iv_target(i_target), iv_rank(i_rank),
     iv_special(NO_SPECIAL_CALLOUT), iv_symbol( i_symbol )
 {
@@ -174,6 +174,7 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_target,
 
     getCommonVars();
 
+    iv_memMruMeld.s.port       = i_port;
     iv_memMruMeld.s.symbol     = iv_symbol.getSymbol();
     iv_memMruMeld.s.pins       = iv_symbol.getPins();
     iv_memMruMeld.s.dramSpared = iv_symbol.isDramSpared() ? 1 : 0;
@@ -187,7 +188,7 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_target,
 //------------------------------------------------------------------------------
 
 MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_target,
-                      const MemRank & i_rank,
+                      const MemRank & i_rank, uint8_t i_port,
                       MemoryMruData::Callout i_specialCallout ) :
     iv_target(i_target), iv_rank(i_rank), iv_special(i_specialCallout)
 {
@@ -200,6 +201,7 @@ MemoryMru::MemoryMru( TARGETING::TargetHandle_t i_target,
 
     getCommonVars();
 
+    iv_memMruMeld.s.port   = i_port;
     iv_memMruMeld.s.symbol = iv_special;
 
     // If the code gets to this point the MemoryMru is valid.
@@ -233,9 +235,8 @@ TargetHandleList MemoryMru::getCalloutList() const
             {
                 // Rank callouts and symbol callouts both callout a single DIMM.
                 uint32_t ds = iv_rank.getDimmSlct();
-                // TODO RTC 210072 - support for multiple ports
                 TargetHandle_t memPort = getConnectedChild( iv_target,
-                        TYPE_MEM_PORT, 0 );
+                        TYPE_MEM_PORT, iv_memMruMeld.s.port );
                 TargetHandle_t dimm = getConnectedChild(memPort, TYPE_DIMM, ds);
 
                 if ( nullptr == dimm )

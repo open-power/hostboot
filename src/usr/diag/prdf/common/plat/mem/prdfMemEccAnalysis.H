@@ -92,12 +92,13 @@ uint32_t handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
  *
  * @param  i_chip OCMB chip.
  * @param  i_rank Rank containing the IUE.
+ * @param  i_port Target port.
  * @param  io_sc  The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
-                       STEP_CODE_DATA_STRUCT & io_sc );
+                       uint8_t i_port, STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief  Handles a MPE attention.

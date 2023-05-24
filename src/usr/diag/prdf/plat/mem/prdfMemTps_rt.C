@@ -364,11 +364,11 @@ uint32_t TpsEvent<T>::analyzeEccErrors( const uint32_t & i_eccAttns,
             io_sc.service_data->setSignature( iv_chip->getHuid(),
                                               PRDFSIG_MaintIUE );
 
-            o_rc = MemEcc::handleMemIue<T>( iv_chip, iv_rank, io_sc );
+            o_rc = MemEcc::handleMemIue<T>( iv_chip, iv_rank, iv_port, io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,0x%02x) failed",
-                          iv_chip->getHuid(), getKey() );
+                PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,0x%02x,%x) failed",
+                          iv_chip->getHuid(), getKey(), iv_port );
                 break;
             }
 
@@ -1114,7 +1114,8 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::getSymbolCeCounts( CeCount & io_badDqCount,
                     // Add all symbols with non-zero counts to the callout list.
                     if ( symData.count != 0 )
                     {
-                        MemoryMru mm { ocmbTrgt, iv_rank, symData.symbol };
+                        MemoryMru mm { ocmbTrgt, iv_rank, iv_port,
+                                       symData.symbol };
                         io_sc.service_data->SetCallout( mm );
                     }
                 }

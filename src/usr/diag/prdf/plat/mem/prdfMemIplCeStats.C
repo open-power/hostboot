@@ -177,7 +177,7 @@ int32_t MemIplCeStats<T>::calloutHardCes( const MemRank & i_stopRank )
 
             // At this point a hard CE was found, callout the symbol.
             MemoryMru memMru ( trgt, symData[i].symbol.getRank(),
-                               symData[i].symbol );
+                               portSlct, symData[i].symbol );
 
             // We are creating and committing error log here. It is different
             // from rest of attention flow. We could have set the callout
@@ -243,7 +243,7 @@ bool MemIplCeStats<T>::calloutCePerDram()
                  (dramIter->first.dram == symIter->symbol.getDram() ) )
             {
                 MemoryMru memMru ( trgt, symIter->symbol.getRank(),
-                                   symIter->symbol );
+                                   dramIter->first.portSlct, symIter->symbol );
 
                 errlHndl_t l_errl = nullptr;
 
@@ -310,7 +310,7 @@ bool MemIplCeStats<T>::calloutCePerRank()
                  (rankIter->first.portSlct == symIter->symbol.getPortSlct()) )
             {
                 MemoryMru memMru ( trgt, symIter->symbol.getRank(),
-                                   symIter->symbol );
+                                   rankIter->first.portSlct, symIter->symbol );
 
                 errlHndl_t l_errl = nullptr;
 
@@ -377,7 +377,8 @@ bool MemIplCeStats<T>::calloutCePerDs()
                                 symIter->symbol.getRank().getDimmSlct()) &&
                  (dsIter->first.portSlct == symIter->symbol.getPortSlct()) )
             {
-                MemoryMru memMru ( trgt, symIter->symbol.getRank() ,
+                MemoryMru memMru ( trgt, symIter->symbol.getRank(),
+                                   symIter->symbol.getPortSlct(),
                                    symIter->symbol );
 
                 errlHndl_t l_errl = nullptr;

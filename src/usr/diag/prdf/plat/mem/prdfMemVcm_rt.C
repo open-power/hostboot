@@ -109,11 +109,11 @@ uint32_t VcmEvent<T>::checkEcc( const uint32_t & i_eccAttns,
             io_sc.service_data->setSignature( iv_chip->getHuid(),
                                               PRDFSIG_MaintIUE );
 
-            o_rc = MemEcc::handleMemIue<T>( iv_chip, iv_rank, io_sc );
+            o_rc = MemEcc::handleMemIue<T>( iv_chip, iv_rank, iv_port, io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,0x%02x) failed",
-                          iv_chip->getHuid(), getKey() );
+                PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,0x%02x,%x) failed",
+                          iv_chip->getHuid(), getKey(), iv_port );
                 break;
             }
 

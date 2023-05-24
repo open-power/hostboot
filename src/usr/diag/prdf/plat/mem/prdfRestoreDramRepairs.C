@@ -268,7 +268,8 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
                 {
                     if ( !sym.isValid() ) continue;
 
-                    MemoryMru mm( i_trgt, rank, sym );
+                    // TODO Odyssey
+                    MemoryMru mm( i_trgt, rank, 0, sym );
 
                     // Add all parts to the error log.
                     for ( auto & dimm : mm.getCalloutList() )

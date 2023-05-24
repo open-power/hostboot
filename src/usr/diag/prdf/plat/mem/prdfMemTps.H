@@ -104,7 +104,7 @@ class TpsEvent : public TdEntry
         // Add the rank to the callout list if no callouts in the list.
         if ( 0 == io_sc.service_data->getMruListSize() )
         {
-            MemoryMru mm { iv_chip->getTrgt(), iv_rank,
+            MemoryMru mm { iv_chip->getTrgt(), iv_rank, iv_port,
                            MemoryMruData::CALLOUT_RANK };
             io_sc.service_data->SetCallout( mm );
         }

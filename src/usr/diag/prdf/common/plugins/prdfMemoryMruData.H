@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -106,11 +106,13 @@ union MemMruMeld
         uint32_t eccSpared  : 1; ///< True if symbol is on ECC DRAM
         uint32_t srank      : 3; ///< Slave rank (0-7)
         uint32_t isOcmb     : 1; ///< True if OCMB is used
-        uint32_t unused     : 2; ///< 2 Bits currently unused
+        uint32_t port       : 1; ///< Port select (0-1)
+        uint32_t unused     : 1; ///< 1 Bit currently unused
 #else
         // Need to reverse this to make the uint32_t look right in the
         // simulator.
-        uint32_t unused     : 2;
+        uint32_t unused     : 1;
+        uint32_t port       : 1;
         uint32_t isOcmb     : 1;
         uint32_t srank      : 3;
         uint32_t eccSpared  : 1;

@@ -103,7 +103,8 @@ class VcmEvent : public TdEntry
         // Add the chip mark to the callout list if no callouts in the list.
         if ( 0 == io_sc.service_data->getMruListSize() )
         {
-            MemoryMru mm { iv_chip->getTrgt(), iv_rank, iv_mark.getSymbol() };
+            MemoryMru mm { iv_chip->getTrgt(), iv_rank, iv_port,
+                           iv_mark.getSymbol() };
             io_sc.service_data->SetCallout( mm );
         }
 

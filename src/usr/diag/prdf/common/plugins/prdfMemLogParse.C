@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -181,8 +181,9 @@ void initMemMruStrings( MemoryMruData::MemMruMeld i_mm, bool & o_addDramSite,
     }
 
     // Build the header string.
-    snprintf( o_header, HEADER_SIZE, "  %s(n%dp%dc%d) Rank:m%ds%d",
-              compStr, nodePos, chipPos, compPos, i_mm.s.mrank, i_mm.s.srank );
+    snprintf( o_header, HEADER_SIZE, "  %s(n%dp%dc%d) Rank:m%ds%d Port:%d",
+              compStr, nodePos, chipPos, compPos, i_mm.s.mrank, i_mm.s.srank,
+              i_mm.s.port );
 
     // Build the generic data string (no DRAM site info).
     switch ( i_mm.s.symbol )
