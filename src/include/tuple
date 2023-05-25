@@ -66,8 +66,21 @@ struct tuple<T>
     constexpr tuple(const tuple&) = default;
     constexpr tuple(tuple&&) = default;
 
-    constexpr tuple(T&& v) : value(forward<T>(v)), rest() { }
-    constexpr tuple(T&& v, tuple<>) : value(forward<T>(v)), rest() { }
+    template<typename U>
+    constexpr tuple(U&& v) : value(forward<U>(v)), rest() { }
+
+    template<typename U>
+    constexpr tuple(U&& v, tuple<>) : value(forward<U>(v)), rest() { }
+
+    template< class... UTypes >
+    constexpr tuple(const tuple<UTypes...>& other )
+    : value(other.value), rest()
+    { }
+
+    template< class... UTypes >
+    constexpr tuple(tuple<UTypes...>& other )
+    : value(other.value), rest()
+    { }
 
     constexpr void swap(tuple& other)
     {
@@ -98,9 +111,14 @@ struct tuple<T, Types...>
     constexpr tuple(const tuple&) = default;
     constexpr tuple(tuple&&) = default;
 
-    template<typename Arg, typename... Args>
-    constexpr tuple(Arg&& arg, Args&&... args)
-        : value(std::forward<Arg>(arg)), rest(std::forward<Args>(args)...)
+    template<typename Arg, typename Arg2, typename... Args>
+    constexpr tuple(Arg&& arg, Arg2&& arg2, Args&&... args)
+        : value(std::forward<Arg>(arg)), rest(std::forward<Arg2>(arg2), std::forward<Args>(args)...)
+    { }
+
+    template< class... UTypes >
+    constexpr tuple(const tuple<UTypes...>& other )
+    : value(other.value), rest(other.rest)
     { }
 
     template<typename Arg, typename... Args>
@@ -228,9 +246,9 @@ get(const tuple<Args...>& tup)
 }
 
 template<typename... Args>
-constexpr tuple<Args...> make_tuple(Args&&... args)
+constexpr tuple<std::decay_t<Args>...> make_tuple(Args&&... args)
 {
-    return tuple<Args...> { std::forward<Args>(args)... };
+    return tuple<std::decay_t<Args>...> { std::forward<Args>(args)... };
 }
 
 template<typename... Args>
@@ -375,3 +393,4 @@ constexpr auto tuple_map(std::tuple<Types...>& t, F&& function)
 }
 
 #endif
+/* vim: set filetype=cpp : */

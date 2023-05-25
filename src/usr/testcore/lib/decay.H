@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/testcore/lib/is_same.H $                              */
+/* $Source: src/usr/testcore/lib/decay.H $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,24 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __LIB_IS_SAME_H
-#define __LIB_IS_SAME_H
+#ifndef __LIB_DECAY_H
+#define __LIB_DECAY_H
 
 #include <cxxtest/TestSuite.H>
 #include <type_traits>
 
-class STLIsSameTest : public CxxTest::TestSuite
+template<typename T, typename U>
+constexpr bool is_decay_equal = std::is_same<std::decay_t<T>, U>::value;
+
+class STLDecayTest : public CxxTest::TestSuite
 {
     public:
-        void testIsSame()
+        void testDecay()
         {
             using namespace std;
 
-            static_assert(!is_same<char,int>::value,"is_same<char,int> is true.");
-            static_assert(!is_same<char*,void*>::value,"is_same<char*,void*> is true.");
-            static_assert(!is_same<size_t, const size_t>::value,"is_same<size_t, const size_t> is true.");
-            static_assert(is_same<int,int>::value,"is_same<int,int> is false.");
-            static_assert(is_same<const char*,const char*>::value,"is_same<const char*, const char*> is false.");
+            // Tests whether the lefthand side template arg can be type-converted to the righthand side.
+            // decay should perform type conversions equivalent to ones performed when passing by value to a function.
+            static_assert(is_decay_equal<int, int>);
+            static_assert( ! is_decay_equal<int, float>);
+            static_assert(is_decay_equal<int&, int>);
+            static_assert(is_decay_equal<int&&, int>);
+            static_assert(is_decay_equal<const int&, int>);
+            static_assert(is_decay_equal<int[2], int*>);
+            static_assert( ! is_decay_equal<int[4][2], int*>);
+            static_assert( ! is_decay_equal<int[4][2], int**>);
+            static_assert(is_decay_equal<int[4][2], int(*)[2]>);
+            static_assert(is_decay_equal<int(int), int(*)(int)>);
         }
 };
 

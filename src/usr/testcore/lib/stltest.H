@@ -692,6 +692,39 @@ class STLTest : public CxxTest::TestSuite
         {
             TS_INFO(ENTER_MRK"testTuple");
 
+            // Test conversion constructors
+            {
+                std::tuple<int> x;
+                std::tuple<char> y(x);
+            }
+            {
+                std::tuple<int, int> x;
+                std::tuple<char, char> y(x);
+            }
+            // Test std::make_tuple
+            {
+                using testTuple = std::tuple<uint32_t, size_t, uint8_t>;
+                const uint32_t a = 15;
+                const size_t   b = 1234;
+                const uint8_t  c = 13;
+                testTuple t1 = std::make_tuple(a, b, c);
+                (void)t1;
+                // Test conversion construction
+                testTuple t2 = std::make_tuple(a, b, 1);
+                (void)t2;
+                // Test constexpr
+                static constexpr std::array<testTuple, 2> TEST_ARR
+                {
+                    std::make_tuple(a, b, c),
+                    std::make_tuple(32, b, c)
+                };
+                // Ignore unused variable error.
+                (void)TEST_ARR;
+                // Make sure that make_tuple makes tuples of values, not references.
+                static_assert(std::is_same<decltype(std::make_tuple(a, b, c)), testTuple>::value);
+            }
+
+
             std::tuple<int, const char*> tup(3, "hi");
 
             static_assert(std::is_same<decltype(std::get<0>(tup)), int&>::value);

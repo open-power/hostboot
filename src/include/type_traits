@@ -38,35 +38,44 @@
 namespace std
 {
 
-template<typename T>
-struct underlying_type
-{
-    using type = __underlying_type(T);
-};
+    template<typename T>
+        struct underlying_type
+        {
+            using type = __underlying_type(T);
+        };
 
-template<typename T>
-struct decay
-{
-    using type = typename std::remove_cv<T>::type;
-};
+    template<bool B, class T, class F>
+        struct conditional
+        {
+            using type = T;
+        };
 
-template<typename T>
-struct decay<T[]>
-{
-    using type = T*;
-};
+    template<class T, class F>
+        struct conditional<false, T, F>
+        {
+            using type = F;
+        };
 
-template<typename T, size_t I>
-struct decay<T[I]>
-{
-    using type = T*;
-};
+    template<typename T>
+        struct decay
+        {
+            private:
+                typedef typename std::remove_reference<T>::type U;
+            public:
+                typedef typename std::conditional<std::is_array<U>::value,
+                                                  typename std::add_pointer<typename std::remove_extent<U>::type>::type,
+                                                  typename std::remove_cv<U>::type
+                                                 >::type type;
+        };
 
-template<typename Ret, typename... Args>
-struct decay<Ret(Args...)>
-{
-    using type = Ret(*)(Args...);
-};
+    template<class T>
+        using decay_t = typename decay<T>::type;
+
+    template<typename Ret, typename... Args>
+        struct decay<Ret(Args...)>
+        {
+            using type = Ret(*)(Args...);
+        };
 
 }
 
