@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,10 +42,85 @@ constexpr uint8_t  VPD_RECORD_START_MAGIC_NUM = 0x84;
 constexpr uint8_t  VPD_RECORD_END_MAGIC_NUM   = 0x78;
 constexpr uint16_t MAX_RECORD_SIZE            = 0xFFFF;
 constexpr uint8_t  MAX_KEYWORD_SIZE           = 0xFF;
+constexpr uint16_t MAX_POUND_KEYWORD_SIZE     = 0xFFFF;
 constexpr uint16_t ASCII_RT                   = 0x5254;
 const char* const VPD_HEADER_RECORD_NAME("VHDR");
 const char* const VPD_TABLE_OF_CONTENTS_RECORD_NAME("VTOC");
 const char* const VPD_KEYWORD_POINTER_TO_RECORD("PT");
+
+// Following values are from the OpenPOWER FRU VPD doc
+typedef uint8_t  vpdKwSize_t;
+typedef uint16_t vpdPdKwSize_t;
+constexpr vpdKwSize_t VPD_RT_KEYWORD_SIZE = 0x04;
+constexpr vpdKwSize_t VPD_DR_KEYWORD_SIZE = 0x10;
+constexpr vpdKwSize_t VPD_CE_KEYWORD_SIZE = 0x01;
+constexpr vpdKwSize_t VPD_VZ_KEYWORD_SIZE = 0x02;
+constexpr vpdKwSize_t VPD_FN_KEYWORD_SIZE = 0x07;
+constexpr vpdKwSize_t VPD_PN_KEYWORD_SIZE = 0x07;
+constexpr vpdKwSize_t VPD_SN_KEYWORD_SIZE = 0x0C;
+constexpr vpdKwSize_t VPD_CC_KEYWORD_SIZE = 0x04;
+constexpr vpdKwSize_t VPD_HE_KEYWORD_SIZE = 0x04;
+constexpr vpdKwSize_t VPD_CT_KEYWORD_SIZE = 0x04;
+constexpr vpdKwSize_t VPD_HW_KEYWORD_SIZE = 0x02;
+constexpr vpdKwSize_t VPD_B3_KEYWORD_SIZE = 0x06;
+constexpr vpdKwSize_t VPD_B4_KEYWORD_SIZE = 0x01;
+constexpr vpdKwSize_t VPD_B7_KEYWORD_SIZE = 0x0C;
+constexpr vpdKwSize_t VPD_PR_KEYWORD_SIZE = 0x08;
+constexpr vpdKwSize_t VPD_SZ_KEYWORD_SIZE = 0x06;
+
+namespace VPD
+{
+enum VPD_ASCII_RECORD_NAME : uint32_t
+{
+    VINI = 0x56494E49,
+    VSPD = 0x56535044
+};
+
+enum VPD_ASCII_KEYWORD_NAME : uint16_t
+{
+    RT      = 0x5254,  // Record Name
+    DR      = 0x4452,  // Card Description, Requires SZ be filled for HDAT purposes
+    CE      = 0x4345,  // Card Id Number (CCIN) Extension
+    VZ      = 0x565A,  // Overall VPD Version
+    FN      = 0x464E,  // Card FRU Number
+    PN      = 0x504E,  // Card Part Number
+    SN      = 0x534E,  // Card Serial Number
+    CC      = 0x4343,  // Card Id Number (CCIN)
+    HE      = 0x4845,  // Hardware EC verion
+    CT      = 0x4354,  // Card Type
+    HW      = 0x4857,  // Hardware Version
+    B3      = 0x4233,  // Used to describe hardware characteristics for system or FRU
+    B4      = 0x4234,  // Manufacturing FRU Control (MFC).
+    B7      = 0x4237,  // This field contains card test-specific info
+    PR      = 0x5052,  // Power
+    SZ      = 0x535a,  // Memory Size
+    POUND_A = 0x2341,  // Generic Keyword. Holds Reverse Bit Sterring (RSB) data.
+    POUND_B = 0x2342,  //
+    POUND_I = 0x2349,  // Contains the actual SPD data from the DIMM
+    PF      = 0x5046,  // Pad fill.
+    VPD_ASCII_KEYWORD_INVALID = 0xFFFF
+};
+
+};
+
+struct keyword_t
+{
+    VPD::VPD_ASCII_KEYWORD_NAME name;
+    vpdKwSize_t size;
+    std::vector<uint8_t> kwData;
+
+    keyword_t(const VPD::VPD_ASCII_KEYWORD_NAME i_name, const vpdKwSize_t i_size, const std::vector<uint8_t>& i_data)
+        : name(i_name), size(i_size), kwData(i_data)
+    {
+    }
+
+    keyword_t(const VPD::VPD_ASCII_KEYWORD_NAME i_name,
+              const vpdKwSize_t i_size,
+              const std::initializer_list<uint8_t>& i_data)
+        : name(i_name), size(i_size), kwData(i_data)
+    {
+    }
+};
 
 /**
   * @brief Structure representing the first 10 bytes of all

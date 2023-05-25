@@ -80,49 +80,31 @@ HdatRam::HdatRam(errlHndl_t &o_errlHndl,
             i_pDimmTarget->getAttr<TARGETING::ATTR_SLCA_INDEX>();
     }
 
-    size_t o_rawKwdSize = 0;
-    size_t o_fmtKwdSize = 0;
+    std::vector<uint8_t> ipzVpdData;
+    size_t ipzVpdSize = 0;
     do
     {
-        char *o_rawKwd = nullptr;
-        char *o_fmtKwd = nullptr;
-
-        o_errlHndl = hdatFetchRawSpdData(i_pDimmTarget,o_rawKwdSize, o_rawKwd);
-        if( o_errlHndl )
-        {
-            HDAT_ERR("Ram Error in getting raw SPD data for DDIMM with "
-            "rid  = %d", iv_fru.hdatResourceId);
-            break;
-        }
-
-        o_errlHndl = hdatConvertRawSpdToIpzFormat(iv_fru.hdatResourceId,
-            o_rawKwdSize, o_rawKwd, o_fmtKwdSize, o_fmtKwd, i_pDimmTarget);
-        HDAT_INF("Ram o_rawKwdSize = %d,o_fmtKwdSize = %d",
-            o_rawKwdSize, o_fmtKwdSize);
+        o_errlHndl = generateIpzFormattedVpd(iv_fru.hdatResourceId, ipzVpdData, i_pDimmTarget);
         if( o_errlHndl )
         {
             break;
         }
 
-        if( o_fmtKwd != nullptr )
+        if( ipzVpdData.size() )
         {
+            ipzVpdSize = ipzVpdData.size();
             // Padding extra 8 bytes to keep data alignment similar to FSP
             // data
-            iv_kwd = new char [o_fmtKwdSize + 8];
-            memcpy(iv_kwd, o_fmtKwd, o_fmtKwdSize);
-            iv_kwdSize = o_fmtKwdSize + 8;
+            iv_kwd = new char [ipzVpdSize + 8];
+            memcpy(iv_kwd, ipzVpdData.data(), ipzVpdSize);
+            iv_kwdSize = ipzVpdSize + 8;
             HDAT_INF("Ram iv_kwdSize = %d", iv_kwdSize);
-            if( o_fmtKwd != nullptr )
-            {
-                 delete[] o_fmtKwd;
-                 o_fmtKwd = nullptr;
-            }
         }
     }while(0);
 
     if (o_errlHndl)
     {
-        HDAT_ERR("Ram Error in creating IPZ format keyword for DDIMM with "
+        HDAT_ERR("Ram Error in creating IPZ format keyword for DIMM with "
             "rid  = %d", iv_fru.hdatResourceId);
         /*@
          * @errortype
@@ -130,21 +112,21 @@ HdatRam::HdatRam(errlHndl_t &o_errlHndl,
          * @subsys     EPUB_FIRMWARE_SP
          * @reasoncode RC_DIMM_IPZ_CONVERT_FAIL
          * @moduleid   MOD_ADD_RAM_AREA_IPZ_VPD
-         * @userdata1  resource id of ddimm
-         * @userdata2  total raw spd keyword size for ddimm
-         * @userdata3  total ipz keyword size for ddimm
+         * @userdata1  resource id of dimm
+         * @userdata2  unused
+         * @userdata3  total ipz keyword size for dimm
          * @userdata4  slca index
-         * @devdesc    Failed trying to convert the raw spd data for ddimm
+         * @devdesc    Failed trying to convert the raw spd data for dimm
          *             to IPZ format
-         * @custdesc   Firmware error processing Vital Product Data for ddimm
+         * @custdesc   Firmware error processing Vital Product Data for dimm
          *             memory
          */
         hdatBldErrLog(o_errlHndl,
                       MOD_ADD_RAM_AREA_IPZ_VPD,            // SRC module ID
                       RC_DIMM_IPZ_CONVERT_FAIL,            // SRC ext ref code
                       iv_fru.hdatResourceId,               // SRC hex word 1
-                      o_rawKwdSize,                        // SRC hex word 2
-                      o_fmtKwdSize,                        // SRC hex word 3
+                      0,                                   // SRC hex word 2
+                      ipzVpdSize,                          // SRC hex word 3
                       iv_fru.hdatSlcaIdx,                  // SRC hex word 4
                       ERRORLOG::ERRL_SEV_UNRECOVERABLE);
     }

@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include "hdatutil.H"
+#include "hdatbldda.H"
 #include <eeprom/eepromif.H>
 #include <stdio.h>
 #include <string.h>
@@ -1426,7 +1427,6 @@ errlHndl_t hdatFetchRawSpdData(TARGETING::Target * i_target,
     do
     {
         assert(i_target != nullptr);
-
         l_err = deviceRead( i_target,
                             nullptr,
                             o_kwdSize,
@@ -1483,64 +1483,460 @@ errlHndl_t hdatFetchRawSpdData(TARGETING::Target * i_target,
 
 }
 
-/******************************************************************************/
-// hdatCreateSzKeyWord
-/******************************************************************************/
-uint32_t  hdatCreateSzKeyWord(const char *i_jedec_vpd_ptr)
+
+// Forward declarations for the various IPZ VPD generation functions. Their documentation comes after
+// generateIpzFormattedKeyword.
+uint32_t  hdatCreateSzKeyword(const char *i_jedec_vpd_ptr);
+void copyPoundKeywordIntoIpzVpdData(std::vector<uint8_t> & io_ipzVpdData,
+        const VPD::VPD_ASCII_KEYWORD_NAME & i_keywordName,
+        const vpdPdKwSize_t & i_keywordSize,
+        const uint8_t       * i_keywordData);
+void copyKeywordIntoIpzVpdData(std::vector<uint8_t> & io_ipzVpdData,
+        const VPD::VPD_ASCII_KEYWORD_NAME & i_keywordName,
+        const vpdKwSize_t & i_keywordSize,
+        const uint8_t * i_keywordData);
+void generateIpzKeywordFromDefault(std::vector<uint8_t> & io_ipzVpdData,
+        const VPD::VPD_ASCII_KEYWORD_NAME i_keywordName);
+void generateIpzKeywordDataFromAttr(std::vector<uint8_t> & io_ipzVpdData,
+        const Target * i_target,
+        const VPD::VPD_ASCII_KEYWORD_NAME & i_keywordName);
+void generateIpzRecordHeader(std::vector<uint8_t> & io_ipzRecord, const VPD::VPD_ASCII_RECORD_NAME & i_asciiRecordName);
+void generateIpzRecordFooter(std::vector<uint8_t> & io_ipzRecordData);
+void generateIpzDrKeyword(std::vector<uint8_t> & io_ipzVpdData, const char * i_rawSpdData, const size_t i_rawSpdSize);
+void generatePoundIKeyword(std::vector<uint8_t> & io_ipzVpdData, const char * i_rawSpdData, const size_t i_rawSpdSize);
+void generatePoundAKeyword(std::vector<uint8_t> & io_ipzVpdData, Target * i_target);
+
+/*
+ * @brief This function serves as a centralized dispatcher for the various functions which generate IPZ formatted
+ *        keywords. Note, that RT and PF keywords are the only keywords that have a strict ordering requirement. The RT
+ *        keyword must always be first as it is part of the header of the IPZ VPD record and used to identify which
+ *        record all subsequent keywords belong to. The PF keyword marks the end of a record and created as part of the
+ *        footer. All other records do not have ordering requirements per the spec. However, some keywords are generated
+ *        with an ordering requirement because their data is largely shared. This isn't required by the spec, it was
+ *        just an arbitrary decision made by the consumers of the data and their generation was coupled together
+ *        for optimization reasons.
+ *
+ * @param[in/out] io_ipzVpdData    The vector of VPD data to append this keyword to.
+ * @param[in]     i_target         The dimm/ocmb target to pull the #A keyword data from.
+ * @param[in]     i_recordName     The ASCII record name.
+ * @param[in]     i_keywordName    The ASCII keyword name.
+ * @param[in]     i_rawSpdData     A pointer to the "raw" SPD data read from the i_target retrieved using
+ *                                 SPD::ENTIRE_SPD.
+ * @param[in]     i_rawSpdSize     The size of the "raw" SPD data.
+ */
+void generateIpzFormattedKeyword(std::vector<uint8_t> & io_ipzVpdData,
+                                 Target * i_target,
+                                 const VPD::VPD_ASCII_RECORD_NAME & i_recordName,
+                                 const VPD::VPD_ASCII_KEYWORD_NAME & i_keyword,
+                                 const char * i_rawSpdData,
+                                 const size_t i_rawSpdSize)
+{
+        switch(i_keyword)
+        {
+            case (VPD::RT):
+            {
+                generateIpzRecordHeader(io_ipzVpdData, i_recordName);
+                break;
+            }
+            case (VPD::SZ):
+            {
+                // DR keyword will fill this
+                break;
+            }
+            case (VPD::DR):
+            {
+                generateIpzDrKeyword(io_ipzVpdData, i_rawSpdData, i_rawSpdSize);
+                break;
+            }
+            case (VPD::CC):
+            case (VPD::SN):
+            case (VPD::PN):
+            case (VPD::FN):
+            {
+                generateIpzKeywordDataFromAttr(io_ipzVpdData, i_target, i_keyword);
+                break;
+            }
+            case (VPD::CE):
+            case (VPD::VZ):
+            case (VPD::HE):
+            case (VPD::CT):
+            case (VPD::HW):
+            case (VPD::B3):
+            case (VPD::B4):
+            case (VPD::B7):
+            case (VPD::PR):
+            {
+                generateIpzKeywordFromDefault(io_ipzVpdData, i_keyword);
+                break;
+            }
+            case (VPD::PF):
+            {
+                generateIpzRecordFooter(io_ipzVpdData);
+                break;
+            }
+            case (VPD::POUND_A):
+            {
+                generatePoundAKeyword(io_ipzVpdData, i_target);
+                break;
+            }
+            case (VPD::POUND_B):
+            {
+                // Do nothing.
+                break;
+            }
+            case (VPD::POUND_I):
+            {
+                generatePoundIKeyword(io_ipzVpdData, i_rawSpdData, i_rawSpdSize);
+                break;
+            }
+            case (VPD::VPD_ASCII_KEYWORD_INVALID):
+            {
+                assert(false);
+            }
+        }
+}
+
+/* @brief This function will generate the record header for a given record name using the standard ipz record header
+ *        format. The record length field will be set to zero since it's not known how long the record will be at the
+ *        time this record is created. It is the caller's responsibility to set that field once the record has been
+ *        completed.
+ *
+ *        Generally, the flow for creating an IPZ record is to include the standard IPZ record header described in this
+ *        function below, add keywords, and complete the record with the footer. The footer is described in the function
+ *        generateIpzRecordHeader.
+ *
+ * @param[in/out] io_ipzRecord      The vector to hold the record header in. Will be cleared before the record is added.
+ * @param[in]     i_asciiRecordName The ASCII record name.
+ */
+void generateIpzRecordHeader(std::vector<uint8_t> & io_ipzRecord, const VPD::VPD_ASCII_RECORD_NAME & i_asciiRecordName)
+{
+    // Start with an empty record
+    io_ipzRecord.clear();
+
+    // Fill in the record header
+    standard_ipz_record_hdr header;
+    header.large_resource = VPD_RECORD_START_MAGIC_NUM;
+    header.record_length = 0; // This is populated later when completing the record footer.
+    header.rt_kw_name = VPD::RT;
+    header.rt_kw_len = VPD_RT_KEYWORD_SIZE;
+    header.rt_kw_val = i_asciiRecordName;
+
+    // Copy the data into the record
+    io_ipzRecord.insert(io_ipzRecord.end(), reinterpret_cast<uint8_t*>(&header),
+                        reinterpret_cast<uint8_t*>(&header) + sizeof(standard_ipz_record_hdr));
+}
+
+/* @brief This function will generate the record footer for a given record name. The footer is just the PF keyword and
+ *        the record end magic number. It will also calculate the size of the given record and update the record header
+ *        with that data in little endian, as required by the spec.
+ *
+ * @param[in/out] io_ipzRecordData      The vector to append the record footer too. Assumes this data comprises only a
+ *                                      single IPZ record.
+ */
+void generateIpzRecordFooter(std::vector<uint8_t> & io_ipzRecordData)
+{
+    // The length of a VPD record must be divisble by 4
+    const size_t WORD_BOUNDARY = 4;
+    // The data in each record must be a minimum of 44 bytes long
+    const size_t MIN_RECORD_LENGTH = 44;
+
+    // Size of the PF keyword name and size byte
+    const size_t PF_SIZE_EXCLUDING_DATA = KEYWORD_BYTE_SIZE + KEYWORD_SIZE_BYTE_SIZE;
+    const size_t SMALL_RESOURCE_SIZE = sizeof(VPD_RECORD_END_MAGIC_NUM);
+    const size_t VPD_SIZE_INCLUDING_PF_AND_SMALL_RESOURCE_SIZE = io_ipzRecordData.size()
+                                                               + PF_SIZE_EXCLUDING_DATA
+                                                               + SMALL_RESOURCE_SIZE;
+
+    // Determine the number of 0x00 bytes the pad fill keyword should have as data. Typically will be between 0-3 bytes.
+    uint8_t padFillSize = 0;
+    if (io_ipzRecordData.size() < MIN_RECORD_LENGTH)
+    {
+        padFillSize = MIN_RECORD_LENGTH
+                    - io_ipzRecordData.size()
+                    - PF_SIZE_EXCLUDING_DATA
+                    - SMALL_RESOURCE_SIZE;
+    }
+    else if ((VPD_SIZE_INCLUDING_PF_AND_SMALL_RESOURCE_SIZE % WORD_BOUNDARY) != 0)
+    {
+        // When calculating how many extra bytes to fill, take (VPD data size % WORD_BOUNDARY) and subtract it
+        // from the WORD_BOUNDARY. This gives how many bytes off the data is from being word aligned and thus how
+        // many to add to achieve word alignment.
+        padFillSize = WORD_BOUNDARY - (VPD_SIZE_INCLUDING_PF_AND_SMALL_RESOURCE_SIZE % WORD_BOUNDARY);
+    }
+    else
+    {
+        // Size of the VPD data including PF keyword w/ size==0 and small resource indicator fits on word boundary.
+        // There is no need to add any extra padding beyond just including the PF keyword and size==0.
+    }
+
+    // Add the PF and PF size to the data buffer
+    const uint16_t PF_KEYWORD = VPD::PF;
+    io_ipzRecordData.insert(io_ipzRecordData.end(),
+                         reinterpret_cast<const uint8_t *>(&PF_KEYWORD),
+                         reinterpret_cast<const uint8_t *>(&PF_KEYWORD) + KEYWORD_BYTE_SIZE);
+    io_ipzRecordData.insert(io_ipzRecordData.end(),
+                         padFillSize);
+    if (padFillSize != 0)
+    {
+        io_ipzRecordData.insert(io_ipzRecordData.end(),
+                             padFillSize,
+                             0x00);
+    }
+    // Add small resource indicator to mark the end of this record
+    io_ipzRecordData.insert(io_ipzRecordData.end(),
+                         VPD_RECORD_END_MAGIC_NUM);
+
+    // Calculate the size of this record.
+    // The record size only includes the bytes between the large and small resource indicators, excluding the bytes for
+    // record length as well.
+    const uint16_t RECORD_LENGTH = io_ipzRecordData.size()
+                                 - SMALL_RESOURCE_SIZE
+                                 - sizeof(VPD_RECORD_START_MAGIC_NUM)
+                                 - sizeof(uint16_t); // Do not include the size of the RECORD_LENGTH itself.
+    standard_ipz_record_hdr * recordHdr = reinterpret_cast<standard_ipz_record_hdr *>(io_ipzRecordData.data());
+    recordHdr->record_length = htole16(RECORD_LENGTH);
+}
+
+/**
+ * @brief This helper function adds the fully formed pound keyword to a given vector of VPD data. The pound keywords all
+ *        start with the # symbol to indicate that their size field is two bytes wide instead of one.
+ *
+ *        Example(hex) : 23 49 00 10 12 34 56 ......
+ *                       #  I  ^SIZE ^DATA
+ *
+ * @param[in/out] io_ipzVpdData    The vector of VPD data to append this keyword to.
+ * @param[in]     i_keywordName    The ASCII keyword name.
+ * @param[in]     i_keywordSize    The size of the keyword. This is copied into the VPD in little endian form.
+ * @param[in]     i_keywordData    The keyword data of length i_keywordSize.
+ *
+ */
+void copyPoundKeywordIntoIpzVpdData(std::vector<uint8_t> & io_ipzVpdData,
+                                    const VPD::VPD_ASCII_KEYWORD_NAME & i_keywordName,
+                                    const vpdPdKwSize_t & i_keywordSize,
+                                    const uint8_t       * i_keywordData)
+{
+    // Copy the keyword name
+    io_ipzVpdData.insert(io_ipzVpdData.end(),
+                         reinterpret_cast<const uint8_t *>(&i_keywordName),
+                         reinterpret_cast<const uint8_t *>(&i_keywordName) + sizeof(VPD::VPD_ASCII_KEYWORD_NAME));
+
+    // Swap the bytes to be in little endian as required by the spec.
+    const vpdPdKwSize_t littleEndianKeywordSize = htole16(i_keywordSize);
+    // Copy the keyword size
+    io_ipzVpdData.insert(io_ipzVpdData.end(),
+                         reinterpret_cast<const uint8_t *>(&littleEndianKeywordSize),
+                         reinterpret_cast<const uint8_t *>(&littleEndianKeywordSize) + sizeof(vpdPdKwSize_t));
+
+    // Copy the keyword data
+    io_ipzVpdData.insert(io_ipzVpdData.end(),
+                         i_keywordData,
+                         i_keywordData + i_keywordSize);
+}
+
+/**
+ * @brief This helper function adds the fully formed keyword to a given vector of VPD data. These keywords do not
+ *        start with a pound symbol which means that their size field is only one byte wide.
+ *
+ *        Example(hex) : 53 5a 07    12 34 56 ......
+ *                       S  Z  ^SIZE ^DATA
+ *
+ * @param[in/out] io_ipzVpdData    The vector of VPD data to append this keyword to.
+ * @param[in]     i_keywordName    The ASCII keyword name.
+ * @param[in]     i_keywordSize    The size of the keyword.
+ * @param[in]     i_keywordData    The keyword data of length i_keywordSize.
+ *
+ */
+void copyKeywordIntoIpzVpdData(std::vector<uint8_t> & io_ipzVpdData,
+                               const VPD::VPD_ASCII_KEYWORD_NAME & i_keywordName,
+                               const vpdKwSize_t & i_keywordSize,
+                               const uint8_t * i_keywordData)
+{
+    // Copy the keyword name
+    io_ipzVpdData.insert(io_ipzVpdData.end(),
+                         reinterpret_cast<const uint8_t *>(&i_keywordName),
+                         reinterpret_cast<const uint8_t *>(&i_keywordName) + sizeof(VPD::VPD_ASCII_KEYWORD_NAME));
+
+    // Copy the keyword size
+    io_ipzVpdData.insert(io_ipzVpdData.end(),
+                         reinterpret_cast<const uint8_t *>(&i_keywordSize),
+                         reinterpret_cast<const uint8_t *>(&i_keywordSize) + sizeof(vpdKwSize_t));
+
+    // Copy the keyword data
+    io_ipzVpdData.insert(io_ipzVpdData.end(),
+                         i_keywordData,
+                         i_keywordData + i_keywordSize);
+}
+
+/* @brief This function will add the default value for a required VINI keyword to the vector of ipz formatted VPD Data
+ *        given.
+ *
+ * @param[in/out] io_ipzVpdData    The vector of VPD data to append this keyword to.
+ * @param[in]     i_keywordName    The ASCII keyword name.
+ *
+ */
+void generateIpzKeywordFromDefault(std::vector<uint8_t> & io_ipzVpdData, const VPD::VPD_ASCII_KEYWORD_NAME i_keywordName)
+{
+    // These are the set of required keywords for the VINI record and their default values. This excludes the RT and PF
+    // keywords which are also required because they deviate from the specified form below enough to warrant their own
+    // generation methods. The RT and PF keywords are also common across many records and so they can be generalized for
+    // use with any record.
+    //
+    // Notably, optional keywords like SZ, are not included here because they are optional.
+    static const std::vector<keyword_t> DEFAULT_VINI_KEYWORDS
+    {
+        { VPD::DR, VPD_DR_KEYWORD_SIZE, std::vector<uint8_t>(VPD_DR_KEYWORD_SIZE, 0x2E) },
+        { VPD::CE, VPD_CE_KEYWORD_SIZE, std::vector<uint8_t>(VPD_CE_KEYWORD_SIZE, 0x31) },
+        { VPD::VZ, VPD_VZ_KEYWORD_SIZE, std::initializer_list<uint8_t>{0x30, 0x31} },
+        { VPD::FN, VPD_FN_KEYWORD_SIZE, std::vector<uint8_t>(VPD_FN_KEYWORD_SIZE, 0x30) },
+        { VPD::PN, VPD_PN_KEYWORD_SIZE, std::vector<uint8_t>(VPD_PN_KEYWORD_SIZE, 0x30) },
+        { VPD::SN, VPD_SN_KEYWORD_SIZE, std::vector<uint8_t>(VPD_SN_KEYWORD_SIZE, 0x30) },
+        { VPD::CC, VPD_CC_KEYWORD_SIZE, std::initializer_list<uint8_t>{0x50, 0x78, 0x78, 0x78} },
+        { VPD::HE, VPD_HE_KEYWORD_SIZE, std::initializer_list<uint8_t>{0x30, 0x30, 0x30, 0x31} },
+        { VPD::CT, VPD_CT_KEYWORD_SIZE, std::vector<uint8_t>(VPD_CT_KEYWORD_SIZE, 0x00) },
+        { VPD::HW, VPD_HW_KEYWORD_SIZE, std::initializer_list<uint8_t>{ 0x00, 0x01 } },
+        { VPD::B3, VPD_B3_KEYWORD_SIZE, std::vector<uint8_t>(VPD_B3_KEYWORD_SIZE, 0x00) },
+        { VPD::B4, VPD_B4_KEYWORD_SIZE, std::vector<uint8_t>(VPD_B4_KEYWORD_SIZE, 0x00) },
+        { VPD::B7, VPD_B7_KEYWORD_SIZE, std::vector<uint8_t>(VPD_B7_KEYWORD_SIZE, 0x00) },
+        { VPD::PR, VPD_PR_KEYWORD_SIZE, std::initializer_list<uint8_t>{ 0x48, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } },
+    };
+
+    const auto defaultKeyword = std::find_if(DEFAULT_VINI_KEYWORDS.begin(), DEFAULT_VINI_KEYWORDS.end(),
+             [&i_keywordName](const keyword_t i_keyword)
+             {
+                return i_keyword.name == i_keywordName;
+             });
+    if (defaultKeyword != nullptr)
+    {
+        copyKeywordIntoIpzVpdData(io_ipzVpdData,
+                                  defaultKeyword->name,
+                                  defaultKeyword->size,
+                                  defaultKeyword->kwData.data());
+    }
+    else
+    {
+        HDAT_INF("generateIpzKeywordFromDefault(): Could not find default keyword data for keyword 0x%X",
+                 i_keywordName);
+    }
+}
+
+/* @brief This function will attempt to find an associated targeting attribute for the given keyword and collect the
+ *        data from the given target. It will then populate the given vector with the IPZ formatted keyword. If the
+ *        attribute cannot be found or used then this function will attempt to populate the default value for the
+ *        keyword.
+ *
+ * @param[in/out] io_ipzVpdData    The vector of VPD data to append this keyword to.
+ * @param[in]     i_target         The target which holds the associated attribute.
+ * @param[in]     i_keywordName    The ASCII keyword name.
+ *
+ */
+void generateIpzKeywordDataFromAttr(std::vector<uint8_t> & io_ipzVpdData,
+                                    const Target * i_target,
+                                    const VPD::VPD_ASCII_KEYWORD_NAME & i_keywordName)
+{
+    // The following array associates a VPD keyword with an attribute that holds its data.
+    using AttrLookupRow = std::tuple<VPD::VPD_ASCII_KEYWORD_NAME, vpdKwSize_t, ATTRIBUTE_ID, size_t>;
+    static const std::array<AttrLookupRow, 4> KEYWORD_SIZES =
+    {
+        std::make_tuple(VPD::CC, VPD_CC_KEYWORD_SIZE,
+                        ATTR_FRU_CCIN, sizeof(AttributeTraits<ATTR_FRU_CCIN>::Type)),
+        std::make_tuple(VPD::PN, VPD_PN_KEYWORD_SIZE,
+                        ATTR_PART_NUMBER, sizeof(AttributeTraits<ATTR_PART_NUMBER>::Type)),
+        std::make_tuple(VPD::FN, VPD_FN_KEYWORD_SIZE,
+                        ATTR_PART_NUMBER, sizeof(AttributeTraits<ATTR_PART_NUMBER>::Type)),
+        std::make_tuple(VPD::SN, VPD_SN_KEYWORD_SIZE,
+                        ATTR_SERIAL_NUMBER, sizeof(AttributeTraits<ATTR_SERIAL_NUMBER>::Type)),
+    };
+    // Presently, FN uses the same value as PN so PN needs to be able to fit into FN.
+    static_assert(VPD_FN_KEYWORD_SIZE >= VPD_PN_KEYWORD_SIZE);
+
+    const AttrLookupRow * keywordAttrRow = std::find_if(KEYWORD_SIZES.begin(), KEYWORD_SIZES.end(),
+                                 [&i_keywordName](const auto i_lookup)
+                                 {
+                                     return std::get<0>(i_lookup) == i_keywordName;
+                                 });
+    if (keywordAttrRow == KEYWORD_SIZES.end())
+    {
+        HDAT_INF("generateIpzKeywordDataFromAttr(): Could not find attribute associated with keyword 0x%X. "
+                 "Using default instead.", i_keywordName);
+        generateIpzKeywordFromDefault(io_ipzVpdData, i_keywordName);
+        goto ERROR_EXIT;
+    }
+
+    {
+        const AttrLookupRow kwAttr = *keywordAttrRow;
+        const auto ATTR_ID = std::get<2>(kwAttr);
+        const auto ATTR_SIZE = std::get<3>(kwAttr);
+        uint8_t l_attr[ATTR_SIZE];
+        if (!i_target->unsafeTryGetAttr(ATTR_ID, ATTR_SIZE, &l_attr))
+        {
+            HDAT_INF("generateIpzKeywordDataFromAttr(): Could not get attribute 0x%X associated with keyword 0x%X. "
+                     "Using default instead.", ATTR_ID, i_keywordName);
+            generateIpzKeywordFromDefault(io_ipzVpdData, i_keywordName);
+            goto ERROR_EXIT;
+        }
+        const vpdKwSize_t MAX_COPY_SIZE = std::get<1>(kwAttr);
+        copyKeywordIntoIpzVpdData(io_ipzVpdData,
+                                  i_keywordName,
+                                  std::min(sizeof(l_attr), static_cast<size_t>(MAX_COPY_SIZE)),
+                                  l_attr);
+    }
+ERROR_EXIT:
+    return;
+}
+
+/**
+ * @brief  Create the SZ keyword for the specific DIMM/OCMB
+ *
+ * @param[in] i_jedec_vpd_ptr: Raw SPD keyword data
+ *
+ * @return the SZ keyword value (Memory size in MB)
+ *
+ */
+uint32_t  hdatCreateSzKeyword(const char *i_jedec_vpd_ptr)
 {
     uint32_t  l_sdram_cap = 1;
     uint32_t  l_pri_bus_wid = 1;
     uint32_t  l_sdram_wid  = 1;
     uint32_t  l_logical_ranks_per_dimm = 1;
     uint32_t  l_tmp = 0;
-
-    uint8_t   l_primaryBusWidthByteInSPD = 0;
-    uint8_t   l_sdramCapacityByteInSPD = 0;
-    uint8_t   l_sdramDeviceWidthByteInSPD = 0;
-    uint8_t   l_packageRanksPerDimmByteInSPD = 0;
     uint8_t   l_dieCount = 1;
+
+    constexpr uint8_t PRIMARY_BUS_WIDTH_BYTE_IN_SPD = SVPD_JEDEC_BYTE_13;
+    constexpr uint8_t SDRAM_CAPACITY_BYTE_IN_SPD = SVPD_JEDEC_BYTE_4;
+    constexpr uint8_t SDRAM_DEVICE_WIDTH_BYTE_IN_SPD = SVPD_JEDEC_BYTE_12;
+    constexpr uint8_t PACKAGE_RANKS_PER_DIMM_BYTE_IN_SPD = SVPD_JEDEC_BYTE_12;
 
     do
     {
-        l_sdramCapacityByteInSPD = SVPD_JEDEC_BYTE_4;
-        l_primaryBusWidthByteInSPD = SVPD_JEDEC_BYTE_13;
-        l_sdramDeviceWidthByteInSPD = SVPD_JEDEC_BYTE_12;
-        l_packageRanksPerDimmByteInSPD = SVPD_JEDEC_BYTE_12;
-
         /* Calculate SDRAM capacity */
-        l_tmp = i_jedec_vpd_ptr[l_sdramCapacityByteInSPD] &
-                SVPD_JEDEC_SDRAM_CAP_MASK;
+        l_tmp = i_jedec_vpd_ptr[SDRAM_CAPACITY_BYTE_IN_SPD] & SVPD_JEDEC_SDRAM_CAP_MASK;
 
         /* Make sure the bits are not Reserved */
         if(l_tmp > SVPD_JEDEC_SDRAMCAP_RESRVD)
         {
-            l_tmp = l_sdramCapacityByteInSPD;
+            l_tmp = SDRAM_CAPACITY_BYTE_IN_SPD;
             break;
         }
-        l_sdram_cap = (l_sdram_cap << l_tmp) *
-                SVPD_JEDEC_SDRAMCAP_MULTIPLIER;
+        l_sdram_cap = (l_sdram_cap << l_tmp) * SVPD_JEDEC_SDRAMCAP_MULTIPLIER;
 
         /* Calculate Primary bus width */
-        l_tmp = i_jedec_vpd_ptr[l_primaryBusWidthByteInSPD] &
-                SVPD_JEDEC_PRI_BUS_WID_MASK;
+        l_tmp = i_jedec_vpd_ptr[PRIMARY_BUS_WIDTH_BYTE_IN_SPD] & SVPD_JEDEC_PRI_BUS_WID_MASK;
         if(l_tmp > SVPD_JEDEC_RESERVED_BITS)
         {
-            l_tmp = l_primaryBusWidthByteInSPD;
+            l_tmp = PRIMARY_BUS_WIDTH_BYTE_IN_SPD;
             break;
         }
-        l_pri_bus_wid = (l_pri_bus_wid << l_tmp) *
-                SVPD_JEDEC_PRI_BUS_WID_MULTIPLIER;
+
+        l_pri_bus_wid = (l_pri_bus_wid << l_tmp) * SVPD_JEDEC_PRI_BUS_WID_MULTIPLIER;
 
         /* Calculate SDRAM width */
-        l_tmp = i_jedec_vpd_ptr[l_sdramDeviceWidthByteInSPD] &
-                SVPD_JEDEC_SDRAM_WID_MASK;
+        l_tmp = i_jedec_vpd_ptr[SDRAM_DEVICE_WIDTH_BYTE_IN_SPD] & SVPD_JEDEC_SDRAM_WID_MASK;
         if(l_tmp > SVPD_JEDEC_RESERVED_BITS)
         {
-            l_tmp = l_sdramDeviceWidthByteInSPD;
+            l_tmp = SDRAM_DEVICE_WIDTH_BYTE_IN_SPD;
             break;
         }
-        l_sdram_wid = (l_sdram_wid << l_tmp) *
-                SVPD_JEDEC_SDRAM_WID_MULTIPLIER;
+        l_sdram_wid = (l_sdram_wid << l_tmp) * SVPD_JEDEC_SDRAM_WID_MULTIPLIER;
 
         /*
          * Number of ranks is calculated differently for "Single load stack"
@@ -1552,343 +1948,326 @@ uint32_t  hdatCreateSzKeyWord(const char *i_jedec_vpd_ptr)
          *
          * */
 
-        l_tmp = i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_6]
-                                & SVPD_JEDEC_SIGNAL_LOADING_MASK;
+        l_tmp = i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_6] & SVPD_JEDEC_SIGNAL_LOADING_MASK;
 
         if(l_tmp == SVPD_JEDEC_SINGLE_LOAD_STACK)
         {
             //Fetch die count
-            l_tmp = i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_6]
-                                    & SVPD_JEDEC_DIE_COUNT_MASK;
+            l_tmp = i_jedec_vpd_ptr[SVPD_JEDEC_BYTE_6] & SVPD_JEDEC_DIE_COUNT_MASK;
 
             l_tmp >>= SVPD_JEDEC_DIE_COUNT_RIGHT_SHIFT;
             l_dieCount = l_tmp + 1;
         }
 
         /* Calculate Number of ranks */
-        l_tmp = i_jedec_vpd_ptr[l_packageRanksPerDimmByteInSPD] &
-                SVPD_JEDEC_NUM_RANKS_MASK;
+        l_tmp = i_jedec_vpd_ptr[PACKAGE_RANKS_PER_DIMM_BYTE_IN_SPD] & SVPD_JEDEC_NUM_RANKS_MASK;
 
         l_tmp >>= SVPD_JEDEC_RESERVED_BITS;
 
         if(l_tmp > SVPD_JEDEC_RESERVED_BITS)
         {
-            l_tmp = l_packageRanksPerDimmByteInSPD;
+            l_tmp = PACKAGE_RANKS_PER_DIMM_BYTE_IN_SPD;
             break;
         }
         l_logical_ranks_per_dimm = (l_tmp + 1) * l_dieCount;
 
-        l_tmp = (l_sdram_cap/SVPD_JEDEC_PRI_BUS_WID_MULTIPLIER) *
-                (l_pri_bus_wid/l_sdram_wid) * l_logical_ranks_per_dimm;
+        l_tmp = (l_sdram_cap/SVPD_JEDEC_PRI_BUS_WID_MULTIPLIER)
+              * (l_pri_bus_wid/l_sdram_wid)
+              * l_logical_ranks_per_dimm;
     }while(0);
 
     return l_tmp;
 }
 
-/******************************************************************************/
-// hdatConvertRawSpdToIpzFormat
-/******************************************************************************/
-errlHndl_t hdatConvertRawSpdToIpzFormat(
-    const uint32_t    i_rid,
-    const size_t      i_jedec_sz,
-    char              *&i_jedec_ptr,
-    size_t            &o_fmtkwdSize,
-    char              *&o_fmtKwd,
-    TARGETING::Target * i_target)
+/* @brief Generates the IPZ formatted DR and SZ keywords. The DR keyword relies on info contained in the SZ keyword so
+ *        that keyword is generated first. Then both keywords are appended to the given vector of IPZ VPD data.
+ *
+ * @param[in/out] io_ipzVpdData    The vector of VPD data to append these keywords to.
+ * @param[in]     i_rawSpdData     A pointer to the "raw" SPD data read from the dimm/ocmb target retrieved using
+ *                                 SPD::ENTIRE_SPD.
+ * @param[in]     i_rawSpdSize     The size of the "raw" SPD data.
+ *
+ */
+void generateIpzDrKeyword(std::vector<uint8_t> & io_ipzVpdData, const char * i_rawSpdData, const size_t i_rawSpdSize)
 {
-    errlHndl_t l_err = nullptr;
-    char     l_dr_str[SVPD_JEDEC_DR_KW_SIZE+1] = "       MB MEMORY";
-    char     l_sz_str[SVPD_JEDEC_SZ_KW_SIZE] = {'\0'};
-    bool     l_invalid_dimm = false;
-    bool     l_is_spd_template_present = true;
-    uint32_t l_spd_template_read_size =0;
-    uint32_t l_szValue = 0;
+        char     l_dr_str[VPD_DR_KEYWORD_SIZE+1] = "       MB MEMORY";
+        char     l_sz_str[VPD_SZ_KEYWORD_SIZE+1] = {'\0'};
+        uint32_t l_szValue = 0;
 
-    do
+        // Generate SZ keyword
+        l_szValue = hdatCreateSzKeyword(i_rawSpdData);
+        snprintf(l_sz_str, VPD_SZ_KEYWORD_SIZE+1, "%d", l_szValue);
+        HDAT_DBG("l_sz_str = %s with size = %d", l_sz_str, sizeof(l_sz_str));
+
+        // Generate DR keyword. It's just the size with "MB MEMORY" appended to it.
+        size_t szStrLength = strlen(l_sz_str);
+        memcpy(l_dr_str, l_sz_str, std::min(szStrLength, static_cast<size_t>(VPD_SZ_KEYWORD_SIZE)));
+        HDAT_DBG("l_dr_str = %s with size = %d", l_dr_str, sizeof(l_dr_str));
+
+        // Copy DR Keyword into buffer
+        copyKeywordIntoIpzVpdData(io_ipzVpdData,
+                                  VPD::DR,
+                                  VPD_DR_KEYWORD_SIZE,
+                                  reinterpret_cast<uint8_t *>(l_dr_str));
+
+        // Copy SZ Keyword into buffer
+        copyKeywordIntoIpzVpdData(io_ipzVpdData,
+                                  VPD::SZ,
+                                  VPD_SZ_KEYWORD_SIZE,
+                                  reinterpret_cast<uint8_t *>(l_sz_str));
+}
+
+/* @brief Generates the #I keyword and appends it to the IPZ VPD data.
+ *
+ * @param[in/out] io_ipzVpdData    The vector of VPD data to append this keyword to.
+ * @param[in]     i_rawSpdData     A pointer to the "raw" SPD data read from the dimm/ocmb target retrieved using
+ *                                 SPD::ENTIRE_SPD.
+ * @param[in]     i_rawSpdSize     The size of the "raw" SPD data.
+ *
+ */
+void generatePoundIKeyword(std::vector<uint8_t> & io_ipzVpdData,
+                           const char * i_rawSpdData,
+                           const size_t i_rawSpdSize)
+{
+    copyPoundKeywordIntoIpzVpdData(io_ipzVpdData,
+                                   VPD::POUND_I,
+                                   i_rawSpdSize,
+                                   reinterpret_cast<const uint8_t *>(i_rawSpdData));
+}
+
+/* @brief Generates the #A keyword and appends it to the IPZ VPD data.
+ *
+ * @param[in/out] io_ipzVpdData    The vector of VPD data to append this keyword to.
+ * @param[in]     i_target         The dimm/ocmb target to pull the #A keyword data from.
+ *
+ */
+void generatePoundAKeyword(std::vector<uint8_t> & io_ipzVpdData,
+                           Target * i_target)
+{
+
+    size_t keywordSize = 0;
+    errlHndl_t err = nullptr;
+
+    // Fetch the size
+    err = deviceRead( i_target,
+            nullptr,
+            keywordSize,
+            DEVICE_SPD_ADDRESS( SPD::DIMM_BAD_DQ_DATA ) );
+    if (err != nullptr)
     {
-        TARGETING::ATTR_MEM_MRW_IS_PLANAR_type isDimms = false;
-        if (!i_target->tryGetAttr<ATTR_MEM_MRW_IS_PLANAR>(isDimms))
-        {
-            isDimms = false;
-        }
-        HDAT_INF("hdatConvertRawSpdToIpzFormat HUID=0x%X isDimms=0x%X", TARGETING::get_huid(i_target), isDimms);
+        HDAT_INF("Could not read #A keyword size from target with HUID=0x%0.8X", get_huid(i_target));
+        delete err;
+        err = nullptr;
+        goto ERROR_EXIT;
+    }
 
+    {
+    uint8_t keywordData[keywordSize] = {0};
 
-        // Below code probes for the DIMM module and DIMM type from the raw SPD
-        // data. DDR4 module is supported for both DDIMM and ISDIMM.
-        // So if its a DDR5 module (VPD format is unknown now) or any other
-        // unknown types, we wont proceed further and return back.
-        if((i_jedec_ptr[SVPD_SPD_BYTE_THREE] == SVPD_DDIMM_MODULE_TYPE) ||
-           (i_jedec_ptr[SVPD_SPD_BYTE_THREE] == SVPD_PLANAR_MODULE_TYPE))
+    // Fetch the data
+    err = deviceRead( i_target,
+            keywordData,
+            keywordSize,
+            DEVICE_SPD_ADDRESS( SPD::DIMM_BAD_DQ_DATA ) );
+    if (err != nullptr)
+    {
+        HDAT_INF("Could not read #A keyword data from target with HUID=0x%0.8X", get_huid(i_target));
+        delete err;
+        err = nullptr;
+        goto ERROR_EXIT;
+    }
+
+    copyPoundKeywordIntoIpzVpdData(io_ipzVpdData,
+                                   VPD::POUND_A,
+                                   keywordSize,
+                                   keywordData);
+    }
+ERROR_EXIT:
+    return;
+}
+
+/*
+ * @brief Generates the IPZ formatted VPD for the given dimm/ocmb by various means. This function will only generate the
+ *        VINI and VSPD sections which is all HDAT needs for its purposes.
+ *
+ * @param[in/out] io_ipzVpdData    The vector of VPD data to append this keyword to.
+ * @param[in]     i_target         The dimm/ocmb target to pull data from.
+ */
+errlHndl_t generateIpzFormattedVpd(const uint32_t    i_rid,
+                                   std::vector<uint8_t> & io_ipzVpdData,
+                                   TARGETING::Target * i_target)
+{
+    // Data is pulled from the "raw" SPD from the target
+    size_t rawSpdSize = 0;
+    char * rawSpd = nullptr; // @TODO JIRA PFHB-387 Does this need to be deleted? Better name too
+    bool invalidDimm = false;
+    errlHndl_t errl = hdatFetchRawSpdData(i_target, rawSpdSize, rawSpd);
+    if ((errl != nullptr) || (rawSpd == nullptr))
+    {
+        HDAT_INF("Error getting raw SPD data for target HUID=0x%X with rid = %d", get_huid(i_target), i_rid);
+        goto ERROR_EXIT;
+    }
+
+    { // goto label scope
+
+    TARGETING::ATTR_MEM_MRW_IS_PLANAR_type isDimms = false;
+    if (!i_target->tryGetAttr<ATTR_MEM_MRW_IS_PLANAR>(isDimms))
+    {
+        isDimms = false;
+    }
+    HDAT_INF("hdatConvertRawSpdToIpzFormat HUID=0x%X isDimms=0x%X", TARGETING::get_huid(i_target), isDimms);
+    // Check for the DIMM module and DIMM type from the raw SPD data. Unsupported types will generate an error.
+    if((rawSpd[SVPD_SPD_BYTE_THREE] == SVPD_DDIMM_MODULE_TYPE) ||
+       (rawSpd[SVPD_SPD_BYTE_THREE] == SVPD_PLANAR_MODULE_TYPE))
+    {
+        if (rawSpd[SVPD_SPD_BYTE_TWO] == SVPD_DDR4_DEVICE_TYPE)
         {
-            // DDIMM path
-            if (i_jedec_ptr[SVPD_SPD_BYTE_TWO] == SVPD_DDR4_DEVICE_TYPE)
-            {
-                HDAT_DBG("Detected DDR4");
-            }
-            else if (i_jedec_ptr[SVPD_SPD_BYTE_TWO] == SVPD_DDR5_DEVICE_TYPE)
-            {
-                HDAT_DBG("Detected DDR5 DDIMM");
-            }
-            else
-            {
-                HDAT_DBG("Detected an unknown DDR type");
-                HDAT_ERR("Invalid Byte 2 value(0x%2X), Unable to "
-                         "determine DDR type for RID 0x%X.",
-                         i_jedec_ptr[SVPD_SPD_BYTE_TWO],
-                         i_rid);
-                l_invalid_dimm = true;
-            }
-            if(l_invalid_dimm == true)
-            {
-                /*@
-                 * @errortype
-                 * @refcode    LIC_REFCODE
-                 * @subsys     EPUB_FIRMWARE_SP
-                 * @reasoncode RC_INVALID_DIMM_MODULE
-                 * @moduleid   MOD_SPD_RAW_CONVERT_TO_IPZ_MODULE
-                 * @userdata1  resource id of fru
-                 * @userdata2  total raw spd keyword size
-                 * @userdata3  dimm type
-                 * @userdata4  none
-                 * @devdesc    Unable to determine the DIMM module from raw
-                 *             spd data
-                 * @custdesc   Firmware error detected for a non supported DIMM
-                 *             module while processing Vital Product Data
-                 *             for memory
-                 */
-                hdatBldErrLog(l_err,
-                      MOD_SPD_RAW_CONVERT_TO_IPZ_MODULE,   // SRC module ID
-                      RC_INVALID_DIMM_MODULE,              // SRC ext ref code
-                      i_rid,                               // SRC hex word 1
-                      i_jedec_sz,                          // SRC hex word 2
-                      i_jedec_ptr[SVPD_SPD_BYTE_THREE],    // SRC hex word 3
-                      0,                                   // SRC hex word 4
-                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-                return l_err;
-            }
+            HDAT_DBG("Detected DDR4");
         }
-        else if(i_jedec_ptr[SVPD_SPD_BYTE_THREE] == SVPD_ISDIMM_MODULE_TYPE)
+        else if (rawSpd[SVPD_SPD_BYTE_TWO] == SVPD_DDR5_DEVICE_TYPE)
         {
-            HDAT_DBG("hdatConvertRawSpdToIpzFormat i_jedec_ptr[SVPD_SPD_BYTE_THREE]=0x%X HUID=0x%X isDimms=0x%X",
-                      i_jedec_ptr[SVPD_SPD_BYTE_THREE], TARGETING::get_huid(i_target), isDimms);
+            HDAT_DBG("Detected DDR5 DDIMM");
         }
         else
         {
-            HDAT_ERR( "Invalid Byte 3 value(0x%2X), Unable to "
-                      "determine DIMM type for RID 0x%X.",
-                      i_jedec_ptr[SVPD_SPD_BYTE_THREE],
-                      i_rid);
+            HDAT_DBG("Detected an unknown DDR type");
+            HDAT_ERR("Invalid Byte 2 value(0x%2X), Unable to determine DDR type for target HUID=0x%X RID 0x%X.",
+                     rawSpd[SVPD_SPD_BYTE_TWO],
+                     get_huid(i_target),
+                     i_rid);
+            invalidDimm = true;
+        }
+        if(invalidDimm == true)
+        {
             /*@
              * @errortype
              * @refcode    LIC_REFCODE
              * @subsys     EPUB_FIRMWARE_SP
-             * @reasoncode RC_INVALID_DIMM_TYPE
-             * @moduleid   MOD_SPD_RAW_CONVERT_TO_IPZ_TYPE
+             * @reasoncode RC_INVALID_DIMM_MODULE
+             * @moduleid   MOD_SPD_RAW_CONVERT_TO_IPZ_MODULE
              * @userdata1  resource id of fru
              * @userdata2  total raw spd keyword size
              * @userdata3  dimm type
              * @userdata4  none
-             * @devdesc    Unable to determine the DIMM type from raw spd data
+             * @devdesc    Unable to determine the DIMM module from raw
+             *             spd data
              * @custdesc   Firmware error detected for a non supported DIMM
-             *             type while processing Vital Product Data for memory
+             *             module while processing Vital Product Data
+             *             for memory
              */
-            hdatBldErrLog(l_err,
-                      MOD_SPD_RAW_CONVERT_TO_IPZ_TYPE,     // SRC module ID
-                      RC_INVALID_DIMM_TYPE,                // SRC ext ref code
-                      i_rid,                               // SRC hex word 1
-                      i_jedec_sz,                          // SRC hex word 2
-                      i_jedec_ptr[SVPD_SPD_BYTE_THREE],    // SRC hex word 3
-                      0,                                   // SRC hex word 4
-                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-            return l_err;
+            hdatBldErrLog(errl,
+                  MOD_SPD_RAW_CONVERT_TO_IPZ_MODULE,   // SRC module ID
+                  RC_INVALID_DIMM_MODULE,              // SRC ext ref code
+                  i_rid,                               // SRC hex word 1
+                  rawSpdSize,                          // SRC hex word 2
+                  rawSpd[SVPD_SPD_BYTE_THREE],    // SRC hex word 3
+                  0,                                   // SRC hex word 4
+                  ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            goto ERROR_EXIT;
         }
-        HDAT_DBG("i_jedec_ptr[SVPD_SPD_BYTE_TWO]=0x%x",
-            i_jedec_ptr[SVPD_SPD_BYTE_TWO]);
-        HDAT_DBG("i_jedec_ptr[SVPD_SPD_BYTE_THREE]=0x%x",
-            i_jedec_ptr[SVPD_SPD_BYTE_THREE]);
+    }
+    else if(rawSpd[SVPD_SPD_BYTE_THREE] == SVPD_ISDIMM_MODULE_TYPE)
+    {
+        HDAT_DBG("hdatConvertRawSpdToIpzFormat rawSpd[SVPD_SPD_BYTE_THREE]=0x%X HUID=0x%X isDimms=0x%X",
+                  rawSpd[SVPD_SPD_BYTE_THREE], TARGETING::get_huid(i_target), isDimms);
+    }
+    else
+    {
+        HDAT_ERR( "Invalid Byte 3 value(0x%2X), Unable to determine DIMM type for target HUID=%X RID 0x%X.",
+                  rawSpd[SVPD_SPD_BYTE_THREE],
+                  get_huid(i_target),
+                  i_rid);
+        /*@
+         * @errortype
+         * @refcode    LIC_REFCODE
+         * @subsys     EPUB_FIRMWARE_SP
+         * @reasoncode RC_INVALID_DIMM_TYPE
+         * @moduleid   MOD_SPD_RAW_CONVERT_TO_IPZ_TYPE
+         * @userdata1  resource id of fru
+         * @userdata2  total raw spd keyword size
+         * @userdata3  dimm type
+         * @userdata4  none
+         * @devdesc    Unable to determine the DIMM type from raw spd data
+         * @custdesc   Firmware error detected for a non supported DIMM
+         *             type while processing Vital Product Data for memory
+         */
+        hdatBldErrLog(errl,
+                  MOD_SPD_RAW_CONVERT_TO_IPZ_TYPE,     // SRC module ID
+                  RC_INVALID_DIMM_TYPE,                // SRC ext ref code
+                  i_rid,                               // SRC hex word 1
+                  rawSpdSize,                          // SRC hex word 2
+                  rawSpd[SVPD_SPD_BYTE_THREE],    // SRC hex word 3
+                  0,                                   // SRC hex word 4
+                  ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        goto ERROR_EXIT;
+    }
 
-        TARGETING::ATTR_SERIAL_NUMBER_type l_SN = {'0'};
-        TARGETING::ATTR_PART_NUMBER_type l_PN = {'0'};
-        TARGETING::ATTR_FRU_CCIN_type l_CC = 0;
+    HDAT_DBG("rawSpd[SVPD_SPD_BYTE_TWO]=0x%x", rawSpd[SVPD_SPD_BYTE_TWO]);
+    HDAT_DBG("rawSpd[SVPD_SPD_BYTE_THREE]=0x%x", rawSpd[SVPD_SPD_BYTE_THREE]);
 
-        if (!(i_target->tryGetAttr<TARGETING::ATTR_FRU_CCIN>(l_CC)))
-        {
-            HDAT_INF("hdatConvertRawSpdToIpzFormat PROBLEM retrieving ATTR_FRU_CCIN HUID=0x%X", TARGETING::get_huid(i_target));
-        }
-        if (!(i_target->tryGetAttr<TARGETING::ATTR_SERIAL_NUMBER>(l_SN)))
-        {
-            HDAT_INF("hdatConvertRawSpdToIpzFormat PROBLEM retrieving ATTR_SERIAL_NUMBER HUID=0x%X", TARGETING::get_huid(i_target));
-        }
-        if (!(i_target->tryGetAttr<TARGETING::ATTR_PART_NUMBER>(l_PN)))
-        {
-            HDAT_INF("hdatConvertRawSpdToIpzFormat PROBLEM retrieving ATTR_PART_NUMBER HUID=0x%X", TARGETING::get_huid(i_target));
-        }
+    // The set of keywords for this record
+    constexpr std::array<VPD::VPD_ASCII_KEYWORD_NAME, 17> FILLED_VINI_KEYWORDS
+    {
+        VPD::RT,
+        VPD::SZ, // No-op, DR will fill this since it depends on it. Listed for completeness
+        VPD::DR,
+        VPD::CC,
+        VPD::SN,
+        VPD::PN,
+        VPD::FN, // Same as PN
+        VPD::CE,
+        VPD::VZ,
+        VPD::HE,
+        VPD::CT,
+        VPD::HW,
+        VPD::B3,
+        VPD::B4,
+        VPD::B7,
+        VPD::PR,
+        VPD::PF,
+    };
+    // Must have RT and PF keywords in the front and back of the array respectively. Otherwise the record will
+    // not be generated properly.
+    static_assert((FILLED_VINI_KEYWORDS.front() == VPD::RT) && (FILLED_VINI_KEYWORDS.back() == VPD::PF),
+                 "RT or PF out of order for FILLED_VINI_KEYWORDS");
 
-        /* Synthesize SZ */
-        l_szValue = hdatCreateSzKeyWord(i_jedec_ptr);
-        sprintf(l_sz_str, "%d", l_szValue);
-        HDAT_DBG("l_sz_str = %s with size = %d",l_sz_str, sizeof(l_sz_str));
+    // Start with an empty vector
+    io_ipzVpdData.clear();
+    for (const auto keyword : FILLED_VINI_KEYWORDS)
+    {
+        generateIpzFormattedKeyword(io_ipzVpdData, i_target, VPD::VINI, keyword, rawSpd, rawSpdSize);
+    }
 
-        /* Synthesize DR */
-        memcpy(l_dr_str,l_sz_str,SVPD_JEDEC_SZ_KW_SIZE);
-        HDAT_DBG("l_dr_str = %s with size = %d",l_dr_str, sizeof(l_dr_str));
+    constexpr std::array<VPD::VPD_ASCII_KEYWORD_NAME, 4> FILLED_VSPD_KEYWORDS
+    {
+        VPD::RT,
+        VPD::POUND_I,
+        VPD::POUND_A,
+        VPD::PF
+    };
+    // Must have RT and PF keywords in the front and back of the array respectively. Otherwise the record will
+    // not be generated properly.
+    static_assert((FILLED_VSPD_KEYWORDS.front() == VPD::RT) && (FILLED_VSPD_KEYWORDS.back() == VPD::PF),
+                 "RT or PF out of order for FILLED_VSPD_KEYWORDS");
 
-        UtilFile l_dimmIpzFile ("spd_ipz_template.dat");
-        if ( !l_dimmIpzFile.exists())
-        {
-            HDAT_ERR("The dimm vpd ipz file template is not found");
-            l_is_spd_template_present = false;
-        }
-        else
-        {
-            l_err = l_dimmIpzFile.open("r");
-            do{
-            if (l_err)
-            {
-                HDAT_DBG("File open of spd_ipz_template.dat failed");
-                break;
-            }
+    std::vector<uint8_t> VSPD_record;
+    for (const auto keyword: FILLED_VSPD_KEYWORDS)
+    {
+        generateIpzFormattedKeyword(VSPD_record, i_target, VPD::VSPD, keyword, rawSpd, rawSpdSize);
+    }
 
-            o_fmtkwdSize = l_dimmIpzFile.size();
-            HDAT_DBG("o_fmtkwdSize size = %d",o_fmtkwdSize);
-            if ( o_fmtkwdSize == 0 )
-            {
-                HDAT_DBG("No templated spd data present");
-                l_err = l_dimmIpzFile.close();
-                if (l_err)
-                {
-                    HDAT_DBG("File close of spd_ipz_template.dat failed");
-                }
-                break;
-            }
-
-            o_fmtKwd = new char [o_fmtkwdSize]();
-            l_spd_template_read_size =
-                 l_dimmIpzFile.read((void *)&o_fmtKwd[0],o_fmtkwdSize);
-            if (l_spd_template_read_size == 0)
-            {
-                HDAT_DBG("File read of spd_ipz_template.dat failed");
-                break;
-            }
-            l_err = l_dimmIpzFile.close();
-            if (l_err)
-            {
-                HDAT_DBG("File close of spd_ipz_template.dat failed");
-            }
-            }while(0);
-        }
-
-        if (l_err || (l_is_spd_template_present == false) )
-        {
-            HDAT_ERR( "Error in processing spd_ipz_template.dat file for"
-                      " RID 0x%X. Size tried to read = %d",
-                      i_rid, o_fmtkwdSize);
-            /*@
-             * @errortype
-             * @refcode    LIC_REFCODE
-             * @subsys     EPUB_FIRMWARE_SP
-             * @reasoncode RC_SPD_IPZ_TEMPLATE_PROCESS_FAIL
-             * @moduleid   MOD_SPD_TO_IPZ_CONVERT_TEMPLATE
-             * @userdata1  resource id of fru
-             * @userdata2  total raw spd keyword size
-             * @userdata3  spd template size from file.read()
-             * @userdata4  spd ipz template data from file.size()
-             * @devdesc    Unable to process the spd ipz template file
-             * @custdesc   Firmware error detected while converting the Vital
-             *             Product Data for memory to IPZ format
-             */
-            hdatBldErrLog(l_err,
-                      MOD_SPD_TO_IPZ_CONVERT_TEMPLATE,     // SRC module ID
-                      RC_SPD_IPZ_TEMPLATE_PROCESS_FAIL,    // SRC ext ref code
-                      i_rid,                               // SRC hex word 1
-                      i_jedec_sz,                          // SRC hex word 2
-                      l_spd_template_read_size,            // SRC hex word 3
-                      o_fmtkwdSize,                        // SRC hex word 4
-                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-            return l_err;
-        }
-        // If we are here we have a template
-        // src/usr/hdat/spd_ipz_template.dat
-        uint16_t template_I_sz = le16toh(*(reinterpret_cast<const uint16_t* const>(&o_fmtKwd[SVPD_I_BLK_SZ_OFFSET])));
-        uint16_t template_A_sz = le16toh(*(reinterpret_cast<const uint16_t* const>(&o_fmtKwd[SVPD_A_BLK_SZ_OFFSET])));
-        uint16_t template_B_sz = le16toh(*(reinterpret_cast<const uint16_t* const>(&o_fmtKwd[SVPD_B_BLK_SZ_OFFSET])));
-        HDAT_INF("hdatConvertRawSpdToIpzFormat template_I_sz=0x%X template_A_sz=0x%X template_B_sz=0x%X",
-                 template_I_sz, template_A_sz, template_B_sz);
-        /****************** Synthesize VINI Block ******************/
-
-        // Copy CC keyword from Attribute
-        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_CC_KW_OFFSET]),
-            &l_CC, std::min( (static_cast<uint16_t>(sizeof(l_CC))), (static_cast<uint16_t>(SVPD_JEDEC_CC_KW_SIZE))));
-
-        // Copy FN keyword (FN and PN values same) from Attribute
-        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_FN_KW_OFFSET]),
-            l_PN, std::min( (static_cast<uint16_t>(sizeof(l_PN))), (static_cast<uint16_t>(SVPD_FN_KW_SIZE))));
-
-        // Copy PN keyword (PN and FN values same) from Attribute
-        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_PN_KW_OFFSET]),
-            l_PN, std::min( (static_cast<uint16_t>(sizeof(l_PN))), (static_cast<uint16_t>(SVPD_PN_KW_SIZE))));
-
-        // Copy SN keyword from Attribute
-        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_SN_KW_OFFSET]),
-            l_SN, std::min( (static_cast<uint16_t>(sizeof(l_SN))), (static_cast<uint16_t>(SVPD_SN_KW_SIZE))));
-
-        // Copy SZ keyword
-        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_SZ_KW_OFFSET]),l_sz_str,
-            SVPD_JEDEC_SZ_KW_SIZE);
-
-        // Copy DR keyword
-        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_DR_KW_OFFSET]),l_dr_str,
-            SVPD_JEDEC_DR_KW_SIZE);
-
-        // See src/usr/hdat/spd_ipz_template.dat for the mapping of data,
-        // 000000a0  50 44 23 49 00 10 00 00  00 00 00 00 00 00 00 00  |PD#I............|  <= #I size=0x1000 (4096)
-        // ^ offset                ^ little endian
-        // byte 160
-        //           #define SVPD_I_BLK_SZ_OFFSET 164
-        //           #define SVPD_I_BLK_OFFSET    166
-
-        /* Synthesize #I KW of VSPD Block                        */
-        /* i_jedec_sz will be properly set, i.e. SPD::ENTIRE_SPD */
-        memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_I_BLK_OFFSET]),
-            &i_jedec_ptr[0],
-            std::min(template_I_sz, static_cast<uint16_t>(i_jedec_sz)));
-
-        if (!isDimms) // ISDIMMs are only 512 bytes in total size
-        {
-            /****************** Synthesize VSPD Block ******************/
-
-            /* Synthesize #A (RBS, Redundant Bit Sterring) KW of VSPD Block */
-            /* (copy offset 640-1023, 384 bytes of VPD for DDIMM) */
-            memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_A_BLK_OFFSET]),
-                   &i_jedec_ptr[DDIMM_SPD_EMP_OFFSET],
-                   std::min(template_A_sz, static_cast<uint16_t>(DDIMM_SPD_EMP_SZ)));
-
-            /* Synthesize #B KW of VSPD Block */
-            /* (copy offset 3072-4095, 1024 bytes of VPD for DDIMM) */
-            /* Data copy is only carried out if we get the fully supported*/
-            /* size of 4096 bytes, other wise value remains zero */
-            if (i_jedec_sz == DDIMM_SPD_SZ)
-            {
-                memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_B_BLK_OFFSET]),
-                       &i_jedec_ptr[DDIMM_SPD_EUP_OFFSET],
-                       std::min(template_B_sz, static_cast<uint16_t>(DDIMM_SPD_EUP_SZ)));
-            }
-        }
-        else
-        {
-            /****************** Synthesize VSPD Block ******************/
-
-            /* Synthesize #A (RBS, Redundant Bit Sterring) KW of VSPD Block */
-            /* (copy offset 384-511, 128 bytes of VPD for ISDIMM) */
-            memcpy(reinterpret_cast<void *>(&o_fmtKwd[SVPD_A_BLK_OFFSET]),
-                &i_jedec_ptr[SVPD_DDR4_RBS_OFFSET],
-                std::min(template_A_sz, static_cast<uint16_t>(SVPD_DDR4_RBS_SZ)));
-        }
-
-      /********************  Done with Conversion ***********************/
-    }while(false);
-    return l_err;
+    // Add the VSPD to the full VPD data
+    io_ipzVpdData.insert(io_ipzVpdData.end(),
+                         VSPD_record.begin(),
+                         VSPD_record.end());
+    }
+ERROR_EXIT:
+    if (rawSpd != nullptr)
+    {
+        delete [] rawSpd;
+        rawSpd = nullptr;
+    }
+    return errl;
 }
 
 void hdatGetTarget (const hdatSpiraDataAreas i_dataArea,

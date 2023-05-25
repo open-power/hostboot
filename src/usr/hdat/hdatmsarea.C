@@ -62,7 +62,7 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
                             char *&i_kwd)
 
 : HdatHdif(o_errlHndl,HDAT_MSAREA_STRUCT_NAME,HDAT_MS_AREA_LAST,cv_actualCnt++,
-    HDAT_MS_AREA_CHILD_LAST,HDAT_MS_AREA_VERSION), 
+    HDAT_MS_AREA_CHILD_LAST,HDAT_MS_AREA_VERSION),
   iv_kwdSize(i_kwdSize),
   iv_maxAddrRngCnt(HDAT_MAX_ADDR_RNG_ENTRIES), iv_maxEcCnt(HDAT_MAX_EC_ENTRIES),
   iv_maxRamCnt(i_ramCnt), iv_actRamCnt(0), iv_maxRamObjSize(0), iv_kwd(NULL),
@@ -89,7 +89,7 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
     //But for Cumulus/Centaur based systems, we need to get the actual data
     iv_msId.hdatFsiDevicePathLen = 0;
     memset(iv_msId.hdatFsiDevicePath, 0x00, 64);
-  
+
     iv_addrRngArrayHdr.hdatOffset    = sizeof(hdatHDIFDataArray_t);
     iv_addrRngArrayHdr.hdatArrayCnt  = 0;
     iv_addrRngArrayHdr.hdatAllocSize = sizeof(hdatMsAreaAddrRange_t);
@@ -106,44 +106,26 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
     iv_ecArrayHdr.hdatActSize   = sizeof(hdatEcLvl_t);
     l_slcaIdx = i_slcaIdx;
 
-    size_t o_rawKwdSize = 0;
-    size_t o_fmtKwdSize = 0;
+    std::vector<uint8_t> ipzVpdData;
+    size_t ipzVpdSize = 0;
     do
     {
-        // Get the ASCII keyword
-        char *o_rawKwd = nullptr;
-        char *o_fmtKwd = nullptr;
 
-        o_errlHndl = hdatFetchRawSpdData(i_target,o_rawKwdSize, o_rawKwd);
-        if( o_errlHndl )
-        {
-            HDAT_ERR("MS Error in getting raw SPD data for OCMB with "
-            "rid  = %d", iv_fru.hdatResourceId);
-            break;
-        }
-
-        o_errlHndl = hdatConvertRawSpdToIpzFormat(iv_fru.hdatResourceId,
-             o_rawKwdSize, o_rawKwd, o_fmtKwdSize, o_fmtKwd, i_target);
-        HDAT_INF("MS o_rawKwdSize = %d, o_fmtKwdSize = %d",
-            o_rawKwdSize, o_fmtKwdSize);
+        o_errlHndl = generateIpzFormattedVpd(iv_fru.hdatResourceId, ipzVpdData, i_target);
         if( o_errlHndl )
         {
             break;
         }
 
-        if( o_rawKwd != nullptr )
+        if( ipzVpdData.size() )
         {
+            ipzVpdSize = ipzVpdData.size();
             // Padding extra 8 bytes to keep data alignment similar to FSP
             // data
-            iv_kwd = new char [o_fmtKwdSize + 8];
-            memcpy(iv_kwd,o_fmtKwd,o_fmtKwdSize);
-            iv_kwdSize = o_fmtKwdSize + 8;
+            iv_kwd = new char [ipzVpdSize + 8];
+            memcpy(iv_kwd, ipzVpdData.data(), ipzVpdSize);
+            iv_kwdSize = ipzVpdSize + 8;
             HDAT_INF("MS iv_kwdSize = %d", iv_kwdSize);
-            if( o_fmtKwd != nullptr )
-            {
-                delete[] o_fmtKwd;
-                o_fmtKwd = nullptr;
-            }
         }
     }while(0);
 
@@ -158,7 +140,7 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
          * @reasoncode RC_OCMB_IPZ_CONVERT_FAIL
          * @moduleid   MOD_ADD_MS_AREA_IPZ_VPD
          * @userdata1  resource id of ocmb chip
-         * @userdata2  total raw spd keyword size of ocmb chip
+         * @userdata2  unused
          * @userdata3  total ipz keyword size of ocmb chip
          * @userdata4  ID number of mainstore area
          * @devdesc    Failed trying to convert the raw spd data for ocmb chip
@@ -169,8 +151,8 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
                       MOD_ADD_MS_AREA_IPZ_VPD,             // SRC module ID
                       RC_OCMB_IPZ_CONVERT_FAIL,            // SRC ext ref code
                       iv_fru.hdatResourceId,               // SRC hex word 1
-                      o_rawKwdSize,                        // SRC hex word 2
-                      o_fmtKwdSize,                        // SRC hex word 3
+                      0,                                   // SRC hex word 2
+                      ipzVpdSize,                          // SRC hex word 3
                       iv_msId.hdatMsAreaId,                // SRC hex word 4
                       ERRORLOG::ERRL_SEV_UNRECOVERABLE);
     }
@@ -227,7 +209,7 @@ HdatMsArea::~HdatMsArea()
         l_curPtr = reinterpret_cast<HdatRam **>(reinterpret_cast<char*>(l_curPtr)
                     + sizeof(HdatRam *));
     }
-    
+
     delete[] iv_kwd;
     delete[] iv_addrRange;
     delete[] iv_ecLvl;
@@ -511,7 +493,7 @@ errlHndl_t HdatMsArea::addRam(HdatRam &i_ram)
                   RC_ERC_MAX_EXCEEDED,  // SRC extended reference code
                   iv_actRamCnt,           // SRC hex word 1
                   iv_maxRamCnt,           // SRC hex word 2
-                  iv_msId.hdatMsAreaId);  // SRC hex word 3 
+                  iv_msId.hdatMsAreaId);  // SRC hex word 3
     }
     HDAT_EXIT();
     return l_errlHndl;
@@ -711,8 +693,8 @@ void HdatMsArea::commitRamAreas(UtilMem &i_data)
 
     // Write the RAM structures
     if (iv_actRamCnt > 0)
-    {      
-        l_cnt = 0; 
+    {
+        l_cnt = 0;
         while (l_cnt < iv_actRamCnt)
         {
             l_ramObj = *(reinterpret_cast<HdatRam **>(reinterpret_cast<char*>

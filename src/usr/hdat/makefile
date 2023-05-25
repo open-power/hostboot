@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2022
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -29,20 +29,6 @@ MODULE = hdat
 EXTRAINCDIR += ../vpd
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 EXTRAINCDIR += ../util
-
-# spd_ipz_template.dat contains a pre-defined template which depicts the
-# IPZ formatted memory info (DDIMM). It contains the size and offsets for
-# required keywords like RT, PN, SN etc under VINI record. Template also
-# contains VSPD keyword blocks for #I, #A and #B with in specified offsets.
-# So in HDAT, each of the Ms Area (filled from ocmb chip) or RAM area
-# (filled from ddimm) contains the VPD data in the IPZ format and data is
-# filled up by parsing the raw SPD data from each memory resource.
-${ROOTPATH}/img/spd_ipz_template.dat:
-	cp spd_ipz_template.dat ${ROOTPATH}/img/spd_ipz_template.dat
-
-code_pass: ${ROOTPATH}/img/spd_ipz_template.dat
-
-EXTRA_PARTS = ${ROOTPATH}/img/spd_ipz_template.dat
 
 OBJS += hdatutil.o
 OBJS += hdatpcia.o

@@ -51,9 +51,6 @@
 #include <vpd/spdenums.H>
 #include <devicefw/driverif.H>
 #include <targeting/common/predicates/predicatectm.H>
-#include "../vpd/mvpd.H"
-#include "../vpd/ipvpd.H"
-#include "../vpd/pvpd.H"
 #include <i2c/i2cif.H>
 #include <targeting/common/hbrt_target.H>
 #include <spi/spi.H>
@@ -72,34 +69,6 @@ using namespace SPI;
 const uint16_t HDAT_VERSION1 = 1;
 const uint16_t HDAT_VERSION2 = 2;
 const uint16_t HDAT_VERSION3 = 3;
-
-// SPD IPZ template file (spd_ipz_template.dat) conatins the offsets for each
-// of the key words. There are pre-defined start offsets in spd_ipz_template.dat
-// file where each of the key word or the VSPD data block are being filled with
-// the values fetched from raw SPD data.
-// Caution : In future if any change occurs in the VPD format template or when a
-// need arises to add or delete keywords, then below mentioned offsets needs to
-// be re-evaluated and re-assigned to get the proper formatting of the IPZ data.
-#define SVPD_CC_KW_OFFSET                   37
-#define SVPD_FN_KW_OFFSET                   48
-#define SVPD_PN_KW_OFFSET                   58
-#define SVPD_SN_KW_OFFSET                   68
-#define SVPD_SZ_KW_OFFSET                   94
-#define SVPD_DR_KW_OFFSET                   13
-#define SVPD_I_BLK_SZ_OFFSET                164
-#define SVPD_I_BLK_OFFSET                   166
-#define SVPD_A_BLK_SZ_OFFSET                4264
-#define SVPD_A_BLK_OFFSET                   4266
-#define SVPD_B_BLK_SZ_OFFSET                5292
-#define SVPD_B_BLK_OFFSET                   5294
-
-// SPD IPZ keyword sizes
-const uint8_t  SVPD_SN_KW_SIZE = 12; /**< FRU Serial Number size */
-const uint8_t  SVPD_PN_KW_SIZE =  7; /**< FRU Part Number size */
-const uint8_t  SVPD_FN_KW_SIZE =  7; /**< FRU Fru Number size */
-const uint8_t  SVPD_JEDEC_CC_KW_SIZE = 4; /**< FRU CCIN size */
-const uint8_t  SVPD_JEDEC_SZ_KW_SIZE = 7;
-const uint8_t  SVPD_JEDEC_DR_KW_SIZE = 16;
 
 // JEDEC format specific constants
 #define SVPD_JEDEC_RESERVED                 0x08
@@ -129,10 +98,6 @@ const uint8_t  SVPD_JEDEC_DR_KW_SIZE = 16;
 #define SVPD_JEDEC_SINGLE_LOAD_STACK        0x02
 #define SVPD_JEDEC_SIGNAL_LOADING_MASK      0x03
 #define SVPD_JEDEC_DIE_COUNT_RIGHT_SHIFT    4
-
-// 384-511 #A RBS (Redundant Bit Steering)
-#define SVPD_DDR4_RBS_SZ                            128
-#define SVPD_DDR4_RBS_OFFSET                        384
 
 // Bytes 416~445 OEM Supplemental Information
 
@@ -173,14 +138,6 @@ const uint8_t  SVPD_JEDEC_DR_KW_SIZE = 16;
 #define DDIMM_SPD_BYTE_439                          439
 #define DDIMM_SPD_BYTE_440                          440
 #define DDIMM_SPD_BYTE_441                          441
-
-// Common defines
-#define DDIMM_SPD_START_OFFSET                      0
-#define DDIMM_SPD_SZ                                4096
-#define DDIMM_SPD_EMP_OFFSET                        640
-#define DDIMM_SPD_EMP_SZ                            384
-#define DDIMM_SPD_EUP_OFFSET                        3072
-#define DDIMM_SPD_EUP_SZ                            1024
 
 // IBM specific defines
 #define IBM_SPECIFIC_DDR4_NVDIMM                    0x91
@@ -647,36 +604,17 @@ errlHndl_t hdatFetchRawSpdData(
                            size_t&o_kwdSize,
                            char* &o_kwd);
 
-/**
- * @brief  Create the SZ keyword for the specific DDIMM
- *
- * @param[in] i_jedec_vpd_ptr: Raw SPD keyword data
- *
- * @return the SZ keyword value (Memory size in MB)
- *
- */
-uint32_t hdatCreateSzKeyWord(const char *i_jedec_vpd_ptr);
 
-/**
- * @brief  Convert the raw SPD data to IPZ formatted keyword data
+/*
+ * @brief Generates the IPZ formatted VPD for the given DIMM by various means. This function will only generate the VINI
+ *        and VSPD sections which is all HDAT needs for its purposes.
  *
- * @param[in] i_rid: RID number of the FRU
- * @param[in] i_jedec_sz: Raw SPD keyword data size
- * @param[in] i_jedec_ptr: Raw SPD keyword data
- * @param[out] o_fmtkwdSize: IPZ Formatted keyword data size
- * @param[out] o_fmtKwd: IPZ Formatted keyword data
- * @param[in] i_target Target for PN/FN/SN/CCIN attributes
- *
- * @return errlHndl_t NULL on success
- *
+ * @param[in/out] io_ipzVpdData    The vector of VPD data to append this keyword to.
+ * @param[in]     i_target         The dimm target to pull data from.
  */
-errlHndl_t hdatConvertRawSpdToIpzFormat(
-    const uint32_t    i_rid,
-    const size_t      i_jedec_sz,
-    char              *&i_jedec_ptr,
-    size_t            &o_fmtkwdSize,
-    char              *&o_fmtKwd,
-    TARGETING::Target * i_target);
+errlHndl_t generateIpzFormattedVpd(const uint32_t    i_rid,
+                                   std::vector<uint8_t> & io_ipzVpdData,
+                                   TARGETING::Target * i_target);
 
 /**
  * @brief Get the Max Cec nde count

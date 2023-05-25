@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -174,4 +174,26 @@ enum HDATReasonCode
 };
 
 }  //namespace HDAT
+
+//*****************************************************
+// SRC Graveyard
+// Contains error log descriptions for SRCs that were
+// removed from the code but we need to still provide
+// backward compatible parser logic for.
+
+/*@
+* @errortype
+* @refcode    LIC_REFCODE
+* @subsys     EPUB_FIRMWARE_SP
+* @reasoncode RC_SPD_IPZ_TEMPLATE_PROCESS_FAIL
+* @moduleid   MOD_SPD_TO_IPZ_CONVERT_TEMPLATE
+* @userdata1  resource id of fru
+* @userdata2  total raw spd keyword size
+* @userdata3  spd template size from file.read()
+* @userdata4  spd ipz template data from file.size()
+* @devdesc    Unable to process the spd ipz template file
+* @custdesc   Firmware error detected while converting the Vital
+*             Product Data for memory to IPZ format
+*/
+
 #endif // HDATSERVICECODES_H
