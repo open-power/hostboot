@@ -2479,6 +2479,118 @@ class ddimm_0_0 : public mss::efd::base
         }
 
         ///
+        /// @brief Set the VREF CA MAX operatiing point field
+        ///
+        /// @param[in] i_efd EFD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_dram_vrefca_sweep_max(const std::vector<uint8_t>& i_efd) const
+        {
+            uint8_t l_vrefca_sweep_max;
+
+            // Documentation: DDR5 Published spec 10-2021 JESD79-5A
+            // Vref_max: 97.5%
+            // MAX Value encoding for 97.5% is 00000000
+            l_vrefca_sweep_max = 0;
+            // =========================================================
+            // EFD Byte:
+            // Attribute: ATTR_MEM_EFF_DDR5_VREFCA_SWEEP_MAX
+            // MODE REG: MR11
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 157-158
+            // =========================================================
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_vrefca_sweep_max(iv_port, l_vrefca_sweep_max));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the VREF CA MIN operating field
+        ///
+        /// @param[in] i_efd EFD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_dram_vrefca_sweep_min(const std::vector<uint8_t>& i_efd) const
+        {
+            uint8_t l_vrefca_sweep_min;
+
+            // Documentation: DDR5 Published spec 10-2021 JESD79-5A
+            // Vref_min: 45%
+            // MIN Value encoding for 45% is 01101001
+            l_vrefca_sweep_min = 0x69;
+            // =========================================================
+            // EFD Byte:
+            // Attribute: ATTR_MEM_EFF_DDR5_VREFCA_SWEEP_MIN
+            // MODE REG: MR11
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 157-158
+            // =========================================================
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_vrefca_sweep_min(iv_port, l_vrefca_sweep_min));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the VREF CS MAX operatiing point field
+        ///
+        /// @param[in] i_efd EFD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_dram_vrefcs_sweep_max(const std::vector<uint8_t>& i_efd) const
+        {
+            uint8_t l_vrefcs_sweep_max;
+
+            // Documentation: DDR5 Published spec 10-2021 JESD79-5A
+            // Vref_max: 97.5%
+            // MAX Value encoding for 97.5% is 00000000
+            l_vrefcs_sweep_max = 0;
+            // =========================================================
+            // EFD Byte:
+            // Attribute: ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MAX
+            // MODE REG: MR11
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 157-158
+            // =========================================================
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_vrefcs_sweep_max(iv_port, l_vrefcs_sweep_max));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the VREF CA MIN operating field
+        ///
+        /// @param[in] i_efd EFD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_dram_vrefcs_sweep_min(const std::vector<uint8_t>& i_efd) const
+        {
+            uint8_t l_vrefcs_sweep_min;
+
+            // Documentation: DDR5 Published spec 10-2021 JESD79-5A
+            // Vref_min: 45%
+            // MIN Value encoding for 45% is 01101001
+            l_vrefcs_sweep_min = 0x69;
+            // =========================================================
+            // EFD Byte:
+            // Attribute: ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MIN
+            // MODE REG: MR11
+            // DDR5 DDIMM SPD Document Release 1.21
+            // Page 157-158
+            // =========================================================
+            // Set the attr
+            FAPI_TRY(mss::attr::set_ddr5_vrefcs_sweep_min(iv_port, l_vrefcs_sweep_min));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
         /// @brief Set the VREF CA field
         ///
         /// @param[in] i_efd EFD binary
@@ -3924,6 +4036,10 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY(set_odtloff_wr_nt(i_efd));
             FAPI_TRY(set_odtlon_rd_nt(i_efd));
             FAPI_TRY(set_odtloff_rd_nt(i_efd));
+            FAPI_TRY(set_dram_vrefca_sweep_max(i_efd));
+            FAPI_TRY(set_dram_vrefca_sweep_min(i_efd));
+            FAPI_TRY(set_dram_vrefcs_sweep_max(i_efd));
+            FAPI_TRY(set_dram_vrefcs_sweep_min(i_efd));
             FAPI_TRY(set_dram_vrefca(i_efd));
             FAPI_TRY(set_dram_vrefcs(i_efd));
 
