@@ -210,9 +210,8 @@ define def_RD_PREAMBLE       =  (MP.ATTR_MEM_SI_DRAM_PREAMBLE[0][0] & 0x10) >> 4
 # DRAM TIMING PARAMETERS #
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRDM_DLY [when=S] {      # BL/2+rank_switch
-  spyv, expr;
-  14,                                 (OCMB.ATTR_MEM_MRW_IS_PLANAR==1);
-  8,                                  (OCMB.ATTR_MEM_MRW_IS_PLANAR==0); # Update per performance testing as of 07-JUL-21
+  spyv;
+  8; # Update per performance testing as of 07-JUL-21
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RRSMSR_DLY [when=S] {    # tccd_s
@@ -255,7 +254,7 @@ ispy  MB_SIM.SRQ.MBA_TMR0Q_RWDM_DLY [when=S] {      # (RL+BL/2+turn_around)-WL
   12,                                 (OCMB.ATTR_MEM_MRW_IS_PLANAR==0 && def_MEM_EFF_FREQ_EQ_2666==1);
   15,                                 (OCMB.ATTR_MEM_MRW_IS_PLANAR==0 && def_MEM_EFF_FREQ_EQ_2933==1);
   14,                                 (OCMB.ATTR_MEM_MRW_IS_PLANAR==0 && def_MEM_EFF_FREQ_EQ_3200==1);
-  21,                                 (OCMB.ATTR_MEM_MRW_IS_PLANAR==1);
+  16,                                 (OCMB.ATTR_MEM_MRW_IS_PLANAR==1);
 }
 
 ispy  MB_SIM.SRQ.MBA_TMR0Q_RWSMSR_DLY [when=S] {    # (RL+BL/2+turn_around)-WL
@@ -400,30 +399,35 @@ ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WRCSLAT_DLY [when=S] {         # ATTR_MEM_EFF_DIM
 }
 
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WRDONE_DLY [when=S] {
-  spyv;
-  24;
+  spyv, expr;
+  24, (OCMB.ATTR_MEM_MRW_IS_PLANAR==0);
+  33, (OCMB.ATTR_MEM_MRW_IS_PLANAR==1);
 }
 
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RODT_START_DLY [when=S] {
-  spyv;
+  spyv, expr;
   # CL - CWL
-  MP.ATTR_MEM_EFF_DRAM_CL - MP.ATTR_MEM_DRAM_CWL + def_RDIMM_Add_latency;
+  MP.ATTR_MEM_EFF_DRAM_CL - MP.ATTR_MEM_DRAM_CWL + def_RDIMM_Add_latency, (OCMB.ATTR_MEM_MRW_IS_PLANAR==0);
+  MP.ATTR_MEM_EFF_DRAM_CL - MP.ATTR_MEM_DRAM_CWL,                         (OCMB.ATTR_MEM_MRW_IS_PLANAR==1);
 }
 
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_RODT_END_DLY [when=S] {
-  spyv;
+  spyv, expr;
   # CL - CWL + BL/2 + 1
-  MP.ATTR_MEM_EFF_DRAM_CL - MP.ATTR_MEM_DRAM_CWL + 5 + def_RDIMM_Add_latency;
+  MP.ATTR_MEM_EFF_DRAM_CL - MP.ATTR_MEM_DRAM_CWL + 5 + def_RDIMM_Add_latency, (OCMB.ATTR_MEM_MRW_IS_PLANAR==0);
+  MP.ATTR_MEM_EFF_DRAM_CL - MP.ATTR_MEM_DRAM_CWL + 5,                         (OCMB.ATTR_MEM_MRW_IS_PLANAR==1);
 }
 
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WODT_START_DLY [when=S] {
-  spyv;
-   0 + def_RDIMM_Add_latency;
+  spyv, expr;
+  0 + def_RDIMM_Add_latency,                (OCMB.ATTR_MEM_MRW_IS_PLANAR==0);
+  0,                                        (OCMB.ATTR_MEM_MRW_IS_PLANAR==1);
 }
 
 ispy  MB_SIM.SRQ.MBA_DSM0Q_CFG_WODT_END_DLY [when=S] {
-  spyv;
-   5 + def_RDIMM_Add_latency;
+  spyv, expr;
+  5 + def_RDIMM_Add_latency,                (OCMB.ATTR_MEM_MRW_IS_PLANAR==0);
+  5,                                        (OCMB.ATTR_MEM_MRW_IS_PLANAR==1);
 }
 
 #  FARB0 SCOM REGISTER   #
