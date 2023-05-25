@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,5 +60,6 @@ static const uint64_t EXP_DDR4_PHY_MASTER0_LCDLDBGCNTL_LCDLFINESNAP            =
 static const uint64_t EXP_DDR4_PHY_MASTER0_LCDLDBGCNTL_LCDLSTATUSSEL           = 63 - 15;
 static const uint64_t EXP_DDR4_PHY_MASTER0_LCDLDBGCNTL_LCDLSTATUSSEL_LEN       = 4;
 static const uint64_t EXP_DDR4_PHY_MASTER0_MEMALERTCONTROL_MALERTRXEN          = 63 - 13;
+static const uint64_t EXP_DDR4_PHY_MASTER0_MEMALERTCONTROL2_MALERTSTNCBYPASS   = 63;
 
 #endif

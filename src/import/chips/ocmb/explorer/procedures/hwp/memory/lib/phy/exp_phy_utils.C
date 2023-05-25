@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,6 +95,40 @@ fapi2::ReturnCode disable_alert_n(const fapi2::Target<fapi2::TARGET_TYPE_MEM_POR
     // Clear MEMALERTCONTROL
     l_data.clearBit<EXP_DDR4_PHY_MASTER0_MEMALERTCONTROL_MALERTRXEN>();
     FAPI_TRY(fapi2::putScom(i_target, EXP_DDR4_PHY_MASTER0_MEMALERTCONTROL, l_data));
+
+    FAPI_TRY(mss::exp::phy::configure_phy_access(i_target, mss::states::OFF_N));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enable async drive of the ALERT_N receiver in MCHP PHY for planar
+///
+/// @param[in] i_target MEM_PORT target
+/// @param[in] i_is_planar true if this is a planar system
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode enable_alert_n_sync_bypass(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_is_planar)
+{
+    // Skips this functionality if the system is not planar
+    if(i_is_planar == fapi2::ENUM_ATTR_MEM_MRW_IS_PLANAR_FALSE)
+    {
+        FAPI_INF("%s is not in a planar system. Skipping alert_n sync bypass enable", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    fapi2::buffer<uint64_t> l_data;
+
+    // Need to enable PHY access in order to scom the PHY regs
+    FAPI_TRY(mss::exp::phy::configure_phy_access(i_target, mss::states::ON_N));
+
+    FAPI_TRY(fapi2::getScom(i_target, EXP_DDR4_PHY_MASTER0_MEMALERTCONTROL2, l_data));
+
+    // Set MALERTSTNCBYPASS
+    l_data.setBit<EXP_DDR4_PHY_MASTER0_MEMALERTCONTROL2_MALERTSTNCBYPASS>();
+    FAPI_TRY(fapi2::putScom(i_target, EXP_DDR4_PHY_MASTER0_MEMALERTCONTROL2, l_data));
 
     FAPI_TRY(mss::exp::phy::configure_phy_access(i_target, mss::states::OFF_N));
 

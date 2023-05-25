@@ -226,9 +226,11 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::EXPLORER>( const fapi2::
     FAPI_TRY(mss::attr::get_mem_mrw_is_planar(i_target, l_is_planar));
 
     // Post-draminit: disable alert N bit on MASTER0_MEMALERTCONTROL
+    // and enable async drive of alert N on MASTER0_MEMALERTCONTROL2 if we're planar
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
         FAPI_TRY(mss::exp::phy::disable_alert_n(l_port, l_is_planar));
+        FAPI_TRY(mss::exp::phy::enable_alert_n_sync_bypass(l_port, l_is_planar));
     }
 
     FAPI_TRY(l_rc1, "unable to create fir::reg for EXPLR_MCBIST_MCBISTFIRQ 0x%08X", EXPLR_MCBIST_MCBISTFIRQ);

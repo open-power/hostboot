@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,16 @@ fapi2::ReturnCode configure_phy_access(const fapi2::Target<fapi2::TARGET_TYPE_ME
 ///
 fapi2::ReturnCode disable_alert_n(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                   const uint8_t i_is_planar);
+
+///
+/// @brief Enable async drive of the ALERT_N receiver in MCHP PHY for planar
+///
+/// @param[in] i_target MEM_PORT target
+/// @param[in] i_is_planar true if this is a planar system
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode enable_alert_n_sync_bypass(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_is_planar);
 
 } // phy
 } // exp
