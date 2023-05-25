@@ -456,6 +456,7 @@ ReturnCode SbeAttributFileParser::parseFile(uint8_t* i_buf, uint16_t i_size)
         {
             uint32_t l_num_targs = be32toh(l_header->iv_numTargets);
             uint8_t* l_cur_ptr = i_buf + sizeof(HeaderEntry_t);
+            uint16_t l_size    = i_size - sizeof(HeaderEntry_t);
 
             FAPI_DBG("Number of target sections : %d", l_num_targs);
 
@@ -463,7 +464,7 @@ ReturnCode SbeAttributFileParser::parseFile(uint8_t* i_buf, uint16_t i_size)
             {
                 iv_target_sections.emplace_back((SbeAttributeFileHandler*)this);
                 FAPI_TRY(static_cast<SbeAttrTargetSectionParser&>(
-                             iv_target_sections.back()).parse(&l_cur_ptr, &i_size));
+                             iv_target_sections.back()).parse(&l_cur_ptr, &l_size));
             }
         }
     }
