@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -701,6 +701,12 @@ fapi2::ReturnCode pba_start(
 
     // Setup the topology id tables for PBA
     FAPI_TRY(init_topo_id_tables(i_target, l_topo_scoms));
+
+    // Enable the use of topology id tables
+    PREP_TP_TPBR_PBA_PBAO_PBAOCFG(i_target);
+    l_data64.flush<0>();
+    SET_TP_TPBR_PBA_PBAO_PBAOCFG_CHSW_USE_TOPOLOGY_ID_SCOPE(1, l_data64);
+    FAPI_TRY(PUT_TP_TPBR_PBA_PBAO_PBAOCFG(i_target, l_data64));
 
     // Perform PBA Slave setup to prepare for the runtime phase.
     FAPI_TRY(pba_slave_setup(i_target, PBA_RUNTIME));
