@@ -165,6 +165,13 @@ class Handler
             }
         };
 
+        if (handlers.contains(key))
+        {
+            error("The eid:InstanceID {EID}:{IID} is using.", "EID",
+                  (unsigned)eid, "IID", (unsigned)instanceId);
+            return PLDM_ERROR;
+        }
+
         auto request = std::make_unique<RequestInterface>(
             fd, eid, event, std::move(requestMsg), numRetries, responseTimeOut,
             currentSendbuffSize, verbose);
