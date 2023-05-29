@@ -41,10 +41,6 @@ static const char *lpc_path = "/dev/aspeed-lpc-ctrl";
 
 #endif
 
-// Workaround for libmctp since it assumes it picks up
-// the definition of the abstraction to mark a function unused
-#define __unused __attribute__((__unused__))
-
 enum mctp_astlpc_cmd {
 	cmd_initialise = 0x00,
 	cmd_tx_begin = 0x01,
@@ -1489,7 +1485,7 @@ struct mctp_binding_astlpc *mctp_astlpc_init_fileio(void)
 #else
 struct mctp_binding_astlpc *mctp_astlpc_init_fileio(void)
 {
-	// Missing support for file IO
+	mctp_prlog(MCTP_LOG_ERR, "%s: Missing support for file IO", __func__);
 	return NULL;
 }
 
