@@ -263,6 +263,20 @@
     </callout>
   </hwpError>
 
+   <hwpError>
+    <rc>RC_PMIC_NOT_DDR5_REVISION</rc>
+    <description>
+       The PMIC revision value did not match TI REV 23 or greater.
+       Exiting to avoid applying DDR5 only procedures.
+    </description>
+    <ffdc>PMIC_REVISION</ffdc>
+    <ffdc>PMIC_TARGET</ffdc>
+    <callout>
+      <target>PMIC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
   <hwpError>
     <rc>RC_VIN_BULK_BELOW_TOLERANCE</rc>
     <description>

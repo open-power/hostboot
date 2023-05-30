@@ -497,6 +497,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
 ///
 /// @brief Check number of pmics received for 2U. If < 2, then throw an error
 ///
