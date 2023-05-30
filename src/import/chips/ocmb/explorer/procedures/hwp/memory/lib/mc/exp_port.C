@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,7 +170,7 @@ void get_bw_snapshot<mss::mc_type::EXPLORER>( const fapi2::buffer<uint64_t>& i_d
 }
 
 ///
-/// @brief Helper for setting rcd protection time to minimum of DSM0Q_WRDONE_DLY & DSM0Q_RDTAG_DLY
+/// @brief Helper for setting rcd protection time for planar RDIMM
 /// @param [in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 
@@ -178,23 +178,13 @@ fapi2::ReturnCode config_exp_rcd_protect_time (const fapi2::Target<fapi2::TARGET
 {
     using TT = portTraits<mss::mc_type::EXPLORER>;
 
-    uint64_t l_rdtag_dly = 0;
-    uint64_t l_wrdone_dly = 0;
-    uint64_t l_rcd_prtct_time = 0;
+    // Hardcoded per characterization tests
+    const uint64_t l_rcd_prtct_time = 0x20;
 
-    fapi2::buffer<uint64_t> l_data;
     fapi2::buffer<uint64_t> l_farb0q_data;
-
-    //Get RDTAG and WRDONE dly values from DSM0Q [36:41] and [24:29] respectively
-    FAPI_TRY(fapi2::getScom(i_target, EXPLR_SRQ_MBA_DSM0Q, l_data));
-    l_data.extractToRight<TT::DSM0Q_RDTAG_DLY, TT::DSM0Q_RDTAG_DLY_LEN>(l_rdtag_dly);
-    l_data.extractToRight<TT::DSM0Q_WRDONE_DLY, TT::DSM0Q_WRDONE_DLY_LEN>(l_wrdone_dly);
 
     // Get previous value of FARB0Q
     FAPI_TRY(fapi2::getScom(i_target, EXPLR_SRQ_MBA_FARB0Q, l_farb0q_data));
-
-    // Find lower of two delay values
-    l_rcd_prtct_time = std::min(l_rdtag_dly, l_wrdone_dly);
 
     // Configure FARB0Q protect time to reflect
     l_farb0q_data.insertFromRight<TT::FARB0Q_RCD_PROTECTION_TIME, TT::FARB0Q_RCD_PROTECTION_TIME_LEN>(l_rcd_prtct_time);
