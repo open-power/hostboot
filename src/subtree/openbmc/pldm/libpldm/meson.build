@@ -1,6 +1,7 @@
 project('libpldm', ['c','cpp'],
     default_options: [
-      'buildtype=debugoptimized',
+      'debug=true',
+      'optimization=g',
       'warning_level=3',
       'werror=true',
       'cpp_std=c++20',
@@ -62,6 +63,48 @@ configure_file(output: 'config.h',
 
 if get_option('tests').enabled()
   subdir('tests')
+
+  c_suite = meson.get_compiler('c').get_id()
+  cpp_suite = meson.get_compiler('cpp').get_id()
+
+  if get_option('abi-compliance-check').allowed() and c_suite == cpp_suite and c_suite == 'gcc'
+    host = host_machine.cpu_family()
+    baseline_dump = meson.project_source_root() / 'abi' / host / '@0@.dump'.format(c_suite)
+
+    abi_dumper = find_program('abi-dumper',
+                              native: true,
+                              required: get_option('abi-compliance-check'))
+    abi_compliance_checker = find_program('abi-compliance-checker',
+                                          native: true,
+                                          required: get_option('abi-compliance-check'))
+
+    test_abi_compliance = abi_dumper.found() and \
+                          abi_compliance_checker.found() and \
+                          import('fs').is_file(baseline_dump)
+
+    current_dump = custom_target('abi-dump',
+                             input: libpldm,
+                             output: 'current.dump',
+                             command: [ abi_dumper,
+                                        '-public-headers',
+                                        meson.project_source_root() / 'include',
+                                        '@INPUT@',
+                                        '-o',
+                                        '@OUTPUT@',
+                                        '-lver',
+                                        meson.project_version()])
+    abi_compliance = custom_target('abi-compliance',
+                                   input: [baseline_dump, current_dump],
+                                   output: 'abi-compliance',
+                                   command: [ abi_compliance_checker,
+                                              '-l',
+                                              meson.project_name(),
+                                              '-old',
+                                              '@INPUT0@',
+                                              '-new',
+                                              '@INPUT1@' ],
+                                   build_by_default: test_abi_compliance)
+  endif
 endif
 
 install_subdir('instance-db',

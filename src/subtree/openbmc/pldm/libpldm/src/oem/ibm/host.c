@@ -16,7 +16,7 @@ int encode_get_alert_status_req(uint8_t instance_id, uint8_t version_id,
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -51,7 +51,7 @@ int decode_get_alert_status_resp(const struct pldm_msg *msg,
 	}
 
 	struct pldm_get_alert_status_resp *response =
-	    (struct pldm_get_alert_status_resp *)msg->payload;
+		(struct pldm_get_alert_status_resp *)msg->payload;
 
 	*rack_entry = le32toh(response->rack_entry);
 	*pri_cec_node = le32toh(response->pri_cec_node);
@@ -87,7 +87,7 @@ int encode_get_alert_status_resp(uint8_t instance_id, uint8_t completion_code,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -98,7 +98,7 @@ int encode_get_alert_status_resp(uint8_t instance_id, uint8_t completion_code,
 	}
 
 	struct pldm_get_alert_status_resp *response =
-	    (struct pldm_get_alert_status_resp *)msg->payload;
+		(struct pldm_get_alert_status_resp *)msg->payload;
 
 	response->completion_code = completion_code;
 	response->rack_entry = htole32(rack_entry);

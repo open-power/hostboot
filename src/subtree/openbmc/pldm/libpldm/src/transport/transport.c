@@ -3,10 +3,15 @@
 #include "libpldm/requester/pldm.h"
 #include "transport.h"
 
+#include <errno.h>
+#include <limits.h>
 #ifdef PLDM_HAS_POLL
 #include <poll.h>
 #endif
+#include <stdbool.h>
 #include <stdlib.h>
+#include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 #ifndef PLDM_HAS_POLL
@@ -76,7 +81,7 @@ pldm_requester_rc_t pldm_transport_recv_msg(struct pldm_transport *transport,
 	}
 
 	pldm_requester_rc_t rc =
-	    transport->recv(transport, tid, pldm_resp_msg, resp_msg_len);
+		transport->recv(transport, tid, pldm_resp_msg, resp_msg_len);
 	if (rc != PLDM_REQUESTER_SUCCESS) {
 		return rc;
 	}
@@ -98,33 +103,108 @@ pldm_requester_rc_t pldm_transport_recv_msg(struct pldm_transport *transport,
 	return PLDM_REQUESTER_SUCCESS;
 }
 
+static void timespec_to_timeval(const struct timespec *ts, struct timeval *tv)
+{
+	tv->tv_sec = ts->tv_sec;
+	tv->tv_usec = ts->tv_nsec / 1000;
+}
+
+/* Overflow safety must be upheld before call */
+static long timeval_to_msec(const struct timeval *tv)
+{
+	return tv->tv_sec * 1000 + tv->tv_usec / 1000;
+}
+
+/* If calculations on `tv` don't overflow then operations on derived
+ * intervals can't either.
+ */
+static bool timeval_is_valid(const struct timeval *tv)
+{
+	if (tv->tv_sec < 0 || tv->tv_usec < 0 || tv->tv_usec >= 1000000) {
+		return false;
+	}
+
+	if (tv->tv_sec > (LONG_MAX - tv->tv_usec / 1000) / 1000) {
+		return false;
+	}
+
+	return true;
+}
+
+static int clock_gettimeval(clockid_t clockid, struct timeval *tv)
+{
+	struct timespec now;
+	int rc;
+
+	rc = clock_gettime(clockid, &now);
+	if (rc < 0) {
+		return rc;
+	}
+
+	timespec_to_timeval(&now, tv);
+
+	return 0;
+}
+
 pldm_requester_rc_t
 pldm_transport_send_recv_msg(struct pldm_transport *transport, pldm_tid_t tid,
 			     const void *pldm_req_msg, size_t req_msg_len,
 			     void **pldm_resp_msg, size_t *resp_msg_len)
 
 {
+	/**
+	 * Section "Requirements for requesters" in DSP0240, define the Time-out
+	 * waiting for a response of the requester.
+	 * PT2max = PT3min - 2*PT4max = 4800ms
+	 */
+	static const struct timeval max_response_interval = {
+		.tv_sec = 4, .tv_usec = 800000
+	};
+	struct timeval remaining;
+	struct timeval now;
+	struct timeval end;
+	pldm_requester_rc_t rc;
+	int ret;
+
 	if (!resp_msg_len) {
 		return PLDM_REQUESTER_INVALID_SETUP;
 	}
 
-	pldm_requester_rc_t rc =
-	    pldm_transport_send_msg(transport, tid, pldm_req_msg, req_msg_len);
+	rc = pldm_transport_send_msg(transport, tid, pldm_req_msg, req_msg_len);
 	if (rc != PLDM_REQUESTER_SUCCESS) {
 		return rc;
 	}
 
-	while (1) {
-		rc = pldm_transport_poll(transport, -1);
+	ret = clock_gettimeval(CLOCK_MONOTONIC, &now);
+	if (ret < 0) {
+		return PLDM_REQUESTER_POLL_FAIL;
+	}
+
+	timeradd(&now, &max_response_interval, &end);
+	if (!timeval_is_valid(&end)) {
+		return PLDM_REQUESTER_POLL_FAIL;
+	}
+
+	do {
+		timersub(&end, &now, &remaining);
+		/* 0 <= `timeval_to_msec()` <= 4800, and 4800 < INT_MAX */
+		rc = pldm_transport_poll(transport,
+					 (int)(timeval_to_msec(&remaining)));
 		if (rc != PLDM_REQUESTER_SUCCESS) {
-			break;
+			return rc;
 		}
+
 		rc = pldm_transport_recv_msg(transport, tid, pldm_resp_msg,
 					     resp_msg_len);
 		if (rc == PLDM_REQUESTER_SUCCESS) {
-			break;
+			return rc;
 		}
-	}
 
-	return rc;
+		ret = clock_gettimeval(CLOCK_MONOTONIC, &now);
+		if (ret < 0) {
+			return PLDM_REQUESTER_POLL_FAIL;
+		}
+	} while (!timercmp(&now, &end, <));
+
+	return PLDM_REQUESTER_RECV_FAIL;
 }

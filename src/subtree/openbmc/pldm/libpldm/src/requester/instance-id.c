@@ -10,7 +10,7 @@
 
 #define BIT(i) (1UL << (i))
 
-#define PLDM_TID_MAX 256
+#define PLDM_TID_MAX	 256
 #define PLDM_INST_ID_MAX 32
 
 /* We need to track our allocations explicitly due to OFD lock merging/splitting
@@ -98,14 +98,14 @@ int pldm_instance_id_alloc(struct pldm_instance_db *ctx, pldm_tid_t tid,
 			   pldm_instance_id_t *iid)
 {
 	static const struct flock cfls = {
-	    .l_type = F_RDLCK,
-	    .l_whence = SEEK_SET,
-	    .l_len = 1,
+		.l_type = F_RDLCK,
+		.l_whence = SEEK_SET,
+		.l_len = 1,
 	};
 	static const struct flock cflx = {
-	    .l_type = F_WRLCK,
-	    .l_whence = SEEK_SET,
-	    .l_len = 1,
+		.l_type = F_WRLCK,
+		.l_whence = SEEK_SET,
+		.l_len = 1,
 	};
 	uint8_t l_iid;
 
@@ -186,9 +186,9 @@ int pldm_instance_id_free(struct pldm_instance_db *ctx, pldm_tid_t tid,
 			  pldm_instance_id_t iid)
 {
 	static const struct flock cflu = {
-	    .l_type = F_UNLCK,
-	    .l_whence = SEEK_SET,
-	    .l_len = 1,
+		.l_type = F_UNLCK,
+		.l_whence = SEEK_SET,
+		.l_len = 1,
 	};
 	struct flock flop;
 	int rc;

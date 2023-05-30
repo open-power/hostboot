@@ -27,7 +27,7 @@ int encode_bios_attribute_update_event_req(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -38,7 +38,7 @@ int encode_bios_attribute_update_event_req(uint8_t instance_id,
 	}
 
 	struct pldm_bios_attribute_update_event_req *request =
-	    (struct pldm_bios_attribute_update_event_req *)msg->payload;
+		(struct pldm_bios_attribute_update_event_req *)msg->payload;
 	request->format_version = format_version;
 	request->tid = tid;
 	request->event_class = PLDM_EVENT_TYPE_OEM_EVENT_BIOS_ATTRIBUTE_UPDATE;

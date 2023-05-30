@@ -30,10 +30,10 @@ endif
 if get_option('requester-api').enabled()
    libpldm_headers += files(
     'instance-id.h',
-    'requester/pldm.h'
+    'requester/pldm.h',
+    'transport.h'
     )
    libpldm_transport_headers += files(
-    'transport.h',
     'transport/af-mctp.h',
     'transport/mctp-demux.h'
    )

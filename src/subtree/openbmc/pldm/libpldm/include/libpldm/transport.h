@@ -18,6 +18,11 @@ struct pldm_transport;
  * 	PLDM_REQUESTER_INVALID_SETUP is returned. This should be called after
  * 	pldm_transport_send_msg has been called.
  *
+ * @param[in] transport - Wait until this transport instance is ready
+ * @param[in] timeout - Wait for readiness for up to timeout milliseconds.
+ *            Specifying a timeout value of zero yields an immediate return.
+ *            Specifying a negative value means an indefinite timeout.
+ *
  * @return pldm_requester_rc_t (errno may be set)
  */
 pldm_requester_rc_t pldm_transport_poll(struct pldm_transport *transport,

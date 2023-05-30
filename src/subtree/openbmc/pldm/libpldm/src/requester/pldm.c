@@ -31,7 +31,8 @@ pldm_requester_rc_t pldm_open(void)
 	int rc;
 
 	if (open_transport) {
-		return -1;
+		fd = pldm_transport_mctp_demux_get_socket_fd(open_transport);
+		return fd;
 	}
 
 	struct pldm_transport_mctp_demux *demux = NULL;
@@ -50,39 +51,39 @@ pldm_requester_rc_t pldm_open(void)
 /* This macro does the setup and teardown required for the old API to use the
  * new API. Since the setup/teardown logic is the same for all four send/recv
  * functions, it makes sense to only define it once. */
-#define PLDM_REQ_FN(eid, fd, fn, ...)                                          \
-	do {                                                                   \
-		struct pldm_transport_mctp_demux *demux;                       \
-		bool using_open_transport = false;                             \
-		pldm_requester_rc_t rc;                                        \
-		pldm_tid_t tid = 1;                                            \
-		struct pldm_transport *ctx;                                    \
+#define PLDM_REQ_FN(eid, fd, fn, ...)                                            \
+	do {                                                                     \
+		struct pldm_transport_mctp_demux *demux;                         \
+		bool using_open_transport = false;                               \
+		pldm_requester_rc_t rc;                                          \
+		pldm_tid_t tid = 1;                                              \
+		struct pldm_transport *ctx;                                      \
 		/* The fd can be for a socket we opened or one the consumer    \
-		 * opened. */                                                  \
-		if (open_transport &&                                          \
-		    mctp_fd == pldm_transport_mctp_demux_get_socket_fd(        \
-				   open_transport)) {                          \
-			using_open_transport = true;                           \
-			demux = open_transport;                                \
-		} else {                                                       \
-			demux = pldm_transport_mctp_demux_init_with_fd(fd);    \
-			if (!demux) {                                          \
-				rc = PLDM_REQUESTER_OPEN_FAIL;                 \
-				goto transport_out;                            \
-			}                                                      \
-		}                                                              \
-		ctx = pldm_transport_mctp_demux_core(demux);                   \
-		rc = pldm_transport_mctp_demux_map_tid(demux, tid, eid);       \
-		if (rc) {                                                      \
-			rc = PLDM_REQUESTER_OPEN_FAIL;                         \
-			goto transport_out;                                    \
-		}                                                              \
-		rc = fn(ctx, tid, __VA_ARGS__);                                \
-	transport_out:                                                         \
-		if (!using_open_transport) {                                   \
-			pldm_transport_mctp_demux_destroy(demux);              \
-		}                                                              \
-		return rc;                                                     \
+		 * opened. */ \
+		if (open_transport &&                                            \
+		    mctp_fd == pldm_transport_mctp_demux_get_socket_fd(          \
+				       open_transport)) {                        \
+			using_open_transport = true;                             \
+			demux = open_transport;                                  \
+		} else {                                                         \
+			demux = pldm_transport_mctp_demux_init_with_fd(fd);      \
+			if (!demux) {                                            \
+				rc = PLDM_REQUESTER_OPEN_FAIL;                   \
+				goto transport_out;                              \
+			}                                                        \
+		}                                                                \
+		ctx = pldm_transport_mctp_demux_core(demux);                     \
+		rc = pldm_transport_mctp_demux_map_tid(demux, tid, eid);         \
+		if (rc) {                                                        \
+			rc = PLDM_REQUESTER_OPEN_FAIL;                           \
+			goto transport_out;                                      \
+		}                                                                \
+		rc = fn(ctx, tid, __VA_ARGS__);                                  \
+	transport_out:                                                           \
+		if (!using_open_transport) {                                     \
+			pldm_transport_mctp_demux_destroy(demux);                \
+		}                                                                \
+		return rc;                                                       \
 	} while (0)
 
 pldm_requester_rc_t pldm_recv_any(mctp_eid_t eid, int mctp_fd,
@@ -97,7 +98,7 @@ pldm_requester_rc_t pldm_recv(mctp_eid_t eid, int mctp_fd,
 			      uint8_t **pldm_resp_msg, size_t *resp_msg_len)
 {
 	pldm_requester_rc_t rc =
-	    pldm_recv_any(eid, mctp_fd, pldm_resp_msg, resp_msg_len);
+		pldm_recv_any(eid, mctp_fd, pldm_resp_msg, resp_msg_len);
 	struct pldm_msg_hdr *hdr = (struct pldm_msg_hdr *)(*pldm_resp_msg);
 	if (hdr->instance_id != instance_id) {
 		free(*pldm_resp_msg);
@@ -125,7 +126,7 @@ pldm_requester_rc_t pldm_send(mctp_eid_t eid, int mctp_fd,
 
 /* Adding this here for completeness in the case we can't smoothly
  * transition apps over to the new api */
-void pldm_close()
+void pldm_close(void)
 {
 	if (open_transport) {
 		pldm_transport_mctp_demux_destroy(open_transport);

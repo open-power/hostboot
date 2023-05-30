@@ -23,10 +23,10 @@ static int pldm_platform_pdr_hdr_validate(struct pldm_value_pdr_hdr *ctx,
 }
 
 int encode_state_effecter_pdr(
-    struct pldm_state_effecter_pdr *const effecter,
-    const size_t allocation_size,
-    const struct state_effecter_possible_states *const possible_states,
-    const size_t possible_states_size, size_t *const actual_size)
+	struct pldm_state_effecter_pdr *const effecter,
+	const size_t allocation_size,
+	const struct state_effecter_possible_states *const possible_states,
+	const size_t possible_states_size, size_t *const actual_size)
 {
 	// Encode possible states
 
@@ -38,13 +38,14 @@ int encode_state_effecter_pdr(
 
 		for (int i = 0; i < effecter->composite_effecter_count; ++i) {
 			struct state_effecter_possible_states *states =
-			    (struct state_effecter_possible_states *)states_ptr;
+				(struct state_effecter_possible_states *)
+					states_ptr;
 
 			HTOLE16(states->state_set_id);
 
 			states_ptr +=
-			    (sizeof(*states) - sizeof(states->states) +
-			     states->possible_states_size);
+				(sizeof(*states) - sizeof(states->states) +
+				 states->possible_states_size);
 		}
 
 		calculated_possible_states_size = states_ptr - begin_states_ptr;
@@ -58,8 +59,8 @@ int encode_state_effecter_pdr(
 	}
 
 	*actual_size =
-	    (sizeof(struct pldm_state_effecter_pdr) + possible_states_size -
-	     sizeof(effecter->possible_states));
+		(sizeof(struct pldm_state_effecter_pdr) + possible_states_size -
+		 sizeof(effecter->possible_states));
 
 	if (allocation_size < *actual_size) {
 		*actual_size = 0;
@@ -92,9 +93,10 @@ int encode_state_effecter_pdr(
 }
 
 int encode_state_sensor_pdr(
-    struct pldm_state_sensor_pdr *const sensor, const size_t allocation_size,
-    const struct state_sensor_possible_states *const possible_states,
-    const size_t possible_states_size, size_t *const actual_size)
+	struct pldm_state_sensor_pdr *const sensor,
+	const size_t allocation_size,
+	const struct state_sensor_possible_states *const possible_states,
+	const size_t possible_states_size, size_t *const actual_size)
 {
 	// Encode possible states
 
@@ -106,13 +108,14 @@ int encode_state_sensor_pdr(
 
 		for (int i = 0; i < sensor->composite_sensor_count; ++i) {
 			struct state_sensor_possible_states *states =
-			    (struct state_sensor_possible_states *)states_ptr;
+				(struct state_sensor_possible_states *)
+					states_ptr;
 
 			HTOLE16(states->state_set_id);
 
 			states_ptr +=
-			    (sizeof(*states) - sizeof(states->states) +
-			     states->possible_states_size);
+				(sizeof(*states) - sizeof(states->states) +
+				 states->possible_states_size);
 		}
 
 		calculated_possible_states_size = states_ptr - begin_states_ptr;
@@ -164,7 +167,7 @@ int encode_set_state_effecter_states_resp(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -184,8 +187,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 					 uint16_t effecter_id,
 					 uint8_t comp_effecter_count,
 					 set_effecter_state_field *field,
-					 struct pldm_msg *msg,
-                                         size_t payload_length)
+					 struct pldm_msg *msg)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -196,11 +198,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	if (payload_length < PLDM_SET_STATE_EFFECTER_STATES_REQ_BYTES ) {
-		return PLDM_ERROR_INVALID_LENGTH;
-	}
-
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -212,7 +210,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 	}
 
 	struct pldm_set_state_effecter_states_req *request =
-	    (struct pldm_set_state_effecter_states_req *)msg->payload;
+		(struct pldm_set_state_effecter_states_req *)msg->payload;
 	effecter_id = htole16(effecter_id);
 	request->effecter_id = effecter_id;
 	request->comp_effecter_count = comp_effecter_count;
@@ -328,7 +326,7 @@ int encode_get_pdr_resp(uint8_t instance_id, uint8_t completion_code,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -340,13 +338,13 @@ int encode_get_pdr_resp(uint8_t instance_id, uint8_t completion_code,
 	}
 
 	struct pldm_get_pdr_resp *response =
-	    (struct pldm_get_pdr_resp *)msg->payload;
+		(struct pldm_get_pdr_resp *)msg->payload;
 	response->completion_code = completion_code;
 
 	if (response->completion_code == PLDM_SUCCESS) {
 		response->next_record_handle = htole32(next_record_hndl);
 		response->next_data_transfer_handle =
-		    htole32(next_data_transfer_hndl);
+			htole32(next_data_transfer_hndl);
 		response->transfer_flag = transfer_flag;
 		response->response_count = htole16(resp_cnt);
 		if (record_data != NULL && resp_cnt > 0) {
@@ -354,8 +352,8 @@ int encode_get_pdr_resp(uint8_t instance_id, uint8_t completion_code,
 		}
 		if (transfer_flag == PLDM_END) {
 			uint8_t *dst = msg->payload;
-			dst +=
-			    (sizeof(struct pldm_get_pdr_resp) - 1) + resp_cnt;
+			dst += (sizeof(struct pldm_get_pdr_resp) - 1) +
+			       resp_cnt;
 			*dst = transfer_crc;
 		}
 	}
@@ -364,17 +362,17 @@ int encode_get_pdr_resp(uint8_t instance_id, uint8_t completion_code,
 }
 
 int encode_get_pdr_repository_info_resp(
-    uint8_t instance_id, uint8_t completion_code, uint8_t repository_state,
-    const uint8_t *update_time, const uint8_t *oem_update_time,
-    uint32_t record_count, uint32_t repository_size,
-    uint32_t largest_record_size, uint8_t data_transfer_handle_timeout,
-    struct pldm_msg *msg)
+	uint8_t instance_id, uint8_t completion_code, uint8_t repository_state,
+	const uint8_t *update_time, const uint8_t *oem_update_time,
+	uint32_t record_count, uint32_t repository_size,
+	uint32_t largest_record_size, uint8_t data_transfer_handle_timeout,
+	struct pldm_msg *msg)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -386,7 +384,7 @@ int encode_get_pdr_repository_info_resp(
 	}
 
 	struct pldm_pdr_repository_info_resp *response =
-	    (struct pldm_pdr_repository_info_resp *)msg->payload;
+		(struct pldm_pdr_repository_info_resp *)msg->payload;
 	response->completion_code = completion_code;
 
 	if (response->completion_code == PLDM_SUCCESS) {
@@ -403,17 +401,18 @@ int encode_get_pdr_repository_info_resp(
 		response->repository_size = htole32(repository_size);
 		response->largest_record_size = htole32(largest_record_size);
 		response->data_transfer_handle_timeout =
-		    data_transfer_handle_timeout;
+			data_transfer_handle_timeout;
 	}
 
 	return PLDM_SUCCESS;
 }
 
 int decode_get_pdr_repository_info_resp(
-    const struct pldm_msg *msg, size_t payload_length, uint8_t *completion_code,
-    uint8_t *repository_state, uint8_t *update_time, uint8_t *oem_update_time,
-    uint32_t *record_count, uint32_t *repository_size,
-    uint32_t *largest_record_size, uint8_t *data_transfer_handle_timeout)
+	const struct pldm_msg *msg, size_t payload_length,
+	uint8_t *completion_code, uint8_t *repository_state,
+	uint8_t *update_time, uint8_t *oem_update_time, uint32_t *record_count,
+	uint32_t *repository_size, uint32_t *largest_record_size,
+	uint8_t *data_transfer_handle_timeout)
 {
 	struct pldm_msgbuf _buf;
 	struct pldm_msgbuf *buf = &_buf;
@@ -466,7 +465,7 @@ int encode_get_pdr_req(uint8_t instance_id, uint32_t record_hndl,
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -478,7 +477,7 @@ int encode_get_pdr_req(uint8_t instance_id, uint32_t record_hndl,
 	}
 
 	struct pldm_get_pdr_req *request =
-	    (struct pldm_get_pdr_req *)msg->payload;
+		(struct pldm_get_pdr_req *)msg->payload;
 	request->record_handle = htole32(record_hndl);
 	request->data_transfer_handle = htole32(data_transfer_hndl);
 	request->transfer_op_flag = transfer_op_flag;
@@ -553,9 +552,9 @@ int decode_set_numeric_effecter_value_req(const struct pldm_msg *msg,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	rc =
-	    pldm_msgbuf_init(buf, PLDM_SET_NUMERIC_EFFECTER_VALUE_MIN_REQ_BYTES,
-			     msg->payload, payload_length);
+	rc = pldm_msgbuf_init(buf,
+			      PLDM_SET_NUMERIC_EFFECTER_VALUE_MIN_REQ_BYTES,
+			      msg->payload, payload_length);
 	if (rc) {
 		return rc;
 	}
@@ -589,7 +588,7 @@ int encode_set_numeric_effecter_value_resp(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -605,9 +604,12 @@ int encode_set_numeric_effecter_value_resp(uint8_t instance_id,
 	return rc;
 }
 
-int encode_set_numeric_effecter_value_req(
-    uint8_t instance_id, uint16_t effecter_id, uint8_t effecter_data_size,
-    const uint8_t *effecter_value, struct pldm_msg *msg, size_t payload_length)
+int encode_set_numeric_effecter_value_req(uint8_t instance_id,
+					  uint16_t effecter_id,
+					  uint8_t effecter_data_size,
+					  const uint8_t *effecter_value,
+					  struct pldm_msg *msg,
+					  size_t payload_length)
 {
 	if (msg == NULL || effecter_value == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -617,7 +619,7 @@ int encode_set_numeric_effecter_value_req(
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -629,7 +631,7 @@ int encode_set_numeric_effecter_value_req(
 	}
 
 	struct pldm_set_numeric_effecter_value_req *request =
-	    (struct pldm_set_numeric_effecter_value_req *)msg->payload;
+		(struct pldm_set_numeric_effecter_value_req *)msg->payload;
 	if (effecter_data_size == PLDM_EFFECTER_DATA_SIZE_UINT8 ||
 	    effecter_data_size == PLDM_EFFECTER_DATA_SIZE_SINT8) {
 		if (payload_length !=
@@ -697,7 +699,7 @@ int encode_get_state_sensor_readings_resp(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -709,7 +711,7 @@ int encode_get_state_sensor_readings_resp(uint8_t instance_id,
 	}
 
 	struct pldm_get_state_sensor_readings_resp *response =
-	    (struct pldm_get_state_sensor_readings_resp *)msg->payload;
+		(struct pldm_get_state_sensor_readings_resp *)msg->payload;
 
 	response->completion_code = completion_code;
 	response->comp_sensor_count = comp_sensor_count;
@@ -728,7 +730,7 @@ int encode_get_state_sensor_readings_req(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -740,7 +742,7 @@ int encode_get_state_sensor_readings_req(uint8_t instance_id,
 	}
 
 	struct pldm_get_state_sensor_readings_req *request =
-	    (struct pldm_get_state_sensor_readings_req *)msg->payload;
+		(struct pldm_get_state_sensor_readings_req *)msg->payload;
 
 	request->sensor_id = htole16(sensor_id);
 	request->reserved = reserved;
@@ -765,9 +767,9 @@ int decode_get_state_sensor_readings_resp(const struct pldm_msg *msg,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	rc =
-	    pldm_msgbuf_init(buf, PLDM_GET_STATE_SENSOR_READINGS_MIN_RESP_BYTES,
-			     msg->payload, payload_length);
+	rc = pldm_msgbuf_init(buf,
+			      PLDM_GET_STATE_SENSOR_READINGS_MIN_RESP_BYTES,
+			      msg->payload, payload_length);
 	if (rc) {
 		return rc;
 	}
@@ -828,15 +830,16 @@ int decode_get_state_sensor_readings_req(const struct pldm_msg *msg,
 }
 
 int encode_sensor_event_data(
-    struct pldm_sensor_event_data *const event_data,
-    const size_t event_data_size, const uint16_t sensor_id,
-    const enum sensor_event_class_states sensor_event_class,
-    const uint8_t sensor_offset, const uint8_t event_state,
-    const uint8_t previous_event_state, size_t *const actual_event_data_size)
+	struct pldm_sensor_event_data *const event_data,
+	const size_t event_data_size, const uint16_t sensor_id,
+	const enum sensor_event_class_states sensor_event_class,
+	const uint8_t sensor_offset, const uint8_t event_state,
+	const uint8_t previous_event_state,
+	size_t *const actual_event_data_size)
 {
 	*actual_event_data_size =
-	    (sizeof(*event_data) - sizeof(event_data->event_class) +
-	     sizeof(struct pldm_sensor_event_state_sensor_state));
+		(sizeof(*event_data) - sizeof(event_data->event_class) +
+		 sizeof(struct pldm_sensor_event_state_sensor_state));
 
 	if (!event_data) {
 		return PLDM_SUCCESS;
@@ -851,8 +854,8 @@ int encode_sensor_event_data(
 	event_data->sensor_event_class_type = sensor_event_class;
 
 	struct pldm_sensor_event_state_sensor_state *const state_data =
-	    (struct pldm_sensor_event_state_sensor_state *)
-		event_data->event_class;
+		(struct pldm_sensor_event_state_sensor_state *)
+			event_data->event_class;
 
 	state_data->sensor_offset = sensor_offset;
 	state_data->event_state = event_state;
@@ -886,15 +889,15 @@ int decode_platform_event_message_req(const struct pldm_msg *msg,
 	pldm_msgbuf_extract(buf, tid);
 	pldm_msgbuf_extract(buf, event_class);
 	*event_data_offset =
-	    sizeof(*format_version) + sizeof(*tid) + sizeof(*event_class);
+		sizeof(*format_version) + sizeof(*tid) + sizeof(*event_class);
 
 	return pldm_msgbuf_destroy(buf);
 }
 
 int decode_poll_for_platform_event_message_req(
-    const struct pldm_msg *msg, size_t payload_length, uint8_t *format_version,
-    uint8_t *transfer_operation_flag, uint32_t *data_transfer_handle,
-    uint16_t *event_id_to_acknowledge)
+	const struct pldm_msg *msg, size_t payload_length,
+	uint8_t *format_version, uint8_t *transfer_operation_flag,
+	uint32_t *data_transfer_handle, uint16_t *event_id_to_acknowledge)
 {
 	struct pldm_msgbuf _buf;
 	struct pldm_msgbuf *buf = &_buf;
@@ -950,7 +953,7 @@ int encode_platform_event_message_resp(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -962,7 +965,7 @@ int encode_platform_event_message_resp(uint8_t instance_id,
 	}
 
 	struct pldm_platform_event_message_resp *response =
-	    (struct pldm_platform_event_message_resp *)msg->payload;
+		(struct pldm_platform_event_message_resp *)msg->payload;
 	response->completion_code = completion_code;
 	response->platform_event_status = platform_event_status;
 
@@ -970,11 +973,11 @@ int encode_platform_event_message_resp(uint8_t instance_id,
 }
 
 int encode_poll_for_platform_event_message_resp(
-    uint8_t instance_id, uint8_t completion_code, uint8_t tid,
-    uint16_t event_id, uint32_t next_data_transfer_handle,
-    uint8_t transfer_flag, uint8_t event_class, uint32_t event_data_size,
-    uint8_t *event_data, uint32_t checksum, struct pldm_msg *msg,
-    size_t payload_length)
+	uint8_t instance_id, uint8_t completion_code, uint8_t tid,
+	uint16_t event_id, uint32_t next_data_transfer_handle,
+	uint8_t transfer_flag, uint8_t event_class, uint32_t event_data_size,
+	uint8_t *event_data, uint32_t checksum, struct pldm_msg *msg,
+	size_t payload_length)
 {
 	struct pldm_msgbuf _buf;
 	struct pldm_msgbuf *buf = &_buf;
@@ -984,7 +987,7 @@ int encode_poll_for_platform_event_message_resp(
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -996,8 +999,8 @@ int encode_poll_for_platform_event_message_resp(
 	}
 
 	rc = pldm_msgbuf_init(
-	    buf, PLDM_POLL_FOR_PLATFORM_EVENT_MESSAGE_MIN_RESP_BYTES,
-	    msg->payload, payload_length);
+		buf, PLDM_POLL_FOR_PLATFORM_EVENT_MESSAGE_MIN_RESP_BYTES,
+		msg->payload, payload_length);
 	if (rc) {
 		return rc;
 	}
@@ -1035,9 +1038,9 @@ int encode_poll_for_platform_event_message_resp(
 }
 
 int encode_platform_event_message_req(
-    uint8_t instance_id, uint8_t format_version, uint8_t tid,
-    uint8_t event_class, const uint8_t *event_data, size_t event_data_length,
-    struct pldm_msg *msg, size_t payload_length)
+	uint8_t instance_id, uint8_t format_version, uint8_t tid,
+	uint8_t event_class, const uint8_t *event_data,
+	size_t event_data_length, struct pldm_msg *msg, size_t payload_length)
 
 {
 	if (format_version != 1) {
@@ -1062,7 +1065,7 @@ int encode_platform_event_message_req(
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -1074,7 +1077,7 @@ int encode_platform_event_message_req(
 	}
 
 	struct pldm_platform_event_message_req *request =
-	    (struct pldm_platform_event_message_req *)msg->payload;
+		(struct pldm_platform_event_message_req *)msg->payload;
 	request->format_version = format_version;
 	request->tid = tid;
 	request->event_class = event_class;
@@ -1124,11 +1127,11 @@ int decode_platform_event_message_resp(const struct pldm_msg *msg,
 	return pldm_msgbuf_destroy(buf);
 }
 
-int encode_event_message_buffer_size_req(
-    uint8_t instance_id, uint16_t event_receiver_max_buffer_size,
-    struct pldm_msg *msg)
+int encode_event_message_buffer_size_req(uint8_t instance_id,
+					 uint16_t event_receiver_max_buffer_size,
+					 struct pldm_msg *msg)
 {
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -1140,9 +1143,9 @@ int encode_event_message_buffer_size_req(
 	}
 
 	struct pldm_event_message_buffer_size_req *request =
-	    (struct pldm_event_message_buffer_size_req *)msg->payload;
+		(struct pldm_event_message_buffer_size_req *)msg->payload;
 	request->event_receiver_max_buffer_size =
-	    event_receiver_max_buffer_size;
+		event_receiver_max_buffer_size;
 
 	return PLDM_SUCCESS;
 }
@@ -1193,7 +1196,7 @@ int encode_event_message_supported_req(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -1205,17 +1208,20 @@ int encode_event_message_supported_req(uint8_t instance_id,
 	}
 
 	struct pldm_event_message_supported_req *request =
-	    (struct pldm_event_message_supported_req *)msg->payload;
+		(struct pldm_event_message_supported_req *)msg->payload;
 	request->format_version = format_version;
 
 	return PLDM_SUCCESS;
 }
 
-int decode_event_message_supported_resp(
-    const struct pldm_msg *msg, size_t payload_length, uint8_t *completion_code,
-    uint8_t *synchrony_config, bitfield8_t *synchrony_config_support,
-    uint8_t *number_event_class_returned, uint8_t *event_class,
-    uint8_t event_class_count)
+int decode_event_message_supported_resp(const struct pldm_msg *msg,
+					size_t payload_length,
+					uint8_t *completion_code,
+					uint8_t *synchrony_config,
+					bitfield8_t *synchrony_config_support,
+					uint8_t *number_event_class_returned,
+					uint8_t *event_class,
+					uint8_t event_class_count)
 {
 	struct pldm_msgbuf _buf;
 	struct pldm_msgbuf *buf = &_buf;
@@ -1290,7 +1296,7 @@ int decode_sensor_event_data(const uint8_t *event_data,
 	}
 
 	size_t event_class_data_length =
-	    event_data_length - PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES;
+		event_data_length - PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES;
 
 	pldm_msgbuf_extract(buf, sensor_id);
 	rc = pldm_msgbuf_extract(buf, sensor_event_class_type);
@@ -1310,9 +1316,9 @@ int decode_sensor_event_data(const uint8_t *event_data,
 		}
 	} else if (*sensor_event_class_type == PLDM_NUMERIC_SENSOR_STATE) {
 		if (event_class_data_length <
-			PLDM_SENSOR_EVENT_NUMERIC_SENSOR_STATE_MIN_DATA_LENGTH ||
+			    PLDM_SENSOR_EVENT_NUMERIC_SENSOR_STATE_MIN_DATA_LENGTH ||
 		    event_class_data_length >
-			PLDM_SENSOR_EVENT_NUMERIC_SENSOR_STATE_MAX_DATA_LENGTH) {
+			    PLDM_SENSOR_EVENT_NUMERIC_SENSOR_STATE_MAX_DATA_LENGTH) {
 			return PLDM_ERROR_INVALID_LENGTH;
 		}
 	} else {
@@ -1320,7 +1326,7 @@ int decode_sensor_event_data(const uint8_t *event_data,
 	}
 
 	*event_class_data_offset =
-	    sizeof(*sensor_id) + sizeof(*sensor_event_class_type);
+		sizeof(*sensor_id) + sizeof(*sensor_event_class_type);
 
 	return pldm_msgbuf_destroy(buf);
 }
@@ -1336,9 +1342,9 @@ int decode_sensor_op_data(const uint8_t *sensor_data, size_t sensor_data_length,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	rc =
-	    pldm_msgbuf_init(buf, PLDM_SENSOR_EVENT_SENSOR_OP_STATE_DATA_LENGTH,
-			     sensor_data, sensor_data_length);
+	rc = pldm_msgbuf_init(buf,
+			      PLDM_SENSOR_EVENT_SENSOR_OP_STATE_DATA_LENGTH,
+			      sensor_data, sensor_data_length);
 	if (rc) {
 		return rc;
 	}
@@ -1398,8 +1404,8 @@ int decode_numeric_sensor_data(const uint8_t *sensor_data,
 	}
 
 	rc = pldm_msgbuf_init(
-	    buf, PLDM_SENSOR_EVENT_NUMERIC_SENSOR_STATE_MIN_DATA_LENGTH,
-	    sensor_data, sensor_data_length);
+		buf, PLDM_SENSOR_EVENT_NUMERIC_SENSOR_STATE_MIN_DATA_LENGTH,
+		sensor_data, sensor_data_length);
 	if (rc) {
 		return rc;
 	}
@@ -1468,8 +1474,8 @@ int decode_numeric_sensor_data(const uint8_t *sensor_data,
 
 #define PLDM_NUMERIC_SENSOR_VALUE_PDR_MIN_SIZE 69
 int decode_numeric_sensor_pdr_data(
-    const void *pdr_data, size_t pdr_data_length,
-    struct pldm_numeric_sensor_value_pdr *pdr_value)
+	const void *pdr_data, size_t pdr_data_length,
+	struct pldm_numeric_sensor_value_pdr *pdr_value)
 {
 	struct pldm_msgbuf _buf;
 	struct pldm_msgbuf *buf = &_buf;
@@ -1487,8 +1493,8 @@ int decode_numeric_sensor_pdr_data(
 	}
 
 	rc = pldm_platform_pdr_hdr_validate(
-	    &pdr_value->hdr, PLDM_NUMERIC_SENSOR_VALUE_PDR_MIN_SIZE,
-	    pdr_data_length);
+		&pdr_value->hdr, PLDM_NUMERIC_SENSOR_VALUE_PDR_MIN_SIZE,
+		pdr_data_length);
 	if (rc) {
 		return rc;
 	}
@@ -1528,7 +1534,7 @@ int decode_numeric_sensor_pdr_data(
 					&pdr_value->hysteresis);
 	pldm_msgbuf_extract(buf, &pdr_value->supported_thresholds.byte);
 	pldm_msgbuf_extract(
-	    buf, &pdr_value->threshold_and_hysteresis_volatility.byte);
+		buf, &pdr_value->threshold_and_hysteresis_volatility.byte);
 	pldm_msgbuf_extract(buf, &pdr_value->state_transition_interval);
 	pldm_msgbuf_extract(buf, &pdr_value->update_interval);
 	pldm_msgbuf_extract_sensor_data(buf, pdr_value->sensor_data_size,
@@ -1546,23 +1552,23 @@ int decode_numeric_sensor_pdr_data(
 
 	pldm_msgbuf_extract(buf, &pdr_value->range_field_support.byte);
 	pldm_msgbuf_extract_range_field_format(
-	    buf, pdr_value->range_field_format, &pdr_value->nominal_value);
+		buf, pdr_value->range_field_format, &pdr_value->nominal_value);
 	pldm_msgbuf_extract_range_field_format(
-	    buf, pdr_value->range_field_format, &pdr_value->normal_max);
+		buf, pdr_value->range_field_format, &pdr_value->normal_max);
 	pldm_msgbuf_extract_range_field_format(
-	    buf, pdr_value->range_field_format, &pdr_value->normal_min);
+		buf, pdr_value->range_field_format, &pdr_value->normal_min);
 	pldm_msgbuf_extract_range_field_format(
-	    buf, pdr_value->range_field_format, &pdr_value->warning_high);
+		buf, pdr_value->range_field_format, &pdr_value->warning_high);
 	pldm_msgbuf_extract_range_field_format(
-	    buf, pdr_value->range_field_format, &pdr_value->warning_low);
+		buf, pdr_value->range_field_format, &pdr_value->warning_low);
 	pldm_msgbuf_extract_range_field_format(
-	    buf, pdr_value->range_field_format, &pdr_value->critical_high);
+		buf, pdr_value->range_field_format, &pdr_value->critical_high);
 	pldm_msgbuf_extract_range_field_format(
-	    buf, pdr_value->range_field_format, &pdr_value->critical_low);
+		buf, pdr_value->range_field_format, &pdr_value->critical_low);
 	pldm_msgbuf_extract_range_field_format(
-	    buf, pdr_value->range_field_format, &pdr_value->fatal_high);
+		buf, pdr_value->range_field_format, &pdr_value->fatal_high);
 	pldm_msgbuf_extract_range_field_format(
-	    buf, pdr_value->range_field_format, &pdr_value->fatal_low);
+		buf, pdr_value->range_field_format, &pdr_value->fatal_low);
 
 	return pldm_msgbuf_destroy(buf);
 }
@@ -1575,7 +1581,7 @@ int encode_get_numeric_effecter_value_req(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -1587,16 +1593,17 @@ int encode_get_numeric_effecter_value_req(uint8_t instance_id,
 	}
 
 	struct pldm_get_numeric_effecter_value_req *request =
-	    (struct pldm_get_numeric_effecter_value_req *)msg->payload;
+		(struct pldm_get_numeric_effecter_value_req *)msg->payload;
 	request->effecter_id = htole16(effecter_id);
 
 	return PLDM_SUCCESS;
 }
 
 int encode_get_numeric_effecter_value_resp(
-    uint8_t instance_id, uint8_t completion_code, uint8_t effecter_data_size,
-    uint8_t effecter_oper_state, const uint8_t *pending_value,
-    const uint8_t *present_value, struct pldm_msg *msg, size_t payload_length)
+	uint8_t instance_id, uint8_t completion_code,
+	uint8_t effecter_data_size, uint8_t effecter_oper_state,
+	const uint8_t *pending_value, const uint8_t *present_value,
+	struct pldm_msg *msg, size_t payload_length)
 {
 	if (msg == NULL || pending_value == NULL || present_value == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -1610,7 +1617,7 @@ int encode_get_numeric_effecter_value_resp(
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -1622,7 +1629,7 @@ int encode_get_numeric_effecter_value_resp(
 	}
 
 	struct pldm_get_numeric_effecter_value_resp *response =
-	    (struct pldm_get_numeric_effecter_value_resp *)msg->payload;
+		(struct pldm_get_numeric_effecter_value_resp *)msg->payload;
 
 	response->completion_code = completion_code;
 	response->effecter_data_size = effecter_data_size;
@@ -1649,9 +1656,9 @@ int encode_get_numeric_effecter_value_resp(
 		       sizeof(uint16_t));
 		uint16_t val_present = *(uint16_t *)present_value;
 		val_present = htole16(val_present);
-		memcpy(
-		    (response->pending_and_present_values + sizeof(uint16_t)),
-		    &val_present, sizeof(uint16_t));
+		memcpy((response->pending_and_present_values +
+			sizeof(uint16_t)),
+		       &val_present, sizeof(uint16_t));
 
 	} else if (effecter_data_size == PLDM_EFFECTER_DATA_SIZE_UINT32 ||
 		   effecter_data_size == PLDM_EFFECTER_DATA_SIZE_SINT32) {
@@ -1665,9 +1672,9 @@ int encode_get_numeric_effecter_value_resp(
 		       sizeof(uint32_t));
 		uint32_t val_present = *(uint32_t *)present_value;
 		val_present = htole32(val_present);
-		memcpy(
-		    (response->pending_and_present_values + sizeof(uint32_t)),
-		    &val_present, sizeof(uint32_t));
+		memcpy((response->pending_and_present_values +
+			sizeof(uint32_t)),
+		       &val_present, sizeof(uint32_t));
 	}
 	return PLDM_SUCCESS;
 }
@@ -1695,10 +1702,13 @@ int decode_get_numeric_effecter_value_req(const struct pldm_msg *msg,
 	return pldm_msgbuf_destroy_consumed(buf);
 }
 
-int decode_get_numeric_effecter_value_resp(
-    const struct pldm_msg *msg, size_t payload_length, uint8_t *completion_code,
-    uint8_t *effecter_data_size, uint8_t *effecter_oper_state,
-    uint8_t *pending_value, uint8_t *present_value)
+int decode_get_numeric_effecter_value_resp(const struct pldm_msg *msg,
+					   size_t payload_length,
+					   uint8_t *completion_code,
+					   uint8_t *effecter_data_size,
+					   uint8_t *effecter_oper_state,
+					   uint8_t *pending_value,
+					   uint8_t *present_value)
 {
 	struct pldm_msgbuf _buf;
 	struct pldm_msgbuf *buf = &_buf;
@@ -1753,12 +1763,12 @@ int decode_get_numeric_effecter_value_resp(
 }
 
 int encode_pldm_pdr_repository_chg_event_data(
-    uint8_t event_data_format, uint8_t number_of_change_records,
-    const uint8_t *event_data_operations,
-    const uint8_t *numbers_of_change_entries,
-    const uint32_t *const *change_entries,
-    struct pldm_pdr_repository_chg_event_data *event_data,
-    size_t *actual_change_records_size, size_t max_change_records_size)
+	uint8_t event_data_format, uint8_t number_of_change_records,
+	const uint8_t *event_data_operations,
+	const uint8_t *numbers_of_change_entries,
+	const uint32_t *const *change_entries,
+	struct pldm_pdr_repository_chg_event_data *event_data,
+	size_t *actual_change_records_size, size_t max_change_records_size)
 {
 	if (event_data_operations == NULL ||
 	    numbers_of_change_entries == NULL || change_entries == NULL) {
@@ -1766,16 +1776,16 @@ int encode_pldm_pdr_repository_chg_event_data(
 	}
 
 	size_t expected_size =
-	    sizeof(event_data_format) + sizeof(number_of_change_records);
+		sizeof(event_data_format) + sizeof(number_of_change_records);
 
 	expected_size +=
-	    sizeof(*event_data_operations) * number_of_change_records;
+		sizeof(*event_data_operations) * number_of_change_records;
 	expected_size +=
-	    sizeof(*numbers_of_change_entries) * number_of_change_records;
+		sizeof(*numbers_of_change_entries) * number_of_change_records;
 
 	for (uint8_t i = 0; i < number_of_change_records; ++i) {
-		expected_size +=
-		    sizeof(*change_entries[0]) * numbers_of_change_entries[i];
+		expected_size += sizeof(*change_entries[0]) *
+				 numbers_of_change_entries[i];
 	}
 
 	*actual_change_records_size = expected_size;
@@ -1792,23 +1802,24 @@ int encode_pldm_pdr_repository_chg_event_data(
 	event_data->number_of_change_records = number_of_change_records;
 
 	struct pldm_pdr_repository_change_record_data *record_data =
-	    (struct pldm_pdr_repository_change_record_data *)
-		event_data->change_records;
+		(struct pldm_pdr_repository_change_record_data *)
+			event_data->change_records;
 
 	for (uint8_t i = 0; i < number_of_change_records; ++i) {
 		record_data->event_data_operation = event_data_operations[i];
 		record_data->number_of_change_entries =
-		    numbers_of_change_entries[i];
+			numbers_of_change_entries[i];
 
 		for (uint8_t j = 0; j < record_data->number_of_change_entries;
 		     ++j) {
 			record_data->change_entry[j] =
-			    htole32(change_entries[i][j]);
+				htole32(change_entries[i][j]);
 		}
 
-		record_data = (struct pldm_pdr_repository_change_record_data
-				   *)(record_data->change_entry +
-				      record_data->number_of_change_entries);
+		record_data =
+			(struct pldm_pdr_repository_change_record_data
+				 *)(record_data->change_entry +
+				    record_data->number_of_change_entries);
 	}
 
 	return PLDM_SUCCESS;
@@ -1839,15 +1850,80 @@ int decode_pldm_pdr_repository_chg_event_data(const uint8_t *event_data,
 	pldm_msgbuf_extract(buf, number_of_change_records);
 
 	*change_record_data_offset =
-	    sizeof(*event_data_format) + sizeof(*number_of_change_records);
+		sizeof(*event_data_format) + sizeof(*number_of_change_records);
 
 	return pldm_msgbuf_destroy(buf);
 }
 
+int decode_pldm_message_poll_event_data(const uint8_t *event_data,
+					size_t event_data_length,
+					uint8_t *format_version,
+					uint16_t *event_id,
+					uint32_t *data_transfer_handle)
+{
+	struct pldm_msgbuf _buf;
+	struct pldm_msgbuf *buf = &_buf;
+	int rc;
+
+	if (event_data == NULL || format_version == NULL || event_id == NULL ||
+	    data_transfer_handle == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	rc = pldm_msgbuf_init(buf, PLDM_MSG_POLL_EVENT_LENGTH, event_data,
+			      event_data_length);
+	if (rc) {
+		return rc;
+	}
+
+	pldm_msgbuf_extract(buf, format_version);
+	rc = pldm_msgbuf_extract(buf, event_id);
+	if (rc) {
+		return rc;
+	}
+
+	if (*event_id == 0x0000 || *event_id == 0xffff) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	pldm_msgbuf_extract(buf, data_transfer_handle);
+
+	return pldm_msgbuf_destroy_consumed(buf);
+}
+
+int encode_pldm_message_poll_event_data(uint8_t format_version,
+					uint16_t event_id,
+					uint32_t data_transfer_handle,
+					uint8_t *event_data,
+					size_t event_data_length)
+{
+	struct pldm_msgbuf _buf;
+	struct pldm_msgbuf *buf = &_buf;
+	int rc;
+
+	if (event_data == NULL) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	if (event_id == 0x0000 || event_id == 0xffff) {
+		return PLDM_ERROR_INVALID_DATA;
+	}
+
+	rc = pldm_msgbuf_init(buf, PLDM_MSG_POLL_EVENT_LENGTH, event_data,
+			      event_data_length);
+	if (rc) {
+		return rc;
+	}
+	pldm_msgbuf_insert(buf, format_version);
+	pldm_msgbuf_insert(buf, event_id);
+	pldm_msgbuf_insert(buf, data_transfer_handle);
+
+	return pldm_msgbuf_destroy(buf);
+}
 int decode_pldm_pdr_repository_change_record_data(
-    const uint8_t *change_record_data, size_t change_record_data_size,
-    uint8_t *event_data_operation, uint8_t *number_of_change_entries,
-    size_t *change_entry_data_offset)
+	const uint8_t *change_record_data, size_t change_record_data_size,
+	uint8_t *event_data_operation, uint8_t *number_of_change_entries,
+	size_t *change_entry_data_offset)
 {
 	struct pldm_msgbuf _buf;
 	struct pldm_msgbuf *buf = &_buf;
@@ -1867,8 +1943,8 @@ int decode_pldm_pdr_repository_change_record_data(
 	pldm_msgbuf_extract(buf, event_data_operation);
 	pldm_msgbuf_extract(buf, number_of_change_entries);
 
-	*change_entry_data_offset =
-	    sizeof(*event_data_operation) + sizeof(*number_of_change_entries);
+	*change_entry_data_offset = sizeof(*event_data_operation) +
+				    sizeof(*number_of_change_entries);
 
 	return pldm_msgbuf_destroy(buf);
 }
@@ -1881,7 +1957,7 @@ int encode_get_sensor_reading_req(uint8_t instance_id, uint16_t sensor_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -1893,7 +1969,7 @@ int encode_get_sensor_reading_req(uint8_t instance_id, uint16_t sensor_id,
 	}
 
 	struct pldm_get_sensor_reading_req *request =
-	    (struct pldm_get_sensor_reading_req *)msg->payload;
+		(struct pldm_get_sensor_reading_req *)msg->payload;
 
 	request->sensor_id = htole16(sensor_id);
 	request->rearm_event_state = rearm_event_state;
@@ -1902,10 +1978,11 @@ int encode_get_sensor_reading_req(uint8_t instance_id, uint16_t sensor_id,
 }
 
 int decode_get_sensor_reading_resp(
-    const struct pldm_msg *msg, size_t payload_length, uint8_t *completion_code,
-    uint8_t *sensor_data_size, uint8_t *sensor_operational_state,
-    uint8_t *sensor_event_message_enable, uint8_t *present_state,
-    uint8_t *previous_state, uint8_t *event_state, uint8_t *present_reading)
+	const struct pldm_msg *msg, size_t payload_length,
+	uint8_t *completion_code, uint8_t *sensor_data_size,
+	uint8_t *sensor_operational_state, uint8_t *sensor_event_message_enable,
+	uint8_t *present_state, uint8_t *previous_state, uint8_t *event_state,
+	uint8_t *present_reading)
 {
 	struct pldm_msgbuf _buf;
 	struct pldm_msgbuf *buf = &_buf;
@@ -1955,11 +2032,14 @@ int decode_get_sensor_reading_resp(
 	return pldm_msgbuf_destroy_consumed(buf);
 }
 
-int encode_get_sensor_reading_resp(
-    uint8_t instance_id, uint8_t completion_code, uint8_t sensor_data_size,
-    uint8_t sensor_operational_state, uint8_t sensor_event_message_enable,
-    uint8_t present_state, uint8_t previous_state, uint8_t event_state,
-    const uint8_t *present_reading, struct pldm_msg *msg, size_t payload_length)
+int encode_get_sensor_reading_resp(uint8_t instance_id, uint8_t completion_code,
+				   uint8_t sensor_data_size,
+				   uint8_t sensor_operational_state,
+				   uint8_t sensor_event_message_enable,
+				   uint8_t present_state,
+				   uint8_t previous_state, uint8_t event_state,
+				   const uint8_t *present_reading,
+				   struct pldm_msg *msg, size_t payload_length)
 {
 	if (msg == NULL || present_reading == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -1969,7 +2049,7 @@ int encode_get_sensor_reading_resp(
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -1981,7 +2061,7 @@ int encode_get_sensor_reading_resp(
 	}
 
 	struct pldm_get_sensor_reading_resp *response =
-	    (struct pldm_get_sensor_reading_resp *)msg->payload;
+		(struct pldm_get_sensor_reading_resp *)msg->payload;
 
 	response->completion_code = completion_code;
 	response->sensor_data_size = sensor_data_size;
@@ -2061,7 +2141,7 @@ int encode_set_event_receiver_req(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -2073,7 +2153,7 @@ int encode_set_event_receiver_req(uint8_t instance_id,
 	}
 
 	struct pldm_set_event_receiver_req *request =
-	    (struct pldm_set_event_receiver_req *)msg->payload;
+		(struct pldm_set_event_receiver_req *)msg->payload;
 	request->event_message_global_enable = event_message_global_enable;
 
 	request->transport_protocol_type = transport_protocol_type;
@@ -2164,7 +2244,7 @@ int encode_set_event_receiver_resp(uint8_t instance_id, uint8_t completion_code,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.instance = instance_id;
 	header.msg_type = PLDM_RESPONSE;
 	header.pldm_type = PLDM_PLATFORM;
@@ -2196,7 +2276,7 @@ int encode_poll_for_platform_event_message_req(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_PLATFORM;
@@ -2208,8 +2288,8 @@ int encode_poll_for_platform_event_message_req(uint8_t instance_id,
 	}
 
 	rc = pldm_msgbuf_init(
-	    buf, PLDM_POLL_FOR_PLATFORM_EVENT_MESSAGE_MIN_RESP_BYTES,
-	    msg->payload, payload_length);
+		buf, PLDM_POLL_FOR_PLATFORM_EVENT_MESSAGE_MIN_RESP_BYTES,
+		msg->payload, payload_length);
 	if (rc) {
 		return rc;
 	}
@@ -2223,10 +2303,11 @@ int encode_poll_for_platform_event_message_req(uint8_t instance_id,
 }
 
 int decode_poll_for_platform_event_message_resp(
-    const struct pldm_msg *msg, size_t payload_length, uint8_t *completion_code,
-    uint8_t *tid, uint16_t *event_id, uint32_t *next_data_transfer_handle,
-    uint8_t *transfer_flag, uint8_t *event_class, uint32_t *event_data_size,
-    void **event_data, uint32_t *event_data_integrity_checksum)
+	const struct pldm_msg *msg, size_t payload_length,
+	uint8_t *completion_code, uint8_t *tid, uint16_t *event_id,
+	uint32_t *next_data_transfer_handle, uint8_t *transfer_flag,
+	uint8_t *event_class, uint32_t *event_data_size, void **event_data,
+	uint32_t *event_data_integrity_checksum)
 {
 	struct pldm_msgbuf _buf;
 	struct pldm_msgbuf *buf = &_buf;
@@ -2241,8 +2322,8 @@ int decode_poll_for_platform_event_message_resp(
 	}
 
 	rc = pldm_msgbuf_init(
-	    buf, PLDM_POLL_FOR_PLATFORM_EVENT_MESSAGE_MIN_RESP_BYTES,
-	    msg->payload, payload_length);
+		buf, PLDM_POLL_FOR_PLATFORM_EVENT_MESSAGE_MIN_RESP_BYTES,
+		msg->payload, payload_length);
 	if (rc) {
 		return rc;
 	}

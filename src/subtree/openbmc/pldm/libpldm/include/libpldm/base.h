@@ -87,25 +87,25 @@ typedef enum {
 	PLDM_ASYNC_REQUEST_NOTIFY, //!< Unacknowledged PLDM request messages
 } MessageType;
 
-#define PLDM_INSTANCE_MAX 31
-#define PLDM_MAX_TYPES 64
+#define PLDM_INSTANCE_MAX      31
+#define PLDM_MAX_TYPES	       64
 #define PLDM_MAX_CMDS_PER_TYPE 256
-#define PLDM_MAX_TIDS 256
+#define PLDM_MAX_TIDS	       256
 
 /* Message payload lengths */
 #define PLDM_GET_COMMANDS_REQ_BYTES 5
-#define PLDM_GET_VERSION_REQ_BYTES 6
+#define PLDM_GET_VERSION_REQ_BYTES  6
 
 /* Response lengths are inclusive of completion code */
-#define PLDM_GET_TYPES_RESP_BYTES 9
-#define PLDM_GET_TID_RESP_BYTES 2
-#define PLDM_SET_TID_RESP_BYTES 1
+#define PLDM_GET_TYPES_RESP_BYTES    9
+#define PLDM_GET_TID_RESP_BYTES	     2
+#define PLDM_SET_TID_RESP_BYTES	     1
 #define PLDM_GET_COMMANDS_RESP_BYTES 33
 /* Response data has only one version and does not contain the checksum */
-#define PLDM_GET_VERSION_RESP_BYTES 10
+#define PLDM_GET_VERSION_RESP_BYTES	 10
 #define PLDM_MULTIPART_RECEIVE_REQ_BYTES 18
 
-#define PLDM_VERSION_0 0
+#define PLDM_VERSION_0	     0
 #define PLDM_CURRENT_VERSION PLDM_VERSION_0
 
 #define PLDM_TIMESTAMP104_SIZE 13
@@ -200,11 +200,9 @@ struct pldm_get_commands_resp {
  *  Structure representing PLDM get version request.
  */
 struct pldm_get_version_req {
-	uint32_t
-	    transfer_handle; //!< handle to identify PLDM version data transfer
+	uint32_t transfer_handle; //!< handle to identify PLDM version data transfer
 	uint8_t transfer_opflag; //!< PLDM GetVersion operation flag
-	uint8_t type; //!< PLDM Type for which version information is being
-		      //!< requested
+	uint8_t type; //!< PLDM Type for which version information is being requested
 } __attribute__((packed));
 
 /** @struct pldm_get_version_resp
@@ -541,10 +539,13 @@ int encode_set_tid_req(uint8_t instance_id, uint8_t tid, struct pldm_msg *msg);
  *  @param[out] section_length - The length of the requested section
  *  @return pldm_completion_codes
  */
-int decode_multipart_receive_req(
-    const struct pldm_msg *msg, size_t payload_length, uint8_t *pldm_type,
-    uint8_t *transfer_opflag, uint32_t *transfer_ctx, uint32_t *transfer_handle,
-    uint32_t *section_offset, uint32_t *section_length);
+int decode_multipart_receive_req(const struct pldm_msg *msg,
+				 size_t payload_length, uint8_t *pldm_type,
+				 uint8_t *transfer_opflag,
+				 uint32_t *transfer_ctx,
+				 uint32_t *transfer_handle,
+				 uint32_t *section_offset,
+				 uint32_t *section_length);
 
 /** @brief Create a PLDM response message containing only cc
  *

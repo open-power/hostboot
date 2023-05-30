@@ -2,6 +2,13 @@
 #define PLDM_MSGBUF_H
 
 #ifdef __cplusplus
+/*
+ * Fix up C11's _Static_assert() vs C++'s static_assert().
+ *
+ * Can we please have nice things for once.
+ */
+// NOLINTNEXTLINE(bugprone-reserved-identifier,cert-dcl37-c,cert-dcl51-cpp)
+#define _Static_assert(...) static_assert(__VA_ARGS__)
 extern "C" {
 #endif
 
@@ -333,14 +340,14 @@ static inline int pldm_msgbuf_extract_real32(struct pldm_msgbuf *ctx,
 }
 
 #define pldm_msgbuf_extract(ctx, dst)                                          \
-	_Generic((*(dst)), uint8_t                                             \
-		 : pldm_msgbuf_extract_uint8, int8_t                           \
-		 : pldm_msgbuf_extract_int8, uint16_t                          \
-		 : pldm_msgbuf_extract_uint16, int16_t                         \
-		 : pldm_msgbuf_extract_int16, uint32_t                         \
-		 : pldm_msgbuf_extract_uint32, int32_t                         \
-		 : pldm_msgbuf_extract_int32, real32_t                         \
-		 : pldm_msgbuf_extract_real32)(ctx, dst)
+	_Generic((*(dst)),                                                     \
+		uint8_t: pldm_msgbuf_extract_uint8,                            \
+		int8_t: pldm_msgbuf_extract_int8,                              \
+		uint16_t: pldm_msgbuf_extract_uint16,                          \
+		int16_t: pldm_msgbuf_extract_int16,                            \
+		uint32_t: pldm_msgbuf_extract_uint32,                          \
+		int32_t: pldm_msgbuf_extract_int32,                            \
+		real32_t: pldm_msgbuf_extract_real32)(ctx, dst)
 
 static inline int pldm_msgbuf_extract_array_uint8(struct pldm_msgbuf *ctx,
 						  uint8_t *dst, size_t count)
@@ -373,8 +380,8 @@ static inline int pldm_msgbuf_extract_array_uint8(struct pldm_msgbuf *ctx,
 }
 
 #define pldm_msgbuf_extract_array(ctx, dst, count)                             \
-	_Generic((*(dst)), uint8_t                                             \
-		 : pldm_msgbuf_extract_array_uint8)(ctx, dst, count)
+	_Generic((*(dst)), uint8_t: pldm_msgbuf_extract_array_uint8)(ctx, dst, \
+								     count)
 
 static inline int pldm_msgbuf_insert_uint32(struct pldm_msgbuf *ctx,
 					    const uint32_t src)
@@ -499,13 +506,13 @@ static inline int pldm_msgbuf_insert_int8(struct pldm_msgbuf *ctx,
 }
 
 #define pldm_msgbuf_insert(dst, src)                                           \
-	_Generic((src), uint8_t                                                \
-		 : pldm_msgbuf_insert_uint8, int8_t                            \
-		 : pldm_msgbuf_insert_int8, uint16_t                           \
-		 : pldm_msgbuf_insert_uint16, int16_t                          \
-		 : pldm_msgbuf_insert_int16, uint32_t                          \
-		 : pldm_msgbuf_insert_uint32, int32_t                          \
-		 : pldm_msgbuf_insert_int32)(dst, src)
+	_Generic((src),                                                        \
+		uint8_t: pldm_msgbuf_insert_uint8,                             \
+		int8_t: pldm_msgbuf_insert_int8,                               \
+		uint16_t: pldm_msgbuf_insert_uint16,                           \
+		int16_t: pldm_msgbuf_insert_int16,                             \
+		uint32_t: pldm_msgbuf_insert_uint32,                           \
+		int32_t: pldm_msgbuf_insert_int32)(dst, src)
 
 static inline int pldm_msgbuf_insert_array_uint8(struct pldm_msgbuf *ctx,
 						 const uint8_t *src,
@@ -538,8 +545,8 @@ static inline int pldm_msgbuf_insert_array_uint8(struct pldm_msgbuf *ctx,
 }
 
 #define pldm_msgbuf_insert_array(dst, src, count)                              \
-	_Generic((*(src)), uint8_t                                             \
-		 : pldm_msgbuf_insert_array_uint8)(dst, src, count)
+	_Generic((*(src)), uint8_t: pldm_msgbuf_insert_array_uint8)(dst, src,  \
+								    count)
 
 static inline int pldm_msgbuf_span_required(struct pldm_msgbuf *ctx,
 					    size_t required, void **cursor)

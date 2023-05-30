@@ -17,7 +17,7 @@ int decode_rw_file_memory_req(const struct pldm_msg *msg, size_t payload_length,
 	}
 
 	struct pldm_read_write_file_memory_req *request =
-	    (struct pldm_read_write_file_memory_req *)msg->payload;
+		(struct pldm_read_write_file_memory_req *)msg->payload;
 
 	*file_handle = le32toh(request->file_handle);
 	*offset = le32toh(request->offset);
@@ -35,7 +35,7 @@ int encode_rw_file_memory_resp(uint8_t instance_id, uint8_t command,
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -46,7 +46,7 @@ int encode_rw_file_memory_resp(uint8_t instance_id, uint8_t command,
 	}
 
 	struct pldm_read_write_file_memory_resp *response =
-	    (struct pldm_read_write_file_memory_resp *)msg->payload;
+		(struct pldm_read_write_file_memory_resp *)msg->payload;
 	response->completion_code = completion_code;
 	if (response->completion_code == PLDM_SUCCESS) {
 		response->length = htole32(length);
@@ -64,7 +64,7 @@ int encode_rw_file_memory_req(uint8_t instance_id, uint8_t command,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -75,7 +75,7 @@ int encode_rw_file_memory_req(uint8_t instance_id, uint8_t command,
 	}
 
 	struct pldm_read_write_file_memory_req *req =
-	    (struct pldm_read_write_file_memory_req *)msg->payload;
+		(struct pldm_read_write_file_memory_req *)msg->payload;
 	req->file_handle = htole32(file_handle);
 	req->offset = htole32(offset);
 	req->length = htole32(length);
@@ -96,7 +96,7 @@ int decode_rw_file_memory_resp(const struct pldm_msg *msg,
 	}
 
 	struct pldm_read_write_file_memory_resp *response =
-	    (struct pldm_read_write_file_memory_resp *)msg->payload;
+		(struct pldm_read_write_file_memory_resp *)msg->payload;
 	*completion_code = response->completion_code;
 	if (*completion_code == PLDM_SUCCESS) {
 		*length = le32toh(response->length);
@@ -119,7 +119,7 @@ int decode_get_file_table_req(const struct pldm_msg *msg, size_t payload_length,
 	}
 
 	struct pldm_get_file_table_req *request =
-	    (struct pldm_get_file_table_req *)msg->payload;
+		(struct pldm_get_file_table_req *)msg->payload;
 
 	*transfer_handle = le32toh(request->transfer_handle);
 	*transfer_opflag = request->operation_flag;
@@ -137,7 +137,7 @@ int encode_get_file_table_resp(uint8_t instance_id, uint8_t completion_code,
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -148,7 +148,7 @@ int encode_get_file_table_resp(uint8_t instance_id, uint8_t completion_code,
 	}
 
 	struct pldm_get_file_table_resp *response =
-	    (struct pldm_get_file_table_resp *)msg->payload;
+		(struct pldm_get_file_table_resp *)msg->payload;
 	response->completion_code = completion_code;
 
 	if (completion_code == PLDM_SUCCESS) {
@@ -162,13 +162,13 @@ int encode_get_file_table_resp(uint8_t instance_id, uint8_t completion_code,
 
 int encode_get_file_table_req(uint8_t instance_id, uint32_t transfer_handle,
 			      uint8_t transfer_opflag, uint8_t table_type,
-			      struct pldm_msg *msg, size_t payload_length)
+			      struct pldm_msg *msg)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -178,12 +178,8 @@ int encode_get_file_table_req(uint8_t instance_id, uint32_t transfer_handle,
 		return rc;
 	}
 
-	if (payload_length != PLDM_GET_FILE_TABLE_REQ_BYTES) {
-		return PLDM_ERROR_INVALID_LENGTH;
-	}
-
 	struct pldm_get_file_table_req *request =
-	    (struct pldm_get_file_table_req *)msg->payload;
+		(struct pldm_get_file_table_req *)msg->payload;
 
 	request->transfer_handle = htole32(transfer_handle);
 	request->operation_flag = transfer_opflag;
@@ -215,7 +211,7 @@ int decode_get_file_table_resp(const struct pldm_msg *msg,
 	}
 
 	struct pldm_get_file_table_resp *response =
-	    (struct pldm_get_file_table_resp *)msg->payload;
+		(struct pldm_get_file_table_resp *)msg->payload;
 
 	*next_transfer_handle = le32toh(response->next_transfer_handle);
 	*transfer_flag = response->transfer_flag;
@@ -223,7 +219,7 @@ int decode_get_file_table_resp(const struct pldm_msg *msg,
 					sizeof(*next_transfer_handle) +
 					sizeof(*transfer_flag);
 	*file_table_length =
-	    payload_length - PLDM_GET_FILE_TABLE_MIN_RESP_BYTES;
+		payload_length - PLDM_GET_FILE_TABLE_MIN_RESP_BYTES;
 
 	return PLDM_SUCCESS;
 }
@@ -242,7 +238,7 @@ int decode_read_file_req(const struct pldm_msg *msg, size_t payload_length,
 	}
 
 	struct pldm_read_file_req *request =
-	    (struct pldm_read_file_req *)msg->payload;
+		(struct pldm_read_file_req *)msg->payload;
 
 	*file_handle = le32toh(request->file_handle);
 	*offset = le32toh(request->offset);
@@ -262,7 +258,7 @@ int encode_read_file_req(uint8_t instance_id, uint32_t file_handle,
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -273,7 +269,7 @@ int encode_read_file_req(uint8_t instance_id, uint32_t file_handle,
 	}
 
 	struct pldm_read_file_req *request =
-	    (struct pldm_read_file_req *)msg->payload;
+		(struct pldm_read_file_req *)msg->payload;
 
 	request->file_handle = htole32(file_handle);
 	request->offset = htole32(offset);
@@ -295,7 +291,7 @@ int decode_read_file_resp(const struct pldm_msg *msg, size_t payload_length,
 	}
 
 	struct pldm_read_file_resp *response =
-	    (struct pldm_read_file_resp *)msg->payload;
+		(struct pldm_read_file_resp *)msg->payload;
 
 	*completion_code = response->completion_code;
 	if (*completion_code == PLDM_SUCCESS) {
@@ -316,7 +312,7 @@ int encode_read_file_resp(uint8_t instance_id, uint8_t completion_code,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -327,7 +323,7 @@ int encode_read_file_resp(uint8_t instance_id, uint8_t completion_code,
 	}
 
 	struct pldm_read_file_resp *response =
-	    (struct pldm_read_file_resp *)msg->payload;
+		(struct pldm_read_file_resp *)msg->payload;
 	response->completion_code = completion_code;
 
 	if (response->completion_code == PLDM_SUCCESS) {
@@ -350,7 +346,7 @@ int decode_write_file_req(const struct pldm_msg *msg, size_t payload_length,
 	}
 
 	struct pldm_write_file_req *request =
-	    (struct pldm_write_file_req *)msg->payload;
+		(struct pldm_write_file_req *)msg->payload;
 
 	*file_handle = le32toh(request->file_handle);
 	*offset = le32toh(request->offset);
@@ -359,7 +355,7 @@ int decode_write_file_req(const struct pldm_msg *msg, size_t payload_length,
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 	*file_data_offset =
-	    sizeof(*file_handle) + sizeof(*offset) + sizeof(*length);
+		sizeof(*file_handle) + sizeof(*offset) + sizeof(*length);
 
 	return PLDM_SUCCESS;
 }
@@ -376,7 +372,7 @@ int encode_write_file_req(uint8_t instance_id, uint32_t file_handle,
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -387,7 +383,7 @@ int encode_write_file_req(uint8_t instance_id, uint32_t file_handle,
 	}
 
 	struct pldm_write_file_req *request =
-	    (struct pldm_write_file_req *)msg->payload;
+		(struct pldm_write_file_req *)msg->payload;
 
 	request->file_handle = htole32(file_handle);
 	request->offset = htole32(offset);
@@ -408,7 +404,7 @@ int decode_write_file_resp(const struct pldm_msg *msg, size_t payload_length,
 	}
 
 	struct pldm_write_file_resp *response =
-	    (struct pldm_write_file_resp *)msg->payload;
+		(struct pldm_write_file_resp *)msg->payload;
 
 	*completion_code = le32toh(response->completion_code);
 	if (response->completion_code == PLDM_SUCCESS) {
@@ -425,7 +421,7 @@ int encode_write_file_resp(uint8_t instance_id, uint8_t completion_code,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -436,7 +432,7 @@ int encode_write_file_resp(uint8_t instance_id, uint8_t completion_code,
 	}
 
 	struct pldm_write_file_resp *response =
-	    (struct pldm_write_file_resp *)msg->payload;
+		(struct pldm_write_file_resp *)msg->payload;
 	response->completion_code = completion_code;
 
 	if (response->completion_code == PLDM_SUCCESS) {
@@ -462,7 +458,7 @@ int decode_rw_file_by_type_memory_req(const struct pldm_msg *msg,
 	}
 
 	struct pldm_read_write_file_by_type_memory_req *request =
-	    (struct pldm_read_write_file_by_type_memory_req *)msg->payload;
+		(struct pldm_read_write_file_by_type_memory_req *)msg->payload;
 	*file_type = le16toh(request->file_type);
 	*file_handle = le32toh(request->file_handle);
 	*offset = le32toh(request->offset);
@@ -480,7 +476,7 @@ int encode_rw_file_by_type_memory_resp(uint8_t instance_id, uint8_t command,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -491,7 +487,7 @@ int encode_rw_file_by_type_memory_resp(uint8_t instance_id, uint8_t command,
 	}
 
 	struct pldm_read_write_file_by_type_memory_resp *response =
-	    (struct pldm_read_write_file_by_type_memory_resp *)msg->payload;
+		(struct pldm_read_write_file_by_type_memory_resp *)msg->payload;
 	response->completion_code = completion_code;
 	if (response->completion_code == PLDM_SUCCESS) {
 		response->length = htole32(length);
@@ -509,7 +505,7 @@ int encode_rw_file_by_type_memory_req(uint8_t instance_id, uint8_t command,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -520,7 +516,7 @@ int encode_rw_file_by_type_memory_req(uint8_t instance_id, uint8_t command,
 	}
 
 	struct pldm_read_write_file_by_type_memory_req *req =
-	    (struct pldm_read_write_file_by_type_memory_req *)msg->payload;
+		(struct pldm_read_write_file_by_type_memory_req *)msg->payload;
 	req->file_type = htole16(file_type);
 	req->file_handle = htole32(file_handle);
 	req->offset = htole32(offset);
@@ -544,7 +540,7 @@ int decode_rw_file_by_type_memory_resp(const struct pldm_msg *msg,
 	}
 
 	struct pldm_read_write_file_by_type_memory_resp *response =
-	    (struct pldm_read_write_file_by_type_memory_resp *)msg->payload;
+		(struct pldm_read_write_file_by_type_memory_resp *)msg->payload;
 	*completion_code = response->completion_code;
 	if (*completion_code == PLDM_SUCCESS) {
 		*length = le32toh(response->length);
@@ -567,7 +563,7 @@ int decode_new_file_req(const struct pldm_msg *msg, size_t payload_length,
 	}
 
 	struct pldm_new_file_req *request =
-	    (struct pldm_new_file_req *)msg->payload;
+		(struct pldm_new_file_req *)msg->payload;
 	*file_type = le16toh(request->file_type);
 	*file_handle = le32toh(request->file_handle);
 	*length = le64toh(request->length);
@@ -582,7 +578,7 @@ int encode_new_file_resp(uint8_t instance_id, uint8_t completion_code,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -593,7 +589,7 @@ int encode_new_file_resp(uint8_t instance_id, uint8_t completion_code,
 	}
 
 	struct pldm_new_file_resp *response =
-	    (struct pldm_new_file_resp *)msg->payload;
+		(struct pldm_new_file_resp *)msg->payload;
 	response->completion_code = completion_code;
 
 	return PLDM_SUCCESS;
@@ -607,7 +603,7 @@ int encode_new_file_req(uint8_t instance_id, uint16_t file_type,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -618,7 +614,7 @@ int encode_new_file_req(uint8_t instance_id, uint16_t file_type,
 	}
 
 	struct pldm_new_file_req *req =
-	    (struct pldm_new_file_req *)msg->payload;
+		(struct pldm_new_file_req *)msg->payload;
 	req->file_type = htole16(file_type);
 	req->file_handle = htole32(file_handle);
 	req->length = htole64(length);
@@ -638,7 +634,7 @@ int decode_new_file_resp(const struct pldm_msg *msg, size_t payload_length,
 	}
 
 	struct pldm_new_file_resp *response =
-	    (struct pldm_new_file_resp *)msg->payload;
+		(struct pldm_new_file_resp *)msg->payload;
 	*completion_code = response->completion_code;
 
 	return PLDM_SUCCESS;
@@ -659,7 +655,7 @@ int decode_rw_file_by_type_req(const struct pldm_msg *msg,
 	}
 
 	struct pldm_read_write_file_by_type_req *request =
-	    (struct pldm_read_write_file_by_type_req *)msg->payload;
+		(struct pldm_read_write_file_by_type_req *)msg->payload;
 	*file_type = le16toh(request->file_type);
 	*file_handle = le32toh(request->file_handle);
 	*offset = le32toh(request->offset);
@@ -680,7 +676,7 @@ int encode_rw_file_by_type_resp(uint8_t instance_id, uint8_t command,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -691,7 +687,7 @@ int encode_rw_file_by_type_resp(uint8_t instance_id, uint8_t command,
 	}
 
 	struct pldm_read_write_file_by_type_resp *response =
-	    (struct pldm_read_write_file_by_type_resp *)msg->payload;
+		(struct pldm_read_write_file_by_type_resp *)msg->payload;
 	response->completion_code = completion_code;
 	if (response->completion_code == PLDM_SUCCESS) {
 		response->length = htole32(length);
@@ -700,36 +696,10 @@ int encode_rw_file_by_type_resp(uint8_t instance_id, uint8_t command,
 	return PLDM_SUCCESS;
 }
 
-int encode_write_file_by_type_req(uint8_t instance_id, uint8_t command,
-				  uint16_t file_type, uint32_t file_handle,
-				  uint32_t offset, uint32_t length,
-				  const uint8_t * write_file_data,
-				  struct pldm_msg *msg, size_t payload_length)
-{
-	if(write_file_data == NULL) {
-		return PLDM_ERROR_INVALID_DATA;
-	}
-
-	int rc = encode_rw_file_by_type_req(instance_id, command,
-					    file_type, file_handle,
-					    offset, length,
-					    msg, payload_length);
-
-	if(rc != PLDM_SUCCESS){
-		return rc;
-	}
-
-	struct pldm_write_file_by_type_req *req =
-		(struct pldm_write_file_by_type_req *)msg->payload;
-
-	memcpy(req->write_data, write_file_data,length);
-	return rc;
-}
-
 int encode_rw_file_by_type_req(uint8_t instance_id, uint8_t command,
 			       uint16_t file_type, uint32_t file_handle,
 			       uint32_t offset, uint32_t length,
-			       struct pldm_msg *msg, size_t payload_length)
+			       struct pldm_msg *msg)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -738,11 +708,8 @@ int encode_rw_file_by_type_req(uint8_t instance_id, uint8_t command,
 	    command != PLDM_WRITE_FILE_BY_TYPE) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
-	if(payload_length < PLDM_RW_FILE_BY_TYPE_REQ_BYTES) {
-		return PLDM_ERROR_INVALID_LENGTH;
-	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -753,7 +720,7 @@ int encode_rw_file_by_type_req(uint8_t instance_id, uint8_t command,
 	}
 
 	struct pldm_read_write_file_by_type_req *req =
-	    (struct pldm_read_write_file_by_type_req *)msg->payload;
+		(struct pldm_read_write_file_by_type_req *)msg->payload;
 	req->file_type = htole16(file_type);
 	req->file_handle = htole32(file_handle);
 	req->offset = htole32(offset);
@@ -764,24 +731,21 @@ int encode_rw_file_by_type_req(uint8_t instance_id, uint8_t command,
 
 int decode_rw_file_by_type_resp(const struct pldm_msg *msg,
 				size_t payload_length, uint8_t *completion_code,
-				uint32_t *length, uint8_t* file_data)
+				uint32_t *length)
 {
 	if (msg == NULL || length == NULL || completion_code == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	if (payload_length < PLDM_RW_FILE_BY_TYPE_RESP_BYTES) {
+	if (payload_length != PLDM_RW_FILE_BY_TYPE_RESP_BYTES) {
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 
 	struct pldm_read_write_file_by_type_resp *response =
-	    (struct pldm_read_write_file_by_type_resp *)msg->payload;
+		(struct pldm_read_write_file_by_type_resp *)msg->payload;
 	*completion_code = response->completion_code;
 	if (*completion_code == PLDM_SUCCESS) {
 		*length = le32toh(response->length);
-	}
-	if(file_data) {
-	memcpy(file_data, response->file_data, *length);
 	}
 
 	return PLDM_SUCCESS;
@@ -800,7 +764,7 @@ int decode_file_ack_req(const struct pldm_msg *msg, size_t payload_length,
 	}
 
 	struct pldm_file_ack_req *request =
-	    (struct pldm_file_ack_req *)msg->payload;
+		(struct pldm_file_ack_req *)msg->payload;
 	*file_type = le16toh(request->file_type);
 	*file_handle = le32toh(request->file_handle);
 	*file_status = request->file_status;
@@ -815,7 +779,7 @@ int encode_file_ack_resp(uint8_t instance_id, uint8_t completion_code,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -826,7 +790,7 @@ int encode_file_ack_resp(uint8_t instance_id, uint8_t completion_code,
 	}
 
 	struct pldm_file_ack_resp *response =
-	    (struct pldm_file_ack_resp *)msg->payload;
+		(struct pldm_file_ack_resp *)msg->payload;
 	response->completion_code = completion_code;
 
 	return PLDM_SUCCESS;
@@ -840,7 +804,7 @@ int encode_file_ack_req(uint8_t instance_id, uint16_t file_type,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -851,7 +815,7 @@ int encode_file_ack_req(uint8_t instance_id, uint16_t file_type,
 	}
 
 	struct pldm_file_ack_req *req =
-	    (struct pldm_file_ack_req *)msg->payload;
+		(struct pldm_file_ack_req *)msg->payload;
 	req->file_type = htole16(file_type);
 	req->file_handle = htole32(file_handle);
 	req->file_status = file_status;
@@ -871,22 +835,23 @@ int decode_file_ack_resp(const struct pldm_msg *msg, size_t payload_length,
 	}
 
 	struct pldm_file_ack_resp *response =
-	    (struct pldm_file_ack_resp *)msg->payload;
+		(struct pldm_file_ack_resp *)msg->payload;
 	*completion_code = response->completion_code;
 
 	return PLDM_SUCCESS;
 }
 
 int encode_file_ack_with_meta_data_req(
-    uint8_t instance_id, uint16_t file_type, uint32_t file_handle,
-    uint8_t file_status, uint32_t file_meta_data_1, uint32_t file_meta_data_2,
-    uint32_t file_meta_data_3, uint32_t file_meta_data_4, struct pldm_msg *msg)
+	uint8_t instance_id, uint16_t file_type, uint32_t file_handle,
+	uint8_t file_status, uint32_t file_meta_data_1,
+	uint32_t file_meta_data_2, uint32_t file_meta_data_3,
+	uint32_t file_meta_data_4, struct pldm_msg *msg)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -897,7 +862,7 @@ int encode_file_ack_with_meta_data_req(
 	}
 
 	struct pldm_file_ack_with_meta_data_req *req =
-	    (struct pldm_file_ack_with_meta_data_req *)msg->payload;
+		(struct pldm_file_ack_with_meta_data_req *)msg->payload;
 	req->file_type = htole16(file_type);
 	req->file_handle = htole32(file_handle);
 	req->file_status = file_status;
@@ -922,17 +887,17 @@ int decode_file_ack_with_meta_data_resp(const struct pldm_msg *msg,
 	}
 
 	struct pldm_file_ack_with_meta_data_resp *response =
-	    (struct pldm_file_ack_with_meta_data_resp *)msg->payload;
+		(struct pldm_file_ack_with_meta_data_resp *)msg->payload;
 	*completion_code = response->completion_code;
 
 	return PLDM_SUCCESS;
 }
 
 int decode_file_ack_with_meta_data_req(
-    const struct pldm_msg *msg, size_t payload_length, uint16_t *file_type,
-    uint32_t *file_handle, uint8_t *file_status, uint32_t *file_meta_data_1,
-    uint32_t *file_meta_data_2, uint32_t *file_meta_data_3,
-    uint32_t *file_meta_data_4)
+	const struct pldm_msg *msg, size_t payload_length, uint16_t *file_type,
+	uint32_t *file_handle, uint8_t *file_status, uint32_t *file_meta_data_1,
+	uint32_t *file_meta_data_2, uint32_t *file_meta_data_3,
+	uint32_t *file_meta_data_4)
 {
 	if (msg == NULL || file_type == NULL || file_handle == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
@@ -943,7 +908,7 @@ int decode_file_ack_with_meta_data_req(
 	}
 
 	struct pldm_file_ack_with_meta_data_req *request =
-	    (struct pldm_file_ack_with_meta_data_req *)msg->payload;
+		(struct pldm_file_ack_with_meta_data_req *)msg->payload;
 	*file_type = le16toh(request->file_type);
 	*file_handle = le32toh(request->file_handle);
 	*file_status = request->file_status;
@@ -963,7 +928,7 @@ int encode_file_ack_with_meta_data_resp(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -974,22 +939,25 @@ int encode_file_ack_with_meta_data_resp(uint8_t instance_id,
 	}
 
 	struct pldm_file_ack_with_meta_data_resp *response =
-	    (struct pldm_file_ack_with_meta_data_resp *)msg->payload;
+		(struct pldm_file_ack_with_meta_data_resp *)msg->payload;
 	response->completion_code = completion_code;
 
 	return PLDM_SUCCESS;
 }
 
-int encode_new_file_with_metadata_req(
-    uint8_t instance_id, uint16_t file_type, uint32_t file_handle,
-    uint64_t length, uint32_t file_meta_data_1, uint32_t file_meta_data_2,
-    uint32_t file_meta_data_3, uint32_t file_meta_data_4, struct pldm_msg *msg)
+int encode_new_file_with_metadata_req(uint8_t instance_id, uint16_t file_type,
+				      uint32_t file_handle, uint64_t length,
+				      uint32_t file_meta_data_1,
+				      uint32_t file_meta_data_2,
+				      uint32_t file_meta_data_3,
+				      uint32_t file_meta_data_4,
+				      struct pldm_msg *msg)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -1000,7 +968,7 @@ int encode_new_file_with_metadata_req(
 	}
 
 	struct pldm_new_file_with_metadata_req *req =
-	    (struct pldm_new_file_with_metadata_req *)msg->payload;
+		(struct pldm_new_file_with_metadata_req *)msg->payload;
 	req->file_type = htole16(file_type);
 	req->file_handle = htole32(file_handle);
 	req->length = htole64(length);
@@ -1026,7 +994,7 @@ int decode_new_file_with_metadata_resp(const struct pldm_msg *msg,
 	}
 
 	struct pldm_new_file_with_metadata_resp *response =
-	    (struct pldm_new_file_with_metadata_resp *)msg->payload;
+		(struct pldm_new_file_with_metadata_resp *)msg->payload;
 
 	*completion_code = msg->payload[0];
 	if (*completion_code == PLDM_SUCCESS) {
@@ -1036,10 +1004,10 @@ int decode_new_file_with_metadata_resp(const struct pldm_msg *msg,
 }
 
 int decode_new_file_with_metadata_req(
-    const struct pldm_msg *msg, size_t payload_length, uint16_t *file_type,
-    uint32_t *file_handle, uint64_t *length, uint32_t *file_meta_data_1,
-    uint32_t *file_meta_data_2, uint32_t *file_meta_data_3,
-    uint32_t *file_meta_data_4)
+	const struct pldm_msg *msg, size_t payload_length, uint16_t *file_type,
+	uint32_t *file_handle, uint64_t *length, uint32_t *file_meta_data_1,
+	uint32_t *file_meta_data_2, uint32_t *file_meta_data_3,
+	uint32_t *file_meta_data_4)
 {
 	if (msg == NULL || file_type == NULL || file_handle == NULL ||
 	    length == NULL) {
@@ -1052,7 +1020,7 @@ int decode_new_file_with_metadata_req(
 	}
 
 	struct pldm_new_file_with_metadata_req *request =
-	    (struct pldm_new_file_with_metadata_req *)msg->payload;
+		(struct pldm_new_file_with_metadata_req *)msg->payload;
 	*file_type = le16toh(request->file_type);
 	*file_handle = le32toh(request->file_handle);
 	*length = le64toh(request->length);
@@ -1072,7 +1040,7 @@ int encode_new_file_with_metadata_resp(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	struct pldm_header_info header = {0};
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_RESPONSE;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_OEM;
@@ -1083,7 +1051,7 @@ int encode_new_file_with_metadata_resp(uint8_t instance_id,
 	}
 
 	struct pldm_new_file_with_metadata_resp *response =
-	    (struct pldm_new_file_with_metadata_resp *)msg->payload;
+		(struct pldm_new_file_with_metadata_resp *)msg->payload;
 
 	if (response->completion_code == PLDM_SUCCESS) {
 		response->completion_code = completion_code;

@@ -113,8 +113,8 @@ pldm_transport_mctp_demux_recv(struct pldm_transport *t, pldm_tid_t tid,
 		return PLDM_REQUESTER_RECV_FAIL;
 	}
 
-	ssize_t min_len =
-	    sizeof(eid) + sizeof(mctp_msg_type) + sizeof(struct pldm_msg_hdr);
+	ssize_t min_len = sizeof(eid) + sizeof(mctp_msg_type) +
+			  sizeof(struct pldm_msg_hdr);
 	ssize_t length = recv(demux->socket, NULL, 0, MSG_PEEK | MSG_TRUNC);
 	if (length <= 0) {
 		return PLDM_REQUESTER_RECV_FAIL;
@@ -141,7 +141,7 @@ pldm_transport_mctp_demux_recv(struct pldm_transport *t, pldm_tid_t tid,
 	}
 	iov[1].iov_len = pldm_len;
 	iov[1].iov_base = *pldm_resp_msg;
-	struct msghdr msg = {0};
+	struct msghdr msg = { 0 };
 	msg.msg_iov = iov;
 	msg.msg_iovlen = sizeof(iov) / sizeof(iov[0]);
 	ssize_t bytes = recvmsg(demux->socket, &msg, 0);
@@ -169,7 +169,7 @@ pldm_transport_mctp_demux_send(struct pldm_transport *t, pldm_tid_t tid,
 		return PLDM_REQUESTER_SEND_FAIL;
 	}
 
-	uint8_t hdr[2] = {eid, mctp_msg_type};
+	uint8_t hdr[2] = { eid, mctp_msg_type };
 
 	struct iovec iov[2];
 	iov[0].iov_base = hdr;
@@ -177,7 +177,7 @@ pldm_transport_mctp_demux_send(struct pldm_transport *t, pldm_tid_t tid,
 	iov[1].iov_base = (uint8_t *)pldm_req_msg;
 	iov[1].iov_len = req_msg_len;
 
-	struct msghdr msg = {0};
+	struct msghdr msg = { 0 };
 	msg.msg_iov = iov;
 	msg.msg_iovlen = sizeof(iov) / sizeof(iov[0]);
 
@@ -195,7 +195,7 @@ int pldm_transport_mctp_demux_init(struct pldm_transport_mctp_demux **ctx)
 	}
 
 	struct pldm_transport_mctp_demux *demux =
-	    calloc(1, sizeof(struct pldm_transport_mctp_demux));
+		calloc(1, sizeof(struct pldm_transport_mctp_demux));
 	if (!demux) {
 		return -ENOMEM;
 	}
@@ -228,7 +228,7 @@ struct pldm_transport_mctp_demux *
 pldm_transport_mctp_demux_init_with_fd(int mctp_fd)
 {
 	struct pldm_transport_mctp_demux *demux =
-	    calloc(1, sizeof(struct pldm_transport_mctp_demux));
+		calloc(1, sizeof(struct pldm_transport_mctp_demux));
 	if (!demux) {
 		return NULL;
 	}
@@ -250,7 +250,7 @@ pldm_transport_mctp_demux_init_with_fd(int mctp_fd)
 }
 
 int pldm_transport_mctp_demux_get_socket_fd(
-    struct pldm_transport_mctp_demux *ctx)
+	struct pldm_transport_mctp_demux *ctx)
 {
 	if (ctx && ctx->socket) {
 		return ctx->socket;

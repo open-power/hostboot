@@ -108,7 +108,7 @@ static pldm_requester_rc_t pldm_transport_af_mctp_send(struct pldm_transport *t,
 		return PLDM_REQUESTER_SEND_FAIL;
 	}
 
-	struct sockaddr_mctp addr = {0};
+	struct sockaddr_mctp addr = { 0 };
 	addr.smctp_family = AF_MCTP;
 	addr.smctp_addr.s_addr = eid;
 	addr.smctp_type = MCTP_MSG_TYPE_PLDM;
@@ -129,7 +129,7 @@ int pldm_transport_af_mctp_init(struct pldm_transport_af_mctp **ctx)
 	}
 
 	struct pldm_transport_af_mctp *af_mctp =
-	    calloc(1, sizeof(struct pldm_transport_af_mctp));
+		calloc(1, sizeof(struct pldm_transport_af_mctp));
 	if (!af_mctp) {
 		return -ENOMEM;
 	}
