@@ -41,6 +41,7 @@ class RawOp : public CommandInterface
     std::pair<int, std::vector<uint8_t>> createRequestMsg() override
 
     {
+        rawData[0] = (rawData[0] & 0xe0) | instanceId;
         return {PLDM_SUCCESS, rawData};
     }
 

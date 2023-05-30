@@ -246,7 +246,7 @@ int SoftPowerOff::getSensorInfo()
             return PLDM_ERROR;
         }
 
-        pldm_state_sensor_pdr* pdr;
+        pldm_state_sensor_pdr* pdr = nullptr;
         for (auto& rep : Response)
         {
             pdr = reinterpret_cast<pldm_state_sensor_pdr*>(rep.data());
