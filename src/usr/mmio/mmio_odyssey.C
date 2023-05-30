@@ -37,6 +37,7 @@
 #include <mmio/mmio_reasoncodes.H>
 #include <sys/sync.h>
 #include "mmio_odyssey.H"
+#include <endian.h>
 
 // Trace definition
 extern trace_desc_t* g_trac_mmio; //from mmio.C
@@ -283,6 +284,9 @@ errlHndl_t routeIbScom(DeviceFW::OperationType i_opType,
         // Only one arg : scom address
         uint64_t l_scomAddr = va_arg(i_args,uint64_t);
 
+        // SCOMs must be exactly 8-bytes
+        assert(io_buflen==8,"routeIbScom> buffer is %d != 8 bytes", io_buflen);
+
         //@FIXME-JIRA:PFHB-466 : NOOP Multicast scoms until we
         // have the workaround in place because they fail
         // one of the range checks in the MMIO code
@@ -298,6 +302,15 @@ errlHndl_t routeIbScom(DeviceFW::OperationType i_opType,
         // Transform the scom address into the MMIO address
         uint64_t l_mmioAddr = MMIOCOMMON_scom_to_offset(l_scomAddr);
 
+        // Make a convenient local var to deal with
+        uint64_t* l_scomdata = (reinterpret_cast<uint64_t *>(io_buffer));
+
+        // OMI is little-endian, need to byteswap the data
+        if(i_opType == DeviceFW::WRITE)
+        {
+            *l_scomdata = __builtin_bswap64(*l_scomdata);
+        }
+
         // Call the MMIO driver to actually perform the operation
         l_errhdl = DeviceFW::deviceOp(i_opType,
                                       i_target,
@@ -311,6 +324,12 @@ errlHndl_t routeIbScom(DeviceFW::OperationType i_opType,
                       l_scomAddr,
                       TARGETING::get_huid(i_target));
             break;
+        }
+
+        // OMI is little-endian, need to byteswap the data
+        if(i_opType == DeviceFW::READ)
+        {
+            *l_scomdata = __builtin_bswap64(*l_scomdata);
         }
 
     } while(0);
