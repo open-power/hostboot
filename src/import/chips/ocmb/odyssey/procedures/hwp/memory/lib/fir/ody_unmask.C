@@ -54,10 +54,6 @@ namespace mss
 
 namespace unmask
 {
-
-constexpr uint8_t IDX_PORT0 = 0;
-constexpr uint8_t IDX_PORT1 = 1;
-
 ///
 /// @brief Finds if a specific port is present
 /// @param[in] i_ports the vector of ports present on this OCMB chip
@@ -351,13 +347,13 @@ fapi2::ReturnCode after_scominit<mss::mc_type::ODYSSEY>( const fapi2::Target<fap
 
     // Port specific errors
     // Port 0
-    if(is_port_present(l_ports, IDX_PORT0))
+    if(is_port_present(l_ports, mss::unmask::IDX_PORT0))
     {
         l_srq_lfir.recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN30>();
     }
 
     // Port 1
-    if(is_port_present(l_ports, IDX_PORT1))
+    if(is_port_present(l_ports, mss::unmask::IDX_PORT1))
     {
         l_srq_lfir.recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN34>();
     }
@@ -373,11 +369,11 @@ fapi2::ReturnCode after_scominit<mss::mc_type::ODYSSEY>( const fapi2::Target<fap
 
         // Set the RCD errors to recoverable based upon the port
         FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN04>(l_ports,
-                 IDX_PORT0,
+                 mss::unmask::IDX_PORT0,
                  mss::fir::action::RECOV,
                  l_srq_lfir));
         FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN33>(l_ports,
-                 IDX_PORT1,
+                 mss::unmask::IDX_PORT1,
                  mss::fir::action::RECOV,
                  l_srq_lfir));
     }
@@ -417,11 +413,11 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::ODYSSEY>( const fapi2::Target<fap
         FAPI_TRY(after_memdiags_enable_rcd_recovery_helper(i_target));
 
         FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN13>(l_ports,
-                 IDX_PORT0,
+                 mss::unmask::IDX_PORT0,
                  mss::fir::action::LXSTOP,
                  l_srq_reg));
         FAPI_TRY(set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN40>(l_ports,
-                 IDX_PORT1,
+                 mss::unmask::IDX_PORT1,
                  mss::fir::action::LXSTOP,
                  l_srq_reg));
 

@@ -48,6 +48,9 @@ namespace mss
 namespace unmask
 {
 
+constexpr uint8_t IDX_PORT0 = 0;
+constexpr uint8_t IDX_PORT1 = 1;
+
 ///
 /// @brief Finds if a specific port is present
 /// @param[in] i_ports the vector of ports present on this OCMB chip

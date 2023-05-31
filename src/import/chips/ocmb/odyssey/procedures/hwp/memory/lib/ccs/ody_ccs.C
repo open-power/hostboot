@@ -47,6 +47,9 @@
 #include <generic/memory/lib/ccs/ccs_instruction.H>
 #include <generic/memory/lib/ccs/ccs_ddr5_commands.H>
 #include <lib/ody_attribute_accessors_manual.H>
+#include <generic/memory/lib/utils/fir/gen_mss_fir.H>
+#include <lib/fir/ody_fir_traits.H>
+#include <lib/fir/ody_unmask.H>
 
 // Generates linkage
 constexpr std::pair<uint64_t, uint64_t> ccsTraits<mss::mc_type::ODYSSEY>::CS_N[];
@@ -427,6 +430,95 @@ fapi2::ReturnCode cleanup_from_execute<mss::mc_type::ODYSSEY>
 
         // Only one of these register per chip, so no need to continue looping
         break;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup before running concurrent CCS
+/// @param[in] i_target the ocmb chip target
+/// @param[out] o_value returns the original value of ODC_SRQ_MBA_FARB0Q
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode pre_execute_via_mcbist(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    fapi2::buffer<uint64_t>& o_value)
+{
+    bool l_recov;
+    bool l_has_rcd = false;
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB0Q, l_data));
+    o_value = l_data;
+    l_recov = l_data.getBit<scomt::ody::ODC_SRQ_MBA_FARB0Q_CFG_DISABLE_RCD_RECOVERY>();
+    FAPI_TRY(mss::has_rcd(i_target, l_has_rcd));
+
+    // Disable RCD_discovery and set RCD parity FIR bits to XSTOP before concurrent CCS.
+    // Do it only if recovery is enabled AND ports have rcd.
+    // Needed as a workaround for an Odyssey erratum.
+    if(!l_recov && l_has_rcd)
+    {
+        // for FIR setting
+        mss::fir::reg2<scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR> l_srq_reg(i_target);
+        const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+        // Port specific errors
+        // Set the RCD errors to recoverable based upon the port
+        FAPI_TRY(mss::unmask::set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN04>(l_ports,
+                 mss::unmask::IDX_PORT0,
+                 mss::fir::action::XSTOP,
+                 l_srq_reg));
+        FAPI_TRY(mss::unmask::set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN33>(l_ports,
+                 mss::unmask::IDX_PORT1,
+                 mss::fir::action::XSTOP,
+                 l_srq_reg));
+        FAPI_TRY(l_srq_reg.write(), "Failed to write SRQ FIR register for " GENTARGTIDFORMAT, GENTARGTID(i_target));
+        l_data.setBit<scomt::ody::ODC_SRQ_MBA_FARB0Q_CFG_DISABLE_RCD_RECOVERY>();
+        FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB0Q, l_data));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup after running concurrent CCS
+/// @param[in] i_target the ocmb chip target
+/// @param[in] i_value value of ODC_SRQ_MBA_FARB0Q to be restored
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode post_execute_via_mcbist(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const fapi2::buffer<uint64_t>& i_value)
+{
+    bool l_recov;
+    bool l_has_rcd = false;
+    mss::fir::reg2<scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR> l_srq_reg(i_target);
+    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+
+    // Check the recovery bit status before making pre_execute_via_mcbist changes
+    l_recov = i_value.getBit<scomt::ody::ODC_SRQ_MBA_FARB0Q_CFG_DISABLE_RCD_RECOVERY>();
+    FAPI_TRY(mss::has_rcd(i_target, l_has_rcd));
+
+    // Restore the recovery bit and FIR bits after concurrent CCS.
+    if(!l_recov && l_has_rcd)
+    {
+        // Port specific errors
+        // Set the RCD errors to recoverable based upon the port
+        FAPI_TRY(mss::unmask::set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN04>(l_ports,
+                 mss::unmask::IDX_PORT0,
+                 mss::fir::action::RECOV,
+                 l_srq_reg));
+        FAPI_TRY(mss::unmask::set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN33>(l_ports,
+                 mss::unmask::IDX_PORT1,
+                 mss::fir::action::RECOV,
+                 l_srq_reg));
+        FAPI_TRY(l_srq_reg.write(), "Failed to write SRQ FIR register for " GENTARGTIDFORMAT, GENTARGTID(i_target));
+        // Restore the recovery bit to i_value that is stored from pre_execute_via_mcbist
+        FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB0Q, i_value));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;

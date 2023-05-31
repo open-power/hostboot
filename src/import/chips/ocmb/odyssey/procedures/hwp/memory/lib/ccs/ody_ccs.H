@@ -139,6 +139,27 @@ template<>
 fapi2::ReturnCode get_rank_config<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         rank_configuration& o_rank_config);
 
+///
+/// @brief Setup before running concurrent CCS
+/// @param[in] i_target the ocmb chip target
+/// @param[out] o_value returns the original value of ODC_SRQ_MBA_FARB0Q
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode pre_execute_via_mcbist(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    fapi2::buffer<uint64_t>& o_value);
+
+///
+/// @brief Setup after running concurrent CCS
+/// @param[in] i_target the ocmb chip target
+/// @param[in] i_value value of ODC_SRQ_MBA_FARB0Q to be restored
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode post_execute_via_mcbist(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const fapi2::buffer<uint64_t>& i_value);
+
+
 namespace workarounds
 {
 
