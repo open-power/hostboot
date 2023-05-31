@@ -273,6 +273,29 @@ static constexpr uint16_t PHASE_MIN = 250;
 static constexpr uint16_t PHASE_MAX = 1500;
 
 ///
+/// @brief
+///
+enum data_position : uint8_t
+{
+    DATA_0   = 0,
+    DATA_1   = 1,
+    DATA_2   = 2,
+    DATA_3   = 3,
+    DATA_4   = 4,
+    DATA_5   = 5,
+    DATA_6   = 6,
+    DATA_7   = 7,
+    DATA_8   = 8,
+    DATA_9   = 9,
+    DATA_10  = 10,
+    DATA_11  = 11,
+    DATA_12  = 12,
+    DATA_13  = 13,
+    DATA_14  = 14,
+    DATA_15  = 15,
+};
+
+///
 /// @brief Bread crumb values to return
 ///
 enum bread_crumb : uint8_t
