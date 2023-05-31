@@ -182,6 +182,7 @@ class ddimm_0_0 : public mss::efd::base
         ///
         virtual fapi2::ReturnCode set_2n_mode(const std::vector<uint8_t>& i_efd) const
         {
+            constexpr uint8_t FIELD_2N = 0;
             uint8_t l_field = 0;
             uint32_t l_omi_freq = 0;
             const auto& l_proc_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(iv_ocmb);
@@ -209,6 +210,10 @@ class ddimm_0_0 : public mss::efd::base
             {
                 FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::MODE_2N_REQUIREMENTS_25600, i_efd, SET_2N_MODE, l_field));
             }
+
+            // Convert from the field description to the attribute value
+            // For the field, a value of 0 indicates 2N mode while a value of a 1 indicates 1N mode
+            l_field = l_field == FIELD_2N ? fapi2::ENUM_ATTR_MEM_2N_MODE_2N : fapi2::ENUM_ATTR_MEM_2N_MODE_1N;
 
             // Set the attr
             FAPI_TRY(mss::attr::set_mem_2n_mode(iv_ocmb, l_field));

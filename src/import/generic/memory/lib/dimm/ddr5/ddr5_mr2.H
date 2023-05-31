@@ -124,7 +124,7 @@ class mr2_data : public mr_base_data<MC>
 
             l_data. template writeBit<RD_PREAMBLE_TRAIN>(iv_rd_preamble_train)
             . template writeBit<WR_LVL_TRAIN>(iv_wr_leveling)
-            . template writeBit<MODE_2N>(iv_2n_mode_read_only)
+            . template writeBit<MODE_2N>(iv_2n_mode_read_only == fapi2::ENUM_ATTR_MEM_2N_MODE_1N)
             . template writeBit<CS_DURING_MPC>(iv_cs_during_mpc)
             . template writeBit<DEVICE15_MPSM>(iv_device15_mpsm)
             . template writeBit<INTERNAL_WR_TIMING>(iv_internal_wr_timing)
@@ -163,7 +163,7 @@ class mr2_data : public mr_base_data<MC>
 
             iv_rd_preamble_train = l_data.getBit<RD_PREAMBLE_TRAIN>();
             iv_wr_leveling = l_data.getBit<WR_LVL_TRAIN>();
-            iv_2n_mode_read_only = l_data.getBit<MODE_2N>();
+            iv_2n_mode_read_only = l_data.getBit<MODE_2N>() ? fapi2::ENUM_ATTR_MEM_2N_MODE_1N : fapi2::ENUM_ATTR_MEM_2N_MODE_2N;
             iv_mpsm = l_data.getBit<MPSM>();
             iv_cs_during_mpc = l_data.getBit<CS_DURING_MPC>();
             iv_device15_mpsm = l_data.getBit<DEVICE15_MPSM>();
