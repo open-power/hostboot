@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -25,10 +25,12 @@
 import json
 import os.path
 import struct
+from udparsers.helpers.hostfw_trace import data_to_hexstring
 
 from udparsers.helpers.errludP_Helpers import hexConcat, memConcat, intConcat, hexDump
 
 OCC_STRING_LID_FILE = "81e00687.lid"
+DEBUG_USER_DATA = 0
 
 ####################################################
 # Used to convert data to readable string
@@ -304,6 +306,9 @@ class errludP_occ:
         lines = []  # stores the parsed data to be returned
         parsed = 0
 
+        if len(tracedata) == 0: # NO DATA TO PARSE!
+            return lines, i
+
         # Get the LID file for the HB string file
         stringFile = getLid(OCC_STRING_LID_FILE)
         if stringFile == "":
@@ -422,6 +427,7 @@ class errludP_occ:
         errud = {}
         j = 0
         while i < len(data):
+            start = i
             errud[j] = dict()
             udstring='UserDetail['+str(j)+']'
             udVersion, _= intConcat(data, i, i+1)
@@ -433,21 +439,28 @@ class errludP_occ:
             errud[j]['reserved'], i=hexConcat(data, i, i+4)
             endUd = i + udSize
 
+            if DEBUG_USER_DATA > 0:
+                print("USER DATA HEADER "+str(j)+":")
+                hexStrings = data_to_hexstring(data, start, i)
+                for line in hexStrings:
+                    print(line)
+
+                print("USER DATA BLOCK "+str(j)+": (type="+str(udType)+", size="+str(udSize)+")")
+                hexStrings = data_to_hexstring(data, i, endUd)
+                for line in hexStrings:
+                    print(line)
+
             if udType == "01": # TRACE
+                subTraceNum = 1
                 parsed = 0
-                to = 0
-                tracedata = data[i:udSize]
-                traceresults,to = errludP_occ.parseTrace(tracedata, to)
-                i += to
-                udSize -= to
-                d['OCC TRACE'] = traceresults
-                if udSize > 0:
+                while udSize > 0:
                     to = 0
-                    tracedata = data[i:udSize]
+                    tracedata = data[i:i+udSize]
                     traceresults,to = errludP_occ.parseTrace(tracedata, to)
                     i += to
                     udSize -= to
-                    d['OCC TRACE2'] = traceresults
+                    errud[j]["Trace "+str(subTraceNum)] = traceresults
+                    subTraceNum += 1
 
             elif udType == "02": # CALLHOME
                 chStart = i
