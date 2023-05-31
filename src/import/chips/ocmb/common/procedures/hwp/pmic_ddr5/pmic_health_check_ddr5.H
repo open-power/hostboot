@@ -41,29 +41,6 @@
 #include <lib/utils/pmic_common_utils_ddr5.H>
 #include <hwp_data_stream.H>
 
-///
-/// @brief
-///
-enum data_position : uint8_t
-{
-    DATA_0   = 0,
-    DATA_1   = 1,
-    DATA_2   = 2,
-    DATA_3   = 3,
-    DATA_4   = 4,
-    DATA_5   = 5,
-    DATA_6   = 6,
-    DATA_7   = 7,
-    DATA_8   = 8,
-    DATA_9   = 9,
-    DATA_10  = 10,
-    DATA_11  = 11,
-    DATA_12  = 12,
-    DATA_13  = 13,
-    DATA_14  = 14,
-    DATA_15  = 15,
-};
-
 static constexpr uint8_t NUMBER_ADDITIONAL_DT_REGS_READ = 2;
 static constexpr uint8_t NUMBER_DT_REGS_READ = 2;
 static constexpr uint8_t NUMBER_PMIC_REGS_READ = 12;

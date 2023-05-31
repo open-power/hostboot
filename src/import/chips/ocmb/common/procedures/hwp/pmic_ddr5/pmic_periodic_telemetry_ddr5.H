@@ -45,6 +45,17 @@ typedef fapi2::ReturnCode (*pmic_periodic_telemetry_ddr5_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
     fapi2::hwp_data_ostream&);
 
+static constexpr uint8_t NUMBER_PMIC_REGS_READ = 4;
+
+///
+/// @brief Struct type for ADC pair
+///
+typedef struct
+{
+    uint8_t first;
+    uint16_t* second;
+} adu_map_t;
+
 ///
 /// @brief Read and store serial number and CCIN number
 ///
@@ -64,6 +75,18 @@ void read_serial_ccin_number(mss::pmic::ddr5::target_info_redundancy_ddr5& io_ta
 ///
 void read_adc_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                    mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info);
+
+///
+/// @brief Read and neg orfet value
+///
+/// @param[in,out] io_pmic_dt_pair PMIC and DT target info struct
+/// @param[in] i_reg_sel reg selection
+/// @param[in,out] read data
+/// None
+///
+void read_neg_orfet_cnt(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_pair,
+                        const uint8_t i_reg_sel,
+                        fapi2::buffer<uint8_t>& io_data_buffer);
 
 ///
 /// @brief Read and store DT regs
@@ -106,7 +129,6 @@ void collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io
 fapi2::ReturnCode pmic_periodic_telemetry_ddr5_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
         mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
         mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info);
-
 
 extern "C"
 {

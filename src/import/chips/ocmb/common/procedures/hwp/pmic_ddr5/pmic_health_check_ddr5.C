@@ -586,18 +586,18 @@ mss::pmic::ddr5::dt_state check_dt_faults(mss::pmic::ddr5::target_info_redundanc
 void fill_pmic_struct(const fapi2::buffer<uint8_t> (&i_data)[NUMBER_PMIC_REGS_READ],
                       mss::pmic::ddr5::pmic_health_check_telemetry& io_pmic_health_check)
 {
-    io_pmic_health_check.iv_r04 = i_data[data_position::DATA_0];
-    io_pmic_health_check.iv_r05 = i_data[data_position::DATA_1];
-    io_pmic_health_check.iv_r06 = i_data[data_position::DATA_2];
-    io_pmic_health_check.iv_r07 = i_data[data_position::DATA_3];
-    io_pmic_health_check.iv_r08 = i_data[data_position::DATA_4];
-    io_pmic_health_check.iv_r09 = i_data[data_position::DATA_5];
-    io_pmic_health_check.iv_r0a = i_data[data_position::DATA_6];
-    io_pmic_health_check.iv_r0b = i_data[data_position::DATA_7];
-    io_pmic_health_check.iv_swa_current_mA = i_data[data_position::DATA_8];
-    io_pmic_health_check.iv_swb_current_mA = i_data[data_position::DATA_9];
-    io_pmic_health_check.iv_swc_current_mA = i_data[data_position::DATA_10];
-    io_pmic_health_check.iv_swd_current_mA = i_data[data_position::DATA_11];
+    io_pmic_health_check.iv_r04 = i_data[mss::pmic::ddr5::data_position::DATA_0];
+    io_pmic_health_check.iv_r05 = i_data[mss::pmic::ddr5::data_position::DATA_1];
+    io_pmic_health_check.iv_r06 = i_data[mss::pmic::ddr5::data_position::DATA_2];
+    io_pmic_health_check.iv_r07 = i_data[mss::pmic::ddr5::data_position::DATA_3];
+    io_pmic_health_check.iv_r08 = i_data[mss::pmic::ddr5::data_position::DATA_4];
+    io_pmic_health_check.iv_r09 = i_data[mss::pmic::ddr5::data_position::DATA_5];
+    io_pmic_health_check.iv_r0a = i_data[mss::pmic::ddr5::data_position::DATA_6];
+    io_pmic_health_check.iv_r0b = i_data[mss::pmic::ddr5::data_position::DATA_7];
+    io_pmic_health_check.iv_swa_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_8];
+    io_pmic_health_check.iv_swb_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_9];
+    io_pmic_health_check.iv_swc_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_10];
+    io_pmic_health_check.iv_swd_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_11];
 }
 
 ///
@@ -789,22 +789,22 @@ void collect_additional_adc_data(const mss::pmic::ddr5::target_info_redundancy_d
     mss::pmic::i2c::reg_read_contiguous(i_target_info.iv_adc, ADC_REGS::SYSTEM_STATUS, l_data_adc);
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    io_additional_info.iv_adc.iv_system_status = l_data_adc[data_position::DATA_0];
-    io_additional_info.iv_adc.iv_general_cfg   = l_data_adc[data_position::DATA_1];
-    io_additional_info.iv_adc.iv_data_cfg      = l_data_adc[data_position::DATA_2];
-    io_additional_info.iv_adc.iv_osr_cfg       = l_data_adc[data_position::DATA_3];
-    io_additional_info.iv_adc.iv_opmode_cfg    = l_data_adc[data_position::DATA_4];
-    io_additional_info.iv_adc.iv_pin_cfg       = l_data_adc[data_position::DATA_5];
-    io_additional_info.iv_adc.iv_dummy_0       = l_data_adc[data_position::DATA_6];
-    io_additional_info.iv_adc.iv_gpio_cfg      = l_data_adc[data_position::DATA_7];
-    io_additional_info.iv_adc.iv_dummy_1       = l_data_adc[data_position::DATA_8];
-    io_additional_info.iv_adc.iv_gpo_drive_cfg = l_data_adc[data_position::DATA_9];
-    io_additional_info.iv_adc.iv_dummy_2       = l_data_adc[data_position::DATA_10];
-    io_additional_info.iv_adc.iv_gpo_value_cfg = l_data_adc[data_position::DATA_11];
-    io_additional_info.iv_adc.iv_dummy_3       = l_data_adc[data_position::DATA_12];
-    io_additional_info.iv_adc.iv_gpi_value     = l_data_adc[data_position::DATA_13];
-    io_additional_info.iv_adc.iv_dummy_4       = l_data_adc[data_position::DATA_14];
-    io_additional_info.iv_adc.iv_dummy_5       = l_data_adc[data_position::DATA_15];
+    io_additional_info.iv_adc.iv_system_status = l_data_adc[mss::pmic::ddr5::data_position::DATA_0];
+    io_additional_info.iv_adc.iv_general_cfg   = l_data_adc[mss::pmic::ddr5::data_position::DATA_1];
+    io_additional_info.iv_adc.iv_data_cfg      = l_data_adc[mss::pmic::ddr5::data_position::DATA_2];
+    io_additional_info.iv_adc.iv_osr_cfg       = l_data_adc[mss::pmic::ddr5::data_position::DATA_3];
+    io_additional_info.iv_adc.iv_opmode_cfg    = l_data_adc[mss::pmic::ddr5::data_position::DATA_4];
+    io_additional_info.iv_adc.iv_pin_cfg       = l_data_adc[mss::pmic::ddr5::data_position::DATA_5];
+    io_additional_info.iv_adc.iv_dummy_0       = l_data_adc[mss::pmic::ddr5::data_position::DATA_6];
+    io_additional_info.iv_adc.iv_gpio_cfg      = l_data_adc[mss::pmic::ddr5::data_position::DATA_7];
+    io_additional_info.iv_adc.iv_dummy_1       = l_data_adc[mss::pmic::ddr5::data_position::DATA_8];
+    io_additional_info.iv_adc.iv_gpo_drive_cfg = l_data_adc[mss::pmic::ddr5::data_position::DATA_9];
+    io_additional_info.iv_adc.iv_dummy_2       = l_data_adc[mss::pmic::ddr5::data_position::DATA_10];
+    io_additional_info.iv_adc.iv_gpo_value_cfg = l_data_adc[mss::pmic::ddr5::data_position::DATA_11];
+    io_additional_info.iv_adc.iv_dummy_3       = l_data_adc[mss::pmic::ddr5::data_position::DATA_12];
+    io_additional_info.iv_adc.iv_gpi_value     = l_data_adc[mss::pmic::ddr5::data_position::DATA_13];
+    io_additional_info.iv_adc.iv_dummy_4       = l_data_adc[mss::pmic::ddr5::data_position::DATA_14];
+    io_additional_info.iv_adc.iv_dummy_5       = l_data_adc[mss::pmic::ddr5::data_position::DATA_15];
 }
 
 ///
