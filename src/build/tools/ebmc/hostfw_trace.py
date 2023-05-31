@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2022
+# Contributors Listed Below - COPYRIGHT 2021,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -123,6 +123,10 @@ TRACE_MAX_ARGS = 8
 """
 TRACE_FILENAME = 32
 flags = 0
+
+DEBUG_TRACE_HEADER = 0
+DEBUG_TRACE_DATA = 0
+DEBUG_TRACE_ENTRY = 0
 
 """@brief Trace identification flag
 """
@@ -241,6 +245,14 @@ def trexMyVsnprintf(bData, fstring, fsource, vparms_start, vparms_end):
         # Check for supported format characters following the '%' which are sub-specifiers
         # such as flags (-+#0), precision (.num) and length (l, ll, L).
         # Also check for unsupported format characters such as the length specifiers hjzt.
+        #
+        # Trace Format String Assertions:
+        # 1. %p will be supported as a 4-byte data entry for legacy support.
+        #    %lp will be supported as a 8-byte data entry
+        # 2. Any number of “l” characters in the format string signifies 8 bytes of data.  This
+        #    is despite the fact that on some platforms %l=4 and %ll=8.
+        # 3. Every subsystem must modify their hasher to match the number of bytes that are saved
+        #    into the trace binary
         longflag = False
         while(1):
             if fstring[i] == 'l':
@@ -249,6 +261,9 @@ def trexMyVsnprintf(bData, fstring, fsource, vparms_start, vparms_end):
             elif fstring[i] == 'L':
                 longflag = True
                 i += 1
+            elif fstring[i] == 'p':
+                # Replace %p with %x
+                fstring = fstring[0 : i : ] + "x" + fstring[i + 1 : :]
             elif unsupportedSubSpecifiers.find(fstring[i]) != -1: #Unsupported char found
                 #Remove char from format string
                 fstring = fstring[0 : i : ] + fstring[i + 1 : :]
@@ -352,7 +367,7 @@ def get_format_by_hash(hashValue):
     if h is not None:
         return h['format']
     else:
-        return ''
+        return '!!! NO STRING NO TRACE !!! for hash='+str(hashValue)
 
 """ Gets the source file for the given hash string
 
@@ -888,6 +903,12 @@ def parse_binary_data_header_v1(binaryData, headerOffset):
     # Reading bytes therefore endianness is not a factor
     (version, retrievedHeaderDataSize, timeFlag, endianess) = struct.unpack_from('4B', binaryData, offset)
 
+    if DEBUG_TRACE_HEADER > 0:
+        print("Trace Header:")
+        hexStrings = data_to_hexstring(binaryData, 0, headerDataSize)
+        for line in hexStrings:
+            print(line)
+
     # Confirm the binary data is version 1
     if (version != TRACE_VERSION1):
         capture_error("Error: Expected version " + str(TRACE_VERSION1) +
@@ -925,11 +946,15 @@ def parse_binary_data_header_v1(binaryData, headerOffset):
 
     # Confirm that the size of binary is equal to the offset to the last trace
     # entry size.  The last entry size will be at the end of the buffer
-    if ( sizeOfBinaryData != offsetToLastEntrySize ):
-        capture_error("Error: The offset to the last trace entry size " + str(offsetToLastEntrySize) +
-                      " does not equal the size of the binary data " + str(sizeOfBinaryData) +
-                      ".  The binary data is corrupt/incorrect" )
-        return -1, 0
+    if (sizeOfBinaryData != offsetToLastEntrySize):
+        # Some apps do not truncate the trace buffer correctly so the offset to the last
+        #   entry is actually before the start of the trace block. Add a warning and adjust
+        #   the offset to allow the trace to be parsed. The oldest trace entry will be
+        #   detected as truncated and be dropped. Allowing this for backwards compatibility.
+        capture_warning("block size:"+str(sizeOfBinaryData)+" != offset to last entry:"+
+                str(offsetToLastEntrySize)+" (wrapCount="+str(wrapCount)+") for component: "+
+                compStr)
+        offsetToLastEntrySize = sizeOfBinaryData
 
     # Get the offset to the start of the trace entries which is right after
     # the header info
@@ -976,6 +1001,12 @@ def parse_data_trace_entries_v1(binaryData, headerData):
     compStr = headerData.compName
     endian = headerData.endianPythonChar
 
+    if DEBUG_TRACE_DATA > 0:
+        print("Trace Data for component \""+compStr+"\":")
+        hexStrings = data_to_hexstring(binaryData, startOffset, endOffset)
+        for line in hexStrings:
+            print(line)
+
     # Cache the size, the number of bytes that make up the trace entry size
     traceEntryByteSize = 4
 
@@ -1016,9 +1047,11 @@ def parse_data_trace_entries_v1(binaryData, headerData):
 
         # Verify that the start of the entry is *not* before the start offset
         if startOffset > traceEntryStart:
-            capture_error("Error: Start of trace entry " + str(traceEntryStart) +
-                          " precedes the start of trace buffer " + str(startOffset))
-            return -1, traceEntriesV2
+            # Print warning, but still return the successfully parsed trace
+            capture_warning("Ignoring truncated last trace entry (offset:" +
+                    str(traceEntryStart) + " < starting offset:" + str(startOffset) +
+                    ") for component \""+compStr+"\"")
+            return 0, traceEntriesV2
 
         # The end of the trace is where the trace entry size begins therefore
         # passing traceEntrySizeOffset as the trace entry end
@@ -1192,6 +1225,12 @@ def parse_trace_entry_header_v1(binaryData, endian, traceEntryStart, traceEntryE
 
     startOffset = traceEntryStart
     endOffset = traceEntryEnd
+
+    if DEBUG_TRACE_ENTRY > 0:
+        print("Trace Entry:")
+        hexStrings = data_to_hexstring(binaryData, startOffset, endOffset)
+        for line in hexStrings:
+            print(line)
 
     if (startOffset + dataHeaderSize) > endOffset:
         capture_error("Error: Trace entry buffer size " +  str(traceEntryEnd - traceEntryStart + 1) +
