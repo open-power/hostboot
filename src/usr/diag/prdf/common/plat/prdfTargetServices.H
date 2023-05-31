@@ -289,14 +289,6 @@ TARGETING::TargetHandle_t getConnectedPeerTarget(
 /**
  * @param  i_trgt The target OCMB_CHIP or MEM_PORT.
  * @param  i_rank The target rank.
- * @return A list of DIMMs connected to the target and rank.
- */
-TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_trgt,
-                                               const MemRank & i_rank );
-
-/**
- * @param  i_trgt The target OCMB_CHIP or MEM_PORT.
- * @param  i_rank The target rank.
  * @param  i_port Port select
  * @return The DIMM connected to the target and rank on a port.
  */

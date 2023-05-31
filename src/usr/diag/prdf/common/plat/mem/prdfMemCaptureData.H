@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,9 +39,11 @@ namespace MemCaptureData
  * @brief Adds memory ECC FFDC to an SDC.
  * @param i_chip OCMB.
  * @param io_sc  Step code data struct.
+ * @param i_port Target memory port.
  */
 template<TARGETING::TYPE T>
-void addEccData( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
+void addEccData( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
+                 uint8_t i_port );
 
 /**
  * @brief Adds Memory ECC FFDC to an error log.
@@ -52,9 +54,11 @@ void addEccData( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
  *        information is not relevant during its intended uses.
  * @param i_trgt An OCMB target
  * @param o_errl Error log.
+ * @param i_port Target memory port.
  */
 template<TARGETING::TYPE T>
-void addEccData( TARGETING::TargetHandle_t i_trgt, errlHndl_t io_errl );
+void addEccData( TARGETING::TargetHandle_t i_trgt, errlHndl_t io_errl,
+                 uint8_t i_port );
 
 /**
  * @brief Adds a new user data section to the error log containing a MemoryMru
@@ -69,39 +73,42 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl );
  *        spare, etc.) for the given OCMB and adds it to the capture data.
  * @param i_trgt An OCMB target.
  * @param io_cd  Capture data struct.
+ * @param i_port Target memory port.
  * @note  This function will be used to capture DRAM repair data into the
  *        capture data struct. Other functions can call this function and
  *        update the error log.
  */
 template<TARGETING::TYPE T>
 void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
-                             CaptureData & io_cd );
+                             CaptureData & io_cd, uint8_t i_port );
 
 /**
  * @brief Queries the Bad DQ attributes for the content of the DRAM repairs VPD
  *        and adds it to the capture data.
  * @param i_trgt An OCMB target.
  * @param io_cd  Capture data struct.
+ * @param i_port Target memory port.
  * @note  This function will be used to capture DRAM repair data into the
  *        capture data struct. Other functions can call this function and
  *        update the error log.
  */
 template<TARGETING::TYPE T>
 void captureDramRepairsVpd( TARGETING::TargetHandle_t i_trgt,
-                            CaptureData & io_cd );
+                            CaptureData & io_cd, uint8_t i_port );
 
 /**
  * @brief Queries the Row Repair attributes for the content of the DRAM repairs
  *        VPD and adds it to the capture data.
  * @param i_trgt An OCMB target.
  * @param io_cd  Capture data struct.
+ * @param i_port Target memory port.
  * @note  This function will be used to capture row repair data into the
  *        capture data struct. Other functions can call this function and
  *        update the error log.
  */
 template<TARGETING::TYPE T>
 void captureRowRepairVpd( TARGETING::TargetHandle_t i_trgt,
-                          CaptureData & io_cd );
+                          CaptureData & io_cd, uint8_t i_port );
 
 /**
  * @brief Queries the IUE threshold variable for the IUE counts and adds them

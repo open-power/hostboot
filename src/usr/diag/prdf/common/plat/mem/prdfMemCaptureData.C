@@ -146,7 +146,7 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
 
 template<TARGETING::TYPE T>
 void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
-                             CaptureData & io_cd )
+                             CaptureData & io_cd, uint8_t i_port )
 {
     #define PRDF_FUNC "[captureDramRepairsData] "
 
@@ -159,8 +159,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
 
     do
     {
-        // TODO Odyssey - multiple port support
-        getMasterRanks<T>( i_trgt, 0, masterRanks );
+        getMasterRanks<T>( i_trgt, i_port, masterRanks );
         if( masterRanks.empty() )
         {
             PRDF_ERR( PRDF_FUNC "Master Rank list size is 0");
@@ -182,23 +181,21 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
         // Iterate all ranks to get DRAM repair data
         for ( auto & rank : masterRanks )
         {
-            // TODO Odyssey - collect both port0 and port1
             // Get chip/symbol marks
             MemMark cm, sm;
-            rc = MarkStore::readChipMark<T>( chip, rank, 0, cm );
+            rc = MarkStore::readChipMark<T>( chip, rank, i_port, cm );
             if ( SUCCESS != rc )
             {
-                PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,0x%02x) "
-                          "failed", chip->getHuid(), rank.getKey() );
+                PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,0x%02x,%x) "
+                          "failed", chip->getHuid(), rank.getKey(), i_port );
                 continue;
             }
 
-            // TODO Odyssey - collect both port0 and port1
-            rc = MarkStore::readSymbolMark<T>( chip, rank, 0, sm );
+            rc = MarkStore::readSymbolMark<T>( chip, rank, i_port, sm );
             if ( SUCCESS != rc )
             {
-                PRDF_ERR( PRDF_FUNC "readSymbolMark<T>(0x%08x,0x%02x) "
-                          "failed", chip->getHuid(), rank.getKey() );
+                PRDF_ERR( PRDF_FUNC "readSymbolMark<T>(0x%08x,0x%02x,%x) "
+                          "failed", chip->getHuid(), rank.getKey(), i_port );
                 continue;
             }
 
@@ -274,7 +271,8 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
+void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd,
+                           uint8_t i_port)
 {
     #define PRDF_FUNC "[captureDramRepairsVpd] "
 
@@ -287,8 +285,7 @@ void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
     do
     {
         std::vector<MemRank> masterRanks;
-        // TODO Odyssey - multiple port support
-        getMasterRanks<T>( i_trgt, 0, masterRanks );
+        getMasterRanks<T>( i_trgt, i_port, masterRanks );
         if( masterRanks.empty() )
         {
             PRDF_ERR( PRDF_FUNC "Master Rank list size is 0");
@@ -357,7 +354,8 @@ void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-void captureRowRepairVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
+void captureRowRepairVpd(TargetHandle_t i_trgt, CaptureData & io_cd,
+                         uint8_t i_port)
 {
     #define PRDF_FUNC "[captureRowRepairVpd] "
 
@@ -370,8 +368,7 @@ void captureRowRepairVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
     do
     {
         std::vector<MemRank> masterRanks;
-        // TODO Odyssey - multiple port support
-        getMasterRanks<T>( i_trgt, 0, masterRanks );
+        getMasterRanks<T>( i_trgt, i_port, masterRanks );
         if( masterRanks.empty() )
         {
             PRDF_ERR( PRDF_FUNC "Master Rank list size is 0");
@@ -389,13 +386,24 @@ void captureRowRepairVpd(TargetHandle_t i_trgt, CaptureData & io_cd)
         uint8_t capData[sz_maxData];
         memset( capData, 0x00, sz_maxData );
 
-        // Iterate all ranks to get VPD data
-        uint32_t idx = 0;
-        for ( auto & rank : masterRanks )
+        // Get the memory port
+        TargetHandle_t memport = getConnectedChild(i_trgt, TYPE_MEM_PORT,
+                                                   i_port);
+        if (nullptr == memport)
         {
-            // Iterate all dimms per rank
-            TargetHandleList dimmList = getConnectedDimms( i_trgt, rank );
-            for ( auto & dimm : dimmList )
+            PRDF_ERR(PRDF_FUNC "Failed to get child MEM_PORT %x from parent "
+                     "0x%08x", i_port, getHuid(i_trgt));
+            return;
+        }
+
+        // Get all DIMMs attached to the port
+        TargetHandleList dimmList = getConnectedChildren(memport, TYPE_DIMM);
+
+        // Iterate all ranks on each DIMM to get VPD data
+        uint32_t idx = 0;
+        for ( auto & dimm : dimmList )
+        {
+            for ( auto & rank : masterRanks )
             {
                 MemRowRepair rowRepair;
 
@@ -468,7 +476,8 @@ void captureIueCounts<OcmbDataBundle*>( TARGETING::TargetHandle_t i_trgt,
 
 template<>
 void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                 STEP_CODE_DATA_STRUCT & io_sc )
+                                 STEP_CODE_DATA_STRUCT & io_sc,
+                                 uint8_t i_port )
 {
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
@@ -478,13 +487,13 @@ void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     TargetHandle_t ocmbTrgt = i_chip->getTrgt();
 
     // Add DRAM repairs data from hardware.
-    captureDramRepairsData<TYPE_OCMB_CHIP>( ocmbTrgt, cd );
+    captureDramRepairsData<TYPE_OCMB_CHIP>( ocmbTrgt, cd, i_port );
 
     // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd );
+    captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, i_port );
 
     // Add Row Repair data from VPD
-    captureRowRepairVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd );
+    captureRowRepairVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, i_port );
 
     // Add IUE counts to capture data.
     captureIueCounts<OcmbDataBundle*>( ocmbTrgt, db, cd );
@@ -500,17 +509,17 @@ void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 template<>
 void addEccData<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
-                                 errlHndl_t io_errl )
+                                 errlHndl_t io_errl, uint8_t i_port )
 {
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
 
     CaptureData cd;
 
     // Add DRAM repairs data from hardware.
-    captureDramRepairsData<TYPE_OCMB_CHIP>( i_trgt, cd );
+    captureDramRepairsData<TYPE_OCMB_CHIP>( i_trgt, cd, i_port );
 
     // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_OCMB_CHIP>( i_trgt, cd );
+    captureDramRepairsVpd<TYPE_OCMB_CHIP>( i_trgt, cd, i_port );
 
     ErrDataService::AddCapData( cd, io_errl );
 }

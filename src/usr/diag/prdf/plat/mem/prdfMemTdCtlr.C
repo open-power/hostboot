@@ -95,6 +95,16 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
     uint32_t o_rc = SUCCESS;
 
+    // First, get the address in which the command stopped.
+    MemAddr addr;
+    o_rc = getMemMaintAddr<T>( iv_chip, addr );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "getMemMaintAddr<T>(0x%08x) failed",
+                  iv_chip->getHuid() );
+        return o_rc;
+    }
+
     do
     {
         // Make sure the TD controller is initialized.
@@ -132,16 +142,6 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         #endif
 
         collectStateCaptureData( io_sc, TD_CTLR_DATA::START );
-
-        // First, get the address in which the command stopped.
-        MemAddr addr;
-        o_rc = getMemMaintAddr<T>( iv_chip, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemMaintAddr<T>(0x%08x) failed",
-                      iv_chip->getHuid() );
-            break;
-        }
 
         if ( nullptr == iv_curProcedure )
         {
@@ -218,7 +218,7 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
     if ( !io_sc.service_data->queryDontCommitErrl() )
     {
         collectStateCaptureData( io_sc, TD_CTLR_DATA::END );
-        MemCaptureData::addEccData<T>( iv_chip, io_sc );
+        MemCaptureData::addEccData<T>( iv_chip, io_sc, addr.getPort() );
     }
 
     if ( SUCCESS != o_rc )

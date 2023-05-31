@@ -501,7 +501,7 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
     } while (0);
 
     // Add ECC capture data for FFDC.
-    MemCaptureData::addEccData<T>( i_chip, io_sc );
+    MemCaptureData::addEccData<T>( i_chip, io_sc, i_port );
 
     #endif // __HOSTBOOT_RUNTIME
 
@@ -632,17 +632,18 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
+    // Get the address of the failure.
+    MemAddr addr;
+    o_rc = getMemReadAddr<T>( i_chip, MemAddr::READ_NCE_ADDR, addr );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x) failed",
+                  i_chip->getHuid() );
+        return o_rc;
+    }
+
     do
     {
-        // Get the address of the failure.
-        MemAddr addr;
-        o_rc = getMemReadAddr<T>( i_chip, MemAddr::READ_NCE_ADDR, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
         MemRank rank = addr.getRank();
 
         // Get the symbols for the NCE/TCE attention.
@@ -715,7 +716,7 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
     } while (0);
 
     // Add ECC capture data for FFDC.
-    MemCaptureData::addEccData<T>( i_chip, io_sc );
+    MemCaptureData::addEccData<T>( i_chip, io_sc, addr.getPort() );
 
     return o_rc;
 
@@ -744,18 +745,18 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
     // first occurrence.
     io_sc.service_data->setServiceCall();
 
+    // Get the address of the failure.
+    MemAddr addr;
+    o_rc = getMemReadAddr<T>( i_chip, MemAddr::READ_UE_ADDR, addr );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x, READ_UE_ADDR) failed",
+                  i_chip->getHuid() );
+        return o_rc;
+    }
+
     do
     {
-        // Get the address of the failure.
-        MemAddr addr;
-        o_rc = getMemReadAddr<T>( i_chip, MemAddr::READ_UE_ADDR, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x, READ_UE_ADDR) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
         // Do memory UE handling.
         o_rc = MemEcc::handleMemUe<T>( i_chip, addr, UE_TABLE::FETCH_UE, io_sc);
         if ( SUCCESS != o_rc )
@@ -790,7 +791,7 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
     } while (0);
 
     // Add ECC capture data for FFDC.
-    MemCaptureData::addEccData<T>( i_chip, io_sc );
+    MemCaptureData::addEccData<T>( i_chip, io_sc, addr.getPort() );
 
     return o_rc;
 

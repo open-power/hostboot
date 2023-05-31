@@ -793,28 +793,6 @@ uint8_t getDimmSlct( TargetHandle_t i_trgt )
 
 //------------------------------------------------------------------------------
 
-TARGETING::TargetHandleList getConnectedDimms( TARGETING::TargetHandle_t i_trgt,
-                                               const MemRank & i_rank )
-{
-    #define PRDF_FUNC "[PlatServices::getConnectedDimms] "
-
-    TargetHandleList o_list;
-
-    TargetHandleList l_dimmList = getConnectedChildren( i_trgt, TYPE_DIMM );
-    for ( auto & dimm : l_dimmList )
-    {
-        uint8_t l_dimmSlct = getDimmSlct( dimm );
-        if ( l_dimmSlct == i_rank.getDimmSlct() )
-        {
-            o_list.push_back( dimm );
-        }
-    }
-
-    return o_list;
-
-    #undef PRDF_FUNC
-}
-
 TARGETING::TargetHandle_t getConnectedDimm( TARGETING::TargetHandle_t i_trgt,
                                             const MemRank & i_rank,
                                             uint8_t i_port )
@@ -823,11 +801,11 @@ TARGETING::TargetHandle_t getConnectedDimm( TARGETING::TargetHandle_t i_trgt,
 
     TargetHandle_t o_dimm = nullptr;
 
-    TargetHandleList l_dimmList = getConnectedDimms( i_trgt, i_rank );
+    TargetHandleList l_dimmList = getConnectedChildren( i_trgt, TYPE_DIMM );
     for ( auto & dimm : l_dimmList )
     {
-        uint8_t l_portSlct = getDimmPort( dimm );
-        if ( l_portSlct == i_port )
+        if ( getDimmPort(dimm) == i_port &&
+             getDimmSlct(dimm) == i_rank.getDimmSlct() )
         {
             o_dimm = dimm;
             break;

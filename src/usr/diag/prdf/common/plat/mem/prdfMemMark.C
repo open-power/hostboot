@@ -461,8 +461,7 @@ uint32_t __addRowRepairCallout( TargetHandle_t i_trgt,
 
     uint32_t o_rc = SUCCESS;
 
-    // Get the dimms on this rank on either port.
-    TargetHandleList dimmList = getConnectedDimms( i_trgt, i_rank );
+    TargetHandleList dimmList = getConnectedChildren( i_trgt, TYPE_DIMM );
 
     // Check for row repairs on each dimm.
     for ( auto const & dimm : dimmList )
