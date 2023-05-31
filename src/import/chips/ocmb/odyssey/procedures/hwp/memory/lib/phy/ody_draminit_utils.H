@@ -4219,11 +4219,13 @@ void display_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targe
 /// @brief Checks the FW revision in the message block
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_is_sim true if this is a simulation run
+/// @param[in] i_is_simics attribute value
 /// @param[in] i_msg_block_response the message block
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode check_fw_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                     const uint8_t i_is_sim,
+                                    const uint8_t i_is_simics,
                                     const _PMU_SMB_DDR5_1D_t& i_msg_block_response);
 
 ///

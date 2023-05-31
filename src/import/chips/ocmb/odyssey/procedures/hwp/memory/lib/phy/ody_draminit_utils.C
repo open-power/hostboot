@@ -7047,15 +7047,17 @@ void display_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_targe
 /// @brief Checks the FW revision in the message block
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_is_sim true if this is a simulation run
+/// @param[in] i_is_simics attribute value
 /// @param[in] i_msg_block_response the message block
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode check_fw_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                     const uint8_t i_is_sim,
+                                    const uint8_t i_is_simics,
                                     const _PMU_SMB_DDR5_1D_t& i_msg_block_response)
 {
-    // If this is a simulation run, just exit out successfully, the version might not be correct
-    if(i_is_sim)
+    // If this is a simulation or SIMICS run, just exit out successfully, the version might not be correct
+    if(i_is_sim || i_is_simics == fapi2::ENUM_ATTR_IS_SIMICS_SIMICS)
     {
         return fapi2::FAPI2_RC_SUCCESS;
     }
@@ -7094,11 +7096,13 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
     mss::ody::phy::bad_bit_interface l_interface(i_msg_block_response);
     bool l_firs_found = false;
     uint8_t l_is_sim = 0;
+    uint8_t l_is_simics = 0;
     FAPI_TRY( mss::attr::get_is_simulation(l_is_sim) );
+    FAPI_TRY( mss::attr::get_is_simics(l_is_simics) );
 
     // First check for a mismatch between the Synopsys binary FW revision and the FW revision the code expects
     // A mismatch in the FW revision is a catastrophic error and needs to be handled by code and FW binary updates
-    FAPI_TRY(check_fw_revision(i_target, l_is_sim, i_msg_block_response));
+    FAPI_TRY(check_fw_revision(i_target, l_is_sim, l_is_simics, i_msg_block_response));
 
     // Check for catastrophic training failure. No need to check FIRs if training failed completely
     // Check training complete mail message
