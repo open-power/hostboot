@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1840,9 +1840,13 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                 }
                 errlCommit(err, TRBOOT_COMP_ID);
 
-                // if a TPM is guarded out for FSP systems, the recovery action is
-                // to force a failover and flip sides to utilize TPM redundancy.
-                // eBMC systems will attempt to recover the TPM via Resourse Recovery
+                // If a TPM is guarded out for FSP systems, the recovery action is
+                // to force an FSP failover and flip to the alternate boot processor, i.e. P1,
+                // to utilize the redundant TPM.
+                //
+                // Old behaviour for eBMC systems was to attempt to recover the TPM via
+                // Resourse Recovery, but we now do NOT support Resource Recovery,
+                // so just do some housekeeping
                 if (!INITSERVICE::spBaseServicesEnabled())
                 {
                     // Get all node targets
@@ -1851,9 +1855,10 @@ void tpmVerifyFunctionalPrimaryTpmExists(
                                     TARGETING::UTIL_FILTER_FUNCTIONAL);
                     for( auto l_node : l_nodelist )
                     {
-                        //For eBMC, in the case where the TPM is garded out by a recoverable gard,
-                        //set block speculative deconfig to resource recover the TPM on next ipl
-                        l_node->setAttr<TARGETING::ATTR_BLOCK_SPEC_DECONFIG>(1);
+                        // We now do NOT support Resource Recovery, therefore just make sure to clear
+                        // the ATTR_BLOCK_SPEC_DECONFIG to be sure the attribute is not maintaining
+                        // any OLD state (from older firmware/IPL/Unknown)
+                        l_node->setAttr<TARGETING::ATTR_BLOCK_SPEC_DECONFIG>(0);
                     }
                 }
 

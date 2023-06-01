@@ -2762,9 +2762,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
         HWAS_DBG("%d GARD Records found", l_gardRecords.size());
 
         std::vector<uint32_t> errlLogEidList;
-        //First apply all Unrecoverable or Fatal gard records and
-        //check whether system is bootable, if not bootable
-        //exit from this function or try to apply remaining records
+        // Apply ALL gard records (NO Resource Recovery Support)
         for (GardRecordsCItr_t l_itr = l_gardRecords.begin();
              l_itr != l_gardRecords.end();
              ++l_itr)
@@ -2794,9 +2792,10 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             // Sticky_deconfig, or for a Node
             if (!l_isUnrecoverableGard)
             {
-                //Skip applying the 'recoverable' record
-                //and continue to the next record in l_gardRecords
-                continue;
+                HWAS_INF("APPLYING ALL gards - NO RESOURCE RECOVERY SUPPORTED FOR HUID=0x%X l_gardRecord.iv_errorType=0x%X", get_huid(l_pTarget), l_gardRecord.iv_errorType);
+                // We use to SKIP applying the 'recoverable' records, but now we APPLY ALL gards
+                // Output informational trace to aide any debug efforts to identify potential exposures or aide problem determination
+                // Resource Recovery is no longer supported
             }
 
             // if this does NOT match, continue to next in loop
