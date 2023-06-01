@@ -108,6 +108,44 @@ enum cmd_encoding : size_t
 };
 
 ///
+/// @brief MPC encodings
+/// @note Excluding opcodes that are currently marked as RFU
+/// Opcode descriptions are taken from the JEDEC spec's table 76 (version 1.7.1)
+///
+enum mpc_op_encoding : size_t
+{
+    EXIT_CS_TRAIN              = 0b00000000,
+    ENTER_CS_TRAIN             = 0b00000001,
+    DLL_RESET                  = 0b00000010,
+    ENTER_CA_TRAIN             = 0b00000011,
+    ZQCAL_LATCH                = 0b00000100,
+    ZQCAL_START                = 0b00000101,
+    STOP_DQS_INTERVAL          = 0b00000110,
+    START_DQS_INTERVAL         = 0b00000111,
+    SET_2N_CMD_TIMING          = 0b00001000,
+    SET_1N_CMD_TIMING          = 0b00001001,
+    EXIT_PDA_ENUM_PROGRAMMING  = 0b00001010,
+    ENTER_PDA_ENUM_PROGRAMMING = 0b00001011,
+    MANUAL_ECS_OP              = 0b00001100,
+    APPLY_VREFCA_CS_RTT        = 0b00011111,
+
+    //                           0b#####xxx  -> X's are used as values
+    GROUP_A_RTT_CK             = 0b00100000, // xxx (See MR32:OP[2:0] for encoding)
+    GROUP_B_RTT_CK             = 0b00101000, // xxx (See MR32:OP[2:0] for encoding)
+    GROUP_A_RTT_CS             = 0b00110000, // xxx (See MR32:OP[5:3] for encoding)
+    GROUP_B_RTT_CS             = 0b00111000, // xxx (See MR32:OP[5:3] for encoding)
+    GROUP_A_RTT_CA             = 0b01000000, // xxx (See MR33:OP[2:0] for encoding)
+    GROUP_B_RTT_CA             = 0b01001000, // xxx (See MR33:OP[2:0] for encoding)
+    SET_DQS_RTT_PARK           = 0b01010000, // xxx (See MR33:OP[5:3] for encoding)
+    SET_RTT_PARK               = 0b01011000, // xxx (See MR34:OP[2:0] for encoding)
+
+    //                           0b####xxxx  -> X's are used as values
+    PDA_ENUM_ID                = 0b01100000, // X's are the enumerate ID's
+    PDA_SELECT_ID              = 0b01110000, // X's are the select
+    CONFIG_TDLLK_TCCD_L        = 0b10000000, // xxxx (See MR13:OP[3:0] for encoding)
+};
+
+///
 /// @brief DDR5 internal API address bit locations
 ///
 enum api_addr_bits
