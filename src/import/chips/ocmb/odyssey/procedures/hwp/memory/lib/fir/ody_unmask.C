@@ -81,6 +81,45 @@ bool is_port_present(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 }
 
 ///
+/// @brief Unmask and setup actions specifically related to ODP_FIR PhyStickyUnlockErr
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode unmask_phy_sticky_unlock_err( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+    fapi2::buffer<uint64_t> l_reg_data;
+    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+
+    for (const auto& l_port : l_ports)
+    {
+        mss::fir::reg2<scomt::mp::S_LFIR_RW_WCLEAR> l_top0_lfir(l_port);
+
+        // Phy special set up
+
+        //PhyInterruptEnable bit [15]
+        FAPI_TRY(fapi2::getScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE, l_reg_data));
+        l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYSTICKYUNLOCKEN>();
+        FAPI_TRY(fapi2::putScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE, l_reg_data));
+
+
+        // LcdlDbgCntl3_p0 setup StickyUnlockThreshold - recommended minimum threshold is 3 = 0b011
+        constexpr uint64_t l_min_stickythreshold = 0x0000000000000003;
+        FAPI_TRY(fapi2::getScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_LCDLDBGCNTL3_P0, l_reg_data));
+        l_reg_data.insertFromRight<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_LCDLDBGCNTL3_P0_STICKYUNLOCKTHRESHOLD,
+                                   scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_LCDLDBGCNTL3_P0_STICKYUNLOCKTHRESHOLD_LEN>
+                                   (l_min_stickythreshold);
+        FAPI_TRY(fapi2::putScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_LCDLDBGCNTL3_P0, l_reg_data));
+
+        FAPI_TRY(l_top0_lfir.recoverable_error<scomt::mp::S_LFIR_PHYSTICKYUNLOCKERR>()
+                 .write(), "Failed to Write ODP FIR register " GENTARGTIDFORMAT, GENTARGTID(l_port));
+    }
+
+fapi_try_exit:
+
+    return fapi2::current_err;
+}
+
+///
 /// @brief Unmask and setup actions performed after draminit_training
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
@@ -142,6 +181,9 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::ODYSSEY>( const fapi2::T
     }
 
     FAPI_TRY(l_srq_reg.write(), "Failed to write SRQ FIR register for " GENTARGTIDFORMAT, GENTARGTID(i_target));
+
+    // Workaround: unmask ODP FIR PhyStickyUnlockErr here to avoid it coming on during training
+    FAPI_TRY(unmask_phy_sticky_unlock_err(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -513,10 +555,10 @@ fapi2::ReturnCode after_phy_reset<mss::mc_type::ODYSSEY>( const fapi2::Target<fa
         mss::fir::reg2<scomt::mp::S_LFIR_RW_WCLEAR> l_top0_lfir(l_port);
 
         // Phy special set up
+        // Workaround: ODP FIR PhyStickyUnlockErr unmasked after draminit to avoid it coming on during training
 
-        //PhyInterruptEnable bits [15, 12-8]
+        //PhyInterruptEnable bits [12-8]
         FAPI_TRY(fapi2::getScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE, l_reg_data));
-        l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYSTICKYUNLOCKEN>();
         l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYD5ACSM0PARITYEN>();
         l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYD5ACSM1PARITYEN>();
         l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYRXFIFOCHECKEN>();
@@ -524,20 +566,10 @@ fapi2::ReturnCode after_phy_reset<mss::mc_type::ODYSSEY>( const fapi2::Target<fa
         l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYECCEN>();
         FAPI_TRY(fapi2::putScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE, l_reg_data));
 
-
-        // LcdlDbgCntl3_p0 setup StickyUnlockThreshold - recommended minimum threshold is 3 = 0b011
-        constexpr uint64_t l_min_stickythreshold = 0x0000000000000003;
-        FAPI_TRY(fapi2::getScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_LCDLDBGCNTL3_P0, l_reg_data));
-        l_reg_data.insertFromRight<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_LCDLDBGCNTL3_P0_STICKYUNLOCKTHRESHOLD,
-                                   scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_LCDLDBGCNTL3_P0_STICKYUNLOCKTHRESHOLD_LEN>
-                                   (l_min_stickythreshold);
-        FAPI_TRY(fapi2::putScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_LCDLDBGCNTL3_P0, l_reg_data));
-
         // ArcPmuEccCtl Overrides/Control for ARC Error Protection Hardware Control Register, ECC Enable => Bits 1:0 = 0b00, Do not change Debug Bits 2:5
         FAPI_TRY(fapi2::getScom(l_port, scomt::mp::DWC_DDRPHYA_DRTUB0_ARCPMUECCCTL, l_reg_data));
         l_reg_data.clearBit<scomt::mp::DWC_DDRPHYA_DRTUB0_ARCPMUECCCTL_ARCPMUECCCTL, 2>();
         FAPI_TRY(fapi2::putScom(l_port, scomt::mp::DWC_DDRPHYA_DRTUB0_ARCPMUECCCTL, l_reg_data));
-
 
         // Flush reg and clear PHYERR bit 5 before unmasking since it comes on erroneously during Odyssey ABIST
         l_reg_data.flush<0>();
@@ -548,7 +580,6 @@ fapi2::ReturnCode after_phy_reset<mss::mc_type::ODYSSEY>( const fapi2::Target<fa
                  .recoverable_error<scomt::mp::S_LFIR_WPERR>()
                  .recoverable_error<scomt::mp::S_LFIR_PSLVPERR>()
                  .recoverable_error<scomt::mp::S_LFIR_ODPCTRLPERR>()
-                 .recoverable_error<scomt::mp::S_LFIR_PHYSTICKYUNLOCKERR>()
                  .recoverable_error<scomt::mp::S_LFIR_PHYD5ACSM0PARITYERR>()
                  .recoverable_error<scomt::mp::S_LFIR_PHYD5ACSM1PARITYERR>()
                  .recoverable_error<scomt::mp::S_LFIR_PHYRXFIFOCHECKERR>()
