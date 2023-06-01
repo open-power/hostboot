@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -144,12 +144,12 @@ public:
                       );
 
             // Verify resources were brought back to life by resource recovery
-            if ((l_hwasState.deconfiguredByEid !=
+            if ((l_hwasState.deconfiguredByEid ==
                     DeconfigGard::CONFIGURED_BY_RESOURCE_RECOVERY) ||
-                (l_hwasState.specdeconfig != 0) ||
-                (l_hwasState.functional != 1))
+                (l_hwasState.specdeconfig == 1) ||
+                (l_hwasState.functional == 1))
             {
-                TS_INFO( "verifyRecoveredAndRestore: After Recovery - "
+                TS_INFO( "verifyRecoveredAndRestore: After - "
                          "HwasState fakeState: "
                          "deconf=0x%x,PO=0x%x,pres=0x%x,func=0x%x,dumpf=0x%x,"
                          "specdeconfig=0x%x",
@@ -160,10 +160,9 @@ public:
                          l_hwasState.dumpfunctional,
                          l_hwasState.specdeconfig
                          );
-                TS_FAIL("verifyRecoveredAndRestore: Incorrect resource "
-                        "recovery hwas states on %.8X",
+                TS_FAIL("verifyRecoveredAndRestore: Unexpected case for NO Resource Recovery Support "
+                        "hwas states on %.8X",
                         TARGETING::get_huid(i_targetHList[i]));
-                rc = false;
             }
 
             // Restore old state
@@ -232,10 +231,10 @@ public:
         {
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig =
                 pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
-            if(l_block_spec_deconfig == 0)
+            if(l_block_spec_deconfig == 1)
             {
-                TS_FAIL("testCheckMinimumHardwareCore: Expected non-zero value "
-                        "for ATTR_BLOCK_SPEC_DECONFIG");
+                TS_FAIL("testCheckMinimumHardwareCore: Unexpected value "
+                        "for ATTR_BLOCK_SPEC_DECONFIG with NO Resource Recovery Support");
             }
             else
             {
@@ -295,10 +294,10 @@ public:
         {
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig
                 = pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
-            if(l_block_spec_deconfig == 0)
+            if(l_block_spec_deconfig == 1)
             {
-                TS_FAIL("testCheckMinimumHardwareDimm: Expected non-zero value "
-                        "for ATTR_BLOCK_SPEC_DECONFIG");
+                TS_FAIL("testCheckMinimumHardwareDimm: Unexpected value "
+                        "for ATTR_BLOCK_SPEC_DECONFIG with NO Resource Recovery Support");
             }
             else
             {
@@ -367,10 +366,10 @@ public:
         {
             TARGETING::ATTR_BLOCK_SPEC_DECONFIG_type l_block_spec_deconfig
                 = pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>();
-            if(l_block_spec_deconfig == 0)
+            if(l_block_spec_deconfig == 1)
             {
-                TS_FAIL("testCheckMinimumHardwareBoth: Expected non-zero value "
-                        "for ATTR_BLOCK_SPEC_DECONFIG");
+                TS_FAIL("testCheckMinimumHardwareBoth: Unexpected value "
+                        "for ATTR_BLOCK_SPEC_DECONFIGi with NO Resource Recovery Support");
             }
             else
             {
@@ -553,9 +552,8 @@ public:
             // run).
             if (pNode->getAttr<ATTR_BLOCK_SPEC_DECONFIG>() != 1)
             {
-                TS_FAIL("testVerifyResourceRecovery: Spec deconfig is not "
-                        "disabled");
-                break;
+                TS_INFO("testVerifyResourceRecovery: Spec deconfig is not "
+                        "disabled, Normal for NO Resource Recovery Support");
             }
 
             // Call the deconfigure interface again and verify even without

@@ -2941,8 +2941,11 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                         TARGETING::UTIL_FILTER_FUNCTIONAL);
         for( auto l_node : l_nodelist )
         {
-            // Minimum hardware not available, block speculative deconfigs
-            l_node->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(1);
+            // Minimum hardware not available, we now do NOT support any
+            // Resource Recovery, so just clear ATTR_BLOCK_SPEC_DECONFIG
+            // to clear any OLD state (from older firmware/IPL/Unknown),
+            // housekeeping only
+            l_node->setAttr<ATTR_BLOCK_SPEC_DECONFIG>(0);
         }
     }
 

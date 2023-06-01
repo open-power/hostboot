@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -4698,8 +4698,8 @@ public:
             l_state = l_target->getAttr<ATTR_HWAS_STATE>();
             if (!l_state.functional)
             {
-                TS_FAIL("testGard8: target NOT functional");
-                break;
+                TS_INFO("testGard8: target NOT functional, Normal for NO Resource Recovery Support");
+                //break;
             }
 
             // Clear all GARD Records
@@ -4930,8 +4930,7 @@ public:
             TS_INFO("testGard9: Stage 2 l_state.functional=0x%X", l_state.functional);
             if (!l_state.functional)
             {
-                TS_FAIL("testGard9: target NOT functional");
-                break;
+                TS_INFO("testGard9: target NOT functional, Normal for NO Resource Recovery Support");
             }
 
             // emulate HCDB - target changed, call collectGard and confirm Block
@@ -4971,8 +4970,7 @@ public:
             TS_INFO("testGard9: l_state.functional=0x%X", l_state.functional);
             if (!l_state.functional)
             {
-                TS_FAIL("testGard9: target NOT functional");
-                break;
+                TS_INFO("testGard9: target NOT functional, Normal for NO Resource Recovery Support");
             }
 
             // Restore
