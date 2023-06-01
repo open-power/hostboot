@@ -398,10 +398,13 @@ void copy_cke_to_spare_cke<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::T
 /// @brief Select the port(s) to be used by the CCS - EXPLORER specialization
 /// @param[in] i_target the target to effect
 /// @param[in] i_ports the buffer representing the ports
+/// @param[in] i_channel_select the channels upon which to operate - unused here
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
 ///
 template<>
 fapi2::ReturnCode select_ports<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        uint64_t i_ports)
+        const uint64_t i_ports,
+        const channel_select i_channel_select)
 {
     // No broadcast mode, only one port, so no port selection
     return fapi2::FAPI2_RC_SUCCESS;

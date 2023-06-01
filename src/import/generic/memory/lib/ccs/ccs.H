@@ -112,6 +112,17 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Enums for selecting channels within a port
+/// @note Only applicable for DDR5+ memory controllers
+///
+enum channel_select : size_t
+{
+    ALL = 0b11,
+    CHA = 0b10,
+    CHB = 0b01,
+};
+
+///
 /// @brief A class representing a series of CCS instructions, and the
 /// CCS engine parameters associated with running the instructions
 /// @tparam MC The memory controller type of the traits
@@ -132,6 +143,8 @@ class program
 
         // Vector of polling probes
         std::vector< poll_probe<TT::PORT_TARGET_TYPE> >    iv_probes;
+
+        channel_select iv_channel_select = channel_select::ALL;
 };
 
 //
@@ -146,9 +159,13 @@ class program
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_ports the buffer representing the ports
+/// @param[in] i_channel_select the channels upon which to operate - DDR5+ only specific
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
-fapi2::ReturnCode select_ports( const fapi2::Target<T>& i_target, uint64_t i_ports);
+fapi2::ReturnCode select_ports( const fapi2::Target<T>& i_target,
+                                const uint64_t i_ports,
+                                const channel_select i_channel_select);
 
 ///
 /// @brief User sets to a '1'b to tell the Hdw to stop CCS whenever failure occurs. When a
@@ -653,7 +670,7 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
                       "Error setting up ccs instructions in registers on %s", mss::c_str(i_target) );
 
             FAPI_INF("executing CCS array for port %d (%s)", l_port_index, mss::c_str(p));
-            FAPI_TRY( select_ports<MC>( i_target, l_port_index),
+            FAPI_TRY( select_ports<MC>( i_target, l_port_index, io_program.iv_channel_select),
                       "Error in port select for %s", mss::c_str(i_target) );
             FAPI_TRY( execute_inst_array<MC>(i_target, io_program, p),
                       "Error in executing ccs array for %s", mss::c_str(i_target) );
@@ -722,7 +739,7 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
                   "Error setting up ccs instructions in registers on %s", mss::c_str(i_target) );
 
         FAPI_INF("executing CCS via MCBIST for port %d (%s)", l_port_index, mss::c_str(p));
-        FAPI_TRY( select_ports<MC>( i_target, l_port_index),
+        FAPI_TRY( select_ports<MC>( i_target, l_port_index, io_program.iv_channel_select),
                   "Error in port select for ccs::execute_via_mcbist on %s", mss::c_str(i_target) );
         FAPI_TRY( execute_inst_via_mcbist<MC>(i_target), "Error in ccs::execute_inst_via_mcbist on %s", mss::c_str(i_target) );
     }

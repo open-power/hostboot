@@ -587,16 +587,19 @@ void copy_cke_to_spare_cke<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TA
 /// @brief Select the port(s) to be used by the CCS - ODYSSEY specialization
 /// @param[in] i_target the target to effect
 /// @param[in] i_ports the buffer representing the ports
-/// @note Only supports a single MEM_PORT at a time right now with both channels being selected
+/// @param[in] i_channel_select the channels upon which to operate - DDR5+ only specific
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+/// @note The same channel and port selects will be used across the entire CCS program in a single execution
+/// Separate channel/port selects would need to be run on a different CCS execution call
 ///
 template<>
 fapi2::ReturnCode select_ports<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        uint64_t i_ports)
+        const uint64_t i_ports,
+        const channel_select i_channel_select)
 {
     typedef ccsTraits<mss::mc_type::ODYSSEY> TT;
-    constexpr uint64_t PORT0 = 0b1100;
-    constexpr uint64_t PORT1 = 0b0011;
-    const auto l_port_value = i_ports == 0 ? PORT0 : PORT1;
+    constexpr uint64_t PORT0_SHIFT = 2;
+    const auto l_port_value = i_ports == 0 ? (i_channel_select << PORT0_SHIFT) : i_channel_select;
 
     fapi2::buffer<uint64_t> l_data;
     FAPI_TRY( mss::getScom(i_target, TT::MODEQ_REG, l_data) );
