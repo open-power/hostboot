@@ -266,6 +266,67 @@ endef
 $(call BUILD_GENERATED)
 ##
 
+## generate code for Odyssey Attribute exchange
+GENERATED=ody_sbe_attribute_generated
+COMMAND=attrtool
+$(GENERATED)_COMMAND_PATH=$(ROOTPATH)/src/import/hwpf/sbe_utils/gentool/attrtool/
+
+$(GENERATED)_PATH = ${ROOTPATH}/obj/genfiles/attr
+
+ATTRFAPI_DIR=$(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/
+P10_ATTR_DIR=$(ROOTPATH)/src/import/chips/p10/procedures/xml/attribute_info/
+
+ATTRFILES := $(ATTRFAPI_DIR)/common_attributes.xml
+ATTRFILES += $(ATTRFAPI_DIR)/system_attributes.xml
+ATTRFILES += $(ATTRFAPI_DIR)/unit_attributes.xml
+ATTRFILES += $(ATTRFAPI_DIR)/chip_attributes.xml
+
+P10_ATTR_FILES := $(shell find $(ROOTPATH)/src/import/chips/p10/procedures/xml/attribute_info -name 'p10*attr*.xml' | sort)
+ATTRFILES += $(P10_ATTR_FILES)
+
+GENERIC_MEM_ATTRFILES := $(shell find $(ROOTPATH)/src/import/generic/procedures/xml/attribute_info -name '*.xml' | sort)
+ATTRFILES += $(GENERIC_MEM_ATTRFILES)
+
+ODY_ATTRFILES := $(shell find $(ROOTPATH)/src/import/chips/ocmb/odyssey/procedures/xml/attribute_info/ -name '*.xml' | sort)
+ATTRFILES += $(ODY_ATTRFILES)
+
+TARGET_LIST := $(ROOTPATH)/src/import/hwpf/sbe_utils/gentool/attrtool/targetlist.json
+
+$(GENERATED)_RUN=$(call ODY_GENERATED_RUN)
+
+# ODY_GENERATED_RUN
+#  *This function executes as a single shell command. It makes use of
+#   command line chaining operators to ensure the steps are done in order.
+#
+#  Steps:
+#   Set TMPDIR for python to avoid any cross-device file copy errors
+#   install python venv
+#   if python venv install is successful, attempt to upgrade pip
+#     if upgrade fails, use ensurepip to verify the pip is installed
+#       if ensurepip fails, attempt the jinja install anyway
+#   install jinja
+#   if jinja install is successful, generate the files
+#
+#  There are three success scenarios
+#  1. all tasks succeed
+#  2. upgrade pip fails, ensurepip success, install jinja success
+#  3. upgrade pip fails, ensurepip fails, install jinja success
+#    *Any other error scenario fails the make
+#
+define ODY_GENERATED_RUN
+        export TMPDIR="$$($(GENERATED)_PATH)/tmp" \
+        && python3 -m venv $$($(GENERATED)_PATH) \
+        && . $$($(GENERATED)_PATH)/bin/activate \
+        && python -m pip install --upgrade pip \
+           || python -m ensurepip --default-pip \
+           || python -m pip install --upgrade --no-cache-dir jinja2 \
+        && python -m pip install --upgrade --no-cache-dir jinja2 \
+        && $$< genhwp ody $(TARGET_LIST) $(ATTRFILES) --outdir=$$($(GENERATED)_PATH) \
+        && echo "${GENERATED} success"
+endef
+$(call BUILD_GENERATED)
+##
+
 
 # Add targets from 'BUILD_GENERATED' into the Hostboot 'GEN_PASS'.
 GEN_PASS_BODY += $(GEN_TARGETS)
