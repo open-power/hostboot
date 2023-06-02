@@ -526,15 +526,13 @@ struct __attribute__ ((__packed__)) pmic_periodic_telemetry_data
     uint16_t iv_swc_current_mA     = 0;
     uint16_t iv_swd_current_mA     = 0;
 
-    uint8_t iv_r31_sample_vin     = 0;
-    uint8_t iv_r31_sample_temp    = 0;
+    uint16_t iv_r31_sample_vin     = 0;
+    uint16_t iv_r31_sample_temp    = 0;
+
     uint8_t iv_r7c_set_swa_offset = 0;
     uint8_t iv_r7d_set_swb_offset = 0;
-
     uint8_t iv_r7e_set_swc_offset = 0;
     uint8_t iv_r7f_set_swd_offset = 0;
-    uint8_t reserved              = 0;
-    uint8_t reserved1             = 0;
 };
 
 ///
@@ -542,14 +540,23 @@ struct __attribute__ ((__packed__)) pmic_periodic_telemetry_data
 ///
 struct __attribute__ ((__packed__)) dt_periodic_telemetry_data
 {
-    uint16_t iv_iin_vcc  = 0;
-    uint16_t iv_vinp_vin = 0;
+    uint16_t iv_r9a_iin  = 0;
+    uint16_t iv_r9b_vcc  = 0;
 
-    uint16_t iv_vaux_b_a = 0;
-    uint16_t iv_vaux_d_c = 0;
+    uint16_t iv_r9c_vinp = 0;
+    uint16_t iv_r9d_vin  = 0;
 
-    uint16_t iv_vinp_min_max = 0;
-    uint16_t iv_iin_min_max  = 0;
+    uint16_t iv_r9e_vaux_b = 0;
+    uint16_t iv_r9f_vaux_a = 0;
+
+    uint16_t iv_ra0_vaux_d = 0;
+    uint16_t iv_ra1_vaux_c = 0;
+
+    uint16_t iv_ra2_vinp_min = 0;
+    uint16_t iv_ra3_vinp_max = 0;
+
+    uint16_t iv_ra4_iin_min  = 0;
+    uint16_t iv_ra5_iin_max  = 0;
 
     uint8_t iv_breadcrumb        = 0;
     uint8_t iv_neg_orfet_cnt_swa = 0;
@@ -595,8 +602,7 @@ struct __attribute__ ((__packed__)) consolidated_health_check_data
 {
     health_check_telemetry_data iv_health_check;
     additional_n_mode_telemetry_data iv_additional_data;
-    // TODO: ZEN:MST-1906 Implement periodic telemetry data collection tool
-    // periodic_telemetry_data;
+    periodic_telemetry_data iv_periodic_telemetry_data;
 
     uint8_t iv_pmic0_errors = 0;
     uint8_t iv_pmic1_errors = 0;
@@ -726,6 +732,7 @@ void dt_reg_read_reverse_buffer(target_info_pmic_dt_pair& io_pmic_dt, const uint
 /// @brief Read contiguous registers of a PMIC target. This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
+/// @tparam N size of the data buffer
 /// @param[in,out] io_pmic_dt target_info_pmic_dt_pair class including target / state info
 /// @param[in] i_reg register
 /// @param[out] o_output output buffer
@@ -748,6 +755,7 @@ void pmic_reg_read_contiguous(target_info_pmic_dt_pair& io_pmic_dt, const uint8_
 /// @brief Read contiguous registers of a DT target. This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
+/// @tparam N size of the data buffer
 /// @param[in,out] io_pmic_dt target_info_pmic_dt_pair class including target / state info
 /// @param[in] i_reg register
 /// @param[out] o_output output buffer
@@ -771,6 +779,7 @@ void dt_reg_read_contiguous(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t 
 ///        This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
+/// @tparam N size of the data buffer
 /// @param[in,out] io_pmic_dt target_info_pmic_dt_pair class including target / state info
 /// @param[in] i_reg register
 /// @param[out] o_output output buffer
@@ -794,6 +803,7 @@ void pmic_reg_read_contiguous_reverse(target_info_pmic_dt_pair& io_pmic_dt, cons
 ///        This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
+/// @tparam N size of the data buffer
 /// @param[in,out] io_pmic_dt target_info_pmic_dt_pair class including target / state info
 /// @param[in] i_reg register
 /// @param[out] o_output output buffer
@@ -816,6 +826,7 @@ void dt_reg_read_contiguous_reverse(target_info_pmic_dt_pair& io_pmic_dt, const 
 /// @brief Write contiguous registers to a PMIC target. This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
+/// @tparam N size of the data buffer
 /// @param[in,out] io_pmic_dt target_info_pmic_dt_pair class including target / state info
 /// @param[in] i_reg register
 /// @param[in] i_data_buffer buffer of data to be writen to register addresses
@@ -839,6 +850,7 @@ void pmic_reg_write_contiguous(target_info_pmic_dt_pair& io_pmic_dt, const uint8
 /// @brief Write contiguous registers to a DT target. This function is for the runtime health check and telemetry functions
 ///        because it updates the pmic and dt states, and doesn't update fapi2::current_err
 ///
+/// @tparam N size of the data buffer
 /// @param[in,out] io_pmic_dt target_info_pmic_dt_pair class including target / state info
 /// @param[in] i_reg register
 /// @param[in] i_data_buffer buffer of data to be writen to register addresses
