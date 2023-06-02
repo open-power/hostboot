@@ -64,7 +64,7 @@ namespace ddr5
 /// @param[in] i_target_info target info struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode setup_dt(const target_info_redundancy_ddr5& i_target_info)
@@ -160,7 +160,7 @@ fapi_try_exit:
 /// @param[in] i_value_comp_config bool value to be written to the comp_config register
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode pre_config(const target_info_redundancy_ddr5& i_target_info,
@@ -222,7 +222,7 @@ fapi_try_exit:
 /// @param[in] i_value to be written to GPO_VALUE ADC reg
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode enable_disable_pmic(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc,
@@ -246,7 +246,7 @@ fapi_try_exit:
 /// @param[in] i_value to be written to PMIC R32 reg
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode post_config(const target_info_redundancy_ddr5& i_target_info,
@@ -536,7 +536,7 @@ fapi_try_exit:
 /// @param[in] i_adc ADC target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode setup_adc(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc)
@@ -554,13 +554,13 @@ fapi2::ReturnCode setup_adc(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRES
     l_data_adc[ADC_REGS::DATA_CFG] = 0x00;
     l_data_adc[ADC_REGS::OSR_CFG]   = 0x07;
     l_data_adc[ADC_REGS::OPMODE_CFG] = 0x32;
-    l_data_adc[ADC_REGS::PIN_CFG]   = 0x80;
+    l_data_adc[ADC_REGS::PIN_CFG]   = 0x81;
     l_data_adc[ADC_REGS::DUMMY_BYTE_0] = 0x00;
-    l_data_adc[ADC_REGS::GPIO_CFG]   = 0x80;
+    l_data_adc[ADC_REGS::GPIO_CFG]   = 0x81;
     l_data_adc[ADC_REGS::DUMMY_BYTE_1] = 0x00;
     l_data_adc[ADC_REGS::GPO_DRIVE_CFG]   = 0x80;
     l_data_adc[ADC_REGS::DUMMY_BYTE_2] = 0x00;
-    l_data_adc[ADC_REGS::GPO_VALUE]   = 0x00;
+    l_data_adc[ADC_REGS::GPO_VALUE]   = 0x01;
     l_data_adc[ADC_REGS::DUMMY_BYTE_3] = 0x00;
     l_data_adc[ADC_REGS::GPI_VALUE]   = 0x00;
     l_data_adc[ADC_REGS::DUMMY_BYTE_4] = 0x00;
@@ -627,7 +627,7 @@ fapi_try_exit:
 /// @param[in] i_target_info target info struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
@@ -710,7 +710,7 @@ fapi_try_exit:
 /// @param[in] i_adc ADC target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode clear_adc_events(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc)
@@ -747,7 +747,7 @@ fapi2::ReturnCode redundancy_check_all_pmics(const target_info_redundancy_ddr5& 
 /// @param[in] i_ocmb_target OCMB target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
 ///       document provided by the Power team
 ///
 fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
