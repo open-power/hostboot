@@ -293,6 +293,9 @@ inline instruction_t<MC> act_command( const uint64_t i_port_rank,
     addr_bit_swizzle<TT::R0_3, api_addr_bits::ROW3_0_LEN, api_addr_bits::ROW3_0>( i_row_addr, l_boilerplate_arr0 );
     addr_bit_swizzle<TT::R4_16, api_addr_bits::ROW16_4_LEN, api_addr_bits::ROW16_4>( i_row_addr, l_boilerplate_arr0 );
 
+    // This is a 2-phase command
+    l_boilerplate_arr0.setBit<TT::ARR0_CMD1_VLD>();
+
     // Row 17 and CID3 share this bit
     // Or'ing and writing them in
     l_boilerplate_arr0.writeBit<TT::WR_RD_CID3>(i_row_addr.getBit<api_addr_bits::CID3>()
@@ -339,6 +342,9 @@ inline instruction_t<MC> rcd_command(const uint64_t i_rcd,
 
     l_boilerplate_arr0.template setBit<TT::CW>();
 
+    // This is a 2-phase command
+    l_boilerplate_arr0.setBit<TT::ARR0_CMD1_VLD>();
+
     // Always use rank 0 here -> only one DIMM per PHY for DDR5
     return instruction_t<MC>(0, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
@@ -366,6 +372,9 @@ inline instruction_t<MC> mrw_command ( const uint64_t i_port_rank,
 
     l_boilerplate_arr0.template clearBit<TT::CW>();
 
+    // This is a 2-phase command
+    l_boilerplate_arr0.setBit<TT::ARR0_CMD1_VLD>();
+
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
 
@@ -391,6 +400,9 @@ inline instruction_t<MC> mrr_command ( const uint64_t i_port_rank,
 
     add_mra7_0<MC>(i_mrs, l_boilerplate_arr0);
 
+    // This is a 2-phase command
+    l_boilerplate_arr0.setBit<TT::ARR0_CMD1_VLD>();
+
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
 
@@ -414,6 +426,9 @@ inline instruction_t<MC> pde_command( const uint64_t i_port_rank,
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::PDE)
     .template setBit<TT::PDE_SRE>()
     .template writeBit<TT::PDE_ODT>(i_odt == mss::states::OFF_N);
+
+    // This is a 1-phase command
+    l_boilerplate_arr0.clearBit<TT::ARR0_CMD1_VLD>();
 
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
@@ -473,6 +488,9 @@ inline instruction_t<MC> wr_command( const uint64_t i_port_rank,
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::WR)
     .template setBit<TT::AP>();
 
+    // This is a 2-phase command
+    l_boilerplate_arr0.setBit<TT::ARR0_CMD1_VLD>();
+
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
 
@@ -503,6 +521,9 @@ inline instruction_t<MC> rd_command( const uint64_t i_port_rank,
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::RD)
     .template setBit<TT::AP>();
 
+    // This is a 2-phase command
+    l_boilerplate_arr0.setBit<TT::ARR0_CMD1_VLD>();
+
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
 ///
@@ -532,6 +553,9 @@ inline instruction_t<MC> rda_command( const uint64_t i_port_rank,
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::RDA)
     .template clearBit<TT::AP>();
 
+    // This is a 2-phase command
+    l_boilerplate_arr0.setBit<TT::ARR0_CMD1_VLD>();
+
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
 
@@ -554,6 +578,9 @@ inline instruction_t<MC> precharge_all_command( const uint64_t i_port_rank,
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::PREAB)
     .template clearBit<TT::AP>();
+
+    // This is a 1-phase command
+    l_boilerplate_arr0.clearBit<TT::ARR0_CMD1_VLD>();
 
     // Handle the CID's
     add_cid2_0<MC>(i_cid, l_boilerplate_arr0);
@@ -580,6 +607,9 @@ inline instruction_t<MC> self_refresh_entry_command( const uint64_t i_port_rank,
     .template clearBit<TT::SRE_VS_PDE>()
     .template setBit<TT::SRE_FREQ_CHANGE>();
 
+    // This is a 1-phase command
+    l_boilerplate_arr0.clearBit<TT::ARR0_CMD1_VLD>();
+
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
 
@@ -599,6 +629,9 @@ inline instruction_t<MC> self_refresh_exit_command( const uint64_t i_port_rank, 
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::PDX);
+
+    // This is a 1-phase command
+    l_boilerplate_arr0.clearBit<TT::ARR0_CMD1_VLD>();
 
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
@@ -626,6 +659,9 @@ inline instruction_t<MC> refresh_command( const uint64_t i_port_rank,
     .template setBit<TT::REF_MAN>()
     .template clearBit<TT::REF_ALL>();
 
+    // This is a 1-phase command
+    l_boilerplate_arr0.clearBit<TT::ARR0_CMD1_VLD>();
+
     // Handle the CID's
     add_cid2_0<MC>(i_cid, l_boilerplate_arr0);
     l_boilerplate_arr0.template writeBit<TT::PRE_REF_CID3>(i_cid.getBit<api_addr_bits::CID3>());
@@ -651,6 +687,9 @@ inline instruction_t<MC> mpc_command( const uint64_t i_port_rank, const uint64_t
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::MPC);
 
     add_mra7_0<MC>(i_op, l_boilerplate_arr0);
+
+    // This is a 1-phase command
+    l_boilerplate_arr0.clearBit<TT::ARR0_CMD1_VLD>();
 
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
@@ -678,6 +717,9 @@ inline instruction_t<MC> vrefca_command( const uint64_t i_port_rank,
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::VREFCA)
     .template clearBit<TT::VREFCA>();
 
+    // This is a 1-phase command
+    l_boilerplate_arr0.clearBit<TT::ARR0_CMD1_VLD>();
+
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
 
@@ -704,6 +746,9 @@ inline instruction_t<MC> vrefcs_command( const uint64_t i_port_rank,
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::VREFCS)
     .template setBit<TT::VREFCA>();
 
+    // This is a 1-phase command
+    l_boilerplate_arr0.clearBit<TT::ARR0_CMD1_VLD>();
+
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
 
@@ -721,6 +766,9 @@ inline instruction_t<MC> des_command(const uint16_t i_idle = 0)
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::NOP);
+
+    // This is a 1-phase command
+    l_boilerplate_arr0.clearBit<TT::ARR0_CMD1_VLD>();
 
     // Device Deslect wants CS_n always high (select nothing using rank NO_CHIP_SELECT_ACTIVE)
     return instruction_t<MC>( NO_CHIP_SELECT_ACTIVE,
