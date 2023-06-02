@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -306,6 +306,16 @@ static void initTargeting(errlHndl_t& io_pError)
         // call ErrlManager function - tell him that TARG is ready!
         ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::TARG);
 #endif
+
+        // Check for a bad patching job by checking for a known value from our
+        // simics xml that should never be set on real hardware
+        auto l_standalone = l_pTopLevel->getAttr<ATTR_IS_STANDALONE>();
+        if( !Util::isSimicsRunning() && l_standalone )
+        {
+            CONSOLE::displayf(CONSOLE::DEFAULT,  NULL,"***Trying to use simics HBD on real hardware***" );
+            CONSOLE::flush();
+            TARG_ASSERT(false, TARG_ERR_LOC "FATAL: Trying to use simics HBD on real hardware");
+        }
 
         // set global that TARG is ready
         Util::setIsTargetingLoaded();
