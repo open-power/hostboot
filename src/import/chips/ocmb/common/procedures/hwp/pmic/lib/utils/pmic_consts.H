@@ -679,6 +679,7 @@ namespace dt
 ///
 enum regs
 {
+    VAUX_RANGE           = 0x62,
     OPS_STATE            = 0x90,
     FAULTS_STATUS_0      = 0x92,
     FAULTS_STATUS_1      = 0x94,
@@ -708,11 +709,16 @@ enum regs
 ///
 enum fields
 {
-    GPI_1           = 13,
-    SWIN_FAULT_A    = 13,
-    SWIN_FAULT_B    =  9,
-    SWIN_FAULT_C    =  5,
-    SWIN_FAULT_D    =  1,
+    GPI_1                  = 13,
+    SWIN_FAULT_A           = 13,
+    SWIN_FAULT_B           = 9,
+    SWIN_FAULT_C           = 5,
+    SWIN_FAULT_D           = 1,
+    VAUX_A_SCALER_POSITION = 6,
+    VAUX_B_SCALER_POSITION = 4,
+    VAUX_C_SCALER_POSITION = 2,
+    VAUX_D_SCALER_POSITION = 0,
+    VAUX_SCALER_LENGTH     = 2,
 };
 
 ///

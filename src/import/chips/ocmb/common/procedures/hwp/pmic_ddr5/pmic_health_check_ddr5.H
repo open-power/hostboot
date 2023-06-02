@@ -224,7 +224,7 @@ void check_current_imbalance(mss::pmic::ddr5::target_info_redundancy_ddr5& io_ta
 ///
 /// @param[in,out] io_target_info  PMIC and DT target info struct
 /// @param[in,out] io_health_check_info health check struct
-/// @return mss::pmic::ddr5::pmic_state aggregrate state of all PMICs
+/// @return None
 /// @note As per the document provided by the Power team "Redundant PoD5 - Functional Specification
 ///      dated 20230412 version 0.07", the only data needed from the PMICs for health determination
 ///      are the rail currents to detect current imbalances (other status faults are summed up into
@@ -372,6 +372,7 @@ fapi2::ReturnCode send_struct(mss::pmic::ddr5::consolidated_health_check_data& i
 /// @param[in] i_target_info PMIC and DT target info struct
 /// @param[in] i_health_check_info health check struct
 /// @param[in] i_additional_info additional data collected struct in case of n-mode detected
+/// @param[in] i_periodic_tele_info periodic telemetry data collected struct in case of n-mode detected
 /// @param[in,out] io_consolidated_data consolidate data of all the structs to be sent
 /// @param[out] o_data hwp_data_ostream of struct information
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
@@ -379,6 +380,7 @@ fapi2::ReturnCode send_struct(mss::pmic::ddr5::consolidated_health_check_data& i
 fapi2::ReturnCode generate_and_send_response(const mss::pmic::ddr5::target_info_redundancy_ddr5& i_target_info,
         const mss::pmic::ddr5::health_check_telemetry_data& i_health_check_info,
         const mss::pmic::ddr5::additional_n_mode_telemetry_data& i_additional_info,
+        const mss::pmic::ddr5::periodic_telemetry_data& i_periodic_tele_info,
         mss::pmic::ddr5::consolidated_health_check_data& io_consolidated_data,
         fapi2::hwp_data_ostream& o_data);
 
@@ -399,6 +401,7 @@ void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_health_check_info health check struct
 /// @param[in,out] io_additional_info additional health check data
+/// @param[in,out] io_periodic_tele_info periodic telemetry data
 /// @param[in,out] io_consolidated_data consolidate data of all the structs to be sent
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
@@ -406,6 +409,7 @@ fapi2::ReturnCode pmic_health_check_ddr5_helper(const fapi2::Target<fapi2::TARGE
         mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
         mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
         mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
+        mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info,
         mss::pmic::ddr5::consolidated_health_check_data& io_consolidated_health_check_data);
 
 extern "C"

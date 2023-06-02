@@ -45,16 +45,10 @@ typedef fapi2::ReturnCode (*pmic_periodic_telemetry_ddr5_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
     fapi2::hwp_data_ostream&);
 
-static constexpr uint8_t NUMBER_PMIC_REGS_READ = 4;
+static constexpr uint8_t NUMBER_PMIC_REGS_READ_TELE = 4;
 
-///
-/// @brief Struct type for ADC pair
-///
-typedef struct
-{
-    uint8_t first;
-    uint16_t* second;
-} adu_map_t;
+static constexpr uint8_t ADC_U16_MAP_LEN = 8;
+static constexpr uint8_t NUM_BYTES_TO_READ = 16;
 
 ///
 /// @brief Read and store serial number and CCIN number
@@ -67,6 +61,16 @@ void read_serial_ccin_number(mss::pmic::ddr5::target_info_redundancy_ddr5& io_ta
                              mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info);
 
 ///
+/// @brief Scale the ADC regs (value * 38147) / 1000000 to get the value in mV
+///
+/// @param[in,out] io_adc_fill_array scaled values to be written to
+/// @param[in] i_data_buffer read ADC values
+/// None
+///
+void scale_adc_readings(uint16_t* (&io_adc_fill_array)[ADC_U16_MAP_LEN],
+                        const fapi2::buffer<uint8_t> (&i_data_buffer)[NUM_BYTES_TO_READ]);
+
+///
 /// @brief Read and store ADC regs
 ///
 /// @param[in,out] io_target_info PMIC and DT target info struct
@@ -77,7 +81,7 @@ void read_adc_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                    mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info);
 
 ///
-/// @brief Read and neg orfet value
+/// @brief Read and store neg orfet value
 ///
 /// @param[in,out] io_pmic_dt_pair PMIC and DT target info struct
 /// @param[in] i_reg_sel reg selection
@@ -87,6 +91,25 @@ void read_adc_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
 void read_neg_orfet_cnt(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_pair,
                         const uint8_t i_reg_sel,
                         fapi2::buffer<uint8_t>& io_data_buffer);
+///
+/// @brief Scale DT VAUX regs
+///
+/// @param[in] i_reg_value reg DT VAUX raw value
+/// @param[in] i_scaling_factor scaling factor from reg 0x62 of DT
+/// None
+///
+uint16_t scale_dt_vaux_regs(const uint8_t& i_reg_value,
+                            const uint8_t& i_scaling_factor);
+
+///
+/// @brief Read and neg orfet value
+///
+/// @param[in,out] io_pmic_dt_pair PMIC and DT target info struct
+/// @param[in,out] io_periodic_dt_tele_info DT struct
+/// None
+///
+void read_store_vaux_values(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_pair,
+                            mss::pmic::ddr5::dt_periodic_telemetry_data& io_periodic_dt_tele_info);
 
 ///
 /// @brief Read and store DT regs

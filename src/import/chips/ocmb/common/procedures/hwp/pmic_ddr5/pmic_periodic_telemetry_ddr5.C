@@ -56,9 +56,44 @@ void read_serial_ccin_number(mss::pmic::ddr5::target_info_redundancy_ddr5& io_ta
 }
 
 ///
+/// @brief Scale the ADC regs (value * 38147) / 1000000 to get the value in mV
+///
+/// @param[in,out] io_adc_fill_array scaled values to be written to
+/// @param[in] i_data_buffer read ADC values
+/// None
+///
+void scale_adc_readings(uint16_t* (&io_adc_fill_array)[ADC_U16_MAP_LEN],
+                        const fapi2::buffer<uint8_t> (&i_data_buffer)[NUM_BYTES_TO_READ])
+{
+    static constexpr uint32_t ADC_LSB_nV = 38147;
+    static constexpr uint64_t TO_MV = 1000000;
+    static constexpr uint8_t REG_SIZE_BITS = 8;
+    static constexpr uint8_t INCREMENT_BYTES_BUFFER = 2;
+
+    uint8_t l_reg_count = 0;
+
+    // Set each one
+    for (const auto& l_adc_fill_array : io_adc_fill_array)
+    {
+        uint16_t l_channel_field = 0;
+        constexpr uint8_t REG_MSB_OFFSET = 1;
+
+        // MSB then LSB
+        i_data_buffer[l_reg_count + REG_MSB_OFFSET].extract<0, REG_SIZE_BITS, 0>(l_channel_field);
+        i_data_buffer[l_reg_count].extract<0, REG_SIZE_BITS, REG_SIZE_BITS>(l_channel_field);
+
+        // scale
+        const uint64_t l_field_unscaled = l_channel_field * ADC_LSB_nV;
+        (*l_adc_fill_array) = static_cast<uint16_t>(l_field_unscaled / TO_MV);
+
+        l_reg_count += INCREMENT_BYTES_BUFFER;
+    }
+}
+
+///
 /// @brief Read and store ADC regs
 ///
-/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_target_info PMIC, DT and ADC target info struct
 /// @param[in,out] io_periodic_tele_info periodic telemetry struct
 /// None
 ///
@@ -67,81 +102,118 @@ void read_adc_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
 {
     FAPI_INF(GENTARGTIDFORMAT " Populating ADC data", GENTARGTID(io_target_info.iv_adc));
 
-    static constexpr uint64_t TO_MV = 1000000;
-    static constexpr uint8_t ADC_U16_MAP_LEN = 24;
-    static constexpr uint8_t BITS_PER_BYTE = 8;
-    static constexpr uint32_t ADC_LSB_nV = 38147;
-    fapi2::buffer<uint8_t> l_reg_contents;
+    fapi2::buffer<uint8_t> l_reg_contents[NUM_BYTES_TO_READ] = {0};
 
-    // Fields that map a LSB register to the uint16_t destination in io_periodic_tele_info.iv_adc
-    const adu_map_t ADC_U16_MAP[ADC_U16_MAP_LEN] =
+    mss::pmic::i2c::reg_read_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG,
+                                            l_reg_contents[mss::pmic::ddr5::data_position::DATA_0]);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    l_reg_contents[mss::pmic::ddr5::data_position::DATA_0].clearBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
+    mss::pmic::i2c::reg_write_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG,
+            l_reg_contents[mss::pmic::ddr5::data_position::DATA_0]);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Fields that map a LSB register to the uint16_t destination in io_periodic_tele_info.iv_adc.
+    uint16_t* l_adc_fill_array_max[ADC_U16_MAP_LEN] =
     {
-        {mss::adc::regs::MAX_CH0_LSB, &io_periodic_tele_info.iv_adc.iv_max_ch0_mV},
-        {mss::adc::regs::MAX_CH1_LSB, &io_periodic_tele_info.iv_adc.iv_max_ch1_mV},
-        {mss::adc::regs::MAX_CH2_LSB, &io_periodic_tele_info.iv_adc.iv_max_ch2_mV},
-        {mss::adc::regs::MAX_CH3_LSB, &io_periodic_tele_info.iv_adc.iv_max_ch3_mV},
-        {mss::adc::regs::MAX_CH4_LSB, &io_periodic_tele_info.iv_adc.iv_max_ch4_mV},
-        {mss::adc::regs::MAX_CH5_LSB, &io_periodic_tele_info.iv_adc.iv_max_ch5_mV},
-        {mss::adc::regs::MAX_CH6_LSB, &io_periodic_tele_info.iv_adc.iv_max_ch6_mV},
-        {mss::adc::regs::MAX_CH7_LSB, &io_periodic_tele_info.iv_adc.iv_max_ch7_mV},
-
-        {mss::adc::regs::MIN_CH0_LSB, &io_periodic_tele_info.iv_adc.iv_min_ch0_mV},
-        {mss::adc::regs::MIN_CH1_LSB, &io_periodic_tele_info.iv_adc.iv_min_ch1_mV},
-        {mss::adc::regs::MIN_CH2_LSB, &io_periodic_tele_info.iv_adc.iv_min_ch2_mV},
-        {mss::adc::regs::MIN_CH3_LSB, &io_periodic_tele_info.iv_adc.iv_min_ch3_mV},
-        {mss::adc::regs::MIN_CH4_LSB, &io_periodic_tele_info.iv_adc.iv_min_ch4_mV},
-        {mss::adc::regs::MIN_CH5_LSB, &io_periodic_tele_info.iv_adc.iv_min_ch5_mV},
-        {mss::adc::regs::MIN_CH6_LSB, &io_periodic_tele_info.iv_adc.iv_min_ch6_mV},
-        {mss::adc::regs::MIN_CH7_LSB, &io_periodic_tele_info.iv_adc.iv_min_ch7_mV},
-
-        {mss::adc::regs::RECENT_CH0_LSB, &io_periodic_tele_info.iv_adc.iv_recent_ch0_mV},
-        {mss::adc::regs::RECENT_CH1_LSB, &io_periodic_tele_info.iv_adc.iv_recent_ch1_mV},
-        {mss::adc::regs::RECENT_CH2_LSB, &io_periodic_tele_info.iv_adc.iv_recent_ch2_mV},
-        {mss::adc::regs::RECENT_CH3_LSB, &io_periodic_tele_info.iv_adc.iv_recent_ch3_mV},
-        {mss::adc::regs::RECENT_CH4_LSB, &io_periodic_tele_info.iv_adc.iv_recent_ch4_mV},
-        {mss::adc::regs::RECENT_CH5_LSB, &io_periodic_tele_info.iv_adc.iv_recent_ch5_mV},
-        {mss::adc::regs::RECENT_CH6_LSB, &io_periodic_tele_info.iv_adc.iv_recent_ch6_mV},
-        {mss::adc::regs::RECENT_CH7_LSB, &io_periodic_tele_info.iv_adc.iv_recent_ch7_mV}
+        &io_periodic_tele_info.iv_adc.iv_max_ch0_mV,
+        &io_periodic_tele_info.iv_adc.iv_max_ch1_mV,
+        &io_periodic_tele_info.iv_adc.iv_max_ch2_mV,
+        &io_periodic_tele_info.iv_adc.iv_max_ch3_mV,
+        &io_periodic_tele_info.iv_adc.iv_max_ch4_mV,
+        &io_periodic_tele_info.iv_adc.iv_max_ch5_mV,
+        &io_periodic_tele_info.iv_adc.iv_max_ch6_mV,
+        &io_periodic_tele_info.iv_adc.iv_max_ch7_mV
     };
+    // First read the LSB reg. Then the MSB reg is the next one
+    mss::pmic::i2c::reg_read_contiguous(io_target_info.iv_adc, mss::adc::regs::MAX_CH0_LSB, l_reg_contents);
+    scale_adc_readings(l_adc_fill_array_max, l_reg_contents);
 
-    mss::pmic::i2c::reg_read_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG, l_reg_contents);
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    l_reg_contents.clearBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
-    mss::pmic::i2c::reg_write_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG, l_reg_contents);
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-
-    // Set each one
-    for (const auto& l_adc_pair : ADC_U16_MAP)
+    uint16_t* l_adc_fill_array_min[ADC_U16_MAP_LEN] =
     {
-        fapi2::buffer<uint8_t> l_channel[2];
+        &io_periodic_tele_info.iv_adc.iv_min_ch0_mV,
+        &io_periodic_tele_info.iv_adc.iv_min_ch1_mV,
+        &io_periodic_tele_info.iv_adc.iv_min_ch2_mV,
+        &io_periodic_tele_info.iv_adc.iv_min_ch3_mV,
+        &io_periodic_tele_info.iv_adc.iv_min_ch4_mV,
+        &io_periodic_tele_info.iv_adc.iv_min_ch5_mV,
+        &io_periodic_tele_info.iv_adc.iv_min_ch6_mV,
+        &io_periodic_tele_info.iv_adc.iv_min_ch7_mV
+    };
+    // First read the LSB reg. Then the MSB reg is the next one
+    mss::pmic::i2c::reg_read_contiguous(io_target_info.iv_adc, mss::adc::regs::MIN_CH0_LSB, l_reg_contents);
+    scale_adc_readings(l_adc_fill_array_min, l_reg_contents);
 
-        uint16_t l_channel_field = 0;
+    uint16_t* l_adc_fill_array_recent[ADC_U16_MAP_LEN] =
+    {
+        &io_periodic_tele_info.iv_adc.iv_recent_ch0_mV,
+        &io_periodic_tele_info.iv_adc.iv_recent_ch1_mV,
+        &io_periodic_tele_info.iv_adc.iv_recent_ch2_mV,
+        &io_periodic_tele_info.iv_adc.iv_recent_ch3_mV,
+        &io_periodic_tele_info.iv_adc.iv_recent_ch4_mV,
+        &io_periodic_tele_info.iv_adc.iv_recent_ch5_mV,
+        &io_periodic_tele_info.iv_adc.iv_recent_ch6_mV,
+        &io_periodic_tele_info.iv_adc.iv_recent_ch7_mV
+    };
+    // First read the LSB reg. Then the MSB reg is the next one
+    mss::pmic::i2c::reg_read_contiguous(io_target_info.iv_adc, mss::adc::regs::RECENT_CH0_LSB, l_reg_contents);
+    scale_adc_readings(l_adc_fill_array_recent, l_reg_contents);
 
-        const auto REG = l_adc_pair.first;
-
-        // First read the LSB reg. Then the MSB reg is the next one
-        mss::pmic::i2c::reg_read_contiguous(io_target_info.iv_adc, REG, l_channel);
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-
-        // MSB then LSB
-        l_channel[1].extract<0, BITS_PER_BYTE, 0>(l_channel_field);
-        l_channel[0].extract<0, BITS_PER_BYTE, BITS_PER_BYTE>(l_channel_field);
-
-        // scale
-        const uint64_t l_field_unscaled = l_channel_field * ADC_LSB_nV;
-        (*l_adc_pair.second) = static_cast<uint16_t>(l_field_unscaled / TO_MV);
-    }
-
-    mss::pmic::i2c::reg_read_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG, l_reg_contents);
+    mss::pmic::i2c::reg_read_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG,
+                                            l_reg_contents[mss::pmic::ddr5::data_position::DATA_0]);
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    l_reg_contents.setBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
-    mss::pmic::i2c::reg_write_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG, l_reg_contents);
+    l_reg_contents[mss::pmic::ddr5::data_position::DATA_0].setBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
+    mss::pmic::i2c::reg_write_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG,
+            l_reg_contents[mss::pmic::ddr5::data_position::DATA_0]);
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     return;
 }
 
 ///
-/// @brief Read and store DT regs
+/// @brief Scale DT VAUX regs
+///
+/// @param[in] i_reg_value reg DT VAUX raw value
+/// @param[in] i_scaling_factor scaling factor from reg 0x62 of DT
+/// None
+///
+uint16_t scale_dt_vaux_regs(const uint8_t& i_reg_value,
+                            const uint8_t& i_scaling_factor)
+{
+    static constexpr uint16_t TO_MV = 10000;
+    static constexpr uint64_t TO_1200_MV = 78125;
+    static constexpr uint64_t TO_2400_MV = 156250;
+    static constexpr uint64_t TO_3600_MV = 208330;
+    static constexpr uint64_t TO_4800_MV = 312500;
+    static constexpr uint8_t SCALE_1200_MV = 0x00;
+    static constexpr uint8_t SCALE_2400_MV = 0x01;
+    static constexpr uint8_t SCALE_3600_MV = 0x02;
+    static constexpr uint8_t SCALE_4800_MV = 0x03;
+    uint64_t l_scaling_factor = 0;
+    uint16_t l_scaled_value = 0;
+
+    switch(i_scaling_factor)
+    {
+        case SCALE_1200_MV:
+            l_scaling_factor = TO_1200_MV;
+            break;
+
+        case SCALE_2400_MV:
+            l_scaling_factor = TO_2400_MV;
+            break;
+
+        case SCALE_3600_MV:
+            l_scaling_factor = TO_3600_MV;
+            break;
+
+        case SCALE_4800_MV:
+            l_scaling_factor = TO_4800_MV;
+            break;
+    }
+
+    return l_scaled_value = static_cast<uint16_t>((i_reg_value * l_scaling_factor) / TO_MV);
+}
+
+///
+/// @brief Read and store neg orfet value
 ///
 /// @param[in,out] io_pmic_dt_pair PMIC and DT target info struct
 /// @param[in] i_reg_sel reg selection
@@ -159,6 +231,49 @@ void read_neg_orfet_cnt(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_pa
     mss::pmic::ddr5::dt_reg_read(io_pmic_dt_pair, DT_REGS::NEG_ORFET_CNT, io_data_buffer);
 }
 
+///
+/// @brief Read and neg orfet value
+///
+/// @param[in,out] io_pmic_dt_pair PMIC and DT target info struct
+/// @param[in,out] io_periodic_dt_tele_info DT struct
+/// None
+///
+void read_store_vaux_values(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_pair,
+                            mss::pmic::ddr5::dt_periodic_telemetry_data& io_periodic_dt_tele_info)
+{
+    using DT_REGS = mss::dt::regs;
+    using FIELDS = mss::dt::fields;
+    static constexpr uint8_t NUM_BYTES_TO_READ = 2;
+    fapi2::buffer<uint8_t> l_dt_buffer[NUM_BYTES_TO_READ];
+    fapi2::buffer<uint8_t> l_vaux_a_scaler = 0;
+    fapi2::buffer<uint8_t> l_vaux_b_scaler = 0;
+    fapi2::buffer<uint8_t> l_vaux_c_scaler = 0;
+    fapi2::buffer<uint8_t> l_vaux_d_scaler = 0;
+
+    // VAUX A/B/C/D regs have to be scaled wrt 0x62 reg values. Below logic deciphers 0x62 values and scales accordingly
+    mss::pmic::ddr5::dt_reg_read(io_pmic_dt_pair, DT_REGS::VAUX_RANGE, l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
+    l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0].extractToRight<FIELDS::VAUX_A_SCALER_POSITION, FIELDS::VAUX_SCALER_LENGTH>
+    (l_vaux_a_scaler);
+    l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0].extractToRight<FIELDS::VAUX_B_SCALER_POSITION, FIELDS::VAUX_SCALER_LENGTH>
+    (l_vaux_b_scaler);
+    l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0].extractToRight<FIELDS::VAUX_C_SCALER_POSITION, FIELDS::VAUX_SCALER_LENGTH>
+    (l_vaux_c_scaler);
+    l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0].extractToRight<FIELDS::VAUX_D_SCALER_POSITION, FIELDS::VAUX_SCALER_LENGTH>
+    (l_vaux_d_scaler);
+
+    // Scale VAUX wrt to 0x62
+    mss::pmic::ddr5::dt_reg_read_contiguous(io_pmic_dt_pair, DT_REGS::VUAX_B_A, l_dt_buffer);
+    io_periodic_dt_tele_info.iv_r9e_vaux_b = scale_dt_vaux_regs(l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0],
+            l_vaux_b_scaler);
+    io_periodic_dt_tele_info.iv_r9f_vaux_a = scale_dt_vaux_regs(l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1],
+            l_vaux_a_scaler);
+
+    mss::pmic::ddr5::dt_reg_read_contiguous(io_pmic_dt_pair, DT_REGS::VUAX_D_C, l_dt_buffer);
+    io_periodic_dt_tele_info.iv_ra0_vaux_d = scale_dt_vaux_regs(l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0],
+            l_vaux_d_scaler);
+    io_periodic_dt_tele_info.iv_ra1_vaux_c = scale_dt_vaux_regs(l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1],
+            l_vaux_c_scaler);
+}
 ///
 /// @brief Read and store DT regs
 ///
@@ -178,29 +293,33 @@ void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
         mss::pmic::ddr5::run_if_present_dt(io_target_info, l_dt_count, [&io_target_info, &io_periodic_tele_info, l_dt_count]
                                            (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
         {
-            static constexpr uint8_t BITS_PER_BYTE = 8;
             static constexpr uint8_t SEL_SWA_ORFET_CNT = 0x00;
             static constexpr uint8_t SEL_SWC_ORFET_CNT = 0x10;
             static constexpr uint8_t SEL_SWD_ORFET_CNT = 0x18;
+            static constexpr uint32_t VOLT_SCALE = 31250;
+            static constexpr uint32_t VIN_VINP_SCALE = 62500;
+            static constexpr uint64_t TO_MV = 1000;
             fapi2::buffer<uint8_t> l_dt_buffer[NUM_BYTES_TO_READ];
 
+            // IIN scale = (value * 31250) / 1000
             mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::IIN_VCC, l_dt_buffer);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_iin_vcc = (l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] << BITS_PER_BYTE) | l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1];
+            io_periodic_tele_info.iv_dt[l_dt_count].iv_r9a_iin = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] * VOLT_SCALE) / TO_MV);
+            // VCC scale = (value * 31250) / 1000
+            io_periodic_tele_info.iv_dt[l_dt_count].iv_r9b_vcc = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1] * VOLT_SCALE) / TO_MV);
 
             mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::VINP_VIN, l_dt_buffer);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_vinp_vin = (l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] << BITS_PER_BYTE) | l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1];
+            io_periodic_tele_info.iv_dt[l_dt_count].iv_r9c_vinp = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] * VIN_VINP_SCALE) / TO_MV);
+            io_periodic_tele_info.iv_dt[l_dt_count].iv_r9d_vin = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1] * VIN_VINP_SCALE) / TO_MV);
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::VUAX_B_A, l_dt_buffer);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_vaux_b_a = (l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] << BITS_PER_BYTE) | l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1];
-
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::VUAX_D_C, l_dt_buffer);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_vaux_d_c = (l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] << BITS_PER_BYTE) | l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1];
+            read_store_vaux_values(io_target_info.iv_pmic_dt_map[l_dt_count], io_periodic_tele_info.iv_dt[l_dt_count]);
 
             mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::VINP_MIN_MAX, l_dt_buffer);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_vinp_min_max = (l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] << BITS_PER_BYTE) | l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1];
+            io_periodic_tele_info.iv_dt[l_dt_count].iv_ra2_vinp_min = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] * VIN_VINP_SCALE) / TO_MV);
+            io_periodic_tele_info.iv_dt[l_dt_count].iv_ra3_vinp_max = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1] * VIN_VINP_SCALE) / TO_MV);
 
             mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::IIN_MIN_MAX, l_dt_buffer);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_iin_min_max = (l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] << BITS_PER_BYTE) | l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1];
+            io_periodic_tele_info.iv_dt[l_dt_count].iv_ra4_iin_min = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] * VOLT_SCALE) / TO_MV);
+            io_periodic_tele_info.iv_dt[l_dt_count].iv_ra5_iin_max = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1] * VOLT_SCALE) / TO_MV);
 
             mss::pmic::ddr5::dt_reg_read(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::BREADCRUMB, l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
             io_periodic_tele_info.iv_dt[l_dt_count].iv_breadcrumb = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
@@ -243,8 +362,9 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
         {
             using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
             using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
-            uint8_t l_adc_read_vin_bulk = 0x28;
-            fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_REGS_READ];
+            static constexpr uint16_t ADC_VIN_BULK_STEP = 70;
+            static constexpr uint16_t ADC_TEMP_STEP = 2;
+            fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_REGS_READ_TELE];
 
             // Read SWA/B/C/D
             mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R0C, l_data_buffer);
@@ -256,20 +376,26 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
 
             // Set PMIC internal ADC to sample VIN
             mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30, l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]);
-            l_data_buffer[mss::pmic::ddr5::data_position::DATA_0] |= l_adc_read_vin_bulk;
+            l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].clearBit<6>();
+            l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].setBit<5>();
+            l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].clearBit<4>();
+            l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].setBit<3>();
             mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30, l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]);
             // VIN
             mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R31, l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]);
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r31_sample_vin = l_data_buffer[mss::pmic::ddr5::data_position::DATA_0];
+            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r31_sample_vin = static_cast<uint16_t>(l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]()) * ADC_VIN_BULK_STEP;
 
             // Set PMIC internal ADC to sample temp
-            l_adc_read_vin_bulk = 0x50;
+            //l_adc_read_vin_bulk = 0x50;
             mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30, l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]);
-            l_data_buffer[mss::pmic::ddr5::data_position::DATA_0] |= l_adc_read_vin_bulk;
+            l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].setBit<6>();
+            l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].clearBit<5>();
+            l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].setBit<4>();
+            l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].clearBit<3>();
             mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30, l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]);
             // Temp
             mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R31, l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]);
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r31_sample_temp = l_data_buffer[mss::pmic::ddr5::data_position::DATA_0];
+            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r31_sample_temp = static_cast<uint16_t>(l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]()) * ADC_TEMP_STEP;
 
             // Read SWA/B/C/D offsets
             mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_count], TPS_REGS::R7C_SET_SWA_OFFSET, l_data_buffer);
@@ -316,7 +442,7 @@ void collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io
 /// @param[out] o_data hwp_data_ostream of struct information
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode send_struct(mss::pmic::ddr5::periodic_telemetry_data i_info,
+fapi2::ReturnCode send_struct(mss::pmic::ddr5::periodic_telemetry_data& i_info,
                               fapi2::hwp_data_ostream& o_data)
 {
     // Casted to char pointer so we can increment in single bytes
