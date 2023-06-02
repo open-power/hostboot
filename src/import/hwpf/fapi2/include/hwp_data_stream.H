@@ -56,6 +56,7 @@
 
 #include <return_code_defs.H>
 #include <algorithm>
+#include <endian.h>
 
 namespace fapi2
 {
@@ -177,9 +178,36 @@ class hwp_array_istream : public hwp_data_istream
             }
         }
 
-    private:
+    protected:
         const hwp_data_unit* iv_data;
         size_t iv_remaining;
+};
+
+/**
+ * @brief Variant of hwp_array_istream which reads from a big-endian array
+ *
+ * The array is treated as an array of big-endian values; the elements
+ * will be endian converted to the platform endianness while reading.
+ */
+class hwp_be_array_istream : public hwp_array_istream
+{
+    public:
+        hwp_be_array_istream(const hwp_data_unit* i_data, size_t i_length) :
+            hwp_array_istream(i_data, i_length) {};
+
+        virtual ReturnCodes get(hwp_data_unit& o_data)
+        {
+            if (iv_remaining)
+            {
+                iv_remaining--;
+                o_data = be32toh(*(iv_data++));
+                return FAPI2_RC_SUCCESS;
+            }
+            else
+            {
+                return FAPI2_RC_FALSE;
+            }
+        }
 };
 
 /**
@@ -226,11 +254,37 @@ class hwp_array_ostream : public hwp_data_ostream
             return iv_length;
         }
 
-    private:
+    protected:
         hwp_data_unit* iv_buffer;
         size_t iv_length, iv_max_length;
 };
 
+/**
+ * @brief Variant of hwp_array_ostream that writes to a big-endian array
+ *
+ * The array is treated as an array of big-endian values; the elements
+ * will be endian converted from the platform endianness while writing.
+ */
+class hwp_be_array_ostream : public hwp_array_ostream
+{
+    public:
+        hwp_be_array_ostream(hwp_data_unit* i_buffer, size_t i_max_length) :
+            hwp_array_ostream(i_buffer, i_max_length) {};
+
+        virtual ReturnCodes put(hwp_data_unit i_data)
+        {
+            if (iv_length >= iv_max_length)
+            {
+                return FAPI2_RC_OVERFLOW;
+            }
+            else
+            {
+                *(iv_buffer++) = htobe32(i_data);
+                iv_length++;
+                return FAPI2_RC_SUCCESS;
+            }
+        }
+};
 
 /**
  * @}
