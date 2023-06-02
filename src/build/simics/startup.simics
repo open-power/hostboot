@@ -280,7 +280,7 @@ $use_odyssey = "0"
 @if 'HB_USE_ODYSSEY' in os.environ: simenv.use_odyssey = "1"
 if($use_odyssey == "1") {
     echo "Loading DDR5_new"
-    foreach $dimm in (list-components backplane0 ddimm_ody) {
+    foreach $dimm in (list-components ddimm_ody) {
         echo "Copy to "+$dimm
         $dimm.image_VPD[0].load-file "DDR5_new.bin"
         $dimm.image_VPD[1].load-file "DDR5_new.bin"
