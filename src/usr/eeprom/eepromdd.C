@@ -739,6 +739,8 @@ errlHndl_t eepromPerformOp(DeviceFW::OperationType i_opType,
                     ERR_MRK"eepromPerformOp: committing error plid 0x%08X error",
                     ERRL_GETPLID_SAFE(e));
             e->collectTrace(EEPROM_COMP_NAME);
+            e->collectTrace(VPD_COMP_NAME);
+            e->collectTrace( "SPD", 256);
             errlCommit(e, EEPROM_COMP_ID);
         }
     }
@@ -921,6 +923,7 @@ errlHndl_t reloadMvpdEecacheFromNextSource( TARGETING::Target* const i_target)
 
         errl->collectTrace(EEPROM_COMP_NAME);
         errl->collectTrace(VPD_COMP_NAME);
+        errl->collectTrace( "SPD", 256);
     }
 
     TRACFCOMP(g_trac_eeprom, EXIT_MRK"reloadMvpdEecacheFromNextSource");
