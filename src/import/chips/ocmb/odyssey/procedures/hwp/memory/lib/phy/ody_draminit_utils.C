@@ -140,7 +140,7 @@ fapi2::ReturnCode poll_for_message_available(const fapi2::Target<fapi2::TARGET_T
                 fapi2::ODY_GET_MAIL_FAILURE().
                 set_PORT_TARGET(i_target),
                 TARGTIDFORMAT " poll for getting mail timed out during DRAM training", TARGTID);
-    FAPI_INF(TARGTIDFORMAT " received mail message", TARGTID);
+    FAPI_DBG(TARGTIDFORMAT " received mail message", TARGTID);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -211,7 +211,7 @@ fapi2::ReturnCode acknowledge_mail(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     // Writing 1 here completes the mail reading process.
     FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_DCTWRITEPROT, ACK_MESSAGE));
 
-    FAPI_INF(TARGTIDFORMAT " mail acknowledged", TARGTID);
+    FAPI_DBG(TARGTIDFORMAT " mail acknowledged", TARGTID);
 
 fapi_try_exit:
     return fapi2::current_err;
