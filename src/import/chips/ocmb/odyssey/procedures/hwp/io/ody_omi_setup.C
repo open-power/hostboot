@@ -128,8 +128,8 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     l_tlxcfg0.set_DCP1_INIT(128);
     FAPI_TRY(l_tlxcfg0.putScom(i_target));
 
-    l_ppe_firs.mc_omi_fir_set(i_target);
-    l_ppe_firs.tlx_fir_set(i_target);
+    FAPI_TRY(l_ppe_firs.mc_omi_fir_set(i_target));
+    FAPI_TRY(l_ppe_firs.tlx_fir_set(i_target));
 
 fapi_try_exit:
     FAPI_DBG("End ody_omi_setup");
