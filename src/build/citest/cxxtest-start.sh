@@ -87,9 +87,8 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     if [ -z "${HB_USE_ODYSSEY}" ]; then
         echo "Using DDR4/Explorer DDIMMs"
     else
-        # FIXME JIRA: PFHB-477 copy in DDR5 SPD and attribute override file for Odyssey.
+        # FIXME JIRA: PFHB-477 copy in customized DDR5 SPD for Odyssey.
         cp /gsa/ausgsa/home/i/s/ismirno/public/debug/odyssey/DDR5_new.bin ${STANDALONE}/simics
-        cp /gsa/ausgsa/home/i/s/ismirno/public/debug/odyssey/run_ody_hwp_from_host.bin ${STANDALONE}/simics/attribute_override.bin
 
         echo "Using DDR5/Odyssey DDIMMs"
         START_SIMICS_CMD+=" dimm_type=ody"

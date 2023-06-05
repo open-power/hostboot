@@ -263,6 +263,8 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
 
             if (l_runOdyHwpFromHost)
             {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Skipping native call to ody_mss_thermal_init" );
                 /* @todo JIRA:PFHB-236 - for ody_mss_thermal_init
                  *
                 FAPI_INVOKE_HWP(l_err, ody_mss_thermal_init, l_fapiOcmbTarget);
@@ -270,7 +272,11 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
             }
             else
             {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Skipping chipop call to ody_mss_thermal_init" );
+                /*  @TODO PFHB-236
                 l_err = sendExecHWPRequest(l_ocmbTarget, MEM_ODY_THERMAL_INIT);
+                 */
             }
 
             if (l_err)
