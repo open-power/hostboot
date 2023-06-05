@@ -589,5 +589,45 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Re-mask MCBIST_PROGRAM_COMPLETE at the beginning of Cronus memdiags
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note this avoids an unnecessary processor attention when the sf_init program completes in memdiags
+///
+fapi2::ReturnCode pre_init_mask_prog_complete( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+    // Create register for MCBISTFIR
+    mss::fir::reg2<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_RW_WCLEAR> l_mcbist_reg(i_target);
+
+    // Re-mask MCBISTFIR PROGRAM_COMPLETE before Cronus mode memdiags
+    FAPI_TRY(l_mcbist_reg.remask<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>(),
+             "Failed to Write MCBIST FIR Mask register " GENTARGTIDFORMAT, GENTARGTID(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Clear and Re-unmask MCBIST_PROGRAM_COMPLETE at the end of Cronus memdiags
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note this avoids an unnecessary processor attention when the sf_init program completes in memdiags
+///
+fapi2::ReturnCode post_init_unmask_prog_complete( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+    // Create register for MCBISTFIR
+    mss::fir::reg2<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_RW_WCLEAR> l_mcbist_reg(i_target);
+
+    // Clear and re-unmask MCBISTFIR PROGRAM_COMPLETE after Cronus mode memdiags
+    FAPI_TRY(l_mcbist_reg.clear<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>(),
+             "Failed to Clear MCBIST FIR register " GENTARGTIDFORMAT, GENTARGTID(i_target));
+    FAPI_TRY(l_mcbist_reg.attention<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>()
+             .write(), "Failed to Write MCBIST FIR Mask register " GENTARGTIDFORMAT, GENTARGTID(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // end unmask ns
 } // end mss ns

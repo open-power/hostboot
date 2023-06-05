@@ -47,6 +47,8 @@
 #include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <lib/fir/ody_unmask.H>
+
 
 extern "C"
 {
@@ -61,6 +63,10 @@ extern "C"
         uint8_t l_post_memdiags_subtest = 0;
 
         FAPI_INF("Start ody_mss_memdiag on: %s", mss::c_str( i_target ));
+
+        // Re-mask MCBIST_PROGRAM_COMPLETE
+        // this avoids an unnecessary processor attention when the sf_init program completes since PRD is not running
+        FAPI_TRY(mss::unmask::pre_init_mask_prog_complete(i_target));
 
         FAPI_TRY(mss::memdiags::mss_initialize_memory<mss::mc_type::ODYSSEY>(i_target));
 
@@ -79,6 +85,9 @@ extern "C"
             // the read-only subtest above switches back to FIFO mode
             FAPI_TRY(mss::reset_reorder_queue_settings<mss::mc_type::ODYSSEY>(i_target) );
         }
+
+        // Clear and re-unmask MCBIST_PROGRAM_COMPLETE
+        FAPI_TRY(mss::unmask::post_init_unmask_prog_complete(i_target));
 
     fapi_try_exit:
         FAPI_INF("End ody_mss_memdiag on %s", mss::c_str( i_target ));

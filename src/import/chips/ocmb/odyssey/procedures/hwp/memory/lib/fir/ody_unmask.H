@@ -132,6 +132,22 @@ fapi2::ReturnCode after_scominit_disable_rcd_recovery_helper( const fapi2::Targe
 fapi2::ReturnCode after_memdiags_enable_rcd_recovery_helper( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target );
 
+///
+/// @brief Re-mask MCBIST_PROGRAM_COMPLETE at the beginning of Cronus memdiags
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note this avoids an unnecessary processor attention when the sf_init program completes in memdiags
+///
+fapi2::ReturnCode pre_init_mask_prog_complete( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target );
+
+///
+/// @brief Clear and Re-unmask MCBIST_PROGRAM_COMPLETE at the end of Cronus memdiags
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note this avoids an unnecessary processor attention when the sf_init program completes in memdiags
+///
+fapi2::ReturnCode post_init_unmask_prog_complete( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target );
+
 } // end unmask ns
 } // end mss ns
 

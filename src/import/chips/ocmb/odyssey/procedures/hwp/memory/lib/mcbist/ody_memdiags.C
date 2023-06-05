@@ -298,9 +298,14 @@ fapi2::ReturnCode mask_program_complete<mss::mc_type::ODYSSEY>(
 
     fapi2::buffer<uint64_t> l_fir_mask;
 
+    // Save the masked/unmasked state of MCBIST_PROGRAM_COMPLETE so it can be restored later
+    o_fir_mask_save.flush<0>();
+    FAPI_TRY( mss::getScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRMASK_RW_WCLEAR, l_fir_mask) );
+    o_fir_mask_save.writeBit<TT::MCB_PROGRAM_COMPLETE>(l_fir_mask.getBit<TT::MCB_PROGRAM_COMPLETE>());
+
     // Mask the FIR
+    l_fir_mask.flush<0>();
     l_fir_mask.setBit<TT::MCB_PROGRAM_COMPLETE>();
-    o_fir_mask_save = l_fir_mask;
     FAPI_TRY( mss::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRMASK_WO_OR, l_fir_mask) );
 
 fapi_try_exit:
@@ -329,7 +334,14 @@ fapi2::ReturnCode clear_and_restore_program_complete<mss::mc_type::ODYSSEY>(
     FAPI_TRY( mss::putScom(i_target, TT::FIRQ_REG, l_fir) );
 
     // Then restore the mask value
-    FAPI_TRY( mss::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRMASK_RW_WCLEAR, i_fir_mask_save) );
+    if (i_fir_mask_save.getBit<TT::MCB_PROGRAM_COMPLETE>())
+    {
+        FAPI_TRY( mss::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRMASK_WO_OR, l_fir) );
+    }
+    else
+    {
+        FAPI_TRY( mss::putScom(i_target, scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRMASK_RW_WCLEAR, l_fir) );
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
