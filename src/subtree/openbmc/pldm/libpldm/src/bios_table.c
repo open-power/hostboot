@@ -480,13 +480,6 @@ static ssize_t attr_table_entry_length_string(const void *entry)
 	return (ssize_t)len;
 }
 
-struct attr_table_integer_entry_fields {
-	uint64_t lower_bound;
-	uint64_t upper_bound;
-	uint32_t scalar_increment;
-	uint64_t default_value;
-} __attribute__((packed));
-
 LIBPLDM_ABI_STABLE
 size_t pldm_bios_table_attr_entry_integer_encode_length(void)
 {
