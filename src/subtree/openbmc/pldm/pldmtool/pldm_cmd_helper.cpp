@@ -214,7 +214,9 @@ int CommandInterface::pldmSendRecv(std::vector<uint8_t>& requestMsg,
         responseMsg.resize(responseMessageSize);
         memcpy(responseMsg.data(), responseMessage, responseMsg.size());
 
+        shutdown(fd, SHUT_RDWR);
         free(responseMessage);
+
         if (pldmVerbose)
         {
             std::cout << "pldmtool: ";
