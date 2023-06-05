@@ -1030,11 +1030,12 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         MemRank rank( mrnk );
 
         // get symbol and DRAM
-        MemSymbol symbol = MemSymbol::fromGalois( trgt, rank, galois );
+        TargetHandle_t memport = getConnectedChild(trgt, TYPE_MEM_PORT, i_port);
+        MemSymbol symbol = MemSymbol::fromGalois( memport, rank, galois );
         if ( !symbol.isValid() )
         {
-            PRDF_ERR( PRDF_FUNC "Galois 0x%02x from EXP_MSR is invalid: 0x%08x,"
-                      "0x%02x", galois, i_chip->getHuid(), rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "Galois 0x%02x from MSR is invalid: 0x%08x,"
+                      "0x%02x", galois, getHuid(trgt), rank.getKey() );
             o_rc = FAIL;
             break;
         }
@@ -1052,15 +1053,13 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         if ( db->getImpeThresholdCounter()->inc(rank, dram, io_sc) )
         {
             // Check if a DRAM spare is available
-            TargetHandle_t memPort = getConnectedChild( i_chip->getTrgt(),
-                                                        TYPE_MEM_PORT, i_port );
             bool spareAvailable = false;
-            o_rc = isSpareAvailable<TYPE_MEM_PORT>( memPort, rank, i_port,
+            o_rc = isSpareAvailable<TYPE_MEM_PORT>( memport, rank,
                                                     spareAvailable );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "isSpareAvailable(0x%08x, 0x%02x, %d) "
-                          "failed", getHuid(memPort), rank.getKey(), i_port );
+                PRDF_ERR( PRDF_FUNC "isSpareAvailable(0x%08x, 0x%02x) "
+                          "failed", getHuid(memport), rank.getKey() );
                 break;
             }
 
@@ -1093,9 +1092,9 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             }
             else // Otherwise, place a chip mark on the failing DRAM.
             {
-                MemMark chipMark( trgt, rank, galois );
+                MemMark chipMark( memport, rank, galois  );
                 o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>( i_chip, rank,
-                    i_port, chipMark );
+                                                                 chipMark );
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) failed",

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -415,8 +415,8 @@ uint32_t MemDqBitmap::isChipMark( const MemSymbol & i_symbol, bool & o_cm )
 
 //------------------------------------------------------------------------------
 
-void MemDqBitmap::checkIfSymSpared( uint8_t i_symbol, bool & o_symOnSp0,
-                                    bool & o_symOnSp1 )
+void MemDqBitmap::checkIfSymSpared( uint8_t i_symbol, uint8_t i_port,
+                                    bool & o_symOnSp0, bool & o_symOnSp1 )
 {
     #define PRDF_FUNC "[MemDqBitmap::checkIfSymSpared] "
 
@@ -430,12 +430,12 @@ void MemDqBitmap::checkIfSymSpared( uint8_t i_symbol, bool & o_symOnSp0,
     MemSymbol sp0, sp1;
     TYPE trgtType = getTargetType( iv_trgt );
     TargetHandle_t trgt = iv_trgt;
-    if ( TYPE_MEM_PORT == trgtType )
+    if ( TYPE_OCMB_CHIP == trgtType )
     {
-        trgt = getConnectedParent( iv_trgt, TYPE_OCMB_CHIP );
+        trgt = getConnectedChild( iv_trgt, TYPE_MEM_PORT, i_port );
     }
 
-    rc = mssGetSteerMux<TYPE_OCMB_CHIP>( trgt, iv_rank, sp0, sp1 );
+    rc = mssGetSteerMux<TYPE_MEM_PORT>( trgt, iv_rank, sp0, sp1 );
     if ( SUCCESS != rc )
     {
         PRDF_ERR( PRDF_FUNC "Failure from mssGetSteerMux()" );
@@ -522,7 +522,7 @@ std::vector<MemSymbol> MemDqBitmap::getSymbolList( uint8_t i_portSlct )
                     // Check if the symbol is on a spare
                     bool onSp0 = false;
                     bool onSp1 = false;
-                    checkIfSymSpared( symbol, onSp0, onSp1 );
+                    checkIfSymSpared( symbol, i_portSlct, onSp0, onSp1 );
 
                     if ( onSp0 || onSp1 )
                     {
@@ -543,9 +543,15 @@ std::vector<MemSymbol> MemDqBitmap::getSymbolList( uint8_t i_portSlct )
                         }
                     }
 
+                    TargetHandle_t memport = iv_trgt;
+                    if (TYPE_OCMB_CHIP == trgtType)
+                    {
+                        memport = getConnectedChild(iv_trgt, TYPE_MEM_PORT,
+                                                    i_portSlct);
+                    }
                     // add symbol to output
-                    o_symbolList.push_back( MemSymbol::fromSymbol(iv_trgt,
-                                            iv_rank, symbol) );
+                    o_symbolList.push_back( MemSymbol::fromSymbol(memport, iv_rank,
+                        symbol) );
                 }
             }
         }

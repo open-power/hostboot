@@ -122,8 +122,11 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
             PRDF_ASSERT( false );
         }
 
-        iv_symbol = MemSymbol::fromSymbol( iv_target, iv_rank,
-                iv_memMruMeld.s.symbol );
+        TargetHandle_t memport = getConnectedChild(iv_target, TYPE_MEM_PORT,
+                                                   iv_memMruMeld.s.port);
+
+        iv_symbol = MemSymbol::fromSymbol( memport, iv_rank,
+                                           iv_memMruMeld.s.symbol );
         if ( !iv_symbol.isValid() )
         {
             PRDF_ERR( PRDF_FUNC "fromSymbol() failed" );
@@ -137,8 +140,8 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
             if ( iv_memMruMeld.s.dramSpared )
             {
                 MemSymbol sp0, sp1;
-                uint32_t rc = mssGetSteerMux<TYPE_OCMB_CHIP>(iv_target, iv_rank,
-                                                             sp0, sp1);
+                uint32_t rc = mssGetSteerMux<TYPE_MEM_PORT>(memport, iv_rank,
+                                                            sp0, sp1);
                 if ( SUCCESS == rc )
                 {
                     iv_symbol.updateSpared( sp0, sp1 );
@@ -146,7 +149,7 @@ MemoryMru::MemoryMru( uint32_t i_memMru ) :
                 else
                 {
                     PRDF_ERR( "MemoryMru: mssGetSteerMux() failed. HUID: "
-                              "0x%08x rank: 0x%02x", getHuid(iv_target),
+                              "0x%08x rank: 0x%02x", getHuid(memport),
                               iv_rank.getKey() );
                 }
             }

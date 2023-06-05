@@ -57,25 +57,20 @@ class MemMark
 
     /**
      * @brief Constructor from components.
-     * @param i_trgt   OCMB target.
-     * @param i_rank   The rank this mark is on.
-     * @param i_galois The Galois field.
+     * @param i_memport MEM_PORT target.
+     * @param i_rank    The rank this mark is on.
+     * @param i_galois  The Galois field.
      */
-    MemMark( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
+    MemMark( TARGETING::TargetHandle_t i_memport, const MemRank & i_rank,
              uint8_t i_galois ) :
-        iv_symbol( MemSymbol::fromGalois(i_trgt, i_rank, i_galois) )
+        iv_symbol( MemSymbol::fromGalois(i_memport, i_rank, i_galois) )
     {}
 
     /**
      * @brief Constructor from components.
-     * @param i_trgt   OCMB target.
-     * @param i_rank   The rank this mark is on.
      * @param i_symbol The symbol representing this mark.
      */
-    MemMark( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
-             const MemSymbol & i_symbol ) :
-        iv_symbol( i_symbol )
-    {}
+    explicit MemMark( const MemSymbol & i_symbol ) : iv_symbol( i_symbol ) {}
 
   public: // functions
 
@@ -126,13 +121,12 @@ uint32_t readChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
  * @brief  Writes a chip mark into markstore for the given rank.
  * @param  i_chip OCMB chip.
  * @param  i_rank Target rank.
- * @param  i_port The target memory port.
  * @param  i_mark Target chip mark.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t writeChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
-                        const uint8_t& i_port, const MemMark & i_mark );
+                        const MemMark & i_mark );
 
 /**
  * @brief  Clear chip mark in markstore for the given rank.
@@ -161,13 +155,12 @@ uint32_t readSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
  * @brief  Writes a symbol mark into markstore for the given rank.
  * @param  i_chip OCMB chip.
  * @param  i_rank Target rank.
- * @param  i_port The target memory port.
  * @param  i_mark Target symbol mark.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t writeSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          const uint8_t& i_port, const MemMark & i_mark );
+                          const MemMark & i_mark );
 
 /**
  * @brief  Clear symbol mark in markstore for the given rank.

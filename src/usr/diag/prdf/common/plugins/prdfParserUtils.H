@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,14 +60,6 @@ namespace PARSERUTILS
  */
 template<TARGETING::TYPE T>
 uint8_t symbol2Dq( uint8_t i_symbol );
-
-/**
- * @brief Find the port select for given symbol
- * @param i_symbol The Symbol
- * @return The Port Select
- */
-template<TARGETING::TYPE T>
-uint8_t symbol2PortSlct( uint8_t i_symbol );
 
 /**
  * @brief Find the symbol for the given DQ

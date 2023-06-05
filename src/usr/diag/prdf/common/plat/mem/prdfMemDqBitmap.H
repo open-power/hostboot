@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -195,10 +195,11 @@ class MemDqBitmap
     /**
      * @brief  Helper function for getSymbolList to adjust for possible spares
      * @param  i_symbol   A symbol on the target DRAM.
+     * @param  o_port     The port select (0-1).
      * @param  o_symOnSp0 True if the symbol is on spare 0, false otherwise
      * @param  o_symOnSp1 True if the symbol is on spare 1, false otherwise
      */
-    void checkIfSymSpared( uint8_t i_symbol, bool & o_symOnSp0,
+    void checkIfSymSpared( uint8_t i_symbol, uint8_t i_port, bool & o_symOnSp0,
                            bool & o_symOnSp1 );
 
     /**

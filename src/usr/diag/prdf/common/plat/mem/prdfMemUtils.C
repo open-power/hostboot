@@ -146,8 +146,8 @@ int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                     dramCounts[dram].symbolCount++;
 
                     SymbolData symData;
-                    symData.symbol = MemSymbol::fromSymbol( ocmbTrgt, i_rank,
-                        sym );
+                    symData.symbol = MemSymbol::fromSymbol( memPortTrgt,
+                                                            i_rank, sym );
                     if ( !symData.symbol.isValid() )
                     {
                         PRDF_ERR( PRDF_FUNC "MemSymbol() failed: symbol=%d",
@@ -193,7 +193,7 @@ int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                : byte2Symbol  <TYPE_OCMB_CHIP>( highestDram );
             PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
 
-            o_chipMark  = MemSymbol::fromSymbol( ocmbTrgt, i_rank, sym );
+            o_chipMark  = MemSymbol::fromSymbol( memPortTrgt, i_rank, sym );
         }
 
     } while(0);

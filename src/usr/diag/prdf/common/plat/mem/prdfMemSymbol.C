@@ -50,7 +50,7 @@ MemSymbol::MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
     iv_pins(1), iv_isSpareDram0(false), iv_isSpareDram1(false)
 {
     PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
+    PRDF_ASSERT( TYPE_MEM_PORT == getTargetType(i_trgt) );
 }
 
 //------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
     MemSymbol o_sym( i_trgt, i_rank, symbol );
 
     MemSymbol sp0, sp1;
-    int32_t rc = mssGetSteerMux<TYPE_OCMB_CHIP>( i_trgt, i_rank, sp0, sp1 );
+    int32_t rc = mssGetSteerMux<TYPE_MEM_PORT>( i_trgt, i_rank, sp0, sp1 );
     if ( SUCCESS != rc )
     {
         PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "
@@ -102,8 +102,8 @@ MemSymbol MemSymbol::fromSymbol( TARGETING::TargetHandle_t i_trgt,
     MemSymbol o_sym( i_trgt, i_rank, i_symbol );
     MemSymbol sp0, sp1;
 
-    int32_t rc = mssGetSteerMux<TARGETING::TYPE_OCMB_CHIP>( i_trgt, i_rank,
-                                                            sp0, sp1 );
+    int32_t rc = mssGetSteerMux<TARGETING::TYPE_MEM_PORT>( i_trgt, i_rank,
+                                                           sp0, sp1 );
     if ( SUCCESS != rc )
     {
         PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed. HUID: 0x%08x "
@@ -169,9 +169,9 @@ uint8_t MemSymbol::getPortSlct() const
     uint8_t portSlct = 0;
     TYPE trgtType = getTargetType( iv_trgt );
 
-    if ( TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_MEM_PORT == trgtType )
     {
-        portSlct = symbol2PortSlct<TYPE_OCMB_CHIP>( iv_symbol );
+        portSlct = iv_trgt->getAttr<ATTR_REL_POS>();
     }
     else
     {
@@ -190,9 +190,10 @@ uint8_t MemSymbol::getDram() const
     TYPE trgtType = getTargetType( iv_trgt );
     bool isX4 = true;
 
-    if ( TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_MEM_PORT == trgtType )
     {
-        TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
+        TargetHandle_t dimm = getConnectedChild(iv_trgt, TYPE_DIMM,
+                                                iv_rank.getDimmSlct());
         isX4 = isDramWidthX4( dimm );
         dram = isX4 ? symbol2Nibble<TYPE_OCMB_CHIP>( iv_symbol )
                     : symbol2Byte  <TYPE_OCMB_CHIP>( iv_symbol );
@@ -217,10 +218,10 @@ uint8_t MemSymbol::getDramSpareAdjusted() const
     {
         bool isX4 = true;
         TYPE trgtType = getTargetType( iv_trgt );
-        if ( TYPE_OCMB_CHIP == trgtType )
+        if ( TYPE_MEM_PORT == trgtType )
         {
-            TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank,
-                                                   getPortSlct());
+            TargetHandle_t dimm = getConnectedChild(iv_trgt, TYPE_DIMM,
+                                                    iv_rank.getDimmSlct());
             isX4 = isDramWidthX4( dimm );
         }
         else
@@ -252,9 +253,10 @@ uint8_t MemSymbol::getDramPins() const
 {
     TYPE trgtType = getTargetType( iv_trgt );
     bool isX4 = true;
-    if ( TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_MEM_PORT == trgtType )
     {
-        TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
+        TargetHandle_t dimm = getConnectedChild(iv_trgt, TYPE_DIMM,
+                                                iv_rank.getDimmSlct());
         isX4 = isDramWidthX4( dimm );
     }
     else
@@ -265,7 +267,7 @@ uint8_t MemSymbol::getDramPins() const
     uint32_t dps = 0;
     uint32_t spd = 0;
 
-    if ( TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_MEM_PORT == trgtType )
     {
         dps = MEM_DQS_PER_SYMBOL;
         spd = isX4 ? MEM_SYMBOLS_PER_NIBBLE : MEM_SYMBOLS_PER_BYTE;
@@ -286,9 +288,10 @@ uint8_t MemSymbol::getDramSymbol() const
     uint8_t dramSymbol = SYMBOLS_PER_RANK;
     TYPE trgtType = getTargetType( iv_trgt );
     bool isX4 = true;
-    if ( TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_MEM_PORT == trgtType )
     {
-        TargetHandle_t dimm = getConnectedDimm(iv_trgt, iv_rank, getPortSlct());
+        TargetHandle_t dimm = getConnectedChild(iv_trgt, TYPE_DIMM,
+                                                iv_rank.getDimmSlct());
         isX4 = isDramWidthX4( dimm );
     }
     else
@@ -297,7 +300,7 @@ uint8_t MemSymbol::getDramSymbol() const
     }
     uint8_t dram  = getDram();
 
-    if ( TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_MEM_PORT == trgtType )
     {
         dramSymbol = isX4 ? nibble2Symbol<TYPE_OCMB_CHIP>( dram )
                           : byte2Symbol  <TYPE_OCMB_CHIP>( dram );
@@ -341,7 +344,7 @@ void MemSymbol::updateSpared(const MemSymbol & i_sp0,
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t getMemReadSymbol<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+uint32_t getMemReadSymbol<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
                                            const MemRank & i_rank,
                                            uint8_t i_port,
                                            MemSymbol & o_sym1,
@@ -350,8 +353,8 @@ uint32_t getMemReadSymbol<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     #define PRDF_FUNC "[getMemReadSymbol<TYPE_OCMB_CHIP>] "
 
     // Check parameters
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+    PRDF_ASSERT( nullptr != i_ocmb );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_ocmb->getType() );
 
     uint32_t o_rc = SUCCESS;
 
@@ -360,12 +363,12 @@ uint32_t getMemReadSymbol<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     do
     {
         // Get the NCE/TCE galois and mask from hardware.
-        SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister("MBSEVR0");
+        SCAN_COMM_REGISTER_CLASS * reg = i_ocmb->getRegister("MBSEVR0");
         o_rc = reg->Read();
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "Read() failed on MBSEVR0: "
-                      "i_chip=0x%08x", i_chip->getHuid() );
+                      "i_ocmb=0x%08x", i_ocmb->getHuid() );
             break;
         }
 
@@ -384,11 +387,12 @@ uint32_t getMemReadSymbol<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         uint8_t tceGalois = reg->GetBitFieldJustified((i_port ? 48 : 16), 8);
         uint8_t tceMask   = reg->GetBitFieldJustified((i_port ? 56 : 24), 8);
 
+        TargetHandle_t memport = getConnectedChild(i_ocmb->getTrgt(),
+                                                   TYPE_MEM_PORT, i_port);
+
         // Get the NCE/TCE symbol.
-        o_sym1 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank,
-                                        nceGalois, nceMask );
-        o_sym2 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank,
-                                        tceGalois, tceMask );
+        o_sym1 = MemSymbol::fromGalois( memport, i_rank, nceGalois, nceMask );
+        o_sym2 = MemSymbol::fromGalois( memport, i_rank, tceGalois, tceMask );
 
     } while (0);
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,18 +66,6 @@ uint8_t symbol2Dq<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
     }
 
     return dq;
-}
-
-//------------------------------------------------------------------------------
-
-template<>
-uint8_t symbol2PortSlct<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
-{
-    // TODO RTC 210072 - Explorer only has one port, as such we can just
-    // return 0. However, multiple ports will be supported in the future,
-    // We'll need to figure out how to convert the symbol to a port select for
-    // OCMB at that time.
-    return 0;
 }
 
 //------------------------------------------------------------------------------

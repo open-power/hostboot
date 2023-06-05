@@ -444,8 +444,8 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::handleFalseAlarm(
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
+template<>
+uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
     CeCount i_badChipCount, CeCount i_sumAboveOneCount,
     CeCount i_singleSymCount, STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -463,6 +463,8 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
         // Get the Bad DQ Bitmap.
         TargetHandle_t trgt = iv_chip->getTrgt();
+        TargetHandle_t memport = getConnectedChild(trgt, TYPE_MEM_PORT,
+                                                   iv_port);
         MemDqBitmap dqBitmap;
 
         o_rc = getBadDqBitmap( trgt, iv_rank, dqBitmap );
@@ -473,10 +475,10 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             break;
         }
 
-        // TODO Odyssey - need to know the port for the MemMarks
         // Get the symbol mark.
         MemMark symMark;
-        o_rc = MarkStore::readSymbolMark<T>(iv_chip, iv_rank, iv_port, symMark);
+        o_rc = MarkStore::readSymbolMark<TYPE_OCMB_CHIP>(iv_chip, iv_rank,
+                                                         iv_port, symMark);
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "readSymbolMark<T>(0x%08x, 0x%02x, %x) "
@@ -486,7 +488,8 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
         // Get the chip mark.
         MemMark chipMark;
-        o_rc = MarkStore::readChipMark<T>(iv_chip, iv_rank, iv_port, chipMark);
+        o_rc = MarkStore::readChipMark<TYPE_OCMB_CHIP>(iv_chip, iv_rank,
+                                                       iv_port, chipMark);
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x, 0x%02x, %x) "
@@ -497,12 +500,11 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         // Check if a spare is available to be used
         bool spAvail = false;
 
-        // TODO RTC 210072 - Support for multiple ports per OCMB
-        o_rc = isSpareAvailable<T>( trgt, iv_rank, 0, spAvail );
+        o_rc = isSpareAvailable<TYPE_MEM_PORT>( memport, iv_rank, spAvail );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "isSpareAvailable(0x%08x, 0x%02x) failed",
-                    iv_chip->getHuid(), getKey() );
+                      getHuid(memport), getKey() );
             break;
         }
 
@@ -529,13 +531,13 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
             {
                 // Placing a chip mark to deploy a spare does not risk a UE
-                MemMark newCM(trgt, iv_rank, i_badDqCount.symList.at(0).symbol);
-                o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank, iv_port,
-                                                    newCM );
+                MemMark newCM(i_badDqCount.symList.at(0).symbol);
+                o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>( iv_chip,
+                    iv_rank, newCM );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x,%x) "
-                              "failed", iv_chip->getHuid(), getKey(), iv_port );
+                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
+                              "failed", iv_chip->getHuid(), getKey() );
                     break;
                 }
             }
@@ -556,14 +558,13 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         // is placed.
                         // Place a symbol mark on this bad DQ.
                         MemSymbol symbol = i_badDqCount.symList.at(0).symbol;
-                        MemMark newSymMark( trgt, iv_rank, symbol );
-                        o_rc = MarkStore::writeSymbolMark<T>( iv_chip,
-                                iv_rank, iv_port, newSymMark );
+                        MemMark newSymMark( symbol );
+                        o_rc = MarkStore::writeSymbolMark<TYPE_OCMB_CHIP>(
+                                iv_chip, iv_rank, newSymMark );
                         if ( SUCCESS != o_rc )
                         {
-                            PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x,"
-                                      "%x) failed", iv_chip->getHuid(),
-                                      getKey(), iv_port );
+                            PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x)"
+                                      " failed", iv_chip->getHuid(), getKey() );
                             break;
                         }
 
@@ -598,7 +599,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         io_sc.service_data->setServiceCall();
 
                         // Permanently mask mainline NCEs and TCEs and ban TPS.
-                        MemDbUtils::banTps<T>( iv_chip, iv_rank );
+                        MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
                     }
                 }
                 else
@@ -621,13 +622,13 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             if ( spAvail && noSpareUeRisk  )
             {
                 // Placing a chip mark to deploy a spare does not risk a UE
-                MemMark newCM(trgt, iv_rank, i_badDqCount.symList.at(0).symbol);
-                o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank, iv_port,
-                                                   newCM );
+                MemMark newCM(i_badDqCount.symList.at(0).symbol);
+                o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>( iv_chip,
+                    iv_rank, newCM );
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x,%x) "
-                              "failed", iv_chip->getHuid(), getKey(), iv_port );
+                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
+                              "failed", iv_chip->getHuid(), getKey() );
                     break;
                 }
             }
@@ -635,7 +636,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             else
             {
                 // Permanently mask mainline NCEs and TCEs and ban TPS.
-                MemDbUtils::banTps<T>( iv_chip, iv_rank );
+                MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
 
                 // If the symbol mark is available.
                 if ( !symMark.isValid() )
@@ -657,15 +658,13 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                                 highSym = sym;
                         }
 
-                        MemMark newSymMark( trgt, iv_rank, highSym.symbol );
-                        o_rc = MarkStore::writeSymbolMark<T>( iv_chip, iv_rank,
-                                                              iv_port,
-                                                              newSymMark );
+                        MemMark newSymMark( highSym.symbol );
+                        o_rc = MarkStore::writeSymbolMark<TYPE_OCMB_CHIP>(
+                            iv_chip, iv_rank, newSymMark );
                         if ( SUCCESS != o_rc )
                         {
-                            PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x,"
-                                      "%x) failed", iv_chip->getHuid(),
-                                      getKey(), iv_port );
+                            PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x)"
+                                      " failed", iv_chip->getHuid(), getKey() );
                             break;
                         }
 
@@ -743,15 +742,13 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     // This means we have only one more potential bad DQ, which
                     // is still correctable after a chip mark is placed.
                     // Place a chip mark on this bad chip.
-                    MemMark newChipMark( trgt, iv_rank,
-                                         i_badChipCount.symList.at(0).symbol );
-                    o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank,
-                                                        iv_port, newChipMark );
+                    MemMark newChipMark( i_badChipCount.symList.at(0).symbol );
+                    o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>( iv_chip,
+                        iv_rank, newChipMark );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x,%x) "
-                                  "failed", iv_chip->getHuid(), getKey(),
-                                  iv_port );
+                        PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
+                                  "failed", iv_chip->getHuid(), getKey() );
                         break;
                     }
 
@@ -759,9 +756,9 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                                                       PRDFSIG_TpsChipMark );
 
                     // Trigger VCM to see if it's contained to a single row
-                    TdEntry * vcm = new VcmEvent<T>{ iv_chip, iv_rank,
-                                                     newChipMark, iv_port };
-                    MemDbUtils::pushToQueue<T>( iv_chip, vcm );
+                    TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{ iv_chip,
+                        iv_rank, newChipMark, iv_port };
+                    MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
                     vcmQueued = true;
                 }
                 else
@@ -782,7 +779,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     io_sc.service_data->setServiceCall();
 
                     // Permanently mask mainline NCEs and TCEs
-                    MemDbUtils::banTps<T>( iv_chip, iv_rank );
+                    MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
                 }
             }
             else
@@ -809,7 +806,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                 io_sc.service_data->setServiceCall();
 
                 // Permanently mask mainline NCEs and TCEs
-                MemDbUtils::banTps<T>( iv_chip, iv_rank );
+                MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
             }
             // If the chip mark is available.
             if ( !chipMark.isValid() )
@@ -825,15 +822,13 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     // This means we have no more potential bad DQ or bad chips
                     // since we can't correct those after chip mark is placed.
                     // Place a chip mark on the bad chip.
-                    MemMark newChipMark( trgt, iv_rank,
-                                         i_badChipCount.symList.at(0).symbol );
-                    o_rc = MarkStore::writeChipMark<T>( iv_chip, iv_rank,
-                                                        iv_port, newChipMark );
+                    MemMark newChipMark( i_badChipCount.symList.at(0).symbol );
+                    o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>( iv_chip,
+                        iv_rank, newChipMark );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x,%x) "
-                                  "failed", iv_chip->getHuid(), getKey(),
-                                  iv_port );
+                        PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
+                                  "failed", iv_chip->getHuid(), getKey() );
                         break;
                     }
 
@@ -847,9 +842,8 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         // this chip mark, we need to clear the symbol mark now
                         // instead of at the end of the function to make room
                         // for the additional symbol mark.
-                        o_rc = MarkStore::clearSymbolMark<T>( iv_chip,
-                                                              iv_rank,
-                                                              iv_port );
+                        o_rc = MarkStore::clearSymbolMark<TYPE_OCMB_CHIP>(
+                            iv_chip, iv_rank, iv_port );
                         if ( SUCCESS != o_rc )
                         {
                             PRDF_ERR( PRDF_FUNC "MarkStore::clearSymbolMark("
@@ -868,9 +862,9 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                                                       PRDFSIG_TpsChipMark );
 
                     // Trigger VCM to see if it's contained to a single row
-                    TdEntry * vcm = new VcmEvent<T>{ iv_chip, iv_rank,
-                                                     newChipMark, iv_port };
-                    MemDbUtils::pushToQueue<T>( iv_chip, vcm );
+                    TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{ iv_chip,
+                        iv_rank, newChipMark, iv_port };
+                    MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
                     vcmQueued = true;
                 }
                 else
@@ -891,7 +885,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     io_sc.service_data->setServiceCall();
 
                     // Permanently mask mainline NCEs and TCEs.
-                    MemDbUtils::banTps<T>( iv_chip, iv_rank );
+                    MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
                 }
             }
             // If the symbol mark is available.
@@ -903,15 +897,13 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     // This means we have no more potential bad DQ or bad chips
                     // since we can't correct those after symbol mark is placed.
                     // Place a symbol mark on this bad DQ.
-                    MemMark newSymMark( trgt, iv_rank,
-                                        i_badDqCount.symList.at(0).symbol );
-                    o_rc = MarkStore::writeSymbolMark<T>( iv_chip,
-                        iv_rank, iv_port, newSymMark );
+                    MemMark newSymMark( i_badDqCount.symList.at(0).symbol );
+                    o_rc = MarkStore::writeSymbolMark<TYPE_OCMB_CHIP>( iv_chip,
+                        iv_rank, newSymMark );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x,%x) "
-                                  "failed", iv_chip->getHuid(), getKey(),
-                                  iv_port );
+                        PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x) "
+                                  "failed", iv_chip->getHuid(), getKey() );
                         break;
                     }
 
@@ -961,7 +953,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     io_sc.service_data->setServiceCall();
 
                     // Permanently mask mainline NCEs and TCEs.
-                    MemDbUtils::banTps<T>( iv_chip, iv_rank );
+                    MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
                 }
             }
 
@@ -984,7 +976,7 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             io_sc.service_data->setServiceCall();
 
             // Permanently mask mainline NCEs and TCEs.
-            MemDbUtils::banTps<T>( iv_chip, iv_rank );
+            MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
         }
 
         // If analysis resulted in a false alarm.
@@ -1015,8 +1007,8 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         if ( !vcmQueued )
         {
             bool junk = false;
-            o_rc = MarkStore::chipMarkCleanup<T>(iv_chip, iv_rank, iv_port,
-                                                 io_sc, junk);
+            o_rc = MarkStore::chipMarkCleanup<TYPE_OCMB_CHIP>(iv_chip, iv_rank,
+                iv_port, io_sc, junk);
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "MarkStore::chipMarkCleanup(0x%08x,0x%02x) "
@@ -1031,11 +1023,6 @@ uint32_t TpsEvent<T>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
     #undef PRDF_FUNC
 }
-
-template
-uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
-    CeCount i_badChipCount, CeCount i_sumAboveOneCount,
-    CeCount i_singleSymCount, STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -1090,9 +1077,12 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::getSymbolCeCounts( CeCount & io_badDqCount,
                     uint8_t sym = baseSymbol + (i+n);
                     PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
 
+                    TargetHandle_t memport = getConnectedChild(ocmbTrgt,
+                        TYPE_MEM_PORT, iv_port);
+
                     MemUtils::SymbolData symData;
-                    symData.symbol = MemSymbol::fromSymbol( ocmbTrgt, iv_rank,
-                        sym );
+                    symData.symbol = MemSymbol::fromSymbol(memport, iv_rank,
+                                                           sym);
                     if ( !symData.symbol.isValid() )
                     {
                         PRDF_ERR( PRDF_FUNC "MemSymbol() failed: symbol=%d",

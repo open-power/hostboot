@@ -144,9 +144,9 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
-                             CaptureData & io_cd, uint8_t i_port )
+template<>
+void captureDramRepairsData<TYPE_OCMB_CHIP>(TARGETING::TargetHandle_t i_trgt,
+                                            CaptureData & io_cd, uint8_t i_port)
 {
     #define PRDF_FUNC "[captureDramRepairsData] "
 
@@ -159,7 +159,7 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
 
     do
     {
-        getMasterRanks<T>( i_trgt, i_port, masterRanks );
+        getMasterRanks<TYPE_OCMB_CHIP>( i_trgt, i_port, masterRanks );
         if( masterRanks.empty() )
         {
             PRDF_ERR( PRDF_FUNC "Master Rank list size is 0");
@@ -167,8 +167,9 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
         }
 
         uint8_t spareConfig = MEM_EFF_DIMM_SPARE_NO_SPARE;
-        // check for spare DRAM. Port does not matter.
-        rc = getDimmSpareConfig<T>( i_trgt, masterRanks[0], 0, spareConfig );
+        // check for spare DRAM.
+        rc = getDimmSpareConfig<TYPE_OCMB_CHIP>( i_trgt, masterRanks[0], i_port,
+                                                 spareConfig );
         if( SUCCESS != rc )
         {
             PRDF_ERR( PRDF_FUNC "getDimmSpareConfig() failed" );
@@ -178,30 +179,37 @@ void captureDramRepairsData( TARGETING::TargetHandle_t i_trgt,
         if( MEM_EFF_DIMM_SPARE_NO_SPARE != spareConfig )
             data.header.isSpareDram = true;
 
+        TargetHandle_t memport = getConnectedChild(i_trgt, TYPE_MEM_PORT,
+                                                   i_port);
+
         // Iterate all ranks to get DRAM repair data
         for ( auto & rank : masterRanks )
         {
             // Get chip/symbol marks
             MemMark cm, sm;
-            rc = MarkStore::readChipMark<T>( chip, rank, i_port, cm );
+            rc = MarkStore::readChipMark<TYPE_OCMB_CHIP>( chip, rank, i_port,
+                                                          cm );
             if ( SUCCESS != rc )
             {
-                PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,0x%02x,%x) "
-                          "failed", chip->getHuid(), rank.getKey(), i_port );
+                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_OCMB_CHIP>(0x%08x,"
+                          "0x%02x,%x) failed", chip->getHuid(), rank.getKey(),
+                          i_port );
                 continue;
             }
 
-            rc = MarkStore::readSymbolMark<T>( chip, rank, i_port, sm );
+            rc = MarkStore::readSymbolMark<TYPE_OCMB_CHIP>( chip, rank, i_port,
+                                                            sm );
             if ( SUCCESS != rc )
             {
-                PRDF_ERR( PRDF_FUNC "readSymbolMark<T>(0x%08x,0x%02x,%x) "
-                          "failed", chip->getHuid(), rank.getKey(), i_port );
+                PRDF_ERR( PRDF_FUNC "readSymbolMark<TYPE_OCMB_CHIP>(0x%08x,"
+                          "0x%02x,%x) failed", chip->getHuid(), rank.getKey(),
+                          i_port );
                 continue;
             }
 
             // Get DRAM spares
             MemSymbol sp0, sp1;
-            rc = mssGetSteerMux<T>( i_trgt, rank, sp0, sp1 );
+            rc = mssGetSteerMux<TYPE_MEM_PORT>( memport, rank, sp0, sp1 );
             if ( SUCCESS != rc )
             {
                 PRDF_ERR( PRDF_FUNC "mssGetSteerMux() failed");

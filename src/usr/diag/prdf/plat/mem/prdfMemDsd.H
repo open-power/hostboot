@@ -155,11 +155,22 @@ class DsdEvent : public TdEntry
         {
             if ( TD_PHASE_0 == iv_phase )
             {
-                // Before starting the first command, set iv_mark in the
-                // hardware steer mux.
-                o_rc = PlatServices::mssSetSteerMux<T>(iv_chip->getTrgt(),
-                                                       iv_rank,
-                                                       iv_mark.getSymbol());
+                if (TARGETING::TYPE_OCMB_CHIP == T)
+                {
+                    TARGETING::TargetHandle_t memport =
+                        PlatServices::getConnectedChild(iv_chip->getTrgt(),
+                            TARGETING::TYPE_MEM_PORT, iv_port);
+                    // Before starting the first command, set iv_mark in the
+                    // hardware steer mux.
+                    o_rc =
+                        PlatServices::mssSetSteerMux<TARGETING::TYPE_MEM_PORT>(
+                            memport, iv_rank, iv_mark.getSymbol());
+                }
+                else
+                {
+                    o_rc = PlatServices::mssSetSteerMux<T>(iv_chip->getTrgt(),
+                        iv_rank, iv_mark.getSymbol());
+                }
                 if ( SUCCESS != o_rc )
                 {
                     PRDF_ERR( PRDF_FUNC "mssSetSteerMux(0x%08x,0x%2x) failed",

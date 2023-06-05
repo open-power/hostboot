@@ -419,11 +419,13 @@ template<>
 void deployDramSpares<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
                                        const std::vector<MemRank> & i_ranks )
 {
+    // TODO Odyssey
+    TargetHandle_t memport = getConnectedChild(i_trgt, TYPE_MEM_PORT, 0);
     for ( auto & rank : i_ranks )
     {
-        MemSymbol sym = MemSymbol::fromSymbol( i_trgt, rank, 71 );
+        MemSymbol sym = MemSymbol::fromSymbol( memport, rank, 71 );
 
-        int32_t l_rc = mssSetSteerMux<TYPE_OCMB_CHIP>(i_trgt, rank, sym);
+        int32_t l_rc = mssSetSteerMux<TYPE_MEM_PORT>(memport, rank, sym);
         if ( SUCCESS != l_rc )
         {
             // mssSetSteerMux() will print a trace and commit the error log,

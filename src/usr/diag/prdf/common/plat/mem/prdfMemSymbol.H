@@ -79,7 +79,7 @@ class MemSymbol
 
     /**
      * @brief  Creates a MemSymbol from a symbol.
-     * @param  i_trgt   OCMB_CHIP target.
+     * @param  i_trgt   MEM_PORT target.
      * @param  i_rank   The rank this symbol is on.
      * @param  i_symbol The input symbol.
      * @return A MemSymbol. Must call isValid() to determine if the function was
@@ -90,7 +90,7 @@ class MemSymbol
 
     /**
      * @brief  Creates a MemSymbol from a symbol returned during mssGetSteerMux.
-     * @param  i_trgt   OCMB_CHIP target.
+     * @param  i_trgt   MEM_PORT target.
      * @param  i_rank   The rank this symbol is on.
      * @param  i_symbol The input symbol.
      * @param  i_sp0    If the symbol is on sp0.
@@ -105,7 +105,7 @@ class MemSymbol
 
     /**
      * @brief  Creates a MemSymbol from a Galois field.
-     * @param  i_trgt   OCMB_CHIP target.
+     * @param  i_trgt   MEM_PORT target.
      * @param  i_rank   The rank this symbol is on.
      * @param  i_galois The Galois field.
      * @param  i_mask   The bit mask.
@@ -169,27 +169,35 @@ class MemSymbol
      * @brief   Overrides the '<' operator.
      * @param   i_symbol The symbol to compare with.
      * @return  TRUE if this symbol is less than i_symbol, FALSE otherwise.
-     * @note    Compares against iv_symbol and iv_rank. There is currently no
-     *          need to compare against iv_trgt.
+     * @note    Compares against iv_symbol and iv_rank as well as the relative
+     *          position of the port target (iv_trgt).
      */
     bool operator < ( const MemSymbol & i_symbol ) const
     {
-        return ( (iv_symbol < i_symbol.iv_symbol) ||
-                 ( (iv_symbol == i_symbol.iv_symbol) &&
-                   (iv_rank   <  i_symbol.iv_rank ) ) );
+        uint8_t lPort = iv_trgt->getAttr<TARGETING::ATTR_REL_POS>();
+        uint8_t rPort = i_symbol.iv_trgt->getAttr<TARGETING::ATTR_REL_POS>();
+        return ( (lPort < rPort) ||
+                 ((lPort == rPort) &&
+                  (iv_rank < i_symbol.iv_rank)) ||
+                 ((lPort == rPort) &&
+                  (iv_rank == i_symbol.iv_rank) &&
+                  (iv_symbol < i_symbol.iv_symbol)) );
     }
 
     /**
      * @brief  Overrides the '==' operator.
      * @param  i_symbol The symbol to compare with.
      * @return TRUE if the two symbols are equivalent, FALSE otherwise.
-     * @note   Compares against iv_symbol and iv_rank. There is currently no
-     *         need to compare against iv_trgt.
+     * @note    Compares against iv_symbol and iv_rank as well as the relative
+     *          position of the port target (iv_trgt).
      */
     bool operator == ( const MemSymbol & i_symbol ) const
     {
+        uint8_t lPort = iv_trgt->getAttr<TARGETING::ATTR_REL_POS>();
+        uint8_t rPort = i_symbol.iv_trgt->getAttr<TARGETING::ATTR_REL_POS>();
         return ( (iv_symbol == i_symbol.iv_symbol) &&
-                 (iv_rank   == i_symbol.iv_rank  ) );
+                 (iv_rank   == i_symbol.iv_rank  ) &&
+                 (lPort  == rPort) );
     }
 
     /**
@@ -198,11 +206,10 @@ class MemSymbol
      *         one of the valid spares
      *         Usually call mssGetSteerMux to fill in associated symbols
      *
-     * @param  i_sp0 A symbol associated with the spare on port 0.
-     * @param  i_sp1 A symbol associated with the spare on port 1.
+     * @param  i_sp0 A symbol associated with spare 0.
+     * @param  i_sp1 A symbol associated with spare 1.
      */
-    void updateSpared(const MemSymbol & i_sp0,
-                      const MemSymbol & i_sp1);
+    void updateSpared(const MemSymbol & i_sp0, const MemSymbol & i_sp1);
 
 
   private: // instance variables

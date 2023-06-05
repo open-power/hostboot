@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -173,7 +173,7 @@ uint32_t clearBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Invokes the get steer mux hardware procedure.
- * @param  i_trgt   Target OCMB
+ * @param  i_trgt   Target MEM_PORT
  * @param  i_rank   Target rank.
  * @param  o_spare0 A symbol associated with spare 0.
  * @param  o_spare1 A symbol associated with spare 1.
@@ -186,7 +186,7 @@ int32_t mssGetSteerMux( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Invokes the set steer mux hardware procedure.
- * @param  i_trgt       Target OCMB
+ * @param  i_trgt       Target MEM_PORT
  * @param  i_rank       Target rank.
  * @param  i_symbol     A symbol associated with the DRAM to be spared.
  * @note   The procedure will be able to derive the port from the given symbol.
@@ -198,7 +198,7 @@ int32_t mssSetSteerMux( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Invokes the undo steer mux hardware procedure.
- * @param  i_trgt       Target OCMB
+ * @param  i_trgt       Target MEM_PORT
  * @param  i_rank       Target rank.
  * @param  i_spare      spare number (0 or 1)
  * @note   The procedure will be able to derive the port from the given symbol.
@@ -239,13 +239,12 @@ uint32_t isDramSparingEnabled( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
  * @brief Checks to see if the spares are available on given target and port.
  * @param i_trgt     Target MEM_PORT
  * @param i_rank     Target rank
- * @param i_ps       Port select
  * @param o_spAvail  If the spare on inputted port select is available
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
-                           uint8_t i_ps, bool & o_spAvail );
+                           bool & o_spAvail );
 
 /**
  * @brief   get DIMM DQ map from FAPI routines

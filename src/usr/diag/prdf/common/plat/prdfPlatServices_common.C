@@ -326,10 +326,10 @@ void getDimmDqAttr<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
 //------------------------------------------------------------------------------
 
 template<>
-int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
-                                        const MemRank & i_rank,
-                                        MemSymbol & o_spare0,
-                                        MemSymbol & o_spare1 )
+int32_t mssGetSteerMux<TYPE_MEM_PORT>( TargetHandle_t i_memport,
+                                       const MemRank & i_rank,
+                                       MemSymbol & o_spare0,
+                                       MemSymbol & o_spare1 )
 {
     int32_t o_rc = SUCCESS;
 
@@ -338,28 +338,27 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 #ifdef __HOSTBOOT_MODULE
     errlHndl_t errl = nullptr;
 
-    uint8_t port0Spare, port1Spare;
+    uint8_t spare0, spare1;
 
-    // TODO RTC 210072 - Support for multiple ports per OCMB
-    TargetHandle_t memport = getConnectedChild( i_ocmb, TYPE_MEM_PORT, 0 );
-    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(memport);
+    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(i_memport);
 
+    // TODO Odyssey: ody version of hwp
     FAPI_INVOKE_HWP( errl, exp_check_steering, fapiPort,
-                     i_rank.getMaster(), port0Spare, port1Spare );
+                     i_rank.getMaster(), spare0, spare1 );
 
     if ( nullptr != errl )
     {
         PRDF_ERR( "[PlatServices::mssGetSteerMux] exp_check_steering() "
                   "failed. HUID: 0x%08x rank: %d",
-                  getHuid(memport), i_rank.getMaster() );
+                  getHuid(i_memport), i_rank.getMaster() );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
     else
     {
-        o_spare0 = MemSymbol::fromSparedSymbol( i_ocmb, i_rank, port0Spare,
+        o_spare0 = MemSymbol::fromSparedSymbol( i_memport, i_rank, spare0,
                                                 true, false );
-        o_spare1 = MemSymbol::fromSparedSymbol( i_ocmb, i_rank, port1Spare,
+        o_spare1 = MemSymbol::fromSparedSymbol( i_memport, i_rank, spare1,
                                                 false, true );
     }
 #endif
@@ -370,7 +369,7 @@ int32_t mssGetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 //------------------------------------------------------------------------------
 
 template<>
-int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
+int32_t mssSetSteerMux<TYPE_MEM_PORT>( TargetHandle_t i_memport,
     const MemRank & i_rank, const MemSymbol & i_symbol )
 {
     int32_t o_rc = SUCCESS;
@@ -378,16 +377,15 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 #ifdef __HOSTBOOT_MODULE
     errlHndl_t errl = nullptr;
 
-    // TODO RTC 210072 - Support for multiple ports per OCMB
-    TargetHandle_t memport = getConnectedChild( i_ocmb, TYPE_MEM_PORT, 0 );
-    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(memport);
+    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(i_memport);
 
-    TargetHandle_t dimm = getConnectedDimm( i_ocmb, i_rank,
-                                            i_symbol.getPortSlct() );
+    TargetHandle_t dimm = getConnectedChild( i_memport, TYPE_DIMM,
+                                             i_rank.getDimmSlct() );
     uint8_t l_dramSymbol = PARSERUTILS::dram2Symbol<TYPE_OCMB_CHIP>(
                                                      i_symbol.getDram(),
                                                      isDramWidthX4(dimm) );
 
+    // TODO Odyssey: ody version of hwp
     FAPI_INVOKE_HWP( errl, exp_do_steering, fapiPort,
                      i_rank.getMaster(), l_dramSymbol );
 
@@ -395,7 +393,7 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
     {
         PRDF_ERR( "[PlatServices::mssSetSteerMux] exp_do_steering() "
                   "failed. HUID: 0x%08x, rank: %d, symbol: %d",
-                  getHuid(memport), i_rank.getMaster(), l_dramSymbol );
+                  getHuid(i_memport), i_rank.getMaster(), l_dramSymbol );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
@@ -407,7 +405,7 @@ int32_t mssSetSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 //------------------------------------------------------------------------------
 
 template<>
-int32_t mssUndoSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
+int32_t mssUndoSteerMux<TYPE_MEM_PORT>( TargetHandle_t i_memport,
     const MemRank & i_rank, const size_t i_spare )
 {
     int32_t o_rc = SUCCESS;
@@ -415,10 +413,9 @@ int32_t mssUndoSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
 #ifdef __HOSTBOOT_MODULE
     errlHndl_t errl = nullptr;
 
-    // TODO RTC 210072 - Support for multiple ports per OCMB
-    TargetHandle_t memport = getConnectedChild( i_ocmb, TYPE_MEM_PORT, 0 );
-    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(memport);
+    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(i_memport);
 
+    // TODO Odyssey: ody version of hwp
     FAPI_INVOKE_HWP( errl, exp_unspare, fapiPort,
                      i_rank.getMaster(), i_spare );
 
@@ -426,7 +423,7 @@ int32_t mssUndoSteerMux<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
     {
         PRDF_ERR( "[PlatServices::mssUndoSteerMux] exp_unspare() "
                   "failed. HUID: 0x%08x, rank: %d, spare: %d",
-                  getHuid(memport), i_rank.getMaster(), i_spare );
+                  getHuid(i_memport), i_rank.getMaster(), i_spare );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
@@ -538,7 +535,7 @@ uint32_t isDramSparingEnabled<TYPE_OCMB_CHIP>( TARGETING::TargetHandle_t i_trgt,
 
 template<TARGETING::TYPE T>
 uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
-                           uint8_t i_ps, bool & o_spAvail )
+                           bool & o_spAvail )
 {
     #define PRDF_FUNC "[PlatServices::isSpareAvailable] "
 
@@ -548,8 +545,10 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 
     do
     {
+        uint8_t ps = i_trgt->getAttr<ATTR_REL_POS>();
+
         bool dramSparingEnabled = false;
-        o_rc = isDramSparingEnabled<T>( i_trgt, i_rank, i_ps,
+        o_rc = isDramSparingEnabled<T>( i_trgt, i_rank, ps,
                                         dramSparingEnabled );
         if ( SUCCESS != o_rc )
         {
@@ -561,21 +560,12 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
         if ( !dramSparingEnabled ) break;
 
         // Get the current spares in hardware
-        TargetHandle_t steerTrgt = i_trgt;
         MemSymbol sp0, sp1;
-        if ( TYPE_MEM_PORT == T )
-        {
-            steerTrgt = getConnectedParent( i_trgt, TYPE_OCMB_CHIP );
-            o_rc = mssGetSteerMux<TYPE_OCMB_CHIP>(steerTrgt, i_rank, sp0, sp1);
-        }
-        else
-        {
-            o_rc = mssGetSteerMux<T>( steerTrgt, i_rank, sp0, sp1 );
-        }
+        o_rc = mssGetSteerMux<T>( i_trgt, i_rank, sp0, sp1 );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "mssGetSteerMux(0x%08x,0x%02x) failed",
-                      getHuid(steerTrgt), i_rank.getKey() );
+                      getHuid(i_trgt), i_rank.getKey() );
             break;
         }
 
@@ -591,7 +581,7 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
             break;
         }
 
-        o_rc = dqBitmap.isSpareAvailable( i_ps, sp0Avail, sp1Avail );
+        o_rc = dqBitmap.isSpareAvailable( ps, sp0Avail, sp1Avail );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "isSpareAvailable() failed" );
@@ -614,10 +604,7 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 
 template
 uint32_t isSpareAvailable<TYPE_MEM_PORT>( TARGETING::TargetHandle_t i_trgt,
-    MemRank i_rank, uint8_t i_ps, bool & o_spAvail );
-template
-uint32_t isSpareAvailable<TYPE_OCMB_CHIP>( TARGETING::TargetHandle_t i_trgt,
-    MemRank i_rank, uint8_t i_ps, bool & o_spAvail );
+    MemRank i_rank, bool & o_spAvail );
 
 //##############################################################################
 //##                         TOD functions

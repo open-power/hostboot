@@ -114,10 +114,11 @@ uint32_t readChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         if (0 != galois)
         {
             // get the target
-            TargetHandle_t trgt = i_chip->getTrgt();
+            TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+                TYPE_MEM_PORT, i_port);
 
             // get the MemMark
-            o_mark = MemMark(trgt, i_rank, galois);
+            o_mark = MemMark(memport, i_rank, galois);
         }
     }
 
@@ -130,7 +131,7 @@ uint32_t readChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 template<>
 uint32_t writeChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-    const MemRank & i_rank, const uint8_t& i_port, const MemMark & i_mark )
+    const MemRank & i_rank, const MemMark & i_mark )
 {
     #define PRDF_FUNC "[writeChipMark<TYPE_OCMB_CHIP>] "
 
@@ -146,7 +147,8 @@ uint32_t writeChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     // Check for Odyssey OCMBs
     if (isOdysseyOcmb(i_chip->getTrgt()))
     {
-        sprintf( msName, "HW_MS%x_%x", i_rank.getMaster(), i_port );
+        sprintf( msName, "HW_MS%x_%x", i_rank.getMaster(),
+                 i_mark.getSymbol().getPortSlct() );
     }
     // Default to Explorer OCMBs
     else
@@ -281,11 +283,12 @@ uint32_t readSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             // FWMSx[15:22] should be all zeros
             PRDF_ASSERT( 0x0 == fwms->GetBitFieldJustified(15,8) );
 
-            // get the target
-            TargetHandle_t trgt = i_chip->getTrgt();
+            // get the memport target
+            TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+                TYPE_MEM_PORT, i_port);
 
             // get the MemMark
-            o_mark = MemMark(trgt, i_rank, galois);
+            o_mark = MemMark(memport, i_rank, galois);
         }
     }
 
@@ -298,7 +301,7 @@ uint32_t readSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 template<>
 uint32_t writeSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-    const MemRank & i_rank, const uint8_t& i_port, const MemMark & i_mark )
+    const MemRank & i_rank, const MemMark & i_mark )
 {
     #define PRDF_FUNC "[writeSymbolMark<TYPE_OCMB_CHIP>] "
 
@@ -313,7 +316,8 @@ uint32_t writeSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     if (isOdysseyOcmb(i_chip->getTrgt()))
     {
-        sprintf( msName, "FW_MS%x_%x", i_rank.getMaster(), i_port );
+        sprintf( msName, "FW_MS%x_%x", i_rank.getMaster(),
+                 i_mark.getSymbol().getPortSlct() );
     }
     // Default to Explorer OCMBs
     else
@@ -516,12 +520,12 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     {
         const uint8_t dram = i_chipMark.getSymbol().getDram();
 
-        TargetHandle_t memPort = getConnectedChild( i_chip->getTrgt(),
+        TargetHandle_t memport = getConnectedChild( i_chip->getTrgt(),
                                                     TYPE_MEM_PORT, i_port );
 
         // Determine if DRAM sparing is enabled.
         bool isEnabled = false;
-        o_rc = isDramSparingEnabled<TYPE_MEM_PORT>( memPort, i_rank, i_port,
+        o_rc = isDramSparingEnabled<TYPE_MEM_PORT>( memport, i_rank, i_port,
                                                     isEnabled );
         if ( SUCCESS != o_rc )
         {
@@ -534,12 +538,12 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         {
             // Sparing is enabled. Get the current spares in hardware.
             MemSymbol sp0, sp1, ecc;
-            o_rc = mssGetSteerMux<TARGETING::TYPE_OCMB_CHIP>(i_chip->getTrgt(),
-                                                             i_rank, sp0, sp1);
+            o_rc = mssGetSteerMux<TARGETING::TYPE_MEM_PORT>(memport, i_rank,
+                                                            sp0, sp1);
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "mssGetSteerMux(0x%08x,0x%02x) failed",
-                          i_chip->getHuid(), i_rank.getKey() );
+                          getHuid(memport), i_rank.getKey() );
                 break;
             }
 
@@ -549,7 +553,7 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             __addCallout( i_chip, i_rank, i_port, ecc, io_sc );
 
             // Add the row repairs to the callout list if they exist
-            o_rc = __addRowRepairCallout<TARGETING::TYPE_OCMB_CHIP>( memPort,
+            o_rc = __addRowRepairCallout<TARGETING::TYPE_OCMB_CHIP>( memport,
                                                                      i_rank,
                                                                      io_sc );
             if ( SUCCESS != o_rc )
@@ -562,20 +566,19 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             // Certain DIMMs may have had spares intentially made unavailable by
             // the manufacturer. Check the VPD for available spares.
             bool spAvail;
-            o_rc = isSpareAvailable<TYPE_MEM_PORT>( memPort, i_rank,
-                                                    i_port, spAvail );
+            o_rc = isSpareAvailable<TYPE_MEM_PORT>( memport, i_rank,
+                                                    spAvail );
             if ( spAvail )
             {
                 // If spare0 is deployed and bad (has the chip mark), we want to
                 // undo spare0 and then deploy spare 1.
                 if ( sp0.isValid() && (dram == sp0.getDram()) )
                 {
-                    o_rc = mssUndoSteerMux<TYPE_OCMB_CHIP>( i_chip->getTrgt(),
-                                                            i_rank, 0 );
+                    o_rc = mssUndoSteerMux<TYPE_MEM_PORT>( memport, i_rank, 0 );
                     if ( SUCCESS != o_rc )
                     {
                         PRDF_ERR(PRDF_FUNC "mssUndoSteerMux(0x%08x,0x%02x) "
-                                 "failed", i_chip->getHuid(), i_rank.getKey());
+                                 "failed", getHuid(memport), i_rank.getKey());
                         break;
                     }
                 }
