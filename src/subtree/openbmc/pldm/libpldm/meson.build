@@ -82,28 +82,30 @@ if get_option('tests').enabled()
                           abi_compliance_checker.found() and \
                           import('fs').is_file(baseline_dump)
 
-    current_dump = custom_target('abi-dump',
-                             input: libpldm,
-                             output: 'current.dump',
-                             command: [ abi_dumper,
-                                        '-public-headers',
-                                        meson.project_source_root() / 'include',
-                                        '@INPUT@',
-                                        '-o',
-                                        '@OUTPUT@',
-                                        '-lver',
-                                        meson.project_version()])
-    abi_compliance = custom_target('abi-compliance',
-                                   input: [baseline_dump, current_dump],
-                                   output: 'abi-compliance',
-                                   command: [ abi_compliance_checker,
-                                              '-l',
-                                              meson.project_name(),
-                                              '-old',
-                                              '@INPUT0@',
-                                              '-new',
-                                              '@INPUT1@' ],
-                                   build_by_default: test_abi_compliance)
+    if test_abi_compliance
+      current_dump = custom_target('abi-dump',
+                               input: libpldm,
+                               output: 'current.dump',
+                               command: [ abi_dumper,
+                                          '-public-headers',
+                                          meson.project_source_root() / 'include',
+                                          '@INPUT@',
+                                          '-o',
+                                          '@OUTPUT@',
+                                          '-lver',
+                                          meson.project_version()])
+      abi_compliance = custom_target('abi-compliance',
+                                     input: [baseline_dump, current_dump],
+                                     output: 'abi-compliance',
+                                     command: [ abi_compliance_checker,
+                                                '-l',
+                                                meson.project_name(),
+                                                '-old',
+                                                '@INPUT0@',
+                                                '-new',
+                                                '@INPUT1@' ],
+                                                build_by_default: true)
+    endif
   endif
 endif
 

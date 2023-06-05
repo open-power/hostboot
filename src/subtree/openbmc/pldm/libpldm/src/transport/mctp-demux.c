@@ -135,26 +135,21 @@ pldm_transport_mctp_demux_recv(struct pldm_transport *t, pldm_tid_t tid,
 	size_t pldm_len = length - mctp_prefix_len;
 	iov[0].iov_len = mctp_prefix_len;
 	iov[0].iov_base = mctp_prefix;
-	*pldm_resp_msg = buf;
-	if (*pldm_resp_msg == NULL) {
-		return PLDM_REQUESTER_RECV_FAIL;
-	}
 	iov[1].iov_len = pldm_len;
-	iov[1].iov_base = *pldm_resp_msg;
+	iov[1].iov_base = buf;
 	struct msghdr msg = { 0 };
 	msg.msg_iov = iov;
 	msg.msg_iovlen = sizeof(iov) / sizeof(iov[0]);
 	ssize_t bytes = recvmsg(demux->socket, &msg, 0);
 	if (length != bytes) {
-		free(*pldm_resp_msg);
-		*pldm_resp_msg = NULL;
+		free(buf);
 		return PLDM_REQUESTER_INVALID_RECV_LEN;
 	}
 	if ((mctp_prefix[0] != eid) || (mctp_prefix[1] != mctp_msg_type)) {
-		free(*pldm_resp_msg);
-		*pldm_resp_msg = NULL;
+		free(buf);
 		return PLDM_REQUESTER_NOT_PLDM_MSG;
 	}
+	*pldm_resp_msg = buf;
 	*resp_msg_len = pldm_len;
 	return PLDM_REQUESTER_SUCCESS;
 }

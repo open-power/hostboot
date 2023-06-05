@@ -87,6 +87,11 @@ pldm_requester_rc_t pldm_transport_recv_msg(struct pldm_transport *transport,
  * @brief Synchronously send a PLDM request and receive the response. Control is
  * 	  returned to the caller once the response is received.
  *
+ * pldm_transport_send_recv() will discard messages received on the underlying transport instance
+ * that are not a response that matches the request. Do not use this function if you're attempting
+ * to use the transport instance asynchronously, as this discard behaviour will affect other
+ * responses that you may care about.
+ *
  * @pre The pldm transport instance must be initialised; otherwise,
  * 	PLDM_REQUESTER_INVALID_SETUP is returned. If the transport requires a
  * 	TID to transport specific identifier mapping, this must already be set

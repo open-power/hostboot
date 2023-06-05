@@ -160,15 +160,18 @@ pldm_transport_send_recv_msg(struct pldm_transport *transport, pldm_tid_t tid,
 	static const struct timeval max_response_interval = {
 		.tv_sec = 4, .tv_usec = 800000
 	};
+	const struct pldm_msg_hdr *req_hdr;
 	struct timeval remaining;
+	pldm_requester_rc_t rc;
 	struct timeval now;
 	struct timeval end;
-	pldm_requester_rc_t rc;
 	int ret;
 
-	if (!resp_msg_len) {
+	if (req_msg_len < sizeof(*req_hdr) || !resp_msg_len) {
 		return PLDM_REQUESTER_INVALID_SETUP;
 	}
+
+	req_hdr = pldm_req_msg;
 
 	rc = pldm_transport_send_msg(transport, tid, pldm_req_msg, req_msg_len);
 	if (rc != PLDM_REQUESTER_SUCCESS) {
@@ -197,7 +200,13 @@ pldm_transport_send_recv_msg(struct pldm_transport *transport, pldm_tid_t tid,
 		rc = pldm_transport_recv_msg(transport, tid, pldm_resp_msg,
 					     resp_msg_len);
 		if (rc == PLDM_REQUESTER_SUCCESS) {
-			return rc;
+			const struct pldm_msg_hdr *resp_hdr = *pldm_resp_msg;
+			if (req_hdr->instance_id == resp_hdr->instance_id) {
+				return rc;
+			}
+
+			/* This isn't the message we wanted */
+			free(*pldm_resp_msg);
 		}
 
 		ret = clock_gettimeval(CLOCK_MONOTONIC, &now);
