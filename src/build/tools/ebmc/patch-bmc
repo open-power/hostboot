@@ -36,7 +36,7 @@ function errlog () {
 
 BMC_PATCH_DIRECTORY=/usr/local/share/hostfw/running/
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-SSHPASS_SCRIPT="$SCRIPT_DIR/hb_sshpass"
+SSHPASS_SCRIPT="sshpass -p"
 #STANDALONE_COMMIT_CHANGE_ID=I7f9e2bfa6d30f91a9055c1a0fde73c3e207e48ea
 STANDALONE_COMMIT_CHANGE_ID=I090b925139d1ed594679f43065b68fa434305469
 # If the STANDALONE_COMMIT_CHANGE_ID is not found, then MGP_FILES_EXIST will be set to 0.
@@ -346,9 +346,6 @@ if [[ $COPY_ONLY = 1 ]] ; then
 
     # Copy all of the non-tst symbol data out there for debug
     cp img/hbotStringFile `find img/*.list.bz2 img/*.syms img/*.bin.modinfo | grep -v _test` "$COPYDIR"
-
-    # Scripts for BMC application
-    cp "$SCRIPT_DIR/hb_sshpass" "$SCRIPT_DIR/patch-bmc" "$COPYDIR"
 
     # Patch files to recreate
     MAKE_GIT_PATCHFILES $COPYDIR
