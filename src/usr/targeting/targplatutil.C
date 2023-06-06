@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -287,7 +287,10 @@ uint32_t getSensorNumber(const TARGETING::Target* i_pTarget,
                                        TYPE_DIMM,
                                        UTIL_FILTER_PRESENT);
 
+#ifndef CONFIG_ODYSSEY_BRINGUP
+        // @TODO JIRA PFHB-222 will add support for Odyssey DDIMMs and remove this check
         assert(dimm.size() <= 1, "Expected at most one DIMM target beneath OCMB/MEM_PORT");
+#endif
 
         if (dimm.empty())
         {

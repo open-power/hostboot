@@ -99,11 +99,13 @@ pldm_entity_node* createEntityAssociationAndFruRecordSetPdrs(pldm_entity_associa
         // pldm_entity_association_tree_add below
         .entity_type = i_entity_type
     };
+
     uint16_t requested_entity_instance_num = getEntityInstanceNumber(i_target, i_entity_type);
 
     PLDM_INF("Adding entity association and FRU record set PDRs for "
              "entity_type 0x%04X, HUID 0x%x, req instance_num 0x%x",
              i_entity_type, get_huid(i_target), requested_entity_instance_num);
+
 
     // Add the Entity Association record to the tree (will be converted
     // to PDRs and stored in the repo at the end)
@@ -486,6 +488,25 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
             else
             {
                 // non-proc types (DIMM, etc...)
+#ifdef CONFIG_ODYSSEY_BRINGUP
+                // @TODO JIRA PFHB-222 will add support for Odyssey DDIMMs and remove this code
+                static uint16_t saved_instance_num = 0xFEED;
+                uint16_t requested_entity_instance_num =
+                    getEntityInstanceNumber(targets[i], entity.entityType);
+
+                if (requested_entity_instance_num == saved_instance_num)
+                {
+                    PLDM_INF("NON-PROC ENTITY: Skipping createEntityAssociationAndFruRecordSetPdrs "
+                        "for entity_type 0x%04X, HUID 0x%x, req instance_num 0x%x "
+                        "(repeated instance_num)",
+                        entity.entityType, get_huid(targets[i]), requested_entity_instance_num);
+                    continue;
+                }
+                else
+                {
+                    saved_instance_num = requested_entity_instance_num;
+                }
+#endif
                 auto non_proc = createEntityAssociationAndFruRecordSetPdrs(enttree.get(),
                                                 parent_entity_node,
                                                 PLDM_ENTITY_ASSOCIAION_PHYSICAL,
@@ -689,12 +710,19 @@ errlHndl_t addFruInventoryPdrs(PdrManager& io_pdrman)
                  * @devdesc    Unable to find the entity associated with this RSID
                  * @custdesc   A software error occurred during system boot
                  */
+#ifndef CONFIG_ODYSSEY_BRINGUP
+                // @TODO JIRA PFHB-222 will add support for Odyssey DDIMMs and will
+                // create this error log, if necessary
                 errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                      MOD_ADD_INVENTORY_PDRS,
                                      RC_NO_ENTITY_FROM_RSID,
                                      target_rsid,
                                      get_huid(target),
                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+#else
+                PLDM_ERR("addFruInventoryPdrs> Skipping Error for "
+                         "MOD_ADD_INVENTORY_PDRS/RC_NO_ENTITY_FROM_RSID (CONFIG_ODYSSEY_BRINGUP)");
+#endif
                 break;
             }
 
