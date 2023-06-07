@@ -598,6 +598,9 @@
       <id>CDM_DOMAIN</id>
     </attribute>
     <attribute>
+      <id>CHIP_FAN_CFM</id>
+    </attribute>
+    <attribute>
       <id>CPU_ATTR</id>
     </attribute>
     <attribute>
@@ -2441,6 +2444,12 @@
       <id>CLEAR_DIMM_SPD_ENABLE</id>
     </attribute>
     <attribute>
+      <id>DIMM_POWER_UTIL</id>
+    </attribute>
+    <attribute>
+      <id>DIMM_POWER_UTIL_INTERMEDIATE_POINTS</id>
+    </attribute>
+    <attribute>
       <id>DISABLE_PLD_WAIT</id>
     </attribute>
     <attribute>
@@ -2532,6 +2541,9 @@
     </attribute>
     <attribute>
       <id>MAX_COMPUTE_NODES_PER_SYSTEM</id>
+    </attribute>
+    <attribute>
+      <id>MAX_DIMM_POWER</id>
     </attribute>
     <attribute>
       <id>MAX_PROC_CHIPS_PER_NODE</id>
@@ -2742,6 +2754,9 @@
     </attribute>
     <attribute>
       <id>SYSTEM_FAMILY</id>
+    </attribute>
+    <attribute>
+      <id>SYSTEM_THERMAL_RESISTANCE</id>
     </attribute>
     <attribute>
       <id>SYSTEM_TYPE</id>

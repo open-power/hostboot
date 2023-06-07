@@ -599,6 +599,19 @@
   </attribute>
 
   <attribute>
+    <id>CHIP_FAN_CFM</id>
+    <description>
+        The reference CFM for this processor at max fan speed. Value will be used
+        to determine the WOF DIMM ambient credit.
+    </description>
+    <simpleType>
+      <uint16_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>CHIP_ID</id>
     <description>attribute indicating the chip's ID</description>
     <simpleType>
@@ -858,15 +871,60 @@
   <attribute>
     <id>DIMM_POWER</id>
     <description>
-        The power to allocate to the DIMMs under this OCMB. Written during power cap
-        calculation and sent to the OCC via HTMGT. (value in cW)
+        The power to allocate to the DIMMs under this OCMB for a given
+        utilization (specified by DIMM_POWER_UTIL).
+        Written during power cap calculation and sent to the OCC via TMGT/HTMGT.
+        The array size must match the DIMM_POWER_UTIL array and must be less
+        than or equal to 12 (values are in cW)
     </description>
     <simpleType>
+      <array>12</array>
       <uint32_t/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>DIMM_POWER_UTIL</id>
+    <description>
+        The utilization value for each element of the DIMM_POWER attribute.
+        Written during power cap calculation and sent to the OCC via TMGT/HTMGT.
+        Values will be listed in increasing order and the array size must
+        match the DIMM_POWER array. The array size will be up to 12 points.
+        The values will be in integer percentages in the range from the minimum
+        (MSS_MRW_SAFEMODE_DRAM_DATABUS_UTIL) to the maximum of 100%.
+        The minimum and maximum will always be included in this array.
+    </description>
+    <simpleType>
+      <array>12</array>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>DIMM_POWER_UTIL_INTERMEDIATE_POINTS</id>
+    <description>
+        The intermediate utilization values that should be used to determine
+        the power to allocate to the DIMMs under an OCMB.
+        The minimum (MSS_MRW_SAFEMODE_DRAM_DATABUS_UTIL) and the maximum (100%)
+        are always used, so they do not need to be specified here.  Any values
+        less than the minimum or greater than the maximum will be ignored.
+        Values must be listed in increasing order and the array size must be
+        less than or equal to 10.
+    </description>
+    <simpleType>
+      <array>10</array>
+      <uint8_t>
+        <default>50,75,0,0,0,0,0,0,0,0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
   </attribute>
 
   <attribute>
@@ -3816,6 +3874,19 @@
     <simpleType>
       <uint8_t/>
     </simpleType>
+  </attribute>
+
+  <attribute>
+    <id>MAX_DIMM_POWER</id>
+    <description>
+        The reference max power per OCMB of the largest DIMM accounted for in
+        the system design (value in cW)
+    </description>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
   </attribute>
 
   <!-- End Required by FSP -->
@@ -9248,6 +9319,19 @@
         <sizeInclNull>64</sizeInclNull>
       </string>
     </simpleType>
+  </attribute>
+
+  <attribute>
+    <id>SYSTEM_THERMAL_RESISTANCE</id>
+    <description>
+        Used to convert ambient temperature changes to watts to prevent
+        exceeding the socket limitations (value in degreesC/Watts * 100)
+    </description>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
   </attribute>
 
   <attribute>
