@@ -92,6 +92,7 @@
 #include <targeting/common/hbrt_target.H>
 #include <runtime/interface.h>
 #include <runtime/hbrt_utilities.H>
+#include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 
 #ifdef CONFIG_NVDIMM
 #include <isteps/nvdimm/nvdimm.H>  // notify NVDIMM protection change
@@ -495,8 +496,8 @@ namespace HBPM
                             uint64_t i_commonPhysAddr)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  ENTER_MRK"loadOCCSetup"
-                  "(OccP:0x%0lX, OccV:0x%0lX, CommonP:0x%0lX)",
+                  ENTER_MRK"loadOCCSetup HUID=0x%X"
+                  "(OccP:0x%0lX, OccV:0x%0lX, CommonP:0x%0lX)", get_huid(i_target),
                   i_occImgPaddr, i_occImgVaddr, i_commonPhysAddr );
 
         errlHndl_t l_errl = nullptr;
@@ -588,8 +589,8 @@ namespace HBPM
                                    loadPmMode i_mode)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK"loadOCCImageToHomer(OccP:0x%0lX, OccV:0x%0lX)",
-                   i_occImgPaddr, i_occImgVaddr);
+                   ENTER_MRK"loadOCCImageToHomer HUID=0x%X (OccP:0x%0lX, OccV:0x%0lX)",
+                   get_huid(i_target), i_occImgPaddr, i_occImgVaddr);
 
         errlHndl_t l_errl = nullptr;
 
@@ -660,7 +661,7 @@ namespace HBPM
                              loadPmMode i_mode)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK"loadPMComplex: %s",
+                   ENTER_MRK"HUID=0x%X loadPMComplex: %s", get_huid(i_target),
                    (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
 
         errlHndl_t l_errl = nullptr;
@@ -797,7 +798,7 @@ namespace HBPM
     errlHndl_t startPMComplex(Target* i_target)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK"startPMComplex");
+                   ENTER_MRK"startPMComplex HUID=0x%X", get_huid(i_target));
 
         errlHndl_t l_errl = nullptr;
 
@@ -900,7 +901,7 @@ namespace HBPM
     errlHndl_t resetPMComplex(TARGETING::Target * i_target)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   ENTER_MRK" resetPMComplex");
+                   ENTER_MRK" resetPMComplex HUID=0x%X", get_huid(i_target));
 
         errlHndl_t l_errl = nullptr;
         ScopedHomerMapper l_homerMapper(i_target);
@@ -1207,6 +1208,19 @@ namespace HBPM
                     break;
                 }
 
+#ifdef __HOSTBOOT_RUNTIME
+                // Perform the UNLOCK immediately after the loadPMComplex, this will ensure
+                // that the OCC lock is properly initialized and made available
+                errlHndl_t l_lock_err = nullptr;
+                l_lock_err = firmware_i2c_lock(l_procChip, hostInterfaces::LOCKOP_UNLOCK);
+                if (l_lock_err)
+                {
+                    // Just log and continue, if later PHYP attempts to get lock and lock unavailable for 15 seconds, PHYP will steal the lock
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "loadAndStartPMAll UNLOCK for the OCC lock failed from firmware_i2c_lock");
+                    l_lock_err->collectTrace("ISTEPS_TRACE",256);
+                    errlCommit( l_lock_err, HWPF_COMP_ID );
+                }
+#endif
                 l_errl = startPMComplex(l_procChip);
                 if( l_errl )
                 {

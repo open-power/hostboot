@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,22 @@
 
 #include <errl/errlentry.H>     // errlHndl_t
 #include <runtime/interface.h>  // hostInterfaces
+
+#define LOCK_HOST_ENGINE_E_ATOMIC_LOCK 3 // Unused at this time, just documentation
+#define LOCK_HOST_ENGINE_E_OCC_LOCK 0x13 // i2cMaster parm, OCC LOCK is 0x10 plus Engine number
+
+/**
+ * @brief Send i2c lock message
+ *
+ * @param[in]  i_target       target device which is either the i2c master (PROC)
+ *                            or an endpoint target device (OCMB) desired to lock
+ *                            out any i2c bus contention from outside sources,
+ *                            i.e. the OCC.
+ * @param[in]  i_operation    enum LOCKOP_LOCK, LOCKOP_UNLOCK
+ * @return errlHndl_t         nullptr if successful,
+ *                            otherwise a pointer to the error log.
+ */
+errlHndl_t firmware_i2c_lock(TARGETING::Target * i_target, enum hostInterfaces::i2c_lock_op i_lock_op);
 
 /**
  * @brief This is a wrapper function for the

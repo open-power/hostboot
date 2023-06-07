@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -170,6 +170,9 @@ namespace RUNTIME
         RC_HOST_CALLBACK_ERR           = RUNTIME_COMP_ID | 0x57,
         RC_UNSUPPORTED_TARGET          = RUNTIME_COMP_ID | 0x58,
         RC_UNSUPPORTED_RESOURCE_TYPE   = RUNTIME_COMP_ID | 0x59,
+        RC_FAPI_I2C_CONTROL_INFO_MISSING = RUNTIME_COMP_ID | 0x5A,
+        RC_TARGET_CHIP_NOT_FOUND       = RUNTIME_COMP_ID | 0x5B,
+        RC_RT_NULL_FIRMWARE_REQUEST_PTR = RUNTIME_COMP_ID | 0x5C,
     };
 
     enum UserDetailsTypes

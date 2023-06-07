@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -593,6 +593,12 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_DEALLOCATE        = 21, // struct deallocate_t
        HBRT_FW_MSG_MCTP_BRIDGE_ENABLED    = 22, // struct mctp_bridge_enabled
        HBRT_FW_MSG_TYPE_LOAD_START_PMC    = 23, // No additional data required
+    };
+
+    // I2C Lock Operations for PHYP
+    enum i2c_lock_op {
+        LOCKOP_LOCK   = 1, // values map to PHYP
+        LOCKOP_UNLOCK = 2, // values map to PHYP
     };
 
     // NVDIMM protection state enum

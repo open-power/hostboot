@@ -35,6 +35,7 @@
 #include <scom/runtime/rt_scomif.H>
 #include <targeting/common/utilFilter.H>
 #include <sbeio/sbeioif.H>
+#include <util/runtime/rt_fwreq_helper.H>
 
 #include <map>
 
@@ -106,9 +107,21 @@ errlHndl_t sbeScomPerformOp(DeviceFW::OperationType i_opType,
                             int64_t i_accessType,
                             va_list i_args)
 {
-    TRACDCOMP(g_trac_sbeio,ENTER_MRK"sbeScomPerformOp");
     errlHndl_t l_err  = nullptr;
     uint64_t   l_addr = va_arg(i_args,uint64_t);
+    TRACDCOMP(g_trac_sbeio,ENTER_MRK"sbeScomPerformOp HUID=0x%X l_addr=0x%X i_opType=0x%X",
+                   get_huid(i_ocmb), l_addr, i_opType);
+    do {
+    // On some systems the OCC can be using the same i2c bus (for reading temperatures)
+    // that the SBE will use to do the scoms out to Explorer.
+    // We need to manage a lock to avoid contention.
+    l_err = firmware_i2c_lock(i_ocmb, hostInterfaces::LOCKOP_LOCK);
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_sbeio, "sbeScomPerformOp UNABLE TO COMPLETE LOCK REQUEST HUID=0x%X", get_huid(i_ocmb));
+        l_err->collectTrace(SBEIO_COMP_NAME);
+        break;
+    }
 
     l_err = SCOM::scomOpSanityCheck(i_opType,
                                     i_ocmb,
@@ -120,17 +133,57 @@ errlHndl_t sbeScomPerformOp(DeviceFW::OperationType i_opType,
     if (l_err)
     {
         // Trace here - sanity check does not know scom type
-        TRACFCOMP(g_trac_sbeio,"Runtime SBE Scom sanity check failed on %.8X",
+        TRACFCOMP(g_trac_sbeio,"sbeScomPerformOp Runtime SBE Scom sanity check failed HUID=0x%X",
             get_huid(i_ocmb));
+        break;
     }
     else
     {
         assert(io_buflen == sizeof(uint64_t) ,
-               "We only support read lengths of 8 bytes for PSU scom ops");
+               "sbeScomPerformOp We only support read lengths of 8 bytes for PSU scom ops");
         l_err = SBEIO::sendPsuGetHwRegRequest(
                                 i_ocmb,
                                 l_addr,
                                 *static_cast<uint64_t *>(io_buffer));
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_sbeio, "sbeScomPerformOp SBEIO::sendPsuGetHwRegRequest HUID=0x%X PROBLEM !", get_huid(i_ocmb));
+            break;
+        }
+    }
+
+    } while (0);
+
+    // Always attempt UNLOCK
+    errlHndl_t l_lock_err  = nullptr;
+    l_lock_err = firmware_i2c_lock(i_ocmb, hostInterfaces::LOCKOP_UNLOCK);
+    if (l_lock_err)
+    {
+        l_lock_err->collectTrace(SBEIO_COMP_NAME);
+        if (!l_err)
+        {
+            TRACFCOMP(g_trac_sbeio, "sbeScomPerformOp - UNABLE TO COMPLETE UNLOCK REQUEST HUID=0x%X", get_huid(i_ocmb));
+            l_err = l_lock_err;
+            // Pass back the l_lock_err to caller as the l_err
+            l_lock_err = nullptr;
+        }
+        else
+        {
+            TRACFCOMP(g_trac_sbeio, "sbeScomPerformOp - HUID=0x%X Operation failed and failed to unlock firmware_i2c_lock", get_huid(i_ocmb));
+            l_lock_err->plid(l_err->plid());
+            // Commit the UNLOCK l_lock_err, we also have the l_err, so pass back l_err linked to l_lock_err for analysis
+            l_lock_err->collectTrace(SBEIO_COMP_NAME);
+            errlCommit(l_lock_err, SBEIO_COMP_ID);
+        }
+    }
+    else
+    {
+        // No previous l_lock_err, but we did have l_err
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_sbeio, "sbeScomPerformOp - Error occurred during operation, but firmware_i2c_lock released successful HUID=0x%X", get_huid(i_ocmb));
+            // DO NOT COMMIT, need caller to handle
+        }
     }
 
     TRACDCOMP(g_trac_sbeio,EXIT_MRK"sbeScomPerformOp");

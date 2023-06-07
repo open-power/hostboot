@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,8 @@
 #include <errl/errlmanager.H>             // errlCommit
 #include <targeting/common/targetUtil.H>  // makeAttribute
 #include <arch/magic.H>
+#include <targeting/common/targetservice.H>
+#include <targeting/runtime/rt_targeting.H>
 
 using namespace ERRORLOG;
 using namespace RUNTIME;
@@ -68,6 +70,213 @@ void add_ffdc( errlHndl_t i_err,
 
     i_err->collectTrace( RUNTIME_COMP_NAME, 256);
 }
+
+/**
+ *  @brief Fill in the i2c lock message to send
+ *  @param[in] i_target target device
+ *  @param[in] i_operation enum i2c_lock_op LOCKOP_LOCK, LOCKOP_UNLOCK
+ *  @param[in/out] io_i2cLockMsg - i2c lock msg (fills this in)
+ *  @return errlHndl_t - NULL if successful,
+ *                       otherwise a pointer to the error log.
+ */
+errlHndl_t fillI2CLockMsg( TARGETING::Target * i_target, enum hostInterfaces::i2c_lock_op i_operation,
+               hostInterfaces::hbrt_fw_msg * io_i2cLockMsg)
+{
+    errlHndl_t l_err = nullptr;
+    TRACFCOMP( g_trac_runtime, ENTER_MRK
+             "fillI2CLockMsg: %s i2cMaster of target huid 0x%llX",
+             (i_operation == hostInterfaces::LOCKOP_LOCK)?"lock":"unlock", get_huid(i_target) );
+    TARGETING::rtChipId_t l_chipId = 0;
+
+    do {
+        io_i2cLockMsg->req_i2c_lock.i_operation = i_operation;
+
+        if (i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC )
+        {
+            l_err = TARGETING::getRtTarget(i_target, l_chipId);
+            if(l_err)
+            {
+                TRACFCOMP( g_trac_runtime, ERR_MRK"fillI2CLockMsg: getRtTarget ERROR HUID=0x%X", get_huid(i_target));
+                break;
+            }
+        }
+        else
+        {
+            // find i2cMaster
+            TARGETING::ATTR_FAPI_I2C_CONTROL_INFO_type l_i2cInfo;
+            if (!(i_target->tryGetAttr<TARGETING::ATTR_FAPI_I2C_CONTROL_INFO>(l_i2cInfo)))
+            // Using tryGetAttr as we want the code to continue
+            {
+                TRACFCOMP( g_trac_runtime, ERR_MRK"fillI2CLockMsg() - "
+                    "unable to get ATTR_FAPI_I2C_CONTROL_INFO HUID=0x%X",
+                    TARGETING::get_huid(i_target) );
+
+                /*@
+                 * @errortype
+                 * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+                 * @moduleid         MOD_RT_FIRMWARE_REQUEST
+                 * @reasoncode       RC_FAPI_I2C_CONTROL_INFO_MISSING
+                 * @userdata1        HUID of target
+                 * @userdata2        nothing
+                 * @devdesc          Unable to find I2C info necessary
+                 *                   for lock/unlock() request
+                 * @custdesc         A problem was detected during runtime of
+                 *                   the system while accessing I2C
+                 */
+                l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                        MOD_RT_FIRMWARE_REQUEST,
+                                        RC_FAPI_I2C_CONTROL_INFO_MISSING,
+                                        TARGETING::get_huid(i_target),
+                                        0, true );
+                break;
+            }
+
+            // Since it exists, convert to a target
+            TARGETING::Target * l_pChipTarget =
+                TARGETING::targetService().toTarget(l_i2cInfo.i2cMasterPath);
+
+
+            if( nullptr == l_pChipTarget )
+            {
+                TRACFCOMP( g_trac_runtime, ERR_MRK"fillI2CLockMsg: i2cMasterPath NULL");
+                /*@
+                 * @errortype
+                 * @severity         ERRORLOG::ERRL_SEV_PREDICTIVE
+                 * @moduleid         MOD_RT_FIRMWARE_REQUEST
+                 * @reasoncode       RC_TARGET_CHIP_NOT_FOUND
+                 * @userdata1        HUID of target
+                 * @userdata2        Nothing
+                 * @devdesc          Unable to find chipId for lock/unlock() request
+                 * @custdesc         A problem was detected during runtime of
+                 *                   the system where locking is currently
+                 *                   unavailable for communication to the host
+                 */
+                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                            MOD_RT_FIRMWARE_REQUEST,
+                                            RC_TARGET_CHIP_NOT_FOUND,
+                                            TARGETING::get_huid(i_target),
+                                            0,true);
+                break;
+            }
+
+            l_err = TARGETING::getRtTarget(l_pChipTarget, l_chipId);
+            if(l_err)
+            {
+                TRACFCOMP( g_trac_runtime, ERR_MRK"fillI2CLockMsg: getRtTarget l_chipId=0x%X ERROR HUID=0x%X", l_chipId, get_huid(l_pChipTarget));
+                break;
+            }
+
+        } // end NOT PROC
+
+        io_i2cLockMsg->req_i2c_lock.i_chipId = reinterpret_cast<uint64_t>(l_chipId);
+        io_i2cLockMsg->req_i2c_lock.i_i2cMaster = LOCK_HOST_ENGINE_E_OCC_LOCK; // l_i2cInfo.engine, always Engine E for PROCs, using OCC LOCK
+    }
+    while (0);
+
+    TRACFCOMP( g_trac_runtime, EXIT_MRK
+               "fillI2CLockMsg: target 0x%llX %s message "
+               "i_chipId: 0x%X, i_i2cMaster LOCK TYPE: 0x%X (0x13 is OCC LOCK ENGINE 3), i_operation: %d",
+               get_huid(i_target), (i_operation == hostInterfaces::LOCKOP_LOCK)?"LOCK":"UNLOCK",
+               io_i2cLockMsg->req_i2c_lock.i_chipId,
+               io_i2cLockMsg->req_i2c_lock.i_i2cMaster,
+               io_i2cLockMsg->req_i2c_lock.i_operation );
+
+    return l_err;
+}
+
+errlHndl_t firmware_i2c_lock( TARGETING::Target * i_target,
+                           enum hostInterfaces::i2c_lock_op i_operation )
+{
+    errlHndl_t l_err = nullptr;
+
+    TRACFCOMP( g_trac_runtime, INFO_MRK
+        "firmware_i2c_lock: %s i2cMaster of target huid 0x%llX",
+        (i_operation == hostInterfaces::LOCKOP_LOCK)?"lock":"unlock", get_huid(i_target) );
+
+    hostInterfaces::hbrt_fw_msg *l_req_fw_msg = nullptr;
+    hostInterfaces::hbrt_fw_msg *l_resp_fw_msg = nullptr;
+
+    do
+    {
+        if ((nullptr == g_hostInterfaces) ||
+            (nullptr == g_hostInterfaces->firmware_request))
+        {
+            /*@
+             * @errortype
+             * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+             * @moduleid         MOD_RT_FIRMWARE_REQUEST
+             * @reasoncode       RC_RT_NULL_FIRMWARE_REQUEST_PTR
+             * @userdata1        HUID of target
+             * @userdata2        I2C Lock message type
+             * @devdesc          HBRT problem with hostInterfaces
+             * @custdesc         A problem was detected during runtime of
+             *                   the system that may affect firmware function.
+             */
+             l_err= new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                      MOD_RT_FIRMWARE_REQUEST,
+                                      RC_RT_NULL_FIRMWARE_REQUEST_PTR,
+                                      TARGETING::get_huid(i_target),
+                                      hostInterfaces::HBRT_FW_MSG_TYPE_I2C_LOCK,
+                                      true);
+            break;
+        }
+
+        // Get an accurate size of memory actually needed to transport the data
+        size_t const L_REQ_FW_MSG_SIZE = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                            sizeof(hostInterfaces::hbrt_fw_msg::req_i2c_lock);
+
+        //create the firmware_request structure to carry the i2c lock msg data
+        l_req_fw_msg =
+                  (hostInterfaces::hbrt_fw_msg *)malloc(L_REQ_FW_MSG_SIZE);
+        memset(l_req_fw_msg, 0, L_REQ_FW_MSG_SIZE);
+
+        // populate the firmware_request structure with given data
+        l_req_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_TYPE_I2C_LOCK;
+
+        // build up msg
+        l_err = fillI2CLockMsg(i_target, i_operation, l_req_fw_msg);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_runtime, ERR_MRK"firmware_i2c_lock: "
+                "unable to fill in i2c %s msg",
+                (i_operation==hostInterfaces::LOCKOP_LOCK)?"lock":"unlock");
+            break;
+        }
+
+        // Create the firmware_request response struct to receive data
+        uint64_t l_resp_fw_msg_size = L_REQ_FW_MSG_SIZE;
+        l_resp_fw_msg =
+                  (hostInterfaces::hbrt_fw_msg *)malloc(l_resp_fw_msg_size);
+        memset(l_resp_fw_msg, 0, l_resp_fw_msg_size);
+
+        // Trace out the request structure
+        TRACFBIN( g_trac_runtime, INFO_MRK"firmware_i2c_lock: "
+                  "Sending firmware_request",
+                  l_req_fw_msg,
+                  L_REQ_FW_MSG_SIZE);
+
+        // Make the firmware_request call
+        l_err = firmware_request_helper(L_REQ_FW_MSG_SIZE,
+                                        l_req_fw_msg,
+                                        &l_resp_fw_msg_size,
+                                        l_resp_fw_msg);
+    }
+    while (0);
+
+    // release the memory created
+    free(l_req_fw_msg);
+    free(l_resp_fw_msg);
+    l_req_fw_msg = l_resp_fw_msg = nullptr;
+
+    if (l_err)
+    {
+        l_err->collectTrace( VPD_COMP_NAME, 256);
+        l_err->collectTrace( SBEIO_COMP_NAME, 256);
+    }
+
+    return l_err;
+}
+
 
 /*****************************************************************************/
 // firmware_request_helper
@@ -212,8 +421,7 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
             case hostInterfaces::HBRT_FW_MSG_TYPE_I2C_LOCK:
                 {
                     TRACFCOMP(g_trac_runtime,
-                              ERR_MRK"FSP is doing a reset/reload, "
-                                     "sending lock msg to FSP failed. "
+                              ERR_MRK"Sending lock msg failed. "
                                      "retry:%d/%d, rc:%d",
                               i,
                               HBRT_FW_REQUEST_RETRIES,
@@ -357,7 +565,7 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                     ERR_MRK"Error from firmware_request with io_type=%d. rc=%d",
                     l_req_fw_msg->io_type,
                     rc);
-          // Default user data 1 wirh Hypervisor return code
+          // Default user data 1 with Hypervisor return code
           // and firmware request message type
           l_userData1 = TWO_UINT32_TO_UINT64(rc,
                                              l_req_fw_msg->io_type);
@@ -475,10 +683,10 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
 
             case hostInterfaces::HBRT_FW_MSG_TYPE_I2C_LOCK:
                 {
-                    TRACFCOMP(g_trac_runtime, ERR_MRK"Failed sending FSP i2c "
-                             "lock message rc 0x%X; i_chipId: 0x%llX, "
-                             "i_i2cMaster: %d, i_operation: %d",
-                             rc,
+                    TRACFCOMP(g_trac_runtime, ERR_MRK"Failed sending i2c "
+                             "lock/unlock message rc=%d (0x%X); i_chipId: 0x%llX, "
+                             "i_i2cMaster: 0x%X, i_operation: %d",
+                             rc, rc,
                              l_req_fw_msg->req_i2c_lock.i_chipId,
                              l_req_fw_msg->req_i2c_lock.i_i2cMaster,
                              l_req_fw_msg->req_i2c_lock.i_operation );
