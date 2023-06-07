@@ -71,6 +71,13 @@ fapi2::ReturnCode read_dts(const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>& 
 
 } // ns i2c
 
+/// @brief constants to specify enable/disable of SMBus timeout
+enum sensor_timeout
+{
+    ENABLE = 0,
+    DISABLE = 1,
+};
+
 ///
 /// @brief Processes the results for this thermal sensor and writes them into the sensor cache register
 /// @param[in] i_ocmb the OCMB target
@@ -123,7 +130,19 @@ class thermal_sensor
         ///
         virtual fapi2::ReturnCode i2c_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>& i_i2c,
                 fapi2::buffer<uint16_t>& o_i2c_data) const;
+
 };
+
+///
+/// @brief Enable or disable SMBus timeout feature on the thermal sensor
+/// @param[in] i_ocmb the OCMB target
+/// @param[in] i_sensor the temp sensor target
+/// @param[in] i_enable switch to enable or disable
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode change_smbus_timeout(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+                                       const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>& i_sensor,
+                                       const sensor_timeout i_enable);
 
 ///
 /// @brief Function that reads and processes all thermal sensors

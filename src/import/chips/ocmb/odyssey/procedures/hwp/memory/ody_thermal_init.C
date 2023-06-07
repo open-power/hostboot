@@ -36,6 +36,7 @@
 #include <fapi2.H>
 #include <ody_thermal_init.H>
 #include <lib/power_thermal/ody_thermal_init_utils.H>
+#include <generic/memory/lib/utils/find.H>
 
 extern "C"
 {
@@ -47,6 +48,12 @@ extern "C"
     ///
     fapi2::ReturnCode ody_thermal_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
     {
+        for(const auto& l_sensor : mss::find_targets<fapi2::TARGET_TYPE_TEMP_SENSOR>(i_target))
+        {
+            // Workaround: disable SMBus timeout feature to avoid i2c errors
+            FAPI_TRY(mss::ody::thermal::change_smbus_timeout(i_target, l_sensor, mss::ody::thermal::sensor_timeout::DISABLE));
+        }
+
         // Polls the DTS for initial values
         FAPI_TRY(mss::ody::thermal::read_dts_sensors(i_target));
 

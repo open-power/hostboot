@@ -144,6 +144,53 @@ fapi2::ReturnCode thermal_sensor::i2c_read_helper(const fapi2::Target<fapi2::TAR
 }
 
 ///
+/// @brief Enable or disable SMBus timeout feature on the thermal sensor
+/// @param[in] i_ocmb the OCMB target
+/// @param[in] i_sensor the temp sensor target
+/// @param[in] i_enable switch to enable or disable
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode change_smbus_timeout(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+                                       const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>& i_sensor,
+                                       const sensor_timeout i_enable)
+{
+    constexpr uint8_t TIMEOUT_REG = 0x22;
+    constexpr uint8_t DATA_SIZE_IN_BYTES = 2;
+
+    std::vector<uint8_t> l_command;
+    std::vector<uint8_t> l_data;
+    fapi2::buffer<uint8_t> l_reg_data0;
+    fapi2::buffer<uint8_t> l_reg_data1;
+
+    uint8_t l_is_sim = 0;
+    FAPI_TRY( mss::attr::get_is_simulation(l_is_sim) );
+
+    if (l_is_sim)
+    {
+        // This register isn't supported in Simics
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    l_command.push_back(TIMEOUT_REG);
+    FAPI_TRY(fapi2::getI2c(i_sensor, DATA_SIZE_IN_BYTES, l_command, l_data));
+
+    // disable SMBus timeout by writing '1' to bit 7 (counting right to left)
+    FAPI_DBG(TARGTIDFORMAT "Writing %d to SMBus timeout bit", GENTARGTID(i_sensor), i_enable);
+    l_reg_data0.insertFromRight<0, BITS_PER_BYTE>(l_data[0]);
+    l_reg_data1.insertFromRight<0, BITS_PER_BYTE>(l_data[1]);
+    l_reg_data1.writeBit<0>(i_enable);
+
+    l_command.push_back(l_reg_data0);
+    l_command.push_back(l_reg_data1);
+
+    // write the data back
+    FAPI_TRY(fapi2::putI2c(i_sensor, l_command));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Processes the results for this thermal sensor and writes them into the sensor cache register
 /// @param[in] i_ocmb the OCMB target
 /// @param[in] i_reg_addr the register address upon which to operate
@@ -223,6 +270,8 @@ fapi2::ReturnCode read_dts_sensors(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         // Should be 0-3, but using a modulo operation for safety's sake
         const auto l_sensor_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
                                   (l_sensor) % NUM_DTS;
+
+        // Read and cache the sensor value
         FAPI_TRY(thermal_sensor_info[l_sensor_pos].read(i_ocmb, l_sensor));
     }
 
