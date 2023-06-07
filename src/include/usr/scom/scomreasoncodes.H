@@ -87,6 +87,7 @@ namespace SCOM
         SCOM_INVALID_ECO_TYPE          = SCOM_COMP_ID | 0x22,
         SCOM_SPCWKUP_COUNT_INCONSISTENT = SCOM_COMP_ID | 0x23,
         SCOM_UNSUPPORTED_CHIPID        = SCOM_COMP_ID | 0x24,
+        SCOM_MULTICAST_WRITE_INVALID   = SCOM_COMP_ID | 0x25,
     };
 
     enum UserDetailsTypes

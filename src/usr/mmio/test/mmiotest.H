@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,12 +34,16 @@
 #include <limits.h>
 #include <devicefw/driverif.H>
 #include "../mmio.H"
+#include <targeting/common/predicates/predicates.H>
+#include <targeting/common/attributes.H>
 #include <targeting/common/utilFilter.H>
 #include <explorer_scom_addresses.H>
 #include <exp_oc_regs.H>
 #include <sys/mmio.h>
 #include <utils/chipids.H>
 #include <test/exptest_utils.H>
+#include <arch/magic.H>
+#include <console/consoleif.H>
 
 #define SCOM2MMIO_ADDR(_ADDR) (EXPLR_IB_MMIO_OFFSET | (_ADDR << 3))
 #define CNFG2MMIO_ADDR(_ADDR) (EXPLR_IB_CONFIG_OFFSET | _ADDR)
@@ -274,4 +278,211 @@ class MmioTest : public CxxTest::TestSuite
 #endif
         TS_INFO("testExplrMMIO> Done");
     };
+
+
+    /**
+     * @brief test_write: This function writes to the specified address
+     */
+    errlHndl_t test_write(uint64_t i_regaddr, Target *i_tgt, uint64_t i_data)
+    {
+        size_t l_numBytes = 8;
+        errlHndl_t l_err = nullptr;
+
+        l_err = DeviceFW::deviceOp(DeviceFW::WRITE, i_tgt,
+                                   reinterpret_cast<uint8_t *>(&i_data),
+                                   l_numBytes,
+                                   DEVICE_SCOM_ADDRESS(i_regaddr));
+        if (l_err)
+        {
+            TS_INFO( "Inband_Scom_DBG> Write Error");
+        }
+        else
+        {
+            TS_INFO( "Inband_Scom_DBG> %.8X=%.16X", i_regaddr, i_data );
+        }
+        return (l_err);
+    }
+
+
+    /**
+     * @brief test_read: This function reads from a multicast address
+     */
+    errlHndl_t test_read(uint64_t i_regaddr, Target *i_tgt, uint8_t *io_buffer)
+    {
+        size_t l_numBytes = 8;
+        errlHndl_t l_err = nullptr;
+
+        l_err = DeviceFW::deviceOp(DeviceFW::READ, i_tgt, io_buffer, l_numBytes,
+                                   DEVICE_SCOM_ADDRESS(i_regaddr));
+        if (l_err)
+        {
+            TS_INFO( "Inband_Scom_DBG> Read Error" );
+        }
+        else
+        {
+            TS_INFO( "Inband_Scom_DBG> %.8X=%.16X",
+                     i_regaddr, *(reinterpret_cast<uint64_t *>(io_buffer)) );
+        }
+        return (l_err);
+    }
+
+    /**
+     * @brief Test Odyssey Multicast Scom operations
+     */
+    void testOdyMulticastScom(void)
+    {
+        errlHndl_t l_err = nullptr;
+        uint8_t l_fails = 0;
+        uint8_t l_total = 0;
+
+        TS_INFO("testOdyMulticastScom> Start" );
+        // Needed since the device operations could be using inband communication in error path
+        HB_MUTEX_SERIALIZE_TEST_LOCK_ATTR l_mutex = exptest::getTestMutex();
+        if (l_mutex == nullptr)
+        {
+            TS_FAIL("testOdyMulticastScom: unable to get test mutex");
+            return;
+        }
+
+        // >> atomic section
+        mutex_lock(l_mutex);
+
+        do {
+            //Get all OCMB targets
+            TargetHandleList l_ocmbTargetList;
+            getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
+
+            if (l_ocmbTargetList.empty())
+            {
+                TS_INFO("testOdyMulticastScom> No OCMB targets found.  Exiting.");
+                break;
+            }
+
+            for (const auto l_ocmb_target : l_ocmbTargetList)
+            {
+                uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
+
+                // Ensure we are dealing with Odyssey Chip and not Explorer
+                if (chipId != POWER_CHIPID::ODYSSEY_16)
+                {
+                    TS_INFO("Skipping non-Odyssey target!");
+                    continue;
+                }
+
+                // For the Odyssey chips, we emulate the multicast
+                // behavior by doing unicast scom operations to the
+                // two chiplets associated with the Odyssey chip.
+                // The two chiplets have IDs 0x01 & 0x08.
+                // Basically the defined MMIO address range for the
+                // Odyssey inband scom address does not have enough
+                // bits to hold the multicast address. Hence, there
+                // is a workaround in place to do the manual scom
+                // operations to the two chiplets.
+                //
+                // Here the tests will do unicast scom writes to the
+                // the two chiplets and read back the value as a
+                // multicast operation. It will test both the OR
+                // and the bit-wise mode.
+
+                constexpr uint64_t CHIPLET1  = 0x010f001e;
+                constexpr uint64_t CHIPLET2  = 0x080f001e;
+                constexpr uint64_t MC_OR_ADDR      = 0x470f001e;
+                constexpr uint64_t MC_BITWISE_ADDR = 0x570f001e;
+                constexpr uint64_t DATA1 = 0xA0A0A0A0B0B0B0B0;
+                constexpr uint64_t DATA2 = 0x0909090908080808;
+                size_t l_numBytes = 8;
+                uint8_t l_buf[8] = {0};
+                uint64_t l_expected = DATA1 | DATA2;
+
+                l_total++;
+
+                l_err = test_write(CHIPLET1, l_ocmb_target, DATA1);
+                if (l_err)
+                {
+                    TS_FAIL("testOdyMulticastScom: Failed writing 0x%llX to 0x%llX"
+                            " target huid= 0x%.8X",
+                            DATA1, CHIPLET1, get_huid(l_ocmb_target) );
+                    l_fails++;
+                    errlCommit (l_err, CXXTEST_COMP_ID);
+                    continue;
+                }
+                l_err = test_write(CHIPLET2, l_ocmb_target, DATA2);
+
+                if (l_err)
+                {
+                    TS_FAIL("testOdyMulticastScom: Failed writing 0x%llX to 0x%llX"
+                            " target huid= 0x%.8X",
+                            DATA2, CHIPLET2, get_huid(l_ocmb_target) );
+                    l_fails++;
+                    errlCommit (l_err, CXXTEST_COMP_ID);
+                    continue;
+                }
+
+                // Read back from this target and verify the multicast OR mode
+                l_err = test_read(MC_OR_ADDR, l_ocmb_target, l_buf);
+                if (l_err)
+                {
+                    TS_FAIL("testOdyMulticastScom: Failed reading from 0x%llX"
+                            " target huid= 0x%.8X", MC_OR_ADDR, get_huid(l_ocmb_target));
+                    l_fails++;
+                    errlCommit (l_err, CXXTEST_COMP_ID);
+                    continue;
+                }
+
+                if (memcmp(l_buf, &l_expected, l_numBytes))
+                {
+                    TS_FAIL("testOdyMulticastScom: Read:0x%llX Exp:0x%llX",
+                            *reinterpret_cast<uint64_t *>(l_buf), l_expected);
+                    l_fails++;
+                }
+                else
+                {
+                    TS_INFO("testOdyMulticastScom: Matched Read:0x%llX Exp:0x%llX",
+                            *reinterpret_cast<uint64_t *>(l_buf), l_expected);
+                }
+
+                // Read back from this target and verify the multicast BITWISE mode
+                l_total++;
+                memset(l_buf, 0, sizeof(l_buf));
+                l_expected = 0x0ULL;
+                if ( DATA1 & 0x8000000000000000 )
+                {
+                    // DATA1 was written to chiplet with ID=0x01
+                    l_expected |= (0x8000000000000000 >> 0x01);
+                }
+                if ( DATA2 & 0x8000000000000000 )
+                {
+                    // DATA2 was written to chiplet with ID=0x08
+                    l_expected |= (0x8000000000000000 >> 0x08);
+                }
+
+                l_err = test_read(MC_BITWISE_ADDR, l_ocmb_target, l_buf);
+                if (l_err)
+                {
+                    TS_FAIL("testOdyMulticastScom: Failed reading from 0x%llX"
+                            " target huid= 0x%.8X", MC_BITWISE_ADDR, get_huid(l_ocmb_target));
+                    l_fails++;
+                    errlCommit (l_err, CXXTEST_COMP_ID);
+                    continue;
+                }
+
+                if (memcmp(l_buf, &l_expected, l_numBytes))
+                {
+                    TS_FAIL("testOdyMulticastScom: Read:0x%llX Exp:0x%llX",
+                            *reinterpret_cast<uint64_t *>(l_buf), l_expected);
+                    l_fails++;
+                }
+                else
+                {
+                    TS_INFO("testOdyMulticastScom: Matched Read:0x%llX Exp:0x%llX",
+                            *reinterpret_cast<uint64_t *>(l_buf), l_expected);
+                }
+            } // end of for loop
+        } while (0);
+
+        // << atomic section
+        mutex_unlock(l_mutex);
+
+        TS_INFO("testOdyMulticastScom: End: test total:%d failed:%d", l_total, l_fails);
+    }
 };

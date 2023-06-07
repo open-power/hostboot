@@ -284,22 +284,8 @@ errlHndl_t routeIbScom(DeviceFW::OperationType i_opType,
         // Only one arg : scom address
         uint64_t l_scomAddr = va_arg(i_args,uint64_t);
 
-        // SCOMs must be exactly 8-bytes
-        assert(io_buflen==8,"routeIbScom> buffer is %d != 8 bytes", io_buflen);
-
-        //@FIXME-JIRA:PFHB-466 : NOOP Multicast scoms until we
-        // have the workaround in place because they fail
-        // one of the range checks in the MMIO code
-        if( l_scomAddr & 0xF0000000 )
-        {
-            TRACFCOMP(g_trac_mmio,
-                      "Skipping multicast scom 0x%.8X to %.8X",
-                      l_scomAddr,
-                      TARGETING::get_huid(i_target));
-            break;
-        }
-
         // Transform the scom address into the MMIO address
+        // There is a workaround in place for handling Odyssey multicast operations.
         uint64_t l_mmioAddr = MMIOCOMMON_scom_to_offset(l_scomAddr);
 
         // Make a convenient local var to deal with
@@ -344,6 +330,6 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::IBSCOM_ODY,
                       TYPE_OCMB_CHIP,
                       routeIbScom);
-  
+
 
 }; // End MMIOODY namespace
