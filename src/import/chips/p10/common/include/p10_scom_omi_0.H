@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,6 +103,19 @@ static const uint32_t RXCTL_DATASM_0_PLREGS_RX_MODE1_PL_RECAL_ABORT_DL_MASK = 51
 static const uint32_t RXCTL_DATASM_0_PLREGS_RX_MODE1_PL_INIT_DONE_DL_MASK = 52;
 //<< [RXCTL_DATASM_0_PLREGS_RX_MODE1_PL]
 // omi/reg00000.H
+
+//>> [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL]
+static const uint64_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL = 0x8004244010012c3full;
+
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_FIFO_L2U_DLY = 48;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_FIFO_L2U_DLY_LEN = 3;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_CLK_DISABLE = 56;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_RXCAL = 57;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL = 58;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL_LEN = 3;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_FIFO_HOLD = 61;
+//<< [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL]
+// omi/reg00001.H
 
 //>>THE END<<
 

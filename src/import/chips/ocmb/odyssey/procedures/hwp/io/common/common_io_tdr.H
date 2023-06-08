@@ -43,7 +43,7 @@ enum TdrResult
     None = 0x00,
     NoIssues = 0x10,
     Open = 0x20,
-    Short = 0x0030,
+    Short = 0x30,
     ShortToGnd = 0x01 | Short,
     ShortToVdd = 0x02 | Short,
     DidNotRun = 0x40,

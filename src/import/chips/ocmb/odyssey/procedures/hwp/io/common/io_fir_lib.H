@@ -178,6 +178,7 @@ fapi2::ReturnCode io_ppe_firs<K, M, V>::ioppe_fir_set_pre_start(const fapi2::Tar
     l_buffer.setBit<PPE_ARB_ARRAY_UNCORRECTABLE_ERROR>();
     l_buffer.setBit<PPE_ARB_ARRAY_CORRECTABLE_ERROR>();
     l_buffer.setBit<PPE_CODE_FATAL_ERROR>();
+    l_buffer.setBit<PPE_CODE_BAD_LANE_WARNING>();
     l_buffer.setBit<PPE_CODE_RECAL_NOT_RUN>();
     l_buffer.setBit<PPE_CODE_THREAD_LOCKED>();
     FAPI_TRY(fapi2::putScom(i_target, l_lfir_rw_wclear_mask, l_buffer));

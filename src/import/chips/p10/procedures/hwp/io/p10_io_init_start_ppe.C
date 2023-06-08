@@ -761,20 +761,36 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                     // Peaking
                     FAPI_TRY(p10_io_ppe_ppe_ctle_peak2_disable[l_thread].putData(l_pauc_target, 0x1));
 
-                    // RX A CTLE_PEAK1
+                    // RX A CTLE_PEAK2
                     FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
                                                     RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL,
                                                     RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK2,
                                                     RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL6_PL_PEAK2_LEN,
                                                     l_num_lanes,
-                                                    4));
-                    // RX B CTLE_PEAK1
+                                                    2));
+                    // RX B CTLE_PEAK2
                     FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
                                                     RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL,
                                                     RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK2,
                                                     RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN,
                                                     l_num_lanes,
-                                                    4));
+                                                    2));
+
+                    // Set tx_fifo_l2u_dly = 0
+                    FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL,
+                                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_FIFO_L2U_DLY,
+                                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_FIFO_L2U_DLY_LEN,
+                                                    l_num_lanes,
+                                                    0));
+
+                    // TODO Set tx_unload_sel = 1
+                    FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL,
+                                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL,
+                                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL_LEN,
+                                                    l_num_lanes,
+                                                    1));
                 }
 
 
@@ -817,6 +833,11 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                                                 l_num_lanes,
                                                 1));
 
+
+                if (l_omi_freq > fapi2::ENUM_ATTR_FREQ_OMI_MHZ_32000)
+                {
+                    l_pre1 = 13; // 13/128 = 10%
+                }
 
                 FAPI_TRY(p10_io_ppe_tx_ffe_pre1_coef[l_thread].putData(l_pauc_target, l_pre1));
                 FAPI_TRY(p10_io_ppe_tx_ffe_pre2_coef[l_thread].putData(l_pauc_target, l_pre2));

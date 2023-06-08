@@ -42,6 +42,7 @@ SCOMT_OMI_USE_D_REG_DL0_CONFIG0
 SCOMT_OMI_USE_D_REG_DL0_CONFIG1
 SCOMT_OMI_USE_D_REG_DL0_CYA_BITS
 SCOMT_ODY_USE_ODC_TLXT_REGS_TLXCFG0
+SCOMT_ODY_USE_ODC_SRQ_MBA_ROQ0Q
 
 ///
 /// @brief Setup OMI DL
@@ -66,6 +67,7 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     D_REG_DL0_CONFIG1_t l_dl0_config1;
     D_REG_DL0_CYA_BITS_t l_dl0_cya;
     ODC_TLXT_REGS_TLXCFG0_t l_tlxcfg0;
+    ODC_SRQ_MBA_ROQ0Q_t l_srq_mba_roq0q;
 
     bool l_mfg_mode = false;
 
@@ -127,6 +129,10 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     FAPI_TRY(l_tlxcfg0.getScom(i_target));
     l_tlxcfg0.set_DCP1_INIT(128);
     FAPI_TRY(l_tlxcfg0.putScom(i_target));
+
+    FAPI_TRY(l_srq_mba_roq0q.getScom(i_target));
+    l_srq_mba_roq0q.set_CFG_TLXR_SPEC_CMD_ENB(1);
+    FAPI_TRY(l_srq_mba_roq0q.putScom(i_target));
 
     FAPI_TRY(l_ppe_firs.mc_omi_fir_set(i_target));
     FAPI_TRY(l_ppe_firs.tlx_fir_set(i_target));

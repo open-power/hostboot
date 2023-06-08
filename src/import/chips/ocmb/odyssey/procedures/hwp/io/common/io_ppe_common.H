@@ -52,8 +52,16 @@ enum IO_PPE_CONSTS
     IO_PPE_EL_DONE_POLL_DELAY_NS = 10000,
     IO_PPE_EL_DONE_POLL_DELAY_SIM_CYCLES = 100000000,
 
+    IO_TX_MODE2_PL = 0x0848, // unload_sel bit 60, 2 wide
+    IO_TX_MODE4_PL = 0x0A78, // tx_fifo_l2u_dly bit 48, 4 wide
+
     IO_PPE_RX_DAC_CNTL3_PL = 0x0030,
     IO_PPE_RX_DAC_CNTL4_PL = 0x0040,
+    IO_TX_FIFO_L2U_DLY = 48,
+    IO_TX_FIFO_L2U_DLY_LEN = 4,
+    IO_TX_UNLOAD_SEL = 60,
+    IO_TX_UNLOAD_SEL_LEN = 2,
+
     IO_PPE_RX_DAC_CNTL6_PL = 0x0060,
     IO_PPE_RX_DAC_CNTL13_PL = 0x00D0,
     IO_PPE_RX_LTE_GAIN = 48,
@@ -165,7 +173,9 @@ class io_ppe_common
                                       const uint32_t i_lane_mask,
                                       const uint8_t i_tx_pre1,
                                       const uint8_t i_tx_pre2,
-                                      const uint8_t i_tx_post);
+                                      const uint8_t i_tx_post,
+                                      const uint32_t i_tx_fifo_l2u_dly,
+                                      const uint32_t i_tx_unload_sel);
         fapi2::ReturnCode hss_init_rx(const fapi2::Target<K, M, V>& i_target,
                                       const uint8_t i_thread,
                                       const uint32_t i_lane_mask,
@@ -713,13 +723,39 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::hss_init_tx(const fapi2::Target<K, M, 
         const uint32_t i_lane_mask,
         const uint8_t i_tx_pre1,
         const uint8_t i_tx_pre2,
-        const uint8_t i_tx_post)
+        const uint8_t i_tx_post,
+        const uint32_t i_tx_fifo_l2u_dly,
+        const uint32_t i_tx_unload_sel)
 {
     FAPI_DBG("Starting io_ppe_common::hss_init_tx");
+    uint64_t l_addr = 0;
+    fapi2::buffer<uint64_t> l_buffer = 0;
+    uint8_t l_lane = 0;
     MEM_REG_TX_FFE_PRE1_COEF_PUT(iv_regs, i_target, i_thread, i_tx_pre1);
     MEM_REG_TX_FFE_PRE2_COEF_PUT(iv_regs, i_target, i_thread, i_tx_pre2);
     MEM_REG_TX_FFE_POST_COEF_PUT(iv_regs, i_target, i_thread, i_tx_post);
     FAPI_TRY(iv_regs->flushCache(i_target));
+
+    for (l_lane = 0; l_lane < 8; l_lane++)
+    {
+        if (i_lane_mask & (0x80000000 >> l_lane))
+        {
+            // tx_fifo_l2u_dly
+            l_addr = buildAddr(iv_regs->base_addr, i_thread, l_lane, IO_TX_MODE4_PL);
+            FAPI_TRY(getScom(i_target, l_addr, l_buffer));
+            l_buffer.insertFromRight<IO_TX_FIFO_L2U_DLY, IO_TX_FIFO_L2U_DLY_LEN, uint8_t>(i_tx_fifo_l2u_dly);
+            FAPI_TRY(putScom(i_target, l_addr, l_buffer));
+
+            // tx_unload_sel
+            l_addr = buildAddr(iv_regs->base_addr, i_thread, l_lane, IO_TX_MODE2_PL);
+            FAPI_TRY(getScom(i_target, l_addr, l_buffer));
+            l_buffer.insertFromRight<IO_TX_UNLOAD_SEL, IO_TX_UNLOAD_SEL_LEN, uint8_t>(i_tx_unload_sel);
+            FAPI_TRY(putScom(i_target, l_addr, l_buffer));
+
+            FAPI_TRY(iv_regs->flushCache(i_target));
+        }
+    }
+
 fapi_try_exit:
     FAPI_DBG("Ending io_ppe_common::hss_init_tx");
     return fapi2::current_err;

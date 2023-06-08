@@ -42,21 +42,25 @@ fapi2::ReturnCode ody_omi_hss_init_tx_lanes(const fapi2::Target<fapi2::TARGET_TY
     FAPI_DBG("Starting ody_omi_hss_init_tx_lanes");
     uint32_t l_tx_lane_mask = 0;
     const uint8_t c_thread = 0;
-    fapi2::ATTR_OMI_TX_PRE1_Type l_tx_pre1;
-    fapi2::ATTR_OMI_TX_PRE2_Type l_tx_pre2;
-    fapi2::ATTR_OMI_TX_POST_Type l_tx_post;
+    const uint32_t l_tx_fifo_l2u_dly = 0;
+    const uint32_t l_tx_unload_sel = 1;
+    fapi2::ATTR_OMI_TX_PRE1_Type l_tx_pre1 = 13; // (13/128) = 10%
+    fapi2::ATTR_OMI_TX_PRE2_Type l_tx_pre2 = 0;
+    fapi2::ATTR_OMI_TX_POST_Type l_tx_post = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_LANES, i_target, l_tx_lane_mask));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_PRE1, i_target, l_tx_pre1));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_PRE2, i_target, l_tx_pre2));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_POST, i_target, l_tx_post));
+    // FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_PRE1, i_target, l_tx_pre1));
+    // FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_PRE2, i_target, l_tx_pre2));
+    // FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_POST, i_target, l_tx_post));
 
     FAPI_TRY(i_ppe_common.hss_init_tx(i_target,
                                       c_thread,
                                       l_tx_lane_mask,
                                       l_tx_pre1,
                                       l_tx_pre2,
-                                      l_tx_post));
+                                      l_tx_post,
+                                      l_tx_fifo_l2u_dly,
+                                      l_tx_unload_sel));
 
 fapi_try_exit:
     FAPI_DBG("End ody_omi_hss_init_tx_lanes");
@@ -70,14 +74,14 @@ fapi2::ReturnCode ody_omi_hss_init_rx_lanes(const fapi2::Target<fapi2::TARGET_TY
     FAPI_DBG("Starting ody_omi_hss_init_rx_lanes");
     uint32_t l_rx_lane_mask = 0;
     const uint8_t c_thread = 0;
-    fapi2::ATTR_OMI_RX_LTEG_Type l_rx_lte_gain = 0;
-    fapi2::ATTR_OMI_RX_LTEZ_Type l_rx_lte_zero = 0;
+    fapi2::ATTR_OMI_RX_LTEG_Type l_rx_lte_gain = 7;
+    fapi2::ATTR_OMI_RX_LTEZ_Type l_rx_lte_zero = 1;
     int32_t l_rx_peak1 = 0;
     int32_t l_rx_peak2 = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LANES, i_target, l_rx_lane_mask));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LTEG, i_target, l_rx_lte_gain));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LTEZ, i_target, l_rx_lte_zero));
+    //FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LTEG, i_target, l_rx_lte_gain));
+    //FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_RX_LTEZ, i_target, l_rx_lte_zero));
 
     if ( i_freq < 32000)
     {
@@ -85,7 +89,7 @@ fapi2::ReturnCode ody_omi_hss_init_rx_lanes(const fapi2::Target<fapi2::TARGET_TY
     }
     else
     {
-        l_rx_peak2 = 8;
+        l_rx_peak2 = 6;
     }
 
     FAPI_TRY(i_ppe_common.hss_init_rx(i_target,
