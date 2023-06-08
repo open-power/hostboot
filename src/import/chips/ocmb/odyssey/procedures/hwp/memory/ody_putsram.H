@@ -45,7 +45,7 @@ typedef fapi2::ReturnCode(*ody_putsram_FP_t) (
     const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP>&,
     const uint64_t,
     const uint32_t,
-    uint8_t*);
+    const uint8_t*);
 
 //------------------------------------------------------------------------------
 // Function prototype
@@ -66,6 +66,6 @@ extern "C" {
     fapi2::ReturnCode ody_putsram(const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                   const uint64_t i_offset,
                                   const uint32_t i_bytes,
-                                  uint8_t* i_data);
+                                  const uint8_t* i_data);
 
 } //extern "C"

@@ -37,9 +37,9 @@ enum poz_image_type
 
 typedef fapi2::ReturnCode(*poz_common_image_load_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
-    uint8_t* const,
-    uint32_t const,
-    uint32_t const,
+    const uint8_t*,
+    const uint32_t,
+    const uint32_t,
     poz_image_type);
 
 #define ASSERT_COMMON_IMAGE_LOAD(hwp) \

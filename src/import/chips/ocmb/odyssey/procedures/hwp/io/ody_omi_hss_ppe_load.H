@@ -52,9 +52,9 @@ const uint32_t OFFSET_64K     = 0x00010000;
 // Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode(*ody_omi_hss_ppe_load_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
-    uint8_t* const,
-    uint32_t const,
-    uint32_t const,
+    const uint8_t*,
+    const uint32_t,
+    const uint32_t,
     poz_image_type);
 
 //------------------------------------------------------------------------------
@@ -84,9 +84,9 @@ extern "C" {
 ///
     fapi2::ReturnCode ody_omi_hss_ppe_load(
         const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        uint8_t* const i_img_data,
-        uint32_t const i_img_size,
-        uint32_t const i_offset,
+        const uint8_t* i_img_data,
+        const uint32_t i_img_size,
+        const uint32_t i_offset,
         poz_image_type i_type);
 
 } //extern "C"

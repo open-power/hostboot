@@ -54,14 +54,14 @@ fapi2::ReturnCode ody_putsram_io_ppe(
     const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP >& i_target,
     const uint64_t i_offset,
     const uint32_t i_bytes,
-    uint8_t* i_data)
+    const uint8_t* i_data)
 {
     FAPI_DBG("Start");
     PHY_PPE_WRAP0_ARB_CSCR_t  WRAP0_ARB_CSCR;
     PHY_PPE_WRAP0_ARB_CSAR_t  WRAP0_ARB_CSAR;
     PHY_PPE_WRAP0_ARB_CSDR_t  WRAP0_ARB_CSDR;
 
-    uint8_t* l_dataPtr = i_data;
+    const uint8_t* l_dataPtr = i_data;
     uint64_t l_data64 = 0;
 
     FAPI_DBG("ody_putsram_io_ppe: i_offset [0x%.8X%.8X], i_bytes %u.",

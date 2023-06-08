@@ -42,7 +42,7 @@
 fapi2::ReturnCode ody_putsram(const fapi2::Target < fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                               const uint64_t i_offset,
                               const uint32_t i_bytes,
-                              uint8_t* i_data)
+                              const uint8_t* i_data)
 {
     FAPI_DBG("Start");
     FAPI_DBG("ody_putsram: i_offset [0x%.8X%.8X], i_bytes %u.",

@@ -42,7 +42,7 @@
 
 // Required for Cronus
 typedef fapi2::ReturnCode (*ody_load_imem_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
-        uint8_t* const i_imem_data,
+        const uint8_t* i_imem_data,
         const uint32_t i_imem_size,
         const uint32_t i_imem_offset,
         poz_image_type i_image_type);
@@ -60,7 +60,7 @@ extern "C"
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode ody_load_imem(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                    uint8_t* const i_imem_data,
+                                    const uint8_t* i_imem_data,
                                     const uint32_t i_imem_size,
                                     const uint32_t i_imem_offset,
                                     poz_image_type i_image_type);

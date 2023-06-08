@@ -52,7 +52,7 @@ extern "C"
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode ody_load_dmem(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                    uint8_t* const i_dmem_data,
+                                    const uint8_t* i_dmem_data,
                                     const uint32_t i_dmem_size,
                                     const uint32_t i_dmem_offset,
                                     poz_image_type /*unused*/)

@@ -72,9 +72,9 @@ uint64_t MEM_REG_OFFSETS[NUM_OF_MEM_REGS] =
 /// NOTE: doxygen in header
 fapi2::ReturnCode ody_omi_hss_ppe_load(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    uint8_t* const i_img_data,
-    uint32_t const i_img_size,
-    uint32_t const i_offset,
+    const uint8_t* i_img_data,
+    const uint32_t i_img_size,
+    const uint32_t i_offset,
     poz_image_type i_type)
 {
     FAPI_DBG("Start");
