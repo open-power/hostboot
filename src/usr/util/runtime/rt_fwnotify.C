@@ -48,6 +48,7 @@
 #include <sys/time.h>                      // nanosleep
 #include <util/util_reasoncodes.H>
 #include <runtime/hbrt_utilities.H>        // HBRT_TRACE_NAME
+#include <util/misc.H>                      // isSimicsRunning()
 
 using namespace TARGETING;
 using namespace RUNTIME;
@@ -1122,7 +1123,12 @@ void setupPmicHealthCheck()
 
     // Call the function to create the first host callback
     uint32_t l_firstCall = true;
-    l_err = createPmicHealthCheckCallback( l_firstCall );
+
+    if (!Util::isSimicsRunning())
+    {
+        l_err = createPmicHealthCheckCallback( l_firstCall );
+    }
+
     if (l_err)
     {
         TRACFCOMP(g_trac_hbrt,
