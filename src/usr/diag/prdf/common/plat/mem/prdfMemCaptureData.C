@@ -278,9 +278,9 @@ void captureDramRepairsData<TYPE_OCMB_CHIP>(TARGETING::TargetHandle_t i_trgt,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd,
-                           uint8_t i_port)
+template<>
+void captureDramRepairsVpd<TYPE_OCMB_CHIP>(TargetHandle_t i_trgt,
+    CaptureData & io_cd, uint8_t i_port)
 {
     #define PRDF_FUNC "[captureDramRepairsVpd] "
 
@@ -293,7 +293,7 @@ void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd,
     do
     {
         std::vector<MemRank> masterRanks;
-        getMasterRanks<T>( i_trgt, i_port, masterRanks );
+        getMasterRanks<TYPE_OCMB_CHIP>( i_trgt, i_port, masterRanks );
         if( masterRanks.empty() )
         {
             PRDF_ERR( PRDF_FUNC "Master Rank list size is 0");
@@ -311,33 +311,34 @@ void captureDramRepairsVpd(TargetHandle_t i_trgt, CaptureData & io_cd,
         uint8_t capData[sz_maxData];
         memset( capData, 0x00, sz_maxData );
 
+        // Get the MEM_PORT target
+        TargetHandle_t memport = getConnectedChild(i_trgt, TYPE_MEM_PORT,
+                                                   i_port);
+
         // Iterate all ranks to get VPD data
         uint32_t idx = 0;
         for ( auto & rank : masterRanks )
         {
             MemDqBitmap bitmap;
 
-            if ( SUCCESS != getBadDqBitmap(i_trgt, rank, bitmap) )
+            if ( SUCCESS != getBadDqBitmap<TYPE_MEM_PORT>(memport, rank,
+                                                          bitmap) )
             {
                 PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed: Trgt=0x%08x"
-                          " rank=0x%02x", getHuid(i_trgt), rank.getKey() );
+                          " rank=0x%02x", getHuid(memport), rank.getKey() );
                 continue; // skip this rank
             }
-            size_t numPorts = bitmap.getNumPorts();
 
             if ( bitmap.badDqs() ) // make sure the data is non-zero
             {
-                // Iterate over the ports
-                for ( uint8_t ps = 0; ps < numPorts; ps++ )
-                {
-                    // Add the rank, port, then the entry data.
-                    capData[idx] = rank.getMaster();
-                    idx += sz_rank;
-                    capData[idx] = ps;
-                    idx += sz_port;
-                    memcpy(&capData[idx], bitmap.getData(ps), sz_entry);
-                    idx += sz_entry;
-                }
+                uint8_t ps = memport->getAttr<ATTR_REL_POS>();
+                // Add the rank, port, then the entry data.
+                capData[idx] = rank.getMaster();
+                idx += sz_rank;
+                capData[idx] = ps;
+                idx += sz_port;
+                memcpy(&capData[idx], bitmap.getData(), sz_entry);
+                idx += sz_entry;
             }
         }
 

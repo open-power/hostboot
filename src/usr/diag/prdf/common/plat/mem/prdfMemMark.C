@@ -765,15 +765,15 @@ uint32_t applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
-                          const uint8_t& i_port, STEP_CODE_DATA_STRUCT & io_sc,
-                          bool & o_dsd )
+template<>
+uint32_t chipMarkCleanup<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+    const MemRank & i_rank, const uint8_t& i_port,
+    STEP_CODE_DATA_STRUCT & io_sc, bool & o_dsd )
 {
     #define PRDF_FUNC "[chipMarkCleanup] "
 
     PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( T == i_chip->getType() );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
     o_dsd = false;
@@ -783,7 +783,7 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
         // It is possible this function was called and there is no chip mark. So
         // first check if one exists.
         MemMark chipMark;
-        o_rc = readChipMark<T>( i_chip, i_rank, i_port, chipMark );
+        o_rc = readChipMark<TYPE_OCMB_CHIP>( i_chip, i_rank, i_port, chipMark );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "readChipMark(0x%08x,0x%02x,%x) failed",
@@ -797,19 +797,22 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
         // Set the chip mark in the DRAM Repairs VPD.
         if ( !areDramRepairsDisabled() )
         {
-            o_rc = setDramInVpd( i_chip->getTrgt(), i_rank,
-                                 chipMark.getSymbol() );
+            TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+                                                       TYPE_MEM_PORT, i_port);
+            o_rc = setDramInVpd<TYPE_MEM_PORT>( memport, i_rank,
+                                                chipMark.getSymbol() );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "setDramInVpd(0x%08x,0x%02x) failed",
-                          i_chip->getHuid(), i_rank.getKey() );
+                          getHuid(memport), i_rank.getKey() );
                 break;
             }
         }
 
         // Apply all RAS policies.
         TdEntry * dsdEvent = nullptr;
-        o_rc = applyRasPolicies<T>( i_chip, i_rank, i_port, io_sc, dsdEvent );
+        o_rc = applyRasPolicies<TYPE_OCMB_CHIP>( i_chip, i_rank, i_port, io_sc,
+                                                 dsdEvent );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "applyRasPolicies(0x%08x,0x%02x) failed",
@@ -821,7 +824,7 @@ uint32_t chipMarkCleanup( ExtensibleChip * i_chip, const MemRank & i_rank,
         if ( nullptr != dsdEvent )
         {
             o_dsd = true;
-            MemDbUtils::pushToQueue<T>( i_chip, dsdEvent );
+            MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( i_chip, dsdEvent );
         }
 
     } while (0);

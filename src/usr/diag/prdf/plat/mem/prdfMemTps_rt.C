@@ -467,11 +467,11 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                                                    iv_port);
         MemDqBitmap dqBitmap;
 
-        o_rc = getBadDqBitmap( trgt, iv_rank, dqBitmap );
+        o_rc = getBadDqBitmap<TYPE_MEM_PORT>( memport, iv_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, 0x%02x) failed",
-                      getHuid(trgt), iv_rank.getKey() );
+                      getHuid(memport), iv_rank.getKey() );
             break;
         }
 
@@ -991,11 +991,11 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         }
 
         // Write any updates to VPD.
-        o_rc = setBadDqBitmap( trgt, iv_rank, dqBitmap );
+        o_rc = setBadDqBitmap<TYPE_MEM_PORT>( memport, iv_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed",
-                      getHuid(trgt), iv_rank.getKey() );
+                      getHuid(memport), iv_rank.getKey() );
             break;
         }
 
@@ -1039,13 +1039,15 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::getSymbolCeCounts( CeCount & io_badDqCount,
     {
         // Get the Bad DQ Bitmap.
         TargetHandle_t ocmbTrgt = iv_chip->getTrgt();
+        TargetHandle_t memport = getConnectedChild(ocmbTrgt, TYPE_MEM_PORT,
+                                                   iv_port);
         MemDqBitmap dqBitmap;
 
-        o_rc = getBadDqBitmap( ocmbTrgt, iv_rank, dqBitmap );
+        o_rc = getBadDqBitmap<TYPE_MEM_PORT>( memport, iv_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x,%d) failed",
-                      getHuid(ocmbTrgt), iv_rank.getMaster() );
+                      getHuid(memport), iv_rank.getMaster() );
             break;
         }
         std::vector<MemSymbol> bmSymList = dqBitmap.getSymbolList();

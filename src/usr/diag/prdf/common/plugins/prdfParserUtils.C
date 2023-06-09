@@ -71,7 +71,7 @@ uint8_t symbol2Dq<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_symbol )
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-uint8_t dq2Symbol( uint8_t i_dq, uint8_t i_ps )
+uint8_t dq2Symbol( uint8_t i_dq )
 {
     uint8_t symbol = SYMBOLS_PER_RANK;
     static const uint8_t sp = SYMBOLS_PER_RANK; // Spare symbols
@@ -99,9 +99,9 @@ uint8_t dq2Symbol( uint8_t i_dq, uint8_t i_ps )
 }
 
 template
-uint8_t dq2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_dq, uint8_t i_ps );
+uint8_t dq2Symbol<TARGETING::TYPE_OCMB_CHIP>( uint8_t i_dq );
 template
-uint8_t dq2Symbol<TARGETING::TYPE_MEM_PORT>( uint8_t i_dq, uint8_t i_ps );
+uint8_t dq2Symbol<TARGETING::TYPE_MEM_PORT>( uint8_t i_dq );
 
 //------------------------------------------------------------------------------
 

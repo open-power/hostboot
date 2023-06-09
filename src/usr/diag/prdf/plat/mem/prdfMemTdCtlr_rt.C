@@ -699,18 +699,12 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns()
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-SCAN_COMM_REGISTER_CLASS * __getEccFirAnd( ExtensibleChip * i_chip );
+template<TARGETING::TYPE TP, TARGETING::TYPE TC>
+uint32_t __findChipMarks( TdRankList<TC> & i_rankList );
 
 template<>
-SCAN_COMM_REGISTER_CLASS * __getEccFirAnd<TYPE_OCMB_CHIP>(
-                                                ExtensibleChip * i_chip )
-{
-    return i_chip->getRegister( "RDFFIR_AND" );
-}
-
-template <TARGETING::TYPE TP, TARGETING::TYPE TC>
-uint32_t __findChipMarks( TdRankList<TC> & i_rankList )
+uint32_t __findChipMarks<TYPE_OCMB_CHIP>(
+        TdRankList<TYPE_OCMB_CHIP> & i_rankList )
 {
     #define PRDF_FUNC "[__findChipMarks] "
 
@@ -720,15 +714,16 @@ uint32_t __findChipMarks( TdRankList<TC> & i_rankList )
     {
         ExtensibleChip * chip = entry.getChip();
         MemRank          rank = entry.getRank();
+        uint8_t          port = entry.getPort();
 
         // Call readChipMark to get MemMark.
-        // TODO Odyssey - this needs to check both ports?
         MemMark chipMark;
-        o_rc = MarkStore::readChipMark<TP>( chip, rank, 0, chipMark );
+        o_rc = MarkStore::readChipMark<TYPE_OCMB_CHIP>( chip, rank, port,
+                                                        chipMark );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "readChipMark(0x%08x,0x%02x) failed",
-                      chip->getHuid(), rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "readChipMark(0x%08x,0x%02x,%x) failed",
+                      chip->getHuid(), rank.getKey(), port );
             break;
         }
 
@@ -736,11 +731,13 @@ uint32_t __findChipMarks( TdRankList<TC> & i_rankList )
 
         // Get the DQ Bitmap data.
         MemDqBitmap dqBitmap;
-        o_rc = getBadDqBitmap( chip->getTrgt(), rank, dqBitmap );
+        TargetHandle_t memport = getConnectedChild(chip->getTrgt(),
+            TYPE_MEM_PORT, port);
+        o_rc = getBadDqBitmap<TYPE_MEM_PORT>( memport, rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x,0x%02x)",
-                      chip->getHuid(), rank.getKey() );
+                      getHuid(memport), rank.getKey() );
             break;
         }
 
@@ -758,26 +755,46 @@ uint32_t __findChipMarks( TdRankList<TC> & i_rankList )
         if ( !cmVerified )
         {
             // Chip mark is not present in VPD. Add it to queue.
-            // TODO Odyssey - this needs to check the relevant port
-            TdEntry * e = new VcmEvent<TP>{ chip, rank, chipMark, 0 };
-            MemDbUtils::pushToQueue<TP>( chip, e );
+            TdEntry * e = new VcmEvent<TYPE_OCMB_CHIP>{ chip, rank, chipMark,
+                                                        port };
+            MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( chip, e );
 
             // We will want to clear the MPE attention for the unverified chip
             // mark so we don't get any redundant attentions for chip marks that
             // are already in the queue. This is reset/reload safe because
             // initialize() will be called again and we can redetect the
             // unverified chip marks.
-            SCAN_COMM_REGISTER_CLASS * reg = __getEccFirAnd<TP>( chip );
-            // TODO Odyssey - adjust bits positions/FIR for odyssey
-            reg->setAllBits();
-            reg->ClearBit(  0 + rank.getMaster() ); // fetch
-            reg->ClearBit( 20 + rank.getMaster() ); // scrub
-            o_rc = reg->Write();
-            if ( SUCCESS != o_rc )
+            if (isOdysseyOcmb(chip->getTrgt()))
             {
-                PRDF_ERR( PRDF_FUNC "Write() failed on ECC FIR AND: 0x%08x",
-                          chip->getHuid() );
-                break;
+                // Odyssey registers are write to clear
+                char regName[64];
+                sprintf(regName, "RDF_FIR_%x", port);
+                SCAN_COMM_REGISTER_CLASS * reg = chip->getRegister(regName);
+
+                reg->SetBit( 1 + rank.getMaster()); // fetch
+                reg->SetBit(21 + rank.getMaster()); // scrub
+                o_rc = reg->Write();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "Write() failed on %s: 0x%08x",
+                              regName, chip->getHuid() );
+                    break;
+                }
+            }
+            else
+            {
+                SCAN_COMM_REGISTER_CLASS * reg =
+                    chip->getRegister( "RDFFIR_AND" );
+                reg->setAllBits();
+                reg->ClearBit(  0 + rank.getMaster() ); // fetch
+                reg->ClearBit( 20 + rank.getMaster() ); // scrub
+                o_rc = reg->Write();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR AND: 0x%08x",
+                              chip->getHuid() );
+                    break;
+                }
             }
         }
     }
@@ -888,29 +905,32 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
         {
             ExtensibleChip * ocmbChip = entry.getChip();
             MemRank rank = entry.getRank();
+            uint8_t port = entry.getPort();
 
             // Get the chip mark
-            // TODO Odyssey - check both ports?
             MemMark chipMark;
             o_rc = MarkStore::readChipMark<TYPE_OCMB_CHIP>( ocmbChip, rank,
-                                                            0, chipMark );
+                                                            port, chipMark );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_OCMB_CHIP>(0x%08x,%d) "
-                          "failed", ocmbChip->getHuid(), rank.getMaster() );
+                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_OCMB_CHIP>(0x%08x,%d,%x)"
+                          " failed", ocmbChip->getHuid(), rank.getMaster(),
+                          port );
                 break;
             }
 
             if ( !chipMark.isValid() ) continue; // no chip mark present
 
             // Get the DQ Bitmap data.
-            MemDqBitmap dqBitmap;
+            TargetHandle_t memport = getConnectedChild(ocmbChip->getTrgt(),
+                                                       TYPE_MEM_PORT, port);
 
-            o_rc = getBadDqBitmap( ocmbChip->getTrgt(), rank, dqBitmap );
+            MemDqBitmap dqBitmap;
+            o_rc = getBadDqBitmap<TYPE_MEM_PORT>( memport, rank, dqBitmap );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, %d)",
-                          ocmbChip->getHuid(), rank.getMaster() );
+                          getHuid(memport), rank.getMaster() );
                 break;
             }
 

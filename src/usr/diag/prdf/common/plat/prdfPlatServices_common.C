@@ -92,47 +92,33 @@ src/hwsv/server/hwpf2/fapi2/target_types.H for a list of all the TargetTypes
 //##                        Memory specific functions
 //##############################################################################
 
-template <fapi2::TargetType T>
-uint32_t __getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
-                           MemDqBitmap & o_bitmap )
+template<>
+uint32_t getBadDqBitmap<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
+    const MemRank & i_rank, MemDqBitmap & o_bitmap )
 {
-    #define PRDF_FUNC "[PlatServices::__getBadDqBitmap] "
+    #define PRDF_FUNC "[PlatServices::getBadDqBitmap] "
 
     uint32_t o_rc = SUCCESS;
 
     #ifdef __HOSTBOOT_MODULE
 
-    BitmapData data;
+    errlHndl_t errl = nullptr;
+    uint8_t data[DQ_BITMAP::BITMAP_SIZE];
 
-    // Determine max number of ports based on OCMB type. Default to Explorer.
-    // Change value if an Odyssey OCMB.
-    uint8_t maxPorts = MAX_PORT_PER_EXP_OCMB;
-    if (isOdysseyOcmb(i_trgt))
+    fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> l_fapiTrgt( i_trgt );
+    uint8_t ps = i_trgt->getAttr<ATTR_REL_POS>();
+
+    FAPI_INVOKE_HWP( errl, p10DimmGetBadDqBitmap, l_fapiTrgt,
+                     i_rank.getDimmSlct(), i_rank.getRankSlct(),
+                     data, ps );
+
+    if ( nullptr != errl )
     {
-        maxPorts = MAX_PORT_PER_ODY_OCMB;
-    }
-
-    for ( uint32_t ps = 0; ps < maxPorts; ps++ )
-    {
-        // Skip if the DIMM doesn't exist
-        if ( nullptr == getConnectedDimm(i_trgt, i_rank, ps) ) continue;
-
-        errlHndl_t errl = nullptr;
-
-        fapi2::Target<T> l_fapiTrgt( i_trgt );
-
-        FAPI_INVOKE_HWP( errl, p10DimmGetBadDqBitmap, l_fapiTrgt,
-                         i_rank.getDimmSlct(), i_rank.getRankSlct(),
-                         data[ps].bitmap, ps );
-
-        if ( nullptr != errl )
-        {
-            PRDF_ERR( PRDF_FUNC "p10DimmGetBadDqBitmap() failed: i_trgt=0x%08x "
-                    "ps=%d ds=%d rs=%d", getHuid(i_trgt), ps,
-                    i_rank.getDimmSlct(), i_rank.getRankSlct() );
-            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-            o_rc = FAIL; break;
-       }
+        PRDF_ERR( PRDF_FUNC "p10DimmGetBadDqBitmap() failed: i_trgt=0x%08x "
+                  "ps=%d ds=%d rs=%d", getHuid(i_trgt), ps,
+                  i_rank.getDimmSlct(), i_rank.getRankSlct() );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
     }
 
     if ( SUCCESS == o_rc )
@@ -147,41 +133,12 @@ uint32_t __getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
     #undef PRDF_FUNC
 }
 
-uint32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
-                         MemDqBitmap & o_bitmap )
-{
-    #define PRDF_FUNC "[PlatServices::getBadDqBitmap] "
-
-    uint32_t o_rc = SUCCESS;
-    TYPE trgtType = getTargetType( i_trgt );
-
-    switch( trgtType )
-    {
-        case TYPE_MEM_PORT:
-            o_rc = __getBadDqBitmap<fapi2::TARGET_TYPE_MEM_PORT>( i_trgt,
-                i_rank, o_bitmap );
-            break;
-        case TYPE_OCMB_CHIP:
-            o_rc = __getBadDqBitmap<fapi2::TARGET_TYPE_OCMB_CHIP>( i_trgt,
-                i_rank, o_bitmap );
-            break;
-        default:
-            PRDF_ERR( PRDF_FUNC "Invalid trgt type" );
-            o_rc = FAIL;
-            break;
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 
 //------------------------------------------------------------------------------
 
-template <fapi2::TargetType T>
-uint32_t __setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
-                        const MemDqBitmap & i_bitmap )
+template<>
+uint32_t setBadDqBitmap<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
+    const MemRank & i_rank, const MemDqBitmap & i_bitmap )
 {
     #define PRDF_FUNC "[PlatServices::setBadDqBitmap] "
 
@@ -191,29 +148,25 @@ uint32_t __setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     if ( !areDramRepairsDisabled() )
     {
-        const BitmapData data = i_bitmap.getData();
+        uint8_t data[DQ_BITMAP::BITMAP_SIZE];
+        memcpy(data, i_bitmap.getData(), sizeof(data));
 
-        size_t maxPorts = i_bitmap.getNumPorts();
-        for ( uint32_t ps = 0; ps < maxPorts; ps++ )
+        errlHndl_t errl = nullptr;
+
+        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> l_fapiTrgt( i_trgt );
+        uint8_t ps = i_trgt->getAttr<ATTR_REL_POS>();
+
+        FAPI_INVOKE_HWP( errl, p10DimmSetBadDqBitmap, l_fapiTrgt,
+                         i_rank.getDimmSlct(), i_rank.getRankSlct(),
+                         data, ps );
+
+        if ( nullptr != errl )
         {
-            // Don't proceed unless the DIMM exists
-            PRDF_ASSERT( nullptr != getConnectedDimm(i_trgt, i_rank, ps) );
-            errlHndl_t errl = nullptr;
-
-            fapi2::Target<T> l_fapiTrgt( i_trgt );
-
-            FAPI_INVOKE_HWP( errl, p10DimmSetBadDqBitmap, l_fapiTrgt,
-                             i_rank.getDimmSlct(), i_rank.getRankSlct(),
-                             data.at(ps).bitmap, ps );
-
-            if ( nullptr != errl )
-            {
-                PRDF_ERR( PRDF_FUNC "p10DimmSetBadDqBitmap() failed: "
-                          "i_trgt=0x%08x ps=%d ds=%d rs=%d", getHuid(i_trgt),
-                          ps, i_rank.getDimmSlct(), i_rank.getRankSlct() );
-                PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-                o_rc = FAIL;
-            }
+            PRDF_ERR( PRDF_FUNC "p10DimmSetBadDqBitmap() failed: "
+                      "i_trgt=0x%08x ps=%d ds=%d rs=%d", getHuid(i_trgt),
+                      ps, i_rank.getDimmSlct(), i_rank.getRankSlct() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL;
         }
     }
 
@@ -224,38 +177,11 @@ uint32_t __setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
     #undef PRDF_FUNC
 }
 
-uint32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
-    const MemDqBitmap & i_bitmap )
-{
-    #define PRDF_FUNC "[PlatServices::setBadDqBitmap] "
-
-    uint32_t o_rc = SUCCESS;
-    TYPE trgtType = getTargetType( i_trgt );
-
-    switch( trgtType )
-    {
-        case TYPE_MEM_PORT:
-            o_rc = __setBadDqBitmap<fapi2::TARGET_TYPE_MEM_PORT>( i_trgt,
-                i_rank, i_bitmap );
-            break;
-        case TYPE_OCMB_CHIP:
-            o_rc = __setBadDqBitmap<fapi2::TARGET_TYPE_OCMB_CHIP>( i_trgt,
-                i_rank, i_bitmap );
-            break;
-        default:
-            PRDF_ERR( PRDF_FUNC "Invalid trgt type" );
-            o_rc = FAIL;
-            break;
-    }
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
 
-uint32_t clearBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank )
+template<>
+uint32_t clearBadDqBitmap<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
+                                          const MemRank & i_rank )
 {
     #define PRDF_FUNC "[PlatServices::clearBadDqBitmap] "
 
@@ -264,7 +190,7 @@ uint32_t clearBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank )
     do
     {
         MemDqBitmap dqBitmap;
-        o_rc = getBadDqBitmap( i_trgt, i_rank, dqBitmap );
+        o_rc = getBadDqBitmap<TYPE_MEM_PORT>( i_trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, 0x%02x) failed.",
@@ -274,7 +200,7 @@ uint32_t clearBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank )
 
         dqBitmap.clearBitmap();
 
-        o_rc = setBadDqBitmap( i_trgt, i_rank, dqBitmap );
+        o_rc = setBadDqBitmap<TYPE_MEM_PORT>( i_trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed.",
@@ -598,14 +524,14 @@ uint32_t isSpareAvailable( TARGETING::TargetHandle_t i_trgt, MemRank i_rank,
 
         // Get the bad dq data
         MemDqBitmap dqBitmap;
-        o_rc = getBadDqBitmap( i_trgt, i_rank, dqBitmap );
+        o_rc = getBadDqBitmap<T>( i_trgt, i_rank, dqBitmap );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
             break;
         }
 
-        o_rc = dqBitmap.isSpareAvailable( ps, sp0Avail, sp1Avail );
+        o_rc = dqBitmap.isSpareAvailable( sp0Avail, sp1Avail );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "isSpareAvailable() failed" );

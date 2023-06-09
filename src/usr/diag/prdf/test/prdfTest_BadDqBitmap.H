@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,18 +78,16 @@ public:
                 TS_FAIL( "ERROR: Failed to get OCMB" );
             }
             TargetHandle_t ocmb = ocmbList[0];
+            TargetHandle_t memport = getConnectedChild(ocmb, TYPE_MEM_PORT, 0);
 
             // Make arbitrary initial data
             MemRank rank( 0 );
             const uint8_t initialBitmap[DQ_BITMAP::BITMAP_SIZE] =
                 { 0xab, 0xab, 0xab, 0xab, 0xab, 0xab, 0xab, 0xab, 0xab, 0xab };
-            BitmapData initialData;
-            memcpy( initialData[0].bitmap, initialBitmap,
-                    sizeof(initialData[0].bitmap) );
 
             // Set with the initial data
-            MemDqBitmap setBitmap( ocmb, rank, initialData );
-            rc = setBadDqBitmap( ocmb, rank, setBitmap );
+            MemDqBitmap setBitmap( memport, rank, initialBitmap );
+            rc = setBadDqBitmap<TYPE_MEM_PORT>( memport, rank, setBitmap );
             if ( SUCCESS != rc )
             {
                 TS_FAIL( "ERROR: setBadDqBitmap failed " );
@@ -97,39 +95,40 @@ public:
 
             // Read the data back
             MemDqBitmap getBitmap;
-            rc = getBadDqBitmap( ocmb, rank, getBitmap );
+            rc = getBadDqBitmap<TYPE_MEM_PORT>( memport, rank, getBitmap );
             if ( SUCCESS != rc )
             {
                 TS_FAIL( "ERROR: getBadDqBitmap failed" );
             }
 
-            BitmapData newData = getBitmap.getData();
+            uint8_t newData[DQ_BITMAP::BITMAP_SIZE];
+            memcpy(newData, getBitmap.getData(), sizeof(newData));
 
             const uint8_t SPARE_BYTE = 5;
 
-            // Compare the read data to the initial data. The last byte (byte 9)
-            // is for spares so we won't worry about comparing that.
+            // Compare the read data to the initial data. The spare byte is not
+            // compared.
             for ( uint8_t n = 0; n < (DQ_BITMAP::BITMAP_SIZE); n++ )
             {
                 if ( SPARE_BYTE == n )
                 {
-                    if ( newData.at(0).bitmap[n] != 0xff )
+                    if ( newData[n] != 0xff )
                     {
-                        TS_FAIL( "TestAxoneReadWriteBadDqBitmap: Spare Byte "
+                        TS_FAIL( "TestP10ReadWriteBadDqBitmap: Spare Byte "
                                  "incorrectly set. newData[%d]=0x%x expected "
-                                 "0xff", n, newData.at(0).bitmap[n] );
+                                 "0xff", n, newData[n] );
                     }
                 }
-                else if ( newData.at(0).bitmap[n] != initialBitmap[n] )
+                else if ( newData[n] != initialBitmap[n] )
                 {
                     TS_FAIL( "TestP10ReadWriteBadDqBitmap: Incorrect data "
                              "found. newData[%d]=0x%x initialBitmap[%d]=0x%x",
-                             n, newData.at(0).bitmap[n], n, initialBitmap[n] );
+                             n, newData[n], n, initialBitmap[n] );
                 }
             }
 
             // Clear the vpd just in case
-            rc = clearBadDqBitmap( ocmb, rank );
+            rc = clearBadDqBitmap<TYPE_MEM_PORT>( memport, rank );
             if ( SUCCESS != rc )
             {
                 TS_FAIL( "ERROR: clearBadDqBitmap failed" );

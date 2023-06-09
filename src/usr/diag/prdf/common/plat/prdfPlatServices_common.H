@@ -140,34 +140,37 @@ int32_t smp_callout( ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
 //##############################################################################
 
 /**
- * @brief  Reads the bad DQ bitmap attribute for both ports of the target rank.
- * @param  i_trgt        An OCMB_CHIP target.
+ * @brief  Reads the bad DQ bitmap attribute for the target MEM_PORT.
+ * @param  i_trgt        A MEM_PORT target.
  * @param  i_rank        Target rank.
  * @param  o_bitmap      DQ bitmap container.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+template<TARGETING::TYPE T>
 uint32_t getBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
                          const MemRank & i_rank, MemDqBitmap & o_bitmap );
 
 /**
- * @brief  Writes the bad DQ bitmap attribute for both ports of the target rank.
- * @param  i_trgt   An OCMB_CHIP target.
+ * @brief  Writes the bad DQ bitmap attribute for the target MEM_PORT.
+ * @param  i_trgt   A MEM_PORT target.
  * @param  i_rank   Target rank.
  * @param  i_bitmap DQ bitmap container.
  * @note   This is a no-op if DRAM Repairs are disabled in manufacturing.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+template<TARGETING::TYPE T>
 uint32_t setBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
                          const MemRank & i_rank,
                          const MemDqBitmap & i_bitmap );
 
 /**
- * @brief  Clears the bad DQ bitmap attribute for all ports of the target rank.
- * @param  i_trgt   An OCMB_CHIP target.
+ * @brief  Clears the bad DQ bitmap attribute for the target MEM_PORT.
+ * @param  i_trgt   A MEM_PORT target.
  * @param  i_rank   Target rank.
  * @note   This is a no-op if DRAM Repairs are disabled in manufacturing.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
+template<TARGETING::TYPE T>
 uint32_t clearBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
                            const MemRank & i_rank );
 

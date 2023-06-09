@@ -98,12 +98,12 @@ uint32_t DsdEvent<T>::checkEcc( const uint32_t & i_eccAttns,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
-                                   STEP_CODE_DATA_STRUCT & io_sc,
-                                   bool & o_done )
+template<>
+uint32_t DsdEvent<TYPE_OCMB_CHIP>::verifySpare( const uint32_t & i_eccAttns,
+                                                STEP_CODE_DATA_STRUCT & io_sc,
+                                                bool & o_done )
 {
-    #define PRDF_FUNC "[DsdEvent<T>::verifySpare] "
+    #define PRDF_FUNC "[DsdEvent<TYPE_OCMB_CHIP>::verifySpare] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -125,11 +125,14 @@ uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
             // Set the bad spare in the VPD. At this point, the chip mark
             // should have already been set in the VPD because it was recently
             // verified.
+            TargetHandle_t memport = getConnectedChild(iv_chip->getTrgt(),
+                TYPE_MEM_PORT, iv_port)
             MemDqBitmap bitmap;
-            o_rc = getBadDqBitmap( iv_chip->getTrgt(), iv_rank, bitmap );
+            o_rc = getBadDqBitmap<TYPE_MEM_PORT>( memport, iv_rank, bitmap );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed" );
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap(0x%08x, 0x%02x) failed",
+                          getHuid(memport), iv_rank.getKey() );
                 break;
             }
             else
@@ -142,10 +145,11 @@ uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
                 }
             }
 
-            o_rc = setBadDqBitmap( iv_chip->getTrgt(), iv_rank, bitmap );
+            o_rc = setBadDqBitmap<TYPE_MEM_PORT>( memport, iv_rank, bitmap );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "setBadDqBitmap() failed" );
+                PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed",
+                          getHuid(memport), iv_rank.getKey() );
                 break;
             }
 
@@ -159,7 +163,8 @@ uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
                                               PRDFSIG_DsdDramSpared );
 
             // Remove the chip mark.
-            o_rc = MarkStore::clearChipMark<T>( iv_chip, iv_rank, iv_port );
+            o_rc = MarkStore::clearChipMark<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                                                             iv_port );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "clearChipMark(0x%08x,0x%02x,%x) failed",

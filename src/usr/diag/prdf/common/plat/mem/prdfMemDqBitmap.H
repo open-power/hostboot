@@ -36,19 +36,13 @@
 #include <prdfMemSymbol.H>
 #include <prdfMemConst.H>
 #include <prdfParserEnums.H>
+#include <prdfTrace.H>
 
 namespace PRDF
 {
 
 class CaptureData;
 class MemSymbol;
-
-struct data
-{
-    uint8_t bitmap[DQ_BITMAP::BITMAP_SIZE];
-};
-// Map from port (uint8_t) to the bitmap data (uint8_t[DQ_BITMAP::BITMAP_SIZE])
-typedef std::map<uint8_t, data> BitmapData;
 
 /**
  * @brief Container for DIMM's DQ bitmap.
@@ -62,50 +56,39 @@ class MemDqBitmap
 
     /** @brief Constructor from components */
     MemDqBitmap( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
-                 BitmapData i_d ) : iv_trgt(i_trgt), iv_rank(i_rank),
-                 iv_x4Dram(true), iv_data(i_d)
+                 const uint8_t (&i_d)[DQ_BITMAP::BITMAP_SIZE] ) :
+                 iv_trgt(i_trgt), iv_rank(i_rank), iv_x4Dram(true)
     {
-        if ( TARGETING::TYPE_MEM_PORT == PlatServices::getTargetType(iv_trgt) ||
-             TARGETING::TYPE_OCMB_CHIP == PlatServices::getTargetType(iv_trgt) )
+        memcpy(iv_bitmap, i_d, sizeof(iv_bitmap));
+        if ( TARGETING::TYPE_MEM_PORT == PlatServices::getTargetType(iv_trgt) )
         {
             iv_spareByte = 5;
-            // TODO RTC 210072 - Support multiple ports
-            TARGETING::TargetHandle_t dimm =
-                PlatServices::getConnectedDimm( iv_trgt, iv_rank );
+            TARGETING::TargetHandle_t dimm = PlatServices::getConnectedChild(
+                iv_trgt, TARGETING::TYPE_DIMM, iv_rank.getDimmSlct() );
             iv_x4Dram = PlatServices::isDramWidthX4( dimm );
         }
         else
         {
-            iv_spareByte = 9;
-            iv_x4Dram = PlatServices::isDramWidthX4( iv_trgt );
+            PRDF_ERR("MemDqBitmap: Invalid target passed to constructor: "
+                     "0x%08x", PlatServices::getHuid(i_trgt));
+            PRDF_ASSERT(false);
         }
     }
 
   public: // functions
 
     /**
-     * @brief  Queries if there are any bad DQs present on either port.
+     * @brief  Queries if there are any bad DQs present.
      * @return TRUE if any bad DQs present.
      */
     bool badDqs() const;
 
     /**
-     * @brief  Queries the given port to determine if there are any bad DQs
-     *         present.
-     * @param  i_portSlct The optional target port. The default is port 0.
-     * @param  o_badDqs   TRUE if there are bad DQS present the given port,
-     *                    FALSE otherwise.
-     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
-     */
-    uint32_t badDqs( bool & o_badDqs, uint8_t i_portSlct = 0 ) const;
-
-    /**
      * @brief  Sets the specified DQ.
      * @param  i_dq       The target DQ.
-     * @param  i_portSlct The optional target port. The default is port 0.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    uint32_t setDq( uint8_t i_dq, uint8_t i_portSlct = 0 );
+    uint32_t setDq( uint8_t i_dq );
 
     /**
      * @brief  Sets the specified symbol.
@@ -143,45 +126,30 @@ class MemDqBitmap
     void clearBitmap();
 
     /**
-     * @brief Adds the bitmaps for both ports to the capture data.
+     * @brief Adds the bitmap to the capture data.
      * @param o_cd Capture data struct.
      */
     void getCaptureData( CaptureData & o_cd ) const;
-
-    /** @return The bitmap data. */
-    const BitmapData & getData() const
-    {
-        return iv_data;
-    }
-
     /**
-     * @brief  Gets the bitmap data for a specified port.
-     * @param  i_ps The port select.
-     * @return A reference to the bitmap data at a certain port.
+     * @brief  Gets the bitmap data.
+     * @return A reference to the bitmap data.
      */
-    const uint8_t (&getData(uint8_t i_ps)const)[DQ_BITMAP::BITMAP_SIZE]
+    const uint8_t (&getData()const)[DQ_BITMAP::BITMAP_SIZE]
     {
-        return iv_data.at(i_ps).bitmap;
-    }
-
-    /** @return The size of the data map, ie how many ports there are */
-    const size_t getNumPorts() const
-    {
-        return iv_data.size();
+        return iv_bitmap;
     }
 
     /**
-     * @brief  Support function to calculate the port select, byte index, and
+     * @brief  Support function to calculate the byte index, and
      *         bit index based on the given symbol.
      * @note   Will adjust the indexes for DRAM spares, if applicable.
      * @param  i_symbol   The target symbol.
-     * @param  o_portSlct The port select (0-1).
      * @param  o_byteIdx  The byte index of the symbol (0-9).
      * @param  o_bitIdx   The bit index of the symbol (0,2,4,6).
      * @return Non-SUCCESS if the symbol is invalid, SUCCESS otherwise.
      */
-    uint32_t getPortByteBitIdx(const MemSymbol & i_symbol, uint8_t & o_portSlct,
-                               uint8_t & o_byteIdx, uint8_t & o_bitIdx) const;
+    uint32_t getByteBitIdx(const MemSymbol & i_symbol, uint8_t & o_byteIdx,
+                           uint8_t & o_bitIdx) const;
 
     /**
      * @brief  Checks if chip mark is present on specified DRAM.
@@ -195,40 +163,36 @@ class MemDqBitmap
     /**
      * @brief  Helper function for getSymbolList to adjust for possible spares
      * @param  i_symbol   A symbol on the target DRAM.
-     * @param  o_port     The port select (0-1).
      * @param  o_symOnSp0 True if the symbol is on spare 0, false otherwise
      * @param  o_symOnSp1 True if the symbol is on spare 1, false otherwise
      */
-    void checkIfSymSpared( uint8_t i_symbol, uint8_t i_port, bool & o_symOnSp0,
+    void checkIfSymSpared( uint8_t i_symbol, bool & o_symOnSp0,
                            bool & o_symOnSp1 );
 
     /**
      * @brief  Returns a list of all active (non-zero) symbols.
-     * @param  i_portSlct The port select. Default is 0. Only needed for MBA.
      * @return Vector of all active symbols.
      */
-    std::vector<MemSymbol> getSymbolList( uint8_t i_portSlct = 0 );
+    std::vector<MemSymbol> getSymbolList();
 
 
     /**
      * @brief  Queries for DRAM spare status.
-     * @param  i_portSlct  The target port.
      * @param  o_sp0Avail TRUE if DRAM spare 0 is available, FALSE otherwise.
      * @param  o_sp1Avail TRUE if DRAM spare 1 is available, FALSE otherwise.
      * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
      */
-    uint32_t isSpareAvailable( uint8_t i_portSlct, bool & o_sp0Avail,
-                               bool & o_sp1Avail );
+    uint32_t isSpareAvailable( bool & o_sp0Avail, bool & o_sp1Avail );
 
   private: // instance variables
 
-    TARGETING::TargetHandle_t iv_trgt; ///< Target MEM_PORT/OCMB_CHIP
+    TARGETING::TargetHandle_t iv_trgt; ///< Target MEM_PORT
     MemRank iv_rank;                   ///< Target rank
     bool iv_x4Dram;                    ///< TRUE if iv_trgt uses x4 DRAMs
     uint8_t iv_spareByte;              ///< Specifies the spare byte location
 
-    /** A bitmap of all bad DQs for each port. */
-    BitmapData iv_data;
+    /** A bitmap of all bad DQs for the associated port/rank */
+    uint8_t iv_bitmap[DQ_BITMAP::BITMAP_SIZE];
 };
 
 //##############################################################################
@@ -237,22 +201,25 @@ class MemDqBitmap
 
 /**
  * @brief  Sets the inputted dram in DRAM repairs VPD.
- * @param  i_trgt MEM_PORT or OCMB chip.
- * @param  i_rank Target rank.
+ * @param  i_trgt   MEM_PORT target.
+ * @param  i_rank   Target rank.
+ * @param  i_symbol A symbol on the target DRAM.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
-uint32_t setDramInVpd( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
-                       MemSymbol i_symbol );
+template<TARGETING::TYPE T>
+uint32_t setDramInVpd( TARGETING::TargetHandle_t i_trgt,
+                       const MemRank & i_rank, MemSymbol i_symbol );
 
 /**
  * @brief  Clears the inputted dram in DRAM repairs VPD.
- * @param  i_trgt MEM_PORT or OCMB chip.
+ * @param  i_trgt MEM_PORT target.
  * @param  i_rank Target rank.
+ * @param  i_symbol A symbol on the target DRAM.
  * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
  */
+template<TARGETING::TYPE T>
 uint32_t clearDramInVpd( TARGETING::TargetHandle_t i_trgt,
-                         const MemRank & i_rank,
-                         MemSymbol i_symbol );
+                         const MemRank & i_rank, MemSymbol i_symbol );
 
 } // end namespace PRDF
 

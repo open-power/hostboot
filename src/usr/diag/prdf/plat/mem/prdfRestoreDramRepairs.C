@@ -100,13 +100,17 @@ void commitErrl( errlHndl_t i_errl, TargetHandle_t i_trgt )
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_portTrgt,
-                    TargetHandle_t i_dimmTrgt, bool i_nvdimmNoGard = false )
+void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_ocmbTrgt,
+    TargetHandle_t i_dimmTrgt, bool i_nvdimmNoGard = false );
+
+template<>
+void __calloutDimm<TYPE_OCMB_CHIP>( errlHndl_t & io_errl,
+    TargetHandle_t i_ocmbTrgt, TargetHandle_t i_dimmTrgt, bool i_nvdimmNoGard )
 {
     #define PRDF_FUNC "[RDR::__calloutDimm] "
 
-    PRDF_ASSERT( nullptr != i_portTrgt );
-    PRDF_ASSERT( T == getTargetType(i_portTrgt) );
+    PRDF_ASSERT( nullptr != i_ocmbTrgt );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_ocmbTrgt) );
 
     PRDF_ASSERT( nullptr != i_dimmTrgt );
     PRDF_ASSERT( TYPE_DIMM == getTargetType(i_dimmTrgt) );
@@ -148,15 +152,18 @@ void __calloutDimm( errlHndl_t & io_errl, TargetHandle_t i_portTrgt,
     if ( !i_nvdimmNoGard )
     {
         std::vector<MemRank> ranks;
-        // TODO Odyssey - needs multiple port support
-        getMasterRanks<T>( i_portTrgt, 0, ranks, getDimmSlct(i_dimmTrgt) );
 
-        for ( auto & rank : ranks )
+        TargetHandle_t memport = getConnectedParent(i_dimmTrgt, TYPE_MEM_PORT);
+        uint8_t port = memport->getAttr<ATTR_REL_POS>();
+        getMasterRanks<TYPE_OCMB_CHIP>( i_ocmbTrgt, port, ranks,
+                                        getDimmSlct(i_dimmTrgt) );
+
+        for ( const auto & rank : ranks )
         {
-            if ( SUCCESS != clearBadDqBitmap(i_portTrgt, rank) )
+            if ( SUCCESS != clearBadDqBitmap<TYPE_MEM_PORT>(memport, rank) )
             {
                 PRDF_ERR( PRDF_FUNC "clearBadDqBitmap(0x%08x,0x%02x) failed",
-                          getHuid(i_portTrgt), rank.getKey() );
+                          getHuid(memport), rank.getKey() );
                 continue;
             }
         }
@@ -265,7 +272,7 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
                     symList.push_back( sm.getSymbol() );
                 }
 
-                for ( auto & sym : symList )
+                for ( const auto & sym : symList )
                 {
                     if ( !sym.isValid() ) continue;
 
@@ -273,7 +280,7 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
                     MemoryMru mm( i_trgt, rank, 0, sym );
 
                     // Add all parts to the error log.
-                    for ( auto & dimm : mm.getCalloutList() )
+                    for ( const auto & dimm : mm.getCalloutList() )
                     {
                         calloutList[dimm] = 1;
                     }
@@ -287,7 +294,7 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
         }
 
         // Callout all DIMMs in the map.
-        for ( auto const & dimm : calloutList )
+        for ( const auto & dimm : calloutList )
         {
             bool nvdimmNoGard = false;
             #ifdef CONFIG_NVDIMM
@@ -332,7 +339,7 @@ bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
 
     // Iterate the list of all DIMMs
     TargetHandleList dimms = getConnectedChildren( i_trgt, TYPE_DIMM );
-    for ( auto & dimm : dimms )
+    for ( const auto & dimm : dimms )
     {
         // i_badDimmMask is defined as a 2-bit mask where a bit set means that
         // DIMM had more bad bits than could be repaired. Note: the value is
@@ -373,27 +380,34 @@ bool processBadDimms<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
 
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-bool screenBadDqs( TargetHandle_t i_trgt, const std::vector<MemRank> & i_ranks )
+template<TARGETING::TYPE  T>
+bool screenBadDqs(TargetHandle_t i_trgt, const std::vector<MemRank> & i_ranks);
+
+template<>
+bool screenBadDqs<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
+                                   const std::vector<MemRank> & i_ranks )
 {
-    #define PRDF_FUNC "[screenBadDqs<T>] "
+    #define PRDF_FUNC "[screenBadDqs<TYPE_OCMB_CHIP>] "
 
     // Callout any attached DIMMs that have any bad DQs.
 
     bool o_calloutMade  = false;
     bool analysisErrors = false;
 
-    for ( auto & rank : i_ranks )
+    // TODO Odyssey: need port
+    TargetHandle_t memport = getConnectedChild(i_trgt, TYPE_MEM_PORT, 0);
+
+    for ( const auto & rank : i_ranks )
     {
         // The HW procedure to read the bad DQ attribute will callout the DIMM
         // if it has DRAM Repairs VPD and the DISABLE_DRAM_REPAIRS MNFG policy
         // flag is set. PRD will simply need to iterate through all the ranks
         // to ensure all DIMMs are screen and the procedure will do the rest.
         MemDqBitmap bitmap;
-        if ( SUCCESS != getBadDqBitmap(i_trgt, rank, bitmap) )
+        if ( SUCCESS != getBadDqBitmap<TYPE_MEM_PORT>(memport, rank, bitmap) )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed: TRGT=0x%08x "
-                      "rank=0x%02x", getHuid(i_trgt), rank.getKey() );
+                      "rank=0x%02x", getHuid(memport), rank.getKey() );
             analysisErrors = true;
             continue; // skip this rank
         }
@@ -401,8 +415,8 @@ bool screenBadDqs( TargetHandle_t i_trgt, const std::vector<MemRank> & i_ranks )
 
     // Commit an additional error log indicating something failed in the
     // analysis, if needed.
-    commitSoftError<T>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
-                        PRDFSIG_RdrInternalFail, analysisErrors );
+    commitSoftError<TYPE_OCMB_CHIP>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
+                                     PRDFSIG_RdrInternalFail, analysisErrors );
 
     return o_calloutMade;
 
@@ -421,7 +435,7 @@ void deployDramSpares<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
 {
     // TODO Odyssey
     TargetHandle_t memport = getConnectedChild(i_trgt, TYPE_MEM_PORT, 0);
-    for ( auto & rank : i_ranks )
+    for ( const auto & rank : i_ranks )
     {
         MemSymbol sym = MemSymbol::fromSymbol( memport, rank, 71 );
 
