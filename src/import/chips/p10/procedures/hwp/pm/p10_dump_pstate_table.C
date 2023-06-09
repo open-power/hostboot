@@ -1199,7 +1199,7 @@ void vrm_print(FILE* stream,
     fprintf(stream,
             "---------------------------------------------------------------------------------------------------------\n");
     fprintf(stream, "\nAvsBus Topology\n");
-    fprintf(stream, "\t Type    BusNum    RailNum \n");
+    fprintf(stream, "\t Type    BusNum    RailNum   \n");
     fprintf(stream, "\t VDD       %u         %u\n", gppb->avs_bus_topology.vdd_avsbus_num,
             gppb->avs_bus_topology.vdd_avsbus_rail);
     fprintf(stream, "\t VDN       %u         %u\n", gppb->avs_bus_topology.vdn_avsbus_num,
@@ -1221,6 +1221,7 @@ void vrm_print(FILE* stream,
                 revle32(gppb->ext_vrm_parms.transition_rate_dec_uv_per_us[r]));
         fprintf(stream, "\tStabilization Time:            %u us\n", revle32(gppb->ext_vrm_parms.stabilization_time_us[r]));
         fprintf(stream, "\tStep Size:                     %u mV\n", revle32(gppb->ext_vrm_parms.step_size_mv[r]));
+        fprintf(stream, "\tCurrent Scalilng               %u \n", gppb->ext_vrm_parms.current_scaling_factor[r]);
     }
 
     fprintf(stream,

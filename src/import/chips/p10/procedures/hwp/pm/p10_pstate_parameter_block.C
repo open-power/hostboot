@@ -1228,7 +1228,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         // turn off voltage movement when the WAR MODE defect exists.
         io_globalppb->pgpe_flags[PGPE_FLAG_STATIC_VOLTAGE_ENABLE] =
                            (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU) ? 1 : 0;
-        io_globalppb->pgpe_flags[PGPE_FLAG_SADDLEBACK_ROLLOVER] = iv_attrs.attr_saddleback_rollover_enable;
+        io_globalppb->pgpe_flags[PGPE_FLAG_SADDLEBACK_ROLLOVER_ENABLE] = iv_attrs.attr_saddleback_rollover_enable;
 
         if ( iv_eco_count )
         {
