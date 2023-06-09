@@ -30,9 +30,7 @@ import unittest
 from collections import OrderedDict
 
 # autopep8: off
-sys.path.append(
-    os.path.join(os.path.dirname(sys.path[0]), "src/build/tools/ebmc/")
-)
+sys.path.append(os.path.join(os.path.dirname(sys.path[0]), "src/build/tools/ebmc/"))
 import udparsers.be500.be500
 
 # autopep8: on
@@ -289,11 +287,11 @@ class TestUserDataParser(unittest.TestCase):
         self.assertEqual(jsonOut[cd][td]["Primary Rank"], 0)
         self.assertEqual(jsonOut[cd][td]["Secondary Rank"], 0)
         self.assertEqual(jsonOut[cd][td]["Phase"], 2)
-        self.assertEqual(jsonOut[cd][td]["TD Type"], "TPS")
+        self.assertEqual(jsonOut[cd][td]["TD Type"], "DSD")
         self.assertEqual(jsonOut[cd][td]["Entries in Queue"], 1)
         self.assertEqual(jsonOut[cd][td]["0"]["Primary Rank"], 0)
         self.assertEqual(jsonOut[cd][td]["0"]["Secondary Rank"], 0)
-        self.assertEqual(jsonOut[cd][td]["0"]["TD Type"], "TPS")
+        self.assertEqual(jsonOut[cd][td]["0"]["TD Type"], "DSD")
 
         drd = "Dram Repairs Data"
         self.assertEqual(jsonOut[cd][drd]["0"]["Rank"], 0)
@@ -564,13 +562,9 @@ class TestUserDataParser(unittest.TestCase):
         l3 = "L3_LD_FFDC"
         self.assertEqual(jsonOut[cd][l3]["L3 LD Counts"], 1)
         self.assertEqual(jsonOut[cd][l3]["L3 LD Max Allowed"], 6)
-        self.assertEqual(
-            jsonOut[cd][l3]["L3 Error Member"], "0x03 (or possibly 0x0b)"
-        )
+        self.assertEqual(jsonOut[cd][l3]["L3 Error Member"], "0x03 (or possibly 0x0b)")
         self.assertEqual(jsonOut[cd][l3]["L3 Error DW"], "0x00")
-        self.assertEqual(
-            jsonOut[cd][l3]["L3 Error Bank"], "0x01 (or possibly 0x03)"
-        )
+        self.assertEqual(jsonOut[cd][l3]["L3 Error Bank"], "0x01 (or possibly 0x03)")
         self.assertEqual(jsonOut[cd][l3]["L3 Error CL Half"], "unknown")
         self.assertEqual(jsonOut[cd][l3]["L3 Error Syndrome Col"], "0x41")
         self.assertEqual(jsonOut[cd][l3]["L3 Error Address"], "0x0022")
