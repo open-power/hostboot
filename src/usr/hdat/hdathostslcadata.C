@@ -409,7 +409,12 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
         std::copy(l_fullProcDimmChildList.begin(),l_fullProcDimmChildList.end(),
                           std::back_inserter(l_childList));
     }
-
+    // In some cases, such as Odyssey OCMBs, there can be multiple logical dimm targets on the same FRU.
+    // To avoid reporting both in the SCLA we keep a list of added pdr entity instances for the DIMMs to compare against
+    // while building the SLCA. This list is compared against and if a match is found then that DIMM is not added
+    // to the SLCA.
+    std::vector<ATTR_PDR_ENTITY_INSTANCE_type> dimmPdrInstances;
+    // Walk the list of children and build up the SLCA for each.
     for (TargetHandleList::const_iterator pTarget_it = l_childList.begin();
                 pTarget_it != l_childList.end();
                 ++pTarget_it)
@@ -506,6 +511,25 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
 
             if(l_hdatFRUType != HDAT_SLCA_FRU_TYPE_UNKNOWN)
             {
+                if (l_hdatFRUType == HDAT_SLCA_FRU_TYPE_DIMM)
+                {
+                    auto l_dimmPdrInstance = l_childTarget->getAttr<ATTR_PDR_ENTITY_INSTANCE>();
+                    auto dimmPdrInstanceIterator = std::find(dimmPdrInstances.begin(),
+                                                              dimmPdrInstances.end(),
+                                                              l_dimmPdrInstance);
+                    if (dimmPdrInstanceIterator != dimmPdrInstances.end())
+                    {
+                        // A previous logical dimm added an SLCA entry already. Move on.
+                        continue;
+                    }
+                    else
+                    {
+                        // Add to list of seen pdr entity instances.
+                        dimmPdrInstances.push_back(l_dimmPdrInstance);
+                        // Fall through to logic that adds a new SLCA entry below.
+                    }
+                }
+
                 HDAT_DBG("calling hdatAddSLCAEntry for fru type 0x%x",l_hdatFRUType);
                 l_slcaEntryIndex = hdatAddSLCAEntry(l_childTarget,
                                                      l_hdatFRUType,
