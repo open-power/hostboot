@@ -1190,15 +1190,15 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
 
         float pstatef = 0;
         if (iv_attrs.attr_extended_freq_mode)
-        {
-            pstatef = (float)(5050 * 1000) /(float)(iv_frequency_step_khz);
-            io_globalppb->base.dpll_pstate0_value = revle32((uint32_t)internal_round(pstatef));
-        }
-        else
-        {
+         {
+             pstatef = (float)(5050 * 1000) /(float)(iv_frequency_step_khz);
+             io_globalppb->base.dpll_pstate0_value = revle32((uint32_t)internal_round(pstatef));
+         }
+         else
+         {
             pstatef = (float)(iv_attrs.attr_pstate0_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
             io_globalppb->base.dpll_pstate0_value = revle32((Pstate)internal_round(pstatef));
-        }
+         }
 
 
         FAPI_INF("l_globalppb.dpll_pstate0_value %X (%d)",
@@ -5064,7 +5064,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
         l_safe_op_freq_mhz = l_op_pt_mhz;
     }
 
-    FAPI_INF ("safe_op_freq_mhz  0x%04x (%4d)",
+    FAPI_INF ("Safe mode operating frequency MHz  0x%04x (%4d)",
                  l_safe_op_freq_mhz,
                  l_safe_op_freq_mhz);
 
@@ -5712,6 +5712,10 @@ void PlatPmPPB::pState2freq (const Pstate i_pstate,
     // compute the frequency for a given Pstate
     // ----------------------------------
     *o_freq_khz = (iv_reference_frequency_khz - (i_pstate * iv_frequency_step_khz));
+
+
+     // round to the nearest MHz
+    *o_freq_khz = ((*o_freq_khz + 500) / 1000)*1000;
 
     FAPI_DBG("pState2freq: pstate = %d; o_freq_khz = %u (0x%X)",
                 i_pstate,  *o_freq_khz, *o_freq_khz);
