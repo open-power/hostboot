@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,18 +82,34 @@ enum
     DSTLFIR_ACT1            = 0x0C010D07,
     DSTLCFG2                = 0x0C010D0E,
 
-    // ocmb mcbist unit regs
-    OCMB_MCBIST_FIR         = 0x08011800,
-    OCMB_MCBIST_FIR_AND     = 0x08011801,
-    OCMB_MCBIST_FIR_MASK    = 0x08011803,
-    OCMB_MCBIST_FIR_ACT0    = 0x08011806,
-    OCMB_MCBIST_FIR_ACT1    = 0x08011807,
+    // explorer ocmb mcbist unit regs
+    EXP_MCBIST_FIR         = 0x08011800,
+    EXP_MCBIST_FIR_AND     = 0x08011801,
+    EXP_MCBIST_FIR_MASK    = 0x08011803,
+    EXP_MCBIST_FIR_ACT0    = 0x08011806,
+    EXP_MCBIST_FIR_ACT1    = 0x08011807,
 
-    // ocmb omidlfir unit regs
-    OMIDLFIR                = 0x08012800,
-    OMIDLFIR_MASK           = 0x08012803,
-    OMIDLFIR_ACT0           = 0x08012806,
-    OMIDLFIR_ACT1           = 0x08012807,
+    // odyssey ocmb mcbist unit regs
+    ODY_MCBIST_FIR         = 0x08011400,
+    ODY_MCBIST_FIR_MASK    = 0x08011402,
+    ODY_MCBIST_FIR_CFG_CS  = 0x08011404,
+    ODY_MCBIST_FIR_CFG_RE  = 0x08011405,
+    ODY_MCBIST_FIR_CFG_SPA = 0x08011406,
+    ODY_MCBIST_FIR_CFG_UCS = 0x08011407,
+
+    // explorer ocmb omidlfir unit regs
+    EXP_OMIDLFIR           = 0x08012800,
+    EXP_OMIDLFIR_MASK      = 0x08012803,
+    EXP_OMIDLFIR_ACT0      = 0x08012806,
+    EXP_OMIDLFIR_ACT1      = 0x08012807,
+
+    // odyssey ocmb omidlfir unit regs
+    ODY_DLX_FIR            = 0x08012400,
+    ODY_DLX_FIR_MASK       = 0x08012402,
+    ODY_DLX_FIR_CFG_CS     = 0x08012404,
+    ODY_DLX_FIR_CFG_RE     = 0x08012405,
+    ODY_DLX_FIR_CFG_SPA    = 0x08012406,
+    ODY_DLX_FIR_CFG_UCS    = 0x08012407,
 
     // proc regs
     IPOLL_MASK              = 0x000F0033,

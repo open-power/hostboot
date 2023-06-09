@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include "../mdiamonitor.H"
 #include "../mdiafwd.H"
 #include <sys/time.h>
+#include <chipids.H>
 
 using namespace MDIA;
 using namespace TARGETING;
@@ -72,7 +73,15 @@ class MdiaTimeoutFfdcTest : public CxxTest::TestSuite
                     PROCESS_COMMAND_TIMEOUT,
                     MAINT_COMMAND_SW_TIMED_OUT,
                     get_huid(trgt) );
-            addTimeoutFFDC( trgt, err );
+
+            if (trgt->getAttr<ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
+            {
+                addTimeoutFFDC_ody( trgt, err );
+            }
+            else
+            {
+                addTimeoutFFDC_exp( trgt, err );
+            }
 
             TS_INFO(EXIT_MRK "testOcmbTimeoutFfdc");
         }

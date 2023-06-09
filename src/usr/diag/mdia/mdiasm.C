@@ -113,7 +113,7 @@ bool isOdysseyOcmb(TARGETING::TargetHandle_t i_trgt)
     return (i_trgt->getAttr<ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16);
 }
 
-void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
+void addTimeoutFFDC_exp(TargetHandle_t i_target, errlHndl_t & io_log)
 {
 
     const uint64_t mccRegs[] = {
@@ -124,15 +124,15 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
         DSTLCFG2,
     };
 
-    const uint64_t ocmbRegs[] = {
-        OCMB_MCBIST_FIR,
-        OCMB_MCBIST_FIR_MASK,
-        OCMB_MCBIST_FIR_ACT0,
-        OCMB_MCBIST_FIR_ACT1,
-        OMIDLFIR,
-        OMIDLFIR_MASK,
-        OMIDLFIR_ACT0,
-        OMIDLFIR_ACT1,
+    const uint64_t exp_ocmbRegs[] = {
+        EXP_MCBIST_FIR,
+        EXP_MCBIST_FIR_MASK,
+        EXP_MCBIST_FIR_ACT0,
+        EXP_MCBIST_FIR_ACT1,
+        EXP_OMIDLFIR,
+        EXP_OMIDLFIR_MASK,
+        EXP_OMIDLFIR_ACT0,
+        EXP_OMIDLFIR_ACT1,
     };
 
     const uint64_t procRegs[] = {
@@ -156,7 +156,7 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
     TargetHandleList targetList;
     getParentAffinityTargets( targetList, i_target, CLASS_UNIT, TYPE_OMI );
 
-    assert( targetList.size() == 1, "[MDIA] addTimeoutFFDC: Multiple parent"
+    assert( targetList.size() == 1, "[MDIA] addTimeoutFFDC_exp: Multiple parent"
             " OMIs found for OCMB i_target: 0x%08x", get_huid(i_target) );
 
     TargetHandle_t omi = targetList[0];
@@ -164,14 +164,14 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
     // Get the parent proc
     ConstTargetHandle_t proc = getParentChip(omi);
 
-    assert( nullptr != proc, "[MDIA] addTimeoutFFDC: Unable to get the "
+    assert( nullptr != proc, "[MDIA] addTimeoutFFDC_exp: Unable to get the "
             "parent proc from omi: 0x%08x", get_huid(omi) );
 
     // Get the parent MCC
     TargetHandleList mccList;
     getParentAffinityTargets( mccList, omi, CLASS_UNIT, TYPE_MCC );
 
-    assert( mccList.size() == 1, "[MDIA] addTimeoutFFDC: Multiple parent"
+    assert( mccList.size() == 1, "[MDIA] addTimeoutFFDC_exp: Multiple parent"
             " MCCs found for OMI: 0x%08x", get_huid(omi) );
 
     TargetHandle_t mcc = mccList[0];
@@ -182,7 +182,115 @@ void addTimeoutFFDC(TargetHandle_t i_target, errlHndl_t & io_log)
         const uint64_t * begin;
         const uint64_t * end;
     } tables[] = {
-        {i_target, ocmbRegs, ocmbRegs + sizeof(ocmbRegs)/sizeof(*ocmbRegs)},
+        {i_target, exp_ocmbRegs,
+         exp_ocmbRegs + sizeof(exp_ocmbRegs)/sizeof(*exp_ocmbRegs)},
+        {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
+        {mcc, mccRegs, mccRegs + sizeof(mccRegs)/sizeof(*mccRegs)},
+    };
+
+    for(const Entry * tableIt = tables;
+            tableIt != tables + sizeof(tables)/sizeof(*tables);
+            ++tableIt)
+    {
+        if(!tableIt->target)
+        {
+            continue;
+        }
+
+        for(const uint64_t * regIt = tableIt->begin;
+                regIt != tableIt->end;
+                ++regIt)
+        {
+            ErrlUserDetailsLogRegister udLogRegister(
+                    tableIt->target,
+                    DEVICE_SCOM_ADDRESS(*regIt));
+            udLogRegister.addToLog(io_log);
+        }
+    }
+
+    // collect these traces for timeout debugging
+    io_log->collectTrace("MDIA_FAST",512);
+    io_log->collectTrace(PRDF_COMP_NAME,512);
+    io_log->collectTrace(FAPI_TRACE_NAME,512);
+    io_log->collectTrace(FAPI_IMP_TRACE_NAME,512);
+
+}
+
+void addTimeoutFFDC_ody(TargetHandle_t i_target, errlHndl_t & io_log)
+{
+
+    const uint64_t mccRegs[] = {
+        DSTLFIR,
+        DSTLFIR_MASK,
+        DSTLFIR_ACT0,
+        DSTLFIR_ACT1,
+        DSTLCFG2,
+    };
+
+    const uint64_t ody_ocmbRegs[] = {
+        ODY_MCBIST_FIR,
+        ODY_MCBIST_FIR_MASK,
+        ODY_MCBIST_FIR_CFG_CS,
+        ODY_MCBIST_FIR_CFG_RE,
+        ODY_MCBIST_FIR_CFG_SPA,
+        ODY_MCBIST_FIR_CFG_UCS,
+        ODY_DLX_FIR,
+        ODY_DLX_FIR_MASK,
+        ODY_DLX_FIR_CFG_CS,
+        ODY_DLX_FIR_CFG_RE,
+        ODY_DLX_FIR_CFG_SPA,
+        ODY_DLX_FIR_CFG_UCS,
+    };
+
+    const uint64_t procRegs[] = {
+        IPOLL_MASK,
+        IPOLL_STATUS,
+        GLOBAL_CS_FIR,
+        GLOBAL_RE_FIR,
+        GLOBAL_UCS_FIR,
+        GLOBAL_HA_FIR,
+        MC0_CHIPLET_HA_FIR,
+        MC0_CHIPLET_HA_FIR_MASK,
+        MC1_CHIPLET_HA_FIR,
+        MC1_CHIPLET_HA_FIR_MASK,
+        MC2_CHIPLET_HA_FIR,
+        MC2_CHIPLET_HA_FIR_MASK,
+        MC3_CHIPLET_HA_FIR,
+        MC3_CHIPLET_HA_FIR_MASK,
+    };
+
+    // Get the parent OMI
+    TargetHandleList targetList;
+    getParentAffinityTargets( targetList, i_target, CLASS_UNIT, TYPE_OMI );
+
+    assert( targetList.size() == 1, "[MDIA] addTimeoutFFDC_ody: Multiple parent"
+            " OMIs found for OCMB i_target: 0x%08x", get_huid(i_target) );
+
+    TargetHandle_t omi = targetList[0];
+
+    // Get the parent proc
+    ConstTargetHandle_t proc = getParentChip(omi);
+
+    assert( nullptr != proc, "[MDIA] addTimeoutFFDC_ody: Unable to get the "
+            "parent proc from omi: 0x%08x", get_huid(omi) );
+
+    // Get the parent MCC
+    TargetHandleList mccList;
+    getParentAffinityTargets( mccList, omi, CLASS_UNIT, TYPE_MCC );
+
+    assert( mccList.size() == 1, "[MDIA] addTimeoutFFDC_ody: Multiple parent"
+            " MCCs found for OMI: 0x%08x", get_huid(omi) );
+
+    TargetHandle_t mcc = mccList[0];
+
+    const struct Entry
+    {
+        TARGETING::ConstTargetHandle_t target;
+        const uint64_t * begin;
+        const uint64_t * end;
+    } tables[] = {
+        {i_target, ody_ocmbRegs,
+         ody_ocmbRegs + sizeof(ody_ocmbRegs)/sizeof(*ody_ocmbRegs)},
         {proc, procRegs, procRegs + sizeof(procRegs)/sizeof(*procRegs)},
         {mcc, mccRegs, mccRegs + sizeof(mccRegs)/sizeof(*mccRegs)},
     };
@@ -281,10 +389,17 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 uint64_t mskData = 0;
                 size_t sz_uint64 = sizeof(uint64_t);
 
-                uint64_t firAddr    = OCMB_MCBIST_FIR;
-                uint64_t firAndAddr = OCMB_MCBIST_FIR_AND;
-                uint64_t mskAddr    = OCMB_MCBIST_FIR_MASK;
+                uint64_t firAddr    = EXP_MCBIST_FIR;
+                uint64_t firAndAddr = EXP_MCBIST_FIR_AND;
+                uint64_t mskAddr    = EXP_MCBIST_FIR_MASK;
                 uint64_t bitMask    = 0x0020000000000000; // bit 10
+
+                if (isOdysseyOcmb(target))
+                {
+                    firAddr = ODY_MCBIST_FIR;
+                    mskAddr = ODY_MCBIST_FIR_MASK;
+                    bitMask = 0x0010000000000000; // bit 11
+                }
 
 
                 // Check for command complete. If set, don't time out.
@@ -344,7 +459,14 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                                             get_huid(target));
 
                         // collect ffdc
-                        addTimeoutFFDC(target, err);
+                        if (isOdysseyOcmb(target))
+                        {
+                            addTimeoutFFDC_ody(target, err);
+                        }
+                        else
+                        {
+                            addTimeoutFFDC_exp(target, err);
+                        }
 
                         errlCommit(err, MDIA_COMP_ID);
 
@@ -388,7 +510,14 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 
                 // collect ffdc
 
-                addTimeoutFFDC(target, timeoutErrl);
+                if (isOdysseyOcmb(target))
+                {
+                    addTimeoutFFDC_ody(target, timeoutErrl);
+                }
+                else
+                {
+                    addTimeoutFFDC_exp(target, timeoutErrl);
+                }
 
                 timeoutErrl->addHwCallout(target,
                         HWAS::SRCI_PRIORITY_HIGH,
@@ -419,10 +548,18 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
 
                 // stop will set the command complete
                 // attention so we need to clear those
-                bitMask = ~bitMask;
-
-                err = deviceWrite( target, &bitMask, sz_uint64,
-                                   DEVICE_SCOM_ADDRESS(firAndAddr) );
+                if (isOdysseyOcmb(target))
+                {
+                    // Odyssey FIRs are write to clear
+                    err = deviceWrite( target, &bitMask, sz_uint64,
+                                       DEVICE_SCOM_ADDRESS(firAddr) );
+                }
+                else
+                {
+                    bitMask = ~bitMask;
+                    err = deviceWrite( target, &bitMask, sz_uint64,
+                                       DEVICE_SCOM_ADDRESS(firAndAddr) );
+                }
 
                 if ( nullptr != err )
                 {
