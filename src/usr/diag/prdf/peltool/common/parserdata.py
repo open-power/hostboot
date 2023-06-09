@@ -51,7 +51,10 @@ class SignatureData:
             with open(data_file, "r") as fp:
                 data = json.load(fp)
 
-            self._data[data["target_type"]] = data
+            if data["target_type"] in self._data:
+                self._data[data["target_type"]]["signatures"].update(data["signatures"])
+            else:
+                self._data[data["target_type"]] = data
 
     def parseSignature(self, chipId: str, chipSig: str) -> str:
         # convert the input chipId to int and back to a hex string to prevent
@@ -119,7 +122,10 @@ class RegisterData:
             with open(data_file, "r") as fp:
                 data = json.load(fp)
 
-            self._data[data["target_type"]] = data
+            if data["target_type"] in self._data:
+                self._data[data["target_type"]].update(data)
+            else:
+                self._data[data["target_type"]] = data
 
     def parseRegister(self, chipId: str, regId: str) -> dict:
         # convert the input chipId to int and back to a hex string to prevent
