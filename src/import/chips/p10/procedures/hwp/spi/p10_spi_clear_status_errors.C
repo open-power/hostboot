@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,8 +40,8 @@ fapi2::ReturnCode p10_spi_clear_status_errors (
                             data64));
 
     // Clear the following bits
-    // Bits 1 to 3
-    data64.clearBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_RDR_OVER_STATUS, 3>();
+    // Bits 0 to 3
+    data64.clearBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_RDR_FULL_STATUS, 4>();
     // Bits 5 to 7
     data64.clearBit<scomt::proc::TP_TPCHIP_PIB_SPIMC_SPIMST0_STATUS_REG_TDR_OVER_STATUS, 3>();
     // Bits 32 to 63
