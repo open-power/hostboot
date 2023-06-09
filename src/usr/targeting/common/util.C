@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,8 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/trace.H>
 #ifdef __HOSTBOOT_MODULE
+#include <targeting/common/predicates/predicates.H>
+#include <target_states.H>
 #include <util/crc32.H>
 #endif
 
@@ -327,6 +329,7 @@ TARGETING::TargetHandleList getProcNVDIMMs( TARGETING::Target * i_proc )
     return o_nvdimmList;
 }
 
+
 #ifdef __HOSTBOOT_MODULE
 errlHndl_t getAttrMetadataPtr(void* i_targetingPtr,
                               section_metadata_mem_layout_t*& o_metadataPtr)
@@ -580,6 +583,46 @@ errlHndl_t parseRWAttributeData(rw_attr_section_t const* i_rwAttributePtr,
     return l_errl;
 }
 
-#endif
+void update_sppe_target_state()
+{
+    TARG_INF("update_sppe_target_state: enter");
+
+    for( const auto l_tgt : composable(getTargetWithAttr<TARGETING::ATTR_SPPE_TARGET_STATE>)())
+    {
+        uint8_t l_sppeState = 0; // fapi:TargetState; zero is not defined
+
+        // get the current ATTR_SPPE_TARGET_STATE
+        l_sppeState = l_tgt->getAttr<ATTR_SPPE_TARGET_STATE>();
+
+        // get HWAS state
+        HwasState l_hwasState;
+        assert( l_tgt->tryGetAttr<ATTR_HWAS_STATE>(l_hwasState),
+               "update_sppe_target_state: no ATTR_HWAS_STATE for tgt 0x%.8X",
+               get_huid(l_tgt));
+
+        // Convert hwasState to SPPE State
+        // NOTE: SPPE State only expects one valid state at a time.  For example,
+        //       functional state is not ORed with present state
+        if (l_hwasState.functional == true)
+        {
+            l_sppeState = fapi2::TARGET_STATE_FUNCTIONAL;
+        }
+        else if (l_hwasState.present)
+        {
+            l_sppeState = fapi2::TARGET_STATE_PRESENT;
+        }
+        // else leave the state as-is
+
+        l_tgt->setAttr<ATTR_SPPE_TARGET_STATE>(l_sppeState);
+
+        TARG_DBG("update_sppe_target_state: Setting 0x%.8X ATTR_SPPE_TARGET_STATE to 0x%X",
+                 get_huid(l_tgt), l_sppeState);
+    }
+
+    TARG_INF("update_sppe_target_state: exit");
+}
+
+
+#endif // __HOSTBOOT_MODULE
 
 } // end namespace TARGETING

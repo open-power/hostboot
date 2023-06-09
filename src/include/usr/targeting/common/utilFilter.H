@@ -32,7 +32,7 @@
  */
 
 #include <attributeenums.H>
-#include <targeting/common/predicates/predicatebase.H>
+#include <targeting/common/predicates/predicates.H>
 #include <targeting/common/iterators/targetiterator.H>
 #include <targeting/common/iterators/rangefilter.H>
 
@@ -767,7 +767,34 @@ auto composable(F&& i_functor)
     };
 }
 
-#endif
+#ifdef __HOSTBOOT_MODULE
+/**
+ * @brief Populate the o_vector with all targets that have the passed in attribute
+ *
+ * @parm[out] o_vector, reference of vector of target pointers.
+ *
+ * @return N/A
+ */
+template <ATTRIBUTE_ID A>
+void getTargetWithAttr(TargetHandleList& o_vector)
+{
+    Target* l_pSys = TARGETING::UTIL::assertGetToplevelTarget();
+
+    PredicateAttr<A> l_predAttr;
+    PredicatePostfixExpr l_predExpr;
+    l_predExpr.push(&l_predAttr);
+
+    targetService().getAssociated(o_vector,
+                                  l_pSys,
+                                  TargetService::CHILD,
+                                  TargetService::ALL,
+                                  &l_predExpr);
+
+    return;
+}
+#endif // __HOSTBOOT_MODULE
+
+#endif // __cplusplus >= 201300
 
 }
 

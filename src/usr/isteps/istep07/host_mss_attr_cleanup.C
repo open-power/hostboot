@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include    <initservice/isteps_trace.H>
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include    <targeting/common/util.H>
 #include    <devicefw/userif.H>
 #include    <vpd/spdenums.H>
 #include    <util/misc.H>
@@ -147,6 +148,9 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
           (TARGETING::MRW_HW_MIRRORING_ENABLE_OFF);
     }
 
+    //*****************************************************
+    //  Setup any SPPE state attributes before sync to OCMB (like Odyssey)
+    TARGETING::update_sppe_target_state();
 
     //*******************************************
     TRACFCOMP( g_trac_isteps_trace, "host_mss_attr_cleanup exit");

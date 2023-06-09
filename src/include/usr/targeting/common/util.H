@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -227,6 +227,13 @@ typedef union
 void extractGroupAndChip(const topoId_t i_topologyId,
                          groupId_t& o_group,
                          chipId_t& o_chip);
+
+/**
+ * @brief   Set ATTR_SPPE_TARGET_STATE on any target that has this attribute based on
+ *          the target's HWAS state
+ */
+void update_sppe_target_state();
+
 
 #ifdef __HOSTBOOT_MODULE
 

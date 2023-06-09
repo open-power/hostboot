@@ -112,8 +112,8 @@ namespace SBEIO
             l_fifoRequest.hwpClass      = i_hwpClass;
             l_fifoRequest.hwpNumber     = i_hwpNumber;
 
-            SBE_TRACD( "sendExecHWPRequest: "
-                       "target=%.8X, hwpClass=%X, hwpNumber=%X",
+            SBE_TRACF( "sendExecHWPRequest: "
+                       "target=0x%.8X, hwpClass=0x%X, hwpNumber=0x%X",
                        TARGETING::get_huid(i_chipTarget),
                        l_fifoRequest.hwpClass,
                        l_fifoRequest.hwpNumber );
