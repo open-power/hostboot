@@ -1135,6 +1135,9 @@
     <array>2</array>
     <writeable/>
     <mssAccessorName>byte_enables</mssAccessorName>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+    </sbeAttrSync>
   </attribute>
 
   <attribute>
