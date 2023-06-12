@@ -725,12 +725,12 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
         {
         case hostInterfaces::HBRT_GARD_ERROR_SLB:
         case hostInterfaces::HBRT_GARD_ERROR_NX:
+        case hostInterfaces::HBRT_GARD_ERROR_COMPUTATION_TEST_FAILURE:
             {
                 // These types are supported
                 break;
             }
         case hostInterfaces::HBRT_GARD_ERROR_UNKNOWN:
-        case hostInterfaces::HBRT_GARD_ERROR_COMPUTATION_TEST_FAILURE:
         case hostInterfaces::HBRT_GARD_ERROR_CHIP_TOD_FAILURE:
         case hostInterfaces::HBRT_GARD_ERROR_TIMEFAC_FAILURE:
         case hostInterfaces::HBRT_GARD_ERROR_PROC_RECOVERY_THRESHOLD:
