@@ -100,6 +100,7 @@ function checkout_hostboot_level ()
     fi
 }
 
+# Gets the change id for the required standalone commit
 function get_standalone_changes ()
 {
     ssh -p 29418 hostboot.gerrit gerrit query "(intopic:bmc_standalone_patching_release-${build_release}) project:hostboot" --current-patch-set | grep -E 'change I|subject:'
@@ -109,9 +110,11 @@ function get_standalone_changes ()
     fi
 }
 
+# Uses a change id to query for the current patch set for that change. For example "refs/changes/06/152106/4"
 function gerrit_refs ()
 {
-    ssh -p 29418 hostboot.gerrit gerrit query --current-patch-set "project:hostboot $1" | grep ref: | awk '{print $2}'
+    # $1 the change id for the commit
+    ssh -p 29418 hostboot.gerrit gerrit query --current-patch-set "(intopic:bmc_standalone_patching_release-${build_release}) project:hostboot $1" | grep ref: | awk '{print $2}'
     rc=$?
     if [ ${rc} -ne 0 ]; then
         return ${rc}
@@ -162,7 +165,7 @@ function cherrypick_standalone_patch ()
     for CHANGEID in ${changeIds[@]} ; do
 
         if ! grep -q $CHANGEID .gitlog ; then
-            echo "PICK $CHANGEID ${subjects[$i]}"
+            echo "PICK $CHANGEID ${subjects[$i]} for ${build_release}"
 
             gerrit_pick $CHANGEID
             rc=$?
