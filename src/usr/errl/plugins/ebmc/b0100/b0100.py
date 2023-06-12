@@ -160,7 +160,7 @@ class errludP_errl:
         # and AccessType_DriverOnly enum in src/include/usr/devicefw/driverif.H
         # New enum values must be added to the corresponding dictionary and, if they
         # print any parameters, to the if/else statement below
-        AccessType = { 0: "DeviceFW:SCOM",
+        AccessType = { 0: "DeviceFW::SCOM",
                        1: "DeviceFW::PNOR - not logged",
                        2: "DeviceFW::MAILBOX - not logged",
                        3: "DeviceFW::PRESENT - not logged",
@@ -169,14 +169,17 @@ class errludP_errl:
                        6: "DeviceFW::MVPD",
                        7: "DeviceFW::SCAN - not logged",
                        8: "DeviceFW::EEPROM",
-                      10: "DeviceFW::LPC"}
+                      10: "DeviceFW::LPC",
+                      24: "DeviceFW::CFAM"}
 
-        AccessType_DriverOnly = {23: "DeviceFW::XSCOM",
-                                 24: "DeviceFW::I2C",
-                                 25: "DeviceFW::FSISCOM",
-                                 26: "DeviceFW::IBSCOM - not logged",
-                                 32: "DeviceFW::SPI_EEPROM - not logged",
-                                 33: "DeviceFW::SPI_TPM - not logged"}
+        AccessType_DriverOnly = {25: "DeviceFW::XSCOM",
+                                 26: "DeviceFW::I2C",
+                                 27: "DeviceFW::FSISCOM",
+                                 28: "DeviceFW::IBSCOM - not logged",
+                                 36: "DeviceFW::SPI_EEPROM - not logged",
+                                 37: "DeviceFW::SPI_TPM - not logged",
+                                 38: "DeviceFW::I2CR_SCOM",
+                                 39: "DeviceFW::I2CR_CFAM" }
 
         subDictLabel = 0
         while i < (len(data) - 4):
@@ -213,7 +216,7 @@ class errludP_errl:
                     addrParams.append("Scom address")
                 elif accessValue == 4: #DeviceFW::FSI
                     numArgs = 1
-                    addrParams.append("FSI address")
+                    addrParams.append("FSI byte address")
                 elif accessValue == 5: #DeviceFW::SPD
                     numArgs = 1
                     addrParams.append("SPD keyword enumeration")
@@ -230,17 +233,26 @@ class errludP_errl:
                     d["Ranges"]="0=IO,1=MEM,2=FW,3=REG,4=ABS,5=ERR"
                     addrParams.append("Range")
                     addrParams.append("Addr")
-                elif accessValue == 23: #DeviceFW::XSCOM
+                elif accessValue == 24: #DeviceFW::CFAM
+                    numArgs = 1
+                    addrParams.append("CFAM address")
+                elif accessValue == 25: #DeviceFW::XSCOM
                     numArgs = 1
                     addrParams.append("XScom address")
-                elif accessValue == 25: #DeviceFW::FSISCOM
-                    numArgs = 1
-                    addrParams.append("FSISCOM address")
-                elif accessValue == 24: #DeviceFW::I2C
+                elif accessValue == 26: #DeviceFW::I2C
                     numArgs = 3
                     addrParams.append("I2C port")
                     addrParams.append("I2C master engine")
                     addrParams.append("Device address")
+                elif accessValue == 27: #DeviceFW::FSISCOM
+                    numArgs = 1
+                    addrParams.append("FSISCOM address")
+                elif accessValue == 38: #DeviceFW::I2CR_SCOM
+                    numArgs = 1
+                    addrParams.append("I2CR SCOM address")
+                elif accessValue == 39: #DeviceFW::I2CR_CFAM
+                    numArgs = 1
+                    addrParams.append("CFAM address (I2CR)")
 
                 if numArgs != -1:
                     for y in range(numArgs):

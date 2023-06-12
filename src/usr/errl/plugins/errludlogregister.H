@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] YADRO                                                              */
@@ -116,7 +116,7 @@ public:
                     case DeviceFW::FSI:         // userif.H
                         i_parser.PrintString("AccessType", "DeviceFW::FSI");
                         numArgs = 1;
-                        addrParams.push_back("  FSI address");
+                        addrParams.push_back("  FSI byte address");
                         break;
                     case DeviceFW::SPD:         // userif.H
                         i_parser.PrintString("AccessType", "DeviceFW::SPD");
@@ -132,6 +132,16 @@ public:
                         i_parser.PrintString("AccessType", "DeviceFW::FSISCOM");
                         numArgs = 1;
                         addrParams.push_back("  FSISCOM address");
+                        break;
+                    case DeviceFW::CFAM:   // userif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::CFAM");
+                        numArgs = 1;
+                        addrParams.push_back("  CFAM address");
+                        break;
+                    case DeviceFW::I2CR_SCOM:   // driverif.H
+                        i_parser.PrintString("AccessType", "DeviceFW::FSISCOM");
+                        numArgs = 1;
+                        addrParams.push_back("  ISCR Scom address");
                         break;
                     // two parameters
                     case DeviceFW::MVPD:        // userif.H

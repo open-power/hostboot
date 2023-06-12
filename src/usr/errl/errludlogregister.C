@@ -127,17 +127,24 @@ void ErrlUserDetailsLogRegister::readRegister(
     //  (DeviceFW::PRESENT is an example, but we chose not to log that type)
     int32_t numAddressArgs = -1;
 
+    // how much data we should save off
+    size_t reg_size = sizeof(uint64_t); //default to scom size
+
     // do we do the deviceOpValist or not, and how many
     //  parameters are there to be logged
     switch (i_accessType)
     {
         // one parameter
-        case DeviceFW::SCOM:        // userif.H
         case DeviceFW::FSI:         // userif.H
+        case DeviceFW::CFAM:        // userif.H
+            reg_size = sizeof(uint32_t);
+        case DeviceFW::SCOM:        // userif.H
         case DeviceFW::SPD:         // userif.H
         case DeviceFW::XSCOM:       // driverif.H
         case DeviceFW::FSISCOM:     // driverif.H
         case DeviceFW::IBSCOM:      // driverif.H
+        case DeviceFW::I2CR_SCOM:   // driverif.H
+        case DeviceFW::I2CR_CFAM:   // driverif.H
         {
             numAddressArgs = 1;
             break;
@@ -162,7 +169,7 @@ void ErrlUserDetailsLogRegister::readRegister(
         case DeviceFW::MAILBOX:     // userif.H
         default:
         {   // no action - not logged
-            TRACFCOMP(g_trac_errl, "LogRegister: AccessType %x not logged",
+            TRACFCOMP(g_trac_errl, "LogRegister: AccessType 0x%x not logged",
                 i_accessType);
             break;
         } // default
@@ -172,12 +179,6 @@ void ErrlUserDetailsLogRegister::readRegister(
     {
         // place for register data to go, and (max) size we expect.
         uint64_t reg_data = 0;
-        size_t reg_size = sizeof(reg_data);
-
-        if ( i_accessType == DeviceFW::FSI)
-        {
-            reg_size = sizeof(uint32_t);
-        }
 
         TRACDCOMP(g_trac_errl, "LogRegister: deviceOpValist()");
         errlHndl_t errl;
@@ -227,6 +228,8 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
         case DeviceFW::XSCOM:       // driverif.H
         case DeviceFW::FSISCOM:     // driverif.H
         case DeviceFW::IBSCOM:      // driverif.H
+        case DeviceFW::CFAM:        // userif.H
+        case DeviceFW::I2CR_SCOM:   // driverif.H
         {
             numAddressArgs = 1;
             break;
@@ -241,9 +244,6 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
         }
         // three parameters
         case DeviceFW::I2C:         // driverif.H
-        case DeviceFW::I2CR_SCOM:   // driverif.H
-        case DeviceFW::I2CR_CFAM:   // driverif.H
-        case DeviceFW::CFAM:        // userif.H
         {
             numAddressArgs = 3;
             break;
@@ -256,7 +256,7 @@ void ErrlUserDetailsLogRegister::copyRegisterData(
         case DeviceFW::SPI_TPM:     // driverif.H
         default:
         {   // no action - not logged
-            TRACFCOMP(g_trac_errl, "LogRegister: AccessType %x not logged",
+            TRACFCOMP(g_trac_errl, "LogRegister: AccessType 0x%x not logged",
                 i_accessType);
             break;
         } // default

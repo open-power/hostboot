@@ -50,6 +50,7 @@
 #include <initservice/initserviceif.H>
 #include <targeting/odyutil.H>
 #include <util/misc.H>
+#include <errl/errludlogregister.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -394,12 +395,20 @@ errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
+            collectRegFFDC(i_target,errl);
             break;
         }
 
         // try later
         nanosleep( 0, 10000 ); //sleep for 10,000 ns
         l_elapsed_time_ns += 10000;
+
+        // In simics a dead chip can take forever to timeout so
+        // make time move faster so we don't hang forever.
+        if( Util::isSimicsRunning() )
+        {
+            l_elapsed_time_ns += (MAX_UP_FIFO_TIMEOUT_NS/100);
+        }
     }
     while (1);
 
@@ -481,6 +490,40 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
+
+            // Log the response buffer that we have
+            errl->addFFDC( SBEIO_COMP_ID,
+                           o_pFifoResponse,
+                           i_responseSize,
+                           1,
+                           ERRL_UDT_NOFORMAT,//raw data
+                           false );
+            // Log the beginning the data buffer that we have
+            //  16 words fits most normal responses
+            size_t l_numwords = std::min( (size_t)16,
+                                          l_fifoBuffer.index() );
+            errl->addFFDC( SBEIO_COMP_ID,
+                           l_fifoBuffer.localBuffer(),
+                           l_numwords*sizeof(uint32_t),
+                           2,
+                           ERRL_UDT_NOFORMAT,//raw data
+                           false );
+            // Log the end of the data buffer that we have
+            l_numwords = std::min( (size_t)16, //last 16 words
+                                   l_fifoBuffer.index() );
+            if( l_numwords )
+            {
+                errl->addFFDC( SBEIO_COMP_ID,
+                               l_fifoBuffer.localBuffer()
+                               + (l_fifoBuffer.index() - l_numwords),
+                               l_numwords*sizeof(uint32_t),
+                               3,
+                               ERRL_UDT_NOFORMAT,//raw data
+                               false );
+            }
+
+            collectRegFFDC(i_target,errl);
+
             break;
         }
 
@@ -531,6 +574,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
+            collectRegFFDC(i_target,errl);
             break;
         }
 
@@ -594,6 +638,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                 errl->collectTrace(SBEIO_COMP_NAME);
             }
             #endif
+
+            collectRegFFDC(i_target,errl);
 
             if(!l_fifoBuffer.msgContainsFFDC())
             {
@@ -872,6 +918,8 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target   *i_target,
                                      HWAS::GARD_NULL );
             }
 
+            collectRegFFDC(i_target,l_errl);
+
             // Set the retry handler's mode to be informational, this will run
             // p9_extract_rc then TI the system on fsp-systems.
             // On open power systems if mode is set to informational we will run
@@ -907,7 +955,6 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target   *i_target,
         // try later
         nanosleep( 0, 10000 ); //sleep for 10,000 ns
         l_elapsed_time_ns += 10000;
-
     }
     while (1);
 
@@ -1036,7 +1083,8 @@ errlHndl_t SbeFifo::readFifoReg64(TARGETING::Target   *i_target,
  */
 errlHndl_t SbeFifo::readFifoReg(TARGETING::Target     *i_target,
                                            fifoRegAddr i_addrIdx,
-                                           uint32_t   *o_pData)
+                                           uint32_t   *o_pData,
+                                           ffdcRegMetadata_t* o_meta)
 {
     size_t     l_32bitSize = sizeof(uint32_t);
     errlHndl_t l_errl      = NULL;
@@ -1051,6 +1099,11 @@ errlHndl_t SbeFifo::readFifoReg(TARGETING::Target     *i_target,
             uint64_t l_data;
             l_errl = readFifoReg64(i_target, i_addrIdx, &l_data);
             *o_pData = l_data>>32;
+            if( o_meta )
+            {
+                o_meta->type = DeviceFW::SCOM;
+                o_meta->addr = getPipeFifoRegValue(i_addrIdx);
+            }
         }
         else
         {
@@ -1061,7 +1114,12 @@ errlHndl_t SbeFifo::readFifoReg(TARGETING::Target     *i_target,
                               o_pData,
                               l_32bitSize,
                               DEVICE_CFAM_ADDRESS(l_addr));
-            SBE_TRACU("  readFifoReg   SPPE addr=0x%08lx data=0x%08x", l_addr,*o_pData);
+            SBE_TRACU("  readFifoReg  SPPE addr=0x%08lx data=0x%08x", l_addr,*o_pData);
+            if( o_meta )
+            {
+                o_meta->type = DeviceFW::CFAM;
+                o_meta->addr = l_addr;
+            }
         }
     }
     else
@@ -1073,7 +1131,12 @@ errlHndl_t SbeFifo::readFifoReg(TARGETING::Target     *i_target,
                           o_pData,
                           l_32bitSize,
                           DEVICE_CFAM_ADDRESS(l_addr));
-        SBE_TRACU("  readFifoReg   SBE addr=0x%08lx data=0x%08x", l_addr,*o_pData);
+        SBE_TRACU("  readFifoReg  SBE addr=0x%08lx data=0x%08x", l_addr,*o_pData);
+        if( o_meta )
+        {
+            o_meta->type = DeviceFW::CFAM;
+            o_meta->addr = l_addr;
+        }
     }
 
     if (l_errl) {SBE_TRACD(ERR_MRK "readFifoReg");}
@@ -1168,6 +1231,65 @@ void SbeFifo::writeFFDCBuffer(const void * i_data, uint32_t i_len)
         SBE_TRACF(ERR_MRK"writeFFDCBuffer: Buffer size too large: %d",
                       i_len);
     }
+}
+
+/**
+ * @brief Collect appropriate registers for FFDC.
+ */
+void SbeFifo::collectRegFFDC(TARGETING::Target * i_target,
+                             errlHndl_t i_errhdl)
+{
+    errlHndl_t ignored = nullptr;
+    ERRORLOG::ErrlUserDetailsLogRegister l_regs(i_target);
+
+    // Add FIFO-specific regs
+    const fifoRegAddr regs_to_read[] = {
+        FIFO_UPFIFO_STATUS,
+        FIFO_DNFIFO_STATUS,
+    };
+
+    for( auto reg : regs_to_read )
+    {
+        uint32_t l_data = 0;
+        ffdcRegMetadata_t l_meta;
+        ignored = readFifoReg(i_target, reg, &l_data, &l_meta);
+        if( ignored )
+        {
+            delete ignored;
+            ignored = nullptr;
+            continue;
+        }
+        if( DeviceFW::CFAM == l_meta.type )
+        {
+            l_regs.addDataBuffer(reinterpret_cast<void *>(&l_data),
+                                 sizeof(l_data),
+                                 DEVICE_CFAM_ADDRESS(l_meta.addr));
+        }
+        else // SCOM, or unknown which we'll lie and choose scom
+        {
+            l_regs.addDataBuffer(reinterpret_cast<void *>(&l_data),
+                                 sizeof(l_data),
+                                 DEVICE_SCOM_ADDRESS(l_meta.addr));
+        }
+    }
+
+
+    // Add SBE status regs
+    const uint32_t cfam_to_read[] = {
+        0x1007, //Status register
+        0x2801, //CBS Control/Status register
+        0x2808, //Selfboot Control/Status register
+        0x2809, //Selfboot Message register
+    };
+
+    for( auto reg : cfam_to_read )
+    {
+        l_regs.addData(DEVICE_CFAM_ADDRESS(reg));
+    }
+
+
+    // Push the reg data into the original error log
+    l_regs.addToLog(i_errhdl);
 }
 
 } //end of namespace SBEIO

@@ -983,6 +983,15 @@ public:
     uint32_t getFifoRegValue(fifoRegType i_type, fifoRegAddr i_reg);
 
     /**
+     * @Brief Metadata to help some FFDC logging
+     */
+    typedef struct
+    {
+        DeviceFW::AccessType type;
+        uint32_t addr;
+    } ffdcRegMetadata_t;
+
+    /**
      * @Brief perform SBE FIFO chip-op
      *
      * @param[in]  i_target        Target to access
@@ -1216,11 +1225,13 @@ private:
      * @param[in]  i_target         Target to access
      * @param[in]  i_addrIdx        FIFO address enum index
      * @param[out] o_pData          Pointer to receive data
+     * @param[out] o_meta           Pointer to metadata
      * @return errlHndl_t Error log handle on failure.
      */
     errlHndl_t readFifoReg(TARGETING::Target   *i_target,
-                                    fifoRegAddr i_addrIdx,
-                                      uint32_t *o_pData);
+                           fifoRegAddr i_addrIdx,
+                           uint32_t *o_pData,
+                           ffdcRegMetadata_t* o_meta = nullptr);
 
     errlHndl_t readFifoReg64(TARGETING::Target     *i_target,
                                         fifoRegAddr i_addrIdx,
@@ -1237,6 +1248,16 @@ private:
     errlHndl_t writeFifoReg(TARGETING::Target   *i_target,
                                      fifoRegAddr i_addrIdx,
                                        uint32_t *i_pData);
+
+    /**
+     * @brief Collect appropriate registers for FFDC.
+     *
+     * @param[in]  i_target  Target to access
+     * @param[in]  i_errhdl  Log to attach data to
+     */
+    void collectRegFFDC(TARGETING::Target * i_target,
+                        errlHndl_t i_errhdl);
+
 
     enum sbeFifoUpstreamStatus
     {
