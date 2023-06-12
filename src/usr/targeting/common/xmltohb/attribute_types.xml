@@ -5999,6 +5999,21 @@
   </attribute>
 
   <attribute>
+    <id>OCMB_ISTEP_MODE</id>
+    <description>
+        A mode flag to enable the Odyssey SPPE to be single stepped.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0x0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>
        Required delay (in seconds) between deasserting the OCMB reset before
        we attempt the first i2c operation out to the OCMB chip.

@@ -327,7 +327,7 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
     }
 
     // We need to do an explicit delay before our first i2c operation
-    //  to Explorer to ensure we don't catch it too early in the boot
+    //  to OCMB to ensure we don't catch it too early in the boot
     //  and lock it up.
     const auto ocmb_delay = UTIL::assertGetToplevelTarget()
       ->getAttr<ATTR_OCMB_RESET_DELAY_SEC>();
@@ -358,6 +358,16 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                                  CLASS_CHIP,
                                  TYPE_OCMB_CHIP,
                                  true);
+
+        if(UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_OCMB_ISTEP_MODE>())
+        {
+            const uint32_t l_ocmb_istep_mode_enable_mask = 0xC0000000; // set bit 0 and bit 1, 0x00 = autoboot 0x11=istep mode
+            // later in HWP's the ATTR_OCMB_BOOT_FLAGS will be used to properly boot the Odyssey SPPE
+            uint32_t l_attr_ocmb_boot_flags = UTIL::assertGetToplevelTarget()->getAttr<ATTR_OCMB_BOOT_FLAGS>();
+            l_attr_ocmb_boot_flags |= l_ocmb_istep_mode_enable_mask;
+            TRACFCOMP(g_trac_isteps_trace, "call_ocmb_check_for_ready setAttr ATTR_OCMB_BOOT_FLAGS=0x%X", l_attr_ocmb_boot_flags);
+            UTIL::assertGetToplevelTarget()->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>(l_attr_ocmb_boot_flags);
+        }
 
         for (const auto & l_ocmb : l_functionalOcmbChipList)
         {
@@ -525,11 +535,11 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                     // Capture error and continue to next OCMB
                     captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
                 }
-
                 // Odyssey chips require a few more HWPs to run to start them up:
                 // ody_sppe_config_update writes the SPPE config
                 // ody_cbs_start starts SPPE
                 // ody_sppe_check_for_ready makes sure that SPPE booted correctly
+
                 if(l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
                 {
                     FAPI_INVOKE_HWP(l_errl, ody_sppe_config_update, l_fapi_ocmb_target);
