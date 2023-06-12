@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -128,22 +128,11 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
 
     if ( nullptr != errl )
     {
-        bool doRetry = false;
-
-        #ifdef __HOSTBOOT_RUNTIME
-
-        #else
-
-        // Check the RC to see if the memory channel has failed.
-        // Hostboot will have switched over to FSI SCOMs. So retry.
-        if ( MMIO::RC_MMIO_CHAN_CHECKSTOP == errl->reasonCode() )
-        {
-            doRetry = true;
-        }
-
-        #endif
-
-        if ( doRetry )
+        // Check the return code to determine if the error was due to a memory
+        // channel failure. If so, the SCOM logic will have automatically
+        // switched over to an alternative method and we'll need to retry the
+        // operation.
+        if (MMIO::RC_MMIO_CHAN_CHECKSTOP == errl->reasonCode())
         {
             PRDF_INF( "deviceRead(0x%08x,0x%016x) failed with reason code "
                       "0x%04x, retrying...", PlatServices::getHuid(i_target),
@@ -159,8 +148,8 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
 
     if ( nullptr != errl )
     {
-        PRDF_ERR( "getScom() failed on i_target=0x%08x i_address=0x%016llx",
-                  getHuid(i_target), i_address );
+        PRDF_ERR("deviceRead(0x%08x, 0x%016llx) returned 0x%04x",
+                 getHuid(i_target), i_address, errl->reasonCode());
 
         rc = PRD_SCANCOM_FAILURE;
         PRDF_ADD_SW_ERR(errl, rc, PRDF_HOM_SCOM, __LINE__);
@@ -196,8 +185,8 @@ uint32_t putScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
 
     if( nullptr != errl )
     {
-        PRDF_ERR( "putScom() failed on i_target=0x%08x i_address=0x%016llx",
-                  getHuid(i_target), i_address );
+        PRDF_ERR("deviceWrite(0x%08x, 0x%016llx) returned 0x%04x",
+                 getHuid(i_target), i_address, errl->reasonCode());
 
         rc = PRD_SCANCOM_FAILURE;
         PRDF_ADD_SW_ERR(errl, rc, PRDF_HOM_SCOM, __LINE__);
