@@ -2683,26 +2683,28 @@ fapi_try_exit:
 ///
 const uint8_t* assemble_mem_bin_data_reg(const uint32_t i_mem_size,
         uint32_t& io_bytes_copied,
-        const uint8_t* i_current_byte,
+        const uint8_t* const i_current_byte,
         fapi2::buffer<uint64_t>& io_data)
 {
+    const uint8_t* l_byte = i_current_byte;
+
     // Copy the last 8(56-63) bits of data
     if (io_bytes_copied < i_mem_size)
     {
-        io_data.insertFromRight < 64 - BITS_PER_BYTE, BITS_PER_BYTE > (*i_current_byte);
+        io_data.insertFromRight < 64 - BITS_PER_BYTE, BITS_PER_BYTE > (*l_byte);
         io_bytes_copied++;
-        i_current_byte++;
+        l_byte++;
     }
 
     if (io_bytes_copied < i_mem_size)
     {
         // Copy the next 8(48-55) bits of data
-        io_data.insertFromRight < 64 - 2 * BITS_PER_BYTE, BITS_PER_BYTE > (*i_current_byte);
+        io_data.insertFromRight < 64 - 2 * BITS_PER_BYTE, BITS_PER_BYTE > (*l_byte);
         io_bytes_copied++;
-        i_current_byte++;
+        l_byte++;
     }
 
-    return i_current_byte;
+    return l_byte;
 }
 
 ///
@@ -2718,7 +2720,7 @@ const uint8_t* assemble_mem_bin_data_reg(const uint32_t i_mem_size,
 fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                     const uint8_t i_is_first_load,
                                     const uint32_t i_start_addr,
-                                    uint8_t* const i_data_start,
+                                    const uint8_t* const i_data_start,
                                     const uint32_t i_mem_size,
                                     const uint32_t i_mem_total_size)
 {
@@ -2941,7 +2943,7 @@ uint32_t calculate_image_end_addr(const uint32_t i_start_addr, const uint32_t i_
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode ody_load_dmem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                       uint8_t* const i_dmem_data,
+                                       const uint8_t* const i_dmem_data,
                                        const uint32_t i_dmem_size,
                                        const uint32_t i_dmem_offset)
 {
@@ -3015,7 +3017,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode ody_load_imem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                       uint8_t* const i_imem_data,
+                                       const uint8_t* const i_imem_data,
                                        const uint32_t i_imem_size,
                                        const uint32_t i_imem_offset)
 {
