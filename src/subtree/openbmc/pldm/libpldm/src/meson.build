@@ -1,4 +1,3 @@
-
 libpldm_sources += files(
   'base.c',
   'bios.c',
@@ -10,11 +9,9 @@ libpldm_sources += files(
   'utils.c'
   )
 
+subdir('requester')
+subdir('transport')
+
 if get_option('oem-ibm').enabled()
    subdir('oem/ibm')
-endif
-
-if get_option('requester-api').enabled()
-   subdir('requester')
-   subdir('transport')
 endif

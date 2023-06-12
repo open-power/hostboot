@@ -1,7 +1,8 @@
 /* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 #ifndef LIBPLDM_AF_MCTP_H
 #define LIBPLDM_AF_MCTP_H
-#include "../config.h"
+
+#include "config.h"
 #include "libpldm/base.h"
 #include "libpldm/pldm.h"
 
@@ -40,4 +41,4 @@ int pldm_transport_af_mctp_unmap_tid(struct pldm_transport_af_mctp *ctx,
 }
 #endif
 
-#endif /* LIBPLDM_AF MCTP*/
+#endif /* LIBPLDM_AF_MCTP*/

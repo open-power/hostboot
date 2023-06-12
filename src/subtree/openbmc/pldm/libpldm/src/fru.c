@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <assert.h>
 #include <endian.h>
 #include <stdbool.h>
@@ -8,6 +10,7 @@
 #include "fru.h"
 #include "utils.h"
 
+LIBPLDM_ABI_STABLE
 int encode_get_fru_record_table_metadata_req(uint8_t instance_id,
 					     struct pldm_msg *msg,
 					     size_t payload_length)
@@ -29,6 +32,7 @@ int encode_get_fru_record_table_metadata_req(uint8_t instance_id,
 	return pack_pldm_header(&header, &(msg->hdr));
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_fru_record_table_metadata_resp(
 	const struct pldm_msg *msg, size_t payload_length,
 	uint8_t *completion_code, uint8_t *fru_data_major_version,
@@ -68,6 +72,7 @@ int decode_get_fru_record_table_metadata_resp(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_get_fru_record_table_metadata_resp(
 	uint8_t instance_id, uint8_t completion_code,
 	uint8_t fru_data_major_version, uint8_t fru_data_minor_version,
@@ -108,6 +113,7 @@ int encode_get_fru_record_table_metadata_resp(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_fru_record_table_req(const struct pldm_msg *msg,
 				    size_t payload_length,
 				    uint32_t *data_transfer_handle,
@@ -131,6 +137,7 @@ int decode_get_fru_record_table_req(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_get_fru_record_table_resp(uint8_t instance_id,
 				     uint8_t completion_code,
 				     uint32_t next_data_transfer_handle,
@@ -166,6 +173,7 @@ int encode_get_fru_record_table_resp(uint8_t instance_id,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_fru_record(uint8_t *fru_table, size_t total_size, size_t *curr_size,
 		      uint16_t record_set_id, uint8_t record_type,
 		      uint8_t num_frus, uint8_t encoding, uint8_t *tlvs,
@@ -205,6 +213,7 @@ static bool is_table_end(const struct pldm_fru_record_data_format *p,
 							    table_size);
 }
 
+LIBPLDM_ABI_STABLE
 void get_fru_record_by_option(const uint8_t *table, size_t table_size,
 			      uint8_t *record_table, size_t *record_size,
 			      uint16_t rsi, uint8_t rt, uint8_t ft)
@@ -265,6 +274,7 @@ void get_fru_record_by_option(const uint8_t *table, size_t table_size,
 	*record_size = pos - record_table;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_get_fru_record_by_option_req(
 	uint8_t instance_id, uint32_t data_transfer_handle,
 	uint16_t fru_table_handle, uint16_t record_set_identifier,
@@ -303,6 +313,7 @@ int encode_get_fru_record_by_option_req(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_fru_record_by_option_req(
 	const struct pldm_msg *msg, size_t payload_length,
 	uint32_t *data_transfer_handle, uint16_t *fru_table_handle,
@@ -333,6 +344,7 @@ int decode_get_fru_record_by_option_req(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_get_fru_record_by_option_resp(uint8_t instance_id,
 					 uint8_t completion_code,
 					 uint32_t next_data_transfer_handle,
@@ -374,6 +386,7 @@ int encode_get_fru_record_by_option_resp(uint8_t instance_id,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_fru_record_by_option_resp(
 	const struct pldm_msg *msg, size_t payload_length,
 	uint8_t *completion_code, uint32_t *next_transfer_handle,
@@ -406,6 +419,7 @@ int decode_get_fru_record_by_option_resp(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_get_fru_record_table_req(uint8_t instance_id,
 				    uint32_t data_transfer_handle,
 				    uint8_t transfer_operation_flag,
@@ -438,6 +452,7 @@ int encode_get_fru_record_table_req(uint8_t instance_id,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_fru_record_table_resp_safe(
 	const struct pldm_msg *msg, size_t payload_length,
 	uint8_t *completion_code, uint32_t *next_data_transfer_handle,
@@ -477,6 +492,7 @@ int decode_get_fru_record_table_resp_safe(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_fru_record_table_resp(const struct pldm_msg *msg,
 				     size_t payload_length,
 				     uint8_t *completion_code,
@@ -491,6 +507,7 @@ int decode_get_fru_record_table_resp(const struct pldm_msg *msg,
 		(size_t)-1);
 }
 
+LIBPLDM_ABI_STABLE
 int decode_set_fru_record_table_req(const struct pldm_msg *msg,
 				    size_t payload_length,
 				    uint32_t *data_transfer_handle,
@@ -519,6 +536,7 @@ int decode_set_fru_record_table_req(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_set_fru_record_table_resp(uint8_t instance_id,
 				     uint8_t completion_code,
 				     uint32_t next_data_transfer_handle,

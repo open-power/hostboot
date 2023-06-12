@@ -1,3 +1,4 @@
+#include "config.h"
 #include "utils.h"
 #include "base.h"
 #include <limits.h>
@@ -83,6 +84,7 @@ static const uint8_t crc8_table[] = {
 	0xfa, 0xfd, 0xf4, 0xf3
 };
 
+LIBPLDM_ABI_STABLE
 uint32_t crc32(const void *data, size_t size)
 {
 	const uint8_t *p = data;
@@ -93,6 +95,7 @@ uint32_t crc32(const void *data, size_t size)
 	return crc ^ ~0U;
 }
 
+LIBPLDM_ABI_STABLE
 uint8_t crc8(const void *data, size_t size)
 {
 	const uint8_t *p = data;
@@ -114,6 +117,8 @@ uint8_t crc8(const void *data, size_t size)
 		}                                                              \
 	}
 #define INSERT_INT(i, b, n) INSERT_CHAR(AS_CHAR(i), (b), (n))
+
+LIBPLDM_ABI_STABLE
 ssize_t ver2str(const ver32_t *version, char *buffer, size_t buffer_size)
 {
 	ssize_t remaining;
@@ -158,37 +163,44 @@ ssize_t ver2str(const ver32_t *version, char *buffer, size_t buffer_size)
 	return (ssize_t)buffer_size - remaining;
 }
 
+LIBPLDM_ABI_STABLE
 uint8_t bcd2dec8(uint8_t bcd)
 {
 	return (bcd >> 4) * 10 + (bcd & 0x0f);
 }
 
+LIBPLDM_ABI_STABLE
 uint8_t dec2bcd8(uint8_t dec)
 {
 	return ((dec / 10) << 4) + (dec % 10);
 }
 
+LIBPLDM_ABI_STABLE
 uint16_t bcd2dec16(uint16_t bcd)
 {
 	return bcd2dec8(bcd >> 8) * 100 + bcd2dec8(bcd & 0xff);
 }
 
+LIBPLDM_ABI_STABLE
 uint16_t dec2bcd16(uint16_t dec)
 {
 	return dec2bcd8(dec % 100) | ((uint16_t)(dec2bcd8(dec / 100)) << 8);
 }
 
+LIBPLDM_ABI_STABLE
 uint32_t bcd2dec32(uint32_t bcd)
 {
 	return bcd2dec16(bcd >> 16) * 10000 + bcd2dec16(bcd & 0xffff);
 }
 
+LIBPLDM_ABI_STABLE
 uint32_t dec2bcd32(uint32_t dec)
 {
 	return dec2bcd16(dec % 10000) |
 	       ((uint32_t)(dec2bcd16(dec / 10000)) << 16);
 }
 
+LIBPLDM_ABI_STABLE
 bool is_time_legal(uint8_t seconds, uint8_t minutes, uint8_t hours, uint8_t day,
 		   uint8_t month, uint16_t year)
 {
@@ -209,6 +221,7 @@ bool is_time_legal(uint8_t seconds, uint8_t minutes, uint8_t hours, uint8_t day,
 	return true;
 }
 
+LIBPLDM_ABI_STABLE
 bool is_transfer_flag_valid(uint8_t transfer_flag)
 {
 	switch (transfer_flag) {

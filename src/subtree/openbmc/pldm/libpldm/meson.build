@@ -12,12 +12,34 @@ project('libpldm', ['c','cpp'],
     meson_version: '>=0.63.0',
 )
 
-add_project_arguments('-D_DEFAULT_SOURCE',language:['c'])
+add_project_arguments('-D_DEFAULT_SOURCE', language: ['c'])
+
+compiler = meson.get_compiler('c')
+conf = configuration_data()
+if compiler.has_header('poll.h')
+  conf.set('PLDM_HAS_POLL', 1)
+endif
+
+# ABI control
+visible =  '__attribute__((visibility("default")))'
+if get_option('abi').contains('deprecated')
+  conf.set('LIBPLDM_ABI_DEPRECATED', visible)
+  add_project_arguments('-DLIBPLDM_API_DEPRECATED', language: ['c', 'cpp'])
+else
+  conf.set('LIBPLDM_ABI_DEPRECATED', '')
+endif
+conf.set('LIBPLDM_ABI_STABLE', visible) # Always expose the stable symbols
+if get_option('abi').contains('testing')
+  conf.set('LIBPLDM_ABI_TESTING', visible)
+  add_project_arguments('-DLIBPLDM_API_TESTING', language: ['c', 'cpp'])
+else
+  conf.set('LIBPLDM_ABI_TESTING', '')
+endif
 
 libpldm_sources = files()
 subdir('src')
 
-libpldm_include_dir = ['include', 'src']
+libpldm_include_dir = ['.', 'include', 'src']
 libpldm_headers = files()
 libpldm_transport_headers = files()
 
@@ -29,6 +51,7 @@ libpldm = library(
    implicit_include_directories: false,
    include_directories: libpldm_include_dir,
    version: meson.project_version(),
+   gnu_symbol_visibility: 'hidden',
    install: true
    )
 
@@ -52,11 +75,6 @@ import('pkgconfig').generate(
   version: meson.project_version(),
   libraries: libpldm)
 
-compiler = meson.get_compiler('c')
-conf = configuration_data()
-if compiler.has_header('poll.h')
-  conf.set('PLDM_HAS_POLL', 1)
-endif
 configure_file(output: 'config.h',
   configuration: conf
 )

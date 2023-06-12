@@ -1,9 +1,11 @@
+#include "config.h"
 #include "bios.h"
 #include "base.h"
 #include "utils.h"
 #include <endian.h>
 #include <string.h>
 
+LIBPLDM_ABI_STABLE
 int encode_get_date_time_req(uint8_t instance_id, struct pldm_msg *msg)
 {
 	if (msg == NULL) {
@@ -18,6 +20,7 @@ int encode_get_date_time_req(uint8_t instance_id, struct pldm_msg *msg)
 	return pack_pldm_header(&header, &(msg->hdr));
 }
 
+LIBPLDM_ABI_STABLE
 int encode_get_date_time_resp(uint8_t instance_id, uint8_t completion_code,
 			      uint8_t seconds, uint8_t minutes, uint8_t hours,
 			      uint8_t day, uint8_t month, uint16_t year,
@@ -53,6 +56,7 @@ int encode_get_date_time_resp(uint8_t instance_id, uint8_t completion_code,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_date_time_resp(const struct pldm_msg *msg, size_t payload_length,
 			      uint8_t *completion_code, uint8_t *seconds,
 			      uint8_t *minutes, uint8_t *hours, uint8_t *day,
@@ -86,6 +90,7 @@ int decode_get_date_time_resp(const struct pldm_msg *msg, size_t payload_length,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_set_date_time_req(uint8_t instance_id, uint8_t seconds,
 			     uint8_t minutes, uint8_t hours, uint8_t day,
 			     uint8_t month, uint16_t year, struct pldm_msg *msg,
@@ -125,6 +130,7 @@ int encode_set_date_time_req(uint8_t instance_id, uint8_t seconds,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_set_date_time_req(const struct pldm_msg *msg, size_t payload_length,
 			     uint8_t *seconds, uint8_t *minutes, uint8_t *hours,
 			     uint8_t *day, uint8_t *month, uint16_t *year)
@@ -154,6 +160,7 @@ int decode_set_date_time_req(const struct pldm_msg *msg, size_t payload_length,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_set_date_time_resp(uint8_t instance_id, uint8_t completion_code,
 			      struct pldm_msg *msg, size_t payload_length)
 {
@@ -182,6 +189,7 @@ int encode_set_date_time_resp(uint8_t instance_id, uint8_t completion_code,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_set_date_time_resp(const struct pldm_msg *msg, size_t payload_length,
 			      uint8_t *completion_code)
 {
@@ -201,6 +209,7 @@ int decode_set_date_time_resp(const struct pldm_msg *msg, size_t payload_length,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_get_bios_table_resp(uint8_t instance_id, uint8_t completion_code,
 			       uint32_t next_transfer_handle,
 			       uint8_t transfer_flag, uint8_t *table_data,
@@ -239,19 +248,16 @@ int encode_get_bios_table_resp(uint8_t instance_id, uint8_t completion_code,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_get_bios_table_req(uint8_t instance_id, uint32_t transfer_handle,
 			      uint8_t transfer_op_flag, uint8_t table_type,
-			      struct pldm_msg *msg, size_t payload_length)
+			      struct pldm_msg *msg)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-        if(payload_length != PLDM_GET_BIOS_TABLE_REQ_BYTES) {
-            return PLDM_ERROR_INVALID_LENGTH;
-        }
-
-        struct pldm_header_info header = { 0 };
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_BIOS;
@@ -271,6 +277,7 @@ int encode_get_bios_table_req(uint8_t instance_id, uint32_t transfer_handle,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_bios_table_req(const struct pldm_msg *msg, size_t payload_length,
 			      uint32_t *transfer_handle,
 			      uint8_t *transfer_op_flag, uint8_t *table_type)
@@ -293,6 +300,7 @@ int decode_get_bios_table_req(const struct pldm_msg *msg, size_t payload_length,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_bios_table_resp(const struct pldm_msg *msg,
 			       size_t payload_length, uint8_t *completion_code,
 			       uint32_t *next_transfer_handle,
@@ -327,19 +335,16 @@ int decode_get_bios_table_resp(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_get_bios_attribute_current_value_by_handle_req(
 	uint8_t instance_id, uint32_t transfer_handle, uint8_t transfer_op_flag,
-	uint16_t attribute_handle, struct pldm_msg *msg, size_t payload_length)
+	uint16_t attribute_handle, struct pldm_msg *msg)
 {
 	if (msg == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	if(payload_length != PLDM_GET_BIOS_ATTR_CURR_VAL_BY_HANDLE_REQ_BYTES) {
-            return PLDM_ERROR_INVALID_LENGTH;
-        }
-
-        struct pldm_header_info header = { 0 };
+	struct pldm_header_info header = { 0 };
 	header.msg_type = PLDM_REQUEST;
 	header.instance = instance_id;
 	header.pldm_type = PLDM_BIOS;
@@ -360,6 +365,7 @@ int encode_get_bios_attribute_current_value_by_handle_req(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_bios_attribute_current_value_by_handle_resp(
 	const struct pldm_msg *msg, size_t payload_length,
 	uint8_t *completion_code, uint32_t *next_transfer_handle,
@@ -394,6 +400,7 @@ int decode_get_bios_attribute_current_value_by_handle_resp(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_bios_attribute_current_value_by_handle_req(
 	const struct pldm_msg *msg, size_t payload_length,
 	uint32_t *transfer_handle, uint8_t *transfer_op_flag,
@@ -418,6 +425,7 @@ int decode_get_bios_attribute_current_value_by_handle_req(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_get_bios_current_value_by_handle_resp(uint8_t instance_id,
 						 uint8_t completion_code,
 						 uint32_t next_transfer_handle,
@@ -455,6 +463,8 @@ int encode_get_bios_current_value_by_handle_resp(uint8_t instance_id,
 	}
 	return PLDM_SUCCESS;
 }
+
+LIBPLDM_ABI_STABLE
 int encode_set_bios_attribute_current_value_req(
 	uint8_t instance_id, uint32_t transfer_handle, uint8_t transfer_flag,
 	const uint8_t *attribute_data, size_t attribute_length,
@@ -487,6 +497,7 @@ int encode_set_bios_attribute_current_value_req(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_set_bios_attribute_current_value_resp(const struct pldm_msg *msg,
 						 size_t payload_length,
 						 uint8_t *completion_code,
@@ -515,6 +526,7 @@ int decode_set_bios_attribute_current_value_resp(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_set_bios_attribute_current_value_req(
 	const struct pldm_msg *msg, size_t payload_length,
 	uint32_t *transfer_handle, uint8_t *transfer_flag,
@@ -538,6 +550,7 @@ int decode_set_bios_attribute_current_value_req(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_set_bios_attribute_current_value_resp(uint8_t instance_id,
 						 uint8_t completion_code,
 						 uint32_t next_transfer_handle,
@@ -566,6 +579,7 @@ int encode_set_bios_attribute_current_value_resp(uint8_t instance_id,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_set_bios_table_req(uint8_t instance_id, uint32_t transfer_handle,
 			      uint8_t transfer_flag, uint8_t table_type,
 			      const uint8_t *table_data, size_t table_length,
@@ -601,6 +615,7 @@ int encode_set_bios_table_req(uint8_t instance_id, uint32_t transfer_handle,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_set_bios_table_resp(const struct pldm_msg *msg,
 			       size_t payload_length, uint8_t *completion_code,
 			       uint32_t *next_transfer_handle)
@@ -627,6 +642,7 @@ int decode_set_bios_table_resp(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_set_bios_table_resp(uint8_t instance_id, uint8_t completion_code,
 			       uint32_t next_transfer_handle,
 			       struct pldm_msg *msg)
@@ -654,6 +670,7 @@ int encode_set_bios_table_resp(uint8_t instance_id, uint8_t completion_code,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_set_bios_table_req(const struct pldm_msg *msg, size_t payload_length,
 			      uint32_t *transfer_handle, uint8_t *transfer_flag,
 			      uint8_t *table_type, struct variable_field *table)

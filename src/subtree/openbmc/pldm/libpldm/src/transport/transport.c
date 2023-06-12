@@ -1,3 +1,4 @@
+#include "config.h"
 #include "libpldm/transport.h"
 #include "base.h"
 #include "libpldm/requester/pldm.h"
@@ -29,6 +30,7 @@ static inline int poll(struct pollfd *fds __attribute__((unused)),
 }
 #endif
 
+LIBPLDM_ABI_TESTING
 pldm_requester_rc_t pldm_transport_poll(struct pldm_transport *transport,
 					int timeout)
 {
@@ -50,6 +52,7 @@ pldm_requester_rc_t pldm_transport_poll(struct pldm_transport *transport,
 	return PLDM_REQUESTER_SUCCESS;
 }
 
+LIBPLDM_ABI_TESTING
 pldm_requester_rc_t pldm_transport_send_msg(struct pldm_transport *transport,
 					    pldm_tid_t tid,
 					    const void *pldm_req_msg,
@@ -71,6 +74,7 @@ pldm_requester_rc_t pldm_transport_send_msg(struct pldm_transport *transport,
 	return transport->send(transport, tid, pldm_req_msg, req_msg_len);
 }
 
+LIBPLDM_ABI_TESTING
 pldm_requester_rc_t pldm_transport_recv_msg(struct pldm_transport *transport,
 					    pldm_tid_t tid,
 					    void **pldm_resp_msg,
@@ -146,6 +150,7 @@ static int clock_gettimeval(clockid_t clockid, struct timeval *tv)
 	return 0;
 }
 
+LIBPLDM_ABI_TESTING
 pldm_requester_rc_t
 pldm_transport_send_recv_msg(struct pldm_transport *transport, pldm_tid_t tid,
 			     const void *pldm_req_msg, size_t req_msg_len,

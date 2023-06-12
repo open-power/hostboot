@@ -1,7 +1,9 @@
+#include "config.h"
 #include "libpldm/platform.h"
 #include "libpldm/platform_oem_ibm.h"
 #include <string.h>
 
+LIBPLDM_ABI_STABLE
 int encode_bios_attribute_update_event_req(uint8_t instance_id,
 					   uint8_t format_version, uint8_t tid,
 					   uint8_t num_handles,

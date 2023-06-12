@@ -1,3 +1,4 @@
+#include "config.h"
 #include "libpldm/requester/pldm.h"
 #include "base.h"
 #include "libpldm/transport.h"
@@ -25,6 +26,7 @@ pldm_transport_mctp_demux_init_with_fd(int mctp_fd);
  */
 static struct pldm_transport_mctp_demux *open_transport;
 
+LIBPLDM_ABI_STABLE
 pldm_requester_rc_t pldm_open(void)
 {
 	int fd;
@@ -86,6 +88,7 @@ pldm_requester_rc_t pldm_open(void)
 		return rc;                                                       \
 	} while (0)
 
+LIBPLDM_ABI_STABLE
 pldm_requester_rc_t pldm_recv_any(mctp_eid_t eid, int mctp_fd,
 				  uint8_t **pldm_resp_msg, size_t *resp_msg_len)
 {
@@ -93,6 +96,7 @@ pldm_requester_rc_t pldm_recv_any(mctp_eid_t eid, int mctp_fd,
 		    (void **)pldm_resp_msg, resp_msg_len);
 }
 
+LIBPLDM_ABI_STABLE
 pldm_requester_rc_t pldm_recv(mctp_eid_t eid, int mctp_fd,
 			      __attribute__((unused)) uint8_t instance_id,
 			      uint8_t **pldm_resp_msg, size_t *resp_msg_len)
@@ -108,6 +112,7 @@ pldm_requester_rc_t pldm_recv(mctp_eid_t eid, int mctp_fd,
 	return rc;
 }
 
+LIBPLDM_ABI_STABLE
 pldm_requester_rc_t pldm_send_recv(mctp_eid_t eid, int mctp_fd,
 				   const uint8_t *pldm_req_msg,
 				   size_t req_msg_len, uint8_t **pldm_resp_msg,
@@ -117,6 +122,7 @@ pldm_requester_rc_t pldm_send_recv(mctp_eid_t eid, int mctp_fd,
 		    req_msg_len, (void **)pldm_resp_msg, resp_msg_len);
 }
 
+LIBPLDM_ABI_STABLE
 pldm_requester_rc_t pldm_send(mctp_eid_t eid, int mctp_fd,
 			      const uint8_t *pldm_req_msg, size_t req_msg_len)
 {
@@ -126,6 +132,7 @@ pldm_requester_rc_t pldm_send(mctp_eid_t eid, int mctp_fd,
 
 /* Adding this here for completeness in the case we can't smoothly
  * transition apps over to the new api */
+LIBPLDM_ABI_STABLE
 void pldm_close(void)
 {
 	if (open_transport) {

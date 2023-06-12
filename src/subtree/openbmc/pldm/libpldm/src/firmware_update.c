@@ -1,3 +1,4 @@
+#include "config.h"
 #include "firmware_update.h"
 #include "utils.h"
 #include <endian.h>
@@ -296,6 +297,7 @@ static bool is_non_functioning_component_indication_valid(
 	}
 }
 
+LIBPLDM_ABI_STABLE
 int decode_pldm_package_header_info(
 	const uint8_t *data, size_t length,
 	struct pldm_package_header_information *package_header_info,
@@ -351,6 +353,7 @@ int decode_pldm_package_header_info(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_firmware_device_id_record(
 	const uint8_t *data, size_t length,
 	uint16_t component_bitmap_bit_length,
@@ -443,6 +446,7 @@ int decode_firmware_device_id_record(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_descriptor_type_length_value(const uint8_t *data, size_t length,
 					uint16_t *descriptor_type,
 					struct variable_field *descriptor_data)
@@ -481,6 +485,7 @@ int decode_descriptor_type_length_value(const uint8_t *data, size_t length,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_vendor_defined_descriptor_value(
 	const uint8_t *data, size_t length, uint8_t *descriptor_title_str_type,
 	struct variable_field *descriptor_title_str,
@@ -526,6 +531,7 @@ int decode_vendor_defined_descriptor_value(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_pldm_comp_image_info(
 	const uint8_t *data, size_t length,
 	struct pldm_component_image_information *pldm_comp_image_info,
@@ -590,6 +596,7 @@ int decode_pldm_comp_image_info(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_query_device_identifiers_req(uint8_t instance_id,
 					size_t payload_length,
 					struct pldm_msg *msg)
@@ -606,6 +613,7 @@ int encode_query_device_identifiers_req(uint8_t instance_id,
 				       PLDM_QUERY_DEVICE_IDENTIFIERS, msg);
 }
 
+LIBPLDM_ABI_STABLE
 int decode_query_device_identifiers_resp(const struct pldm_msg *msg,
 					 size_t payload_length,
 					 uint8_t *completion_code,
@@ -653,6 +661,7 @@ int decode_query_device_identifiers_resp(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_get_firmware_parameters_req(uint8_t instance_id,
 				       size_t payload_length,
 				       struct pldm_msg *msg)
@@ -669,6 +678,7 @@ int encode_get_firmware_parameters_req(uint8_t instance_id,
 				       PLDM_GET_FIRMWARE_PARAMETERS, msg);
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_firmware_parameters_resp(
 	const struct pldm_msg *msg, size_t payload_length,
 	struct pldm_get_firmware_parameters_resp *resp_data,
@@ -767,6 +777,7 @@ int decode_get_firmware_parameters_resp(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_firmware_parameters_resp_comp_entry(
 	const uint8_t *data, size_t length,
 	struct pldm_component_parameter_entry *component_data,
@@ -842,6 +853,7 @@ int decode_get_firmware_parameters_resp_comp_entry(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_request_update_req(uint8_t instance_id, uint32_t max_transfer_size,
 			      uint16_t num_of_comp,
 			      uint8_t max_outstanding_transfer_req,
@@ -901,6 +913,7 @@ int encode_request_update_req(uint8_t instance_id, uint32_t max_transfer_size,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_request_update_resp(const struct pldm_msg *msg,
 			       size_t payload_length, uint8_t *completion_code,
 			       uint16_t *fd_meta_data_len,
@@ -930,6 +943,7 @@ int decode_request_update_resp(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_pass_component_table_req(uint8_t instance_id, uint8_t transfer_flag,
 				    uint16_t comp_classification,
 				    uint16_t comp_identifier,
@@ -989,6 +1003,7 @@ int encode_pass_component_table_req(uint8_t instance_id, uint8_t transfer_flag,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_pass_component_table_resp(const struct pldm_msg *msg,
 				     const size_t payload_length,
 				     uint8_t *completion_code,
@@ -1026,6 +1041,7 @@ int decode_pass_component_table_resp(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_update_component_req(
 	uint8_t instance_id, uint16_t comp_classification,
 	uint16_t comp_identifier, uint8_t comp_classification_index,
@@ -1084,6 +1100,7 @@ int encode_update_component_req(
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_update_component_resp(const struct pldm_msg *msg,
 				 size_t payload_length,
 				 uint8_t *completion_code,
@@ -1131,6 +1148,7 @@ int decode_update_component_resp(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_request_firmware_data_req(const struct pldm_msg *msg,
 				     size_t payload_length, uint32_t *offset,
 				     uint32_t *length)
@@ -1153,6 +1171,7 @@ int decode_request_firmware_data_req(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_request_firmware_data_resp(uint8_t instance_id,
 				      uint8_t completion_code,
 				      struct pldm_msg *msg,
@@ -1177,6 +1196,7 @@ int encode_request_firmware_data_resp(uint8_t instance_id,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_transfer_complete_req(const struct pldm_msg *msg,
 				 size_t payload_length,
 				 uint8_t *transfer_result)
@@ -1193,6 +1213,7 @@ int decode_transfer_complete_req(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_transfer_complete_resp(uint8_t instance_id, uint8_t completion_code,
 				  struct pldm_msg *msg, size_t payload_length)
 {
@@ -1219,6 +1240,7 @@ int encode_transfer_complete_resp(uint8_t instance_id, uint8_t completion_code,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_verify_complete_req(const struct pldm_msg *msg,
 			       size_t payload_length, uint8_t *verify_result)
 {
@@ -1234,6 +1256,7 @@ int decode_verify_complete_req(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_verify_complete_resp(uint8_t instance_id, uint8_t completion_code,
 				struct pldm_msg *msg, size_t payload_length)
 {
@@ -1260,6 +1283,7 @@ int encode_verify_complete_resp(uint8_t instance_id, uint8_t completion_code,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_apply_complete_req(const struct pldm_msg *msg, size_t payload_length,
 			      uint8_t *apply_result,
 			      bitfield16_t *comp_activation_methods_modification)
@@ -1288,6 +1312,7 @@ int decode_apply_complete_req(const struct pldm_msg *msg, size_t payload_length,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_apply_complete_resp(uint8_t instance_id, uint8_t completion_code,
 			       struct pldm_msg *msg, size_t payload_length)
 {
@@ -1314,6 +1339,7 @@ int encode_apply_complete_resp(uint8_t instance_id, uint8_t completion_code,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_activate_firmware_req(uint8_t instance_id,
 				 bool8_t self_contained_activation_req,
 				 struct pldm_msg *msg, size_t payload_length)
@@ -1349,6 +1375,7 @@ int encode_activate_firmware_req(uint8_t instance_id,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_activate_firmware_resp(const struct pldm_msg *msg,
 				  size_t payload_length,
 				  uint8_t *completion_code,
@@ -1377,6 +1404,7 @@ int decode_activate_firmware_resp(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_get_status_req(uint8_t instance_id, struct pldm_msg *msg,
 			  size_t payload_length)
 {
@@ -1401,6 +1429,7 @@ int encode_get_status_req(uint8_t instance_id, struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_get_status_resp(const struct pldm_msg *msg, size_t payload_length,
 			   uint8_t *completion_code, uint8_t *current_state,
 			   uint8_t *previous_state, uint8_t *aux_state,
@@ -1467,6 +1496,7 @@ int decode_get_status_resp(const struct pldm_msg *msg, size_t payload_length,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_cancel_update_component_req(uint8_t instance_id,
 				       struct pldm_msg *msg,
 				       size_t payload_length)
@@ -1492,6 +1522,7 @@ int encode_cancel_update_component_req(uint8_t instance_id,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_cancel_update_component_resp(const struct pldm_msg *msg,
 					size_t payload_length,
 					uint8_t *completion_code)
@@ -1508,6 +1539,7 @@ int decode_cancel_update_component_resp(const struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int encode_cancel_update_req(uint8_t instance_id, struct pldm_msg *msg,
 			     size_t payload_length)
 {
@@ -1532,6 +1564,7 @@ int encode_cancel_update_req(uint8_t instance_id, struct pldm_msg *msg,
 	return PLDM_SUCCESS;
 }
 
+LIBPLDM_ABI_STABLE
 int decode_cancel_update_resp(const struct pldm_msg *msg, size_t payload_length,
 			      uint8_t *completion_code,
 			      bool8_t *non_functioning_component_indication,
