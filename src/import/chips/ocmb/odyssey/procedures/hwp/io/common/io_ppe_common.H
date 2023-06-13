@@ -243,6 +243,7 @@ class io_ppe_common
                                     const uint8_t i_thread);
 
         uint8_t get_num_lanes(uint32_t);
+
 };
 
 // ===============================================================
@@ -1152,7 +1153,7 @@ uint8_t io_ppe_common<K, M, V>::get_num_lanes(uint32_t i_lane_mask)
 {
     uint8_t count = 0;
 
-    while(i_lane_mask)
+    while (i_lane_mask)
     {
         count += i_lane_mask & 0x1;
         i_lane_mask >>= 0x1;

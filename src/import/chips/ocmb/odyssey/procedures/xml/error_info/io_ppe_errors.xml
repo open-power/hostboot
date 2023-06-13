@@ -77,4 +77,15 @@
         <priority>HIGH</priority>
       </callout>
     </hwpError>
+  <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_IO_PPE_UNDEGRADE_FAIL</rc>
+      <description>IO PPE undegrade attempt failed</description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>DISABLED_LANES</ffdc>
+      <callout>
+        <target>TARGET</target>
+        <priority>HIGH</priority>
+      </callout>
+    </hwpError>
 </hwpErrors>

@@ -60,6 +60,7 @@ const uint64_t FIR_TLX_RW_WCLEAR = 0x8012000ull;
 namespace ody_io
 {
 #include <io_ppe_common.H>
+#include <ody_omi_degrade.H>
 
 ///
 /// @brief Checks the ATTR_MFG_FLAGS for manufacturing mode
