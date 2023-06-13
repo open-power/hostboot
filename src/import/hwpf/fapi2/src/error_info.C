@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -281,8 +281,12 @@ void ErrorInfoEntryHwCallout::addErrorInfo(std::shared_ptr<ErrorInfo> i_info,
         iv_avsbus,
         iv_avsrail);
 
-    FAPI_DBG("addErrorInfo: Adding hw callout target: 0x%lx hw: %d, pri: %d, pos: %d, avsbus: %d, avsrail: %d",
-             ei->iv_refTarget.get(), ei->iv_hw, ei->iv_calloutPriority, ei->iv_clkPos, ei->iv_avsbus, ei->iv_avsrail);
+    char target_path[128] = { };
+    fapi2::toString(ei->iv_refTarget, target_path, sizeof(target_path));
+
+    FAPI_DBG("addErrorInfo: Adding hw callout target: %s hw: %d, pri: %d, pos: %d, avsbus: %d, avsrail: %d",
+             target_path, ei->iv_hw, ei->iv_calloutPriority, ei->iv_clkPos, ei->iv_avsbus,
+             ei->iv_avsrail);
 
     i_info->iv_hwCallouts.push_back(std::shared_ptr<ErrorInfoHwCallout>(ei));
 }

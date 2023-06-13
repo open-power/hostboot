@@ -846,12 +846,15 @@ fapi2::ReturnCode throttle<MC, TT>::calc_dimm_power(const double i_databus_idle,
 {
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target))
     {
+        char fapi_target_str[128] = { };
+        fapi2::toString(l_dimm, fapi_target_str, sizeof(fapi_target_str));
+
         fapi2::ReturnCode l_rc;
         const uint8_t l_pos = mss::relative_pos<MC, TT::PORT_TARGET_TYPE>(l_dimm);
         o_dimm_power_idle[l_pos] = calc_power(i_databus_idle, l_pos, l_rc);
-        FAPI_TRY(l_rc, "calc_power failed on %s", l_dimm);
+        FAPI_TRY(l_rc, "calc_power (idle) failed on %s", fapi_target_str);
         o_dimm_power_max[l_pos]  = calc_power(i_databus_max, l_pos, l_rc);
-        FAPI_TRY(l_rc, "calc_power failed on %s", l_dimm);
+        FAPI_TRY(l_rc, "calc_power (max) failed on %s", fapi_target_str);
 
         //Raise the powers by the uplift percent
         calc_power_uplift(iv_power_uplift_idle, o_dimm_power_idle[l_pos]);

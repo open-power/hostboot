@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -492,6 +492,9 @@ fapi2::ReturnCode p10_load_rtrim_override(
         //Read PCIE - DLP Training Control Register to check for DL_PGRESET to be deasserted
         l_poll_counter = 0; //Reset poll counter
 
+        char fapi_target_string[128] = { };
+        fapi2::toString(l_phb_target, fapi_target_string, sizeof(fapi_target_string));
+
         while (l_poll_counter < MAX_NUM_POLLS)
         {
             l_poll_counter++;
@@ -500,8 +503,6 @@ fapi2::ReturnCode p10_load_rtrim_override(
             l_data = 0;
             FAPI_TRY(p10_phb_hv_access(l_phb_target, PHB_DLP_TRAINING_CTRL_REGISTER, true, false, l_data),
                      "Error from p10_phb_hv_access: PHB_DLP_TRAINING_CTRL_REGISTER (Read)");
-
-            FAPI_DBG("PHB%i: PHB_DLP_TRAINING_CTRL_REGISTER %#lx", l_phb_target, l_data());
 
             //Check DL_PGRESET is deasserted
             if (!(l_data.getBit(PHB_HV_1A40_TL_EC10_DL_PGRESET)))
@@ -512,6 +513,8 @@ fapi2::ReturnCode p10_load_rtrim_override(
             }
         }
 
+        FAPI_DBG("PHB %s: PHB_DLP_TRAINING_CTRL_REGISTER %#lx", fapi_target_string, l_data());
+
         FAPI_DBG("  DL_PGRESET status (poll counter = %d).", l_poll_counter);
 
         FAPI_ASSERT(l_poll_counter < MAX_NUM_POLLS,
@@ -519,7 +522,7 @@ fapi2::ReturnCode p10_load_rtrim_override(
                     .set_TARGET(l_phb_target)
                     .set_PHB_ADDR(PHB_DLP_TRAINING_CTRL_REGISTER)
                     .set_PHB_DATA(l_data),
-                    "PHB%i: DL_PGRESET did not clear.", l_phb_target);
+                    "PHB %s: DL_PGRESET did not clear.", fapi_target_string);
 
     }
 
