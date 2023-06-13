@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -231,7 +231,7 @@ void testMulticastReadOr()
     fapi2::ReturnCode l_fapiRc = fapi2::getScom(l_mc, TEST_REG,l_fapiReadData);
     if(l_fapiRc)
     {
-        TS_FAIL("testMulticastReadOr: Multicast getScom returned RC: %d",l_fapiRc);
+        TS_FAIL("testMulticastReadOr: Multicast getScom returned RC: %d",static_cast<uint64_t>(l_fapiRc));
         l_errl = fapi2::rcToErrl(l_fapiRc);
         break;
     }
@@ -269,7 +269,7 @@ void testMulticastReadOr()
     l_fapiRc = getScom(l_mc, TEST_REG, l_fapiReadData);
     if(l_fapiRc)
     {
-        TS_FAIL("testMulticastReadOr: Multicast getScom returned RC: %d",l_fapiRc);
+        TS_FAIL("testMulticastReadOr: Multicast getScom returned RC: %d",static_cast<uint64_t>(l_fapiRc));
         l_errl = fapi2::rcToErrl(l_fapiRc);
         break;
     }
@@ -652,7 +652,7 @@ void testMulticastReadAnd()
     if(l_fapiRc)
     {
         TS_FAIL("testMulticastReadAnd: could not multicast write; FAPI RC: %d",
-                l_fapiRc);
+                static_cast<uint64_t>(l_fapiRc));
         l_errl = fapi2::rcToErrl(l_fapiRc);
         break;
     }
@@ -683,7 +683,7 @@ void testMulticastReadAnd()
     if(l_fapiRc)
     {
         TS_FAIL("testMulticastReadAnd: could not read multicast SCOM via fapi2 layer from addr 0x%.08x; FAPI RC: %d",
-                l_multicastScom, l_fapiRc);
+                l_multicastScom, static_cast<uint64_t>(l_fapiRc));
         l_errl = fapi2::rcToErrl(l_fapiRc);
         break;
     }
@@ -1006,7 +1006,7 @@ void testMulticastCompare()
             TS_FAIL("testMulticastCompare: incorrect RC returned for FAPI "
                     "multicsat miscompare. Expected 0x%x; actual 0x%x",
                     fapi2::FAPI2_RC_PLAT_MISCOMPARE,
-                    l_fapiRc);
+                    static_cast<uint64_t>(l_fapiRc));
             l_errl = fapi2::rcToErrl(l_fapiRc);
             break;
         }

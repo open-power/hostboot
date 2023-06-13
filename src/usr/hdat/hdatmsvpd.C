@@ -1449,6 +1449,7 @@ errlHndl_t HdatMsVpd::loadMsDataAllProcs()
                             else
                             {
                                 HDAT_INF("Added SMF memory range to HDAT at index[%d]; start addr: 0x%08x; end addr: 0x%08x; size: 0x%08x",
+                                        l_index,
                                         l_smfStartAddr,
                                         l_smfStartAddr + l_smfSize,
                                         l_smfSize);

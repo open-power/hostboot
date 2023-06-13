@@ -156,8 +156,8 @@ void PNOR::checkHeader (ffs_hdr* i_ffs_hdr,
     {
         PNOR_UTIL_TRACE_W_BRK(BTLDR_TRC_UTILS_CHECKHEADER_ENTRYSIZE,
                                "E>PNOR::checkHeader: Unexpected"
-                " entry_size(0x%.8x) in FFS header: 0x%.4X",
-                i_ffs_hdr->entry_size);
+                " entry_size(0x%.8x) in FFS header",
+                              i_ffs_hdr->entry_size);
         io_errCode |= INVALID_ENTRY_SIZE;
     }
     if(i_ffs_hdr->entry_count == 0)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,7 +158,7 @@ namespace SBEIO
             if (l_errl)
             {
                 TRACFCOMP(g_trac_sbeio,
-                        ERR_MRK"SBE Putmem chip-op ERROR : errorlog PLID=0x%x "
+                        ERR_MRK"SBE Putmem chip-op ERROR : errorlog "
                         TRACE_ERR_FMT,
                         TRACE_ERR_ARGS(l_errl));
             }

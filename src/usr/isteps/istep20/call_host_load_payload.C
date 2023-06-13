@@ -325,7 +325,7 @@ static errlHndl_t load_pnor_section(PNOR::SectionId i_section,
         }else
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
-                     "load_pnor_section: xz-embedded returned an error, ",
+                     "load_pnor_section: xz-embedded returned an error, "
                      "the ret is %d",ret);
 
             /*@

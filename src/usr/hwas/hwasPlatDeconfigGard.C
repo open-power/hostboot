@@ -1534,8 +1534,7 @@ errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
             }
             else if (is_fused_mode())
             {
-                HWAS_INF("FCO: node %.8X: fused_mode detected, FCO value %d will be doubled during processing. "
-                         "fco=0x%X", get_huid(pNode), fco);
+                HWAS_INF("FCO: node %.8X: fused_mode detected, FCO value %d will be doubled during processing.", get_huid(pNode), fco);
             }
             else
             {

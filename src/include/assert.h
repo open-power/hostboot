@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,8 +126,8 @@ void __assert(AssertBehavior i_assertb, const char* i_file, int i_line);
         { \
             if (__ASSERT_HAS_TRACE(__VA_ARGS__)) \
             { \
-                TRACFCOMP(TRACE::g_assertTraceBuffer, \
-                          "Assertion [ " #expr " ] failed; " __VA_ARGS__); \
+                TRACFCOMP_CHECKED(true, TRACE::g_assertTraceBuffer,     \
+                                  "Assertion [ " #expr " ] failed; " __VA_ARGS__); \
             } \
         }
 

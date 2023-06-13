@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,7 @@ void * call_tod_init(void *dummy)
 
         if (l_errl)
         {
-            TOD_ERR("todInit() return errl handle ",
+            TOD_ERR("todInit() return errl handle "
                     TRACE_ERR_FMT,
                     TRACE_ERR_ARGS(l_errl));
             l_errl->collectTrace("ISTEPS_TRACE");
@@ -79,7 +79,7 @@ void * call_tod_init(void *dummy)
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"HTMGT::calcMemThrottles() return errl handle ",
+                      ERR_MRK"HTMGT::calcMemThrottles() return errl handle "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(l_errl));
             l_errl->collectTrace("ISTEPS_TRACE");

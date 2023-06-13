@@ -216,7 +216,7 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "startTdScrubOnNextRow(0x%08x,0x%02x) "
-                          "failed", iv_chip->getHuid() );
+                          "failed", iv_chip->getHuid(), iv_rank );
             }
         }
         else

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,7 @@ namespace SBEIO
     errlHndl_t handleVitalAttn( TARGETING::Target* i_procTarg )
     {
         TRACFCOMP( g_trac_sbeio,
-                   ENTER_MRK "handleVitalAttn> i_procTarg=",
+                   ENTER_MRK "handleVitalAttn> i_procTarg=0x%08X",
                    TARGETING::get_huid(i_procTarg) );
         errlHndl_t l_err = nullptr;
 

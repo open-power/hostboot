@@ -1729,7 +1729,7 @@ errlHndl_t FsiDD::genFullFsiAddr(FSI::FsiAddrInfo_t& io_addrInfo)
         //check for invalid topology
         if( mfsi_info.master != iv_master )
         {
-            TRACFCOMP( g_trac_fsi, "target=%.8X : master=%.8X : master's master=%.8X : Cannot chain 2 masters", TARGETING::get_huid(io_addrInfo.fsiTarg), TARGETING::get_huid(io_addrInfo.accessInfo.master), TARGETING::get_huid(mfsi_info.master), io_addrInfo.accessInfo.type );
+            TRACFCOMP( g_trac_fsi, "target=%.8X : master=%.8X : master's master=%.8X (access type %d) : Cannot chain 2 masters", TARGETING::get_huid(io_addrInfo.fsiTarg), TARGETING::get_huid(io_addrInfo.accessInfo.master), TARGETING::get_huid(mfsi_info.master), io_addrInfo.accessInfo.type );
             /*@
              * @errortype
              * @moduleid     FSI::MOD_FSIDD_GENFULLFSIADDR

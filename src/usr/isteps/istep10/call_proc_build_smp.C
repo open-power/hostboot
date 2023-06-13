@@ -373,7 +373,7 @@ void preventPRDHaltHandling(const TargetHandleList& i_secondaryProcs,
         if (errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to mask TP_LOCAL_FIR[33] on 0x%8X processor",
+                      ERR_MRK"Failed to mask TP_LOCAL_FIR[33] on 0x%8X processor"
                       " tried to write 0x%016llX to SCOM address 0x%.8X",
                       get_huid(proc), local_fir_mask,
                       scomt::proc::TP_TPCHIP_TPC_EPS_FIR_LOCAL_MASK_WO_OR);

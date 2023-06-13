@@ -272,7 +272,7 @@ void enablePRDHaltHandling(const TargetHandleList& i_secondaryProcs,
         if (errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"Failed to clear TP_LOCAL_FIR[33] on 0x%8X processor",
+                      ERR_MRK"Failed to clear TP_LOCAL_FIR[33] on 0x%8X processor"
                       " tried to write 0x%016llX to SCOM address 0x%.8X",
                       get_huid(proc), local_fir_mask,
                       scomt::proc::TP_TPCHIP_TPC_LOCAL_FIR_WO_AND);
@@ -692,7 +692,7 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                         "call_host_secureboot_lockdown: "
-                        "Cannot lock OPAL keystore on PROC 0x%08x ",
+                        "Cannot lock OPAL keystore on PROC 0x%08x "
                         TRACE_ERR_FMT, get_huid(l_proc),
                         TRACE_ERR_ARGS(l_err));
                     l_istepError.addErrorDetails(l_err);
@@ -709,7 +709,7 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                         "call_host_secureboot_lockdown: "
-                        "Cannot lock PHyp keystore on PROC 0x%08x ",
+                        "Cannot lock PHyp keystore on PROC 0x%08x "
                         TRACE_ERR_FMT, get_huid(l_proc),
                         TRACE_ERR_ARGS(l_err));
                     l_istepError.addErrorDetails(l_err);

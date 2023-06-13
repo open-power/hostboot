@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1112,37 +1112,37 @@ void LpcDD::computeOpbmErrSev(OpbmErrReg_t i_opbmErrData,
     {
         o_resetLevel = RESET_OPB_LPCHC_SOFT;
         TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> Invalid Transfer Size Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
-                   i_opbmErrData, o_resetLevel);
+                   i_opbmErrData.data32, o_resetLevel);
     }
     if( i_opbmErrData.rxicmd )
     {
         o_resetLevel = RESET_OPB_LPCHC_SOFT;
         TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> Invalid Command Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
-                   i_opbmErrData, o_resetLevel);
+                   i_opbmErrData.data32, o_resetLevel);
     }
     if( i_opbmErrData.rxiaa )
     {
         o_resetLevel = RESET_OPB_LPCHC_SOFT;
         TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> Invalid Address Alignment Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
-                   i_opbmErrData, o_resetLevel);
+                   i_opbmErrData.data32, o_resetLevel);
     }
     if( i_opbmErrData.rxopbe )
     {
         o_resetLevel = RESET_OPB_LPCHC_SOFT;
         TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> OPB Error Acknowledged: OPBM Status Reg =0x%8X, ResetLevel=%d",
-                   i_opbmErrData, o_resetLevel);
+                   i_opbmErrData.data32, o_resetLevel);
     }
     if( i_opbmErrData.rxicmdb )
     {
         o_resetLevel = RESET_OPB_LPCHC_SOFT;
         TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> OPB Master Command Buffer Parity Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
-                   i_opbmErrData, o_resetLevel);
+                   i_opbmErrData.data32, o_resetLevel);
     }
     if( i_opbmErrData.rxidatab )
     {
         o_resetLevel = RESET_OPB_LPCHC_SOFT;
         TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> OPM Master Data Buffer Parity Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
-                   i_opbmErrData, o_resetLevel);
+                   i_opbmErrData.data32, o_resetLevel);
     }
 
     // Now look for HARD errors that will override SOFT errors reset Level
@@ -1150,19 +1150,19 @@ void LpcDD::computeOpbmErrSev(OpbmErrReg_t i_opbmErrData,
     {
         o_resetLevel = RESET_OPB_LPCHC_HARD;
         TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> OPM Timeout Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
-                   i_opbmErrData, o_resetLevel);
+                   i_opbmErrData.data32, o_resetLevel);
     }
     if( i_opbmErrData.rxiaddr )
     {
         o_resetLevel = RESET_OPB_LPCHC_HARD;
         TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> Invalid Address Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
-                   i_opbmErrData, o_resetLevel);
+                   i_opbmErrData.data32, o_resetLevel);
     }
     if( i_opbmErrData.rxctgtel )
     {
         o_resetLevel = RESET_OPB_LPCHC_HARD;
         TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> OPB Master Timeout: OPBM Status Reg =0x%8X, ResetLevel=%d",
-                   i_opbmErrData, o_resetLevel);
+                   i_opbmErrData.data32, o_resetLevel);
     }
 }
 

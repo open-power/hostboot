@@ -223,6 +223,7 @@ errlHndl_t UtilLidMgr::getLidPnorSectionInfo(const uint32_t i_lidId,
         else if (l_err)
         {
             UTIL_FT(ERR_MRK"UtilLidMgr::getLidPnorSectionInfo Lid 0x%X getSectionInfo failed rc=0x%08X",
+                    i_lidId,
                     l_err->reasonCode());
             break;
         }

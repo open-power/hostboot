@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/attn/hostboot/test/attntesttest.H $              */
+/* $Source: src/usr/diag/attn/ipl/test/attntesttest.H $                   */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,7 +63,8 @@ class AttnTestTest: public CxxTest::TestSuite
 
                 if(val < lower || upper < val)
                 {
-                    TS_FAIL("rand %d not between bounds %d and %d");
+                    TS_FAIL("rand %d not between bounds %d and %d", 
+                            val, lower, upper);
                 }
 
                 lower = iteration;
@@ -73,7 +74,7 @@ class AttnTestTest: public CxxTest::TestSuite
 
                 if(val < lower || upper < val)
                 {
-                    TS_FAIL("rand %d not between bounds %d and %d");
+                    TS_FAIL("rand %d not between bounds %d and %d", val, lower, upper);
                 }
             }
 

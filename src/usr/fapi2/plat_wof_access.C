@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1048,7 +1048,7 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
         // WOF table header fields
         FAPI_INF("getOverrideWofTable WOF Header Table Fields: magic: 0x%X "
             "Version %d Mode %d Cores %d SocketPower 0x%X NomFreq 0x%X",
-            l_tableHeader->magic_number,
+            l_tableHeader->magic_number.value,
             l_tableHeader->header_version, l_tableHeader->ocs_mode,
             l_tableHeader->core_count, l_tableHeader->socket_power_w,
             l_tableHeader->sort_power_freq_mhz);

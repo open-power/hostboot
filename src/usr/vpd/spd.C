@@ -1542,7 +1542,7 @@ errlHndl_t spdUpdateEepromRedundancy(Target * i_target, const uint8_t i_memType)
                          TRACFCOMP(g_trac_spd,
                             "spdUpdateEepromRedundancy> OCMB (0x%08X), parent of DIMM (0x%08X), is a planar OCMB. "
                             "Skip setting ATTR_EEPROM_VPD_REDUNDANCY since planar OCMBs don't share EEPROM devices with their child DIMMs",
-                            get_huid(i_target), get_huid(l_ocmbs[0]), newEepromRedundancy);
+                            get_huid(i_target), get_huid(l_ocmbs[0]));
                     }
                 }
                 else

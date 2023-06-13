@@ -233,7 +233,7 @@ class SPDTest: public CxxTest::TestSuite
                     else if (theSize == 3)
                     {
                         TRACFCOMP( g_trac_spd,
-                                   "testSpdRead - kwd: 0x%04x, val: 0x%02x%02x%02x, size: 3",
+                                   "testSpdRead - kwd: 0x%04x, val: 0x%02x%02x%02x, size: %d",
                                    keyword, theData[0], theData[1], theData[2],
                                    theSize );
                     }
@@ -1371,7 +1371,7 @@ class SPDTest: public CxxTest::TestSuite
                     else if (theSize == 3)
                     {
                         TRACFCOMP( g_trac_spd,
-                                   "testspdModSpecKwds - kwd: 0x%04x, val: 0x%02x%02x%02x, size: 3",
+                                   "testspdModSpecKwds - kwd: 0x%04x, val: 0x%02x%02x%02x, size: %d",
                                    keyword, theData[0], theData[1], theData[2],
                                    theSize );
                     }
@@ -1663,7 +1663,7 @@ class SPDTest: public CxxTest::TestSuite
                     else if (theSize == 3)
                     {
                         TRACFCOMP( g_trac_spd,
-                                   "testSpdReadGeneric - kwd: 0x%04x, val: 0x%02x%02x%02x, size: 3",
+                                   "testSpdReadGeneric - kwd: 0x%04x, val: 0x%02x%02x%02x, size: %d",
                                    keyword, theData[0], theData[1], theData[2],
                                    theSize );
                     }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -804,7 +804,7 @@ errlHndl_t SbePsu::checkResponse(TARGETING::Target  * i_target,
                 //Deallocate FFDC buffer
                 if(i_pPsuRequest->command == SBE_PSU_SET_FFDC_ADDRESS)
                 {
-                    SBE_TRACF(ERR_MRK, "sbe_psudd.C: checkResponse: "
+                    SBE_TRACF(ERR_MRK "sbe_psudd.C: checkResponse: "
                         "Set FFDC Address failed.");
                     freePage(l_ffdcPkg);
                     iv_ffdcPackageBuffer.erase(i_target);

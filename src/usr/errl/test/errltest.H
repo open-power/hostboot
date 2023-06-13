@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -249,7 +249,7 @@ public:
             {
                 // cb is big enough for the header only, but no
                 // room for any entries.
-                TS_FAIL( "collectTrace(TARG,l_cb) rets false", l_cb );
+                TS_FAIL( "collectTrace(TARG,%d) rets false", l_cb );
                 break;
             }
 

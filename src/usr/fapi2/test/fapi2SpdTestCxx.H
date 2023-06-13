@@ -89,7 +89,7 @@ class SPDTest: public CxxTest::TestSuite
               if( !l_spdSize || (l_rc != fapi2::FAPI2_RC_SUCCESS) )
               {
                   FAPI_ERR("fapi2::getSPD(l_fDim, NULL, l_spdSize) returned %d",
-                           l_rc);
+                           static_cast<uint64_t>(l_rc));
 
                   auto errl = fapi2::rcToErrl(l_rc);
                   errlCommit(errl, CXXTEST_COMP_ID);
@@ -105,7 +105,7 @@ class SPDTest: public CxxTest::TestSuite
               if ( l_rc != fapi2::FAPI2_RC_SUCCESS )
               {
                   FAPI_ERR("fapi2::getSPD(l_fDim, l_blobData, l_spdSize) returned %d",
-                           l_rc);
+                           static_cast<uint64_t>(l_rc));
 
                   auto errl = fapi2::rcToErrl(l_rc);
                   errlCommit(errl, CXXTEST_COMP_ID);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,7 @@ void * call_tod_setup(void *dummy)
 
         if (l_errl)
         {
-            TOD_ERR("todSetup() return errl handle ",
+            TOD_ERR("todSetup() return errl handle "
                     TRACE_ERR_FMT,
                     TRACE_ERR_ARGS(l_errl));
             l_errl->collectTrace("ISTEPS_TRACE");

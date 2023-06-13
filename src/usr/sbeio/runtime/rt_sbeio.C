@@ -389,8 +389,7 @@ namespace RT_SBEIO
             if(errl)
             {
                 TRACFCOMP(g_trac_sbeio, ERR_MRK"process_sbe_msg: process "
-                          "command returned error log",
-                          o_response.cmdHdr.dataSize);
+                          "command returned error log");
 
                 errl->addFFDC( SBE_COMP_ID,
                                &(i_request),

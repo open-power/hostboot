@@ -934,9 +934,7 @@ errlHndl_t verifyMeasurementSeepromSecurity(const TARGETING::TargetHandle_t& i_p
         {
             SB_ERR("verifyMeasurementSeepromSecurity: "
                     "Detected Measurement SEEPROM fuse has not been blown. "
-                    "Platform security is compromised.",
-                    (reg.data & VERSION_BYTES_MASK),
-                    MINIMUM_SECURE_MEASUREMENT_VERSION);
+                    "Platform security is compromised.");
             /*@
              * @errortype
              * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE/INFORMATIONAL

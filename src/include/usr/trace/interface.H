@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,9 +43,11 @@
 /******************************************************************************/
 // Includes
 /******************************************************************************/
+#include <utility>
 #include <builtins.h>
 #include <stdint.h>
 #include <trace/trace.H>      // Internal function and struct definitions
+#include <type_traits>
 
 /******************************************************************************/
 // Globals/Constants
@@ -206,9 +208,79 @@ inline constexpr size_t TRAC_COUNT_ARGS()
     return T::num_args;
 }
 
-#define TRAC_CHECK_ARGS(skip, printf_string, args...)                    \
+inline constexpr size_t TRAC_COUNT_FMT_SPECIFIERS(const char* const str,
+                                                  const size_t len = 0)
+{
+    if (str[0] == '\0')
+    {
+        return len;
+    }
+
+    if (str[0] == '%')
+    {
+        if (str[1] == '%')
+        {
+            return TRAC_COUNT_FMT_SPECIFIERS(str + 2, len);
+        }
+        else
+        {
+            // This may not skip the entire format specifier (in the
+            // case of e.g. "%lld"), but we don't care because we just
+            // want to count percent signs.
+            return TRAC_COUNT_FMT_SPECIFIERS(str + 2, len + 1);
+        }
+    }
+
+    return TRAC_COUNT_FMT_SPECIFIERS(str + 1, len);
+}
+
+template<typename T>
+struct TRAC_CHECK_ARG_TYPE
+{
+    /* @TODO: Finer-grained argument type checking
+    static bool is_bits_type(...);
+
+    template<typename X>
+    static int is_bits_type(const X&, const typename X::bits_type&);
+
+    using decay_T = typename std::decay<T>::type;
+
+    static constexpr bool value
+        = (std::is_integral<decay_T>::value
+           || std::is_same<decay_T, float>::value
+           || std::is_same<decay_T, double>::value
+           || std::is_enum<decay_T>::value
+           || std::is_pointer<decay_T>::value
+           || std::is_same<decltype(is_bits_type(std::declval<T>(), 0)), int>::value
+           || (std::is_pod<decay_T>::value && sizeof(T) <= 8));
+    */
+    static constexpr bool value = sizeof(T) <= 8;
+};
+
+template<typename... Args>
+struct TRAC_CHECK_ARG_TYPES;
+
+template<typename T, typename... Args>
+struct TRAC_CHECK_ARG_TYPES<TRAC_ARG_TUPLE<T, Args...>>
+    : TRAC_CHECK_ARG_TYPES<TRAC_ARG_TUPLE<Args...>>
+{
+    static_assert(TRAC_CHECK_ARG_TYPE<T>::value,
+                  "Invalid argument type given to trace macro");
+};
+
+template<>
+struct TRAC_CHECK_ARG_TYPES<TRAC_ARG_TUPLE<>>
+{
+    static constexpr bool value = true;
+};
+
+#define TRAC_CHECK_ARGS(skip, printf_string, args...)                   \
     static_assert(skip || TRAC_COUNT_ARGS<decltype(TRAC_MAKE_ARG_TUPLE(args))>() <= TRAC_MAX_ARGS, \
-                  "Too many arguments to trace function");
+                  "Too many arguments to trace function");              \
+    static_assert(skip || (TRAC_COUNT_ARGS<decltype(TRAC_MAKE_ARG_TUPLE(args))>() \
+                           == TRAC_COUNT_FMT_SPECIFIERS(printf_string)), \
+                  "Number of format specifiers does not match number of arguments"); \
+    static_assert(TRAC_CHECK_ARG_TYPES<decltype(TRAC_MAKE_ARG_TUPLE(args))>::value);
 
 /**
  * @fn void TRACFCOMP_CHECKED(skip_check, des, printf_string, p1, p2, ...)

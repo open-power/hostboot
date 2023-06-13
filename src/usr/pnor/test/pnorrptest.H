@@ -578,7 +578,7 @@ class PnorRpTest : public CxxTest::TestSuite
             if (TOC_used == cur_TOC)
             {
                 TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC> ERROR : TOC %d header is corrupted, did not use other TOC", cur_TOC);
-                TS_FAIL("PnorRpTest::test_TOC> ERROR : TOC %d header is corrupted, did not use other TOC");
+                TS_FAIL("PnorRpTest::test_TOC> ERROR : TOC %d header is corrupted, did not use other TOC", cur_TOC);
             }
 
             // Fix cur_TOC header

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -833,7 +833,7 @@ namespace SBE
                   // no previous error, so returning cleanup error
                   TRACFCOMP( g_trac_sbe,
                              ERR_MRK"updateProcessorSbeSeeproms(): "
-                             "cleanupPreloadedPnorSections() failed.",
+                             "cleanupPreloadedPnorSections() failed. "
                              "rc=0x%.4X", err_cleanup->reasonCode() );
                   err = err_cleanup;
              }
@@ -853,7 +853,7 @@ namespace SBE
                     ERR_MRK"updateProcessorSbeSeeproms(): Failed in call to "
                     "updateKeyTransitionState with state of "
                     "KEY_TRANSITION_STATE_KEY_TRANSITION_FAILED. "
-                    "Error log's EID=0x%08X, PLID=0x%08X, RC=0x%04X. ",
+                    "Error log's EID=0x%08X, PLID=0x%08X, RC=0x%04X. "
                     "Changing error log's PLID to 0x%08X.",
                     pError->eid(),pError->plid(),pError->reasonCode(),
                     err->plid());

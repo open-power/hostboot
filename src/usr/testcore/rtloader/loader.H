@@ -949,7 +949,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         {
             TRACFCOMP(g_trac_hbrt,
                       "Loading runtime hcode_update: "
-                      "target 0x%llX chipId 0x%llX section 0x%X "
+                      "chipId 0x%llX section 0x%X "
                       "operation 0x%X scomAddr 0x%llX scomData 0x%llX",
                       i_chipId, i_section, i_operation, i_scomAddr, i_scomData);
             return 0;

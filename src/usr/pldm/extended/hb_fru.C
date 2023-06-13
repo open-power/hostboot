@@ -574,7 +574,7 @@ void getRecordSetByIdAndType(const uint8_t* const i_pldm_fru_table_buf,
                              uint16_t & o_records_in_output_table)
 {
   PLDM_ENTER("getRecordSetByIdAndType: o_pldm_fru_table_buf = %p  i_record_set_id = 0x%x  i_record_type = 0x%x",
-             o_pldm_fru_table_buf,
+             o_pldm_fru_table_buf.data(),
              i_record_set_id,
              i_record_type);
 

@@ -5,7 +5,8 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -67,7 +68,7 @@ void* call_proc_load_iop_xram (void *io_pArgs)
     if (l_errl)
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                ERR_MRK"call_proc_load_iop_xram ERROR : errorlog PLID=0x%x "
+                ERR_MRK"call_proc_load_iop_xram ERROR : errorlog "
                 TRACE_ERR_FMT,
                 TRACE_ERR_ARGS(l_errl));
         captureError(l_errl, l_stepError, HWPF_COMP_ID);

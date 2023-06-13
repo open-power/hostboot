@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -943,7 +943,7 @@ errlHndl_t UtilLidMgr::cleanup()
                                       iv_lidPnorInfo.size );
             if( rc )
             {
-                UTIL_FT( ERR_MRK"rc=%d from mm_remove_pages(%llX,%llX)", iv_lidPnorInfo.vaddr, iv_lidPnorInfo.size );
+                UTIL_FT( ERR_MRK"rc=%d from mm_remove_pages(%llX,%llX)", rc, iv_lidPnorInfo.vaddr, iv_lidPnorInfo.size );
                 /*@
                  *   @errortype
                  *   @moduleid      Util::UTIL_LIDMGR_CLEANUP

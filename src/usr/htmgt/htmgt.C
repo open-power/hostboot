@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -466,7 +466,7 @@ namespace HTMGT
         else
         {
             uint32_t huid = i_proc->getAttr<TARGETING::ATTR_HUID>();
-            TMGT_INF("processOccReset: Invalid OCC target (proc huid=0x08X)"
+            TMGT_INF("processOccReset: Invalid OCC target (proc huid=0x%08X)"
                      "resetting OCCs anyway",
                      huid);
 

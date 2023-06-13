@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -353,12 +353,12 @@ public:
           if(test_data[x].expectErr)
           {
               TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> Reading from the addr: 0x%X with opMode: 0x%X and an error is expected",
-                        test_data[x].addr,test_data[x].data,test_data[x].mode);
+                        test_data[x].addr,test_data[x].mode);
           }
           else
           {
             TRACFCOMP(g_trac_scom, "ScomTest::test_opModes> Reading from the addr: 0x%X with opMode: 0x%X and an error is not expected",
-                      test_data[x].addr,test_data[x].data,test_data[x].mode);
+                      test_data[x].addr,test_data[x].mode);
           }
 
           total++;

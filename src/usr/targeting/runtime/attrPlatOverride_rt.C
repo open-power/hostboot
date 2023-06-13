@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -125,7 +125,7 @@ int apply_attr_override(uint8_t* i_data,
 #endif
     }
 
-    TRACFCOMP(g_trac_hbrt, EXIT_MRK" apply_attr_override: rc=%d");
+    TRACFCOMP(g_trac_hbrt, EXIT_MRK" apply_attr_override: rc=%d", rc);
 
     return rc;
 }

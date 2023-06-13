@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -705,7 +705,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             if (local_ec != sbeState.ec)
             {
                 fails++;
-                TS_FAIL("testSbeUpdateTarget() - Bad ec check: local=0x%X, other=0x%X", local_ec, sbeState);
+                TS_FAIL("testSbeUpdateTarget() - Bad ec check: local=0x%X, other=0x%X", local_ec, sbeState.ec);
                 break;
             }
 

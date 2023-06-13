@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -364,7 +364,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
                         (l_err->moduleId() != TARG_RT_VALIDATEDATA))
                 {
                     TS_FAIL("testValidateData> unexpected module ID from "
-                            "validateData, expected 0x86, received 0x%.2x",
+                            "validateData, expected 0x%.4x, received 0x%.2x",
                             TARG_RT_VALIDATEDATA,
                             l_err->moduleId());
                     break;
@@ -404,7 +404,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
                         (l_err->moduleId() != TARG_RT_VALIDATEDATA))
                 {
                     TS_FAIL("testValidateData> unexpected module ID from "
-                            "validateData, expected 0x86, received 0x%.2x",
+                            "validateData, expected 0x%.2x, received 0x%.2x",
                             TARG_RT_VALIDATEDATA,
                             l_err->moduleId());
                     break;
@@ -444,7 +444,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
                         (l_err->moduleId() != TARG_RT_VALIDATEDATA))
                 {
                     TS_FAIL("testValidateData> unexpected module ID from "
-                            "validateData, expected 0x86, received 0x%.2x",
+                            "validateData, expected 0x%.2x, received 0x%.2x",
                             TARG_RT_VALIDATEDATA,
                             l_err->moduleId());
                     break;
@@ -497,7 +497,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
                         (l_err->moduleId() != TARG_RT_VALIDATEDATA))
                 {
                     TS_FAIL("testValidateData> unexpected module ID from "
-                            "validateData, expected 0x86, received 0x%.2x",
+                            "validateData, expected 0x%.2x, received 0x%.2x",
                             TARG_RT_VALIDATEDATA,
                             l_err->moduleId());
                     break;
@@ -769,12 +769,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
 
                 if(l_memcmpFailed != 0)
                 {
-                    TS_FAIL("testSaveRestoreAttrs FAILED memcmp %d "
-                              ERR_MRK"testSaveRestoreAttrs FAILED memcmp %d "
-                              "(0x%.8x) times out of %d (0x%.8x)",
+                    TS_FAIL(ERR_MRK"testSaveRestoreAttrs FAILED memcmp %d "
+                              "times out of %d",
                               l_memcmpFailed,
-                              l_memcmpFailed,
-                              l_memcmpCount,
                               l_memcmpCount);
                     break;
                 }

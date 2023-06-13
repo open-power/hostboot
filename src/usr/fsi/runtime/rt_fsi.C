@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -223,7 +223,7 @@ errlHndl_t RtFsi::genFullFsiAddr(FSI::FsiAddrInfo_t& io_addrInfo)
         {
             TRACFCOMP( g_trac_fsi,
                       "target=%.8X : master=%.8X : master's master=%.8X :"
-                      " Cannot chain 2 masters",
+                      " Cannot chain 2 masters (type=%d)",
                       TARGETING::get_huid(io_addrInfo.fsiTarg),
                       TARGETING::get_huid(io_addrInfo.accessInfo.master),
                       TARGETING::get_huid(mfsi_info.master),

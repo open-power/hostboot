@@ -1746,7 +1746,7 @@ void IntrRp::handleExternalInterrupt()
                             "IntrRp::handleExternalInterrupt: sendXiveEOI "
                             "returned error for interrupt source: 0x%016llX "
                             "and PIR: 0x%lx",
-                            intSource, l_pir);
+                            intSource, l_pir.word);
                         errlCommit(pError, INTR_COMP_ID);
                     }
 

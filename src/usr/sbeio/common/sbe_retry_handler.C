@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1752,7 +1752,7 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(P10_EXTRACT_SBE_RC::RETURN_ACTION i
 
             errlCommit(l_errl, SBEIO_COMP_ID);
 
-            SBE_TRACF("ERROR MVPDOP_READ switch_sbe_sides: getSetMVPDVersion IPL time proc target = %.8X",
+            SBE_TRACF("ERROR MVPDOP_READ switch_sbe_sides: getSetMVPDVersion IPL time proc target = %.8X (rc=0x%X, plid=0x%08x)",
                       TARGETING::get_huid(iv_proc),
                        ERRL_GETRC_SAFE(l_errl),
                        ERRL_GETPLID_SAFE(l_errl));
@@ -1899,7 +1899,7 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(P10_EXTRACT_SBE_RC::RETURN_ACTION i
                 updatePlids(l_errl);
 
                 errlCommit(l_errl, SBEIO_COMP_ID);
-                SBE_TRACF("ERROR MVPDOP_WRITE switch_sbe_sides: getSetMVPDVersion IPL time proc target = %.8X",
+                SBE_TRACF("ERROR MVPDOP_WRITE switch_sbe_sides: getSetMVPDVersion IPL time proc target = %.8X (RC=0x%x, PLID=0x%08X)",
                           TARGETING::get_huid(iv_proc),
                            ERRL_GETRC_SAFE(l_errl),
                            ERRL_GETPLID_SAFE(l_errl));

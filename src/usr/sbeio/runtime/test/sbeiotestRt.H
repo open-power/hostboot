@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -783,7 +783,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                 {
                     TS_FAIL("Unexpected error during RT SBE message passing. "
                             "Testing message size too small / data size too "
-                            "large for chipID",
+                            "large for chipID %d",
                             chipId);
                     break;
                 }

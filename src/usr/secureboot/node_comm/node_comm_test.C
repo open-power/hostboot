@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -220,8 +220,7 @@ errlHndl_t nodeCommXbus2ProcTest(void)
     {
         TRACFCOMP(g_trac_nc,INFO_MRK"nodeCommXbus2ProcTest: "
                   "DATA SUCCESSFULLY READ BACK = 0x%.16llx from "
-                  "proc=0x%X's L%d/M%d Mailbox"
-                  "L%d/M%d using proc=0x%X",
+                  "proc=0x%X's L%d/M%d Mailbox",
                   read_data, TARGETING::get_huid(read_tgt), linkId, mboxId);
     }
     else

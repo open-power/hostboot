@@ -1066,7 +1066,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                     FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
                                      mss::mcbist::PATTERN_RANDOM );
                 }
-                MDIA_FAST( "sm: random init %p on: 0x%08x", fapiOcmb,
+                MDIA_FAST( "sm: random init %p on: 0x%08x", static_cast<void*>(fapiOcmb.get()),
                            get_huid(target) );
                 break;
 
@@ -1109,7 +1109,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
                     FAPI_INVOKE_HWP( err, exp_sf_read, fapiOcmb, sc );
                 }
-                MDIA_FAST( "sm: scrub %p on: 0x%08x", fapiOcmb,
+                MDIA_FAST( "sm: scrub %p on: 0x%08x", static_cast<void*>(fapiOcmb.get()),
                            get_huid(target) );
                 break;
             }
@@ -1134,7 +1134,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                     FAPI_INVOKE_HWP( err, exp_sf_init, fapiOcmb,
                                      workItem );
                 }
-                MDIA_FAST( "sm: init %p on: 0x%08x", fapiOcmb,
+                MDIA_FAST( "sm: init %p on: 0x%08x", static_cast<void*>(fapiOcmb.get()),
                            get_huid(target) );
                 break;
 

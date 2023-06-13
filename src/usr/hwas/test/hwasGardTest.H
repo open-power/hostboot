@@ -5207,7 +5207,7 @@ public:
                 if (l_records.size() != 0)
                 {
                     TS_INFO("testGardVersion: target has %d existing Gard Records, SKIPPING test",
-                             number_processed, l_records.size());
+                             l_records.size());
                      break;
                 }
 

@@ -2692,7 +2692,7 @@ void hdatGetMemTargetMmioInfo(TARGETING::Target* i_pTarget,
     for (const auto& mmioDev : mmioInfo)
     {
         HDAT_DBG("MMIO device attached to HUID=0x%08X: "
-            "hbrt Id=0x%02X, ",
+            "hbrt Id=0x%02X, "
             "mmio flags=0x%02X, ",
             TARGETING::get_huid(i_pTarget),
             mmioDev.hbrtId,

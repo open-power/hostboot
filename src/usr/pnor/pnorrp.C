@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1834,7 +1834,7 @@ errlHndl_t PnorRP::clearSection(PNOR::SectionId i_section)
         l_errl = flush(i_section);
         if (l_errl)
         {
-            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorRP::clearSection: flush() failed on section",
+            TRACFCOMP( g_trac_pnor, ERR_MRK"PnorRP::clearSection: flush() failed on section %d",
                         i_section);
             break;
         }

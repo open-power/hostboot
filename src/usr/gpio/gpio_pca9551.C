@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -270,7 +270,7 @@ errlHndl_t gpioPca9551SetLed(TARGETING::Target * i_target,
     if (data != write_data)
     {
         TRACFCOMP(g_trac_gpio, ERR_MRK"gpioPca9551SetLed: "
-                  "Reading Back LED Select register 0x%X had unexpected data=",
+                  "Reading Back LED Select register 0x%X had unexpected data="
                   "0x%.2X. Expected 0x%.2X",
                   register_addr, data, write_data);
 

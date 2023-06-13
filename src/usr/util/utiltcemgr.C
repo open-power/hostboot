@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1131,7 +1131,7 @@ errlHndl_t UtilTceMgr::disableTces(void)
         if ( rc )
         {
             // Got a bad rc from mm_block_unmap
-            TRACFCOMP(g_trac_tce, "UtilTceMgr::disableTces: mm_unmap_block failed: rc = 0x%.16llX, iv_tceTableVaAddr=0x%.16llX iv_tceTablePhysAddr=0x%X", rc, iv_tceTableVaAddr, iv_tceTablePhysAddr, rc);
+            TRACFCOMP(g_trac_tce, "UtilTceMgr::disableTces: mm_unmap_block failed: rc = 0x%.16llX, iv_tceTableVaAddr=0x%.16llX iv_tceTablePhysAddr=0x%X", rc, iv_tceTableVaAddr, iv_tceTablePhysAddr);
 
             /*@
              * @errortype
