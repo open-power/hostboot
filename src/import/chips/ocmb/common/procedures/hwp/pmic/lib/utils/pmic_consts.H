@@ -293,6 +293,7 @@ struct consts<mss::pmic::product::TPS5383X>
     static constexpr uint32_t R78_VOLT_SWABCD_RANGE1_MIN   = 800;
     static constexpr uint32_t R78_VOLT_SWABCD_RANGE2_MIN   = 500;
     static constexpr uint32_t R78_VOLT_SWABCD_RANGE3_MIN   = 1500;
+
     // R78 voltage ranges
     static constexpr uint8_t R78_NUM_RANGES                = 4;
     static constexpr uint8_t R78_RANGE_0                   = 0;
@@ -312,6 +313,7 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
 {
     static constexpr uint8_t RANGE_0                    = 0;
     static constexpr uint8_t RANGE_1                    = 1;
+    static constexpr uint8_t RANGE_2                    = 2;
     static constexpr uint8_t NUM_PRIMARY_PMICS          = 2; // PMIC0/2, PMIC1/3
     static constexpr uint8_t NUM_PMICS_4U               = 4; // DDR4: 2 redundant, DDR5: 1 redundant
     static constexpr uint8_t NUM_DTS_4U                 = 4; // DDR4: not present, DDR5: 1 redundant
@@ -354,7 +356,7 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     // Shift left 1 to match buffer position
     static constexpr uint8_t SHIFT_VOLTAGE_FOR_REG      = 1;
 
-    static constexpr uint8_t NUM_RANGES                 = 2; // RANGE0 and RANGE1
+    static constexpr uint8_t NUM_RANGES                 = 3; // RANGE0, RANGE1, RANGE2
     static constexpr uint8_t MAX_VOLT_BITMAP            = 0b01111111;
     static constexpr uint8_t MAX_DELAY_BITMAP           = 0b00000111;
     static constexpr uint8_t CONVERT_RANGE1_TO_RANGE0   = 40;
@@ -369,6 +371,8 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint32_t SWD_VOLT_RANGE0_MAX          = 2135;
     static constexpr uint32_t SWD_VOLT_RANGE1_MIN          = 2200;
     static constexpr uint32_t SWD_VOLT_RANGE1_MAX          = 2835;
+    static constexpr uint32_t SWCD_VOLT_RANGE2_MIN         = 800;
+    static constexpr uint32_t SWCD_VOLT_RANGE2_MAX         = 1000;
 
     static constexpr uint32_t VOLT_STEP                    = 5;
 

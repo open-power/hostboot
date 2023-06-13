@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,9 +60,6 @@ const std::vector<uint8_t> PMIC0_NOMINALS =
     0x78  // SWD 2.5V
 };
 
-// This is handy for determining nominal in pmic_bias_tool.
-static constexpr uint8_t PMIC0_SWD_RANGE = 1;
-
 ///
 /// @brief PMIC1 nominal voltages
 ///
@@ -75,6 +72,7 @@ const std::vector<uint8_t> PMIC1_NOMINALS =
 };
 
 // This is handy for determining nominal in pmic_bias_tool.
+static constexpr uint8_t PMIC0_SWD_RANGE = 1;
 static constexpr uint8_t PMIC1_SWD_RANGE = 0;
 
 ///
