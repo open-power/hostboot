@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -215,8 +215,9 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
                     mss::mcbist::STOP_AFTER_ADDRESS );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "startTdScrubOnNextRow(0x%08x,0x%02x) "
-                          "failed", iv_chip->getHuid() );
+                PRDF_ERR(PRDF_FUNC "startTdScrubOnNextRow(0x%08x,0x%02x) "
+                                   "failed",
+                         iv_chip->getHuid(), getKey());
             }
         }
         else
