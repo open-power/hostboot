@@ -1549,7 +1549,7 @@ group gOCMB_PHY_FIR
     /** OCMB_PHY_FIR[24]
      *  PPE Code Bad Lane Warning
      */
-    (rOCMB_PHY_FIR, bit(24)) ? ocmb_M_th_32perDay;
+    (rOCMB_PHY_FIR, bit(24)) ? ocmb_M_mnfg_info_only;
 
     /** OCMB_PHY_FIR[25]
      *  PPE Code DFT Error

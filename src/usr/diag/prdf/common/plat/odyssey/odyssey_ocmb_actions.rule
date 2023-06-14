@@ -287,6 +287,12 @@ actionclass ocmb_M_info_only
     info_only_th32;
 };
 
+actionclass ocmb_M_mnfg_info_only
+{
+    calloutOcmbMed;
+    info_only_mnfgInfo_th32;
+};
+
 actionclass level2_M_info_only
 {
     callout2ndLvlMed;
@@ -348,6 +354,12 @@ actionclass omi_degraded_mode
 actionclass info_only_mnfgInfo_th1
 {
     threshold1;
+    funccall("ClearServiceCallFlag_mnfgInfo"); # must be called after threshold
+};
+
+actionclass info_only_mnfgInfo_th32
+{
+    threshold32pday;
     funccall("ClearServiceCallFlag_mnfgInfo"); # must be called after threshold
 };
 
