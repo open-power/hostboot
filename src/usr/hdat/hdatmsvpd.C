@@ -2019,7 +2019,9 @@ errlHndl_t HdatMsVpd::hdatScanDimms(const TARGETING::Target *i_pOcmbTarget,
                                                                                    TYPE_DIMM,
                                                                                    UTIL_FILTER_PRESENT))
         {
-            uint32_t l_dimmfru = l_pDimmTarget->getAttr<TARGETING::ATTR_FRU_ID>();
+            // Using PDR entity instance as FRU ID since this is the Hostboot equivalent which meets
+            // criteria imposed by PHYP. (value within range 0-15)
+            uint32_t l_dimmfru = l_pDimmTarget->getAttr<TARGETING::ATTR_PDR_ENTITY_INSTANCE>();
 
             TARGETING::ATTR_MEM_PORT_type l_dimmMemPort = 0;
 
@@ -2038,8 +2040,7 @@ errlHndl_t HdatMsVpd::hdatScanDimms(const TARGETING::Target *i_pOcmbTarget,
                                                   ++l_area)
             {
                 // dimms with same fruid will fall into same ram area
-                // even if they have fru id same with mca
-                if (l_area->ivfruId == l_dimmfru)//this means soldered dimms
+                if (l_area->ivfruId == l_dimmfru)
                 {
                     foundArea = true;
                     l_area->ivFunctional = l_area->ivFunctional || isFunctional(l_pDimmTarget);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1040,8 +1040,10 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
                                     isFunctional(l_pOccTarget);
         }
 
+        // Using PDR entity instance as FRU ID since this is the Hostboot equivalent which meets
+        // criteria imposed by PHYP. (value within range 0-15)
         iv_spPcrd->hdatChipData.hdatPcrdProcessorFruId =
-                            i_pProcTarget->getAttr<TARGETING::ATTR_FRU_ID>();
+                            i_pProcTarget->getAttr<TARGETING::ATTR_PDR_ENTITY_INSTANCE>();
         HDAT_DBG("pcrd: ProcessorFruId=0x%8X",
                              iv_spPcrd->hdatChipData.hdatPcrdProcessorFruId);
 
@@ -1057,8 +1059,11 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
             break;
         }
         iv_spPcrd->hdatChipData.hdatPcrdChipECLevel = l_eclevel;
+
+        // Using PDR entity instance as FRU ID since this is the Hostboot equivalent which meets
+        // criteria imposed by PHYP. (value within range 0-15)
         iv_spPcrd->hdatChipData.hdatPcrdHwModuleId =
-                            i_pProcTarget->getAttr<TARGETING::ATTR_FRU_ID>();
+                            i_pProcTarget->getAttr<TARGETING::ATTR_PDR_ENTITY_INSTANCE>();
         // Set Hardware Card ID
         uint32_t l_HWCardId  =  0;
         l_errl = hdatGetHwCardId(i_pProcTarget,l_HWCardId);

@@ -1654,7 +1654,7 @@ bool platSystemIsAtRuntime()
 
 const TARGETING::Target * getFRU_Target(const TARGETING::Target * i_target)
 {
-    TARGETING::ATTR_FRU_ID_type l_fruid = 0;  // set to invalid FRU ID
+    TARGETING::ATTR_STATIC_ABS_LOCATION_CODE_typeStdArr l_locationCode = {0};  // set to invalid
     TARGETING::TargetHandleList l_parentList;
     const TARGETING::Target * l_target = i_target;
     uint16_t level = 0; // just a basic parent level counter
@@ -1664,7 +1664,7 @@ const TARGETING::Target * getFRU_Target(const TARGETING::Target * i_target)
     {
         // Only if this is NOT an OCMB on the backplane do we check if its the FRU.
         // OCMBs on the backplane need to look up the FRU parent, i.e. the backplane
-        foundFru = i_target->tryGetAttr<TARGETING::ATTR_FRU_ID>(l_fruid);
+        foundFru = i_target->tryGetAttr<TARGETING::ATTR_STATIC_ABS_LOCATION_CODE>(l_locationCode);
     }
     while (!foundFru)
     {
@@ -1685,9 +1685,9 @@ const TARGETING::Target * getFRU_Target(const TARGETING::Target * i_target)
         }
 
         l_target = l_parentList[0];
-        if (l_target->tryGetAttr<TARGETING::ATTR_FRU_ID>(l_fruid))
+        if (l_target->tryGetAttr<TARGETING::ATTR_STATIC_ABS_LOCATION_CODE>(l_locationCode))
         {
-            // Found 1st parent with a FRU ID
+            // Found 1st parent with a location code
             foundFru = true;
         }
 
@@ -1697,13 +1697,13 @@ const TARGETING::Target * getFRU_Target(const TARGETING::Target * i_target)
 
     if (foundFru)
     {
-        HWAS_INF("getFRU_ID: ATTR_FRU_ID=0x%X parent level=%d found for l_target=0x%X target HUID 0x%X",
-            l_fruid, level, l_target, TARGETING::get_huid(l_target));
+        HWAS_INF("getFRU_Target: parent level=%d found for l_target=0x%X target HUID 0x%X",
+                 level, l_target, TARGETING::get_huid(l_target));
     }
     else
     {
-        HWAS_INF("getFRU_ID: Failed to find a FRU ID for l_target=0x%X target HUID 0x%X. Looked at %d parent levels.",
-            l_target, TARGETING::get_huid(l_target), level);
+        HWAS_INF("getFRU_Target: Failed to find a FRU ID for l_target=0x%X target HUID 0x%X. Looked at %d parent levels.",
+                 l_target, TARGETING::get_huid(l_target), level);
     }
 
     return l_target;

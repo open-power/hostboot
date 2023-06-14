@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -396,8 +396,6 @@ case HWAS::_type: i_parser.PrintString( "Flag", #_type); break;
             break;
         } // switch partType
     } // parse
-
-    friend class ErrlUserDetailsParserSensor;
 
 private:
     // Disabled

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -800,12 +800,14 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
         this->iv_spPcia[i_index].hdatCoreData.pciaCCMNodeID = l_nodeOrdId;
         //get the parent node id and set that
 
-        //Ordinal Id of the fru containing this proc
-        uint32_t l_fruOrdId = i_pProcTarget->getAttr<TARGETING::ATTR_FRU_ID>();
-        this->iv_spPcia[i_index].hdatCoreData.pciaFruId = l_fruOrdId;
+        // Ordinal Id of the fru containing this proc
+        // Using PDR entity instance as FRU ID since this is the Hostboot equivalent which meets
+        // criteria imposed by PHYP. (value within range 0-15)
+        uint32_t l_fruId = i_pProcTarget->getAttr<TARGETING::ATTR_PDR_ENTITY_INSTANCE>();
+        this->iv_spPcia[i_index].hdatCoreData.pciaFruId = l_fruId;
 
         //Module id is same as FRU Ordinal ID
-        this->iv_spPcia[i_index].hdatCoreData.pciaModuleId = l_fruOrdId;
+        this->iv_spPcia[i_index].hdatCoreData.pciaModuleId = l_fruId;
 
         //Ordinal ID of the core
         this->iv_spPcia[i_index].hdatCoreData.pciaHdwProcId = l_coreOrdId;

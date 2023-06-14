@@ -41,9 +41,6 @@
     <attribute>
       <id>BMC_SW_TYPE</id>
     </attribute>
-    <attribute>
-      <id>FRU_ID</id>
-    </attribute>
   </targetTypeExtension>
 
   <targetTypeExtension>
@@ -56,9 +53,6 @@
     </attribute>
     <attribute>
       <id>BMC_SW_TYPE</id>
-    </attribute>
-    <attribute>
-      <id>FRU_ID</id>
     </attribute>
   </targetTypeExtension>
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,6 @@
 #include "errludattributeP.H"
 #include "errludlogregister.H"
 #include "errludcallout.H"
-#include "errludsensor.H"
 #include "errludbuild.H"
 #include "errludstate.H"
 #include "errludwofdata.H"
@@ -67,7 +66,6 @@ public:
         registerParser<ErrlUserDetailsParserAttribute>(ERRL_UDT_ATTRIBUTE);
         registerParser<ErrlUserDetailsParserLogRegister>(ERRL_UDT_LOGREGISTER);
         registerParser<ErrlUserDetailsParserCallout>(ERRL_UDT_CALLOUT);
-        registerParser<ErrlUserDetailsParserSensor>(ERRL_UDT_SENSOR);
         registerParser<ErrlUserDetailsParserBuild>(ERRL_UDT_BUILD);
         registerParser<ErrlUserDetailsParserSysState>(ERRL_UDT_SYSSTATE);
         registerParser<ErrlUserDetailsParserWofData>(ERRL_UDT_WOFDATA);

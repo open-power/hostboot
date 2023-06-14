@@ -331,9 +331,6 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
     TARGETING::PredicateCTM l_procFilter(TARGETING::CLASS_CHIP,
                                              TARGETING::TYPE_PROC);
 
-    TARGETING::PredicateCTM l_memFilter(TARGETING::CLASS_CHIP,
-                                             TARGETING::TYPE_MEMBUF);
-
     TARGETING::PredicateCTM l_pciFilter(TARGETING::CLASS_UNIT,
                                              TARGETING::TYPE_PCI);
 
@@ -369,12 +366,12 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
     //Need to refine the SLCA table filter
     if (!l_pSystemTarget->getAttr<TARGETING::ATTR_PLDM_CONNECTOR_PDRS_ENABLED>())
     {
-        l_presentChildren.push(&l_procFilter).push(&l_memFilter).Or().
-                     push(&l_pciFilter).Or().push(&l_psFilter).Or().
-                     push(&l_fanFilter).Or().push(&l_uartFilter).Or().
-                     push(&l_usbFilter).Or().push(&l_ethFilter).Or().
-                     push(&l_vrmFilter).Or().push(&l_dimmFilter).Or().
-                     push(&l_tpmFilter).Or().push(&l_predHwas).And();
+        l_presentChildren.push(&l_procFilter).push(&l_pciFilter).Or().
+                     push(&l_psFilter).Or().push(&l_fanFilter).Or().
+                     push(&l_uartFilter).Or().push(&l_usbFilter).Or().
+                     push(&l_ethFilter).Or().push(&l_vrmFilter).Or().
+                     push(&l_dimmFilter).Or().push(&l_tpmFilter).Or().
+                     push(&l_predHwas).And();
 
          //Get all children of this node
          TARGETING::targetService().
@@ -387,11 +384,11 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
         TARGETING::TargetHandleList l_fullProcDimmChildList;
 
         // Get the present list except for proc and dimm
-        l_presentChildren.push(&l_memFilter).push(&l_pciFilter).Or()
-                         .push(&l_psFilter).Or().push(&l_fanFilter).Or()
-                         .push(&l_uartFilter).Or().push(&l_usbFilter).Or()
-                         .push(&l_ethFilter).Or().push(&l_vrmFilter).Or()
-                         .push(&l_tpmFilter).Or().push(&l_predHwas).And();
+        l_presentChildren.push(&l_pciFilter).push(&l_psFilter).Or().
+                          push(&l_fanFilter).Or().push(&l_uartFilter).Or().
+                          push(&l_usbFilter).Or().push(&l_ethFilter).Or().
+                          push(&l_vrmFilter).Or().push(&l_tpmFilter).Or().
+                          push(&l_predHwas).And();
 
         TARGETING::targetService().
                   getAssociated(l_childList, i_Target,
@@ -430,34 +427,6 @@ static void hdatAddNodeToSLCATable(TARGETING::Target *i_Target,
             {
                 case TYPE_PROC:
                     l_hdatFRUType = HDAT_SLCA_FRU_TYPE_PROC;
-                break;
-
-                case TYPE_MEMBUF:
-                {
-                    ATTR_FRU_ID_type l_childFRUId;
-                    ATTR_FRU_ID_type l_encFRUId;
-                    TARGETING::TargetHandleList targetList;
-                    targetList.clear();
-                    getParentAffinityTargets(targetList,l_childTarget,
-                               TARGETING::CLASS_ENC,TARGETING::TYPE_NODE);
-                    if(!targetList.empty())
-                    {
-                        TARGETING::Target* l_pNodeTarget = targetList[0];
-                        l_encFRUId = l_pNodeTarget->getAttr<ATTR_FRU_ID>();
-                        l_childFRUId = l_childTarget->getAttr<ATTR_FRU_ID>();
-                        if(l_encFRUId != l_childFRUId)
-                        {
-                            l_hdatFRUType = HDAT_SLCA_FRU_TYPE_RI;
-                        }
-                    }
-                    else
-                    {
-                        //target list is empty for type membuf then FRU type
-                        //would be set as HDAT_SLCA_FRU_TYPE_UNKNOWN
-                        HDAT_ERR("Empty list returned while querying"
-                                                  "for parents of membuf");
-                    }
-                }
                 break;
 
                 case TYPE_DIMM:
