@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -62,8 +62,6 @@ define __BUILD_GENERATED
 $(GENERATED)_PATH ?= $$(GENPATH)
 $(GENERATED)_COMMAND_PATH ?= $(dir $(lastword $(MAKEFILE_LIST)))
 
-
-GEN_PASS: $$($(GENERATED)_PATH)/.$(GENERATED).built
 
 $$($(GENERATED)_PATH)/.$(GENERATED).built : \
 	$$($(GENERATED)_COMMAND_PATH)$(COMMAND) $(SOURCES)
