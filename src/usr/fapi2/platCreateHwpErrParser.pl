@@ -566,7 +566,7 @@ foreach my $key (sort {$a <=> $b} keys %registerFfdcRecords)
     {
         # python3.9 only allows up to 2940 elif statements before recursion
         # depth error, hence only use "if" instead of "elif"
-        print TGFILEPY "    if ffdcId == 0x$record{register}{hash}\n";
+        print TGFILEPY "    if ffdcId == 0x$record{register}{hash}:\n";
         print TGFILEPY "        d[\"Register FFDC\"]=\"$record{register}{name}\"\n";
         print TGFILEPY "        while (len(data) - i) > 0:\n";
         print TGFILEPY "            registerArray = []\n";
