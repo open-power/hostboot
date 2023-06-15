@@ -25,7 +25,7 @@
 <hwpErrors>
   <format>poz</format>
   <hwpError>
-    <rc>RC_ODY_OMI_PPE_RESET</rc>
+    <rc>RC_IO_PPE_RESET</rc>
     <description>
       PPE failed to reset
     </description>

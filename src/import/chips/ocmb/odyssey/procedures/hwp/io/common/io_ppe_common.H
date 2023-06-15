@@ -443,7 +443,7 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
     l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(l_iar);
     FAPI_ASSERT(
         l_iar == c_ppe_start_reset_iar,
-        fapi2::ODY_OMI_PPE_RESET()
+        fapi2::IO_PPE_RESET()
         .set_TARGET_CHIP(i_target)
         .set_IAR(l_iar),
         "IAR (0x%8x) did not reset.", l_iar);
@@ -460,7 +460,7 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
     l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(l_iar);
     FAPI_ASSERT(
         l_iar != c_ppe_start_reset_iar,
-        fapi2::ODY_OMI_PPE_RESET()
+        fapi2::IO_PPE_RESET()
         .set_TARGET_CHIP(i_target)
         .set_IAR(l_iar),
         "IAR (0x%8x) did not resume.", l_iar);
