@@ -80,8 +80,31 @@ class TestPrdSrcParsing(unittest.TestCase):
         self.assertEqual(jsonOut["Signature"], sigCheck)
         self.assertEqual(jsonOut["Attn Type"], "RECOVERABLE")
 
+    def testCodeFail(self):
+        refcode = "BC13E580"
+        hex2 = "000000E0"
+        hex3 = "00000B00"
+        hex4 = "00000000"
+        hex5 = "01200000"
+        hex6 = "0007002E"
+        hex7 = "00000303"
+        hex8 = "BB710008"
+        hex9 = "00000000"
+
+        testOut = srcparsers.be500.be500.parseSRCToJson(
+            refcode, hex2, hex3, hex4, hex5, hex6, hex7, hex8, hex9
+        )
+
+        jsonOut = json.loads(testOut)
+        # Print the output for manual testing
+        print(json.dumps(jsonOut, indent=4))
+
+        sigCheck = "PRD Internal Firmware Software Fault"
+        self.assertEqual(jsonOut["Signature"], sigCheck)
+
 
 if __name__ == "__main__":
     test = TestPrdSrcParsing()
     test.testOutput()
     test.testCorefir()
+    test.testCodeFail()

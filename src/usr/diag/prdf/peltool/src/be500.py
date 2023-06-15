@@ -120,14 +120,23 @@ def parseSRCToJson(
 
     out = OrderedDict()
 
-    # The HUID is word6.
-    out["Target Desc"] = huidToStr(word6)
+    # Check for any special reason codes. The reason code is the last byte of
+    # the reference code.
+    reasonCode = refcode[6:8]
 
-    # The target type is the second byte of the HUID.
-    # The signature is word8.
-    out["Signature"] = SignatureData().parseSignature(word6[2:4], word8)
+    # Reason code '80' indicates a PRD internal code error.
+    if "80" == reasonCode:
+        out["Signature"] = "PRD Internal Firmware Software Fault"
+    # If there was not an internal error, parse as normal
+    else:
+        # The HUID is word6.
+        out["Target Desc"] = huidToStr(word6)
 
-    # The attention type is the last byte of word7.
-    out["Attn Type"] = attnTypeToStr(word7[6:8])
+        # The target type is the second byte of the HUID.
+        # The signature is word8.
+        out["Signature"] = SignatureData().parseSignature(word6[2:4], word8)
+
+        # The attention type is the last byte of word7.
+        out["Attn Type"] = attnTypeToStr(word7[6:8])
 
     return json.dumps(out)

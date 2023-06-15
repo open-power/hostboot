@@ -844,6 +844,20 @@ class TestUserDataParser(unittest.TestCase):
 }""",
         )
 
+    def testUdString1(self):
+        testData = bytearray.fromhex(
+            "54455354494e475b31305d202d2054657374204d657373616765"
+        )
+        mv = memoryview(testData)
+
+        testStr = udparsers.be500.be500.parseUDToJson(10, 1, mv)
+
+        jsonOut = json.loads(testStr)
+
+        print(json.dumps(jsonOut, indent=4))
+
+        self.assertEqual(jsonOut["String"], "TESTING[10] - Test Message")
+
 
 if __name__ == "__main__":
     test = TestUserDataParser()
@@ -860,3 +874,4 @@ if __name__ == "__main__":
     test.testUncompressCaptureDataRegsParse()
     test.testUdL2LineDeleteFfdc()
     test.testUdL3LineDeleteFfdc()
+    test.testUdString1()
