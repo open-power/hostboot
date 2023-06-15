@@ -98,6 +98,8 @@ COPY_FILES = \
     src/import/tools/wof/wof_data_xlator.pl:openpower,openpower-sim \
     src/build/buildpnor/memd_creation.pl:openpower,openpower-sim \
     src/build/buildpnor/pkgOcmbFw.pl:openpower,openpower-sim \
+    src/build/buildpnor/pkgOcmbFw_ext.py:openpower,openpower-sim \
+    src/build/buildpnor/ocmbfw-layout.json.template:openpower,openpower-sim \
     src/usr/targeting/common/processMrw.pl:openpower,openpower-sim \
     src/usr/targeting/common/Targets.pm:openpower,openpower-sim \
     src/usr/targeting/common/BusFruCallouts.pm:openpower,openpower-sim \
