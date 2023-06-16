@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,9 +60,10 @@ fapi2::ReturnCode ody_putsram_io_ppe(
     PHY_PPE_WRAP0_ARB_CSCR_t  WRAP0_ARB_CSCR;
     PHY_PPE_WRAP0_ARB_CSAR_t  WRAP0_ARB_CSAR;
     PHY_PPE_WRAP0_ARB_CSDR_t  WRAP0_ARB_CSDR;
-
     const uint8_t* l_dataPtr = i_data;
     uint64_t l_data64 = 0;
+    uint64_t l_skip_ctr = 0;
+    uint64_t l_currOffset = i_offset;
 
     FAPI_DBG("ody_putsram_io_ppe: i_offset [0x%.8X%.8X], i_bytes %u.",
              ((i_offset >> 32) & 0xFFFFFFFF), (i_offset & 0xFFFFFFFF), i_bytes);
@@ -100,9 +101,29 @@ fapi2::ReturnCode ody_putsram_io_ppe(
             }
         }
 
-        WRAP0_ARB_CSDR.set_CSDR_SRAM_DATA(l_data64);
-        FAPI_TRY(WRAP0_ARB_CSDR.putScom(i_target),
-                 "Error putscom to WRAP0_ARB_CSDR.");
+        if (l_data64 != 0)
+        {
+            // Update sram addr reg before writing data when 0 was skipped previously
+            if (l_skip_ctr > 0)
+            {
+                FAPI_DBG("Skip counter: %d", l_skip_ctr);
+                l_skip_ctr = 0;
+                WRAP0_ARB_CSAR = l_currOffset;
+                FAPI_TRY(WRAP0_ARB_CSAR.putScom(i_target),
+                         "Error putscom to WRAP0_ARB_CSAR.");
+            }
+
+            // Write data
+            WRAP0_ARB_CSDR.set_CSDR_SRAM_DATA(l_data64);
+            FAPI_TRY(WRAP0_ARB_CSDR.putScom(i_target),
+                     "Error putscom to WRAP0_ARB_CSDR.");
+        }
+        else
+        {
+            l_skip_ctr ++; // Skip 0 data counter
+        }
+
+        l_currOffset += ((uint64_t)0x8) << 32;
     }
 
     // Disable auto-increment
