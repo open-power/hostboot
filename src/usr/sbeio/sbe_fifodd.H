@@ -45,6 +45,9 @@
 namespace SBEIO
 {
 
+// forward declare
+class SbeFifoRespBuffer;
+
 //-----------------------------------------------------------------------------
 //  Interfaces to the SBE FIFO device driver to be used by clients
 //  within this component.
@@ -819,7 +822,8 @@ public:
     };
 
     /**
-     * @brief Struct for FIFO Get Code Levels request. This message type is only supported on Odyssey chips.
+     * @brief Struct for FIFO Get Code Levels request. This message type is only
+     *        supported on Odyssey chips.
      */
     struct fifoGetCodeLevelsRequest
     {
@@ -890,37 +894,45 @@ public:
     //
     ///////////////////////////////////////////////////////////////////////
 
-
     /**
-     * @brief SBE FIFO CFAM register addresses. These addresses will be translated at the FSI device driver layer
-     *        into their byte address equivalents which is what the SBE FIFO expects to receive.
+     * @brief FIFO CFAM register addresses.
+     *        These enums are used as input to an accessor method to get
+     *        the addrs for a particular FIFO
      */
-    enum fifoRegisterAddress
+    enum fifoRegAddr
     {
-        // SBE_FIFO_* are the constants for Secure Host FIFO
-        SBE_FIFO_UPFIFO_DATA_IN    = 0x00002420, // Byte Addr 2480
-        SBE_FIFO_UPFIFO_STATUS     = 0x00002421, // Byte Addr 2484
-        SBE_FIFO_UPFIFO_SIG_EOT    = 0x00002422, // Byte Addr 2488
-        SBE_FIFO_UPFIFO_REQ_RESET  = 0x00002423, // Byte Addr 248C
-        SBE_FIFO_DNFIFO_DATA_OUT   = 0x00002430, // Byte Addr 24C0
-        SBE_FIFO_DNFIFO_STATUS     = 0x00002431, // Byte Addr 24C4
-        SBE_FIFO_DNFIFO_RESET      = 0x00002434, // Byte Addr 24D0
-        SBE_FIFO_DNFIFO_ACK_EOT    = 0x00002435, // Byte Addr 24D4
-        SBE_FIFO_DNFIFO_MAX_TSFR   = 0x00002436, // Byte Addr 24D8
-
-        // SPPE_FIFO_* are the constants for the standard CFAM
-        // FIFO that is used for Odyssey chip ops.
-        SPPE_FIFO_UPFIFO_DATA_IN    = 0x00002400,
-        SPPE_FIFO_UPFIFO_STATUS     = 0x00002401,
-        SPPE_FIFO_UPFIFO_SIG_EOT    = 0x00002402,
-        SPPE_FIFO_UPFIFO_REQ_RESET  = 0x00002403,
-        SPPE_FIFO_DNFIFO_DATA_OUT   = 0x00002410,
-        SPPE_FIFO_DNFIFO_STATUS     = 0x00002411,
-        SPPE_FIFO_DNFIFO_RESET      = 0x00002414,
-        SPPE_FIFO_DNFIFO_ACK_EOT    = 0x00002415,
-        SPPE_FIFO_DNFIFO_MAX_TSFR   = 0x00002416,
+        FIFO_UPFIFO_DATA_IN,
+        FIFO_UPFIFO_STATUS,
+        FIFO_UPFIFO_SIG_EOT,
+        FIFO_UPFIFO_REQ_RESET,
+        FIFO_DNFIFO_DATA_OUT,
+        FIFO_DNFIFO_STATUS,
+        FIFO_DNFIFO_RESET,
+        FIFO_DNFIFO_ACK_EOT,
+        FIFO_DNFIFO_MAX_TSFR,
     };
 
+    /**
+     * @brief FIFO CFAM register types
+     *        These enums are used as input to an accessor method to get
+     *        the addrs for a particular FIFO
+     */
+    enum fifoRegType
+    {
+        FIFO_SBE,
+        FIFO_SPPE,
+        FIFO_PIPE,
+    };
+
+    /**
+     * @brief get the CFAM FIFO register addr from i_type/i_reg
+     *
+     * @param[in]  i_type    type of FIFO for addr
+     * @param[in]  i_reg     register for the FIFO
+     * @return     uint32_t  value of the register
+     *                       0 - ERROR, no register found
+     */
+    uint32_t getFifoRegValue(fifoRegType i_type, fifoRegAddr i_reg);
 
     /**
      * @Brief perform SBE FIFO chip-op
@@ -996,6 +1008,16 @@ public:
      */
     errlHndl_t performFifoReset(TARGETING::Target * i_target);
 
+    /**
+     * @Brief Setup the Access Control for the FIFO PIPE
+     *
+     *        NOT to be used on running SBE -- only for IPL
+     *
+     * @param[in]  i_target        Target to access
+     *
+     * @return errlHndl_t Error log handle on failure.
+     */
+    errlHndl_t setupPipeAccess(TARGETING::Target *i_target);
 
 protected:
 
@@ -1037,6 +1059,45 @@ private:
     //-------------------------------------------------------------------
 
     /**
+     * @brief get the register addr from the enum index
+     *
+     *        SBE FIFO CFAM register addresses. These addresses will be
+     *        translated at the FSI device driver layer into their byte address
+     *        equivalents which is what the SBE FIFO expects to receive.
+     *
+     * @param[in] i_reg     index of the register value to return
+     * @return    uint32_t  value of the register
+     *                      0 - ERROR, no register found
+     */
+    uint32_t getSbeFifoRegValue(fifoRegAddr i_reg);
+
+    /**
+     * @brief get the register addr from the enum index
+     *
+     *        SPPE FIFO CFAM register addresses. These addresses will be
+     *        translated at the FSI device driver layer into their byte address
+     *        equivalents which is what the SBE FIFO expects to receive.
+     *
+     * @param[in] i_reg     index of the register value to return
+     * @return    uint32_t  value of the register
+     *                      0 - ERROR, no register found
+     */
+    uint32_t getSppeFifoRegValue(fifoRegAddr i_reg);
+
+    /**
+     * @brief get the register addr from the enum index
+     *
+     *        PIPE FIFO CFAM register addresses. These addresses will be
+     *        translated at the FSI device driver layer into their byte address
+     *        equivalents which is what the SBE FIFO expects to receive.
+     *
+     * @param[in] i_reg     index of the register value to return
+     * @return    uint32_t  value of the register
+     *                      0 - ERROR, no register found
+     */
+    uint32_t getPipeFifoRegValue(fifoRegAddr i_reg);
+
+    /**
      * @brief send a request via SBE FIFO using a data stream.
      *
      * @param[in]  i_target         Target to access
@@ -1072,38 +1133,62 @@ private:
     errlHndl_t waitUpFifoReady(TARGETING::Target * i_target);
 
     /**
-     * @brief poll until downlift Fifo has a value to read
-     *             or has hit EOT.
+     * @brief  Wait for data in downstream fifo to receive, hit EOT, or timeout.
+     *         Add each entry to the RespBuffer and do the RespBuffer
+     *         completeMessage upon receiving EOT.
      *
      * @param[in]  i_target         Target to access
      * @param[out] o_status         Down load door bell status
+     * @param[out] o_EOT            indicates if an EOT was received
      * @return errlHndl_t Error log handle on failure.
      */
-    errlHndl_t waitDnFifoReady(TARGETING::Target * i_target,
-            uint32_t          & o_status);
+    errlHndl_t waitDnFifoReady(TARGETING::Target   * i_target,
+                          SBEIO::SbeFifoRespBuffer & o_fifoBuffer,
+                                          bool     & o_EOT);
 
     /**
-     * @brief Encapsulates a CFAM read.
+     * @brief Read and parse the receive side FIFO register(s)
      *
      * @param[in]  i_target         Target to access
-     * @param[in]  i_addr           CFAM address
+     * @param[out] o_data           Down load door bell data
+     * @param[out] o_status         Down load door bell status
+     * @param[out] o_EMPTY          indicates if an entry was received
+     * @param[out] o_EOT            indicates if an EOT was received
+     * @return errlHndl_t Error log handle on failure.
+     */
+    errlHndl_t parseDataOutReg(TARGETING::Target   *i_target,
+                                          uint32_t &o_data,
+                                          uint32_t &o_status,
+                                          bool     &o_EMPTY,
+                                          bool     &o_EOT);
+
+    /**
+     * @brief Encapsulates a FIFO read.
+     *
+     * @param[in]  i_target         Target to access
+     * @param[in]  i_addrIdx        FIFO address enum index
      * @param[out] o_pData          Pointer to receive data
      * @return errlHndl_t Error log handle on failure.
      */
-    errlHndl_t readCfam(TARGETING::Target * i_target,
-            uint64_t   i_addr,
-            uint32_t * o_pData);
+    errlHndl_t readFifoReg(TARGETING::Target   *i_target,
+                                    fifoRegAddr i_addrIdx,
+                                      uint32_t *o_pData);
+
+    errlHndl_t readFifoReg64(TARGETING::Target     *i_target,
+                                        fifoRegAddr i_addrIdx,
+                                        uint64_t   *o_pData);
+
     /**
-     * @brief Encapsulates a CFAM write.
+     * @brief Encapsulates a Fifo write.
      *
      * @param[in]  i_target         Target to access
-     * @param[in]  i_addr           CFAM address
+     * @param[in]  i_addrIdx        FIFO address enum index
      * @param[in]  i_pData          Pointer to receive data
      * @return errlHndl_t Error log handle on failure.
      */
-    errlHndl_t writeCfam(TARGETING::Target * i_target,
-            uint64_t   i_addr,
-            uint32_t * i_pData);
+    errlHndl_t writeFifoReg(TARGETING::Target   *i_target,
+                                     fifoRegAddr i_addrIdx,
+                                       uint32_t *i_pData);
 
     enum sbeFifoUpstreamStatus
     {
@@ -1172,6 +1257,12 @@ private:
         DNFIFO_STATUS_FIFO_EOT_FLAGS =0x000000FF,
     };
 
+    enum sbePipeDownstreamStatus
+    {
+        DNFIFO_STATUS_VALID = 0x80000000,
+        DNFIFO_STATUS_EOT   = 0x40000000
+    };
+
     enum sbeFifoReqDownstreamFifoReset
     {
         FSB_DNFIFO_REQ_RESET =0x80000000,
@@ -1182,7 +1273,11 @@ private:
         FSB_DNFIFO_ACK_EOT =0x80000000,
     };
 
+    // max wait for a FIFO to have room to write
     enum { MAX_UP_FIFO_TIMEOUT_NS = 90000*NS_PER_MSEC }; //=90s
+
+    // max wait for a FIFO to present data and/or EOT to receive
+    enum { MAX_DWN_FIFO_TIMEOUT_NS = 2*90000*NS_PER_MSEC }; //=180s
 
 }; // End of classSbeFifo
 

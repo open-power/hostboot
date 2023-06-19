@@ -55,17 +55,28 @@ extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_TRACF(printf_string,args...) \
     TRACFCOMP(g_trac_sbeio,"fifodd: " printf_string,##args)
-#define SBE_TRACD(printf_string,args...) \
-    TRACDCOMP(g_trac_sbeio,"fifodd: " printf_string,##args)
-#define SBE_TRACU(args...)
 #define SBE_TRACFBIN(printf_string,args...) \
     TRACFBIN(g_trac_sbeio,"fifodd: " printf_string,##args)
-#define SBE_TRACDBIN(printf_string,args...) \
-    TRACDBIN(g_trac_sbeio,"fifodd: " printf_string,##args)
-/* replace for unit testing
+
+#define UNIT_TEST_TRACES 0
+#define DEBUG_TRACES     0
+
+#if UNIT_TEST_TRACES
 #define SBE_TRACU(printf_string,args...) \
     TRACFCOMP(g_trac_sbeio,"fifodd: " printf_string,##args)
-*/
+#else
+#define SBE_TRACU(args...)
+#endif
+
+#if DEBUG_TRACES
+#define SBE_TRACD(printf_string,args...) \
+    TRACFCOMP(g_trac_sbeio,"fifodd: " printf_string,##args)
+#define SBE_TRACDBIN(printf_string,args...) \
+    TRACFBIN(g_trac_sbeio,"fifodd: " printf_string,##args)
+#else
+#define SBE_TRACD(args...)
+#define SBE_TRACDBIN(args...)
+#endif
 
 #define TOLERATE_BLACKLIST_ERRS 0
 
@@ -100,10 +111,10 @@ SbeFifo::~SbeFifo()
     }
 }
 
-errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
-                             uint32_t          * i_pFifoRequest,
-                             uint32_t          * i_pFifoResponse,
-                             uint32_t            i_responseSize)
+errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   * i_target,
+                                                 uint32_t * i_pFifoRequest,
+                                                 uint32_t * i_pFifoResponse,
+                                                 uint32_t   i_responseSize)
 {
     memory_stream stream { i_pFifoRequest, *i_pFifoRequest * sizeof(uint32_t) };
 
@@ -113,49 +124,107 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
 /**
  * @brief perform SBE FIFO chip-op
  */
-errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target * i_target,
-                             fifo_chipop_data_stream&& i_requestStream,
-                             uint32_t          * i_pFifoResponse,
-                             uint32_t            i_responseSize)
+errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   *i_target,
+                                 fifo_chipop_data_stream&& i_requestStream,
+                                                 uint32_t *i_pFifoResponse,
+                                                 uint32_t  i_responseSize)
 {
     errlHndl_t errl = nullptr;
 
     //Serialize access to the FIFO
-    mutex_t* l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SBE_FIFO_MUTEX>();
-    const auto lock = scoped_mutex_lock(*l_mutex);
+    mutex_t *l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SBE_FIFO_MUTEX>();
+    const auto lock  = scoped_mutex_lock(*l_mutex);
 
     SBE_TRACD(ENTER_MRK "performFifoChipOp");
 
-    do
+    std::array<uint32_t, 2> request_header = { };
+    errl = writeRequest(i_target, i_requestStream, request_header);
+    if (errl) {goto ERROR_EXIT;}
+
+    // skip reading a response for commands that don't have one
+    if ((i_pFifoResponse != nullptr) && (i_responseSize > 0))
     {
-        std::array<uint32_t, 2> request_header = { };
-        errl = writeRequest(i_target,
-                            i_requestStream,
-                            request_header);
-        if (errl) break;  // return with error
-
-        // skip reading a response for commands that don't have one
-        if ((i_pFifoResponse != nullptr) && (i_responseSize > 0))
-        {
-            errl = readResponse(i_target,
-                                &request_header[0],
-                                i_pFifoResponse,
-                                i_responseSize);
-            if (errl) break;  // return with error
-        }
-        else
-        {
-            SBE_TRACD("performFifoChipOp: skipping readResponse()");
-        }
-
+        errl = readResponse(i_target,
+                            &request_header[0],
+                            i_pFifoResponse,
+                            i_responseSize);
+        if (errl) {goto ERROR_EXIT;}
     }
-    while (0);
+    else
+    {
+        SBE_TRACD("performFifoChipOp: skipping readResponse()");
+    }
+
+    ERROR_EXIT:
+    if (errl) {SBE_TRACF(ERR_MRK  "performFifoChipOp");}
 
     SBE_TRACD(EXIT_MRK "performFifoChipOp");
-
     return errl;
 }
 
+/**
+ * @brief Setup PIPE Access Control Registers
+ *        The caller holds the FIFO lock
+ *
+ * Note: This is a temporary function, to be replaced by the SBE doing this setup.
+ *       @TODO JIRA PFHB-492
+ *
+ * PIPE ACtrl 0x8e88000000000000
+ *
+ *  OF  - Open Flag
+ *  UID - Use ctrlID
+ *  IE  - Interrupt Enabled
+ *
+ * ACtrl:   0x8E 0b10001110  WRITE_SIDE PIPE1: OF
+ *                           READ_SIDE  PIPE1: OF UID IE
+ *          0x88 0b11001000  WRITE_SIDE PIPE2: OF
+ *                           READ_SIDE  PIPE2: OF
+ *
+ * PIPE ACtrlID 0x0dd0000000000000
+ *
+ *  -The 13 is the PIB ID, used to route the interrupt
+ *
+ * ACtrlID: 0x0D 0b00001101  WRITE_SIDE PIPE1 CTRL_ID: 0
+ *                           READ_SIDE  PIPE1 CTRL_ID: 13
+ *          0xD0 0b11010000  WRITE_SIDE PIPE2 CTRL_ID: 13
+ *                           READ_SIDE  PIPE2 CTRL_ID: 0
+ */
+errlHndl_t SbeFifo::setupPipeAccess(TARGETING::Target *i_target)
+{
+    errlHndl_t l_errl      = nullptr;
+    size_t     l_64bitSize = sizeof(uint64_t);
+
+    constexpr uint32_t l_addr_WRITE_ACtrl   = 0x000B0121;
+    constexpr uint32_t l_addr_WRITE_ACtrlID = 0x000B0124;
+              uint64_t l_data_WRITE_ACtrl   = 0x8E88000000000000;
+              uint64_t l_data_WRITE_ACtrlID = 0x0DD0000000000000;
+
+    SBE_TRACF(ENTER_MRK "setupPipeAccess: to HUID 0x%08X", TARGETING::get_huid(i_target));
+
+    SBE_TRACD("  setupPipeAccess WRITE PIPE ACtrladdr=0x%08lx data=0x%016llx",
+            l_addr_WRITE_ACtrl, l_data_WRITE_ACtrl);
+    l_errl = deviceOp(DeviceFW::WRITE,
+                      i_target,
+                      &l_data_WRITE_ACtrl,
+                      l_64bitSize,
+                      DEVICE_SCOM_ADDRESS(l_addr_WRITE_ACtrl));
+    if (l_errl) {goto ERROR_EXIT;}
+
+    l_errl = deviceOp(DeviceFW::WRITE,
+                      i_target,
+                      &l_data_WRITE_ACtrlID,
+                      l_64bitSize,
+                      DEVICE_SCOM_ADDRESS(l_addr_WRITE_ACtrlID));
+    SBE_TRACD("  setupPipeAccess WRITE PIPE addr=0x%08lx data=0x%016llx",
+              l_addr_WRITE_ACtrlID, l_data_WRITE_ACtrlID);
+    if (l_errl) {goto ERROR_EXIT;}
+
+    ERROR_EXIT:
+    if (l_errl) {SBE_TRACF(ERR_MRK "setupPipeAccess");}
+
+    SBE_TRACF(EXIT_MRK "setupPipeAccess: HUID 0x%08X", TARGETING::get_huid(i_target));
+    return l_errl;
+}
 
 /**
  * @brief perform SBE FIFO Reset
@@ -165,17 +234,18 @@ errlHndl_t SbeFifo::performFifoReset(TARGETING::Target * i_target)
     errlHndl_t errl = nullptr;
 
     //Serialize access to the FIFO
-    mutex_t* l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SBE_FIFO_MUTEX>();
-    const auto lock = scoped_mutex_lock(*l_mutex);
+    mutex_t *l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SBE_FIFO_MUTEX>();
+    const auto lock  = scoped_mutex_lock(*l_mutex);
 
-    SBE_TRACF(ENTER_MRK "sending FSI SBEFIFO Reset to HUID 0x%08X",
+    SBE_TRACF(ENTER_MRK "performFifoReset: to HUID 0x%08X",
               TARGETING::get_huid(i_target));
 
     // Perform a write to the DNFIFO Reset to cleanup the fifo
     uint32_t l_dummy = 0xDEAD;
-    uint32_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_DNFIFO_RESET : SBE_FIFO_DNFIFO_RESET;
-    errl = writeCfam(i_target,l_addr,&l_dummy);
+    errl = writeFifoReg(i_target, FIFO_DNFIFO_RESET, &l_dummy);
 
+    if (errl) {SBE_TRACF(ERR_MRK "performFifoReset");}
+    SBE_TRACF(EXIT_MRK "performFifoReset: HUID 0x%08X", TARGETING::get_huid(i_target));
     return errl;
 }
 
@@ -204,69 +274,71 @@ bool read_at_least(SbeFifo::fifo_chipop_data_stream& stream,
 /**
  * @brief write FIFO request message
  */
-errlHndl_t SbeFifo::writeRequest(TARGETING::Target * i_target,
-                                 fifo_chipop_data_stream& i_stream,
-                                 std::array<uint32_t, 2>& o_request_header)
+errlHndl_t SbeFifo::writeRequest(TARGETING::Target *i_target,
+                           fifo_chipop_data_stream& i_stream,
+                           std::array<uint32_t, 2>& o_request_header)
 {
-    errlHndl_t errl = NULL;
+    errlHndl_t l_errl = NULL;
+    uint32_t   l_data{};          // register value to write
+    uint32_t   l_word{};          // word value read from the i_stream or fifo
+    int        l_i{};             // counter to fill the o_request_header
+    bool       l_go       = true; // true if more data from the i_stream exists
+    bool       l_max_tsfr = true; // false if i_target is an odyssey PIPE
 
     SBE_TRACD(ENTER_MRK "writeRequest");
 
-    do
+    if (TARGETING::UTIL::isOdysseyChip(i_target) &&
+        i_target->getAttr<TARGETING::ATTR_USE_PIPE_FIFO>())
+    {
+        // do not set MAX_TSFR for an odyssey PIPE, it does not exist for a PIPE
+        l_max_tsfr = false;
+    }
+
+    if (l_max_tsfr)
     {
         // Ensure Downstream Max Transfer Counter is 0 since
         // hostboot has no need for it (non-0 can cause
         // protocol issues)
-        uint64_t l_addr       = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_DNFIFO_MAX_TSFR : SBE_FIFO_DNFIFO_MAX_TSFR;
-        uint32_t l_data       = 0;
-        errl = writeCfam(i_target,l_addr,&l_data);
-        if (errl) break;
+        l_errl = writeFifoReg(i_target, FIFO_DNFIFO_MAX_TSFR, &l_data);
+        if (l_errl) {goto ERROR_EXIT;}
+    }
 
-        //The first uint32_t has the number of uint32_t words in the request
-        l_addr                = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_UPFIFO_DATA_IN : SBE_FIFO_UPFIFO_DATA_IN;
+    l_go = read_at_least(i_stream, &l_word, sizeof(l_word));
+    l_i  = 0;
 
-        uint32_t l_word = 0;
-        bool go = read_at_least(i_stream, &l_word, sizeof(l_word));
-
-        int i = 0;
-        while (go)
+    while (l_go)
+    {
+        if (l_i < 2)
         {
-            if (i < 2)
-            {
-                o_request_header[i] = l_word;
-            }
-
-            // Wait for room to write into fifo
-            errl = waitUpFifoReady(i_target);
-            if (errl) break;
-
-            // Send data into fifo
-            errl = writeCfam(i_target,l_addr,&l_word);
-
-            ++i;
-
-            if (errl) break;
-
-            go = read_at_least(i_stream, &l_word, sizeof(l_word));
+            o_request_header[l_i] = l_word;
         }
 
-        if (errl) break;
+        // Wait for room to write into fifo
+        l_errl = waitUpFifoReady(i_target);
+        if (l_errl) {goto ERROR_EXIT;}
 
-        //notify SBE that last word has been sent
-        errl = waitUpFifoReady(i_target);
-        if (errl) break;
+        // Send data into fifo
+        l_errl = writeFifoReg(i_target, FIFO_UPFIFO_DATA_IN, &l_word);
+        if (l_errl) {goto ERROR_EXIT;}
 
-        l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_UPFIFO_SIG_EOT : SBE_FIFO_UPFIFO_SIG_EOT;
-        l_data = FSB_UPFIFO_SIG_EOT;
-        errl = writeCfam(i_target,l_addr,&l_data);
-        if (errl) break;
-
+        ++l_i;
+        l_go = read_at_least(i_stream, &l_word, sizeof(l_word));
     }
-    while (0);
+
+    // notify SBE that last word has been sent
+    l_errl = waitUpFifoReady(i_target);
+    if (l_errl) {goto ERROR_EXIT;}
+
+    l_data = FSB_UPFIFO_SIG_EOT;
+    l_errl = writeFifoReg(i_target, FIFO_UPFIFO_SIG_EOT, &l_data);
+    if (l_errl) {goto ERROR_EXIT;}
+
+    ERROR_EXIT:
+    if (l_errl) {SBE_TRACF(ERR_MRK  "writeRequest");}
 
     SBE_TRACD(EXIT_MRK "writeRequest");
 
-    return errl;
+    return l_errl;
 }
 
 /**
@@ -276,22 +348,18 @@ errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
 {
     errlHndl_t errl = NULL;
 
-    SBE_TRACD(ENTER_MRK "waitUpFifoReady");
+    SBE_TRACU(ENTER_MRK "waitUpFifoReady");
 
     uint64_t l_elapsed_time_ns = 0;
-    uint64_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_UPFIFO_STATUS : SBE_FIFO_UPFIFO_STATUS;
     uint32_t l_data = 0;
 
     do
     {
         // read upstream status to see if room for more data
-        errl = readCfam(i_target,l_addr,&l_data);
-        if (errl) break;
+        errl = readFifoReg(i_target, FIFO_UPFIFO_STATUS, &l_data);
+        if (errl) {break;}
 
-        if ( !(l_data & UPFIFO_STATUS_FIFO_FULL) )
-        {
-            break;
-        }
+        if (! (l_data & UPFIFO_STATUS_FIFO_FULL)) {break;}
 
         // time out if wait too long
         if (l_elapsed_time_ns >= MAX_UP_FIFO_TIMEOUT_NS )
@@ -335,7 +403,8 @@ errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
     }
     while (1);
 
-    SBE_TRACD(EXIT_MRK "waitUpFifoReady");
+    if (errl) {SBE_TRACF(ERR_MRK  "waitUpFifoReady");}
+    SBE_TRACU(EXIT_MRK "waitUpFifoReady");
 
     return errl;
 }
@@ -343,10 +412,10 @@ errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
 /**
  * @brief Read FIFO response messages
  */
-errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
-                        uint32_t * i_pFifoRequest,
-                        uint32_t * o_pFifoResponse,
-                        uint32_t   i_responseSize)
+errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
+                                            uint32_t *i_pFifoRequest,
+                                            uint32_t *o_pFifoResponse,
+                                            uint32_t  i_responseSize)
 {
     errlHndl_t errl = NULL;
     SbeFifo::fifoGetSbeFfdcRequest *l_pFifoRequest =
@@ -373,39 +442,16 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
         // to the status, which is placed at the end of the returned data
         // in order to reflect errors during transfer.
 
-        bool       l_EOT      = false;
+        bool l_EOT = false;
 
         while(l_fifoBuffer) //keep reading data until an error or until the
                             //message is completely read.
         {
-            // Wait for data to be ready to receive (download) or if the EOT
-            // has been sent. If not EOT, then data ready to receive.
-            uint32_t l_status = 0;
-            errl = waitDnFifoReady(i_target,l_status);
-            if (errl)
-            {
-                SBE_TRACF("readResponse: waitDnFifoReady returned an error");
-                break;
-            }
-
-            if (l_status & DNFIFO_STATUS_DEQUEUED_EOT_FLAG)
-            {
-                l_EOT = true;
-                l_fifoBuffer.completeMessage();
-            }
-            else
-            {
-                uint32_t l_data{};
-                uint32_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_DNFIFO_DATA_OUT : SBE_FIFO_DNFIFO_DATA_OUT;
-                // read next word
-                errl = readCfam(i_target,l_addr,&l_data);
-                if (errl) break;
-
-                l_fifoBuffer.append(l_data);
-            }
+            errl = waitDnFifoReady(i_target, l_fifoBuffer, l_EOT);
+            if (errl) {break;}
         }
 
-        if (errl) break;
+        if (errl) {break;}
 
         // EOT is expected before running out of response buffer
         if (!l_EOT)
@@ -440,9 +486,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
 
         //notify that EOT has been received
         uint32_t l_eotSig = FSB_UPFIFO_SIG_EOT;
-        uint32_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_DNFIFO_ACK_EOT : SBE_FIFO_DNFIFO_ACK_EOT;
-        errl = writeCfam(i_target,l_addr,&l_eotSig);
-        if (errl) break;
+        errl = writeFifoReg(i_target, FIFO_DNFIFO_ACK_EOT, &l_eotSig);
+        if (errl) {break;}
 
         //Determine if successful.
         if (!l_fifoBuffer.getStatus())
@@ -643,8 +688,6 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
     }
     while (0);
 
-    SBE_TRACD(EXIT_MRK "readResponse");
-
 #ifdef TOLERATE_BLACKLIST_ERRS
     if(blacklisted)
     {
@@ -657,50 +700,121 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
     }
 #endif
 
+    if (errl) {SBE_TRACF(ERR_MRK  "readResponse");}
+
+    SBE_TRACD(EXIT_MRK "readResponse");
     return errl;
 }
 
 /**
- * @brief wait for data in downstream fifo to receive
- *        or hit EOT.
+ * @brief Read and parse the downstream fifo register(s)
  *
- *        On return, either a valid word is ready to read,
- *        or the EOT will be set in the returned doorbell status.
+ *  if PIPE FIFO
+ *    read64 FIFO_DNFIFO_DATA_OUT and parse
+ *  else
+ *    read FIFO_DNFIFO_STATUS/FIFO_DNFIFO_DATA_OUT and parse
  */
-errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
-                           uint32_t          & o_status)
+errlHndl_t SbeFifo::parseDataOutReg(TARGETING::Target   *i_target,
+                                               uint32_t &o_data,
+                                               uint32_t &o_status,
+                                               bool     &o_EMPTY,
+                                               bool     &o_EOT)
 {
-    errlHndl_t errl = NULL;
-    SBE_TRACD(ENTER_MRK "waitDnFifoReady");
+    errlHndl_t l_errl = NULL;
+    bool       l_usePipe64 = (TARGETING::UTIL::isOdysseyChip(i_target) &&
+                            i_target->getAttr<TARGETING::ATTR_USE_PIPE_FIFO>());
 
-    uint64_t l_elapsed_time_ns = 0;
-    uint64_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SPPE_FIFO_DNFIFO_STATUS : SBE_FIFO_DNFIFO_STATUS;
+    if (l_usePipe64)
+    {
+        uint64_t l_data{};
+
+        l_errl = readFifoReg64(i_target, FIFO_DNFIFO_DATA_OUT, &l_data);
+        if (l_errl) {goto ERROR_EXIT;}
+
+        o_data   = l_data >> 32;
+        o_status = l_data & 0xFFFFFFFF;
+        o_EOT    = o_status & DNFIFO_STATUS_EOT;
+
+        if (o_EOT)
+        {
+            // when a 64-bit DATA_OUT register is used, we must use the data
+            // included with the EOT status, so mark the entry VALID
+            o_status |= DNFIFO_STATUS_VALID;
+        }
+
+        o_EMPTY = !(o_status & DNFIFO_STATUS_VALID);
+    }
+    else
+    {
+        l_errl = readFifoReg(i_target, FIFO_DNFIFO_STATUS, &o_status);
+        if (l_errl) {goto ERROR_EXIT;}
+
+        o_EMPTY = o_status & DNFIFO_STATUS_FIFO_EMPTY;
+        o_EOT   = o_EMPTY && (o_status & DNFIFO_STATUS_DEQUEUED_EOT_FLAG);
+        if (!o_EMPTY)
+        {
+            // an entry exists, read it
+            l_errl = readFifoReg(i_target, FIFO_DNFIFO_DATA_OUT, &o_data);
+            if (l_errl) {goto ERROR_EXIT;}
+        }
+    }
+
+    if (!o_EMPTY)
+    {
+        SBE_TRACD("  parseDataOutReg: ENTRY, status:%08lX data:%08lX",o_status,o_data);
+    }
+
+    if (o_EOT)
+    {
+        SBE_TRACD("  parseDataOutReg: EOT,   status:%08lX",o_status);
+    }
+    else
+    {
+        SBE_TRACU("  parseDataOutReg: WAIT,  status:%08lX",o_status);
+    }
+
+    ERROR_EXIT:
+    if (l_errl) {SBE_TRACF(ERR_MRK  "parseDataOutReg");}
+
+    return l_errl;
+}
+
+/**
+ * @brief  Wait for data in downstream fifo to receive, hit EOT, or timeout.
+ *         Add each entry to the RespBuffer and do the RespBuffer
+ *         completeMessage upon receiving EOT.
+ *
+ */
+errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target   *i_target,
+                               SBEIO::SbeFifoRespBuffer &o_fifoBuffer,
+                                               bool     &o_EOT)
+{
+    uint64_t   l_elapsed_time_ns = 0;
+    errlHndl_t l_errl            = NULL;
+    bool       l_EMPTY{};
+    uint32_t   l_data{};
+    uint32_t   l_status{};
+
+    SBE_TRACU(ENTER_MRK "waitDnFifoReady");
 
     do
     {
-        // read dnstream status to see if data ready to be read
-        // or if has hit the EOT
-        errl = readCfam(i_target,l_addr,&o_status);
-        if (errl) break;
+        // read and parse the FIFO data
+        l_errl = parseDataOutReg(i_target, l_data, l_status, l_EMPTY, o_EOT);
+        if (l_errl) {break;}
 
-        if (  (!(o_status & DNFIFO_STATUS_FIFO_EMPTY)) ||
-              (o_status & DNFIFO_STATUS_DEQUEUED_EOT_FLAG) )
-        {
-            SBE_TRACD("waitDnFifoReady: Read a word from status register: 0x%.8X",o_status);
-            break;
-        }
-        else
-        {
-            SBE_TRACD("waitDnFifoReady: SBE status reg returned fifo empty or "
-                      "dequeued eot flag 0x%.8X",
-                      o_status);
-        }
+        if (!l_EMPTY) {o_fifoBuffer.append(l_data);}
+        if (o_EOT)    {o_fifoBuffer.completeMessage();}
 
-        // time out if wait too long
-        if (l_elapsed_time_ns >= MAX_UP_FIFO_TIMEOUT_NS )
+        // if we received a new entry or an EOT, stop the FIFO receive timer
+        if ((!l_EMPTY || o_EOT)) {break;}
+
+        // else, continue waiting to receive data
+
+        if (l_elapsed_time_ns >= MAX_DWN_FIFO_TIMEOUT_NS)
         {
-            SBE_TRACF(ERR_MRK "waitDnFifoReady: timeout waiting for downstream FIFO to be not full on %.8X",
-                      TARGETING::get_huid(i_target));
+            SBE_TRACF(ERR_MRK "waitDnFifoReady: "
+                      "timeout waiting for downstream FIFO ENTRY or EOT");
 
             /*@
              * @errortype
@@ -714,25 +828,25 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
              * @custdesc     Firmware error communicating with a chip
              */
 
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                SBEIO_FIFO,
-                                SBEIO_FIFO_DOWNSTREAM_TIMEOUT,
-                                MAX_UP_FIFO_TIMEOUT_NS,
-                                TWO_UINT32_TO_UINT64(
+            l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                   SBEIO_FIFO,
+                                   SBEIO_FIFO_DOWNSTREAM_TIMEOUT,
+                                   MAX_UP_FIFO_TIMEOUT_NS,
+                                   TWO_UINT32_TO_UINT64(
                                    TARGETING::get_huid(i_target),
-                                   o_status));
+                                   l_status));
 
-            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                      HWAS::SRCI_PRIORITY_HIGH);
+            l_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                        HWAS::SRCI_PRIORITY_HIGH);
 
             // Keep a copy of the plid so we can pass it to the retry_handler
             // so the error logs it creates will be linked
-            uint32_t l_errPlid = errl->plid();
+            uint32_t l_errPlid = l_errl->plid();
 
             //@TODO-JIRA:PFHB-489 Add Odyssey Timeout support
             if( TARGETING::UTIL::isOdysseyChip(i_target) )
             {
-                errl->addHwCallout(  i_target,
+                l_errl->addHwCallout(i_target,
                                      HWAS::SRCI_PRIORITY_HIGH,
                                      HWAS::DELAYED_DECONFIG,
                                      HWAS::GARD_NULL );
@@ -743,16 +857,16 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
             // we will not return from retry handler
             if(INITSERVICE::spBaseServicesEnabled())
             {
-                errl->addHwCallout(  i_target,
+                l_errl->addHwCallout(i_target,
                                      HWAS::SRCI_PRIORITY_HIGH,
                                      HWAS::NO_DECONFIG,
                                      HWAS::GARD_NULL );
-                ERRORLOG::errlCommit( errl, SBEIO_COMP_ID );
+                ERRORLOG::errlCommit( l_errl, SBEIO_COMP_ID );
             }
             //On BMC systems we want to deconfigure the chip
             else
             {
-                errl->addHwCallout(  i_target,
+                l_errl->addHwCallout(i_target,
                                      HWAS::SRCI_PRIORITY_HIGH,
                                      HWAS::DELAYED_DECONFIG,
                                      HWAS::GARD_NULL );
@@ -803,51 +917,235 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
     }
     while (1);
 
-    SBE_TRACD(EXIT_MRK "waitDnFifoReady");
+    if (l_errl) {SBE_TRACD(ERR_MRK  "waitDnFifoReady");}
 
-    return errl;
+    SBE_TRACU(EXIT_MRK "waitDnFifoReady");
+    return l_errl;
 }
 
 /**
- * @brief read FSI
+ * @brief get the register addr from the enum index
  */
-errlHndl_t SbeFifo::readCfam(TARGETING::Target * i_target,
-                     uint64_t   i_addr,
-                     uint32_t * o_pData)
+uint32_t SbeFifo::getSbeFifoRegValue(fifoRegAddr i_reg)
 {
-    errlHndl_t errl = NULL;
+    uint32_t l_addr{};
 
-    size_t l_32bitSize = sizeof(uint32_t);
-    errl = deviceOp(DeviceFW::READ,
-                    i_target,
-                    o_pData,
-                    l_32bitSize,
-                    DEVICE_CFAM_ADDRESS(i_addr));
-    SBE_TRACU("  readCfam addr=0x%08lx data=0x%08x",
-                         i_addr,*o_pData);
-
-    return errl;
+    switch(i_reg)
+    {
+        case FIFO_UPFIFO_DATA_IN:   l_addr = 0x00002420; break;
+        case FIFO_UPFIFO_STATUS:    l_addr = 0x00002421; break;
+        case FIFO_UPFIFO_SIG_EOT:   l_addr = 0x00002422; break;
+        case FIFO_UPFIFO_REQ_RESET: l_addr = 0x00002423; break;
+        case FIFO_DNFIFO_DATA_OUT:  l_addr = 0x00002430; break;
+        case FIFO_DNFIFO_STATUS:    l_addr = 0x00002431; break;
+        case FIFO_DNFIFO_RESET:     l_addr = 0x00002434; break;
+        case FIFO_DNFIFO_ACK_EOT:   l_addr = 0x00002435; break;
+        case FIFO_DNFIFO_MAX_TSFR:  l_addr = 0x00002436; break;
+    }
+    return l_addr;
 }
 
 /**
- * @brief write FSI
+ * @brief get the register addr from the enum index
  */
-errlHndl_t SbeFifo::writeCfam(TARGETING::Target * i_target,
-                     uint64_t   i_addr,
-                     uint32_t * i_pData)
+uint32_t SbeFifo::getSppeFifoRegValue(fifoRegAddr i_reg)
 {
-    errlHndl_t errl = NULL;
+    uint32_t l_addr{};
 
-    SBE_TRACU("  writeCfam addr=0x%08lx data=0x%08x",
-                         i_addr,*i_pData);
-    size_t l_32bitSize = sizeof(uint32_t);
-    errl = deviceOp(DeviceFW::WRITE,
-                    i_target,
-                    i_pData,
-                    l_32bitSize,
-                    DEVICE_CFAM_ADDRESS(i_addr));
+    switch(i_reg)
+    {
+        case FIFO_UPFIFO_DATA_IN:   l_addr = 0x00002400; break;
+        case FIFO_UPFIFO_STATUS:    l_addr = 0x00002401; break;
+        case FIFO_UPFIFO_SIG_EOT:   l_addr = 0x00002402; break;
+        case FIFO_UPFIFO_REQ_RESET: l_addr = 0x00002403; break;
+        case FIFO_DNFIFO_DATA_OUT:  l_addr = 0x00002410; break;
+        case FIFO_DNFIFO_STATUS:    l_addr = 0x00002411; break;
+        case FIFO_DNFIFO_RESET:     l_addr = 0x00002414; break;
+        case FIFO_DNFIFO_ACK_EOT:   l_addr = 0x00002415; break;
+        case FIFO_DNFIFO_MAX_TSFR:  l_addr = 0x00002416; break;
+    }
+    return l_addr;
+}
 
-    return errl;
+/**
+ * @brief get the register addr from the enum index
+ */
+uint32_t SbeFifo::getPipeFifoRegValue(fifoRegAddr i_reg)
+{
+    uint32_t l_addr{};
+
+    switch(i_reg)
+    {
+        case FIFO_UPFIFO_DATA_IN:   l_addr = 0x000B0110; break;
+        case FIFO_UPFIFO_STATUS:    l_addr = 0x000B0101; break;
+        case FIFO_UPFIFO_SIG_EOT:   l_addr = 0x000B0112; break;
+        case FIFO_UPFIFO_REQ_RESET: l_addr = 0x000B0113; break;
+        case FIFO_DNFIFO_DATA_OUT:  l_addr = 0x000B0200; break;
+        case FIFO_DNFIFO_STATUS:    l_addr = 0x000B0201; break;
+        case FIFO_DNFIFO_RESET:     l_addr = 0x000B0204; break;
+        case FIFO_DNFIFO_ACK_EOT:   l_addr = 0x000B0204; break;
+        case FIFO_DNFIFO_MAX_TSFR:  assert(0);           break;
+    }
+    return l_addr;
+}
+
+/**
+ * @brief get the register addr from the enum index
+ */
+uint32_t SbeFifo::getFifoRegValue(fifoRegType i_type, fifoRegAddr i_reg)
+{
+    uint32_t l_addr{};
+
+    switch (i_type)
+    {
+        case FIFO_SBE:  l_addr = getSbeFifoRegValue(i_reg);  break;
+        case FIFO_SPPE: l_addr = getSppeFifoRegValue(i_reg); break;
+        case FIFO_PIPE: l_addr = getPipeFifoRegValue(i_reg); break;
+    }
+    return l_addr;
+}
+
+/**
+ * @brief read FIFO register
+ */
+errlHndl_t SbeFifo::readFifoReg64(TARGETING::Target   *i_target,
+                                           fifoRegAddr i_addrIdx,
+                                             uint64_t *o_pData)
+{
+    size_t     l_64bitSize = sizeof(uint64_t);
+    errlHndl_t l_errl      = NULL;
+    uint32_t   l_addr{};
+
+    l_addr = getFifoRegValue(FIFO_PIPE, i_addrIdx);
+    l_errl = deviceOp(DeviceFW::READ,
+                      i_target,
+                      o_pData,
+                      l_64bitSize,
+                      DEVICE_SCOM_ADDRESS(l_addr));
+    if (l_errl)
+    {
+        if (TARGETING::UTIL::isOdysseyChip(i_target) &&
+            i_target->getAttr<TARGETING::ATTR_USE_PIPE_FIFO>())
+        {
+            // ERROR with PIPE FIFO, disable the PIPE FIFO
+            i_target->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(0);
+        }
+    }
+
+    SBE_TRACU("  readFifoReg64 PIPE addr=0x%08lx data=0x%016llx", l_addr, *o_pData);
+    if (l_errl) {SBE_TRACD(ERR_MRK "readFifoReg64");}
+    return l_errl;
+}
+
+/**
+ * @brief read FIFO register
+ */
+errlHndl_t SbeFifo::readFifoReg(TARGETING::Target     *i_target,
+                                           fifoRegAddr i_addrIdx,
+                                           uint32_t   *o_pData)
+{
+    size_t     l_32bitSize = sizeof(uint32_t);
+    errlHndl_t l_errl      = NULL;
+    uint32_t   l_addr{};
+
+    if (TARGETING::UTIL::isOdysseyChip(i_target))
+    {
+        // Odyssey
+
+        if (i_target->getAttr<TARGETING::ATTR_USE_PIPE_FIFO>())
+        {
+            uint64_t l_data;
+            l_errl = readFifoReg64(i_target, i_addrIdx, &l_data);
+            *o_pData = l_data>>32;
+        }
+        else
+        {
+            // SPPE CFAM FIFO
+            l_addr = getFifoRegValue(FIFO_SPPE, i_addrIdx);
+            l_errl = deviceOp(DeviceFW::READ,
+                              i_target,
+                              o_pData,
+                              l_32bitSize,
+                              DEVICE_CFAM_ADDRESS(l_addr));
+            SBE_TRACU("  readFifoReg   SPPE addr=0x%08lx data=0x%08x", l_addr,*o_pData);
+        }
+    }
+    else
+    {
+        // SBE CFAM FIFO
+        l_addr = getFifoRegValue(FIFO_SBE, i_addrIdx);
+        l_errl = deviceOp(DeviceFW::READ,
+                          i_target,
+                          o_pData,
+                          l_32bitSize,
+                          DEVICE_CFAM_ADDRESS(l_addr));
+        SBE_TRACU("  readFifoReg   SBE addr=0x%08lx data=0x%08x", l_addr,*o_pData);
+    }
+
+    if (l_errl) {SBE_TRACD(ERR_MRK "readFifoReg");}
+    return l_errl;
+}
+
+/**
+ * @brief write FIFO register
+ */
+errlHndl_t SbeFifo::writeFifoReg(TARGETING::Target     *i_target,
+                                            fifoRegAddr i_addrIdx,
+                                            uint32_t   *i_pData)
+{
+    size_t     l_32bitSize = sizeof(uint32_t);
+    errlHndl_t l_errl      = NULL;
+    uint32_t   l_addr{};
+
+    if (TARGETING::UTIL::isOdysseyChip(i_target))
+    {
+        // Odyssey
+
+        if (i_target->getAttr<TARGETING::ATTR_USE_PIPE_FIFO>())
+        {
+            // scom data and addrs must be 64-bit
+            size_t   l_64bitSize = sizeof(uint64_t);
+            uint64_t l_data = *i_pData;
+            l_data <<= 32;
+            l_addr = getFifoRegValue(FIFO_PIPE, i_addrIdx);
+            SBE_TRACU("  writeFifoReg  PIPE addr=0x%08lx data=0x%08x", l_addr,*i_pData);
+            l_errl = deviceOp(DeviceFW::WRITE,
+                              i_target,
+                              &l_data,
+                              l_64bitSize,
+                              DEVICE_SCOM_ADDRESS(l_addr));
+            if (l_errl)
+            {
+                // ERROR with PIPE FIFO, disable the PIPE FIFO
+                i_target->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(0);
+            }
+        }
+        else
+        {
+            // SPPE CFAM FIFO
+            l_addr = getFifoRegValue(FIFO_SPPE, i_addrIdx);
+            SBE_TRACU("  writeFifoReg  SPPE addr=0x%08lx data=0x%08x", l_addr,*i_pData);
+            l_errl = deviceOp(DeviceFW::WRITE,
+                              i_target,
+                              i_pData,
+                              l_32bitSize,
+                              DEVICE_CFAM_ADDRESS(l_addr));
+        }
+    }
+    else
+    {
+        // SBE CFAM FIFO
+        l_addr = getFifoRegValue(FIFO_SBE, i_addrIdx);
+        SBE_TRACU("  writeFifoReg  SBE  addr=0x%08lx data=0x%08x", l_addr,*i_pData);
+        l_errl = deviceOp(DeviceFW::WRITE,
+                          i_target,
+                          i_pData,
+                          l_32bitSize,
+                          DEVICE_CFAM_ADDRESS(l_addr));
+    }
+
+    if (l_errl) {SBE_TRACD(ERR_MRK "writeFifoReg");}
+    return l_errl;
 }
 
 /**
@@ -864,7 +1162,8 @@ void SbeFifo::initFFDCPackageBuffer()
  * @param[in]  i_data        FFDC error data
  * @param[in]  i_len         data buffer len to copy
  */
-void SbeFifo::writeFFDCBuffer(const void * i_data, uint32_t i_len) {
+void SbeFifo::writeFFDCBuffer(const void * i_data, uint32_t i_len)
+{
     if(i_len <= PAGESIZE * SBE_FFDC_MAX_PAGES)
     {
         initFFDCPackageBuffer();

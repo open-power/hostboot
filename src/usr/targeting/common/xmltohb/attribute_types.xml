@@ -10199,6 +10199,19 @@
   </attribute>
 
   <attribute>
+    <description>
+        Indicates if the ODYSSEY PIPE FIFO is available.
+    </description>
+    <id>USE_PIPE_FIFO</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+  </attribute>
+
+  <attribute>
     <id>USE_TCES_FOR_DMAS</id>
     <description>
       Specifies whether or not the FSP is ready for Hostboot to enable TCEs

@@ -70,12 +70,12 @@
  */
 #define RUN_SUB_CHIPOP(CALLER, ERRL, TARGET, OP) \
   TRACFCOMP(g_trac_isteps_trace, \
-            #CALLER ": run " #OP " on target HUID 0x%.8X", get_huid(TARGET)); \
+            #CALLER ": run CHIPOP " #OP " on target HUID 0x%.8X", get_huid(TARGET)); \
   ERRL = sendExecHWPRequest(TARGET, OP); \
   if (ERRL) \
   { \
       TRACFCOMP(g_trac_isteps_trace, \
-                ERR_MRK #CALLER ": " #OP " on target HUID 0x%.8X", get_huid(TARGET)); \
+                ERR_MRK #CALLER ": CHIPOP " #OP " on target HUID 0x%.8X", get_huid(TARGET)); \
       goto ERROR_EXIT; \
   }
 

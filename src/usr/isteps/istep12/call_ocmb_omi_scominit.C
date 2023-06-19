@@ -180,7 +180,7 @@ void* call_ocmb_omi_scominit (void *io_pArgs)
         else if (chipId == POWER_CHIPID::ODYSSEY_16)
         {
             TRACFCOMP( g_trac_isteps_trace,
-                "call_ocmb_omi_scominit: Run ODY HWPs on target HUID 0x%.8X "
+                "call_ocmb_omi_scominit: Run ODY on target HUID 0x%.8X "
                 "l_runOdyHwpFromHost:%d",
                 get_huid(l_ocmb_target), l_runOdyHwpFromHost);
 

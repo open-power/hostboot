@@ -43,9 +43,12 @@
 #include    <initservice/isteps_trace.H>
 #include    <istepHelperFuncs.H>          // captureError
 
+#include <sbeio/sbeioif.H>
+
 //  targeting support.
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+#include    <targeting/odyutil.H>
 
 //Fapi Support
 #include    <config.h>
@@ -72,6 +75,7 @@ using   namespace   ISTEPS_TRACE;
 namespace ISTEP_12
 {
 void enableInbandScomsOCMB( TargetHandleList i_ocmbTargetList );
+void enablePipeFifoOCMB( TargetHandleList i_ocmbTargetList );
 
 class WorkItem_exp_omi_init: public HwpWorkItem_OCMBUpdateCheck
 {
@@ -128,6 +132,7 @@ class WorkItem_p10_omi_init: public HwpWorkItem_OCMBUpdateCheck
         getChildAffinityTargets(l_ocmbTargetList, iv_pTarget,
                                 CLASS_CHIP, TYPE_OCMB_CHIP);
         enableInbandScomsOCMB(l_ocmbTargetList);
+        enablePipeFifoOCMB(l_ocmbTargetList);
     }
 };
 
@@ -219,7 +224,7 @@ void enableInbandScomsOCMB( TargetHandleList i_ocmbTargetList )
     {
         //don't mess with attributes without the mutex (just to be safe)
         l_mutex = l_ocmb->getHbMutexAttr<ATTR_SCOM_ACCESS_MUTEX>();
-        recursive_mutex_lock(l_mutex);
+        const auto lock = scoped_recursive_mutex_lock(*l_mutex);
 
         ScomSwitches l_switches = l_ocmb->getAttr<ATTR_SCOM_SWITCHES>();
         l_switches.useI2cScom = 0;
@@ -228,7 +233,36 @@ void enableInbandScomsOCMB( TargetHandleList i_ocmbTargetList )
 
         // Modify attribute
         l_ocmb->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
-        recursive_mutex_unlock(l_mutex);
+    }
+}
+
+/**
+ * @brief Enable the PIPE FIFO for the OCMB targets
+ * @param i_ocmbTargetList - OCMB targets
+ */
+void enablePipeFifoOCMB( TargetHandleList i_ocmbTargetList )
+{
+    errlHndl_t l_errl  = nullptr;
+    mutex_t   *l_mutex = nullptr;
+
+    for (const auto l_ocmb : i_ocmbTargetList)
+    {
+        // don't mess with attributes without the mutex (just to be safe)
+        l_mutex = l_ocmb->getHbMutexAttr<ATTR_SBE_FIFO_MUTEX>();
+        const auto lock = scoped_mutex_lock(*l_mutex);
+
+        if (TARGETING::UTIL::isOdysseyChip(l_ocmb))
+        {
+            l_errl = SBEIO::doSetupPipeAccess(l_ocmb);
+            if (l_errl)
+            {
+                ERRORLOG::errlCommit(l_errl, ISTEP_COMP_ID);
+            }
+            else
+            {
+                l_ocmb->setAttr<ATTR_USE_PIPE_FIFO>(1);
+            }
+        }
     }
 }
 

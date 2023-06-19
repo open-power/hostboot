@@ -571,6 +571,9 @@
       <id>TYPE</id>
     </attribute>
     <attribute>
+      <id>USE_PIPE_FIFO</id>
+    </attribute>
+    <attribute>
       <id>VPD_REC_NUM</id>
     </attribute>
   </targetType>

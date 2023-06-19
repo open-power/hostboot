@@ -414,6 +414,17 @@ namespace SBEIO
     errlHndl_t sendFifoReset(TARGETING::Target * i_target);
 
     /**
+     * @brief Setup the Access Control for the FIFO PIPE
+     *
+     * @param[in]  i_target  OCMB Target to setup
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     * TODO JIRA: PFHB-492 Remove temporary Odyssey pipe setup from Hostboot
+     */
+    errlHndl_t doSetupPipeAccess(TARGETING::Target *i_target);
+
+    /**
     * @brief Get the SBE FFDC.  Request that SBE retrieve the SBE FFDC
     *
     * @param[in]     i_procChip      The proc from which to get the SBE FFDC

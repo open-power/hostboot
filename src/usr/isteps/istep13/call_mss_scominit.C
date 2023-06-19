@@ -217,7 +217,7 @@ void run_mss_scominit(IStepError & io_iStepError)
         else if (chipId == POWER_CHIPID::ODYSSEY_16)
         {
             TRACFCOMP( g_trac_isteps_trace,
-                "call_mss_scominit: Run ODY HWPs on target HUID 0x%.8X l_runOdyHwpFromHost:%d",
+                "call_mss_scominit: Run ODY on target HUID 0x%.8X l_runOdyHwpFromHost:%d",
                 get_huid(l_ocmb), l_runOdyHwpFromHost);
 
             if (l_runOdyHwpFromHost)

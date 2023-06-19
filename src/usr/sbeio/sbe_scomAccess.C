@@ -207,27 +207,49 @@ errlHndl_t putFifoScomUnderMask(TARGETING::Target * i_target,
 errlHndl_t sendFifoReset(TARGETING::Target * i_target)
 {
     errlHndl_t errl = NULL;
+    uint32_t l_addr{};
 
     SBE_TRACD(ENTER_MRK "sendFifoReset");
 
-    do
-    {
-        uint32_t l_addr = TARGETING::UTIL::isOdysseyChip(i_target) ? SbeFifo::SPPE_FIFO_DNFIFO_RESET : SbeFifo::SBE_FIFO_DNFIFO_RESET;
-        // error check input parameters
-        errl = sbeioInterfaceChecks(i_target,
-                                    SbeFifo::SBE_FIFO_CLASS_SCOM_ACCESS,
-                                    SbeFifo::SBE_FIFO_CMD_PUT_SCOM,
-                                    l_addr);
-        if (errl)
-        {
-            break;
-        }
+    SbeFifo::fifoRegType l_type = TARGETING::UTIL::isOdysseyChip(i_target) ?
+                                                        SbeFifo::FIFO_SPPE :
+                                                        SbeFifo::FIFO_SBE;
+    l_addr = SbeFifo::getTheInstance().getFifoRegValue(l_type, SbeFifo::FIFO_DNFIFO_RESET);
 
-        errl = SbeFifo::getTheInstance().performFifoReset(i_target);
-    }
-    while (0);
+    // error check input parameters
+    errl = sbeioInterfaceChecks(i_target,
+                                SbeFifo::SBE_FIFO_CLASS_SCOM_ACCESS,
+                                SbeFifo::SBE_FIFO_CMD_PUT_SCOM,
+                                l_addr);
+    if (errl) {goto ERROR_EXIT;}
 
+    errl = SbeFifo::getTheInstance().performFifoReset(i_target);
+
+    ERROR_EXIT:
     SBE_TRACD(EXIT_MRK "sendFifoReset");
+    return errl;
+};
+
+// setup the FIFO Pipe Access Control
+errlHndl_t doSetupPipeAccess(TARGETING::Target *i_target)
+{
+    errlHndl_t errl = NULL;
+
+    SBE_TRACD(ENTER_MRK "doSetupPipeAccess");
+
+    uint32_t l_addr = 0x000B0120; // FSI SBE_FIFO Pipe : Access Control
+
+    // error check input parameters
+    errl = sbeioInterfaceChecks(i_target,
+                                SbeFifo::SBE_FIFO_CLASS_SCOM_ACCESS,
+                                SbeFifo::SBE_FIFO_CMD_PUT_SCOM,
+                                l_addr);
+    if (!errl)
+    {
+        errl = SbeFifo::getTheInstance().setupPipeAccess(i_target);
+    }
+
+    SBE_TRACD(EXIT_MRK "doSetupPipeAccess");
 
     return errl;
 };
