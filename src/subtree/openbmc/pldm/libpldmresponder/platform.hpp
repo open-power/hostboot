@@ -1,7 +1,5 @@
 #pragma once
 
-#include "config.h"
-
 #include "common/utils.hpp"
 #include "event_parser.hpp"
 #include "fru.hpp"

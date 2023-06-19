@@ -1,7 +1,5 @@
 #pragma once
 
-#include "config.h"
-
 #include "common/utils.hpp"
 #include "oem/ibm/requester/dbus_to_file_handler.hpp"
 #include "oem_ibm_handler.hpp"

@@ -15,6 +15,8 @@ option('number-of-request-retries', type: 'integer', min: 2, max: 30, descriptio
 option('instance-id-expiration-interval', type: 'integer', min: 5, max: 6, description: 'Instance ID expiration interval in seconds', value: 5)
 # Default response-time-out set to 2 seconds to facilitate a minimum retry of the request of 2.
 option('response-time-out', type: 'integer', min: 300, max: 4800, description: 'The amount of time a requester has to wait for a response message in milliseconds', value: 2000)
+# Time taken to wait for the reply for any PLDM dbus call is set to 5 seconds. After 5 seconds the dbus method will exit.
+option('dbus-timeout-value', type: 'integer', min: 3, max: 10, description: 'The amount of time pldm waits to get a response for a dbus message before timing out', value: 5)
 
 option('heartbeat-timeout-seconds', type: 'integer', description: ' The amount of time host waits for BMC to respond to pings from host, as part of host-bmc surveillance', value: 120)
 

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "config.h"
-
 #include "fru_parser.hpp"
 #include "pldmd/handler.hpp"
 

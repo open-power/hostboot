@@ -1,6 +1,5 @@
 #include "pdr.hpp"
 
-#include <config.h>
 #include <libpldm/platform.h>
 
 #include <phosphor-logging/lg2.hpp>

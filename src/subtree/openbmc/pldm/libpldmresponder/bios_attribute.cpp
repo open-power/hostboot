@@ -1,5 +1,3 @@
-#include "config.h"
-
 #include "bios_attribute.hpp"
 
 #include "bios_config.hpp"

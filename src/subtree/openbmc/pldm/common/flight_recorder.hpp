@@ -1,7 +1,5 @@
 #pragma once
 
-#include <config.h>
-
 #include <common/utils.hpp>
 #include <phosphor-logging/lg2.hpp>
 

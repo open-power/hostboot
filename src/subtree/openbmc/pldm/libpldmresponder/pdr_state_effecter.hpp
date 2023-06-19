@@ -3,7 +3,6 @@
 #include "pdr.hpp"
 #include "pdr_utils.hpp"
 
-#include <config.h>
 #include <libpldm/platform.h>
 
 #include <phosphor-logging/lg2.hpp>

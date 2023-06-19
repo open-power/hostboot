@@ -1,5 +1,3 @@
-#include "config.h"
-
 #include "base.hpp"
 
 #include "common/utils.hpp"

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "config.h"
-
 #include "common/types.hpp"
 #include "pldmd/instance_id.hpp"
 #include "request.hpp"

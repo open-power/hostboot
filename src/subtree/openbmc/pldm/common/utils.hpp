@@ -21,6 +21,9 @@
 #include <variant>
 #include <vector>
 
+using microsec = std::chrono::microseconds;
+using sec = std::chrono::seconds;
+
 namespace pldm
 {
 namespace utils

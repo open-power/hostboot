@@ -1,5 +1,3 @@
-#include "config.h"
-
 #include "bios_enum_attribute.hpp"
 
 #include "common/utils.hpp"

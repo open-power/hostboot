@@ -1,7 +1,5 @@
 #pragma once
 
-#include "config.h"
-
 #include "bios_config.hpp"
 #include "bios_table.hpp"
 #include "pldmd/handler.hpp"

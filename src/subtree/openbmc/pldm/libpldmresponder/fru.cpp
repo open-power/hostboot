@@ -2,7 +2,6 @@
 
 #include "common/utils.hpp"
 
-#include <config.h>
 #include <libpldm/entity.h>
 #include <libpldm/utils.h>
 #include <systemd/sd-journal.h>
@@ -37,7 +36,9 @@ void FruImpl::buildFRUTable()
         auto method = bus.new_method_call(
             std::get<0>(dbusInfo).c_str(), std::get<1>(dbusInfo).c_str(),
             "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
-        auto reply = bus.call(method);
+        auto reply = bus.call(
+            method,
+            std::chrono::duration_cast<microsec>(sec(DBUS_TIMEOUT)).count());
         reply.read(objects);
     }
     catch (const std::exception& e)
@@ -143,7 +144,9 @@ std::string FruImpl::populatefwVersion()
                                           pldm::utils::dbusProperties, "Get");
         method.append("xyz.openbmc_project.Association", "endpoints");
         std::variant<std::vector<std::string>> paths;
-        auto reply = bus.call(method);
+        auto reply = bus.call(
+            method,
+            std::chrono::duration_cast<microsec>(sec(DBUS_TIMEOUT)).count());
         reply.read(paths);
         auto fwRunningVersion = std::get<std::vector<std::string>>(paths)[0];
         constexpr auto versionIntf = "xyz.openbmc_project.Software.Version";

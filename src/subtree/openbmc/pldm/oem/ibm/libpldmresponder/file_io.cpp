@@ -1,5 +1,3 @@
-#include "config.h"
-
 #include "file_io.hpp"
 
 #include "file_io_by_type.hpp"

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "config.h"
-
 #include "common/utils.hpp"
 #include "libpldmresponder/pdr.hpp"
 #include "pdr_utils.hpp"
