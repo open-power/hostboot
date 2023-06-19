@@ -114,6 +114,231 @@ fapi2::ReturnCode nibble_enable_db_disable(const fapi2::buffer<uint32_t>& i_nibb
         uint8_t(&o_byte_disables)[10]);
 
 constexpr uint8_t NUM_RCW = 0x80;
+constexpr uint8_t NUM_SUPPORTED_RCW = 19;
+constexpr uint8_t DIMM_NUMBER = 2;
+constexpr uint8_t DIMM0 = 0;
+constexpr uint8_t DIMM1 = 1;
+
+#ifndef __PPE__
+// Attribute getter FP type
+typedef fapi2::ReturnCode (*rcw_attr_getter_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        uint8_t& o_value);
+
+// RCW getter methods
+const static mss::pair<uint64_t, rcw_attr_getter_ptr>
+get_rcw[NUM_SUPPORTED_RCW][mss::ddr5::mr::ATTR_NUM_CHANNELS][DIMM_NUMBER] =
+{
+    //RCW00
+    {
+        {
+            {0x00, mss::attr::get_ddr5_rcw00_cha_d0},
+            {0x00, mss::attr::get_ddr5_rcw00_cha_d1}
+        },
+        {
+            {0x00, mss::attr::get_ddr5_rcw00_chb_d0},
+            {0x00, mss::attr::get_ddr5_rcw00_chb_d1}
+        }
+    },
+    //RCW05
+    {
+        {
+            {0x05, mss::attr::get_ddr5_rcw05_cha_d0},
+            {0x05, mss::attr::get_ddr5_rcw05_cha_d1}
+        },
+        {
+            {0x05, mss::attr::get_ddr5_rcw05_chb_d0},
+            {0x05, mss::attr::get_ddr5_rcw05_chb_d1}
+        }
+    },
+    //RCW08
+    {
+        {
+            {0x08, mss::attr::get_ddr5_rcw08_cha_d0},
+            {0x08, mss::attr::get_ddr5_rcw08_cha_d1}
+        },
+        {
+            {0x08, mss::attr::get_ddr5_rcw08_chb_d0},
+            {0x08, mss::attr::get_ddr5_rcw08_chb_d1}
+        }
+    },
+    //RCW09
+    {
+        {
+            {0x09, mss::attr::get_ddr5_rcw09_cha_d0},
+            {0x09, mss::attr::get_ddr5_rcw09_cha_d1}
+        },
+        {
+            {0x09, mss::attr::get_ddr5_rcw09_chb_d0},
+            {0x09, mss::attr::get_ddr5_rcw09_chb_d1}
+        }
+    },
+    //RCW0A
+    {
+        {
+            {0x0A, mss::attr::get_ddr5_rcw0a_cha_d0},
+            {0x0A, mss::attr::get_ddr5_rcw0a_cha_d1}
+        },
+        {
+            {0x0A, mss::attr::get_ddr5_rcw0a_chb_d0},
+            {0x0A, mss::attr::get_ddr5_rcw0a_chb_d1}
+        }
+    },
+    //RCW0C
+    {
+        {
+            {0x0C, mss::attr::get_ddr5_rcw0c_cha_d0},
+            {0x0C, mss::attr::get_ddr5_rcw0c_cha_d1}
+        },
+        {
+            {0x0C, mss::attr::get_ddr5_rcw0c_chb_d0},
+            {0x0C, mss::attr::get_ddr5_rcw0c_chb_d1}
+        }
+    },
+    //RCW0D
+    {
+        {
+            {0x0D, mss::attr::get_ddr5_rcw0d_cha_d0},
+            {0x0D, mss::attr::get_ddr5_rcw0d_cha_d1}
+        },
+        {
+            {0x0D, mss::attr::get_ddr5_rcw0d_chb_d0},
+            {0x0D, mss::attr::get_ddr5_rcw0d_chb_d1}
+        }
+    },
+    //RCW0E
+    {
+        {
+            {0x0E, mss::attr::get_ddr5_rcw0e_cha_d0},
+            {0x0E, mss::attr::get_ddr5_rcw0e_cha_d1}
+        },
+        {
+            {0x0E, mss::attr::get_ddr5_rcw0e_chb_d0},
+            {0x0E, mss::attr::get_ddr5_rcw0e_chb_d1}
+        }
+    },
+    //RCW0F
+    {
+        {
+            {0x0F, mss::attr::get_ddr5_rcw0f_cha_d0},
+            {0x0F, mss::attr::get_ddr5_rcw0f_cha_d1}
+        },
+        {
+            {0x0F, mss::attr::get_ddr5_rcw0f_chb_d0},
+            {0x0F, mss::attr::get_ddr5_rcw0f_chb_d1}
+        }
+    },
+    //RCW40
+    {
+        {
+            {0x40, mss::attr::get_ddr5_rcw40_cha_d0},
+            {0x40, mss::attr::get_ddr5_rcw40_cha_d1}
+        },
+        {
+            {0x40, mss::attr::get_ddr5_rcw40_chb_d0},
+            {0x40, mss::attr::get_ddr5_rcw40_chb_d1}
+        }
+    },
+    //RCW41
+    {
+        {
+            {0x41, mss::attr::get_ddr5_rcw41_cha_d0},
+            {0x41, mss::attr::get_ddr5_rcw41_cha_d1}
+        },
+        {
+            {0x41, mss::attr::get_ddr5_rcw41_chb_d0},
+            {0x41, mss::attr::get_ddr5_rcw41_chb_d1}
+        }
+    },
+    //RCW42
+    {
+        {
+            {0x42, mss::attr::get_ddr5_rcw42_cha_d0},
+            {0x42, mss::attr::get_ddr5_rcw42_cha_d1}
+        },
+        {
+            {0x42, mss::attr::get_ddr5_rcw42_chb_d0},
+            {0x42, mss::attr::get_ddr5_rcw42_chb_d1}
+        }
+    },
+    //RCW43
+    {
+        {
+            {0x43, mss::attr::get_ddr5_rcw43_cha_d0},
+            {0x43, mss::attr::get_ddr5_rcw43_cha_d1}
+        },
+        {
+            {0x43, mss::attr::get_ddr5_rcw43_chb_d0},
+            {0x43, mss::attr::get_ddr5_rcw43_chb_d1}
+        }
+    },
+    //RCW44
+    {
+        {
+            {0x44, mss::attr::get_ddr5_rcw44_cha_d0},
+            {0x44, mss::attr::get_ddr5_rcw44_cha_d1}
+        },
+        {
+            {0x44, mss::attr::get_ddr5_rcw44_chb_d0},
+            {0x44, mss::attr::get_ddr5_rcw44_chb_d1}
+        }
+    },
+    //RCW45
+    {
+        {
+            {0x45, mss::attr::get_ddr5_rcw45_cha_d0},
+            {0x45, mss::attr::get_ddr5_rcw45_cha_d1}
+        },
+        {
+            {0x45, mss::attr::get_ddr5_rcw45_chb_d0},
+            {0x45, mss::attr::get_ddr5_rcw45_chb_d1}
+        }
+    },
+    //RCW46
+    {
+        {
+            {0x46, mss::attr::get_ddr5_rcw46_cha_d0},
+            {0x46, mss::attr::get_ddr5_rcw46_cha_d1}
+        },
+        {
+            {0x46, mss::attr::get_ddr5_rcw46_chb_d0},
+            {0x46, mss::attr::get_ddr5_rcw46_chb_d1}
+        }
+    },
+    //RCW47
+    {
+        {
+            {0x47, mss::attr::get_ddr5_rcw47_cha_d0},
+            {0x47, mss::attr::get_ddr5_rcw47_cha_d1}
+        },
+        {
+            {0x47, mss::attr::get_ddr5_rcw47_chb_d0},
+            {0x47, mss::attr::get_ddr5_rcw47_chb_d1}
+        }
+    },
+    //RCW48
+    {
+        {
+            {0x48, mss::attr::get_ddr5_rcw48_cha_d0},
+            {0x48, mss::attr::get_ddr5_rcw48_cha_d1}
+        },
+        {
+            {0x48, mss::attr::get_ddr5_rcw48_chb_d0},
+            {0x48, mss::attr::get_ddr5_rcw48_chb_d1}
+        }
+    },
+    //RCW49
+    {
+        {
+            {0x49, mss::attr::get_ddr5_rcw49_cha_d0},
+            {0x49, mss::attr::get_ddr5_rcw49_cha_d1}
+        },
+        {
+            {0x49, mss::attr::get_ddr5_rcw49_chb_d0},
+            {0x49, mss::attr::get_ddr5_rcw49_chb_d1}
+        }
+    }
+};
+#endif
 
 ///
 /// @class msg_block_vars
@@ -197,7 +422,7 @@ struct msg_block_vars
     uint8_t iv_Reserved1E7 = 0;
     uint16_t iv_WL_ADJ_START = 0;
     uint16_t iv_WL_ADJ_END = 0;
-    uint8_t iv_RCW[NUM_RCW] = {0};
+    uint8_t iv_RCW[NUM_RCW][mss::ddr5::mr::ATTR_NUM_CHANNELS][DIMM_NUMBER] = {};
     uint32_t iv_nibbles_enables[mss::ody::MAX_DIMM_PER_PORT] = {0};
     uint8_t iv_DisabledDB[mss::ody::MAX_BYTES_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
     uint8_t iv_VrefCS_Sweep_Min = 0;
@@ -483,7 +708,25 @@ class msg_block_params
             FAPI_TRY(mss::attr::get_ddr5_wl_adj_start(i_target, iv_msg_block_vars.iv_WL_ADJ_START));
             FAPI_TRY(mss::attr::get_ddr5_wl_adj_end(i_target, iv_msg_block_vars.iv_WL_ADJ_END));
 
-            // TODO: Zen:MST-1732 Fill in RCW fields in ody_draminit message block from attributes
+            // Initialize the RCW to zeros
+            memset(iv_msg_block_vars.iv_RCW, 0, sizeof(iv_msg_block_vars.iv_RCW));
+#ifndef __PPE__
+
+            // Get the supported RCW attr values
+            for(uint8_t l_getter_index = 0; l_getter_index < NUM_SUPPORTED_RCW; l_getter_index++)
+            {
+                for(uint8_t l_channel = 0; l_channel < mss::ddr5::mr::ATTR_NUM_CHANNELS; l_channel++)
+                {
+                    for(uint8_t l_dimm = 0; l_dimm < DIMM_NUMBER; l_dimm++)
+                    {
+                        const uint64_t l_rcw_id = get_rcw[l_getter_index][l_channel][l_dimm].first;
+                        FAPI_TRY(get_rcw[l_getter_index][l_channel][l_dimm].second(i_target,
+                                 iv_msg_block_vars.iv_RCW[l_rcw_id][l_channel][l_dimm]));
+                    }
+                }
+            }
+
+#endif
 
         fapi_try_exit:
             o_rc = fapi2::current_err;
@@ -1924,522 +2167,521 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_RCW(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            // TODO: Zen:MST-1732 Fill in RCW fields in ody_draminit message block from attributes
-            io_msg_block.RCW00_ChA_D0 = iv_msg_block_vars.iv_RCW[0];
-            io_msg_block.RCW01_ChA_D0 = iv_msg_block_vars.iv_RCW[1];
-            io_msg_block.RCW02_ChA_D0 = iv_msg_block_vars.iv_RCW[2];
-            io_msg_block.RCW03_ChA_D0 = iv_msg_block_vars.iv_RCW[3];
-            io_msg_block.RCW04_ChA_D0 = iv_msg_block_vars.iv_RCW[4];
-            io_msg_block.RCW05_ChA_D0 = iv_msg_block_vars.iv_RCW[5];
-            io_msg_block.RCW06_ChA_D0 = iv_msg_block_vars.iv_RCW[6];
-            io_msg_block.RCW07_ChA_D0 = iv_msg_block_vars.iv_RCW[7];
-            io_msg_block.RCW08_ChA_D0 = iv_msg_block_vars.iv_RCW[8];
-            io_msg_block.RCW09_ChA_D0 = iv_msg_block_vars.iv_RCW[9];
-            io_msg_block.RCW0A_ChA_D0 = iv_msg_block_vars.iv_RCW[10];
-            io_msg_block.RCW0B_ChA_D0 = iv_msg_block_vars.iv_RCW[11];
-            io_msg_block.RCW0C_ChA_D0 = iv_msg_block_vars.iv_RCW[12];
-            io_msg_block.RCW0D_ChA_D0 = iv_msg_block_vars.iv_RCW[13];
-            io_msg_block.RCW0E_ChA_D0 = iv_msg_block_vars.iv_RCW[14];
-            io_msg_block.RCW0F_ChA_D0 = iv_msg_block_vars.iv_RCW[15];
-            io_msg_block.RCW10_ChA_D0 = iv_msg_block_vars.iv_RCW[16];
-            io_msg_block.RCW11_ChA_D0 = iv_msg_block_vars.iv_RCW[17];
-            io_msg_block.RCW12_ChA_D0 = iv_msg_block_vars.iv_RCW[18];
-            io_msg_block.RCW13_ChA_D0 = iv_msg_block_vars.iv_RCW[19];
-            io_msg_block.RCW14_ChA_D0 = iv_msg_block_vars.iv_RCW[20];
-            io_msg_block.RCW15_ChA_D0 = iv_msg_block_vars.iv_RCW[21];
-            io_msg_block.RCW16_ChA_D0 = iv_msg_block_vars.iv_RCW[22];
-            io_msg_block.RCW17_ChA_D0 = iv_msg_block_vars.iv_RCW[23];
-            io_msg_block.RCW18_ChA_D0 = iv_msg_block_vars.iv_RCW[24];
-            io_msg_block.RCW19_ChA_D0 = iv_msg_block_vars.iv_RCW[25];
-            io_msg_block.RCW1A_ChA_D0 = iv_msg_block_vars.iv_RCW[26];
-            io_msg_block.RCW1B_ChA_D0 = iv_msg_block_vars.iv_RCW[27];
-            io_msg_block.RCW1C_ChA_D0 = iv_msg_block_vars.iv_RCW[28];
-            io_msg_block.RCW1D_ChA_D0 = iv_msg_block_vars.iv_RCW[29];
-            io_msg_block.RCW1E_ChA_D0 = iv_msg_block_vars.iv_RCW[30];
-            io_msg_block.RCW1F_ChA_D0 = iv_msg_block_vars.iv_RCW[31];
-            io_msg_block.RCW20_ChA_D0 = iv_msg_block_vars.iv_RCW[32];
-            io_msg_block.RCW21_ChA_D0 = iv_msg_block_vars.iv_RCW[33];
-            io_msg_block.RCW22_ChA_D0 = iv_msg_block_vars.iv_RCW[34];
-            io_msg_block.RCW23_ChA_D0 = iv_msg_block_vars.iv_RCW[35];
-            io_msg_block.RCW24_ChA_D0 = iv_msg_block_vars.iv_RCW[36];
-            io_msg_block.RCW25_ChA_D0 = iv_msg_block_vars.iv_RCW[37];
-            io_msg_block.RCW26_ChA_D0 = iv_msg_block_vars.iv_RCW[38];
-            io_msg_block.RCW27_ChA_D0 = iv_msg_block_vars.iv_RCW[39];
-            io_msg_block.RCW28_ChA_D0 = iv_msg_block_vars.iv_RCW[40];
-            io_msg_block.RCW29_ChA_D0 = iv_msg_block_vars.iv_RCW[41];
-            io_msg_block.RCW2A_ChA_D0 = iv_msg_block_vars.iv_RCW[42];
-            io_msg_block.RCW2B_ChA_D0 = iv_msg_block_vars.iv_RCW[43];
-            io_msg_block.RCW2C_ChA_D0 = iv_msg_block_vars.iv_RCW[44];
-            io_msg_block.RCW2D_ChA_D0 = iv_msg_block_vars.iv_RCW[45];
-            io_msg_block.RCW2E_ChA_D0 = iv_msg_block_vars.iv_RCW[46];
-            io_msg_block.RCW2F_ChA_D0 = iv_msg_block_vars.iv_RCW[47];
-            io_msg_block.RCW30_ChA_D0 = iv_msg_block_vars.iv_RCW[48];
-            io_msg_block.RCW31_ChA_D0 = iv_msg_block_vars.iv_RCW[49];
-            io_msg_block.RCW32_ChA_D0 = iv_msg_block_vars.iv_RCW[50];
-            io_msg_block.RCW33_ChA_D0 = iv_msg_block_vars.iv_RCW[51];
-            io_msg_block.RCW34_ChA_D0 = iv_msg_block_vars.iv_RCW[52];
-            io_msg_block.RCW35_ChA_D0 = iv_msg_block_vars.iv_RCW[53];
-            io_msg_block.RCW36_ChA_D0 = iv_msg_block_vars.iv_RCW[54];
-            io_msg_block.RCW37_ChA_D0 = iv_msg_block_vars.iv_RCW[55];
-            io_msg_block.RCW38_ChA_D0 = iv_msg_block_vars.iv_RCW[56];
-            io_msg_block.RCW39_ChA_D0 = iv_msg_block_vars.iv_RCW[57];
-            io_msg_block.RCW3A_ChA_D0 = iv_msg_block_vars.iv_RCW[58];
-            io_msg_block.RCW3B_ChA_D0 = iv_msg_block_vars.iv_RCW[59];
-            io_msg_block.RCW3C_ChA_D0 = iv_msg_block_vars.iv_RCW[60];
-            io_msg_block.RCW3D_ChA_D0 = iv_msg_block_vars.iv_RCW[61];
-            io_msg_block.RCW3E_ChA_D0 = iv_msg_block_vars.iv_RCW[62];
-            io_msg_block.RCW3F_ChA_D0 = iv_msg_block_vars.iv_RCW[63];
-            io_msg_block.RCW40_ChA_D0 = iv_msg_block_vars.iv_RCW[64];
-            io_msg_block.RCW41_ChA_D0 = iv_msg_block_vars.iv_RCW[65];
-            io_msg_block.RCW42_ChA_D0 = iv_msg_block_vars.iv_RCW[66];
-            io_msg_block.RCW43_ChA_D0 = iv_msg_block_vars.iv_RCW[67];
-            io_msg_block.RCW44_ChA_D0 = iv_msg_block_vars.iv_RCW[68];
-            io_msg_block.RCW45_ChA_D0 = iv_msg_block_vars.iv_RCW[69];
-            io_msg_block.RCW46_ChA_D0 = iv_msg_block_vars.iv_RCW[70];
-            io_msg_block.RCW47_ChA_D0 = iv_msg_block_vars.iv_RCW[71];
-            io_msg_block.RCW48_ChA_D0 = iv_msg_block_vars.iv_RCW[72];
-            io_msg_block.RCW49_ChA_D0 = iv_msg_block_vars.iv_RCW[73];
-            io_msg_block.RCW4A_ChA_D0 = iv_msg_block_vars.iv_RCW[74];
-            io_msg_block.RCW4B_ChA_D0 = iv_msg_block_vars.iv_RCW[75];
-            io_msg_block.RCW4C_ChA_D0 = iv_msg_block_vars.iv_RCW[76];
-            io_msg_block.RCW4D_ChA_D0 = iv_msg_block_vars.iv_RCW[77];
-            io_msg_block.RCW4E_ChA_D0 = iv_msg_block_vars.iv_RCW[78];
-            io_msg_block.RCW4F_ChA_D0 = iv_msg_block_vars.iv_RCW[79];
-            io_msg_block.RCW50_ChA_D0 = iv_msg_block_vars.iv_RCW[80];
-            io_msg_block.RCW51_ChA_D0 = iv_msg_block_vars.iv_RCW[81];
-            io_msg_block.RCW52_ChA_D0 = iv_msg_block_vars.iv_RCW[82];
-            io_msg_block.RCW53_ChA_D0 = iv_msg_block_vars.iv_RCW[83];
-            io_msg_block.RCW54_ChA_D0 = iv_msg_block_vars.iv_RCW[84];
-            io_msg_block.RCW55_ChA_D0 = iv_msg_block_vars.iv_RCW[85];
-            io_msg_block.RCW56_ChA_D0 = iv_msg_block_vars.iv_RCW[86];
-            io_msg_block.RCW57_ChA_D0 = iv_msg_block_vars.iv_RCW[87];
-            io_msg_block.RCW58_ChA_D0 = iv_msg_block_vars.iv_RCW[88];
-            io_msg_block.RCW59_ChA_D0 = iv_msg_block_vars.iv_RCW[89];
-            io_msg_block.RCW5A_ChA_D0 = iv_msg_block_vars.iv_RCW[90];
-            io_msg_block.RCW5B_ChA_D0 = iv_msg_block_vars.iv_RCW[91];
-            io_msg_block.RCW5C_ChA_D0 = iv_msg_block_vars.iv_RCW[92];
-            io_msg_block.RCW5D_ChA_D0 = iv_msg_block_vars.iv_RCW[93];
-            io_msg_block.RCW5E_ChA_D0 = iv_msg_block_vars.iv_RCW[94];
-            io_msg_block.RCW5F_ChA_D0 = iv_msg_block_vars.iv_RCW[95];
-            io_msg_block.RCW60_ChA_D0 = iv_msg_block_vars.iv_RCW[96];
-            io_msg_block.RCW61_ChA_D0 = iv_msg_block_vars.iv_RCW[97];
-            io_msg_block.RCW62_ChA_D0 = iv_msg_block_vars.iv_RCW[98];
-            io_msg_block.RCW63_ChA_D0 = iv_msg_block_vars.iv_RCW[99];
-            io_msg_block.RCW64_ChA_D0 = iv_msg_block_vars.iv_RCW[100];
-            io_msg_block.RCW65_ChA_D0 = iv_msg_block_vars.iv_RCW[101];
-            io_msg_block.RCW66_ChA_D0 = iv_msg_block_vars.iv_RCW[102];
-            io_msg_block.RCW67_ChA_D0 = iv_msg_block_vars.iv_RCW[103];
-            io_msg_block.RCW68_ChA_D0 = iv_msg_block_vars.iv_RCW[104];
-            io_msg_block.RCW69_ChA_D0 = iv_msg_block_vars.iv_RCW[105];
-            io_msg_block.RCW6A_ChA_D0 = iv_msg_block_vars.iv_RCW[106];
-            io_msg_block.RCW6B_ChA_D0 = iv_msg_block_vars.iv_RCW[107];
-            io_msg_block.RCW6C_ChA_D0 = iv_msg_block_vars.iv_RCW[108];
-            io_msg_block.RCW6D_ChA_D0 = iv_msg_block_vars.iv_RCW[109];
-            io_msg_block.RCW6E_ChA_D0 = iv_msg_block_vars.iv_RCW[110];
-            io_msg_block.RCW6F_ChA_D0 = iv_msg_block_vars.iv_RCW[111];
-            io_msg_block.RCW70_ChA_D0 = iv_msg_block_vars.iv_RCW[112];
-            io_msg_block.RCW71_ChA_D0 = iv_msg_block_vars.iv_RCW[113];
-            io_msg_block.RCW72_ChA_D0 = iv_msg_block_vars.iv_RCW[114];
-            io_msg_block.RCW73_ChA_D0 = iv_msg_block_vars.iv_RCW[115];
-            io_msg_block.RCW74_ChA_D0 = iv_msg_block_vars.iv_RCW[116];
-            io_msg_block.RCW75_ChA_D0 = iv_msg_block_vars.iv_RCW[117];
-            io_msg_block.RCW76_ChA_D0 = iv_msg_block_vars.iv_RCW[118];
-            io_msg_block.RCW77_ChA_D0 = iv_msg_block_vars.iv_RCW[119];
-            io_msg_block.RCW78_ChA_D0 = iv_msg_block_vars.iv_RCW[120];
-            io_msg_block.RCW79_ChA_D0 = iv_msg_block_vars.iv_RCW[121];
-            io_msg_block.RCW7A_ChA_D0 = iv_msg_block_vars.iv_RCW[122];
-            io_msg_block.RCW7B_ChA_D0 = iv_msg_block_vars.iv_RCW[123];
-            io_msg_block.RCW7C_ChA_D0 = iv_msg_block_vars.iv_RCW[124];
-            io_msg_block.RCW7D_ChA_D0 = iv_msg_block_vars.iv_RCW[125];
-            io_msg_block.RCW7E_ChA_D0 = iv_msg_block_vars.iv_RCW[126];
-            io_msg_block.RCW7F_ChA_D0 = iv_msg_block_vars.iv_RCW[127];
+            io_msg_block.RCW00_ChA_D0 = iv_msg_block_vars.iv_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW01_ChA_D0 = iv_msg_block_vars.iv_RCW[1][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW02_ChA_D0 = iv_msg_block_vars.iv_RCW[2][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW03_ChA_D0 = iv_msg_block_vars.iv_RCW[3][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW04_ChA_D0 = iv_msg_block_vars.iv_RCW[4][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW05_ChA_D0 = iv_msg_block_vars.iv_RCW[5][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW06_ChA_D0 = iv_msg_block_vars.iv_RCW[6][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW07_ChA_D0 = iv_msg_block_vars.iv_RCW[7][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW08_ChA_D0 = iv_msg_block_vars.iv_RCW[8][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW09_ChA_D0 = iv_msg_block_vars.iv_RCW[9][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW0A_ChA_D0 = iv_msg_block_vars.iv_RCW[10][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW0B_ChA_D0 = iv_msg_block_vars.iv_RCW[11][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW0C_ChA_D0 = iv_msg_block_vars.iv_RCW[12][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW0D_ChA_D0 = iv_msg_block_vars.iv_RCW[13][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW0E_ChA_D0 = iv_msg_block_vars.iv_RCW[14][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW0F_ChA_D0 = iv_msg_block_vars.iv_RCW[15][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW10_ChA_D0 = iv_msg_block_vars.iv_RCW[16][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW11_ChA_D0 = iv_msg_block_vars.iv_RCW[17][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW12_ChA_D0 = iv_msg_block_vars.iv_RCW[18][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW13_ChA_D0 = iv_msg_block_vars.iv_RCW[19][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW14_ChA_D0 = iv_msg_block_vars.iv_RCW[20][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW15_ChA_D0 = iv_msg_block_vars.iv_RCW[21][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW16_ChA_D0 = iv_msg_block_vars.iv_RCW[22][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW17_ChA_D0 = iv_msg_block_vars.iv_RCW[23][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW18_ChA_D0 = iv_msg_block_vars.iv_RCW[24][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW19_ChA_D0 = iv_msg_block_vars.iv_RCW[25][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW1A_ChA_D0 = iv_msg_block_vars.iv_RCW[26][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW1B_ChA_D0 = iv_msg_block_vars.iv_RCW[27][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW1C_ChA_D0 = iv_msg_block_vars.iv_RCW[28][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW1D_ChA_D0 = iv_msg_block_vars.iv_RCW[29][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW1E_ChA_D0 = iv_msg_block_vars.iv_RCW[30][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW1F_ChA_D0 = iv_msg_block_vars.iv_RCW[31][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW20_ChA_D0 = iv_msg_block_vars.iv_RCW[32][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW21_ChA_D0 = iv_msg_block_vars.iv_RCW[33][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW22_ChA_D0 = iv_msg_block_vars.iv_RCW[34][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW23_ChA_D0 = iv_msg_block_vars.iv_RCW[35][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW24_ChA_D0 = iv_msg_block_vars.iv_RCW[36][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW25_ChA_D0 = iv_msg_block_vars.iv_RCW[37][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW26_ChA_D0 = iv_msg_block_vars.iv_RCW[38][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW27_ChA_D0 = iv_msg_block_vars.iv_RCW[39][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW28_ChA_D0 = iv_msg_block_vars.iv_RCW[40][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW29_ChA_D0 = iv_msg_block_vars.iv_RCW[41][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW2A_ChA_D0 = iv_msg_block_vars.iv_RCW[42][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW2B_ChA_D0 = iv_msg_block_vars.iv_RCW[43][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW2C_ChA_D0 = iv_msg_block_vars.iv_RCW[44][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW2D_ChA_D0 = iv_msg_block_vars.iv_RCW[45][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW2E_ChA_D0 = iv_msg_block_vars.iv_RCW[46][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW2F_ChA_D0 = iv_msg_block_vars.iv_RCW[47][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW30_ChA_D0 = iv_msg_block_vars.iv_RCW[48][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW31_ChA_D0 = iv_msg_block_vars.iv_RCW[49][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW32_ChA_D0 = iv_msg_block_vars.iv_RCW[50][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW33_ChA_D0 = iv_msg_block_vars.iv_RCW[51][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW34_ChA_D0 = iv_msg_block_vars.iv_RCW[52][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW35_ChA_D0 = iv_msg_block_vars.iv_RCW[53][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW36_ChA_D0 = iv_msg_block_vars.iv_RCW[54][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW37_ChA_D0 = iv_msg_block_vars.iv_RCW[55][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW38_ChA_D0 = iv_msg_block_vars.iv_RCW[56][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW39_ChA_D0 = iv_msg_block_vars.iv_RCW[57][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW3A_ChA_D0 = iv_msg_block_vars.iv_RCW[58][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW3B_ChA_D0 = iv_msg_block_vars.iv_RCW[59][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW3C_ChA_D0 = iv_msg_block_vars.iv_RCW[60][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW3D_ChA_D0 = iv_msg_block_vars.iv_RCW[61][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW3E_ChA_D0 = iv_msg_block_vars.iv_RCW[62][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW3F_ChA_D0 = iv_msg_block_vars.iv_RCW[63][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW40_ChA_D0 = iv_msg_block_vars.iv_RCW[64][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW41_ChA_D0 = iv_msg_block_vars.iv_RCW[65][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW42_ChA_D0 = iv_msg_block_vars.iv_RCW[66][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW43_ChA_D0 = iv_msg_block_vars.iv_RCW[67][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW44_ChA_D0 = iv_msg_block_vars.iv_RCW[68][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW45_ChA_D0 = iv_msg_block_vars.iv_RCW[69][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW46_ChA_D0 = iv_msg_block_vars.iv_RCW[70][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW47_ChA_D0 = iv_msg_block_vars.iv_RCW[71][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW48_ChA_D0 = iv_msg_block_vars.iv_RCW[72][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW49_ChA_D0 = iv_msg_block_vars.iv_RCW[73][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW4A_ChA_D0 = iv_msg_block_vars.iv_RCW[74][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW4B_ChA_D0 = iv_msg_block_vars.iv_RCW[75][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW4C_ChA_D0 = iv_msg_block_vars.iv_RCW[76][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW4D_ChA_D0 = iv_msg_block_vars.iv_RCW[77][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW4E_ChA_D0 = iv_msg_block_vars.iv_RCW[78][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW4F_ChA_D0 = iv_msg_block_vars.iv_RCW[79][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW50_ChA_D0 = iv_msg_block_vars.iv_RCW[80][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW51_ChA_D0 = iv_msg_block_vars.iv_RCW[81][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW52_ChA_D0 = iv_msg_block_vars.iv_RCW[82][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW53_ChA_D0 = iv_msg_block_vars.iv_RCW[83][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW54_ChA_D0 = iv_msg_block_vars.iv_RCW[84][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW55_ChA_D0 = iv_msg_block_vars.iv_RCW[85][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW56_ChA_D0 = iv_msg_block_vars.iv_RCW[86][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW57_ChA_D0 = iv_msg_block_vars.iv_RCW[87][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW58_ChA_D0 = iv_msg_block_vars.iv_RCW[88][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW59_ChA_D0 = iv_msg_block_vars.iv_RCW[89][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW5A_ChA_D0 = iv_msg_block_vars.iv_RCW[90][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW5B_ChA_D0 = iv_msg_block_vars.iv_RCW[91][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW5C_ChA_D0 = iv_msg_block_vars.iv_RCW[92][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW5D_ChA_D0 = iv_msg_block_vars.iv_RCW[93][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW5E_ChA_D0 = iv_msg_block_vars.iv_RCW[94][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW5F_ChA_D0 = iv_msg_block_vars.iv_RCW[95][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW60_ChA_D0 = iv_msg_block_vars.iv_RCW[96][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW61_ChA_D0 = iv_msg_block_vars.iv_RCW[97][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW62_ChA_D0 = iv_msg_block_vars.iv_RCW[98][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW63_ChA_D0 = iv_msg_block_vars.iv_RCW[99][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW64_ChA_D0 = iv_msg_block_vars.iv_RCW[100][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW65_ChA_D0 = iv_msg_block_vars.iv_RCW[101][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW66_ChA_D0 = iv_msg_block_vars.iv_RCW[102][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW67_ChA_D0 = iv_msg_block_vars.iv_RCW[103][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW68_ChA_D0 = iv_msg_block_vars.iv_RCW[104][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW69_ChA_D0 = iv_msg_block_vars.iv_RCW[105][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW6A_ChA_D0 = iv_msg_block_vars.iv_RCW[106][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW6B_ChA_D0 = iv_msg_block_vars.iv_RCW[107][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW6C_ChA_D0 = iv_msg_block_vars.iv_RCW[108][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW6D_ChA_D0 = iv_msg_block_vars.iv_RCW[109][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW6E_ChA_D0 = iv_msg_block_vars.iv_RCW[110][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW6F_ChA_D0 = iv_msg_block_vars.iv_RCW[111][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW70_ChA_D0 = iv_msg_block_vars.iv_RCW[112][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW71_ChA_D0 = iv_msg_block_vars.iv_RCW[113][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW72_ChA_D0 = iv_msg_block_vars.iv_RCW[114][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW73_ChA_D0 = iv_msg_block_vars.iv_RCW[115][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW74_ChA_D0 = iv_msg_block_vars.iv_RCW[116][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW75_ChA_D0 = iv_msg_block_vars.iv_RCW[117][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW76_ChA_D0 = iv_msg_block_vars.iv_RCW[118][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW77_ChA_D0 = iv_msg_block_vars.iv_RCW[119][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW78_ChA_D0 = iv_msg_block_vars.iv_RCW[120][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW79_ChA_D0 = iv_msg_block_vars.iv_RCW[121][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW7A_ChA_D0 = iv_msg_block_vars.iv_RCW[122][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW7B_ChA_D0 = iv_msg_block_vars.iv_RCW[123][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW7C_ChA_D0 = iv_msg_block_vars.iv_RCW[124][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW7D_ChA_D0 = iv_msg_block_vars.iv_RCW[125][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW7E_ChA_D0 = iv_msg_block_vars.iv_RCW[126][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+            io_msg_block.RCW7F_ChA_D0 = iv_msg_block_vars.iv_RCW[127][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
 
-            io_msg_block.RCW00_ChB_D0 = iv_msg_block_vars.iv_RCW[0];
-            io_msg_block.RCW01_ChB_D0 = iv_msg_block_vars.iv_RCW[1];
-            io_msg_block.RCW02_ChB_D0 = iv_msg_block_vars.iv_RCW[2];
-            io_msg_block.RCW03_ChB_D0 = iv_msg_block_vars.iv_RCW[3];
-            io_msg_block.RCW04_ChB_D0 = iv_msg_block_vars.iv_RCW[4];
-            io_msg_block.RCW05_ChB_D0 = iv_msg_block_vars.iv_RCW[5];
-            io_msg_block.RCW06_ChB_D0 = iv_msg_block_vars.iv_RCW[6];
-            io_msg_block.RCW07_ChB_D0 = iv_msg_block_vars.iv_RCW[7];
-            io_msg_block.RCW08_ChB_D0 = iv_msg_block_vars.iv_RCW[8];
-            io_msg_block.RCW09_ChB_D0 = iv_msg_block_vars.iv_RCW[9];
-            io_msg_block.RCW0A_ChB_D0 = iv_msg_block_vars.iv_RCW[10];
-            io_msg_block.RCW0B_ChB_D0 = iv_msg_block_vars.iv_RCW[11];
-            io_msg_block.RCW0C_ChB_D0 = iv_msg_block_vars.iv_RCW[12];
-            io_msg_block.RCW0D_ChB_D0 = iv_msg_block_vars.iv_RCW[13];
-            io_msg_block.RCW0E_ChB_D0 = iv_msg_block_vars.iv_RCW[14];
-            io_msg_block.RCW0F_ChB_D0 = iv_msg_block_vars.iv_RCW[15];
-            io_msg_block.RCW10_ChB_D0 = iv_msg_block_vars.iv_RCW[16];
-            io_msg_block.RCW11_ChB_D0 = iv_msg_block_vars.iv_RCW[17];
-            io_msg_block.RCW12_ChB_D0 = iv_msg_block_vars.iv_RCW[18];
-            io_msg_block.RCW13_ChB_D0 = iv_msg_block_vars.iv_RCW[19];
-            io_msg_block.RCW14_ChB_D0 = iv_msg_block_vars.iv_RCW[20];
-            io_msg_block.RCW15_ChB_D0 = iv_msg_block_vars.iv_RCW[21];
-            io_msg_block.RCW16_ChB_D0 = iv_msg_block_vars.iv_RCW[22];
-            io_msg_block.RCW17_ChB_D0 = iv_msg_block_vars.iv_RCW[23];
-            io_msg_block.RCW18_ChB_D0 = iv_msg_block_vars.iv_RCW[24];
-            io_msg_block.RCW19_ChB_D0 = iv_msg_block_vars.iv_RCW[25];
-            io_msg_block.RCW1A_ChB_D0 = iv_msg_block_vars.iv_RCW[26];
-            io_msg_block.RCW1B_ChB_D0 = iv_msg_block_vars.iv_RCW[27];
-            io_msg_block.RCW1C_ChB_D0 = iv_msg_block_vars.iv_RCW[28];
-            io_msg_block.RCW1D_ChB_D0 = iv_msg_block_vars.iv_RCW[29];
-            io_msg_block.RCW1E_ChB_D0 = iv_msg_block_vars.iv_RCW[30];
-            io_msg_block.RCW1F_ChB_D0 = iv_msg_block_vars.iv_RCW[31];
-            io_msg_block.RCW20_ChB_D0 = iv_msg_block_vars.iv_RCW[32];
-            io_msg_block.RCW21_ChB_D0 = iv_msg_block_vars.iv_RCW[33];
-            io_msg_block.RCW22_ChB_D0 = iv_msg_block_vars.iv_RCW[34];
-            io_msg_block.RCW23_ChB_D0 = iv_msg_block_vars.iv_RCW[35];
-            io_msg_block.RCW24_ChB_D0 = iv_msg_block_vars.iv_RCW[36];
-            io_msg_block.RCW25_ChB_D0 = iv_msg_block_vars.iv_RCW[37];
-            io_msg_block.RCW26_ChB_D0 = iv_msg_block_vars.iv_RCW[38];
-            io_msg_block.RCW27_ChB_D0 = iv_msg_block_vars.iv_RCW[39];
-            io_msg_block.RCW28_ChB_D0 = iv_msg_block_vars.iv_RCW[40];
-            io_msg_block.RCW29_ChB_D0 = iv_msg_block_vars.iv_RCW[41];
-            io_msg_block.RCW2A_ChB_D0 = iv_msg_block_vars.iv_RCW[42];
-            io_msg_block.RCW2B_ChB_D0 = iv_msg_block_vars.iv_RCW[43];
-            io_msg_block.RCW2C_ChB_D0 = iv_msg_block_vars.iv_RCW[44];
-            io_msg_block.RCW2D_ChB_D0 = iv_msg_block_vars.iv_RCW[45];
-            io_msg_block.RCW2E_ChB_D0 = iv_msg_block_vars.iv_RCW[46];
-            io_msg_block.RCW2F_ChB_D0 = iv_msg_block_vars.iv_RCW[47];
-            io_msg_block.RCW30_ChB_D0 = iv_msg_block_vars.iv_RCW[48];
-            io_msg_block.RCW31_ChB_D0 = iv_msg_block_vars.iv_RCW[49];
-            io_msg_block.RCW32_ChB_D0 = iv_msg_block_vars.iv_RCW[50];
-            io_msg_block.RCW33_ChB_D0 = iv_msg_block_vars.iv_RCW[51];
-            io_msg_block.RCW34_ChB_D0 = iv_msg_block_vars.iv_RCW[52];
-            io_msg_block.RCW35_ChB_D0 = iv_msg_block_vars.iv_RCW[53];
-            io_msg_block.RCW36_ChB_D0 = iv_msg_block_vars.iv_RCW[54];
-            io_msg_block.RCW37_ChB_D0 = iv_msg_block_vars.iv_RCW[55];
-            io_msg_block.RCW38_ChB_D0 = iv_msg_block_vars.iv_RCW[56];
-            io_msg_block.RCW39_ChB_D0 = iv_msg_block_vars.iv_RCW[57];
-            io_msg_block.RCW3A_ChB_D0 = iv_msg_block_vars.iv_RCW[58];
-            io_msg_block.RCW3B_ChB_D0 = iv_msg_block_vars.iv_RCW[59];
-            io_msg_block.RCW3C_ChB_D0 = iv_msg_block_vars.iv_RCW[60];
-            io_msg_block.RCW3D_ChB_D0 = iv_msg_block_vars.iv_RCW[61];
-            io_msg_block.RCW3E_ChB_D0 = iv_msg_block_vars.iv_RCW[62];
-            io_msg_block.RCW3F_ChB_D0 = iv_msg_block_vars.iv_RCW[63];
-            io_msg_block.RCW40_ChB_D0 = iv_msg_block_vars.iv_RCW[64];
-            io_msg_block.RCW41_ChB_D0 = iv_msg_block_vars.iv_RCW[65];
-            io_msg_block.RCW42_ChB_D0 = iv_msg_block_vars.iv_RCW[66];
-            io_msg_block.RCW43_ChB_D0 = iv_msg_block_vars.iv_RCW[67];
-            io_msg_block.RCW44_ChB_D0 = iv_msg_block_vars.iv_RCW[68];
-            io_msg_block.RCW45_ChB_D0 = iv_msg_block_vars.iv_RCW[69];
-            io_msg_block.RCW46_ChB_D0 = iv_msg_block_vars.iv_RCW[70];
-            io_msg_block.RCW47_ChB_D0 = iv_msg_block_vars.iv_RCW[71];
-            io_msg_block.RCW48_ChB_D0 = iv_msg_block_vars.iv_RCW[72];
-            io_msg_block.RCW49_ChB_D0 = iv_msg_block_vars.iv_RCW[73];
-            io_msg_block.RCW4A_ChB_D0 = iv_msg_block_vars.iv_RCW[74];
-            io_msg_block.RCW4B_ChB_D0 = iv_msg_block_vars.iv_RCW[75];
-            io_msg_block.RCW4C_ChB_D0 = iv_msg_block_vars.iv_RCW[76];
-            io_msg_block.RCW4D_ChB_D0 = iv_msg_block_vars.iv_RCW[77];
-            io_msg_block.RCW4E_ChB_D0 = iv_msg_block_vars.iv_RCW[78];
-            io_msg_block.RCW4F_ChB_D0 = iv_msg_block_vars.iv_RCW[79];
-            io_msg_block.RCW50_ChB_D0 = iv_msg_block_vars.iv_RCW[80];
-            io_msg_block.RCW51_ChB_D0 = iv_msg_block_vars.iv_RCW[81];
-            io_msg_block.RCW52_ChB_D0 = iv_msg_block_vars.iv_RCW[82];
-            io_msg_block.RCW53_ChB_D0 = iv_msg_block_vars.iv_RCW[83];
-            io_msg_block.RCW54_ChB_D0 = iv_msg_block_vars.iv_RCW[84];
-            io_msg_block.RCW55_ChB_D0 = iv_msg_block_vars.iv_RCW[85];
-            io_msg_block.RCW56_ChB_D0 = iv_msg_block_vars.iv_RCW[86];
-            io_msg_block.RCW57_ChB_D0 = iv_msg_block_vars.iv_RCW[87];
-            io_msg_block.RCW58_ChB_D0 = iv_msg_block_vars.iv_RCW[88];
-            io_msg_block.RCW59_ChB_D0 = iv_msg_block_vars.iv_RCW[89];
-            io_msg_block.RCW5A_ChB_D0 = iv_msg_block_vars.iv_RCW[90];
-            io_msg_block.RCW5B_ChB_D0 = iv_msg_block_vars.iv_RCW[91];
-            io_msg_block.RCW5C_ChB_D0 = iv_msg_block_vars.iv_RCW[92];
-            io_msg_block.RCW5D_ChB_D0 = iv_msg_block_vars.iv_RCW[93];
-            io_msg_block.RCW5E_ChB_D0 = iv_msg_block_vars.iv_RCW[94];
-            io_msg_block.RCW5F_ChB_D0 = iv_msg_block_vars.iv_RCW[95];
-            io_msg_block.RCW60_ChB_D0 = iv_msg_block_vars.iv_RCW[96];
-            io_msg_block.RCW61_ChB_D0 = iv_msg_block_vars.iv_RCW[97];
-            io_msg_block.RCW62_ChB_D0 = iv_msg_block_vars.iv_RCW[98];
-            io_msg_block.RCW63_ChB_D0 = iv_msg_block_vars.iv_RCW[99];
-            io_msg_block.RCW64_ChB_D0 = iv_msg_block_vars.iv_RCW[100];
-            io_msg_block.RCW65_ChB_D0 = iv_msg_block_vars.iv_RCW[101];
-            io_msg_block.RCW66_ChB_D0 = iv_msg_block_vars.iv_RCW[102];
-            io_msg_block.RCW67_ChB_D0 = iv_msg_block_vars.iv_RCW[103];
-            io_msg_block.RCW68_ChB_D0 = iv_msg_block_vars.iv_RCW[104];
-            io_msg_block.RCW69_ChB_D0 = iv_msg_block_vars.iv_RCW[105];
-            io_msg_block.RCW6A_ChB_D0 = iv_msg_block_vars.iv_RCW[106];
-            io_msg_block.RCW6B_ChB_D0 = iv_msg_block_vars.iv_RCW[107];
-            io_msg_block.RCW6C_ChB_D0 = iv_msg_block_vars.iv_RCW[108];
-            io_msg_block.RCW6D_ChB_D0 = iv_msg_block_vars.iv_RCW[109];
-            io_msg_block.RCW6E_ChB_D0 = iv_msg_block_vars.iv_RCW[110];
-            io_msg_block.RCW6F_ChB_D0 = iv_msg_block_vars.iv_RCW[111];
-            io_msg_block.RCW70_ChB_D0 = iv_msg_block_vars.iv_RCW[112];
-            io_msg_block.RCW71_ChB_D0 = iv_msg_block_vars.iv_RCW[113];
-            io_msg_block.RCW72_ChB_D0 = iv_msg_block_vars.iv_RCW[114];
-            io_msg_block.RCW73_ChB_D0 = iv_msg_block_vars.iv_RCW[115];
-            io_msg_block.RCW74_ChB_D0 = iv_msg_block_vars.iv_RCW[116];
-            io_msg_block.RCW75_ChB_D0 = iv_msg_block_vars.iv_RCW[117];
-            io_msg_block.RCW76_ChB_D0 = iv_msg_block_vars.iv_RCW[118];
-            io_msg_block.RCW77_ChB_D0 = iv_msg_block_vars.iv_RCW[119];
-            io_msg_block.RCW78_ChB_D0 = iv_msg_block_vars.iv_RCW[120];
-            io_msg_block.RCW79_ChB_D0 = iv_msg_block_vars.iv_RCW[121];
-            io_msg_block.RCW7A_ChB_D0 = iv_msg_block_vars.iv_RCW[122];
-            io_msg_block.RCW7B_ChB_D0 = iv_msg_block_vars.iv_RCW[123];
-            io_msg_block.RCW7C_ChB_D0 = iv_msg_block_vars.iv_RCW[124];
-            io_msg_block.RCW7D_ChB_D0 = iv_msg_block_vars.iv_RCW[125];
-            io_msg_block.RCW7E_ChB_D0 = iv_msg_block_vars.iv_RCW[126];
-            io_msg_block.RCW7F_ChB_D0 = iv_msg_block_vars.iv_RCW[127];
+            io_msg_block.RCW00_ChB_D0 = iv_msg_block_vars.iv_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW01_ChB_D0 = iv_msg_block_vars.iv_RCW[1][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW02_ChB_D0 = iv_msg_block_vars.iv_RCW[2][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW03_ChB_D0 = iv_msg_block_vars.iv_RCW[3][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW04_ChB_D0 = iv_msg_block_vars.iv_RCW[4][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW05_ChB_D0 = iv_msg_block_vars.iv_RCW[5][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW06_ChB_D0 = iv_msg_block_vars.iv_RCW[6][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW07_ChB_D0 = iv_msg_block_vars.iv_RCW[7][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW08_ChB_D0 = iv_msg_block_vars.iv_RCW[8][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW09_ChB_D0 = iv_msg_block_vars.iv_RCW[9][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW0A_ChB_D0 = iv_msg_block_vars.iv_RCW[10][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW0B_ChB_D0 = iv_msg_block_vars.iv_RCW[11][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW0C_ChB_D0 = iv_msg_block_vars.iv_RCW[12][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW0D_ChB_D0 = iv_msg_block_vars.iv_RCW[13][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW0E_ChB_D0 = iv_msg_block_vars.iv_RCW[14][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW0F_ChB_D0 = iv_msg_block_vars.iv_RCW[15][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW10_ChB_D0 = iv_msg_block_vars.iv_RCW[16][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW11_ChB_D0 = iv_msg_block_vars.iv_RCW[17][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW12_ChB_D0 = iv_msg_block_vars.iv_RCW[18][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW13_ChB_D0 = iv_msg_block_vars.iv_RCW[19][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW14_ChB_D0 = iv_msg_block_vars.iv_RCW[20][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW15_ChB_D0 = iv_msg_block_vars.iv_RCW[21][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW16_ChB_D0 = iv_msg_block_vars.iv_RCW[22][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW17_ChB_D0 = iv_msg_block_vars.iv_RCW[23][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW18_ChB_D0 = iv_msg_block_vars.iv_RCW[24][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW19_ChB_D0 = iv_msg_block_vars.iv_RCW[25][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW1A_ChB_D0 = iv_msg_block_vars.iv_RCW[26][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW1B_ChB_D0 = iv_msg_block_vars.iv_RCW[27][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW1C_ChB_D0 = iv_msg_block_vars.iv_RCW[28][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW1D_ChB_D0 = iv_msg_block_vars.iv_RCW[29][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW1E_ChB_D0 = iv_msg_block_vars.iv_RCW[30][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW1F_ChB_D0 = iv_msg_block_vars.iv_RCW[31][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW20_ChB_D0 = iv_msg_block_vars.iv_RCW[32][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW21_ChB_D0 = iv_msg_block_vars.iv_RCW[33][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW22_ChB_D0 = iv_msg_block_vars.iv_RCW[34][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW23_ChB_D0 = iv_msg_block_vars.iv_RCW[35][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW24_ChB_D0 = iv_msg_block_vars.iv_RCW[36][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW25_ChB_D0 = iv_msg_block_vars.iv_RCW[37][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW26_ChB_D0 = iv_msg_block_vars.iv_RCW[38][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW27_ChB_D0 = iv_msg_block_vars.iv_RCW[39][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW28_ChB_D0 = iv_msg_block_vars.iv_RCW[40][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW29_ChB_D0 = iv_msg_block_vars.iv_RCW[41][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW2A_ChB_D0 = iv_msg_block_vars.iv_RCW[42][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW2B_ChB_D0 = iv_msg_block_vars.iv_RCW[43][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW2C_ChB_D0 = iv_msg_block_vars.iv_RCW[44][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW2D_ChB_D0 = iv_msg_block_vars.iv_RCW[45][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW2E_ChB_D0 = iv_msg_block_vars.iv_RCW[46][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW2F_ChB_D0 = iv_msg_block_vars.iv_RCW[47][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW30_ChB_D0 = iv_msg_block_vars.iv_RCW[48][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW31_ChB_D0 = iv_msg_block_vars.iv_RCW[49][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW32_ChB_D0 = iv_msg_block_vars.iv_RCW[50][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW33_ChB_D0 = iv_msg_block_vars.iv_RCW[51][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW34_ChB_D0 = iv_msg_block_vars.iv_RCW[52][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW35_ChB_D0 = iv_msg_block_vars.iv_RCW[53][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW36_ChB_D0 = iv_msg_block_vars.iv_RCW[54][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW37_ChB_D0 = iv_msg_block_vars.iv_RCW[55][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW38_ChB_D0 = iv_msg_block_vars.iv_RCW[56][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW39_ChB_D0 = iv_msg_block_vars.iv_RCW[57][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW3A_ChB_D0 = iv_msg_block_vars.iv_RCW[58][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW3B_ChB_D0 = iv_msg_block_vars.iv_RCW[59][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW3C_ChB_D0 = iv_msg_block_vars.iv_RCW[60][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW3D_ChB_D0 = iv_msg_block_vars.iv_RCW[61][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW3E_ChB_D0 = iv_msg_block_vars.iv_RCW[62][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW3F_ChB_D0 = iv_msg_block_vars.iv_RCW[63][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW40_ChB_D0 = iv_msg_block_vars.iv_RCW[64][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW41_ChB_D0 = iv_msg_block_vars.iv_RCW[65][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW42_ChB_D0 = iv_msg_block_vars.iv_RCW[66][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW43_ChB_D0 = iv_msg_block_vars.iv_RCW[67][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW44_ChB_D0 = iv_msg_block_vars.iv_RCW[68][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW45_ChB_D0 = iv_msg_block_vars.iv_RCW[69][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW46_ChB_D0 = iv_msg_block_vars.iv_RCW[70][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW47_ChB_D0 = iv_msg_block_vars.iv_RCW[71][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW48_ChB_D0 = iv_msg_block_vars.iv_RCW[72][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW49_ChB_D0 = iv_msg_block_vars.iv_RCW[73][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW4A_ChB_D0 = iv_msg_block_vars.iv_RCW[74][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW4B_ChB_D0 = iv_msg_block_vars.iv_RCW[75][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW4C_ChB_D0 = iv_msg_block_vars.iv_RCW[76][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW4D_ChB_D0 = iv_msg_block_vars.iv_RCW[77][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW4E_ChB_D0 = iv_msg_block_vars.iv_RCW[78][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW4F_ChB_D0 = iv_msg_block_vars.iv_RCW[79][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW50_ChB_D0 = iv_msg_block_vars.iv_RCW[80][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW51_ChB_D0 = iv_msg_block_vars.iv_RCW[81][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW52_ChB_D0 = iv_msg_block_vars.iv_RCW[82][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW53_ChB_D0 = iv_msg_block_vars.iv_RCW[83][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW54_ChB_D0 = iv_msg_block_vars.iv_RCW[84][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW55_ChB_D0 = iv_msg_block_vars.iv_RCW[85][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW56_ChB_D0 = iv_msg_block_vars.iv_RCW[86][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW57_ChB_D0 = iv_msg_block_vars.iv_RCW[87][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW58_ChB_D0 = iv_msg_block_vars.iv_RCW[88][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW59_ChB_D0 = iv_msg_block_vars.iv_RCW[89][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW5A_ChB_D0 = iv_msg_block_vars.iv_RCW[90][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW5B_ChB_D0 = iv_msg_block_vars.iv_RCW[91][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW5C_ChB_D0 = iv_msg_block_vars.iv_RCW[92][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW5D_ChB_D0 = iv_msg_block_vars.iv_RCW[93][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW5E_ChB_D0 = iv_msg_block_vars.iv_RCW[94][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW5F_ChB_D0 = iv_msg_block_vars.iv_RCW[95][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW60_ChB_D0 = iv_msg_block_vars.iv_RCW[96][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW61_ChB_D0 = iv_msg_block_vars.iv_RCW[97][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW62_ChB_D0 = iv_msg_block_vars.iv_RCW[98][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW63_ChB_D0 = iv_msg_block_vars.iv_RCW[99][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW64_ChB_D0 = iv_msg_block_vars.iv_RCW[100][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW65_ChB_D0 = iv_msg_block_vars.iv_RCW[101][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW66_ChB_D0 = iv_msg_block_vars.iv_RCW[102][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW67_ChB_D0 = iv_msg_block_vars.iv_RCW[103][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW68_ChB_D0 = iv_msg_block_vars.iv_RCW[104][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW69_ChB_D0 = iv_msg_block_vars.iv_RCW[105][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW6A_ChB_D0 = iv_msg_block_vars.iv_RCW[106][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW6B_ChB_D0 = iv_msg_block_vars.iv_RCW[107][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW6C_ChB_D0 = iv_msg_block_vars.iv_RCW[108][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW6D_ChB_D0 = iv_msg_block_vars.iv_RCW[109][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW6E_ChB_D0 = iv_msg_block_vars.iv_RCW[110][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW6F_ChB_D0 = iv_msg_block_vars.iv_RCW[111][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW70_ChB_D0 = iv_msg_block_vars.iv_RCW[112][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW71_ChB_D0 = iv_msg_block_vars.iv_RCW[113][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW72_ChB_D0 = iv_msg_block_vars.iv_RCW[114][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW73_ChB_D0 = iv_msg_block_vars.iv_RCW[115][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW74_ChB_D0 = iv_msg_block_vars.iv_RCW[116][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW75_ChB_D0 = iv_msg_block_vars.iv_RCW[117][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW76_ChB_D0 = iv_msg_block_vars.iv_RCW[118][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW77_ChB_D0 = iv_msg_block_vars.iv_RCW[119][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW78_ChB_D0 = iv_msg_block_vars.iv_RCW[120][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW79_ChB_D0 = iv_msg_block_vars.iv_RCW[121][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW7A_ChB_D0 = iv_msg_block_vars.iv_RCW[122][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW7B_ChB_D0 = iv_msg_block_vars.iv_RCW[123][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW7C_ChB_D0 = iv_msg_block_vars.iv_RCW[124][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW7D_ChB_D0 = iv_msg_block_vars.iv_RCW[125][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW7E_ChB_D0 = iv_msg_block_vars.iv_RCW[126][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+            io_msg_block.RCW7F_ChB_D0 = iv_msg_block_vars.iv_RCW[127][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
 
-            io_msg_block.RCW00_ChA_D1 = iv_msg_block_vars.iv_RCW[0];
-            io_msg_block.RCW01_ChA_D1 = iv_msg_block_vars.iv_RCW[1];
-            io_msg_block.RCW02_ChA_D1 = iv_msg_block_vars.iv_RCW[2];
-            io_msg_block.RCW03_ChA_D1 = iv_msg_block_vars.iv_RCW[3];
-            io_msg_block.RCW04_ChA_D1 = iv_msg_block_vars.iv_RCW[4];
-            io_msg_block.RCW05_ChA_D1 = iv_msg_block_vars.iv_RCW[5];
-            io_msg_block.RCW06_ChA_D1 = iv_msg_block_vars.iv_RCW[6];
-            io_msg_block.RCW07_ChA_D1 = iv_msg_block_vars.iv_RCW[7];
-            io_msg_block.RCW08_ChA_D1 = iv_msg_block_vars.iv_RCW[8];
-            io_msg_block.RCW09_ChA_D1 = iv_msg_block_vars.iv_RCW[9];
-            io_msg_block.RCW0A_ChA_D1 = iv_msg_block_vars.iv_RCW[10];
-            io_msg_block.RCW0B_ChA_D1 = iv_msg_block_vars.iv_RCW[11];
-            io_msg_block.RCW0C_ChA_D1 = iv_msg_block_vars.iv_RCW[12];
-            io_msg_block.RCW0D_ChA_D1 = iv_msg_block_vars.iv_RCW[13];
-            io_msg_block.RCW0E_ChA_D1 = iv_msg_block_vars.iv_RCW[14];
-            io_msg_block.RCW0F_ChA_D1 = iv_msg_block_vars.iv_RCW[15];
-            io_msg_block.RCW10_ChA_D1 = iv_msg_block_vars.iv_RCW[16];
-            io_msg_block.RCW11_ChA_D1 = iv_msg_block_vars.iv_RCW[17];
-            io_msg_block.RCW12_ChA_D1 = iv_msg_block_vars.iv_RCW[18];
-            io_msg_block.RCW13_ChA_D1 = iv_msg_block_vars.iv_RCW[19];
-            io_msg_block.RCW14_ChA_D1 = iv_msg_block_vars.iv_RCW[20];
-            io_msg_block.RCW15_ChA_D1 = iv_msg_block_vars.iv_RCW[21];
-            io_msg_block.RCW16_ChA_D1 = iv_msg_block_vars.iv_RCW[22];
-            io_msg_block.RCW17_ChA_D1 = iv_msg_block_vars.iv_RCW[23];
-            io_msg_block.RCW18_ChA_D1 = iv_msg_block_vars.iv_RCW[24];
-            io_msg_block.RCW19_ChA_D1 = iv_msg_block_vars.iv_RCW[25];
-            io_msg_block.RCW1A_ChA_D1 = iv_msg_block_vars.iv_RCW[26];
-            io_msg_block.RCW1B_ChA_D1 = iv_msg_block_vars.iv_RCW[27];
-            io_msg_block.RCW1C_ChA_D1 = iv_msg_block_vars.iv_RCW[28];
-            io_msg_block.RCW1D_ChA_D1 = iv_msg_block_vars.iv_RCW[29];
-            io_msg_block.RCW1E_ChA_D1 = iv_msg_block_vars.iv_RCW[30];
-            io_msg_block.RCW1F_ChA_D1 = iv_msg_block_vars.iv_RCW[31];
-            io_msg_block.RCW20_ChA_D1 = iv_msg_block_vars.iv_RCW[32];
-            io_msg_block.RCW21_ChA_D1 = iv_msg_block_vars.iv_RCW[33];
-            io_msg_block.RCW22_ChA_D1 = iv_msg_block_vars.iv_RCW[34];
-            io_msg_block.RCW23_ChA_D1 = iv_msg_block_vars.iv_RCW[35];
-            io_msg_block.RCW24_ChA_D1 = iv_msg_block_vars.iv_RCW[36];
-            io_msg_block.RCW25_ChA_D1 = iv_msg_block_vars.iv_RCW[37];
-            io_msg_block.RCW26_ChA_D1 = iv_msg_block_vars.iv_RCW[38];
-            io_msg_block.RCW27_ChA_D1 = iv_msg_block_vars.iv_RCW[39];
-            io_msg_block.RCW28_ChA_D1 = iv_msg_block_vars.iv_RCW[40];
-            io_msg_block.RCW29_ChA_D1 = iv_msg_block_vars.iv_RCW[41];
-            io_msg_block.RCW2A_ChA_D1 = iv_msg_block_vars.iv_RCW[42];
-            io_msg_block.RCW2B_ChA_D1 = iv_msg_block_vars.iv_RCW[43];
-            io_msg_block.RCW2C_ChA_D1 = iv_msg_block_vars.iv_RCW[44];
-            io_msg_block.RCW2D_ChA_D1 = iv_msg_block_vars.iv_RCW[45];
-            io_msg_block.RCW2E_ChA_D1 = iv_msg_block_vars.iv_RCW[46];
-            io_msg_block.RCW2F_ChA_D1 = iv_msg_block_vars.iv_RCW[47];
-            io_msg_block.RCW30_ChA_D1 = iv_msg_block_vars.iv_RCW[48];
-            io_msg_block.RCW31_ChA_D1 = iv_msg_block_vars.iv_RCW[49];
-            io_msg_block.RCW32_ChA_D1 = iv_msg_block_vars.iv_RCW[50];
-            io_msg_block.RCW33_ChA_D1 = iv_msg_block_vars.iv_RCW[51];
-            io_msg_block.RCW34_ChA_D1 = iv_msg_block_vars.iv_RCW[52];
-            io_msg_block.RCW35_ChA_D1 = iv_msg_block_vars.iv_RCW[53];
-            io_msg_block.RCW36_ChA_D1 = iv_msg_block_vars.iv_RCW[54];
-            io_msg_block.RCW37_ChA_D1 = iv_msg_block_vars.iv_RCW[55];
-            io_msg_block.RCW38_ChA_D1 = iv_msg_block_vars.iv_RCW[56];
-            io_msg_block.RCW39_ChA_D1 = iv_msg_block_vars.iv_RCW[57];
-            io_msg_block.RCW3A_ChA_D1 = iv_msg_block_vars.iv_RCW[58];
-            io_msg_block.RCW3B_ChA_D1 = iv_msg_block_vars.iv_RCW[59];
-            io_msg_block.RCW3C_ChA_D1 = iv_msg_block_vars.iv_RCW[60];
-            io_msg_block.RCW3D_ChA_D1 = iv_msg_block_vars.iv_RCW[61];
-            io_msg_block.RCW3E_ChA_D1 = iv_msg_block_vars.iv_RCW[62];
-            io_msg_block.RCW3F_ChA_D1 = iv_msg_block_vars.iv_RCW[63];
-            io_msg_block.RCW40_ChA_D1 = iv_msg_block_vars.iv_RCW[64];
-            io_msg_block.RCW41_ChA_D1 = iv_msg_block_vars.iv_RCW[65];
-            io_msg_block.RCW42_ChA_D1 = iv_msg_block_vars.iv_RCW[66];
-            io_msg_block.RCW43_ChA_D1 = iv_msg_block_vars.iv_RCW[67];
-            io_msg_block.RCW44_ChA_D1 = iv_msg_block_vars.iv_RCW[68];
-            io_msg_block.RCW45_ChA_D1 = iv_msg_block_vars.iv_RCW[69];
-            io_msg_block.RCW46_ChA_D1 = iv_msg_block_vars.iv_RCW[70];
-            io_msg_block.RCW47_ChA_D1 = iv_msg_block_vars.iv_RCW[71];
-            io_msg_block.RCW48_ChA_D1 = iv_msg_block_vars.iv_RCW[72];
-            io_msg_block.RCW49_ChA_D1 = iv_msg_block_vars.iv_RCW[73];
-            io_msg_block.RCW4A_ChA_D1 = iv_msg_block_vars.iv_RCW[74];
-            io_msg_block.RCW4B_ChA_D1 = iv_msg_block_vars.iv_RCW[75];
-            io_msg_block.RCW4C_ChA_D1 = iv_msg_block_vars.iv_RCW[76];
-            io_msg_block.RCW4D_ChA_D1 = iv_msg_block_vars.iv_RCW[77];
-            io_msg_block.RCW4E_ChA_D1 = iv_msg_block_vars.iv_RCW[78];
-            io_msg_block.RCW4F_ChA_D1 = iv_msg_block_vars.iv_RCW[79];
-            io_msg_block.RCW50_ChA_D1 = iv_msg_block_vars.iv_RCW[80];
-            io_msg_block.RCW51_ChA_D1 = iv_msg_block_vars.iv_RCW[81];
-            io_msg_block.RCW52_ChA_D1 = iv_msg_block_vars.iv_RCW[82];
-            io_msg_block.RCW53_ChA_D1 = iv_msg_block_vars.iv_RCW[83];
-            io_msg_block.RCW54_ChA_D1 = iv_msg_block_vars.iv_RCW[84];
-            io_msg_block.RCW55_ChA_D1 = iv_msg_block_vars.iv_RCW[85];
-            io_msg_block.RCW56_ChA_D1 = iv_msg_block_vars.iv_RCW[86];
-            io_msg_block.RCW57_ChA_D1 = iv_msg_block_vars.iv_RCW[87];
-            io_msg_block.RCW58_ChA_D1 = iv_msg_block_vars.iv_RCW[88];
-            io_msg_block.RCW59_ChA_D1 = iv_msg_block_vars.iv_RCW[89];
-            io_msg_block.RCW5A_ChA_D1 = iv_msg_block_vars.iv_RCW[90];
-            io_msg_block.RCW5B_ChA_D1 = iv_msg_block_vars.iv_RCW[91];
-            io_msg_block.RCW5C_ChA_D1 = iv_msg_block_vars.iv_RCW[92];
-            io_msg_block.RCW5D_ChA_D1 = iv_msg_block_vars.iv_RCW[93];
-            io_msg_block.RCW5E_ChA_D1 = iv_msg_block_vars.iv_RCW[94];
-            io_msg_block.RCW5F_ChA_D1 = iv_msg_block_vars.iv_RCW[95];
-            io_msg_block.RCW60_ChA_D1 = iv_msg_block_vars.iv_RCW[96];
-            io_msg_block.RCW61_ChA_D1 = iv_msg_block_vars.iv_RCW[97];
-            io_msg_block.RCW62_ChA_D1 = iv_msg_block_vars.iv_RCW[98];
-            io_msg_block.RCW63_ChA_D1 = iv_msg_block_vars.iv_RCW[99];
-            io_msg_block.RCW64_ChA_D1 = iv_msg_block_vars.iv_RCW[100];
-            io_msg_block.RCW65_ChA_D1 = iv_msg_block_vars.iv_RCW[101];
-            io_msg_block.RCW66_ChA_D1 = iv_msg_block_vars.iv_RCW[102];
-            io_msg_block.RCW67_ChA_D1 = iv_msg_block_vars.iv_RCW[103];
-            io_msg_block.RCW68_ChA_D1 = iv_msg_block_vars.iv_RCW[104];
-            io_msg_block.RCW69_ChA_D1 = iv_msg_block_vars.iv_RCW[105];
-            io_msg_block.RCW6A_ChA_D1 = iv_msg_block_vars.iv_RCW[106];
-            io_msg_block.RCW6B_ChA_D1 = iv_msg_block_vars.iv_RCW[107];
-            io_msg_block.RCW6C_ChA_D1 = iv_msg_block_vars.iv_RCW[108];
-            io_msg_block.RCW6D_ChA_D1 = iv_msg_block_vars.iv_RCW[109];
-            io_msg_block.RCW6E_ChA_D1 = iv_msg_block_vars.iv_RCW[110];
-            io_msg_block.RCW6F_ChA_D1 = iv_msg_block_vars.iv_RCW[111];
-            io_msg_block.RCW70_ChA_D1 = iv_msg_block_vars.iv_RCW[112];
-            io_msg_block.RCW71_ChA_D1 = iv_msg_block_vars.iv_RCW[113];
-            io_msg_block.RCW72_ChA_D1 = iv_msg_block_vars.iv_RCW[114];
-            io_msg_block.RCW73_ChA_D1 = iv_msg_block_vars.iv_RCW[115];
-            io_msg_block.RCW74_ChA_D1 = iv_msg_block_vars.iv_RCW[116];
-            io_msg_block.RCW75_ChA_D1 = iv_msg_block_vars.iv_RCW[117];
-            io_msg_block.RCW76_ChA_D1 = iv_msg_block_vars.iv_RCW[118];
-            io_msg_block.RCW77_ChA_D1 = iv_msg_block_vars.iv_RCW[119];
-            io_msg_block.RCW78_ChA_D1 = iv_msg_block_vars.iv_RCW[120];
-            io_msg_block.RCW79_ChA_D1 = iv_msg_block_vars.iv_RCW[121];
-            io_msg_block.RCW7A_ChA_D1 = iv_msg_block_vars.iv_RCW[122];
-            io_msg_block.RCW7B_ChA_D1 = iv_msg_block_vars.iv_RCW[123];
-            io_msg_block.RCW7C_ChA_D1 = iv_msg_block_vars.iv_RCW[124];
-            io_msg_block.RCW7D_ChA_D1 = iv_msg_block_vars.iv_RCW[125];
-            io_msg_block.RCW7E_ChA_D1 = iv_msg_block_vars.iv_RCW[126];
-            io_msg_block.RCW7F_ChA_D1 = iv_msg_block_vars.iv_RCW[127];
+            io_msg_block.RCW00_ChA_D1 = iv_msg_block_vars.iv_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW01_ChA_D1 = iv_msg_block_vars.iv_RCW[1][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW02_ChA_D1 = iv_msg_block_vars.iv_RCW[2][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW03_ChA_D1 = iv_msg_block_vars.iv_RCW[3][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW04_ChA_D1 = iv_msg_block_vars.iv_RCW[4][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW05_ChA_D1 = iv_msg_block_vars.iv_RCW[5][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW06_ChA_D1 = iv_msg_block_vars.iv_RCW[6][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW07_ChA_D1 = iv_msg_block_vars.iv_RCW[7][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW08_ChA_D1 = iv_msg_block_vars.iv_RCW[8][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW09_ChA_D1 = iv_msg_block_vars.iv_RCW[9][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW0A_ChA_D1 = iv_msg_block_vars.iv_RCW[10][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW0B_ChA_D1 = iv_msg_block_vars.iv_RCW[11][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW0C_ChA_D1 = iv_msg_block_vars.iv_RCW[12][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW0D_ChA_D1 = iv_msg_block_vars.iv_RCW[13][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW0E_ChA_D1 = iv_msg_block_vars.iv_RCW[14][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW0F_ChA_D1 = iv_msg_block_vars.iv_RCW[15][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW10_ChA_D1 = iv_msg_block_vars.iv_RCW[16][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW11_ChA_D1 = iv_msg_block_vars.iv_RCW[17][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW12_ChA_D1 = iv_msg_block_vars.iv_RCW[18][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW13_ChA_D1 = iv_msg_block_vars.iv_RCW[19][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW14_ChA_D1 = iv_msg_block_vars.iv_RCW[20][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW15_ChA_D1 = iv_msg_block_vars.iv_RCW[21][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW16_ChA_D1 = iv_msg_block_vars.iv_RCW[22][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW17_ChA_D1 = iv_msg_block_vars.iv_RCW[23][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW18_ChA_D1 = iv_msg_block_vars.iv_RCW[24][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW19_ChA_D1 = iv_msg_block_vars.iv_RCW[25][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW1A_ChA_D1 = iv_msg_block_vars.iv_RCW[26][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW1B_ChA_D1 = iv_msg_block_vars.iv_RCW[27][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW1C_ChA_D1 = iv_msg_block_vars.iv_RCW[28][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW1D_ChA_D1 = iv_msg_block_vars.iv_RCW[29][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW1E_ChA_D1 = iv_msg_block_vars.iv_RCW[30][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW1F_ChA_D1 = iv_msg_block_vars.iv_RCW[31][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW20_ChA_D1 = iv_msg_block_vars.iv_RCW[32][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW21_ChA_D1 = iv_msg_block_vars.iv_RCW[33][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW22_ChA_D1 = iv_msg_block_vars.iv_RCW[34][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW23_ChA_D1 = iv_msg_block_vars.iv_RCW[35][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW24_ChA_D1 = iv_msg_block_vars.iv_RCW[36][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW25_ChA_D1 = iv_msg_block_vars.iv_RCW[37][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW26_ChA_D1 = iv_msg_block_vars.iv_RCW[38][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW27_ChA_D1 = iv_msg_block_vars.iv_RCW[39][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW28_ChA_D1 = iv_msg_block_vars.iv_RCW[40][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW29_ChA_D1 = iv_msg_block_vars.iv_RCW[41][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW2A_ChA_D1 = iv_msg_block_vars.iv_RCW[42][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW2B_ChA_D1 = iv_msg_block_vars.iv_RCW[43][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW2C_ChA_D1 = iv_msg_block_vars.iv_RCW[44][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW2D_ChA_D1 = iv_msg_block_vars.iv_RCW[45][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW2E_ChA_D1 = iv_msg_block_vars.iv_RCW[46][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW2F_ChA_D1 = iv_msg_block_vars.iv_RCW[47][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW30_ChA_D1 = iv_msg_block_vars.iv_RCW[48][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW31_ChA_D1 = iv_msg_block_vars.iv_RCW[49][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW32_ChA_D1 = iv_msg_block_vars.iv_RCW[50][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW33_ChA_D1 = iv_msg_block_vars.iv_RCW[51][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW34_ChA_D1 = iv_msg_block_vars.iv_RCW[52][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW35_ChA_D1 = iv_msg_block_vars.iv_RCW[53][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW36_ChA_D1 = iv_msg_block_vars.iv_RCW[54][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW37_ChA_D1 = iv_msg_block_vars.iv_RCW[55][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW38_ChA_D1 = iv_msg_block_vars.iv_RCW[56][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW39_ChA_D1 = iv_msg_block_vars.iv_RCW[57][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW3A_ChA_D1 = iv_msg_block_vars.iv_RCW[58][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW3B_ChA_D1 = iv_msg_block_vars.iv_RCW[59][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW3C_ChA_D1 = iv_msg_block_vars.iv_RCW[60][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW3D_ChA_D1 = iv_msg_block_vars.iv_RCW[61][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW3E_ChA_D1 = iv_msg_block_vars.iv_RCW[62][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW3F_ChA_D1 = iv_msg_block_vars.iv_RCW[63][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW40_ChA_D1 = iv_msg_block_vars.iv_RCW[64][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW41_ChA_D1 = iv_msg_block_vars.iv_RCW[65][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW42_ChA_D1 = iv_msg_block_vars.iv_RCW[66][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW43_ChA_D1 = iv_msg_block_vars.iv_RCW[67][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW44_ChA_D1 = iv_msg_block_vars.iv_RCW[68][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW45_ChA_D1 = iv_msg_block_vars.iv_RCW[69][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW46_ChA_D1 = iv_msg_block_vars.iv_RCW[70][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW47_ChA_D1 = iv_msg_block_vars.iv_RCW[71][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW48_ChA_D1 = iv_msg_block_vars.iv_RCW[72][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW49_ChA_D1 = iv_msg_block_vars.iv_RCW[73][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW4A_ChA_D1 = iv_msg_block_vars.iv_RCW[74][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW4B_ChA_D1 = iv_msg_block_vars.iv_RCW[75][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW4C_ChA_D1 = iv_msg_block_vars.iv_RCW[76][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW4D_ChA_D1 = iv_msg_block_vars.iv_RCW[77][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW4E_ChA_D1 = iv_msg_block_vars.iv_RCW[78][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW4F_ChA_D1 = iv_msg_block_vars.iv_RCW[79][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW50_ChA_D1 = iv_msg_block_vars.iv_RCW[80][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW51_ChA_D1 = iv_msg_block_vars.iv_RCW[81][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW52_ChA_D1 = iv_msg_block_vars.iv_RCW[82][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW53_ChA_D1 = iv_msg_block_vars.iv_RCW[83][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW54_ChA_D1 = iv_msg_block_vars.iv_RCW[84][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW55_ChA_D1 = iv_msg_block_vars.iv_RCW[85][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW56_ChA_D1 = iv_msg_block_vars.iv_RCW[86][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW57_ChA_D1 = iv_msg_block_vars.iv_RCW[87][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW58_ChA_D1 = iv_msg_block_vars.iv_RCW[88][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW59_ChA_D1 = iv_msg_block_vars.iv_RCW[89][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW5A_ChA_D1 = iv_msg_block_vars.iv_RCW[90][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW5B_ChA_D1 = iv_msg_block_vars.iv_RCW[91][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW5C_ChA_D1 = iv_msg_block_vars.iv_RCW[92][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW5D_ChA_D1 = iv_msg_block_vars.iv_RCW[93][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW5E_ChA_D1 = iv_msg_block_vars.iv_RCW[94][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW5F_ChA_D1 = iv_msg_block_vars.iv_RCW[95][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW60_ChA_D1 = iv_msg_block_vars.iv_RCW[96][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW61_ChA_D1 = iv_msg_block_vars.iv_RCW[97][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW62_ChA_D1 = iv_msg_block_vars.iv_RCW[98][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW63_ChA_D1 = iv_msg_block_vars.iv_RCW[99][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW64_ChA_D1 = iv_msg_block_vars.iv_RCW[100][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW65_ChA_D1 = iv_msg_block_vars.iv_RCW[101][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW66_ChA_D1 = iv_msg_block_vars.iv_RCW[102][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW67_ChA_D1 = iv_msg_block_vars.iv_RCW[103][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW68_ChA_D1 = iv_msg_block_vars.iv_RCW[104][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW69_ChA_D1 = iv_msg_block_vars.iv_RCW[105][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW6A_ChA_D1 = iv_msg_block_vars.iv_RCW[106][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW6B_ChA_D1 = iv_msg_block_vars.iv_RCW[107][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW6C_ChA_D1 = iv_msg_block_vars.iv_RCW[108][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW6D_ChA_D1 = iv_msg_block_vars.iv_RCW[109][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW6E_ChA_D1 = iv_msg_block_vars.iv_RCW[110][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW6F_ChA_D1 = iv_msg_block_vars.iv_RCW[111][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW70_ChA_D1 = iv_msg_block_vars.iv_RCW[112][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW71_ChA_D1 = iv_msg_block_vars.iv_RCW[113][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW72_ChA_D1 = iv_msg_block_vars.iv_RCW[114][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW73_ChA_D1 = iv_msg_block_vars.iv_RCW[115][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW74_ChA_D1 = iv_msg_block_vars.iv_RCW[116][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW75_ChA_D1 = iv_msg_block_vars.iv_RCW[117][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW76_ChA_D1 = iv_msg_block_vars.iv_RCW[118][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW77_ChA_D1 = iv_msg_block_vars.iv_RCW[119][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW78_ChA_D1 = iv_msg_block_vars.iv_RCW[120][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW79_ChA_D1 = iv_msg_block_vars.iv_RCW[121][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW7A_ChA_D1 = iv_msg_block_vars.iv_RCW[122][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW7B_ChA_D1 = iv_msg_block_vars.iv_RCW[123][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW7C_ChA_D1 = iv_msg_block_vars.iv_RCW[124][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW7D_ChA_D1 = iv_msg_block_vars.iv_RCW[125][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW7E_ChA_D1 = iv_msg_block_vars.iv_RCW[126][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+            io_msg_block.RCW7F_ChA_D1 = iv_msg_block_vars.iv_RCW[127][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
 
-            io_msg_block.RCW00_ChB_D1 = iv_msg_block_vars.iv_RCW[0];
-            io_msg_block.RCW01_ChB_D1 = iv_msg_block_vars.iv_RCW[1];
-            io_msg_block.RCW02_ChB_D1 = iv_msg_block_vars.iv_RCW[2];
-            io_msg_block.RCW03_ChB_D1 = iv_msg_block_vars.iv_RCW[3];
-            io_msg_block.RCW04_ChB_D1 = iv_msg_block_vars.iv_RCW[4];
-            io_msg_block.RCW05_ChB_D1 = iv_msg_block_vars.iv_RCW[5];
-            io_msg_block.RCW06_ChB_D1 = iv_msg_block_vars.iv_RCW[6];
-            io_msg_block.RCW07_ChB_D1 = iv_msg_block_vars.iv_RCW[7];
-            io_msg_block.RCW08_ChB_D1 = iv_msg_block_vars.iv_RCW[8];
-            io_msg_block.RCW09_ChB_D1 = iv_msg_block_vars.iv_RCW[9];
-            io_msg_block.RCW0A_ChB_D1 = iv_msg_block_vars.iv_RCW[10];
-            io_msg_block.RCW0B_ChB_D1 = iv_msg_block_vars.iv_RCW[11];
-            io_msg_block.RCW0C_ChB_D1 = iv_msg_block_vars.iv_RCW[12];
-            io_msg_block.RCW0D_ChB_D1 = iv_msg_block_vars.iv_RCW[13];
-            io_msg_block.RCW0E_ChB_D1 = iv_msg_block_vars.iv_RCW[14];
-            io_msg_block.RCW0F_ChB_D1 = iv_msg_block_vars.iv_RCW[15];
-            io_msg_block.RCW10_ChB_D1 = iv_msg_block_vars.iv_RCW[16];
-            io_msg_block.RCW11_ChB_D1 = iv_msg_block_vars.iv_RCW[17];
-            io_msg_block.RCW12_ChB_D1 = iv_msg_block_vars.iv_RCW[18];
-            io_msg_block.RCW13_ChB_D1 = iv_msg_block_vars.iv_RCW[19];
-            io_msg_block.RCW14_ChB_D1 = iv_msg_block_vars.iv_RCW[20];
-            io_msg_block.RCW15_ChB_D1 = iv_msg_block_vars.iv_RCW[21];
-            io_msg_block.RCW16_ChB_D1 = iv_msg_block_vars.iv_RCW[22];
-            io_msg_block.RCW17_ChB_D1 = iv_msg_block_vars.iv_RCW[23];
-            io_msg_block.RCW18_ChB_D1 = iv_msg_block_vars.iv_RCW[24];
-            io_msg_block.RCW19_ChB_D1 = iv_msg_block_vars.iv_RCW[25];
-            io_msg_block.RCW1A_ChB_D1 = iv_msg_block_vars.iv_RCW[26];
-            io_msg_block.RCW1B_ChB_D1 = iv_msg_block_vars.iv_RCW[27];
-            io_msg_block.RCW1C_ChB_D1 = iv_msg_block_vars.iv_RCW[28];
-            io_msg_block.RCW1D_ChB_D1 = iv_msg_block_vars.iv_RCW[29];
-            io_msg_block.RCW1E_ChB_D1 = iv_msg_block_vars.iv_RCW[30];
-            io_msg_block.RCW1F_ChB_D1 = iv_msg_block_vars.iv_RCW[31];
-            io_msg_block.RCW20_ChB_D1 = iv_msg_block_vars.iv_RCW[32];
-            io_msg_block.RCW21_ChB_D1 = iv_msg_block_vars.iv_RCW[33];
-            io_msg_block.RCW22_ChB_D1 = iv_msg_block_vars.iv_RCW[34];
-            io_msg_block.RCW23_ChB_D1 = iv_msg_block_vars.iv_RCW[35];
-            io_msg_block.RCW24_ChB_D1 = iv_msg_block_vars.iv_RCW[36];
-            io_msg_block.RCW25_ChB_D1 = iv_msg_block_vars.iv_RCW[37];
-            io_msg_block.RCW26_ChB_D1 = iv_msg_block_vars.iv_RCW[38];
-            io_msg_block.RCW27_ChB_D1 = iv_msg_block_vars.iv_RCW[39];
-            io_msg_block.RCW28_ChB_D1 = iv_msg_block_vars.iv_RCW[40];
-            io_msg_block.RCW29_ChB_D1 = iv_msg_block_vars.iv_RCW[41];
-            io_msg_block.RCW2A_ChB_D1 = iv_msg_block_vars.iv_RCW[42];
-            io_msg_block.RCW2B_ChB_D1 = iv_msg_block_vars.iv_RCW[43];
-            io_msg_block.RCW2C_ChB_D1 = iv_msg_block_vars.iv_RCW[44];
-            io_msg_block.RCW2D_ChB_D1 = iv_msg_block_vars.iv_RCW[45];
-            io_msg_block.RCW2E_ChB_D1 = iv_msg_block_vars.iv_RCW[46];
-            io_msg_block.RCW2F_ChB_D1 = iv_msg_block_vars.iv_RCW[47];
-            io_msg_block.RCW30_ChB_D1 = iv_msg_block_vars.iv_RCW[48];
-            io_msg_block.RCW31_ChB_D1 = iv_msg_block_vars.iv_RCW[49];
-            io_msg_block.RCW32_ChB_D1 = iv_msg_block_vars.iv_RCW[50];
-            io_msg_block.RCW33_ChB_D1 = iv_msg_block_vars.iv_RCW[51];
-            io_msg_block.RCW34_ChB_D1 = iv_msg_block_vars.iv_RCW[52];
-            io_msg_block.RCW35_ChB_D1 = iv_msg_block_vars.iv_RCW[53];
-            io_msg_block.RCW36_ChB_D1 = iv_msg_block_vars.iv_RCW[54];
-            io_msg_block.RCW37_ChB_D1 = iv_msg_block_vars.iv_RCW[55];
-            io_msg_block.RCW38_ChB_D1 = iv_msg_block_vars.iv_RCW[56];
-            io_msg_block.RCW39_ChB_D1 = iv_msg_block_vars.iv_RCW[57];
-            io_msg_block.RCW3A_ChB_D1 = iv_msg_block_vars.iv_RCW[58];
-            io_msg_block.RCW3B_ChB_D1 = iv_msg_block_vars.iv_RCW[59];
-            io_msg_block.RCW3C_ChB_D1 = iv_msg_block_vars.iv_RCW[60];
-            io_msg_block.RCW3D_ChB_D1 = iv_msg_block_vars.iv_RCW[61];
-            io_msg_block.RCW3E_ChB_D1 = iv_msg_block_vars.iv_RCW[62];
-            io_msg_block.RCW3F_ChB_D1 = iv_msg_block_vars.iv_RCW[63];
-            io_msg_block.RCW40_ChB_D1 = iv_msg_block_vars.iv_RCW[64];
-            io_msg_block.RCW41_ChB_D1 = iv_msg_block_vars.iv_RCW[65];
-            io_msg_block.RCW42_ChB_D1 = iv_msg_block_vars.iv_RCW[66];
-            io_msg_block.RCW43_ChB_D1 = iv_msg_block_vars.iv_RCW[67];
-            io_msg_block.RCW44_ChB_D1 = iv_msg_block_vars.iv_RCW[68];
-            io_msg_block.RCW45_ChB_D1 = iv_msg_block_vars.iv_RCW[69];
-            io_msg_block.RCW46_ChB_D1 = iv_msg_block_vars.iv_RCW[70];
-            io_msg_block.RCW47_ChB_D1 = iv_msg_block_vars.iv_RCW[71];
-            io_msg_block.RCW48_ChB_D1 = iv_msg_block_vars.iv_RCW[72];
-            io_msg_block.RCW49_ChB_D1 = iv_msg_block_vars.iv_RCW[73];
-            io_msg_block.RCW4A_ChB_D1 = iv_msg_block_vars.iv_RCW[74];
-            io_msg_block.RCW4B_ChB_D1 = iv_msg_block_vars.iv_RCW[75];
-            io_msg_block.RCW4C_ChB_D1 = iv_msg_block_vars.iv_RCW[76];
-            io_msg_block.RCW4D_ChB_D1 = iv_msg_block_vars.iv_RCW[77];
-            io_msg_block.RCW4E_ChB_D1 = iv_msg_block_vars.iv_RCW[78];
-            io_msg_block.RCW4F_ChB_D1 = iv_msg_block_vars.iv_RCW[79];
-            io_msg_block.RCW50_ChB_D1 = iv_msg_block_vars.iv_RCW[80];
-            io_msg_block.RCW51_ChB_D1 = iv_msg_block_vars.iv_RCW[81];
-            io_msg_block.RCW52_ChB_D1 = iv_msg_block_vars.iv_RCW[82];
-            io_msg_block.RCW53_ChB_D1 = iv_msg_block_vars.iv_RCW[83];
-            io_msg_block.RCW54_ChB_D1 = iv_msg_block_vars.iv_RCW[84];
-            io_msg_block.RCW55_ChB_D1 = iv_msg_block_vars.iv_RCW[85];
-            io_msg_block.RCW56_ChB_D1 = iv_msg_block_vars.iv_RCW[86];
-            io_msg_block.RCW57_ChB_D1 = iv_msg_block_vars.iv_RCW[87];
-            io_msg_block.RCW58_ChB_D1 = iv_msg_block_vars.iv_RCW[88];
-            io_msg_block.RCW59_ChB_D1 = iv_msg_block_vars.iv_RCW[89];
-            io_msg_block.RCW5A_ChB_D1 = iv_msg_block_vars.iv_RCW[90];
-            io_msg_block.RCW5B_ChB_D1 = iv_msg_block_vars.iv_RCW[91];
-            io_msg_block.RCW5C_ChB_D1 = iv_msg_block_vars.iv_RCW[92];
-            io_msg_block.RCW5D_ChB_D1 = iv_msg_block_vars.iv_RCW[93];
-            io_msg_block.RCW5E_ChB_D1 = iv_msg_block_vars.iv_RCW[94];
-            io_msg_block.RCW5F_ChB_D1 = iv_msg_block_vars.iv_RCW[95];
-            io_msg_block.RCW60_ChB_D1 = iv_msg_block_vars.iv_RCW[96];
-            io_msg_block.RCW61_ChB_D1 = iv_msg_block_vars.iv_RCW[97];
-            io_msg_block.RCW62_ChB_D1 = iv_msg_block_vars.iv_RCW[98];
-            io_msg_block.RCW63_ChB_D1 = iv_msg_block_vars.iv_RCW[99];
-            io_msg_block.RCW64_ChB_D1 = iv_msg_block_vars.iv_RCW[100];
-            io_msg_block.RCW65_ChB_D1 = iv_msg_block_vars.iv_RCW[101];
-            io_msg_block.RCW66_ChB_D1 = iv_msg_block_vars.iv_RCW[102];
-            io_msg_block.RCW67_ChB_D1 = iv_msg_block_vars.iv_RCW[103];
-            io_msg_block.RCW68_ChB_D1 = iv_msg_block_vars.iv_RCW[104];
-            io_msg_block.RCW69_ChB_D1 = iv_msg_block_vars.iv_RCW[105];
-            io_msg_block.RCW6A_ChB_D1 = iv_msg_block_vars.iv_RCW[106];
-            io_msg_block.RCW6B_ChB_D1 = iv_msg_block_vars.iv_RCW[107];
-            io_msg_block.RCW6C_ChB_D1 = iv_msg_block_vars.iv_RCW[108];
-            io_msg_block.RCW6D_ChB_D1 = iv_msg_block_vars.iv_RCW[109];
-            io_msg_block.RCW6E_ChB_D1 = iv_msg_block_vars.iv_RCW[110];
-            io_msg_block.RCW6F_ChB_D1 = iv_msg_block_vars.iv_RCW[111];
-            io_msg_block.RCW70_ChB_D1 = iv_msg_block_vars.iv_RCW[112];
-            io_msg_block.RCW71_ChB_D1 = iv_msg_block_vars.iv_RCW[113];
-            io_msg_block.RCW72_ChB_D1 = iv_msg_block_vars.iv_RCW[114];
-            io_msg_block.RCW73_ChB_D1 = iv_msg_block_vars.iv_RCW[115];
-            io_msg_block.RCW74_ChB_D1 = iv_msg_block_vars.iv_RCW[116];
-            io_msg_block.RCW75_ChB_D1 = iv_msg_block_vars.iv_RCW[117];
-            io_msg_block.RCW76_ChB_D1 = iv_msg_block_vars.iv_RCW[118];
-            io_msg_block.RCW77_ChB_D1 = iv_msg_block_vars.iv_RCW[119];
-            io_msg_block.RCW78_ChB_D1 = iv_msg_block_vars.iv_RCW[120];
-            io_msg_block.RCW79_ChB_D1 = iv_msg_block_vars.iv_RCW[121];
-            io_msg_block.RCW7A_ChB_D1 = iv_msg_block_vars.iv_RCW[122];
-            io_msg_block.RCW7B_ChB_D1 = iv_msg_block_vars.iv_RCW[123];
-            io_msg_block.RCW7C_ChB_D1 = iv_msg_block_vars.iv_RCW[124];
-            io_msg_block.RCW7D_ChB_D1 = iv_msg_block_vars.iv_RCW[125];
-            io_msg_block.RCW7E_ChB_D1 = iv_msg_block_vars.iv_RCW[126];
-            io_msg_block.RCW7F_ChB_D1 = iv_msg_block_vars.iv_RCW[127];
+            io_msg_block.RCW00_ChB_D1 = iv_msg_block_vars.iv_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW01_ChB_D1 = iv_msg_block_vars.iv_RCW[1][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW02_ChB_D1 = iv_msg_block_vars.iv_RCW[2][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW03_ChB_D1 = iv_msg_block_vars.iv_RCW[3][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW04_ChB_D1 = iv_msg_block_vars.iv_RCW[4][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW05_ChB_D1 = iv_msg_block_vars.iv_RCW[5][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW06_ChB_D1 = iv_msg_block_vars.iv_RCW[6][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW07_ChB_D1 = iv_msg_block_vars.iv_RCW[7][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW08_ChB_D1 = iv_msg_block_vars.iv_RCW[8][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW09_ChB_D1 = iv_msg_block_vars.iv_RCW[9][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW0A_ChB_D1 = iv_msg_block_vars.iv_RCW[10][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW0B_ChB_D1 = iv_msg_block_vars.iv_RCW[11][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW0C_ChB_D1 = iv_msg_block_vars.iv_RCW[12][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW0D_ChB_D1 = iv_msg_block_vars.iv_RCW[13][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW0E_ChB_D1 = iv_msg_block_vars.iv_RCW[14][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW0F_ChB_D1 = iv_msg_block_vars.iv_RCW[15][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW10_ChB_D1 = iv_msg_block_vars.iv_RCW[16][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW11_ChB_D1 = iv_msg_block_vars.iv_RCW[17][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW12_ChB_D1 = iv_msg_block_vars.iv_RCW[18][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW13_ChB_D1 = iv_msg_block_vars.iv_RCW[19][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW14_ChB_D1 = iv_msg_block_vars.iv_RCW[20][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW15_ChB_D1 = iv_msg_block_vars.iv_RCW[21][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW16_ChB_D1 = iv_msg_block_vars.iv_RCW[22][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW17_ChB_D1 = iv_msg_block_vars.iv_RCW[23][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW18_ChB_D1 = iv_msg_block_vars.iv_RCW[24][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW19_ChB_D1 = iv_msg_block_vars.iv_RCW[25][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW1A_ChB_D1 = iv_msg_block_vars.iv_RCW[26][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW1B_ChB_D1 = iv_msg_block_vars.iv_RCW[27][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW1C_ChB_D1 = iv_msg_block_vars.iv_RCW[28][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW1D_ChB_D1 = iv_msg_block_vars.iv_RCW[29][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW1E_ChB_D1 = iv_msg_block_vars.iv_RCW[30][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW1F_ChB_D1 = iv_msg_block_vars.iv_RCW[31][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW20_ChB_D1 = iv_msg_block_vars.iv_RCW[32][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW21_ChB_D1 = iv_msg_block_vars.iv_RCW[33][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW22_ChB_D1 = iv_msg_block_vars.iv_RCW[34][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW23_ChB_D1 = iv_msg_block_vars.iv_RCW[35][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW24_ChB_D1 = iv_msg_block_vars.iv_RCW[36][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW25_ChB_D1 = iv_msg_block_vars.iv_RCW[37][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW26_ChB_D1 = iv_msg_block_vars.iv_RCW[38][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW27_ChB_D1 = iv_msg_block_vars.iv_RCW[39][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW28_ChB_D1 = iv_msg_block_vars.iv_RCW[40][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW29_ChB_D1 = iv_msg_block_vars.iv_RCW[41][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW2A_ChB_D1 = iv_msg_block_vars.iv_RCW[42][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW2B_ChB_D1 = iv_msg_block_vars.iv_RCW[43][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW2C_ChB_D1 = iv_msg_block_vars.iv_RCW[44][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW2D_ChB_D1 = iv_msg_block_vars.iv_RCW[45][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW2E_ChB_D1 = iv_msg_block_vars.iv_RCW[46][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW2F_ChB_D1 = iv_msg_block_vars.iv_RCW[47][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW30_ChB_D1 = iv_msg_block_vars.iv_RCW[48][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW31_ChB_D1 = iv_msg_block_vars.iv_RCW[49][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW32_ChB_D1 = iv_msg_block_vars.iv_RCW[50][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW33_ChB_D1 = iv_msg_block_vars.iv_RCW[51][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW34_ChB_D1 = iv_msg_block_vars.iv_RCW[52][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW35_ChB_D1 = iv_msg_block_vars.iv_RCW[53][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW36_ChB_D1 = iv_msg_block_vars.iv_RCW[54][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW37_ChB_D1 = iv_msg_block_vars.iv_RCW[55][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW38_ChB_D1 = iv_msg_block_vars.iv_RCW[56][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW39_ChB_D1 = iv_msg_block_vars.iv_RCW[57][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW3A_ChB_D1 = iv_msg_block_vars.iv_RCW[58][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW3B_ChB_D1 = iv_msg_block_vars.iv_RCW[59][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW3C_ChB_D1 = iv_msg_block_vars.iv_RCW[60][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW3D_ChB_D1 = iv_msg_block_vars.iv_RCW[61][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW3E_ChB_D1 = iv_msg_block_vars.iv_RCW[62][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW3F_ChB_D1 = iv_msg_block_vars.iv_RCW[63][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW40_ChB_D1 = iv_msg_block_vars.iv_RCW[64][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW41_ChB_D1 = iv_msg_block_vars.iv_RCW[65][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW42_ChB_D1 = iv_msg_block_vars.iv_RCW[66][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW43_ChB_D1 = iv_msg_block_vars.iv_RCW[67][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW44_ChB_D1 = iv_msg_block_vars.iv_RCW[68][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW45_ChB_D1 = iv_msg_block_vars.iv_RCW[69][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW46_ChB_D1 = iv_msg_block_vars.iv_RCW[70][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW47_ChB_D1 = iv_msg_block_vars.iv_RCW[71][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW48_ChB_D1 = iv_msg_block_vars.iv_RCW[72][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW49_ChB_D1 = iv_msg_block_vars.iv_RCW[73][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW4A_ChB_D1 = iv_msg_block_vars.iv_RCW[74][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW4B_ChB_D1 = iv_msg_block_vars.iv_RCW[75][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW4C_ChB_D1 = iv_msg_block_vars.iv_RCW[76][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW4D_ChB_D1 = iv_msg_block_vars.iv_RCW[77][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW4E_ChB_D1 = iv_msg_block_vars.iv_RCW[78][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW4F_ChB_D1 = iv_msg_block_vars.iv_RCW[79][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW50_ChB_D1 = iv_msg_block_vars.iv_RCW[80][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW51_ChB_D1 = iv_msg_block_vars.iv_RCW[81][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW52_ChB_D1 = iv_msg_block_vars.iv_RCW[82][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW53_ChB_D1 = iv_msg_block_vars.iv_RCW[83][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW54_ChB_D1 = iv_msg_block_vars.iv_RCW[84][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW55_ChB_D1 = iv_msg_block_vars.iv_RCW[85][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW56_ChB_D1 = iv_msg_block_vars.iv_RCW[86][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW57_ChB_D1 = iv_msg_block_vars.iv_RCW[87][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW58_ChB_D1 = iv_msg_block_vars.iv_RCW[88][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW59_ChB_D1 = iv_msg_block_vars.iv_RCW[89][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW5A_ChB_D1 = iv_msg_block_vars.iv_RCW[90][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW5B_ChB_D1 = iv_msg_block_vars.iv_RCW[91][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW5C_ChB_D1 = iv_msg_block_vars.iv_RCW[92][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW5D_ChB_D1 = iv_msg_block_vars.iv_RCW[93][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW5E_ChB_D1 = iv_msg_block_vars.iv_RCW[94][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW5F_ChB_D1 = iv_msg_block_vars.iv_RCW[95][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW60_ChB_D1 = iv_msg_block_vars.iv_RCW[96][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW61_ChB_D1 = iv_msg_block_vars.iv_RCW[97][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW62_ChB_D1 = iv_msg_block_vars.iv_RCW[98][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW63_ChB_D1 = iv_msg_block_vars.iv_RCW[99][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW64_ChB_D1 = iv_msg_block_vars.iv_RCW[100][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW65_ChB_D1 = iv_msg_block_vars.iv_RCW[101][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW66_ChB_D1 = iv_msg_block_vars.iv_RCW[102][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW67_ChB_D1 = iv_msg_block_vars.iv_RCW[103][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW68_ChB_D1 = iv_msg_block_vars.iv_RCW[104][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW69_ChB_D1 = iv_msg_block_vars.iv_RCW[105][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW6A_ChB_D1 = iv_msg_block_vars.iv_RCW[106][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW6B_ChB_D1 = iv_msg_block_vars.iv_RCW[107][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW6C_ChB_D1 = iv_msg_block_vars.iv_RCW[108][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW6D_ChB_D1 = iv_msg_block_vars.iv_RCW[109][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW6E_ChB_D1 = iv_msg_block_vars.iv_RCW[110][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW6F_ChB_D1 = iv_msg_block_vars.iv_RCW[111][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW70_ChB_D1 = iv_msg_block_vars.iv_RCW[112][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW71_ChB_D1 = iv_msg_block_vars.iv_RCW[113][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW72_ChB_D1 = iv_msg_block_vars.iv_RCW[114][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW73_ChB_D1 = iv_msg_block_vars.iv_RCW[115][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW74_ChB_D1 = iv_msg_block_vars.iv_RCW[116][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW75_ChB_D1 = iv_msg_block_vars.iv_RCW[117][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW76_ChB_D1 = iv_msg_block_vars.iv_RCW[118][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW77_ChB_D1 = iv_msg_block_vars.iv_RCW[119][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW78_ChB_D1 = iv_msg_block_vars.iv_RCW[120][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW79_ChB_D1 = iv_msg_block_vars.iv_RCW[121][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW7A_ChB_D1 = iv_msg_block_vars.iv_RCW[122][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW7B_ChB_D1 = iv_msg_block_vars.iv_RCW[123][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW7C_ChB_D1 = iv_msg_block_vars.iv_RCW[124][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW7D_ChB_D1 = iv_msg_block_vars.iv_RCW[125][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW7E_ChB_D1 = iv_msg_block_vars.iv_RCW[126][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+            io_msg_block.RCW7F_ChB_D1 = iv_msg_block_vars.iv_RCW[127][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
 
             return fapi2::FAPI2_RC_SUCCESS;
         }

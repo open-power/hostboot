@@ -2531,7 +2531,6 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
     FAPI_TRY(l_msg_block_config.setup_Reserved1E7(o_struct));
     FAPI_TRY(l_msg_block_config.setup_WL_ADJ_START(o_struct));
     FAPI_TRY(l_msg_block_config.setup_WL_ADJ_END(o_struct));
-    // TODO: Zen:MST-1732 Fill in RCW fields in ody_draminit message block from attributes
     FAPI_TRY(l_msg_block_config.setup_RCW(o_struct));
     FAPI_TRY(l_msg_block_config.setup_BCW(o_struct));
     FAPI_TRY(l_msg_block_config.setup_VrefDq(o_struct));
@@ -2720,7 +2719,7 @@ const uint8_t* assemble_mem_bin_data_reg(const uint32_t i_mem_size,
 fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                     const uint8_t i_is_first_load,
                                     const uint32_t i_start_addr,
-                                    const uint8_t* i_data_start,
+                                    const uint8_t* const i_data_start,
                                     const uint32_t i_mem_size,
                                     const uint32_t i_mem_total_size)
 {
@@ -2943,7 +2942,7 @@ uint32_t calculate_image_end_addr(const uint32_t i_start_addr, const uint32_t i_
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode ody_load_dmem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                       const uint8_t* i_dmem_data,
+                                       const uint8_t* const i_dmem_data,
                                        const uint32_t i_dmem_size,
                                        const uint32_t i_dmem_offset)
 {
@@ -3017,7 +3016,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode ody_load_imem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                       const uint8_t* i_imem_data,
+                                       const uint8_t* const i_imem_data,
                                        const uint32_t i_imem_size,
                                        const uint32_t i_imem_offset)
 {

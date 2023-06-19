@@ -504,4 +504,920 @@
         </sbeAttrSync>
     </attribute>
 
+  <!-- RCW attributes for Channel A DIMM0-->
+  <attribute>
+    <id>ATTR_RCW00_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Command Address Rate and SDR Modes for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>1</default>
+    <mssAccessorName>ddr5_rcw00_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW05_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Operating Speed, Vdd Operating voltage and frequency context for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw05_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW08_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Clock Driver Enable for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x2e</default>
+    <mssAccessorName>ddr5_rcw08_cha_d0</mssAccessorName>
+  </attribute>
+
+   <attribute>
+    <id>ATTR_RCW09_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Output Address and Control Enable for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x4e</default>
+    <mssAccessorName>ddr5_rcw09_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0A_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for QCK Signal Driver Characteristics for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x55</default>
+    <mssAccessorName>ddr5_rcw0a_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0C_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute QxCA and QxCS Signal Driver Characteristics for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>1</default>
+    <mssAccessorName>ddr5_rcw0c_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0D_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Data Buffer Interface Driver Characteristics for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw0d_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0E_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for QCK, QCA and QCS Output Slew Rate for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw0e_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0F_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for BCK, BCOM and BCS Output Slew Rate for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw0f_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW40_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw40_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW41_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw41_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW42_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw42_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW43_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw43_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW44_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw44_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW45_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw45_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW46_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw46_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW47_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw47_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW48_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCS for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw48_cha_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW49_CHA_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCS for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw49_cha_d0</mssAccessorName>
+  </attribute>
+
+  <!-- RCW attributes for Channel A DIMM1 -->
+  <attribute>
+    <id>ATTR_RCW00_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Command Address Rate and SDR Modes for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>1</default>
+    <mssAccessorName>ddr5_rcw00_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW05_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Operating Speed, Vdd Operating voltage and frequency context for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw05_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW08_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Clock Driver Enable for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x2e</default>
+    <mssAccessorName>ddr5_rcw08_cha_d1</mssAccessorName>
+  </attribute>
+
+   <attribute>
+    <id>ATTR_RCW09_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Output Address and Control Enable for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x4e</default>
+    <mssAccessorName>ddr5_rcw09_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0A_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for QCK Signal Driver Characteristics for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x55</default>
+    <mssAccessorName>ddr5_rcw0a_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0C_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute QxCA and QxCS Signal Driver Characteristics for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>1</default>
+    <mssAccessorName>ddr5_rcw0c_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0D_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Data Buffer Interface Driver Characteristics for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw0d_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0E_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for QCK, QCA and QCS Output Slew Rate for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw0e_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0F_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for BCK, BCOM and BCS Output Slew Rate for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw0f_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW40_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw40_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW41_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw41_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW42_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw42_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW43_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw43_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW44_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw44_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW45_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw45_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW46_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw46_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW47_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw47_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW48_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCS for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw48_cha_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW49_CHA_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCS for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw49_cha_d1</mssAccessorName>
+  </attribute>
+
+    <!-- RCW attributes for Channel B DIMM0-->
+  <attribute>
+    <id>ATTR_RCW00_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Command Address Rate and SDR Modes for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>1</default>
+    <mssAccessorName>ddr5_rcw00_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW05_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Operating Speed, Vdd Operating voltage and frequency context for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw05_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW08_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Clock Driver Enable for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x2e</default>
+    <mssAccessorName>ddr5_rcw08_chb_d0</mssAccessorName>
+  </attribute>
+
+   <attribute>
+    <id>ATTR_RCW09_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Output Address and Control Enable for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x4e</default>
+    <mssAccessorName>ddr5_rcw09_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0A_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for QCK Signal Driver Characteristics for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x55</default>
+    <mssAccessorName>ddr5_rcw0a_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0C_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute QxCA and QxCS Signal Driver Characteristics for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>1</default>
+    <mssAccessorName>ddr5_rcw0c_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0D_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Data Buffer Interface Driver Characteristics for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw0d_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0E_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for QCK, QCA and QCS Output Slew Rate for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw0e_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0F_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for BCK, BCOM and BCS Output Slew Rate for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw0f_chb_d0</mssAccessorName>
+  </attribute>
+
+   <attribute>
+    <id>ATTR_RCW40_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw40_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW41_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw41_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW42_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw42_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW43_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw43_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW44_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw44_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW45_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw45_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW46_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw46_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW47_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw47_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW48_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCS for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw48_chb_d0</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW49_CHB_D0</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCS for DIMM0
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw49_chb_d0</mssAccessorName>
+  </attribute>
+
+  <!-- RCW attributes for Channel B DIMM1 -->
+  <attribute>
+    <id>ATTR_RCW00_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Command Address Rate and SDR Modes for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>1</default>
+    <mssAccessorName>ddr5_rcw00_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW05_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Operating Speed, Vdd Operating voltage and frequency context for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw05_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW08_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Clock Driver Enable for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x2e</default>
+    <mssAccessorName>ddr5_rcw08_chb_d1</mssAccessorName>
+  </attribute>
+
+   <attribute>
+    <id>ATTR_RCW09_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Output Address and Control Enable for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x4e</default>
+    <mssAccessorName>ddr5_rcw09_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0A_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for QCK Signal Driver Characteristics for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x55</default>
+    <mssAccessorName>ddr5_rcw0a_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0C_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute QxCA and QxCS Signal Driver Characteristics for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>1</default>
+    <mssAccessorName>ddr5_rcw0c_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0D_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Data Buffer Interface Driver Characteristics for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw0d_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0E_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for QCK, QCA and QCS Output Slew Rate for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw0e_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW0F_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for BCK, BCOM and BCS Output Slew Rate for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <mssAccessorName>ddr5_rcw0f_chb_d1</mssAccessorName>
+  </attribute>
+
+    <attribute>
+    <id>ATTR_RCW40_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw40_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW41_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw41_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW42_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw42_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW43_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw43_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW44_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw44_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW45_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw45_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW46_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw46_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW47_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCA for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw47_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW48_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCS for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw48_chb_d1</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_RCW49_CHB_D1</id>
+    <targetType>TARGET_TYPE_MEM_PORT</targetType>
+    <description>
+      Attribute for Internal VrefCS for DIMM1
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0x39</default>
+    <mssAccessorName>ddr5_rcw49_chb_d1</mssAccessorName>
+  </attribute>
+
 </attributes>
