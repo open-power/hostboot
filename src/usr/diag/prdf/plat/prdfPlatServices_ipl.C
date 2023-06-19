@@ -126,13 +126,13 @@ uint32_t mssRestoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
     if (isOdysseyOcmb(i_target))
     {
         FAPI_INVOKE_HWP( errl, ody_restore_repairs,
-                         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>( i_target ),
+                         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target),
                          tmpRepairedRankMask, tmpBadDimmMask );
     }
     else
     {
         FAPI_INVOKE_HWP( errl, exp_restore_repairs,
-                         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>( i_target ),
+                         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target),
                          tmpRepairedRankMask, tmpBadDimmMask );
     }
 

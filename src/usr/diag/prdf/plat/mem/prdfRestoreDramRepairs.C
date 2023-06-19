@@ -57,7 +57,7 @@ namespace RDR // local utility functions to support PRDF::restoreDramRepairs()
 // Creates and returns an error log.
 template<TARGETING::TYPE T>
 errlHndl_t createErrl( uint32_t i_reasonCode, TargetHandle_t i_trgt,
-                       uint32_t i_signature )
+                       uint32_t i_signature, uint8_t i_port )
 {
     uint64_t userdata12 = PRDF_GET_UINT64_FROM_UINT32( getHuid(i_trgt), 0 );
     uint64_t userdata34 = PRDF_GET_UINT64_FROM_UINT32( i_signature,    0 );
@@ -74,8 +74,7 @@ errlHndl_t createErrl( uint32_t i_reasonCode, TargetHandle_t i_trgt,
 
     // Add capture data. Need to do this now before the DIMM callouts are made
     // because the VPD is cleared if a DIMM is added to the callout list.
-    // TODO: Odyssey multiple port updates
-    MemCaptureData::addEccData<T>( i_trgt, errl, 0 );
+    MemCaptureData::addEccData<T>( i_trgt, errl, i_port );
 
     return errl;
 }
@@ -178,11 +177,13 @@ void __calloutDimm<TYPE_OCMB_CHIP>( errlHndl_t & io_errl,
 // level support callout.
 template<TARGETING::TYPE T>
 void commitSoftError( uint32_t i_reasonCode, TargetHandle_t i_trgt,
-                      uint32_t i_signature, bool i_analysisErrors )
+                      uint32_t i_signature, bool i_analysisErrors,
+                      uint8_t i_port )
 {
     if ( i_analysisErrors )
     {
-        errlHndl_t errl = createErrl<T>( i_reasonCode, i_trgt, i_signature );
+        errlHndl_t errl = createErrl<T>( i_reasonCode, i_trgt, i_signature,
+                                         i_port );
         errl->addProcedureCallout( HWAS::EPUB_PRC_LVL_SUPP,
                                    HWAS::SRCI_PRIORITY_HIGH );
         commitErrl<T>( errl, i_trgt );
@@ -200,7 +201,6 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
     // hardware and compare against RAS policies.
 
     bool o_calloutMade  = false;
-    bool analysisErrors = false;
 
     errlHndl_t errl = nullptr; // Initially nullptr, will create if needed.
 
@@ -222,74 +222,88 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
 
             MemRank rank ( r );
 
-            // TODO Odyssey - need port to get the MemMarks, check both ports
-            MemMark cm;
-            if ( SUCCESS != MarkStore::readChipMark<T>( chip, rank, 0, cm ) )
+            // The i_repairedRankMask we get back from the HWP does not specify
+            // which port the repair was on, so we check both for repairs.
+            uint8_t maxPorts = MAX_PORT_PER_EXP_OCMB;
+            if (isOdysseyOcmb(i_trgt))
             {
-                PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,0x%02x) "
-                          "failed", chip->getHuid(), rank.getKey() );
-                continue; // skip this rank
+                maxPorts = MAX_PORT_PER_ODY_OCMB;
             }
 
-            // TODO Odyssey - need port to get the MemMarks, check both ports
-            MemMark sm;
-            if ( SUCCESS != MarkStore::readSymbolMark<T>( chip, rank, 0, sm ) )
+            for (uint8_t port = 0; port < maxPorts; port++)
             {
-                PRDF_ERR( PRDF_FUNC "readSymbolMark<T>(0x%08x,0x%02x) "
-                          "failed", chip->getHuid(), rank.getKey() );
-                continue; // skip this rank
-            }
+                // Double check the MEM_PORT target actually exists
+                TargetHandle_t memport = getConnectedChild(i_trgt,
+                                                           TYPE_MEM_PORT, port);
+                if (nullptr == memport) continue;
 
-            // Check whether sparing is enabled
-            // TODO RTC 210072 - support for multiple ports
-            bool spareEnable = false;
-            if ( SUCCESS !=
-                 isDramSparingEnabled<T>(i_trgt, rank, 0, spareEnable) )
-            {
-                PRDF_ERR( PRDF_FUNC "isDramSparingEnabled(0x%08x, 0x%02x) "
-                          "failed", getHuid(i_trgt), rank.getKey() );
-                break;
-            }
-
-            // If sparing is enabled, we only check if the chip mark was used.
-            // If sparing is not enabled we check if both the chip and symbol
-            // marks are used.
-            if ( cm.isValid() && ( sm.isValid() || spareEnable ) )
-            {
-                // All repairs on the rank have been used. Callout all repairs.
-
-                if ( nullptr == errl )
+                MemMark cm;
+                if (SUCCESS != MarkStore::readChipMark<T>(chip, rank, port, cm))
                 {
-                    errl = createErrl<T>( PRDF_DETECTED_FAIL_HARDWARE,
-                                          i_trgt, PRDFSIG_RdrRepairsUsed );
+                    PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,0x%02x,%x) "
+                            "failed", chip->getHuid(), rank.getKey(), port );
+                    continue; // skip this rank
                 }
 
-                std::vector<MemSymbol> symList;
-                symList.push_back( cm.getSymbol() );
-
-                if ( sm.isValid() )
+                MemMark sm;
+                if (SUCCESS != MarkStore::readSymbolMark<T>(chip, rank, port,
+                                                            sm))
                 {
-                    symList.push_back( sm.getSymbol() );
+                    PRDF_ERR( PRDF_FUNC "readSymbolMark<T>(0x%08x,0x%02x,%x) "
+                            "failed", chip->getHuid(), rank.getKey(), port );
+                    continue; // skip this rank
                 }
 
-                for ( const auto & sym : symList )
+                // Check whether sparing is enabled
+                bool spareEnable = false;
+                if ( SUCCESS != isDramSparingEnabled<T>(i_trgt, rank, port,
+                                                        spareEnable) )
                 {
-                    if ( !sym.isValid() ) continue;
+                    PRDF_ERR(PRDF_FUNC "isDramSparingEnabled(0x%08x,0x%02x,%x) "
+                             "failed", getHuid(i_trgt), rank.getKey(), port);
+                    break;
+                }
 
-                    // TODO Odyssey
-                    MemoryMru mm( i_trgt, rank, 0, sym );
+                // If sparing is enabled, we only check if the chip mark was
+                // used. If sparing is not enabled we check if both the chip and
+                // symbol marks are used.
+                if ( cm.isValid() && ( sm.isValid() || spareEnable ) )
+                {
+                    // All repairs on the rank have been used. Callout all repairs.
 
-                    // Add all parts to the error log.
-                    for ( const auto & dimm : mm.getCalloutList() )
+                    if ( nullptr == errl )
                     {
-                        calloutList[dimm] = 1;
+                        errl = createErrl<T>( PRDF_DETECTED_FAIL_HARDWARE,
+                                              i_trgt, PRDFSIG_RdrRepairsUsed,
+                                              port );
                     }
 
-                    // Add the MemoryMru to the capture data.
-                    MemCaptureData::addExtMemMruData( mm, errl );
-                }
+                    std::vector<MemSymbol> symList;
+                    symList.push_back( cm.getSymbol() );
 
-                o_calloutMade = true;
+                    if ( sm.isValid() )
+                    {
+                        symList.push_back( sm.getSymbol() );
+                    }
+
+                    for ( const auto & sym : symList )
+                    {
+                        if ( !sym.isValid() ) continue;
+
+                        MemoryMru mm( i_trgt, rank, port, sym );
+
+                        // Add all parts to the error log.
+                        for ( const auto & dimm : mm.getCalloutList() )
+                        {
+                            calloutList[dimm] = 1;
+                        }
+
+                        // Add the MemoryMru to the capture data.
+                        MemCaptureData::addExtMemMruData( mm, errl );
+                    }
+
+                    o_calloutMade = true;
+                }
             }
         }
 
@@ -307,10 +321,6 @@ bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask )
         // Commit the error log, if needed.
         commitErrl<T>( errl, i_trgt );
 
-        // Commit an additional error log indicating something failed in the
-        // analysis, if needed.
-        commitSoftError<T>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
-                            PRDFSIG_RdrInternalFail, analysisErrors );
     }while(0);
 
     return o_calloutMade;
@@ -325,7 +335,11 @@ bool processRepairedRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
+bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask );
+
+template<>
+bool processBadDimms<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
+                                      uint8_t i_badDimmMask )
 {
     #define PRDF_FUNC "[processBadDimms] "
 
@@ -333,7 +347,6 @@ bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
     // available repairs. Callout these DIMMs.
 
     bool o_calloutMade  = false;
-    bool analysisErrors = false;
 
     errlHndl_t errl = nullptr; // Initially nullptr, will create if needed.
 
@@ -341,61 +354,51 @@ bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
     TargetHandleList dimms = getConnectedChildren( i_trgt, TYPE_DIMM );
     for ( const auto & dimm : dimms )
     {
-        // i_badDimmMask is defined as a 2-bit mask where a bit set means that
-        // DIMM had more bad bits than could be repaired. Note: the value is
-        // actually a 4-bit field for use with Centaur, but we only use the
-        // first 2 bits of that field here.
-        uint8_t mask = 0x80 >> getDimmSlct(dimm);
+        // i_badDimmMask is defined as a 2-bit (left-justified) mask where a bit
+        // set means that DIMM had more bad bits than could be repaired.
+        // For Odyssey this means the first bit indicates the DIMM on port0 and
+        // the second bit indicates the DIMM on port1, so we need to shift based
+        // on the port value.
+        uint8_t mask = 0x80 >> getDimmPort(dimm);
 
         if ( 0 != (i_badDimmMask & mask) )
         {
             if ( nullptr == errl )
             {
-                errl = createErrl<T>( PRDF_DETECTED_FAIL_HARDWARE,
-                                      i_trgt, PRDFSIG_RdrRepairUnavail );
+                uint8_t port = getDimmPort(dimm);
+                errl = createErrl<TYPE_OCMB_CHIP>( PRDF_DETECTED_FAIL_HARDWARE,
+                    i_trgt, PRDFSIG_RdrRepairUnavail, port );
             }
 
-            __calloutDimm<T>( errl, i_trgt, dimm );
+            __calloutDimm<TYPE_OCMB_CHIP>( errl, i_trgt, dimm );
 
             o_calloutMade = true;
         }
     }
 
     // Commit the error log, if needed.
-    commitErrl<T>( errl, i_trgt );
-
-    // Commit an additional error log indicating something failed in the
-    // analysis, if needed.
-    commitSoftError<T>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
-                        PRDFSIG_RdrInternalFail, analysisErrors );
+    commitErrl<TYPE_OCMB_CHIP>( errl, i_trgt );
 
     return o_calloutMade;
 
     #undef PRDF_FUNC
 }
 
-template
-bool processBadDimms<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
-                                      uint8_t i_badDimmMask );
-
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE  T>
-bool screenBadDqs(TargetHandle_t i_trgt, const std::vector<MemRank> & i_ranks);
+bool screenBadDqs(TargetHandle_t i_memport, const std::vector<MemRank> & i_ranks);
 
 template<>
-bool screenBadDqs<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
-                                   const std::vector<MemRank> & i_ranks )
+bool screenBadDqs<TYPE_MEM_PORT>( TargetHandle_t i_memport,
+                                  const std::vector<MemRank> & i_ranks )
 {
-    #define PRDF_FUNC "[screenBadDqs<TYPE_OCMB_CHIP>] "
+    #define PRDF_FUNC "[screenBadDqs<TYPE_MEM_PORT>] "
 
     // Callout any attached DIMMs that have any bad DQs.
 
     bool o_calloutMade  = false;
     bool analysisErrors = false;
-
-    // TODO Odyssey: need port
-    TargetHandle_t memport = getConnectedChild(i_trgt, TYPE_MEM_PORT, 0);
 
     for ( const auto & rank : i_ranks )
     {
@@ -404,10 +407,10 @@ bool screenBadDqs<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
         // flag is set. PRD will simply need to iterate through all the ranks
         // to ensure all DIMMs are screen and the procedure will do the rest.
         MemDqBitmap bitmap;
-        if ( SUCCESS != getBadDqBitmap<TYPE_MEM_PORT>(memport, rank, bitmap) )
+        if ( SUCCESS != getBadDqBitmap<TYPE_MEM_PORT>(i_memport, rank, bitmap) )
         {
             PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed: TRGT=0x%08x "
-                      "rank=0x%02x", getHuid(memport), rank.getKey() );
+                      "rank=0x%02x", getHuid(i_memport), rank.getKey() );
             analysisErrors = true;
             continue; // skip this rank
         }
@@ -415,8 +418,11 @@ bool screenBadDqs<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
 
     // Commit an additional error log indicating something failed in the
     // analysis, if needed.
-    commitSoftError<TYPE_OCMB_CHIP>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
-                                     PRDFSIG_RdrInternalFail, analysisErrors );
+    uint8_t port = i_memport->getAttr<ATTR_REL_POS>();
+    TargetHandle_t ocmb = getConnectedParent(i_memport, TYPE_OCMB_CHIP);
+    commitSoftError<TYPE_OCMB_CHIP>( PRDF_DETECTED_FAIL_SOFTWARE, ocmb,
+                                     PRDFSIG_RdrInternalFail, analysisErrors,
+                                     port );
 
     return o_calloutMade;
 
@@ -426,20 +432,18 @@ bool screenBadDqs<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE>
-void deployDramSpares( TargetHandle_t i_trgt,
+void deployDramSpares( TargetHandle_t i_memport,
                        const std::vector<MemRank> & i_ranks );
 
 template<>
-void deployDramSpares<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
-                                       const std::vector<MemRank> & i_ranks )
+void deployDramSpares<TYPE_MEM_PORT>( TargetHandle_t i_memport,
+                                      const std::vector<MemRank> & i_ranks )
 {
-    // TODO Odyssey
-    TargetHandle_t memport = getConnectedChild(i_trgt, TYPE_MEM_PORT, 0);
     for ( const auto & rank : i_ranks )
     {
-        MemSymbol sym = MemSymbol::fromSymbol( memport, rank, 71 );
+        MemSymbol sym = MemSymbol::fromSymbol( i_memport, rank, 71 );
 
-        int32_t l_rc = mssSetSteerMux<TYPE_MEM_PORT>(memport, rank, sym);
+        int32_t l_rc = mssSetSteerMux<TYPE_MEM_PORT>(i_memport, rank, sym);
         if ( SUCCESS != l_rc )
         {
             // mssSetSteerMux() will print a trace and commit the error log,
@@ -456,10 +460,10 @@ void deployDramSpares<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
 // External functions - declared in prdfMain.H
 //------------------------------------------------------------------------------
 
-template<TARGETING::TYPE T>
-uint32_t restoreDramRepairs( TargetHandle_t i_trgt )
+template<>
+uint32_t restoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt )
 {
-    #define PRDF_FUNC "PRDF::restoreDramRepairs<T>"
+    #define PRDF_FUNC "PRDF::restoreDramRepairs<TYPE_OCMB_CHIP>"
 
     PRDF_ENTER( PRDF_FUNC "(0x%08x)", getHuid(i_trgt) );
 
@@ -478,65 +482,81 @@ uint32_t restoreDramRepairs( TargetHandle_t i_trgt )
             if ( nullptr != errl )
             {
                 PRDF_ERR( PRDF_FUNC "Failed to initialize PRD" );
-                RDR::commitErrl<T>( errl, i_trgt );
+                RDR::commitErrl<TYPE_OCMB_CHIP>( errl, i_trgt );
                 break;
             }
         }
 
         std::vector<MemRank> ranks;
-        // TODO Odyssey - needs multiple port support
-        getMasterRanks<T>( i_trgt, 0, ranks );
 
-        bool spareDramDeploy = mnfgSpareDramDeploy();
-
-        if ( spareDramDeploy )
+        // Loop through all ports
+        uint8_t maxPorts = MAX_PORT_PER_EXP_OCMB;
+        if (isOdysseyOcmb(i_trgt))
         {
-            // Deploy all spares for MNFG corner tests.
-            RDR::deployDramSpares<T>( i_trgt, ranks );
+            maxPorts = MAX_PORT_PER_ODY_OCMB;
         }
 
-        if ( areDramRepairsDisabled() )
+        for (uint8_t port = 0; port < maxPorts; port++)
         {
-            // DRAM Repairs are disabled in MNFG mode, so screen all DIMMs with
-            // VPD information.
-            if ( RDR::screenBadDqs<T>(i_trgt, ranks) )
-                calloutMade = true;
+            // Check if the port target actually exists, if it doesn't, skip it.
+            TargetHandle_t memport = getConnectedChild(i_trgt, TYPE_MEM_PORT,
+                                                       port);
+            if (nullptr == memport)
+                continue;
 
-            // No need to continue because there will not be anything to
-            // restore.
-            break;
+            getMasterRanks<TYPE_OCMB_CHIP>( i_trgt, port, ranks );
+
+            bool spareDramDeploy = mnfgSpareDramDeploy();
+
+            if ( spareDramDeploy )
+            {
+                // Deploy all spares for MNFG corner tests.
+                RDR::deployDramSpares<TYPE_MEM_PORT>( memport, ranks );
+            }
+
+            if ( areDramRepairsDisabled() )
+            {
+                // DRAM Repairs are disabled in MNFG mode, so screen all DIMMs with
+                // VPD information.
+                if ( RDR::screenBadDqs<TYPE_MEM_PORT>(memport, ranks) )
+                     calloutMade = true;
+
+                // No need to continue because there will not be anything to
+                // restore.
+                break;
+            }
+
+            if ( spareDramDeploy )
+            {
+                // This is an error. The MNFG spare DRAM deply bit is set, but DRAM
+                // Repairs have not been disabled.
+
+                PRDF_ERR( "[" PRDF_FUNC "] MNFG spare deploy enabled, but DRAM "
+                          "repairs are not disabled" );
+
+                RDR::commitSoftError<TYPE_OCMB_CHIP>( PRDF_INVALID_CONFIG,
+                    i_trgt, PRDFSIG_RdrInvalidConfig, true, port );
+
+                break; // Assume user meant to disable DRAM repairs.
+            }
+
+            uint8_t rankMask = 0, dimmMask = 0;
+            if ( SUCCESS != mssRestoreDramRepairs<TYPE_OCMB_CHIP>(i_trgt,
+                 rankMask, dimmMask) )
+            {
+                // Can't check anything if this doesn't work.
+                PRDF_ERR( "[" PRDF_FUNC "] mssRestoreDramRepairs() failed" );
+                break;
+            }
+
+            // Callout DIMMs with too many bad bits and not enough repairs available
+            if ( RDR::processBadDimms<TYPE_OCMB_CHIP>(i_trgt, dimmMask) )
+                 calloutMade = true;
+
+            // Check repaired ranks for RAS policy violations.
+            if ( RDR::processRepairedRanks<TYPE_OCMB_CHIP>(i_trgt, rankMask) )
+                 calloutMade = true;
         }
-
-        if ( spareDramDeploy )
-        {
-            // This is an error. The MNFG spare DRAM deply bit is set, but DRAM
-            // Repairs have not been disabled.
-
-            PRDF_ERR( "[" PRDF_FUNC "] MNFG spare deploy enabled, but DRAM "
-                      "repairs are not disabled" );
-
-            RDR::commitSoftError<T>( PRDF_INVALID_CONFIG, i_trgt,
-                                     PRDFSIG_RdrInvalidConfig, true );
-
-            break; // Assume user meant to disable DRAM repairs.
-        }
-
-        uint8_t rankMask = 0, dimmMask = 0;
-        if ( SUCCESS != mssRestoreDramRepairs<T>( i_trgt, rankMask,
-                                                  dimmMask) )
-        {
-            // Can't check anything if this doesn't work.
-            PRDF_ERR( "[" PRDF_FUNC "] mssRestoreDramRepairs() failed" );
-            break;
-        }
-
-        // Callout DIMMs with too many bad bits and not enough repairs available
-        if ( RDR::processBadDimms<T>(i_trgt, dimmMask) )
-            calloutMade = true;
-
-        // Check repaired ranks for RAS policy violations.
-        if ( RDR::processRepairedRanks<T>(i_trgt, rankMask) )
-            calloutMade = true;
 
     } while(0);
 
@@ -546,9 +566,6 @@ uint32_t restoreDramRepairs( TargetHandle_t i_trgt )
 
     #undef PRDF_FUNC
 }
-
-template
-uint32_t restoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt );
 
 //------------------------------------------------------------------------------
 
