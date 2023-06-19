@@ -284,6 +284,9 @@ errlHndl_t routeIbScom(DeviceFW::OperationType i_opType,
         // Only one arg : scom address
         uint64_t l_scomAddr = va_arg(i_args,uint64_t);
 
+        // SCOMs must be exactly 8-bytes
+        assert(io_buflen==8,"routeIbScom> buffer is %d != 8 bytes", io_buflen);
+
         // Transform the scom address into the MMIO address
         // There is a workaround in place for handling Odyssey multicast operations.
         uint64_t l_mmioAddr = MMIOCOMMON_scom_to_offset(l_scomAddr);
