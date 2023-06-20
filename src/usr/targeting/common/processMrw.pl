@@ -120,7 +120,7 @@ my %MAX_INST_PER_PARENT =
     POWER_IC  => 4, # Number of POWER_ICs per OCMB
     GENERIC_I2C_DEVICE  => 4, # Number of GENERIC_I2C_DEVICEs per OCMB.
                               # Max of 4, but not all DIMMs will have these.
-    TEMP_SENSOR => 3, # Number of TEMP_SENSORs per OCMB
+    TEMP_SENSOR => 4, # Number of TEMP_SENSORs per OCMB (only 3 but space for 4)
     MEM_PORT  => 2, # Number of MEM_PORTs per OCMB
     DIMM      => 2, # Number of DIMMs per MEM_PORT
 
@@ -280,6 +280,9 @@ exit 0;  # YOU SHALL NOT PASS!! All code should start in sub main
 #--------------------------------------------------
 sub main
 {
+    STDERR->autoflush(1);
+    STDOUT->autoflush(1);
+
     # Create a Target object
     my $targetObj = Targets->new;
 
@@ -1981,12 +1984,18 @@ sub processOcmbChipAndChildren
         }
         elsif ($childType eq "PERV")
         {
-            print "Found PERV $child\n";
+            print "Found PERV $child\n" if $targetObj->{debug};
             setCommonAttrForChiplet($targetObj, $child,
                                     $sysParentPos, $nodeParentPos,
                                     $ocmbPosPerNode,
                                     "PERV_ODY", #override for unique numbering
                                     );
+        }
+        elsif ($childType eq "TEMP_SENSOR")
+        {
+            print "Found TEMP_SENSOR $child\n" if $targetObj->{debug};
+            processTempSensor($targetObj, $child);
+            $foundTempSensor = true;
         }
         else
         {
@@ -2185,43 +2194,20 @@ sub processTempSensor
     my $nodeParent = $targetObj->findParentByType($target, "NODE");
     my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
     my $ocmbParent = $targetObj->getTargetParent($target);
-    my $ocmbParentAffinity = $targetObj->getAttribute($ocmbParent, "AFFINITY_PATH");
-    my $ocmbParentPhysical = $targetObj->getAttribute($ocmbParent, "PHYS_PATH");
     my $ocmbParentPos = $targetObj->getAttribute($ocmbParent, "FAPINAME_POS");
 
     # Get the instance number (position) of the temp sensor
     my $tempSensorInstancePos = $targetObj->getInstanceNum($target);
 
-    # Use the parent OCMB's FAPI_POS, per system, to set the TEMP_SENSOR's
-    # FAPI_POS, per system. IE, the FAPI_POS is an increasing sequential
-    # number, starting at 0, and ending with the last TEMP_SENSOR for the system
-    # (target type SYS).
-    my $tempSensorPosPerSystem = $targetObj->getAttribute($ocmbParent, "FAPI_POS")
-                              * getMaxInstPerParent($type)
-                              + $tempSensorInstancePos;
-
     # Up to 3 tempSensor instances per OCMB are supported, use the sensor's instance
     # position to compute the unique position per node.
     my $tempSensorPosPerNode = ($ocmbParentPos * getMaxInstPerParent($type)) + $tempSensorInstancePos;
 
-    # Get the FAPI_NAME by using the data gathered above.
-    my $tempSensorFapiName = $targetObj->getFapiName($type, $nodeParentPos, $ocmbParentPos, $tempSensorInstancePos);
-
-    # Take advantage of previous work done on the DDIMMs.  Use the parent DDIMM's
-    # affinity/physical path for our self and append the temp_sensor to the end.
-    my $tempSensorAffinity = $ocmbParentAffinity . "/temp_sensor-" . $tempSensorInstancePos;
-    my $tempSensorPhysical = $ocmbParentPhysical . "/temp_sensor-" . $tempSensorInstancePos;
-
-    # Now that we collected all the data we need, set some target attributes
-    $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $tempSensorPosPerNode);
-    $targetObj->setAttribute($target, "FAPI_POS",      $tempSensorPosPerSystem);
-    $targetObj->setAttribute($target, "FAPI_NAME",     $tempSensorFapiName);
-    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_POS",  $ocmbParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_UNIT", $tempSensorInstancePos);
-    $targetObj->setAttribute($target, "REL_POS",       $tempSensorInstancePos);
-    $targetObj->setAttribute($target, "AFFINITY_PATH", $tempSensorAffinity);
-    $targetObj->setAttribute($target, "PHYS_PATH",     $tempSensorPhysical);
+    # Set the TEMP_SENSOR's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
+    # FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
+    setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target,
+                                                     $ocmbParentPos, $type,
+                                                     getMaxInstPerParent($type));
 
     # Save this target for retrieval later when printing the xml (sub printXML)
     $targetObj->{targeting}{SYS}[$sysParentPos]{NODES}[$nodeParentPos]
