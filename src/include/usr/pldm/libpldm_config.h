@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/include/errno.h $                                         */
+/* $Source: src/include/usr/pldm/libpldm_config.h $                       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2023                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,44 +22,22 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef _ERRNO_H
-#define _ERRNO_H
 
 /**
- * @file errno.h
- * @brief Defines error number for standard errors
+ *  @file Controls which libpldm functions are allowed to compile.
+ *     Currently, Hostboot uses all of the stable, testing, and deprecated
+ *     APIs to compile the libpldm code.  By release time, Hostboot should
+ *     attempt to use just stable APIs, if possible.
  */
 
-#define ENOENT           2      // No such file or directory
-#define EIO              5      // I/O error
-#define ENXIO            6      // No such device or address
-#define ENOEXEC          8      // Exec format error
-#define EBADF            9      // Bad file descriptor
-#define EAGAIN          11      // Try again
-#define ENOMEM          12      // Not enough space
-#define EACCES          13      // Permission denied
-#define EFAULT          14      // Bad address
-#define EBUSY           16      // Device or resource busy
-#define EINVAL          22      // Invalid argument
-#define ENFILE          23      // Too many open files in system
-#define EDEADLK         35      // Operation would cause deadlock.
-#define ETIME           62      // Time expired.
-#define EMSGSIZE        90      // Message too long
-#define EHOSTDOWN       112     // Host is down
-#define EALREADY        114     // Operation already in progress
-#define ENOKEY          132     // Required key not available
-#define EWOULDBLOCK     EAGAIN  // operation would block
+#ifndef LIBPLDM_CONFIG_H
 
-/**
-  * @brief Returns string representation of an errno.
-  *
-  * @param[in] i_errno     errno to get string for.
-  *
-  * @return  const char*  - If found, String associated with errno
-  *                         else, "UNKNOWN" string
-  *
-*/
-const char * ErrnoToString( int i_errno );
+// To prevent compiling any of these interfaces add:
+//     __attribute__((error("<type> APIs are not allowed")))
+// where <type> is one of Stable | Testing | Deprecated
 
+#define LIBPLDM_ABI_STABLE
+#define LIBPLDM_ABI_TESTING
+#define LIBPLDM_ABI_DEPRECATED
 
-#endif
+#endif // LIBPLDM_CONFIG_H

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -25,6 +25,11 @@
 
 ROOTPATH = ../../../..
 MODULE = pldm_base
+
+# Force module's files to pull in the special libpldm_config.h file
+# that is used to configure which libpldm APIs can be compiled (stable,
+# deprecated, undergoing testing).  Only needed by libpldm files.
+CFLAGS += -include ${ROOTPATH}/src/include/usr/pldm/libpldm_config.h
 
 include ../common/common.mk
 
