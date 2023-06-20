@@ -1,0 +1,24 @@
+// This file describes the layout of extended OCMBFW PNOR partition.
+// It will be transformed by the C preprocessor before being used
+// by pkgOcmbFw_ext.py to produce an OCMBFW image.
+// Lines beginning with C-style comments are ignored.
+//
+// Preprocessor definitions for this file:
+//
+//   UNPKGD_EXP_FW_IMG          Quoted absolute path to the Explorer fw image.
+//
+{
+    "version": 1,
+    "images": [
+        {
+            "ocmb_type": "explorer",
+            "image_type": "runtime",
+            "dd_level": "1.0",
+            "image_version": "1",
+            "image_path": UNPKGD_EXP_FW_IMG,
+            "compression": "none",
+            "image_hash": "sha512",
+            "unhashed_header_size": 640
+        }
+    ]
+}
