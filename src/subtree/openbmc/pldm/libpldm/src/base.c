@@ -1,4 +1,3 @@
-#include "config.h"
 #include "base.h"
 #include "pldm_types.h"
 #include <endian.h>

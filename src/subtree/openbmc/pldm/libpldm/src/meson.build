@@ -12,6 +12,6 @@ libpldm_sources += files(
 subdir('requester')
 subdir('transport')
 
-if get_option('oem-ibm').enabled()
+if get_option('oem-ibm').allowed()
    subdir('oem/ibm')
 endif

@@ -1,4 +1,3 @@
-#include "config.h"
 #include "libpldm/transport.h"
 #include "base.h"
 #include "libpldm/requester/pldm.h"
@@ -66,11 +65,6 @@ pldm_requester_rc_t pldm_transport_send_msg(struct pldm_transport *transport,
 		return PLDM_REQUESTER_NOT_REQ_MSG;
 	}
 
-	const struct pldm_msg_hdr *hdr = pldm_req_msg;
-	if (!hdr->request) {
-		return PLDM_REQUESTER_NOT_REQ_MSG;
-	}
-
 	return transport->send(transport, tid, pldm_req_msg, req_msg_len);
 }
 
@@ -90,20 +84,11 @@ pldm_requester_rc_t pldm_transport_recv_msg(struct pldm_transport *transport,
 		return rc;
 	}
 
-	struct pldm_msg_hdr *hdr = *pldm_resp_msg;
-	if (hdr->request || hdr->datagram) {
+	if (*resp_msg_len < sizeof(struct pldm_msg_hdr)) {
 		free(*pldm_resp_msg);
 		*pldm_resp_msg = NULL;
-		return PLDM_REQUESTER_NOT_RESP_MSG;
+		return PLDM_REQUESTER_INVALID_RECV_LEN;
 	}
-
-	uint8_t pldm_rc = 0;
-	if (*resp_msg_len < (sizeof(struct pldm_msg_hdr) + sizeof(pldm_rc))) {
-		free(*pldm_resp_msg);
-		*pldm_resp_msg = NULL;
-		return PLDM_REQUESTER_RESP_MSG_TOO_SMALL;
-	}
-
 	return PLDM_REQUESTER_SUCCESS;
 }
 

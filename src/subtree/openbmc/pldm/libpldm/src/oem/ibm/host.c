@@ -1,4 +1,3 @@
-#include "config.h"
 #include "base.h"
 #include <endian.h>
 #include <stdint.h>

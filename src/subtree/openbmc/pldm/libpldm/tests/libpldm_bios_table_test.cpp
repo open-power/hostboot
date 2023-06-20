@@ -102,7 +102,7 @@ TEST(AttrTable, EnumEntryDecodeTest)
     EXPECT_EQ(pvHandles[1], 3);
     rc = pldm_bios_table_attr_entry_enum_decode_pv_hdls_check(
         entry, pvHandles.data(), 1);
-    EXPECT_EQ(rc, PLDM_ERROR_INVALID_DATA);
+    EXPECT_EQ(rc, PLDM_SUCCESS);
 
     uint8_t defNumber = pldm_bios_table_attr_entry_enum_decode_def_num(entry);
     EXPECT_EQ(defNumber, 1);
@@ -1006,9 +1006,10 @@ TEST(StringTable, EntryDecodeTest)
     EXPECT_EQ(rc, PLDM_SUCCESS);
     EXPECT_EQ(std::strcmp("Allowed", buffer.data()), 0);
 
-    rc = pldm_bios_table_string_entry_decode_string_check(entry, buffer.data(),
-                                                          buffer.size() - 1);
-    EXPECT_EQ(rc, PLDM_ERROR_INVALID_LENGTH);
+    /* Ensure equivalence with the unchecked API */
+    rc = pldm_bios_table_string_entry_decode_string_check(
+        entry, buffer.data(), 2 + 1 /* sizeof '\0' */);
+    EXPECT_EQ(rc, std::strcmp("Al", buffer.data()));
 }
 
 TEST(StringTable, IteratorTest)

@@ -1,6 +1,5 @@
 // NOLINTNEXTLINE(bugprone-reserved-identifier,cert-dcl37-c,cert-dcl51-cpp)
 #define _GNU_SOURCE
-#include "config.h"
 #include "libpldm/instance-id.h"
 #include "libpldm/pldm.h"
 #include <errno.h>

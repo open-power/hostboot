@@ -111,8 +111,8 @@ stable.
 
 ### Marking functions as testing, stable or deprecated
 
-Three macros are provided through `config.h` to mark functions as testing,
-stable or deprecated:
+Three macros are provided through `config.h` (automatically included for all
+translation units) to mark functions as testing, stable or deprecated:
 
 1. `LIBPLDM_ABI_TESTING`
 2. `LIBPLDM_ABI_STABLE`
@@ -121,10 +121,6 @@ stable or deprecated:
 These annotations go immediately before your function signature:
 
 ```c
-#include "config.h"
-
-...
-
 LIBPLDM_ABI_TESTING
 pldm_requester_rc_t pldm_transport_send_msg(struct pldm_transport *transport,
 					    pldm_tid_t tid,

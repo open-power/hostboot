@@ -2,7 +2,6 @@
 #ifndef LIBPLDM_AF_MCTP_H
 #define LIBPLDM_AF_MCTP_H
 
-#include "config.h"
 #include "libpldm/base.h"
 #include "libpldm/pldm.h"
 

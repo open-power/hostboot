@@ -167,6 +167,39 @@ void pldm_pdr_remove_pdrs_by_terminus_handle(pldm_pdr *repo,
 void pldm_pdr_update_TL_pdr(const pldm_pdr *repo, uint16_t terminus_handle,
 			    uint8_t tid, uint8_t tl_eid, bool valid);
 
+/** @brief Find the last record within the particular range
+ * of record handles
+ *
+ *  @param[in] repo - pointer acting as a PDR repo handle
+ *  @param[in] first - first record handle value of the records in the range
+ *  @param[in] last - last record handle value of the records in the range
+ *
+ *  @return pointer to the PDR record,will be NULL if record was not
+ *  found
+ */
+pldm_pdr_record *pldm_pdr_find_last_in_range(const pldm_pdr *repo,
+					     uint32_t first, uint32_t last);
+
+/** @brief find the container ID of the contained entity which is not in the
+ *  particular range of record handles given
+ *
+ * @param[in] repo - opaque pointer acting as a PDR repo handle
+ * @param[in] entity_type - entity type
+ * @param[in] entity_instance - instance of the entity
+ * @param[in] range_exclude_start_handle - first record handle in the range of the remote endpoint
+ *            which is ignored
+ * @param[in] range_exclude_end_handle - last record handle in the range of the remote endpoint
+ *            which is ignored
+ * @param[out] container_id - container id of the contained entity
+ *
+ * @return container id of the PDR record found on success, -EINVAL when repo is NULL, or -ENOKEY if
+ * the container id is not found.
+ */
+int pldm_pdr_find_container_id_range_exclude(
+	const pldm_pdr *repo, uint16_t entity_type, uint16_t entity_instance,
+	uint32_t range_exclude_start_handle, uint32_t range_exclude_end_handle,
+	uint16_t *container_id);
+
 /* ======================= */
 /* FRU Record Set PDR APIs */
 /* ======================= */
@@ -242,7 +275,7 @@ typedef struct pldm_entity_node pldm_entity_node;
  */
 pldm_entity_association_tree *pldm_entity_association_tree_init(void);
 
-/** @brief Add an entity into the entity association tree
+/** @brief Add a local entity into the entity association tree
  *
  *  @param[in/out] tree - opaque pointer acting as a handle to the tree
  *  @param[in/out] entity - pointer to the entity to be added. Input has the
@@ -262,6 +295,35 @@ pldm_entity_node *pldm_entity_association_tree_add(
 	uint16_t entity_instance_number, pldm_entity_node *parent,
 	uint8_t association_type);
 
+/** @brief Add an entity into the entity association tree based on remote field
+ *  set or unset.
+ *
+ *  @param[in/out] tree - opaque pointer acting as a handle to the tree
+ *  @param[in/out] entity - pointer to the entity to be added. Input has the
+ *                          entity type. On output, instance number and the
+ *                          container id are populated.
+ *  @param[in] entity_instance_number - entity instance number, we can use the
+ *                                      entity instance number of the entity by
+ *                                      default if its value is equal 0xFFFF.
+ *  @param[in] parent - pointer to the node that should be the parent of input
+ *                      entity. If this is NULL, then the entity is the root
+ *  @param[in] association_type - relation with the parent : logical or physical
+ *  @param[in] is_remote - used to denote whether we are adding a BMC entity to
+ *                         the tree or a host entity
+ *  @param[in] is_update_contanier_id - Used to determine whether need to update
+ *                                      contanier id.
+ *                                      true: should be changed
+ *                                      false: should not be changed
+ *  @param[in] container_id - container id of the entity added.
+ *
+ *  @return pldm_entity_node* - opaque pointer to added entity
+ */
+pldm_entity_node *pldm_entity_association_tree_add_entity(
+	pldm_entity_association_tree *tree, pldm_entity *entity,
+	uint16_t entity_instance_number, pldm_entity_node *parent,
+	uint8_t association_type, bool is_remote, bool is_update_container_id,
+	uint16_t container_id);
+
 /** @brief Visit and note each entity in the entity association tree
  *
  *  @param[in] tree - opaque pointer acting as a handle to the tree
@@ -279,6 +341,15 @@ void pldm_entity_association_tree_visit(pldm_entity_association_tree *tree,
  *  @return pldm_entity - pldm entity
  */
 pldm_entity pldm_entity_extract(pldm_entity_node *node);
+
+/** @brief Extract remote container id from the pldm_entity_node
+ *
+ *  @param[in] entity         - pointer to existing entity
+ *
+ *  @param[out] cid           -  remote container id
+ */
+int pldm_entity_node_get_remote_container_id(const pldm_entity_node *entity,
+					     uint16_t *cid);
 
 /** @brief Destroy entity association tree
  *
@@ -331,6 +402,24 @@ void pldm_entity_association_pdr_add_from_node(
 	pldm_entity_node *node, pldm_pdr *repo, pldm_entity **entities,
 	size_t num_entities, bool is_remote, uint16_t terminus_handle);
 
+/** @brief Add entity association pdr record based on record handle
+ *  earlier the records where added in a sequential way alone, with
+ *  this change the entity association PDR records gets the new record
+ *  handle based on the input value given.
+ *
+ *  @param[in] node - opaque pointer acting as a handle to an entity node
+ *  @param[in] repo - PDR repo where entity association records should be added
+ *  @param[in] is_remote  - if true, then the PDR is not from this terminus
+ *  @param[in] terminus_handle - terminus handle of the terminus
+ *  @param[in] record_handle - record handle of the PDR
+ *
+ *  @return 0 on succes, -EINVAL if the provided arguments are invalid.
+ */
+int pldm_entity_association_pdr_add_from_node_with_record_handle(
+	pldm_entity_node *node, pldm_pdr *repo, pldm_entity **entities,
+	size_t num_entities, bool is_remote, uint16_t terminus_handle,
+	uint32_t record_handle);
+
 /** @brief Find entity reference in tree
  *
  *  @param[in] tree - opaque pointer to entity association tree
@@ -362,12 +451,26 @@ bool pldm_is_current_parent_child(pldm_entity_node *parent, pldm_entity *node);
  *  @param[in] tree - pointer to entity association tree
  *  @param[in/out] entity - entity type and instance id set on input, container
  *                 id set on output
- *
  *  @return pldm_entity_node* pointer to entity if found, NULL otherwise
  */
 pldm_entity_node *
 pldm_entity_association_tree_find(pldm_entity_association_tree *tree,
 				  pldm_entity *entity);
+
+/** @brief Find an entity in the entity association tree if remote
+ *
+ *  @param[in] tree - pointer to entity association tree
+ *  @param[in/out] entity - entity type and instance id set on input, container
+ *                          id set on output
+ *  @param[in] is_remote - variable to denote whether we are finding a host
+ *                         entity or a BMC entity
+ *
+ *  @return pldm_entity_node* pointer to entity if found, NULL otherwise
+ */
+pldm_entity_node *
+pldm_entity_association_tree_find_if_remote(pldm_entity_association_tree *tree,
+					    pldm_entity *entity,
+					    bool is_remote);
 
 /** @brief Create a copy of an existing entity association tree
  *
@@ -403,15 +506,6 @@ bool pldm_is_empty_entity_assoc_tree(pldm_entity_association_tree *tree);
 void pldm_entity_association_pdr_extract(const uint8_t *pdr, uint16_t pdr_len,
 					 size_t *num_entities,
 					 pldm_entity **entities);
-
-/** @brief Delete record using its record handle
- *
- *  @param[in] repo - opaque pointer acting as a PDR repo handle
- *  @param[in] record_handle - record handle of input PDR record
- *  @param[in] is_remote - if true, then the PDR is not from this terminus
- */
-void pldm_delete_by_record_handle(pldm_pdr *repo, uint32_t record_handle,
-				  bool is_remote);
 
 #ifdef __cplusplus
 }

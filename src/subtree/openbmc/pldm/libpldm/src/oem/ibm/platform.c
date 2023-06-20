@@ -1,4 +1,3 @@
-#include "config.h"
 #include "libpldm/platform.h"
 #include "libpldm/platform_oem_ibm.h"
 #include <string.h>

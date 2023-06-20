@@ -2,7 +2,6 @@
 #ifndef LIBPLDM_DEMUX_H
 #define LIBPLDM_DEMUX_H
 
-#include "config.h"
 #include "libpldm/base.h"
 #include "libpldm/pldm.h"
 

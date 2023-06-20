@@ -1,4 +1,3 @@
-#include "config.h"
 #include "firmware_update.h"
 #include "utils.h"
 #include <endian.h>

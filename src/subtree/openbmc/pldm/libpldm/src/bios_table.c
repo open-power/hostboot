@@ -1,4 +1,3 @@
-#include "config.h"
 #include "bios_table.h"
 #include "base.h"
 #include "bios.h"
@@ -52,7 +51,7 @@ size_t pldm_bios_table_string_entry_encode_length(uint16_t string_length)
 	       MEMBER_SIZE(pldm_bios_string_table_entry, name) + string_length;
 }
 
-LIBPLDM_ABI_STABLE
+LIBPLDM_ABI_DEPRECATED
 void pldm_bios_table_string_entry_encode(void *entry, size_t entry_length,
 					 const char *str, uint16_t str_length)
 {
@@ -95,7 +94,7 @@ uint16_t pldm_bios_table_string_entry_decode_string_length(
 	return le16toh(entry->string_length);
 }
 
-LIBPLDM_ABI_STABLE
+LIBPLDM_ABI_DEPRECATED
 uint16_t pldm_bios_table_string_entry_decode_string(
 	const struct pldm_bios_string_table_entry *entry, char *buffer,
 	size_t size)
@@ -115,9 +114,9 @@ int pldm_bios_table_string_entry_decode_string_check(
 {
 	POINTER_CHECK(entry);
 	POINTER_CHECK(buffer);
-	size_t length =
-		pldm_bios_table_string_entry_decode_string_length(entry);
-	BUFFER_SIZE_EXPECT(size, length + 1);
+	if (size == 0) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
 	pldm_bios_table_string_entry_decode_string(entry, buffer, size);
 	return PLDM_SUCCESS;
 }
@@ -179,7 +178,7 @@ size_t pldm_bios_table_attr_entry_enum_encode_length(uint8_t pv_num,
 	       def_num;
 }
 
-LIBPLDM_ABI_STABLE
+LIBPLDM_ABI_DEPRECATED
 void pldm_bios_table_attr_entry_enum_encode(
 	void *entry, size_t entry_length,
 	const struct pldm_bios_table_attr_entry_enum_info *info)
@@ -226,7 +225,7 @@ int pldm_bios_table_attr_entry_enum_encode_check(
 			return PLDM_ERROR_INVALID_DATA;                        \
 	} while (0)
 
-LIBPLDM_ABI_STABLE
+LIBPLDM_ABI_DEPRECATED
 uint8_t pldm_bios_table_attr_entry_enum_decode_pv_num(
 	const struct pldm_bios_attr_table_entry *entry)
 {
@@ -244,7 +243,7 @@ int pldm_bios_table_attr_entry_enum_decode_pv_num_check(
 	return PLDM_SUCCESS;
 }
 
-LIBPLDM_ABI_STABLE
+LIBPLDM_ABI_DEPRECATED
 uint8_t pldm_bios_table_attr_entry_enum_decode_def_num(
 	const struct pldm_bios_attr_table_entry *entry)
 {
@@ -264,7 +263,7 @@ int pldm_bios_table_attr_entry_enum_decode_def_num_check(
 	return PLDM_SUCCESS;
 }
 
-LIBPLDM_ABI_STABLE
+LIBPLDM_ABI_DEPRECATED
 uint8_t pldm_bios_table_attr_entry_enum_decode_pv_hdls(
 	const struct pldm_bios_attr_table_entry *entry, uint16_t *pv_hdls,
 	uint8_t pv_num)
@@ -288,10 +287,6 @@ int pldm_bios_table_attr_entry_enum_decode_pv_hdls_check(
 	POINTER_CHECK(entry);
 	POINTER_CHECK(pv_hdls);
 	ATTR_TYPE_EXPECT(entry->attr_type, PLDM_BIOS_ENUMERATION);
-	uint8_t num = pldm_bios_table_attr_entry_enum_decode_pv_num(entry);
-	if (num != pv_num) {
-		return PLDM_ERROR_INVALID_DATA;
-	}
 	pldm_bios_table_attr_entry_enum_decode_pv_hdls(entry, pv_hdls, pv_num);
 	return PLDM_SUCCESS;
 }
@@ -339,7 +334,7 @@ size_t pldm_bios_table_attr_entry_string_encode_length(uint16_t def_str_len)
 	       def_str_len;
 }
 
-LIBPLDM_ABI_STABLE
+LIBPLDM_ABI_DEPRECATED
 void pldm_bios_table_attr_entry_string_encode(
 	void *entry, size_t entry_length,
 	const struct pldm_bios_table_attr_entry_string_info *info)
@@ -392,7 +387,7 @@ int pldm_bios_table_attr_entry_string_info_check(
 		set_errmsg(errmsg, "Wrong StringType");
 		return PLDM_ERROR_INVALID_DATA;
 	}
-	if (info->def_length != strlen(info->def_string)) {
+	if (info->def_string && info->def_length != strlen(info->def_string)) {
 		set_errmsg(errmsg, "Length of DefaultString should be equal to "
 				   "DefaultStringLength");
 		return PLDM_ERROR_INVALID_DATA;
@@ -419,7 +414,7 @@ int pldm_bios_table_attr_entry_string_encode_check(
 	return PLDM_SUCCESS;
 }
 
-LIBPLDM_ABI_STABLE
+LIBPLDM_ABI_DEPRECATED
 uint16_t pldm_bios_table_attr_entry_string_decode_def_string_length(
 	const struct pldm_bios_attr_table_entry *entry)
 {
@@ -494,6 +489,13 @@ static size_t attr_table_entry_length_string(const void *entry)
 			entry);
 	return pldm_bios_table_attr_entry_string_encode_length(def_str_len);
 }
+
+struct attr_table_integer_entry_fields {
+	uint64_t lower_bound;
+	uint64_t upper_bound;
+	uint32_t scalar_increment;
+	uint64_t default_value;
+} __attribute__((packed));
 
 LIBPLDM_ABI_STABLE
 size_t pldm_bios_table_attr_entry_integer_encode_length(void)

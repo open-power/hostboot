@@ -1,4 +1,3 @@
-#include "config.h"
 #include "utils.h"
 #include "base.h"
 #include <limits.h>

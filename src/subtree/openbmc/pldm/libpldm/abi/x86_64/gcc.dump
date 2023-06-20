@@ -7,11 +7,14 @@ $VAR1 = {
                          'base.h' => 1,
                          'bios.h' => 1,
                          'bios_table.h' => 1,
+                         'file_io.h' => 1,
                          'firmware_update.h' => 1,
                          'fru.h' => 1,
+                         'host.h' => 1,
                          'instance-id.h' => 1,
                          'pdr.h' => 1,
                          'platform.h' => 1,
+                         'platform_oem_ibm.h' => 1,
                          'pldm.h' => 1,
                          'utils.h' => 1
                        },
@@ -213,6 +216,354 @@ $VAR1 = {
                                          'Return' => '74',
                                          'ShortName' => 'encode_get_date_time_resp'
                                        },
+                            '110835' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_new_file_with_metadata_resp'
+                                        },
+                            '111035' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_type',
+                                                                'type' => '8521'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '2087'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'length',
+                                                                'type' => '55734'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'file_meta_data_1',
+                                                                'type' => '2087'
+                                                              },
+                                                       '6' => {
+                                                                'name' => 'file_meta_data_2',
+                                                                'offset' => '0',
+                                                                'type' => '2087'
+                                                              },
+                                                       '7' => {
+                                                                'name' => 'file_meta_data_3',
+                                                                'offset' => '8',
+                                                                'type' => '2087'
+                                                              },
+                                                       '8' => {
+                                                                'name' => 'file_meta_data_4',
+                                                                'offset' => '16',
+                                                                'type' => '2087'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '4' => 'r8',
+                                                     '5' => 'r9'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_new_file_with_metadata_req'
+                                        },
+                            '111267' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '2082'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '0' => 'rdi',
+                                                     '1' => 'rsi',
+                                                     '2' => 'rdx'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_new_file_with_metadata_resp'
+                                        },
+                            '111368' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'file_type',
+                                                                'type' => '5053'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '180'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'length',
+                                                                'type' => '46630'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'file_meta_data_1',
+                                                                'type' => '180'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'file_meta_data_2',
+                                                                'type' => '180'
+                                                              },
+                                                       '6' => {
+                                                                'name' => 'file_meta_data_3',
+                                                                'offset' => '0',
+                                                                'type' => '180'
+                                                              },
+                                                       '7' => {
+                                                                'name' => 'file_meta_data_4',
+                                                                'offset' => '8',
+                                                                'type' => '180'
+                                                              },
+                                                       '8' => {
+                                                                'name' => 'msg',
+                                                                'offset' => '16',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_new_file_with_metadata_req'
+                                        },
+                            '111665' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_file_ack_with_meta_data_resp'
+                                        },
+                            '111860' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_type',
+                                                                'type' => '8521'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '2087'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'file_status',
+                                                                'type' => '2082'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'file_meta_data_1',
+                                                                'type' => '2087'
+                                                              },
+                                                       '6' => {
+                                                                'name' => 'file_meta_data_2',
+                                                                'offset' => '0',
+                                                                'type' => '2087'
+                                                              },
+                                                       '7' => {
+                                                                'name' => 'file_meta_data_3',
+                                                                'offset' => '8',
+                                                                'type' => '2087'
+                                                              },
+                                                       '8' => {
+                                                                'name' => 'file_meta_data_4',
+                                                                'offset' => '16',
+                                                                'type' => '2087'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '4' => 'r8',
+                                                     '5' => 'r9'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_file_ack_with_meta_data_req'
+                                        },
+                            '112072' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '2082'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '0' => 'rdi',
+                                                     '1' => 'rsi',
+                                                     '2' => 'rdx'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_file_ack_with_meta_data_resp'
+                                        },
+                            '112168' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'file_type',
+                                                                'type' => '5053'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '180'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'file_status',
+                                                                'type' => '168'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'file_meta_data_1',
+                                                                'type' => '180'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'file_meta_data_2',
+                                                                'type' => '180'
+                                                              },
+                                                       '6' => {
+                                                                'name' => 'file_meta_data_3',
+                                                                'offset' => '0',
+                                                                'type' => '180'
+                                                              },
+                                                       '7' => {
+                                                                'name' => 'file_meta_data_4',
+                                                                'offset' => '8',
+                                                                'type' => '180'
+                                                              },
+                                                       '8' => {
+                                                                'name' => 'msg',
+                                                                'offset' => '16',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_file_ack_with_meta_data_req'
+                                        },
+                            '112465' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '2082'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '0' => 'rdi',
+                                                     '1' => 'rsi',
+                                                     '2' => 'rdx'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_file_ack_resp'
+                                        },
+                            '112566' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'file_type',
+                                                                'type' => '5053'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '180'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'file_status',
+                                                                'type' => '168'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_file_ack_req'
+                                        },
+                            '112801' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_file_ack_resp'
+                                        },
                             '11299' => {
                                          'Header' => 'bios.h',
                                          'Param' => {
@@ -228,6 +579,1037 @@ $VAR1 = {
                                          'Return' => '74',
                                          'ShortName' => 'encode_get_date_time_req'
                                        },
+                            '112991' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_type',
+                                                                'type' => '8521'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '2087'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'file_status',
+                                                                'type' => '2082'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '3' => 'rcx',
+                                                     '4' => 'r8'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_file_ack_req'
+                                        },
+                            '113133' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '2082'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'length',
+                                                                'type' => '2087'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '0' => 'rdi',
+                                                     '1' => 'rsi',
+                                                     '2' => 'rdx',
+                                                     '3' => 'rcx'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_rw_file_by_type_resp'
+                                        },
+                            '113248' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'command',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_type',
+                                                                'type' => '5053'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '180'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'offset',
+                                                                'type' => '180'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'length',
+                                                                'type' => '180'
+                                                              },
+                                                       '6' => {
+                                                                'name' => 'msg',
+                                                                'offset' => '0',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_rw_file_by_type_req'
+                                        },
+                            '113518' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'command',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '168'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'length',
+                                                                'type' => '180'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_rw_file_by_type_resp'
+                                        },
+                            '113748' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_type',
+                                                                'type' => '8521'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '2087'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'offset',
+                                                                'type' => '2087'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'length',
+                                                                'type' => '2087'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '4' => 'r8',
+                                                     '5' => 'r9'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_rw_file_by_type_req'
+                                        },
+                            '113910' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '2082'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '0' => 'rdi',
+                                                     '1' => 'rsi',
+                                                     '2' => 'rdx'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_new_file_resp'
+                                        },
+                            '114011' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'file_type',
+                                                                'type' => '5053'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '180'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'length',
+                                                                'type' => '46630'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_new_file_req'
+                                        },
+                            '114246' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_new_file_resp'
+                                        },
+                            '114436' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_type',
+                                                                'type' => '8521'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '2087'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'length',
+                                                                'type' => '55734'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '3' => 'rcx',
+                                                     '4' => 'r8'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_new_file_req'
+                                        },
+                            '114578' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '2082'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'length',
+                                                                'type' => '2087'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '0' => 'rdi',
+                                                     '1' => 'rsi',
+                                                     '2' => 'rdx',
+                                                     '3' => 'rcx'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_rw_file_by_type_memory_resp'
+                                        },
+                            '114693' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'command',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_type',
+                                                                'type' => '5053'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '180'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'offset',
+                                                                'type' => '180'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'length',
+                                                                'type' => '180'
+                                                              },
+                                                       '6' => {
+                                                                'name' => 'address',
+                                                                'offset' => '0',
+                                                                'type' => '46630'
+                                                              },
+                                                       '7' => {
+                                                                'name' => 'msg',
+                                                                'offset' => '8',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_rw_file_by_type_memory_req'
+                                        },
+                            '114978' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'command',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '168'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'length',
+                                                                'type' => '180'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_rw_file_by_type_memory_resp'
+                                        },
+                            '115208' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_type',
+                                                                'type' => '8521'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '2087'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'offset',
+                                                                'type' => '2087'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'length',
+                                                                'type' => '2087'
+                                                              },
+                                                       '6' => {
+                                                                'name' => 'address',
+                                                                'offset' => '0',
+                                                                'type' => '55734'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '4' => 'r8',
+                                                     '5' => 'r9'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_rw_file_by_type_memory_req'
+                                        },
+                            '115385' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'length',
+                                                                'type' => '180'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_write_file_resp'
+                                        },
+                            '115600' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '2082'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'length',
+                                                                'type' => '2087'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '0' => 'rdi',
+                                                     '1' => 'rsi',
+                                                     '2' => 'rdx',
+                                                     '3' => 'rcx'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_write_file_resp'
+                                        },
+                            '115710' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '180'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'offset',
+                                                                'type' => '180'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'length',
+                                                                'type' => '180'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_write_file_req'
+                                        },
+                            '115945' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '2087'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'offset',
+                                                                'type' => '2087'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'length',
+                                                                'type' => '2087'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'file_data_offset',
+                                                                'type' => '9084'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '1' => 'rsi',
+                                                     '3' => 'rcx',
+                                                     '4' => 'r8',
+                                                     '5' => 'r9'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_write_file_req'
+                                        },
+                            '116100' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'length',
+                                                                'type' => '180'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_read_file_resp'
+                                        },
+                            '116315' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '2082'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'length',
+                                                                'type' => '2087'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'file_data_offset',
+                                                                'type' => '9084'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '2' => 'rdx',
+                                                     '3' => 'rcx',
+                                                     '4' => 'r8'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_read_file_resp'
+                                        },
+                            '116451' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '180'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'offset',
+                                                                'type' => '180'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'length',
+                                                                'type' => '180'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_read_file_req'
+                                        },
+                            '116686' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '2087'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'offset',
+                                                                'type' => '2087'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'length',
+                                                                'type' => '2087'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '3' => 'rcx',
+                                                     '4' => 'r8'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_read_file_req'
+                                        },
+                            '116821' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '2082'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'next_transfer_handle',
+                                                                'type' => '2087'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'transfer_flag',
+                                                                'type' => '2082'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'file_table_data_start_offset',
+                                                                'type' => '2082'
+                                                              },
+                                                       '6' => {
+                                                                'name' => 'file_table_length',
+                                                                'offset' => '0',
+                                                                'type' => '9084'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '4' => 'r8',
+                                                     '5' => 'r9'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_get_file_table_resp'
+                                        },
+                            '116994' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'transfer_handle',
+                                                                'type' => '180'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'transfer_opflag',
+                                                                'type' => '168'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'table_type',
+                                                                'type' => '168'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_get_file_table_req'
+                                        },
+                            '117220' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'next_transfer_handle',
+                                                                'type' => '180'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'transfer_flag',
+                                                                'type' => '168'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'table_data',
+                                                                'type' => '6245'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'table_size',
+                                                                'type' => '123'
+                                                              },
+                                                       '6' => {
+                                                                'name' => 'msg',
+                                                                'offset' => '0',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_get_file_table_resp'
+                                        },
+                            '117517' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'transfer_handle',
+                                                                'type' => '2087'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'transfer_opflag',
+                                                                'type' => '2082'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'table_type',
+                                                                'type' => '2082'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '3' => 'rcx',
+                                                     '4' => 'r8'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_get_file_table_req'
+                                        },
+                            '117652' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '2082'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'length',
+                                                                'type' => '2087'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '0' => 'rdi',
+                                                     '1' => 'rsi',
+                                                     '2' => 'rdx',
+                                                     '3' => 'rcx'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_rw_file_memory_resp'
+                                        },
+                            '117761' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'command',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '180'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'offset',
+                                                                'type' => '180'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'length',
+                                                                'type' => '180'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'address',
+                                                                'type' => '46630'
+                                                              },
+                                                       '6' => {
+                                                                'name' => 'msg',
+                                                                'offset' => '0',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_rw_file_memory_req'
+                                        },
+                            '118020' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'command',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '168'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'length',
+                                                                'type' => '180'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_rw_file_memory_resp'
+                                        },
+                            '118241' => {
+                                          'Header' => 'file_io.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'file_handle',
+                                                                'type' => '2087'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'offset',
+                                                                'type' => '2087'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'length',
+                                                                'type' => '2087'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'address',
+                                                                'type' => '55734'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '4' => 'r8',
+                                                     '5' => 'r9'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_rw_file_memory_req'
+                                        },
+                            '119208' => {
+                                          'Header' => 'host.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'rack_entry',
+                                                                'type' => '180'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'pri_cec_node',
+                                                                'type' => '180'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_get_alert_status_resp'
+                                        },
+                            '119456' => {
+                                          'Header' => 'host.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'version_id',
+                                                                'type' => '2082'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '0' => 'rdi',
+                                                     '1' => 'rsi',
+                                                     '2' => 'rdx'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_get_alert_status_req'
+                                        },
+                            '119539' => {
+                                          'Header' => 'host.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'msg',
+                                                                'type' => '2077'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'completion_code',
+                                                                'type' => '2082'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'rack_entry',
+                                                                'type' => '2087'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'pri_cec_node',
+                                                                'type' => '2087'
+                                                              }
+                                                     },
+                                          'Reg' => {
+                                                     '3' => 'rcx',
+                                                     '4' => 'r8'
+                                                   },
+                                          'Return' => '74',
+                                          'ShortName' => 'decode_get_alert_status_resp'
+                                        },
+                            '119678' => {
+                                          'Header' => 'host.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'version_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'msg',
+                                                                'type' => '1632'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_get_alert_status_req'
+                                        },
+                            '120747' => {
+                                          'Header' => 'platform_oem_ibm.h',
+                                          'Param' => {
+                                                       '0' => {
+                                                                'name' => 'instance_id',
+                                                                'type' => '168'
+                                                              },
+                                                       '1' => {
+                                                                'name' => 'format_version',
+                                                                'type' => '168'
+                                                              },
+                                                       '2' => {
+                                                                'name' => 'tid',
+                                                                'type' => '168'
+                                                              },
+                                                       '3' => {
+                                                                'name' => 'num_handles',
+                                                                'type' => '168'
+                                                              },
+                                                       '4' => {
+                                                                'name' => 'list_of_handles',
+                                                                'type' => '6245'
+                                                              },
+                                                       '5' => {
+                                                                'name' => 'payload_length',
+                                                                'type' => '123'
+                                                              },
+                                                       '6' => {
+                                                                'name' => 'msg',
+                                                                'offset' => '0',
+                                                                'type' => '1632'
+                                                              }
+                                                     },
+                                          'Return' => '74',
+                                          'ShortName' => 'encode_bios_attribute_update_event_req'
+                                        },
                             '1440' => {
                                         'Header' => 'base.h',
                                         'Param' => {
@@ -6636,7 +8018,13 @@ $VAR1 = {
                                                  'decode_descriptor_type_length_value' => 1,
                                                  'decode_event_message_buffer_size_resp' => 1,
                                                  'decode_event_message_supported_resp' => 1,
+                                                 'decode_file_ack_req' => 1,
+                                                 'decode_file_ack_resp' => 1,
+                                                 'decode_file_ack_with_meta_data_req' => 1,
+                                                 'decode_file_ack_with_meta_data_resp' => 1,
                                                  'decode_firmware_device_id_record' => 1,
+                                                 'decode_get_alert_status_req' => 1,
+                                                 'decode_get_alert_status_resp' => 1,
                                                  'decode_get_bios_attribute_current_value_by_handle_req' => 1,
                                                  'decode_get_bios_attribute_current_value_by_handle_resp' => 1,
                                                  'decode_get_bios_table_req' => 1,
@@ -6644,6 +8032,8 @@ $VAR1 = {
                                                  'decode_get_commands_req' => 1,
                                                  'decode_get_commands_resp' => 1,
                                                  'decode_get_date_time_resp' => 1,
+                                                 'decode_get_file_table_req' => 1,
+                                                 'decode_get_file_table_resp' => 1,
                                                  'decode_get_firmware_parameters_resp' => 1,
                                                  'decode_get_firmware_parameters_resp_comp_entry' => 1,
                                                  'decode_get_fru_record_by_option_req' => 1,
@@ -6667,6 +8057,10 @@ $VAR1 = {
                                                  'decode_get_version_req' => 1,
                                                  'decode_get_version_resp' => 1,
                                                  'decode_multipart_receive_req' => 1,
+                                                 'decode_new_file_req' => 1,
+                                                 'decode_new_file_resp' => 1,
+                                                 'decode_new_file_with_metadata_req' => 1,
+                                                 'decode_new_file_with_metadata_resp' => 1,
                                                  'decode_numeric_sensor_data' => 1,
                                                  'decode_numeric_sensor_pdr_data' => 1,
                                                  'decode_pass_component_table_resp' => 1,
@@ -6679,8 +8073,16 @@ $VAR1 = {
                                                  'decode_poll_for_platform_event_message_req' => 1,
                                                  'decode_poll_for_platform_event_message_resp' => 1,
                                                  'decode_query_device_identifiers_resp' => 1,
+                                                 'decode_read_file_req' => 1,
+                                                 'decode_read_file_resp' => 1,
                                                  'decode_request_firmware_data_req' => 1,
                                                  'decode_request_update_resp' => 1,
+                                                 'decode_rw_file_by_type_memory_req' => 1,
+                                                 'decode_rw_file_by_type_memory_resp' => 1,
+                                                 'decode_rw_file_by_type_req' => 1,
+                                                 'decode_rw_file_by_type_resp' => 1,
+                                                 'decode_rw_file_memory_req' => 1,
+                                                 'decode_rw_file_memory_resp' => 1,
                                                  'decode_sensor_event_data' => 1,
                                                  'decode_sensor_op_data' => 1,
                                                  'decode_set_bios_attribute_current_value_req' => 1,
@@ -6701,14 +8103,23 @@ $VAR1 = {
                                                  'decode_update_component_resp' => 1,
                                                  'decode_vendor_defined_descriptor_value' => 1,
                                                  'decode_verify_complete_req' => 1,
+                                                 'decode_write_file_req' => 1,
+                                                 'decode_write_file_resp' => 1,
                                                  'encode_activate_firmware_req' => 1,
                                                  'encode_apply_complete_resp' => 1,
+                                                 'encode_bios_attribute_update_event_req' => 1,
                                                  'encode_cancel_update_component_req' => 1,
                                                  'encode_cancel_update_req' => 1,
                                                  'encode_cc_only_resp' => 1,
                                                  'encode_event_message_buffer_size_req' => 1,
                                                  'encode_event_message_supported_req' => 1,
+                                                 'encode_file_ack_req' => 1,
+                                                 'encode_file_ack_resp' => 1,
+                                                 'encode_file_ack_with_meta_data_req' => 1,
+                                                 'encode_file_ack_with_meta_data_resp' => 1,
                                                  'encode_fru_record' => 1,
+                                                 'encode_get_alert_status_req' => 1,
+                                                 'encode_get_alert_status_resp' => 1,
                                                  'encode_get_bios_attribute_current_value_by_handle_req' => 1,
                                                  'encode_get_bios_current_value_by_handle_resp' => 1,
                                                  'encode_get_bios_table_req' => 1,
@@ -6717,6 +8128,8 @@ $VAR1 = {
                                                  'encode_get_commands_resp' => 1,
                                                  'encode_get_date_time_req' => 1,
                                                  'encode_get_date_time_resp' => 1,
+                                                 'encode_get_file_table_req' => 1,
+                                                 'encode_get_file_table_resp' => 1,
                                                  'encode_get_firmware_parameters_req' => 1,
                                                  'encode_get_fru_record_by_option_req' => 1,
                                                  'encode_get_fru_record_by_option_resp' => 1,
@@ -6740,6 +8153,10 @@ $VAR1 = {
                                                  'encode_get_types_resp' => 1,
                                                  'encode_get_version_req' => 1,
                                                  'encode_get_version_resp' => 1,
+                                                 'encode_new_file_req' => 1,
+                                                 'encode_new_file_resp' => 1,
+                                                 'encode_new_file_with_metadata_req' => 1,
+                                                 'encode_new_file_with_metadata_resp' => 1,
                                                  'encode_pass_component_table_req' => 1,
                                                  'encode_platform_event_message_req' => 1,
                                                  'encode_platform_event_message_resp' => 1,
@@ -6748,8 +8165,16 @@ $VAR1 = {
                                                  'encode_poll_for_platform_event_message_req' => 1,
                                                  'encode_poll_for_platform_event_message_resp' => 1,
                                                  'encode_query_device_identifiers_req' => 1,
+                                                 'encode_read_file_req' => 1,
+                                                 'encode_read_file_resp' => 1,
                                                  'encode_request_firmware_data_resp' => 1,
                                                  'encode_request_update_req' => 1,
+                                                 'encode_rw_file_by_type_memory_req' => 1,
+                                                 'encode_rw_file_by_type_memory_resp' => 1,
+                                                 'encode_rw_file_by_type_req' => 1,
+                                                 'encode_rw_file_by_type_resp' => 1,
+                                                 'encode_rw_file_memory_req' => 1,
+                                                 'encode_rw_file_memory_resp' => 1,
                                                  'encode_sensor_event_data' => 1,
                                                  'encode_set_bios_attribute_current_value_req' => 1,
                                                  'encode_set_bios_attribute_current_value_resp' => 1,
@@ -6770,6 +8195,8 @@ $VAR1 = {
                                                  'encode_transfer_complete_resp' => 1,
                                                  'encode_update_component_req' => 1,
                                                  'encode_verify_complete_resp' => 1,
+                                                 'encode_write_file_req' => 1,
+                                                 'encode_write_file_resp' => 1,
                                                  'entity_association_tree_find' => 1,
                                                  'find_entity_ref_in_tree' => 1,
                                                  'get_fru_record_by_option' => 1,

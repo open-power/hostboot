@@ -36,6 +36,12 @@ else
   conf.set('LIBPLDM_ABI_TESTING', '')
 endif
 
+config = configure_file(output: 'config.h',
+  configuration: conf
+)
+
+add_project_arguments('-include', '@0@'.format(config), language: 'c')
+
 libpldm_sources = files()
 subdir('src')
 
@@ -74,10 +80,6 @@ import('pkgconfig').generate(
   description: 'PLDM protocol encode/decode C lib',
   version: meson.project_version(),
   libraries: libpldm)
-
-configure_file(output: 'config.h',
-  configuration: conf
-)
 
 if get_option('tests').enabled()
   subdir('tests')

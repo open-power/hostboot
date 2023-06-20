@@ -26,7 +26,7 @@ tests = [
   'msgbuf',
 ]
 
-if get_option('oem-ibm').enabled()
+if get_option('oem-ibm').allowed()
   tests += [
     'oem/ibm/libpldm_fileio_test',
     'oem/ibm/libpldm_host_test',

@@ -84,7 +84,7 @@ TEST(BcdConversion, BcdCoversion)
 TEST(TimeLegal, TimeLegal)
 {
     EXPECT_EQ(true, is_time_legal(30, 25, 16, 18, 8, 2019));
-    EXPECT_EQ(true, is_time_legal(30, 25, 16, 29, 2, 2020));   // leap year
+    EXPECT_EQ(true, is_time_legal(30, 25, 16, 29, 2, 2020)); // leap year
 
     EXPECT_EQ(false, is_time_legal(30, 25, 16, 18, 8, 1960));  // year illegal
     EXPECT_EQ(false, is_time_legal(30, 25, 16, 18, 15, 2019)); // month illegal
