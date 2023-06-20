@@ -1096,15 +1096,19 @@ errlHndl_t i2crCheckErrors( Target* i_target, uint64_t i_addr, uint32_t i_sftAdd
                        l_firstErrLog64 );
         }
 
+
         // Make sure the error was for the address we just sent
-        // Also, check for a concurrent access error
-        if (((l_errorReg.badaddress) && (l_status.address != l_sftAddr)) ||
+        // The status register shows only the 24 bits of address so compare only
+        // the 24 bits of the shifted address with the address reported in the
+        // status register. Also, check for a concurrent access error
+        if (((l_errorReg.badaddress) && (l_status.address != (l_sftAddr & 0xFFFFFF))) ||
             (l_status.inprogress))
         {
             // We are in some kind of concurrent access from another task
             TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> Concurrent/Bad access error!"
-                       " status=0x%.8X! Addr=0x%x [0x%llX != 0x%llX] inprogress=%d anyerror=%d",
-                       l_status32, i_addr, l_status.address, l_sftAddr,
+                       " status=0x%.8X! Addr=0x%x Shifted=0x%x [0x%llX != 0x%llX]"
+                       " inprogress=%d anyerror=%d",
+                       l_status32, i_addr, l_sftAddr, l_status.address, (l_sftAddr & 0xFFFFFF),
                        l_status.inprogress, l_status.anyerror );
             TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> Error Reg=0x%.8X piberr=%d badaddress=%d"
                        " security=%d", l_errorReg32, l_errorReg.piberr,
