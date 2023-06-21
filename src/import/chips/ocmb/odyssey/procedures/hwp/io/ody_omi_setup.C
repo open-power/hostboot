@@ -42,6 +42,9 @@ SCOMT_OMI_USE_D_REG_DL0_CONFIG0
 SCOMT_OMI_USE_D_REG_DL0_CONFIG1
 SCOMT_OMI_USE_D_REG_DL0_CYA_BITS
 SCOMT_ODY_USE_ODC_TLXT_REGS_TLXCFG0
+SCOMT_ODY_USE_ODC_TLXT_REGS_TLXCFG1
+SCOMT_ODY_USE_ODC_TLXT_REGS_TLXCFG2
+SCOMT_ODY_USE_ODC_TLXT_REGS_TLXCFG3
 SCOMT_ODY_USE_ODC_SRQ_MBA_ROQ0Q
 
 ///
@@ -67,6 +70,9 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     D_REG_DL0_CONFIG1_t l_dl0_config1;
     D_REG_DL0_CYA_BITS_t l_dl0_cya;
     ODC_TLXT_REGS_TLXCFG0_t l_tlxcfg0;
+    ODC_TLXT_REGS_TLXCFG1_t l_tlxcfg1;
+    ODC_TLXT_REGS_TLXCFG2_t l_tlxcfg2;
+    ODC_TLXT_REGS_TLXCFG3_t l_tlxcfg3;
     ODC_SRQ_MBA_ROQ0Q_t l_srq_mba_roq0q;
 
     bool l_mfg_mode = false;
@@ -127,8 +133,52 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     FAPI_TRY(l_dl0_cya.putScom(i_target));
 
     FAPI_TRY(l_tlxcfg0.getScom(i_target));
+    l_tlxcfg0.set_EARLY_WDONE_DISABLE(0);
+    l_tlxcfg0.set_DCP1_RETURN_PAUSE(0);
+    l_tlxcfg0.set_VC0_RETURN_PAUSE(0);
+    l_tlxcfg0.set_VC1_RETURN_PAUSE(0);
     l_tlxcfg0.set_DCP1_INIT(128);
     FAPI_TRY(l_tlxcfg0.putScom(i_target));
+
+    FAPI_TRY(l_tlxcfg1.getScom(i_target));
+    l_tlxcfg1.set_FIR_TLXR_SHUTDOWN_CONTROLS(0x614);
+    l_tlxcfg1.set_TLXR_MS_MMIO_ADDRBIT(0xe);
+    l_tlxcfg1.set_CDD_THRESHOLD(4);
+    l_tlxcfg1.set_CD4_THRESHOLD(4);
+    l_tlxcfg1.set_CFG_CDD_DIS(0);
+    l_tlxcfg1.set_CFG_CD4_DIS(1);
+    l_tlxcfg1.set_CFG_CD6_DIS(1);
+    l_tlxcfg1.set_LOW_LAT_RD_DIS(0);
+    l_tlxcfg1.set_CLK_GATE_DIS(0);
+    l_tlxcfg1.set_CFEI_ENAB(0);
+    l_tlxcfg1.set_CFEI_PERSIST(0);
+    l_tlxcfg1.set_CFEI_BIT0(0);
+    l_tlxcfg1.set_CFEI_BIT1(0);
+    l_tlxcfg1.set_LOW_LAT_DEGRADE_DIS(1);
+    FAPI_TRY(l_tlxcfg1.putScom(i_target));
+
+    FAPI_TRY(l_tlxcfg2.getScom(i_target));
+    l_tlxcfg2.set_XSTOP_RD_GATE_DIS(0);
+    l_tlxcfg2.set_READ_CANCEL_DIS(1);
+    l_tlxcfg2.set_READ_PROMOTE_DIS(1);
+    l_tlxcfg2.set_READ_DROPPABLE_DIS(1);
+    l_tlxcfg2.set_LP_STARVATION_DIS(0);
+    l_tlxcfg2.set_MP_STARVATION_DIS(0);
+    l_tlxcfg2.set_ENTRY0_HP_DLY(255);
+    l_tlxcfg2.set_CFG_TLXT_128B_RESP_EN(0);
+    l_tlxcfg2.set_SYS_XSTOP_IN_DIS(0);
+    l_tlxcfg2.set_CFG_TLXT_ENHANCED_LL_MODE_DIS(1);
+    l_tlxcfg2.set_CFG_TLXT_CD6_THRESHOLD(4);
+    l_tlxcfg2.set_CFG_XMETA_LANE_WIDTH_COMP_DIS(1);
+    FAPI_TRY(l_tlxcfg2.putScom(i_target));
+
+    FAPI_TRY(l_tlxcfg3.getScom(i_target));
+    l_tlxcfg3.set_CFG_TL_CREDIT_HP_TIMEOUT(0x00ff);
+    l_tlxcfg3.set_CFG_VC0_CREDIT_HP_THRESHOLD(1);
+    l_tlxcfg3.set_CFG_VC1_CREDIT_HP_THRESHOLD(4);
+    l_tlxcfg3.set_CFG_DCP1_CREDIT_HP_THRESHOLD(6);
+    l_tlxcfg3.set_CFG_TL_CREDIT_FORCE_HP(0);
+    FAPI_TRY(l_tlxcfg3.putScom(i_target));
 
     FAPI_TRY(l_srq_mba_roq0q.getScom(i_target));
     l_srq_mba_roq0q.set_CFG_TLXR_SPEC_CMD_ENB(1);
