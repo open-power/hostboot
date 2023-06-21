@@ -425,6 +425,18 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
     fapi2::buffer<uint64_t> l_buffer = 0;
     uint32_t l_iar = 0;
 
+    // Check if the IAR is already set
+    FAPI_TRY(fapi2::getScom(i_target, c_xidbgpro, l_buffer));
+    l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(l_iar);
+
+    if (l_iar == c_ppe_start_reset_iar)
+    {
+        FAPI_DBG("PPE is already running");
+        goto fapi_try_exit;
+    }
+
+    l_buffer.flush<0>();
+
     // SRAM Scrub, set via Write-OR to CSCR
     FAPI_DBG("SRAM Scrub");
     l_buffer.setBit<c_sram_scrub_enable_bit>();
