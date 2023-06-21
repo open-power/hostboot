@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1269,6 +1269,15 @@ private:
      */
     void traceLogEntry(void);
 
+    /**
+     * @brief Check whether the input gard type is a predictive type and
+     *        predictive gard has been disabled by the BIOS attribute.
+     *
+     * @param[in] i_gardType the type of gard to apply
+     * @return bool whether the input gard type needs to be skipped (if it's
+                    a predictive type and predictive gard has been disabled).
+     */
+    bool skipPredictiveGard(HWAS::GARD_ErrorType i_gardType);
 
 
 private:

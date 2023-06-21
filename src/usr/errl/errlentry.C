@@ -1090,7 +1090,10 @@ void ErrlEntry::checkForDeconfigAndGard()
                 }
                 if(callout_ud->gardErrorType != HWAS::GARD_NULL)
                 {
-                    setGardBit();
+                    if(!skipPredictiveGard(callout_ud->gardErrorType))
+                    {
+                        setGardBit();
+                    }
                 }
             }
             else if(callout_ud->type == HWAS::CLOCK_CALLOUT)
@@ -1101,7 +1104,10 @@ void ErrlEntry::checkForDeconfigAndGard()
                 }
                 if(callout_ud->clkGardErrorType != HWAS::GARD_NULL)
                 {
-                    setGardBit();
+                    if(!skipPredictiveGard(callout_ud->gardErrorType))
+                    {
+                        setGardBit();
+                    }
                 }
             }
             else if(callout_ud->type == HWAS::PART_CALLOUT)
@@ -1112,7 +1118,10 @@ void ErrlEntry::checkForDeconfigAndGard()
                 }
                 if(callout_ud->partGardErrorType != HWAS::GARD_NULL)
                 {
-                    setGardBit();
+                    if(!skipPredictiveGard(callout_ud->gardErrorType))
+                    {
+                        setGardBit();
+                    }
                 }
             }
         }
@@ -3771,6 +3780,34 @@ void ErrlEntry::addFruCalloutDataToSrc(TARGETING::Target *          const i_targ
                            reinterpret_cast<const char*>(l_serialnumber), nullptr,
                            i_target, i_priority, i_compType, i_procedure_id);
 }
-#endif
+#endif // CONFIG_BUILD_FULL_PEL
+
+bool ErrlEntry::skipPredictiveGard(HWAS::GARD_ErrorType i_gardType)
+{
+    using namespace TARGETING;
+    bool l_skipGard = false;
+
+    do {
+    if(i_gardType != HWAS::GARD_Predictive)
+    {
+        // Do not skip non-predictive gard
+        break;
+    }
+
+    if(Util::isTargetingLoaded() && targetService().isInitialized())
+    {
+        // The predictive gard skip policy is enabled and we know that
+        // gard type is predictive from above: skip this gard.
+        if(UTIL::assertGetToplevelTarget()->getAttr<ATTR_CDM_POLICIES>() &
+           CDM_POLICIES_PREDICTIVE_DISABLED)
+        {
+            l_skipGard = true;
+        }
+    }
+
+    } while(0);
+
+    return l_skipGard;
+}
 
 } // End namespace
