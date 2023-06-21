@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,8 +54,9 @@ namespace ecc
 /// @tparam MC the mc type of the T
 /// @tparam T fapi2 Target Type defaults to fapi2::TARGET_TYPE_MCA or TARGET_TYPE_MEM_PORT
 /// @tparam TT traits type defaults to eccTraits<T>
+/// @tparam AT the mcbistAddrTraits associated with T
 ///
-template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::FWMS_ADDR_TARGET_TYPE, typename TT = mss::eccTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::FWMS_ADDR_TARGET_TYPE, typename TT = mss::eccTraits<MC, T>, typename AT = mcbistAddrTraits<MC> >
 class trap_address
 {
     public:
@@ -88,26 +89,25 @@ class trap_address
         /// @note Construction of mcbist::address from trap_address
         /// @note located in mcbist::address class
         ///
-        trap_address( const mcbist::address& i_mcbist_address )
+        trap_address( const mcbist::address<MC>& i_mcbist_address )
         {
-            iv_value.insertFromRight<PORT.first, PORT.second>(i_mcbist_address.get_field<mcbist::address::PORT>());
-            iv_value.insertFromRight<DIMM.first, DIMM.second>(i_mcbist_address.get_field<mcbist::address::DIMM>());
-            iv_value.insertFromRight<MRANK.first, MRANK.second>(i_mcbist_address.get_field<mcbist::address::MRANK>());
-            iv_value.insertFromRight<SRANK.first, SRANK.second>(i_mcbist_address.get_field<mcbist::address::SRANK>());
-            iv_value.insertFromRight<ROW.first, ROW.second>(i_mcbist_address.get_field<mcbist::address::ROW>());
-            iv_value.insertFromRight<COL.first, COL.second>(i_mcbist_address.get_field<mcbist::address::COL>());
-            iv_value.insertFromRight<BANK.first, BANK.second>(i_mcbist_address.get_field<mcbist::address::BANK>());
-            iv_value.insertFromRight<BANK_GROUP.first, BANK_GROUP.second>
-            (i_mcbist_address.get_field<mcbist::address::BANK_GROUP>());
+            iv_value.insertFromRight<PORT.first, PORT.second>(i_mcbist_address.template get_field<AT::PORT>());
+            iv_value.insertFromRight<DIMM.first, DIMM.second>(i_mcbist_address.template get_field<AT::DIMM>());
+            iv_value.insertFromRight<MRANK.first, MRANK.second>(i_mcbist_address.template get_field<AT::MRANK>());
+            iv_value.insertFromRight<SRANK.first, SRANK.second>(i_mcbist_address.template get_field<AT::SRANK>());
+            iv_value.insertFromRight<ROW.first, ROW.second>(i_mcbist_address.template get_field<AT::ROW>());
+            iv_value.insertFromRight<COL.first, COL.second>(i_mcbist_address.template get_field<AT::COL>());
+            iv_value.insertFromRight<BANK.first, BANK.second>(i_mcbist_address.template get_field<AT::BANK>());
+            iv_value.insertFromRight<BANK_GROUP.first, BANK_GROUP.second>(i_mcbist_address.template get_field<AT::BANK_GROUP>());
         }
 
         ///
         /// @brief Construct an mcbist::address from an ecc::trap_address
         /// @return the mcbist::address
         ///
-        inline operator mss::mcbist::address() const
+        inline operator mss::mcbist::address<MC>() const
         {
-            mss::mcbist::address l_mcbist_address;
+            mss::mcbist::address<MC> l_mcbist_address;
             l_mcbist_address.set_port       (this->get_field<PORT>());
             l_mcbist_address.set_dimm       (this->get_field<DIMM>());
             l_mcbist_address.set_master_rank(this->get_field<MRANK>());
@@ -146,29 +146,29 @@ class trap_address
         fapi2::buffer<uint64_t> iv_value;
 };
 
-template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr typename trap_address<MC, T, TT>::field trap_address<MC, T, TT>::PORT;
+template< mss::mc_type MC, fapi2::TargetType T , typename TT, typename AT >
+constexpr typename trap_address<MC, T, TT, AT>::field trap_address<MC, T, TT, AT>::PORT;
 
-template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr typename trap_address<MC, T, TT>::field trap_address<MC, T, TT>::DIMM;
+template< mss::mc_type MC, fapi2::TargetType T , typename TT, typename AT >
+constexpr typename trap_address<MC, T, TT, AT>::field trap_address<MC, T, TT, AT>::DIMM;
 
-template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr typename trap_address<MC, T, TT>::field trap_address<MC, T, TT>::MRANK;
+template< mss::mc_type MC, fapi2::TargetType T , typename TT, typename AT >
+constexpr typename trap_address<MC, T, TT, AT>::field trap_address<MC, T, TT, AT>::MRANK;
 
-template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr typename trap_address<MC, T, TT>::field trap_address<MC, T, TT>::SRANK;
+template< mss::mc_type MC, fapi2::TargetType T , typename TT, typename AT >
+constexpr typename trap_address<MC, T, TT, AT>::field trap_address<MC, T, TT, AT>::SRANK;
 
-template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr typename trap_address<MC, T, TT>::field trap_address<MC, T, TT>::ROW;
+template< mss::mc_type MC, fapi2::TargetType T , typename TT, typename AT >
+constexpr typename trap_address<MC, T, TT, AT>::field trap_address<MC, T, TT, AT>::ROW;
 
-template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr typename trap_address<MC, T, TT>::field trap_address<MC, T, TT>::COL;
+template< mss::mc_type MC, fapi2::TargetType T , typename TT, typename AT >
+constexpr typename trap_address<MC, T, TT, AT>::field trap_address<MC, T, TT, AT>::COL;
 
-template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr typename trap_address<MC, T, TT>::field trap_address<MC, T, TT>::BANK;
+template< mss::mc_type MC, fapi2::TargetType T , typename TT, typename AT >
+constexpr typename trap_address<MC, T, TT, AT>::field trap_address<MC, T, TT, AT>::BANK;
 
-template< mss::mc_type MC, fapi2::TargetType T , typename TT >
-constexpr typename trap_address<MC, T, TT>::field trap_address<MC, T, TT>::BANK_GROUP;
+template< mss::mc_type MC, fapi2::TargetType T , typename TT, typename AT >
+constexpr typename trap_address<MC, T, TT, AT>::field trap_address<MC, T, TT, AT>::BANK_GROUP;
 
 
 } // close namespace ecc

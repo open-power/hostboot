@@ -117,8 +117,8 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pa
         std::vector<uint64_t> l_pr;
         mss::mcbist::program<MC> l_program;
 
-        mss::mcbist::address l_start;
-        mss::mcbist::address l_end;
+        mss::mcbist::address<MC> l_start;
+        mss::mcbist::address<MC> l_end;
 
         size_t l_rank_address_pair = 0;
 
@@ -610,6 +610,8 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT >
 inline fapi2::ReturnCode operation<MC, T, TT>::single_port_init()
 {
     using ET = mcbistMCTraits<MC>;
+    using AT = mcbistAddrTraits<MC>;
+
     FAPI_INF("single port init for %s", mss::c_str(iv_target));
 
     const uint64_t l_relative_port_number = iv_const.iv_start_address.get_port();
@@ -629,7 +631,6 @@ inline fapi2::ReturnCode operation<MC, T, TT>::single_port_init()
     {
         mss::mcbist::subtest_t<MC> l_subtest = iv_subtest;
 
-        // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
         l_subtest.enable_port(l_relative_port_number);
         l_subtest.enable_dimm(l_dimm_number);
         iv_program.iv_subtests.push_back(l_subtest);
@@ -646,7 +647,7 @@ inline fapi2::ReturnCode operation<MC, T, TT>::single_port_init()
     else if (iv_const.iv_end_address == TT::LARGEST_ADDRESS)
     {
         // Only the DIMM range as we don't want to cross ports.
-        iv_const.iv_start_address.template get_range<mss::mcbist::address::DIMM>(iv_const.iv_end_address);
+        iv_const.iv_start_address.template get_range<AT::DIMM>(iv_const.iv_end_address);
     }
 
     // Configure the address range
@@ -832,8 +833,10 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
     fapi2::ReturnCode& o_rc ):
     operation<MC>(i_target, mss::mcbist::scrub_subtest<MC>(), i_const)
 {
-    mss::mcbist::address l_generic_start_address;
-    mss::mcbist::address l_generic_end_address;
+    using AT = mcbistAddrTraits<MC>;
+
+    mss::mcbist::address<MC> l_generic_start_address;
+    mss::mcbist::address<MC> l_generic_end_address;
 
     FAPI_INF("setting up for continuous scrub for %s", mss::c_str(i_target));
 
@@ -849,7 +852,7 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
     // *INDENT-OFF*
     operation<MC>::iv_sim ?
         l_generic_start_address.get_sim_end_address(l_generic_end_address) :
-        l_generic_start_address.get_range<mss::mcbist::address::DIMM>(l_generic_end_address);
+        l_generic_start_address.template get_range<AT::DIMM>(l_generic_end_address);
     // *INDENT-ON*
 
     FAPI_TRY( mss::mcbist::config_address_range0<MC>(i_target, l_generic_start_address, l_generic_end_address) );
@@ -908,7 +911,7 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
         // *INDENT-OFF*
         operation<MC>::iv_sim ?
             operation<MC>::iv_const.iv_start_address.get_sim_end_address(operation<MC>::iv_const.iv_end_address) :
-            operation<MC>::iv_const.iv_start_address.template get_range<mss::mcbist::address::DIMM>(operation<MC>::iv_const.iv_end_address);
+            operation<MC>::iv_const.iv_start_address.template get_range<AT::DIMM>(operation<MC>::iv_const.iv_end_address);
         // *INDENT-ON*
 
         FAPI_TRY( mss::mcbist::config_address_range1<MC>(i_target, operation<MC>::iv_const.iv_start_address,
@@ -1001,8 +1004,10 @@ continuous_steer_operation<MC, T, TT>::continuous_steer_operation(
     fapi2::ReturnCode& o_rc ):
     operation<MC>(i_target, mss::mcbist::steer_subtest<MC>(), i_const)
 {
-    mss::mcbist::address l_generic_start_address;
-    mss::mcbist::address l_generic_end_address;
+    using AT = mcbistAddrTraits<MC>;
+
+    mss::mcbist::address<MC> l_generic_start_address;
+    mss::mcbist::address<MC> l_generic_end_address;
 
     FAPI_INF("setting up for continuous steer for %s", mss::c_str(i_target));
 
@@ -1018,7 +1023,7 @@ continuous_steer_operation<MC, T, TT>::continuous_steer_operation(
     // *INDENT-OFF*
     operation<MC>::iv_sim ?
         l_generic_start_address.get_sim_end_address(l_generic_end_address) :
-        l_generic_start_address.get_range<mss::mcbist::address::DIMM>(l_generic_end_address);
+        l_generic_start_address.template get_range<AT::DIMM>(l_generic_end_address);
     // *INDENT-ON*
 
     FAPI_TRY( mss::mcbist::config_address_range0<MC>(i_target, l_generic_start_address, l_generic_end_address) );
@@ -1077,7 +1082,7 @@ continuous_steer_operation<MC, T, TT>::continuous_steer_operation(
         // *INDENT-OFF*
         operation<MC>::iv_sim ?
             operation<MC>::iv_const.iv_start_address.get_sim_end_address(operation<MC>::iv_const.iv_end_address) :
-            operation<MC>::iv_const.iv_start_address.template get_range<mss::mcbist::address::DIMM>(operation<MC>::iv_const.iv_end_address);
+            operation<MC>::iv_const.iv_start_address.template get_range<AT::DIMM>(operation<MC>::iv_const.iv_end_address);
         // *INDENT-ON*
 
         FAPI_TRY( mss::mcbist::config_address_range1<MC>(i_target, operation<MC>::iv_const.iv_start_address,
@@ -1270,9 +1275,9 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
                            const stop_conditions<MC>& i_stop,
-                           const mss::mcbist::address& i_address = mss::mcbist::address(),
+                           const mss::mcbist::address<MC>& i_address = mss::mcbist::address<MC>(),
                            const end_boundary i_end = end_boundary::STOP_AFTER_SLAVE_RANK,
-                           const mss::mcbist::address& i_end_address = mss::mcbist::address(TT::LARGEST_ADDRESS) )
+                           const mss::mcbist::address<MC>& i_end_address = mss::mcbist::address<MC>(TT::LARGEST_ADDRESS) )
 {
     using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("superfast read - start for %s", mss::c_str(i_target));
@@ -1312,7 +1317,7 @@ template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
                                     const stop_conditions<MC>& i_stop,
                                     const speed i_speed,
-                                    const mss::mcbist::address& i_address )
+                                    const mss::mcbist::address<MC>& i_address )
 {
     using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("continuous (background) scrub for %s", mss::c_str(i_target));
@@ -1349,7 +1354,7 @@ template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode background_fast_scrub( const fapi2::Target<T>& i_target,
         const stop_conditions<MC>& i_stop)
 {
-    const mss::mcbist::address l_start_address;
+    const mss::mcbist::address<MC> l_start_address;
     using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("Fast scrub for %s", mss::c_str(i_target));
 
@@ -1387,7 +1392,7 @@ template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode background_steer( const fapi2::Target<T>& i_target,
                                     const stop_conditions<MC>& i_stop,
                                     const speed i_speed,
-                                    const mss::mcbist::address& i_address )
+                                    const mss::mcbist::address<MC>& i_address )
 {
     using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF("continuous (background) steer for %s", mss::c_str(i_target));
@@ -1427,8 +1432,8 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
                                   const stop_conditions<MC>& i_stop,
-                                  const mss::mcbist::address& i_start_address,
-                                  const mss::mcbist::address& i_end_address,
+                                  const mss::mcbist::address<MC>& i_start_address,
+                                  const mss::mcbist::address<MC>& i_end_address,
                                   const end_boundary i_end )
 {
     using ET = mss::mcbistMCTraits<MC>;
@@ -1469,8 +1474,8 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode targeted_steer( const fapi2::Target<T>& i_target,
                                   const stop_conditions<MC>& i_stop,
-                                  const mss::mcbist::address& i_start_address,
-                                  const mss::mcbist::address& i_end_address,
+                                  const mss::mcbist::address<MC>& i_start_address,
+                                  const mss::mcbist::address<MC>& i_end_address,
                                   const end_boundary i_end )
 {
     using ET = mss::mcbistMCTraits<MC>;
@@ -1758,7 +1763,7 @@ fapi2::ReturnCode mss_background_scrub_helper( const fapi2::Target<T>& i_target 
         FAPI_TRY ( mss::memdiags::background_scrub<MC>( i_target,
                    mss::mcbist::stop_conditions<MC>(),
                    mss::mcbist::speed::BG_SCRUB,
-                   mss::mcbist::address() ) );
+                   mss::mcbist::address<MC>() ) );
     }
 
     // Unmask firs after background scrub is started
@@ -1800,7 +1805,7 @@ fapi2::ReturnCode mss_background_steer_helper( const fapi2::Target<T>& i_target 
         FAPI_TRY ( mss::memdiags::background_steer<MC>( i_target,
                    mss::mcbist::stop_conditions<MC>(),
                    mss::mcbist::speed::BG_SCRUB,
-                   mss::mcbist::address() ) );
+                   mss::mcbist::address<MC>() ) );
     }
 
     // Unmask firs after background steer is started
@@ -1825,7 +1830,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T
 fapi2::ReturnCode mss_firmware_background_scrub_helper( const fapi2::Target<T>& i_target,
         const stop_conditions<MC>& i_stop,
         const speed i_speed,
-        const mss::mcbist::address& i_address )
+        const mss::mcbist::address<MC>& i_address )
 {
     FAPI_INF("Start mss_firmware_background_scrub_helper on: %s", mss::c_str( i_target ));
 
@@ -1857,7 +1862,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T
 fapi2::ReturnCode mss_firmware_background_steer_helper( const fapi2::Target<T>& i_target,
         const stop_conditions<MC>& i_stop,
         const speed i_speed,
-        const mss::mcbist::address& i_address )
+        const mss::mcbist::address<MC>& i_address )
 {
     FAPI_INF("Start mss_firmware_background_steer_helper on: %s", mss::c_str( i_target ));
 

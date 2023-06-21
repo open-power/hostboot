@@ -44,11 +44,58 @@
 
 #include <lib/shared/exp_consts.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
 
 namespace mss
 {
+
+///
+/// @class mcbistAddrTraits
+/// @brief a collection of traits associated with the Explorer MCBIST address class
+/// @note DDR4 MCBIST MAINT address map:
+/// 0:1   port select
+/// 2     dimm select
+/// 3:4   mrank(0 to 1)
+/// 5:7   srank(0 to 2)
+/// 8:25  row(0 to 17)
+/// 26:32 col(3 to 9)
+/// 33:35 bank(0 to 2)
+/// 36:37 bank_group(0 to 1)
+///
+template<>
+class mcbistAddrTraits<mss::mc_type::EXPLORER>
+{
+    public:
+        // How far over we shift to align the address in either the register or a buffer
+        // i.e. start/end address MCBSA, MCBEA regs
+        static constexpr uint64_t MAGIC_PAD = 26;
+
+        // first is the start bit of the field, second is the length
+        using field = mss::pair<uint64_t, uint64_t>;
+
+        constexpr static field PORT = {0, 2};
+        constexpr static field DIMM = {2, 1};
+        constexpr static field MRANK = {3, 2};
+        constexpr static field SRANK = {5, 3};
+        constexpr static field ROW = {8, 18};
+        constexpr static field COL = {26, 7};
+        constexpr static field BANK = {33, 3};
+        constexpr static field BANK_GROUP = {36, 2};
+        constexpr static field LAST_VALID = BANK_GROUP;
+
+        // Used when accessing an integral value containing a port and DIMM combination
+        static constexpr uint64_t DIMM_BIT = 63;
+        static constexpr uint64_t PORT_START = 61;
+        static constexpr uint64_t PORT_LEN = 2;
+
+        // This magic number represents a range of addresses which cover all
+        // cache lines the training algorithms touch. By effecting 0 - this end
+        // address you'll effect everything which has bad ECC in the sim.
+        static constexpr uint64_t SIM_ECC_RANGE = 0b1000000;
+
+};
 
 ///
 /// @class mcbistMCTraits
@@ -207,7 +254,7 @@ class mcbistTraits< mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr size_t LEFT_SHIFT = (sizeof(uint64_t) * 8) - BITS_IN_SUBTEST;
 
         // LARGEST_ADDRESS. port select (bit0~1) are always 0 so shift 2 more bits.
-        static constexpr uint64_t LARGEST_ADDRESS = ~0 >> (mss::mcbist::address::MAGIC_PAD + 2);
+        static constexpr uint64_t LARGEST_ADDRESS = ~0 >> (mss::mcbistAddrTraits<mss::mc_type::EXPLORER>::MAGIC_PAD + 2);
 
         // Length of expected patterns
         static constexpr uint64_t EXPECTED_PATTERN_SIZE = 4;

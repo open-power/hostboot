@@ -449,11 +449,10 @@ void mnfgForceHalfBandwidthMode(ExtensibleChip* i_chip, unsigned int i_link)
 
 template<>
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                          const MemRank & i_rank,
-                                          const uint8_t& i_port,
-                                          mss::mcbist::address & o_startAddr,
-                                          mss::mcbist::address & o_endAddr,
-                                          AddrRangeType i_rangeType )
+    const MemRank & i_rank, const uint8_t& i_port,
+    mss::mcbist::address<mss::mc_type::EXPLORER> & o_startAddr,
+    mss::mcbist::address<mss::mc_type::EXPLORER> & o_endAddr,
+    AddrRangeType i_rangeType )
 {
     #define PRDF_FUNC "[PlatServices::getMemAddrRange<TYPE_OCMB_CHIP>] "
 
@@ -462,16 +461,54 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     if ( SLAVE_RANK == i_rangeType )
     {
-        FAPI_CALL_HWP_NORETURN( mss::mcbist::address::get_srank_range,
-                                i_port, i_rank.getDimmSlct(),
-                                i_rank.getRankSlct(), i_rank.getSlave(),
-                                o_startAddr, o_endAddr );
+        FAPI_CALL_HWP_NORETURN(
+            mss::mcbist::address<mss::mc_type::EXPLORER>::get_srank_range,
+            i_port, i_rank.getDimmSlct(), i_rank.getRankSlct(),
+            i_rank.getSlave(), o_startAddr, o_endAddr );
     }
     else if ( MASTER_RANK == i_rangeType )
     {
-        FAPI_CALL_HWP_NORETURN( mss::mcbist::address::get_mrank_range,
-                                i_port, i_rank.getDimmSlct(),
-                                i_rank.getRankSlct(), o_startAddr, o_endAddr );
+        FAPI_CALL_HWP_NORETURN(
+            mss::mcbist::address<mss::mc_type::EXPLORER>::get_mrank_range,
+            i_port, i_rank.getDimmSlct(), i_rank.getRankSlct(), o_startAddr,
+            o_endAddr );
+    }
+    else
+    {
+        PRDF_ERR( PRDF_FUNC "unsupported range type %d", i_rangeType );
+        PRDF_ASSERT(false);
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+    const MemRank & i_rank, const uint8_t& i_port,
+    mss::mcbist::address<mss::mc_type::ODYSSEY> & o_startAddr,
+    mss::mcbist::address<mss::mc_type::ODYSSEY> & o_endAddr,
+    AddrRangeType i_rangeType )
+{
+    #define PRDF_FUNC "[PlatServices::getMemAddrRange<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    if ( SLAVE_RANK == i_rangeType )
+    {
+        FAPI_CALL_HWP_NORETURN(
+            mss::mcbist::address<mss::mc_type::ODYSSEY>::get_srank_range,
+            i_port, i_rank.getDimmSlct(), i_rank.getRankSlct(),
+            i_rank.getSlave(), o_startAddr, o_endAddr );
+    }
+    else if ( MASTER_RANK == i_rangeType )
+    {
+        FAPI_CALL_HWP_NORETURN(
+            mss::mcbist::address<mss::mc_type::ODYSSEY>::get_mrank_range,
+            i_port, i_rank.getDimmSlct(), i_rank.getRankSlct(), o_startAddr,
+            o_endAddr );
     }
     else
     {
@@ -494,8 +531,9 @@ uint64_t __maskBits( uint64_t i_val, uint64_t i_numBits )
 
 //------------------------------------------------------------------------------
 
-uint32_t __expConvertMssMcbistAddr( ExtensibleChip * i_chip,
-        const mss::mcbist::address & i_addr, MemAddr & o_addr )
+uint32_t __convertMssMcbistAddr( ExtensibleChip * i_chip,
+    const mss::mcbist::address<mss::mc_type::EXPLORER> & i_addr,
+    MemAddr & o_addr )
 {
     #define PRDF_FUNC "[PlatServices::__expConvertMssMcbistAddr] "
 
@@ -544,15 +582,15 @@ uint32_t __expConvertMssMcbistAddr( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-uint32_t __odyConvertMssMcbistAddr( ExtensibleChip * i_chip,
-        const mss::mcbist::address & i_addr, MemAddr & o_addr )
+uint32_t __convertMssMcbistAddr( ExtensibleChip * i_chip,
+    const mss::mcbist::address<mss::mc_type::ODYSSEY> & i_addr,
+    MemAddr & o_addr )
 {
     #define PRDF_FUNC "[PlatServices::__odyConvertMssMcbistAddr] "
 
     uint32_t o_rc = SUCCESS;
 
-    // The 'dimm select' in the mss::mcbist::address actually specifies port.
-    uint64_t port    = i_addr.get_dimm();
+    uint64_t port    = i_addr.get_port();
     uint64_t prnk    = i_addr.get_master_rank();
     uint64_t srnk    = i_addr.get_slave_rank();
     uint64_t bnk     = i_addr.get_bank();
@@ -611,35 +649,16 @@ uint32_t __odyConvertMssMcbistAddr( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 
-uint32_t __convertMssMcbistAddr( ExtensibleChip * i_chip,
-    const mss::mcbist::address & i_addr, MemAddr & o_addr )
-{
-    // Check for Odyssey OCMB
-    if (isOdysseyOcmb(i_chip->getTrgt()))
-    {
-        return __odyConvertMssMcbistAddr(i_chip, i_addr, o_addr);
-    }
-    // Default to Explorer OCMB
-    else
-    {
-        return __expConvertMssMcbistAddr(i_chip, i_addr, o_addr);
-    }
-}
-
 //------------------------------------------------------------------------------
 
-template<>
-uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                          const MemRank & i_rank,
-                                          const uint8_t& i_port,
-                                          MemAddr & o_startAddr,
-                                          MemAddr & o_endAddr,
-                                          AddrRangeType i_rangeType )
+uint32_t expGetMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
+                             const uint8_t& i_port, MemAddr & o_startAddr,
+                             MemAddr & o_endAddr, AddrRangeType i_rangeType )
 {
-    #define PRDF_FUNC "[PlatServices::getMemAddrRange] "
+    #define PRDF_FUNC "[PlatServices::expGetMemAddrRange] "
 
     uint32_t o_rc = SUCCESS;
-    mss::mcbist::address saddr, eaddr;
+    mss::mcbist::address<mss::mc_type::EXPLORER> saddr, eaddr;
 
     do
     {
@@ -676,6 +695,74 @@ uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     return o_rc;
 
     #undef PRDF_FUNC
+}
+
+uint32_t odyGetMemAddrRange( ExtensibleChip * i_chip, const MemRank & i_rank,
+                             const uint8_t& i_port, MemAddr & o_startAddr,
+                             MemAddr & o_endAddr, AddrRangeType i_rangeType )
+{
+    #define PRDF_FUNC "[PlatServices::odyGetMemAddrRange] "
+
+    uint32_t o_rc = SUCCESS;
+    mss::mcbist::address<mss::mc_type::ODYSSEY> saddr, eaddr;
+
+    do
+    {
+        uint32_t o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, i_port,
+            saddr, eaddr, i_rangeType );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_TRAC( PRDF_FUNC "Fail from getMemAddrRange(0x%08x,0x%02x,%x,"
+                       "%d)", i_chip->getHuid(), i_rank.getKey(), i_port,
+                       i_rangeType );
+            break;
+        }
+
+        o_rc = __convertMssMcbistAddr( i_chip, saddr, o_startAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_TRAC( PRDF_FUNC "Could not convert start address from "
+                       "chip=0x%08x, rank=0x%02x.", i_chip->getHuid(),
+                       i_rank.getKey() );
+            break;
+        }
+
+        o_rc = __convertMssMcbistAddr( i_chip, eaddr, o_endAddr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_TRAC( PRDF_FUNC "Could not convert end address from "
+                       "chip=0x%08x, rank=0x%02x.", i_chip->getHuid(),
+                       i_rank.getKey() );
+            break;
+        }
+
+    } while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                          const MemRank & i_rank,
+                                          const uint8_t& i_port,
+                                          MemAddr & o_startAddr,
+                                          MemAddr & o_endAddr,
+                                          AddrRangeType i_rangeType )
+{
+    // Check for Odyssey OCMBs
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        return odyGetMemAddrRange(i_chip, i_rank, i_port, o_startAddr,
+                                  o_endAddr, i_rangeType);
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        return expGetMemAddrRange(i_chip, i_rank, i_port, o_startAddr,
+                                  o_endAddr, i_rangeType);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -729,10 +816,15 @@ uint32_t getMemAddrRange( ExtensibleChip * i_chip, VT & o_startAddr,
 
 template
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                          mss::mcbist::address & o_startAddr,
-                                          mss::mcbist::address & o_endAddr,
-                                          const uint8_t& i_port,
-                                          uint8_t i_dimmSlct );
+    mss::mcbist::address<mss::mc_type::EXPLORER> & o_startAddr,
+    mss::mcbist::address<mss::mc_type::EXPLORER> & o_endAddr,
+    const uint8_t& i_port, uint8_t i_dimmSlct );
+
+template
+uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+    mss::mcbist::address<mss::mc_type::ODYSSEY> & o_startAddr,
+    mss::mcbist::address<mss::mc_type::ODYSSEY> & o_endAddr,
+    const uint8_t& i_port, uint8_t i_dimmSlct );
 
 template
 uint32_t getMemAddrRange<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
@@ -961,17 +1053,6 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
     do
     {
-        // Get the first address of the given rank.
-        mss::mcbist::address saddr, eaddr;
-        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_ocmb, i_rank, i_port, saddr,
-                                                eaddr, SLAVE_RANK );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
-                      i_ocmb->getHuid(), i_rank.getKey() );
-            break;
-        }
-
         // Clear all of the counters and maintenance ECC attentions.
         o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( i_ocmb );
         if ( SUCCESS != o_rc )
@@ -986,6 +1067,16 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
         if (isOdysseyOcmb(i_ocmb->getTrgt()))
         {
+            // Get the first address of the given rank.
+            mss::mcbist::address<mss::mc_type::ODYSSEY> saddr, eaddr;
+            o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_ocmb, i_rank, i_port,
+                                                    saddr, eaddr, SLAVE_RANK );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                          i_ocmb->getHuid(), i_rank.getKey() );
+                break;
+            }
             // Get the stop conditions.
             // NOTE: If HBRT_PRD is not configured, we want to use the defaults
             //       so that background scrubbing never stops.
@@ -1027,6 +1118,16 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
         }
         else
         {
+            // Get the first address of the given rank.
+            mss::mcbist::address<mss::mc_type::EXPLORER> saddr, eaddr;
+            o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_ocmb, i_rank, i_port,
+                                                    saddr, eaddr, SLAVE_RANK );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                          i_ocmb->getHuid(), i_rank.getKey() );
+                break;
+            }
             // Get the stop conditions.
             // NOTE: If HBRT_PRD is not configured, we want to use the defaults
             //       so that background scrubbing never stops.
@@ -1094,7 +1195,7 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
     do
     {
         // Get the address range of the given rank.
-        mss::mcbist::address saddr, eaddr;
+        mss::mcbist::address<mss::mc_type::EXPLORER> saddr, eaddr;
         o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, i_port, saddr,
                                                 eaddr, i_rangeType );
         if ( SUCCESS != o_rc )
@@ -1158,7 +1259,7 @@ uint32_t startTdScrub<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
     do
     {
         // Get the address range of the given rank.
-        mss::mcbist::address saddr, eaddr;
+        mss::mcbist::address<mss::mc_type::ODYSSEY> saddr, eaddr;
         o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_chip, i_rank, i_port, saddr,
                                                 eaddr, i_rangeType );
         if ( SUCCESS != o_rc )
@@ -1323,7 +1424,7 @@ uint32_t startTdScrubOnNextRow<TYPE_OCMB_CHIP>(
     do
     {
         // Get the address range of the given rank.
-        mss::mcbist::address junk, eaddr;
+        mss::mcbist::address<mss::mc_type::EXPLORER> junk, eaddr;
         o_rc = getMemAddrRange<TYPE_OCMB_CHIP>(i_chip, i_rank, i_addr.getPort(),
                                                junk, eaddr, i_rangeType);
         if ( SUCCESS != o_rc )
@@ -1334,7 +1435,8 @@ uint32_t startTdScrubOnNextRow<TYPE_OCMB_CHIP>(
         }
 
         // Get the starting address from the input address.
-        mss::mcbist::address saddr( i_addr.incRowAddr<TYPE_OCMB_CHIP>(i_chip) );
+        mss::mcbist::address<mss::mc_type::EXPLORER>
+            saddr( i_addr.incRowAddr<TYPE_OCMB_CHIP>(i_chip) );
 
         // Get the OCMB_CHIP fapi target.
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt(i_chip->getTrgt());
@@ -1399,7 +1501,7 @@ uint32_t startTdScrubOnNextRow<TYPE_OCMB_CHIP>(
     do
     {
         // Get the address range of the given rank.
-        mss::mcbist::address junk, eaddr;
+        mss::mcbist::address<mss::mc_type::ODYSSEY> junk, eaddr;
         o_rc = getMemAddrRange<TYPE_OCMB_CHIP>(i_chip, i_rank, i_addr.getPort(),
                                                junk, eaddr, i_rangeType);
         if ( SUCCESS != o_rc )
@@ -1410,7 +1512,8 @@ uint32_t startTdScrubOnNextRow<TYPE_OCMB_CHIP>(
         }
 
         // Get the starting address from the input address.
-        mss::mcbist::address saddr( i_addr.incRowAddr<TYPE_OCMB_CHIP>(i_chip) );
+        mss::mcbist::address<mss::mc_type::ODYSSEY>
+            saddr( i_addr.incRowAddr<TYPE_OCMB_CHIP>(i_chip) );
 
         // Get the OCMB_CHIP fapi target.
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt(i_chip->getTrgt());

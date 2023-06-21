@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,9 +89,9 @@ fapi2::ReturnCode exp_sf_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 ///
 fapi2::ReturnCode exp_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                const mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>& i_stop,
-                               const mss::mcbist::address& i_address,
+                               const mss::mcbist::address<mss::mc_type::EXPLORER>& i_address,
                                const mss::mcbist::end_boundary i_end,
-                               const mss::mcbist::address& i_end_address )
+                               const mss::mcbist::address<mss::mc_type::EXPLORER>& i_end_address )
 {
     return mss::memdiags::sf_read<mss::mc_type::EXPLORER>(i_target, i_stop, i_address, i_end, i_end_address);
 }
@@ -107,7 +107,7 @@ fapi2::ReturnCode exp_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 fapi2::ReturnCode exp_background_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                         const mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>& i_stop,
                                         const mss::mcbist::speed i_speed,
-                                        const mss::mcbist::address& i_address )
+                                        const mss::mcbist::address<mss::mc_type::EXPLORER>& i_address )
 {
     return mss::memdiags::mss_firmware_background_scrub_helper<mss::mc_type::EXPLORER>(i_target,
             i_stop,
@@ -127,8 +127,8 @@ fapi2::ReturnCode exp_background_scrub( const fapi2::Target<fapi2::TARGET_TYPE_O
 ///
 fapi2::ReturnCode exp_targeted_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                       const mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>& i_stop,
-                                      const mss::mcbist::address& i_start_address,
-                                      const mss::mcbist::address& i_end_address,
+                                      const mss::mcbist::address<mss::mc_type::EXPLORER>& i_start_address,
+                                      const mss::mcbist::address<mss::mc_type::EXPLORER>& i_end_address,
                                       const mss::mcbist::end_boundary i_end )
 {
     return mss::memdiags::targeted_scrub<mss::mc_type::EXPLORER>(i_target, i_stop, i_start_address, i_end_address, i_end);

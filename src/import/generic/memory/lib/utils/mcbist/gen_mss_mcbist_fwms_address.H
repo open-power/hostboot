@@ -72,11 +72,11 @@ class address
         // first is the start bit of the field, second is the length
         using field = mss::pair<uint64_t, uint64_t>;
 
-        constexpr static field DIMM = {TT::FIRMWARE_MS_ADDRESS, 1};
-        constexpr static field MRANK = {TT::FIRMWARE_MS_ADDRESS + 1, 2};
-        constexpr static field SRANK = {TT::FIRMWARE_MS_ADDRESS + 3, 3};
-        constexpr static field BANK_GROUP = {TT::FIRMWARE_MS_ADDRESS + 6, 2};
-        constexpr static field BANK = {TT::FIRMWARE_MS_ADDRESS + 8, 3};
+        constexpr static field DIMM = {TT::FIRMWARE_MS_ADDRESS_DIMM, TT::FIRMWARE_MS_ADDRESS_DIMM_LEN};
+        constexpr static field MRANK = {TT::FIRMWARE_MS_ADDRESS_MRANK, TT::FIRMWARE_MS_ADDRESS_MRANK_LEN};
+        constexpr static field SRANK = {TT::FIRMWARE_MS_ADDRESS_SRANK, TT::FIRMWARE_MS_ADDRESS_SRANK_LEN};
+        constexpr static field BANK_GROUP = {TT::FIRMWARE_MS_ADDRESS_BANK_GROUP, TT::FIRMWARE_MS_ADDRESS_BANK_GROUP_LEN};
+        constexpr static field BANK = {TT::FIRMWARE_MS_ADDRESS_BANK, TT::FIRMWARE_MS_ADDRESS_BANK_LEN};
 
         address() = default;
 
@@ -95,7 +95,7 @@ class address
         /// @note Construction of mcbist::address from address
         /// @note located in mcbist::address class
         ///
-        address( const mss::mcbist::address& i_mcbist_address )
+        address( const mss::mcbist::address<MC>& i_mcbist_address )
         {
             iv_value.insertFromRight<DIMM.first, DIMM.second>(i_mcbist_address.get_dimm());
             iv_value.insertFromRight<MRANK.first, MRANK.second>(i_mcbist_address.get_master_rank());
@@ -114,9 +114,9 @@ class address
         /// @brief Construct an mcbist::address from an ecc::fwms::address
         /// @return the mcbist::address
         ///
-        inline operator mss::mcbist::address() const
+        inline operator mss::mcbist::address<MC>() const
         {
-            mss::mcbist::address l_mcbist_address;
+            mss::mcbist::address<MC> l_mcbist_address;
             l_mcbist_address.set_dimm       (this->get_field<DIMM>());
             l_mcbist_address.set_master_rank(this->get_field<MRANK>());
             l_mcbist_address.set_slave_rank (this->get_field<SRANK>());

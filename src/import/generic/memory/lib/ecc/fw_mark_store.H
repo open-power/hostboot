@@ -581,7 +581,7 @@ inline void get_region( const fapi2::buffer<uint64_t>& i_data, mark_region& o_va
 /// @param[in] i_address mcbist::address form of address field
 ///
 template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGET_TYPE, typename TT = eccTraits<MC, T> >
-inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address& i_address)
+inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address<MC>& i_address)
 {
     // construct fwms::address from mcbist::address
     const auto l_addr = address<MC, T, TT>(i_address);
@@ -598,12 +598,12 @@ inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address
 /// @param[out] o_address mcbist::address form of address field
 ///
 template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGET_TYPE, typename TT = eccTraits<MC, T> >
-inline void get_address( const fapi2::buffer<uint64_t>& i_data, mcbist::address& o_address )
+inline void get_address( const fapi2::buffer<uint64_t>& i_data, mcbist::address<MC>& o_address )
 {
     // construct fwms::address from i_data
     const auto l_addr = mss::ecc::fwms::address<MC, T, TT>(uint64_t(i_data));
     // construct mcbist::address from fwms::address
-    o_address = l_addr.operator mss::mcbist::address();
+    o_address = l_addr.operator mss::mcbist::address<MC>();
     FAPI_INF("get_address: 0x%016lx", uint64_t(l_addr));
 }
 
@@ -659,7 +659,7 @@ fapi2::ReturnCode get_fwms( const fapi2::Target<T>& i_target,
                             uint64_t& o_galois,
                             mss::ecc::fwms::mark_type& o_type,
                             mss::ecc::fwms::mark_region& o_region,
-                            mss::mcbist::address& o_address )
+                            mss::mcbist::address<MC>& o_address )
 {
     fapi2::buffer<uint64_t> l_buffer;
 
@@ -691,7 +691,7 @@ fapi2::ReturnCode set_fwms( const fapi2::Target<T>& i_target,
                             const uint64_t i_galois,
                             const mss::ecc::fwms::mark_type& i_type,
                             const mss::ecc::fwms::mark_region& i_region,
-                            const mss::mcbist::address& i_address )
+                            const mss::mcbist::address<MC>& i_address )
 {
     fapi2::buffer<uint64_t> l_buffer;
     uint8_t l_symbol = 0;

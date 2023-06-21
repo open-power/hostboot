@@ -85,17 +85,17 @@ template<>
 fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
 {
     using TT = mcbistTraits<mss::mc_type::ODYSSEY>;
+    using AT = mcbistAddrTraits<mss::mc_type::ODYSSEY>;
 
-    mss::mcbist::address l_end_of_start_port;
-    mss::mcbist::address l_end_of_complete_port(TT::LARGEST_ADDRESS);
-    mss::mcbist::address l_start_of_end_port;
+    mss::mcbist::address<mss::mc_type::ODYSSEY> l_end_of_start_port;
+    mss::mcbist::address<mss::mc_type::ODYSSEY> l_end_of_complete_port(TT::LARGEST_ADDRESS);
+    mss::mcbist::address<mss::mc_type::ODYSSEY> l_start_of_end_port;
 
-    // The last address in the start port is the start address thru the "DIMM range" (all addresses left on this DIMM)
-    iv_const.iv_start_address.get_range<mss::mcbist::address::DIMM>(l_end_of_start_port);
+    // The last address in the start port is the start address thru the "port range" (all addresses left on this port)
+    iv_const.iv_start_address.get_range<AT::PORT>(l_end_of_start_port);
 
-    // The first address in the end port is the 0th address of the 0th DIMM on said port.
-    // Note the DIMM bit is used as the port select for Odyssey according to the design team
-    l_start_of_end_port.set_dimm(iv_const.iv_end_address.get_dimm());
+    // Set the first address in the end port
+    l_start_of_end_port.set_port(iv_const.iv_end_address.get_port());
 
     // Before we do anything else, fix up the address for sim. The end address given has to be limited so
     // we don't run too many cycles. Also, if there are intermediate ports the end addresses of those ports
@@ -104,7 +104,7 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
     if (iv_sim)
     {
         iv_const.iv_start_address.get_sim_end_address(l_end_of_start_port);
-        mss::mcbist::address().get_sim_end_address(l_end_of_complete_port);
+        mss::mcbist::address<mss::mc_type::ODYSSEY>().get_sim_end_address(l_end_of_complete_port);
         l_start_of_end_port.get_sim_end_address(iv_const.iv_end_address);
     }
 
@@ -114,7 +114,8 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
     // We know we have three address configs: start address -> end of DIMM, 0 -> end of DIMM and 0 -> end address.
     FAPI_TRY( mss::mcbist::config_address_range0<mss::mc_type::ODYSSEY>(iv_target, iv_const.iv_start_address,
               l_end_of_start_port) );
-    FAPI_TRY( mss::mcbist::config_address_range1<mss::mc_type::ODYSSEY>(iv_target, mss::mcbist::address(),
+    FAPI_TRY( mss::mcbist::config_address_range1<mss::mc_type::ODYSSEY>(iv_target,
+              mss::mcbist::address<mss::mc_type::ODYSSEY>(),
               l_end_of_complete_port) );
     FAPI_TRY( mss::mcbist::config_address_range2<mss::mc_type::ODYSSEY>(iv_target, l_start_of_end_port,
               iv_const.iv_end_address) );
@@ -169,9 +170,7 @@ void operation<mss::mc_type::ODYSSEY>::configure_multiport_subtests(
         // Ok, we're gonna need to push on a subtest.
         auto l_subtest = iv_subtest;
 
-        // Again, the DIMM select is used for the port on Odyssey
-        // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
-        l_subtest.enable_dimm(l_portdimm_this_dimm);
+        l_subtest.enable_port(l_portdimm_this_dimm);
 
         // Ok this is the starting point. We know it's address selection is config0
         if (l_portdimm_this_dimm == l_portdimm_start_address)
@@ -263,7 +262,7 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_init_internal()
     std::sort(iv_program.iv_subtests.begin(), iv_program.iv_subtests.end(),
               [](const decltype(iv_subtest)& a, const decltype(iv_subtest)& b) -> bool
     {
-        return a.get_dimm() < b.get_dimm();
+        return a.get_port() < b.get_port();
     });
 
     // Initialize the common sections

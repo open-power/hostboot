@@ -158,6 +158,26 @@ class MemAddr
              iv_col(i_col), iv_port(i_port)
     {}
 
+  private: // functions
+
+    /**
+     * @brief  Returns a right justified uint64_t version of the address that
+     *         has been incremented to the next row to be input to a scrub cmd.
+     *         Explorer specific function.
+     * @param  i_ocmb OCMB chip.
+     * @return A right justified uint64_t version of the address.
+     */
+    uint64_t expIncRowAddr( ExtensibleChip * i_ocmb ) const;
+
+    /**
+     * @brief  Returns a right justified uint64_t version of the address that
+     *         has been incremented to the next row to be input to a scrub cmd.
+     *         Odyssey specific function.
+     * @param  i_ocmb OCMB chip.
+     * @return A right justified uint64_t version of the address.
+     */
+    uint64_t odyIncRowAddr( ExtensibleChip * i_ocmb ) const;
+
   private: // instance variables
 
     MemRank  iv_rnk = MemRank(0); ///< Rank

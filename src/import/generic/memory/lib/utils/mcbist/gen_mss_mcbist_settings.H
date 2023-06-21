@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -765,7 +765,7 @@ struct constraints
     /// @param[in] i_start_address address to start from
     ///
     constraints( const stop_conditions<MC, T, TT>& i_stop,
-                 const address& i_start_address ):
+                 const address<MC>& i_start_address ):
         constraints(i_stop)
     {
         iv_start_address = i_start_address;
@@ -783,8 +783,8 @@ struct constraints
     constraints( const stop_conditions<MC, T, TT>& i_stop,
                  const speed i_speed,
                  const end_boundary i_end_boundary,
-                 const address& i_start_address,
-                 const address& i_end_address = mcbist::address(TT::LARGEST_ADDRESS) ):
+                 const address<MC>& i_start_address,
+                 const address<MC>& i_end_address = mcbist::address<MC>(TT::LARGEST_ADDRESS) ):
         constraints(i_stop, i_start_address)
     {
         iv_end_boundary = i_end_boundary;
@@ -805,8 +805,8 @@ struct constraints
     uint64_t iv_pattern;
     end_boundary iv_end_boundary;
     speed iv_speed;
-    mcbist::address iv_start_address;
-    mcbist::address iv_end_address;
+    mcbist::address<MC> iv_start_address;
+    mcbist::address<MC> iv_end_address;
 };
 
 

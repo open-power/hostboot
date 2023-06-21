@@ -133,6 +133,56 @@ namespace mcbist
 {
 
 ///
+/// @brief Enable a specific port for this test - maint address mode - ODYSSEY specialization
+/// @param[in] i_port the port desired to be enabled - int 0, 1, 2, 3
+/// @note The port number is relative to the MCBIST
+/// @return void
+///
+template<>
+void subtest_t<mss::mc_type::ODYSSEY>::enable_port( const uint64_t i_port )
+{
+    using TT = mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
+    // Odyssey uses COMPL_3RD_CMD to select the port
+    iv_mcbmr.template writeBit<TT::COMPL_3RD_CMD>(i_port);
+    return;
+}
+
+///
+/// @brief Enable a specific dimm for this test - maint address mode - ODYSSEY specialization
+/// @param[in] i_dimm the dimm desired to be enabled - int 0, 1
+/// @return void
+///
+template<>
+void subtest_t<mss::mc_type::ODYSSEY>::enable_dimm( const uint64_t i_dimm )
+{
+    // Odyssey doesn't use the DIMM field
+    return;
+}
+
+///
+/// @brief Get the port from this subtest - ODYSSEY specialization
+/// @note The port number is relative to the MCBIST
+/// @return the port of the subtest
+///
+template<>
+uint64_t subtest_t<mss::mc_type::ODYSSEY>::get_port() const
+{
+    using TT = mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
+    return iv_mcbmr.template getBit<TT::COMPL_3RD_CMD>() ? 1 : 0;
+}
+
+///
+/// @brief Get the DIMM from this subtest - ODYSSEY specialization
+/// @return the DIMM this subtest has been configured for
+///
+template<>
+uint64_t subtest_t<mss::mc_type::ODYSSEY>::get_dimm() const
+{
+    // Odyssey doesn't use the DIMM field
+    return 0;
+}
+
+///
 /// @brief Get a list of ports involved in the program
 /// Specialization for program<mss::mc_type::ODYSSEY>
 /// @param[in] i_target the target for this program

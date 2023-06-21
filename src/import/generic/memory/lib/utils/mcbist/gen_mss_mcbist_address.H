@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <generic/memory/lib/ecc/ecc_traits.H>
 #include <generic/memory/lib/utils/mss_pair.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
 
 namespace mss
 {
@@ -49,52 +50,27 @@ namespace mcbist
 ///
 /// @class address
 /// @brief Represents a physical address in memory
-/// @note
-/// 0:1   port select
-/// 2     dimm select
-/// 3:4   mrank(0 to 1)
-/// 5:7   srank(0 to 2)
-/// 8:25  row(0 to 17)
-/// 26:32 col(3 to 9)
-/// 33:35 bank(0 to 2)
-/// 36:37 bank_group(0 to 1)
+/// @tparam MC the memory controller type
+/// @tparam TT the MCBIST address traits for the controller
 ///
+template <mss::mc_type MC, typename TT = mss::mcbistAddrTraits<MC>>
 class address
 {
-    public:
-
-        // How far over we shift to align the address in either the register or a buffer
-        static constexpr uint64_t MAGIC_PAD = 26;
-
         // first is the start bit of the field, second is the length
         using field = mss::pair<uint64_t, uint64_t>;
 
-        constexpr static field PORT = {0, 2};
-        constexpr static field DIMM = {2, 1};
-        constexpr static field MRANK = {3, 2};
-        constexpr static field SRANK = {5, 3};
-        constexpr static field ROW = {8, 18};
-        constexpr static field COL = {26, 7};
-        constexpr static field BANK = {33, 3};
-        constexpr static field BANK_GROUP = {36, 2};
-        constexpr static field LAST_VALID = BANK_GROUP;
-
+    public:
         ///
         /// @brief default ctor
         ///
         address() = default;
-
-        // Used when accessing an integral value containing a port and DIMM combination
-        static constexpr uint64_t DIMM_BIT = 63;
-        static constexpr uint64_t PORT_START = 61;
-        static constexpr uint64_t PORT_LEN = 2;
 
         ///
         /// @brief Construct an address from a uint64_t
         /// @param[in] i_value representing an address
         ///
         address( const uint64_t i_value ):
-            iv_address(i_value << MAGIC_PAD)
+            iv_address(i_value << TT::MAGIC_PAD)
         {
         }
 
@@ -113,7 +89,7 @@ class address
         ///
         inline operator uint64_t() const
         {
-            return iv_address >> MAGIC_PAD;
+            return iv_address >> TT::MAGIC_PAD;
         }
 
         ///
@@ -123,7 +99,7 @@ class address
         /// @return address& for method chaining
         ///
         template< const field& F >
-        inline address& set_field( const uint64_t i_value )
+        inline address<MC>& set_field( const uint64_t i_value )
         {
             iv_address.insertFromRight<F.first, F.second>(i_value);
             return *this;
@@ -150,14 +126,14 @@ class address
         /// @note this pointer is the start address
         ///
         template< const field& F >
-        inline void get_range( address& o_end ) const
+        inline void get_range( address<MC>& o_end ) const
         {
             constexpr uint64_t START = F.first + F.second;
-            constexpr uint64_t LEN = (LAST_VALID.first + LAST_VALID.second) - START;
+            constexpr uint64_t LEN = (TT::LAST_VALID.first + TT::LAST_VALID.second) - START;
 
             // All we need to do is fill in the bits to the right of the last valid field
             o_end.iv_address = iv_address;
-            o_end.iv_address.setBit<START, LEN>();
+            o_end.iv_address.template setBit<START, LEN>();
         }
 
 
@@ -166,17 +142,10 @@ class address
         /// @param[out] o_end representing an address to end at
         /// @note this pointer is the start address
         ///
-        inline void get_sim_end_address( address& o_end ) const
+        inline void get_sim_end_address( address<MC>& o_end ) const
         {
-            // This magic number represents a range of addresses which cover all
-            // cache lines the training algorithms touch. By effecting 0 - this end
-            // address you'll effect everything which has bad ECC in the sim.
-            // TODO: this will have to change for explorer. it's algorithm dependent.
-            //       we'll need to talk to the microchip about this
-            constexpr uint64_t l_magic_sim_number = 0b1000000;
-
-            get_range<COL>(o_end);
-            o_end.set_column(l_magic_sim_number);
+            get_range<TT::COL>(o_end);
+            o_end.set_column(TT::SIM_ECC_RANGE);
             return;
         }
 
@@ -185,9 +154,9 @@ class address
         /// @param[in] i_start representing an address to start from
         /// @param[out] o_end representing an address to end at
         ///
-        inline static void get_mrank_range( const address& i_start, address& o_end )
+        inline static void get_mrank_range( const address<MC>& i_start, address<MC>& o_end )
         {
-            i_start.get_range<MRANK>(o_end);
+            i_start.template get_range<TT::MRANK>(o_end);
         }
 
         ///
@@ -201,8 +170,8 @@ class address
         inline static void get_mrank_range( const uint64_t i_port,
                                             const uint64_t i_dimm,
                                             const uint64_t i_mrank,
-                                            address& o_start,
-                                            address& o_end )
+                                            address<MC>& o_start,
+                                            address<MC>& o_end )
         {
             o_start.set_port(i_port).set_dimm(i_dimm).set_master_rank(i_mrank);
             get_mrank_range(o_start, o_end);
@@ -213,9 +182,9 @@ class address
         /// @param[in] i_start representing an address to start from
         /// @param[out] o_end representing an address to end at
         ///
-        inline static void get_srank_range( const address& i_start, address& o_end )
+        inline static void get_srank_range( const address<MC>& i_start, address<MC>& o_end )
         {
-            i_start.get_range<SRANK>(o_end);
+            i_start.template get_range<TT::SRANK>(o_end);
         }
 
         ///
@@ -229,8 +198,8 @@ class address
         ///
         inline static void get_srank_range( const uint64_t i_port, const uint64_t i_dimm,
                                             const uint64_t i_mrank, const uint64_t i_srank,
-                                            address& o_start,
-                                            address& o_end )
+                                            address<MC>& o_start,
+                                            address<MC>& o_end )
         {
             o_start.set_port(i_port).set_dimm(i_dimm).set_master_rank(i_mrank).set_slave_rank(i_srank);
             get_srank_range(o_start, o_end);
@@ -241,9 +210,9 @@ class address
         /// @param[in] i_value the value to set
         /// @return address& for method chaining
         ///
-        inline address& set_port( const uint64_t i_value )
+        inline address<MC>& set_port( const uint64_t i_value )
         {
-            return set_field<PORT>(i_value);
+            return set_field<TT::PORT>(i_value);
         }
 
         ///
@@ -252,7 +221,7 @@ class address
         ///
         inline uint64_t get_port() const
         {
-            return get_field<PORT>();
+            return get_field<TT::PORT>();
         }
 
         ///
@@ -261,19 +230,13 @@ class address
         /// @note 0 is the DIMM[0] != 0 is DIMM[1]
         /// @return address& for method chaining
         ///
-        inline address& set_dimm( const uint64_t i_value )
-        {
-            return set_field<DIMM>(i_value);
-        }
+        address<MC>& set_dimm( const uint64_t i_value );
 
         ///
         /// @brief Get the DIMM value for an address
         /// @return right-aligned uint64_t representing the value
         ///
-        inline uint64_t get_dimm() const
-        {
-            return get_field<DIMM>();
-        }
+        uint64_t get_dimm() const;
 
         ///
         /// @brief Set the port and DIMM value for an address
@@ -281,37 +244,23 @@ class address
         /// @return address& for method chaining
         /// @note Useful for indexing all ports/DIMM on a controller
         ///
-        inline address& set_port_dimm( const fapi2::buffer<uint64_t> i_value )
-        {
-            uint64_t l_read_port = 0;
-
-            i_value.extractToRight<PORT_START, PORT_LEN>(l_read_port);
-            return set_dimm(i_value.getBit<DIMM_BIT>()).set_port(l_read_port);
-        }
+        address<MC>& set_port_dimm( const fapi2::buffer<uint64_t> i_value );
 
         ///
         /// @brief Get the port and DIMM value for an address
         /// @return right-aligned uint64_t representing the value
         /// @note Useful for indexing all ports/DIMM on a controller
         ///
-        inline uint64_t get_port_dimm() const
-        {
-            fapi2::buffer<uint64_t> l_value;
-
-            l_value.insertFromRight<PORT_START, PORT_LEN>(get_port());
-            l_value.writeBit<DIMM_BIT>(get_dimm());
-
-            return l_value;
-        }
+        uint64_t get_port_dimm() const;
 
         ///
         /// @brief Set the master rank value for an address
         /// @param[in] i_value the value to set
         /// @return address& for method chaining
         ///
-        inline address& set_master_rank( const uint64_t i_value )
+        inline address<MC>& set_master_rank( const uint64_t i_value )
         {
-            return set_field<MRANK>(i_value);
+            return set_field<TT::MRANK>(i_value);
         }
 
         ///
@@ -320,7 +269,7 @@ class address
         ///
         inline uint64_t get_master_rank() const
         {
-            return get_field<MRANK>();
+            return get_field<TT::MRANK>();
         }
 
 
@@ -330,7 +279,7 @@ class address
         ///
         inline void set_slave_rank( const uint64_t i_value )
         {
-            set_field<SRANK>(i_value);
+            set_field<TT::SRANK>(i_value);
         }
 
         ///
@@ -339,7 +288,7 @@ class address
         ///
         inline uint64_t get_slave_rank() const
         {
-            return get_field<SRANK>();
+            return get_field<TT::SRANK>();
         }
 
 
@@ -348,9 +297,9 @@ class address
         /// @param[in] i_value the value to set
         /// @return address& for method chaining
         ///
-        inline address& set_row( const uint64_t i_value )
+        inline address<MC>& set_row( const uint64_t i_value )
         {
-            return set_field<ROW>(i_value);
+            return set_field<TT::ROW>(i_value);
         }
 
         ///
@@ -359,7 +308,7 @@ class address
         ///
         inline uint64_t get_row() const
         {
-            return get_field<ROW>();
+            return get_field<TT::ROW>();
         }
 
 
@@ -368,9 +317,9 @@ class address
         /// @param[in] i_value the value to set
         /// @return address& for method chaining
         ///
-        inline address& set_column( const uint64_t i_value )
+        inline address<MC>& set_column( const uint64_t i_value )
         {
-            return set_field<COL>(i_value);
+            return set_field<TT::COL>(i_value);
         }
 
         ///
@@ -379,7 +328,7 @@ class address
         ///
         inline uint64_t get_column() const
         {
-            return get_field<COL>();
+            return get_field<TT::COL>();
         }
 
 
@@ -388,9 +337,9 @@ class address
         /// @param[in] i_value the value to set
         /// @return address& for method chaining
         ///
-        inline address& set_bank( const uint64_t i_value )
+        inline address<MC>& set_bank( const uint64_t i_value )
         {
-            return set_field<BANK>(i_value);
+            return set_field<TT::BANK>(i_value);
         }
 
         ///
@@ -399,7 +348,7 @@ class address
         ///
         inline uint64_t get_bank() const
         {
-            return get_field<BANK>();
+            return get_field<TT::BANK>();
         }
 
         ///
@@ -407,9 +356,9 @@ class address
         /// @param[in] i_value the value to set
         /// @return address& for method chaining
         ///
-        inline address& set_bank_group( const uint64_t i_value )
+        inline address<MC>& set_bank_group( const uint64_t i_value )
         {
-            return set_field<BANK_GROUP>(i_value);
+            return set_field<TT::BANK_GROUP>(i_value);
         }
 
         ///
@@ -418,7 +367,7 @@ class address
         ///
         inline uint64_t get_bank_group() const
         {
-            return get_field<BANK_GROUP>();
+            return get_field<TT::BANK_GROUP>();
         }
 
         ///

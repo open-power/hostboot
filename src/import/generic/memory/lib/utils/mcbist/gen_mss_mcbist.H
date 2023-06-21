@@ -380,59 +380,27 @@ class subtest_t
         /// @note The port number is relative to the MCBIST
         /// @return void
         ///
-        inline void enable_port( const uint64_t i_port )
-        {
-            if (TT::MULTI_PORTS == mss::states::YES)
-            {
-                constexpr uint64_t l_len = (TT::COMPL_2ND_CMD - TT::COMPL_1ST_CMD) + 1;
-                iv_mcbmr.template insertFromRight<TT::COMPL_1ST_CMD, l_len>(i_port);
-            }
-
-            return;
-        }
+        void enable_port( const uint64_t i_port );
 
         ///
         /// @brief Enable a specific dimm for this test - maint address mode
         /// @param[in] i_dimm the dimm desired to be enabled - int 0, 1
         /// @return void
         ///
-        // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
-        inline void enable_dimm( const uint64_t i_dimm )
-        {
-            iv_mcbmr.template writeBit<TT::COMPL_3RD_CMD>(i_dimm);
-            return;
-        }
+        void enable_dimm( const uint64_t i_dimm );
 
         ///
         /// @brief Get the port from this subtest
         /// @note The port number is relative to the MCBIST
         /// @return the port of the subtest
         ///
-        // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
-        inline uint64_t get_port() const
-        {
-            uint64_t l_port = 0;
-
-            if (TT::MULTI_PORTS == mss::states::YES)
-            {
-                constexpr uint64_t l_len = (TT::COMPL_2ND_CMD - TT::COMPL_1ST_CMD) + 1;
-                iv_mcbmr.template extractToRight<TT::COMPL_1ST_CMD, l_len>(l_port);
-            }
-
-            return l_port;
-        }
+        uint64_t get_port() const;
 
         ///
         /// @brief Get the DIMM from this subtest
         /// @return the DIMM this subtest has been configured for
         ///
-        inline uint64_t get_dimm() const
-        {
-
-            return iv_mcbmr.template getBit<TT::COMPL_3RD_CMD>() ? 1 : 0;
-
-            return 0;
-        }
+        uint64_t get_dimm() const;
 
         ///
         /// @brief Add the subtest to go to
@@ -2947,6 +2915,7 @@ inline fapi2::ReturnCode load_addr_gen( const fapi2::Target<T>& i_target, const 
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the mcbistTraits associated with T
+/// @tparam AT the mcbistAddrTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_start 64b right-aligned address
 /// @param[in] i_end 64b right-aligned address
@@ -2955,7 +2924,7 @@ inline fapi2::ReturnCode load_addr_gen( const fapi2::Target<T>& i_target, const 
 /// @note Only the right-most 37 bits of the start/end are used.
 /// @warn if address counting mode is enabled in the MCBIST program, these bits are start, len
 ///
-template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T>, typename AT = mcbistAddrTraits<MC> >
 inline fapi2::ReturnCode config_address_range( const fapi2::Target<T>& i_target,
         const uint64_t i_start,
         const uint64_t i_end,
@@ -2963,8 +2932,8 @@ inline fapi2::ReturnCode config_address_range( const fapi2::Target<T>& i_target,
 {
     FAPI_INF("config MCBIST address range %d start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
              i_index,
-             i_start, (i_start << mss::mcbist::address::MAGIC_PAD),
-             i_end, (i_end << mss::mcbist::address::MAGIC_PAD),
+             i_start, (i_start << AT::MAGIC_PAD),
+             i_end, (i_end << AT::MAGIC_PAD),
              mss::c_str(i_target));
     FAPI_ASSERT( i_index < TT::ADDRESS_PAIRS,
                  fapi2::MSS_MCBIST_INVALID_ADDRESS_PAIR_INDEX().
@@ -2972,8 +2941,8 @@ inline fapi2::ReturnCode config_address_range( const fapi2::Target<T>& i_target,
                  set_MC_TYPE(MC).
                  set_TARGET(i_target),
                  "An invalid address pair index %d for %s", i_index, mss::c_str(i_target));
-    FAPI_TRY( fapi2::putScom(i_target, TT::address_pairs[i_index].first, i_start << mss::mcbist::address::MAGIC_PAD) );
-    FAPI_TRY( fapi2::putScom(i_target, TT::address_pairs[i_index].second, i_end << mss::mcbist::address::MAGIC_PAD) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::address_pairs[i_index].first, i_start << AT::MAGIC_PAD) );
+    FAPI_TRY( fapi2::putScom(i_target, TT::address_pairs[i_index].second, i_end << AT::MAGIC_PAD) );
 
 fapi_try_exit:
     return fapi2::current_err;

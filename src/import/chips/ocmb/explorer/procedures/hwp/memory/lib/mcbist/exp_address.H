@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <utility>
 #include <lib/shared/exp_consts.H>
 #include <lib/ecc/ecc_traits_explorer.H>
+#include <lib/mcbist/exp_mcbist_traits.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_ecc_trap_address.H>

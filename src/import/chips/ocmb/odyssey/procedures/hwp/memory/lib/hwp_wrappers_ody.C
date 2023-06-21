@@ -88,9 +88,9 @@ fapi2::ReturnCode ody_sf_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 ///
 fapi2::ReturnCode ody_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop,
-                               const mss::mcbist::address& i_address,
+                               const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_address,
                                const mss::mcbist::end_boundary i_end,
-                               const mss::mcbist::address& i_end_address )
+                               const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_end_address )
 {
     return mss::memdiags::sf_read<mss::mc_type::ODYSSEY>(i_target, i_stop, i_address, i_end, i_end_address);
 }
@@ -106,7 +106,7 @@ fapi2::ReturnCode ody_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 fapi2::ReturnCode ody_background_steer( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                         const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop,
                                         const mss::mcbist::speed i_speed,
-                                        const mss::mcbist::address& i_address )
+                                        const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_address )
 {
     return mss::memdiags::mss_firmware_background_steer_helper<mss::mc_type::ODYSSEY>(i_target,
             i_stop,
@@ -133,7 +133,7 @@ fapi2::ReturnCode ody_mnfg_fast_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OC
 /// @return FAPI2_RC_SUCCESS iff everything ok
 ///
 fapi2::ReturnCode ody_single_address_steer( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const mss::mcbist::address& i_address )
+        const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_address )
 {
     mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> l_stop;
     return mss::memdiags::targeted_steer<mss::mc_type::ODYSSEY>(i_target, l_stop, i_address, i_address,
@@ -152,8 +152,8 @@ fapi2::ReturnCode ody_single_address_steer( const fapi2::Target<fapi2::TARGET_TY
 ///
 fapi2::ReturnCode ody_targeted_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                       const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop,
-                                      const mss::mcbist::address& i_start_address,
-                                      const mss::mcbist::address& i_end_address,
+                                      const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_start_address,
+                                      const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_end_address,
                                       const mss::mcbist::end_boundary i_end )
 {
     return mss::memdiags::targeted_scrub<mss::mc_type::ODYSSEY>(i_target, i_stop, i_start_address, i_end_address, i_end);

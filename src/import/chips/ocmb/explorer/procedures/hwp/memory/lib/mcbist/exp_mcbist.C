@@ -134,6 +134,71 @@ const std::vector< uint64_t > mcbistTraits<mss::mc_type::EXPLORER, fapi2::TARGET
 
 namespace mcbist
 {
+
+///
+/// @brief Enable a specific port for this test - maint address mode - EXPLORER specialization
+/// @param[in] i_port the port desired to be enabled - int 0, 1, 2, 3
+/// @note The port number is relative to the MCBIST
+/// @return void
+///
+template<>
+void subtest_t<mss::mc_type::EXPLORER>::enable_port( const uint64_t i_port )
+{
+    using TT = mcbistTraits<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>;
+
+    if (TT::MULTI_PORTS == mss::states::YES)
+    {
+        constexpr uint64_t l_len = (TT::COMPL_2ND_CMD - TT::COMPL_1ST_CMD) + 1;
+        iv_mcbmr.template insertFromRight<TT::COMPL_1ST_CMD, l_len>(i_port);
+    }
+
+    return;
+}
+
+///
+/// @brief Enable a specific dimm for this test - maint address mode - EXPLORER specialization
+/// @param[in] i_dimm the dimm desired to be enabled - int 0, 1
+/// @return void
+///
+template<>
+void subtest_t<mss::mc_type::EXPLORER>::enable_dimm( const uint64_t i_dimm )
+{
+    using TT = mcbistTraits<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>;
+    iv_mcbmr.template writeBit<TT::COMPL_3RD_CMD>(i_dimm);
+    return;
+}
+
+///
+/// @brief Get the port from this subtest - EXPLORER specialization
+/// @note The port number is relative to the MCBIST
+/// @return the port of the subtest
+///
+template<>
+uint64_t subtest_t<mss::mc_type::EXPLORER>::get_port() const
+{
+    using TT = mcbistTraits<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>;
+    uint64_t l_port = 0;
+
+    if (TT::MULTI_PORTS == mss::states::YES)
+    {
+        constexpr uint64_t l_len = (TT::COMPL_2ND_CMD - TT::COMPL_1ST_CMD) + 1;
+        iv_mcbmr.template extractToRight<TT::COMPL_1ST_CMD, l_len>(l_port);
+    }
+
+    return l_port;
+}
+
+///
+/// @brief Get the DIMM from this subtest - EXPLORER specialization
+/// @return the DIMM this subtest has been configured for
+///
+template<>
+uint64_t subtest_t<mss::mc_type::EXPLORER>::get_dimm() const
+{
+    using TT = mcbistTraits<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>;
+    return iv_mcbmr.template getBit<TT::COMPL_3RD_CMD>() ? 1 : 0;
+}
+
 ///
 /// @brief Get a list of ports involved in the program
 /// Specialization for program<mss::mc_type::EXPLORER>

@@ -102,7 +102,7 @@ fapi_try_exit:
 /// @param[in] i_address mcbist::address form of address field
 ///
 template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGET_TYPE, typename TT = eccTraits<MC, T> >
-inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address& i_address)
+inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address<MC>& i_address)
 {
     io_data.insertFromRight<TT::CURRENT_ADDR_TRAP, TT::CURRENT_ADDR_TRAP_LEN>(uint64_t(i_address));
     FAPI_INF("set_address: 0x%016lx", uint64_t(i_address));
@@ -117,11 +117,11 @@ inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address
 /// @param[out] o_address mcbist::address form of address field
 ///
 template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGET_TYPE, typename TT = eccTraits<MC, T> >
-inline void get_address( const fapi2::buffer<uint64_t>& i_data, mcbist::address& o_address )
+inline void get_address( const fapi2::buffer<uint64_t>& i_data, mcbist::address<MC>& o_address )
 {
     uint64_t l_addr = 0;
     i_data.extractToRight<TT::CURRENT_ADDR_TRAP, TT::CURRENT_ADDR_TRAP_LEN>(l_addr);
-    o_address = mcbist::address(l_addr);
+    o_address = mcbist::address<MC>(l_addr);
     FAPI_INF("get_address: 0x%016lx", uint64_t(l_addr));
 }
 

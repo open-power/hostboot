@@ -159,11 +159,9 @@ uint64_t MemAddr::toMaintAddr<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt ) const
     }
 }
 
-template<TARGETING::TYPE T>
-uint64_t MemAddr::incRowAddr( ExtensibleChip * i_chip ) const
+uint64_t MemAddr::expIncRowAddr( ExtensibleChip * i_ocmb ) const
 {
-    // TODO: This format has changed for Odyssey, bits 0:1 are unused and
-    //       bit 2 is actually the port select.
+    // Explorer:
     // Format of mss::mcbist::address, bits in ascending order
     // 0:1   port select
     // 2     dimm select
@@ -182,12 +180,12 @@ uint64_t MemAddr::incRowAddr( ExtensibleChip * i_chip ) const
     bool twoDimmConfig, col3Config;
     uint8_t mrnkBits, srnkBits, extraRowBits;
     // TODO Odyssey - needs odyssey version
-    int32_t rc = MemUtils::expGetAddrConfig( i_chip, iv_rnk.getDimmSlct(),
+    int32_t rc = MemUtils::expGetAddrConfig( i_ocmb, iv_rnk.getDimmSlct(),
         twoDimmConfig, mrnkBits, srnkBits, extraRowBits, col3Config );
     if ( SUCCESS != rc )
     {
         PRDF_ERR( "[MemAddr::incRowAddr] expGetAddrConfig(0x%08x, %d)",
-                  i_chip->getHuid(), iv_rnk.getDimmSlct() );
+                  i_ocmb->getHuid(), iv_rnk.getDimmSlct() );
     }
 
     // Zero out bank and column.
@@ -230,9 +228,89 @@ uint64_t MemAddr::incRowAddr( ExtensibleChip * i_chip ) const
     );
 }
 
-template
-uint64_t MemAddr::incRowAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip ) const;
+uint64_t MemAddr::odyIncRowAddr( ExtensibleChip * i_ocmb ) const
+{
+    // Odyssey:
+    // Format of mss::mcbist::address, bits in ascending order
+    // 0:1   unused
+    // 2     port select
+    // 3     mrank
+    // 4:6   srank(0 to 2)
+    // 7:24  row(0 to 17)
+    // 25:32 col(3 to 10)
+    // 33:34 bank(0 to 1)
 
+    // Note: we should not be calling this function for the last address of the
+    // master rank.
+
+    // Get the address config to determine whether we are using row17 or not.
+    // extraRowBits will denote whether row16:row17 are used (0:2);
+    bool twoPortConfig, col3Config, col10Config, bank1Config, bankGrp2Config;
+    uint8_t prnkBits, srnkBits, extraRowBits;
+
+    int32_t rc = MemUtils::odyGetAddrConfig( i_ocmb, iv_port,
+        twoPortConfig, prnkBits, srnkBits, extraRowBits, col3Config,
+        col10Config, bank1Config, bankGrp2Config );
+    if ( SUCCESS != rc )
+    {
+        PRDF_ERR( "[MemAddr::incRowAddr] odyGetAddrConfig(0x%08x, %d)",
+                  i_ocmb->getHuid(), iv_port );
+    }
+
+    // Zero out bank and column.
+    uint32_t incRow  = 0;
+    uint16_t zeroCol = 0;
+    uint8_t  zeroBnk = 0;
+    uint8_t  srank = iv_rnk.getSlave();
+
+    // If we are on the last row of the secondary rank, we need to increment
+    // the srank and zero out the row. If row17 or row16 isn't used, don't
+    // check it for determining the last row.
+    uint8_t shift = 2 - extraRowBits;
+    uint32_t lastRow = (0x3ffff >> shift) << shift;
+    if ( iv_row == lastRow )
+    {
+        srank += 1;
+    }
+    else
+    {
+        // Increment row
+        // Note: we need to increment the rightmost row bit that is valid, so
+        //       we shift our row value over based on the number of extra row
+        //       bits first before incrementing.
+        incRow = iv_row >> shift;
+        incRow += 1;
+        incRow = incRow << shift;
+    }
+
+    // Note: the uint64_t passed back will be right justified as that is the
+    // format we will want for passing into the constructor of
+    // mss::mcbist::address.
+    return
+    (
+        ((uint64_t)(iv_port              & 0x1    ) << 35) | // 2
+        ((uint64_t)(iv_rnk.getRankSlct() & 0x1    ) << 34) | // 3
+        ((uint64_t)(srank                & 0x7    ) << 31) | // 4:6
+        ((uint64_t)(incRow               & 0x3ffff) << 13) | // 7:24
+        ((uint64_t)(zeroCol              & 0xff   ) <<  5) | // 25:32
+        ((uint64_t)(zeroBnk              & 0x1f   ))         // 33:37
+    );
+}
+
+template<>
+uint64_t MemAddr::incRowAddr<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip ) const
+{
+    // Check for Odyssey OCMBs
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        return odyIncRowAddr(i_chip);
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        return expIncRowAddr(i_chip);
+    }
+}
 
 //------------------------------------------------------------------------------
 //                       Address Accessor Functions

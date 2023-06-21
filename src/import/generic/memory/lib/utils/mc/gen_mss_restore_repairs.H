@@ -108,13 +108,15 @@ fapi2::ReturnCode place_symbol_mark(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
     const auto l_rank_idx = mss::index(i_port_rank);
 
     uint8_t l_galois = 0;
-    mss::mcbist::address l_addr;
+    mss::mcbist::address<MC> l_addr;
 
     // For symbol marks, we set the appropriate Firmware Mark Store reg, with the symbol's
     // Galois code, mark_type=SYMBOL, mark_region=MRANK, and the address of the DIMM+MRANK
     // TODO RTC:165133 Remove static_cast once Galois API is updated to accept uint64_t input
     FAPI_TRY( mss::ecc::dq_to_galois<MC>(static_cast<uint8_t>(i_dq), l_galois) );
 
+    // Note that for Odyssey, the DIMM and MRANK[0] bits should always be 0
+    // but this is ok here because set_dimm does nothing on Odyssey and there is only one mrank on Odyssey
     l_addr.set_dimm(l_dimm_idx).set_master_rank(l_rank_idx);
 
     FAPI_INF(TARGTIDFORMAT " Setting firmware symbol mark on rank:%d dq:%d galois:0x%02x",

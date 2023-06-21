@@ -238,17 +238,6 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
     do
     {
-        // Get the first address of the given rank.
-        mss::mcbist::address saddr, eaddr;
-        o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_ocmb, i_rank, i_port, saddr,
-                                                eaddr, SLAVE_RANK );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
-                      i_ocmb->getHuid(), i_rank.getKey() );
-            break;
-        }
-
         // Clear all of the counters and maintenance ECC attentions.
         o_rc = prepareNextCmd<TYPE_OCMB_CHIP>( i_ocmb );
         if ( SUCCESS != o_rc )
@@ -263,6 +252,16 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
 
         if (isOdysseyOcmb(i_ocmb->getTrgt()))
         {
+            // Get the first address of the given rank.
+            mss::mcbist::address<mss::mc_type::ODYSSEY> saddr, eaddr;
+            o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_ocmb, i_rank, i_port,
+                                                    saddr, eaddr, SLAVE_RANK );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                          i_ocmb->getHuid(), i_rank.getKey() );
+                break;
+            }
             // Get the stop conditions.
             mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> stopCond;
             stopCond.set_pause_on_mpe(mss::ON)
@@ -283,6 +282,17 @@ uint32_t startSfRead<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
         }
         else
         {
+            // Get the first address of the given rank.
+            mss::mcbist::address<mss::mc_type::EXPLORER> saddr, eaddr;
+            o_rc = getMemAddrRange<TYPE_OCMB_CHIP>( i_ocmb, i_rank, i_port,
+                                                    saddr, eaddr, SLAVE_RANK );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getMemAddrRange(0x%08x,0x%2x) failed",
+                          i_ocmb->getHuid(), i_rank.getKey() );
+                break;
+            }
+
             // Get the stop conditions.
             mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
             stopCond.set_pause_on_mpe(mss::ON)

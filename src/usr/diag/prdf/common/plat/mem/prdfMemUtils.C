@@ -1085,6 +1085,10 @@ uint32_t odyGetAddrConfig( ExtensibleChip * i_chip, uint8_t i_portSlct,
     // The 'half' bit (prank0) of the primary rank is not used in two port mode
     if (!o_twoPortConfig)
     {
+        // This is unexpected, as two port mode should always be enabled.
+        // Print an error trace just in case it happens.
+        PRDF_ERR(PRDF_FUNC "OCMB 0x%08x unexpectedly not in two port mode",
+                 i_chip->getHuid());
         o_prnkBits++;
     }
     if ( mc_addr_trans0.isBitSet(i_portSlct ? 18: 17) ) o_prnkBits++;

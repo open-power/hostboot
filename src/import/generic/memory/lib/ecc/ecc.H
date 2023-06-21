@@ -116,7 +116,7 @@ inline fapi2::ReturnCode get_fw_marks( const fapi2::Target<T>& i_target,
     uint64_t l_galois = 0;
     auto l_type = mss::ecc::fwms::mark_type::CHIP;
     auto l_region = mss::ecc::fwms::mark_region::UNIVERSAL;
-    mss::mcbist::address l_address;
+    mss::mcbist::address<MC> l_address;
 
     o_marks.clear();
 
@@ -148,7 +148,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
 inline fapi2::ReturnCode get_nce_addr_trap( const fapi2::Target<T>& i_target,
-        mss::mcbist::address& o_address,
+        mss::mcbist::address<MC>& o_address,
         mss::states& o_on_rce,
         mss::states& o_is_tce )
 {
@@ -199,7 +199,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
 inline fapi2::ReturnCode get_tce_addr_trap( const fapi2::Target<T>& i_target,
-        mss::mcbist::address& o_address,
+        mss::mcbist::address<MC>& o_address,
         mss::states& o_on_rce,
         mss::states& o_is_tce )
 {
@@ -255,7 +255,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
 inline fapi2::ReturnCode get_mpe_addr_trap( const fapi2::Target<T>& i_target,
-        mss::mcbist::address& o_address,
+        mss::mcbist::address<MC>& o_address,
         mss::states& o_on_rce )
 {
     fapi2::buffer<uint64_t> l_buffer;
@@ -281,7 +281,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
 inline fapi2::ReturnCode get_rce_addr_trap( const fapi2::Target<T>& i_target,
-        mss::mcbist::address& o_address,
+        mss::mcbist::address<MC>& o_address,
         mss::states& o_nce_on_rce,
         mss::states& o_tce_on_rce,
         mss::states& o_mpe_on_rce )
@@ -312,7 +312,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
 inline fapi2::ReturnCode get_ue_addr_trap( const fapi2::Target<T>& i_target,
-        mss::mcbist::address& o_address )
+        mss::mcbist::address<MC>& o_address )
 {
     fapi2::buffer<uint64_t> l_buffer;
 
@@ -333,7 +333,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
 inline fapi2::ReturnCode get_aue_addr_trap( const fapi2::Target<T>& i_target,
-        mss::mcbist::address& o_address )
+        mss::mcbist::address<MC>& o_address )
 {
     fapi2::buffer<uint64_t> l_buffer;
 
@@ -380,7 +380,7 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
 inline fapi2::ReturnCode get_maint_current_addr_trap( const fapi2::Target<T>& i_target,
-        mss::mcbist::address& o_address,
+        mss::mcbist::address<MC>& o_address,
         uint64_t& o_port_trap,
         uint64_t& o_dimm_trap )
 {

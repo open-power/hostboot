@@ -76,9 +76,11 @@ fapi2::ReturnCode exp_sf_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 ///
 fapi2::ReturnCode exp_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                const mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>& i_stop,
-                               const mss::mcbist::address& i_address = mss::mcbist::address(),
+                               const mss::mcbist::address<mss::mc_type::EXPLORER>& i_address =
+                                   mss::mcbist::address<mss::mc_type::EXPLORER>(),
                                const mss::mcbist::end_boundary i_end = mss::mcbist::end_boundary::STOP_AFTER_SLAVE_RANK,
-                               const mss::mcbist::address& i_end_address = mss::mcbist::address(
+                               const mss::mcbist::address<mss::mc_type::EXPLORER>& i_end_address =
+                                   mss::mcbist::address<mss::mc_type::EXPLORER>(
                                        mss::mcbistTraits<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>::LARGEST_ADDRESS) );
 
 ///
@@ -92,7 +94,7 @@ fapi2::ReturnCode exp_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 fapi2::ReturnCode exp_background_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                         const mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>& i_stop,
                                         const mss::mcbist::speed i_speed,
-                                        const mss::mcbist::address& i_address );
+                                        const mss::mcbist::address<mss::mc_type::EXPLORER>& i_address );
 
 ///
 /// @brief Targeted scrub command wrapper for Explorer
@@ -105,8 +107,8 @@ fapi2::ReturnCode exp_background_scrub( const fapi2::Target<fapi2::TARGET_TYPE_O
 ///
 fapi2::ReturnCode exp_targeted_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                       const mss::mcbist::stop_conditions<mss::mc_type::EXPLORER>& i_stop,
-                                      const mss::mcbist::address& i_start_address,
-                                      const mss::mcbist::address& i_end_address,
+                                      const mss::mcbist::address<mss::mc_type::EXPLORER>& i_start_address,
+                                      const mss::mcbist::address<mss::mc_type::EXPLORER>& i_end_address,
                                       const mss::mcbist::end_boundary i_end );
 
 ///
@@ -227,9 +229,11 @@ fapi2::ReturnCode ody_sf_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 ///
 fapi2::ReturnCode ody_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop,
-                               const mss::mcbist::address& i_address = mss::mcbist::address(),
+                               const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_address =
+                                   mss::mcbist::address<mss::mc_type::ODYSSEY>(),
                                const mss::mcbist::end_boundary i_end = mss::mcbist::end_boundary::STOP_AFTER_SUBTEST,
-                               const mss::mcbist::address& i_end_address = mss::mcbist::address(
+                               const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_end_address =
+                                   mss::mcbist::address<mss::mc_type::ODYSSEY>(
                                        mss::mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>::LARGEST_ADDRESS) );
 
 ///
@@ -243,7 +247,7 @@ fapi2::ReturnCode ody_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 fapi2::ReturnCode ody_background_steer( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                         const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop,
                                         const mss::mcbist::speed i_speed,
-                                        const mss::mcbist::address& i_address );
+                                        const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_address );
 
 ///
 /// @brief Single address steer command wrapper for Odyssey
@@ -252,7 +256,7 @@ fapi2::ReturnCode ody_background_steer( const fapi2::Target<fapi2::TARGET_TYPE_O
 /// @return FAPI2_RC_SUCCESS iff everything ok
 ///
 fapi2::ReturnCode ody_single_address_steer( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const mss::mcbist::address& i_address );
+        const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_address );
 
 ///
 /// @brief Targeted scrub command wrapper for Odyssey
@@ -265,8 +269,8 @@ fapi2::ReturnCode ody_single_address_steer( const fapi2::Target<fapi2::TARGET_TY
 ///
 fapi2::ReturnCode ody_targeted_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                       const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop,
-                                      const mss::mcbist::address& i_start_address,
-                                      const mss::mcbist::address& i_end_address,
+                                      const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_start_address,
+                                      const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_end_address,
                                       const mss::mcbist::end_boundary i_end );
 
 ///
