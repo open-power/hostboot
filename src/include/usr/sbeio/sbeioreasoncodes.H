@@ -182,4 +182,20 @@ enum UserDetailsTypes
 
 };  // end SBEIO
 
+//*****************************************************
+// SRC Graveyard
+// Contains error log descriptions for SRCs that were
+// removed from the code but we need to still provide
+// backward compatible parser logic for.
+
+/*@
+ * @errortype    ERRORLOG::ERRL_SEV_INFORMATIONAL
+ * @moduleid     SBEIO_GET_FFDC_HANDLER
+ * @reasoncode   SBEIO_MORE_FFDC_THAN_EXPECTED
+ * @userdata1    Maximum expected packages
+ * @userdata2    Number of FFDC packages
+ * @devdesc      Unexpected number of FFDC packages in buffer
+ * @custdesc     Extra FFDC gathered, marked information event
+ */
+
 #endif

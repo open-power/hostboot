@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,7 +133,7 @@ uint64_t addr = 0x1234567890ABCDEF;
 TARGETING::Target* g_testTarget = reinterpret_cast<TARGETING::Target*>(addr);
 errlHndl_t g_errl = reinterpret_cast<errlHndl_t>(addr);
 
-ffdc_package g_testPackage = {nullptr, 0, 0};
+ffdc_package g_testPackage{};
 
 //============================================================
 class SbeFFDCPackageParserTest : public CxxTest::TestSuite
@@ -636,7 +636,7 @@ public:
                 break;
              }
 
-             ffdc_package package2 = {nullptr, 0, 0};
+             ffdc_package package2{};
              bool rc = ffdcParser.getFFDCPackage(0, package2);
 
              if(not rc)

@@ -612,7 +612,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
             bool l_didDefaultProcessing{false};
             for(uint8_t i = 0; i < l_pkgs; i++)
             {
-                 ffdc_package l_package = {nullptr, 0, 0};
+                 ffdc_package l_package{};
                  if(!l_ffdc_parser->getFFDCPackage(i, l_package))
                  {
                      continue;

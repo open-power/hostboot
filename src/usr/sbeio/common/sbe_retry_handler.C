@@ -119,12 +119,6 @@ constexpr uint8_t MAX_SIDE_BOOT_ATTEMPTS        = 2;
 //How many times to attempt RESTART_SBE
 constexpr uint8_t MAX_RESTARTS                  = 2;
 
-// Currently we expect a maxiumum of 2 FFDC packets, the one
-// that is useful to HB is the HWP FFDC. It is possible there is
-// a packet that details an internal sbe fail that hostboot will
-// add to an errorlog but otherwise ignores
-constexpr uint8_t MAX_EXPECTED_FFDC_PACKAGES    = 2;
-
 // Set up constants that will be used for setting up the timeout for
 // reading the sbe message register
 constexpr uint64_t SBE_RETRY_TIMEOUT_HW_SEC     = 60;  // 60 seconds
@@ -1346,43 +1340,6 @@ void SbeRetryHandler::sbe_get_ffdc_handler()
 
         uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
 
-        // Currently we expect a maxiumum of 2 FFDC packets. These packets would be
-        // a HWP FFDC packet which we will look at to determine what our retry action
-        // should be. The other type of packet we might see would be details on the
-        // internal SBE fail. For internal SBE fail packets we will just add the FFDC
-        // to the error log and move on.
-        //
-        // Note:  If we exceed MAX_EXPECTED_FFDC_PACKAGES, commit an informational log.
-        // It shouldn't break anything but this could help us understand if something odd
-        // is happening
-        if(l_pkgs > MAX_EXPECTED_FFDC_PACKAGES)
-        {
-            /*@
-            * @errortype    ERRORLOG::ERRL_SEV_INFORMATIONAL
-            * @moduleid     SBEIO_GET_FFDC_HANDLER
-            * @reasoncode   SBEIO_MORE_FFDC_THAN_EXPECTED
-            * @userdata1    Maximum expected packages
-            * @userdata2    Number of FFDC packages
-            * @devdesc      Unexpected number of FFDC packages in buffer
-            * @custdesc     Extra FFDC gathered, marked information event
-            */
-            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                             SBEIO_GET_FFDC_HANDLER,
-                                             SBEIO_MORE_FFDC_THAN_EXPECTED,
-                                             MAX_EXPECTED_FFDC_PACKAGES,
-                                             l_pkgs);
-
-            l_errl->collectTrace( SBEIO_COMP_NAME, 256);
-
-            // Set the PLID of the error log to master PLID
-            // if the master PLID is set
-            updatePlids(l_errl);
-
-            // Also log the failing proc as FFDC
-            ERRORLOG::ErrlUserDetailsTarget(iv_proc).addToLog(l_errl);
-            errlCommit(l_errl, SBEIO_COMP_ID);
-        }
-
         // If there are FFDC packages, make a log for FFDC from SBE
         if(l_pkgs > 0)
         {
@@ -1415,7 +1372,7 @@ void SbeRetryHandler::sbe_get_ffdc_handler()
                 if (l_rc != fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA)
                 {
                     fapi2::ReturnCode l_fapiRc;
-                    ffdc_package l_package = {nullptr, 0, 0};
+                    ffdc_package l_package{};
                     if(!l_ffdc_parser->getFFDCPackage(i, l_package))
                     {
                         continue;

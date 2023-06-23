@@ -39,15 +39,27 @@ namespace SBEIO
 {
 
 /*
- * @brief Type to hold the ffdc package
- * This struct also holds the RC and the
- * size, in bytes, of the ffdc package
+ * @brief Type to hold the ffdc package and other useful data from the package header.
 */
 struct ffdc_package
 {
-    void * ffdcPtr;
-    uint32_t rc;
-    size_t size;
+    void         * ffdcPtr;
+    uint32_t       rc; // SBE Return code
+    size_t         size; // number of FFDC data words
+    // Odyssey SBE uses this to aggregate data across many packages into the same PEL
+    // For P10, this will always be zero since those SBE packages do not have this field and should be ignored.
+    // SLID == 0 is considered invalid.
+    uint16_t       slid; // SBE Log Id
+    // Odyssey SBE uses this field. Maps to fapi2::errlSeverity_t which is a subset of ERRORLOG::errlSeverity_t
+    // For P10, this will always be ERRL_SEV_UNRECOVERABLE since those SBE packages do not have this field and
+    // historically that was the only severity used.
+    ERRORLOG::errlSeverity_t severity;
+
+    ffdc_package() : ffdcPtr(nullptr), rc(0), size(0), slid(0), severity(ERRORLOG::ERRL_SEV_UNRECOVERABLE)
+    { };
+
+    ~ffdc_package() { };
+
 };
 
 class SbeFFDCParser
@@ -122,27 +134,43 @@ class SbeFFDCParser
          */
         uint32_t getPackageLength(size_t i_index);
 
+
+        uint16_t getPackageSlid(size_t i_index);
+
+        ERRORLOG::errlSeverity_t getPackageSeverity(size_t i_index);
+
         /**
          * @brief: converts fapi2 rc to pib rc
          * @param[in]: i_index index in the ffdc package
          */
         PIB::PibError getPibRc (size_t i_index);
     private:
-
         /**
          * @brief List of ffdc packages
          */
         std::vector<std::unique_ptr<ffdc_package>> iv_ffdcPackages;
+
+        inline bool isIndexValid(const size_t i_index)
+        {
+            return (i_index >= 0) && (i_index < getTotalPackages());
+        };
+
+        ERRORLOG::errlSeverity_t setSeverity(uint8_t i_sev);
 
         /**
          * @brief Store the data words found in FFDC package
          *  @param[in]  i_ffdcPackage   FFDC package to store
          *  @param[in]  i_rc            the RC word
          *  @param[in]  i_packageLen    length of package
+         *  @param[in]  i_slid          SBE Log Id. For P10, 0 as it does not exist.
+         *  @param[in]  i_sev           fapi2::errlSeverity from FFDC package. For P10, does not exist.
          */
 
-        void addFFDCPackage(void * i_ffdcPackage, uint32_t i_rc,
-                            uint32_t i_packageLen);
+        void addFFDCPackage(void * i_ffdcPackage,
+                            uint32_t i_rc,
+                            uint32_t i_packageLen,
+                            uint16_t i_slid,
+                            uint8_t  i_sev);
 
 };
 

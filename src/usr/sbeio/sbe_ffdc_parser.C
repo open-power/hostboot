@@ -153,7 +153,8 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
                                     + i
                                     + HDR_SIZE_IN_BYTES;
 
-                addFFDCPackage(l_wordBuffer, FFDC_RETURN_CODE, FFDC_BUFFER_LENGTH_IN_BYTES);
+                // @TODO JIRA PFHB-260
+                addFFDCPackage(l_wordBuffer, FFDC_RETURN_CODE, FFDC_BUFFER_LENGTH_IN_BYTES, 0, 0);
 
             }
 
@@ -185,7 +186,7 @@ size_t SbeFFDCParser::getTotalPackages()
 uint32_t SbeFFDCParser::getPackageLength(const size_t i_index)
 {
     uint32_t l_retLen = 0;
-    if((i_index >= 0) && (i_index < getTotalPackages()))
+    if(isIndexValid(i_index))
     {
         l_retLen = iv_ffdcPackages.at(i_index)->size;
     }
@@ -198,7 +199,7 @@ uint32_t SbeFFDCParser::getPackageLength(const size_t i_index)
 void * SbeFFDCParser::getFFDCPackage(const size_t i_index)
 {
     void *l_retPtr = nullptr;
-    if((i_index >= 0) && (i_index < getTotalPackages()))
+    if(isIndexValid(i_index))
     {
         l_retPtr =  iv_ffdcPackages.at(i_index)->ffdcPtr;
     }
@@ -211,7 +212,7 @@ void * SbeFFDCParser::getFFDCPackage(const size_t i_index)
 bool SbeFFDCParser::getFFDCPackage(const size_t i_index, ffdc_package& o_package)
 {
     bool retval{false};
-    if((i_index >= 0) && (i_index < getTotalPackages()))
+    if(isIndexValid(i_index))
     {
         ffdc_package * l_ffdcPkg = iv_ffdcPackages.at(i_index).get();
         if(l_ffdcPkg)
@@ -229,11 +230,83 @@ bool SbeFFDCParser::getFFDCPackage(const size_t i_index, ffdc_package& o_package
 uint32_t SbeFFDCParser::getPackageRC(const size_t i_index)
 {
     uint32_t l_retRc = 0;
-    if((i_index >= 0) && (i_index < getTotalPackages()))
+    if(isIndexValid(i_index))
     {
         l_retRc = iv_ffdcPackages.at(i_index)->rc;
     }
     return l_retRc;
+}
+
+uint16_t SbeFFDCParser::getPackageSlid(const size_t i_index)
+{
+    uint16_t l_slid = 0; // 0 is invalid
+    if (isIndexValid(i_index))
+    {
+        l_slid = iv_ffdcPackages.at(i_index)->slid;
+    }
+    return l_slid;
+}
+
+ERRORLOG::errlSeverity_t SbeFFDCParser::getPackageSeverity(const size_t i_index)
+{
+    // Fetch the value from the package
+    ERRORLOG::errlSeverity_t l_sev = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+    if (isIndexValid(i_index))
+    {
+        l_sev = iv_ffdcPackages.at(i_index)->severity;
+    }
+
+    return l_sev;
+}
+
+ERRORLOG::errlSeverity_t SbeFFDCParser::setSeverity(const uint8_t i_sev)
+{
+    // Default to unrecoverable.
+    // For P10, this is the only severity used.
+    ERRORLOG::errlSeverity_t errlSev = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+
+    // These are the only supported types in fapi2::errlSeverity_t that map to ERRORLOG::errlSeverity_t
+    // Since we're casting to ERRORLOG::errlSeverity_t because we need to use this field to create the log
+    // severity let's make sure these stay in sync.
+    static_assert(static_cast<size_t>(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                  == static_cast<size_t>(ERRORLOG::ERRL_SEV_RECOVERED));
+    static_assert(static_cast<size_t>(fapi2::FAPI2_ERRL_SEV_PREDICTIVE)
+                  == static_cast<size_t>(ERRORLOG::ERRL_SEV_PREDICTIVE));
+    static_assert(static_cast<size_t>(fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE)
+                  == static_cast<size_t>(ERRORLOG::ERRL_SEV_UNRECOVERABLE));
+
+    // Cast value to fapi2::errlSeverity_t and check it matches one of those values. There are fewer of those than what
+    // hostboot has. So if fapi2 has a need in the future to add another severity that hostboot has this code should be
+    // updated to reflect those changes.
+    fapi2::errlSeverity_t fapiSev = static_cast<fapi2::errlSeverity_t>(i_sev);
+
+    bool valid = false;
+    switch(fapiSev)
+    {
+        case fapi2::FAPI2_ERRL_SEV_RECOVERED:
+        case fapi2::FAPI2_ERRL_SEV_PREDICTIVE:
+        case fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE:
+        {
+            // These are supported
+            valid = true;
+            break;
+        }
+        case fapi2::FAPI2_ERRL_SEV_UNDEFINED:
+        {
+            // This maps to ERRORLOG::errlSeverity_t::ERRL_SEV_INFORMATIONAL in hostboot. This is not valid.
+            break;
+        }
+    }
+
+    // Only update from ERRL_SEV_UNRECOVERABLE if we detected a valid mapping between fapi2 and hostboot.
+    // If hostboot got garbage in this field probably best to err on the side of visibility.
+    if (valid)
+    {
+        // Cast to ERRORLOG::errlSeverity_t enum.
+        errlSev = static_cast<ERRORLOG::errlSeverity_t>(i_sev);
+    }
+
+    return errlSev;
 }
 
 /*
@@ -241,11 +314,14 @@ uint32_t SbeFFDCParser::getPackageRC(const size_t i_index)
  * and push it to the list
  */
 void SbeFFDCParser::addFFDCPackage(void * i_ffdcPackage,
-                                   const uint32_t i_rc, const uint32_t i_packageLen)
+                                   const uint32_t i_rc, const uint32_t i_packageLen,
+                                   const uint16_t i_slid, const uint8_t i_sev)
 {
     std::unique_ptr<ffdc_package> l_ffdcPkg = std::make_unique<ffdc_package>();
     l_ffdcPkg->rc = i_rc;
     l_ffdcPkg->size = i_packageLen;
+    l_ffdcPkg->slid = i_slid;
+    l_ffdcPkg->severity = setSeverity(i_sev);
 
     l_ffdcPkg->ffdcPtr = malloc(i_packageLen);
     memcpy(l_ffdcPkg->ffdcPtr, i_ffdcPackage, i_packageLen);
