@@ -714,6 +714,22 @@ namespace SBEIO
      */
     errlHndl_t sendAttrListRequest(TARGETING::Target* i_chipTarget);
 
+    /**
+     * @brief Send the request to SBE to enable thermal sensor polling and DQA tracking.
+     *        This request is sent via the chip op AC-02.
+     *
+     * @param[in] i_chipTarget The Odyssey chip to perform the chipop on
+     * @param[in] i_interval   The thermal sensor polling interval in MS
+     * @param[in] i_dqa        The DQA tracking interval
+     *
+     * @return errlHndl_t Error log handle on failure.
+     */
+    errlHndl_t sendExecHWPRequestForThermalSensorPolling(TARGETING::Target* i_chipTarget,
+                                                         uint32_t i_interval,
+                                                         uint8_t i_dqa);
+
+
+
 } //end namespace SBEIO
 
 #endif /* _SBEIOIF_H */

@@ -200,6 +200,14 @@ public:
         SBE_FIFO_CMD_SYNC_CODE_LEVELS = 0x03,
     };
 
+    /**
+     * @brief enums for Telemetry Commands
+     */
+    enum fifoTelemetryMessage
+    {
+        SBE_FIFO_CMD_THERMAL_SENSOR_AND_DQA_POLLING = 0x02,
+    };
+
     ///////////////////////////////////////////////////////////////////////
     //
     //                     SBE FIFO Requests/Responses
@@ -727,6 +735,41 @@ public:
             dumpType(0)
         {}
     } PACKED;
+
+
+
+    ///////////////////////////////////////////////////////////////////////
+    //     Telemetry command to control thermal sensor & DQA Polling
+    ///////////////////////////////////////////////////////////////////////
+
+    /**
+     * @brief Struct for FIFO "Control Thermal Sensor Polling & DQA Tracking" Cmd
+     */
+    struct fifoExecuteControlThermalSensorRequest
+    {
+        uint32_t wordCnt;
+        uint8_t  reserved;
+        uint8_t  chipId;
+        uint8_t  commandClass;
+        uint8_t  command;
+        uint32_t interval;
+        uint8_t  reserved1;
+        uint8_t  reserved2;
+        uint8_t  reserved3;
+        uint8_t  dqa;
+
+        fifoExecuteControlThermalSensorRequest() :
+            wordCnt(0x4),
+            reserved(0),
+            chipId(0),
+            commandClass(SBE_FIFO_CLASS_TELEMETRY_COMMANDS),
+            command(SBE_FIFO_CMD_THERMAL_SENSOR_AND_DQA_POLLING),
+            reserved1(0),
+            reserved2(0),
+            reserved3(0)
+        {}
+    } PACKED;
+
 
     ///////////////////////////////////////////////////////////////////////
     //                     Attribute Messages

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2022
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -29,6 +29,12 @@ MODULE = istep14
 # Create some aliases for path
 SRC_IMPORT_PATH      = ${ROOTPATH}/src/import
 P10_PROCEDURE_PATH   = ${SRC_IMPORT_PATH}/chips/p10/procedures/hwp
+ODYSSEY_HWP_PATH     = ${SRC_IMPORT_PATH}/chips/ocmb/odyssey/procedures/hwp
+ODYSSEY_MEM_PATH     = ${SRC_IMPORT_PATH}/chips/ocmb/odyssey/procedures/hwp/memory
+ODYSSEY_COMMON_PATH  = ${SRC_IMPORT_PATH}/chips/ocmb/odyssey/common
+ODYSSEY_PERV_PATH    = ${SRC_IMPORT_PATH}/chips/ocmb/odyssey/procedures/hwp/perv
+ODYSSEY_SPPE_PATH    = ${SRC_IMPORT_PATH}/chips/ocmb/odyssey/procedures/hwp/sppe
+ODYSSEY_UTILS_PATH   = ${SRC_IMPORT_PATH}/chips/ocmb/odyssey/procedures/hwp/utils
 EXPLORER_HWP_PATH    = ${SRC_IMPORT_PATH}/chips/ocmb/explorer/procedures/hwp/memory
 EXPLORER_COMMON_PATH = ${SRC_IMPORT_PATH}/chips/ocmb/explorer/common
 
@@ -51,6 +57,16 @@ EXTRAINCDIR += ${P10_PROCEDURE_PATH}/pm/
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/lib/
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/core/
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/corecache/
+EXTRAINCDIR += ${ODYSSEY_HWP_PATH}/
+EXTRAINCDIR += ${ODYSSEY_MEM_PATH}/
+EXTRAINCDIR += ${ODYSSEY_MEM_PATH}/lib/
+EXTRAINCDIR += ${ODYSSEY_MEM_PATH}/lib/power_thermal
+EXTRAINCDIR += ${ODYSSEY_MEM_PATH}/lib/inband/
+EXTRAINCDIR += ${ODYSSEY_MEM_PATH}/lib/shared/
+EXTRAINCDIR += ${ODYSSEY_COMMON_PATH}/include/
+EXTRAINCDIR += ${ODYSSEY_PERV_PATH}/
+EXTRAINCDIR += ${ODYSSEY_SPPE_PATH}/
+EXTRAINCDIR += ${ODYSSEY_UTILS_PATH}/
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/
 EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/inband/
@@ -58,8 +74,8 @@ EXTRAINCDIR += ${EXPLORER_HWP_PATH}/lib/shared/
 EXTRAINCDIR += ${EXPLORER_COMMON_PATH}/include/
 EXTRAINCDIR += ${P10_PROCEDURE_PATH}/initfiles/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
-EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 
 # Add the sub step object files
 OBJS += call_mss_memdiag.o
@@ -83,6 +99,9 @@ include ${P10_PROCEDURE_PATH}/nest/p10_load_iop_xram.mk
 # Compile the HWP directly because of linking issues with HWPs that
 # include the same object file in their *.mk files.
 OBJS += exp_mss_thermal_init.o
+OBJS += ody_dts_read.o
+OBJS += ody_thermal_init.o
+OBJS += ody_thermal_init_utils.o
 OBJS += p10_adu_setup.o
 OBJS += p10_getputmemproc_utils.o
 OBJS += p10_getputsram_utils.o
@@ -122,6 +141,11 @@ VPATH += ${P10_PROCEDURE_PATH}/nest/
 VPATH += ${P10_PROCEDURE_PATH}/pm/
 VPATH += ${P10_PROCEDURE_PATH}/core/
 VPATH += ${P10_PROCEDURE_PATH}/corecache/
+VPATH += ${ODYSSEY_HWP_PATH}/
+VPATH += ${ODYSSEY_MEM_PATH}/
+VPATH += ${ODYSSEY_PERV_PATH}/
+VPATH += ${ODYSSEY_MEM_PATH}/lib
+VPATH += ${ODYSSEY_MEM_PATH}/lib/power_thermal
 VPATH += ${EXPLORER_HWP_PATH}/
 VPATH += ${P10_PROCEDURE_PATH}/initfiles/
 

@@ -49,12 +49,14 @@
 // Targeting support
 #include <targeting/common/target.H>     // TargetHandleList, getAttr
 #include <targeting/common/utilFilter.H> // getAllChips
+#include <targeting/odyutil.H>           // isOdysseyChip
 
 // Fapi
 #include <fapi2/target.H>                // fapi2::TARGET_TYPE_OCMB_CHIP
 #include <fapi2/plat_hwp_invoker.H>      // FAPI_INVOKE_HWP
 
 // HWP
+#include <ody_thermal_init.H>            // ody_thermal_init
 #include <exp_mss_thermal_init.H>        // exp_mss_thermal_init
 #include <p10_throttle_sync.H>           // p10_throttle_sync
 
@@ -62,6 +64,8 @@
 
 // Misc
 #include <chipids.H>                     // POWER_CHIPID::EXPLORER_16
+
+
 
 /******************************************************************************/
 // namespace shortcuts
@@ -139,55 +143,67 @@ void* call_mss_thermal_init (void*)
  */
 void ody_enable_periodic_sensor_poll(IStepError & io_iStepError)
 {
+    uint32_t l_odySensorPollingPeriod = 0;
+    uint8_t  l_odyDqsTrackingPeriod = 0;
     errlHndl_t l_err(nullptr);
 
-    TARGETING::TargetHandleList l_ocmbTargetList;
-    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
+    // get RUN_ODY_HWP_FROM_HOST
+    const auto l_runOdyHwpFromHost =
+        TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
 
-    for (auto l_ocmbTarget : l_ocmbTargetList)
+    if (!l_runOdyHwpFromHost)
     {
-        uint32_t l_chipId = l_ocmbTarget->getAttr<TARGETING::ATTR_CHIP_ID>();
+        // We are in chipop mode.
 
-        if (l_chipId == POWER_CHIPID::ODYSSEY_16)
+        for (const auto l_ocmbTarget : composable(getAllChips)(TYPE_OCMB_CHIP, true))
         {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                       "Running istep14_2b HWP call on Odyssey "
-                       "chip, target HUID 0x%.8X, chipId 0x%.8X",
-                       TARGETING::get_huid(l_ocmbTarget),
-                       l_chipId );
-
-            /* @todo JIRA:PFHB-258 JIRA:PFHB-236
-             *
-             * 14.2b
-             *  ody_read_dts            [OSBE]
-             *  ody_read_dimm_sensors   [OSBE]
-             *  ody_update_sensor_cache [OSBE]
-
-            l_err = sendExecHWPRequest(l_ocmbTarget, );
-             */
-
-            if (l_err)
+            if (TARGETING::UTIL::isOdysseyChip(l_ocmbTarget))
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                           "ERROR: istep14_2b HWP call on Odyssey "
-                           "chip, target HUID 0x%08x, chipId 0x%.8X failed."
-                           TRACE_ERR_FMT,
-                           get_huid(l_ocmbTarget),
-                           l_chipId,
-                           TRACE_ERR_ARGS(l_err) );
+                l_odySensorPollingPeriod =
+                    l_ocmbTarget->getAttr<ATTR_ODY_SENSOR_POLLING_PERIOD_MS_INIT>();
+                l_odyDqsTrackingPeriod =
+                    l_ocmbTarget->getAttr<ATTR_ODY_DQS_TRACKING_PERIOD_INIT>();
 
-                // We don't want to fail the IPL, so just commit the log here.
-                errlCommit(l_err, ISTEP_COMP_ID);
-            }
-            else
-            {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                           "SUCCESS: istep14_2b HWP on Odyssey "
-                           "chip, target HUID 0x%.8X, chipId 0x%.8X",
-                           TARGETING::get_huid(l_ocmbTarget),
-                           l_chipId );
+                           "Running istep14_2b HWP call on Odyssey chip, "
+                           "target HUID 0x%.8X sensor_polling=0x%x dqs_tracking=0x%x",
+                           TARGETING::get_huid(l_ocmbTarget), l_odySensorPollingPeriod,
+                           l_odyDqsTrackingPeriod );
+                /*
+                 * 14.2b
+                 *  ody_read_dts            [OSBE]
+                 *  ody_read_dimm_sensors   [OSBE]
+                 *  ody_update_sensor_cache [OSBE]
+                 */
+                l_err = sendExecHWPRequestForThermalSensorPolling(l_ocmbTarget,
+                                        l_odySensorPollingPeriod, l_odyDqsTrackingPeriod);
+                if (l_err)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                               "ERROR: istep14_2b HWP call on Odyssey "
+                               "chip, target HUID 0x%08x failed."
+                               TRACE_ERR_FMT,
+                               get_huid(l_ocmbTarget),
+                               TRACE_ERR_ARGS(l_err) );
+
+                    // We don't want to fail the IPL, so just commit the log here.
+                    errlCommit(l_err, ISTEP_COMP_ID);
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                               "SUCCESS: istep14_2b HWP on Odyssey chip, "
+                               "target HUID 0x%.8X", TARGETING::get_huid(l_ocmbTarget) );
+                }
             }
         }
+    }
+    else
+    {
+        // We are in native HWP mode which is not supported.
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Exiting ody_enable_periodic_sensor_poll as it's"
+                   " not supported in native HWP mode!");
     }
 }
 
@@ -255,28 +271,25 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
         }
         else if (l_chipId == POWER_CHIPID::ODYSSEY_16)
         {
+
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                       "Running ody_mss_thermal_init HWP call on Odyssey "
+                       "Running ody_thermal_init HWP call on Odyssey "
                        "chip, target HUID 0x%.8X, chipId 0x%.8X",
-                       TARGETING::get_huid(l_ocmbTarget),
-                       l_chipId );
+                       TARGETING::get_huid(l_ocmbTarget), l_chipId );
 
             if (l_runOdyHwpFromHost)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Skipping native call to ody_mss_thermal_init" );
-                /* @todo JIRA:PFHB-236 - for ody_mss_thermal_init
-                 *
-                FAPI_INVOKE_HWP(l_err, ody_mss_thermal_init, l_fapiOcmbTarget);
-                 */
+                           "ody_thermal_init HWP call on Odyssey chip natively!"
+                           "Skipping: target HUID 0x%08x, chipId 0x%.8X."
+                           TRACE_ERR_FMT,
+                           get_huid(l_ocmbTarget),
+                           l_chipId,
+                           TRACE_ERR_ARGS(l_err) );
             }
             else
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Skipping chipop call to ody_mss_thermal_init" );
-                /*  @TODO PFHB-236
                 l_err = sendExecHWPRequest(l_ocmbTarget, MEM_ODY_THERMAL_INIT);
-                 */
             }
 
             if (l_err)
