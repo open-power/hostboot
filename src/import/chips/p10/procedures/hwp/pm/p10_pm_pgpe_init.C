@@ -86,6 +86,7 @@ fapi2::ReturnCode pgpe_start(
     fapi2::buffer<uint64_t> l_xcr;
     fapi2::buffer<uint64_t> l_xsr_iar;
     fapi2::buffer<uint64_t> l_ivpr;
+    fapi2::buffer<uint64_t> l_ccsr;
     uint32_t                l_xsr_halt_condition = 0;
     uint32_t                l_timeout_counter = TIMEOUT_COUNT;
 
@@ -99,6 +100,9 @@ fapi2::ReturnCode pgpe_start(
     // Setup OCCMISC
     l_data64.flush<1>();
     FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCMISC_WO_CLEAR, l_data64));
+
+    //Read CCSR register
+    FAPI_TRY( getScom( i_target, scomt::proc::TP_TPCHIP_OCC_OCI_OCB_CCSR_RW, l_ccsr ) );
 
     fapi2::ATTR_CHIP_EC_FEATURE_PVREF_ENABLE_Type l_pvref_enable;
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PVREF_ENABLE,
@@ -147,8 +151,9 @@ fapi2::ReturnCode pgpe_start(
                             l_ps_enabled),
               "Error getting ATTR_PSTATES_ENABLED");
 
-    // Boot if not OFF
-    if (l_pstates_mode != fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF)
+    // Boot if not OFF and core count is non-zero
+    if (l_pstates_mode != fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF &&
+        (l_ccsr & 0xFFFFFFFF00000000))
     {
         // Set auto mode if needed
         if (l_pstates_mode == fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_AUTO)
