@@ -379,6 +379,21 @@
   </attribute>
 
   <attribute>
+    <id>CURRENT_MIN_POWER_CAP_WATTS</id>
+    <description>
+      System minimum power cap in output watts.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>CURRENT_N_BULK_POWER_LIMIT_WATTS</id>
     <description>
         System maximum power cap in output watts when system is oversubscribed.
@@ -1200,6 +1215,22 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>INDEX_MIN_POWER_CAP_WATTS</id>
+    <description>
+        Array of system minimum power cap in output watts from MRW when system config in
+        INDEX_POWER_LIMIT_CONFIG matches.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</default>
+      </uint16_t>
+      <array>24</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
   </attribute>
 
   <attribute>
