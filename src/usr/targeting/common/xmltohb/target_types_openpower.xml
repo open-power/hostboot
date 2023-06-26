@@ -315,6 +315,9 @@
       <id>INDEX_BULK_POWER</id>
     </attribute>
     <attribute>
+      <id>INDEX_MIN_POWER_CAP_WATTS</id>
+    </attribute>
+    <attribute>
       <id>INDEX_N_BULK_POWER_LIMIT_WATTS</id>
     </attribute>
     <attribute>
