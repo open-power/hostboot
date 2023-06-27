@@ -815,6 +815,7 @@ struct continuous_scrub_operation : public operation<MC>
     continuous_scrub_operation() = delete;
 };
 
+
 ///
 /// @brief memdiags::continuous_scrub_operation constructor
 /// @tparam MC the mc type of the T
@@ -1335,6 +1336,42 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Fast Scrub - continuous scrub all memory behind the target
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType of the target
+/// @param[in] i_target the target behind which all memory should be scrubbed
+/// @param[in] i_stop stop conditions
+/// @return FAPI2_RC_SUCCESS iff everything ok
+/// @note The function is asynchronous, and the caller should be looking for a done attention
+/// @note The address is often the port, dimm, rank but this is not enforced in the API.
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode background_fast_scrub( const fapi2::Target<T>& i_target,
+        const stop_conditions<MC>& i_stop)
+{
+    const mss::mcbist::address l_start_address;
+    using ET = mss::mcbistMCTraits<MC>;
+    FAPI_INF("Fast scrub for %s", mss::c_str(i_target));
+
+    FAPI_TRY( pre_scrub_settings<MC>(i_target) );
+
+    {
+        fapi2::ReturnCode l_rc;
+        constraints<MC> l_const(i_stop, mss::mcbist::speed::LUDICROUS, end_boundary::STOP_AFTER_ADDRESS, l_start_address);
+        continuous_scrub_operation<MC> l_op(i_target, l_const, l_rc);
+
+        FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
+                     ET::memdiags_continuous_scrub_failed_init().set_MC_TARGET(i_target),
+                     "Unable to initialize the MCBIST engine for a fast scrub %s", mss::c_str(i_target) );
+
+        return l_op.execute();
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Steer - continuous steer all memory behind the target
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType of the target
@@ -1836,6 +1873,28 @@ fapi2::ReturnCode mss_firmware_background_steer_helper( const fapi2::Target<T>& 
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Begin MNFG FAST SCRUB here
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mcbistTraits associated with T
+/// @param[in] i_target MC
+/// @param[in] i_stop stop conditions
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
+fapi2::ReturnCode mnfg_fast_scrub( const fapi2::Target<T>& i_target,
+                                   const stop_conditions<MC>& i_stop)
+{
+    FAPI_INF("Start mnfg_fast_scrub on: %s", mss::c_str( i_target ));
+    // Start Fast scrub
+    FAPI_TRY ( mss::memdiags::background_fast_scrub<MC>( i_target, i_stop));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 ///
 /// @brief Process the result from the mcbist sf_read subtest after memdiags

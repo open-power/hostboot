@@ -115,6 +115,18 @@ fapi2::ReturnCode ody_background_steer( const fapi2::Target<fapi2::TARGET_TYPE_O
 }
 
 ///
+/// @brief Manufacturing fast scrub command wrapper for Odyssey
+/// @param[in] i_target the target behind which all memory should be scrubbed
+/// @param[in] i_stop stop conditions
+/// @return FAPI2_RC_SUCCESS if everything ok
+///
+fapi2::ReturnCode ody_mnfg_fast_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop)
+{
+    return mss::memdiags::mnfg_fast_scrub<mss::mc_type::ODYSSEY>(i_target, i_stop);
+}
+
+///
 /// @brief Single address steer command wrapper for Odyssey
 /// @param[in] i_target the target behind which all memory should be scrubbed
 /// @param[in] i_address mcbist::address representing the address to test.
