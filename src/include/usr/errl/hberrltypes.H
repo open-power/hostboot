@@ -104,7 +104,7 @@ inline uint64_t right_bitmask(const int bits)
 
 /** @brief Base case for recursion.
  */
-inline uint64_t userdata_(const uint64_t accumulator)
+inline uint64_t SrcUserData_(const uint64_t accumulator)
 {
     return accumulator;
 }
@@ -118,15 +118,15 @@ struct bits
  *  Then do the same thing for the rest of the arguments.
  */
 template<typename T, typename... Args>
-uint64_t userdata_(const uint64_t accumulator,
+uint64_t SrcUserData_(const uint64_t accumulator,
                    const bits range, const T value,
                    Args&&... rest)
 {
-    return userdata_(accumulator
-                     | ((static_cast<uint64_t>(value)
-                         & right_bitmask(range.end - range.start + 1))
-                        << (64 - range.end - 1)),
-                     std::forward<Args>(rest)...);
+    return SrcUserData_(accumulator
+                        | ((static_cast<uint64_t>(value)
+                            & right_bitmask(range.end - range.start + 1))
+                           << (64 - range.end - 1)),
+                        std::forward<Args>(rest)...);
 }
 
 /**
@@ -135,11 +135,11 @@ uint64_t userdata_(const uint64_t accumulator,
  *
  * Example:
  *
- *   userdata(bits{0 ,  7}, value1,
- *            bits{8 , 15}, value2,
- *            bits{16, 31}, value3,
- *            bits{32, 33}, value4,
- *            bits{34, 63}, value5)
+ *   SrcUserData(bits{0 ,  7}, value1,
+ *               bits{8 , 15}, value2,
+ *               bits{16, 31}, value3,
+ *               bits{32, 33}, value4,
+ *               bits{34, 63}, value5)
  *
  * In this example, the bit range [0, 7] will be set to the lower 8
  * bits of value1, the bit range [32, 33] will be set to the lower 2
@@ -150,9 +150,9 @@ uint64_t userdata_(const uint64_t accumulator,
  * positions are inclusive.
  */
 template<typename... Args>
-uint64_t userdata(Args&&... args)
+uint64_t SrcUserData(Args&&... args)
 {
-    return userdata_(0, std::forward<Args>(args)...);
+    return SrcUserData_(0, std::forward<Args>(args)...);
 }
 
 }
