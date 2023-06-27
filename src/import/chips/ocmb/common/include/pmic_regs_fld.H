@@ -202,6 +202,13 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t SOFT_STOP_TIME = 0;
     static constexpr uint8_t SOFT_STOP_TIME_LEN = 2;
 
+    // R29 and R2A
+    static constexpr uint8_t R29_SWA_MODE_SELECT_START = 6;
+    static constexpr uint8_t R29_SWB_MODE_SELECT_START = 2;
+    static constexpr uint8_t R2A_SWC_MODE_SELECT_START = 6;
+    static constexpr uint8_t R2A_SWD_MODE_SELECT_START = 2;
+    static constexpr uint8_t SWX_MODE_SELECT_LENGTH    = 2;
+
     // R2B - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
     static constexpr uint8_t R2B_LDO_1P8_VOLT_SETTING_START     = 0;
     static constexpr uint8_t R2B_LDO_1P8_VOLT_SETTING_LENGTH    = 2;

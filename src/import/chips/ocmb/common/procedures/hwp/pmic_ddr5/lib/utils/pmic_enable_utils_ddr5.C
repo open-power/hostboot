@@ -421,6 +421,7 @@ fapi2::ReturnCode enable_2u(
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
     static constexpr uint8_t PMIC0 = 0;
     static constexpr uint8_t PMIC1 = 1;
@@ -454,6 +455,22 @@ fapi2::ReturnCode enable_2u(
 
         // Disable write protection
         FAPI_TRY(mss::pmic::i2c::reg_write(l_pmic, REGS::R2F, 0x06));
+
+        // Set mode FCCM for 2U DDR5 DDIMMs for all rails (continuous current mode)
+        // FCCM mode not being set by pmic programming scripts at tester, but will be in future
+        // Once pmic programming sets FCCM mode this could be removed but doesn't hurt to leave this in for EUH DDIMMs
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R29, l_pmic_buffer));
+        l_pmic_buffer.insertFromRight<FIELDS::R29_SWA_MODE_SELECT_START, FIELDS::SWX_MODE_SELECT_LENGTH>
+        (CONSTS::SWX_MODE_SELECT_FCCM);
+        l_pmic_buffer.insertFromRight<FIELDS::R29_SWB_MODE_SELECT_START, FIELDS::SWX_MODE_SELECT_LENGTH>
+        (CONSTS::SWX_MODE_SELECT_FCCM);
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R29, l_pmic_buffer));
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R2A, l_pmic_buffer));
+        l_pmic_buffer.insertFromRight<FIELDS::R2A_SWC_MODE_SELECT_START, FIELDS::SWX_MODE_SELECT_LENGTH>
+        (CONSTS::SWX_MODE_SELECT_FCCM);
+        l_pmic_buffer.insertFromRight<FIELDS::R2A_SWD_MODE_SELECT_START, FIELDS::SWX_MODE_SELECT_LENGTH>
+        (CONSTS::SWX_MODE_SELECT_FCCM);
+        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R2A, l_pmic_buffer));
 
         // Enable internal ADC and default to temp readings
         FAPI_TRY(mss::pmic::i2c::reg_write(l_pmic, REGS::R30, 0xD0));

@@ -372,6 +372,10 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
 
     static constexpr uint32_t VOLT_STEP                    = 5;
 
+    // R29 and R2A MODE SELECT (bits are flipped here)
+    static constexpr uint8_t SWX_MODE_SELECT_FDCM = 1;
+    static constexpr uint8_t SWX_MODE_SELECT_FCCM = 3;
+
     // R2C/R2D
     static constexpr uint8_t R2C_R2D_4MS_ALL = 0x44;
 
