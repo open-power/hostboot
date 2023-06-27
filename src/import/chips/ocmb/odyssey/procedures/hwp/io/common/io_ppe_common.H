@@ -132,7 +132,8 @@ class io_ppe_common
                                            const int32_t i_rx_peak1,
                                            const int32_t i_rx_peak2);
 
-        fapi2::ReturnCode ppe_start(const fapi2::Target<K, M, V>& i_target);
+        fapi2::ReturnCode ppe_start(const fapi2::Target<K, M, V>& i_target, bool& o_fail,
+                                    uint32_t& o_iar);
 
         fapi2::ReturnCode config_ppe(const fapi2::Target<K, M, V>& i_target,
                                      const uint8_t i_num_threads,
@@ -229,12 +230,12 @@ class io_ppe_common
                                      const uint32_t i_tx_lanes_0_31,
                                      const uint32_t i_ext_cmd_override);
 
-
         fapi2::ReturnCode bist_poll(const fapi2::Target<K, M, V>& i_target,
                                     const uint8_t i_num_threads,
                                     uint8_t& o_done,
                                     uint32_t& o_fail,
-                                    const uint32_t i_ext_cmd_override);
+                                    const uint32_t i_ext_cmd_override,
+                                    const uint32_t i_poll_count);
 
         fapi2::ReturnCode fast_mode(const fapi2::Target<K, M, V>& i_target,
                                     const uint8_t i_thread);
@@ -408,7 +409,8 @@ fapi_try_exit:
 // ===============================================================
 
 template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
-fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>& i_target)
+fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>& i_target, bool& o_fail,
+        uint32_t& o_iar)
 {
     const uint64_t c_lfir_wclear = (iv_regs->base_addr + 0x0);
     const uint64_t c_cscr        = (iv_regs->base_addr + 0xC);
@@ -423,13 +425,12 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
     const uint8_t c_ppe_halted_bit = 17;
 
     fapi2::buffer<uint64_t> l_buffer = 0;
-    uint32_t l_iar = 0;
 
     // Check if the IAR is already set
     FAPI_TRY(fapi2::getScom(i_target, c_xidbgpro, l_buffer));
-    l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(l_iar);
+    l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(o_iar);
 
-    if (l_iar == c_ppe_start_reset_iar)
+    if (o_iar == c_ppe_start_reset_iar)
     {
         FAPI_DBG("PPE is already running");
         goto fapi_try_exit;
@@ -452,13 +453,15 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
     // Verify IAR @ reset vector loc
     FAPI_DBG("Verify IAR reset.");
     FAPI_TRY(fapi2::getScom(i_target, c_xidbgpro, l_buffer));
-    l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(l_iar);
-    FAPI_ASSERT(
-        l_iar == c_ppe_start_reset_iar,
-        fapi2::IO_PPE_RESET()
-        .set_TARGET_CHIP(i_target)
-        .set_IAR(l_iar),
-        "IAR (0x%8x) did not reset.", l_iar);
+    l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(o_iar);
+
+    if (o_iar != c_ppe_start_reset_iar)
+    {
+        o_fail = true;
+        FAPI_DBG("IAR (0x%8x) did not reset.", o_iar);
+        return fapi2::current_err;
+    }
+
     l_buffer.flush<0>();
 
     // Resume PPE
@@ -469,13 +472,14 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
 
     FAPI_DBG("Verify IAR cleared.");
     FAPI_TRY(fapi2::getScom(i_target, c_xidbgpro, l_buffer));
-    l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(l_iar);
-    FAPI_ASSERT(
-        l_iar != c_ppe_start_reset_iar,
-        fapi2::IO_PPE_RESET()
-        .set_TARGET_CHIP(i_target)
-        .set_IAR(l_iar),
-        "IAR (0x%8x) did not resume.", l_iar);
+    l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(o_iar);
+
+    if (o_iar == c_ppe_start_reset_iar)
+    {
+        o_fail = true;
+        FAPI_DBG("IAR (0x%8x) did not resume.", o_iar);
+        return fapi2::current_err;
+    }
 
     // Clear Halted FIR Bit
     // Reg is RW_CLEAR
@@ -1033,20 +1037,40 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
+template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::bist_poll(const fapi2::Target<K, M, V>& i_target,
         const uint8_t i_thread,
         uint8_t& o_done,
         uint32_t& o_fail,
-        const uint32_t i_ext_cmd_override)
+        const uint32_t i_ext_cmd_override,
+        const uint32_t i_poll_count)
 {
     FAPI_DBG("Starting io_ppe_common::bist_poll");
 
     fapi2::buffer<uint64_t> l_cmd;
     fapi2::buffer<uint64_t> l_data = 0;
+    uint32_t l_loop_count = 0;
+
+    o_done = 0;
+    o_fail = 0;
+
     l_cmd = (i_ext_cmd_override == 0x00000000) ? BIST_START_CMD : i_ext_cmd_override;
 
-    FAPI_TRY(ext_cmd_poll(i_target, i_thread, l_cmd, o_done, o_fail));
+    FAPI_DBG("io_ppe_common::BIST Poll: thread: %d", i_thread);
+
+    while (!o_done && (l_loop_count < i_poll_count))
+    {
+        FAPI_DBG("Loop: %d", l_loop_count);
+        FAPI_TRY(iv_regs->flushCache(i_target));
+        FAPI_TRY(ext_cmd_check(i_target, i_thread, l_cmd, o_done, o_fail));
+
+        if (!o_done)
+        {
+            fapi2::delay(2000000, 2000000); // ns, sim cycles. 1ms
+        }
+
+        l_loop_count++;
+    }
 
     FAPI_TRY(MEM_REG_BIST_OVERALL_PASS_GET(iv_regs, i_target, i_thread, l_data));
     IO_PPE_COMMON_PRINT(l_data == 0, "Thread %d BIST_OVERALL_PASS: 0x%04x", i_thread, l_data)
