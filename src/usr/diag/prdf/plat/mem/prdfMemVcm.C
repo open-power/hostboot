@@ -186,62 +186,124 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
-    // No stop conditions.
-    mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
-
-    // If at phase 2, set to stop on MCEs
-    if ( TD_PHASE_2 == iv_phase )
+    // Check for Odyssey OCMBs
+    if (isOdysseyOcmb(iv_chip->getTrgt()))
     {
-        stopCond.set_pause_on_mce_hard(mss::ON)
-                .set_pause_on_mce_soft(mss::ON)
-                .set_pause_on_mce_int(mss::ON);
-    }
+        // No stop conditions.
+        mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> stopCond;
 
-    if ( iv_canResumeScrub )
-    {
-        PRDF_TRAC( PRDF_FUNC "Scrub stopped before end of rank, resuming "
-                   "scrub from the next addr of this rank: "
-                   "resumeTdScrub(0x%08x)", iv_chip->getHuid() );
-
-        if ( iv_rowRepairEnabled )
+        // If at phase 2, set to stop on MCEs
+        if ( TD_PHASE_2 == iv_phase )
         {
-            // If row repair is enabled and we hit an MCE, start a new TD scrub
-            // on the next row instead of the next address. This is so scrub
-            // avoids just immediately hitting another MCE on the next address
-            // of the bad row. The address we stopped on should be stored in
-            // iv_rowRepairFailAddr by this point.
-            o_rc = startTdScrubOnNextRow<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
-                    iv_rowRepairFailAddr, MASTER_RANK, stopCond,
-                    mss::mcbist::STOP_AFTER_ADDRESS );
-            if ( SUCCESS != o_rc )
+            stopCond.set_pause_on_mce_hard(mss::ON)
+                    .set_pause_on_mce_soft(mss::ON)
+                    .set_pause_on_mce_int(mss::ON);
+        }
+
+        if ( iv_canResumeScrub )
+        {
+            PRDF_TRAC( PRDF_FUNC "Scrub stopped before end of rank, resuming "
+                       "scrub from the next addr of this rank: "
+                       "resumeTdScrub(0x%08x)", iv_chip->getHuid() );
+
+            if ( iv_rowRepairEnabled )
             {
-                PRDF_ERR(PRDF_FUNC "startTdScrubOnNextRow(0x%08x,0x%02x) "
-                                   "failed",
-                         iv_chip->getHuid(), getKey());
+                // If row repair is enabled and we hit an MCE, start a new TD
+                // scrub on the next row instead of the next address. This is
+                // so scrub avoids just immediately hitting another MCE on the
+                // next address of the bad row. The address we stopped on
+                // should be stored in iv_rowRepairFailAddr by this point.
+                o_rc = startTdScrubOnNextRow<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                        iv_rowRepairFailAddr, MASTER_RANK, stopCond,
+                        mss::mcbist::STOP_AFTER_ADDRESS );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR(PRDF_FUNC "startTdScrubOnNextRow(0x%08x,0x%02x) "
+                             "failed", iv_chip->getHuid(), getKey());
+                }
+            }
+            else
+            {
+                // Resume the command from the next addr to the end of this
+                // master rank.
+                o_rc = resumeTdScrub<TYPE_OCMB_CHIP>( iv_chip, stopCond );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "resumeTdScrub(0x%08x) failed",
+                              iv_chip->getHuid() );
+                }
             }
         }
         else
         {
-            // Resume the command from the next addr to the end of this master
-            // rank.
-            o_rc = resumeTdScrub<TYPE_OCMB_CHIP>( iv_chip, stopCond );
+            // Start the time based scrub procedure on this master rank.
+            o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, iv_port,
+                MASTER_RANK, stopCond, mss::mcbist::STOP_AFTER_ADDRESS );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "resumeTdScrub(0x%08x) failed",
-                          iv_chip->getHuid() );
+                PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%02x,%x) failed",
+                          iv_chip->getHuid(), getKey(), iv_port );
             }
         }
     }
+    // Default to Explorer OCMBs
     else
     {
-        // Start the time based scrub procedure on this master rank.
-        o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, iv_port,
-                                             MASTER_RANK, stopCond,
-                                             mss::mcbist::STOP_AFTER_ADDRESS );
-        if ( SUCCESS != o_rc )
+        // No stop conditions.
+        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
+
+        // If at phase 2, set to stop on MCEs
+        if ( TD_PHASE_2 == iv_phase )
         {
-            PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%02x,%x) failed",
-                      iv_chip->getHuid(), getKey(), iv_port );
+            stopCond.set_pause_on_mce_hard(mss::ON)
+                    .set_pause_on_mce_soft(mss::ON)
+                    .set_pause_on_mce_int(mss::ON);
+        }
+
+        if ( iv_canResumeScrub )
+        {
+            PRDF_TRAC( PRDF_FUNC "Scrub stopped before end of rank, resuming "
+                       "scrub from the next addr of this rank: "
+                       "resumeTdScrub(0x%08x)", iv_chip->getHuid() );
+
+            if ( iv_rowRepairEnabled )
+            {
+                // If row repair is enabled and we hit an MCE, start a new TD
+                // scrub on the next row instead of the next address. This is
+                // so scrub avoids just immediately hitting another MCE on the
+                // next address of the bad row. The address we stopped on
+                // should be stored in iv_rowRepairFailAddr by this point.
+                o_rc = startTdScrubOnNextRow<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                        iv_rowRepairFailAddr, MASTER_RANK, stopCond,
+                        mss::mcbist::STOP_AFTER_ADDRESS );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR(PRDF_FUNC "startTdScrubOnNextRow(0x%08x,0x%02x) "
+                             "failed", iv_chip->getHuid(), getKey());
+                }
+            }
+            else
+            {
+                // Resume the command from the next addr to the end of this
+                // master rank.
+                o_rc = resumeTdScrub<TYPE_OCMB_CHIP>( iv_chip, stopCond );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "resumeTdScrub(0x%08x) failed",
+                              iv_chip->getHuid() );
+                }
+            }
+        }
+        else
+        {
+            // Start the time based scrub procedure on this master rank.
+            o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, iv_port,
+                MASTER_RANK, stopCond, mss::mcbist::STOP_AFTER_ADDRESS );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%02x,%x) failed",
+                          iv_chip->getHuid(), getKey(), iv_port );
+            }
         }
     }
 

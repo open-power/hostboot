@@ -1291,29 +1291,60 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::startCmd()
     // the per-symbol counters. Therefore, all we need to do is tell the
     // hardware which CE types to count.
 
-    mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
-
-    switch ( iv_phase )
+    // Check for Odyssey OCMBs
+    if (isOdysseyOcmb(iv_chip->getTrgt()))
     {
-        case TD_PHASE_1:
-            // Set the per symbol counters to count only hard CEs.
-            stopCond.set_nce_hard_symbol_count_enable(mss::ON);
-            break;
+        mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> stopCond;
 
-        case TD_PHASE_2:
-            // Since there are not enough hard CEs to trigger a symbol mark, set
-            // the per symbol counters to count all CE types.
-            stopCond.set_nce_soft_symbol_count_enable( mss::ON);
-            stopCond.set_nce_inter_symbol_count_enable(mss::ON);
-            stopCond.set_nce_hard_symbol_count_enable( mss::ON);
-            break;
+        switch ( iv_phase )
+        {
+            case TD_PHASE_1:
+                // Set the per symbol counters to count only hard CEs.
+                stopCond.set_nce_hard_symbol_count_enable(mss::ON);
+                break;
 
-        default: PRDF_ASSERT( false ); // invalid phase
+            case TD_PHASE_2:
+                // Since there are not enough hard CEs to trigger a symbol mark, set
+                // the per symbol counters to count all CE types.
+                stopCond.set_nce_soft_symbol_count_enable( mss::ON);
+                stopCond.set_nce_inter_symbol_count_enable(mss::ON);
+                stopCond.set_nce_hard_symbol_count_enable( mss::ON);
+                break;
+
+            default: PRDF_ASSERT( false ); // invalid phase
+        }
+
+        // Start the time based scrub procedure on this slave rank.
+        o_rc = startTdScrub<TYPE_OCMB_CHIP>(iv_chip, iv_rank, iv_port,
+                                            SLAVE_RANK, stopCond);
     }
+    // Default to Explorer OCMBs
+    else
+    {
+        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
 
-    // Start the time based scrub procedure on this slave rank.
-    o_rc = startTdScrub<TYPE_OCMB_CHIP>(iv_chip, iv_rank, iv_port, SLAVE_RANK,
-                                        stopCond);
+        switch ( iv_phase )
+        {
+            case TD_PHASE_1:
+                // Set the per symbol counters to count only hard CEs.
+                stopCond.set_nce_hard_symbol_count_enable(mss::ON);
+                break;
+
+            case TD_PHASE_2:
+                // Since there are not enough hard CEs to trigger a symbol mark, set
+                // the per symbol counters to count all CE types.
+                stopCond.set_nce_soft_symbol_count_enable( mss::ON);
+                stopCond.set_nce_inter_symbol_count_enable(mss::ON);
+                stopCond.set_nce_hard_symbol_count_enable( mss::ON);
+                break;
+
+            default: PRDF_ASSERT( false ); // invalid phase
+        }
+
+        // Start the time based scrub procedure on this slave rank.
+        o_rc = startTdScrub<TYPE_OCMB_CHIP>(iv_chip, iv_rank, iv_port,
+                                            SLAVE_RANK, stopCond);
+    }
     if ( SUCCESS != o_rc )
     {
         PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x,%x) failed",

@@ -192,33 +192,69 @@ uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
-    mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
-
-    switch ( iv_phase )
+    // Check for Odyssey OCMBs
+    if (isOdysseyOcmb(iv_chip->getTrgt()))
     {
-        case TD_PHASE_1:
-            // Start the steer cleanup procedure on this master rank.
-            o_rc = startTdSteerCleanup<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
-                                                        MASTER_RANK, stopCond );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "startTdSteerCleanup(0x%08x,0x%2x) failed",
-                          iv_chip->getHuid(), getKey() );
-            }
-            break;
+        mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> stopCond;
 
-        case TD_PHASE_2:
-            // Start the superfast read procedure on this master rank.
-            o_rc = startTdSfRead<TYPE_OCMB_CHIP>( iv_chip, iv_rank, MASTER_RANK,
-                                                  stopCond );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "startTdSfRead(0x%08x,0x%2x) failed",
-                          iv_chip->getHuid(), getKey() );
-            }
-            break;
+        switch ( iv_phase )
+        {
+            case TD_PHASE_1:
+                // Start the steer cleanup procedure on this master rank.
+                o_rc = startTdSteerCleanup<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                    MASTER_RANK, stopCond );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "startTdSteerCleanup(0x%08x,0x%2x) "
+                              "failed", iv_chip->getHuid(), getKey() );
+                }
+                break;
 
-        default: PRDF_ASSERT( false ); // invalid phase
+            case TD_PHASE_2:
+                // Start the superfast read procedure on this master rank.
+                o_rc = startTdSfRead<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                                                      MASTER_RANK, stopCond );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "startTdSfRead(0x%08x,0x%2x) failed",
+                              iv_chip->getHuid(), getKey() );
+                }
+                break;
+
+            default: PRDF_ASSERT( false ); // invalid phase
+        }
+    }
+    // Default to Explorer OCMBs
+    else
+    {
+        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
+
+        switch ( iv_phase )
+        {
+            case TD_PHASE_1:
+                // Start the steer cleanup procedure on this master rank.
+                o_rc = startTdSteerCleanup<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                    MASTER_RANK, stopCond );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "startTdSteerCleanup(0x%08x,0x%2x) "
+                              "failed", iv_chip->getHuid(), getKey() );
+                }
+                break;
+
+            case TD_PHASE_2:
+                // Start the superfast read procedure on this master rank.
+                o_rc = startTdSfRead<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                                                      MASTER_RANK, stopCond );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "startTdSfRead(0x%08x,0x%2x) failed",
+                              iv_chip->getHuid(), getKey() );
+                }
+                break;
+
+            default: PRDF_ASSERT( false ); // invalid phase
+        }
     }
 
     return o_rc;

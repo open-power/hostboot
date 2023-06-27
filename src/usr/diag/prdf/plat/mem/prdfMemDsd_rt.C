@@ -180,13 +180,28 @@ uint32_t DsdEvent<TYPE_OCMB_CHIP>::startCmd()
 
     uint32_t o_rc = SUCCESS;
 
-    mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
+    // Check for Odyssey OCMBs
+    if (isOdysseyOcmb(iv_chip->getTrgt()))
+    {
+        mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> stopCond;
+        stopCond.set_pause_on_ue(mss::ON);
 
-    stopCond.set_pause_on_ue(mss::ON);
+        // Start the time based scrub procedure on this master rank.
+        o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, iv_port,
+                                             MASTER_RANK, stopCond );
+    }
+    // Default to Explorer OCMBs
+    else
+    {
 
-    // Start the time based scrub procedure on this master rank.
-    o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, iv_port, MASTER_RANK,
-                                         stopCond );
+        mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
+        stopCond.set_pause_on_ue(mss::ON);
+
+        // Start the time based scrub procedure on this master rank.
+        o_rc = startTdScrub<TYPE_OCMB_CHIP>( iv_chip, iv_rank, iv_port,
+                                             MASTER_RANK, stopCond );
+    }
+
     if ( SUCCESS != o_rc )
     {
         PRDF_ERR( PRDF_FUNC "startTdScrub(0x%08x,0x%2x,%x) failed",
