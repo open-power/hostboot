@@ -91,6 +91,8 @@ class SbeFFDCParser
         // The header size of an Odyssey FFDC Package in bytes.
         static constexpr uint8_t  HEADER_SIZE_IN_BYTES_ODYSSEY = (MIN_FFDC_PACKAGE_WORD_SIZE_ODYSSEY - 1)
                                                                * sizeof(uint32_t);
+        // Offset to the SBE Log Id in an Odyssey FFDC Package. Word 2 of header
+        static constexpr uint8_t SLID_OFFSET = 2 * sizeof(uint32_t);
 
         /**
          * @brief Parses the FFDC data package
@@ -135,8 +137,14 @@ class SbeFFDCParser
         uint32_t getPackageLength(size_t i_index);
 
 
+        /*
+         * @brief Returns the SBE log id from the FFDC package at the given index.
+         */
         uint16_t getPackageSlid(size_t i_index);
 
+        /*
+         * @brief Returns the errlSeverity_t from the FFDC package at the given index.
+         */
         ERRORLOG::errlSeverity_t getPackageSeverity(size_t i_index);
 
         /**
@@ -155,6 +163,14 @@ class SbeFFDCParser
             return (i_index >= 0) && (i_index < getTotalPackages());
         };
 
+        /*
+         * @brief Converts a uint8_t from an FFDC package into ERRORLOG::errlSeverity_t. If the conversion cannot be
+         *        done then the return will be ERRL_SEV_UNRECOVERABLE.
+         *
+         * @param[in]  i_sev  The severity value to convert.
+         *
+         * @return ERRORLOG::errlSeverity_t
+         */
         ERRORLOG::errlSeverity_t setSeverity(uint8_t i_sev);
 
         /**

@@ -274,8 +274,7 @@ public:
 
         if (testPassed)
         {
-            TS_TRACE("ffdcParserTest test 5 -\
-                    2 packages, bad 2nd magic byte PASSED");
+            TS_TRACE("ffdcParserTest test 5 - 2 packages, bad 2nd magic byte PASSED");
         }
     }
 
@@ -385,6 +384,97 @@ public:
         {
             TS_TRACE("ffdcParserTest test 7 PASSED");
         }
+    }
+
+    /*
+     * Test that multiple Odyssey packages with 2 different SLIDs are sorted by SLID during parsing.
+     * This test also verifies that the parsing logic is smart enough to tell that SLIDs and Severities are
+     * present and can handle them.
+     */
+    void testSBEFFDC8()
+    {
+        struct expectedResults
+        {
+            uint16_t slid;
+            ERRORLOG::errlSeverity_t sev;
+
+            expectedResults(uint16_t i_slid, ERRORLOG::errlSeverity_t i_sev) : slid(i_slid), sev(i_sev) {};
+        };
+
+        // The slids are sorted so make the expected list in sorted order.
+        // Severity has to be the same for all packages that have a matching SLID.
+        std::vector<expectedResults> expected;
+        expected.push_back({0x1, ERRORLOG::ERRL_SEV_RECOVERED});
+        expected.push_back({0x1, ERRORLOG::ERRL_SEV_RECOVERED});
+        expected.push_back({0x2, ERRORLOG::ERRL_SEV_PREDICTIVE});
+
+        bool testPassed = true;
+        std::vector<uint32_t> odyPackage = {
+            0xFBAD0006,        // magic byte + package length
+            0x00020101,        // arbitrary sequence ID, command class, and command
+            0x00011001,        // SLID, errlSeverity_t, and arbitrary chipid
+            0x04050607,        // return code
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xFBAD0008,        // magic byte + package length
+            0x00020101,        // arbitrary sequence ID, command class, and command
+            0x00022001,        // SLID, errlSeverity_t, and arbitrary chipid
+            0x04050607,        // return code
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xFBAD0008,        // magic byte + package length
+            0x00020101,        // arbitrary sequence ID, command class, and command
+            0x00011001,        // SLID, errlSeverity_t, and arbitrary chipid
+            0x04050607,        // return code
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+        };
+
+        SBEIO::SbeFFDCParser ffdcParser;
+        ffdcParser.parseFFDCData(&odyPackage[0]);
+        size_t numPackages = ffdcParser.getTotalPackages();
+        if (numPackages != expected.size())
+        {
+            TS_FAIL("ffdcParserTest test 8 FAIL expected %d packages, got %d", expected.size(), numPackages);
+            testPassed = false;
+            goto TEST_EXIT;
+        }
+
+        for (size_t i = 0; i < numPackages; ++i)
+        {
+            if (ffdcParser.getPackageSlid(i) != expected[i].slid)
+            {
+                TS_FAIL("ffdcParserTest test 8: FAIL Package %d/%d SLID %d didn't match expected SLID %d",
+                        i+1,
+                        numPackages,
+                        ffdcParser.getPackageSlid(i),
+                        expected[i].slid);
+                testPassed = false;
+            }
+            else
+            {
+                if (ffdcParser.getPackageSeverity(i) != expected[i].sev)
+                {
+                    TS_FAIL("ffdcParserTest test 8: FAIL Package %d/%d Severity 0x%X didn't match expected 0x%X",
+                            i+1,
+                            numPackages,
+                            ffdcParser.getPackageSeverity(i),
+                            expected[i].sev);
+                    testPassed = false;
+                }
+            }
+        }
+        if (testPassed)
+        {
+            TS_TRACE("ffdcParserTest test 8 PASSED");
+        }
+
+TEST_EXIT:
+    return;
     }
 };
 

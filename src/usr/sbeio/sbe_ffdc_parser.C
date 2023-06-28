@@ -68,33 +68,80 @@ SbeFFDCParser::~SbeFFDCParser()
 /*
  * @brief Parses FFDC package(s) ffdcPackageBuffer
  *
- * FFDC package according to the SBE Interface Specification:
- * Dword 0:
+ * P10 FFDC package according to the SBE Interface Specification:
+ * Word 0:
  *     byte 0,1: Magic Byte: 0xFFDC
  *     byte 2,3: Length in words (N + 4)
- *     byte 4,5: Sequence Id
- *     byte 6  : Command Class
- *     byte 7  : Command
- * Dword 1:
+ * Word 1:
+ *     byte 0,1: Sequence Id
+ *     byte 2  : Command Class
+ *     byte 3  : Command
+ * Word 2:
  *     byte 0-3: Return Code
- *     byte 4-7: Word 0
- * Dword M:
- *     byte 0-3: Word N - 1
- *     byte 4-7: Word N
+ * Word 3:
+ *     byte 0-3: FFDC Word 0
+ * Word N:
+ *     byte 0-3: FFDC Word N
+ *
+ * Odyssey FFDC package according to the SBE Interface Specification:
+ * Word 0:
+ *     byte 0,1: Magic Byte: 0xFBAD
+ *     byte 2,3: Length in words (N + 5)
+ * Word 1:
+ *     byte 0,1: Sequence Id
+ *     byte 2  : Command Class
+ *     byte 3  : Command
+ * Word 2:
+ *     byte 0-1: SBE Log Identifier (SLID)
+ *     byte 2  : Severity (fapi2::errlSeverity_t)
+ *     byte 3  : Chip Id
+ * Word 3:
+ *     byte 0-3: Return Code
+ * Word 4:
+ *     byte 0-3: FFDC Word 0
+ * Word N:
+ *     byte 0-3: FFDC Word N
  */
 void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
 {
     uint16_t l_magicByte = 0x00;
-    size_t   i           = 0;
+    size_t   i           = 0; // offset into the buffer
     errlHndl_t errl      = nullptr;
+    uint8_t * ffdcPackageBuffer = static_cast<uint8_t *>(i_ffdcPackageBuffer);
 
     SBE_TRACF(ENTER_MRK "parseFFDCData");
+    // Clear the internal vector of packages. If this function gets called more than once for any reason, we don't want
+    // to accidentally duplicate FFDC data or jumble unrelated data together.
+    iv_ffdcPackages.clear();
+
     do {
         // Magic Byte is 1st 2 bytes
-        l_magicByte = UtilByte::bufferTo16uint(static_cast<char *>(i_ffdcPackageBuffer) + i);
+        l_magicByte = UtilByte::bufferTo16uint(ffdcPackageBuffer + i);
 
         if ((l_magicByte == SbeFifo::FIFO_FFDC_MAGIC) || (l_magicByte == SbeFifo::FIFO_ODY_FFDC_MAGIC))
         {
+            // Recognized a valid magic byte. Gather up relevant data to copy into an ffdc_package managed by this
+            // object.
+
+            // As noted above, P10 and Odyssey FFDC packages have slightly different structures. Odyssey needs to
+            // collect a couple extra fields from its package. Whereas P10 will simply take reasonable defaults.
+            uint8_t severity = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE;
+            uint16_t slid = 0; // Invalid value
+            if (l_magicByte == SbeFifo::FIFO_ODY_FFDC_MAGIC)
+            {
+                // For Odyssey, collect the SLID and severity
+                // Get the SLID from the package header. Word 2.
+                slid = UtilByte::bufferTo16uint(ffdcPackageBuffer
+                                               + i
+                                               + SLID_OFFSET);
+
+                // Get the log severity by advancing past the SLID. They are in the same word.
+                severity = *(ffdcPackageBuffer
+                             + i
+                             + SLID_OFFSET
+                             + sizeof(uint16_t)); // Slid size
+            }
+
             // P10 and Odyssey header sizes are different from one another. Have to account for that in the
             // pointer math below.
             const uint8_t HDR_SIZE_IN_BYTES = (l_magicByte == SbeFifo::FIFO_ODY_FFDC_MAGIC)
@@ -102,25 +149,28 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
                                            : HEADER_SIZE_IN_BYTES;
             /*
              * Length is next 2 bytes (in words, each word is 4 bytes)
-             * In FFDC packet, byte 2 & byte 3 holds the length in words,
-             * which is 4 words less than the total package length.
+             * See comment block above this function for detailed layout of the package
              */
-            const uint16_t PACKAGE_LENGTH_IN_WORDS = UtilByte::bufferTo16uint(static_cast<char *>(i_ffdcPackageBuffer) +
-                                                   i + sizeof(l_magicByte));
+            const uint16_t PACKAGE_LENGTH_IN_WORDS = UtilByte::bufferTo16uint(ffdcPackageBuffer
+                                                   + i
+                                                   + sizeof(l_magicByte));
 
             /*
              * Get the Return Code - final word of the header
+             * Subtract size of uint32_t from header size to rewind to start of return code.
              */
-            const uint32_t FFDC_RETURN_CODE = UtilByte::bufferTo32uint(static_cast<char *>(i_ffdcPackageBuffer)
+            const uint32_t FFDC_RETURN_CODE = UtilByte::bufferTo32uint(ffdcPackageBuffer
                                             + i
                                             + (HDR_SIZE_IN_BYTES - sizeof(uint32_t)));
 
             /*
-             * Get the length in bytes of the FFDC data contained in the FFDC Package.
+             * Get the length in bytes of the FFDC Word data contained in the FFDC Package. Later, we'll copy all the
+             * FFDC words into a buffer.
              */
-            const uint32_t FFDC_BUFFER_LENGTH_IN_BYTES = (sizeof(uint32_t) * PACKAGE_LENGTH_IN_WORDS) - HDR_SIZE_IN_BYTES;
+            const uint32_t FFDC_BUFFER_LENGTH_IN_BYTES = (sizeof(uint32_t) * PACKAGE_LENGTH_IN_WORDS)
+                                                       - HDR_SIZE_IN_BYTES;
 
-            // Check to see if what we're copying is beyond the buffer size
+            // Check to see if what we're copying is beyond the buffer size.
             const uint32_t OFFSET_INTO_FFDC_BUFFER = i + HDR_SIZE_IN_BYTES + FFDC_BUFFER_LENGTH_IN_BYTES;
             if( OFFSET_INTO_FFDC_BUFFER > (PAGESIZE * SBE_FFDC_MAX_PAGES))
             {
@@ -149,12 +199,13 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
             {
                 // Copy just the FFDC data from ffdcPackageBuffer to wordBuffer
                 // starting at the offset to the current FFDC package + header size.
-                void * l_wordBuffer = reinterpret_cast<uint8_t *>(i_ffdcPackageBuffer)
+                // The rest of the package data will be stored as fields in the ffdc_package struct
+                // or discarded as unused.
+                void * l_wordBuffer = ffdcPackageBuffer
                                     + i
                                     + HDR_SIZE_IN_BYTES;
 
-                // @TODO JIRA PFHB-260
-                addFFDCPackage(l_wordBuffer, FFDC_RETURN_CODE, FFDC_BUFFER_LENGTH_IN_BYTES, 0, 0);
+                addFFDCPackage(l_wordBuffer, FFDC_RETURN_CODE, FFDC_BUFFER_LENGTH_IN_BYTES, slid, severity);
 
             }
 
@@ -168,6 +219,12 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
             break;
         }
     } while (1);
+
+    // Done parsing, now sort by SLID
+    std::sort(iv_ffdcPackages.begin(), iv_ffdcPackages.end(),
+              [](auto & packageA, auto & packageB)
+              { return packageA->slid <= packageB->slid; });
+
 
     SBE_TRACD(EXIT_MRK "parseFFDCData");
 }
