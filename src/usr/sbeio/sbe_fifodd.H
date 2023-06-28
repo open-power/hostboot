@@ -880,12 +880,17 @@ public:
         uint8_t  chipId;
         uint8_t  commandClass;
         uint8_t  command;
-        fifoSyncCodeLevelsRequest() :
-            wordCnt(2),
+        uint16_t reserved2;
+        uint16_t force_sync;
+
+        fifoSyncCodeLevelsRequest(const uint16_t i_force_sync) :
+            wordCnt(sizeof(fifoSyncCodeLevelsRequest) / sizeof(uint32_t)),
             reserved(0),
             chipId(0),
             commandClass(SBE_FIFO_CLASS_CODE_UPDATE_MESSAGES),
-            command(SBE_FIFO_CMD_SYNC_CODE_LEVELS)
+            command(SBE_FIFO_CMD_SYNC_CODE_LEVELS),
+            reserved2(),
+            force_sync(i_force_sync)
         {}
     } PACKED;
     ///////////////////////////////////////////////////////////////////////

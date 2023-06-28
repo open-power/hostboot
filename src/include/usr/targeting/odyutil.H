@@ -27,6 +27,9 @@
    This file includes various targeting utilities for Odyssey OCMBs
 */
 
+#ifndef TARGETING_ODYUTIL_H__
+#define TARGETING_ODYUTIL_H__
+
 #include <targeting/common/target.H>
 #include <attributeenums.H>
 #include <chipids.H>
@@ -47,3 +50,5 @@ inline bool isOdysseyChip(const Target* i_target)
 }
 
 } // namespace TARGETING::UTIL
+
+#endif

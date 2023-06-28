@@ -622,6 +622,8 @@ namespace SBEIO
     {
         enum codelevel_info_type
         {
+            // The order of this enumeration should not be
+            // changed. Code depends on it for sorting.
             bootloader,
             runtime
         };
@@ -651,11 +653,24 @@ namespace SBEIO
      *                          (The hash is ignored.)
      * @param[in] i_img         The image contents to write to SPPE storage.
      * @param[in] i_img_size    The size of the image contents to write.
+     *
+     * @return errlHndl_t        Error log handle on failure.
      */
     errlHndl_t sendUpdateImageRequest(TARGETING::Target* i_chipTarget,
                                       const codelevel_info_t& i_clip,
                                       const void* i_img,
                                       size_t i_img_size);
+
+    /**
+     * @brief Sync the backup code image with the running code image.
+     *
+     * @param[in] i_chipTarget  The Odyssey chip target.
+     * @param[in] i_force_sync  Whether to force a sync even if the code levels match.
+     *
+     * @return errlHndl_t        Error log handle on failure.
+     */
+    errlHndl_t sendSyncCodeLevelsRequest(TARGETING::Target* i_chipTarget,
+                                         bool i_force_sync = false);
 
     /**
     * @brief Send the IO or MEMORY HWP request to the SBE.  These overloaded

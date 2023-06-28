@@ -62,6 +62,8 @@ struct get_code_levels_response
 {
     uint16_t num_capabilities;
     uint16_t num_sub_images;
+
+    // @TODO: This is now a major/minor version
     uint32_t reserved;
 
     sppeCLIP_t updatable_images[UPDATABLE_IMG_SECTION_CNT];
@@ -326,15 +328,10 @@ namespace SBEIO
     };
 
     /**
-    * @brief @TODO JIRA PFHB-255
-    *
-    * @param[in] i_chipTarget The chip you would like to perform the chipop on
-    *                       NOTE: HB should only be sending this to non-boot procs or Odyssey chips
-    *
-    * @return errlHndl_t Error log handle on failure.
-    *
-    */
-    errlHndl_t sendSyncCodeLevelsRequest(TARGETING::Target * i_chipTarget)
+     * @brief Sync the backup code image with the running code image.
+     */
+    errlHndl_t sendSyncCodeLevelsRequest(TARGETING::Target* const i_chipTarget,
+                                         const bool i_force_sync)
     {
         errlHndl_t errl = nullptr;
 
@@ -349,8 +346,20 @@ namespace SBEIO
                 break;
             }
 
-            SBE_TRACF(EXIT_MRK "Skipping unimplemented chipop sendSyncCodeLevelsRequest");
+            SbeFifo::fifoSyncCodeLevelsRequest request(i_force_sync);
 
+            SbeFifo::fifoStandardResponse response;
+            errl = SbeFifo::getTheInstance().performFifoChipOp(i_chipTarget,
+                                                               reinterpret_cast<uint32_t*>(&request),
+                                                               reinterpret_cast<uint32_t*>(&response),
+                                                               sizeof(response));
+
+            if (errl)
+            {
+                SBE_TRACF("sendSyncCodeLevels failed: " TRACE_ERR_FMT,
+                          TRACE_ERR_ARGS(errl));
+                break;
+            }
         }while(0);
 
         SBE_TRACD(EXIT_MRK "sendSyncCodeLevelsRequest");
