@@ -38,6 +38,8 @@
 #include <sbeio/sbe_utils.H>                   // SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES
 #include <targeting/common/mfgFlagAccessors.H> // areAllSrcsTerminating
 #include <vpd/vpd_if.H>
+#include <targeting/odyutil.H>                 // isOdysseyChip
+
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -544,7 +546,6 @@ uint32_t getMemConfigInfo(const TargetHandle_t i_pProc,
     uint32_t l_numberOfTargetsProcessed(0);
     uint32_t l_max(0);
     bool l_max_exceeded =false;
-
     TargetHandleList l_TargetList;
 
     // Get the targets associated with the PROC target based on i_class and i_type
@@ -575,71 +576,71 @@ uint32_t getMemConfigInfo(const TargetHandle_t i_pProc,
     io_buffer->ocmb_chips_max_number = SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER;
 
     TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig.C:getMemConfigInfo: version=0x%X config_types_supported=%d",
-        io_buffer->i2c_config_version, io_buffer->i2c_config_types_supported);
+              io_buffer->i2c_config_version, io_buffer->i2c_config_types_supported);
     TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig.C:getMemConfigInfo: Max entries supported for "
-        "PMIC=%d GENERIC=%d OCMB=%d",
-        io_buffer->pmic_chips_max_number, io_buffer->gi2c_chips_max_number,
-        io_buffer->ocmb_chips_max_number);
+              "PMIC=%d GENERIC=%d OCMB=%d",
+              io_buffer->pmic_chips_max_number, io_buffer->gi2c_chips_max_number,
+              io_buffer->ocmb_chips_max_number);
     TRACFCOMP(g_trac_sbeio, INFO_MRK"sbe_psuSendMemConfig.C:getMemConfigInfo: "
-        "PROC HUID=0x%X targets found=%d io_buffer=0x%X i_type=0x%X",
-        get_huid(i_pProc), l_TargetList.size(), io_buffer, i_type);
+              "PROC HUID=0x%X targets found=%d io_buffer=0x%X i_type=0x%X",
+              get_huid(i_pProc), l_TargetList.size(), io_buffer, i_type);
 
     switch (i_type)
     {
-        case (TYPE_PMIC):
+    case (TYPE_PMIC):
+    {
+        TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig:getMemConfigInfo: Validating MAX entries "
+                  "for TYPE_PMIC PMICs found=%d MAX PMICs=%d",
+                  l_TargetList.size(), (io_buffer->pmic_chips_max_number));
+        if (l_TargetList.size() > (io_buffer->pmic_chips_max_number))
         {
-            TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig:getMemConfigInfo: Validating MAX entries "
-                "for TYPE_PMIC PMICs found=%d MAX PMICs=%d",
-                l_TargetList.size(), (io_buffer->pmic_chips_max_number));
-            if (l_TargetList.size() > (io_buffer->pmic_chips_max_number))
-            {
-                l_max_exceeded = true;
-                l_max = (io_buffer->pmic_chips_max_number);
-                TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig.C:getMemConfigInfo: Exceeded MAX entries "
-                    "for TYPE_PMIC");
-            }
-            break;
+            l_max_exceeded = true;
+            l_max = (io_buffer->pmic_chips_max_number);
+            TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig.C:getMemConfigInfo: Exceeded MAX entries "
+                      "for TYPE_PMIC");
         }
-        case (TYPE_GENERIC_I2C_DEVICE):
-        {
-            TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig:getMemConfigInfo: Validating MAX entries "
-                "for TYPE_GENERIC_I2C_DEVICE GI2Cs found=%d MAX GI2Cs=%d",
-                l_TargetList.size(), (io_buffer->gi2c_chips_max_number));
-            if (l_TargetList.size() > (io_buffer->gi2c_chips_max_number))
-            {
-                l_max_exceeded = true;
-                l_max = (io_buffer->gi2c_chips_max_number);
-                TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig.C:getMemConfigInfo: Exceeded MAX entries "
-                    "for TYPE_GENERIC_I2C_DEVICE");
-            }
-            break;
-        }
-        case (TYPE_OCMB_CHIP):
-        {
-            TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig:getMemConfigInfo: Validating MAX entries "
-                "for TYPE_OCMB_CHIP OCMBs found=%d MAX OCMBs=%d",
-                l_TargetList.size(), (io_buffer->ocmb_chips_max_number));
-            if (l_TargetList.size() > (io_buffer->ocmb_chips_max_number))
-            {
-                l_max_exceeded = true;
-                l_max = (io_buffer->ocmb_chips_max_number);
-                TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig.C:getMemConfigInfo: Exceeded MAX entries "
-                    "for TYPE_OCMB_CHIP");
-            }
-            break;
-        }
-        default:
-        {
-            TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig.C:getMemConfigInfo: DEFAULT for unrecognized MAX Checks");
-            // We will SKIP handling the unrecognized case in the next steps below
-            break;
-        }
+        break;
     }
+    case (TYPE_GENERIC_I2C_DEVICE):
+    {
+        TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig:getMemConfigInfo: Validating MAX entries "
+                  "for TYPE_GENERIC_I2C_DEVICE GI2Cs found=%d MAX GI2Cs=%d",
+                  l_TargetList.size(), (io_buffer->gi2c_chips_max_number));
+        if (l_TargetList.size() > (io_buffer->gi2c_chips_max_number))
+        {
+            l_max_exceeded = true;
+            l_max = (io_buffer->gi2c_chips_max_number);
+            TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig.C:getMemConfigInfo: Exceeded MAX entries "
+                      "for TYPE_GENERIC_I2C_DEVICE");
+        }
+        break;
+    }
+    case (TYPE_OCMB_CHIP):
+    {
+        TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig:getMemConfigInfo: Validating MAX entries "
+                  "for TYPE_OCMB_CHIP OCMBs found=%d MAX OCMBs=%d",
+                  l_TargetList.size(), (io_buffer->ocmb_chips_max_number));
+        if (l_TargetList.size() > (io_buffer->ocmb_chips_max_number))
+        {
+            l_max_exceeded = true;
+            l_max = (io_buffer->ocmb_chips_max_number);
+            TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig.C:getMemConfigInfo: Exceeded MAX entries "
+                      "for TYPE_OCMB_CHIP");
+        }
+        break;
+    }
+    default:
+    {
+        TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig.C:getMemConfigInfo: DEFAULT for unrecognized MAX Checks");
+        // We will SKIP handling the unrecognized case in the next steps below
+        break;
+    }
+    } // end of switch
 
     if ( (l_TargetList.size() == 0) || l_max_exceeded )
     {
         TRACFCOMP(g_trac_sbeio, INFO_MRK"sbe_psuSendMemConfig.C:getMemConfigInfo: No targets "
-            "found in BLUEPRINT OR TOO many found for i_type=0x%X", i_type);
+                  "found in BLUEPRINT OR TOO many found for i_type=0x%X", i_type);
 
         if (l_max_exceeded)
         {
@@ -655,28 +656,57 @@ uint32_t getMemConfigInfo(const TargetHandle_t i_pProc,
              * @custdesc         A software error occurred during system boot
              */
             errlHndl_t l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                             SBEIO_PSU,
-                                             SBEIO_PSU_COUNT_UNEXPECTED,
-                                             TWO_UINT32_TO_UINT64(
-                                                         get_huid(i_pProc),
-                                                         l_TargetList.size() ),
-                                             TWO_UINT32_TO_UINT64(
-                                                         i_type,
-                                                         l_max ),
-                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+                                                        SBEIO_PSU,
+                                                        SBEIO_PSU_COUNT_UNEXPECTED,
+                                                        TWO_UINT32_TO_UINT64(
+                                                            get_huid(i_pProc),
+                                                            l_TargetList.size() ),
+                                                        TWO_UINT32_TO_UINT64(
+                                                            i_type,
+                                                            l_max ),
+                                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
             errlCommit(l_err, SBEIO_COMP_ID);
         }
     }
     else
     {
         TRACFCOMP(g_trac_sbeio, INFO_MRK"sbe_psuSendMemConfig.C:getMemConfigInfo: START WORKING on "
-            "PROC HUID=0x%X targets found=%d io_buffer=0x%X i_type=0x%X",
-            get_huid(i_pProc), l_TargetList.size(), io_buffer, i_type);
-
+                  "PROC HUID=0x%X targets found=%d io_buffer=0x%X i_type=0x%X",
+                  get_huid(i_pProc), l_TargetList.size(), io_buffer, i_type);
 
         // Iterate thru the targets and gather the config info
+        // Please Note:
+        // We do not want to tell SBE about the DDR5 parts. The reasons are
+        // that the DDR5 Odyssey devices will use a different protocol (I2CR)
+        // for SCOM accessess and HW dumps. Also, it helps in keeping the
+        // P10 SBE code from having to 'special-case' Odyssey support.
         for (const auto & l_Target: l_TargetList)
         {
+            if (i_type == TYPE_OCMB_CHIP)
+            {
+                // Skip if Odyssey
+                if (TARGETING::UTIL::isOdysseyChip(l_Target))
+                {
+                    TRACFCOMP(g_trac_sbeio, INFO_MRK"sbe_psuSendMemConfig.C:getMemConfigInfo:"
+                              " Skipping Odyssey Target HUID=0x%X i_type=0x%X",
+                              get_huid(l_Target), i_type);
+                    continue;
+                }
+            }
+            else
+            {
+                // Get the parent OCMB of this target.
+                const auto l_parentOCMB = getImmediateParentByAffinity(l_Target);
+                // Skip if the parent is an Odyssey chip
+                if (TARGETING::UTIL::isOdysseyChip(l_parentOCMB))
+                {
+                    TRACFCOMP(g_trac_sbeio, INFO_MRK"sbe_psuSendMemConfig.C:getMemConfigInfo:"
+                              " Skipping Odyssey Target HUID=0x%X i_type=0x%X parent=0x%x",
+                              get_huid(l_Target), i_type, get_huid(l_parentOCMB));
+                    continue;
+                }
+            }
+
             // Get the FAPI position of the target.  The FAPI position will
             // be used as an index into PSU command message.
             const ATTR_FAPI_POS_type l_fapiPos = l_Target->getAttr<ATTR_FAPI_POS>();
@@ -687,13 +717,15 @@ uint32_t getMemConfigInfo(const TargetHandle_t i_pProc,
             ATTR_FAPI_I2C_CONTROL_INFO_type l_fapiI2cControlInfo
                 = l_Target->getAttr<ATTR_FAPI_I2C_CONTROL_INFO>();
 
+
             ATTR_FAPI_I2C_CONTROL_INFO_type l_dynamic_i2cInfo = { };
 
             // If the target has dynamic device address attribute, then use that instead of the
             // read-only address found in ATTR_FAPI_I2C_CONTROL_INFO. We use the dynamic address
             // attribute because ATTR_FAPI_I2C_CONTROL_INFO is not writable and its difficult
             // to override complex attributes.
-            if (l_Target->tryGetAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_dynamic_i2cInfo.devAddr))
+            if (l_Target->tryGetAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>
+                (l_dynamic_i2cInfo.devAddr))
             {
                 l_fapiI2cControlInfo.devAddr = l_dynamic_i2cInfo.devAddr;
             }
@@ -703,39 +735,39 @@ uint32_t getMemConfigInfo(const TargetHandle_t i_pProc,
 
             switch (i_type)
             {
-                case (TYPE_PMIC):
-                {
-                    io_buffer->pmic_chips[l_arrayIndex].i2c_port  = l_fapiI2cControlInfo.port;
-                    io_buffer->pmic_chips[l_arrayIndex].i2c_engine  = l_fapiI2cControlInfo.engine;
-                    io_buffer->pmic_chips[l_arrayIndex].i2c_devAddr  = l_fapiI2cControlInfo.devAddr;
-                    io_buffer->pmic_chips[l_arrayIndex].i2c_functional = l_currentState.functional;
-                    io_buffer->pmic_chips[l_arrayIndex].i2c_present = l_currentState.present;
-                    break;
-                }
-                case (TYPE_GENERIC_I2C_DEVICE):
-                {
-                    io_buffer->gi2c_chips[l_arrayIndex].i2c_port  = l_fapiI2cControlInfo.port;
-                    io_buffer->gi2c_chips[l_arrayIndex].i2c_engine  = l_fapiI2cControlInfo.engine;
-                    io_buffer->gi2c_chips[l_arrayIndex].i2c_devAddr  = l_fapiI2cControlInfo.devAddr;
-                    io_buffer->gi2c_chips[l_arrayIndex].i2c_functional = l_currentState.functional;
-                    io_buffer->gi2c_chips[l_arrayIndex].i2c_present = l_currentState.present;
-                    break;
-                }
-                case (TYPE_OCMB_CHIP):
-                {
-                    io_buffer->ocmb_chips[l_arrayIndex].i2c_port  = l_fapiI2cControlInfo.port;
-                    io_buffer->ocmb_chips[l_arrayIndex].i2c_engine  = l_fapiI2cControlInfo.engine;
-                    io_buffer->ocmb_chips[l_arrayIndex].i2c_devAddr  = l_fapiI2cControlInfo.devAddr;
-                    io_buffer->ocmb_chips[l_arrayIndex].i2c_functional = l_currentState.functional;
-                    io_buffer->ocmb_chips[l_arrayIndex].i2c_present = l_currentState.present;
-                    break;
-                }
-                default:
-                {
-                    TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig.C:getMemConfigInfo: Unrecognized "
-                        "i_type=0x%X, no data populated", i_type);
-                    break;
-                }
+            case (TYPE_PMIC):
+            {
+                io_buffer->pmic_chips[l_arrayIndex].i2c_port  = l_fapiI2cControlInfo.port;
+                io_buffer->pmic_chips[l_arrayIndex].i2c_engine  = l_fapiI2cControlInfo.engine;
+                io_buffer->pmic_chips[l_arrayIndex].i2c_devAddr  = l_fapiI2cControlInfo.devAddr;
+                io_buffer->pmic_chips[l_arrayIndex].i2c_functional = l_currentState.functional;
+                io_buffer->pmic_chips[l_arrayIndex].i2c_present = l_currentState.present;
+                break;
+            }
+            case (TYPE_GENERIC_I2C_DEVICE):
+            {
+                io_buffer->gi2c_chips[l_arrayIndex].i2c_port  = l_fapiI2cControlInfo.port;
+                io_buffer->gi2c_chips[l_arrayIndex].i2c_engine  = l_fapiI2cControlInfo.engine;
+                io_buffer->gi2c_chips[l_arrayIndex].i2c_devAddr  = l_fapiI2cControlInfo.devAddr;
+                io_buffer->gi2c_chips[l_arrayIndex].i2c_functional = l_currentState.functional;
+                io_buffer->gi2c_chips[l_arrayIndex].i2c_present = l_currentState.present;
+                break;
+            }
+            case (TYPE_OCMB_CHIP):
+            {
+                io_buffer->ocmb_chips[l_arrayIndex].i2c_port  = l_fapiI2cControlInfo.port;
+                io_buffer->ocmb_chips[l_arrayIndex].i2c_engine  = l_fapiI2cControlInfo.engine;
+                io_buffer->ocmb_chips[l_arrayIndex].i2c_devAddr  = l_fapiI2cControlInfo.devAddr;
+                io_buffer->ocmb_chips[l_arrayIndex].i2c_functional = l_currentState.functional;
+                io_buffer->ocmb_chips[l_arrayIndex].i2c_present = l_currentState.present;
+                break;
+            }
+            default:
+            {
+                TRACFCOMP(g_trac_sbeio, "sbe_psuSendMemConfig.C:getMemConfigInfo: Unrecognized "
+                          "i_type=0x%X, no data populated", i_type);
+                break;
+            }
             }
 
             ++l_numberOfTargetsProcessed;

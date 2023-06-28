@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@
 #include <sbeio/sbe_psudd.H>                   // SbePsu::psuCommand
 #include <targeting/common/commontargeting.H>  // get_huid
 #include <targeting/common/utilFilter.H>       // getAllChips
-
+#include <targeting/odyutil.H>                 // isOdysseyChip
 
 #define SBE_TRACFBIN(printf_string,args...) \
     TRACFBIN(g_trac_sbeio, "PsuSendMemConfigTest: testMemConfigInfo " printf_string,##args)
@@ -53,6 +53,7 @@ namespace SBEIO
 
 }
 
+using namespace TARGETING;
 using namespace SBEIO;
 
 extern trace_desc_t* g_trac_sbeio;
@@ -82,6 +83,8 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
     void testMemConfigInfo(void)
     {
         TRACFCOMP(g_trac_sbeio, ENTER_MRK"PsuSendMemConfigTest: testMemConfigInfo");
+        bool l_procHasDDR4parts = false;
+        bool l_procHasDDR5parts = false;
         errlHndl_t l_err = nullptr;
 
         // Create a vector of Target pointers to hold the targets.
@@ -110,6 +113,8 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
             memset(l_pmic_HuidArray, 0, SbePsu::SBE_PMIC_CONFIG_MAX_NUMBER);
             memset(l_generic_HuidArray, 0, SbePsu::SBE_GENERIC_I2C_CONFIG_MAX_NUMBER);
             memset(l_ocmb_HuidArray, 0, SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER);
+            l_procHasDDR4parts = false;
+            l_procHasDDR5parts = false;
 
             // Get the PMIC targets associated with the PROC target
             // UTIL_FILTER_ALL will retrieve ALL BLUEPRINT
@@ -235,6 +240,17 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
                 // Cache the HUID for tracing/debugging means
                 l_ocmb_HuidArray[l_arrayIndex] = get_huid(l_ocmbTarget);
 
+                if (TARGETING::UTIL::isOdysseyChip(l_ocmbTarget))
+                {
+                    TS_INFO("testMemConfigInfo:Ody Chip 0x%.8X", l_ocmb_HuidArray[l_arrayIndex]);
+                    l_procHasDDR5parts = true;
+                }
+                else
+                {
+                    TS_INFO("testMemConfigInfo:Exp Chip 0x%.8X", l_ocmb_HuidArray[l_arrayIndex]);
+                    l_procHasDDR4parts = true;
+                }
+
                 // Get the FAPI I2C control info from the target. The port info,
                 // engine and device address resides within the FAPI I2C control info.
                 const ATTR_FAPI_I2C_CONTROL_INFO_type l_fapiI2cControlInfo
@@ -259,10 +275,10 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
 
             // Create a PSU command message and initialize it with Memory Config specific flags
             SbePsu::psuCommand l_psuCommand(
-                        SbePsu::SBE_REQUIRE_RESPONSE |
-                        SbePsu::SBE_REQUIRE_ACK,          // control flags
-                        SbePsu::SBE_PSU_GENERIC_MESSAGE,  // command class (0xD7)
-                        SbePsu::SBE_CMD_MEM_CONFIG);      // command (0x0B)
+                SbePsu::SBE_REQUIRE_RESPONSE |
+                SbePsu::SBE_REQUIRE_ACK,          // control flags
+                SbePsu::SBE_PSU_GENERIC_MESSAGE,  // command class (0xD7)
+                SbePsu::SBE_CMD_MEM_CONFIG);      // command (0x0B)
 
 
             // Populate the PSU command with the Memory config info
@@ -274,162 +290,211 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
             // Assumed the virtual pages returned by malloc are backed by contiguous physical pages
 
             TRACFCOMP(g_trac_sbeio, "psuSendSbeMemConfig: SBE indirect data at address 0x%lx "
-                "l_sbeMemAlloc=0x%X sizeof(MemConfigData_t)=0x%X",
-                l_MemConfigAlloc.physAddr, l_sbeMemAlloc, sizeof(SbePsu::MemConfigData_t));
+                      "l_sbeMemAlloc=0x%X sizeof(MemConfigData_t)=0x%X",
+                      l_MemConfigAlloc.physAddr, l_sbeMemAlloc, sizeof(SbePsu::MemConfigData_t));
 
             l_psuCommand.cd7_sendMemConfig_DataAddr = l_MemConfigAlloc.physAddr;
 
             uint32_t l_total_mem_targets_processed = 0;
             uint32_t l_current_targets_processed = 0;
-            l_current_targets_processed = getMemConfigInfo(l_procTarget, CLASS_NA,
-                                          TYPE_PMIC,
-                                          SbePsu::SBE_PMIC_CONFIG_MAX_NUMBER,
-                                          reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc));
+
+            // We deliberately don't report DDR5 partslist to SBE. So we don't expect
+            // any DDR5 devices in the list.
+
+            l_current_targets_processed =
+                      getMemConfigInfo(l_procTarget, CLASS_NA,
+                                       TYPE_PMIC,
+                                       SbePsu::SBE_PMIC_CONFIG_MAX_NUMBER,
+                                       reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc));
+
             l_total_mem_targets_processed += l_current_targets_processed;
             if (l_current_targets_processed > SbePsu::SBE_PMIC_CONFIG_MAX_NUMBER)
             {
                 TS_FAIL("testMemConfigInfo: Processed %d "
-                    "PMICs but MAX is SBE_PMIC_CONFIG_MAX_NUMBER of %d",
-                    l_current_targets_processed, SbePsu::SBE_PMIC_CONFIG_MAX_NUMBER);
+                        "PMICs but MAX is SBE_PMIC_CONFIG_MAX_NUMBER of %d",
+                        l_current_targets_processed, SbePsu::SBE_PMIC_CONFIG_MAX_NUMBER);
             }
             else
             {
                 TS_INFO("testMemConfigInfo: Completed processing %d "
-                    "PMICs and MAX is SBE_PMIC_CONFIG_MAX_NUMBER of %d",
-                    l_current_targets_processed, SbePsu::SBE_PMIC_CONFIG_MAX_NUMBER);
+                        "PMICs and MAX is SBE_PMIC_CONFIG_MAX_NUMBER of %d",
+                        l_current_targets_processed, SbePsu::SBE_PMIC_CONFIG_MAX_NUMBER);
             }
 
-            l_current_targets_processed = getMemConfigInfo(l_procTarget, CLASS_NA,
-                                          TYPE_GENERIC_I2C_DEVICE,
-                                          SbePsu::SBE_GENERIC_I2C_CONFIG_MAX_NUMBER,
-                                          reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc));
+            l_current_targets_processed =
+                      getMemConfigInfo(l_procTarget, CLASS_NA,
+                                       TYPE_GENERIC_I2C_DEVICE,
+                                       SbePsu::SBE_GENERIC_I2C_CONFIG_MAX_NUMBER,
+                                       reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc));
             l_total_mem_targets_processed += l_current_targets_processed;
             if (l_current_targets_processed > SbePsu::SBE_GENERIC_I2C_CONFIG_MAX_NUMBER)
             {
                 TS_FAIL("testMemConfigInfo: Processed %d GENERIC I2Cs "
-                    "but MAX is SBE_GENERIC_I2C_CONFIG_MAX_NUMBER of %d",
-                    l_current_targets_processed, SbePsu::SBE_GENERIC_I2C_CONFIG_MAX_NUMBER);
+                        "but MAX is SBE_GENERIC_I2C_CONFIG_MAX_NUMBER of %d",
+                        l_current_targets_processed, SbePsu::SBE_GENERIC_I2C_CONFIG_MAX_NUMBER);
             }
             else
             {
                 TS_INFO("testMemConfigInfo: Completed processing %d "
-                    "GENERIC I2Cs and MAX is SBE_GENERIC_I2C_CONFIG_MAX_NUMBER of %d",
-                    l_current_targets_processed, SbePsu::SBE_GENERIC_I2C_CONFIG_MAX_NUMBER);
+                        "GENERIC I2Cs and MAX is SBE_GENERIC_I2C_CONFIG_MAX_NUMBER of %d",
+                        l_current_targets_processed, SbePsu::SBE_GENERIC_I2C_CONFIG_MAX_NUMBER);
             }
 
-            l_current_targets_processed = getMemConfigInfo(l_procTarget, CLASS_CHIP,
-                                          TYPE_OCMB_CHIP,
-                                          SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER,
-                                          reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc));
+            l_current_targets_processed =
+                      getMemConfigInfo(l_procTarget, CLASS_CHIP,
+                                       TYPE_OCMB_CHIP,
+                                       SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER,
+                                       reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc));
             l_total_mem_targets_processed += l_current_targets_processed;
             if (l_current_targets_processed > SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER)
             {
                 TS_FAIL("testMemConfigInfo: Processed %d OCMBs "
-                    "but MAX is SBE_OCMB_CONFIG_MAX_NUMBER of %d",
-                    l_current_targets_processed, SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER);
+                        "but MAX is SBE_OCMB_CONFIG_MAX_NUMBER of %d",
+                        l_current_targets_processed, SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER);
             }
             else
             {
                 TS_INFO("testMemConfigInfo: Completed processing %d "
-                    "OCMBs and MAX is SBE_OCMB_CONFIG_MAX_NUMBER of %d",
-                    l_current_targets_processed, SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER);
+                        "OCMBs and MAX is SBE_OCMB_CONFIG_MAX_NUMBER of %d",
+                        l_current_targets_processed, SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER);
             }
 
             // Cache the PROC's HUID for tracing
             auto l_procHuid = get_huid(l_procTarget);
 
-            // Validate the PSU command's reserved0 data has not been modified
-            if ( l_psuCommand.cd7_sendMemConfig_Reserved0 != 0)
+            // SBE should not report DDR5 parts as HB hides them from SBE.
+            // Do any validation only if we are not dealing with DDR5 parts...
+            // only if we are not dealing with DDR5 parts...
+            if (l_procHasDDR5parts)
             {
-                TS_FAIL("testMemConfigInfo: PSU command, Reserved0 "
-                        "mismatch, expected(0) but found(0x%.8X)",
-                        l_psuCommand.cd7_sendMemConfig_Reserved0 );
+                // SBE should report 0 targets if there are only DDR5 parts
+                if ((l_total_mem_targets_processed > 0) && (!l_procHasDDR4parts))
+                {
+                    TS_FAIL("testMemConfigInfo: proc:0x%.8X has only DDR5 parts. SBE reported:%d",
+                            l_procHuid, l_total_mem_targets_processed);
+                }
+                else
+                {
+                    TS_INFO("testMemConfigInfo: proc:0x%.8X has DDR5 parts. SBE reported:%d",
+                            l_procHuid, l_total_mem_targets_processed);
+                }
             }
 
-            // Validate the PSU command's reserved 1 (control flags) has not been modified
-            if ( l_psuCommand.cd7_sendMemConfig_ControlFlags !=
-                 (SbePsu::SBE_REQUIRE_RESPONSE | SbePsu::SBE_REQUIRE_ACK) )
+            if (l_procHasDDR4parts)
             {
-                TS_FAIL("testMemConfigInfo: PSU command, Reserved1 (control "
-                        "flags) mismatch, expected(0x%.8X) but found(0x%.8X)",
-                        (SbePsu::SBE_REQUIRE_RESPONSE | SbePsu::SBE_REQUIRE_ACK),
-                        l_psuCommand.cd7_sendMemConfig_ControlFlags );
-            }
+                // NOT DDR5 parts, so validate and do other checks...
+                // Validate the PSU command's reserved0 data has not been modified
+                if ( l_psuCommand.cd7_sendMemConfig_Reserved0 != 0)
+                {
+                    TS_FAIL("testMemConfigInfo: PSU command, Reserved0 "
+                            "mismatch, expected(0) but found(0x%.8X)",
+                            l_psuCommand.cd7_sendMemConfig_Reserved0 );
+                }
 
-            // Validate the PSU command's sequence id has not been modified
-            if ( l_psuCommand.cd7_sendMemConfig_SeqID != 0)
-            {
-                TS_FAIL("testMemConfigInfo: PSU command, sequence ID "
-                        "mismatch, expected(0) but found(0x%.8X)",
-                        l_psuCommand.cd7_sendMemConfig_SeqID );
-            }
+                // Validate the PSU command's reserved 1 (control flags) has not been modified
+                if ( l_psuCommand.cd7_sendMemConfig_ControlFlags !=
+                     (SbePsu::SBE_REQUIRE_RESPONSE | SbePsu::SBE_REQUIRE_ACK) )
+                {
+                    TS_FAIL("testMemConfigInfo: PSU command, Reserved1 (control "
+                            "flags) mismatch, expected(0x%.8X) but found(0x%.8X)",
+                            (SbePsu::SBE_REQUIRE_RESPONSE | SbePsu::SBE_REQUIRE_ACK),
+                            l_psuCommand.cd7_sendMemConfig_ControlFlags );
+                }
+
+                // Validate the PSU command's sequence id has not been modified
+                if ( l_psuCommand.cd7_sendMemConfig_SeqID != 0)
+                {
+                    TS_FAIL("testMemConfigInfo: PSU command, sequence ID "
+                            "mismatch, expected(0) but found(0x%.8X)",
+                            l_psuCommand.cd7_sendMemConfig_SeqID );
+                }
 
 
-            // Validate the PSU command class has not been modified
-            if ( l_psuCommand.cd7_sendMemConfig_CommandClass !=
-                 SbePsu::SBE_PSU_GENERIC_MESSAGE )
-            {
-                TS_FAIL("testMemConfigInfo: PSU command class "
-                        "mismatch, expected(0x%.8X) but found(0x%.8X)",
-                        SbePsu::SBE_PSU_GENERIC_MESSAGE,
-                        l_psuCommand.cd7_sendMemConfig_CommandClass );
-            }
+                // Validate the PSU command class has not been modified
+                if ( l_psuCommand.cd7_sendMemConfig_CommandClass !=
+                     SbePsu::SBE_PSU_GENERIC_MESSAGE )
+                {
+                    TS_FAIL("testMemConfigInfo: PSU command class "
+                            "mismatch, expected(0x%.8X) but found(0x%.8X)",
+                            SbePsu::SBE_PSU_GENERIC_MESSAGE,
+                            l_psuCommand.cd7_sendMemConfig_CommandClass );
+                }
 
-            // Validate the PSU command has not been modified
-            if ( l_psuCommand.cd7_sendMemConfig_Command !=
-                 SbePsu::SBE_CMD_MEM_CONFIG )
-            {
-                TS_FAIL("testMemConfigInfo: PSU command "
-                        "mismatch, expected(0x%.8X) but found(0x%.8X)",
-                        SbePsu::SBE_CMD_MEM_CONFIG,
-                        l_psuCommand.cd7_sendMemConfig_Command );
+                // Validate the PSU command has not been modified
+                if ( l_psuCommand.cd7_sendMemConfig_Command !=
+                     SbePsu::SBE_CMD_MEM_CONFIG )
+                {
+                    TS_FAIL("testMemConfigInfo: PSU command "
+                            "mismatch, expected(0x%.8X) but found(0x%.8X)",
+                            SbePsu::SBE_CMD_MEM_CONFIG,
+                            l_psuCommand.cd7_sendMemConfig_Command );
+                }
             }
 
             // Validate the PMICs
             for ( const auto & l_pmicTarget: l_pmicTargetList )
             {
+                // Get the parent OCMB of this target.
+                const auto l_parentOCMB = getImmediateParentByAffinity(l_pmicTarget);
+                // Skip if the parent is an Odyssey chip
+                if (TARGETING::UTIL::isOdysseyChip(l_parentOCMB))
+                {
+                    TS_INFO("testMemConfigInfo: Skipping Odyssey PMIC Target =0x%X parent=0x%x",
+                            get_huid(l_pmicTarget), get_huid(l_parentOCMB));
+                    continue;
+                }
+
                 // Get the FAPI position of the target.  The FAPI position will
                 // be used as an index into PSU command message.
                 const ATTR_FAPI_POS_type l_fapiPos
                     = l_pmicTarget->getAttr<ATTR_FAPI_POS>();
                 uint32_t i = l_fapiPos % SbePsu::SBE_PMIC_CONFIG_MAX_NUMBER;
-                SbePsu::MemConfigData_t * l_testMemAlloc = reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc);
+                SbePsu::MemConfigData_t * l_testMemAlloc =
+                    reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc);
 
-                if ( l_i2c_telemetry_data.pmic_chips[i].i2c_port != l_testMemAlloc->pmic_chips[i].i2c_port )
+                if ( l_i2c_telemetry_data.pmic_chips[i].i2c_port !=
+                     l_testMemAlloc->pmic_chips[i].i2c_port )
                 {
                     TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): PMIC(0x%X) port "
-                            "mismatch, expected i2c_port (0x%X) but found l_testMemAlloc->pmic_chips[i].i2c_port (0x%X)",
+                            "mismatch, expected i2c_port (0x%X) but found "
+                            "l_testMemAlloc->pmic_chips[i].i2c_port (0x%X)",
                             i,
                             l_procHuid,
                             l_pmic_HuidArray[i],
                             l_i2c_telemetry_data.pmic_chips[i].i2c_port,
                             l_testMemAlloc->pmic_chips[i].i2c_port);
                 }
-                if ( l_i2c_telemetry_data.pmic_chips[i].i2c_engine != l_testMemAlloc->pmic_chips[i].i2c_engine )
+                if ( l_i2c_telemetry_data.pmic_chips[i].i2c_engine !=
+                     l_testMemAlloc->pmic_chips[i].i2c_engine )
                 {
                     TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): PMIC(0x%X) engine "
-                            "mismatch, expected i2c_engine (0x%X) but found l_testMemAlloc->pmic_chips[i].i2c_engine (0x%X)",
+                            "mismatch, expected i2c_engine (0x%X) but found "
+                            "l_testMemAlloc->pmic_chips[i].i2c_engine (0x%X)",
                             i,
                             l_procHuid,
                             l_pmic_HuidArray[i],
                             l_i2c_telemetry_data.pmic_chips[i].i2c_engine,
                             l_testMemAlloc->pmic_chips[i].i2c_engine);
                 }
-                if ( l_i2c_telemetry_data.pmic_chips[i].i2c_devAddr != l_testMemAlloc->pmic_chips[i].i2c_devAddr )
+                if ( l_i2c_telemetry_data.pmic_chips[i].i2c_devAddr !=
+                     l_testMemAlloc->pmic_chips[i].i2c_devAddr )
                 {
                     TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): PMIC(0x%X) devAddr "
-                            "mismatch, expected i2c_devAddr (0x%X) but found l_testMemAlloc->pmic_chips[i].i2c_devAddr (0x%X)",
+                            "mismatch, expected i2c_devAddr (0x%X) but found "
+                            "l_testMemAlloc->pmic_chips[i].i2c_devAddr (0x%X)",
                             i,
                             l_procHuid,
                             l_pmic_HuidArray[i],
                             l_i2c_telemetry_data.pmic_chips[i].i2c_devAddr,
                             l_testMemAlloc->pmic_chips[i].i2c_devAddr);
                 }
-                if ( l_i2c_telemetry_data.pmic_chips[i].i2c_functional != l_testMemAlloc->pmic_chips[i].i2c_functional)
+                if ( l_i2c_telemetry_data.pmic_chips[i].i2c_functional !=
+                     l_testMemAlloc->pmic_chips[i].i2c_functional)
                 {
                     {
                         TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): PMIC(0x%X) functional state "
-                                "mismatch, expected i2c_functional (0x%X) but found l_testMemAlloc->pmic_chips[i].i2c_functional (0x%X)",
+                                "mismatch, expected i2c_functional (0x%X) but found "
+                                "l_testMemAlloc->pmic_chips[i].i2c_functional (0x%X)",
                                 i,
                                 l_procHuid,
                                 l_pmic_HuidArray[i],
@@ -437,11 +502,13 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
                                 l_testMemAlloc->pmic_chips[i].i2c_functional);
                     }
                 }
-                if ( l_i2c_telemetry_data.pmic_chips[i].i2c_present != l_testMemAlloc->pmic_chips[i].i2c_present)
+                if ( l_i2c_telemetry_data.pmic_chips[i].i2c_present !=
+                     l_testMemAlloc->pmic_chips[i].i2c_present)
                 {
                     {
                         TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): PMIC(0x%X) present state "
-                                "mismatch, expected i2c_present (0x%X) but found l_testMemAlloc->pmic_chips[i].i2c_present (0x%X)",
+                                "mismatch, expected i2c_present (0x%X) but found "
+                                "l_testMemAlloc->pmic_chips[i].i2c_present (0x%X)",
                                 i,
                                 l_procHuid,
                                 l_pmic_HuidArray[i],
@@ -454,48 +521,67 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
             // Validate the GENERICs
             for ( const auto & l_genericTarget: l_genericTargetList )
             {
+                // Get the parent OCMB of this target.
+                const auto l_parentOCMB = getImmediateParentByAffinity(l_genericTarget);
+                // Skip if the parent is an Odyssey chip
+                if (TARGETING::UTIL::isOdysseyChip(l_parentOCMB))
+                {
+                    TS_INFO("testMemConfigInfo: Skipping Odyssey generic Target =0x%X parent=0x%x",
+                            get_huid(l_genericTarget), get_huid(l_parentOCMB));
+                    continue;
+                }
+
                 // Get the FAPI position of the target.  The FAPI position will
                 // be used as an index into PSU command message.
                 const ATTR_FAPI_POS_type l_fapiPos
                     = l_genericTarget->getAttr<ATTR_FAPI_POS>();
                 uint32_t i = l_fapiPos % SbePsu::SBE_GENERIC_I2C_CONFIG_MAX_NUMBER;
-                SbePsu::MemConfigData_t * l_testMemAlloc = reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc);
+                SbePsu::MemConfigData_t * l_testMemAlloc =
+                    reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc);
 
-                if ( l_i2c_telemetry_data.gi2c_chips[i].i2c_port != l_testMemAlloc->gi2c_chips[i].i2c_port )
+                if ( l_i2c_telemetry_data.gi2c_chips[i].i2c_port !=
+                     l_testMemAlloc->gi2c_chips[i].i2c_port )
                 {
                     TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): GENERIC(0x%X) port "
-                            "mismatch, expected i2c_port (0x%X) but found l_testMemAlloc->gi2c_chips[i].i2c_port (0x%X)",
+                            "mismatch, expected i2c_port (0x%X) but found "
+                            "l_testMemAlloc->gi2c_chips[i].i2c_port (0x%X)",
                             i,
                             l_procHuid,
                             l_generic_HuidArray[i],
                             l_i2c_telemetry_data.gi2c_chips[i].i2c_port,
                             l_testMemAlloc->gi2c_chips[i].i2c_port);
                 }
-                if ( l_i2c_telemetry_data.gi2c_chips[i].i2c_engine != l_testMemAlloc->gi2c_chips[i].i2c_engine )
+                if ( l_i2c_telemetry_data.gi2c_chips[i].i2c_engine !=
+                     l_testMemAlloc->gi2c_chips[i].i2c_engine )
                 {
                     TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): GENERIC(0x%X) engine "
-                            "mismatch, expected i2c_engine (0x%X) but found l_testMemAlloc->gi2c_chips[i].i2c_engine (0x%X)",
+                            "mismatch, expected i2c_engine (0x%X) but found "
+                            "l_testMemAlloc->gi2c_chips[i].i2c_engine (0x%X)",
                             i,
                             l_procHuid,
                             l_generic_HuidArray[i],
                             l_i2c_telemetry_data.gi2c_chips[i].i2c_engine,
                             l_testMemAlloc->gi2c_chips[i].i2c_engine);
                 }
-                if ( l_i2c_telemetry_data.gi2c_chips[i].i2c_devAddr != l_testMemAlloc->gi2c_chips[i].i2c_devAddr )
+                if ( l_i2c_telemetry_data.gi2c_chips[i].i2c_devAddr !=
+                     l_testMemAlloc->gi2c_chips[i].i2c_devAddr )
                 {
                     TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): GENERIC(0x%X) devAddr "
-                            "mismatch, expected l_generic_devAddrArray (0x%X) but found l_testMemAlloc->gi2c_chips[i].i2c_devAddr (0x%X)",
+                            "mismatch, expected l_generic_devAddrArray (0x%X) but found "
+                            "l_testMemAlloc->gi2c_chips[i].i2c_devAddr (0x%X)",
                             i,
                             l_procHuid,
                             l_generic_HuidArray[i],
                             l_i2c_telemetry_data.gi2c_chips[i].i2c_devAddr,
                             l_testMemAlloc->gi2c_chips[i].i2c_devAddr);
                 }
-                if ( l_i2c_telemetry_data.gi2c_chips[i].i2c_functional != l_testMemAlloc->gi2c_chips[i].i2c_functional)
+                if ( l_i2c_telemetry_data.gi2c_chips[i].i2c_functional !=
+                     l_testMemAlloc->gi2c_chips[i].i2c_functional)
                 {
                     {
                         TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): GENERIC(0x%X) functional state "
-                                "mismatch, expected i2c_functional (0x%X) but found l_testMemAlloc->gi2c_chips[i].i2c_functional (0x%X)",
+                                "mismatch, expected i2c_functional (0x%X) but "
+                                "found l_testMemAlloc->gi2c_chips[i].i2c_functional (0x%X)",
                                 i,
                                 l_procHuid,
                                 l_generic_HuidArray[i],
@@ -503,11 +589,13 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
                                 l_testMemAlloc->gi2c_chips[i].i2c_functional);
                     }
                 }
-                if ( l_i2c_telemetry_data.gi2c_chips[i].i2c_present != l_testMemAlloc->gi2c_chips[i].i2c_present)
+                if ( l_i2c_telemetry_data.gi2c_chips[i].i2c_present !=
+                     l_testMemAlloc->gi2c_chips[i].i2c_present)
                 {
                     {
                         TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): GENERIC(0x%X) present state "
-                                "mismatch, expected i2c_present (0x%X) but found l_testMemAlloc->gi2c_chips[i].i2c_present (0x%X)",
+                                "mismatch, expected i2c_present (0x%X) but found "
+                                "l_testMemAlloc->gi2c_chips[i].i2c_present (0x%X)",
                                 i,
                                 l_procHuid,
                                 l_generic_HuidArray[i],
@@ -520,48 +608,65 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
             // Validate the OCMBs
             for ( const auto & l_ocmbTarget: l_ocmbTargetList )
             {
+                // Skip if Odyssey
+                if (TARGETING::UTIL::isOdysseyChip(l_ocmbTarget))
+                {
+                    TS_INFO("testMemConfigInfo: Skipping Odyssey OCMB Target: 0x%X",
+                            get_huid(l_ocmbTarget));
+                    continue;
+                }
+
                 // Get the FAPI position of the target.  The FAPI position will
                 // be used as an index into PSU command message.
                 const ATTR_FAPI_POS_type l_fapiPos
                     = l_ocmbTarget->getAttr<ATTR_FAPI_POS>();
                 uint32_t i = l_fapiPos % SbePsu::SBE_OCMB_CONFIG_MAX_NUMBER;
-                SbePsu::MemConfigData_t * l_testMemAlloc = reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc);
+                SbePsu::MemConfigData_t * l_testMemAlloc =
+                    reinterpret_cast<SbePsu::MemConfigData_t *>(l_sbeMemAlloc);
 
-                if ( l_i2c_telemetry_data.ocmb_chips[i].i2c_port != l_testMemAlloc->ocmb_chips[i].i2c_port )
+                if ( l_i2c_telemetry_data.ocmb_chips[i].i2c_port !=
+                     l_testMemAlloc->ocmb_chips[i].i2c_port )
                 {
                     TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): OCMB(0x%X) port "
-                            "mismatch, expected i2c_port (0x%X) but found l_testMemAlloc->ocmb_chips[i].i2c_port (0x%X)",
+                            "mismatch, expected i2c_port (0x%X) but found "
+                            "l_testMemAlloc->ocmb_chips[i].i2c_port (0x%X)",
                             i,
                             l_procHuid,
                             l_ocmb_HuidArray[i],
                             l_i2c_telemetry_data.ocmb_chips[i].i2c_port,
                             l_testMemAlloc->ocmb_chips[i].i2c_port);
                 }
-                if ( l_i2c_telemetry_data.ocmb_chips[i].i2c_engine != l_testMemAlloc->ocmb_chips[i].i2c_engine )
+                if ( l_i2c_telemetry_data.ocmb_chips[i].i2c_engine !=
+                     l_testMemAlloc->ocmb_chips[i].i2c_engine )
                 {
                     TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): OCMB(0x%X) engine "
-                            "mismatch, expected i2c_engine (0x%X) but found l_testMemAlloc->ocmb_chips[i].i2c_engine (0x%X)",
+                            "mismatch, expected i2c_engine (0x%X) but found "
+                            "l_testMemAlloc->ocmb_chips[i].i2c_engine (0x%X)",
                             i,
                             l_procHuid,
                             l_ocmb_HuidArray[i],
                             l_i2c_telemetry_data.ocmb_chips[i].i2c_engine,
                             l_testMemAlloc->ocmb_chips[i].i2c_engine);
                 }
-                if ( l_i2c_telemetry_data.ocmb_chips[i].i2c_devAddr != l_testMemAlloc->ocmb_chips[i].i2c_devAddr )
+                if ( l_i2c_telemetry_data.ocmb_chips[i].i2c_devAddr !=
+                     l_testMemAlloc->ocmb_chips[i].i2c_devAddr )
                 {
                     TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): OCMB(0x%X) devAddr "
-                            "mismatch, expected i2c_devAddr (0x%X) but found l_testMemAlloc->ocmb_chips[i].i2c_devAddr (0x%X)",
+                            "mismatch, expected i2c_devAddr (0x%X) but found "
+                            "l_testMemAlloc->ocmb_chips[i].i2c_devAddr (0x%X)",
                             i,
                             l_procHuid,
                             l_ocmb_HuidArray[i],
                             l_i2c_telemetry_data.ocmb_chips[i].i2c_devAddr,
                             l_testMemAlloc->ocmb_chips[i].i2c_devAddr);
                 }
-                if ( l_i2c_telemetry_data.ocmb_chips[i].i2c_functional != l_testMemAlloc->ocmb_chips[i].i2c_functional)
+                if ( l_i2c_telemetry_data.ocmb_chips[i].i2c_functional !=
+                     l_testMemAlloc->ocmb_chips[i].i2c_functional)
                 {
                     {
                         TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): OCMB(0x%X) functional state "
-                                "mismatch, expected i2c_functional (0x%X) but found l_testMemAlloc->ocmb_chips[i].i2c_functional (0x%X)",
+                                "mismatch, expected i2c_functional (0x%X) but found "
+                                "l_testMemAlloc->ocmb_chips[i].i2c_functional (0x%X)",
                                 i,
                                 l_procHuid,
                                 l_ocmb_HuidArray[i],
@@ -569,11 +674,13 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
                                 l_testMemAlloc->ocmb_chips[i].i2c_functional);
                     }
                 }
-                if ( l_i2c_telemetry_data.ocmb_chips[i].i2c_present != l_testMemAlloc->ocmb_chips[i].i2c_present)
+                if ( l_i2c_telemetry_data.ocmb_chips[i].i2c_present !=
+                     l_testMemAlloc->ocmb_chips[i].i2c_present)
                 {
                     {
                         TS_FAIL("testMemConfigInfo: i=%d PROC(0x%X): OCMB(0x%X) present state "
-                                "mismatch, expected i2c_present (0x%X) but found l_testMemAlloc->ocmb_chips[i].i2c_present (0x%X)",
+                                "mismatch, expected i2c_present (0x%X) but found "
+                                "l_testMemAlloc->ocmb_chips[i].i2c_present (0x%X)",
                                 i,
                                 l_procHuid,
                                 l_ocmb_HuidArray[i],
@@ -583,51 +690,53 @@ class PsuSendMemConfigTest : public CxxTest::TestSuite
                 }
             } // for ( const auto l_ocmbTarget: l_ocmbTargetList )
 
-        // Create a PSU response message
-        SbePsu::psuResponse l_psuResponse;
-        bool command_unsupported =false;
+            if (l_procHasDDR4parts)
+            {
+                // Create a PSU response message
+                SbePsu::psuResponse l_psuResponse;
+                bool command_unsupported =false;
 
-        // Make the call to perform the PSU Chip Operation
-        l_err = SbePsu::getTheInstance().performPsuChipOp(
-                        l_procTarget,
-                        &l_psuCommand,
-                        &l_psuResponse,
-                        SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
-                        SbePsu::SBE_MEM_CONFIG_REQ_USED_REGS,
-                        SbePsu::SBE_MEM_CONFIG_RSP_USED_REGS,
-                        SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_PREDICTIVE },
-                        &command_unsupported);
-        if ( command_unsupported )
-        {
-            TS_FAIL("testMemConfigInfo: ERROR: SBE firmware "
-                    "does not support PSU sending Memory configuration information" );
-            errlCommit(l_err, CXXTEST_COMP_ID);
-            break;
-        }
-        else if (l_err)
-        {
-            TRACFCOMP( g_trac_sbeio, ERR_MRK"testMemConfigInfo: ERROR: "
-                       "Call to performPsuChipOp failed, error returned" );
-            TS_FAIL("testMemConfigInfo: ERROR: "
-                    "Call to performPsuChipOp failed. RC 0x%.8X", l_err->reasonCode());
-            errlCommit(l_err, CXXTEST_COMP_ID);
-            break;
-        }
-        else if (SBE_PRI_OPERATION_SUCCESSFUL != l_psuResponse.primaryStatus)
-        {
-            TS_FAIL("testMemConfigInfo: ERROR: "
-                      "Call to performPsuChipOp failed. Returned primary status "
-                      "(0x%.4X) and secondary status (0x%.4X)",
-                      l_psuResponse.primaryStatus,
-                      l_psuResponse.secondaryStatus);
-            // Collect the entire command and response buffers
-            SBE_TRACFBIN("Send Memory Config full command:",
-                         &l_psuCommand, sizeof(l_psuCommand));
-            SBE_TRACFBIN("Send Memory Config full response:",
-                         &l_psuResponse, sizeof(l_psuResponse));
-            break;
-        }
-
+                // Make the call to perform the PSU Chip Operation
+                l_err = SbePsu::getTheInstance().performPsuChipOp(
+                    l_procTarget,
+                    &l_psuCommand,
+                    &l_psuResponse,
+                    SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
+                    SbePsu::SBE_MEM_CONFIG_REQ_USED_REGS,
+                    SbePsu::SBE_MEM_CONFIG_RSP_USED_REGS,
+                    SbePsu::unsupported_command_error_severity { ERRORLOG::ERRL_SEV_PREDICTIVE },
+                    &command_unsupported);
+                if ( command_unsupported )
+                {
+                    TS_FAIL("testMemConfigInfo: ERROR: SBE firmware "
+                            "does not support PSU sending Memory configuration information" );
+                    errlCommit(l_err, CXXTEST_COMP_ID);
+                    break;
+                }
+                else if (l_err)
+                {
+                    TRACFCOMP( g_trac_sbeio, ERR_MRK"testMemConfigInfo: ERROR: "
+                               "Call to performPsuChipOp failed, error returned" );
+                    TS_FAIL("testMemConfigInfo: ERROR: "
+                            "Call to performPsuChipOp failed. RC 0x%.8X", l_err->reasonCode());
+                    errlCommit(l_err, CXXTEST_COMP_ID);
+                    break;
+                }
+                else if (SBE_PRI_OPERATION_SUCCESSFUL != l_psuResponse.primaryStatus)
+                {
+                    TS_FAIL("testMemConfigInfo: ERROR: "
+                            "Call to performPsuChipOp failed. Returned primary status "
+                            "(0x%.4X) and secondary status (0x%.4X)",
+                            l_psuResponse.primaryStatus,
+                            l_psuResponse.secondaryStatus);
+                    // Collect the entire command and response buffers
+                    SBE_TRACFBIN("Send Memory Config full command:",
+                                 &l_psuCommand, sizeof(l_psuCommand));
+                    SBE_TRACFBIN("Send Memory Config full response:",
+                                 &l_psuResponse, sizeof(l_psuResponse));
+                    break;
+                }
+            } // if (l_procHasDDR4parts)
         } // for ( const auto l_procTarget: l_procTargetList )
 
         sbeFree(l_MemConfigAlloc);
