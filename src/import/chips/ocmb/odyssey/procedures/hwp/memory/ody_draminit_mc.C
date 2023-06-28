@@ -75,8 +75,8 @@ extern "C"
         // TODO Zen:MST-1406 Check with design team if we have an "init complete" indicator in Odyssey.
         // This was assigned to an unused (and unnamed) bit on Explorer PMU8Q.
         // Set the IML Complete bit. Steve Powell to find a bit in the SRQ to use for this purpose
-        // FAPI_TRY( mss::change_iml_complete<mss::mc_type::ODYSSEY>(i_target, mss::HIGH), "%s Failed to set_ipm_complete",
-        //           mss::c_str(i_target));
+        // FAPI_TRY( mss::change_iml_complete<mss::mc_type::ODYSSEY>(i_target, mss::HIGH),  TARGTIDFORMAT " Failed to set_ipm_complete",
+        //           TARGTID);
 
         // Set DFI init start. Toggle OFF then ON just in case we're re-running
         FAPI_TRY( mss::change_dfi_init_start<mss::mc_type::ODYSSEY>(i_target, mss::OFF ),
