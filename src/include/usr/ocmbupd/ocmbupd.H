@@ -93,17 +93,6 @@ errlHndl_t check_for_odyssey_codeupdate_needed(TARGETING::Target* i_ocmb,
                                                ody_cur_version_new_image_t& o_updates_required);
 
 /**
- * @brief Write a set of firmware images to the given Odyssey chip.
- *
- * @param[in] i_ocmb              The Odyssey chip.
- * @param[in] i_fwhdr             The OCMBFW PNOR partition header pointer.
- * @param[in] i_updates_required  The images to write.
- */
-errlHndl_t odyssey_update_code(TARGETING::Target* i_ocmb,
-                               const ocmbfw_owning_ptr_t& i_fwhdr,
-                               const ody_cur_version_new_image_t& i_updates_required);
-
-/**
  * @brief Checks if update is needed and will perform i2c update if necessary
  * @param[in/out] o_stepError Error handle for logging istep failures
  */

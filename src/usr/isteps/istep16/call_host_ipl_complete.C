@@ -50,6 +50,7 @@
 
 #include <util/utilsemipersist.H>
 #include <hwas/common/deconfigGard.H>
+#include <hwas/common/hwas.H>
 
 #ifdef CONFIG_DEVTREE
 #include <devtree/devtree.H>
@@ -63,6 +64,11 @@
 #include <secureboot/service.H>
 
 #include <algorithm>
+
+#include <targeting/odyutil.H>
+#include <ocmbupd/ody_upd_fsm.H>
+
+#define TRACF(...) TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, __VA_ARGS__)
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -208,6 +214,22 @@ void* call_host_ipl_complete(void* const io_pArgs)
         auto keyClearRequests = KEY_CLEAR_REQUEST_NONE;
         sys->setAttr<ATTR_KEY_CLEAR_REQUEST>(keyClearRequests);
         l_nodeTgt->setAttr<ATTR_KEY_CLEAR_REQUEST>(keyClearRequests);
+
+        // Note that we're iterating ALL OCMB chips here, not just
+        // functional ones. This is required for this particular
+        // Odyssey state
+        using namespace ocmbupd;
+        l_err = ody_upd_all_process_event(IPL_COMPLETE,
+                                          EVENT_ON_ALL_OCMBS,
+                                          REQUEST_RECONFIG_IF_NEEDED);
+
+        if (l_err)
+        {
+            TRACF(ERR_MRK"host_ipl_complete: ody_upd_all_process_event(IPL_COMPLETE) failed: "
+                  TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(l_err));
+            break;
+        }
 
 #ifdef CONFIG_PLDM
         PLDM::thePdrManager().sendAllFruFunctionalStates();

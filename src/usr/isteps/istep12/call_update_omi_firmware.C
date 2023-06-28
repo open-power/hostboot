@@ -49,13 +49,25 @@
 #include    <chipids.H>
 #include    <exp_process_image_status.H>
 
+// Misc
+#include <hwas/common/hwas.H>
+#include <console/consoleif.H>
+
+#include <targeting/odyutil.H>
+#include <ocmbupd/ody_upd_fsm.H>
+
+#define TRACF(...) TRACFCOMP(g_trac_isteps_trace, __VA_ARGS__)
+
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   TARGETING;
 using   namespace   ISTEPS_TRACE;
+using   namespace   HWAS;
+using   namespace   ocmbupd;
 
 namespace ISTEP_12
 {
+
 void* call_update_omi_firmware (void *io_pArgs)
 {
     IStepError l_StepError;
@@ -80,19 +92,19 @@ void* call_update_omi_firmware (void *io_pArgs)
             TRACFCOMP( g_trac_isteps_trace,
                        "Running exp_process_image_status HWP on target HUID 0x%.8X",
                        get_huid(l_ocmb_target) );
-            errlHndl_t l_err = nullptr;
-            FAPI_INVOKE_HWP(l_err, exp_process_image_status, l_fapi_ocmb_target);
+            errlHndl_t hwp_err = nullptr;
+            FAPI_INVOKE_HWP(hwp_err, exp_process_image_status, l_fapi_ocmb_target);
 
-            if ( l_err )
+            if ( hwp_err )
             {
                 TRACFCOMP( g_trac_isteps_trace,
                            "ERROR : call exp_process_image_status HWP(): failed on target 0x%08X. "
                            TRACE_ERR_FMT,
                            get_huid(l_ocmb_target),
-                           TRACE_ERR_ARGS(l_err));
+                           TRACE_ERR_ARGS(hwp_err));
 
                 // Capture error and continue to the next chip
-                captureError(l_err, l_StepError, HWPF_COMP_ID, l_ocmb_target);
+                captureError(hwp_err, l_StepError, HWPF_COMP_ID, l_ocmb_target);
             }
             else
             {
@@ -101,14 +113,13 @@ void* call_update_omi_firmware (void *io_pArgs)
                            get_huid(l_ocmb_target) );
             }
         }
-        else // Not an Explorer, continue to the next chip.
+        else if (!UTIL::isOdysseyChip(l_ocmb_target))
         {
             TRACFCOMP( g_trac_isteps_trace,
                        "call_update_omi_firmware: Unknown chip ID 0x%X on target HUID 0x%.8X",
                        chipId, get_huid(l_ocmb_target) );
         }
     } // OCMB loop
-
 
     // Clear ATTR_ATTN_CHK_OCMBS to let ATTN know that interrupts from the OCMBs
     // should now be enabled.
@@ -122,11 +133,28 @@ void* call_update_omi_firmware (void *io_pArgs)
     if (UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>())
     {
         TRACFCOMP( g_trac_isteps_trace,
-                   "skipping ocmbupd::explorerUpdateAll() due to MPIPL");
+                   "skipping OCMB firmware update due to MPIPL");
     }
     else
     {
+        TRACF("Updating Explorer OCMBs");
+
         ocmbupd::explorerUpdateAll(l_StepError);
+
+        TRACF("Processing Odyssey OCMB firmware update events");
+
+        using namespace ocmbupd;
+        auto errl = ody_upd_all_process_event(UPDATE_OMI_FIRMWARE_REACHED,
+                                              EVENT_ON_FUNCTIONAL_OCMBS,
+                                              REQUEST_RECONFIG_IF_NEEDED);
+
+        if (errl)
+        {
+            TRACF(ERR_MRK"call_update_omi_firmware: ody_upd_all_process_event(UPDATE_OMI_FIRMWARE_REACHED) failed: "
+                  TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(errl));
+            captureError(errl, l_StepError, HWPF_COMP_ID);
+        }
     }
 
     TRACFCOMP( g_trac_isteps_trace, "call_update_omi_firmware exit" );
@@ -136,4 +164,4 @@ void* call_update_omi_firmware (void *io_pArgs)
 
 }
 
-};
+}
