@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2023-07-11 Tue 12:26 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Odyssey code update - Side switching FSM</title>
+<meta name="author" content="zach" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Odyssey code update - Side switching FSM</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org5f56dd7">1. Definitions</a></li>
+<li><a href="#orga0559fa">2. Code update overview</a></li>
+<li><a href="#org1ea41c6">3. Error cases</a></li>
+<li><a href="#orgf0322de">4. Implementation details</a>
+<ul>
+<li><a href="#org3132254">4.1. State</a></li>
+<li><a href="#orgfe1d108">4.2. FSM events</a></li>
+<li><a href="#org1f29057">4.3. FSM transitions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<p>
+Each Odyssey has three boot SEEPROMs: one primary, one backup, and one
+"golden". These each store copies of the bootloader and runtime
+firmware for the SBE. These sides are used for redundancy in the face
+of boot errors, and also for code updates.
+</p>
+
+<p>
+The goal of the Odyssey code update (or "firmware update") process is
+to write the version of the firmware that Hostboot has in its OCMBFW
+PNOR partition to both the primary and backup boot SEEPROMs in a given
+Odyssey chip.
+</p>
+
+<p>
+The golden side is never updated. It contains a firmware version that
+is known to work just enough to boot the Odyssey to a state where it
+can perform a code update.
+</p>
+
+<p>
+The code update process is different than that for Explorer OCMBs,
+because while Explorer had primary and backup boot SEEPROMs, it
+managed them transparently from Hostboot's point of view. Odyssey
+exposes the primary and backup SEEPROMs to Hostboot, and Hostboot has
+to manage the update process.
+</p>
+
+<div id="outline-container-org5f56dd7" class="outline-2">
+<h2 id="org5f56dd7"><span class="section-number-2">1.</span> Definitions</h2>
+<div class="outline-text-2" id="text-1">
+<ul class="org-ul">
+<li>A <b>boot side</b> on an Odyssey chip refers to one of the boot SEEPROMs,
+either side 0, side 1, or golden, which contains a complete and
+independent copy of the Odyssey bootloader and runtime firmware.</li>
+<li>The <b>active</b> side is the side (side 0, side 1, or golden) that is
+currently being used to boot.</li>
+<li>The <b>alternate</b> side is the side that is not currently being used to
+boot. This term usually only applies if side 0 or side 1 is the
+active side.</li>
+<li><b>Primary</b> and <b>backup</b> are alternate terms for boot sides 0 and 1,
+respectively.</li>
+<li><b>Inband</b> or <b>OMI</b> or <b>fast</b> code update happens when we can boot the
+Odyssey up far enough to communicate with it over the memory
+controller (i.e. when we make it to update_omi_firmware). This is
+much faster than I2C updates, and we want to do this whenever we
+can.</li>
+<li><b>Out-of-band</b> or <b>OOB</b> or <b>I2C</b> or <b>slow</b> code update happens when
+the Odyssey firmware boots up enough for Hostboot to communicate
+with the Odyssey via I2C and invoke chipops on it, but not enough to
+send traffic to it via the memory controller. I2C updates are very
+slow, but less of the firmware needs to be functional for this
+update method to succeed. When booting from the golden side, this is
+the only update method available to us.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orga0559fa" class="outline-2">
+<h2 id="orga0559fa"><span class="section-number-2">2.</span> Code update overview</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+The overall good-path process for a single OCMB chip goes like this
+(assuming the code on the Odyssey is out of date):
+</p>
+
+<ol class="org-ol">
+<li>The Odyssey is booted up from its side 0 boot SEEPROM, and passes
+ocmb_check_for_ready (istep 11.4). Hostboot determines whether the
+version of code running on side 0 is up to date or not.</li>
+<li>Memory is initialized in istep 12, and in istep 12.12
+(update_omi_firmware), we update the boot code on side 1.</li>
+<li>We switch sides (taking effect next boot), and perform a reconfig
+loop.</li>
+<li>When Hostboot reaches Istep 11.4 again, it boots the Odyssey from
+side 1. The code now looks "up to date" from Hostboot's perspective
+because the currently-active side was updated on the previous boot
+by step 2.</li>
+<li>Memory is initialized, and the IPL reaches host_ipl_complete (istep
+16).</li>
+<li>Hostboot calls a chipop on the Odyssey that will overwrite the
+contents of the alternate side with that of the active side. In
+effect this updates side 0. (We always call this chipop at this
+istep, but it won't do anything if side 0 already matches side 1.)</li>
+<li>We then continue to boot to runtime.</li>
+</ol>
+
+<p>
+Note that on every full re-IPL, each Odyssey starts from
+side 0. Errors may cause Hostboot to switch to side 1 to boot, but
+this state isn't remembered on subsequent full IPLs (it is remembered
+for reconfig loops though).
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1ea41c6" class="outline-2">
+<h2 id="org1ea41c6"><span class="section-number-2">3.</span> Error cases</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Hostboot handles errors that occur between ocmb_check_for_ready and
+update_omi_firmware by taking several actions:
+</p>
+
+<ul class="org-ul">
+<li>If we haven't tried booting from side 1, Hostboot will restart the
+memory boot process on that side (either by a reconfig loop or by
+restarting ocmb_check_for_ready's HWPs if we're still in that
+istep).</li>
+<li>If we can't make it to update_omi_firmware to do a fast inband
+update (due to any error), Hostboot will perform a slower I2C update
+instead.</li>
+<li>If the firmware is out of date and we cannot boot the Odyssey up far
+enough on any of the three sides to update the firmware, the OCMB is
+deconfigured (i.e. we will never boot with a functional but
+out-of-date Odyssey).</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgf0322de" class="outline-2">
+<h2 id="orgf0322de"><span class="section-number-2">4.</span> Implementation details</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+The Odyssey code update process is controlled by the Odyssey Code
+Update Finite State Machine (FSM), implemented in ody_upd_fsm.C.
+</p>
+</div>
+
+<div id="outline-container-org3132254" class="outline-3">
+<h3 id="org3132254"><span class="section-number-3">4.1.</span> State</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+There are four state variables for the FSM to track. These variables
+are set to their "init" values on a BMC firmware update; when an OCMB
+part is removed or added (or deconfigured); and at host_ipl_complete
+(on ALL OCMBs, present or not).
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Name</th>
+<th scope="col" class="org-left">Values</th>
+<th scope="col" class="org-left">Description</th>
+<th scope="col" class="org-left">Location</th>
+<th scope="col" class="org-left">Duration</th>
+<th scope="col" class="org-right">Init</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Code update performed?</td>
+<td class="org-left">Yes, no</td>
+<td class="org-left">Has an OMI or I2C code update been performed this boot attempt?</td>
+<td class="org-left">ATTR_OCMB_CODE_UPDATED</td>
+<td class="org-left">non-volatile</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-left">Golden boot performed?</td>
+<td class="org-left">Yes, no</td>
+<td class="org-left">Has the OCMB been booted from the golden side this boot attempt?</td>
+<td class="org-left">ATTR_OCMB_GOLDEN_BOOT_ATTEMPTED</td>
+<td class="org-left">non-volatile</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-left">Side?</td>
+<td class="org-left">0, 1, Golden</td>
+<td class="org-left">What side is the OCMB currently set to boot from?</td>
+<td class="org-left">ATTR_OCMB_BOOT_SIDE</td>
+<td class="org-left">non-volatile</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-left">Fw current?</td>
+<td class="org-left">Yes, no, unknown</td>
+<td class="org-left">Is the firmware level flashed on the device up to date with the version Hostboot has in PNOR?</td>
+<td class="org-left">ATTR_OCMB_FW_STATE</td>
+<td class="org-left">volatile</td>
+<td class="org-right">"UNKNOWN"</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgfe1d108" class="outline-3">
+<h3 id="orgfe1d108"><span class="section-number-3">4.2.</span> FSM events</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+When these events occur, the FSM is invoked to handle them and take
+action if necessary.
+</p>
+
+<ul class="org-ul">
+<li>Boot to check_for_ready (i.e. we can tell what code version the sbe
+is running)</li>
+<li>Unrecoverable boot error (ody_sppe_check_for_ready fails, any error
+except RC_POZ_SPPE_NOT_READY_ERR with async FFDC)</li>
+<li>Recoverable boot error (ody_sppe_check_for_ready fails with
+RC_POZ_SPPE_NOT_READY_ERR and async FFDC is present)</li>
+<li>OCMB HWP fail, hash fail encountered</li>
+<li>Other OCMB HWP fail encountered</li>
+<li>HWP fail encountered on some non-OCMB target</li>
+<li>Attribute incompatibility detected</li>
+<li>Code update failure</li>
+<li>Image sync failure or measurement registers mismatch</li>
+<li>Boot to update_omi_firmware</li>
+<li>IPL completed (host_ipl_complete)</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org1f29057" class="outline-3">
+<h3 id="org1f29057"><span class="section-number-3">4.3.</span> FSM transitions</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+This table is a <b>template</b> for transitions that could happen in
+response to each event. The table in ody_upd_fsm.C is essentially just
+a collection of "instantiations" of this table for each possible event
+type.
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Code update performed?</th>
+<th scope="col" class="org-left">Golden boot performed?</th>
+<th scope="col" class="org-right">Active side</th>
+<th scope="col" class="org-left">Fw current?</th>
+<th scope="col" class="org-left">Transition</th>
+<th scope="col" class="org-left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">No</td>
+<td class="org-left">No</td>
+<td class="org-right">0</td>
+<td class="org-left">no</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Normal IPL, first try</td>
+</tr>
+
+<tr>
+<td class="org-left">No</td>
+<td class="org-left">No</td>
+<td class="org-right">1</td>
+<td class="org-left">no</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Side 0 failed IPL, trying side 1</td>
+</tr>
+
+<tr>
+<td class="org-left">No</td>
+<td class="org-left">Yes</td>
+<td class="org-right">0</td>
+<td class="org-left">no</td>
+<td class="org-left">(Can't happen)</td>
+<td class="org-left">(Can't boot side 0 or 1 after golden without updating code)</td>
+</tr>
+
+<tr>
+<td class="org-left">No</td>
+<td class="org-left">Yes</td>
+<td class="org-right">1</td>
+<td class="org-left">no</td>
+<td class="org-left">(Can't happen)</td>
+<td class="org-left">(Can't boot side 0 or 1 after golden without updating code)</td>
+</tr>
+
+<tr>
+<td class="org-left">Yes</td>
+<td class="org-left">No</td>
+<td class="org-right">0</td>
+<td class="org-left">no</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Side 1 performed a code update (because side 0 failed), and code update didn't do anything</td>
+</tr>
+
+<tr>
+<td class="org-left">Yes</td>
+<td class="org-left">No</td>
+<td class="org-right">1</td>
+<td class="org-left">no</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Normal code update flow, side 0 performed a code update, and code update didn't do anything</td>
+</tr>
+
+<tr>
+<td class="org-left">Yes</td>
+<td class="org-left">Yes</td>
+<td class="org-right">0</td>
+<td class="org-left">no</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Golden side updated code, and code update didn't do anything</td>
+</tr>
+
+<tr>
+<td class="org-left">Yes</td>
+<td class="org-left">Yes</td>
+<td class="org-right">1</td>
+<td class="org-left">no</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Golden side updated code, booting from side 0 failed, and golden code update didn't do anything to side 1</td>
+</tr>
+
+<tr>
+<td class="org-left">No</td>
+<td class="org-left">No</td>
+<td class="org-right">Golden</td>
+<td class="org-left">no</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Failures happened on both side 0 and 1 and never got to try a code update, trying golden now</td>
+</tr>
+
+<tr>
+<td class="org-left">No</td>
+<td class="org-left">Yes</td>
+<td class="org-right">Golden</td>
+<td class="org-left">no</td>
+<td class="org-left">(Can't happen)</td>
+<td class="org-left">(Can't do a golden boot twice)</td>
+</tr>
+
+<tr>
+<td class="org-left">Yes</td>
+<td class="org-left">No</td>
+<td class="org-right">Golden</td>
+<td class="org-left">no</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Failures happened on both side 0 and 1 but we did try to update code before, trying golden now</td>
+</tr>
+
+<tr>
+<td class="org-left">Yes</td>
+<td class="org-left">Yes</td>
+<td class="org-right">Golden</td>
+<td class="org-left">no</td>
+<td class="org-left">(Can't happen)</td>
+<td class="org-left">(Can't do a golden boot twice)</td>
+</tr>
+</tbody>
+<tbody>
+<tr>
+<td class="org-left">No</td>
+<td class="org-left">No</td>
+<td class="org-right">0</td>
+<td class="org-left">yes</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Normal IPL, first try</td>
+</tr>
+
+<tr>
+<td class="org-left">No</td>
+<td class="org-left">No</td>
+<td class="org-right">1</td>
+<td class="org-left">yes</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Side 0 failed IPL, trying side 1</td>
+</tr>
+
+<tr>
+<td class="org-left">No</td>
+<td class="org-left">Yes</td>
+<td class="org-right">0</td>
+<td class="org-left">yes</td>
+<td class="org-left">(Can't happen)</td>
+<td class="org-left">(Can't boot side 0 or 1 after golden without updating code)</td>
+</tr>
+
+<tr>
+<td class="org-left">No</td>
+<td class="org-left">Yes</td>
+<td class="org-right">1</td>
+<td class="org-left">yes</td>
+<td class="org-left">(Can't happen)</td>
+<td class="org-left">(Can't boot side 0 or 1 after golden without updating code)</td>
+</tr>
+
+<tr>
+<td class="org-left">Yes</td>
+<td class="org-left">No</td>
+<td class="org-right">0</td>
+<td class="org-left">yes</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Side 1 performed a code update (because side 0 failed), trying side 0 now</td>
+</tr>
+
+<tr>
+<td class="org-left">Yes</td>
+<td class="org-left">No</td>
+<td class="org-right">1</td>
+<td class="org-left">yes</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Normal code update flow, side 0 performed a code update, trying side 1 now</td>
+</tr>
+
+<tr>
+<td class="org-left">Yes</td>
+<td class="org-left">Yes</td>
+<td class="org-right">0</td>
+<td class="org-left">yes</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Golden side updated code, trying to boot from side 0 now</td>
+</tr>
+
+<tr>
+<td class="org-left">Yes</td>
+<td class="org-left">Yes</td>
+<td class="org-right">1</td>
+<td class="org-left">yes</td>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">Golden side updated code, booting from side 0 failed, trying side 1</td>
+</tr>
+
+<tr>
+<td class="org-left">No</td>
+<td class="org-left">No</td>
+<td class="org-right">Golden</td>
+<td class="org-left">yes</td>
+<td class="org-left">(Can't happen)</td>
+<td class="org-left">(Golden side fw is never considered current)</td>
+</tr>
+
+<tr>
+<td class="org-left">No</td>
+<td class="org-left">Yes</td>
+<td class="org-right">Golden</td>
+<td class="org-left">yes</td>
+<td class="org-left">(Can't happen)</td>
+<td class="org-left">(Can't do a golden boot twice)</td>
+</tr>
+
+<tr>
+<td class="org-left">Yes</td>
+<td class="org-left">No</td>
+<td class="org-right">Golden</td>
+<td class="org-left">yes</td>
+<td class="org-left">(Can't happen)</td>
+<td class="org-left">(Golden side fw is never considered current)</td>
+</tr>
+
+<tr>
+<td class="org-left">Yes</td>
+<td class="org-left">Yes</td>
+<td class="org-right">Golden</td>
+<td class="org-left">yes</td>
+<td class="org-left">(Can't happen)</td>
+<td class="org-left">(Can't do a golden boot twice)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: zach</p>
+<p class="date">Created: 2023-07-11 Tue 12:26</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

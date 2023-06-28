@@ -1,0 +1,168 @@
+#+TITLE: Odyssey code update - Side switching FSM
+#+AUTHOR: zach
+#+OPTIONS: ^:{}
+
+Each Odyssey has three boot SEEPROMs: one primary, one backup, and one
+"golden". These each store copies of the bootloader and runtime
+firmware for the SBE. These sides are used for redundancy in the face
+of boot errors, and also for code updates.
+
+The goal of the Odyssey code update (or "firmware update") process is
+to write the version of the firmware that Hostboot has in its OCMBFW
+PNOR partition to both the primary and backup boot SEEPROMs in a given
+Odyssey chip.
+
+The golden side is never updated. It contains a firmware version that
+is known to work just enough to boot the Odyssey to a state where it
+can perform a code update.
+
+The code update process is different than that for Explorer OCMBs,
+because while Explorer had primary and backup boot SEEPROMs, it
+managed them transparently from Hostboot's point of view. Odyssey
+exposes the primary and backup SEEPROMs to Hostboot, and Hostboot has
+to manage the update process.
+
+* Definitions
+
+- A *boot side* on an Odyssey chip refers to one of the boot SEEPROMs,
+  either side 0, side 1, or golden, which contains a complete and
+  independent copy of the Odyssey bootloader and runtime firmware.
+- The *active* side is the side (side 0, side 1, or golden) that is
+  currently being used to boot.
+- The *alternate* side is the side that is not currently being used to
+  boot. This term usually only applies if side 0 or side 1 is the
+  active side.
+- *Primary* and *backup* are alternate terms for boot sides 0 and 1,
+  respectively.
+- *Inband* or *OMI* or *fast* code update happens when we can boot the
+  Odyssey up far enough to communicate with it over the memory
+  controller (i.e. when we make it to update_omi_firmware). This is
+  much faster than I2C updates, and we want to do this whenever we
+  can.
+- *Out-of-band* or *OOB* or *I2C* or *slow* code update happens when
+  the Odyssey firmware boots up enough for Hostboot to communicate
+  with the Odyssey via I2C and invoke chipops on it, but not enough to
+  send traffic to it via the memory controller. I2C updates are very
+  slow, but less of the firmware needs to be functional for this
+  update method to succeed. When booting from the golden side, this is
+  the only update method available to us.
+
+* Code update overview
+
+The overall good-path process for a single OCMB chip goes like this
+(assuming the code on the Odyssey is out of date):
+
+1. The Odyssey is booted up from its side 0 boot SEEPROM, and passes
+   ocmb_check_for_ready (istep 11.4). Hostboot determines whether the
+   version of code running on side 0 is up to date or not.
+2. Memory is initialized in istep 12, and in istep 12.12
+   (update_omi_firmware), we update the boot code on side 1.
+3. We switch sides (taking effect next boot), and perform a reconfig
+   loop.
+4. When Hostboot reaches Istep 11.4 again, it boots the Odyssey from
+   side 1. The code now looks "up to date" from Hostboot's perspective
+   because the currently-active side was updated on the previous boot
+   by step 2.
+5. Memory is initialized, and the IPL reaches host_ipl_complete (istep
+   16).
+6. Hostboot calls a chipop on the Odyssey that will overwrite the
+   contents of the alternate side with that of the active side. In
+   effect this updates side 0. (We always call this chipop at this
+   istep, but it won't do anything if side 0 already matches side 1.)
+7. We then continue to boot to runtime.
+
+Note that on every full re-IPL, each Odyssey starts from
+side 0. Errors may cause Hostboot to switch to side 1 to boot, but
+this state isn't remembered on subsequent full IPLs (it is remembered
+for reconfig loops though).
+
+* Error cases
+
+Hostboot handles errors that occur between ocmb_check_for_ready and
+update_omi_firmware by taking several actions:
+
+- If we haven't tried booting from side 1, Hostboot will restart the
+  memory boot process on that side (either by a reconfig loop or by
+  restarting ocmb_check_for_ready's HWPs if we're still in that
+  istep).
+- If we can't make it to update_omi_firmware to do a fast inband
+  update (due to any error), Hostboot will perform a slower I2C update
+  instead.
+- If the firmware is out of date and we cannot boot the Odyssey up far
+  enough on any of the three sides to update the firmware, the OCMB is
+  deconfigured (i.e. we will never boot with a functional but
+  out-of-date Odyssey).
+
+* Implementation details
+
+The Odyssey code update process is controlled by the Odyssey Code
+Update Finite State Machine (FSM), implemented in ody_upd_fsm.C.
+
+** State
+
+There are four state variables for the FSM to track. These variables
+are set to their "init" values on a BMC firmware update; when an OCMB
+part is removed or added (or deconfigured); and at host_ipl_complete
+(on ALL OCMBs, present or not).
+
+| Name                   | Values           | Description                                                                                   | Location                        | Duration     |      Init |
+|------------------------+------------------+-----------------------------------------------------------------------------------------------+---------------------------------+--------------+-----------|
+| Code update performed? | Yes, no          | Has an OMI or I2C code update been performed this boot attempt?                               | ATTR_OCMB_CODE_UPDATED          | non-volatile |         0 |
+| Golden boot performed? | Yes, no          | Has the OCMB been booted from the golden side this boot attempt?                              | ATTR_OCMB_GOLDEN_BOOT_ATTEMPTED | non-volatile |         0 |
+| Side?                  | 0, 1, Golden     | What side is the OCMB currently set to boot from?                                             | ATTR_OCMB_BOOT_SIDE             | non-volatile |         0 |
+| Fw current?            | Yes, no, unknown | Is the firmware level flashed on the device up to date with the version Hostboot has in PNOR? | ATTR_OCMB_FW_STATE              | volatile     | "UNKNOWN" |
+
+** FSM events
+
+When these events occur, the FSM is invoked to handle them and take
+action if necessary.
+
+- Boot to check_for_ready (i.e. we can tell what code version the sbe
+  is running)
+- Unrecoverable boot error (ody_sppe_check_for_ready fails, any error
+  except RC_POZ_SPPE_NOT_READY_ERR with async FFDC)
+- Recoverable boot error (ody_sppe_check_for_ready fails with
+  RC_POZ_SPPE_NOT_READY_ERR and async FFDC is present)
+- OCMB HWP fail, hash fail encountered
+- Other OCMB HWP fail encountered
+- HWP fail encountered on some non-OCMB target
+- Attribute incompatibility detected
+- Code update failure
+- Image sync failure or measurement registers mismatch
+- Boot to update_omi_firmware
+- IPL completed (host_ipl_complete)
+
+** FSM transitions
+
+This table is a *template* for transitions that could happen in
+response to each event. The table in ody_upd_fsm.C is essentially just
+a collection of "instantiations" of this table for each possible event
+type.
+
+ | Code update performed? | Golden boot performed? | Active side | Fw current? | Transition     | Description                                                                                               |
+ |------------------------+------------------------+-------------+-------------+----------------+-----------------------------------------------------------------------------------------------------------|
+ | No                     | No                     |           0 | no          |                | Normal IPL, first try                                                                                     |
+ | No                     | No                     |           1 | no          |                | Side 0 failed IPL, trying side 1                                                                          |
+ | No                     | Yes                    |           0 | no          | (Can't happen) | (Can't boot side 0 or 1 after golden without updating code)                                               |
+ | No                     | Yes                    |           1 | no          | (Can't happen) | (Can't boot side 0 or 1 after golden without updating code)                                               |
+ | Yes                    | No                     |           0 | no          |                | Side 1 performed a code update (because side 0 failed), and code update didn't do anything                |
+ | Yes                    | No                     |           1 | no          |                | Normal code update flow, side 0 performed a code update, and code update didn't do anything               |
+ | Yes                    | Yes                    |           0 | no          |                | Golden side updated code, and code update didn't do anything                                              |
+ | Yes                    | Yes                    |           1 | no          |                | Golden side updated code, booting from side 0 failed, and golden code update didn't do anything to side 1 |
+ | No                     | No                     |      Golden | no          |                | Failures happened on both side 0 and 1 and never got to try a code update, trying golden now              |
+ | No                     | Yes                    |      Golden | no          | (Can't happen) | (Can't do a golden boot twice)                                                                            |
+ | Yes                    | No                     |      Golden | no          |                | Failures happened on both side 0 and 1 but we did try to update code before, trying golden now            |
+ | Yes                    | Yes                    |      Golden | no          | (Can't happen) | (Can't do a golden boot twice)                                                                            |
+ |------------------------+------------------------+-------------+-------------+----------------+-----------------------------------------------------------------------------------------------------------|
+ | No                     | No                     |           0 | yes         |                | Normal IPL, first try                                                                                     |
+ | No                     | No                     |           1 | yes         |                | Side 0 failed IPL, trying side 1                                                                          |
+ | No                     | Yes                    |           0 | yes         | (Can't happen) | (Can't boot side 0 or 1 after golden without updating code)                                               |
+ | No                     | Yes                    |           1 | yes         | (Can't happen) | (Can't boot side 0 or 1 after golden without updating code)                                               |
+ | Yes                    | No                     |           0 | yes         |                | Side 1 performed a code update (because side 0 failed), trying side 0 now                                 |
+ | Yes                    | No                     |           1 | yes         |                | Normal code update flow, side 0 performed a code update, trying side 1 now                                |
+ | Yes                    | Yes                    |           0 | yes         |                | Golden side updated code, trying to boot from side 0 now                                                  |
+ | Yes                    | Yes                    |           1 | yes         |                | Golden side updated code, booting from side 0 failed, trying side 1                                       |
+ | No                     | No                     |      Golden | yes         | (Can't happen) | (Golden side fw is never considered current)                                                              |
+ | No                     | Yes                    |      Golden | yes         | (Can't happen) | (Can't do a golden boot twice)                                                                            |
+ | Yes                    | No                     |      Golden | yes         | (Can't happen) | (Golden side fw is never considered current)                                                              |
+ | Yes                    | Yes                    |      Golden | yes         | (Can't happen) | (Can't do a golden boot twice)                                                                            |

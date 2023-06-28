@@ -37,3 +37,7 @@ istep 12.7 - 12.11
     - else if updateI2c = 0
         - set updateI2c and commit HWP error as recovered
         - force reconfig loop (don't kill the IPL)
+
+# Odyssey firmware update
+
+See odyssey-code-update-notes.org or its HTML rendering for a description of the Odyssey code update process.
