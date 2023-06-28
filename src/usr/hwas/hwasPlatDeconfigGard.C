@@ -54,6 +54,8 @@
 
 #include <errl/errlreasoncodes.H> // ERRL_UDT_NOFORMAT
 
+#include <ody_upd_fsm.H>
+
 #ifdef __HOSTBOOT_RUNTIME
 #include <runtime/interface.h>             // g_hostInterfaces
 #include <runtime/hbrt_utilities.H>        // createGenericFspMsg
@@ -1320,6 +1322,13 @@ void DeconfigGard::platPostDeconfigureTarget(
     }
 #endif  // CONFIG_TPMDD
 #endif  // #ifndef __HOSTBOOT_RUNTIME
+
+    if (TARGETING::UTIL::isOdysseyChip(i_pTarget))
+    { // When an Odyssey dimm is deconfigured, the code update process
+      // restarts, so that if that dimm is un-deconfigured in the
+      // future, we don't use stale state.
+        ocmbupd::ody_upd_reset_state(i_pTarget);
+    }
 
 #ifdef __HOSTBOOT_RUNTIME
    // As part of keeping things in sync when a target is

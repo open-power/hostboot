@@ -65,6 +65,11 @@
           <no_export/>
      </attribute>
 
+    <attribute>
+        <id>ATTR_SPPE_BOOT_SIDE</id>
+        <writeable/>
+    </attribute>
+
      <attribute>
           <id>ATTR_SPI_BUS_DIV_REF</id>
           <!-- Value taken from p10_sbe_attributes.xml -->

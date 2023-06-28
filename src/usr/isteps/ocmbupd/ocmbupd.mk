@@ -40,6 +40,7 @@ EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memor
 OBJS += expupd.o
 OBJS += odyupd.o
 OBJS += ocmbFwImage.o
+OBJS += ody_upd_fsm.o
 
 # Need to build exp_fw_update procedure
 OBJS += exp_fw_update.o

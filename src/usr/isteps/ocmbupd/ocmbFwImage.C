@@ -753,7 +753,7 @@ void unload_ocmbfw_pnor_partition(const void*)
 
 ocmbfw_owning_ptr_t load_ocmbfw_pnor_section(errlHndl_t& o_err)
 {
-    TRACF(ENTER_MRK"call_ocmb_check_for_ready/load_ocmbfw_pnor_section");
+    TRACF(ENTER_MRK"load_ocmbfw_pnor_section");
 
     assert(!o_err, "load_ocmbfw_pnor_section: o_err already contains an error!");
 
@@ -798,7 +798,7 @@ ocmbfw_owning_ptr_t load_ocmbfw_pnor_section(errlHndl_t& o_err)
 
     } while (false);
 
-    TRACF(EXIT_MRK"call_ocmb_check_for_ready/load_ocmbfw_pnor_section = %p",
+    TRACF(EXIT_MRK"load_ocmbfw_pnor_section = %p",
           owning_ptr.get());
 
     return owning_ptr;

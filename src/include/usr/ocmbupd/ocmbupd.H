@@ -53,16 +53,8 @@ typedef struct rawImageInfo
  *        of the image in PNOR.
  *
  * @param[out] o_stepError Error handle for logging istep failures
- *
  */
 void explorerUpdateAll(ISTEP_ERROR::IStepError& o_stepError);
-
-
-/**
- * @brief Checks if update is needed and will perform i2c update if necessary
- * @param[out] o_stepError Error handle for logging istep failures
- */
-void ocmbFwI2cUpdateStatusCheck( ISTEP_ERROR::IStepError & io_StepError);
 
 /**
  * @brief List of pairs of the image level currently flashed on the
@@ -76,6 +68,16 @@ using ody_cur_version_new_image_t
  */
 using ocmbfw_owning_ptr_t = std::unique_ptr<const ocmbfw_ext_pnor_section_header,
                                             void(*)(const void*)>;
+
+/**
+ * @brief Update Odyssey OCMB firmware on the given target if necessary.
+ *
+ * @param[in] i_ocmb                   OCMB to update.
+ * @param[in] i_ocmbfw_pnor_partition  Owning handle for the OCMBFW PNOR partition.
+ * @return                             Error if any, otherwise nullptr.
+ */
+errlHndl_t odysseyUpdateImages(TARGETING::Target* i_ocmb,
+                               const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition);
 
 /**
  * @brief Check which Odyssey images need to be updated in the given chip, compared
@@ -100,6 +102,12 @@ errlHndl_t check_for_odyssey_codeupdate_needed(TARGETING::Target* i_ocmb,
 errlHndl_t odyssey_update_code(TARGETING::Target* i_ocmb,
                                const ocmbfw_owning_ptr_t& i_fwhdr,
                                const ody_cur_version_new_image_t& i_updates_required);
+
+/**
+ * @brief Checks if update is needed and will perform i2c update if necessary
+ * @param[in/out] o_stepError Error handle for logging istep failures
+ */
+void ocmbFwI2cUpdateStatusCheck( ISTEP_ERROR::IStepError & io_StepError);
 
 /**
  * @brief Load the OCMBFW PNOR partition and produce a pointer to the extended

@@ -38,6 +38,7 @@ namespace OCMBUPD
         MOD_SET_FW_VERSION_INFO        = 0x03,
         MOD_WRITE_EXPLORER_FW_VERSION  = 0x04,
         MOD_IS_MDS_DDIMM               = 0x05,
+        MOD_ODY_UPD_FSM                = 0x06
     };
 
     enum OcmbUpdReasonCode
@@ -56,6 +57,11 @@ namespace OCMBUPD
         EXPLORER_FW_IMAGE_MISSING                 = OCMBUPD_COMP_ID | 0x0c,
         OCMB_INVALID_EXT_HEADER_VERSION           = OCMBUPD_COMP_ID | 0x0d,
         FW_IMAGE_MISSING                          = OCMBUPD_COMP_ID | 0x0e,
+        ODY_UPD_DECONFIGURE_OCMB                  = OCMBUPD_COMP_ID | 0x0f,
+        ODY_UPD_INTERNAL_ERROR                    = OCMBUPD_COMP_ID | 0x10,
+        ODY_UPD_BAD_FIRMWARE                      = OCMBUPD_COMP_ID | 0x11,
+        ODY_UPD_FIRMWARE_UPDATED                  = OCMBUPD_COMP_ID | 0x12,
+        ODY_UPD_UNKNOWN_STATE                     = OCMBUPD_COMP_ID | 0x13,
     };
 
 }; // namespace OCMBUPD

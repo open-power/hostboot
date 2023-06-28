@@ -33,6 +33,7 @@
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
 #include <targeting/attrsync.H>
+#include <targeting/odyutil.H>
 #include <targeting/namedtarget.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/commontargeting.H>
@@ -75,14 +76,7 @@
 #include <sbe/sbeif.H>
 
 // FIXME RTC: 208841 MPIPL support
-//#include <p9_query_core_access_state.H>
 #include <p10_setup_sbe_config.H>
-//#include <p9_query_cache_access_state.H>
-//#include <p9_hcd_core_stopclocks.H>
-//#include <p9_hcd_cache_stopclocks.H>
-//#include <p9_hcd_common.H>
-//#include <p9_quad_power_off.H>
-//#include <p9_perv_scom_addresses.H>
 
 #ifdef CONFIG_PRINT_SYSTEM_INFO
 #include <stdio.h>
@@ -91,6 +85,7 @@
 //  HWP call support
 #include <nest/nestHwpHelperFuncs.H>   // fapiHWPCallWrapperHandler
 
+#include <ocmbupd/ody_upd_fsm.H>
 
 namespace ISTEP_06
 {
@@ -475,6 +470,18 @@ void* host_discover_targets( void *io_pArgs )
     // the previous function.  This bool will track if some function calls need to be
     // skipped.
     bool skip_functions_due_to_previous_error = false;
+
+    // If we detect that an Odyssey target was added or removed, reset
+    // its code update state, since it's no longer applicable.
+    const auto part_change_callback_handle =
+        EEPROM::registerPartChangedCallback([](TARGETING::Target* const target,
+                                               EEPROM::part_change_t)
+        {
+            if (TARGETING::UTIL::isOdysseyChip(target))
+            {
+                ocmbupd::ody_upd_reset_state(target);
+            }
+        });
 
     do
     {

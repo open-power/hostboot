@@ -5884,6 +5884,79 @@
     <no_export/>
   </attribute>
 
+  <attribute>
+    <id>OCMB_BOOT_SIDE</id>
+    <description>
+      The firmware image source from which to boot this OCMB. (Only
+      used for Odyssey OCMBs.) Sides are swapped when booting from a
+      given side fails, or when doing a code update.
+    </description>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+      Whether or not we have successfully updated code on this OCMB
+      on this boot attempt (including any reconfig loops) before.
+    </description>
+    <id>OCMB_CODE_UPDATED</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>OCMB_FW_STATE</id>
+    <description>
+      Whether this OCMB has out-of-date firmware.
+    </description>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+    <simpleType>
+      <enumeration>
+        <id>OCMB_FW_STATE</id>
+        <default>UNKNOWN</default>
+      </enumeration>
+    </simpleType>
+  </attribute>
+
+  <enumerationType>
+    <default/>
+    <description>
+      Describes whether the OCMB firmware running on this device is up
+      to date or not. This enumeration is used for the various OCMB
+      Firmware update behaviors.
+    </description>
+    <enumerator>
+      <name>UNKNOWN</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>UP_TO_DATE</name>
+      <value>1</value>
+    </enumerator>
+    <enumerator>
+      <name>OUT_OF_DATE</name>
+      <value>2</value>
+    </enumerator>
+    <id>OCMB_FW_STATE</id>
+  </enumerationType>
+
   <enumerationType>
     <default>DEFAULT_ALL</default>
     <description>Enumeration for the various OCMB Firmware update behaviors</description>
@@ -5996,6 +6069,25 @@
     </complexType>
     <writeable/>
     <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
+      Whether or not we have booted from the golden firmware image on
+      this OCMB on this boot attempt (including any reconfig loops)
+      before. Note that this is set to false (0) if we are currently
+      attempting to boot from the golden side (because we have not
+      booted from the golden side *before*).
+    </description>
+    <id>OCMB_GOLDEN_BOOT_ATTEMPTED</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <writeable/>
   </attribute>
 
   <attribute>

@@ -1,0 +1,1200 @@
+/* IBM_PROLOG_BEGIN_TAG                                                   */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/isteps/ocmbupd/ody_upd_fsm.C $                        */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+
+/** @brief This file contains the implementation of the Odyssey Code
+ *  Update FSM. The FSM is invoked whenever an Odyssey-related event
+ *  occurs in the boot (i.e. an Odyssey fails to boot, or reaches
+ *  update_omi_firmware successfully, or a code update operation
+ *  fails, etc.) and takes actions based on that event. (Actions
+ *  include switching boot sides, deconfiguring an OCMB, updating
+ *  code, etc.)
+ */
+
+#include <array>
+
+#include <fapi2/target.H>
+#include <attributeenums.H>
+
+#include <console/consoleif.H>
+#include <sbeio/sbeioif.H>
+
+#include <ocmbupd/ocmbupd.H>
+#include <ocmbupd/ocmbupd_trace.H>
+#include <ocmbupd/ody_upd_fsm.H>
+#include <ocmbupd/ocmbupd_reasoncodes.H>
+
+#include <targeting/odyutil.H>
+
+#include <hwas/common/hwas.H>
+
+#include <errl/hberrltypes.H>
+
+using namespace TARGETING;
+using namespace ERRORLOG;
+using namespace errl_util;
+using namespace OCMBUPD;
+using namespace ocmbupd;
+
+#define TRACF(...) TRACFCOMP(g_trac_ocmbupd, __VA_ARGS__)
+
+/** @brief This enumeration describes the actions that can be taken in response to a code
+ *  update event.
+ */
+enum update_action_t
+{
+    do_nothing = 0,
+
+    // These alter the severity of the error log related to an event, if there is one. These
+    // aren't used right now but may be used if an event (like an HWP error) needs to 
+    // suppress the error log that caused it. Currently the severity is captured in 
+    // higher-level operations, e.g. deconfigure_ocmb creates an unrecoverable log.
+    mark_error_predictive,
+    mark_error_recovered,
+    mark_error_unrecoverable,
+
+    perform_code_update,
+
+    deconfigure_ocmb,
+    fail_boot_bad_firmware,
+
+    // Resets the code update FSM state on the given OCMB.
+    reset_ocmb_upd_state,
+
+    sync_images_normal,
+    sync_images_forced,
+
+    // Side-switching actions.
+
+    // In addition to switching sides, these actions will set the severity of any related
+    // error logs to RECOVERED. (This is just so that we don't have all the mark_error_*
+    // actions cluttering up the table.) If there is an explicit mark_error_* action
+    // alongside a switch_to_side_* in the action list for a transition, the explicit
+    // mark_error_* action will take precedence over the implicit severity of these
+    // side-switching actions.
+    switch_to_side_0,
+    switch_to_side_1,
+    switch_to_side_golden,
+
+    // This may mean a reconfig loop is necessary, depending on where in the IPL the event
+    // happens. Whether one is required or not is determined by the caller.
+    retry_check_for_ready, // retry_check_for_ready must ALWAYS be preceded by a side switch
+                           // (even if that "side switch" is just switching to the side that
+                           // is currently active, in case you want to retry the check_for_ready
+                           // loop without switching sides) so that the FSM can keep track of what
+                           // sides have been attempted before.
+
+    // This means that an invalid state/event combination has happened.
+    internal_error
+};
+
+/** @brief Enumeration corresponding to Odyssey boot sides. These elements can be OR'd
+ *  together to make a bit set.
+ */
+enum ocmb_boot_side_t
+{
+    SIDE0 = 1 << 0,
+    SIDE1 = 1 << 1,
+    GOLDEN = 1 << 2
+};
+
+/** @brief A tristate enumeration. These elements can be OR'd together to make a bit set.
+ */
+enum tristate_t
+{
+    yes = 1 << 0,
+    no = 1 << 1,
+    unknown = 1 << 2
+};
+
+/** @brief A convenience structure to make initializing the table below easier.
+ */
+struct ody_upd_event_s
+{
+    constexpr ody_upd_event_s(const ody_upd_event_t t) : event(t) { }
+    constexpr ody_upd_event_s(const unsigned int t) : event(static_cast<ody_upd_event_t>(t)) { }
+
+    constexpr operator ody_upd_event_t() const
+    {
+        return event;
+    }
+
+    ody_upd_event_t event;
+};
+
+/** @brief A convenience structure to make initializing the table below easier.
+ */
+struct ocmb_boot_side_s
+{
+    constexpr ocmb_boot_side_s(const ocmb_boot_side_t t) : side(t) { }
+    constexpr ocmb_boot_side_s(const unsigned int t) : side(static_cast<ocmb_boot_side_t>(t)) { }
+
+    constexpr operator ocmb_boot_side_t() const
+    {
+        return side;
+    }
+
+    ocmb_boot_side_t side;
+};
+
+/** @brief A convenience structure to make initializing the table below easier.
+ */
+struct tristate_s
+{
+    constexpr tristate_s(const tristate_t t) : state(t) { }
+    constexpr tristate_s(const unsigned int t) : state(static_cast<tristate_t>(t)) { }
+
+    constexpr operator tristate_t() const
+    {
+        return state;
+    }
+
+    tristate_t state;
+};
+
+/** @brief This structure represents all of the state of an OCMB at a single point in time that
+ *  the code update FSM needs to know to make decisions.
+ */
+struct state_t
+{
+    tristate_s update_performed = no; // can't be unknown
+
+    // Note that golden_boot_performed is only true if the boot side was set to GOLDEN on
+    // some *previous* attempt. i.e. just because boot side=GOLDEN doesn't mean "Golden boot
+    // performed?" is true.
+    tristate_s golden_boot_performed = no; // can't be unknown
+
+    ocmb_boot_side_s ocmb_boot_side = SIDE0; // This variable must have only one bit set
+    tristate_s ocmb_fw_up_to_date = no;
+};
+
+/** @brief An event and actions to take when that event occurs.
+ */
+struct state_transition_t
+{
+    // This array may need to be expanded in the future if
+    // we need to handle more than 4 actions.
+    static const int MAX_ACTIONS = 4;
+
+    ody_upd_event_s event = NO_EVENT;
+    update_action_t actions[MAX_ACTIONS] = { };
+};
+
+/** @brief A state, and a set of transitions for possible events that can happen in that
+ *  state.
+ */
+struct state_transitions_t
+{
+    // This array may need to be expanded in the future if
+    // we need to handle more than 4 transitions.
+    static const int MAX_TRANSITIONS = 4;
+
+    state_t state;
+    state_transition_t transitions[MAX_TRANSITIONS];
+};
+
+/** @brief This table describes the Odyssey code update state machine.
+ *
+ *  Each entry describes a state and a list of possible transitions/actions that can occur
+ *  in that state. The actions will determine what happens and what state the FSM goes to
+ *  next. The actions are performed in order from left to right.
+ *
+ *  Note that "Golden boot performed?" is only true if Side was set to GOLDEN on some
+ *  previous attempt. i.e. just because Side=Golden doesn't mean "Golden boot performed?"
+ *  is true.
+ */
+const state_transitions_t transitions[] =
+{
+    //                |                        | Active |                |                             |
+    //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
+    //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
+    { { no            , no                     , SIDE0  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_1, retry_check_for_ready                       }},
+                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
+                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+
+    { { no            , no                     , SIDE0  , no          },{{ UPDATE_OMI_FIRMWARE_REACHED
+                                                                           | OCMB_BOOT_ERROR_WITH_FFDC
+                                                                           | OCMB_HWP_FAIL_HASH_FAIL
+                                                                           | OCMB_HWP_FAIL_OTHER
+                                                                           | ATTRS_INCOMPATIBLE        , {perform_code_update, switch_to_side_1, retry_check_for_ready  }},
+                                                                         { CODE_UPDATE_CHIPOP_FAILURE  , {switch_to_side_golden, retry_check_for_ready                  }} } },
+
+    { { no            , no                     , SIDE0  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL     , {switch_to_side_golden,  retry_check_for_ready                 }},
+                                                                         { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
+                                                                         { OCMB_BOOT_ERROR_WITH_FFDC
+                                                                           | OCMB_HWP_FAIL_OTHER
+                                                                           | IMAGE_SYNC_CHIPOP_FAILURE
+                                                                           | MEAS_REGS_MISMATCH        , {deconfigure_ocmb                                              }},
+                                                                         { IPL_COMPLETE                , {sync_images_normal, reset_ocmb_upd_state                      }} } },
+
+    //                |                        | Active |                |                             |
+    //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
+    //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
+    { { no            , no                     , SIDE1  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_golden, retry_check_for_ready                  }},
+                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
+                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+
+    { { no            , no                     , SIDE1  , no          },{{ OCMB_HWP_FAIL_OTHER
+                                                                           | OCMB_HWP_FAIL_HASH_FAIL   , {switch_to_side_golden, retry_check_for_ready                  }},
+                                                                         { OCMB_BOOT_ERROR_WITH_FFDC
+                                                                           | UPDATE_OMI_FIRMWARE_REACHED
+                                                                           | ATTRS_INCOMPATIBLE        , {perform_code_update, switch_to_side_0, retry_check_for_ready  }},
+                                                                         { CODE_UPDATE_CHIPOP_FAILURE  , {switch_to_side_golden, retry_check_for_ready                  }} } },
+
+    { { no            , no                     , SIDE1  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL     , {switch_to_side_golden, retry_check_for_ready                  }},
+                                                                         { OCMB_BOOT_ERROR_WITH_FFDC
+                                                                           | OCMB_HWP_FAIL_OTHER
+                                                                           | IMAGE_SYNC_CHIPOP_FAILURE
+                                                                           | MEAS_REGS_MISMATCH        , {deconfigure_ocmb                                              }},
+                                                                         { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
+                                                                         { IPL_COMPLETE                , {sync_images_forced, reset_ocmb_upd_state                      }} } },
+
+    //                |                        | Active |                |                             |
+    //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
+    //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
+    { { yes           , no                     , SIDE0  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_golden, retry_check_for_ready                  }},
+                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
+                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+
+    { { yes           , no                     , SIDE0  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap
+
+    { { yes           , no                     , SIDE0  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL
+                                                                           | OCMB_HWP_FAIL_OTHER       , {switch_to_side_golden,  retry_check_for_ready                 }},
+                                                                         { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
+                                                                         { OCMB_BOOT_ERROR_WITH_FFDC
+                                                                           | IMAGE_SYNC_CHIPOP_FAILURE
+                                                                           | MEAS_REGS_MISMATCH        , {deconfigure_ocmb                                              }},
+                                                                         { IPL_COMPLETE                , {sync_images_normal, reset_ocmb_upd_state                      }} } },
+
+    //                |                        | Active |                |                             |
+    //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
+    //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
+    { { yes           , no                     , SIDE1  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_golden, retry_check_for_ready                  }},
+                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
+                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+
+    { { yes           , no                     , SIDE1  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap,
+
+    { { yes           , no                     , SIDE1  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL
+                                                                           | OCMB_HWP_FAIL_OTHER       , {switch_to_side_golden, retry_check_for_ready                  }},
+                                                                         { OCMB_BOOT_ERROR_WITH_FFDC
+                                                                           | IMAGE_SYNC_CHIPOP_FAILURE
+                                                                           | MEAS_REGS_MISMATCH        , {deconfigure_ocmb                                              }},
+                                                                         { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
+                                                                         { IPL_COMPLETE                , {sync_images_normal, reset_ocmb_upd_state                      }} } },
+
+    //                |                        | Active |                |                             |
+    //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
+    //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
+    { { yes           , yes                    , SIDE0  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_1, retry_check_for_ready                       }},
+                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
+                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+
+    { { yes           , yes                    , SIDE0  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap
+
+    { { yes           , yes                    , SIDE0  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL
+                                                                           | OCMB_HWP_FAIL_OTHER       , {switch_to_side_1, retry_check_for_ready                       }},
+                                                                         { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
+                                                                         { OCMB_BOOT_ERROR_WITH_FFDC   , {deconfigure_ocmb                                              }},
+                                                                         { IPL_COMPLETE                , {reset_ocmb_upd_state                                          }} } },
+
+    //                |                        | Active |                |                             |
+    //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
+    //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
+    { { yes           , yes                    , SIDE1  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_golden, retry_check_for_ready                  }},
+                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
+                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+
+    { { yes           , yes                    , SIDE1  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap,
+
+    { { yes           , yes                    , SIDE1  , yes         },{{ OCMB_BOOT_ERROR_WITH_FFDC
+                                                                           | OCMB_HWP_FAIL_HASH_FAIL
+                                                                           | OCMB_HWP_FAIL_OTHER       , {deconfigure_ocmb                                              }},
+                                                                         { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
+                                                                         { IPL_COMPLETE                , {reset_ocmb_upd_state                                          }} } },
+
+    //                |                        | Active |                |                             |
+    //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
+    //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
+    { { yes | no      , no                     , GOLDEN , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {deconfigure_ocmb                                              }},
+                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
+                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+
+                                                          // golden side
+                                                          // is never
+                                                          // up to date
+    { { yes | no      , no                     , GOLDEN , no          },{{ OCMB_HWP_FAIL_OTHER
+                                                                           | OCMB_HWP_FAIL_HASH_FAIL
+                                                                           | OCMB_HWP_FAIL_OTHER
+                                                                           | CODE_UPDATE_CHIPOP_FAILURE, {deconfigure_ocmb                                              }},
+                                                                         { OCMB_BOOT_ERROR_WITH_FFDC
+                                                                           | ATTRS_INCOMPATIBLE        , {perform_code_update, switch_to_side_0, retry_check_for_ready  }} } }, // Golden side's attrs are always incompatible
+};
+
+/** @brief Convert an event to a string for logs and traces.
+ */
+std::array<char, 256> event_to_str(const ody_upd_event_t i_event)
+{
+    std::array<char, 256> str = { };
+
+    do
+    {
+
+    if (i_event == ANY_EVENT)
+    {
+        strcpy(&str[0], "ANY_EVENT");
+        break;
+    }
+
+    fapi2::each_1bit_mask(i_event, [&](const uint64_t bit)
+    {
+        const auto ody_event = static_cast<ody_upd_event_t>(bit);
+
+        switch (ody_event)
+        {
+        case CHECK_FOR_READY_COMPLETED:
+            strcat(&str[0], "CHECK_FOR_READY_COMPLETED|"); break;
+        case UPDATE_OMI_FIRMWARE_REACHED:
+            strcat(&str[0], "UPDATE_OMI_FIRMWARE_REACHED|"); break;
+        case OCMB_BOOT_ERROR_NO_FFDC:
+            strcat(&str[0], "OCMB_BOOT_ERROR_NO_FFDC|"); break;
+        case OCMB_BOOT_ERROR_WITH_FFDC:
+            strcat(&str[0], "OCMB_BOOT_ERROR_WITH_FFDC|"); break;
+        case OCMB_HWP_FAIL_HASH_FAIL:
+            strcat(&str[0], "OCMB_HWP_FAIL_HASH_FAIL|"); break;
+        case OCMB_HWP_FAIL_OTHER:
+            strcat(&str[0], "OCMB_HWP_FAIL_OTHER|"); break;
+        case ATTRS_INCOMPATIBLE:
+            strcat(&str[0], "ATTRS_INCOMPATIBLE|"); break;
+        case CODE_UPDATE_CHIPOP_FAILURE:
+            strcat(&str[0], "CODE_UPDATE_CHIPOP_FAILURE|"); break;
+        case IMAGE_SYNC_CHIPOP_FAILURE:
+            strcat(&str[0], "IMAGE_SYNC_CHIPOP_FAILURE|"); break;
+        case MEAS_REGS_MISMATCH:
+            strcat(&str[0], "MEAS_REGS_MISMATCH|"); break;
+        case IPL_COMPLETE:
+            strcat(&str[0], "IPL_COMPLETE|"); break;
+        case NO_EVENT: // just to satisfy the compiler
+        case ANY_EVENT:
+            break;
+        }
+
+        return true; // continue iteration until the end
+    });
+
+    if (strlen(&str[0]))
+    {
+        str[strlen(&str[0]) - 1] = '\0'; // chop off the last |
+    }
+
+    } while (false);
+
+    return str;
+}
+
+/** @brief Determine whether a given state [lhs] matches a state pattern [rhs]. The state
+ *  pattern [rhs] may have fields that are bitfields representing a set of values to match,
+ *  but the state [lhs] must be a single state.
+ */
+bool state_pattern_matches(const state_t& lhs, const state_t& rhs)
+{
+    assert(__builtin_popcount(lhs.ocmb_boot_side) == 1, "state_pattern_matches: Expected a single state for matching (ocmb_boot_side)");
+    assert(__builtin_popcount(lhs.update_performed) == 1, "state_pattern_matches: Expected a single state for matching (update_performed)");
+    assert(__builtin_popcount(lhs.golden_boot_performed) == 1, "state_pattern_matches: Expected a single state for matching (golden_boot_performed)");
+    assert(__builtin_popcount(lhs.ocmb_fw_up_to_date) == 1, "state_pattern_matches: Expected a single state for matching (ocmb_fw_up_to_date)");
+
+    return (lhs.ocmb_boot_side == rhs.ocmb_boot_side)
+        && (lhs.update_performed & rhs.update_performed)
+        && (lhs.golden_boot_performed & rhs.golden_boot_performed)
+        && (lhs.ocmb_fw_up_to_date & rhs.ocmb_fw_up_to_date);
+}
+
+/** @brief Determine whether a given event [lhs] matches a event pattern [rhs]. The event
+ *  pattern [rhs] may have fields that are bitfields representing a set of values to match,
+ *  but the event [lhs] must be a single event.
+ */
+bool event_pattern_matches(const ody_upd_event_t lhs, const ody_upd_event_t rhs)
+{
+    assert(__builtin_popcount(lhs) == 1, "event_pattern_matches: Expected a single state for matching");
+    return lhs & rhs;
+}
+
+/** @brief Convert a tristate value to a string for logs and traces.
+ */
+std::array<char, 64> tristate_mask_to_str(const tristate_t i_state)
+{
+    std::array<char, 64> str = { };
+
+    if (i_state == 0)
+    {
+        strcat(&str[0], "null");
+    }
+    else
+    {
+        if (i_state & yes)
+        {
+            strcat(&str[0], "yes|");
+        }
+
+        if (i_state & no)
+        {
+            strcat(&str[0], "no|");
+        }
+
+        if (i_state & unknown)
+        {
+            strcat(&str[0], "unknown|");
+        }
+
+        if (strlen(&str[0]))
+        {
+            str[strlen(&str[0]) - 1] = '\0'; // chop off the last |
+        }
+    }
+
+    return str;
+}
+
+/** @brief Convert an OCMB boot side enumeration value to a string for logs and traces.
+ */
+std::array<char, 64> ocmb_boot_side_to_str(const ocmb_boot_side_t i_side)
+{
+    std::array<char, 64> str = { };
+
+    if (i_side == SIDE0)
+    {
+        strcat(&str[0], "SIDE0|");
+    }
+
+    if (i_side == SIDE1)
+    {
+        strcat(&str[0], "SIDE1|");
+    }
+
+    if (i_side == GOLDEN)
+    {
+        strcat(&str[0], "GOLDEN|");
+    }
+
+    if (strlen(&str[0]))
+    {
+        str[strlen(&str[0]) - 1] = '\0'; // chop off the last |
+    }
+
+    return str;
+}
+
+/** @brief Convert a state to a string for logs and traces.
+ */
+std::array<char, 256> state_to_str(const state_t& i_state)
+{
+    std::array<char, 256> str = { };
+
+    sprintf(&str[0],
+            "{ update_performed: %s, golden_boot_performed: %s, ocmb_boot_side: %s, fw_up_to_date: %s }",
+            tristate_mask_to_str(i_state.update_performed).data(),
+            tristate_mask_to_str(i_state.golden_boot_performed).data(),
+            ocmb_boot_side_to_str(i_state.ocmb_boot_side).data(),
+            tristate_mask_to_str(i_state.ocmb_fw_up_to_date).data());
+
+    return str;
+}
+
+/** @brief Convert an action to a string for logs and traces.
+ */
+std::array<char, 128> action_to_str(const update_action_t i_action)
+{
+    std::array<char, 128> str = { };
+
+    switch (i_action)
+    {
+    case do_nothing: strcpy(&str[0], "do nothing"); break;
+    case mark_error_predictive: strcpy(&str[0], "convert error to predictive"); break;
+    case mark_error_recovered: strcpy(&str[0], "convert error to recovered"); break;
+    case mark_error_unrecoverable: strcpy(&str[0], "convert error to unrecoverable"); break;
+    case perform_code_update: strcpy(&str[0], "perform code update"); break;
+    case deconfigure_ocmb: strcpy(&str[0], "deconfigure ocmb"); break;
+    case fail_boot_bad_firmware: strcpy(&str[0], "fail boot; bad firmware"); break;
+    case reset_ocmb_upd_state: strcpy(&str[0], "reset ocmb update state"); break;
+    case sync_images_normal: strcpy(&str[0], "sync images (normal)"); break;
+    case sync_images_forced: strcpy(&str[0], "sync images (forced)"); break;
+    case switch_to_side_0: strcpy(&str[0], "switch to side 0"); break;
+    case switch_to_side_1: strcpy(&str[0], "switch to side 1"); break;
+    case switch_to_side_golden: strcpy(&str[0], "switch to golden side"); break;
+    case retry_check_for_ready: strcpy(&str[0], "retry check_for_ready"); break;
+    case internal_error: strcpy(&str[0], "internal error"); break;
+    }
+
+    return str;
+}
+
+/** @brief Capture the state of the code update FSM in an error log.
+ */
+errlHndl_t capture_state_in_errlog(const errlSeverity_t i_sev,
+                                   const uint8_t i_mod,
+                                   const uint16_t i_rc,
+                                   const bool i_sw_callout,
+                                   Target* const i_ocmb,
+                                   const state_t& i_state,
+                                   const state_transitions_t& i_state_pattern,
+                                   const state_transition_t& i_transition,
+                                   const ody_upd_event_t i_event)
+{
+    return new ErrlEntry(i_sev,
+                         i_mod,
+                         i_rc,
+                         SrcUserData(bits{0, 31},  get_huid(i_ocmb),
+                                     bits{32, 39}, i_state.update_performed,
+                                     bits{40, 47}, i_state.golden_boot_performed,
+                                     bits{48, 55}, i_state.ocmb_boot_side,
+                                     bits{56, 63}, i_state.ocmb_fw_up_to_date),
+                         SrcUserData(bits{0, 15},  i_event,
+                                     bits{16, 31}, i_transition.event,
+                                     bits{32, 39}, i_state_pattern.state.update_performed,
+                                     bits{40, 47}, i_state_pattern.state.golden_boot_performed,
+                                     bits{48, 55}, i_state_pattern.state.ocmb_boot_side,
+                                     bits{56, 63}, i_state_pattern.state.ocmb_fw_up_to_date),
+                         i_sw_callout);
+
+    // @TODO: JIRA PFHB-485 add firmware version info to error log
+}
+
+/** @brief Create and commit an error log that will immediately deconfigure the given
+ *  OCMB.
+ *
+ *  @note The error that this function returns indicates a problem in its own operation; the
+ *  error log that it creates to deconfigure the OCMB is committed, not returned.
+ *
+ *  @param[in] i_ocmb           The OCMB to deconfigure.
+ *  @param[in] i_state          The state of the FSM for this OCMB.
+ *  @param[in] i_state_pattern  The state pattern in the FSM table that the state matched.
+ *  @param[in] i_transition     The transition that is being executed.
+ *  @param[in] i_event          The event that caused i_transition.
+ *  @param[in] i_errlog         The error log that caused this event, if any.
+ *
+ *  @return errlHndl_t          Error if any, otherwise nullptr.
+ */
+errlHndl_t create_and_commit_ocmb_deconfigure_log(Target* const i_ocmb,
+                                                  const state_t& i_state,
+                                                  const state_transitions_t& i_state_pattern,
+                                                  const state_transition_t& i_transition,
+                                                  const ody_upd_event_t i_event,
+                                                  const errlHndl_t i_errlog)
+{
+    /*@
+     *@moduleid         MOD_ODY_UPD_FSM
+     *@reasoncode       ODY_UPD_DECONFIGURE_OCMB
+     *@userdata1[0:31]  The OCMB's HUID
+     *@userdata1[32:39] OCMB state.update_performed
+     *@userdata1[40:47] OCMB state.golden_boot_performed
+     *@userdata1[48:55] OCMB state.ocmb_boot_side
+     *@userdata1[56:63] OCMB state.ocmb_fw_up_to_date
+     *@userdata2[0:15]  The OCMB event that caused this transition
+     *@userdata2[16:31] The OCMB event pattern that the event matched
+     *@userdata2[32:39] The state pattern in the FSM table that the state matched (State.update_performed)
+     *@userdata2[40:47] Matching state pattern's State.golden_boot_performed
+     *@userdata2[48:55] Matching state pattern's State.ocmb_boot_side
+     *@userdata2[56:63] Matching state pattern's ocmb_fw_up_to_date
+     *@devdesc          The Odyssey code update FSM requested to deconfigure this OCMB.
+     *@custdesc         A software error occurred during system boot
+     */
+    auto errl = capture_state_in_errlog(ERRL_SEV_UNRECOVERABLE, MOD_ODY_UPD_FSM, ODY_UPD_DECONFIGURE_OCMB,
+                                        ErrlEntry::NO_SW_CALLOUT, i_ocmb, i_state, i_state_pattern, i_transition, i_event);
+
+    errl->addHwCallout(i_ocmb, HWAS::SRCI_PRIORITY_HIGH, HWAS::DECONFIG, HWAS::GARD_NULL);
+
+    // We have to do this because (1) we want to communicate the deconfigured state of the
+    // target to the caller immediately, and (2) on FSP machines, addHwCallout will silently
+    // convert our DECONFIG request to a DELAYED_DECONFIG request, which conflicts with
+    // (1). So we can't rely on the error log to do it, even if we flush the error logs
+    // here.
+    const auto deconfig_errl = HWAS::theDeconfigGard().deconfigureTarget(*i_ocmb, errl->eid());
+
+    if (i_errlog)
+    { // Link the deconfig log with the originating error log.
+        errl->plid(i_errlog->plid());
+    }
+
+    errlCommit(errl, OCMBUPD_COMP_ID);
+
+    return deconfig_errl;
+}
+
+/** @brief Create a log for an internal error in the code update FSM. This should halt the boot.
+ */
+errlHndl_t create_internal_error_log(Target* const i_ocmb,
+                                     const state_t& i_state,
+                                     const state_transitions_t& i_state_pattern,
+                                     const state_transition_t& i_transition,
+                                     const ody_upd_event_t i_event,
+                                     const uint16_t i_rc)
+{
+    auto errl = capture_state_in_errlog(ERRL_SEV_UNRECOVERABLE, MOD_ODY_UPD_FSM, i_rc,
+                                        ErrlEntry::ADD_SW_CALLOUT, i_ocmb, i_state, i_state_pattern, i_transition, i_event);
+
+    errl->addHwCallout(i_ocmb, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+
+    return errl;
+}
+
+/** @brief Create an error log for a fatal error in the Odyssey firmware. This should halt
+ *  the boot.
+ */
+errlHndl_t create_boot_fail_bad_firmware_log(Target* const i_ocmb,
+                                             const state_t& i_state,
+                                             const state_transitions_t& i_state_pattern,
+                                             const state_transition_t& i_transition,
+                                             const ody_upd_event_t i_event)
+{
+    /*@
+     *@moduleid         MOD_ODY_UPD_FSM
+     *@reasoncode       ODY_UPD_BAD_FIRMWARE
+     *@userdata1[0:31]  The OCMB's HUID
+     *@userdata1[32:39] OCMB state.update_performed
+     *@userdata1[40:47] OCMB state.golden_boot_performed
+     *@userdata1[48:55] OCMB state.ocmb_boot_side
+     *@userdata1[56:63] OCMB state.ocmb_fw_up_to_date
+     *@userdata2[0:15]  The OCMB event that caused this transition
+     *@userdata2[16:31] The OCMB event pattern that the event matched
+     *@userdata2[32:39] The state pattern in the FSM table that the state matched (State.update_performed)
+     *@userdata2[40:47] Matching state pattern's State.golden_boot_performed
+     *@userdata2[48:55] Matching state pattern's State.ocmb_boot_side
+     *@userdata2[56:63] Matching state pattern's ocmb_fw_up_to_date
+     *@devdesc          The OCMB firmware is up to date but invalid.
+     *@custdesc         A software error occurred during system boot
+     */
+    const auto errl = capture_state_in_errlog(ERRL_SEV_UNRECOVERABLE, MOD_ODY_UPD_FSM, ODY_UPD_BAD_FIRMWARE,
+                                              ErrlEntry::ADD_SW_CALLOUT, i_ocmb, i_state, i_state_pattern, i_transition, i_event);
+
+    errl->addHwCallout(i_ocmb, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+
+    return errl;
+}
+
+/** @brief Create and commit an informational error log for a code update.
+ */
+void create_firmware_update_log(Target* const i_ocmb,
+                                const state_t& i_state,
+                                const state_transitions_t& i_state_pattern,
+                                const state_transition_t& i_transition,
+                                const ody_upd_event_t i_event)
+{
+    /*@
+     *@moduleid         MOD_ODY_UPD_FSM
+     *@reasoncode       ODY_UPD_FIRMWARE_UPDATED
+     *@userdata1[0:31]  The OCMB's HUID
+     *@userdata1[32:39] OCMB state.update_performed
+     *@userdata1[40:47] OCMB state.golden_boot_performed
+     *@userdata1[48:55] OCMB state.ocmb_boot_side
+     *@userdata1[56:63] OCMB state.ocmb_fw_up_to_date
+     *@userdata2[0:15]  The OCMB event that caused this transition
+     *@userdata2[16:31] The OCMB event pattern that the event matched
+     *@userdata2[32:39] The state pattern in the FSM table that the state matched (State.update_performed)
+     *@userdata2[40:47] Matching state pattern's State.golden_boot_performed
+     *@userdata2[48:55] Matching state pattern's State.ocmb_boot_side
+     *@userdata2[56:63] Matching state pattern's ocmb_fw_up_to_date
+     *@devdesc          An Odyssey OCMB was updated during the boot.
+     *@custdesc         An OCMB was updated during the boot
+     */
+    auto errl = capture_state_in_errlog(ERRL_SEV_INFORMATIONAL, MOD_ODY_UPD_FSM, ODY_UPD_FIRMWARE_UPDATED,
+                                        ErrlEntry::NO_SW_CALLOUT, i_ocmb, i_state, i_state_pattern, i_transition, i_event);
+
+    errl->addHwCallout(i_ocmb, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+
+    errlCommit(errl, OCMBUPD_COMP_ID);
+}
+
+/** @brief Execute the actions for the given transition on the given OCMB.
+ *
+ *  @param[in] i_ocmb             The OCMB to deconfigure.
+ *  @param[in] i_state            The state of the FSM for this OCMB.
+ *  @param[in] i_state_pattern    The state pattern in the FSM table that the state matched.
+ *  @param[in] i_transition       The transition that is being executed.
+ *  @param[in] i_event            The event that caused i_transition.
+ *  @param[in] i_errlog           The error log associated with the event, if any. This
+ *                                function does not take ownership of the error log.
+ *  @param[in] i_ocmbfw_pnor_partition  Owning handle to the OCMBFW PNOR partition.
+ *  @param[out] o_restart_needed  Whether the ocmb_check_for_ready loop should be
+ *                                restarted on the given OCMB.
+ *
+ *  @return errlHndl_t            Error if any, otherwise nullptr.
+ *
+ *  @note This function is recursive and does NOT take ownership of i_errlog.
+ */
+errlHndl_t execute_actions(Target* const i_ocmb,
+                           const state_t& i_state,
+                           const state_transitions_t& i_state_pattern,
+                           const state_transition_t& i_transition,
+                           const ody_upd_event_t i_event,
+                           errlHndl_t i_errlog,
+                           const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition,
+                           bool& o_restart_needed)
+{
+    errlHndl_t errl = nullptr;
+
+    bool manually_set_errl_sev = false;
+
+    for (const auto& action : i_transition.actions)
+    {
+        if (action != do_nothing)
+        {
+            TRACF(INFO_MRK"ody_upd_fsm/execute_actions(0x%08X): Executing action %s",
+                  get_huid(i_ocmb),
+                  action_to_str(action).data());
+
+            switch (action)
+            {
+            case do_nothing:
+                break;
+            case mark_error_predictive:
+                if (i_errlog)
+                {
+                    i_errlog->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                }
+                manually_set_errl_sev = true;
+                break;
+            case mark_error_recovered:
+                if (i_errlog)
+                {
+                    i_errlog->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+                }
+                manually_set_errl_sev = true;
+                break;
+            case mark_error_unrecoverable:
+                if (i_errlog)
+                {
+                    i_errlog->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                }
+                manually_set_errl_sev = true;
+                break;
+            case perform_code_update:
+                if (auto update_err = odysseyUpdateImages(i_ocmb, i_ocmbfw_pnor_partition))
+                {
+                    TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): odysseyUpdateImages failed: "
+                          TRACE_ERR_FMT,
+                          get_huid(i_ocmb),
+                          TRACE_ERR_ARGS(update_err));
+
+                    return ody_upd_process_event(i_ocmb,
+                                                 CODE_UPDATE_CHIPOP_FAILURE,
+                                                 update_err,
+                                                 i_ocmbfw_pnor_partition,
+                                                 o_restart_needed);
+                }
+
+                create_firmware_update_log(i_ocmb, i_state, i_state_pattern, i_transition, i_event);
+                i_ocmb->setAttr<ATTR_OCMB_CODE_UPDATED>(1);
+
+                break;
+            case switch_to_side_0:
+                if (i_errlog && !manually_set_errl_sev)
+                {
+                    i_errlog->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+                }
+                if (i_state.ocmb_boot_side == GOLDEN)
+                {
+                    i_ocmb->setAttr<ATTR_OCMB_GOLDEN_BOOT_ATTEMPTED>(1);
+                }
+                i_ocmb->setAttr<ATTR_OCMB_BOOT_SIDE>(SPPE_BOOT_SIDE_SIDE0);
+                break;
+            case switch_to_side_1:
+                if (i_errlog && !manually_set_errl_sev)
+                {
+                    i_errlog->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+                }
+                if (i_state.ocmb_boot_side == GOLDEN)
+                {
+                    i_ocmb->setAttr<ATTR_OCMB_GOLDEN_BOOT_ATTEMPTED>(1);
+                }
+                i_ocmb->setAttr<ATTR_OCMB_BOOT_SIDE>(SPPE_BOOT_SIDE_SIDE1);
+                break;
+            case switch_to_side_golden:
+                if (i_errlog && !manually_set_errl_sev)
+                {
+                    i_errlog->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+                }
+                if (i_state.ocmb_boot_side == GOLDEN)
+                {
+                    i_ocmb->setAttr<ATTR_OCMB_GOLDEN_BOOT_ATTEMPTED>(1);
+                }
+                i_ocmb->setAttr<ATTR_OCMB_BOOT_SIDE>(SPPE_BOOT_SIDE_GOLDEN);
+                break;
+            case reset_ocmb_upd_state:
+                ody_upd_reset_state(i_ocmb);
+                break;
+            case deconfigure_ocmb:
+                if (i_errlog && !manually_set_errl_sev)
+                {
+                    i_errlog->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                }
+
+                errl = create_and_commit_ocmb_deconfigure_log(i_ocmb, i_state, i_state_pattern, i_transition, i_event, i_errlog);
+
+                if (errl)
+                {
+                    TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): create_and_commit_ocmb_deconfigure_log"
+                          " failed - "
+                          TRACE_ERR_FMT,
+                          get_huid(i_ocmb),
+                          TRACE_ERR_ARGS(errl));
+                }
+
+                break;
+            case fail_boot_bad_firmware:
+                errl = create_boot_fail_bad_firmware_log(i_ocmb, i_state, i_state_pattern, i_transition, i_event);
+                break;
+            case sync_images_forced:
+            case sync_images_normal:
+                if (auto sync_err = SBEIO::sendSyncCodeLevelsRequest(i_ocmb, action == sync_images_forced))
+                {
+                    TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): sendSyncCodeLevelsRequest failed: "
+                          TRACE_ERR_FMT,
+                          get_huid(i_ocmb),
+                          TRACE_ERR_ARGS(sync_err));
+
+                    return ody_upd_process_event(i_ocmb,
+                                                 IMAGE_SYNC_CHIPOP_FAILURE,
+                                                 sync_err,
+                                                 i_ocmbfw_pnor_partition,
+                                                 o_restart_needed);
+                }
+                break;
+            case retry_check_for_ready:
+                o_restart_needed = true;
+                break;
+            case internal_error:
+                /*@
+                 *@moduleid         MOD_ODY_UPD_FSM
+                 *@reasoncode       ODY_UPD_INTERNAL_ERROR
+                 *@userdata1[0:31]  The OCMB's HUID
+                 *@userdata1[32:39] OCMB state.update_performed
+                 *@userdata1[40:47] OCMB state.golden_boot_performed
+                 *@userdata1[48:55] OCMB state.ocmb_boot_side
+                 *@userdata1[56:63] OCMB state.ocmb_fw_up_to_date
+                 *@userdata2[0:15]  The OCMB event that caused this transition
+                 *@userdata2[16:31] The OCMB event pattern that the event matched
+                 *@userdata2[32:39] The state pattern in the FSM table that the state matched (State.update_performed)
+                 *@userdata2[40:47] Matching state pattern's State.golden_boot_performed
+                 *@userdata2[48:55] Matching state pattern's State.ocmb_boot_side
+                 *@userdata2[56:63] Matching state pattern's ocmb_fw_up_to_date
+                 *@devdesc          The Odyssey code update FSM experienced an internal error; this is a code bug.
+                 *@custdesc         A software error occurred during system boot
+                 */
+                errl = create_internal_error_log(i_ocmb, i_state, i_state_pattern, i_transition, i_event, ODY_UPD_INTERNAL_ERROR);
+                break;
+            }
+        }
+
+        if (errl)
+        {
+            break;
+        }
+    }
+
+    return errl;
+}
+
+/** @brief Process an event on the given OCMB. If an error log is
+ *  related to the event, it is passed in as well, and this function
+ *  takes ownership of it.
+ */
+errlHndl_t ody_upd_process_event(Target* const i_ocmb,
+                                 const state_t& i_state,
+                                 const ody_upd_event_t i_event,
+                                 errlHndl_t& i_errlog,
+                                 const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition,
+                                 bool& o_restart_needed)
+{
+    TRACF(ENTER_MRK"ody_upd_process_event(HUID=0x%08X): Current state+event %s + %s",
+          get_huid(i_ocmb),
+          state_to_str(i_state).data(),
+          event_to_str(i_event).data());
+
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+
+    const state_transitions_t* matched_state = nullptr;
+    const state_transition_t* matched_event = nullptr;
+
+    /* Special case for non-functional DIMMs upon event IPL_COMPLETE;
+       we just reset all state. */
+
+    if (!i_ocmb->getAttr<ATTR_HWAS_STATE>().functional && i_event == IPL_COMPLETE)
+    {
+        execute_actions(i_ocmb, i_state, /* state pattern */ { }, /* transition */ { },
+                        IPL_COMPLETE, i_errlog, i_ocmbfw_pnor_partition, o_restart_needed);
+        break;
+    }
+
+    /* Look for a match for this state+event in our state transition table */
+
+    for (const auto& state_pattern : transitions)
+    {
+        if (state_pattern_matches(i_state, state_pattern.state))
+        {
+            matched_state = &state_pattern;
+
+            for (const auto& event_pattern : state_pattern.transitions)
+            {
+                if (event_pattern_matches(i_event, event_pattern.event))
+                {
+                    matched_event = &event_pattern;
+                    break;
+                }
+            }
+
+            break;
+        }
+    }
+
+    /* If we found a match, execute the actions! */
+
+    if (matched_event)
+    {
+        TRACF("ody_upd_process_event(HUID=0x%08X): Current state+event %s + %s matches pattern %s + %s",
+              get_huid(i_ocmb),
+              state_to_str(i_state).data(),
+              event_to_str(i_event).data(),
+              state_to_str(matched_state->state).data(),
+              event_to_str(matched_event->event).data());
+
+        execute_actions(i_ocmb, i_state, *matched_state, *matched_event, i_event, i_errlog, i_ocmbfw_pnor_partition, o_restart_needed);
+    }
+    else if (matched_state)
+    {
+        TRACF("ody_upd_process_event(HUID=0x%08X): Current state+event %s + %s matched state pattern %s but did not match any event pattern; no actions for this event",
+              get_huid(i_ocmb),
+              state_to_str(i_state).data(),
+              event_to_str(i_event).data(),
+              state_to_str(matched_state->state).data());
+    }
+    else
+    {
+        TRACF("ody_upd_process_event(HUID=0x%08X): Current state+event %s + %s did not match any state pattern; this is a bug!",
+              get_huid(i_ocmb),
+              state_to_str(i_state).data(),
+              event_to_str(i_event).data());
+
+        /*@
+         *@moduleid         MOD_ODY_UPD_FSM
+         *@reasoncode       ODY_UPD_UNKNOWN_STATE
+         *@userdata1[0:31]  The OCMB's HUID
+         *@userdata1[32:39] OCMB state.update_performed
+         *@userdata1[40:47] OCMB state.golden_boot_performed
+         *@userdata1[48:55] OCMB state.ocmb_boot_side
+         *@userdata1[56:63] OCMB state.ocmb_fw_up_to_date
+         *@userdata2[0:15]  The OCMB event that caused this transition
+         *@userdata2[16:31] The OCMB event pattern that the event matched
+         *@userdata2[32:39] The state pattern in the FSM table that the state matched (State.update_performed)
+         *@userdata2[40:47] Matching state pattern's State.golden_boot_performed
+         *@userdata2[48:55] Matching state pattern's State.ocmb_boot_side
+         *@userdata2[56:63] Matching state pattern's ocmb_fw_up_to_date
+         *@devdesc          The Odyssey code update FSM experienced an internal error; this is a code bug.
+         *@custdesc         A software error occurred during system boot
+         */
+        errl = create_internal_error_log(i_ocmb, i_state, { }, { }, i_event, ODY_UPD_UNKNOWN_STATE);
+        break;
+    }
+
+    } while (false);
+
+    if (i_errlog)
+    {
+        errlCommit(i_errlog, OCMBUPD_COMP_ID);
+        ErrlManager::callFlushErrorLogs(); // this may deconfigure an ocmb, and we want to
+                                           // communicate that to the caller.
+    }
+
+    TRACF(EXIT_MRK"ody_upd_process_event(HUID=0x%08X) = 0x%08X",
+          get_huid(i_ocmb),
+          ERRL_GETPLID_SAFE(errl));
+
+    return errl;
+}
+
+/** @brief Process an event on the given OCMB. If an error log is
+ *  related to the event, it is passed in as well, and this function
+ *  takes ownership of it.
+ *
+ *  This function prepares the inputs to pass to the other overload of
+ *  ody_upd_process_event.
+ */
+errlHndl_t ocmbupd::ody_upd_process_event(Target* const i_ocmb,
+                                          const ody_upd_event_t i_event,
+                                          errlHndl_t& i_errlog,
+                                          const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition,
+                                          bool& o_restart_needed)
+{
+    state_t state = { };
+
+    state.update_performed = i_ocmb->getAttr<ATTR_OCMB_CODE_UPDATED>() ? yes : no;
+    state.golden_boot_performed = i_ocmb->getAttr<ATTR_OCMB_GOLDEN_BOOT_ATTEMPTED>() ? yes : no;
+
+    switch (static_cast<SPPE_BOOT_SIDE>(i_ocmb->getAttr<ATTR_OCMB_BOOT_SIDE>()))
+    {
+    case SPPE_BOOT_SIDE_INVALID:
+        assert(false, "Unexpected state for ATTR_OCMB_BOOT_SIDE"); // this can never happen
+        break;
+    case SPPE_BOOT_SIDE_SIDE0:
+        state.ocmb_boot_side = SIDE0;
+        break;
+    case SPPE_BOOT_SIDE_SIDE1:
+        state.ocmb_boot_side = SIDE1;
+        break;
+    case SPPE_BOOT_SIDE_GOLDEN:
+        state.ocmb_boot_side = GOLDEN;
+        break;
+    }
+
+    switch (i_ocmb->getAttr<ATTR_OCMB_FW_STATE>())
+    {
+    case OCMB_FW_STATE_INVALID:
+    case OCMB_FW_STATE_UNKNOWN:
+        state.ocmb_fw_up_to_date = unknown;
+        break;
+    case OCMB_FW_STATE_UP_TO_DATE:
+        state.ocmb_fw_up_to_date = yes;
+        break;
+    case OCMB_FW_STATE_OUT_OF_DATE:
+        state.ocmb_fw_up_to_date = no;
+        break;
+    }
+
+    return ody_upd_process_event(i_ocmb, state, i_event, i_errlog, i_ocmbfw_pnor_partition, o_restart_needed);
+}
+
+/** @brief Process an event that concerns all Odyssey OCMBs in the system. This is
+ *  a wrapper around ody_upd_process_event.
+ */
+errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
+                                              const functional_ocmbs_only_t i_which_ocmbs,
+                                              const perform_reconfig_t i_perform_reconfig_if_needed,
+                                              bool* const o_restart_needed)
+{
+    errlHndl_t errl = nullptr;
+    bool restart_needed = false;
+
+    const auto ocmbfw = ocmbupd::load_ocmbfw_pnor_section(errl);
+
+    do
+    {
+
+    if (errl)
+    {
+        TRACF(ERR_MRK"ody_upd_all_process_event: load_ocmbfw_pnor_section failed: "
+              TRACE_ERR_FMT,
+              TRACE_ERR_ARGS(errl));
+
+        TRACF(INFO_MRK"ody_upd_all_process_event: Ignoring error until support for "
+              "OCMBFW PNOR partition version 1 is dropped");
+
+        // @TODO: JIRA PFHB-522 Capture this error when OCMBFW V1 support is deprecated
+        delete errl;
+        errl = nullptr;
+
+        //captureError(errl, o_stepError, ISTEP_COMP_ID);
+        break;
+    }
+
+    for (const auto ocmb : composable(getAllChips)(TYPE_OCMB_CHIP, i_which_ocmbs == EVENT_ON_FUNCTIONAL_OCMBS))
+    {
+        if (!UTIL::isOdysseyChip(ocmb))
+        {
+            continue;
+        }
+
+        TRACF(INFO_MRK"ody_upd_all_process_event: Issuing Odyssey FSM event "
+              "%s on chip 0x%08X",
+              event_to_str(i_event).data(),
+              get_huid(ocmb));
+
+        errlHndl_t event_errlog = nullptr; // no error to consider here
+        errlHndl_t fsm_error = ocmbupd::ody_upd_process_event(ocmb, i_event, event_errlog, ocmbfw, restart_needed);
+
+        if (fsm_error)
+        {
+            TRACF(ERR_MRK"ody_upd_all_process_event: ody_upd_process_event(0x%08x, %s) failed: "
+                  TRACE_ERR_FMT,
+                  get_huid(ocmb),
+                  event_to_str(i_event).data(),
+                  TRACE_ERR_ARGS(fsm_error));
+
+            foldErrors(errl, fsm_error, OCMBUPD_COMP_ID);
+        }
+    }
+
+    if (errl)
+    {
+        break;
+    }
+
+    if (restart_needed && (i_perform_reconfig_if_needed == REQUEST_RECONFIG_IF_NEEDED))
+    {
+#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+        CONSOLE::displayf(CONSOLE::DEFAULT, nullptr,
+                          "Performing reconfig loop for updated OCMBs");
+#endif
+
+        TRACF(INFO_MRK"host_ipl_complete: Requesting reconfig loop for "
+              "OCMB firmware update");
+
+        setOrClearReconfigLoopReason(HWAS::ReconfigSetOrClear::RECONFIG_SET,
+                                     RECONFIGURE_LOOP_OCMB_FW_UPDATE);
+    }
+
+    } while (false);
+
+    return errl;
+}
+
+/** @brief Set the Odyssey code update state related to the firmware
+ *  levels on the given target. Assumes that ATTR_SPPE_BOOT_SIDE is already
+ *  set on the target.
+ */
+errlHndl_t ocmbupd::set_ody_code_levels_state(Target* const i_ocmb,
+                                              const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition)
+{
+    errlHndl_t errl = nullptr;
+
+    if (i_ocmb->getAttr<ATTR_SPPE_BOOT_SIDE>() == SPPE_BOOT_SIDE_GOLDEN)
+    { // The golden side is always considered to be out of date.
+        i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_OUT_OF_DATE);
+    }
+    else
+    {
+        ody_cur_version_new_image_t images;
+        errl = check_for_odyssey_codeupdate_needed(i_ocmb, i_ocmbfw_pnor_partition, images);
+
+        if (!errl)
+        {
+            i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(images.empty()
+                                                ? OCMB_FW_STATE_UP_TO_DATE
+                                                : OCMB_FW_STATE_OUT_OF_DATE);
+        }
+    }
+
+    return errl;
+}

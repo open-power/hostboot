@@ -133,7 +133,7 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
         TRACF("call_ocmb_check_for_ready: Ignoring error until support for "
               "OCMBFW PNOR partition version 1 is dropped");
 
-        // @TODO: Capture this error when OCMBFW V1 support is deprecated
+        // @TODO: JIRA PFHB-522 Capture this error when OCMBFW V1 support is deprecated
         delete l_errl;
         l_errl = nullptr;
 

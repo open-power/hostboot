@@ -25,13 +25,20 @@
 
 #include "ocmbupd_trace.H"
 
+#include <istepHelperFuncs.H>
 #include <console/consoleif.H>
 
 #include <ocmbupd/ocmbupd.H>
 #include <ocmbupd/ocmbFwImage.H>
 
+#include <hwas/common/hwas.H>
+
+#include <targeting/odyutil.H>
+
+using namespace HWAS;
 using namespace ERRORLOG;
 using namespace TARGETING;
+using namespace ISTEP_ERROR;
 
 #define TRACF(...) TRACFCOMP(g_trac_ocmbupd, __VA_ARGS__)
 
@@ -56,20 +63,23 @@ const char* codelevel_info_type_to_string(const codelevel_info_t::codelevel_info
 
 /**
  * @brief Write a set of firmware images to the given Odyssey chip.
+ *
+ * @param[in] i_ocmb              The Odyssey chip.
+ * @param[in] i_fwhdr             The OCMBFW PNOR partition header pointer.
+ * @param[in] i_updates_required  The images to write.
  */
 errlHndl_t odyssey_update_code(Target* const i_ocmb,
                                const ocmbfw_owning_ptr_t& i_fwhdr,
                                const ody_cur_version_new_image_t& i_updates_required)
 {
-    TRACF(ENTER_MRK"call_ocmb_check_for_ready/odyssey_update_code(0x%08X)",
+    TRACF(ENTER_MRK"odyssey_update_code(0x%08X)",
           get_huid(i_ocmb));
 
     errlHndl_t errl = nullptr;
 
     for (const auto [ clip, img ] : i_updates_required)
     {
-        TRACF("call_ocmb_check_for_ready/odyssey_update_code(0x%08X): "
-              "Updating %s firmware image...",
+        TRACF("odyssey_update_code(0x%08X): Updating %s firmware image...",
               get_huid(i_ocmb),
               codelevel_info_type_to_string(clip.type));
 
@@ -87,7 +97,7 @@ errlHndl_t odyssey_update_code(Target* const i_ocmb,
 
         if (errl)
         {
-            TRACF("call_ocmb_check_for_ready/odyssey_update_code(0x%08X): "
+            TRACF("odyssey_update_code(0x%08X): "
                   "sendUpdateImageRequest(type=%s) failed: " TRACE_ERR_FMT,
                   get_huid(i_ocmb),
                   codelevel_info_type_to_string(clip.type),
@@ -96,7 +106,7 @@ errlHndl_t odyssey_update_code(Target* const i_ocmb,
         }
         else
         {
-            TRACF("call_ocmb_check_for_ready/odyssey_update_code(0x%08X): "
+            TRACF("odyssey_update_code(0x%08X): "
                   "Update completed successfully",
                   get_huid(i_ocmb));
 
@@ -109,7 +119,7 @@ errlHndl_t odyssey_update_code(Target* const i_ocmb,
         }
     }
 
-    TRACF(EXIT_MRK"call_ocmb_check_for_ready/odyssey_update_code(0x%08X) = 0x%08X",
+    TRACF(EXIT_MRK"odyssey_update_code(0x%08X) = 0x%08X",
           get_huid(i_ocmb), ERRL_GETPLID_SAFE(errl));
 
     return errl;
@@ -150,7 +160,7 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
                                                const ocmbfw_owning_ptr_t& i_fwhdr,
                                                ody_cur_version_new_image_t& o_updates_required)
 {
-    TRACF(ENTER_MRK"call_ocmb_check_for_ready/check_for_odyssey_codeupdate_needed(0x%08X)",
+    TRACF(ENTER_MRK"check_for_odyssey_codeupdate_needed(0x%08X)",
           get_huid(i_ocmb));
 
     errlHndl_t errl = nullptr;
@@ -172,6 +182,21 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
     {
         break;
     }
+
+    std::sort(begin(codelevels), end(codelevels),
+              [](const codelevel_info_t& lhs, const codelevel_info_t& rhs)
+              {
+                  // Each type should only appear once in the vector.
+                  return lhs.type < rhs.type;
+              });
+
+    // If the bootloader needs to be updated, then we will always
+    // update the runtime, because a change in size of the bootloader
+    // can cause the runtime to break (even if the runtime hash
+    // doesn't change). We will always evaluate the bootloader image
+    // before the runtime image (so that this variable will be set in
+    // time for the check) because of the sort above.
+    bool bootloader_needs_update = false;
 
     for (const auto& codelevel : codelevels)
     {
@@ -199,16 +224,22 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
         if (errl)
         {
             TRACF("check_for_odyssey_codeupdate_needed: Cannot locate image with ocmb type = %d, "
-                  "image type = %d, dd = %d.%d in OCMBFW PNOR partition",
+                  "image type = %d, dd = %d.%d in OCMBFW PNOR partition; skipping firmware update",
                   OCMB_TYPE_ODYSSEY, image_type, dd_level_major, dd_level_minor);
+            delete errl;
+            errl = nullptr;
             break;
         }
 
         static_assert(sizeof(img->image_hash) == sizeof(codelevel.hash));
 
-        /* If the hashes don't match, we need to update this image. */
+        /* If the hashes don't match (or if the bootloader needs
+           updating and this image is the runtime image (see comments
+           for bootloader_needs_update)), we need to update this
+           image. */
 
-        if (memcmp(&img->image_hash, &codelevel.hash, sizeof(img->image_hash)))
+        if ((bootloader_needs_update && (codelevel.type == codelevel_info_t::runtime))
+             || memcmp(&img->image_hash, &codelevel.hash, sizeof(img->image_hash)))
         {
             char flashed_hash_str[25] = { }, hb_hash_str[25] = { };
             str_to_hex(flashed_hash_str, codelevel.hash, (sizeof(flashed_hash_str) - 1) / 2);
@@ -219,6 +250,11 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
                   get_huid(i_ocmb), image_type_str, flashed_hash_str, hb_hash_str);
 
             o_updates_required.push_back({ codelevel, img });
+
+            if (codelevel.type == codelevel_info_t::bootloader)
+            {
+                bootloader_needs_update = true;
+            }
         }
         else
         {
@@ -229,7 +265,59 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
 
     } while (false);
 
-    TRACF(EXIT_MRK"call_ocmb_check_for_ready/check_for_odyssey_codeupdate_needed");
+    TRACF(EXIT_MRK"check_for_odyssey_codeupdate_needed = 0x%08X", ERRL_GETPLID_SAFE(errl));
+
+    return errl;
+}
+
+/** @brief Add callouts and collect traces for the given Odyssey code
+ *  update error. Deconfigure the given OCMB (delayed).
+ */
+void add_odyssey_callouts(errlHndl_t& i_errl, const Target* const i_ocmb)
+{
+    i_errl->collectTrace(SBEIO_COMP_NAME);
+    i_errl->collectTrace(I2CR_COMP_NAME);
+    i_errl->collectTrace(OCMBUPD_COMP_NAME);
+
+    i_errl->addHwCallout(i_ocmb, SRCI_PRIORITY_HIGH, DELAYED_DECONFIG, GARD_NULL);
+}
+
+/**
+ * @brief Update Odyssey OCMB firmware on the given target if necessary.
+ */
+errlHndl_t odysseyUpdateImages(Target* const i_ocmb,
+                               const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition)
+{
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+
+    if (UTIL::isOdysseyChip(i_ocmb))
+    {
+        ody_cur_version_new_image_t images_to_update;
+        errl = check_for_odyssey_codeupdate_needed(i_ocmb,
+                                                   i_ocmbfw_pnor_partition,
+                                                   images_to_update);
+
+        if (errl)
+        {
+            add_odyssey_callouts(errl, i_ocmb);
+            break;
+        }
+
+        errl = odyssey_update_code(i_ocmb,
+                                   i_ocmbfw_pnor_partition,
+                                   images_to_update);
+
+        if (errl)
+        {
+            add_odyssey_callouts(errl, i_ocmb);
+            break;
+        }
+    }
+
+    } while (false);
 
     return errl;
 }

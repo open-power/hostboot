@@ -52,6 +52,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/secureboot
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 #EXTRAINCDIR += ${NEST_HWP_PATH}
 EXTRAINCDIR += ${PERV_HWP_PATH}
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include

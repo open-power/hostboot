@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,6 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef __EEPROM_CACHE_H
 #define __EEPROM_CACHE_H
+
+#include <memory>
 
 #include <eeprom/eeprom_const.H>
 #include <errl/errlentry.H>
@@ -502,6 +504,39 @@ errlHndl_t eecachePresenceDetect(TARGETING::Target* i_target,
  * @return nullptr if EECACHE is valid; an error log otherwise
  */
 errlHndl_t isEecacheEmpty(const eecacheSectionHeader* const i_header);
+
+/** @brief Parameter for part-changed callbacks describing the type of
+ *  change detected.
+ */
+enum part_change_t
+{
+    PART_ADDED,
+    PART_REMOVED,
+};
+
+/** @brief The type of all part-changed callback functions. The first
+ *  argument is the target that was detected changed, and the second
+ *  is the type of change detected.
+ */
+using part_change_callback_t = void(*)(TARGETING::Target*, part_change_t);
+
+/** @brief Return type of registerPartChangedCallback.
+ */
+using part_change_callback_owner_t = std::unique_ptr<void, void(*)(void*)>;
+
+/** @brief Register a callback that will be invoked when a part change
+ *  (addition or removal) is detected. This only works for parts that
+ *  have cached EEPROM data.
+ *
+ *  @param[in] i_callback  The callback to invoke.
+ *
+ *  @return A callback handle owner. When this object is destroyed it
+ *          will automatically unregister the callback.
+ *
+ *  @note  This interface is not thread-safe.
+ */
+part_change_callback_owner_t registerPartChangedCallback(part_change_callback_t i_callback);
+
 }
 
 #endif // namespace  EEPROM

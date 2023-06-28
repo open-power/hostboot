@@ -42,6 +42,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 
+##      Miscellaneous
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ocmbupd
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
+
 VPATH += ${ROOTPATH}/src/usr/hwas/plat
 VPATH += ${ROOTPATH}/src/usr/hwas/common
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/

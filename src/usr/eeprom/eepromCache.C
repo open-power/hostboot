@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,6 +94,48 @@ uint64_t g_eecachePnorSize  = 0;
 //         and other points to the location of the cache, and a byte indicating
 //         if this eeprom's hardware has changed this IPL
 std::map<eepromRecordHeader, EepromEntryMetaData_t> g_cachedEeproms;
+
+// This is the ID of the next part-change callback handle that will be registered.
+intptr_t next_part_change_callback = 1;
+
+// A map of change callback handles to function pointers.
+std::map<intptr_t, part_change_callback_t> g_part_change_callbacks;
+
+/** @brief Unregister a callback previously registered with
+ *  registerPartChangedCallback.
+ *
+ *  @param[in] i_key  The callback handle.
+ */
+void unregisterPartChangedCallback(void* const i_key)
+{
+    g_part_change_callbacks.erase(reinterpret_cast<intptr_t>(i_key));
+}
+
+/** @brief Register a callback that will be invoked when a part change
+ *  (addition or removal) is detected.
+ */
+part_change_callback_owner_t registerPartChangedCallback(const part_change_callback_t i_callback)
+{
+    const auto callback_id = next_part_change_callback++;
+    g_part_change_callbacks[callback_id] = i_callback;
+    return { reinterpret_cast<void*>(callback_id),
+             unregisterPartChangedCallback };
+}
+
+/** @brief Invoke the registered part change callbacks on the given
+ *  target.
+ *
+ *  @param[in] i_target      The part that changed.
+ *  @param[in] i_changetype  The type of change that was detected.
+ */
+void invokePartChangedCallbacks(TARGETING::Target* const i_target,
+                                const part_change_t i_changetype)
+{
+    for (const auto [ key, value ] : g_part_change_callbacks)
+    {
+        value(i_target, i_changetype);
+    }
+}
 
 /**
  * @brief A helper function to populate the global variables used by
@@ -389,6 +431,8 @@ errlHndl_t updateEecacheContents(TARGETING::Target*          i_target,
                 // We have updated the cache entry, this indicates we have found a
                 // "new" part. Mark the target as changed in hwas.
                 HWAS::markTargetChanged(i_target);
+
+                invokePartChangedCallbacks(i_target, PART_ADDED);
             }
         }
     } while(0);
@@ -964,6 +1008,8 @@ errlHndl_t checkForEecacheEntryUpdate(
                 // a part has been removed. Mark that the target is changed in
                 // hwas.
                 HWAS::markTargetChanged(i_target);
+
+                invokePartChangedCallbacks(i_target, PART_REMOVED);
             }
 
             // PNOR contents already cleared by clearEecache()
@@ -1198,6 +1244,8 @@ errlHndl_t updateExistingEecacheEntry(
                     // We have updated the cache entry, this indicates we have found a
                     // "new" part. Mark the target as changed in hwas.
                     HWAS::markTargetChanged(i_target);
+
+                    invokePartChangedCallbacks(i_target, PART_ADDED);
                 }
             }
         }

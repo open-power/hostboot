@@ -446,6 +446,18 @@
       <id>LOCATION_CODE</id>
     </attribute>
     <attribute>
+      <id>OCMB_BOOT_SIDE</id>
+    </attribute>
+    <attribute>
+      <id>OCMB_CODE_UPDATED</id>
+    </attribute>
+    <attribute>
+      <id>OCMB_FW_STATE</id>
+    </attribute>
+    <attribute>
+      <id>OCMB_GOLDEN_BOOT_ATTEMPTED</id>
+    </attribute>
+    <attribute>
       <id>SBE_COMMIT_ID</id>
     </attribute>
     <attribute>
