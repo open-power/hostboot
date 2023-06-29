@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,16 +119,22 @@ p10_ocmb_enable(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
         FAPI_TRY(PUT_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL7_RW(i_target, l_scom_buf));
 
         //Wait 500 milliseconds - anything much less seems to lead to SPI issues in Explorer
-        fapi2::delay(500 * 1000000, 10000);
+        FAPI_TRY(fapi2::delay(500 * 1000000, 10000));
 
-        // Toggle the reset signal
+        // ensure that reset signal is asserted
         FAPI_TRY(GET_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_RW(i_target, l_scom_buf));
+        SET_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_TPFSI_IO_OCMB_RESET_EN(l_scom_buf);
+        FAPI_TRY(PUT_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_RW(i_target, l_scom_buf));
+
+        FAPI_TRY(fapi2::delay(500 * 1000000, 10000));
+
+        // then deasserted
         CLEAR_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_TPFSI_IO_OCMB_RESET_EN(l_scom_buf);
         FAPI_TRY(PUT_TP_TPVSB_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_RW(i_target, l_scom_buf));
 
         // Wait 500 milliseconds - Explorer spec says not to attempt i2c communication until
         // 500ms after toggling reset
-        fapi2::delay(500 * 1000000, 10000);
+        FAPI_TRY(fapi2::delay(500 * 1000000, 10000));
 
     }
 
