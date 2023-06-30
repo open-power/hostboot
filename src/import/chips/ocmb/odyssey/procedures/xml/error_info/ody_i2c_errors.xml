@@ -42,5 +42,12 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <sbeError/>
+    <rc>RC_ODYSSEY_I2CC_RESET_ERROR</rc>
+    <description>Error resetting Odyssey I2C controller</description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>STATUS_DATA</ffdc>
+  </hwpError>
 
 </hwpErrors>

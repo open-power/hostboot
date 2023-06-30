@@ -134,15 +134,11 @@ class thermal_sensor
 };
 
 ///
-/// @brief Enable or disable SMBus timeout feature on the thermal sensor
+/// @brief Reset I2C controller
 /// @param[in] i_ocmb the OCMB target
-/// @param[in] i_sensor the temp sensor target
-/// @param[in] i_enable switch to enable or disable
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode change_smbus_timeout(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
-                                       const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>& i_sensor,
-                                       const sensor_timeout i_enable);
+fapi2::ReturnCode reset_i2cc(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb);
 
 ///
 /// @brief Function that reads and processes all thermal sensors

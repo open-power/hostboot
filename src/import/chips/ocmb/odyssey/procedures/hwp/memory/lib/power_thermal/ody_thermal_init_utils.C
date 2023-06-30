@@ -41,6 +41,7 @@
 #include <lib/power_thermal/ody_thermal_init_utils.H>
 #include <lib/shared/ody_consts.H>
 #include <ody_scom_ody_odc.H>
+#include <ody_scom_ody_t.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <mss_generic_system_attribute_getters.H>
@@ -144,47 +145,61 @@ fapi2::ReturnCode thermal_sensor::i2c_read_helper(const fapi2::Target<fapi2::TAR
 }
 
 ///
-/// @brief Enable or disable SMBus timeout feature on the thermal sensor
+/// @brief Reset I2C controller
 /// @param[in] i_ocmb the OCMB target
-/// @param[in] i_sensor the temp sensor target
-/// @param[in] i_enable switch to enable or disable
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
-fapi2::ReturnCode change_smbus_timeout(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
-                                       const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>& i_sensor,
-                                       const sensor_timeout i_enable)
+fapi2::ReturnCode reset_i2cc(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
 {
-    constexpr uint8_t TIMEOUT_REG = 0x22;
-    constexpr uint8_t DATA_SIZE_IN_BYTES = 2;
+    fapi2::ATTR_FREQ_OMI_MHZ_Type l_freq_omi_mhz;
+    fapi2::ATTR_IS_SIMULATION_Type l_is_sim;
+    uint64_t l_brd = 0;
+    fapi2::buffer<uint64_t> l_i2cc_imm_reset_data = 0;
+    fapi2::buffer<uint64_t> l_i2cc_mode_data = 0;
+    fapi2::buffer<uint64_t> l_i2cc_cmd_data = 0;
+    fapi2::buffer<uint64_t> l_i2cc_status_data_exp = 0;
+    fapi2::buffer<uint64_t> l_i2cc_status_data_act = 0;
 
-    std::vector<uint8_t> l_command;
-    std::vector<uint8_t> l_data;
-    fapi2::buffer<uint8_t> l_reg_data0;
-    fapi2::buffer<uint8_t> l_reg_data1;
-
-    uint8_t l_is_sim = 0;
-    FAPI_TRY( mss::attr::get_is_simulation(l_is_sim) );
+    FAPI_TRY(mss::attr::get_is_simulation(l_is_sim));
 
     if (l_is_sim)
     {
-        // This register isn't supported in Simics
+        // skip in Simics
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    l_command.push_back(TIMEOUT_REG);
-    FAPI_TRY(fapi2::getI2c(i_sensor, DATA_SIZE_IN_BYTES, l_command, l_data));
+    // reset i2cc logic
+    FAPI_TRY(fapi2::putScom(i_ocmb, scomt::ody::T_TPCHIP_PIB_I2CC_IMM_RESET_I2C_B, l_i2cc_imm_reset_data));
 
-    // disable SMBus timeout by writing '1' to bit 7 (counting right to left)
-    FAPI_DBG(TARGTIDFORMAT "Writing %d to SMBus timeout bit", GENTARGTID(i_sensor), i_enable);
-    l_reg_data0.insertFromRight<0, BITS_PER_BYTE>(l_data[0]);
-    l_reg_data1.insertFromRight<0, BITS_PER_BYTE>(l_data[1]);
-    l_reg_data1.writeBit<0>(i_enable);
+    // configure i2c mode register
+    // BRD field:
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, i_ocmb, l_freq_omi_mhz));
+    l_brd = ((((l_freq_omi_mhz / 128) * 1000) / 400) - 1) / 4;
+    l_i2cc_mode_data.insertFromRight<scomt::ody::T_TPCHIP_PIB_I2CC_MODE_REGISTER_B_BIT_RATE_DIVISOR_000,
+                                     scomt::ody::T_TPCHIP_PIB_I2CC_MODE_REGISTER_B_BIT_RATE_DIVISOR_000_LEN>(l_brd & 0xFFFFULL);
+    l_i2cc_mode_data.setBit<scomt::ody::T_TPCHIP_PIB_I2CC_MODE_REGISTER_B_FGAT_MODE_000>();
+    FAPI_TRY(fapi2::putScom(i_ocmb, scomt::ody::T_TPCHIP_PIB_I2CC_MODE_REGISTER_B, l_i2cc_mode_data));
 
-    l_command.push_back(l_reg_data0);
-    l_command.push_back(l_reg_data1);
+    // send stop command to reset downstream thermal sensor devices
+    l_i2cc_cmd_data.setBit<scomt::ody::T_TPCHIP_PIB_I2CC_COMMAND_REGISTER_B_WITH_STOP_000>();
+    FAPI_TRY(fapi2::putScom(i_ocmb, scomt::ody::T_TPCHIP_PIB_I2CC_COMMAND_REGISTER_B, l_i2cc_cmd_data));
+    FAPI_TRY(fapi2::delay(10000000, 10000000));
 
-    // write the data back
-    FAPI_TRY(fapi2::putI2c(i_sensor, l_command));
+    // confirm clean status
+    l_i2cc_status_data_exp.setBit<scomt::ody::T_TPCHIP_PIB_I2CC_STATUS_REGISTER_ENGINE_B_CMD_COMPLETE_000>()
+    .setBit<scomt::ody::T_TPCHIP_PIB_I2CC_STATUS_REGISTER_ENGINE_B_SCL_SYN_000>()
+    .setBit<scomt::ody::T_TPCHIP_PIB_I2CC_STATUS_REGISTER_ENGINE_B_SDA_SYN_000>()
+    .insertFromRight<scomt::ody::T_TPCHIP_PIB_I2CC_STATUS_REGISTER_ENGINE_B_PEEK_DATA1_000, scomt::ody::T_TPCHIP_PIB_I2CC_STATUS_REGISTER_ENGINE_B_PEEK_DATA1_000_LEN>
+    (0x1);
+
+    FAPI_TRY(fapi2::getScom(i_ocmb, scomt::ody::T_TPCHIP_PIB_I2CC_STATUS_REGISTER_ENGINE_B, l_i2cc_status_data_act));
+    FAPI_ASSERT(l_i2cc_status_data_exp == l_i2cc_status_data_act,
+                fapi2::ODYSSEY_I2CC_RESET_ERROR()
+                .set_OCMB_TARGET(i_ocmb)
+                .set_STATUS_DATA(l_i2cc_status_data_act),
+                "Unexpected state after i2cc reset (a: 0x%08X%08X, e: 0x%08X%08X)",
+                l_i2cc_status_data_act >> 32, l_i2cc_status_data_act & 0xFFFFFFFF,
+                l_i2cc_status_data_exp >> 32, l_i2cc_status_data_exp & 0xFFFFFFFF);
 
 fapi_try_exit:
     return fapi2::current_err;
