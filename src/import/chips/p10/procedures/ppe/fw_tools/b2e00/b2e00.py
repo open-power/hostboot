@@ -33,7 +33,7 @@ import  udparsers.b2900.pmPpe2fsp
 
 #PARSER Version
 parserVersion = 1.0
-PGPE_STRING_LID_FILE = "81E00691.lid"
+PGPE_STRING_LID_FILE = "81e00691.lid"
 
 ##############################################################################
 # Function - Functions - Functions - Functions - Functions
