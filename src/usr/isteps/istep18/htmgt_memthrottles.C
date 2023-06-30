@@ -45,7 +45,6 @@
 
 using namespace TARGETING;
 
-
 /**
  * Uses system attributes:
  *   ATTR_REGULATOR_EFFICIENCY_FACTOR    - Power supply efficiency
@@ -702,6 +701,7 @@ void init_bulk_power_limits(void)
     auto Index_Config = sys->getAttrAsStdArr<ATTR_INDEX_POWER_LIMIT_CONFIG>();
     auto N_Power = sys->getAttrAsStdArr<ATTR_INDEX_N_BULK_POWER_LIMIT_WATTS>();
     auto Nplus_Power = sys->getAttrAsStdArr<ATTR_INDEX_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>();
+    auto MinPowerCap = sys->getAttrAsStdArr<ATTR_INDEX_MIN_POWER_CAP_WATTS>();
 
     bool useSingleEntryBulkPower = true;
     if (Index_Config[0] != 0)
@@ -723,7 +723,8 @@ void init_bulk_power_limits(void)
                 // If match on PS config, and N / N+1 bulk power limits != 0
                 if ((Index_Config[Index_Loop] == MyConfig) &&
                     (N_Power[Index_Loop]      != 0) &&
-                    (Nplus_Power[Index_Loop]  != 0))
+                    (Nplus_Power[Index_Loop]  != 0) &&
+                    (MinPowerCap[Index_Loop]  != 0))
                 {
                     useSingleEntryBulkPower = false;
 
@@ -731,10 +732,17 @@ void init_bulk_power_limits(void)
                     if ((!sys->trySetAttr<ATTR_CURRENT_N_BULK_POWER_LIMIT_WATTS>
                                             (N_Power[Index_Loop])) ||
                         (!sys->trySetAttr<ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>
-                                        (Nplus_Power[Index_Loop])))
+                                        (Nplus_Power[Index_Loop])) ||
+                        (!sys->trySetAttr<ATTR_CURRENT_MIN_POWER_CAP_WATTS>
+                                        (MinPowerCap[Index_Loop])))
                     {
-                        TMGT_ERR("init_bulk_power_limits: Failed Attr Write  "
-                                        "ATTR_CURRENT_XXX_BULK_POWER_LIMIT_WATTS ");
+                        TMGT_ERR("init_bulk_power_limits: FAILED write of Config based power "
+                                "limits -ATTR_CURRENT_N_BULK_POWER_LIMIT_WATTS(0x%08X) "
+                                "-ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS(0x%08X) "
+                                "-ATTR_CURRENT_MIN_POWER_CAP_WATTS(0x%08X) ",
+                                    N_Power[Index_Loop], Nplus_Power[Index_Loop],
+                                    MinPowerCap[Index_Loop]);
+
                         useSingleEntryBulkPower = true;
 
                         /*@
@@ -742,29 +750,36 @@ void init_bulk_power_limits(void)
                         * @subsys EPUB_FIRMWARE_SP
                         * @moduleid HTMGT_MOD_PS_CONFIG_POWER_LIMIT
                         * @reasoncode HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL
-                        * @userdata1 N Bulk power limit
-                        * @userdata2 N+1 Bulk power limit
+                        * @userdata1 PS Config Searching for match.
+                        * @userdata2 index trying to write.
                         * @devdesc Software problem, Failed to write bulk power limit attributes
                         * @custdesc An internal firmware error occurred
                         */
                         errlHndl_t err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                     HTMGT_MOD_PS_CONFIG_POWER_LIMIT,
                                                     HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL,
-                                                    N_Power[Index_Loop],
-                                                    Nplus_Power[Index_Loop],
+                                                    MyConfig,
+                                                    Index_Loop,
                                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                         err->collectTrace(HTMGT_COMP_NAME);
                         errlCommit(err, HTMGT_COMP_ID);
                     }
                     else
                     {
-                        TMGT_INF("init_bulk_power_limits: Bulk Power PS Config "
-                                "0x%08X : N(%dW) : N+1(%dW)",
-                                MyConfig,
-                                N_Power[Index_Loop],
-                                Nplus_Power[Index_Loop]);
+                        TMGT_INF("init_bulk_power_limits: Found Bulk Power PS Config "
+                                "0x%08X at index(%d)", MyConfig, Index_Loop);
                     }
                     break; // Stop on first found, Config should not have duplicates.
+                }
+                // else found config but one or more data fields are missing.
+                else if (Index_Config[Index_Loop] == MyConfig)
+                {
+                    TMGT_ERR("init_bulk_power_limits: FAILED MRW check for config(0x%08X) "
+                            "-ATTR_CURRENT_N_BULK_POWER_LIMIT_WATTS(0x%08X) "
+                            "-ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS(0x%08X) "
+                            "-ATTR_CURRENT_MIN_POWER_CAP_WATTS(0x%08X) ", MyConfig,
+                                N_Power[Index_Loop], Nplus_Power[Index_Loop],
+                                MinPowerCap[Index_Loop]);
                 }
             }
             // if we hit the end of loop, and not found config post error log.
@@ -812,37 +827,48 @@ void init_bulk_power_limits(void)
         uint32_t power2 = 0;
         power2 = sys->getAttr<ATTR_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>();
 
+        uint32_t powerMinCap = 0;
+        powerMinCap = sys->getAttr<ATTR_MIN_POWER_CAP_WATTS>();
+
         // Set the run time version of Bulk Power for both N and N+1.
         if ((!sys->trySetAttr<ATTR_CURRENT_N_BULK_POWER_LIMIT_WATTS>(power1)) ||
-            (!sys->trySetAttr<ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>(power2)))
+            (!sys->trySetAttr<ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>(power2)) ||
+            (!sys->trySetAttr<ATTR_CURRENT_MIN_POWER_CAP_WATTS>(powerMinCap)))
         {
-            TMGT_ERR("init_bulk_power_limits: FAILED write Original bulk power limits "
-                    "- ATTR_CURRENT_XXX_BULK_POWER_LIMIT_WATTS ");
+            TMGT_ERR("init_bulk_power_limits: FAILED write of Original power limits "
+                    "-ATTR_CURRENT_N_BULK_POWER_LIMIT_WATTS(0x%08X) "
+                    "-ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS(0x%08X) "
+                    "-ATTR_CURRENT_MIN_POWER_CAP_WATTS(0x%08X) ",
+                        power1, power2, powerMinCap);
 
             /*@
             * @errortype
             * @subsys EPUB_FIRMWARE_SP
             * @moduleid HTMGT_MOD_MRW_POWER_LIMIT
             * @reasoncode HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL
-            * @userdata1 N Bulk power limit
-            * @userdata2 N+1 Bulk power limit
+            * @userdata1[00:31] N Bulk power limit
+            * @userdata1[32:63] N+1 Bulk power limit
+            * @userdata2[00:31] Min power cap
+            * @userdata2[32:63] Reserved
             * @devdesc Software problem, Failed to write bulk power limit attributes
             * @custdesc An internal firmware error occurred
             */
             errlHndl_t err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                         HTMGT_MOD_MRW_POWER_LIMIT,
                                         HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL,
-                                        power1,
-                                        power2,
+                                        TWO_UINT32_TO_UINT64(power1, power2),
+                                        TWO_UINT32_TO_UINT64(powerMinCap, 0x0),
                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             err->collectTrace(HTMGT_COMP_NAME);
             errlCommit(err, HTMGT_COMP_ID);
         }
     }
 
-    TMGT_INF("init_bulk_power_limits: bulk power limits N(%dW)  and  N+1(%dW) ",
+    TMGT_INF("init_bulk_power_limits: bulk power limits N(%dW)  and  N+1(%dW) "
+                    "and Min power cap(%dW)",
                     sys->getAttr<ATTR_CURRENT_N_BULK_POWER_LIMIT_WATTS>(),
-                    sys->getAttr<ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>());
+                    sys->getAttr<ATTR_CURRENT_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>(),
+                    sys->getAttr<ATTR_CURRENT_MIN_POWER_CAP_WATTS>());
 
 }
 
