@@ -934,7 +934,7 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
 
     // Minimum HARD Power Cap
     ATTR_MIN_POWER_CAP_WATTS_type min_pcap =
-        sys->getAttr<ATTR_MIN_POWER_CAP_WATTS>();
+        sys->getAttr<ATTR_CURRENT_MIN_POWER_CAP_WATTS>();
 
     // Minimum SOFT Power Cap
     ATTR_SOFT_MIN_POWER_CAP_WATTS_type soft_pcap;
