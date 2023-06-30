@@ -33,7 +33,7 @@ import  udparsers.b2900.pmPpe2fsp
 
 #PARSER Version
 parserVersion = 1.0
-QME_STRING_LID_FILE = "81E0068F.lid"
+QME_STRING_LID_FILE = "81e0068f.lid"
 
 ##############################################################################
 # Function - Functions - Functions - Functions - Functions
@@ -68,7 +68,7 @@ def parseQmeUserDataSection(data):
     with open( "/tmp/qmeElogBin.bin", "wb" ) as qmeTraceBinFile:
         qmeTraceBinFile.write( data )
     magicWordOffset = checkForPpeTraceBuff()
-    cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(1080) + " if=" + "/tmp/qmeElogBin.bin " + " of=" + "/tmp/qmeTrace.bin" + " bs=1 >/dev/null 2>&1"
+    cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(312) + " if=" + "/tmp/qmeElogBin.bin " + " of=" + "/tmp/qmeTrace.bin" + " bs=1 >/dev/null 2>&1"
     rc = os.system( cmd )
     if( rc ):
         print( "Failed To Extract QME Trace Section. RC : " + str( rc ) )
