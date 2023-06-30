@@ -228,13 +228,6 @@ void extractGroupAndChip(const topoId_t i_topologyId,
                          groupId_t& o_group,
                          chipId_t& o_chip);
 
-/**
- * @brief   Set ATTR_SPPE_TARGET_STATE on any target that has this attribute based on
- *          the target's HWAS state
- */
-void update_sppe_target_state();
-
-
 #ifdef __HOSTBOOT_MODULE
 
 const uint8_t CURRENT_HBD_PERSISTENT_VERSION = 0;
@@ -383,7 +376,14 @@ ERRORLOG::ErrlEntry* parseRWAttributeData(rw_attr_section_t const* i_rwAttribute
  * @return The string name of the attribute
  */
 const char* getAttrName(ATTRIBUTE_ID i_attrId, bool i_rwOnly = false);
-#endif
+
+/**
+ * @brief   Set ATTR_SPPE_TARGET_STATE on any target that has this attribute based on
+ *          the target's HWAS state
+ */
+void update_sppe_target_state();
+
+#endif // #ifdef __HOSTBOOT_MODULE
 
 
 } // TARGETING

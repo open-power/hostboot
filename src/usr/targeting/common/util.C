@@ -587,7 +587,7 @@ void update_sppe_target_state()
 {
     TARG_INF("update_sppe_target_state: enter");
 
-    for( const auto l_tgt : composable(getTargetWithAttr<TARGETING::ATTR_SPPE_TARGET_STATE>)())
+    for( const auto l_tgt : composable(getTargetsWithAttr<TARGETING::ATTR_SPPE_TARGET_STATE>)())
     {
         uint8_t l_sppeState = 0; // fapi:TargetState; zero is not defined
 

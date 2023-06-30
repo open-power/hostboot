@@ -776,7 +776,7 @@ auto composable(F&& i_functor)
  * @return N/A
  */
 template <ATTRIBUTE_ID A>
-void getTargetWithAttr(TargetHandleList& o_vector)
+void getTargetsWithAttr(TargetHandleList& o_vector)
 {
     Target* l_pSys = TARGETING::UTIL::assertGetToplevelTarget();
 
