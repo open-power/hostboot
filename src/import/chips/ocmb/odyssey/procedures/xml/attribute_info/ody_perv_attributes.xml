@@ -106,8 +106,7 @@
     To choose scan ratio value for SCAN0 operation
   </description>
   <valueType>uint8</valueType>
-  <platInit/>
-  <mrwHide/>
+  <writeable/>
   <default>0x0</default>
 </attribute>
 <!-- ********************************************************************** -->
