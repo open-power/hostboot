@@ -273,4 +273,42 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_ODY_OUT_OF_BOUNDS_RANK_PASSED_TO_SWIZZLE</rc>
+    <description>Bad rank index passed to swizzle function</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>RANK</ffdc>
+    <ffdc>MAX_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_OUT_OF_BOUNDS_DBYTE_PASSED_TO_SWIZZLE</rc>
+    <description>Bad dbyte index passed to swizzle function</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>DBYTE</ffdc>
+    <ffdc>MAX_DBYTE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

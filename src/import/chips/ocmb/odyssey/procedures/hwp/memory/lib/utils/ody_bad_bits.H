@@ -40,6 +40,7 @@
 #include <lib/shared/ody_consts.H>
 #include <lib/dimm/ody_rank.H>
 #include <lib/phy/ody_snps_dram_train_msg_blk.H>
+#include <lib/phy/ody_phy_utils.H>
 #include <mss_generic_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
 
@@ -71,12 +72,16 @@ class bad_bit_interface
 
         ///
         /// @brief Constructor from PHY response struct
+        /// @param[in] i_port the port target
         /// @param[in] i_response response data from training
+        /// @param[out] o_rc constructor's return code
         /// @note Swizzles the bytes into the attribute's (MC) perspective
         ///
-        bad_bit_interface(const _PMU_SMB_DDR5_1D_t& i_response )
+        bad_bit_interface(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                          const _PMU_SMB_DDR5_1D_t& i_response,
+                          fapi2::ReturnCode& o_rc)
         {
-            // Swizzle constants: PHY to MC
+            // Byte swizzle constants: PHY to MC
             constexpr uint8_t PHY_TO_MC_BYTE0 = 0;
             constexpr uint8_t PHY_TO_MC_BYTE1 = 1;
             constexpr uint8_t PHY_TO_MC_BYTE2 = 2;
@@ -89,50 +94,58 @@ class bad_bit_interface
             constexpr uint8_t PHY_TO_MC_BYTE9 = 9;
 
             // Assign the results to the bad bits internal structure
-            // At this point, we want to assign all data
-            iv_bad_bits[0][PHY_TO_MC_BYTE0] = i_response.DisabledDB0LaneR0;
-            iv_bad_bits[0][PHY_TO_MC_BYTE1] = i_response.DisabledDB1LaneR0;
-            iv_bad_bits[0][PHY_TO_MC_BYTE2] = i_response.DisabledDB2LaneR0;
-            iv_bad_bits[0][PHY_TO_MC_BYTE3] = i_response.DisabledDB3LaneR0;
-            iv_bad_bits[0][PHY_TO_MC_BYTE4] = i_response.DisabledDB4LaneR0;
-            iv_bad_bits[0][PHY_TO_MC_BYTE5] = i_response.DisabledDB5LaneR0;
-            iv_bad_bits[0][PHY_TO_MC_BYTE6] = i_response.DisabledDB6LaneR0;
-            iv_bad_bits[0][PHY_TO_MC_BYTE7] = i_response.DisabledDB7LaneR0;
-            iv_bad_bits[0][PHY_TO_MC_BYTE8] = i_response.DisabledDB8LaneR0;
-            iv_bad_bits[0][PHY_TO_MC_BYTE9] = i_response.DisabledDB9LaneR0;
+            // Swizzle for DBytes is handled by above constants
+            // Swizzle of bits within a DByte is handled by swizzle_bad_bits_phy_to_mc
+            // Note that the rank indexes used below are PHY perspective
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 0, 0, i_response.DisabledDB0LaneR0, iv_bad_bits[0][PHY_TO_MC_BYTE0]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 0, 1, i_response.DisabledDB1LaneR0, iv_bad_bits[0][PHY_TO_MC_BYTE1]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 0, 2, i_response.DisabledDB2LaneR0, iv_bad_bits[0][PHY_TO_MC_BYTE2]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 0, 3, i_response.DisabledDB3LaneR0, iv_bad_bits[0][PHY_TO_MC_BYTE3]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 0, 4, i_response.DisabledDB4LaneR0, iv_bad_bits[0][PHY_TO_MC_BYTE4]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 0, 5, i_response.DisabledDB5LaneR0, iv_bad_bits[0][PHY_TO_MC_BYTE5]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 0, 6, i_response.DisabledDB6LaneR0, iv_bad_bits[0][PHY_TO_MC_BYTE6]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 0, 7, i_response.DisabledDB7LaneR0, iv_bad_bits[0][PHY_TO_MC_BYTE7]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 0, 8, i_response.DisabledDB8LaneR0, iv_bad_bits[0][PHY_TO_MC_BYTE8]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 0, 9, i_response.DisabledDB9LaneR0, iv_bad_bits[0][PHY_TO_MC_BYTE9]));
 
-            iv_bad_bits[1][PHY_TO_MC_BYTE0] = i_response.DisabledDB0LaneR1;
-            iv_bad_bits[1][PHY_TO_MC_BYTE1] = i_response.DisabledDB1LaneR1;
-            iv_bad_bits[1][PHY_TO_MC_BYTE2] = i_response.DisabledDB2LaneR1;
-            iv_bad_bits[1][PHY_TO_MC_BYTE3] = i_response.DisabledDB3LaneR1;
-            iv_bad_bits[1][PHY_TO_MC_BYTE4] = i_response.DisabledDB4LaneR1;
-            iv_bad_bits[1][PHY_TO_MC_BYTE5] = i_response.DisabledDB5LaneR1;
-            iv_bad_bits[1][PHY_TO_MC_BYTE6] = i_response.DisabledDB6LaneR1;
-            iv_bad_bits[1][PHY_TO_MC_BYTE7] = i_response.DisabledDB7LaneR1;
-            iv_bad_bits[1][PHY_TO_MC_BYTE8] = i_response.DisabledDB8LaneR1;
-            iv_bad_bits[1][PHY_TO_MC_BYTE9] = i_response.DisabledDB9LaneR1;
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 1, 0, i_response.DisabledDB0LaneR1, iv_bad_bits[1][PHY_TO_MC_BYTE0]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 1, 1, i_response.DisabledDB1LaneR1, iv_bad_bits[1][PHY_TO_MC_BYTE1]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 1, 2, i_response.DisabledDB2LaneR1, iv_bad_bits[1][PHY_TO_MC_BYTE2]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 1, 3, i_response.DisabledDB3LaneR1, iv_bad_bits[1][PHY_TO_MC_BYTE3]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 1, 4, i_response.DisabledDB4LaneR1, iv_bad_bits[1][PHY_TO_MC_BYTE4]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 1, 5, i_response.DisabledDB5LaneR1, iv_bad_bits[1][PHY_TO_MC_BYTE5]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 1, 6, i_response.DisabledDB6LaneR1, iv_bad_bits[1][PHY_TO_MC_BYTE6]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 1, 7, i_response.DisabledDB7LaneR1, iv_bad_bits[1][PHY_TO_MC_BYTE7]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 1, 8, i_response.DisabledDB8LaneR1, iv_bad_bits[1][PHY_TO_MC_BYTE8]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 1, 9, i_response.DisabledDB9LaneR1, iv_bad_bits[1][PHY_TO_MC_BYTE9]));
 
-            iv_bad_bits[2][PHY_TO_MC_BYTE0] = i_response.DisabledDB0LaneR2;
-            iv_bad_bits[2][PHY_TO_MC_BYTE1] = i_response.DisabledDB1LaneR2;
-            iv_bad_bits[2][PHY_TO_MC_BYTE2] = i_response.DisabledDB2LaneR2;
-            iv_bad_bits[2][PHY_TO_MC_BYTE3] = i_response.DisabledDB3LaneR2;
-            iv_bad_bits[2][PHY_TO_MC_BYTE4] = i_response.DisabledDB4LaneR2;
-            iv_bad_bits[2][PHY_TO_MC_BYTE5] = i_response.DisabledDB5LaneR2;
-            iv_bad_bits[2][PHY_TO_MC_BYTE6] = i_response.DisabledDB6LaneR2;
-            iv_bad_bits[2][PHY_TO_MC_BYTE7] = i_response.DisabledDB7LaneR2;
-            iv_bad_bits[2][PHY_TO_MC_BYTE8] = i_response.DisabledDB8LaneR2;
-            iv_bad_bits[2][PHY_TO_MC_BYTE9] = i_response.DisabledDB9LaneR2;
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 2, 0, i_response.DisabledDB0LaneR2, iv_bad_bits[2][PHY_TO_MC_BYTE0]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 2, 1, i_response.DisabledDB1LaneR2, iv_bad_bits[2][PHY_TO_MC_BYTE1]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 2, 2, i_response.DisabledDB2LaneR2, iv_bad_bits[2][PHY_TO_MC_BYTE2]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 2, 3, i_response.DisabledDB3LaneR2, iv_bad_bits[2][PHY_TO_MC_BYTE3]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 2, 4, i_response.DisabledDB4LaneR2, iv_bad_bits[2][PHY_TO_MC_BYTE4]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 2, 5, i_response.DisabledDB5LaneR2, iv_bad_bits[2][PHY_TO_MC_BYTE5]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 2, 6, i_response.DisabledDB6LaneR2, iv_bad_bits[2][PHY_TO_MC_BYTE6]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 2, 7, i_response.DisabledDB7LaneR2, iv_bad_bits[2][PHY_TO_MC_BYTE7]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 2, 8, i_response.DisabledDB8LaneR2, iv_bad_bits[2][PHY_TO_MC_BYTE8]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 2, 9, i_response.DisabledDB9LaneR2, iv_bad_bits[2][PHY_TO_MC_BYTE9]));
 
-            iv_bad_bits[3][PHY_TO_MC_BYTE0] = i_response.DisabledDB0LaneR3;
-            iv_bad_bits[3][PHY_TO_MC_BYTE1] = i_response.DisabledDB1LaneR3;
-            iv_bad_bits[3][PHY_TO_MC_BYTE2] = i_response.DisabledDB2LaneR3;
-            iv_bad_bits[3][PHY_TO_MC_BYTE3] = i_response.DisabledDB3LaneR3;
-            iv_bad_bits[3][PHY_TO_MC_BYTE4] = i_response.DisabledDB4LaneR3;
-            iv_bad_bits[3][PHY_TO_MC_BYTE5] = i_response.DisabledDB5LaneR3;
-            iv_bad_bits[3][PHY_TO_MC_BYTE6] = i_response.DisabledDB6LaneR3;
-            iv_bad_bits[3][PHY_TO_MC_BYTE7] = i_response.DisabledDB7LaneR3;
-            iv_bad_bits[3][PHY_TO_MC_BYTE8] = i_response.DisabledDB8LaneR3;
-            iv_bad_bits[3][PHY_TO_MC_BYTE9] = i_response.DisabledDB9LaneR3;
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 3, 0, i_response.DisabledDB0LaneR3, iv_bad_bits[3][PHY_TO_MC_BYTE0]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 3, 1, i_response.DisabledDB1LaneR3, iv_bad_bits[3][PHY_TO_MC_BYTE1]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 3, 2, i_response.DisabledDB2LaneR3, iv_bad_bits[3][PHY_TO_MC_BYTE2]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 3, 3, i_response.DisabledDB3LaneR3, iv_bad_bits[3][PHY_TO_MC_BYTE3]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 3, 4, i_response.DisabledDB4LaneR3, iv_bad_bits[3][PHY_TO_MC_BYTE4]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 3, 5, i_response.DisabledDB5LaneR3, iv_bad_bits[3][PHY_TO_MC_BYTE5]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 3, 6, i_response.DisabledDB6LaneR3, iv_bad_bits[3][PHY_TO_MC_BYTE6]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 3, 7, i_response.DisabledDB7LaneR3, iv_bad_bits[3][PHY_TO_MC_BYTE7]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 3, 8, i_response.DisabledDB8LaneR3, iv_bad_bits[3][PHY_TO_MC_BYTE8]));
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_port, 3, 9, i_response.DisabledDB9LaneR3, iv_bad_bits[3][PHY_TO_MC_BYTE9]));
+            o_rc = fapi2::FAPI2_RC_SUCCESS;
+            return;
+
+        fapi_try_exit:
+            o_rc = fapi2::current_err;
+            return;
         }
 
         ///

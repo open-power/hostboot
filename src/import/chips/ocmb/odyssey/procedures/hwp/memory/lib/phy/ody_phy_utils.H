@@ -39,6 +39,17 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <lib/shared/ody_consts.H>
+#include <ody_scom_mp_dbyte0_b0.H>
+#include <ody_scom_mp_dbyte1_b0.H>
+#include <ody_scom_mp_dbyte2_b0.H>
+#include <ody_scom_mp_dbyte3_b0.H>
+#include <ody_scom_mp_dbyte4_b0.H>
+#include <ody_scom_mp_dbyte5_b0.H>
+#include <ody_scom_mp_dbyte6_b0.H>
+#include <ody_scom_mp_dbyte7_b0.H>
+#include <ody_scom_mp_dbyte8_b0.H>
+#include <ody_scom_mp_dbyte9_b0.H>
 
 
 namespace mss
@@ -47,6 +58,463 @@ namespace ody
 {
 namespace phy
 {
+
+// @brief Odyssey per-bit swizzle registers, ordered in the PHY rank and byte perspective
+constexpr const uint64_t PER_BIT_SWIZZLE_REGS[MAX_RANK_PER_PHY][MAX_BYTES_PER_PORT][BITS_PER_BYTE] =
+{
+    // Rank0
+    {
+        // DByte 0
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ0LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ1LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ2LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ3LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ4LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ5LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ6LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ7LNSELTG0,
+        },
+        // DByte 1
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ0LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ1LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ2LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ3LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ4LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ5LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ6LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ7LNSELTG0,
+        },
+        // DByte 2
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ0LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ1LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ2LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ3LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ4LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ5LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ6LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ7LNSELTG0,
+        },
+        // DByte 3
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ0LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ1LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ2LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ3LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ4LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ5LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ6LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ7LNSELTG0,
+        },
+        // DByte 4
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ0LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ1LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ2LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ3LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ4LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ5LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ6LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ7LNSELTG0,
+        },
+        // DByte 5
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ0LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ1LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ2LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ3LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ4LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ5LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ6LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ7LNSELTG0,
+        },
+        // DByte 6
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ0LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ1LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ2LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ3LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ4LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ5LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ6LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ7LNSELTG0,
+        },
+        // DByte 7
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ0LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ1LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ2LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ3LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ4LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ5LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ6LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ7LNSELTG0,
+        },
+        // DByte 8
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ0LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ1LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ2LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ3LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ4LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ5LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ6LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ7LNSELTG0,
+        },
+        // DByte 9
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ0LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ1LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ2LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ3LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ4LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ5LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ6LNSELTG0,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ7LNSELTG0,
+        },
+    },
+    // Rank1
+    {
+        // DByte 0
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ0LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ1LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ2LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ3LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ4LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ5LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ6LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ7LNSELTG1,
+        },
+        // DByte 1
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ0LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ1LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ2LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ3LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ4LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ5LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ6LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ7LNSELTG1,
+        },
+        // DByte 2
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ0LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ1LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ2LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ3LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ4LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ5LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ6LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ7LNSELTG1,
+        },
+        // DByte 3
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ0LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ1LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ2LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ3LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ4LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ5LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ6LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ7LNSELTG1,
+        },
+        // DByte 4
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ0LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ1LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ2LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ3LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ4LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ5LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ6LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ7LNSELTG1,
+        },
+        // DByte 5
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ0LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ1LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ2LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ3LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ4LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ5LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ6LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ7LNSELTG1,
+        },
+        // DByte 6
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ0LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ1LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ2LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ3LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ4LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ5LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ6LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ7LNSELTG1,
+        },
+        // DByte 7
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ0LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ1LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ2LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ3LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ4LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ5LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ6LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ7LNSELTG1,
+        },
+        // DByte 8
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ0LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ1LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ2LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ3LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ4LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ5LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ6LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ7LNSELTG1,
+        },
+        // DByte 9
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ0LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ1LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ2LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ3LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ4LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ5LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ6LNSELTG1,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ7LNSELTG1,
+        },
+    },
+    // Rank2
+    {
+        // DByte 0
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ0LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ1LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ2LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ3LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ4LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ5LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ6LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ7LNSELTG2,
+        },
+        // DByte 1
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ0LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ1LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ2LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ3LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ4LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ5LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ6LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ7LNSELTG2,
+        },
+        // DByte 2
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ0LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ1LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ2LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ3LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ4LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ5LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ6LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ7LNSELTG2,
+        },
+        // DByte 3
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ0LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ1LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ2LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ3LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ4LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ5LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ6LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ7LNSELTG2,
+        },
+        // DByte 4
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ0LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ1LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ2LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ3LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ4LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ5LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ6LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ7LNSELTG2,
+        },
+        // DByte 5
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ0LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ1LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ2LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ3LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ4LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ5LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ6LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ7LNSELTG2,
+        },
+        // DByte 6
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ0LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ1LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ2LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ3LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ4LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ5LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ6LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ7LNSELTG2,
+        },
+        // DByte 7
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ0LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ1LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ2LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ3LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ4LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ5LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ6LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ7LNSELTG2,
+        },
+        // DByte 8
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ0LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ1LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ2LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ3LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ4LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ5LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ6LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ7LNSELTG2,
+        },
+        // DByte 9
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ0LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ1LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ2LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ3LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ4LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ5LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ6LNSELTG2,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ7LNSELTG2,
+        },
+    },
+    // Rank3
+    {
+        // DByte 0
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ0LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ1LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ2LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ3LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ4LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ5LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ6LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ7LNSELTG3,
+        },
+        // DByte 1
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ0LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ1LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ2LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ3LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ4LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ5LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ6LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_DQ7LNSELTG3,
+        },
+        // DByte 2
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ0LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ1LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ2LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ3LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ4LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ5LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ6LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_DQ7LNSELTG3,
+        },
+        // DByte 3
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ0LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ1LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ2LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ3LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ4LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ5LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ6LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_DQ7LNSELTG3,
+        },
+        // DByte 4
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ0LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ1LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ2LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ3LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ4LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ5LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ6LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_DQ7LNSELTG3,
+        },
+        // DByte 5
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ0LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ1LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ2LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ3LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ4LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ5LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ6LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_DQ7LNSELTG3,
+        },
+        // DByte 6
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ0LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ1LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ2LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ3LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ4LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ5LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ6LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_DQ7LNSELTG3,
+        },
+        // DByte 7
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ0LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ1LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ2LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ3LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ4LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ5LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ6LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_DQ7LNSELTG3,
+        },
+        // DByte 8
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ0LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ1LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ2LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ3LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ4LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ5LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ6LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_DQ7LNSELTG3,
+        },
+        // DByte 9
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ0LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ1LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ2LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ3LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ4LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ5LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ6LNSELTG3,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_DQ7LNSELTG3,
+        },
+    }
+};
 
 ///
 /// @brief Configure the PHY to allow/disallow register accesses via scom
@@ -181,6 +649,20 @@ fapi2::ReturnCode getScom_synopsys_addr_wrapper(const fapi2::Target<fapi2::TARGE
         const uint32_t i_addr,
         fapi2::buffer<uint64_t>& o_data);
 
+///
+/// @brief Swizzle a byte of DQ disables from PHY to MC perspective using per-bit swizzle registers
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_phy_rank the rank for the disables in question, in the PHY perspective
+/// @param[in] i_dbyte the DByte for the disables in question
+/// @param[in] i_disables_phy the lane disable data in PHY perspecitve
+/// @param[out] o_disables_mc the lane disable data swizzled to MC perspective
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode swizzle_bad_bits_phy_to_mc(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_phy_rank,
+        const uint8_t i_dbyte,
+        const uint8_t i_disables_phy,
+        uint8_t& o_disables_mc);
 
 } // namespace phy
 } // namespace ody

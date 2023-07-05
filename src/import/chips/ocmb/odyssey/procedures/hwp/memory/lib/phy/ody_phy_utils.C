@@ -344,6 +344,64 @@ fapi2::ReturnCode getScom_synopsys_addr_wrapper(const fapi2::Target<fapi2::TARGE
     return fapi2::getScom(i_target, convert_synopsys_to_ibm_reg_addr(i_addr), o_data);
 }
 
+///
+/// @brief Swizzle a byte of DQ disables from PHY to MC perspective using per-bit swizzle registers
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_phy_rank the rank for the disables in question, in the PHY perspective
+/// @param[in] i_dbyte the DByte for the disables in question
+/// @param[in] i_disables_phy the lane disable data in PHY perspecitve
+/// @param[out] o_disables_mc the lane disable data swizzled to MC perspective
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode swizzle_bad_bits_phy_to_mc(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_phy_rank,
+        const uint8_t i_dbyte,
+        const uint8_t i_disables_phy,
+        uint8_t& o_disables_mc)
+{
+    const fapi2::buffer<uint8_t> l_disables_phy_buf(i_disables_phy);
+    fapi2::buffer<uint8_t> l_disables_mc_buf;
+
+    FAPI_ASSERT(i_phy_rank < MAX_RANK_PER_PHY,
+                fapi2::ODY_OUT_OF_BOUNDS_RANK_PASSED_TO_SWIZZLE().
+                set_PORT_TARGET(i_target).
+                set_RANK(i_phy_rank).
+                set_MAX_RANK(MAX_RANK_PER_PHY - 1),
+                TARGTIDFORMAT " bad rank (%d) passed to swizzle function (must be less than %d)",
+                TARGTID, i_phy_rank, MAX_RANK_PER_PHY);
+
+    FAPI_ASSERT(i_dbyte < MAX_BYTES_PER_PORT,
+                fapi2::ODY_OUT_OF_BOUNDS_DBYTE_PASSED_TO_SWIZZLE().
+                set_PORT_TARGET(i_target).
+                set_DBYTE(i_dbyte).
+                set_MAX_DBYTE(MAX_BYTES_PER_PORT - 1),
+                TARGTIDFORMAT " bad dbyte (%d) passed to swizzle function (must be less than %d)",
+                TARGTID, i_dbyte, MAX_BYTES_PER_PORT);
+
+    for (uint8_t l_mc_dq = 0; l_mc_dq < BITS_PER_BYTE; l_mc_dq++)
+    {
+        fapi2::buffer<uint64_t> l_data;
+        uint8_t l_phy_dq = 0;
+
+        // Read swizzle regs for this rank/dbyte/dq
+        FAPI_TRY(fapi2::getScom(i_target, PER_BIT_SWIZZLE_REGS[i_phy_rank][i_dbyte][l_mc_dq], l_data));
+
+        // Extract swizzle index from reg data (all of these regs use the three bits)
+        l_data.extractToRight<scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ0LNSELTG0_DQ0LNSELTG0,
+                              scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_DQ0LNSELTG0_DQ0LNSELTG0_LEN>(l_phy_dq);
+
+        // Copy value from i_disables_phy into corresponding slot in o_disables_mc
+        // note the subtract from 7 in here is to change from right-to-left index order to left-to-right
+        FAPI_TRY(l_disables_mc_buf.writeBit(l_disables_phy_buf.getBit(7 - l_mc_dq), l_phy_dq));
+    }
+
+    o_disables_mc = l_disables_mc_buf;
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // namespace phy
 } // namespace ody
 } // namespace mss

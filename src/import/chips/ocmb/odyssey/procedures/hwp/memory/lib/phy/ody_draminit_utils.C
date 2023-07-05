@@ -7094,11 +7094,13 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
                                         const _PMU_SMB_DDR5_1D_t& i_msg_block_response)
 {
     constexpr uint8_t MSG_BLOCK_TRAIN_PASS = 0x00;
-
-    mss::ody::phy::bad_bit_interface l_interface(i_msg_block_response);
     bool l_firs_found = false;
     uint8_t l_is_sim = 0;
     uint8_t l_is_simics = 0;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    mss::ody::phy::bad_bit_interface l_interface(i_target, i_msg_block_response, l_rc);
+    FAPI_TRY(l_rc, TARGTIDFORMAT " bad_bit_interface constructor failed", TARGTID);
     FAPI_TRY( mss::attr::get_is_simulation(l_is_sim) );
     FAPI_TRY( mss::attr::get_is_simics(l_is_simics) );
 
