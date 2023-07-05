@@ -5903,6 +5903,25 @@
   </attribute>
 
   <attribute>
+    <id>OCMB_CODE_LEVEL_SUMMARY</id>
+    <description>
+      A human-readable string containing (portions of) the hashes of
+      the relevant boot images running on the given OCMB. (Currently
+      only used for Odyssey.)
+    </description>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+    <simpleType>
+      <string>
+        <default>unknown</default>
+        <sizeInclNull>256</sizeInclNull>
+      </string>
+    </simpleType>
+  </attribute>
+
+  <attribute>
     <description>
       Whether or not we have successfully updated code on this OCMB
       on this boot attempt (including any reconfig loops) before.

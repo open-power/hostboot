@@ -50,6 +50,7 @@
 #include <hwas/common/hwas.H>
 
 #include <errl/hberrltypes.H>
+#include <errl/errludstring.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -67,8 +68,8 @@ enum update_action_t
     do_nothing = 0,
 
     // These alter the severity of the error log related to an event, if there is one. These
-    // aren't used right now but may be used if an event (like an HWP error) needs to 
-    // suppress the error log that caused it. Currently the severity is captured in 
+    // aren't used right now but may be used if an event (like an HWP error) needs to
+    // suppress the error log that caused it. Currently the severity is captured in
     // higher-level operations, e.g. deconfigure_ocmb creates an unrecoverable log.
     mark_error_predictive,
     mark_error_recovered,
@@ -561,23 +562,30 @@ errlHndl_t capture_state_in_errlog(const errlSeverity_t i_sev,
                                    const state_transition_t& i_transition,
                                    const ody_upd_event_t i_event)
 {
-    return new ErrlEntry(i_sev,
-                         i_mod,
-                         i_rc,
-                         SrcUserData(bits{0, 31},  get_huid(i_ocmb),
-                                     bits{32, 39}, i_state.update_performed,
-                                     bits{40, 47}, i_state.golden_boot_performed,
-                                     bits{48, 55}, i_state.ocmb_boot_side,
-                                     bits{56, 63}, i_state.ocmb_fw_up_to_date),
-                         SrcUserData(bits{0, 15},  i_event,
-                                     bits{16, 31}, i_transition.event,
-                                     bits{32, 39}, i_state_pattern.state.update_performed,
-                                     bits{40, 47}, i_state_pattern.state.golden_boot_performed,
-                                     bits{48, 55}, i_state_pattern.state.ocmb_boot_side,
-                                     bits{56, 63}, i_state_pattern.state.ocmb_fw_up_to_date),
-                         i_sw_callout);
+    const auto errl
+        = new ErrlEntry(i_sev,
+                        i_mod,
+                        i_rc,
+                        SrcUserData(bits{0, 31},  get_huid(i_ocmb),
+                                    bits{32, 39}, i_state.update_performed,
+                                    bits{40, 47}, i_state.golden_boot_performed,
+                                    bits{48, 55}, i_state.ocmb_boot_side,
+                                    bits{56, 63}, i_state.ocmb_fw_up_to_date),
+                        SrcUserData(bits{0, 15},  i_event,
+                                    bits{16, 31}, i_transition.event,
+                                    bits{32, 39}, i_state_pattern.state.update_performed,
+                                    bits{40, 47}, i_state_pattern.state.golden_boot_performed,
+                                    bits{48, 55}, i_state_pattern.state.ocmb_boot_side,
+                                    bits{56, 63}, i_state_pattern.state.ocmb_fw_up_to_date),
+                        i_sw_callout);
 
-    // @TODO: JIRA PFHB-485 add firmware version info to error log
+    const auto vsn_summary = i_ocmb->getAttrAsStdArr<ATTR_OCMB_CODE_LEVEL_SUMMARY>();
+    char errl_vsn_details[sizeof(vsn_summary) + 32] = { };
+    sprintf(errl_vsn_details,
+            "Odyssey code versions: %s", vsn_summary);
+    ErrlUserDetailsString(errl_vsn_details).addToLog(errl);
+
+    return errl;
 }
 
 /** @brief Create and commit an error log that will immediately deconfigure the given
@@ -1179,21 +1187,44 @@ errlHndl_t ocmbupd::set_ody_code_levels_state(Target* const i_ocmb,
 {
     errlHndl_t errl = nullptr;
 
-    if (i_ocmb->getAttr<ATTR_SPPE_BOOT_SIDE>() == SPPE_BOOT_SIDE_GOLDEN)
-    { // The golden side is always considered to be out of date.
-        i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_OUT_OF_DATE);
-    }
-    else
-    {
-        ody_cur_version_new_image_t images;
-        errl = check_for_odyssey_codeupdate_needed(i_ocmb, i_ocmbfw_pnor_partition, images);
+    ody_cur_version_new_image_t images;
+    uint64_t rt_vsn = 0, bldr_vsn = 0;
+    errl = check_for_odyssey_codeupdate_needed(i_ocmb, i_ocmbfw_pnor_partition, images,
+                                               &rt_vsn, &bldr_vsn);
 
-        if (!errl)
-        {
-            i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(images.empty()
-                                                ? OCMB_FW_STATE_UP_TO_DATE
-                                                : OCMB_FW_STATE_OUT_OF_DATE);
+    const auto boot_side = i_ocmb->getAttr<ATTR_SPPE_BOOT_SIDE>();
+
+    if (!errl)
+    {
+        if (!images.empty() || boot_side == SPPE_BOOT_SIDE_GOLDEN)
+        { // The golden side is always considered to be out of date for
+          // the purposes of code update. This causes an update to always
+          // happen when booting from the golden side.
+            i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_OUT_OF_DATE);
         }
+        else
+        {
+            i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_UP_TO_DATE);
+        }
+
+        const char* side_string = "golden side";
+
+        if (boot_side == SPPE_BOOT_SIDE_SIDE0)
+        {
+            side_string = "side 0";
+        }
+        else if (boot_side == SPPE_BOOT_SIDE_SIDE1)
+        {
+            side_string = "side 1";
+        }
+
+        ATTR_OCMB_CODE_LEVEL_SUMMARY_type vsn_string = { };
+
+        snprintf(vsn_string, sizeof(vsn_string),
+                 "(%s) bldr vsn=0x%16lx, rt vsn=0x%16lx",
+                 side_string, bldr_vsn, rt_vsn);
+
+        i_ocmb->setAttr<ATTR_OCMB_CODE_LEVEL_SUMMARY>(vsn_string);
     }
 
     return errl;

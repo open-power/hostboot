@@ -86,11 +86,17 @@ errlHndl_t odysseyUpdateImages(TARGETING::Target* i_ocmb,
  * @param[in] i_ocmb               The Odyssey chip.
  * @param[in] i_fwhdr              The OCMBFW PNOR partition header pointer.
  * @param[out] o_updates_required  The images needing update.
+ * @param[out] o_rt_hash_prefix    The 64-bit prefix of the hash of the runtime code
+ *                                 level on running the Odyssey (optional).
+ * @param[out] o_bldr_hash_prefix  The 64-bit prefix of the hash of the bootloader
+ *                                 code level running on the Odyssey (optional).
  * @return                         Error if any, otherwise nullptr.
  */
 errlHndl_t check_for_odyssey_codeupdate_needed(TARGETING::Target* i_ocmb,
                                                const ocmbfw_owning_ptr_t& i_fwhdr,
-                                               ody_cur_version_new_image_t& o_updates_required);
+                                               ody_cur_version_new_image_t& o_updates_required,
+                                               uint64_t* const o_rt_hash_prefix = nullptr,
+                                               uint64_t* const o_bldr_hash_prefix = nullptr);
 
 /**
  * @brief Checks if update is needed and will perform i2c update if necessary

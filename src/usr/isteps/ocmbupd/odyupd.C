@@ -158,7 +158,9 @@ void str_to_hex(char* const o_buf, const uint8_t* const i_bytes, const size_t i_
  */
 errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
                                                const ocmbfw_owning_ptr_t& i_fwhdr,
-                                               ody_cur_version_new_image_t& o_updates_required)
+                                               ody_cur_version_new_image_t& o_updates_required,
+                                               uint64_t* const o_rt_hash_prefix,
+                                               uint64_t* const o_bldr_hash_prefix)
 {
     TRACF(ENTER_MRK"check_for_odyssey_codeupdate_needed(0x%08X)",
           get_huid(i_ocmb));
@@ -202,16 +204,19 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
     {
         image_type_t image_type = { };
         const char* image_type_str = nullptr;
+        const uint64_t hash_prefix = *reinterpret_cast<const uint64_t*>(codelevel.hash);
 
         switch (codelevel.type)
         {
         case codelevel_info_t::bootloader:
             image_type = IMAGE_TYPE_BOOTLOADER;
             image_type_str = "bootloader";
+            o_bldr_hash_prefix && (*o_bldr_hash_prefix = hash_prefix);
             break;
         case codelevel_info_t::runtime:
             image_type = IMAGE_TYPE_RUNTIME;
             image_type_str = "runtime";
+            o_rt_hash_prefix && (*o_rt_hash_prefix = hash_prefix);
             break;
         }
 

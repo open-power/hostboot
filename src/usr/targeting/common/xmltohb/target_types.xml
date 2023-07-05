@@ -446,6 +446,9 @@
       <id>OCMB_BOOT_SIDE</id>
     </attribute>
     <attribute>
+      <id>OCMB_CODE_LEVEL_SUMMARY</id>
+    </attribute>
+    <attribute>
       <id>OCMB_CODE_UPDATED</id>
     </attribute>
     <attribute>

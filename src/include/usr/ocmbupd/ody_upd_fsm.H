@@ -129,6 +129,26 @@ errlHndl_t ody_upd_all_process_event(const ody_upd_event_t i_event,
 errlHndl_t set_ody_code_levels_state(TARGETING:: Target* i_ocmb,
                                      const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition);
 
+/** @brief Clears the code update state related to just the Odyssey
+ *  code levels on the given OCMB (rather than related to all
+ *  information, like the active side, golden boots attempted, etc.)
+ *  This is a separate function because this function is populated
+ *  every Odyssey boot, whereas the other information needs to be
+ *  preserved across Odyssey boots.
+ */
+inline void clear_ody_code_levels_state(TARGETING::Target* const i_ocmb)
+{
+    using namespace TARGETING;
+    if (UTIL::isOdysseyChip(i_ocmb))
+    {
+        i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_UNKNOWN);
+
+        ATTR_OCMB_CODE_LEVEL_SUMMARY_type vsn_string = { };
+        strcpy(vsn_string, "unknown");
+        i_ocmb->setAttr<ATTR_OCMB_CODE_LEVEL_SUMMARY>(vsn_string);
+    }
+}
+
 /** @brief Reset the Odyssey FSM state for the given OCMB. This is
  *  done when we reach host_ipl_complete or when we detect that a part
  *  has been replaced.
@@ -145,23 +165,8 @@ inline void ody_upd_reset_state(TARGETING::Target* const i_ocmb)
         i_ocmb->setAttr<ATTR_OCMB_CODE_UPDATED>(0);
         i_ocmb->setAttr<ATTR_OCMB_GOLDEN_BOOT_ATTEMPTED>(0);
         i_ocmb->setAttr<ATTR_OCMB_BOOT_SIDE>(SPPE_BOOT_SIDE_SIDE0);
-        i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_UNKNOWN);
-    }
-}
 
-/** @brief Clears the code update state related to just the Odyssey
- *  code levels on the given OCMB (rather than related to all
- *  information, like the active side, golden boots attempted, etc.)
- *  This is a separate function because this function is populated
- *  every Odyssey boot, whereas the other information needs to be
- *  preserved across Odyssey boots.
- */
-inline void clear_ody_code_levels_state(TARGETING::Target* const i_ocmb)
-{
-    using namespace TARGETING;
-    if (UTIL::isOdysseyChip(i_ocmb))
-    {
-        i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_UNKNOWN);
+        clear_ody_code_levels_state(i_ocmb);
     }
 }
 
