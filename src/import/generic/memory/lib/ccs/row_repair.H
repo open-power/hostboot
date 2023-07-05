@@ -486,31 +486,7 @@ struct repair_entry
 template < mss::mc_type MC, typename TT = ccsTraits<MC>, typename PT = mss::portTraits<MC> >
 fapi2::ReturnCode config_ccs_regs(const fapi2::Target<PT::MC_TARGET_TYPE>& i_mc_target,
                                   const fapi2::Target<PT::PORT_TYPE>& i_mem_port_target,
-                                  fapi2::buffer<uint64_t>& o_modeq_reg)
-{
-    // Use a temp buffer to save original settings
-    fapi2::buffer<uint64_t> l_temp = 0;
-
-    // Configure modeq register
-    FAPI_TRY(mss::getScom(i_mc_target, TT::MODEQ_REG, o_modeq_reg));
-    l_temp = o_modeq_reg;
-    l_temp.template clearBit<TT::NTTM_MODE>();            // 1 = nontraditional transparent mode
-    l_temp.template clearBit<TT::STOP_ON_ERR>();          // 1 = stop on ccs error
-    l_temp.template setBit<TT::UE_DISABLE>();             // 1 = hardware ignores UEs
-    l_temp.template setBit<TT::COPY_CKE_TO_SPARE_CKE>();  // 1 = copy CKE to spare CKE
-    l_temp.template setBit<TT::CFG_PARITY_AFTER_CMD>();   // 1 = OE driven on parity cycle
-    l_temp.template setBit<TT::IDLE_PAT_ACTN>();          // ACTn Idle
-    l_temp.template setBit<TT::IDLE_PAT_ADDRESS_16>();    // RASn Idle
-    l_temp.template setBit<TT::IDLE_PAT_ADDRESS_15>();    // CASn Idle
-    l_temp.template setBit<TT::IDLE_PAT_ADDRESS_14>();    // WEn Idle
-    // TODO:ZEN:MST-2262
-    l_temp.template clearBit<TT::ARR0_DDR_PARITY>();      // 0 = hardware sets parity
-    FAPI_TRY(mss::putScom(i_mc_target, TT::MODEQ_REG, l_temp));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
+                                  fapi2::buffer<uint64_t>& o_modeq_reg);
 
 ///
 /// @brief Sets config registers to passed values

@@ -90,7 +90,6 @@ class ccsTraits<mss::mc_type::ODYSSEY>
             AUTO_BURST = scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_CCS_AUTO_BURST,
             // TODO:MST-1437 Fix the next two bits for Odyssey CCS
             CFG_PARITY_AFTER_CMD = 24,
-            COPY_CKE_TO_SPARE_CKE = 26,
             DISABLE_ECC_ARRAY_CHK = scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_DISABLE_ECC_ARRAY_CHK,
             DISABLE_ECC_ARRAY_CORRECTION = scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_DISABLE_ECC_ARRAY_CORRECTION,
             CFG_DGEN_FIXED_MODE = scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_CFG_CCS_DGEN_FIXED_MODE,

@@ -65,6 +65,48 @@
 namespace mss
 {
 
+namespace row_repair
+{
+
+///
+/// @brief Configures registers for ccs repair execution - Explorer specialization
+/// @param[in] i_mc_target The MC target
+/// @param[in] i_mem_port_target The Mem Port target
+/// @param[out] o_modeq_reg A buffer to return the original value of modeq
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <>
+fapi2::ReturnCode config_ccs_regs<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_mc_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_mem_port_target,
+        fapi2::buffer<uint64_t>& o_modeq_reg)
+{
+    using TT = ccsTraits<mss::mc_type::EXPLORER>;
+
+    // Use a temp buffer to save original settings
+    fapi2::buffer<uint64_t> l_temp = 0;
+
+    // Configure modeq register
+    FAPI_TRY(mss::getScom(i_mc_target, TT::MODEQ_REG, o_modeq_reg));
+    l_temp = o_modeq_reg;
+    l_temp.template clearBit<TT::NTTM_MODE>();            // 1 = nontraditional transparent mode
+    l_temp.template clearBit<TT::STOP_ON_ERR>();          // 1 = stop on ccs error
+    l_temp.template setBit<TT::UE_DISABLE>();             // 1 = hardware ignores UEs
+    l_temp.template setBit<TT::COPY_CKE_TO_SPARE_CKE>();  // 1 = copy CKE to spare CKE
+    l_temp.template setBit<TT::CFG_PARITY_AFTER_CMD>();   // 1 = OE driven on parity cycle
+    l_temp.template setBit<TT::IDLE_PAT_ACTN>();          // ACTn Idle TK fixup
+    l_temp.template setBit<TT::IDLE_PAT_ADDRESS_16>();    // RASn Idle
+    l_temp.template setBit<TT::IDLE_PAT_ADDRESS_15>();    // CASn Idle
+    l_temp.template setBit<TT::IDLE_PAT_ADDRESS_14>();    // WEn Idle
+    l_temp.template clearBit<TT::ARR0_DDR_PARITY>();      // 0 = hardware sets parity
+    FAPI_TRY(mss::putScom(i_mc_target, TT::MODEQ_REG, l_temp));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // namespace row_repair
+
 namespace exp
 {
 
