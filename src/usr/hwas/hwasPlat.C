@@ -2241,6 +2241,14 @@ errlHndl_t deconfigureUnmatchedPairsOnDDIMM()
              ((l_memMod & SPD::MOD_TYPE_MASK) == SPD::MOD_TYPE_DDIMM) &&
              (l_memHeight == SPD::DDIMM_MOD_HEIGHT_4U) )
         {
+
+            // TODO JIRA: PFHB-520 POWER_IC presence detection is currently not
+            // working, which causes pmics to be deconfigured, which in turn causes
+            // OCMBs to be deconfigured, and Hostboot fails with "not enough HW".
+            // This below logic needs to be uncommented once POWER_IC presence detection
+            // is fixed.
+            (void)l_ocmbTarget;
+/*
             // get functional PMIC and POWER_IC targets under this OCMB
             TargetHandleList l_pmicTargetList;
             TargetHandleList l_powericTargetList;
@@ -2288,6 +2296,7 @@ errlHndl_t deconfigureUnmatchedPairsOnDDIMM()
                 theDeconfigGard().deconfigureTarget(*l_poweric,
                                                 HWAS::DeconfigGard::DECONFIGURED_BY_NO_PEER_TARGET);
             }
+*/
         } // end of DDR5 4U DDIMM type check
         else
         {
