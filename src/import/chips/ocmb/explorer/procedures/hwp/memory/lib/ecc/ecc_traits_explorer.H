@@ -227,6 +227,34 @@ class eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>
             3,  2,  1,  0
         };
 
+        // Symbol to DQ index mapping table for Odyssey x8
+        // dq = symbol2dq[symbol]
+        // Note that in x8 mode each symbol is for 2 DQ bits, so we encode only the higher of the two here
+        // For example, symbol0 is for DQ47 and DQ46
+        // Also, we ignore symbols 8-39 just like in the symbol2galois table
+        // TODO Zen:MST-1420 Create specialization of restore_repairs for x8 if we need it
+        // Values are copied over from Odyssey X8 for the sake of compilation . No such values exist for explorer.
+        constexpr static const uint8_t symbol2dq_x8[] =
+        {
+            47, 45, 43, 41,
+            39, 37, 35, 33,
+            0,  0,  0,  0,
+            0,  0,  0,  0,
+            0,  0,  0,  0,
+            0,  0,  0,  0,
+            0,  0,  0,  0,
+            0,  0,  0,  0,
+            0,  0,  0,  0,
+            0,  0,  0,  0,
+            79, 77, 75, 73,
+            71, 69, 67, 65,
+            63, 61, 59, 57,
+            55, 53, 51, 49,
+            31, 29, 27, 25,
+            23, 21, 19, 17,
+            15, 13, 11, 9,
+            7,  5,  3,  1
+        };
 };
 
 ///

@@ -73,6 +73,26 @@ const std::vector<uint8_t> portTraits< mss::mc_type::EXPLORER >::SPARE_NIBBLES =
     11
 };
 
+const std::vector<uint8_t> portTraits< mss::mc_type::EXPLORER >::NON_SPARE_BYTES =
+{
+    0,
+    1,
+    2,
+    3,
+    4,
+    // Byte 5 contains the spares (if they exist) for mc_type
+    6,
+    7,
+    8,
+    9
+};
+
+const std::vector<uint8_t> portTraits< mss::mc_type::EXPLORER >::SPARE_BYTES =
+{
+    // Byte 5 contains the spares (if they exist) for mc_type
+    5
+};
+
 ///
 /// @brief Configures the write reorder queue bit - Explorer specialization
 /// @param[in] i_target the target to effect

@@ -248,7 +248,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 ///
 /// @brief Checks the symbol input for steer functions, but also allows the user to program a value to clear the spare
 /// @tparam MC the memory controller
@@ -276,96 +275,140 @@ fapi2::ReturnCode symbol_or_clear(
 }// ns check
 
 ///
-/// @brief Figure out if selected nibble is a non-existent spare in restore_repairs, mc_type specialization
+/// @brief Figure out if selected byte/nibble is a non-existent spare in restore_repairs, mc_type specialization
 /// @tparam MC the memory controller type
 /// @tparam TT portTraits class with mc_type
 /// @param[in] i_spare_support value of ATTR_DIMM_SPARE for this [DIMM][RANK] combo
 /// @param[in] i_byte logical byte index
 /// @param[in] i_nibble logical nibble index
+/// @param[in] i_width DRAM width x4 or x8
 /// @return true if selected nibble is a non-existent spare and needs to be skipped
 ///
 template< mss::mc_type MC, typename TT = portTraits<MC> >
-bool skip_dne_spare_nibble(const uint8_t i_spare_support,
-                           const uint64_t i_byte,
-                           const size_t i_nibble)
+bool skip_dne_spare_dram(const uint8_t i_spare_support,
+                         const uint64_t i_byte,
+                         const size_t i_nibble,
+                         const uint8_t i_width)
 {
 
-    // The spare nibble is always on the same byte for mc_type, so return false if we're not there
+    // The spare byte/nibble is always on the same byte for mc_type, so return false if we're not there
     if (i_byte != TT::SPARE_DQ_BYTE)
     {
         return false;
     }
 
-    // If the spare is the low nibble skip the high nibble, and vice versa
-    return (((i_spare_support == fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_LOW_NIBBLE) && (i_nibble == 1)) ||
-            ((i_spare_support == fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_HIGH_NIBBLE) && (i_nibble == 0)) ||
-            (i_spare_support == fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE));
+    if(i_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4)
+    {
+        // If the spare is the low nibble skip the high nibble, and vice versa
+        return (((i_spare_support == fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_LOW_NIBBLE) && (i_nibble == 1)) ||
+                ((i_spare_support == fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_HIGH_NIBBLE) && (i_nibble == 0)) ||
+                (i_spare_support == fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE));
+    }
+    else
+    {
+        return (i_spare_support == fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE);
+    }
 }
 
 #ifndef __PPE__
 ///
-/// @brief Grab a vector of non-spare nibbles - specialization for mc_type
+/// @brief Grab a vector of non-spare bytes/nibbles - specialization for mc_type
 /// @tparam MC the memory controller type
 /// @tparam TT portTraits class with mc_type
-/// @param[out] o_nonspare_nibbles vector of nonspare nibble indices
+/// @param[in] i_width DRAM width X4 or X8
+/// @param[out] o_nonspare_dram vector of nonspare bytes/nibbles indices
 /// @note mc_type specialization
 ///
 template< mss::mc_type MC, typename TT = portTraits<MC> >
-void get_nonspare_nibbles(std::vector<uint8_t>& o_nonspare_nibbles)
+void get_nonspare_dram(const uint8_t i_width,
+                       std::vector<uint8_t>& o_nonspare_dram)
 {
-    o_nonspare_nibbles = TT::NON_SPARE_NIBBLES;
+    if(i_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4)
+    {
+        o_nonspare_dram = TT::NON_SPARE_NIBBLES;
+    }
+    else
+    {
+        o_nonspare_dram = TT::NON_SPARE_BYTES;
+    }
 }
 
-
 ///
-/// @brief Grab a vector of non-spare nibbles - specialization for mc_type
+/// @brief Grab a vector of non-spare bytes/nibbles - specialization for mc_type
 /// @tparam MC the memory controller type
 /// @tparam TT portTraits class with mc_type
 /// @param[in] i_target A target representing a DIMM
-/// @param[in] i_dimm_rank The DIMM rank for this target
-/// @param[out] o_spare_nibbles a vector of bytes/nibbles based upon the MC type
+/// @param[in] i_rank The rank for this target
+/// @param[in] i_width DRAM width X4 or X8
+/// @param[out] o_spare_dram a vector of bytes/nibbles based upon the MC type
 /// @return FAPI2_RC_SUCCESS if and only if ok
-/// @note Vector is a pair of uint8_t's. First is byte. Second is nibble
+/// @note Vector is a pair of uint8_t's. First is byte. Second is nibble (0 for x8 mode)
 ///
 template< mss::mc_type MC, typename TT = portTraits<MC> >
-fapi2::ReturnCode get_spare_nibbles( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                     const mss::rank::info<MC>& i_rank,
-                                     std::vector<uint8_t>& o_spare_nibbles)
+fapi2::ReturnCode get_spare_dram( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                  const mss::rank::info<MC>& i_rank,
+                                  const uint8_t i_width,
+                                  std::vector<uint8_t>& o_spare_dram)
 {
     // Clear this out. Just. In. Case.
-    o_spare_nibbles.clear();
+    o_spare_dram.clear();
 
     // Safety check so we don't need an assert here
     const auto l_dimm_rank = i_rank.get_dimm_rank();
 
     // Grab our spare attribute for this DIMM and rank
     uint8_t l_spare_attr[mss::MAX_RANK_PER_DIMM_ATTR] = {};
+    std::vector<uint8_t> l_spare_dram;
+
     FAPI_TRY(mss::attr::get_dimm_spare(i_target, l_spare_attr));
 
-    // Checks that the nibbles exist and assembles our vector
-    for (const auto l_nibble_idx : TT::SPARE_NIBBLES)
+    if(i_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4)
     {
-        const auto l_byte = l_nibble_idx / NIBBLES_PER_BYTE;
-        const auto l_nibble = l_nibble_idx % NIBBLES_PER_BYTE;
+        l_spare_dram = TT::SPARE_NIBBLES;
+    }
+    else
+    {
+        l_spare_dram = TT::SPARE_BYTES;
+    }
+
+    // Checks that the byte/nibbles exist and assembles our vector
+    for (const auto l_dram_idx : l_spare_dram)
+    {
+        uint8_t l_byte;
+        uint8_t l_nibble;
+
+        if(i_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4)
+        {
+            l_byte = l_dram_idx / NIBBLES_PER_BYTE;
+            l_nibble = l_dram_idx % NIBBLES_PER_BYTE;
+        }
+        else
+        {
+            l_byte = l_dram_idx;
+            l_nibble = 0;
+        }
 
         // Skips non-existant spares
-        if (skip_dne_spare_nibble<MC>(
+        if (skip_dne_spare_dram<MC>(
                 l_spare_attr[l_dimm_rank],
                 l_byte,
-                l_nibble))
+                l_nibble,
+                i_width))
         {
-            FAPI_DBG(TARGTIDFORMAT " Skip processing bits on rank:%d nibble%d because they are non-existent spares",
-                     TARGTID, l_dimm_rank, (l_byte * NIBBLES_PER_BYTE) + l_nibble);
+            FAPI_DBG(TARGTIDFORMAT
+                     " Skip processing bits on rank:%d byte%d nibble%d (0 for X8 mode) because they are non-existent spares",
+                     TARGTID, l_dimm_rank, (l_byte), l_nibble);
             continue;
         }
 
-        // Otherwise, add this to our spare nibbles vector
-        o_spare_nibbles.push_back(l_nibble_idx);
+        // Otherwise, add this to our spare bytes/nibbles vector
+        o_spare_dram.push_back(l_dram_idx);
     }
 
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 #endif
 ///
 /// @brief Round the symbol from dq_to_symbol to its base multiple of 4, for use with steering
@@ -374,7 +417,7 @@ fapi_try_exit:
 /// @param[in] i_symbol symbol from dq_to_symbol
 /// @return uint8_t rounded DQ symbol
 ///
-template< mss::mc_type MC, typename TT = portTraits<MC> >
+template< mss::mc_type MC, typename TT = portTraits<MC>>
 uint8_t symbol_rounder(const uint8_t i_symbol)
 {
     // Round down to the multiple of 4
@@ -384,6 +427,7 @@ uint8_t symbol_rounder(const uint8_t i_symbol)
 
     return l_symbol;
 }
+
 
 ///
 /// @brief Returns the spare index of the symbol passed in
@@ -416,19 +460,18 @@ fapi2::ReturnCode symbol_to_spare( const uint8_t i_symbol, uint8_t& o_spare_inde
     o_spare_index = std::distance(TT::spare_to_symbol.begin(), l_it);
 
     return fapi2::FAPI2_RC_SUCCESS;
-
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Gets either the read or write steer mux control register for the given rank
 /// @tparam MC the memory controller type
 /// @tparam MT the read-write mux_type
 /// @tparam TT steerTraits class with mc_type and mux_type
-/// @param[in]  i_target Mem Port target
-/// @param[in]  i_port_rank Rank we want to read steer mux for.
+/// @param[in] i_target Mem Port target
+/// @param[in] i_port_rank Rank we want to read steer mux for.
+/// @param[in] i_width DRAM width X4 or X8
 /// @param[out] o_dram_spare0_symbol First symbol index of the DRAM fixed by the
 ///                                  spare on port0 (if no steer, return 0xff)
 /// @param[out] o_dram_spare1_symbol First symbol index of the DRAM fixed by the
@@ -439,6 +482,7 @@ template<mss::mc_type MC, mss::steer::mux_type MT, typename TT = steerTraits<MC,
 fapi2::ReturnCode get_steer_mux(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     const uint8_t i_port_rank,
+    const uint8_t i_width,
     uint8_t& o_dram_spare0_symbol,
     uint8_t& o_dram_spare1_symbol )
 {
@@ -467,15 +511,26 @@ fapi2::ReturnCode get_steer_mux(
     // Read Steer Mux
     FAPI_TRY(fapi2::getScom(l_scom_target, TT::MUX_REGISTER, l_steer_mux));
 
-    // Get correct ranks spare data for spare0
-    FAPI_TRY(l_steer_mux.extractToRight(l_dramSpare0Index,
-                                        TT::muxregs_left[i_port_rank],
-                                        TT::SPARE_MUX_LEN));
+    if(i_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X8)
+    {
+        // Get correct ranks spare data for spare0
+        FAPI_TRY(l_steer_mux.extractToRight(l_dramSpare0Index,
+                                            TT::muxregs_left[i_port_rank],
+                                            TT::SPARE_MUX_LEN));
 
-    // Get correct ranks spare data for spare1
-    FAPI_TRY(l_steer_mux.extractToRight(l_dramSpare1Index,
-                                        TT::muxregs_right[i_port_rank],
-                                        TT::SPARE_MUX_LEN));
+        l_dramSpare1Index = genSteerTraits<MC>::SPARE_UNUSED;
+    }
+    else
+    {
+        // Get correct ranks spare data for spare0
+        FAPI_TRY(l_steer_mux.extractToRight(l_dramSpare0Index,
+                                            TT::muxregs_left[i_port_rank],
+                                            TT::SPARE_MUX_LEN));
+        // Get correct ranks spare data for spare1
+        FAPI_TRY(l_steer_mux.extractToRight(l_dramSpare1Index,
+                                            TT::muxregs_right[i_port_rank],
+                                            TT::SPARE_MUX_LEN));
+    }
 
     // Check for spare indeces out of range
     FAPI_TRY( check::spare_index<MC>(i_target, l_dramSpare0Index, l_dramSpare1Index) );
@@ -483,6 +538,12 @@ fapi2::ReturnCode get_steer_mux(
     // Return symbol from index or 0xff for unused
     if (l_dramSpare0Index != genSteerTraits<MC>::SPARE_UNUSED)
     {
+        if(i_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X8)
+        {
+            // Multiplying the spare index by 2 to use the x4 spare2symbol table.
+            l_dramSpare0Index *= 2;
+        }
+
         o_dram_spare0_symbol = genSteerTraits<MC>::spare_to_symbol[l_dramSpare0Index];
     }
 
@@ -507,8 +568,9 @@ fapi_try_exit:
 /// @tparam TT steerTraits class with mc_type and mux_type
 /// @param[in] i_target MEM_PORT target
 /// @param[in] i_port_rank Rank we want to write steer mux for.
-/// @param[in] i_steer_type DRAM_SPARE0 or DRAM_SPARE1
+/// @param[in] i_steer_type DRAM_SPARE0 or DRAM_SPARE1 (DRAM_SPARE0 for X8 mode)
 /// @param[in] i_symbol First symbol index of the DRAM to steer around.
+/// @param[in] i_width DRAM width X4 or X8
 /// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
 ///
 template<mss::mc_type MC, mss::steer::mux_type MT, typename TT = steerTraits<MC, MT> >
@@ -516,7 +578,8 @@ fapi2::ReturnCode put_steer_mux(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     const uint8_t i_port_rank,
     const steer_type i_steer_type,
-    const uint8_t i_symbol )
+    const uint8_t i_symbol,
+    const uint8_t i_width )
 {
     const auto& l_scom_target = TT::get_target(i_target);
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -545,6 +608,12 @@ fapi2::ReturnCode put_steer_mux(
 
     // Convert from i_symbol to Dram Spare Index
     FAPI_TRY( symbol_to_spare<MC>(i_symbol, l_dramSpareIndex) );
+
+    if(i_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X8)
+    {
+        // need to divide the spare index by 2 because I used the x4 symbol2spare table.
+        l_dramSpareIndex /= 2;
+    }
 
     // Insert steer data into correct spare
     if (i_steer_type == steer_type::DRAM_SPARE0)
@@ -575,6 +644,7 @@ fapi_try_exit:
 /// @tparam MC the memory controller type
 /// @param[in] i_target MEM_PORT target
 /// @param[in] i_rank Rank we want to read steer mux for.
+/// @param[in] i_width DRAM width X4 or X8
 /// @param[out] o_dram_spare0_symbol First symbol index of the DRAM fixed by the
 ///                                  spare on port0 (if no steer, return 0xff)
 /// @param[out] o_dram_spare1_symbol First symbol index of the DRAM fixed by the
@@ -584,6 +654,7 @@ fapi_try_exit:
 template<mss::mc_type MC>
 fapi2::ReturnCode check_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                  const uint8_t i_port_rank,
+                                 const uint8_t i_width,
                                  uint8_t& o_dram_spare0_symbol,
                                  uint8_t& o_dram_spare1_symbol )
 {
@@ -591,8 +662,9 @@ fapi2::ReturnCode check_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     // that the write mux will be the same.
     return get_steer_mux<MC, mux_type::READ_MUX>(i_target,
             i_port_rank,
+            i_width,
             o_dram_spare0_symbol,
-            o_dram_spare1_symbol);
+            o_dram_spare1_symbol );
 }
 
 
@@ -603,6 +675,7 @@ fapi2::ReturnCode check_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 /// @param[in] i_target MEM_PORT target
 /// @param[in] i_port_rank Rank we want to read steer mux for
 /// @param[in] i_ignore_bad_bits True to ignore, otherwise false
+/// @param[in] i_width DRAM width X4 or X8
 /// @param[out] o_spare0_free True if the spare is free, othewise false
 /// @param[out] o_spare1_free True if the spare is free, othewise false
 /// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
@@ -613,11 +686,14 @@ template<mss::mc_type MC, typename TT = genSteerTraits<MC> >
 fapi2::ReturnCode check_if_spare_is_free(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const uint8_t i_port_rank,
         const bool i_ignore_bad_bits,
+        const uint8_t i_width,
         bool& o_spare0_free,
-        bool& o_spare1_free )
+        bool& o_spare1_free)
 {
-    constexpr uint8_t SPARE0_MASK = 0xf0;
-    constexpr uint8_t SPARE1_MASK = 0x0f;
+    // using only o_spare0_free for x8 mode.
+
+    uint8_t l_spare0_mask = 0xf0;
+    uint8_t l_spare1_mask = 0x0f;
     constexpr uint8_t SPARE_FREE = TT::INVALID_SYMBOL;
 
     // If we have errors, we can't be sure we have spares, mark em as bad
@@ -638,23 +714,34 @@ fapi2::ReturnCode check_if_spare_is_free(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(l_rc, TARGTIDFORMAT " failed to obtain rank info", TARGTID);
     // 1) Checks if the spares exist
     FAPI_TRY(mss::attr::get_dimm_spare(l_rank_info.get_dimm_target(), l_dimm_spare));
-    // The logic is inverted to what we want. True means the spare doesn't exist when returned out of the function
-    l_spare0_exists = !mss::steer::skip_dne_spare_nibble<MC>(l_dimm_spare[l_rank_info.get_dimm_rank()],
-                      portTraits<MC>::SPARE_DQ_BYTE, 0);
-    l_spare1_exists = !mss::steer::skip_dne_spare_nibble<MC>(l_dimm_spare[l_rank_info.get_dimm_rank()],
-                      portTraits<MC>::SPARE_DQ_BYTE, 1);
+
+    if(i_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4)
+    {
+        // The logic is inverted to what we want. True means the spare doesn't exist when returned out of the function
+        l_spare0_exists = !mss::steer::skip_dne_spare_dram<MC>(l_dimm_spare[l_rank_info.get_dimm_rank()],
+                          portTraits<MC>::SPARE_DQ_BYTE, 0, i_width);
+        l_spare1_exists = !mss::steer::skip_dne_spare_dram<MC>(l_dimm_spare[l_rank_info.get_dimm_rank()],
+                          portTraits<MC>::SPARE_DQ_BYTE, 1, i_width);
+    }
+    else
+    {
+        l_spare0_exists = !mss::steer::skip_dne_spare_dram<MC>(l_dimm_spare[l_rank_info.get_dimm_rank()],
+                          portTraits<MC>::SPARE_DQ_BYTE, 0, i_width);
+        l_spare1_exists = false;
+        l_spare0_mask = 0xff; // to be used for checking if spare if clear of errors.
+    }
 
     // 2) Checks if the spare is clear of errors (only if we need to)
     if (!i_ignore_bad_bits)
     {
         FAPI_TRY(mss::attr::get_bad_dq_bitmap(l_rank_info.get_dimm_target(), l_bad_bits));
 
-        l_spare0_is_clean = !(l_bad_bits[l_rank_info.get_dimm_rank()][portTraits<MC>::SPARE_DQ_BYTE] & SPARE0_MASK);
-        l_spare1_is_clean = !(l_bad_bits[l_rank_info.get_dimm_rank()][portTraits<MC>::SPARE_DQ_BYTE] & SPARE1_MASK);
+        l_spare0_is_clean = !(l_bad_bits[l_rank_info.get_dimm_rank()][portTraits<MC>::SPARE_DQ_BYTE] & l_spare0_mask);
+        l_spare1_is_clean = !(l_bad_bits[l_rank_info.get_dimm_rank()][portTraits<MC>::SPARE_DQ_BYTE] & l_spare1_mask);
     }
 
     // 3) Checks if the spare has been deployed
-    FAPI_TRY((check_steering<MC>(i_target, i_port_rank, l_dram_spare0_symbol, l_dram_spare1_symbol)));
+    FAPI_TRY((check_steering<MC>(i_target, i_port_rank, i_width, l_dram_spare0_symbol, l_dram_spare1_symbol)));
 
     // Assembles all of the information - the spare is only free if all of the bellow are true
     o_spare0_free = l_spare0_exists && l_spare0_is_clean && (l_dram_spare0_symbol == SPARE_FREE);
@@ -673,6 +760,7 @@ fapi_try_exit:
 /// @param[in] i_port_rank Rank we want to write steer mux for.
 /// @param[in] i_steer_type DRAM_SPARE0 or DRAM_SPARE1
 /// @param[in] i_symbol First symbol index of the DRAM to steer  around.
+/// @param[in] i_width DRAM width X4 or X8
 /// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
 /// @note Allows the user to manually set or clear one steering mux
 ///
@@ -680,7 +768,8 @@ template<mss::mc_type MC, typename TT = portTraits<MC>>
 fapi2::ReturnCode program_steering_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const uint8_t i_port_rank,
         const steer_type i_steer_type,
-        const uint8_t i_symbol)
+        const uint8_t i_symbol,
+        const uint8_t i_width)
 {
     // Note: we check the rank and mux type in put_steer_mux, so we're not rechecking them here
 
@@ -690,8 +779,9 @@ fapi2::ReturnCode program_steering_helper(const fapi2::Target<fapi2::TARGET_TYPE
     FAPI_TRY( (put_steer_mux<MC, mss::steer::mux_type::WRITE_MUX>(
                    i_target,               // MEM PORT
                    i_port_rank,            // Rank: 0-7
-                   i_steer_type,           // DRAM_SPARE0/DRAM_SPARE1
-                   i_symbol)) );           // First symbol index of DRAM to steer around
+                   i_steer_type,           // DRAM_SPARE0/DRAM_SPARE1 (0 for x8 mode)
+                   i_symbol,
+                   i_width)) );           // First symbol index of DRAM to steer around
 
 
     //------------------------------------------------------
@@ -705,8 +795,9 @@ fapi2::ReturnCode program_steering_helper(const fapi2::Target<fapi2::TARGET_TYPE
     FAPI_TRY( (put_steer_mux<MC, mss::steer::mux_type::READ_MUX>(
                    i_target,               // MEM PORT
                    i_port_rank,            // Rank: 0-7
-                   i_steer_type,           // DRAM_SPARE0/DRAM_SPARE1
-                   i_symbol)) );             // First symbol index of DRAM to steer around
+                   i_steer_type,           // DRAM_SPARE0/DRAM_SPARE1 (0 for x8 mode)
+                   i_symbol,
+                   i_width)) );             // First symbol index of DRAM to steer around
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -719,6 +810,7 @@ fapi_try_exit:
 /// @param[in] i_target MEM PORT target
 /// @param[in] i_port_rank Rank we want to write steer mux for.
 /// @param[in] i_symbol First symbol index of the DRAM to steer around.
+/// @param[in] i_width DRAM width X4 or X8
 /// @param[in] i_ignore_bad_bits Set to true to deploy spare regardless of training fails on it (default false)
 /// @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
 ///
@@ -726,12 +818,12 @@ template<mss::mc_type MC>
 fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                               const uint8_t i_port_rank,
                               const uint8_t i_symbol,
+                              const uint8_t i_width,
                               const bool i_ignore_bad_bits = false)
 {
+    steer_type l_target_spare;
     bool l_spare0_free = false;
     bool l_spare1_free = false;
-    steer_type l_target_spare;
-
     // Check for i_port_rank or i_symbol out of range
     FAPI_TRY( check::rank<MC>(i_target, i_port_rank) );
 
@@ -741,7 +833,7 @@ fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
     //------------------------------------------------------
     // Determine which spare is free
     //------------------------------------------------------
-    FAPI_TRY( (check_if_spare_is_free<MC>(i_target, i_port_rank, i_ignore_bad_bits, l_spare0_free, l_spare1_free)) );
+    FAPI_TRY(check_if_spare_is_free<MC>(i_target, i_port_rank, i_ignore_bad_bits, i_width, l_spare0_free, l_spare1_free) );
 
     // TODO: Zen-1554: Remove EXP_* error codes
     // If neither spare is free, assert out
@@ -753,9 +845,17 @@ fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
                 "Both Spare0 and Spare1 are already deployed on " TARGTIDFORMAT " rank %u symbol %u.",
                 TARGTID, i_port_rank, i_symbol);
 
-    // Default to using spare 0 first
-    l_target_spare = l_spare0_free ? steer_type::DRAM_SPARE0 : steer_type::DRAM_SPARE1;
-    FAPI_TRY( (program_steering_helper<MC>(i_target, i_port_rank, l_target_spare, i_symbol)) );
+    if(i_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4)
+    {
+        // Default to using spare 0 first
+        l_target_spare = l_spare0_free ? steer_type::DRAM_SPARE0 : steer_type::DRAM_SPARE1;
+    }
+    else
+    {
+        l_target_spare = steer_type::DRAM_SPARE0;
+    }
+
+    FAPI_TRY( (program_steering_helper<MC>(i_target, i_port_rank, l_target_spare, i_symbol, i_width)) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -767,82 +867,103 @@ fapi_try_exit:
 /// @tparam MC the memory controller type
 /// @tparam TT portTraits class with mc_type
 /// @param[in] i_target A target representing a DIMM
-/// @param[in] i_dimm_rank The DIMM rank for this target
-/// @param[in] i_nibble_idx Index of the nibble to spare out
-/// @param[in] i_spare_nibbles a vector of bytes/nibbles for the spare nibbles
+/// @param[in] i_rank The rank for this target
+/// @param[in] i_dram_idx Index of the byte/nibble to spare out
+/// @param[in] i_spare a vector of bytes/nibbles for the spare bytes/nibbles
 /// @param[in,out] io_deployed_spares a vector of bytes/nibbles containing which byte/nibble is spared out
 /// @param[in] i_ignore_bad_bits Set to true to deploy spare regardless of training fails on it (default false)
+/// @param[in] i_width DRAM width X4 or X8
 /// @return FAPI2_RC_SUCCESS if and only if ok
-/// @note Vector is a pair of uint8_t's. First is byte. Second is nibble
+/// @note Vector is a pair of uint8_t's. First is byte. Second is nibble (0 for x8 mode)
 ///
 template< mss::mc_type MC, typename TT = portTraits<MC> >
 fapi2::ReturnCode deploy_spare_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                        const mss::rank::info<MC>& i_rank,
-                                       const uint8_t i_nibble_idx,
-                                       const std::vector<uint8_t>& i_spare_nibbles,
+                                       const uint8_t i_dram_idx,
+                                       const std::vector<uint8_t>& i_spare,
                                        std::vector<uint8_t>& io_deployed_spares,
-                                       const bool i_ignore_bad_bits)
+                                       const bool i_ignore_bad_bits,
+                                       const uint8_t i_width)
 {
+    uint8_t l_symbol = 0;
 
-    const auto MAX_NIBBLE_IDX = TT::MAX_NIBBLE_IDX;
-
-    // Sanity check that we have not gone out of bounds. This shouldn't occur
-    FAPI_ASSERT((i_nibble_idx <= MAX_NIBBLE_IDX),
-                fapi2::MSS_RESTORE_REPAIRS_NIBBLE_OUT_OF_RANGE()
-                .set_DIMM_TARGET(i_target)
-                .set_NIBBLE_IDX(i_nibble_idx)
-                .set_MAX_NIBBLE_IDX(MAX_NIBBLE_IDX),
-                TARGTIDFORMAT " Nibble index %u provided to deploy_spare_helper was beyond the max nibble index %u",
-                TARGTID, i_nibble_idx, MAX_NIBBLE_IDX);
-
+    if (i_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X8)
     {
-        // Grab nibble and byte
-        const auto l_byte = i_nibble_idx / NIBBLES_PER_BYTE;
-        const auto l_nibble = i_nibble_idx % NIBBLES_PER_BYTE;
-
-        // Deploy that spare
-        uint8_t l_symbol = 0;
-        const uint8_t l_dq = (l_byte * BITS_PER_BYTE) + (l_nibble * BITS_PER_NIBBLE);
-
-        FAPI_TRY( mss::ecc::dq_to_symbol<MC>(l_dq, l_symbol));
-
-        // Round the symbol down to the nearest multiple of 4
-        l_symbol = (symbol_rounder<MC>(l_symbol));
-
-        // Conversion from DQ -> Symbol -> Spare goes like this:
-        //
-        // The mapping table for a set of 4 DQ bits / symbols / spare index looks like this:
-        // Arbitrarily choosing spare index 5 as an example
-        //
-        // +---------+--------------+-------------+
-        // | OCMB DQ | Symbol Index | Spare Index |
-        // +---------+--------------+-------------+
-        // |      20 |           31 |           5 |
-        // |      21 |           30 |           5 |
-        // |      22 |           29 |           5 |
-        // |      23 |           28 |           5 |
-        // +---------+--------------+-------------+
-        // The DQ values are generated from the byte and nibble index and will always be the "first" value
-        // in the DQ list for a spare index, in this case the one divisible by 4 (20 in the above example)
-        // When fed into dq_to_symbol, we get out a 31. However, our symbol_to_spare table makes use of the
-        // "last" value in the symbol index column (28), and the translation to that one is always to subtract
-        // 3. So our translation looks like this for the above example:
-
-        // DQ 20 -> Symbol Index 31 -> Symbol Index 28 -> Spare Index 5
-
-        FAPI_TRY( (mss::steer::do_steering<MC>(i_rank.get_port_target(),
-                                               i_rank.get_port_rank(),
-                                               l_symbol,
-                                               i_ignore_bad_bits)) );
-
-        // Mark this spare as deployed and note which nibble is deployed
-        io_deployed_spares.push_back(i_nibble_idx);
+        const auto MAX_BYTE_IDX = TT::MAX_BYTE_IDX;
+        // Sanity check that we have not gone out of bounds. This shouldn't occur
+        FAPI_ASSERT((i_dram_idx <= MAX_BYTE_IDX),
+                    fapi2::MSS_RESTORE_REPAIRS_BYTE_OUT_OF_RANGE()
+                    .set_DIMM_TARGET(i_target)
+                    .set_BYTE_IDX(i_dram_idx)
+                    .set_MAX_BYTE_IDX(MAX_BYTE_IDX),
+                    TARGTIDFORMAT " Byte index %u provided to deploy_spare_helper was beyond the max byte index %u",
+                    TARGTID, i_dram_idx, MAX_BYTE_IDX);
+        {
+            const uint8_t l_dq = i_dram_idx * BITS_PER_BYTE;
+            FAPI_TRY( mss::ecc::dq_to_symbol_x8<MC>(l_dq, l_symbol));
+        }
     }
+    else
+    {
+        const auto MAX_NIBBLE_IDX = TT::MAX_NIBBLE_IDX;
+
+        // Sanity check that we have not gone out of bounds. This shouldn't occur
+        FAPI_ASSERT((i_dram_idx <= MAX_NIBBLE_IDX),
+                    fapi2::MSS_RESTORE_REPAIRS_NIBBLE_OUT_OF_RANGE()
+                    .set_DIMM_TARGET(i_target)
+                    .set_NIBBLE_IDX(i_dram_idx)
+                    .set_MAX_NIBBLE_IDX(MAX_NIBBLE_IDX),
+                    TARGTIDFORMAT " Nibble index %u provided to deploy_spare_helper was beyond the max nibble index %u",
+                    TARGTID, i_dram_idx, MAX_NIBBLE_IDX);
+
+        {
+            // Grab nibble and byte
+            const auto l_byte = i_dram_idx / NIBBLES_PER_BYTE;
+            const auto l_nibble = i_dram_idx % NIBBLES_PER_BYTE;
+
+            // Deploy that spare
+            const uint8_t l_dq = (l_byte * BITS_PER_BYTE) + (l_nibble * BITS_PER_NIBBLE);
+
+            FAPI_TRY( mss::ecc::dq_to_symbol<MC>(l_dq, l_symbol));
+        }
+    }
+
+    // Round the symbol down to the nearest multiple of 4
+    l_symbol = (symbol_rounder<MC>(l_symbol));
+
+    // Conversion from DQ -> Symbol -> Spare goes like this:
+    //
+    // The mapping table for a set of 4 DQ bits / symbols looks like this:
+    // Arbitrarily choosing spare index 5 as an example
+    //
+    // +---------+--------------+---------------+---------------+
+    // | OCMB DQ | Symbol Index | Spare Index x8| Spare Index x4|
+    // +---------+--------------+---------------+---------------+
+    // |      20 |           61 |             2 |             5 |
+    // |      21 |           61 |             2 |             5 |
+    // |      22 |           60 |             2 |             5 |
+    // |      23 |           60 |             2 |             5 |
+    // +---------+--------------+---------------+---------------+
+    // The DQ values are generated from the byte and nibble index and will always be the "first" value
+    // in the DQ list for a spare index, in this case the one divisible by 4 (20 in the above example)
+    // When fed into dq_to_symbol, we get out a 31. However, our symbol_to_spare table makes use of the
+    // "last" value in the symbol index column (28), and the translation to that one is always to subtract
+    // 3. So our translation looks like this for the above example:
+
+    // DQ 20 -> Symbol Index 31 -> Symbol Index 28 -> Spare Index 5
+
+    FAPI_TRY( (mss::steer::do_steering<MC>(i_rank.get_port_target(),
+                                           i_rank.get_port_rank(),
+                                           l_symbol,
+                                           i_width,
+                                           i_ignore_bad_bits)) );
+
+    // Mark this spare as deployed and note which nibble is deployed
+    io_deployed_spares.push_back(i_dram_idx);
 
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Undeploy the specified spare on the provided rank

@@ -114,11 +114,14 @@ class portTraits< mss::mc_type::EXPLORER >
         // This number includes the two spare nibbles, it is compared against
         // the actual nibble index we're at
         static constexpr uint8_t MAX_NIBBLE_IDX = 19;
-
+        static constexpr uint8_t MAX_BYTE_IDX = 9;
         static constexpr uint8_t SYMBOL_ROUNDER = 4;
 
         static const std::vector<uint8_t> NON_SPARE_NIBBLES;
         static const std::vector<uint8_t> SPARE_NIBBLES;
+
+        static const std::vector<uint8_t> NON_SPARE_BYTES;
+        static const std::vector<uint8_t> SPARE_BYTES;
 
         // Settings: INTERVAL = 16K * 128 = 2M cycles, CTRLUPD_MIN = 128
         static constexpr uint8_t CAL_INTERVAL_TB_16384_CYCLES = 0x02;

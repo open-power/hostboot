@@ -113,13 +113,16 @@ class portTraits< mss::mc_type::ODYSSEY >
         // the actual nibble index we're at
         // TODO Zen:MST-1404 Verify this for Odyssey
         static constexpr uint8_t MAX_NIBBLE_IDX = 19;
-
+        static constexpr uint8_t MAX_BYTE_IDX = 9;
 
         static constexpr uint8_t SYMBOL_ROUNDER = 4;
 
 #ifndef __PPE__
         static const std::vector<uint8_t> NON_SPARE_NIBBLES;
         static const std::vector<uint8_t> SPARE_NIBBLES;
+
+        static const std::vector<uint8_t> NON_SPARE_BYTES;
+        static const std::vector<uint8_t> SPARE_BYTES;
 #endif
 
         // Settings: INTERVAL = 16K * 128 = 2M cycles, CTRLUPD_MIN = 128

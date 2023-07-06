@@ -126,6 +126,42 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Return symbol value from a given DQ index
+/// @tparam MC the memory controller type
+/// @tparam T fapi2 Target Type defaults to eccMCTraits<MC>::MEM_PORT_TARGET_TYPE
+/// @tparam TT traits type defaults to eccTraits<MC, T>
+/// @param[in] i_dq the DQ index
+/// @param[out] o_symbol symbol value represented by given DQ index
+/// @return FAPI2_RC_SUCCESS iff all is ok
+///
+template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGET_TYPE, typename TT = eccTraits<MC, T> >
+fapi2::ReturnCode dq_to_symbol_x8( const uint8_t i_dq, uint8_t& o_symbol )
+{
+    // setting dq to its nearest higher odd number as there is 1 symbol for a pair of dq.
+    // and only odd numbers are listed in array symbol2dq_x8
+    uint8_t l_dq = i_dq;
+
+    if(i_dq % 2 == 0)
+    {
+        l_dq += 1;
+    }
+
+    const auto& l_p = std::find(TT::symbol2dq_x8, (TT::symbol2dq_x8 + TT::ECC_MAX_SYMBOLS), l_dq);
+
+    FAPI_ASSERT( l_p != (TT::symbol2dq_x8 + TT::ECC_MAX_SYMBOLS),
+                 fapi2::MSS_INVALID_DQ_TO_SYMBOL()
+                 .set_DQ(i_dq),
+                 "Invalid DQ index: %d",
+                 i_dq);
+
+    o_symbol = (l_p - TT::symbol2dq_x8);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Return DQ index from a given symbol value
 /// @tparam MC the memory controller type
 /// @tparam T fapi2 Target Type defaults to eccMCTraits<MC>::MEM_PORT_TARGET_TYPE
@@ -177,15 +213,24 @@ fapi_try_exit:
 /// @tparam T fapi2 Target Type defaults to eccMCTraits<MC>::MEM_PORT_TARGET_TYPE
 /// @tparam TT traits type defaults to eccTraits<MC, T>
 /// @param[in] i_dq the DQ index
+/// @paran[in] i_width DRAM width x4 or x8
 /// @param[out] o_galois Galois code represented by given symbol
 /// @return FAPI2_RC_SUCCESS iff all is ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGET_TYPE, typename TT = eccTraits<MC, T> >
-fapi2::ReturnCode dq_to_galois( const uint8_t i_dq, uint8_t& o_galois )
+fapi2::ReturnCode dq_to_galois( const uint8_t i_dq, const uint8_t i_width, uint8_t& o_galois )
 {
     uint8_t l_symbol = 0;
 
-    FAPI_TRY( dq_to_symbol<MC>(i_dq, l_symbol), "Failed dq_to_symbol");
+    if(i_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4)
+    {
+        FAPI_TRY( dq_to_symbol<MC>(i_dq, l_symbol), "Failed dq_to_symbol");
+    }
+    else
+    {
+        FAPI_TRY( dq_to_symbol_x8<MC>(i_dq, l_symbol), "Failed dq_to_symbol");
+    }
+
     FAPI_TRY( symbol_to_galois<MC>(l_symbol, o_galois) , "Failed symbol_to_galois" );
 
 fapi_try_exit:

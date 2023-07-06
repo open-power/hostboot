@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,7 @@ constexpr const uint64_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_POR
 constexpr const uint64_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>::ERROR_VECTOR_REGS[];
 constexpr const uint8_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>::symbol2galois[];
 constexpr const uint8_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>::symbol2dq[];
+constexpr const uint8_t eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>::symbol2dq_x8[];
 
 // Definition of the symbol error count registers for Explorer
 const std::vector< uint64_t > eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>::SYMBOL_COUNT_REG =

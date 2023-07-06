@@ -180,8 +180,12 @@ fapi2::ReturnCode exp_check_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_
                                      uint8_t& o_dram_spare0_symbol,
                                      uint8_t& o_dram_spare1_symbol )
 {
-    return mss::steer::check_steering<mss::mc_type::EXPLORER>(i_target, i_port_rank, o_dram_spare0_symbol,
+    uint8_t l_width[mss::exp::MAX_DIMM_PER_PORT] = {0};
+    FAPI_TRY( mss::attr::get_dram_width(i_target, l_width));
+    return mss::steer::check_steering<mss::mc_type::EXPLORER>(i_target, i_port_rank, l_width[0], o_dram_spare0_symbol,
             o_dram_spare1_symbol);
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///

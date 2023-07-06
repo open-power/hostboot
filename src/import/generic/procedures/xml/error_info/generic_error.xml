@@ -1820,6 +1820,20 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_RESTORE_REPAIRS_BYTE_OUT_OF_RANGE</rc>
+    <description>
+        The byte index to perform repairs on / deploy a spare was out of range.
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>BYTE_IDX</ffdc>
+    <ffdc>MAX_BYTE_IDX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_PLUG_RULES_MIXED_MDS_PLUG_ERROR</rc>
     <description>
         An invalid mixing of MDS and non-MDS dimms detected.

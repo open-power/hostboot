@@ -86,6 +86,26 @@ const std::vector<uint8_t> portTraits< mss::mc_type::ODYSSEY >::SPARE_NIBBLES =
     10,
     11
 };
+
+const std::vector<uint8_t> portTraits< mss::mc_type::ODYSSEY >::NON_SPARE_BYTES =
+{
+    0,
+    1,
+    2,
+    3,
+    4,
+    // Byte 5 contains the spares (if they exist) for mc_type
+    6,
+    7,
+    8,
+    9
+};
+
+const std::vector<uint8_t> portTraits< mss::mc_type::ODYSSEY >::SPARE_BYTES =
+{
+    // Byte 5 contains the spares (if they exist) for mc_type
+    5
+};
 #endif
 ///
 /// @brief Configures the write reorder queue bit - Odyssey specialization
