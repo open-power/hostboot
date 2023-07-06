@@ -135,16 +135,19 @@
 
     Bit 0      : Indicates istep IPL (0b1)
     Bit 1      : Indicates that SBE should go directly to runtime functionality (0b1)
-    Bit 2      : Reserved
+    Bit 2      : MPIPL indication
     Bit 3      : Conveys ATTR_IS_SIMULATION state (0=HW, 1=AWAN/MESA)
-    Bit 4      : Reserved
+    Bit 4      : Security enable (0=default, 1=enable)
     Bit 5      : Indicates that the SBE should not send back internal FFDC on any ChipOp failure response
-    Bit 6      : Disable security, if permitted
+    Bit 6      : Disable security, if permitted (can't disable security for Odyssey)
     Bit 7      : Allow ATTR overrides in secure system
-    Bits 8-11  : Reserved
+    Bits 8-9   : Override SMT mode
+    Bit 10     : No xstop on master xstop
+    Bit 11     : Disable SCOM security
     Bit 12     : Disable Invalid Scom address check
     Bit 13     : Indicates MFG mode, where extra tests/isteps can be executed
-    Bits 14-15 : Reserved
+    Bit 14     : Enable SUART output
+    Bit 15     : Skip MPIPL dump
     Bit 16     : Enable ECDSA Signature enable (when not fused on)
     Bit 17     : Enable Dilithium Signature enable (when not fused on)
     Bit 18     : Enable ECID verification (when not fused on)
@@ -189,5 +192,24 @@
   <default>ENABLE</default>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_SECURITY_LEVEL</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+    Reflects the boot security level of the given chip.
 
+    Level 0 - DISABLED   - Security disabled, SAB=0
+    Level 1 - PERMISSIVE - Security enabled but not strictly enforced, SAB=1 but firmware signed with imprint keys
+    Level 2 - ENFORCING  - Security enabled and strictly enforced, SAB=1 and firmware signed with production keys
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DISABLED   = 0,
+    PERMISSIVE = 1,
+    ENFORCING  = 2
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>
