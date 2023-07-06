@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -846,6 +846,52 @@ private:
 
 };
 
+/** @brief Take up to two possible-related errors and produce one by
+ *  either committing the extra one or assigning it to the primary.
+ *  This function is intended to be used like this:
+ *
+ *    errlHndl_t error = nullptr;
+ *    for (...) {
+ *        errlHndl_t tmp_err = ...;
+ *        foldErrors(error, tmp_err);
+ *    }
+ *
+ *  At the end of the above loop, "error" will contain an error if at
+ *  least one error was produced (and "error" will point to the first
+ *  one); and if more than one was produced, all but "error" will have
+ *  been committed. Additionally, all of the other errors will have
+ *  their PLID linked to "error" if i_linkPlids = true.
+ *
+ *  @param[in/out]  io_main_error      The main error. This will be set to
+ *                                     io_old_error if it's null.
+ *  @param[in/out] io_secondary_error  The secondary error. This is
+ *                                     either committed, or becomes
+ *                                     the primary error if there isn't one
+ *                                     already. This always becomes null
+ *                                     after this function. If null, this
+ *                                     function does nothing.
+ *  @param[in] i_comp_id               The component ID to commit io_secondary_error
+ *                                     with if io_main_error already exists.
+ *  @param[in] i_linkPlids             Links all secondary errors to the main error
+ *                                     if true. Otherwise, does not change any PLID.
+ */
+inline void foldErrors(errlHndl_t& io_main_error, errlHndl_t& io_secondary_error, const compId_t i_comp_id, const bool i_linkPlids = false)
+{
+    if (!io_main_error)
+    {
+        io_main_error = io_secondary_error;
+        io_secondary_error = nullptr;
+    }
+    else if (io_secondary_error)
+    {
+        if (i_linkPlids)
+        {
+            io_secondary_error->plid(io_main_error->plid());
+        }
+
+        errlCommit(io_secondary_error, i_comp_id);
+    }
+}
 
 } // End namespace
 
