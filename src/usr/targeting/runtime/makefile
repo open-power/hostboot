@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -32,6 +32,7 @@ TARGETING_REL_PATH = ..
 include ${TARGETING_REL_PATH}/hostboot_common.mk
 ROOTPATH = ../../../..
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 
 vpath %.C ${TARGETING_REL_PATH}
 

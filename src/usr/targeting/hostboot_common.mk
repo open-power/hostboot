@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2022
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -38,6 +38,7 @@ VPATH += ${addprefix ${COMMON_TARGETING_REL_PATH}/, ${COMMON_TARGETING_SUBDIRS}}
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/include/util/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 
 HOSTBOOT_RT_IPL_COMMON_OBJS += attrPlatOverride.o
 HOSTBOOT_RT_IPL_COMMON_OBJS += translateTarget.o

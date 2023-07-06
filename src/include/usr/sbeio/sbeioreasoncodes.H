@@ -65,6 +65,7 @@ enum sbeioModuleId
     SBEIO_FIFO_HALT                     = 0x14,
     SBEIO_RT_PSU                        = 0x15,
     SBEIO_PSU_PMIC_HEALTH_CHECK         = 0x16,
+    SBEIO_RT_SCOM                       = 0x17,
 };
 
 /**
@@ -163,6 +164,9 @@ enum sbeioReasonCode
     SBEIO_PMIC_HEALTH_CHECK_DATA       = SBEIO_COMP_ID | 0x6A,
     SBEIO_PMIC_FAILED_HEALTH_CHECK     = SBEIO_COMP_ID | 0x6B,
     SBEIO_RECONFIG_WITH_CLOCK_GUARD    = SBEIO_COMP_ID | 0x6C,
+    // SBE Runtime Odyssey support
+    SBEIO_SCOM_SUPPORT_READ            = SBEIO_COMP_ID | 0x6D,
+    SBEIO_SCOM_SUPPORT_WRITE           = SBEIO_COMP_ID | 0x6E,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

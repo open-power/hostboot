@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2020
+# Contributors Listed Below - COPYRIGHT 2019,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -29,6 +29,7 @@ MODULE = mmio_rt
 
 # add unique object modules
 OBJS += rt_mmio.o
+OBJS += mmio_odyssey.o
 
 VPATH += ..
 

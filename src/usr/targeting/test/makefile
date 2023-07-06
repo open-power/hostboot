@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2022
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -58,7 +58,8 @@ EXTRAINCDIR +=                                       \
     ../                                              \
     ${ROOTPATH}/obj/genfiles/                        \
     ${ROOTPATH}/src/import/hwpf/fapi2/include/       \
-    ${ROOTPATH}/src/include/usr/fapi2/
+    ${ROOTPATH}/src/include/usr/fapi2/               \
+    ${ROOTPATH}/src/import/chips/common/utils/
 
 # Generate the test suite
 

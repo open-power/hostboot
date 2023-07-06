@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,7 @@
 #include <targeting/common/targreasoncodes.H>
 #include <targeting/common/trace.H>
 #include <targeting/targplatutil.H>
+#include <chipids.H>
 #ifdef __HOSTBOOT_MODULE
 #include <errl/errludtarget.H>
 #include <limits.h>
@@ -134,26 +135,38 @@ errlHndl_t getMemTargetMmioInfo ( TARGETING::Target * i_memTarget,
         TARG_ASSERT(l_ocmbBaseMmioPhysAddr != 0,
                "0 returned for physical address of OCMB's MMIO space. MMIO map probably isn't set up yet.");
 
+        const auto l_ocmbChipId = i_memTarget->getAttr<TARGETING::ATTR_CHIP_ID>();
         // CONFIG space ( 2 GB )
         l_tmpRange.mmioBaseAddr = l_ocmbBaseMmioPhysAddr;
         l_tmpRange.mmioEndAddr = l_tmpRange.mmioBaseAddr + (2 * GIGABYTE) - 1;
         l_tmpRange.accessSize = 4;
         o_ocmbMmioSpaces.push_back(l_tmpRange);
 
-        // Microchip Scom Access Space ( 128 MB )
-        //   Scom addresses 0x00000000..0x07FFFFFF, no shifting
-        l_tmpRange.mmioBaseAddr = l_ocmbBaseMmioPhysAddr + (4 * GIGABYTE);
-        l_tmpRange.mmioEndAddr = l_tmpRange.mmioBaseAddr + (128 * MEGABYTE) - 1;
-        l_tmpRange.accessSize = 4;
-        o_ocmbMmioSpaces.push_back(l_tmpRange);
+        if (l_ocmbChipId == POWER_CHIPID::EXPLORER_16)
+        {
+            // Microchip Scom Access Space ( 128 MB )
+            //   Scom addresses 0x00000000..0x07FFFFFF, no shifting
+            l_tmpRange.mmioBaseAddr = l_ocmbBaseMmioPhysAddr + (4 * GIGABYTE);
+            l_tmpRange.mmioEndAddr = l_tmpRange.mmioBaseAddr + (128 * MEGABYTE) - 1;
+            l_tmpRange.accessSize = 4;
+            o_ocmbMmioSpaces.push_back(l_tmpRange);
 
-        // IBM Scom Access Space ( Remainder )
-        //   Scom addresses 0x08000000..0x08FFFFFF, then shifted 3 bits left
-        //   but we can just cheat and reserve the rest of the 4G..6G range
-        l_tmpRange.mmioBaseAddr = l_ocmbBaseMmioPhysAddr + (4 * GIGABYTE) + (128 * MEGABYTE);
-        l_tmpRange.mmioEndAddr = l_ocmbBaseMmioPhysAddr + (6 * GIGABYTE) - 1;
-        l_tmpRange.accessSize = 8;
-        o_ocmbMmioSpaces.push_back(l_tmpRange);
+            // IBM Scom Access Space ( Remainder )
+            //   Scom addresses 0x08000000..0x08FFFFFF, then shifted 3 bits left
+            //   but we can just cheat and reserve the rest of the 4G..6G range
+            l_tmpRange.mmioBaseAddr = l_ocmbBaseMmioPhysAddr + (4 * GIGABYTE) + (128 * MEGABYTE);
+            l_tmpRange.mmioEndAddr = l_ocmbBaseMmioPhysAddr + (6 * GIGABYTE) - 1;
+            l_tmpRange.accessSize = 8;
+            o_ocmbMmioSpaces.push_back(l_tmpRange);
+        }
+
+        if (l_ocmbChipId == POWER_CHIPID::ODYSSEY_16)
+        {
+            l_tmpRange.mmioBaseAddr = l_ocmbBaseMmioPhysAddr + (4 * GIGABYTE);
+            l_tmpRange.mmioEndAddr = l_ocmbBaseMmioPhysAddr + (6 * GIGABYTE) - 1;
+            l_tmpRange.accessSize = 8;
+            o_ocmbMmioSpaces.push_back(l_tmpRange);
+        }
 
     }while(0);
 

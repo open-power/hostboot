@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,6 +68,8 @@
 
 // Generated
 #include <attribute_ids.H>
+
+#include <chipids.H>
 
 /**
  *  @brief Struct to hold pointers to a mutex / protected value
@@ -791,18 +793,27 @@ class TargetingTestSuite : public CxxTest::TestSuite
             constexpr uint64_t PER_MC_OFFSET =      0x200000000;//8GB
 
             constexpr uint64_t CONFIG_SPACE_SIZE = OFFSET_TO_ODD_OCMB;
-            constexpr uint64_t SM_MMIO_SPACE_SIZE = 128 * MEGABYTE;                      
+            constexpr uint64_t SM_MMIO_SPACE_SIZE = 128 * MEGABYTE;
             constexpr uint64_t SM_MMIO_SPACE_OFFSET = 0;
-            constexpr uint64_t IBM_MMIO_SPACE_OFFSET = SM_MMIO_SPACE_OFFSET
-                                                     + SM_MMIO_SPACE_SIZE; 
-            // Actual MMIO SPACE for IBM scoms is only 16 MB but we reserve 
+            uint64_t ibm_mmio_space_offset = SM_MMIO_SPACE_OFFSET
+                                                     + SM_MMIO_SPACE_SIZE;
+            // Actual MMIO SPACE for IBM scoms is only 16 MB but we reserve
             // remainder of the entire 2 GB window
-            const uint64_t IBM_MMIO_SPACE_RSV_SIZE = 2 * GIGABYTE
+            uint64_t ibm_mmio_space_rsv_size = 2 * GIGABYTE
                                                      - SM_MMIO_SPACE_SIZE;
             const uint8_t SUPPORTS_8_BYTE = 8;
             const uint8_t SUPPORTS_4_BYTE = 4;
 
             const uint64_t OCMB0_RT_ID = 0x80000000;
+            // Just take the first ocmb to detect if Explorer or Odyssey
+            const auto l_ocmbChipId = l_ocmbTargetList[0]->getAttr<TARGETING::ATTR_CHIP_ID>();
+            uint8_t ibm_mmio_index = 2; // table assumption for Explorer
+            if (l_ocmbChipId == POWER_CHIPID::ODYSSEY_16)
+            {
+                ibm_mmio_space_offset = SM_MMIO_SPACE_OFFSET;
+                ibm_mmio_index = 1; // table assumption for Odyssey
+                ibm_mmio_space_rsv_size = 2 * GIGABYTE; // no carve out for extra 128G size for Odyssey
+            }
 
             for (const auto & l_ocmb_target : l_ocmbTargetList)
             {
@@ -836,9 +847,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 // IBM MMIO Space
                 TARGETING::ocmbMmioAddressRange_t exp_space_mmio_ibm(
                                        exp_runtimeid,
-                                       exp_mmio + IBM_MMIO_SPACE_OFFSET,
-                                       exp_mmio + IBM_MMIO_SPACE_OFFSET
-                                                + IBM_MMIO_SPACE_RSV_SIZE - 1,
+                                       exp_mmio + ibm_mmio_space_offset,
+                                       exp_mmio + ibm_mmio_space_offset
+                                                + ibm_mmio_space_rsv_size - 1,
                                        SUPPORTS_8_BYTE);
 
                 // Compute the ranges
@@ -857,9 +868,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 }
 
                 l_tests++;
-                if(l_ranges.size() != 3)
+                if (((l_ranges.size() != 3) && (l_ocmbChipId == POWER_CHIPID::EXPLORER_16)) || ((l_ranges.size() != 2) && (l_ocmbChipId == POWER_CHIPID::ODYSSEY_16)))
                 {
-                    TS_FAIL("testGetMemTargetMmioInfo OCMB with huid %.08X returned %d mmio ranges when 3 were expected",
+                    TS_FAIL("testGetMemTargetMmioInfo OCMB with huid %.08X returned %d mmio ranges when EXPLORER==3 ODYSSEY==2 were expected",
                             TARGETING::get_huid(l_ocmb_target), l_ranges.size());
                     l_fails++;
                     // Skip this target
@@ -889,26 +900,29 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 }
 
                 l_tests++;
-                if ( memcmp( &l_ranges[1], &exp_space_mmio_mchp, sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
+                if (l_ocmbChipId == POWER_CHIPID::EXPLORER_16)
                 {
-                    TS_FAIL("testGetMemTargetMmioInfo::"
-                            "OCMB %.8X Microchip MMIO space info did not match what was expected",
-                            TARGETING::get_huid(l_ocmb_target));
-                    l_fails++;
-                    TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                            exp_space_mmio_mchp.hbrtId,
-                            exp_space_mmio_mchp.mmioBaseAddr,
-                            exp_space_mmio_mchp.mmioEndAddr,
-                            exp_space_mmio_mchp.accessSize == 8 ? "true" : "false");
-                    TS_INFO("ACTUAL  : id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                            l_ranges[1].hbrtId,
-                            l_ranges[1].mmioBaseAddr,
-                            l_ranges[1].mmioEndAddr,
-                            l_ranges[1].accessSize == 8 ? "true" : "false");
+                    if ( memcmp( &l_ranges[1], &exp_space_mmio_mchp, sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
+                    {
+                        TS_FAIL("testGetMemTargetMmioInfo::"
+                                "OCMB %.8X Microchip MMIO space info did not match what was expected",
+                                TARGETING::get_huid(l_ocmb_target));
+                        l_fails++;
+                        TS_INFO("EXPECTED: id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
+                                exp_space_mmio_mchp.hbrtId,
+                                exp_space_mmio_mchp.mmioBaseAddr,
+                                exp_space_mmio_mchp.mmioEndAddr,
+                                exp_space_mmio_mchp.accessSize == 8 ? "true" : "false");
+                        TS_INFO("ACTUAL  : id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
+                                l_ranges[1].hbrtId,
+                                l_ranges[1].mmioBaseAddr,
+                                l_ranges[1].mmioEndAddr,
+                                l_ranges[1].accessSize == 8 ? "true" : "false");
+                    }
                 }
 
                 l_tests++;
-                if ( memcmp( &l_ranges[2], &exp_space_mmio_ibm, sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
+                if ( memcmp( &l_ranges[ibm_mmio_index], &exp_space_mmio_ibm, sizeof(TARGETING::ocmbMmioAddressRange_t )) != 0)
                 {
                     TS_FAIL("testGetMemTargetMmioInfo::"
                             "OCMB %.8X IBM MMIO space info did not match what was expected",
@@ -920,10 +934,10 @@ class TargetingTestSuite : public CxxTest::TestSuite
                             exp_space_mmio_ibm.mmioEndAddr,
                             exp_space_mmio_ibm.accessSize == 8 ? "true" : "false");
                     TS_INFO("ACTUAL  : id:0x%lx  start addr:0x%lx  end addr:0x%lx  8byteAccess:%s ",
-                            l_ranges[2].hbrtId,
-                            l_ranges[2].mmioBaseAddr,
-                            l_ranges[2].mmioEndAddr,
-                            l_ranges[2].accessSize == 8 ? "true" : "false");
+                            l_ranges[ibm_mmio_index].hbrtId,
+                            l_ranges[ibm_mmio_index].mmioBaseAddr,
+                            l_ranges[ibm_mmio_index].mmioEndAddr,
+                            l_ranges[ibm_mmio_index].accessSize == 8 ? "true" : "false");
                 }
             }
         }while(0);
