@@ -908,12 +908,6 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target   *i_target,
         nanosleep( 0, 10000 ); //sleep for 10,000 ns
         l_elapsed_time_ns += 10000;
 
-        // In simics a dead chip can take forever to timeout so
-        // make time move faster so we don't hang forever.
-        if( Util::isSimicsRunning() )
-        {
-            l_elapsed_time_ns += (MAX_UP_FIFO_TIMEOUT_NS/100);
-        }
     }
     while (1);
 
