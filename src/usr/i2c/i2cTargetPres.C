@@ -177,15 +177,24 @@ errlHndl_t genericI2CTargetPresenceDetect(TARGETING::Target* i_target,
                    TARGETING::get_huid(i_target),  TARGETING::get_huid(l_i2cMasterTarget),
                    l_i2cInfo.engine, l_i2cInfo.port, l_i2cInfo.devAddr);
 
-        // The GPIO devices require an I2C read of 1 byte for their prsesence detection
+        // The GPIO devices and POWER_ICs require an I2C read of 1 byte for their prsesence detection
         TARGETING::ATTR_I2C_DEV_TYPE_type l_i2c_dev_type = TARGETING::I2C_DEV_TYPE_INVALID;
-        if ((i_target->tryGetAttr<TARGETING::ATTR_I2C_DEV_TYPE>(l_i2c_dev_type)) &&
+        if (((i_target->tryGetAttr<TARGETING::ATTR_I2C_DEV_TYPE>(l_i2c_dev_type)) &&
             (l_i2c_dev_type == TARGETING::I2C_DEV_TYPE_PCA9554A_GPIO_EXPANDER))
+            ||
+            (i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_POWER_IC))
         {
             uint8_t l_data;
             size_t  l_size=sizeof(l_data);
             uint8_t l_offset=0;
             size_t  l_offset_length=sizeof(l_offset);
+
+            // Use a known good address offset for POWER_IC devices. A HWP later
+            // writes to this addr.
+            if(i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_POWER_IC)
+            {
+                l_offset = 0xD4; // DT_REGS::FAULTS_CLEAR_0
+            }
 
             TRACSSCOMP(g_trac_i2c, "I2C::genericI2CTargetPresenceDetect> trying 1-byte I2C read "
                        "for HUID 0x%.08X i2cm=0x%.08X, e%d/p%d/devAddr=0x%X, offset=%d, "

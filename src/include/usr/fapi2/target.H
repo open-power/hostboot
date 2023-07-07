@@ -745,7 +745,8 @@ inline std::vector<Target<K_CHILD, M, V> >
               || (K_CHILD == fapi2::TARGET_TYPE_PROC_CHIP)
               || (K_CHILD == fapi2::TARGET_TYPE_PMIC)
               || (K_CHILD == fapi2::TARGET_TYPE_GENERICI2CSLAVE)
-              || (K_CHILD == fapi2::TARGET_TYPE_OCMB_CHIP) ) )
+              || (K_CHILD == fapi2::TARGET_TYPE_OCMB_CHIP)
+              || (K_CHILD == fapi2::TARGET_TYPE_POWER_IC) ))
         {
             l_state = TARGETING::UTIL_FILTER_PRESENT;
         }
