@@ -372,22 +372,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_EXP_HALF_DIMM_MODE_NOT_SUPPORTED</rc>
-    <description>
-      The enterprise settings do not support half dimm mode.
-    </description>
-    <ffdc>ENTERPRISE_SETTING</ffdc>
-    <ffdc>HALF_DIMM_SETTING</ffdc>
-    <callout>
-      <target>OCMB_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>OCMB_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_EXP_ENTERPRISE_INVALID_CONFIGURATION</rc>
     <description>
       The enterprise supported bit from explorer fuse

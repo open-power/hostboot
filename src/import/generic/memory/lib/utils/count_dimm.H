@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 /// @brief Count the DIMM attached to a target
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
-// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP HWP Backup: Geetha Pisapati <geetha.pisapati@ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -157,6 +157,21 @@ inline size_t count_mem_port(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& 
     const auto& l_ocmb = find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target, i_state);
 
     return count_mem_port(l_ocmb, i_state);
+}
+
+///
+/// @brief Return the count of the number of OCMB attached to a proc chip
+/// @param[in] i_target a target
+/// @param[in] i_state [optional] fapi2 target state (defaults to TARGET_STATE_FUNCTIONAL)
+/// @return size_t the count of OCMB chips attached
+/// @note Use this function to count "present and nonfunctional" DIMMs
+///
+inline size_t count_ocmb_chip(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                              fapi2::TargetState i_state = fapi2::TARGET_STATE_FUNCTIONAL)
+{
+    const auto& l_ocmb = find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target, i_state);
+
+    return (l_ocmb.size());
 }
 
 }

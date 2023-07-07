@@ -67,6 +67,8 @@ OBJS += p10_mss_utils_to_throttle.o
 OBJS += exp_bulk_pwr_throttles.o
 OBJS += ody_bulk_pwr_throttles.o
 OBJS += ody_throttle.o
+OBJS += ody_kind.o
+OBJS += exp_kind.o
 
 # Include the makefiles to compile the HWPs needed by the sub steps
 include ${ROOTPATH}/procedure.rules.mk
@@ -82,6 +84,8 @@ VPATH += ${P10_PROCEDURES_PATH}/memory
 VPATH += ${EXP_PROCEDURES_PATH}/memory
 VPATH += ${ODY_PROCEDURES_PATH}/memory
 VPATH += ${ODY_PROCEDURES_PATH}/memory/lib/power_thermal/
+VPATH += ${EXP_PROCEDURES_PATH}/memory/lib/dimm/
+VPATH += ${ODY_PROCEDURES_PATH}/memory/lib/dimm/
 
 # Include the configuration after everything else has been added
 include ${ROOTPATH}/config.mk

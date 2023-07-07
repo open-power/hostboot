@@ -98,6 +98,8 @@ OBJS += ody_ddrphy_phyinit_config.o
 OBJS += dwc_ddrphy_phyinit_I_loadPIEImage.o
 OBJS += dwc_ddrphy_phyinit_LoadPieProdCode_rdimm.o
 OBJS += dwc_ddrphy_phyinit_LoadPieProdCode.o
+OBJS += ody_kind.o
+OBJS += exp_kind.o
 
 include ${ROOTPATH}/config.mk
 
@@ -109,3 +111,5 @@ VPATH += ${ODYSSEY_HWP_PATH}/memory/lib/phy/
 VPATH += ${ODYSSEY_HWP_PATH}/memory/lib/workarounds/
 VPATH += ${ODYSSEY_HWP_PATH}/memory/lib/fir/
 VPATH += ${ODYSSEY_HWP_PATH}/memory/lib/power_thermal/
+VPATH += ${EXPLORER_HWP_PATH}/lib/dimm/
+VPATH += ${ODYSSEY_HWP_PATH}/memory/lib/dimm/

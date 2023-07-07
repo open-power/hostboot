@@ -56,6 +56,8 @@ OBJS += mss_pmic_attribute_accessors_manual.o
 OBJS += ody_mss_eff_config_thermal.o
 OBJS += ody_throttle.o
 OBJS += ody_decoder.o
+OBJS += ody_kind.o
+OBJS += exp_kind.o
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
@@ -103,6 +105,8 @@ VPATH += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/utils/
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/power_thermal/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/dimm/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/dimm/
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk

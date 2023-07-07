@@ -49,6 +49,18 @@ namespace dimm
 {
 
 ///
+/// @brief Function to get number of dimms
+/// @param[in] i_target ocmb chip target
+/// @return number of the dimms
+///
+template<>
+size_t count_num_dimms<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    return mss::count_mem_port(mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
+                               fapi2::TARGET_STATE_PRESENT);
+}
+
+///
 /// @brief Check if any dimms exist that have RCD enabled - explorer/DIMM specialization
 /// @param[in] i_target - the fapi2::Target we are starting from
 /// @param[out] o_has_rcd - true iff any DIMM with RCD detected

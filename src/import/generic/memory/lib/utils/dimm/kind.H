@@ -74,6 +74,15 @@ namespace dimm
 {
 
 ///
+/// @brief Function to get number of dimms
+/// @tparam MC the memory controller type
+/// @param[in] i_target ocmb chip target
+/// @return number of the dimms
+///
+template< mss::mc_type MC >
+size_t count_num_dimms(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
 /// @brief Function to round up dimm count
 /// @param[in] i_dimm_count the dimm count value to be rounded off
 /// @return rounded up value of the dimm count
@@ -211,8 +220,7 @@ class kind
             FAPI_TRY( mss::attr::get_rcd_mfg_id(i_target, iv_rcd_mfgid) );
             FAPI_TRY( mss::attr::get_dram_module_height(l_ocmb, iv_module_height) );
 
-            iv_rounded_off_dimm_count = mss::count_mem_port(mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(l_ocmb),
-                                        fapi2::TARGET_STATE_PRESENT);
+            iv_rounded_off_dimm_count = mss::dimm::count_num_dimms<MC>(l_ocmb);
             iv_rounded_off_dimm_count = round_up_dimm_count(iv_rounded_off_dimm_count);
             iv_attached_dimm_count = mss::count_dimm (mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target));
 
@@ -338,6 +346,7 @@ class kind
                     (iv_attached_dimm_count == i_input_compare.iv_attached_dimm_count));
         }
 };
+
 
 ///
 /// @brief Check if any dimms exist that have RCD enabled
