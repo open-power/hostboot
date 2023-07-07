@@ -1478,15 +1478,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
                 }
                 //End P10 DD1 Workaround
 
-                // Simics currently has bad CRC for the serial number portion
-                if(!Util::isSimicsRunning())
-                {
-                    platCheckOcmbCRC(pTarget, present);
-                }
-                else
-                {
-                    HWAS_DBG( "Ignoring CRC in Simics" );
-                }
+                platCheckOcmbCRC(pTarget, present);
             }
         }
 

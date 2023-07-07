@@ -210,6 +210,8 @@ namespace SPD
         // store CRC values for later logging
         uint16_t crcSPD;
         uint16_t crcActual;
+        crc_section_t(size_t i_start, size_t i_numbytes) :
+               start(i_start), numbytes(i_numbytes), crcSPD(0), crcActual(0) {}
     };
 
     /**

@@ -685,15 +685,45 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
 
     o_crc_sections.clear();
 
-    // SPD data that has CRC (per DDIMM spec)
-    crc_section_t l_sections[] = {
-        {    0,  128 }, //0:125+126:127
-        {  192,  256 }, //192:445+446:447
-        { 1024,  128 }, //1024:1149+1150:1151
-        { 1152,  128 }, //1152:1277+1278:1279
-        { 1280,  128 }, //1280:1405+1406:1407
-        { 3456,  128 }  //3456:3581+3582:3583
-    };
+    // Read the Basic Memory Type
+    SPD::spdMemType_t    l_memType   (SPD::MEM_TYPE_INVALID);
+    SPD::spdModType_t    l_memMod    (SPD::MOD_TYPE_INVALID);
+    SPD::dimmModHeight_t l_memHeight (SPD::DDIMM_MOD_HEIGHT_INVALID);
+
+    l_errl = SPD::getMemInfo(i_target, l_memType, l_memMod, l_memHeight);
+    if (l_errl)
+    {
+        TRACFCOMP( g_trac_spd, "getMemInfo failed on %.08X", T::get_huid(i_target) );
+        return l_errl;
+    }
+
+    std::vector <crc_section_t> l_sections;
+
+    l_sections.push_back(crc_section_t(0, 128));       // common to DDR4/DDR5
+
+    if (!Util::isSimicsRunning())
+    {
+        // skip serial number CRC in simics
+        l_sections.push_back(crc_section_t(192, 256)); // common to DDR4/DDR5
+    }
+
+    if (l_memType == SPD::DDR5_TYPE)
+    {
+        // DDR5 SPD data that has CRC (per DDIMM spec)
+        l_sections.push_back(crc_section_t(512,  128));
+        l_sections.push_back(crc_section_t(1024, 512));
+        l_sections.push_back(crc_section_t(1536, 512));
+        l_sections.push_back(crc_section_t(2048, 512));
+        l_sections.push_back(crc_section_t(3456, 128));
+    }
+    else
+    {
+        // DDR4 SPD data that has CRC (per DDIMM spec)
+        l_sections.push_back(crc_section_t(1024, 128));
+        l_sections.push_back(crc_section_t(1152, 128));
+        l_sections.push_back(crc_section_t(1280, 128));
+        l_sections.push_back(crc_section_t(3456, 128));
+    }
 
     // Remember if we found a miscompare and if we repaired it
     bool l_foundMiscompare = false;
@@ -745,10 +775,7 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
                    i_location );
             TRACFBIN( g_trac_spd, "SPD Data", l_spddata, l_section.numbytes );
 
-// DDR5 SPD currently has a CRC issue that causes miscompares, which fails the boot
-#ifndef CONFIG_ODYSSEY_BRINGUP
             l_foundMiscompare = true;
-#endif
 
             // Write the new CRC out to the SPD if asked
             if( (FIX == i_mode) || (CHECK_AND_FIX == i_mode) )
