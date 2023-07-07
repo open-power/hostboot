@@ -561,10 +561,11 @@ uint32_t __odyConvertMssMcbistAddr( ExtensibleChip * i_chip,
     uint64_t col     = i_addr.get_column();
 
     // Adjust the address components based on what is configured.
-    bool twoPortConfig, col3Config, col10Config, bank1Config;
+    bool twoPortConfig, col3Config, col10Config, bank1Config, bankGrp2Config;
     uint8_t prnkBits, srnkBits, extraRowBits;
     o_rc = MemUtils::odyGetAddrConfig( i_chip, port, twoPortConfig, prnkBits,
-        srnkBits, extraRowBits, col3Config, col10Config, bank1Config );
+        srnkBits, extraRowBits, col3Config, col10Config, bank1Config,
+        bankGrp2Config );
     if ( SUCCESS != o_rc )
     {
         PRDF_ERR( PRDF_FUNC "Failure from odyGetAddrConfig" );
@@ -593,6 +594,12 @@ uint32_t __odyConvertMssMcbistAddr( ExtensibleChip * i_chip,
         if ( !bank1Config )
         {
             bnk = ((bnk >> 1) << 1);
+        }
+
+        // Check if bank group 2 is configured
+        if ( !bankGrp2Config )
+        {
+            bnk_grp = ((bnk_grp >> 1) << 1);
         }
     }
 

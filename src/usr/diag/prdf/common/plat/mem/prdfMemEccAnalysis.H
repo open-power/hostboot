@@ -223,10 +223,11 @@ bool queryIueTh( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
  * @brief  Will mask off an entire memory port. At runtime will issue dynamic
  *         memory deallocation of the port.
  * @param  i_chip OCMB chip
+ * @param  i_port   Target port select.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
  */
 template<TARGETING::TYPE T>
-uint32_t maskMemPort( ExtensibleChip * i_chip );
+uint32_t maskMemPort( ExtensibleChip * i_chip, uint8_t i_port );
 
 #endif
 

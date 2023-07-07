@@ -114,11 +114,11 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 #ifdef __HOSTBOOT_MODULE
 
 template<>
-uint32_t maskMemPort<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+uint32_t maskMemPort<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, uint8_t i_port )
 {
     #define PRDF_FUNC "[MemEcc::maskMemPort<TYPE_OCMB_CHIP>] "
 
-    // TODO Odyssey - need port passed in
+    // TODO Odyssey - register updates
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
@@ -198,11 +198,10 @@ uint32_t maskMemPort<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
         #ifdef __HOSTBOOT_RUNTIME
 
         // Dynamically deallocate the port.
-        // TODO Odyssey - need port
-        if ( SUCCESS != MemDealloc::port<TYPE_OCMB_CHIP>( i_chip, 0 ) )
+        if ( SUCCESS != MemDealloc::port<TYPE_OCMB_CHIP>( i_chip, i_port ) )
         {
-            PRDF_ERR( PRDF_FUNC "MemDealloc::port<TYPE_OCMB_CHIP>(0x%08x) "
-                      "failed", i_chip->getHuid() );
+            PRDF_ERR( PRDF_FUNC "MemDealloc::port<TYPE_OCMB_CHIP>(0x%08x,%x) "
+                      "failed", i_chip->getHuid(), i_port );
         }
 
         #endif
@@ -870,11 +869,11 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             // the error log has been committed.
 
             // Mask off the entire port to avoid collateral.
-            o_rc = MemEcc::maskMemPort<TYPE_OCMB_CHIP>( i_chip );
+            o_rc = MemEcc::maskMemPort<TYPE_OCMB_CHIP>( i_chip, i_port );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "MemEcc::maskMemPort(0x%08x) failed",
-                          i_chip->getHuid() );
+                PRDF_ERR( PRDF_FUNC "MemEcc::maskMemPort(0x%08x,%x) failed",
+                          i_chip->getHuid(), i_port );
                 break;
             }
         }

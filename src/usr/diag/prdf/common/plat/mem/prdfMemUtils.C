@@ -803,8 +803,6 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
     PRDF_ASSERT( nullptr != i_omi );
     PRDF_ASSERT( TYPE_OMI == getTargetType(i_omi) );
 
-    // TODO Odyssey - need updates for regs, input port
-
     do
     {
         // No cleanup if this is a checkstop attention.
@@ -889,8 +887,25 @@ void __cleanupChnlFail<TYPE_OMI>( TargetHandle_t i_omi,
         //   During runtime, send a dynamic memory deallocation message.
         //   During Memory Diagnostics, tell MDIA to stop pattern tests.
         #ifdef __HOSTBOOT_RUNTIME
-        // TODO Odyssey - need port, maybe both?
-        MemDealloc::port<TYPE_OCMB_CHIP>( ocmbChip, 0 );
+
+        // For Odyssey, send a dynamic memory deallocation message for both
+        // ports if they are enabled.
+        uint8_t maxPorts = MAX_PORT_PER_EXP_OCMB;
+        if (isOdysseyOcmb(ocmb))
+        {
+            maxPorts = MAX_PORT_PER_ODY_OCMB;
+        }
+
+        for (uint8_t port = 0; port < maxPorts; port++)
+        {
+            // Check if the MEM_PORT target exists
+            TargetHandle_t memport = getConnectedChild(ocmb, TYPE_MEM_PORT,
+                                                       port);
+            if (nullptr == memport)
+                continue;
+
+            MemDealloc::port<TYPE_OCMB_CHIP>( ocmbChip, port );
+        }
         #else
         if ( isInMdiaMode() )
         {
@@ -1023,7 +1038,7 @@ uint32_t expGetAddrConfig( ExtensibleChip * i_chip, uint8_t i_dslct,
 uint32_t odyGetAddrConfig( ExtensibleChip * i_chip, uint8_t i_portSlct,
     bool & o_twoPortConfig, uint8_t & o_prnkBits, uint8_t & o_srnkBits,
     uint8_t & o_extraRowBits, bool & o_col3Config, bool & o_col10Config,
-    bool & o_bank1Config)
+    bool & o_bank1Config, bool & o_bankGrp2Config)
 {
     #define PRDF_FUNC "[MemUtils::odyGetAddrConfig] "
 
@@ -1093,6 +1108,9 @@ uint32_t odyGetAddrConfig( ExtensibleChip * i_chip, uint8_t i_portSlct,
 
     // Check whether bank1 is enabled
     if ( mc_addr_trans2.isBitSet(i_portSlct ? 34:33) ) o_bank1Config = true;
+
+    // Check whether bank_group2 is enabled
+    if ( mc_addr_trans2.isBitSet(i_portSlct ? 58:57) ) o_bankGrp2Config = true;
 
     return o_rc;
 
