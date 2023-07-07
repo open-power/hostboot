@@ -53,6 +53,10 @@
 #include <fapiwrap/fapiWrapif.H>
 #endif
 
+//needed for FSP
+#ifndef __HOSTBOOT_MODULE
+#include <hwasSpd.H>
+#endif
 
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
@@ -469,7 +473,6 @@ errlHndl_t discoverOcmbDependentTargetsAndEnable(const Target &i_sysTarget)
         }
         if( l_err ) { break; }
 
-#ifdef __HOSTBOOT_MODULE
         // The MEM_PORTs and downstream DIMMs could be forced non-present and
         //  also non-functional depending on SPD
 
@@ -605,7 +608,6 @@ errlHndl_t discoverOcmbDependentTargetsAndEnable(const Target &i_sysTarget)
 
         }
         if( l_err ) { break; }
-#endif // #ifdef __HOSTBOOT_MODULE
 
     } while (0);
 
