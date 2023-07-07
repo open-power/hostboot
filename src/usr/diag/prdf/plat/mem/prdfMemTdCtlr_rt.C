@@ -856,20 +856,37 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
 
     do
     {
-        // TODO Odyssey - reg updates
         // Check if maintenance command complete attention is set.
-        SCAN_COMM_REGISTER_CLASS * mcbistfir =
-                                iv_chip->getRegister("MCBISTFIR");
-        o_rc = mcbistfir->Read();
-        if ( SUCCESS != o_rc )
+        if (isOdysseyOcmb(iv_chip->getTrgt()))
         {
-            PRDF_ERR( PRDF_FUNC "Read() failed on MCBISTFIR");
-            break;
-        }
+            SCAN_COMM_REGISTER_CLASS * mcbistfir =
+                iv_chip->getRegister("MCBIST_FIR");
+            o_rc = mcbistfir->Read();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Read() failed on MCBIST_FIR");
+                break;
+            }
 
-        // If there is a command complete attention, nothing to do, break out.
-        if ( mcbistfir->IsBitSet(10) )
-            break;
+            // If there is a command complete attention, nothing to do, break out.
+            if ( mcbistfir->IsBitSet(11) )
+                break;
+        }
+        else
+        {
+            SCAN_COMM_REGISTER_CLASS * mcbistfir =
+                iv_chip->getRegister("MCBISTFIR");
+            o_rc = mcbistfir->Read();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Read() failed on MCBISTFIR");
+                break;
+            }
+
+            // If there is a command complete attention, nothing to do, break out.
+            if ( mcbistfir->IsBitSet(10) )
+                break;
+        }
 
 
         // Check if a command is not running.
@@ -886,16 +903,32 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
         // If a command is not running, set command complete attn, break.
         if ( !mcb_cntlstat->IsBitSet(0) )
         {
-            SCAN_COMM_REGISTER_CLASS * mcbistfir_or =
-                iv_chip->getRegister("MCBISTFIR_OR");
-            mcbistfir_or->SetBit( 10 );
-
-            mcbistfir_or->Write();
-            if ( SUCCESS != o_rc )
+            if (isOdysseyOcmb(iv_chip->getTrgt()))
             {
-                PRDF_ERR( PRDF_FUNC "Write() failed on MCBISTFIR_OR" );
+                SCAN_COMM_REGISTER_CLASS * mcbistfir_or =
+                    iv_chip->getRegister("MCBIST_FIR_OR");
+                mcbistfir_or->SetBit( 11 );
+
+                mcbistfir_or->Write();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "Write() failed on MCBIST_FIR_OR" );
+                }
+                break;
             }
-            break;
+            else
+            {
+                SCAN_COMM_REGISTER_CLASS * mcbistfir_or =
+                    iv_chip->getRegister("MCBISTFIR_OR");
+                mcbistfir_or->SetBit( 10 );
+
+                mcbistfir_or->Write();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "Write() failed on MCBISTFIR_OR" );
+                }
+                break;
+            }
         }
 
         // Check if there are unverified chip marks.

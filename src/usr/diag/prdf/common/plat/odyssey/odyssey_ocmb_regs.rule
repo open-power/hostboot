@@ -101,6 +101,14 @@
     # Odyssey chip MCBIST_FIR
     ############################################################################
 
+    register MCBIST_FIR_OR
+    {
+        name        "Odyssey OCMB target MCBIST_FIR OR";
+        scomaddr    0x08011401;
+        capture     group never;
+        access      write_only;
+    };
+
     register MBSEC0
     {
         name        "Odyssey chip MBS Memory Scrub/Read Error Counter Reg 0";
