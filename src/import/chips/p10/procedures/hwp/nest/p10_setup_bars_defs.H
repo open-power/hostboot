@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019                             */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -241,6 +241,29 @@ struct p10_setup_bars_addr_range
     uint64_t end_addr() const
     {
         return(base_addr + size - 1);
+    }
+
+    // overload operator for set usage
+    bool operator<(const p10_setup_bars_addr_range& rhs) const
+    {
+        // both valid/invalid
+        if (enabled == rhs.enabled)
+        {
+            return (base_addr < rhs.base_addr);
+        }
+
+        return rhs.enabled;
+    }
+
+    // check for adjacent/abutting ranges
+    bool abuts(const p10_setup_bars_addr_range& range_compare) const
+    {
+        // if either range is disabled, return false
+        return(enabled &&
+               range_compare.enabled &&
+               !(this->overlaps(range_compare)) &&
+               ((base_addr == (range_compare.end_addr() + 1)) ||
+                ((end_addr() + 1) == range_compare.base_addr)));
     }
 
     // check for overlapping ranges

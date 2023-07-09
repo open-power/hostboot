@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -537,14 +537,14 @@ fapi2::ReturnCode p10_fbc_utils_get_chip_base_address(
     }
     else
     {
-        //mirrored start => m = 0b00 ; nm = 0b01/0b10 ; mmi0 = 0b11
+        //mirrored start => m = 0b00 ; nm = 0b10/0b01 ; mmi0 = 0b11
         o_base_address_m = l_base_address();
-        l_base_address.setBit<FABRIC_ADDR_MSEL_END_BIT>();
-        o_base_address_nm0 = l_base_address();
-        l_base_address.clearBit<FABRIC_ADDR_MSEL_END_BIT>();
         l_base_address.setBit<FABRIC_ADDR_MSEL_START_BIT>();
-        o_base_address_nm1 = l_base_address();
+        o_base_address_nm0 = l_base_address();
+        l_base_address.clearBit<FABRIC_ADDR_MSEL_START_BIT>();
         l_base_address.setBit<FABRIC_ADDR_MSEL_END_BIT>();
+        o_base_address_nm1 = l_base_address();
+        l_base_address.setBit<FABRIC_ADDR_MSEL_START_BIT>();
         o_base_address_mmio = l_base_address();
     }
 
