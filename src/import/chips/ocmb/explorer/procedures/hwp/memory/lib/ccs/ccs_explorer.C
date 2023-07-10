@@ -56,6 +56,44 @@ namespace mss
 {
 namespace ccs
 {
+
+///
+/// @brief Configures registers for concurrent CCS execution - EXPLORER specialization
+/// @param[in] i_target The MC target
+/// @param[out] o_modeq_reg A buffer to return the original value of modeq
+/// @param[in] i_nttm_mode state to write to the NTTM mode bit (default false)
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <>
+fapi2::ReturnCode config_ccs_regs_for_concurrent<mss::mc_type::EXPLORER>(const
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        fapi2::buffer<uint64_t>& o_modeq_reg,
+        const mss::states i_nttm_mode)
+{
+    using TT = ccsTraits<mss::mc_type::EXPLORER>;
+
+    // Use a temp buffer to save original settings
+    fapi2::buffer<uint64_t> l_temp = 0;
+
+    // Configure modeq register
+    FAPI_TRY(mss::getScom(i_target, TT::MODEQ_REG, o_modeq_reg));
+    l_temp = o_modeq_reg;
+    l_temp.template writeBit<TT::NTTM_MODE>(i_nttm_mode); // 1 = nontraditional transparent mode
+    l_temp.template clearBit<TT::STOP_ON_ERR>();          // 1 = stop on ccs error
+    l_temp.template setBit<TT::UE_DISABLE>();             // 1 = hardware ignores UEs
+    l_temp.template setBit<TT::COPY_CKE_TO_SPARE_CKE>();  // 1 = copy CKE to spare CKE
+    l_temp.template setBit<TT::CFG_PARITY_AFTER_CMD>();   // 1 = OE driven on parity cycle
+    l_temp.template setBit<TT::IDLE_PAT_ACTN>();          // ACTn Idle TK fixup
+    l_temp.template setBit<TT::IDLE_PAT_ADDRESS_16>();    // RASn Idle
+    l_temp.template setBit<TT::IDLE_PAT_ADDRESS_15>();    // CASn Idle
+    l_temp.template setBit<TT::IDLE_PAT_ADDRESS_14>();    // WEn Idle
+    l_temp.template clearBit<TT::ARR0_DDR_PARITY>();      // 0 = hardware sets parity
+    FAPI_TRY(mss::putScom(i_target, TT::MODEQ_REG, l_temp));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Configures the CCS engine
 /// @param[in] i_target the target on which to operate

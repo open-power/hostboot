@@ -488,28 +488,6 @@ fapi2::ReturnCode config_ccs_regs(const fapi2::Target<PT::MC_TARGET_TYPE>& i_mc_
                                   const fapi2::Target<PT::PORT_TYPE>& i_mem_port_target,
                                   fapi2::buffer<uint64_t>& o_modeq_reg);
 
-///
-/// @brief Sets config registers to passed values
-/// @tparam MC the memory controller type which executes the CCS instruction
-/// @tparam TT ccsTraits for MC
-/// @tparam PT portTraits for MC
-/// @param[in] i_mc_target The MC target
-/// @param[in] i_mem_port_target The Mem Port target
-/// @param[in] i_modeq_reg The value to set modeq
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-template <mss::mc_type MC, typename TT = ccsTraits<MC>, typename PT = mss::portTraits<MC> >
-fapi2::ReturnCode revert_config_regs(const fapi2::Target<PT::MC_TARGET_TYPE>& i_mc_target,
-                                     const fapi2::Target<PT::PORT_TYPE>& i_mem_port_target,
-                                     const fapi2::buffer<uint64_t>& i_modeq_reg)
-{
-    // Configure ccs mode register:
-    FAPI_TRY(mss::putScom(i_mc_target, TT::MODEQ_REG, i_modeq_reg));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
 } // row repair
 } // mss
 #endif

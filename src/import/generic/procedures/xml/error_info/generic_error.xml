@@ -2052,6 +2052,36 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_CCS_STUCK_IN_PROGRESS</rc>
+    <description>
+        CCS engine is in use and is not available
+    </description>
+    <ffdc>MC_TARGET</ffdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MCBIST_STUCK_IN_PROGRESS</rc>
+    <description>
+        MCBIST engine is in use and is not available
+    </description>
+    <ffdc>MC_TARGET</ffdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_INVALID_PRIMARY_RANK_COUNT</rc>
     <description>
         Invalid number of primary ranks per port retrieved

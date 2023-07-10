@@ -690,13 +690,13 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
 
             // Run ccs instruction setup
             FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),
-                      "Error setting up ccs instructions in registers on " TARGTIDFORMAT, TARGTID );
+                      "Error setting up ccs instructions in registers on " TARGTIDFORMAT, TARGTID);
 
             FAPI_INF("executing CCS array for port %d " TARGTIDFORMAT, l_port_index, GENTARGTID(p));
             FAPI_TRY( select_ports<MC>( i_target, l_port_index, io_program.iv_channel_select),
-                      "Error in port select for " TARGTIDFORMAT, TARGTID );
+                      "Error in port select for " TARGTIDFORMAT, TARGTID);
             FAPI_TRY( execute_inst_array<MC>(i_target, io_program, p),
-                      "Error in executing ccs array for " TARGTIDFORMAT, TARGTID );
+                      "Error in executing ccs array for " TARGTIDFORMAT, TARGTID);
         }
     }
 
@@ -705,6 +705,127 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
 
 fapi_try_exit:
     io_program.iv_instructions.clear();
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup CCS and MCBIST before running concurrent CCS
+/// @tparam MC the memory controller type running CCS
+/// @tparam T the target type of the memory controller which executes the CCS instruction
+/// @tparam TT the CCS traits of the memory controller which executes the CCS instruction
+/// @tparam MT the MCBIST traits of the memory controller which executes the CCS instruction
+/// @param[in] i_target the memory controller target
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template<mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC>, typename MT = mcbistTraits<MC, T>>
+fapi2::ReturnCode stop_ccs_and_mcbist(const fapi2::Target<T>& i_target)
+{
+    fapi2::buffer<uint64_t> l_mcbist_status;
+    fapi2::buffer<uint64_t> l_ccs_status;
+    bool l_poll_result = false;
+
+    // Stop the CCS engine
+    FAPI_TRY( mss::ccs::start_stop<MC>(i_target, mss::states::STOP),
+              "Error stopping CCS engine before ccs::execution on "
+              TARGTIDFORMAT, TARGTID );
+
+    // Verify that the in-progress bit has not been set for CCS, meaning no other CCS is running
+    l_poll_result = mss::poll(i_target, TT::STATQ_REG, poll_parameters(),
+                              [i_target](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_INF(TARGTIDFORMAT " ccs statq (stop) " UINT64FORMAT ", remaining: %d",
+        TARGTID, UINT64_VALUE(stat_reg), poll_remaining);
+        // We're done polling when we see ccs is not in progress.
+        return stat_reg.getBit<TT::CCS_IN_PROGRESS>() != 1;
+    });
+
+    // Check that ccs is not being used after poll
+    FAPI_ASSERT(l_poll_result == true,
+                fapi2::MSS_CCS_STUCK_IN_PROGRESS().
+                set_MC_TARGET(i_target),
+                TARGTIDFORMAT
+                " CCS engine is in use and is not available for execution",
+                TARGTID);
+
+    // Stop any ongoing MCBIST command
+    FAPI_TRY( mss::memdiags::stop<MC>(i_target) );
+
+    // Verify that the in-progress bit has not been set for MCBIST, meaning the MCBIST is free
+    l_poll_result = mss::poll(i_target, MT::STATQ_REG, poll_parameters(),
+                              [i_target](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_INF(TARGTIDFORMAT " mcbist statq (stop) " UINT64FORMAT ", remaining: %d",
+        TARGTID, UINT64_VALUE(stat_reg), poll_remaining);
+        // We're done polling when we see mcbist is not in progress.
+        return stat_reg.getBit<MT::MCBIST_IN_PROGRESS>() != 1;
+    });
+
+    // Check that mcbist is not being used after poll
+    FAPI_ASSERT(l_poll_result == true,
+                fapi2::MSS_MCBIST_STUCK_IN_PROGRESS().
+                set_MC_TARGET(i_target),
+                TARGTIDFORMAT
+                " MCBIST engine is in use and is not available for execution",
+                TARGTID);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup before running concurrent CCS
+/// @tparam MC the memory controller type running CCS
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @param[in] i_target the ocmb chip target
+/// @param[out] o_value returns the original value of FARB0Q
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template<mss::mc_type MC, fapi2::TargetType T>
+fapi2::ReturnCode pre_execute_via_mcbist(const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_value);
+
+///
+/// @brief Setup after running concurrent CCS
+/// @tparam MC the memory controller type running CCS
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @param[in] i_target the ocmb chip target
+/// @param[in] i_value value of FARB0Q to be restored
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template<mss::mc_type MC, fapi2::TargetType T>
+fapi2::ReturnCode post_execute_via_mcbist(const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_value);
+
+///
+/// @brief Configures registers for concurrent CCS execution
+/// @tparam MC the memory controller type which executes the CCS instruction
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT ccsTraits for MC
+/// @param[in] i_target The MC target
+/// @param[out] o_modeq_reg A buffer to return the original value of modeq
+/// @param[in] i_nttm_mode state to write to the NTTM mode bit (default false)
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC>>
+fapi2::ReturnCode config_ccs_regs_for_concurrent(const fapi2::Target<T>& i_target,
+        fapi2::buffer<uint64_t>& o_modeq_reg,
+        const mss::states i_nttm_mode = mss::states::OFF);
+
+///
+/// @brief Sets config registers to passed values
+/// @tparam MC the memory controller type which executes the CCS instruction
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT ccsTraits for MC
+/// @param[in] i_target The MC target
+/// @param[in] i_modeq_reg The value to set modeq
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC>>
+fapi2::ReturnCode revert_config_regs(const fapi2::Target<T>& i_target,
+                                     const fapi2::buffer<uint64_t>& i_modeq_reg)
+{
+    // Configure ccs mode register:
+    FAPI_TRY(mss::putScom(i_target, TT::MODEQ_REG, i_modeq_reg));
+
+fapi_try_exit:
     return fapi2::current_err;
 }
 

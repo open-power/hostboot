@@ -65,48 +65,6 @@
 namespace mss
 {
 
-namespace row_repair
-{
-
-///
-/// @brief Configures registers for ccs repair execution - Explorer specialization
-/// @param[in] i_mc_target The MC target
-/// @param[in] i_mem_port_target The Mem Port target
-/// @param[out] o_modeq_reg A buffer to return the original value of modeq
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-template <>
-fapi2::ReturnCode config_ccs_regs<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
-        i_mc_target,
-        const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_mem_port_target,
-        fapi2::buffer<uint64_t>& o_modeq_reg)
-{
-    using TT = ccsTraits<mss::mc_type::EXPLORER>;
-
-    // Use a temp buffer to save original settings
-    fapi2::buffer<uint64_t> l_temp = 0;
-
-    // Configure modeq register
-    FAPI_TRY(mss::getScom(i_mc_target, TT::MODEQ_REG, o_modeq_reg));
-    l_temp = o_modeq_reg;
-    l_temp.template clearBit<TT::NTTM_MODE>();            // 1 = nontraditional transparent mode
-    l_temp.template clearBit<TT::STOP_ON_ERR>();          // 1 = stop on ccs error
-    l_temp.template setBit<TT::UE_DISABLE>();             // 1 = hardware ignores UEs
-    l_temp.template setBit<TT::COPY_CKE_TO_SPARE_CKE>();  // 1 = copy CKE to spare CKE
-    l_temp.template setBit<TT::CFG_PARITY_AFTER_CMD>();   // 1 = OE driven on parity cycle
-    l_temp.template setBit<TT::IDLE_PAT_ACTN>();          // ACTn Idle TK fixup
-    l_temp.template setBit<TT::IDLE_PAT_ADDRESS_16>();    // RASn Idle
-    l_temp.template setBit<TT::IDLE_PAT_ADDRESS_15>();    // CASn Idle
-    l_temp.template setBit<TT::IDLE_PAT_ADDRESS_14>();    // WEn Idle
-    l_temp.template clearBit<TT::ARR0_DDR_PARITY>();      // 0 = hardware sets parity
-    FAPI_TRY(mss::putScom(i_mc_target, TT::MODEQ_REG, l_temp));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-} // namespace row_repair
-
 namespace exp
 {
 
@@ -839,9 +797,9 @@ fapi2::ReturnCode maint_row_repair( const mss::rank::info<mss::mc_type::EXPLORER
     FAPI_INF("%s Deploying maint row repair during ipl", mss::c_str(l_ocmb_target));
 
     // EXECUTE CCS ARRAY
-    FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
+    FAPI_TRY( mss::ccs::config_ccs_regs_for_concurrent<mss::mc_type::EXPLORER>(l_ocmb_target, l_modeq_reg) );
     FAPI_TRY( mss::ccs::execute<mss::mc_type::EXPLORER>(l_ocmb_target, l_program, l_port_target) );
-    FAPI_TRY( mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
+    FAPI_TRY( mss::ccs::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_modeq_reg) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -880,7 +838,7 @@ fapi2::ReturnCode hppr_row_repair( const mss::rank::info<mss::mc_type::EXPLORER>
     FAPI_INF("%s Deploying hPPR row repair", mss::c_str(l_ocmb_target));
 
     // EXECUTE CCS ARRAY
-    FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
+    FAPI_TRY( mss::ccs::config_ccs_regs_for_concurrent<mss::mc_type::EXPLORER>(l_ocmb_target, l_modeq_reg) );
     FAPI_TRY( mss::ccs::execute<mss::mc_type::EXPLORER>(l_ocmb_target, l_program, l_port_target) );
 
     // Delay for tPGM (1 second for x4 and x8 DIMMs - setting to 2 seconds for further safety)
@@ -896,7 +854,7 @@ fapi2::ReturnCode hppr_row_repair( const mss::rank::info<mss::mc_type::EXPLORER>
 
     // EXECUTE CCS ARRAY
     FAPI_TRY( mss::ccs::execute<mss::mc_type::EXPLORER>(l_ocmb_target, l_program, l_port_target) );
-    FAPI_TRY( mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
+    FAPI_TRY( mss::ccs::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_modeq_reg) );
 
     // Turn refresh back on
     FAPI_TRY(mss::change_refresh_enable<mss::mc_type::EXPLORER>(l_port_target, mss::states::HIGH));
@@ -1007,7 +965,7 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::EXPLOR
     FAPI_INF("%s Deploying dynamic row repair", mss::c_str(l_ocmb_target));
 
     // Configure CCS regs for execution
-    FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg ) );
+    FAPI_TRY( mss::ccs::config_ccs_regs_for_concurrent<mss::mc_type::EXPLORER>(l_ocmb_target, l_modeq_reg ) );
 
     // Disable zq cal before Concurrent CCS
     FAPI_TRY( mss::exp::workarounds::disable_zq_cal(l_ocmb_target, l_reg_data));
@@ -1020,7 +978,7 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::EXPLOR
 
     // Revert CCS regs after execution
     // NOTE: May require MCBIST restoration for exp_background_scrub
-    FAPI_TRY( mss::row_repair::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_port_target, l_modeq_reg) );
+    FAPI_TRY( mss::ccs::revert_config_regs<mss::mc_type::EXPLORER>(l_ocmb_target, l_modeq_reg) );
 
 fapi_try_exit:
     return fapi2::current_err;

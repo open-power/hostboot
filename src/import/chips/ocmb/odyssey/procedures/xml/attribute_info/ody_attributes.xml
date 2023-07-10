@@ -171,7 +171,8 @@
             for polling during the mss_thermal_init step.
         </description>
         <valueType>uint8</valueType>
-        <default>5</default>
+        <!-- Setting to zero until the SBE portion and toggling in and out of scrub is guaranteed to work -->
+        <initToZero></initToZero>
         <writeable/>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>

@@ -77,25 +77,7 @@ fapi2::ReturnCode config_ccs_regs<mss::mc_type::ODYSSEY>(const fapi2::Target<fap
         const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_mem_port_target,
         fapi2::buffer<uint64_t>& o_modeq_reg)
 {
-    using TT = ccsTraits<mss::mc_type::ODYSSEY>;
-
-    // Use a temp buffer to save original settings
-    fapi2::buffer<uint64_t> l_temp = 0;
-
-    // Configure modeq register
-    FAPI_TRY(mss::getScom(i_mc_target, TT::MODEQ_REG, o_modeq_reg));
-    l_temp = o_modeq_reg;
-    l_temp.template clearBit<TT::NTTM_MODE>();            // 1 = nontraditional transparent mode
-    l_temp.template clearBit<TT::STOP_ON_ERR>();          // 1 = stop on ccs error
-    l_temp.template setBit<TT::UE_DISABLE>();             // 1 = hardware ignores UEs
-    l_temp.template
-    clearBit<TT::DDR_PARITY_ENABLE>();      // HW drives computes the parity rather than using CCS array's value
-    l_temp.template
-    setBit<TT::IDLE_PAT_ADDRESS_0_13, TT::IDLE_PAT_ADDRESS_0_13_LEN>(); // Setting these to a 1 so the command is a NOP
-    FAPI_TRY(mss::putScom(i_mc_target, TT::MODEQ_REG, l_temp));
-
-fapi_try_exit:
-    return fapi2::current_err;
+    return mss::ccs::config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(i_mc_target, o_modeq_reg);
 }
 
 } // namespace row_repair
@@ -385,19 +367,19 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::ODYSSE
     FAPI_INF(GENTARGTIDFORMAT " Deploying dynamic row repair", GENTARGTID(l_ocmb_target));
 
     // Configure CCS regs for execution
-    FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_port_target, l_modeq_reg ) );
+    FAPI_TRY( mss::ccs::config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg ) );
 
     // Backup ODC_SRQ_MBA_FARB0Q value before running Concurrent CCS
-    FAPI_TRY( mss::ccs::pre_execute_via_mcbist(l_ocmb_target, l_reg_data) );
+    FAPI_TRY( mss::ccs::pre_execute_via_mcbist<mss::mc_type::ODYSSEY>(l_ocmb_target, l_reg_data) );
 
     // Run CCS via MCBIST for Concurrent CCS
     FAPI_TRY( mss::ccs::execute_via_mcbist<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target) );
 
     // Restore ODC_SRQ_MBA_FARB0Q value after running Concurrent CCS
-    FAPI_TRY( mss::ccs::post_execute_via_mcbist(l_ocmb_target, l_reg_data) );
+    FAPI_TRY( mss::ccs::post_execute_via_mcbist<mss::mc_type::ODYSSEY>(l_ocmb_target, l_reg_data) );
 
     // Revert CCS regs after execution
-    FAPI_TRY( mss::row_repair::revert_config_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_port_target, l_modeq_reg) );
+    FAPI_TRY( mss::ccs::revert_config_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -468,13 +450,13 @@ fapi2::ReturnCode standalone_row_repair( const mss::rank::info<mss::mc_type::ODY
     FAPI_INF(GENTARGTIDFORMAT " Deploying row repair using standalone CCS", GENTARGTID(l_ocmb_target));
 
     // Configure CCS regs for execution
-    FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_port_target, l_modeq_reg ) );
+    FAPI_TRY( mss::ccs::config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg ) );
 
     // Run CCS standalone execution
     FAPI_TRY( mss::ccs::execute<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target) );
 
     // Revert CCS regs after execution
-    FAPI_TRY( mss::row_repair::revert_config_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_port_target, l_modeq_reg) );
+    FAPI_TRY( mss::ccs::revert_config_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg) );
 
 fapi_try_exit:
     return fapi2::current_err;

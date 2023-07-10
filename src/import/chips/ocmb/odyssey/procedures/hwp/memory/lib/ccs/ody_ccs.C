@@ -459,12 +459,13 @@ fapi2::ReturnCode cleanup_from_execute<mss::mc_type::ODYSSEY>(const fapi2::Targe
 }
 
 ///
-/// @brief Setup before running concurrent CCS
+/// @brief Setup before running concurrent CCS - ODYSSEY specialization
 /// @param[in] i_target the ocmb chip target
 /// @param[out] o_value returns the original value of ODC_SRQ_MBA_FARB0Q
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-fapi2::ReturnCode pre_execute_via_mcbist(
+template<>
+fapi2::ReturnCode pre_execute_via_mcbist<mss::mc_type::ODYSSEY>(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     fapi2::buffer<uint64_t>& o_value)
 {
@@ -506,12 +507,13 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Setup after running concurrent CCS
+/// @brief Setup after running concurrent CCS - ODYSSEY specialization
 /// @param[in] i_target the ocmb chip target
 /// @param[in] i_value value of ODC_SRQ_MBA_FARB0Q to be restored
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-fapi2::ReturnCode post_execute_via_mcbist(
+template<>
+fapi2::ReturnCode post_execute_via_mcbist<mss::mc_type::ODYSSEY>(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const fapi2::buffer<uint64_t>& i_value)
 {
@@ -543,6 +545,40 @@ fapi2::ReturnCode post_execute_via_mcbist(
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configures registers for concurrent CCS execution - ODYSSEY specialization
+/// @param[in] i_target The MC target
+/// @param[out] o_modeq_reg A buffer to return the original value of modeq
+/// @param[in] i_nttm_mode state to write to the NTTM mode bit (default false)
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <>
+fapi2::ReturnCode config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(const
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        fapi2::buffer<uint64_t>& o_modeq_reg,
+        const mss::states i_nttm_mode)
+{
+    using TT = ccsTraits<mss::mc_type::ODYSSEY>;
+
+    // Use a temp buffer to save original settings
+    fapi2::buffer<uint64_t> l_temp = 0;
+
+    // Configure modeq register
+    FAPI_TRY(mss::getScom(i_target, TT::MODEQ_REG, o_modeq_reg));
+    l_temp = o_modeq_reg;
+    l_temp.template writeBit<TT::NTTM_MODE>(i_nttm_mode); // 1 = nontraditional transparent mode
+    l_temp.template clearBit<TT::STOP_ON_ERR>();          // 1 = stop on ccs error
+    l_temp.template setBit<TT::UE_DISABLE>();             // 1 = hardware ignores UEs
+    l_temp.template
+    clearBit<TT::DDR_PARITY_ENABLE>();      // HW drives computes the parity rather than using CCS array's value
+    l_temp.template
+    setBit<TT::IDLE_PAT_ADDRESS_0_13, TT::IDLE_PAT_ADDRESS_0_13_LEN>(); // Setting these to a 1 so the command is a NOP
+    FAPI_TRY(mss::putScom(i_target, TT::MODEQ_REG, l_temp));
+
 fapi_try_exit:
     return fapi2::current_err;
 }
