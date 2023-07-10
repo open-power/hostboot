@@ -632,34 +632,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
-fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<T>& i_target )
-{
-
-    fapi2::buffer<uint64_t> l_data;
-
-    FAPI_TRY( fapi2::getScom(i_target, TT::FARB9Q_REG, l_data) );
-
-    // Set up noise window triggered calibration
-    l_data.setBit<TT::CFG_CTRLUPD_AFTER_ERR>();
-
-    // Set up periodic calibration
-    l_data.setBit<TT::CFG_MC_PER_CAL_ENABLE>();
-    l_data.insertFromRight<TT::CFG_MC_PER_CAL_INTERVAL_TB,
-                           TT::CFG_MC_PER_CAL_INTERVAL_TB_LEN>(TT::CAL_INTERVAL_TB_16384_CYCLES);
-    l_data.insertFromRight<TT::CFG_MC_PER_CAL_INTERVAL,
-                           TT::CFG_MC_PER_CAL_INTERVAL_LEN>(TT::CAL_INTERVAL_VALUE);
-    l_data.clearBit<TT::CFG_MC_PER_CAL_FIXED_RUN_LENGTH_EN>();
-    l_data.insertFromRight<TT::CFG_MC_PER_CAL_RUN_LENGTH,
-                           TT::CFG_MC_PER_CAL_RUN_LENGTH_LEN>(0);
-    l_data.insertFromRight<TT::CFG_MC_PER_CAL_CTRLUPD_MIN,
-                           TT::CFG_MC_PER_CAL_CTRLUPD_MIN_LEN>(TT::CAL_CTRLUPD_MIN_VALUE);
-
-    FAPI_TRY( fapi2::putScom(i_target, TT::FARB9Q_REG, l_data) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
+fapi2::ReturnCode enable_periodic_cal( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Change the state of the force_str bit

@@ -157,83 +157,6 @@ namespace ody
 {
 
 ///
-/// @brief Enable power management - Odyssey helper for unit testing
-/// @param[in] i_target the target
-/// @param[in] i_pwr_cntrl value of ATTR_MSS_MRW_POWER_CONTROL_REQUESTED
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-fapi2::ReturnCode enable_power_management_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const uint8_t i_pwr_cntrl)
-{
-    using TT = portTraits<mss::mc_type::ODYSSEY>;
-
-    fapi2::buffer<uint64_t> l_rpc0;
-    fapi2::buffer<uint64_t> l_str0;
-
-    // Get the value from attribute and write the corresponding settings to scom registers
-    FAPI_TRY(fapi2::getScom(i_target, TT::MBARPC0Q_REG, l_rpc0));
-    FAPI_TRY(fapi2::getScom(i_target, TT::STR0Q_REG, l_str0));
-
-    switch (i_pwr_cntrl)
-    {
-        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_OFF:
-            {
-                l_rpc0.clearBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>()
-                .clearBit<TT::CFG_LP_CTRL_ENABLE>()
-                .clearBit<TT::CFG_LP_DATA_ENABLE>();
-                l_str0.clearBit<TT::CFG_STR_ENABLE>()
-                .clearBit<TT::CFG_DIS_CLK_IN_STR>();
-                break;
-            }
-
-        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_POWER_DOWN:
-            {
-                l_rpc0.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>()
-                .clearBit<TT::CFG_LP_CTRL_ENABLE>()
-                .clearBit<TT::CFG_LP_DATA_ENABLE>();
-                l_str0.clearBit<TT::CFG_STR_ENABLE>()
-                .clearBit<TT::CFG_DIS_CLK_IN_STR>();
-                break;
-            }
-
-        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR:
-            {
-                l_rpc0.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>()
-                .setBit<TT::CFG_LP_CTRL_ENABLE>()
-                .setBit<TT::CFG_LP_DATA_ENABLE>();
-                l_str0.setBit<TT::CFG_STR_ENABLE>()
-                .clearBit<TT::CFG_DIS_CLK_IN_STR>();
-                break;
-            }
-
-        case fapi2::ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP:
-        default:
-            {
-                l_rpc0.setBit<TT::CFG_MIN_DOMAIN_REDUCTION_ENABLE>()
-                .setBit<TT::CFG_LP_CTRL_ENABLE>()
-                .setBit<TT::CFG_LP_DATA_ENABLE>();
-                l_str0.setBit<TT::CFG_STR_ENABLE>()
-                .setBit<TT::CFG_DIS_CLK_IN_STR>();
-                break;
-            }
-    }
-
-    // Set the MIN_DOMAIN_REDUCTION time
-    l_rpc0.insertFromRight<TT::CFG_MIN_DOMAIN_REDUCTION_TIME, TT::CFG_MIN_DOMAIN_REDUCTION_TIME_LEN>
-    (TT::MIN_DOMAIN_REDUCTION_TIME);
-
-    // Set the ENTER_STR time
-    l_str0.insertFromRight<TT::CFG_ENTER_STR_TIME, TT::CFG_ENTER_STR_TIME_LEN>(TT::ENTER_STR_TIME);
-
-    FAPI_TRY(fapi2::putScom(i_target, TT::MBARPC0Q_REG, l_rpc0));
-    FAPI_TRY(fapi2::putScom(i_target, TT::STR0Q_REG, l_str0));
-
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Initializes the DFI interface
 /// @param[in] i_target the target to check for DFI interface completion
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -314,15 +237,29 @@ template< >
 fapi2::ReturnCode enable_power_management<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target )
 {
-    //Enable Power management based off of mrw_power_control_requested
-    FAPI_INF(TARGTIDFORMAT " Enable Power min max domains", TARGTID);
+    // This function is a no-op; all settings are configured in odyssey_scom
+    return fapi2::FAPI2_RC_SUCCESS;
+}
 
-    uint8_t l_pwr_cntrl = 0;
+///
+/// @brief Enable the MC Periodic calibration functionality - ODYSSEY specialization
+/// @param[in] i_target the target
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template<>
+fapi2::ReturnCode enable_periodic_cal<mss::mc_type::ODYSSEY>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+    using TT = portTraits<mss::mc_type::ODYSSEY>;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           l_pwr_cntrl));
+    fapi2::buffer<uint64_t> l_data;
 
-    FAPI_TRY(mss::ody::enable_power_management_helper(i_target, l_pwr_cntrl));
+    FAPI_TRY( fapi2::getScom(i_target, TT::FARB9Q_REG, l_data) );
+
+    // Enable periodic calibration. Note that settings are done in ody_scominit
+    l_data.setBit<TT::CFG_MC_PER_CAL_ENABLE>();
+
+    FAPI_TRY( fapi2::putScom(i_target, TT::FARB9Q_REG, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;

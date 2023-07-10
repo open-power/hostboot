@@ -55,8 +55,7 @@ constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_18 = 18;
 constexpr uint64_t literal_12 = 12;
 constexpr uint64_t literal_40 = 40;
-constexpr uint64_t literal_1023 = 1023;
-constexpr uint64_t literal_256 = 256;
+constexpr uint64_t literal_128 = 128;
 constexpr uint64_t literal_24 = 24;
 constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_15 = 15;
@@ -157,6 +156,8 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRFC, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRFC));
         fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR_Type l_TGT1_ATTR_MEM_EFF_DRAM_TRFC_DLR;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRFC_DLR));
+        fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_Type l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED, TGT2, l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED));
         uint64_t l_def_NUM_UPPER_ADDR_BITS = (((((l_def_D_EN + l_def_M_EN) + l_def_S2_EN) + l_def_S1_EN) + l_def_R16_EN) +
                                               l_def_C10_EN);
         fapi2::buffer<uint64_t> l_scom_buffer;
@@ -316,11 +317,12 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_1 );
             l_scom_buffer.insert<22, 1, 63, uint64_t>(literal_0 );
             l_scom_buffer.insert<23, 6, 58, uint64_t>(literal_40 );
-            l_scom_buffer.insert<33, 2, 62, uint64_t>(literal_3 );
-            l_scom_buffer.insert<35, 9, 55, uint64_t>(literal_7 );
+            l_scom_buffer.insert<33, 2, 62, uint64_t>(literal_2 );
+            l_scom_buffer.insert<35, 9, 55, uint64_t>(literal_128 );
             l_scom_buffer.insert<44, 1, 63, uint64_t>(literal_0 );
-            l_scom_buffer.insert<45, 10, 54, uint64_t>(literal_1023 );
-            l_scom_buffer.insert<55, 9, 55, uint64_t>(literal_256 );
+            l_scom_buffer.insert<45, 10, 54, uint64_t>(literal_0 );
+            l_scom_buffer.insert<55, 9, 55, uint64_t>(literal_128 );
+            l_scom_buffer.insert<31, 1, 63, uint64_t>(literal_1 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011011ull, l_scom_buffer));
         }
         {
@@ -859,7 +861,38 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8011036ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<22, 1, 63, uint64_t>(literal_0 );
+            l_scom_buffer.insert<22, 1, 63, uint64_t>(literal_1 );
+
+            if ((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_OFF))
+            {
+                l_scom_buffer.insert<23, 10, 54, uint64_t>(literal_64 );
+            }
+            else if ((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_OFF))
+            {
+                l_scom_buffer.insert<23, 10, 54, uint64_t>(literal_4 );
+            }
+
+            if (((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR)
+                 && (l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
+            {
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0 );
+            }
+            else if (((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR)
+                      || (l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
+            {
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            }
+
+            if (((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR)
+                 && (l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
+            {
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(literal_0 );
+            }
+            else if (((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR)
+                      || (l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
+            {
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(literal_1 );
+            }
 
             if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
             {
@@ -907,7 +940,28 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 
             l_scom_buffer.insert<46, 11, 53, uint64_t>(l_def_REFRESH_INTERVAL );
             l_scom_buffer.insert<62, 1, 63, uint64_t>(literal_1 );
-            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0 );
+            l_scom_buffer.insert<2, 10, 54, uint64_t>(literal_8 );
+
+            if (((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR)
+                 && (l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
+            {
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0 );
+            }
+            else if (((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR)
+                      || (l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP)))
+            {
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            }
+
+            if ((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED != ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP))
+            {
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(literal_0 );
+            }
+            else if ((l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED == ENUM_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_PD_AND_STR_CLK_STOP))
+            {
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(literal_1 );
+            }
+
             l_scom_buffer.insert<57, 4, 60, uint64_t>(literal_0 );
             l_scom_buffer.insert<38, 8, 56, uint64_t>(literal_0 );
 

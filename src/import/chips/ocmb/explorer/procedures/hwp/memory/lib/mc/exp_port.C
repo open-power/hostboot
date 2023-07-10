@@ -229,4 +229,40 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Enable the MC Periodic calibration functionality - EXPLORER specialization
+/// @param[in] i_target the target
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template<>
+fapi2::ReturnCode enable_periodic_cal<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+{
+    using TT = portTraits<mss::mc_type::EXPLORER>;
+
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY( fapi2::getScom(i_target, TT::FARB9Q_REG, l_data) );
+
+    // Set up noise window triggered calibration
+    l_data.setBit<TT::CFG_CTRLUPD_AFTER_ERR>();
+
+    // Set up periodic calibration
+    l_data.setBit<TT::CFG_MC_PER_CAL_ENABLE>();
+    l_data.insertFromRight<TT::CFG_MC_PER_CAL_INTERVAL_TB,
+                           TT::CFG_MC_PER_CAL_INTERVAL_TB_LEN>(TT::CAL_INTERVAL_TB_16384_CYCLES);
+    l_data.insertFromRight<TT::CFG_MC_PER_CAL_INTERVAL,
+                           TT::CFG_MC_PER_CAL_INTERVAL_LEN>(TT::CAL_INTERVAL_VALUE);
+    l_data.clearBit<TT::CFG_MC_PER_CAL_FIXED_RUN_LENGTH_EN>();
+    l_data.insertFromRight<TT::CFG_MC_PER_CAL_RUN_LENGTH,
+                           TT::CFG_MC_PER_CAL_RUN_LENGTH_LEN>(0);
+    l_data.insertFromRight<TT::CFG_MC_PER_CAL_CTRLUPD_MIN,
+                           TT::CFG_MC_PER_CAL_CTRLUPD_MIN_LEN>(TT::CAL_CTRLUPD_MIN_VALUE);
+
+    FAPI_TRY( fapi2::putScom(i_target, TT::FARB9Q_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 }// namespace mss
