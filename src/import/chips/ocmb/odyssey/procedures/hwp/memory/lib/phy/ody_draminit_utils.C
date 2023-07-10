@@ -59,6 +59,7 @@
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr12.H>
 
 #if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
+    #include <i2c_access.H>
     // Included for progress / time left reporting (Cronus only)
     #include <ctime>
 #endif
@@ -2795,6 +2796,66 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+// The defines should be removed once GENERICI2C target is added to SBE
+#if (!defined(__HOSTBOOT_MODULE) && !defined(__PPE__))
+///
+/// @brief Gets the RCD target that is needed for the i2c command
+/// @param[in] i_target ocmb chip target
+/// @param[out] o_rc return code of either fapi2::FAPI2_RC_SUCCESS or FAIL
+/// @return RCD target or empty target
+///
+fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER> get_rcd_target(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target, fapi2::ReturnCode& o_rc)
+{
+    // Get the i2c devices and grab only the one that has ATTR_REL_POS set to 1
+    const auto& I2C_DEVICES =
+        mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>(i_target);
+    const uint8_t NUM_GENERICI2CRESPONDER = I2C_DEVICES.size();
+    const uint8_t RCD_TARGET_POSITION = 1;
+    FAPI_ASSERT((NUM_GENERICI2CRESPONDER > RCD_TARGET_POSITION),
+                fapi2::ODY_INVALID_GI2C_TARGET_CONFIG()
+                .set_NUM_GI2CS(NUM_GENERICI2CRESPONDER)
+                .set_RCD_TARGET_POS(RCD_TARGET_POSITION),
+                "Not enough targets %u GI2C, RCD Target position %u",
+                NUM_GENERICI2CRESPONDER,
+                RCD_TARGET_POSITION);
+
+    o_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    return I2C_DEVICES[RCD_TARGET_POSITION];
+
+fapi_try_exit:
+    o_rc = fapi2::current_err;
+
+// return empty target if fails
+    return fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>();
+}
+
+///
+/// @brief Helper function to put together the data sent to i2c command
+/// @param[in] i_rcw_info rcw info that need to be sent to i2c
+/// @param[out] o_rcw_puti2c_data vector to put the i2c data
+/// @return none
+///
+void  assemble_rcw_i2c_data(const rcw_id& i_rcw_info, std::vector<uint8_t>& o_rcw_puti2c_data)
+{
+    constexpr uint32_t l_sidebus_cmd = 0xc6;
+    constexpr uint32_t l_byte_cnt = 0x05;
+
+    // Push the RCW INFO into a vector
+    // I2C write command: Write Byte, Block Mode, PEC Disabled
+    o_rcw_puti2c_data.push_back(l_sidebus_cmd);
+    o_rcw_puti2c_data.push_back(l_byte_cnt);
+    // Reserved data
+    o_rcw_puti2c_data.push_back(0x00);
+    o_rcw_puti2c_data.push_back(i_rcw_info.iv_channel_id);
+    o_rcw_puti2c_data.push_back(i_rcw_info.iv_rcw_page);
+    o_rcw_puti2c_data.push_back(i_rcw_info.iv_rcw_id);
+    o_rcw_puti2c_data.push_back(i_rcw_info.iv_rcw_val);
+    return;
+}
+#endif
+
 ///
 /// @brief Processes an SMBus message request (aka runs an RCW via i2c)
 /// @param[in] i_target the target on which to operate
@@ -2807,9 +2868,19 @@ fapi2::ReturnCode process_smbus_message(const fapi2::Target<fapi2::TARGET_TYPE_M
     // Grabbing an SMBUS message should be relatively quick
     // Only using a loop count of 10 (10 ms) to hopefully allow draminit to run quickly
     constexpr uint64_t LOOP_COUNT = 10;
-
     fapi2::buffer<uint64_t> l_mail;
 
+    // Need to be removed when the GENERICI2C target is added to hostboot and SBE
+#if (!defined(__HOSTBOOT_MODULE) && !defined(__PPE__))
+    fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+    // Byte vector for RCW INFO that is needed for puti2c
+    std::vector<uint8_t> l_rcw_puti2c_data;
+    // Get OCMB target
+    const auto& l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+    // Get RCD target
+    const auto& l_rcd_target = get_rcd_target(l_ocmb_target, l_rc);
+    FAPI_TRY(l_rc);
+#endif
     // SMBus messages (containing data) use the 32 bit interface
     FAPI_TRY(mss::ody::phy::get_mail(i_target, STREAMING_SMBUS_MSG_MODE, LOOP_COUNT, l_mail));
 
@@ -2822,8 +2893,14 @@ fapi2::ReturnCode process_smbus_message(const fapi2::Target<fapi2::TARGET_TYPE_M
         FAPI_INF(TARGTIDFORMAT " RCW page: 0x%02x, RCW val: 0x%02x",
                  TARGTID, l_rcw_info.iv_rcw_page, l_rcw_info.iv_rcw_val);
 
-        // Send the RCW: Note: we cannot do this yet see the below TODO
-        // TODO:ZEN:MST-1541 Add DDR5 RCW writes using i2c when SMBus message is received
+        // Need to be removed when the puti2c commands are updated in hostboot and SBE
+#if (!defined(__HOSTBOOT_MODULE) && !defined(__PPE__))
+        // Get the puti2c data to send it via i2c
+        assemble_rcw_i2c_data(l_rcw_info, l_rcw_puti2c_data);
+
+        // Call the cronus puti2c
+        FAPI_TRY(fapi2::putI2c(l_rcd_target, l_rcw_puti2c_data));
+#endif
     }
 
     // Look for the SMBus complete message (only 16 bits!)

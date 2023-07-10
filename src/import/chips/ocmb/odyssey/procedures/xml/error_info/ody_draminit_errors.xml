@@ -310,4 +310,24 @@
       <target>PORT_TARGET</target>
     </deconfigure>
   </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_INVALID_GI2C_TARGET_CONFIG</rc>
+    <description>Expected 4 GENERICI2CRESPONDER targets</description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>NUM_GI2CS</ffdc>
+    <ffdc>RCD_TARGET_POS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

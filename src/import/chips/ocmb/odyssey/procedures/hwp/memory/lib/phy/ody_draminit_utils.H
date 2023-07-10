@@ -4255,6 +4255,25 @@ fapi2::ReturnCode configure_and_load_dram_train_message_block(const fapi2::Targe
         i_target,
         PMU_SMB_DDR5U_1D_t& io_msg_block);
 
+// The defines should be removed once GENERICI2C target is added to SBE
+#if (!defined(__HOSTBOOT_MODULE) && !defined(__PPE__))
+///
+/// @brief Gets the RCD target that is needed for the i2c command
+/// @param[in] i_target ocmb chip target
+/// @param[out] o_rc return code of either fapi2::FAPI2_RC_SUCCESS or FAIL
+/// @return RCD target or empty target
+///
+fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER> get_rcd_target(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target, fapi2::ReturnCode& o_rc);
+
+///
+/// @brief Helper function to put together the data sent to i2c command
+/// @param[in] i_rcw_info rcw info that need to be sent to i2c
+/// @param[out] o_rcw_puti2c_data vector to put the i2c data
+/// @return none
+///
+void assemble_rcw_i2c_data(const rcw_id& i_rcw_info, std::vector<uint8_t>& o_rcw_puti2c_data);
+#endif
 ///
 /// @brief Processes a streaming message from the mailbox protocol
 /// @param[in] i_target the target on which to operate
