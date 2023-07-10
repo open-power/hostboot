@@ -132,7 +132,11 @@ uint32_t getScom(TARGETING::TargetHandle_t i_target, BitString& io_bs,
         // channel failure. If so, the SCOM logic will have automatically
         // switched over to an alternative method and we'll need to retry the
         // operation.
+        #ifdef __HOSTBOOT_RUNTIME
+        if (SCOM::SCOM_RUNTIME_HYP_ERR == errl->reasonCode())
+        #else
         if (MMIO::RC_MMIO_CHAN_CHECKSTOP == errl->reasonCode())
+        #endif
         {
             PRDF_INF( "deviceRead(0x%08x,0x%016x) failed with reason code "
                       "0x%04x, retrying...", PlatServices::getHuid(i_target),
