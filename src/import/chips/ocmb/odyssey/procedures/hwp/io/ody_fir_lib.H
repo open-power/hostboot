@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/common/io_fir_lib.H $ */
+/* $Source: src/import/chips/ocmb/odyssey/procedures/hwp/io/ody_fir_lib.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file io_fir_lib.H
+/// @file ody_fir_lib.H
 ///
 /// @brief Function lib definition file for IO hwps
 ///
@@ -32,6 +32,7 @@
 /// *HWP FW Maintainer:
 /// *HWP Consumed by: SBE
 ///
+// EKB-Mirror-To: hostboot
 
 #pragma once
 

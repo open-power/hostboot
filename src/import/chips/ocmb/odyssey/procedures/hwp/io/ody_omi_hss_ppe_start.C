@@ -38,7 +38,7 @@
 #include <fapi2_subroutine_executor.H>
 #include <ody_io_ppe_common.H>
 #include <ody_scom_omi_ioo.H>
-#include <io_fir_lib.H>
+#include <ody_fir_lib.H>
 
 //------------------------------------------------------------------------------
 // Function definitions

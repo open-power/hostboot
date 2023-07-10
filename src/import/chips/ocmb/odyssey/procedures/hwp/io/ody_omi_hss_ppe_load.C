@@ -38,7 +38,7 @@
 #include <fapi2_subroutine_executor.H>
 #include <ody_scom_omi_ioo.H>
 #include <ody_putsram.H>
-#include <io_fir_lib.H>
+#include <ody_fir_lib.H>
 #include <ody_io_ppe_common.H>
 
 // Scomt definitions

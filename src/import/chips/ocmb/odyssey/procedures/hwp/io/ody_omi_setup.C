@@ -34,7 +34,7 @@
 #include <ody_io_ppe_common.H>
 #include <ody_scom_omi.H>
 #include <ody_scom_ody.H>
-#include <io_fir_lib.H>
+#include <ody_fir_lib.H>
 
 SCOMT_OMI_USE_D_REG_DL0_ERROR_MASK
 SCOMT_OMI_USE_D_REG_CMN_CONFIG
