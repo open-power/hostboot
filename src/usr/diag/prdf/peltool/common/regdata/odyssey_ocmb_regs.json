@@ -924,6 +924,11 @@
         "description": "Odyssey chip RDF_FIR 1 MASK OR",
         "name": "RDF_FIR_MASK_OR_1"
     },
+    "0xc4db": {
+        "address": "0x0000000008011401",
+        "description": "Odyssey OCMB target MCBIST_FIR OR",
+        "name": "MCBIST_FIR_OR"
+    },
     "0xc537": {
         "address": "0x0000000008011455",
         "description": "Odyssey chip MBS Memory Scrub/Read Error Counter Reg 0",
