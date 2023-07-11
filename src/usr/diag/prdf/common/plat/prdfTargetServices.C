@@ -1043,12 +1043,16 @@ bool isDramWidthX4( TargetHandle_t i_trgt )
 
 template<TARGETING::TYPE T>
 void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
-                       uint8_t i_ds )
+                       uint8_t i_ds );
+
+template<>
+void __getMasterRanks<TYPE_MEM_PORT>( TargetHandle_t i_trgt,
+    std::vector<MemRank> & o_ranks, uint8_t i_ds )
 {
     #define PRDF_FUNC "[__getMasterRanks] "
 
     PRDF_ASSERT( nullptr != i_trgt );
-    PRDF_ASSERT( T == getTargetType(i_trgt) );
+    PRDF_ASSERT( TYPE_MEM_PORT == getTargetType(i_trgt) );
     PRDF_ASSERT( i_ds <= MAX_DIMM_PER_PORT ); // can equal MAX_DIMM_PER_PORT
 
     o_ranks.clear();
@@ -1058,9 +1062,12 @@ void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
     if ( !i_trgt->tryGetAttr<ATTR_MEM_EFF_DIMM_RANKS_CONFIGED>(info) )
     {
         PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_DIMM_RANKS_CONFIGED> "
-                "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+                  "failed: i_trgt=0x%08x", getHuid(i_trgt) );
         PRDF_ASSERT( false ); // attribute does not exist for target
     }
+
+    TargetHandle_t ocmb = getConnectedParent(i_trgt, TYPE_OCMB_CHIP);
+    bool isOdy = isOdysseyOcmb(ocmb);
 
     for ( uint32_t ds = 0; ds < MAX_DIMM_PER_PORT; ds++ )
     {
@@ -1068,16 +1075,41 @@ void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
         if ( (MAX_DIMM_PER_PORT != i_ds) && (ds != i_ds) )
             continue;
 
+        // For Odyssey, the HWP team adjusted the definition of
+        // ATTR_MEM_EFF_DIMM_RANKS_CONFIGED dependent on
+        // ATTR_MEM_EFF_REDUNDANT_CS_EN to adjust on their side for redundant
+        // chip selects. If that attribute is 0, the definition will be
+        // the same, if it is 1, then ATTR_MEM_EFF_DIMM_RANKS_CONFIGED
+        // will show double the number of ranks, e.g. 0xC0 for 1 rank, 0xF0 for
+        // 2 ranks.
+        uint8_t bitMask = 0x80;
+        uint8_t inc = 1;
+        if (isOdy)
+        {
+            uint8_t redunCs[2];
+            if (!i_trgt->tryGetAttr<ATTR_MEM_EFF_REDUNDANT_CS_EN>(redunCs))
+            {
+                PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_MEM_EFF_REDUNDANT_CS_EN> "
+                          "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+                PRDF_ASSERT( false ); // attribute does not exist for target
+            }
+            if (1 == redunCs[ds])
+            {
+                bitMask = 0xC0;
+                inc = 2;
+            }
+        }
+
         uint8_t rankMask = info[ds];
 
         // The configured rank selects are in the first nibble.
-        for ( uint32_t rs = 0; rs < 4; rs++ )
+        for ( uint32_t rs = 0; rs < 4; rs+=inc )
         {
-            if ( 0 != (rankMask & (0x80 >> rs)) )
+            if ( 0 != (rankMask & (bitMask >> rs)) )
             {
                 // Note that the ranks are getting inserted in order so no need
                 // to sort later.
-                o_ranks.push_back( MemRank((ds << 2) | rs) );
+                o_ranks.push_back( MemRank((ds << 2) | (rs/inc)) );
             }
         }
     }
