@@ -40,6 +40,7 @@
 #include <ody_scom_mp.H>
 #include <ody_scom_mp_mastr_b0.H>
 #include <ody_scom_mp_drtub0.H>
+#include <poz_scom_perv_tpchip.H>
 #include <generic/memory/lib/utils/scom.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/fir/ody_fir_traits.H>
@@ -310,7 +311,13 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::ODYSSEY>(const fapi2::Target<f
 
     FAPI_TRY(l_mc_omi_fir_reg.write(), "Failed to Write MC OMI FIR register " GENTARGTIDFORMAT, GENTARGTID(i_target));
 
-    // TODO: Zen:MST-1929: Add code to enable Odyssey FIR interrupts using the global FIR register
+    // Unmask IPOLL bits to enable interrupts
+    FAPI_TRY(fapi2::getScom(i_target, scomt::poz::PCBCTL_COMP_INTR_HOST_MASK_REG, l_reg_data));
+    l_reg_data.clearBit<scomt::poz::PCBCTL_COMP_INTR_HOST_MASK_REG_ERROR_MASK_0>();
+    l_reg_data.clearBit<scomt::poz::PCBCTL_COMP_INTR_HOST_MASK_REG_ERROR_MASK_1>();
+    l_reg_data.clearBit<scomt::poz::PCBCTL_COMP_INTR_HOST_MASK_REG_ERROR_MASK_2>();
+    l_reg_data.clearBit<scomt::poz::PCBCTL_COMP_INTR_HOST_MASK_REG_ERROR_MASK_3>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::poz::PCBCTL_COMP_INTR_HOST_MASK_REG, l_reg_data));
 
 fapi_try_exit:
     return fapi2::current_err;
