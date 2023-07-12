@@ -625,11 +625,8 @@ hb_startsimics()
             exit 1
         fi
 
-        # Set up some ENV vars that SBE simics scripts require
-        export SBEROOT=${SBE_ODY_DIR}
-        export PYTHON_USER_PACKAGE_PATH=$(python3 -m site --user-site)
-        export SBE_PLATFORM=odyssey
-        export SBE_IMAGE=pnor
+        # Get python user site path that SBE simics scripts require
+        PYTHON_USER_PACKAGE_PATH=$(python3 -m site --user-site)
 
         # We don't want to run SBE in VPO mode; pass the SBE image to
         # simics in non-VPO mode
@@ -645,11 +642,11 @@ hb_startsimics()
             #@FIXME-RTC:254475-Remove once this works everywhere
             STARTSIMCMD+=(hb_ignoresmpfail=0)
             if [ -n "${HB_USE_ODYSSEY}" ]; then
-                # TODO JIRA: PFHB-417 SBE and SPPE currently use the same runsim params,
-                # which does not work in this case. Uncomment the SPPE paths once there
-                # are different runsim params for SPPE.
-                #STARTSIMCMD+=(sbe_scripts_path=$SPPE_SCRIPTS_PATH)
-                #STARTSIMCMD+=(sbe_script_to_run=$SPPE_SCRIPT_TO_RUN)
+                ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
+
+                STARTSIMCMD+=(sbe_project_type=odyssey)
+                STARTSIMCMD+=(sbe_image_type=pnor)
+                STARTSIMCMD+=(paths_to_add=$ODY_SBE_DEBUG_DIR,$ODY_SBE_DEBUG_DIR/simics,$PYTHON_USER_PACKAGE_PATH)
                 STARTSIMCMD+=(odyssey_otprom_img=$ODYSSEY_OTPROM_IMG)
                 STARTSIMCMD+=(odyssey_pnor_img=$ODYSSEY_PNOR_IMG)
                 STARTSIMCMD+=(odyssey_srom_img=$ODYSSEY_SROM_IMG)

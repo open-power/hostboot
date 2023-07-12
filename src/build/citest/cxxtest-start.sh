@@ -65,11 +65,8 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         ODYSSEY_PNOR_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_nor_DD1.img.ecc
     fi
 
-    # Set up some ENV vars that SBE simics scripts require
-    export SBEROOT=${SBE_DIR}
-    export PYTHON_USER_PACKAGE_PATH=$(python3 -m site --user-site)
-    export SBE_PLATFORM=odyssey
-    export SBE_IMAGE=pnor
+    # Get python user site path that SBE simics scripts require
+    PYTHON_USER_PACKAGE_PATH=$(python3 -m site --user-site)
 
     export START_SIMICS_CMD=" runsim -m ${MACHINE}"
     START_SIMICS_CMD+=" hb_script_to_run=${STARTUPSIMICS}"
@@ -87,17 +84,18 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         # FIXME JIRA: PFHB-477 copy in customized DDR5 SPD for Odyssey.
         cp /gsa/ausgsa/home/i/s/ismirno/public/debug/odyssey/DDR5_new.bin ${STANDALONE}/simics
 
+        ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
+
         echo "Using DDR5/Odyssey DDIMMs"
         START_SIMICS_CMD+=" dimm_type=ody"
         # Odyssey params
+        START_SIMICS_CMD+=" sbe_project_type=odyssey"
+        START_SIMICS_CMD+=" sbe_image_type=pnor"
+        START_SIMICS_CMD+=" paths_to_add=$ODY_SBE_DEBUG_DIR,$ODY_SBE_DEBUG_DIR/simics,$PYTHON_USER_PACKAGE_PATH"
         START_SIMICS_CMD+=" odyssey_srom_img=${ODYSSEY_SROM_IMG}"
         START_SIMICS_CMD+=" odyssey_otprom_img=${ODYSSEY_OTPROM_IMG}"
         START_SIMICS_CMD+=" odyssey_pnor_img=${ODYSSEY_PNOR_IMG}"
         START_SIMICS_CMD+=" run_till_boot=FALSE"
-        # TODO JIRA: PFHB-417: uncomment these params once simics has
-        # different param names for SPPE startup scripts
-        #START_SIMICS_CMD+=" sbe_script_to_run=${SPPE_SCRIPT_TO_RUN}"
-        #START_SIMICS_CMD+=" sbe_scripts_path=${SPPE_SCRIPTS_PATH}"
     fi
     START_SIMICS_CMD+=" fused_core=TRUE"
     START_SIMICS_CMD+=" xive_gen=2"

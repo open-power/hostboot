@@ -188,6 +188,8 @@ generate_sbe_odyssey_images()
         # new shell that SBE workon spawns to prevent SBE going down the wrong signing path.
         ./sbe workon odyssey pnor <<< 'unset SIGNING_BASE_DIR && ./sbe build && ./sbe prime && exit'
         cd ${PROJECT_ROOT}
+        STANDALONE_SIMICS=${PROJECT_ROOT}/standalone/simics
+        tar -xzvf ${SBE_DIR}/images/odyssey/odyssey_sbe_debug_DD1.tar.gz -C ${STANDALONE_SIMICS}/ || exit 1
     else
         echo "\nSkipping generation of SBE Odyssey images\n"
     fi
