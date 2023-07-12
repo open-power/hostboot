@@ -37,9 +37,11 @@
 #include <devicefw/userif.H>
 #include <fsi/fsiif.H>
 #include <targeting/common/util.H>
+#include <targeting/common/utilFilter.H>
 #include <hw_access_def.H>
 #include <devicefw/driverif.H>
-
+#include <trace/interface.H>
+#include <chipids.H>
 
 extern trace_desc_t* g_trac_scom;
 
@@ -49,9 +51,224 @@ class ScomTestRt: public CxxTest::TestSuite
 public:
 
   /**
-   * @brief runtime SCOM test
+   * @brief Test the Runtime OCMB Odyssey Device Register Interfaces
    *
+   *        Main mission of the test_SCOMreadWrite_ocmb_ody Runtime
+   *        test is to assure that the proper DEVICE_REGISTER_ROUTE
+   *        interfaces are built to properly map the DEVICE request
+   *        to the proper Device Driver (DD) subsystems/interfaces.
+   *
+   *        For example, ibscom.C implements the routeIbScom procedure
+   *        to calculate the proper routing of the OCMB IBSCOM
+   *        ADDRESS to either the EXPLORER or ODYSSEY deviceOp,
+   *        either DEVICE_IBSCOM_EXP_ADDRESS or DEVICE_IBSCOM_ODY_ADDRESS.
+   *
+   *        During the Runtime tests, rtloader.H emulates PHYP, therefore
+   *        some scom/mmio address manipulations are required directly
+   *        in the rtloader.H logic (efforts are made to minimize any
+   *        duplication, however the purpose of these tests are NOT
+   *        the specific deviceOp, but the main purpose here are the
+   *        application layer interfaces in order to achieve the desired
+   *        call/return logic.
    */
+  void test_SCOMreadWrite_ocmb_ody(void)
+  {
+      TRACFCOMP( g_trac_scom, "ScomTest::test_SCOMreadWrite_ocmb_ody> Start" );
+      errlHndl_t l_err = nullptr;
+      uint64_t fails = 0;
+      uint64_t total = 0;
+      size_t op_size = sizeof(uint64_t);
+
+      // ODYSSEY Specific
+      // See doIbscomMulticastWorkaround for more information on masks for parsing addresses
+      constexpr uint64_t CHIPLET1        = 0x010f001e;  // T.TPCHIP.NET.PCBRSPPERV.RESPONDER_CONFIG_REG Responder config register
+      constexpr uint64_t CHIPLET2        = 0x080f001e; //  T.TPCHIP.NET.PCBRSPMC.RESPONDER_CONFIG_REG   Responder config register
+      constexpr uint64_t DATA1           = 0xFEEDB0B000001234;
+      constexpr uint64_t DATA2           = 0xFEDCBA9876543210;
+      constexpr uint64_t MC_OR_ADDR      = 0x470f001e;  // IS_MULTICAST | GROUP_ALL
+      constexpr uint64_t MC_BITWISE_ADDR = 0x570f001e;  // IS_MULTICAST | MULTICAST_OP_BITWISE | GROUP_ALL
+
+      uint64_t l_expected = 0x0ULL;
+
+      // scratch data to use
+      struct {
+          uint64_t addr;
+          uint64_t data;
+      } test_data[] = {
+          { CHIPLET1, DATA1},
+          { CHIPLET2, DATA2},
+      };
+      const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
+
+      // allocate space for read data
+      uint64_t read_data[NUM_ADDRS] = {0};
+
+      do {
+          TARGETING::TargetHandle_t   ocmb_target = nullptr;
+          TARGETING::TargetHandleList ocmb_target_list;
+          getAllChips(ocmb_target_list, TARGETING::TYPE_OCMB_CHIP);
+          if (ocmb_target_list.size() == 0)
+          {
+              TS_INFO("test_SCOMreadWrite_ocmb_ody> No OCMB targets found.  Exiting.");
+              break;
+          }
+          ocmb_target = ocmb_target_list[0]; // pick the first target to test with
+          if ((ocmb_target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional == true) && (ocmb_target->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16))
+          {
+              for ( uint64_t x = 0; x < NUM_ADDRS; x++ ) // First write the OCMB two chiplets with some test data
+              {
+                  total++;
+                  // Buffer passed to deviceWrite will be manipulated (like byte and word swapping) so use a volatile buffer
+                  // so as to not alter the expected test data to later compare results
+                  uint64_t volatile_data = 0x0ULL;
+                  volatile_data = test_data[x].data;
+                  l_err = deviceWrite( ocmb_target,
+                                      &volatile_data,
+                                      op_size,
+                                      DEVICE_SCOM_ADDRESS(test_data[x].addr) );
+                  if( l_err )
+                  {
+                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> x=%d WRITE: Error SCOM addr=0x%llX, RC=%llX", x, test_data[x].addr, l_err->reasonCode() );
+                      fails++;
+                      errlCommit(l_err,SCOM_COMP_ID);
+                  }
+              } // end FOR ALL NUM_ADDRS
+              for ( uint64_t x = 0; x < NUM_ADDRS; x++ ) // Read back what we wrote and compare results on the OCMB two chiplets, id=0x01 and id=0x08
+              {
+                  total++;
+                  l_err = deviceRead( ocmb_target,
+                                      &(read_data[x]),
+                                      op_size,
+                                      DEVICE_SCOM_ADDRESS(test_data[x].addr) );
+                  if( l_err )
+                  {
+                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> x=%d Read: Error SCOM addr=0x%X, RC=%X", x, test_data[x].addr, l_err->reasonCode() );
+                      fails++;
+                      errlCommit(l_err,SCOM_COMP_ID);
+                  }
+                  else if (read_data[x] != test_data[x].data)
+                  {
+                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> x=%d FAILURE !! NO MATCH !! READ -> 0x%llX TEST DATA -> 0x%llX", x, read_data[x], test_data[x].data);
+                      fails++;
+                  }
+              } // end FOR ALL NUM_ADDRS
+              for ( uint64_t x = 0; x < NUM_ADDRS; x++ ) // Multicast OR Tests
+              {
+                  total++;
+                  l_err = deviceRead( ocmb_target,
+                                      &(read_data[x]),
+                                      op_size,
+                                      DEVICE_SCOM_ADDRESS(MC_OR_ADDR) );
+                  // See details on multicast workaround for Odyssey OCMB address space limitations
+                  // i.e. see doIbscomMulticastWorkaround and masks for parsing the address
+                  if( l_err )
+                  {
+                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> x=%d MC_OR_ADDR Read: Error SCOM addr=0x%X, RC=%X", x, test_data[x].addr, l_err->reasonCode() );
+                      fails++;
+                      errlCommit(l_err,SCOM_COMP_ID);
+                  }
+                  else if (read_data[x] != (DATA1 | DATA2))
+                  {
+                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> x=%d MC_OR_ADDR FAILURE !! NO MATCH !! READ -> 0x%llX DATA1|DATA2 -> 0x%llX", x, read_data[x], (DATA1|DATA2));
+                      fails++;
+                  }
+              } // end FOR ALL NUM_ADDRS
+              for ( uint64_t x = 0; x < NUM_ADDRS; x++ ) // Multicast BITWISE Tests
+              {
+                  total++;
+                  read_data[x] = 0x0ULL;
+                  l_err = deviceRead( ocmb_target,
+                                      &(read_data[x]),
+                                      op_size,
+                                      DEVICE_SCOM_ADDRESS(MC_BITWISE_ADDR) );
+                  // For each OCMB chiplet (id=0x01 and id=0x08) if the data read from the register
+                  // in that chiplet position is set (=1) then set expectations on the BITWISE READ
+                  // to have the bit(s) set (=1).
+                  // See details on multicast workaround for Odyssey OCMB address space limitations
+                  // i.e. see doIbscomMulticastWorkaround and masks for parsing the address
+                  if (DATA1 & 0x8000000000000000)
+                  {
+                      l_expected |= (0x8000000000000000 >> 0x01);
+                  }
+                  if (DATA2 & 0x8000000000000000)
+                  {
+                      l_expected |= (0x8000000000000000 >> 0x08);
+                  }
+                  if( l_err )
+                  {
+                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> x=%d BITWISE Read: Error SCOM addr=0x%X, RC=%X", x, test_data[x].addr, l_err->reasonCode() );
+                      fails++;
+                      errlCommit(l_err,SCOM_COMP_ID);
+                  }
+                  else if (read_data[x] != l_expected)
+                  {
+                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> x=%d BITWISE FAILURE !! NO MATCH !! READ llX -> 0x%llX l_expected -> 0x%llX", x, read_data[x], l_expected);
+                      fails++;
+                  }
+              } // end FOR ALL NUM_ADDRS
+
+              // Set up the SCOM SWITCHES for CHANNEL FAILURE tests
+              mutex_t* l_mutex = nullptr;
+              l_mutex = ocmb_target->getHbMutexAttr<TARGETING::ATTR_SCOM_ACCESS_MUTEX>();
+              recursive_mutex_lock(l_mutex);
+              TARGETING::ScomSwitches l_switches = ocmb_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+              l_switches.useI2cScom = 0;
+              l_switches.useSbeScom = 1;
+              l_switches.useInbandScom = 0;
+              ocmb_target->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
+              recursive_mutex_unlock(l_mutex);
+
+              for ( uint64_t x = 0; x < NUM_ADDRS; x++ )
+              {
+                  total++;
+                  l_err = deviceRead( ocmb_target,
+                                      &(read_data[x]),
+                                      op_size,
+                                      DEVICE_SCOM_ADDRESS(test_data[x].addr) );
+                  if( l_err )
+                  {
+                      // @TODO PFHB-400
+                      TS_INFO("ScomTest::test_SCOMreadWrite_ocmb_ody> Read: CHANNEL FAIL Error UNSUPPORTED needs PFHB-400 SCOM addr=0x%llX, RC=%X", test_data[x].addr, l_err->reasonCode() );
+                      //fails++;
+                      errlCommit(l_err,SCOM_COMP_ID);
+                  }
+                  else if (read_data[x] != test_data[x].data)
+                  {
+                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> CHANNEL FAIL FAILURE !! NO MATCH !! READ llx -> 0x%llX TEST DATA -> 0x%llX", read_data[x], test_data[x].data);
+                      fails++;
+                  }
+
+              } // end FOR ALL NUM_ADDRS
+
+              // Restore the SCOM_SWITCHES
+              l_mutex = ocmb_target->getHbMutexAttr<TARGETING::ATTR_SCOM_ACCESS_MUTEX>();
+              recursive_mutex_lock(l_mutex);
+              l_switches = ocmb_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+              l_switches.useI2cScom = 0;
+              l_switches.useSbeScom = 0;
+              l_switches.useInbandScom = 1;
+              ocmb_target->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
+              recursive_mutex_unlock(l_mutex);
+
+          } // end FUNCTIONAL
+          else
+          {
+              if (ocmb_target->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
+              {
+                  // We expect a functional ODYSSEY OCMB HUID
+                  TS_FAIL("test_SCOMreadWrite_ocmb_ody> ODYSSEY OCMB HUID=0x%X NON-FUNCTIONAL", get_huid(ocmb_target));
+                  fails++;
+              }
+              else
+              {
+                  TS_INFO("test_SCOMreadWrite_ocmb_ody> SKIPPING EXPLORER OCMB HUID=0x%X", get_huid(ocmb_target));
+              }
+          }
+      } while (0);
+
+      TRACFCOMP( g_trac_scom, "ScomTest::test_SCOMreadWrite_ocmb_ody> %d/%d fails", fails, total );
+  }
+
   void test_SCOMreadWrite_proc(void)
   {
 

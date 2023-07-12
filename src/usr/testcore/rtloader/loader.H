@@ -52,10 +52,12 @@
 #include <sbeio/sbe_psudd.H>
 #include <vmmconst.h>
 #include <runtime/runtime.H>
+#include <chipids.H>
 
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 12*KILOBYTE);
 
+constexpr uint64_t MMIO_MASK = 0xBFFFFFFF; // Mask out the 4GIG
 
 class RuntimeLoaderTest : public CxxTest::TestSuite
 {
@@ -287,9 +289,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         // Get the target for the given rt chipid
         static TARGETING::Target* get_target_for_hbrt_id( uint32_t i_hbrtid )
         {
-            TARGETING::TargetHandleList procChips;
-            getAllChips(procChips, TARGETING::TYPE_PROC, false);
-            for (const auto & l_procChip: procChips)
+            for (const auto l_procChip : composable(getAllChips)(TARGETING::TYPE_PROC, false))
             {
                 uint64_t l_instance =
                     l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
@@ -298,7 +298,17 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                     return l_procChip;
                 }
             }
-            TRACFCOMP( g_trac_hbrt, "No target found for id=%.8X", i_hbrtid );
+            for (const auto l_ocmbChip : composable(getAllChips)(TARGETING::TYPE_OCMB_CHIP, false))
+            {
+                uint64_t l_instance =
+                    l_ocmbChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
+                if(l_instance == i_hbrtid)
+                {
+                    return l_ocmbChip;
+                }
+            }
+
+            TRACFCOMP( g_trac_hbrt, "rtloader loader.H NULLPTR ! get_target_for_hbrt_id No target found for id=0x%X", i_hbrtid );
             return nullptr;
         }
 
@@ -373,23 +383,57 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                                 void* data)
         {
             int rc = 0;
+            bool l_odyssey = false;
+            uint64_t custom_addr = 0x0;
 
-            TRACFCOMP(g_trac_hbrt,
-                      "Scom read chipid: 0x%08x Address: 0x%08x",
-                      chipid,
-                      addr);
+            TRACFCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_read chipid=0x%llX addr=0x%llX",
+                          chipid, addr);
 
             errlHndl_t l_errl = nullptr;
             TARGETING::Target* l_target = get_target_for_hbrt_id(chipid);
+            if (l_target == nullptr)
+            {
+                TRACFCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_read PROBLEM !  NULL TARGET rc=1");
+                return 1;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_read get_target_for_hbrt_id TARGET=0x%X", get_huid(l_target));
+            }
 
-            // First attempt a real SCOM read
             size_t l_size = sizeof(uint64_t);
-            l_errl = DeviceFW::deviceRead(l_target,
-                                          data,
-                                          l_size,
-                                          DEVICE_SCOM_ADDRESS(addr));
+            if (l_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_OCMB_CHIP)
+            {
+                // See testscom_rt.H for details on how rtloader.H is leveraged to provide
+                // PHYP-like emulation during the running of the Runtime test interfaces
+                //
+                if (l_target->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
+                {
+                    l_odyssey = true;
+                    custom_addr = (addr & MMIO_MASK) >> 3;
+                }
+                else // EXPLORER_16 not yet supported
+                {
+                    custom_addr = addr;
+                }
+
+                l_errl = DeviceFW::deviceRead(l_target,
+                                              data,
+                                              l_size,
+                                              DEVICE_SCOM_ADDRESS(custom_addr) );
+            }
+            else
+            {
+                // First attempt deviceRead, if it fails we will retrieve cache data for simulating a successful read
+                l_errl = DeviceFW::deviceRead(l_target,
+                                              data,
+                                              l_size,
+                                              DEVICE_SCOM_ADDRESS(addr));
+            }
+
             if(l_errl)
             {
+                TRACFCOMP(g_trac_hbrt, "rt_loader.H rt_scom_read ERROR USING CACHE, deleting ERROR !");
                 delete l_errl;
                 l_errl = nullptr;
 
@@ -418,19 +462,21 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 }
             }
 
-            // PHYP handles the 4-byte accesses to the OCMB differently
-            // than our native code does, need to rearrange the results.
-            if( ((chipid & HBRT_CHIPID_TYPE_MASK) == HBRT_OCMB_TYPE)
-                //input is mmio addr which is scom left-shifted by 3
-                && (((addr>>3) & 0x0F000000) != 0x08000000) ) //Not IBM scom
+            if (!l_odyssey) // Explorer only handling
             {
-                // HB has the data right-justified
-                // PHYP returns it left-justified
-                uint32_t* l_u32 = reinterpret_cast<uint32_t*>(data);
-                l_u32[0] = l_u32[1];
-                l_u32[1] = 0;
+                // PHYP handles the 4-byte accesses to the OCMB differently
+                // than our native code does, need to rearrange the results.
+                if( ((chipid & HBRT_CHIPID_TYPE_MASK) == HBRT_OCMB_TYPE)
+                    //input is mmio addr which is scom left-shifted by 3
+                    && (((addr>>3) & 0x0F000000) != 0x08000000) ) //Not IBM scom
+                {
+                    // HB has the data right-justified
+                    // PHYP returns it left-justified
+                    uint32_t* l_u32 = reinterpret_cast<uint32_t*>(data);
+                    l_u32[0] = l_u32[1];
+                    l_u32[1] = 0;
+                }
             }
-
             return rc;
         }
 
@@ -440,23 +486,51 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         {
             int rc = 0;
             uint64_t * data64 = static_cast<uint64_t *>(data);
-            TRACFCOMP(g_trac_hbrt,
-                      "Scom write chipid:0x%.8x Address:0x%08x Data:0x%16x",
-                      chipid,
-                      addr,
-                      *data64);
+            uint64_t custom_addr = 0x0;
+            TRACFCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_write chipid=0x%llX addr=0x%llX data=0x%llX",
+                          chipid, addr, *data64);
 
             errlHndl_t l_errl = nullptr;
             TARGETING::Target* l_target = get_target_for_hbrt_id(chipid);
+            if (l_target == nullptr)
+            {
+                TRACFCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_write PROBLEM !  NULL TARGET rc=1");
+                return 1;
+            }
 
-            // First attempt a real SCOM write
+            // First attempt deviceWrite, if it fails we will cache data for simulating a successful write
             size_t l_size = sizeof(uint64_t);
-            l_errl = DeviceFW::deviceWrite(l_target,
-                                           data,
-                                           l_size,
-                                           DEVICE_SCOM_ADDRESS(addr));
+
+            if (l_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_OCMB_CHIP)
+            {
+                // See testscom_rt.H for details on how rtloader.H is leveraged to provide
+                // PHYP-like emulation during the running of the Runtime test interfaces
+                //
+                if (l_target->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
+                {
+                    custom_addr = (addr & MMIO_MASK) >> 3;
+                }
+                else // EXPLORER_16 not yet supported
+                {
+                    custom_addr = addr;
+                }
+
+                l_errl = DeviceFW::deviceWrite(l_target,
+                                              data,
+                                              l_size,
+                                              DEVICE_SCOM_ADDRESS(custom_addr));
+            }
+            else // proc
+            {
+                l_errl = DeviceFW::deviceWrite(l_target,
+                                               data,
+                                               l_size,
+                                               DEVICE_SCOM_ADDRESS(addr));
+            }
+
             if(l_errl)
             {
+                TRACFCOMP(g_trac_hbrt, "rt_loader.H rt_scom_write ERROR USING CACHE, deleting ERROR !");
                 delete l_errl;
                 l_errl = nullptr;
 

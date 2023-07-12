@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -28,6 +28,7 @@ ROOTPATH = ../../../../..
 MODULE = testscom_rt
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 
 TESTS = *.H
 

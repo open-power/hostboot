@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -23,6 +23,8 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
+
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 
 MODULE = testrtloader
 TESTS = *.H
