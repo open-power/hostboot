@@ -82,9 +82,8 @@ typedef std::map<uint32_t, DramCount_t> DramCountMap;
 //------------------------------------------------------------------------------
 template<>
 int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                        const MemRank & i_rank,
-                                        MaintSymbols & o_maintStats,
-                                        MemSymbol & o_chipMark, uint8_t i_thr )
+    const MemRank & i_rank, uint8_t i_port, MaintSymbols & o_maintStats,
+    MemSymbol & o_chipMark, uint8_t i_thr )
 {
     #define PRDF_FUNC "[MemUtils::collectCeStats<TYPE_OCMB_CHIP>] "
 
@@ -96,10 +95,8 @@ int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         PRDF_ASSERT( 0 != i_thr );
 
         TargetHandle_t ocmbTrgt = i_chip->getTrgt();
-
-        // TODO RTC 210072 - support for multiple ports
         TargetHandle_t memPortTrgt = getConnectedChild( ocmbTrgt,
-                                                        TYPE_MEM_PORT, 0 );
+                                                        TYPE_MEM_PORT, i_port );
         TargetHandle_t dimm = getConnectedDimm( memPortTrgt, i_rank );
         const bool isX4 = isDramWidthX4( dimm );
 
@@ -132,8 +129,7 @@ int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                 uint8_t sym  = baseSymbol + i;
                 PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
 
-                uint8_t dram = isX4 ? symbol2Nibble<TYPE_OCMB_CHIP>( sym )
-                                    : symbol2Byte  <TYPE_OCMB_CHIP>( sym );
+                uint8_t dram = symbol2Dram<TYPE_OCMB_CHIP>( sym, isX4 );
 
                 // Keep track of the total DRAM counts.
                 dramCounts[dram].totalCount += count;
@@ -189,8 +185,7 @@ int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
         if ( 0 != highestCount )
         {
-            uint8_t sym = isX4 ? nibble2Symbol<TYPE_OCMB_CHIP>( highestDram )
-                               : byte2Symbol  <TYPE_OCMB_CHIP>( highestDram );
+            uint8_t sym = dram2Symbol<TYPE_OCMB_CHIP>( highestDram, isX4 );
             PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
 
             o_chipMark  = MemSymbol::fromSymbol( memPortTrgt, i_rank, sym );

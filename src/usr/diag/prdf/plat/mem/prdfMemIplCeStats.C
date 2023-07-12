@@ -87,12 +87,12 @@ int32_t MemIplCeStats<T>::collectStats( const MemRank & i_stopRank,
     do
     {
         MemUtils::MaintSymbols symData; MemSymbol junk;
-        o_rc = MemUtils::collectCeStats<T>( iv_chip, i_stopRank, symData,
-                                            junk );
+        o_rc = MemUtils::collectCeStats<T>( iv_chip, i_stopRank, i_port,
+                                            symData, junk );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats failed. chip:0X%08X",
-                      getHuid( iv_chip->getTrgt() ) );
+            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats(0x%08x,0x%02x,%x)",
+                      iv_chip->getHuid(), i_stopRank.getKey(), i_port );
             break;
         }
 
@@ -150,7 +150,8 @@ bool MemIplCeStats<T>::analyzeStats()
 //------------------------------------------------------------------------------
 
 template<TYPE T>
-int32_t MemIplCeStats<T>::calloutHardCes( const MemRank & i_stopRank )
+int32_t MemIplCeStats<T>::calloutHardCes( const MemRank & i_stopRank,
+                                          uint8_t i_port )
 {
     #define PRDF_FUNC "[MemIplCeStats::calloutHardCes] "
     TargetHandle_t trgt = iv_chip->getTrgt();
@@ -158,12 +159,12 @@ int32_t MemIplCeStats<T>::calloutHardCes( const MemRank & i_stopRank )
     do
     {
         MemUtils::MaintSymbols symData; MemSymbol junk;
-        o_rc = MemUtils::collectCeStats<T>( iv_chip, i_stopRank, symData,
-                                            junk );
+        o_rc = MemUtils::collectCeStats<T>( iv_chip, i_stopRank, i_port,
+                                            symData, junk );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats() failed.chip:0X%08X",
-                      getHuid( iv_chip->getTrgt() ) );
+            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats(0x%08x,0x%02x,%x)",
+                      iv_chip->getHuid(), i_stopRank.getKey(), i_port );
             break;
         }
 

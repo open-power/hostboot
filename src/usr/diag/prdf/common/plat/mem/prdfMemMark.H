@@ -181,10 +181,12 @@ uint32_t clearSymbolMark( ExtensibleChip * i_chip, const MemRank & i_rank,
  *         scrub needs to be configured to set the per-symbol counters.
  * @param  i_chip OCMB chip.
  * @param  i_rank Target rank.
+ * @param  i_port Target port.
  * @return True if it is safe to remove the chip mark, false otherwise.
  */
 template<TARGETING::TYPE T>
-bool isSafeToRemoveChipMark( ExtensibleChip * i_chip, const MemRank & i_rank );
+bool isSafeToRemoveChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
+                             uint8_t i_port );
 
 #ifdef __HOSTBOOT_MODULE // Not supported on FSP.
 

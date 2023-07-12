@@ -854,6 +854,51 @@
         "description": "Odyssey chip Maint Current Address Trap Register",
         "name": "MCBMCAT"
     },
+    "0xa9e6": {
+        "address": "0x0000000008011458",
+        "description": "ODC.MCBIST.SCOM.MBSSYMEC0Q",
+        "name": "OCMB_MBSSYMEC0"
+    },
+    "0xa9e8": {
+        "address": "0x0000000008011459",
+        "description": "ODC.MCBIST.SCOM.MBSSYMEC1Q",
+        "name": "OCMB_MBSSYMEC1"
+    },
+    "0xa9ea": {
+        "address": "0x000000000801145a",
+        "description": "ODC.MCBIST.SCOM.MBSSYMEC2Q",
+        "name": "OCMB_MBSSYMEC2"
+    },
+    "0xa9ec": {
+        "address": "0x000000000801145b",
+        "description": "ODC.MCBIST.SCOM.MBSSYMEC3Q",
+        "name": "OCMB_MBSSYMEC3"
+    },
+    "0xa9ee": {
+        "address": "0x000000000801145c",
+        "description": "ODC.MCBIST.SCOM.MBSSYMEC4Q",
+        "name": "OCMB_MBSSYMEC4"
+    },
+    "0xa9f0": {
+        "address": "0x000000000801145d",
+        "description": "ODC.MCBIST.SCOM.MBSSYMEC5Q",
+        "name": "OCMB_MBSSYMEC5"
+    },
+    "0xa9f2": {
+        "address": "0x000000000801145e",
+        "description": "ODC.MCBIST.SCOM.MBSSYMEC6Q",
+        "name": "OCMB_MBSSYMEC6"
+    },
+    "0xa9f4": {
+        "address": "0x000000000801145f",
+        "description": "ODC.MCBIST.SCOM.MBSSYMEC7Q",
+        "name": "OCMB_MBSSYMEC7"
+    },
+    "0xa9f6": {
+        "address": "0x0000000008011460",
+        "description": "ODC.MCBIST.SCOM.MBSSYMEC8Q",
+        "name": "OCMB_MBSSYMEC8"
+    },
     "0xab8f": {
         "address": "0x0000000008013002",
         "description": "Odyssey chip ODP_FIR MASK 0",

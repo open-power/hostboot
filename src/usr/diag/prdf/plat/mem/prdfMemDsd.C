@@ -130,10 +130,11 @@ uint32_t DsdEvent<T>::verifySpare( const uint32_t & i_eccAttns,
 
         // If it is safe to remove the chip mark, do so. Then the DRAM spare
         // has been applied successfully.
-        if ( MarkStore::isSafeToRemoveChipMark<T>( iv_chip, iv_rank ) )
+        if ( MarkStore::isSafeToRemoveChipMark<T>( iv_chip, iv_rank, iv_port ) )
         {
             PRDF_TRAC( PRDF_FUNC "DRAM spare applied successfully: "
-                       "0x%08x,0x%02x", iv_chip->getHuid(), getKey() );
+                       "0x%08x,0x%02x,%x", iv_chip->getHuid(), getKey(),
+                       iv_port );
 
             io_sc.service_data->setSignature( iv_chip->getHuid(),
                                               PRDFSIG_DsdDramSpared );

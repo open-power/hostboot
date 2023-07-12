@@ -751,56 +751,83 @@ actionclass phyEccErrArcEccInt_1
 # Analyze groups
 ################################################################################
 
+actionclass analyzeTP_LOCAL_FIR
+{
+    capture(ocmb_regs);
+    analyze(gTP_LOCAL_FIR);
+};
+
+actionclass analyzeMEM_LOCAL_FIR
+{
+    capture(ocmb_regs);
+    analyze(gMEM_LOCAL_FIR);
+};
+
 actionclass analyzeMMIO_FIR
 {
+    capture(ocmb_regs);
     capture(mmio_fir_regs);
     analyze(gMMIO_FIR);
 };
 
 actionclass analyzeSRQ_FIR
 {
+    capture(ocmb_regs);
     capture(srq_fir_regs);
     analyze(gSRQ_FIR);
 };
 
 actionclass analyzeMCBIST_FIR
 {
+    capture(ocmb_regs);
     capture(mcbist_fir_regs);
     analyze(gMCBIST_FIR);
 };
 
 actionclass analyzeRDF_FIR_0
 {
+    capture(ocmb_regs);
     capture(rdf_fir_0_regs);
     analyze(gRDF_FIR_0);
 };
 
 actionclass analyzeRDF_FIR_1
 {
+    capture(ocmb_regs);
     capture(rdf_fir_1_regs);
     analyze(gRDF_FIR_1);
 };
 
 actionclass analyzeTLX_FIR
 {
+    capture(ocmb_regs);
     capture(tlx_fir_regs);
     analyze(gTLX_FIR);
 };
 
 actionclass analyzeODP_FIR_0
 {
+    capture(ocmb_regs);
     capture(odp_fir_0_regs);
     analyze(gODP_FIR_0);
 };
 
 actionclass analyzeODP_FIR_1
 {
+    capture(ocmb_regs);
     capture(odp_fir_1_regs);
     analyze(gODP_FIR_1);
 };
 
+actionclass analyzeOCMB_PHY_FIR
+{
+    capture(ocmb_regs);
+    analyze(gOCMB_PHY_FIR);
+};
+
 actionclass analyzeDLX_FIR
 {
+    capture(ocmb_regs);
     capture(omi_ocmb_ffdc);
     funccall("CollectOmiFfdc");
     analyze(gDLX_FIR);

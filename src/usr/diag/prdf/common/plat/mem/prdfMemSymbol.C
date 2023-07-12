@@ -149,7 +149,7 @@ uint8_t MemSymbol::getDq() const
     uint8_t dq = DQS_PER_DIMM;
     TYPE trgtType = getTargetType( iv_trgt );
 
-    if ( TYPE_OCMB_CHIP == trgtType )
+    if ( TYPE_MEM_PORT == trgtType )
     {
         dq = symbol2Dq<TYPE_OCMB_CHIP>( iv_symbol );
     }
@@ -195,8 +195,7 @@ uint8_t MemSymbol::getDram() const
         TargetHandle_t dimm = getConnectedChild(iv_trgt, TYPE_DIMM,
                                                 iv_rank.getDimmSlct());
         isX4 = isDramWidthX4( dimm );
-        dram = isX4 ? symbol2Nibble<TYPE_OCMB_CHIP>( iv_symbol )
-                    : symbol2Byte  <TYPE_OCMB_CHIP>( iv_symbol );
+        dram = symbol2Dram<TYPE_OCMB_CHIP>( iv_symbol, isX4 );
     }
     else
     {
@@ -302,8 +301,7 @@ uint8_t MemSymbol::getDramSymbol() const
 
     if ( TYPE_MEM_PORT == trgtType )
     {
-        dramSymbol = isX4 ? nibble2Symbol<TYPE_OCMB_CHIP>( dram )
-                          : byte2Symbol  <TYPE_OCMB_CHIP>( dram );
+        dramSymbol = dram2Symbol<TYPE_OCMB_CHIP>( dram, isX4 );
     }
     else
     {

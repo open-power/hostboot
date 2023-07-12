@@ -26,6 +26,73 @@
 # Additional registers for ocmb, not defined in XML
 ###############################################################################
 
+    ###########################################################################
+    # Odyssey OCMB Modal Symbol Counter Registers
+    ###########################################################################
+
+    register OCMB_MBSSYMEC0
+    {
+        name        "ODC.MCBIST.SCOM.MBSSYMEC0Q";
+        scomaddr    0x08011458;
+        capture     group ocmb_regs;
+    };
+
+    register OCMB_MBSSYMEC1
+    {
+        name        "ODC.MCBIST.SCOM.MBSSYMEC1Q";
+        scomaddr    0x08011459;
+        capture     group ocmb_regs;
+    };
+
+    register OCMB_MBSSYMEC2
+    {
+        name        "ODC.MCBIST.SCOM.MBSSYMEC2Q";
+        scomaddr    0x0801145A;
+        capture     group ocmb_regs;
+    };
+
+    register OCMB_MBSSYMEC3
+    {
+        name        "ODC.MCBIST.SCOM.MBSSYMEC3Q";
+        scomaddr    0x0801145B;
+        capture     group ocmb_regs;
+    };
+
+    register OCMB_MBSSYMEC4
+    {
+        name        "ODC.MCBIST.SCOM.MBSSYMEC4Q";
+        scomaddr    0x0801145C;
+        capture     group ocmb_regs;
+    };
+
+    register OCMB_MBSSYMEC5
+    {
+        name        "ODC.MCBIST.SCOM.MBSSYMEC5Q";
+        scomaddr    0x0801145D;
+        capture     group ocmb_regs;
+    };
+
+    register OCMB_MBSSYMEC6
+    {
+        name        "ODC.MCBIST.SCOM.MBSSYMEC6Q";
+        scomaddr    0x0801145E;
+        capture     group ocmb_regs;
+    };
+
+    register OCMB_MBSSYMEC7
+    {
+        name        "ODC.MCBIST.SCOM.MBSSYMEC7Q";
+        scomaddr    0x0801145F;
+        capture     group ocmb_regs;
+    };
+
+    register OCMB_MBSSYMEC8
+    {
+        name        "ODC.MCBIST.SCOM.MBSSYMEC8Q";
+        scomaddr    0x08011460;
+        capture     group ocmb_regs;
+    };
+
     ############################################################################
     # Odyssey chip MMIO_FIR
     ############################################################################

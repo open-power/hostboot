@@ -75,7 +75,7 @@ uint32_t TpsEvent<T>::analyzePhase( STEP_CODE_DATA_STRUCT & io_sc,
                 break;
 
             case TD_PHASE_2: // Collect hard CE stats.
-                o_rc = ceStats->calloutHardCes( iv_rank );
+                o_rc = ceStats->calloutHardCes( iv_rank, iv_port );
                 break;
 
             default: PRDF_ASSERT(false); // code bug

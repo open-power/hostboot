@@ -404,7 +404,8 @@ uint32_t clearSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-bool isSafeToRemoveChipMark( ExtensibleChip * i_chip, const MemRank & i_rank )
+bool isSafeToRemoveChipMark( ExtensibleChip * i_chip, const MemRank & i_rank,
+                             uint8_t i_port )
 {
     bool o_safeToRemoveCm = false;
 
@@ -414,8 +415,8 @@ bool isSafeToRemoveChipMark( ExtensibleChip * i_chip, const MemRank & i_rank )
     MemUtils::MaintSymbols badNonCmSyms;
     MemSymbol junk;
 
-    if ( SUCCESS == MemUtils::collectCeStats<T>(i_chip, i_rank, badNonCmSyms,
-                                                junk, 2) )
+    if ( SUCCESS == MemUtils::collectCeStats<T>(i_chip, i_rank, i_port,
+                                                badNonCmSyms, junk, 2) )
     {
         uint8_t badCmSyms = MemUtils::collectMceBadSyms<T>( i_chip );
 
@@ -433,7 +434,7 @@ bool isSafeToRemoveChipMark( ExtensibleChip * i_chip, const MemRank & i_rank )
 
 template
 bool isSafeToRemoveChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                             const MemRank & i_rank );
+    const MemRank & i_rank, uint8_t i_port );
 
 //##############################################################################
 //          Utilities to cleanup markstore after a chip mark is verified

@@ -96,8 +96,9 @@ class MemIplCeStats
 
     /** @brief  Calls out all symbols with hard CEs.
      *  @param  i_stopRank The rank the maintenance command stopped on.
+     *  @param  i_port The target port.
      */
-    int32_t calloutHardCes( const MemRank & i_stopRank );
+    int32_t calloutHardCes( const MemRank & i_stopRank, uint8_t i_port );
 
   private: // enums, structs, typedefs
 

@@ -129,10 +129,11 @@ uint32_t RrdEvent<T>::verifyRowRepair( STEP_CODE_DATA_STRUCT & io_sc,
 
         // If it is safe to remove the chip mark, do so. Then the row repair
         // has been successfully deployed.
-        if ( MarkStore::isSafeToRemoveChipMark<T>( iv_chip, iv_rank ) )
+        if ( MarkStore::isSafeToRemoveChipMark<T>( iv_chip, iv_rank, iv_port ) )
         {
             PRDF_TRAC( PRDF_FUNC "Row repair deployed successfully: "
-                       "0x%08x,0x%02x", iv_chip->getHuid(), getKey() );
+                       "0x%08x,0x%02x,%x", iv_chip->getHuid(), getKey(),
+                       iv_port );
 
             io_sc.service_data->setSignature( iv_chip->getHuid(),
                                               PRDFSIG_RrdRowDeployed );

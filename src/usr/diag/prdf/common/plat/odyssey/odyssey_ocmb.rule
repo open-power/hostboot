@@ -160,49 +160,49 @@ chip odyssey_ocmb
         scomaddr    0x01040100;
         reset       (^, 0x01040100);
         mask        (|, 0x01040103);
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TP_LOCAL_FIR_MASK
     {
         name        "Odyssey chip TP_LOCAL_FIR MASK";
         scomaddr    0x01040102;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TP_LOCAL_FIR_CFG_CS
     {
         name        "Odyssey chip TP_LOCAL_FIR Checkstop Config";
         scomaddr    0x01040104;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TP_LOCAL_FIR_CFG_RE
     {
         name        "Odyssey chip TP_LOCAL_FIR Recoverable Config";
         scomaddr    0x01040105;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TP_LOCAL_FIR_CFG_SPA
     {
         name        "Odyssey chip TP_LOCAL_FIR Special Attention Config";
         scomaddr    0x01040106;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TP_LOCAL_FIR_CFG_UCS
     {
         name        "Odyssey chip TP_LOCAL_FIR Unit Checkstop Config";
         scomaddr    0x01040107;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TP_LOCAL_FIR_WOF
     {
         name        "Odyssey chip TP_LOCAL_FIR WOF";
         scomaddr    0x01040108;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -275,49 +275,49 @@ chip odyssey_ocmb
         scomaddr    0x08040100;
         reset       (^, 0x08040100);
         mask        (|, 0x08040103);
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MEM_LOCAL_FIR_MASK
     {
         name        "Odyssey chip MEM_LOCAL_FIR MASK";
         scomaddr    0x08040102;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MEM_LOCAL_FIR_CFG_CS
     {
         name        "Odyssey chip Checkstop Config";
         scomaddr    0x08040104;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MEM_LOCAL_FIR_CFG_RE
     {
         name        "Odyssey chip Recoverable Config";
         scomaddr    0x08040105;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MEM_LOCAL_FIR_CFG_SPA
     {
         name        "Odyssey chip Special Attention Config";
         scomaddr    0x08040106;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MEM_LOCAL_FIR_CFG_UCS
     {
         name        "Odyssey chip Unit Checkstop Config";
         scomaddr    0x08040107;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MEM_LOCAL_FIR_WOF
     {
         name        "Odyssey chip WOF";
         scomaddr    0x08040108;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -330,49 +330,49 @@ chip odyssey_ocmb
         scomaddr    0x08010870;
         reset       (^, 0x08010870);
         mask        (|, 0x08010873);
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MMIO_FIR_MASK
     {
         name        "Odyssey chip MMIO_FIR MASK";
         scomaddr    0x08010872;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MMIO_FIR_CFG_CS
     {
         name        "Odyssey chip MMIO_FIR Checkstop Config";
         scomaddr    0x08010874;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MMIO_FIR_CFG_RE
     {
         name        "Odyssey chip MMIO_FIR Recoverable Config";
         scomaddr    0x08010875;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MMIO_FIR_CFG_SPA
     {
         name        "Odyssey chip MMIO_FIR Special Attention Config";
         scomaddr    0x08010876;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MMIO_FIR_CFG_UCS
     {
         name        "Odyssey chip MMIO_FIR Unit Checkstop Config";
         scomaddr    0x08010877;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MMIO_FIR_WOF
     {
         name        "Odyssey chip MMIO_FIR WOF";
         scomaddr    0x08010878;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -385,49 +385,49 @@ chip odyssey_ocmb
         scomaddr    0x08010C00;
         reset       (^, 0x08010C00);
         mask        (|, 0x08010C03);
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_PHY_FIR_MASK
     {
         name        "Odyssey chip OCMB_PHY_FIR MASK";
         scomaddr    0x08010C02;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_PHY_FIR_CFG_CS
     {
         name        "Odyssey chip OCMB_PHY_FIR Checkstop Config";
         scomaddr    0x08010C04;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_PHY_FIR_CFG_RE
     {
         name        "Odyssey chip OCMB_PHY_FIR Recoverable Config";
         scomaddr    0x08010C05;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_PHY_FIR_CFG_SPA
     {
         name        "Odyssey chip OCMB_PHY_FIR Special Attention Config";
         scomaddr    0x08010C06;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_PHY_FIR_CFG_UCS
     {
         name        "Odyssey chip OCMB_PHY_FIR Unit Checkstop Config";
         scomaddr    0x08010C07;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register OCMB_PHY_FIR_WOF
     {
         name        "Odyssey chip OCMB_PHY_FIR WOF";
         scomaddr    0x08010C08;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -440,49 +440,49 @@ chip odyssey_ocmb
         scomaddr    0x08011000;
         reset       (^, 0x08011000);
         mask        (|, 0x08011003);
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register SRQ_FIR_MASK
     {
         name        "Odyssey chip SRQ_FIR MASK";
         scomaddr    0x08011002;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register SRQ_FIR_CFG_CS
     {
         name        "Odyssey chip SRQ_FIR Checkstop Config";
         scomaddr    0x08011004;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register SRQ_FIR_CFG_RE
     {
         name        "Odyssey chip SRQ_FIR Recoverable Config";
         scomaddr    0x08011005;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register SRQ_FIR_CFG_SPA
     {
         name        "Odyssey chip SRQ_FIR Special Attention Config";
         scomaddr    0x08011006;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register SRQ_FIR_CFG_UCS
     {
         name        "Odyssey chip SRQ_FIR Unit Checkstop Config";
         scomaddr    0x08011007;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register SRQ_FIR_WOF
     {
         name        "Odyssey chip SRQ_FIR WOF";
         scomaddr    0x08011008;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -495,7 +495,7 @@ chip odyssey_ocmb
         scomaddr    0x08011400;
         reset       (^, 0x08011400);
         mask        (|, 0x08011403);
-        capture     group default;
+        capture     group ocmb_regs;
         capture     group MaintCmdRegs_ocmb;
     };
 
@@ -503,42 +503,42 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip MCBIST_FIR MASK";
         scomaddr    0x08011402;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MCBIST_FIR_CFG_CS
     {
         name        "Odyssey chip MCBIST_FIR Checkstop Config";
         scomaddr    0x08011404;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MCBIST_FIR_CFG_RE
     {
         name        "Odyssey chip MCBIST_FIR Recoverable Config";
         scomaddr    0x08011405;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MCBIST_FIR_CFG_SPA
     {
         name        "Odyssey chip MCBIST_FIR Special Attention Config";
         scomaddr    0x08011406;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MCBIST_FIR_CFG_UCS
     {
         name        "Odyssey chip MCBIST_FIR Unit Checkstop Config";
         scomaddr    0x08011407;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register MCBIST_FIR_WOF
     {
         name        "Odyssey chip MCBIST_FIR WOF";
         scomaddr    0x08011408;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -551,7 +551,7 @@ chip odyssey_ocmb
         scomaddr    0x08011800;
         reset       (^, 0x08011800);
         mask        (|, 0x08011803);
-        capture     group default;
+        capture     group ocmb_regs;
         capture     group MaintCmdRegs_ocmb;
     };
 
@@ -559,42 +559,42 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip RDF_FIR 0 MASK";
         scomaddr    0x08011802;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register RDF_FIR_CFG_CS_0
     {
         name        "Odyssey chip RDF_FIR 0 Checkstop Config";
         scomaddr    0x08011804;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register RDF_FIR_CFG_RE_0
     {
         name        "Odyssey chip RDF_FIR 0 Recoverable Config";
         scomaddr    0x08011805;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register RDF_FIR_CFG_SPA_0
     {
         name        "Odyssey chip RDF_FIR 0 Special Attention Config";
         scomaddr    0x08011806;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register RDF_FIR_CFG_UCS_0
     {
         name        "Odyssey chip RDF_FIR 0 Unit Checkstop Config";
         scomaddr    0x08011807;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register RDF_FIR_WOF_0
     {
         name        "Odyssey chip RDF_FIR 0 WOF";
         scomaddr    0x08011808;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -607,7 +607,7 @@ chip odyssey_ocmb
         scomaddr    0x08012800;
         reset       (^, 0x08012800);
         mask        (|, 0x08012803);
-        capture     group default;
+        capture     group ocmb_regs;
         capture     group MaintCmdRegs_ocmb;
     };
 
@@ -615,42 +615,42 @@ chip odyssey_ocmb
     {
         name        "Odyssey chip RDF_FIR MASK 1";
         scomaddr    0x08012802;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register RDF_FIR_CFG_CS_1
     {
         name        "Odyssey chip RDF_FIR Checkstop Config 1";
         scomaddr    0x08012804;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register RDF_FIR_CFG_RE_1
     {
         name        "Odyssey chip RDF_FIR Recoverable Config 1";
         scomaddr    0x08012805;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register RDF_FIR_CFG_SPA_1
     {
         name        "Odyssey chip RDF_FIR Special Attention Config 1";
         scomaddr    0x08012806;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register RDF_FIR_CFG_UCS_1
     {
         name        "Odyssey chip RDF_FIR Unit Checkstop Config 1";
         scomaddr    0x08012807;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register RDF_FIR_WOF_1
     {
         name        "Odyssey chip RDF_FIR WOF 1";
         scomaddr    0x08012808;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -663,49 +663,49 @@ chip odyssey_ocmb
         scomaddr    0x08012000;
         reset       (^, 0x08012000);
         mask        (|, 0x08012003);
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TLX_FIR_MASK
     {
         name        "Odyssey chip TLX_FIR MASK";
         scomaddr    0x08012002;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TLX_FIR_CFG_CS
     {
         name        "Odyssey chip TLX_FIR Checkstop Config";
         scomaddr    0x08012004;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TLX_FIR_CFG_RE
     {
         name        "Odyssey chip TLX_FIR Recoverable Config";
         scomaddr    0x08012005;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TLX_FIR_CFG_SPA
     {
         name        "Odyssey chip TLX_FIR Special Attention Config";
         scomaddr    0x08012006;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TLX_FIR_CFG_UCS
     {
         name        "Odyssey chip TLX_FIR Unit Checkstop Config";
         scomaddr    0x08012007;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register TLX_FIR_WOF
     {
         name        "Odyssey chip TLX_FIR WOF";
         scomaddr    0x08012008;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -718,63 +718,63 @@ chip odyssey_ocmb
         scomaddr    0x08012400;
         reset       (^, 0x08012400);
         mask        (|, 0x08012403);
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register DLX_FIR_MASK
     {
         name        "Odyssey chip DLX_FIR MASK";
         scomaddr    0x08012402;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register DLX_FIR_CFG_CS
     {
         name        "Odyssey chip DLX_FIR Checkstop Config";
         scomaddr    0x08012404;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register DLX_FIR_CFG_RE
     {
         name        "Odyssey chip DLX_FIR Recoverable Config";
         scomaddr    0x08012405;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register DLX_FIR_CFG_SPA
     {
         name        "Odyssey chip DLX_FIR Special Attention Config";
         scomaddr    0x08012406;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register DLX_FIR_CFG_UCS
     {
         name        "Odyssey chip DLX_FIR Unit Checkstop Config";
         scomaddr    0x08012407;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register DLX_FIR_WOF
     {
         name        "Odyssey chip DLX_FIR WOF";
         scomaddr    0x08012408;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register DLX_ERR_MASK
     {
         name        "Odyssey chip DLX Error Mask Register";
         scomaddr    0x08012412;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register DLX_ERR_RPT
     {
         name        "Odyssey chip DLX Error Report Register";
         scomaddr    0x08012413;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -787,49 +787,49 @@ chip odyssey_ocmb
         scomaddr    0x08013000;
         reset       (^, 0x08013000);
         mask        (|, 0x08013003);
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register ODP_FIR_MASK_0
     {
         name        "Odyssey chip ODP_FIR MASK 0";
         scomaddr    0x08013002;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register ODP_FIR_CFG_CS_0
     {
         name        "Odyssey chip ODP_FIR Checkstop Config 0";
         scomaddr    0x08013004;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register ODP_FIR_CFG_RE_0
     {
         name        "Odyssey chip ODP_FIR Recoverable Config 0";
         scomaddr    0x08013005;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register ODP_FIR_CFG_SPA_0
     {
         name        "Odyssey chip ODP_FIR Special Attention Config 0";
         scomaddr    0x08013006;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register ODP_FIR_CFG_UCS_0
     {
         name        "Odyssey chip ODP_FIR Unit Checkstop Config 0";
         scomaddr    0x08013007;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register ODP_FIR_WOF_0
     {
         name        "Odyssey chip ODP_FIR WOF 0";
         scomaddr    0x08013008;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     ############################################################################
@@ -842,49 +842,49 @@ chip odyssey_ocmb
         scomaddr    0x08013400;
         reset       (^, 0x08013400);
         mask        (|, 0x08013403);
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register ODP_FIR_MASK_1
     {
         name        "Odyssey chip ODP_FIR MASK 1";
         scomaddr    0x08013402;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register ODP_FIR_CFG_CS_1
     {
         name        "Odyssey chip ODP_FIR Checkstop Config 1";
         scomaddr    0x08013404;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register ODP_FIR_CFG_RE_1
     {
         name        "Odyssey chip ODP_FIR Recoverable Config 1";
         scomaddr    0x08013405;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register ODP_FIR_CFG_SPA_1
     {
         name        "Odyssey chip ODP_FIR Special Attention Config 1";
         scomaddr    0x08013406;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register ODP_FIR_CFG_UCS_1
     {
         name        "Odyssey chip ODP_FIR Unit Checkstop Config 1";
         scomaddr    0x08013407;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
     register ODP_FIR_WOF_1
     {
         name        "Odyssey chip ODP_FIR WOF 1";
         scomaddr    0x08013408;
-        capture     group default;
+        capture     group ocmb_regs;
     };
 
 # Include registers not defined by the xml
@@ -955,7 +955,7 @@ group gCFIR_TP
     /** CFIR_TP[4]
      *  Attention from TP_LOCAL_FIR
      */
-    (rCFIR_TP, bit(4)) ? analyze(gTP_LOCAL_FIR);
+    (rCFIR_TP, bit(4)) ? analyzeTP_LOCAL_FIR;
 
 };
 
@@ -1178,7 +1178,7 @@ group gCFIR_MEM
     /** CFIR_MEM[4]
      *  Attention from MEM_LOCAL_FIR
      */
-    (rCFIR_MEM, bit(4)) ? analyze(gMEM_LOCAL_FIR);
+    (rCFIR_MEM, bit(4)) ? analyzeMEM_LOCAL_FIR;
 
     /** CFIR_MEM[5]
      *  Attention from DLX_FIR
@@ -1228,7 +1228,7 @@ group gCFIR_MEM
     /** CFIR_MEM[14]
      *  Attention from OCMB_PHY_FIR
      */
-    (rCFIR_MEM, bit(14)) ? analyze(gOCMB_PHY_FIR);
+    (rCFIR_MEM, bit(14)) ? analyzeOCMB_PHY_FIR;
 
 };
 

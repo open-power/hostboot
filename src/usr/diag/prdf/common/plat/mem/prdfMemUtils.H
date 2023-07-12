@@ -75,6 +75,7 @@ inline bool sortSymDataCount( const SymbolData & i, const SymbolData & j )
  * @note   The returned list will be sorted from lowest count to highest count.
  * @param  i_chip        Target OCMB chip.
  * @param  i_rank        Target rank.
+ * @param  i_port        Target port.
  * @param  o_maintStats  Returns the list of symbols and counts.
  * @param  o_chipMark    This represents the DRAM in which a chip mark should be
  *                       placed, if necessary, based on the following:
@@ -97,8 +98,8 @@ inline bool sortSymDataCount( const SymbolData & i, const SymbolData & j )
  */
 template<TARGETING::TYPE T>
 int32_t collectCeStats( ExtensibleChip * i_chip, const MemRank & i_rank,
-                        MaintSymbols & o_maintStats, MemSymbol & o_chipMark,
-                        uint8_t i_thr = 1 );
+    uint8_t i_port, MaintSymbols & o_maintStats, MemSymbol & o_chipMark,
+    uint8_t i_thr = 1 );
 
 
 /**

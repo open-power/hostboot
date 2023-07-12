@@ -69,12 +69,13 @@ uint32_t __handleNceEte( ExtensibleChip * i_chip,
     {
         // Query the per-symbol counters for the CE symbol(s).
         MemUtils::MaintSymbols symData; MemSymbol junk;
-        o_rc = MemUtils::collectCeStats<T>( i_chip, rank, symData, junk );
+        o_rc = MemUtils::collectCeStats<T>( i_chip, rank, i_addr.getPort(),
+                                            symData, junk );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats(0x%08x,m%ds%d) "
-                      "failed", i_chip->getHuid(), rank.getMaster(),
-                      rank.getSlave() );
+            PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats(0x%08x,0x%02x,%x) "
+                      "failed", i_chip->getHuid(), rank.getKey(),
+                      i_addr.getPort() );
             break;
         }
 
