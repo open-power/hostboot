@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -445,9 +445,14 @@ class errludP_occ:
                     to = 0
                     tracedata = data[i:udSize]
                     traceresults,to = errludP_occ.parseTrace(tracedata, to)
-                    i += to
-                    udSize -= to
-                    d['OCC TRACE2'] = traceresults
+                    if to > 0:
+                        i += to
+                        udSize -= to
+                        errud[j]["Trace "+str(subTraceNum)] = traceresults
+                        subTraceNum += 1
+                    else:
+                        errud[j]["Trace "+str(subTraceNum)] = traceresults
+                        break
 
             elif udType == "02": # CALLHOME
                 chStart = i
