@@ -457,10 +457,14 @@ class errludP_occ:
                     to = 0
                     tracedata = data[i:i+udSize]
                     traceresults,to = errludP_occ.parseTrace(tracedata, to)
-                    i += to
-                    udSize -= to
-                    errud[j]["Trace "+str(subTraceNum)] = traceresults
-                    subTraceNum += 1
+                    if to > 0:
+                        i += to
+                        udSize -= to
+                        errud[j]["Trace "+str(subTraceNum)] = traceresults
+                        subTraceNum += 1
+                    else:
+                        errud[j]["Trace "+str(subTraceNum)] = traceresults
+                        break
 
             elif udType == "02": # CALLHOME
                 chStart = i
