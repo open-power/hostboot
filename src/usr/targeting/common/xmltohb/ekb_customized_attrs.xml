@@ -1005,6 +1005,12 @@
          <persistency>volatile</persistency>
     </attribute>
 
+    <attribute>
+        <!-- Lab override only -->
+        <id>ATTR_SLOW_MEM_POOL_TEST</id>
+        <no_export/>
+    </attribute>
+
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->

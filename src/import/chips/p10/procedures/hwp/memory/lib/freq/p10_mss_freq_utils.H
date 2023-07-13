@@ -152,10 +152,16 @@ fapi2::ReturnCode limit_freq_by_processor_p10(
     freq_scoreboard& io_scoreboard)
 {
     fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_OMI_FREQ_Type l_limited_omi_freq;
+    fapi2::ATTR_SLOW_MEM_POOL_TEST_Type l_slow_mem_test;
 
     // Set omi frequency limit flag based on whether the system is DD1
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_OMI_FREQ, i_target, l_limited_omi_freq),
              "%s failed to read ATTR_CHIP_EC_FEATURE_DD1_LIMITED_OMI_FREQ", mss::c_str(i_target));
+
+    // Set up frequency limit override for slow memory test
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SLOW_MEM_POOL_TEST, i_target, l_slow_mem_test),
+             "%s failed to read ATTR_SLOW_MEM_POOL_TEST", mss::c_str(i_target));
+
 
     // OCMB always needs to be in sync between OMI and DDR, by the given ratio
     // so we convert the supported OMI freqs and remove every other DDR freq
@@ -167,7 +173,8 @@ fapi2::ReturnCode limit_freq_by_processor_p10(
         std::vector<uint64_t> l_converted_omi_freqs;
 
         // Check for DD1 OMI frequency limitation - if exists use 21330 MHz
-        for (const auto l_omi_freq : (l_limited_omi_freq ? P10_LIMITED_OMI_FREQS : P10_OMI_FREQS))
+        for (const auto l_omi_freq : ((l_limited_omi_freq || l_slow_mem_test)
+                                      ? P10_LIMITED_OMI_FREQS : P10_OMI_FREQS))
         {
             uint64_t l_ddr_freq = 0;
             FAPI_TRY(convert_omi_freq_to_ddr_freq(l_port, l_omi_freq, l_ddr_freq));

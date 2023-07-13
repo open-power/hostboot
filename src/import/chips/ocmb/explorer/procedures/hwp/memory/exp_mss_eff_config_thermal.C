@@ -196,6 +196,30 @@ extern "C"
             }
         }
 
+        // Set up throttle override for slow memory test
+        {
+            uint8_t l_slow_mem_test = 0;
+            uint16_t l_slow_mem_override = 40;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SLOW_MEM_POOL_TEST,
+                                   mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_targets[0]),
+                                   l_slow_mem_test));
+
+            if (l_slow_mem_test == fapi2::ENUM_ATTR_SLOW_MEM_POOL_TEST_ENABLE)
+            {
+                for ( const auto& l_ocmb : i_targets)
+                {
+                    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(l_ocmb))
+                    {
+                        FAPI_INF("%s Setting up throttle override for slow memory performance test...",
+                                 mss::c_str(l_port));
+                        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT,
+                                               l_port,
+                                               l_slow_mem_override));
+                    }
+                }
+            }
+        }
+
     fapi_try_exit:
         return fapi2::current_err;
     }

@@ -24,6 +24,24 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <attributes>
   <attribute>
+      <id>ATTR_SLOW_MEM_POOL_TEST</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <description>
+        Force frequency and throttles of all memory below
+        the target to operate as "slow" memory for performance
+        testing. NOTE: Do not set with DDR5 DIMMs, as this will
+        result in failures in mss_freq.
+      </description>
+      <initToZero></initToZero>
+      <valueType>uint8</valueType>
+      <enum>
+          DISABLE = 0,
+          ENABLE = 1
+      </enum>
+      <platInit/>
+  </attribute>
+
+  <attribute>
       <id>ATTR_MSS_OCMB_EXP_OMI_CFG_ENDIAN_CTRL</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>

@@ -118,6 +118,44 @@ extern "C"
             FAPI_TRY(mss::power_thermal::thermal_throttle_scominit<mss::mc_type::EXPLORER>(l_port));
         }
 
+        // Set up scom overrides for slow memory test
+        {
+            uint8_t l_slow_mem_test = 0;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SLOW_MEM_POOL_TEST,
+                                   mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target),
+                                   l_slow_mem_test));
+
+            if (l_slow_mem_test == fapi2::ENUM_ATTR_SLOW_MEM_POOL_TEST_ENABLE)
+            {
+                fapi2::buffer<uint64_t> l_reg_data;
+                FAPI_INF("%s Setting up scom overrides for slow memory performance test...", mss::c_str(i_target));
+
+                FAPI_TRY(fapi2::getScom(i_target, EXPLR_SRQ_MBA_RRQ0Q, l_reg_data));
+                l_reg_data.setBit<EXPLR_SRQ_MBA_RRQ0Q_CFG_DISABLE_FAST_ACT>();
+                l_reg_data.setBit<EXPLR_SRQ_MBA_RRQ0Q_CFG_DISABLE_FAST_ACT_FIFO>();
+                FAPI_TRY(fapi2::putScom(i_target, EXPLR_SRQ_MBA_RRQ0Q, l_reg_data));
+
+                FAPI_TRY(fapi2::getScom(i_target, EXPLR_SRQ_MBA_TMR1Q, l_reg_data));
+                l_reg_data.insertFromRight<EXPLR_SRQ_MBA_TMR1Q_CFG_TRCD, EXPLR_SRQ_MBA_TMR1Q_CFG_TRCD_LEN>(0b11111);
+                l_reg_data.setBit<EXPLR_SRQ_MBA_TMR1Q_CFG_TRCD_MSB>();
+                FAPI_TRY(fapi2::putScom(i_target, EXPLR_SRQ_MBA_TMR1Q, l_reg_data));
+
+                FAPI_TRY(fapi2::getScom(i_target, EXPLR_RDF_RECR, l_reg_data));
+                l_reg_data.insertFromRight<EXPLR_RDF_RECR_MBSECCQ_EXIT_OVERRIDE,
+                                           EXPLR_RDF_RECR_MBSECCQ_EXIT_OVERRIDE_LEN>(0b10);
+                FAPI_TRY(fapi2::putScom(i_target, EXPLR_RDF_RECR, l_reg_data));
+
+                FAPI_TRY(fapi2::getScom(i_target, EXPLR_DLX_DL0_CONFIG0, l_reg_data));
+                l_reg_data.setBit<EXPLR_DLX_DL0_CONFIG0_CFG_FP_DISABLE>();
+                FAPI_TRY(fapi2::putScom(i_target, EXPLR_DLX_DL0_CONFIG0, l_reg_data));
+
+                FAPI_TRY(fapi2::getScom(i_target, EXPLR_MMIO_OTTCFG, l_reg_data));
+                l_reg_data.clearBit<EXPLR_MMIO_OTTCFG_TEMPLATE_9>();
+                l_reg_data.setBit<EXPLR_MMIO_OTTCFG_TEMPLATE_5>();
+                FAPI_TRY(fapi2::putScom(i_target, EXPLR_MMIO_OTTCFG, l_reg_data));
+            }
+        }
+
         // Run required unmasks for LOCAL_FIR, FABR0, SRQFIR after scominit
         FAPI_TRY(mss::unmask::after_scominit<mss::mc_type::EXPLORER>(i_target));
 
