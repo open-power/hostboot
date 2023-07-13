@@ -54,8 +54,8 @@ static const uint64_t EXPLR_IB_MMIO_OFFSET   = 0x0000000100000000ull; // 4GB
 
 // NOTE: changing this address requires changes
 //       to src/build/simics/standalone.simics
-static const uint64_t EXPLR_INVALID_SCOM_ADDR =
-                            EXPLR_TP_MB_UNIT_TOP_TRACE_TRDATA_CONFIG_0;
+// @TODO PFHB-530 Fix Explorer MMIO Error Path Testcases
+static const uint64_t EXPLR_INVALID_SCOM_ADDR = 0x80109999;
 
 using namespace TARGETING;
 
@@ -70,7 +70,6 @@ class MmioTest : public CxxTest::TestSuite
     {
         TS_INFO("testExplrMMIO> Start" );
 
-#if 0 // TODO: re-enable the test
         errlHndl_t l_err = nullptr;
         uint32_t regdata4 = 0;
         size_t op_size = 0;
@@ -199,11 +198,11 @@ class MmioTest : public CxxTest::TestSuite
 
             // Write to an "invalid" scom address.  Should
             // return with failure (now that we've set up the error regs).
-            // EXPLR_INVALID_SCOM_ADDR =
-            //   EXPLR_TP_MB_UNIT_TOP_TRACE_TRDATA_CONFIG_0 = 0x08010403
+            // EXPLR_INVALID_SCOM_ADDR = 0x80109999
             // NOTE: Also, writing MMIO_OCMB_UE_DETECTED to this register
             //       sets up the following read to the same register
             //       to fail.
+            // @TODO PFHB-530 Fix Explorer MMIO Error Path Testcases
             l_buffer64 = MMIO_OCMB_UE_DETECTED;
             op_size = sizeof(l_buffer64);
             l_err = DeviceFW::deviceWrite(
@@ -220,13 +219,13 @@ class MmioTest : public CxxTest::TestSuite
                 TS_INFO("testExplrMMIO: Current SCOM mode: %s",
                         (l_switches.useInbandScom)? "MMIO": "I2C");
                 TS_FAIL("testExplrMMIO> "
-                        "did not recieve expected failure on mmio write");
+                        "did not receive expected failure on mmio write");
                 break;
             }
             else
             {
                 TS_INFO("testExplrMMIO> "
-                        "received expected failure on mmio write");
+                        "received expected failure on mmio write, Expect to see Error deleted without commit");
                 delete l_err;
                 l_err = nullptr;
             }
@@ -260,7 +259,7 @@ class MmioTest : public CxxTest::TestSuite
             else
             {
                 TS_INFO("testExplrMMIO> "
-                        "received expected failure on mmio read");
+                        "received expected failure on mmio read, Expect to see Error deleted without commit");
                 delete l_err;
                 l_err = nullptr;
             }
@@ -275,7 +274,6 @@ class MmioTest : public CxxTest::TestSuite
 
         // << atomic section
         mutex_unlock(l_mutex);
-#endif
         TS_INFO("testExplrMMIO> Done");
     };
 

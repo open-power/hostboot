@@ -190,11 +190,12 @@ foreach $proc in (get-component-list -all proc_p10_pib) {
 foreach $obj in (list-objects ocmb -all){
 
     # Allow for testing MMIO HW failures
-    # Forces write access to TRACE_TRDATA_CONFIG_0(0x08010403) to fail
+    # Forces write access to (0x80109999) to fail
     # in src/usr/mmio/test/mmiotest.H
     # NOTE: address is left shifted 3 and has MMIO
     #       offset (0x100000000) added.
-    $obj->mmio_regs_mmioerr = 0x0000000140082018
+    # @TODO PFHB-530 Fix Explorer MMIO Error Path Testcases
+    $obj->mmio_regs_mmioerr = 0x0000000140084CC8
 
 }
 
