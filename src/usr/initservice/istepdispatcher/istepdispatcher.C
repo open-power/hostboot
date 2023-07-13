@@ -1472,8 +1472,6 @@ void IStepDispatcher::loadModules(uint32_t istepNumber) const
 // ----------------------------------------------------------------------------
 void IStepDispatcher::unLoadModules(uint32_t istepNumber) const
 {
-    errlHndl_t l_errl = NULL;
-
     do
     {
         //  if no dep modules then just exit out
@@ -1484,19 +1482,31 @@ void IStepDispatcher::unLoadModules(uint32_t istepNumber) const
                     istepNumber );
             break;
         }
+
         uint32_t i = 0;
 
-        while( ( l_errl == NULL ) &&
-                ( g_isteps[istepNumber].depModules->modulename[i] != NULL) )
+        /* We have to unload the modules in reverse order of what we
+           loaded them in, because the construction of the objects in
+           a module could have depended on modules earlier in the load
+           order, and similarly the destruction of objects could also
+           depend on the earlier modules still being loaded. */
+
+        while (g_isteps[istepNumber].depModules->modulename[i] != NULL)
         {
-            TRACFCOMP( g_trac_initsvc,
-                    "unloading [%s]",
-                    g_isteps[istepNumber].depModules->modulename[i]);
-
-            l_errl = VFS::module_unload(
-                    g_isteps[istepNumber].depModules->modulename[i] );
-
             i++;
+        }
+
+        errlHndl_t l_errl = NULL;
+
+        while (l_errl == NULL && i > 0)
+        {
+            const char* const module_name = g_isteps[istepNumber].depModules->modulename[i-1];
+
+            TRACFCOMP(g_trac_initsvc, "unloading [%s]", module_name);
+
+            l_errl = VFS::module_unload(module_name);
+
+            i--;
         }
 
         if( l_errl )
@@ -2473,6 +2483,8 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
         {
             TRACFCOMP(g_trac_initsvc, "task_wait_tid failed; l_tidretrc=0x%x, l_childsts=0x%x",
                       l_tidretrc, l_childsts);
+
+            CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "%s", kernel_printk_buffer);
             // the launched task failed or crashed,
         } // endif tidretrc
 
