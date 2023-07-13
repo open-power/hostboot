@@ -415,12 +415,6 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
 
                 nanosleep( 0, 10000 ); //sleep for 10,000 ns
                 elapsed_indScom_time_ns += 10000;
-#ifdef CONFIG_ODYSSEY_BRINGUP
-                if(Util::isSimicsRunning())
-                {
-                    elapsed_indScom_time_ns += (MAX_INDSCOM_TIMEOUT_NS/2); //only check twice
-                }
-#endif
 
             }while ( elapsed_indScom_time_ns <= MAX_INDSCOM_TIMEOUT_NS);
 
