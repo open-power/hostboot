@@ -66,6 +66,7 @@ enum sbeioModuleId
     SBEIO_RT_PSU                        = 0x15,
     SBEIO_PSU_PMIC_HEALTH_CHECK         = 0x16,
     SBEIO_RT_SCOM                       = 0x17,
+    SBEIO_PROCESS_ATTR_ARRAY            = 0x18,
 };
 
 /**
@@ -167,6 +168,8 @@ enum sbeioReasonCode
     // SBE Runtime Odyssey support
     SBEIO_SCOM_SUPPORT_READ            = SBEIO_COMP_ID | 0x6D,
     SBEIO_SCOM_SUPPORT_WRITE           = SBEIO_COMP_ID | 0x6E,
+    // Attr exchange errors
+    SBEIO_ATTR_MISMATCH_DETECTED       = SBEIO_COMP_ID | 0x6F,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

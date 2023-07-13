@@ -728,8 +728,6 @@ namespace SBEIO
                                                          uint32_t i_interval,
                                                          uint8_t i_dqa);
 
-
-
 } //end namespace SBEIO
 
 #endif /* _SBEIOIF_H */
