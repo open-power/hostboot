@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,9 @@ fapi2::ReturnCode __getDimmRepairData( const fapi2::Target
         for ( auto &dimmTrgt : l_dimmList )
         {
             // Get and compare the port
-            const uint8_t l_port = dimmTrgt->getAttr<ATTR_MEM_PORT>();
+            // TODO: check dimm ATTR_MEM_PORT if support for it is added back
+            TargetHandle_t memport = getAffinityParent(dimmTrgt, TYPE_MEM_PORT);
+            uint8_t l_port = memport->getAttr<ATTR_REL_POS>();
 
             if ( l_port == i_port )
             {

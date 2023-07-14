@@ -778,7 +778,10 @@ uint8_t getDimmPort( TARGETING::TargetHandle_t i_dimmTrgt )
     PRDF_ASSERT( nullptr != i_dimmTrgt );
     PRDF_ASSERT( TYPE_DIMM == getTargetType(i_dimmTrgt) );
 
-    return i_dimmTrgt->getAttr<ATTR_MEM_PORT>();
+    // TODO: check dimm ATTR_MEM_PORT if support for it is added back
+    TargetHandle_t memport = getConnectedParent(i_dimmTrgt, TYPE_MEM_PORT);
+
+    return memport->getAttr<ATTR_REL_POS>();
 }
 
 //------------------------------------------------------------------------------
