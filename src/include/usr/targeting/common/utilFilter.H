@@ -745,6 +745,7 @@ void getPeerTargets(
 Target * getPositionPairedTarget(const Target * i_source_tgt,
                                  TYPE i_paired_type);
 
+
 #if __cplusplus >= 201300
 
 /* @brief Wrap the given utility filter function such that it can be called with
@@ -792,10 +793,50 @@ void getTargetsWithAttr(TargetHandleList& o_vector)
 
     return;
 }
+
+enum ocmbsInSystem : int
+{
+    // (default) Unknown which types of OCMBs are in the system
+    // NOTE: This can represent the case that targeting is not fully up such that not all of the
+    //       OCMBs have not been detected yet
+    UTIL_OCMBS_UNDEFINED      = 0x00,
+
+    UTIL_EXPLORER_FOUND       = 0x01,      // At least one Explorer is in the system
+    UTIL_ODYSSEY_FOUND        = 0x02,      // At least one Odyssey is in the system
+
+    UTIL_EXPLORER_AND_ODYSSEY = UTIL_EXPLORER_FOUND | UTIL_ODYSSEY_FOUND,
+};
+
+/**
+ * @brief Checks to see if a specific ocmbsInSystem value (i_check) is contained in the
+ *        enum that might hold multiple values (i_source)
+ *        MAB: I admit this could be better written ^^^)
+ *
+ * @param[in] i_source    A version of ocmbsInSystem that might hold multiple values
+ * @param[in] i_check     A value of ocmbsInSystem that is checked to see if it is in i_source
+ *
+ * @return bool           True if i_check is in i_source; otherwise false
+ */
+inline bool compareOcmbsInSystem(const ocmbsInSystem& i_source,
+                                 const ocmbsInSystem& i_check)
+{
+    return ((static_cast<int>(i_source) & static_cast<int>(i_check)) == static_cast<int>(i_check));
+}
+
+/**
+ * @brief Determine the types of OCMB chips present in the System
+ *
+ * @param[in] i_detectionType   Determines if the search uses present (default), functional,
+ *                              or other options
+ *
+ * @return ocmbsInSystem        Enum representing which, if any, OCMBs are found in the system
+ */
+ocmbsInSystem getOcmbChipTypesInSystem(const ResourceState & i_detectionType = UTIL_FILTER_PRESENT);
+
 #endif // __HOSTBOOT_MODULE
 
 #endif // __cplusplus >= 201300
 
 }
 
-#endif // __TARGETING_COMMON_UTIL_H
+#endif // __TARGETING_COMMON_UTIL_FILTER_H

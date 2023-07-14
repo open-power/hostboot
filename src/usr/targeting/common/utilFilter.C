@@ -43,6 +43,10 @@
 #include <targeting/common/predicates/predicateisnonfunctional.H>
 #include <algorithm>
 
+#ifdef __HOSTBOOT_MODULE
+#include <targeting/odyutil.H>
+#endif
+
 /**
  * Miscellaneous Filter Utility Functions
  */
@@ -1235,6 +1239,51 @@ Target * getPositionPairedTarget(const Target * i_source_tgt, TYPE i_paired_type
     #undef TARG_FN
     return pairedTarget;
 }
+
+#ifdef __HOSTBOOT_MODULE
+
+inline bool isExplorerChip(const Target* i_target)
+{
+    return (i_target->getAttr<ATTR_TYPE>() == TYPE_OCMB_CHIP &&
+            i_target->getAttr<ATTR_CHIP_ID>() == POWER_CHIPID::EXPLORER_16);
+}
+
+ocmbsInSystem getOcmbChipTypesInSystem(const ResourceState & i_detectionType)
+{
+
+    TARG_DBG(">>getOcmbChipTypesInSystem: i_detectionType=%d", i_detectionType);
+
+    int ret = 0; // aka default return variable of ocmbsInSystem to UTIL_OCMBS_UNDEFINED
+
+    // Get all present OBMC_CHIPs in the system
+    for (const auto ocmb : composable(getChipResources)(TYPE_OCMB_CHIP, i_detectionType))
+    {
+        if (((ret & UTIL_ODYSSEY_FOUND) == 0) &&
+            (UTIL::isOdysseyChip(ocmb) == true))
+        {
+            ret |= UTIL_ODYSSEY_FOUND;
+        }
+
+        if (((ret & UTIL_EXPLORER_FOUND) == 0) &&
+            (isExplorerChip(ocmb) == true))
+        {
+            ret |= UTIL_EXPLORER_FOUND;
+        }
+
+        // Only look for Explorer and Odyssey for now. So if they're both found, then break
+        if (((ret & UTIL_ODYSSEY_FOUND) != 0) &&
+            ((ret & UTIL_EXPLORER_FOUND) != 0))
+        {
+            break;
+        }
+    }
+
+    TARG_DBG("<<getOcmbChipTypesInSystem: ret=%d", ret);
+
+    return static_cast<ocmbsInSystem>(ret);
+}
+
+#endif // __HOSTBOOT_MODULE
 
 #undef TARG_CLASS
 

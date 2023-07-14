@@ -287,11 +287,6 @@ uint32_t getSensorNumber(const TARGETING::Target* i_pTarget,
                                        TYPE_DIMM,
                                        UTIL_FILTER_PRESENT);
 
-#ifndef CONFIG_ODYSSEY_BRINGUP
-        // @TODO JIRA PFHB-222 will add support for Odyssey DDIMMs and remove this check
-        assert(dimm.size() <= 1, "Expected at most one DIMM target beneath OCMB/MEM_PORT");
-#endif
-
         if (dimm.empty())
         {
             // Print a message and use SENSOR_TYPE_DIMM (in the TYPE_DIMM case),
@@ -306,6 +301,8 @@ uint32_t getSensorNumber(const TARGETING::Target* i_pTarget,
         }
         else
         {
+            // @TODO JIRA PFHB-222 will add support for Odyssey DDIMMs (where more than 1 dimm can
+            // get returned here) and make sure the right target is used
             i_pTarget = dimm.front();
         }
         sensor_id.target_type = occ_sensor_id_t::target_type_t::TARGET_TYPE_OCMB;
