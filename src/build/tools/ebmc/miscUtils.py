@@ -35,13 +35,14 @@
 import os.path   # Used in getLid function
 import os
 import site
+import sys
 
 # Global variable to hold search directories for the LIDs and in what order to search
 # Listed in order of priority, i.e. HOSTBOOT_TRACE_DIR takes highest priority if found, etc.
 LID_SEARCH_DIRS = [ os.getenv('HOSTBOOT_TRACE_DIR'),                    # ENV VAR OVERRIDE HOSTBOOT
                     os.getenv('SBE_TRACE_DIR'),                         # ENV VAR OVERRIDE SBE
-                    os.path.join(site.USER_BASE, 'hostboot_data'),      # data_files exported from Hostboot
-                    os.path.join(site.USER_BASE, 'sbe_data'),           # data_files exported from SBE
+                    os.path.join(sys.prefix, 'hostboot_data'),          # data_files exported from Hostboot
+                    os.path.join(sys.prefix, 'sbe_data'),               # data_files exported from SBE
                     "/usr/local/share/hostfw/running",                  # The BMC patch directory
                     "/var/lib/phosphor-software-manager/hostfw/running" # The BMC running directory
                   ]
