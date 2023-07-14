@@ -102,12 +102,8 @@ class planar_rdimm_ddr4_1_1 : public ddimm_0_4
         virtual fapi2::ReturnCode set_module_rcd(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = fapi2::ENUM_ATTR_MEM_EFF_SUPPORTED_RCD_RCD_PER_CHANNEL_1;
-            uint8_t l_rcd_parity = 2;
-            const auto l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(iv_dimm);
+
             FAPI_TRY(mss::attr::set_supported_rcd(iv_dimm, l_field));
-            // Activate RCD parity checking
-            FAPI_TRY( mss::attr::set_dimm_ddr4_f0rc0f(iv_dimm, l_rcd_parity));
-            FAPI_TRY( mss::attr::set_dimm_buffer_delay(l_port, l_rcd_parity));
 
         fapi_try_exit:
             return fapi2::current_err;
