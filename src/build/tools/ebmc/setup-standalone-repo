@@ -265,7 +265,7 @@ function main ()
         return 1
     fi
 
-    HOSTBOOT_COMMIT_HASH=$(sed -n -e 's/^.*hostboot-p10-//p' < /afs/rchland.ibm.com/projects/esw/$pnor_release/Builds/$pnor_build/logs/status.html | cut -c 1-7 | head -n1)
+    export HOSTBOOT_COMMIT_HASH=$(sed -n -e 's/^.*hostboot-p10-//p' < /afs/rchland.ibm.com/projects/esw/$pnor_release/Builds/$pnor_build/logs/status.html | cut -c 1-7 | head -n1)
     echo "Hostboot commit for PNOR build: $HOSTBOOT_COMMIT_HASH"
     if [ -z "$HOSTBOOT_COMMIT_HASH" ]; then
         echo "ERROR: Could not find hostboot commit hash with given package name:'$package_name'"
