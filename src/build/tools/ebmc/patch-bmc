@@ -37,12 +37,16 @@ function errlog () {
 BMC_PATCH_DIRECTORY=/usr/local/share/hostfw/running/
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SSHPASS_SCRIPT="sshpass -p"
-#STANDALONE_COMMIT_CHANGE_ID=I7f9e2bfa6d30f91a9055c1a0fde73c3e207e48ea
+
+# If the STANDALONE_COMMIT_CHANGE_ID is not found users can force the script
+# to continue without that commit with HB_PATCH_BMC_FORCE_PATCH.
 STANDALONE_COMMIT_CHANGE_ID=I090b925139d1ed594679f43065b68fa434305469
-# If the STANDALONE_COMMIT_CHANGE_ID is not found, then MGP_FILES_EXIST will be set to 0.
-# Users can force the script to continue without that commit with HB_PATCH_BMC_FORCE_PATCH.
-# With that set and this variable equal 0 then the script won't attempt to copy a non-existent
-# directory.
+
+# If neither HOSTBOOT_COMMIT_HASH (set by setup-standalone-repo) nor
+# BASE_CHANGEID_FOR_PATCHES (set by user) is found, then MGP_FILES_EXIST
+# will be set to 0.  Users can force the script to continue without that
+# commit with HB_PATCH_BMC_FORCE_PATCH.  With that set and this variable
+# equal 0 then the script won't attempt to copy a non-existent directory.
 MGP_FILES_EXIST=1
 
 #User might specify a different ssh port (e.g. for simics)
@@ -233,19 +237,23 @@ function MAKE_GIT_PATCHFILES () {
     MGP_COPYDIR=$1
     echo "MGP_COPYDIR=$MGP_COPYDIR"
 
+    if [ -z "$BASE_CHANGEID_FOR_PATCHES" ]
+    then
+        BASE_CHANGEID_FOR_PATCHES=$HOSTBOOT_COMMIT_HASH
+    fi
+
     if [ -z "$EXTERNAL_PATCHES" ]
     then
-        relcommit=`git log | grep "$STANDALONE_COMMIT_CHANGE_ID" -A2 | sed -n 's/commit //p'`
         rm -f $MGP_COPYDIR/HB_BASE_IS__*
 
-        if [ "$relcommit" != "" ]
+        if [ "$BASE_CHANGEID_FOR_PATCHES" != "" ]
         then
-            echo "Making patches based against $relcommit"
+            echo "Making patches based against $BASE_CHANGEID_FOR_PATCHES"
             rm -f $MGP_COPYDIR/*.patch
-            git format-patch $relcommit --output-directory $MGP_COPYDIR/
-            touch $MGP_COPYDIR/HB_BASE_IS__$relcommit
+            git format-patch $BASE_CHANGEID_FOR_PATCHES --output-directory $MGP_COPYDIR/
+            touch $MGP_COPYDIR/HB_BASE_IS__$BASE_CHANGEID_FOR_PATCHES
         else
-            echo "No base commit found, skipping patches"
+            echo "** No base commit found, skipping patches **"
             MGP_FILES_EXIST=0
         fi
     else
@@ -351,8 +359,9 @@ if [[ $COPY_ONLY = 1 ]] ; then
     MAKE_GIT_PATCHFILES $COPYDIR
 
     echo "Patches copied to $COPYDIR."
-    echo "To apply to BMC run:"
-    echo "   PATCHES_DIR=$COPYDIR $COPYDIR/patch-bmc [USERNAME@]HOSTNAME PASSWORD $SECTIONS"
+    echo "To apply to BMC run:" > $COPYDIR/HOW_TO_APPLY.txt
+    echo "   PATCHES_DIR=$COPYDIR $COPYDIR/patch-bmc [USERNAME@]HOSTNAME PASSWORD $SECTIONS" >> $COPYDIR/HOW_TO_APPLY.txt
+    cat $COPYDIR/HOW_TO_APPLY.txt
 
 else   # Apply the data to the BMC
 
