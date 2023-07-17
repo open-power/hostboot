@@ -379,23 +379,6 @@ fapi2::ReturnCode setup_to_execute<mss::mc_type::ODYSSEY>(
     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
     const ccs::program<mss::mc_type::ODYSSEY>& i_program)
 {
-    // Loops through all ports
-    for(const auto& l_port : i_ports)
-    {
-        const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
-
-        // Disables low power mode
-        fapi2::buffer<uint64_t> l_data;
-        FAPI_TRY(fapi2::getScom(l_ocmb, scomt::ody::ODC_SRQ_MBARPC0Q, l_data));
-
-        l_data.setBit<scomt::ody::ODC_SRQ_MBARPC0Q_CFG_CONC_LP_DATA_DISABLE>();
-
-        FAPI_TRY(fapi2::putScom(l_ocmb, scomt::ody::ODC_SRQ_MBARPC0Q, l_data));
-
-        // Only one of these register per chip, so no need to continue looping
-        break;
-    }
-
     // Check for read/write commands, and set up workaround bits if needed
     FAPI_TRY(workarounds::setup_ccs_rdwr(i_ports, i_program));
 
@@ -415,26 +398,7 @@ fapi2::ReturnCode cleanup_from_execute<mss::mc_type::ODYSSEY>
 (const ccs::program<mss::mc_type::ODYSSEY>& i_program,
  const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports)
 {
-    // Loops through all ports
-    for(const auto& l_port : i_ports)
-    {
-        const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
-
-        // Re-enable low power mode
-        fapi2::buffer<uint64_t> l_data;
-        FAPI_TRY(fapi2::getScom(l_ocmb, scomt::ody::ODC_SRQ_MBARPC0Q, l_data));
-
-        l_data.clearBit<scomt::ody::ODC_SRQ_MBARPC0Q_CFG_CONC_LP_DATA_DISABLE>();
-
-        FAPI_TRY(fapi2::putScom(l_ocmb, scomt::ody::ODC_SRQ_MBARPC0Q, l_data));
-
-        // Only one of these register per chip, so no need to continue looping
-        break;
-    }
-
     return fapi2::FAPI2_RC_SUCCESS;
-fapi_try_exit:
-    return fapi2::current_err;
 }
 
 ///
