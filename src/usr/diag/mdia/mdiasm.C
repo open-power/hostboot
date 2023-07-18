@@ -927,11 +927,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
             case RESTORE_DRAM_REPAIRS:
             {
                 TargetHandle_t target = getTarget( *i_wfp );
-                // TODO: reenable restore dram repairs for Odyssey
-                if (!isOdysseyOcmb(target))
-                {
-                    rc = PRDF::restoreDramRepairs<TYPE_OCMB_CHIP>( target );
-                }
+                rc = PRDF::restoreDramRepairs<TYPE_OCMB_CHIP>( target );
                 break;
             }
             case START_PATTERN_0:
