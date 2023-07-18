@@ -156,6 +156,13 @@ void append_wr_data_enable_command<mss::mc_type::ODYSSEY>(const uint64_t i_port_
             }
 
             l_inst.arr1.template setBit<TT::ARR1_FORCE_DATA>();
+            io_inst.push_back(l_inst);
+        }
+
+        // Finally, add in the data set to a 0
+        // TK check this again w/ logan
+        {
+            l_inst = des_command<mss::mc_type::ODYSSEY>();
             l_inst.iv_idles = i_idles;
             io_inst.push_back(l_inst);
         }
@@ -379,6 +386,16 @@ fapi2::ReturnCode setup_to_execute<mss::mc_type::ODYSSEY>(
     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
     const ccs::program<mss::mc_type::ODYSSEY>& i_program)
 {
+    if(!i_ports.empty())
+    {
+        const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_ports[0]);
+        using TT = ccsTraits<mss::mc_type::ODYSSEY>;
+        fapi2::buffer<uint64_t> l_data;
+        FAPI_TRY(mss::getScom(l_ocmb, TT::MODEQ_REG, l_data));
+        l_data.setBit<TT::AUTO_BURST>();
+        FAPI_TRY(mss::putScom(l_ocmb, TT::MODEQ_REG, l_data));
+    }
+
     // Check for read/write commands, and set up workaround bits if needed
     FAPI_TRY(workarounds::setup_ccs_rdwr(i_ports, i_program));
 

@@ -479,20 +479,25 @@ inline instruction_t<MC> pde_command( const uint64_t i_port_rank,
 /// @param[in] i_bank_group_addr the bank group for this instruction -> right justified BG[2:0]
 /// @param[in] i_bank_addr the bank address for this instruction -> right justified BA[1:0]
 /// @param[in] i_column_addr the column address for this instruction -> COL[10:0] (only 10:3] is used)
+/// @param[in] i_burstchop_n sets the command to be in burst chop mode - either OFF_N or ON_N
 /// @return the write/read command CCS boilerplate
 ///
 template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 static fapi2::buffer<uint64_t> wr_rd_cmd_boilerplate(const fapi2::buffer<uint64_t>& i_cid = 0,
         const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
         const fapi2::buffer<uint64_t>& i_bank_addr = 0,
-        const fapi2::buffer<uint64_t>& i_column_addr = 0)
+        const fapi2::buffer<uint64_t>& i_column_addr = 0,
+        const mss::states i_burstchop_n = mss::states::OFF_N)
 {
+    constexpr uint64_t BC_BIT = TT::ARR0_CMD0_ADDRESS_0_13 + 5;
+
     fapi2::buffer<uint64_t> l_inst0 = default_inst_arr0<MC>();
 
     add_cid2_0<MC>(i_cid, l_inst0);
     add_ba1_0<MC>(i_bank_addr, l_inst0);
     add_bg2_0<MC>(i_bank_group_addr, l_inst0);
     add_col10_3<MC>(i_column_addr, l_inst0);
+    l_inst0.writeBit<BC_BIT>(i_burstchop_n);
 
     l_inst0.writeBit<TT::WR_RD_CID3>(i_cid.getBit<api_addr_bits::CID3>());
 
@@ -508,6 +513,8 @@ static fapi2::buffer<uint64_t> wr_rd_cmd_boilerplate(const fapi2::buffer<uint64_
 /// @param[in] i_bank_group_addr the bank group for this instruction -> right justified BG[2:0]
 /// @param[in] i_bank_addr the bank address for this instruction -> right justified BA[1:0]
 /// @param[in] i_column_addr the column address for this instruction -> COL[10:0] (only 10:3] is used)
+/// @param[in] i_burstchop_n sets the command to be in burst chop mode - either OFF_N or ON_N
+/// @param[in] i_write_partial_n sets the command to do a partial write - either OFF_N or ON_N
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the write command CCS instruction
 ///
@@ -517,10 +524,14 @@ inline instruction_t<MC> wr_command( const uint64_t i_port_rank,
                                      const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
                                      const fapi2::buffer<uint64_t>& i_bank_addr = 0,
                                      const fapi2::buffer<uint64_t>& i_column_addr = 0,
+                                     const mss::states i_burstchop_n = mss::states::OFF_N,
+                                     const mss::states i_write_partial_n = mss::states::OFF_N,
                                      const uint16_t i_idle = 0)
 {
+    constexpr uint64_t WR_PARTIAL_BIT = TT::ARR0_CMD1_ADDRESS_0_13 + 11;
+
     fapi2::buffer<uint64_t> l_boilerplate_arr0 = wr_rd_cmd_boilerplate<MC>(i_cid, i_bank_group_addr, i_bank_addr,
-            i_column_addr );
+            i_column_addr, i_burstchop_n );
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::WR)
@@ -528,6 +539,7 @@ inline instruction_t<MC> wr_command( const uint64_t i_port_rank,
 
     // This is a 2-phase command
     l_boilerplate_arr0.setBit<TT::ARR0_CMD1_VLD>();
+    l_boilerplate_arr0.writeBit<WR_PARTIAL_BIT>(i_write_partial_n);
 
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }
@@ -541,6 +553,7 @@ inline instruction_t<MC> wr_command( const uint64_t i_port_rank,
 /// @param[in] i_bank_group_addr the bank group for this instruction -> right justified BG[2:0]
 /// @param[in] i_bank_addr the bank address for this instruction -> right justified BA[1:0]
 /// @param[in] i_column_addr the column address for this instruction -> COL[10:0] (only 10:3] is used)
+/// @param[in] i_burstchop_n sets the command to be in burst chop mode - either OFF_N or ON_N
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the read command CCS instruction
 ///
@@ -550,10 +563,11 @@ inline instruction_t<MC> rd_command( const uint64_t i_port_rank,
                                      const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
                                      const fapi2::buffer<uint64_t>& i_bank_addr = 0,
                                      const fapi2::buffer<uint64_t>& i_column_addr = 0,
+                                     const mss::states i_burstchop_n = mss::states::OFF_N,
                                      const uint16_t i_idle = 0 )
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0 = wr_rd_cmd_boilerplate<MC>(i_cid, i_bank_group_addr, i_bank_addr,
-            i_column_addr );
+            i_column_addr, i_burstchop_n );
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::RD)
@@ -573,6 +587,7 @@ inline instruction_t<MC> rd_command( const uint64_t i_port_rank,
 /// @param[in] i_bank_group_addr the bank group for this instruction -> right justified BG[2:0]
 /// @param[in] i_bank_addr the bank address for this instruction -> right justified BA[1:0]
 /// @param[in] i_column_addr the column address for this instruction -> COL[10:0] (only 10:3] is used)
+/// @param[in] i_burstchop_n sets the command to be in burst chop mode - either OFF_N or ON_N
 /// @param[in] i_idle the idle time to the next command (default to 0)
 /// @return the read command CCS instruction
 ///
@@ -582,10 +597,11 @@ inline instruction_t<MC> rda_command( const uint64_t i_port_rank,
                                       const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
                                       const fapi2::buffer<uint64_t>& i_bank_addr = 0,
                                       const fapi2::buffer<uint64_t>& i_column_addr = 0,
+                                      const mss::states i_burstchop_n = mss::states::OFF_N,
                                       const uint16_t i_idle = 0 )
 {
     fapi2::buffer<uint64_t> l_boilerplate_arr0 = wr_rd_cmd_boilerplate<MC>(i_cid, i_bank_group_addr, i_bank_addr,
-            i_column_addr );
+            i_column_addr, i_burstchop_n );
     fapi2::buffer<uint64_t> l_boilerplate_arr1;
 
     l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::RDA)
@@ -623,6 +639,42 @@ inline instruction_t<MC> precharge_all_command( const uint64_t i_port_rank,
     // Handle the CID's
     add_cid2_0<MC>(i_cid, l_boilerplate_arr0);
     l_boilerplate_arr0.template writeBit<TT::PRE_REF_CID3>(i_cid.getBit<api_addr_bits::CID3>());
+
+    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
+}
+
+///
+/// @brief Setup precharge to bank command instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
+/// @param[in] i_port_rank the port rank
+/// @param[in] i_cid the CID for this instruction -> right justified CID[3:0]
+/// @param[in] i_bank_group_addr the bank group for this instruction -> right justified BG[2:0]
+/// @param[in] i_bank_addr the bank address for this instruction -> right justified BA[1:0]
+/// @param[in] i_idle the idle time to the next command (default to 0)
+/// @return the precharge all banks command CCS instruction
+///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> precharge_bank_command( const uint64_t i_port_rank,
+        const fapi2::buffer<uint64_t>& i_cid = 0,
+        const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
+        const fapi2::buffer<uint64_t>& i_bank_addr = 0,
+        const uint16_t i_idle = 0 )
+{
+    fapi2::buffer<uint64_t> l_boilerplate_arr0 = default_inst_arr0<MC>();
+    fapi2::buffer<uint64_t> l_boilerplate_arr1;
+
+    l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::PREPB);
+
+    // This is a 1-phase command
+    l_boilerplate_arr0.clearBit<TT::ARR0_CMD1_VLD>();
+
+    // Handle the CID's
+    add_cid2_0<MC>(i_cid, l_boilerplate_arr0);
+    l_boilerplate_arr0.template writeBit<TT::PRE_REF_CID3>(i_cid.getBit<api_addr_bits::CID3>());
+
+    add_ba1_0<MC>(i_bank_addr, l_boilerplate_arr0);
+    add_bg2_0<MC>(i_bank_group_addr, l_boilerplate_arr0);
 
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }

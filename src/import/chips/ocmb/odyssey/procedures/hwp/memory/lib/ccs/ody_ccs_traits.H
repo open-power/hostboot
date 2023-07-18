@@ -87,6 +87,7 @@ class ccsTraits<mss::mc_type::ODYSSEY>
             UE_DISABLE = scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_CCS_UE_DISABLE,
             DATA_COMPARE_BURST_SEL = scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_CCS_DATA_COMPARE_BURST_SEL,
             DATA_COMPARE_BURST_SEL_LEN = scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_CCS_DATA_COMPARE_BURST_SEL_LEN,
+            AUTO_BURST = scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_CCS_AUTO_BURST,
             // TODO:MST-1437 Fix the next two bits for Odyssey CCS
             CFG_PARITY_AFTER_CMD = 24,
             COPY_CKE_TO_SPARE_CKE = 26,
