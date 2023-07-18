@@ -48,7 +48,6 @@ struct ffdc_package
     size_t         size; // number of FFDC data words
     // Odyssey SBE uses this to aggregate data across many packages into the same PEL
     // For P10, this will always be zero since those SBE packages do not have this field and should be ignored.
-    // SLID == 0 is considered invalid.
     uint16_t       slid; // SBE Log Id
     // Odyssey SBE uses this field. Maps to fapi2::errlSeverity_t which is a subset of ERRORLOG::errlSeverity_t
     // For P10, this will always be ERRL_SEV_UNRECOVERABLE since those SBE packages do not have this field and
@@ -152,6 +151,16 @@ class SbeFFDCParser
          * @param[in]: i_index index in the ffdc package
          */
         PIB::PibError getPibRc (size_t i_index);
+
+        /* @JIRA PFHB-551 Fill in this interface
+         *
+         */
+        std::vector<errlHndl_t> generateSbeErrors(const uint8_t i_modId,
+                const uint16_t i_reasonCode,
+                const uint64_t i_userdata1,
+                const uint64_t i_userdata2);
+
+
     private:
         /**
          * @brief List of ffdc packages

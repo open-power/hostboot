@@ -234,6 +234,17 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
     SBE_TRACD(EXIT_MRK "parseFFDCData");
 }
 
+std::vector<errlHndl_t> SbeFFDCParser::generateSbeErrors(const uint8_t i_modId,
+                                                         const uint16_t i_reasonCode,
+                                                         const uint64_t i_userdata1,
+                                                         const uint64_t i_userdata2)
+{
+    // @TODO JIRA PFHB-551 Fill in this function.
+    // The SBE could have multiple errors it wants to create for context.
+    std::vector<errlHndl_t> sbeErrors;
+    return sbeErrors;
+}
+
 /*
  * @brief returns total FFDC packages found
  */
@@ -301,7 +312,7 @@ uint32_t SbeFFDCParser::getPackageRC(const size_t i_index)
 
 uint16_t SbeFFDCParser::getPackageSlid(const size_t i_index)
 {
-    uint16_t l_slid = 0; // 0 is invalid
+    uint16_t l_slid = 0;
     if (isIndexValid(i_index))
     {
         l_slid = iv_ffdcPackages.at(i_index)->slid;
