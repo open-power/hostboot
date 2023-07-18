@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,7 +85,7 @@ fapi2::ReturnCode check_dfi_init_helper( const fapi2::Target<fapi2::TARGET_TYPE_
     {
         FAPI_INF(TARGTIDFORMAT " Running the DFI workaround for simulation",
                  TARGTID);
-        FAPI_TRY(complete_dfi_init_for_sim(i_target),
+        FAPI_TRY(stop_wait_for_dfi_init(i_target),
                  TARGTIDFORMAT " Failed DFI init workaround for simulation",
                  TARGTID);
     }
@@ -97,6 +97,12 @@ fapi2::ReturnCode check_dfi_init_helper( const fapi2::Target<fapi2::TARGET_TYPE_
         FAPI_TRY(mss::ody::poll_for_dfi_init_complete(i_target),
                  TARGTIDFORMAT " Failed to poll_for_dfi_init_complete",
                  TARGTID );
+
+        // Single port setups would cause stalls when running CCS via MCBIST as DFI had not completed on the non-existent port
+        // If the wait is stopped, then the CCS via MCBIST will run successfully
+        FAPI_TRY(stop_wait_for_dfi_init(i_target),
+                 TARGTIDFORMAT " Failed stop_wait_for_dfi_init",
+                 TARGTID);
     }
 
 fapi_try_exit:
@@ -104,11 +110,15 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Completes the DFI initialization for simulation
+/// @brief Stops the waiting for the the DFI init to complete
 /// @param[in] i_target the target on which to operate
 /// @return FAPI2_RC_SUCCSS iff ok
+/// @note This is consumed in two places for this workaround:
+/// 1) it is consumed in SIM as DFI init will not complete in certain sim environments
+/// 2) it is run after polling for DFI init to complete in hardware
+///    single port setups would cause stalls when running CCS via MCBIST as DFI had not completed on the non-existent port
 ///
-fapi2::ReturnCode complete_dfi_init_for_sim( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+fapi2::ReturnCode stop_wait_for_dfi_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
 {
     // Clear FARB0Q(55) to let commands flow on DFI interface without requiring DFI init to complete
     fapi2::buffer<uint64_t> l_farb0q;
