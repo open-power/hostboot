@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -671,6 +671,46 @@ union wiringData
 };
 
 //******************************************************************************
+// fapi2::platAttrSvc::__isX4Dram function
+//******************************************************************************
+ReturnCode __isX4Dram( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
+                       bool & o_isX4Dram )
+{
+    o_isX4Dram = false;
+
+    // Get if drams are x4 or x8
+
+    // Get the MEM_PORT target
+    Target<TARGET_TYPE_MEM_PORT> l_fapiMemPort =
+        i_fapiDimm.getParent<TARGET_TYPE_MEM_PORT>();
+
+    // Get the dimm slct and the dram width attr
+    TARGETING::TargetHandle_t l_dimmTrgt;
+    errlHndl_t l_errl = getTargetingTarget( i_fapiDimm, l_dimmTrgt );
+    if ( l_errl )
+    {
+        FAPI_ERR("__isX4Dram: Error getting dimm from getTargetingTarget");
+        fapi2::ReturnCode l_rc;
+        // Add the error log pointer as data to the ReturnCode
+        addErrlPtrToReturnCode(l_rc, l_errl);
+        return l_rc;
+    }
+
+    uint8_t l_dimmSlct =
+        l_dimmTrgt->getAttr<TARGETING::ATTR_POS_ON_MEM_PORT>();
+
+    uint8_t l_dramWidth[2];
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, l_fapiMemPort,
+                            l_dramWidth) );
+
+    o_isX4Dram = ( fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 ==
+                   l_dramWidth[l_dimmSlct] );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+//******************************************************************************
 // fapi2::platAttrSvc::__badDqBitmapGetHelperAttrs function
 //******************************************************************************
 ReturnCode __badDqBitmapGetHelperAttrs(
@@ -700,72 +740,6 @@ fapi_try_exit:
 }
 
 //******************************************************************************
-// fapi2::platAttrSvc::__dimmUpdateDqBitmapEccByte function
-//******************************************************************************
-ReturnCode __dimmUpdateDqBitmapEccByte(
-    const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
-    uint8_t (&o_data)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT] )
-{
-    ReturnCode l_rc;
-    errlHndl_t l_errl = nullptr;
-
-    const uint8_t ECC_DQ_BYTE_NUMBER_INDEX = 8;
-    const uint8_t ENUM_ATTR_SPD_MODULE_MEMORY_BUS_WIDTH_WE8 = 0x08;
-    size_t MEM_BUS_WIDTH_SIZE = 0x01;
-    uint8_t *l_eccBits = static_cast<uint8_t*>(malloc(MEM_BUS_WIDTH_SIZE));
-
-    do
-    {
-        TARGETING::TargetHandle_t l_dimm = nullptr;
-        l_errl = getTargetingTarget( i_fapiDimm, l_dimm );
-        if ( l_errl )
-        {
-            FAPI_ERR( "__dimmUpdateDqBitmapEccByte: Error from "
-                      "getTargetingTarget" );
-            // Add the error log pointer as data to the ReturnCode
-            addErrlPtrToReturnCode(l_rc, l_errl);
-            break;
-        }
-
-        l_errl = deviceRead( l_dimm, l_eccBits, MEM_BUS_WIDTH_SIZE,
-                             DEVICE_SPD_ADDRESS(SPD::MODULE_MEMORY_BUS_WIDTH) );
-        if ( l_errl )
-        {
-            FAPI_ERR( "__dimmUpdateDqBitmapEccByte: Failed to get "
-                      "SPD::MODULE_MEMORY_BUS_WIDTH." );
-            // Add the error log pointer as data to the ReturnCode
-            addErrlPtrToReturnCode(l_rc, l_errl);
-            break;
-        }
-
-        // The ATTR_SPD_MODULE_MEMORY_BUS_WIDTH contains ENUM values
-        // for bus widths of 8, 16, 32, and 64 bits both with ECC
-        // and without ECC.  WExx ENUMS denote the ECC extension
-        // is present, and all have bit 3 set.  Therefore,
-        // it is only required to check against the WE8 = 0x08 ENUM
-        // value in order to determine if ECC lines are present.
-        if ( !(ENUM_ATTR_SPD_MODULE_MEMORY_BUS_WIDTH_WE8 & *l_eccBits) )
-        {
-            // Iterate through each rank and set DQ bits in
-            // caller's data.
-            for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
-            {
-                // Set DQ bits in caller's data
-                o_data[i][ECC_DQ_BYTE_NUMBER_INDEX] = 0xFF;
-            }
-        }
-    }while(0);
-
-    if ( l_eccBits != nullptr )
-    {
-        free( l_eccBits );
-        l_eccBits = nullptr;
-    }
-
-    return l_rc;
-}
-
-//******************************************************************************
 // fapi2::platAttrSvc::__dimmGetDqBitmapSpareByte function
 //******************************************************************************
 ReturnCode __dimmGetDqBitmapSpareByte(
@@ -782,6 +756,8 @@ ReturnCode __dimmGetDqBitmapSpareByte(
     Target<TARGET_TYPE_MEM_PORT> l_fapiMemPort =
         i_fapiDimm.getParent<TARGET_TYPE_MEM_PORT>();
 
+    bool l_isX4 = false;
+
     uint32_t l_ds = 0;
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_fapiDimm, l_ds) );
     l_ds = l_ds % mss::exp::MAX_DIMM_PER_PORT;
@@ -789,9 +765,18 @@ ReturnCode __dimmGetDqBitmapSpareByte(
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_SPARE, l_fapiMemPort,
                             l_dramSpare) );
 
+    // Currently x4 drams are the only ones that support spares. For x8 drams,
+    // all DQs are used with no spares.
+    FAPI_TRY( __isX4Dram(i_fapiDimm, l_isX4) );
+
     // Iterate through each rank of this DIMM
     for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
     {
+        // For any non x4 drams, just set to 0x0
+        if (!l_isX4)
+        {
+            o_spareByte[i] = 0x0;
+        }
         // Handle spare DRAM configuration cases
         switch ( l_dramSpare[l_ds][i] )
         {
@@ -845,15 +830,15 @@ fapi_try_exit:
 }
 
 //******************************************************************************
-// fapi2::platAttrSvc::__compareEccAndSpare function
+// fapi2::platAttrSvc::__compareSpare function
 //******************************************************************************
-ReturnCode __compareEccAndSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
+ReturnCode __compareSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     bool & o_mfgModeBadBitsPresent,
     uint8_t i_bitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT],
-    uint8_t (&o_eccSpareBitmap)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT])
+    uint8_t (&o_spareBitmap)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT])
 {
-    // This function will compare o_eccSpareBitmap, which represents a bad dq
-    // bitmap with the appropriate spare/ECC bits set (if any) and all other DQ
+    // This function will compare o_spareBitmap, which represents a bad dq
+    // bitmap with the appropriate spare bits set (if any) and all other DQ
     // lines functional, to the caller's data. If discrepancies are found, we
     // know this is the result of a manufacturing mode process and these bits
     // should not be recorded.
@@ -864,16 +849,15 @@ ReturnCode __compareEccAndSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
     do
     {
         // Set a clean bitmap with only the appropriate spare/ECC bits set
-        memset( o_eccSpareBitmap, 0, sizeof(o_eccSpareBitmap) );
-        FAPI_TRY( __dimmUpdateDqBitmapEccByte(i_fapiDimm, o_eccSpareBitmap) );
-        FAPI_TRY( __dimmUpdateDqBitmapSpareByte(i_fapiDimm, o_eccSpareBitmap) );
+        memset( o_spareBitmap, 0, sizeof(o_spareBitmap) );
+        FAPI_TRY( __dimmUpdateDqBitmapSpareByte(i_fapiDimm, o_spareBitmap) );
 
-        // Compare o_eccSpareBitmap to i_bitmap.
+        // Compare o_spareBitmap to i_bitmap.
         for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
         {
             for (uint8_t j = 0; j < mss::BAD_DQ_BYTE_COUNT; j++)
             {
-                if ( i_bitmap[i][j] != o_eccSpareBitmap[i][j] )
+                if ( i_bitmap[i][j] != o_spareBitmap[i][j] )
                 {
                     o_mfgModeBadBitsPresent = true;
                     break;
@@ -885,7 +869,7 @@ ReturnCode __compareEccAndSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
         // Create and log error if discrepancies were found.
         if ( o_mfgModeBadBitsPresent )
         {
-            FAPI_ERR( "__compareEccAndSpare: Read/write requested while in "
+            FAPI_ERR( "__compareSpare: Read/write requested while in "
                       "DISABLE_DRAM_REPAIRS mode found extra bad bits set for "
                       "DIMM" );
 
@@ -893,7 +877,7 @@ ReturnCode __compareEccAndSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
             l_errl = getTargetingTarget( i_fapiDimm, l_dimm );
             if ( l_errl )
             {
-                FAPI_ERR("__compareEccAndSpare: Error from getTargetingTarget");
+                FAPI_ERR("__compareSpare: Error from getTargetingTarget");
                 // Add the error log pointer as data to the ReturnCode
                 addErrlPtrToReturnCode(l_rc, l_errl);
                 break;
@@ -916,20 +900,20 @@ ReturnCode __compareEccAndSpare(const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
                     RC_BAD_DQ_MFG_MODE_BITS,
                     TARGETING::get_huid(l_dimm) );
 
-            l_errl->addFFDC( HWPF_COMP_ID, &o_eccSpareBitmap[0],
-                             sizeof(o_eccSpareBitmap[0]), 1,
+            l_errl->addFFDC( HWPF_COMP_ID, &o_spareBitmap[0],
+                             sizeof(o_spareBitmap[0]), 1,
                              CLEAN_BAD_DQ_BITMAP_RANK0 );
 
-            l_errl->addFFDC( HWPF_COMP_ID, &o_eccSpareBitmap[1],
-                             sizeof(o_eccSpareBitmap[1]), 1,
+            l_errl->addFFDC( HWPF_COMP_ID, &o_spareBitmap[1],
+                             sizeof(o_spareBitmap[1]), 1,
                              CLEAN_BAD_DQ_BITMAP_RANK1 );
 
-            l_errl->addFFDC( HWPF_COMP_ID, &o_eccSpareBitmap[2],
-                             sizeof(o_eccSpareBitmap[2]), 1,
+            l_errl->addFFDC( HWPF_COMP_ID, &o_spareBitmap[2],
+                             sizeof(o_spareBitmap[2]), 1,
                              CLEAN_BAD_DQ_BITMAP_RANK2 );
 
-            l_errl->addFFDC( HWPF_COMP_ID, &o_eccSpareBitmap[3],
-                             sizeof(o_eccSpareBitmap[3]), 1,
+            l_errl->addFFDC( HWPF_COMP_ID, &o_spareBitmap[3],
+                             sizeof(o_spareBitmap[3]), 1,
                              CLEAN_BAD_DQ_BITMAP_RANK3 );
 
             l_errl->addFFDC( HWPF_COMP_ID, &i_bitmap[0],
@@ -1159,12 +1143,8 @@ ReturnCode fapiAttrGetBadDqBitmap(
         {
             FAPI_INF( "fapiAttrGetBadDqBitmap: SPD DQ not initialized." );
 
-            // We still set the ECC and spare bytes in the output data to
+            // We still set the spare bytes in the output data to
             // avoid issues in the setter when SPD DQ is not initialized.
-            // Set bits for any unconnected DQs.
-            // First, check ECC.
-            FAPI_TRY( __dimmUpdateDqBitmapEccByte(l_fapiDimm, o_data) );
-
             // Check spare DRAM.
             FAPI_TRY( __dimmUpdateDqBitmapSpareByte(l_fapiDimm, o_data) );
         }
@@ -1181,10 +1161,6 @@ ReturnCode fapiAttrGetBadDqBitmap(
                                             o_data, l_wiringData, l_spareByte,
                                             l_ps, false) );
 
-            // Set bits for any unconnected DQs.
-            // First, check ECC.
-            FAPI_TRY( __dimmUpdateDqBitmapEccByte(l_fapiDimm, o_data) );
-
             // Check spare DRAM.
             FAPI_TRY( __dimmUpdateDqBitmapSpareByte(l_fapiDimm, o_data) );
 
@@ -1193,11 +1169,11 @@ ReturnCode fapiAttrGetBadDqBitmap(
                 // Flag to set if the discrepancies are found.
                 bool l_mfgModeBadBitsPresent = false;
 
-                uint8_t l_eccSpareBitmap[mss::MAX_RANK_PER_DIMM]
-                                        [mss::BAD_DQ_BYTE_COUNT];
+                uint8_t l_spareBitmap[mss::MAX_RANK_PER_DIMM]
+                                     [mss::BAD_DQ_BYTE_COUNT];
 
-                FAPI_TRY( __compareEccAndSpare(l_fapiDimm,
-                          l_mfgModeBadBitsPresent, o_data, l_eccSpareBitmap) );
+                FAPI_TRY( __compareSpare(l_fapiDimm,
+                          l_mfgModeBadBitsPresent, o_data, l_spareBitmap) );
 
                 if ( l_mfgModeBadBitsPresent )
                 {
@@ -1207,7 +1183,7 @@ ReturnCode fapiAttrGetBadDqBitmap(
                         for ( uint8_t j=0; j < (mss::BAD_DQ_BYTE_COUNT);
                                 j++ )
                         {
-                            o_data[i][j] = l_eccSpareBitmap[i][j];
+                            o_data[i][j] = l_spareBitmap[i][j];
                         }
                     }
                 }
@@ -1276,19 +1252,18 @@ ReturnCode fapiAttrSetBadDqBitmap(
         uint8_t l_tmpBitmap[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
         memcpy( &l_tmpBitmap, &i_data, sizeof(i_data) );
 
-        FAPI_TRY( __dimmUpdateDqBitmapEccByte(l_fapiDimm, l_tmpBitmap) );
         FAPI_TRY( __dimmUpdateDqBitmapSpareByte(l_fapiDimm, l_tmpBitmap) );
 
         // If system is in DISABLE_DRAM_REPAIRS mode
         if ( TARGETING::isDramRepairsDisabled() )
         {
 
-            uint8_t l_eccSpareBitmap[mss::MAX_RANK_PER_DIMM]
-                                    [mss::BAD_DQ_BYTE_COUNT];
+            uint8_t l_spareBitmap[mss::MAX_RANK_PER_DIMM]
+                                 [mss::BAD_DQ_BYTE_COUNT];
 
             bool l_mfgModeBadBitsPresent = false;
-            FAPI_TRY( __compareEccAndSpare(l_fapiDimm, l_mfgModeBadBitsPresent,
-                                           l_tmpBitmap, l_eccSpareBitmap) );
+            FAPI_TRY( __compareSpare(l_fapiDimm, l_mfgModeBadBitsPresent,
+                                     l_tmpBitmap, l_spareBitmap) );
 
             // Don't write bad dq bitmap if discrepancies are found
             // Break out of do while loop
@@ -1367,45 +1342,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-//******************************************************************************
-// fapi2::platAttrSvc::__isX4Dram function
-//******************************************************************************
-ReturnCode __isX4Dram( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
-                       bool & o_isX4Dram )
-{
-    o_isX4Dram = false;
-
-    // Get if drams are x4 or x8
-
-    // Get the MEM_PORT target
-    Target<TARGET_TYPE_MEM_PORT> l_fapiMemPort =
-        i_fapiDimm.getParent<TARGET_TYPE_MEM_PORT>();
-
-    // Get the dimm slct and the dram width attr
-    TARGETING::TargetHandle_t l_dimmTrgt;
-    errlHndl_t l_errl = getTargetingTarget( i_fapiDimm, l_dimmTrgt );
-    if ( l_errl )
-    {
-        FAPI_ERR("__isX4Dram: Error getting dimm from getTargetingTarget");
-        fapi2::ReturnCode l_rc;
-        // Add the error log pointer as data to the ReturnCode
-        addErrlPtrToReturnCode(l_rc, l_errl);
-        return l_rc;
-    }
-
-    uint8_t l_dimmSlct =
-        l_dimmTrgt->getAttr<TARGETING::ATTR_POS_ON_MEM_PORT>();
-
-    uint8_t l_dramWidth[2];
-    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, l_fapiMemPort,
-                            l_dramWidth) );
-
-    o_isX4Dram = ( fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 ==
-                   l_dramWidth[l_dimmSlct] );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 //******************************************************************************
 // fapi2::platAttrSvc::__dramToDq function
 //******************************************************************************
