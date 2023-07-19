@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,6 +150,7 @@ namespace fapi2
         RC_UNSUPPORTED_OPERATION       = FAPI2_COMP_ID | 0xF0,
 
         // HWP generated errors
+        RC_HWP_GENERATED_SBE_ERROR     = HWPF_COMP_ID | 0x06,
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,
 
         // DIMM SPD generated errors

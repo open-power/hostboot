@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -979,12 +979,55 @@ void processEIChildrenCDGs(const ErrorInfo & i_errInfo,
     }
 }
 
+errlHndl_t makeHwpError(const ERRORLOG::errlSeverity_t i_sev,
+                        const fapi2::fapi2ReasonCode   i_rc,
+                        const uint32_t                 i_rcVal)
+{
+    errlHndl_t errl = nullptr;
+    if ((i_rc == RC_HWP_GENERATED_ERROR) || (i_rc == RC_HWP_GENERATED_SBE_ERROR))
+    {
+        /*@
+         * @errortype
+         * @moduleid     MOD_FAPI2_RC_TO_ERRL
+         * @reasoncode   RC_HWP_GENERATED_ERROR
+         * @userdata1    RC value from HWP
+         * @userdata2    <unused>
+         * @devdesc      HW Procedure generated error. Check User Data.
+         * @custdesc     Error initializing processor/memory subsystem
+         *               during boot. Check FRU list for repair actions
+         */
+        /*@
+         * @errortype
+         * @moduleid     MOD_FAPI2_RC_TO_ERRL
+         * @reasoncode   RC_HWP_GENERATED_SBE_ERROR
+         * @userdata1    RC value from the SBE HWP
+         * @userdata2    <unused>
+         * @devdesc      SBE HW Procedure generated error. Check User Data.
+         * @custdesc     Error initializing processor/memory subsystem
+         *               during boot. Check FRU list for repair actions
+         */
+        errl = new ERRORLOG::ErrlEntry(i_sev,
+                                       MOD_FAPI2_RC_TO_ERRL,
+                                       i_rc,
+                                       i_rcVal);
+    }
+    else
+    {
+        // Unsupported RC type.
+        assert(false, "rcToErrl(): Unsupported reasoncode supplied to error!");
+    }
+
+    return errl;
+
+}
+
 ///
 /// @brief Converts a fapi2::ReturnCode to a HostBoot PLAT error log
 /// See doxygen in plat_utils.H
 ///
 errlHndl_t rcToErrl(ReturnCode & io_rc,
-                    ERRORLOG::errlSeverity_t i_sev)
+                    ERRORLOG::errlSeverity_t i_sev,
+                    const fapi2::fapi2ReasonCode   i_rc)
 {
     errlHndl_t l_pError = NULL;
 
@@ -1014,20 +1057,7 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
                 // HWP Error. Create an error log
                 FAPI_ERR("rcToErrl: HWP error: 0x%08x", l_rcValue);
 
-                /*@
-                 * @errortype
-                 * @moduleid     MOD_FAPI2_RC_TO_ERRL
-                 * @reasoncode   RC_HWP_GENERATED_ERROR
-                 * @userdata1    RC value from HWP
-                 * @userdata2    <unused>
-                 * @devdesc      HW Procedure generated error. Check User Data.
-                 * @custdesc     Error initializing processor/memory subsystem
-                 *               during boot. Check FRU list for repair actions
-                 */
-                l_pError = new ERRORLOG::ErrlEntry(i_sev,
-                                                   MOD_FAPI2_RC_TO_ERRL,
-                                                   RC_HWP_GENERATED_ERROR,
-                                                   l_rcValue);
+                l_pError = makeHwpError(i_sev, i_rc, l_rcValue);
                 // Note - If location of RC value changes, must update
                 //   ErrlEntry::getFapiRC accordingly
 

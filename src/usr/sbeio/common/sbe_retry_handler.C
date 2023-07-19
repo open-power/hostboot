@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1184,7 +1184,9 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg()
         FAPI_EXEC_HWP(l_rc, p10_get_sbe_msg_register,
                         l_fapi2_proc_target, this->iv_sbeRegister);
 
-        l_errl = rcToErrl(l_rc, ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        l_errl = rcToErrl(l_rc,
+                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                          fapi2::RC_HWP_GENERATED_SBE_ERROR);
         if (l_errl)
         {
             SBE_TRACF("ERROR : call p10_get_sbe_msg_register, PLID=0x%x, "
@@ -1427,7 +1429,10 @@ void SbeRetryHandler::sbe_get_ffdc_handler()
                     uint32_t l_pos = iv_proc->getAttr<TARGETING::ATTR_FAPI_POS>();
                     FAPI_SET_SBE_ERROR(l_fapiRc, l_rc, l_sbeFfdc, l_pos);
 
-                    errlHndl_t l_sbeHwpfErr = rcToErrl(l_fapiRc);
+                    errlHndl_t l_sbeHwpfErr = rcToErrl(l_fapiRc,
+                                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                       fapi2::RC_HWP_GENERATED_SBE_ERROR);
+
                     // If we created an error successfully we must now commit it
                     if(l_sbeHwpfErr)
                     {
