@@ -60,8 +60,6 @@ MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
 {
     #define PRDF_FUNC "[MemSymbol::fromGalois] "
 
-    // TODO Odyssey - need adjustments for x8 dram galois mapping
-
     // Get symbol from Galois field.
     uint8_t symbol = SYMBOLS_PER_RANK;
     for ( uint32_t i = 0; i < SYMBOLS_PER_RANK; i++ )
@@ -151,7 +149,10 @@ uint8_t MemSymbol::getDq() const
 
     if ( TYPE_MEM_PORT == trgtType )
     {
-        dq = symbol2Dq<TYPE_OCMB_CHIP>( iv_symbol );
+        TargetHandle_t dimm = getConnectedChild(iv_trgt, TYPE_DIMM,
+                                                iv_rank.getDimmSlct());
+        bool isX4 = isDramWidthX4( dimm );
+        dq = symbol2Dq<TYPE_OCMB_CHIP>( iv_symbol, isX4 );
     }
     else
     {

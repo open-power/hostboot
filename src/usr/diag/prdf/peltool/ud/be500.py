@@ -27,7 +27,8 @@ import json
 from collections import OrderedDict
 
 from pel.prd.parserdata import RegisterData, SignatureData
-from udparsers.helpers.errludP_Helpers import hexConcat, intConcat, memConcat, strConcat
+from udparsers.helpers.errludP_Helpers import (hexConcat, intConcat, memConcat,
+                                               strConcat)
 
 # ###################################################
 # Used to convert attention types to readable string
@@ -211,92 +212,51 @@ def tdTypeToStr(i_tdType):
 # ###################################################
 
 
-def symbol2Dq(symbol, dramSpared):
+def symbol2Dq(symbol, dramSpared, isX4):
     dq = 80
 
-    convertToDq = [
-        39,
-        38,
-        37,
-        36,
-        35,
-        34,
-        33,
-        32,
-        79,
-        78,
-        77,
-        76,
-        71,
-        70,
-        69,
-        68,
-        63,
-        62,
-        61,
-        60,
-        55,
-        54,
-        53,
-        52,
-        31,
-        30,
-        29,
-        28,
-        23,
-        22,
-        21,
-        20,
-        15,
-        14,
-        13,
-        12,
-        7,
-        6,
-        5,
-        4,
-        75,
-        74,
-        73,
-        72,
-        67,
-        66,
-        65,
-        64,
-        59,
-        58,
-        57,
-        56,
-        51,
-        50,
-        49,
-        48,
-        27,
-        26,
-        25,
-        24,
-        19,
-        18,
-        17,
-        16,
-        11,
-        10,
-        9,
-        8,
-        3,
-        2,
-        1,
-        0,
+    # fmt: off
+    convertToDq_x4 = [
+        39, 38, 37, 36, 35, 34, 33, 32,
+        79, 78, 77, 76, 71, 70, 69, 68,
+        63, 62, 61, 60, 55, 54, 53, 52,
+        31, 30, 29, 28, 23, 22, 21, 20,
+        15, 14, 13, 12,  7,  6,  5,  4,
+        75, 74, 73, 72, 67, 66, 65, 64,
+        59, 58, 57, 56, 51, 50, 49, 48,
+        27, 26, 25, 24, 19, 18, 17, 16,
+        11, 10,  9,  8,  3,  2,  1,  0,
     ]
+
+    # x8 drams have 40 symbols (2 per DQ). Symbol indexes 8:39 are unused.
+    un = 80
+    convertToDq_x8 = [
+        46, 44, 42, 40, 38, 36, 34, 32,
+        un, un, un, un, un, un, un, un,
+        un, un, un, un, un, un, un, un,
+        un, un, un, un, un, un, un, un,
+        un, un, un, un, un, un, un, un,
+        78, 76, 74, 72, 70, 68, 66, 64,
+        62, 60, 58, 56, 54, 52, 50, 48,
+        30, 28, 26, 24, 22, 20, 18, 16,
+        14, 12, 10,  8,  6,  4,  2,  0,
+    ]
+
+    # fmt: on
 
     # convert the symbol to its equivalent dq
     if symbol < 80:
-        dq = convertToDq[symbol]
+        # x4 drams
+        if isX4:
+            dq = convertToDq_x4[symbol]
+        # x8 drams
+        else:
+            dq = convertToDq_x8[symbol]
 
     # if the symbol is on a spare, convert the dq to its place on the spare
     if 1 == dramSpared:
-        # The DRAM spare indexes are 72-79, so adjust the DQ to match
-        dq = 72 + (dq % 8)
+        # The DRAM spare indexes are 40-47, so adjust the DQ to match
+        dq = 40 + (dq % 8)
 
     return dq
 
@@ -306,22 +266,22 @@ def symbol2Dq(symbol, dramSpared):
 # ###################################################
 
 
-def parseMemMruCallout(mruCallout, prefix, d, ver, dqMap=None):
+def parseMemMruCallout(mruCallout, prefix, d, ver, dqMap=None, isX4=1):
     # We have a MemMRU, parse the 32 bits of the callout
-    # autopep8: off
-    valid = (mruCallout >> 31) & 0x1
-    procPos = (mruCallout >> 28) & 0x7
-    chnlPos = (mruCallout >> 25) & 0x7
-    omiPos = (mruCallout >> 24) & 0x1
-    pins = (mruCallout >> 22) & 0x3
-    nodePos = (mruCallout >> 19) & 0x7
-    prank = (mruCallout >> 16) & 0x7
+    # fmt: off
+    valid      = (mruCallout >> 31) & 0x1
+    procPos    = (mruCallout >> 28) & 0x7
+    chnlPos    = (mruCallout >> 25) & 0x7
+    omiPos     = (mruCallout >> 24) & 0x1
+    pins       = (mruCallout >> 22) & 0x3
+    nodePos    = (mruCallout >> 19) & 0x7
+    prank      = (mruCallout >> 16) & 0x7
     dramSpared = (mruCallout >> 15) & 0x1
-    symbol = (mruCallout >> 8) & 0x7F
-    eccSpared = (mruCallout >> 7) & 0x1
-    srank = (mruCallout >> 4) & 0x7
-    isOcmb = (mruCallout >> 3) & 0x1
-    # autopep8: on
+    symbol     = (mruCallout >> 8) & 0x7F
+    eccSpared  = (mruCallout >> 7) & 0x1
+    srank      = (mruCallout >> 4) & 0x7
+    isOcmb     = (mruCallout >> 3) & 0x1
+    # fmt: on
 
     compPos = (chnlPos * 8) + omiPos
 
@@ -337,7 +297,7 @@ def parseMemMruCallout(mruCallout, prefix, d, ver, dqMap=None):
     if symbol >= 0x70:
         d[prefix]["Special Callout"] = mruCalloutToStr(symbol)
     else:
-        dq = symbol2Dq(symbol, dramSpared)
+        dq = symbol2Dq(symbol, dramSpared, isX4)
         d[prefix]["Symbol"] = symbol
         d[prefix]["Pins"] = pins
         d[prefix]["Dram Spared"] = "Yes" if (dramSpared == 1) else "No"
@@ -657,15 +617,9 @@ class errludP_prdf:
                         d[cd][cet][y]["Row"] = hex(row)
                         d[cd][cet][y]["Dram Pins"] = hex(dramPins)
                         d[cd][cet][y]["Dram"] = hex(dram)
-                        d[cd][cet][y]["On Spare"] = (
-                            "Yes" if (isSp == 1) else "No"
-                        )
-                        d[cd][cet][y]["Hard CE"] = (
-                            "Yes" if (isHard == 1) else "No"
-                        )
-                        d[cd][cet][y]["Is Active"] = (
-                            "Yes" if (active == 1) else "No"
-                        )
+                        d[cd][cet][y]["On Spare"] = "Yes" if (isSp == 1) else "No"
+                        d[cd][cet][y]["Hard CE"] = "Yes" if (isHard == 1) else "No"
+                        d[cd][cet][y]["Is Active"] = "Yes" if (active == 1) else "No"
 
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
@@ -964,28 +918,20 @@ class errludP_prdf:
                     tod = "TOD_ERROR_DATA"
                     d[cd][tod] = OrderedDict()
                     d[cd][tod]["Master Path Switch by HW"] = hardwareSwitchFlip
-                    d[cd][tod][
-                        "Host Detected TOD Error"
-                    ] = phypDetectedTodError
+                    d[cd][tod]["Host Detected TOD Error"] = phypDetectedTodError
                     d[cd][tod]["Host Switched Topology"] = topologySwitchByPhyp
-                    d[cd][tod][
-                        "Topology Reset Requested"
-                    ] = topologyResetRequested
+                    d[cd][tod]["Topology Reset Requested"] = topologyResetRequested
                     d[cd][tod]["Active Topology"] = activeTopology
                     d[cd][tod]["Active MDMT"] = hex(activeMdmt)
                     d[cd][tod]["Backup MDMT"] = hex(backupMdmt)
                     d[cd][tod]["Active Topology Summary"] = todTopologyToStr(
                         activeTopologySummary
                     )
-                    d[cd][tod][
-                        "Active Topology M Path"
-                    ] = activeTopologyMastPath
+                    d[cd][tod]["Active Topology M Path"] = activeTopologyMastPath
                     d[cd][tod]["Backup Topology Summary"] = todTopologyToStr(
                         backUpTopologySummary
                     )
-                    d[cd][tod][
-                        "Backup Topology M Path"
-                    ] = backUpTopologyMastPath
+                    d[cd][tod]["Backup Topology M Path"] = backUpTopologyMastPath
 
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
@@ -1039,9 +985,7 @@ class errludP_prdf:
                     d[cd][l2]["L2 Error Member"] = "0x%02x" % l2errMember
                     d[cd][l2]["L2 Error DW"] = "0x%02x" % l2errDW
                     d[cd][l2]["L2 Error Bank"] = "0x%02x" % l2errBank
-                    d[cd][l2]["L2 Error Back of 2to1 Next Cycle"] = (
-                        0 != l2errBack2to1
-                    )
+                    d[cd][l2]["L2 Error Back of 2to1 Next Cycle"] = 0 != l2errBack2to1
                     d[cd][l2]["L2 Error Syndrome Col"] = "0x%02x" % l2errSynCol
                     d[cd][l2]["L2 Error Address"] = "0x%04x" % l2errAddress
                     # autopep8: on
@@ -1134,10 +1078,7 @@ class errludP_prdf:
                         format(targetType, "x"), dataId
                     )
                     regIndex = (
-                        regInfo["name"].ljust(25)
-                        + " ("
-                        + regInfo["address"]
-                        + ")"
+                        regInfo["name"].ljust(25) + " (" + regInfo["address"] + ")"
                     )
                     regData, i = hexConcat(buf, i, i + dataLength)
 
@@ -1239,30 +1180,16 @@ class errludP_prdf:
         d["SDC Flags"]["SUE"] = "True" if (sdcSue == 1) else "False"
         d["SDC Flags"]["AT_THRESHOLD"] = "True" if (sdcAtTh == 1) else "False"
         d["SDC Flags"]["DEGRADED"] = "True" if (sdcDegraded == 1) else "False"
-        d["SDC Flags"]["SERVICE_CALL"] = (
-            "True" if (sdcServCall == 1) else "False"
-        )
+        d["SDC Flags"]["SERVICE_CALL"] = "True" if (sdcServCall == 1) else "False"
         d["SDC Flags"]["TRACKIT"] = "True" if (sdcTrackit == 1) else "False"
         d["SDC Flags"]["TERMINATE"] = "True" if (sdcTerm == 1) else "False"
         d["SDC Flags"]["LOGIT"] = "True" if (sdcLogit == 1) else "False"
-        d["SDC Flags"]["MEM_CHNL_FAIL"] = (
-            "True" if (sdcChnlFail == 1) else "False"
-        )
-        d["SDC Flags"]["PROC_CORE_CS"] = (
-            "True" if (sdcCoreCs == 1) else "False"
-        )
-        d["SDC Flags"]["USING_SAVED_SDC"] = (
-            "True" if (sdcSavedSdc == 1) else "False"
-        )
-        d["SDC Flags"]["LAST_CORE_TERM"] = (
-            "True" if (sdcLastCore == 1) else "False"
-        )
-        d["SDC Flags"]["DEFER_DECONFIG"] = (
-            "True" if (sdcDeferDe == 1) else "False"
-        )
-        d["SDC Flags"]["SECONDARY_ERROR"] = (
-            "True" if (sdcSecErr == 1) else "False"
-        )
+        d["SDC Flags"]["MEM_CHNL_FAIL"] = "True" if (sdcChnlFail == 1) else "False"
+        d["SDC Flags"]["PROC_CORE_CS"] = "True" if (sdcCoreCs == 1) else "False"
+        d["SDC Flags"]["USING_SAVED_SDC"] = "True" if (sdcSavedSdc == 1) else "False"
+        d["SDC Flags"]["LAST_CORE_TERM"] = "True" if (sdcLastCore == 1) else "False"
+        d["SDC Flags"]["DEFER_DECONFIG"] = "True" if (sdcDeferDe == 1) else "False"
+        d["SDC Flags"]["SECONDARY_ERROR"] = "True" if (sdcSecErr == 1) else "False"
         # autopep8: on
 
         d["Error Count"], i = intConcat(data, i, i + 2)
@@ -1325,9 +1252,9 @@ class errludP_prdf:
             # Chip type is the character 2:3 of the chip ID
             chipType = chipId[2] + chipId[3]
             signatureData = SignatureData()
-            d["Multi-Signature List"][
-                sigFormat
-            ] = signatureData.parseSignature(chipType, chipSig)
+            d["Multi-Signature List"][sigFormat] = signatureData.parseSignature(
+                chipType, chipSig
+            )
 
         return json.dumps(d)
 
@@ -1350,12 +1277,12 @@ class errludP_prdf:
         otherData, i = intConcat(data, i, i + 1)
 
         isBufDimm = (otherData >> 7) & 0x1
-        isX4Dram = (otherData >> 6) & 0x1
+        isX4 = (otherData >> 6) & 0x1
         isValid = (otherData >> 5) & 0x1
         reserved = otherData & 0x1F
 
         d["Extended Mem Mru"] = OrderedDict()
-        d["Extended Mem Mru"]["isX4Dram"] = "Yes" if (isX4Dram == 1) else "No"
+        d["Extended Mem Mru"]["isX4Dram"] = "Yes" if (isX4 == 1) else "No"
 
         # Version 2 and above: parse the DQ Mapping
         dqMap = None
@@ -1369,7 +1296,7 @@ class errludP_prdf:
 
             d["Extended Mem Mru"]["Mem VPD Dq Mapping"] = dqMapString
 
-        parseMemMruCallout(mruCallout, "Extended Mem Mru", d, ver, dqMap)
+        parseMemMruCallout(mruCallout, "Extended Mem Mru", d, ver, dqMap, isX4)
 
         return json.dumps(d)
 

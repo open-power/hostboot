@@ -55,19 +55,21 @@ namespace PARSERUTILS
  * within the symbol will be returned. The user will need to calculate the other
  * DQ values if needed.
  *
- * @param  i_symbol Target symbol.
+ * @param i_symbol Target symbol.
+ * @param i_isX4Dram TRUE if DRAM is x4
  * @return The first DQ of the given symbol.
  */
 template<TARGETING::TYPE T>
-uint8_t symbol2Dq( uint8_t i_symbol );
+uint8_t symbol2Dq( uint8_t i_symbol, bool i_isX4Dram );
 
 /**
  * @brief Find the symbol for the given DQ
  * @param i_dq The chip DQ
+ * @param i_isX4Dram TRUE if DRAM is x4
  * @return The Symbol
  */
 template<TARGETING::TYPE T>
-uint8_t dq2Symbol( uint8_t i_dq );
+uint8_t dq2Symbol( uint8_t i_dq, bool i_isX4Dram );
 
 /**
  * @brief Find the first symbol of the given x4 DRAM index

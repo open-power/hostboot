@@ -42,6 +42,8 @@ namespace PRDF
 {
 
 // Symbol to Galois code mapping table
+// Note: For x8 drams, symbols 8:39 are not used, but the galois mapping remains
+// consistent with x4 drams for the symbols that are used.
 static const uint8_t symbol2Galois[] =
 {
     0x80, 0xa0, 0x90, 0xf0, 0x08, 0x0a, 0x09, 0x0f, // symbols  0- 7

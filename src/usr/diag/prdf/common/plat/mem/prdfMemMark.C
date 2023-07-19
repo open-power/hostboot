@@ -76,8 +76,6 @@ uint32_t readChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[readChipMark<TYPE_OCMB_CHIP>] "
 
-    // TODO Odyssey - need adjustments for new registers and new galois mapping
-
     uint32_t o_rc = SUCCESS;
     o_mark = MemMark(); // ensure invalid
 
