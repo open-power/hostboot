@@ -152,9 +152,11 @@ Layout Description - Used when building an FSP driver
         <ecc/>
     </section>
     <section>
-        <description>Hostboot Runtime Services for Sapphire (6MB)</description>
+        <description>Hostboot Runtime Services for PHYP/OPAL (6MB+ECC)</description>
         <eyeCatch>HBRT</eyeCatch>
-        <physicalRegionSize>0x600000</physicalRegionSize>
+        <!-- Hard limit of content is 6MB for the lid -->
+        <!-- This value will keep us just under with ~100KB to spare  -->
+        <physicalRegionSize>0x6B0000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
