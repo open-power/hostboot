@@ -278,6 +278,28 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_PMIC_MISMATCHING_REVISIONS_DDR5</rc>
+    <description>
+       The PMIC revision value did not match TI REV 23.
+       Exiting to avoid applying DDR5 only procedures.
+    </description>
+    <ffdc>REVISION_ATTR</ffdc>
+    <ffdc>REVISION_REG</ffdc>
+    <ffdc>PMIC_TARGET</ffdc>
+    <callout>
+      <target>PMIC_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_VIN_BULK_BELOW_TOLERANCE</rc>
     <description>
        The VIN_BULK read by the PMIC ADC was below the minimum tolerance.

@@ -142,6 +142,29 @@ fapi2::ReturnCode pmic_power_down(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target);
 
 ///
+/// @brief Checks if the rev number matches the attr rev number
+///
+/// @param[in]  i_ocmb_target OCMB target
+/// @param[in]  i_pmic_target PMIC target to check
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode validate_pmic_revisions(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Helper function to do fapi assert for checking between attr and reg
+///
+/// @param[in]  i_pmic_target PMIC target to check
+/// @param[in]  i_rev_attr attribute value of the revision
+/// @param[in]  i_rev_reg register value of the revision
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode validate_pmic_revisions_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint8_t i_rev_attr,
+    const uint8_t i_rev_reg);
+
+///
 /// @brief Enable PMIC for 2U
 ///
 /// @param[in] i_ocmb_target OCMB target parent of PMICs
@@ -149,7 +172,6 @@ fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note There is no 1U support for DDR5
 ///
-// TODO: ZEN:MST-1890 Implement pmic_enable() for 2U
 fapi2::ReturnCode enable_2u(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::enable_mode i_mode);

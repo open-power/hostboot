@@ -405,6 +405,90 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Checks if the rev number matches the attr rev number
+///
+/// @param[in]  i_ocmb_target OCMB target
+/// @param[in]  i_pmic_target PMIC target to check
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode validate_pmic_revisions(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    uint8_t l_rev_attr = 0;
+    fapi2::buffer<uint8_t> l_rev_reg;
+    const uint8_t l_pmic_id = mss::index(i_pmic_target);
+    uint8_t l_simics = 0;
+
+    // Get attribute value
+    FAPI_TRY(mss::attr::get_revision[l_pmic_id](i_ocmb_target, l_rev_attr));
+
+    // Get the register value
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3B_REVISION, l_rev_reg));
+
+    if (l_rev_attr == l_rev_reg)
+    {
+        // The simics check has been added here to skip simics testing of the below function as
+        // simics is throwing error for the attribute and revision register mismatch condition.
+        // Updating simics is not recommended as there are no real PMICs on the simulation model
+        // and skipping this check will not affect rest of the pmic_enable functionality in simics
+        // This skips the check in HB CI in simics
+        FAPI_TRY(mss::attr::get_is_simics(l_simics));
+
+        if (!l_simics)
+        {
+            // Check if the attr is same as the register value
+            FAPI_TRY(validate_pmic_revisions_helper(i_pmic_target, l_rev_attr, l_rev_reg()));
+        }
+        else
+        {
+            FAPI_DBG("Simulation mode detected. Skipping revision check between attr and pmic register");
+        }
+    }
+
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to do fapi assert for checking between attr and reg
+///
+/// @param[in]  i_pmic_target PMIC target to check
+/// @param[in]  i_rev_attr attribute value of the revision
+/// @param[in]  i_rev_reg register value of the revision
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode validate_pmic_revisions_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint8_t i_rev_attr,
+    const uint8_t i_rev_reg)
+{
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target);
+
+    FAPI_INF("PMIC i_rev_attr: 0x%02X, PMIC i_rev_reg: 0x%02X " GENTARGTIDFORMAT, i_rev_attr, i_rev_reg,
+             GENTARGTID(i_pmic_target));
+
+    FAPI_ASSERT(i_rev_attr == i_rev_reg,
+                fapi2::PMIC_MISMATCHING_REVISIONS_DDR5()
+                .set_REVISION_ATTR(i_rev_attr)
+                .set_REVISION_REG(i_rev_reg)
+                .set_PMIC_TARGET(i_pmic_target)
+                .set_OCMB_TARGET(l_ocmb),
+                "Mismatching PMIC revisions for ATTR: 0x%02X REG: 0x%02X. May have the wrong SPD for this DIMM." GENTARGTIDFORMAT,
+                i_rev_attr,
+                i_rev_reg,
+                GENTARGTID(i_pmic_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Enable PMIC for 2U
 ///
 /// @param[in] i_ocmb_target OCMB target parent of PMICs
@@ -443,6 +527,12 @@ fapi2::ReturnCode enable_2u(
 
     // Get vendor ID. We just need vendor ID from 1 PMIC as both PMICs will be from the same vendor
     FAPI_TRY(mss::attr::get_mfg_id[l_first_pmic_id](i_ocmb_target, l_vendor_id));
+
+    // Validate vendor id
+    FAPI_TRY((mss::pmic::check::matching_vendors(i_ocmb_target, l_pmics[PMIC0])));
+
+    // Validate revision number
+    FAPI_TRY(validate_pmic_revisions(i_ocmb_target, l_pmics[PMIC0]));
 
     for (const auto& l_pmic : l_pmics)
     {
@@ -773,6 +863,7 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
 
     fapi2::buffer<uint8_t> l_reg_contents;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    static constexpr uint8_t PMIC0 = 0;
 
     // Grab the targets as a struct, if they exist
     target_info_redundancy_ddr5 l_target_info(i_ocmb_target, l_rc);
@@ -787,6 +878,13 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
 
     // First, initialize and enable DT
     FAPI_TRY(mss::pmic::ddr5::setup_dt(l_target_info));
+
+    // Validate the vendor_id and revision
+    // 1a, Validate pmic vendor id
+    FAPI_TRY((mss::pmic::check::matching_vendors(i_ocmb_target, l_target_info.iv_pmic_dt_map[PMIC0].iv_pmic)));
+
+    // 1b, Validate and return revision number
+    FAPI_TRY(validate_pmic_revisions(i_ocmb_target, l_target_info.iv_pmic_dt_map[PMIC0].iv_pmic));
 
     // Second, initialize PMIC
     FAPI_TRY(mss::pmic::ddr5::initialize_pmic(i_ocmb_target, l_target_info));
