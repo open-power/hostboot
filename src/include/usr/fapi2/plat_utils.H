@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,12 +70,14 @@ bool platIsScanTraceEnabled();
 ///
 /// @param[io] io_rc Reference to ReturnCode (set to success after function)
 /// @param[in] i_sev Error log severity defaulted to unrecoverable
+/// @param[in] i_rc  Return Code of the error. Should be left defaulted to RC_HWP_GENERATED_ERROR in most cases.
+///                  However, it can be provided to differentiate an error from the generic hardware procedure error.
 ///
 /// @return errlHndl_t (NULL if Return Code contained success)
 ///
-errlHndl_t rcToErrl(ReturnCode & io_rc,
-                    ERRORLOG::errlSeverity_t i_sev =
-                        ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+errlHndl_t rcToErrl(ReturnCode             & io_rc,
+                    ERRORLOG::errlSeverity_t i_sev = ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    fapi2ReasonCode          i_rc = RC_HWP_GENERATED_ERROR);
 
 
 ///

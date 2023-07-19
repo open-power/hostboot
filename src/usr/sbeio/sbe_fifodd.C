@@ -631,22 +631,22 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                  }
                  else
                  {
-                     using namespace fapi2;
-
                      fapi2::ReturnCode l_fapiRC;
 
                      /*
                       * Put FFDC data into sbeFfdc_t struct and
                       * call FAPI_SET_SBE_ERROR
                       */
-                     sbeFfdc_t * l_ffdcBuf = reinterpret_cast<sbeFfdc_t * >(l_package.ffdcPtr);
+                     fapi2::sbeFfdc_t * l_ffdcBuf = reinterpret_cast<fapi2::sbeFfdc_t * >(l_package.ffdcPtr);
 
                      FAPI_SET_SBE_ERROR(l_fapiRC,
                                 l_rc,
                                 l_ffdcBuf,
                                 i_target->getAttr<TARGETING::ATTR_FAPI_POS>());
 
-                     errlHndl_t sbe_errl = fapi2::rcToErrl(l_fapiRC);
+                     errlHndl_t sbe_errl = fapi2::rcToErrl(l_fapiRC,
+                                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                           fapi2::RC_HWP_GENERATED_SBE_ERROR);
                      if( sbe_errl )
                      {
                          sbe_errl->plid(errl->plid());
