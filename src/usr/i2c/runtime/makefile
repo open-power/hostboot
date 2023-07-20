@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2021
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -38,12 +38,14 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
 
 # include common objects between hostboot and runtime hostboot
 include ../i2c.mk
 
 # add unique object modules
 OBJS += rt_i2c.o
+OBJS += fapi_i2c_dd.o
 
 VPATH += ..
 
