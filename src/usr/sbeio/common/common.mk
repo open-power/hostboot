@@ -39,6 +39,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/sbe_utils/include
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/attr
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
+EXTRAINCDIR += ${ROOTPATH}/src/import
 
 #Common Objects
 OBJS += sbe_attn.o
@@ -54,6 +56,7 @@ OBJS += sbe_psuGetHwReg.o
 OBJS += sbe_utils.o
 OBJS += sbe_psuSendMemConfig.o
 OBJS += sbe_psuSendCoreConfig.o
+OBJS += pmic_n_mode_detect.o
 
 #Common VPATHs
 VPATH += ${ROOTPATH}/src/usr/sbeio/common
@@ -61,3 +64,4 @@ VPATH += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe/
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
